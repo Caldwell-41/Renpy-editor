@@ -13,10 +13,17 @@ PHASE_CHECKS={1:{
  'Cancelled response writes nothing and retains task','Fresh valid proposal available after refusal and cancellation',
  'Stale external source refuses acceptance with zero writes','Project reopen retains accepted source',
 },2:{'Process reopen retains accepted literal source and protected tokens','Process reopen retains custom prompt','Process reopen retains native credential readability'}}
-def validate_report(report,phase):
+CONTINUE_CHECKS={phase:set(checks) for phase,checks in PHASE_CHECKS.items()}
+CONTINUE_CHECKS[1].remove('Semantic and exact source diff are inert and disclose protected tokens')
+CONTINUE_CHECKS[1].remove('Unsafe token response writes nothing')
+CONTINUE_CHECKS[1].update({'Whole group and exact source diff are inert and disclose anchor and terminal','Unsafe group response writes nothing','Surrounding source is byte exact across group insertion','Core group IDs are new and all existing Beats terminal and payloads survive'})
+CONTINUE_CHECKS[2].remove('Process reopen retains accepted literal source and protected tokens')
+CONTINUE_CHECKS[2].add('Process reopen retains accepted group and existing terminal')
+def validate_report(report,phase,continuing=False):
  if not isinstance(report,dict) or report.get('case')!='dialogue-rewrite' or report.get('passed') is not True or report.get('cleanupComplete') is not True:raise ValueError('Missing successful cleaned rewrite report')
  d=report.get('details',{})
- if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not PHASE_CHECKS[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
+ if continuing and d.get('action')!='continueScene':raise ValueError('Continue Scene action evidence required')
+ if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not (CONTINUE_CHECKS if continuing else PHASE_CHECKS)[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
  if phase==1:
   hashes=d.get('reviewedBodyDigests')
   if not isinstance(hashes,list) or len(hashes)!=5 or any(not isinstance(v,str) or len(v)!=64 for v in hashes):raise ValueError('Five exact reviewed body digests required')

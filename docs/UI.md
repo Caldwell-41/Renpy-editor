@@ -1152,3 +1152,19 @@ and offer **Cancel request**; terminal text is literal and usage is reported or
 unknown. Safe completion/cancel/error status remains visible. Closing the panel
 first cancels active work; project/configuration/shutdown changes reject late results.
 Literal-loopback HTTP is the current supported subset, disclosed before sending.
+
+
+### Continue Scene authoring
+
+Story's **Assist · Continue Scene** captures insertion before the selected saved root
+Beat. Unsupported, adjacent custom/nested and invalid-terminal boundaries disable
+entry and core independently refuses them. The nonmodal Assist panel labels the
+anchor and preserved terminal, lets the author select exact saved references/task/
+limits, and requires **Review complete send** followed by **Generate proposal**.
+Static receipt changes no source. **Accept Beat group** applies the inseparable ordered
+group once; semantic review shows literal text/Character IDs/new Beat IDs and exact
+Source/source-map before/after. All content uses passive text. Ordinary Story Undo/Redo
+and reopened source/history use the shared transaction layer. Settings' assistance
+selector edits/restores each action's saved prompt with draft protection. Continue Scene
+qualification is pending; [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#continue-scene) owns
+bounds and source/lifetime rules. Draft Scene and generated references stay unavailable.

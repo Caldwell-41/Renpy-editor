@@ -57,6 +57,60 @@ struct Target {
     scene_id: String,
     beat_id: String,
 }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ContinueResponse {
+    schema_version: u32,
+    action: String,
+    target: Target,
+    beats: Vec<GeneratedBeat>,
+}
+#[derive(Deserialize, serde::Serialize)]
+#[serde(
+    tag = "type",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
+enum GeneratedBeat {
+    Narration { text: String },
+    Dialogue { character_id: String, text: String },
+}
+impl GeneratedBeat {
+    fn entry(&self) -> Result<(Option<String>, String), RewriteError> {
+        let (speaker, text) = match self {
+            Self::Narration { text } => (None, text),
+            Self::Dialogue { character_id, text } => (Some(character_id.clone()), text),
+        };
+        if text.trim().is_empty() {
+            return Err(RewriteError::Invalid);
+        }
+        let encoded = Boundary {
+            segments: vec![],
+            protected: vec![],
+        }
+        .emit(&[Segment::Literal {
+            literal: text.clone(),
+        }])
+        .map_err(|_| RewriteError::Invalid)?;
+        Ok((speaker, encoded))
+    }
+    fn text(&self) -> &str {
+        match self {
+            Self::Narration { text } | Self::Dialogue { text, .. } => text,
+        }
+    }
+}
+fn continue_schema(scene: &str, beat: &str, characters: Vec<&str>) -> Value {
+    let text = json!({"type":"string","minLength":1,"maxLength":10000});
+    let mut alternatives = vec![
+        json!({"type":"object","additionalProperties":false,"required":["type","text"],"properties":{"type":{"type":"string","enum":["narration"]},"text":text}}),
+    ];
+    if !characters.is_empty() {
+        alternatives.push(json!({"type":"object","additionalProperties":false,"required":["type","characterId","text"],"properties":{"type":{"type":"string","enum":["dialogue"]},"characterId":{"type":"string","enum":characters},"text":text}}));
+    }
+    json!({"type":"object","additionalProperties":false,"required":["schemaVersion","action","target","beats"],"properties":{"schemaVersion":{"type":"integer","enum":[1]},"action":{"type":"string","enum":[prompts::CONTINUE]},"target":{"type":"object","additionalProperties":false,"required":["sceneId","beatId"],"properties":{"sceneId":{"type":"string","enum":[scene]},"beatId":{"type":"string","enum":[beat]}}},"beats":{"type":"array","minItems":1,"maxItems":8,"items":{"anyOf":alternatives}}}})
+}
 #[derive(PartialEq)]
 enum Phase {
     Prepared,
@@ -167,27 +221,53 @@ impl AuthoringService {
         if !user["story"]["owner"].is_null() || !user["story"]["conditionalBranch"].is_null() {
             return Err(RewriteError::Unsupported);
         }
-        let exact = user["story"]["source"]
-            .as_str()
-            .ok_or(RewriteError::Invalid)?;
-        let boundary = Boundary::parse(
-            quoted_content(exact)?,
-            &request.context.expected_source_revision,
-        )
-        .map_err(|_| RewriteError::Unsupported)?;
-        let response_schema = schema(
-            &request.context.scene_id,
-            &request.context.beat_id,
-            &boundary,
-        );
-        user["responseContract"] = json!({"version":1,"action":prompts::ACTION,"schema":response_schema,"authority":"Replace only the selected saved text; preserve speaker, order and every protected token exactly once in its original order. Literal segments are inert display text. No paths, source patches, tools or other operations.","protected":boundary.protected,"segments":boundary.segments});
+        let continuing = request.context.action == prompts::CONTINUE;
+        let boundary = if continuing {
+            Boundary {
+                segments: vec![],
+                protected: vec![],
+            }
+        } else {
+            let exact = user["story"]["source"]
+                .as_str()
+                .ok_or(RewriteError::Invalid)?;
+            Boundary::parse(
+                quoted_content(exact)?,
+                &request.context.expected_source_revision,
+            )
+            .map_err(|_| RewriteError::Unsupported)?
+        };
+        let response_schema = if continuing {
+            continue_schema(
+                &request.context.scene_id,
+                &request.context.beat_id,
+                user["definitions"]
+                    .as_array()
+                    .ok_or(RewriteError::Invalid)?
+                    .iter()
+                    .filter(|d| d["kind"] == "character")
+                    .filter_map(|d| d["id"].as_str())
+                    .collect(),
+            )
+        } else {
+            schema(
+                &request.context.scene_id,
+                &request.context.beat_id,
+                &boundary,
+            )
+        };
+        user["responseContract"] = if continuing {
+            json!({"version":1,"action":prompts::CONTINUE,"schema":response_schema,"authority":"Insert one inseparable group of 1–8 dialogue/narration Beats BEFORE the saved anchor. At most 10000 total UTF-8 text bytes; existing reviewed Characters only. Core owns IDs, paths and source encoding. Preserve all existing source and the terminal. New prose is literal display text; no source, tokens, tools, definitions or terminal operations."})
+        } else {
+            json!({"version":1,"action":prompts::ACTION,"schema":response_schema,"authority":"Replace only the selected saved text; preserve speaker, order and every protected token exactly once in its original order. Literal segments are inert display text. No paths, source patches, tools or other operations.","protected":boundary.protected,"segments":boundary.segments})
+        };
         profile.settings.context_budget = request.context.context_budget as u32;
         profile.settings.context_ceiling = request.context.context_ceiling as u32;
         profile.settings.maximum_response = request.context.maximum_response as u32;
         if !profile.settings.valid() {
             return Err(RewriteError::Invalid);
         }
-        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":"loomlight_rewrite_v1","strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
+        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
         let margin = 256.max(body.len().div_ceil(10));
         let total = body.len() + margin + request.context.maximum_response;
         if body.len() > crate::ai_request::MAX_BODY
@@ -211,7 +291,7 @@ impl AuthoringService {
             .source_draft_versions(project, &paths)
             .map_err(|_| RewriteError::Stale)?;
         let token = uuid::Uuid::new_v4().to_string();
-        let result = json!({"token":token,"payloadDigest":content_digest(&body),"serializedPayload":std::str::from_utf8(&body).unwrap(),"context":context,"protected":boundary.protected,"segments":boundary.segments,"destination":{"provider":"Unsloth Studio","endpoint":profile.settings.endpoint,"model":profile.settings.model,"connectionLocation":"Literal loopback HTTP","inferenceLocality":"Unknown","retention":"Provider may retain supplied content; cancellation may not stop server computation."},"size":{"serializedBytes":body.len(),"estimatedInputTokens":body.len(),"maximumResponse":request.context.maximum_response,"margin":margin,"total":total,"contextBudget":request.context.context_budget,"contextCeiling":request.context.context_ceiling},"responseMode":"Strict JSON schema; no fallback"});
+        let result = json!({"action":request.context.action,"anchor":user["story"]["anchor"],"terminal":user["story"]["terminal"],"token":token,"payloadDigest":content_digest(&body),"serializedPayload":std::str::from_utf8(&body).unwrap(),"context":context,"protected":boundary.protected,"segments":boundary.segments,"destination":{"provider":"Unsloth Studio","endpoint":profile.settings.endpoint,"model":profile.settings.model,"connectionLocation":"Literal loopback HTTP","inferenceLocality":"Unknown","retention":"Provider may retain supplied content; cancellation may not stop server computation."},"size":{"serializedBytes":body.len(),"estimatedInputTokens":body.len(),"maximumResponse":request.context.maximum_response,"margin":margin,"total":total,"contextBudget":request.context.context_budget,"contextCeiling":request.context.context_ceiling},"responseMode":"Strict JSON schema; no fallback"});
         let transient = Transient {
             token,
             session: session.into(),
@@ -348,32 +428,101 @@ impl AuthoringService {
         }
         let parsed = crate::ai_discovery::strict_json(completion.text.as_bytes())
             .map_err(|_| RewriteError::Invalid)?;
-        let response: Response =
-            serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
-        if response.schema_version != 1
-            || response.action != prompts::ACTION
-            || response.target.scene_id != t.context.scene_id
-            || response.target.beat_id != t.context.beat_id
-        {
-            return Err(RewriteError::Invalid);
-        }
-        let encoded = t
-            .boundary
-            .emit(&response.segments)
-            .map_err(|_| RewriteError::Invalid)?;
-        let proposal = self
-            .prepare_dialogue_rewrite(
-                project,
-                project_id,
-                &t.context.scene_id,
-                &t.context.expected_source_revision,
-                &t.context.beat_id,
-                encoded,
+        let (proposal, semantic) = if t.context.action == prompts::CONTINUE {
+            let response: ContinueResponse =
+                serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
+            if response.schema_version != 1
+                || response.action != prompts::CONTINUE
+                || response.target.scene_id != t.context.scene_id
+                || response.target.beat_id != t.context.beat_id
+                || response.beats.is_empty()
+                || response.beats.len() > 8
+                || response.beats.iter().map(|b| b.text().len()).sum::<usize>()
+                    > crate::rewrite_text::MAX_TEXT
+            {
+                return Err(RewriteError::Invalid);
+            }
+            let original_user: Value = serde_json::from_str(
+                t.preview["payload"]["messages"][1]["content"]
+                    .as_str()
+                    .ok_or(RewriteError::Invalid)?,
             )
-            .map_err(RewriteError::Scene)?;
+            .map_err(|_| RewriteError::Invalid)?;
+            for beat in &response.beats {
+                if let GeneratedBeat::Dialogue { character_id, .. } = beat {
+                    if !original_user["definitions"]
+                        .as_array()
+                        .ok_or(RewriteError::Invalid)?
+                        .iter()
+                        .any(|d| d["kind"] == "character" && d["id"] == *character_id)
+                    {
+                        return Err(RewriteError::Invalid);
+                    }
+                }
+            }
+            let entries = response
+                .beats
+                .iter()
+                .map(GeneratedBeat::entry)
+                .collect::<Result<Vec<_>, _>>()?;
+            let proposal = self
+                .prepare_continue_scene(
+                    project,
+                    project_id,
+                    &t.context.scene_id,
+                    &t.context.expected_source_revision,
+                    &t.context.beat_id,
+                    entries,
+                )
+                .map_err(RewriteError::Scene)?;
+            let mapping = proposal.mutations.iter().find(|m|m.path.as_str()==".renpy-editor/source-map.json").ok_or(RewriteError::Invalid)?;
+            let before_map: Value = serde_json::from_slice(&mapping.expected_bytes).map_err(|_|RewriteError::Invalid)?;
+            let after_map: Value = serde_json::from_slice(&mapping.proposed).map_err(|_|RewriteError::Invalid)?;
+            let old_ids: std::collections::BTreeSet<_> = before_map["sceneMappings"].as_array().ok_or(RewriteError::Invalid)?.iter().flat_map(|m|m["beats"].as_array().into_iter().flatten()).filter_map(|b|b["id"].as_str()).collect();
+            let new_ids: Vec<_> = after_map["sceneMappings"].as_array().ok_or(RewriteError::Invalid)?.iter().filter(|m|m["sceneId"]==t.context.scene_id).flat_map(|m|m["beats"].as_array().into_iter().flatten()).filter_map(|b|b["id"].as_str()).filter(|id|!old_ids.contains(id)).map(String::from).collect();
+            if new_ids.len()!=response.beats.len(){return Err(RewriteError::Invalid);}
+            (proposal,json!({"action":prompts::CONTINUE,"beats":response.beats,"assignedBeatIds":new_ids,"anchor":original_user["story"]["anchor"],"terminal":original_user["story"]["terminal"]}))
+        } else {
+            let response: Response =
+                serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
+            if response.schema_version != 1
+                || response.action != prompts::ACTION
+                || response.target.scene_id != t.context.scene_id
+                || response.target.beat_id != t.context.beat_id
+            {
+                return Err(RewriteError::Invalid);
+            }
+            let encoded = t
+                .boundary
+                .emit(&response.segments)
+                .map_err(|_| RewriteError::Invalid)?;
+            let proposal = self
+                .prepare_dialogue_rewrite(
+                    project,
+                    project_id,
+                    &t.context.scene_id,
+                    &t.context.expected_source_revision,
+                    &t.context.beat_id,
+                    encoded,
+                )
+                .map_err(RewriteError::Scene)?;
+            (
+                proposal,
+                json!({"action":prompts::ACTION,"beforeSegments":t.boundary.segments,"segments":response.segments,"protected":t.boundary.protected}),
+            )
+        };
         let patches:Vec<_>=proposal.mutations.iter().map(|m|json!({"path":m.path.as_str(),"before":String::from_utf8_lossy(&m.expected_bytes),"after":String::from_utf8_lossy(&m.proposed)})).collect();
-        let preview_digest = content_digest(&serde_json::to_vec(&patches).unwrap());
-        let review = json!({"proposalId":t.token,"previewDigest":preview_digest,"target":{"sceneId":t.context.scene_id,"beatId":t.context.beat_id},"beforeSegments":t.boundary.segments,"segments":response.segments,"protected":t.boundary.protected,"patches":patches,"uncertainty":"Static text replacement only. Runtime state is unknown; no SDK validation or project code execution.","usage":completion.usage});
+        // Bind semantic selection as well as exact source/map bytes.
+        let preview_digest = content_digest(
+            &serde_json::to_vec(&json!({"semantic":semantic,"patches":patches})).unwrap(),
+        );
+        let mut review = semantic;
+        review["proposalId"] = json!(t.token);
+        review["previewDigest"] = json!(preview_digest);
+        review["target"] = json!({"sceneId":t.context.scene_id,"beatId":t.context.beat_id});
+        review["patches"] = json!(patches);
+        review["uncertainty"] = json!("Static literal prose only. Runtime state is unknown; no SDK validation or project code execution.");
+        review["usage"] = json!(completion.usage);
         self.rewrite_validate(project, project_id, session, profile_token, t)?;
         t.phase = Phase::Review;
         t.review = Some(review.clone());

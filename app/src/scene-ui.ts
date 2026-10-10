@@ -179,7 +179,7 @@ export interface RecoveryItem {
 export interface RecoveryReport { readonly items: readonly RecoveryItem[] }
 
 export interface SceneActions {
-  readonly assist?: (sceneId: string, beatId: string) => void;
+  readonly assist?: (sceneId: string, beatId: string, action?: string) => void;
   readonly layoutKey?: string;
   readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>;
   readonly status: (message: string, kind?: "normal" | "error") => void;
@@ -561,7 +561,12 @@ export function renderSceneAuthoring(
       const assist=button("Assist · Rewrite dialogue");
       assist.disabled=!selected||selected.protected||!!selected.owner||!!selected.conditionalBranch||!["dialogue","narration"].includes(selected.payload.type);
       assist.addEventListener("click",()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id);});
-      tools.append(assist);
+      const continuation=button("Assist · Continue Scene");
+      const anchorIndex=scene.beats.findIndex(b=>b.id===selected?.id),terminalKinds=["return","jump","choice"];
+      const adjacent=scene.beats.slice(Math.max(0,anchorIndex-1),anchorIndex+1);
+      continuation.disabled=!selected||scene.sourceConflict||!terminalKinds.includes(scene.beats.at(-1)?.payload.type??"")||scene.beats.slice(0,-1).some(b=>terminalKinds.includes(b.payload.type))||adjacent.some(b=>b.protected||!!b.owner||!!b.conditionalBranch)||!!scene.beats.at(-1)?.protected||!!scene.beats.at(-1)?.owner||!!scene.beats.at(-1)?.conditionalBranch;
+      continuation.addEventListener("click",()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"continueScene");});
+      tools.append(assist,continuation);
     }
     toolbar.append(heading, tools); beatsRegion.append(toolbar);
     const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); beatsRegion.append(list);

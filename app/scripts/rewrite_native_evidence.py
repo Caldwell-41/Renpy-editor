@@ -7,7 +7,7 @@ from pathlib import Path
 NATIVE_STAGES = {'observe-light', 'observe-dark', 'observe-narrow', 'physical-send', 'physical-accept'}
 
 
-def validate_native_stage(directory, stage, pid, executable_digest):
+def validate_native_stage(directory, stage, pid, executable_digest, continuing=False):
     directory = Path(directory)
     receipt = json.loads((directory / f'{stage}.json').read_text(encoding='utf-8-sig'))
     if stage not in NATIVE_STAGES or receipt.get('stage') != stage or receipt.get('passed') is not True:
@@ -16,6 +16,8 @@ def validate_native_stage(directory, stage, pid, executable_digest):
         raise ValueError('Owned native process/binary evidence mismatch')
     if receipt.get('inputDesktop') != 'Default' or receipt.get('layer') != 'Windows UI Automation observation and OS SendInput; automated, not human acceptance':
         raise ValueError('Interactive native evidence required')
+    if continuing and receipt.get('action') != 'continueScene':
+        raise ValueError('Changed-action native evidence required')
     checks = receipt.get('checks', {})
     required = {'ownedWindow', 'nativeControls', 'captureNonblank', 'controlsInViewport'}
     required |= {'themeLight'} if stage == 'observe-light' else set()

@@ -3,7 +3,8 @@ param(
     [string]$Stage,
     [Parameter(Mandatory=$true)][string]$Output,
     [int]$ProcessId = 0,
-    [string]$Executable
+    [string]$Executable,
+    [switch]$ContinueScene
 )
 # CI-only native driver. Never creates .done files or invokes a renderer bridge.
 $ErrorActionPreference = 'Stop'
@@ -43,7 +44,10 @@ public static class RewriteNative {
 '@
 [void][RewriteNative]::SetProcessDPIAware()
 New-Item -ItemType Directory -Path $Output -Force | Out-Null
+$acceptName=if($ContinueScene){'Accept Beat group'}else{'Accept 1 change'}
+$actionTitle=if($ContinueScene){'Continue Scene'}else{'Rewrite dialogue'}
 $receipt = [ordered]@{
+    action=if($ContinueScene){'continueScene'}else{'rewriteDialogue'};
     stage=$Stage; passed=$false; processId=$ProcessId; executableSHA256=$null
     inputDesktop=$null; layer='Windows UI Automation observation and OS SendInput; automated, not human acceptance'
     checks=[ordered]@{}; captures=@(); controls=@(); uiaStaleRetries=0
@@ -174,10 +178,10 @@ try {
         [void][RewriteNative]::SetForegroundWindow($script:handle)
         Wait-Native { [RewriteNative]::GetForegroundWindow() -eq $script:handle }
         $receipt.checks.ownedWindow=$true
-        $controlName=if($Stage -eq 'physical-accept') {'Accept 1 change'} else {'Generate proposal'}
+        $controlName=if($Stage -eq 'physical-accept') { $acceptName } else {'Generate proposal'}
         Wait-Native { $null -ne (Button $controlName) }
         Focus-Control (Button $controlName)
-        Assert-Native ((Has-Text 'Rewrite dialogue') -and $null -ne (Button 'Generate proposal') -and $null -ne (Button 'Accept 1 change')) 'Required native rewrite controls missing'
+        Assert-Native ((Has-Text $actionTitle) -and $null -ne (Button 'Generate proposal') -and $null -ne (Button $acceptName)) 'Required native rewrite controls missing'
         $receipt.checks.nativeControls=$true
         $before=Capture ($Stage+'-before') (Window-Rect $script:handle)
         $receipt.captures=@($before); $receipt.checks.captureNonblank=$true
@@ -191,13 +195,13 @@ try {
             Assert-Native (($before.width*96/$dpi) -le 800) 'Compact native width not observed'; $receipt.checks.compactWidth=$true
         } elseif($Stage -eq 'physical-send') {
             Click-Control 'Generate proposal'
-            Wait-Native { (Has-Text 'Proposal received. No source changed.') -and (Has-ButtonState 'Accept 1 change' $true) }
+            Wait-Native { (Has-Text 'Proposal received. No source changed.') -and (Has-ButtonState $acceptName $true) }
             $receipt.checks.inertProposalObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         } elseif($Stage -eq 'physical-accept') {
             Assert-Native ((Has-Text 'Exact Source changes') -and (Has-Text 'New [[str(7)] {{a=jump:label}')) 'Exact native source review missing'
-            Click-Control 'Accept 1 change'
-            Wait-Native { (Has-Text 'Accepted and saved as one change.') -and (Has-ButtonState 'Accept 1 change' $false) }
+            Click-Control $acceptName
+            Wait-Native { (Has-Text 'Accepted and saved as one change.') -and (Has-ButtonState $acceptName $false) }
             $receipt.checks.savedOnceObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         }

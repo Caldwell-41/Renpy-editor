@@ -189,3 +189,46 @@ The gate explicitly requires enabled prompt focus after physical Save and light/
 compact observation markers, as well as persistence/context checks. Failed native
 reports remain failures even when individual preceding checks passed.
 Use only the selected ledger's remaining cumulative build/launch allowance.
+
+
+## Continue Scene
+
+Implementation is present; both-target changed-action qualification is pending in the
+[owning task](tasks/active/phase-2-initial-llm-assistance.md#continue-scene-selection--2026-10-10).
+Story offers **Assist · Continue Scene** at an eligible saved root Beat. The anchor is
+explicitly **before that Beat**, bound to its ID, byte offset, source/structure revisions
+and project session. A supported existing terminal is required and disclosed. The
+selected and preceding Beat must be supported root boundaries; nested, custom,
+ambiguous or conflicting boundaries refuse. Terminal/edge replacement is unavailable.
+
+Settings → System prompts selects Dialogue rewrite or Continue Scene. Each has one
+versioned bundled baseline and a project-local editable override, using existing
+metadata/history. Save/restore/Undo/Redo/reopen retain that action's exact prose and
+other settings. Overrides never change core response permissions. Assist uses the
+saved action-specific prompt; it reviews the complete strict-schema body before Generate.
+
+Continue context includes the saved Scene's supported root Beat payloads and terminal,
+custom/nested exclusion markers, existing runnable Character definitions, relevant
+variable defaults (runtime unknown) and explicitly selected approved references. Other
+Scenes, excluded source, assets and unknown metadata stay excluded. Every source file
+read and source draft generation is bound. No silent truncation, automatic send or
+provider expansion. The accepted loopback Studio/non-streaming destination remains.
+
+The closed v1 response has `schemaVersion:1`, `action:"continueScene"`, exact
+`target:{sceneId,beatId}` (the Beat before which to insert), and `beats`. The inseparable
+ordered group contains **1–8** entries: `{"type":"narration","text":…}` or
+`{"type":"dialogue","characterId":…,"text":…}`. Character IDs must be from reviewed
+existing definitions; total text is at most **10,000 UTF-8 bytes**. Unknown fields,
+model IDs/paths/patches, definitions, terminals, tools, empty/control text, duplicate keys,
+wrong targets, incomplete/malformed responses or unsafe values refuse without writes.
+New prose uses the existing literal source/display encoder; expressions/tags stay inert.
+
+Core prepares the whole group in memory with fresh UUIDs and a single source insertion
+plus source-map mutation. Review shows the ordered semantic text, assigned IDs, saved
+anchor/terminal and exact source/metadata before/after. Its digest binds all those bytes
+and semantics. **Accept Beat group** consumes that stored proposal once through the
+shared journal/history: one transaction and one Undo entry. Existing Beat IDs/payloads,
+terminal and prefix/suffix source bytes survive. Undo/Redo/reopen retain exact source
+and identity. Cancellation, session/profile/prompt/reference/source changes, competing
+Source drafts or changed draft generations, replaced proposals and ordinary external
+writes invalidate send/completion/acceptance. There is no automatic rebase/retry.

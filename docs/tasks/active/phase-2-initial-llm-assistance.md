@@ -3202,3 +3202,87 @@ team. [OpenAI's multi-agent guidance](https://developers.openai.com/api/docs/gui
 supports concrete independent assignments and serial ownership of dependent/shared
 work. These inform the cadence; the deliverable queue and repository gates are
 Loomlight decisions, not a mandated OpenAI milestone count or new orchestration system.
+
+
+### Continue Scene selection — 2026-10-10
+
+State: `in_progress`. User selected bounded Continue Scene on
+`codex/provider-qualification`, reconciled clean local/remote `e69782c`; fresh main
+remains `5f448ca`. One GPT-6.1 Sol High owner; shared implementation stays serial.
+Preserve any independently required review. This selection does not advance the queue.
+
+Acceptance: action-specific editable prompt and exact context/send review; explicit
+saved, source/structure/session-bound insertion **before** an eligible root Beat;
+closed response of 1–8 dialogue/narration Beats (10,000 UTF-8 bytes total), existing
+reviewed Characters only, core-owned IDs and literal display encoding. Static semantic
+and exact Source/metadata preview binds one whole group, one transaction/Undo entry
+and one acceptance. Surrounding source and existing terminal Beat/ID remain unchanged.
+Refuse custom/nested/unsupported boundaries and invalid terminals; no edge replacement.
+Prove exact HTTP body, passive rendering, byte preservation, Undo/Redo/reopen,
+duplicate refusal, and zero writes for malformed/unsafe/cancel/stale output, competing
+drafts and ordinary external writers. Reuse unchanged provider/reference/credential,
+protected-token and transaction evidence; add focused official pinned-SDK literal/runtime
+proof and changed-action native evidence on Windows x64/macOS ARM64.
+
+New cumulative allowance per target: **4 package-build attempts, 6 app launches,
+4 focused CI dispatches**; initial use **0/4, 0/6, 0/4** on both. Failed/cancelled and
+implicit attempts count. Reassess after two unsuccessful corrections of one hypothesis.
+Earlier slice allowances/results are retained and not borrowed or reset.
+
+CI capability inspection: existing focused Windows UIA/OS-input driver and
+`windows-2025`; ARM64 automated checks can use `macos-26`. Repository Actions secret
+and self-hosted runner inventories are empty. README's approved certificate-backed
+Mac package policy therefore prevents hosted signed-package/native credential proof;
+retain the current Mac session for that named required case, using its existing
+approved identity without provisioning/export/trust changes. CI still owns automated
+both-target qualification. Actual native preflights must pass before launching.
+
+No paid/public provider call, provider expansion, generated reference, Draft Scene,
+terminal/edge replacement, route expansion, signing-policy change, merge or release.
+Commit/push coherent work to the existing branch; audit actual CI cases/artifacts.
+Manual same-thread wait/resume applies after a confirmed nonterminal dispatch.
+
+
+### Continue Scene implementation and local preparation — 2026-10-10
+
+Core reuses the transient rewrite pipeline with `continueScene`, action-specific prompt
+resources/context, one revision-bound safe root boundary and a 1–8 Beat/10,000-byte
+closed group. A dedicated internal insertion edit emits the group once in memory,
+allocates IDs, checks resulting IDs and prepares one source/map transaction. Semantic
+text/IDs and exact patches share the acceptance digest. Existing prefix/suffix, Beat IDs,
+payloads and terminal survive; one Undo/Redo and independent reopen are covered.
+Settings/Story/Assist expose the action, explicit terminal/anchor, whole-group passive
+review and one Accept Beat group. Unsupported adjacency/terminal entry disables and
+core independently refuses. Provider, credential, transport and recovery policies stay.
+
+Focused local proof with pinned Node 24.19.0/npm 11.9.0/Rust 1.90.0: core rewrite
+**15/15**, prompts **5/5**, transport **8/8**, native worker **6/6**, final focused action
+DOM **9/9**. Actual renderer controller/native credential reader/strict loopback HTTP
+passes exact reviewed body, inert preview, held-owner refusal, one acceptance/Undo/Redo,
+malformed/cancel/stale zero writes and responsive Save. Full renderer initially
+**124/124** passed; final coherent candidate with the action-selector regression passes
+**125/125**, zero fail/cancel/skip, and frontend production build passes. Report/native evidence gates **3/3 and 4/4** pass;
+reuse-drift gate **5 pass / 1 Windows-only skip** on Mac, with that actual PowerShell
+case required in Windows CI. Actionlint and Python source compilation pass.
+
+Retained ignored logs `.toolchains/logs/continue-*` record failures accurately: initial
+controller/network worker binds were sandbox `EPERM`/permission denials, then passed
+with authorized loopback capability. Python bytecode cache initially tried the system
+cache and was refused; redirected contained cache compiled successfully. The new
+prompt DOM test initially used an unsupported happy-dom ARIA-property selector; a
+named control selector resolves the harness-only failure, now 9/9. No package/editor
+launch/CI consumption for these checks. No failed case is represented as a pass.
+
+Owner integrated review follows sections 6–8/10–11/20: context source exclusion,
+closed action/target/Character authority, generated literal bounds, core IDs, immutable
+source/map review, single consumption/commit, raw revision identities, draft/lifecycle
+and stale refusal. Source review removed unrelated formatter-only changes from files
+outside selected scope. Existing independently required checkpoint review is retained;
+this bounded deliverable adds no new independent reviewer mandate (section 19).
+
+The isolated existing workflow has action-specific Windows native receipts/report
+assertions and Mac automated evidence. Continue forbids old package/SDK/focused reuse;
+changed inputs require actual fresh cases. Canonical contracts explicitly label target
+qualification pending. Next: finish coherent local checks, commit/push candidate and
+perform one focused CI dispatch; then publish wait identity and pause this same thread.
+Current use remains **Mac 0/4 builds, 0/6 launches, 0/4 CI; Windows 0/4, 0/6, 0/4**.

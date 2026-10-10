@@ -871,7 +871,8 @@ fn main() {
                     } else if case == "dialogue-rewrite" {
                         main.show().expect("rewrite show");main.set_focus().expect("rewrite focus");
                         let phase=if std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2"){2}else{1};
-                        main.eval(&format!("window.__loomlightRewritePhase={phase};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("dialogue_rewrite_probe.js"))).expect("rewrite injection");
+                        let script=if std::env::var("LOOMLIGHT_CONTINUE_SCENE").as_deref()==Ok("1"){include_str!("continue_scene_probe.js")}else{include_str!("dialogue_rewrite_probe.js")};
+                        main.eval(&format!("window.__loomlightRewritePhase={phase};\n{}\n{}",include_str!("native_editor_probe.js"),script)).expect("rewrite injection");
                     } else if case == "reference-library" {
                         main.show().expect("reference probe show");main.set_focus().expect("reference probe focus");
                         let phase=if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){2}else{1};

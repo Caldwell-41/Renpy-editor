@@ -687,3 +687,18 @@ transaction/history commit; ambiguity uses existing recovery. Relevant Source dr
 generations and renderer author-input/retention guards protect hidden input. Closing
 a session discards/cancels its transient. [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite)
 owns the bounded response and send contract.
+
+
+### Continue Scene insertion boundary
+
+The same transient `rewrite.prepare/send/accept/discard` pipeline carries the
+`continueScene` action. Core context/schema/response planning chooses the saved root
+insertion anchor; the renderer supplies intent and reviewed tokens only. A dedicated
+`PreparedInsertion` edit emits one bounded group in a transient source candidate,
+allocates UUIDs and builds one combined source/map proposal without looping apply
+handlers. Literal encoding reuses `rewrite_text::Boundary` with no protected tokens.
+The exact semantic group, assigned IDs and source/map patches share one preview digest.
+The existing journal, history, recovery, read-set identities, draft generations,
+ApplicationHost/worker cancellation and acceptance consumption are reused.
+[PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#continue-scene) owns the exact bounded contract;
+qualification state remains in the task/status records.

@@ -1,32 +1,29 @@
 # Current status
 
-**Updated:** 2026-10-10. [First safe dialogue rewrite](../tasks/active/phase-2-initial-llm-assistance.md#final-pinned-windows-audit-and-both-target-qualification--2026-10-10)
-is implemented and qualified on **macOS ARM64 and Windows x64** on
-`codex/provider-qualification`, preserving implementation `515cd85` and accepted
-both-target prompt/context/manual-reference foundations. **Selected slice: accepted.**
-Full Phase 2 remains incomplete; no next feature is selected.
+**Updated:** 2026-10-10. **Selected outcome: Continue Scene, in progress** on
+`codex/provider-qualification`. Entry reconciled clean local/remote `e69782c`; main
+remains `5f448ca`. The accepted first safe dialogue rewrite and provider/reference/
+prompt/literal-text/transaction foundations remain the baseline. This outcome adds
+bounded dialogue/narration insertion at an explicit saved root anchor while retaining
+surrounding source and the existing terminal. No next deliverable is selected.
 
-| Capability | Automated proof | Native acceptance |
+| Capability | Implemented / local proof | Required target evidence |
 | --- | --- | --- |
-| One saved Beat: exact send, strict response, inert review, acceptance/history | Both-target core/native/controller pass; Windows renderer 123/123 | Mac signed walkthrough and Windows native UIA/OS input pass |
-| Generated prose displays literally; existing tokens protected | Official pinned Ren'Py 8.5.3 compile/lint/substitution/token/startup/say/return pass | Both SDK runtimes pass |
-| Zero-write refusals, Undo/Redo and persistence | Malformed/unsafe/cancel/stale checks and exact history pass | Both process reopens pass; zero HTTP/whole bytes/cleanup pass |
+| Continue action/prompt/context and exact send | Action-specific saved prompt, closed 1–8 Beat group, existing Characters, literal encoding; focused controller/renderer/core proof | Windows x64 and Mac ARM64 focused CI pending |
+| Whole group review/accept/history | Assigned UUIDs, semantic/source/map digest, one transaction/Undo, duplicate refusal; exact prefix/suffix/terminal/IDs and Undo/Redo/reopen tests | Changed-action packaged native and official pinned SDK proof pending |
+| Zero-write refusals | Malformed/unsafe/cancel/stale, drafts and external writers; shared lifecycle retained | Artifact/case audit pending; no waived cases |
 
-[Run 38031993657](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38031993657),
-attempt 1, tested candidate `95ce9c4`, completed success at **2026-10-10 06:55:14 UTC**.
-Fresh selected checks, official SDK and package pass with actual **npm 11.9.0**.
-All 76 artifact hashes and seven native captures were audited. Launch 5 passes all
-20 distinct assertions/five exact HTTP bodies and physical Generate/Accept; independent
-launch 6 passes three persistence checks with zero HTTP, unchanged whole-project bytes
-and cleanup. Earlier CI/harness failures and npm mismatch remain in the task ledger.
-Mac signed package evidence remains valid on unchanged production inputs.
+New cumulative allowance per target: **4 builds / 6 app launches / 4 focused CI
+dispatches**. Current use is **0/0/0** on each target before dispatch. Older selected
+rewrite consumption (Mac 1/4 builds, 3/6 launches; Windows 2/4, 6/6) is retained in its
+ledger and grants no operations here. CI uses existing Windows native capability and
+Mac ARM64 automated checks. Hosted Mac has no configured approved signing identity;
+the named signed-package/native case stays on this retained Mac session using the
+existing approved pin, without policy/provisioning changes.
 
-**Final usage:** Mac **1/4 builds, 3/6 launches**; Windows **2/4 builds, 6/6 launches**.
-No pending CI, owned fixture, synthetic credential or selected acceptance case.
-Windows launch allowance is exhausted; no further run is authorized by this slice.
-[HANDOVER](HANDOVER.md) owns closure identity and retained artifact locations.
-No merge/release, production/signing-policy or dependency changes. Phase 1/PR19/main
-`5f448ca` and public v0.1.0 remain unchanged. Full 2B.1/2A.2/Phase 2 and next feature
-remain outside this slice. [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite),
-[UI](../UI.md), [ARCHITECTURE](../ARCHITECTURE.md#first-safe-dialogue-rewrite-boundary)
-own accepted behavior.
+[The owning task](../tasks/active/phase-2-initial-llm-assistance.md#continue-scene-selection--2026-10-10)
+owns scope, cumulative counts and failures. [HANDOVER](HANDOVER.md) owns the live
+candidate, pending operation and next action. Implementation is not yet accepted;
+no merge/release, provider expansion, Draft Scene or generated references. The earlier
+[first rewrite qualification](../tasks/active/phase-2-initial-llm-assistance.md#final-pinned-windows-audit-and-both-target-qualification--2026-10-10)
+remains accepted; full Phase 2 is incomplete.

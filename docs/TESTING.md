@@ -1411,3 +1411,40 @@ cleanup. It preserves the earlier locked-host failure and sandbox capability fai
 Active-request shutdown and the broader response/race variants use focused deterministic
 checks; the native walkthrough did not quit with a request still active. User-review
 screenshots remain outside Git and are not a new mandatory acceptance gate.
+
+
+## Continue Scene focused qualification
+
+The [selected task](tasks/active/phase-2-initial-llm-assistance.md#continue-scene-selection--2026-10-10)
+owns cumulative allowances and results. Local/core selectors are `cargo test -p
+loomlight-core --locked rewrite`, `prompts::tests`, `ai_request::tests`, desktop
+`ai_requests::tests`, `npm run check`, and the actual native-worker controller fixture:
+`node tests/rewrite-controller.dispatch.mjs <compiled rewrite-controller-driver>
+--continue-scene`. Network fixtures need loopback bind capability. Test binaries are
+focused checks; signed package/editor-process launches remain separately counted.
+
+Manual `production-scaffold.yml` input `continue_scene=true` isolates Windows x64
+package/UIA/OS-input and macOS ARM64 automated proof. All other selectors and reuse IDs
+must be false/empty; ordinals bind the Windows attempt ledger. Existing generic matrix
+jobs skip. Hosted Mac has no approved signing identity provisioning: this job runs
+core/native-worker/controller/renderer and official SDK checks without a signed package
+or editor launch. The named signed native Mac case stays on the retained approved local
+host. No signing fallback or trust change is permitted.
+
+The shared `dialogue-rewrite-probe.py --continue-scene` uses the dedicated packaged
+Continue script and a closed synthetic loopback response. Action-specific report gates
+require every distinct assertion, five matching reviewed/HTTP bodies, owned cleanup,
+passive semantic/exact source review, byte-exact prefix/suffix, group/new/existing IDs,
+preserved terminal, one acceptance/history, malformed/unsafe/cancel/stale zero writes
+and project reopen. A second independent process requires persisted group/terminal,
+action prompt and native credential readability with zero HTTP and unchanged project
+bytes. Windows native receipts require the Continue action, exact PID/binary hash,
+interactive desktop, all five stages and intact captures before acknowledgement.
+
+`continue-literal-driver` emits an actual accepted group. The existing official
+`rewrite-literal-sdk.py --continue-scene` verifies published Ren'Py **8.5.3** archive
+checksum, standard-template compile/lint, actual substitution/tokenization and startup,
+exact two generated say payloads, preserved terminal say and return. Raw case logs and
+input/binary/artifact hashes must be audited; green/skipped/partial badges do not qualify
+missing cases. Preserve failures, respect manual same-thread wait/resume and reuse only
+unchanged evidence. No paid provider or private game content is involved.

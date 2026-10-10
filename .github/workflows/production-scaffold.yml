@@ -3,6 +3,11 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
     inputs:
+      continue_scene:
+        description: Isolated Continue Scene Windows native and Mac ARM64 automated proof
+        required: false
+        type: boolean
+        default: false
       dialogue_rewrite_windows:
         description: Only focused Windows first-rewrite qualification; no generic matrix
         required: false
@@ -43,7 +48,7 @@ concurrency:
 
 jobs:
   preflight:
-    if: ${{ !inputs.dialogue_rewrite_windows }}
+    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene }}
     name: Preflight
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -80,7 +85,7 @@ jobs:
         run: cargo fmt --check --all
 
   packaged-boundary:
-    if: ${{ !inputs.dialogue_rewrite_windows }}
+    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene }}
     name: ${{ matrix.name }}
     needs: preflight
     strategy:
@@ -463,8 +468,8 @@ jobs:
           retention-days: 7
 
   dialogue-rewrite-windows:
-    if: ${{ inputs.dialogue_rewrite_windows }}
-    name: Focused first rewrite — Windows x64
+    if: ${{ inputs.dialogue_rewrite_windows || inputs.continue_scene }}
+    name: Focused Assist — Windows x64
     runs-on: windows-2025
     timeout-minutes: 60
     permissions:
@@ -473,6 +478,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: never
       PYTHONUTF8: '1'
+      CONTINUE_SCENE: ${{ inputs.continue_scene }}
     defaults:
       run:
         working-directory: app
@@ -486,10 +492,11 @@ jobs:
           BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}
           FIRST_LAUNCH_ORDINAL: ${{ inputs.rewrite_first_launch_ordinal }}
           UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
+          LEGACY_REWRITE: ${{ inputs.dialogue_rewrite_windows }}
           REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
           REUSE_FOCUSED_RUN_ID: ${{ inputs.rewrite_focused_reuse_run_id }}
         run: |
-          python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
+          python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert not (os.environ.get('CONTINUE_SCENE')=='true' and (os.environ['REUSE_REWRITE_RUN_ID'] or os.environ['REUSE_FOCUSED_RUN_ID'] or os.environ['LEGACY_REWRITE']=='true'));  assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
           if ($LASTEXITCODE -ne 0) { throw 'Branch, fresh attempt or cumulative ordinal guard failed' }
           python -c "import os; value=os.environ['REUSE_REWRITE_RUN_ID']; assert not value or value.isdecimal()"
           if ($LASTEXITCODE -ne 0) { throw 'Package reuse run identity guard failed' }
@@ -639,5 +646,53 @@ jobs:
         with:
           name: rewrite-windows-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/rewrite-windows/
+          if-no-files-found: error
+          retention-days: 7
+
+
+  continue-scene-macos:
+    if: ${{ inputs.continue_scene && !inputs.dialogue_rewrite_windows }}
+    name: Continue Scene automated — macOS ARM64
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: never
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify isolated selection and ARM64 capability
+        env:
+          UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
+          REUSE_RUN: ${{ inputs.rewrite_reuse_run_id }}
+          FOCUSED_REUSE: ${{ inputs.rewrite_focused_reuse_run_id }}
+        run: |
+          python3 -c "import os,platform; assert platform.machine()=='arm64'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert not os.environ['REUSE_RUN'] and not os.environ['FOCUSED_REUSE']"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select pinned npm and install locked dependencies
+        working-directory: app
+        run: |
+          npm install --global npm@11.9.0
+          test "$(npm --version)" = '11.9.0'
+          npm ci --ignore-scripts
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase-1b-macos-26
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Fetch official pinned SDK archive and published checksums
+        run: |
+          curl --fail --location --max-time 300 --output "$RUNNER_TEMP/continue-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          curl --fail --location --max-time 300 --output "$RUNNER_TEMP/continue-sdk.tar.bz2" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+      - name: Focused real controller and core plus official literal/runtime proof
+        run: python3 app/scripts/qualify-continue-automated.py --output "$RUNNER_TEMP/continue-macos" --archive "$RUNNER_TEMP/continue-sdk.tar.bz2" --checksums "$RUNNER_TEMP/continue-checksums.txt"
+      - name: Retain actual automated cases and failure logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: continue-macos-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/continue-macos/
           if-no-files-found: error
           retention-days: 7

@@ -609,8 +609,38 @@ impl AuthoringService {
         encoded: String,
     ) -> Result<TransactionProposal, SceneError> {
         let loaded = self.load(project, project_id)?;
-        self.beat_proposal(project, loaded, scene_id, source_revision,
-            BeatEdit::PreparedDialogue { id: beat_id.into(), encoded })
+        self.beat_proposal(
+            project,
+            loaded,
+            scene_id,
+            source_revision,
+            BeatEdit::PreparedDialogue {
+                id: beat_id.into(),
+                encoded,
+            },
+        )
+    }
+
+    pub(crate) fn prepare_continue_scene(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        scene_id: &str,
+        source_revision: &str,
+        before: &str,
+        entries: Vec<(Option<String>, String)>,
+    ) -> Result<TransactionProposal, SceneError> {
+        let loaded = self.load(project, project_id)?;
+        self.beat_proposal(
+            project,
+            loaded,
+            scene_id,
+            source_revision,
+            BeatEdit::PreparedInsertion {
+                before: before.into(),
+                entries,
+            },
+        )
     }
 
     pub fn scene_recovery(&self, project: &ProjectId) -> RecoveryReport {
@@ -1664,7 +1694,14 @@ impl AuthoringService {
 }
 
 enum BeatEdit {
-    PreparedDialogue { id: String, encoded: String },
+    PreparedInsertion {
+        before: String,
+        entries: Vec<(Option<String>, String)>,
+    },
+    PreparedDialogue {
+        id: String,
+        encoded: String,
+    },
     ChildDialogue {
         id: String,
         owner: crate::metadata::BeatOwner,
@@ -1713,6 +1750,7 @@ fn apply_beat_edit(
     // Nested edits require their dedicated revision-bound owner assertion. No
     // structural operation may accidentally promote a child to a root statement.
     let target = match &edit {
+        BeatEdit::PreparedInsertion { before, .. } => Some(before.as_str()),
         BeatEdit::Insert { before, .. } => before.as_deref(),
         BeatEdit::Update { id, .. }
         | BeatEdit::PreparedDialogue { id, .. }
@@ -1731,19 +1769,72 @@ fn apply_beat_edit(
         "\n"
     };
     match edit {
+        BeatEdit::PreparedInsertion { before, entries } => {
+            let insertion = continue_anchor(beats, &before)?;
+            if entries.is_empty()
+                || entries.len() > 8
+                || beats.len() + entries.len() > MAX_BEATS_PER_SCENE
+            {
+                return Err(SceneError::InvalidPayload);
+            }
+            let mut rendered = Vec::new();
+            let mut forced = Vec::new();
+            for (speaker, encoded) in entries {
+                let prefix = match &speaker {
+                    Some(id) => format!("    {} ", character(loaded, id)?.technical_name),
+                    None => "    ".into(),
+                };
+                let line = format!("{prefix}\"{encoded}\"{newline}");
+                forced.push((
+                    if speaker.is_some() {
+                        "dialogue"
+                    } else {
+                        "narration"
+                    }
+                    .into(),
+                    sha256(line.as_bytes()),
+                    uuid::Uuid::new_v4().to_string(),
+                    Some(insertion + rendered.len()),
+                ));
+                rendered.extend_from_slice(line.as_bytes());
+            }
+            let mut output = source.to_vec();
+            output.splice(insertion..insertion, rendered);
+            Ok((output, forced))
+        }
         BeatEdit::PreparedDialogue { id, encoded } => {
-            let beat = beats.iter().find(|b| b.id == id).ok_or(SceneError::UnknownEntity)?;
-            if beat.protected || !matches!(beat.payload, BeatPayload::Dialogue { .. } | BeatPayload::Narration { .. }) {
+            let beat = beats
+                .iter()
+                .find(|b| b.id == id)
+                .ok_or(SceneError::UnknownEntity)?;
+            if beat.protected
+                || !matches!(
+                    beat.payload,
+                    BeatPayload::Dialogue { .. } | BeatPayload::Narration { .. }
+                )
+            {
                 return Err(SceneError::OpaqueBoundary);
             }
-            let original = std::str::from_utf8(&source[beat.byte_start as usize..beat.byte_end as usize])
-                .map_err(|_| SceneError::UnsupportedSource)?;
+            let original =
+                std::str::from_utf8(&source[beat.byte_start as usize..beat.byte_end as usize])
+                    .map_err(|_| SceneError::UnsupportedSource)?;
             let (start, end) = dialogue_quotes(original).ok_or(SceneError::UnsupportedSource)?;
             let mut rendered = original.to_owned();
             rendered.replace_range(start + 1..end, &encoded);
             let mut output = source.to_vec();
-            output.splice(beat.byte_start as usize..beat.byte_end as usize, rendered.bytes());
-            Ok((output, vec![(beat.payload.kind().into(), sha256(rendered.as_bytes()), id, Some(beat.byte_start as usize))]))
+            output.splice(
+                beat.byte_start as usize..beat.byte_end as usize,
+                rendered.bytes(),
+            );
+            Ok((
+                output,
+                vec![(
+                    beat.payload.kind().into(),
+                    sha256(rendered.as_bytes()),
+                    id,
+                    Some(beat.byte_start as usize),
+                )],
+            ))
         }
         BeatEdit::ChildDialogue {
             id,
@@ -3217,6 +3308,37 @@ fn custom(start: usize, end: usize, body: &str) -> ParsedBeat {
 
 /// A root statement may precede a whole group or follow its last child, but
 /// cannot split headers, children or the trivia between them.
+/// Continue is deliberately narrower than manual insertion: a saved root boundary
+/// with an existing terminal and no adjacent opaque/nested region.
+pub(crate) fn continue_anchor(beats: &[SceneBeat], before: &str) -> Result<usize, SceneError> {
+    let index = beats
+        .iter()
+        .position(|b| b.id == before)
+        .ok_or(SceneError::UnknownEntity)?;
+    let terminal = beats.last().ok_or(SceneError::InvariantBlocked)?;
+    if !is_terminal_payload(&terminal.payload)
+        || terminal.protected
+        || terminal.owner.is_some()
+        || terminal.conditional_branch.is_some()
+        || beats
+            .iter()
+            .take(beats.len() - 1)
+            .any(|b| is_terminal_payload(&b.payload))
+    {
+        return Err(SceneError::InvariantBlocked);
+    }
+    for b in beats[index.saturating_sub(1)..=index].iter() {
+        if b.protected || b.owner.is_some() || b.conditional_branch.is_some() {
+            return Err(SceneError::OpaqueBoundary);
+        }
+    }
+    let offset = beats[index].byte_start as usize;
+    if root_insertion_is_nested(beats, offset) || boundary_is_opaque(beats, offset) {
+        return Err(SceneError::OpaqueBoundary);
+    }
+    Ok(offset)
+}
+
 fn root_insertion_is_nested(beats: &[SceneBeat], insertion: usize) -> bool {
     let mut group_start = None;
     for beat in beats {

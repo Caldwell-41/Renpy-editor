@@ -272,7 +272,7 @@ function shell(content: HTMLElement): void {
   const footer = document.createElement("footer"); footer.className = "app-footer";
   const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
   const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}const owner={};openSettings({...project,runtime:()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=false;runtimeWorkspace.panel.focus();}},prompts:{current:()=>currentProject?.sessionId===project.sessionId,
-          load:()=>projectValue<Options>(project,"context.options"),preview:input=>projectValue<Preview>(project,"context.preview",{...input}),apply:async(command,expectedRevision)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<PromptModel>(project,"prompts.apply",{command,expectedRevision}));if(!result)throw new Error("Another change is still being saved. Wait for it to finish.");return result;}}});});
+          load:()=>projectValue<Options>(project,"context.options"),preview:input=>projectValue<Preview>(project,"context.preview",{...input}),apply:async(command,expectedRevision,action)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<PromptModel>(project,"prompts.apply",{command,expectedRevision,action}));if(!result)throw new Error("Another change is still being saved. Wait for it to finish.");return result;}}});});
   footer.append(context,status,settings); main.append(header, content, footer); root.replaceChildren(main);
 }
 
@@ -602,7 +602,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     }
     disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
-      assist: (sceneId,beatId) => {
+      assist: (sceneId,beatId,action="rewriteDialogue") => {
         if (rewriteController?.busy()) { setStatus("Finish or cancel the current Assist operation first.","error"); return; }
         if (rewriteController?.hasWork() && !window.confirm("Discard the unfinished Assist task/proposal and select this Beat?")) return;
         rewriteController?.dispose();
@@ -630,7 +630,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
             return task();
           },
           accepted:(s,b)=>showProject(project,"story",{sceneId:s,beatId:b}),
-        });
+        },action);
       },
       status: setStatus,
       resolution: project.resolution,
