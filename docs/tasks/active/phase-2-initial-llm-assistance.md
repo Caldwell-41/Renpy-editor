@@ -4182,3 +4182,41 @@ not a new execution. Docs-only wait successor does not replace the runtime candi
 Required CI acceptance and final independent evidence audit remain pending; no bounded
 closure/full Phase2/human acceptance claim. Continue in-scope fixes within allowance,
 then record acceptance and return the next proposal-only prompt without starting it.
+
+### Generated card first CI failure and correction — 2026-10-11
+
+User resumed the same thread to audit run38083896396 attempt1 and diagnose/fix before
+another dispatch. Fresh local/origin refs reconcile at55ef6e5; clean checkout retained.
+Recorded candidate67faeaa remains the tested runtime. Terminal overall failure:
+Windows focused worker5/6 fails `ordinary_external_configuration_change_and_project_session_reject_results`;
+server read reports `TimedOut` at ai_requests.rs491 then join panic628. The test built
+the entire project fixture after opening the stalled request's two-second socket
+deadline. Mac worker6/6 and automated9checks pass. This is diagnosed fixture timing,
+not proof of a product cancellation defect; corrected Windows execution remains required.
+
+Owner moves only fixture construction/drop before starting the request, keeping the
+original host unopened and captured session None. Actual open_path still expires it.
+Two-second deadlines, expired/null completion, finish/socket EOF and shutdown assertions
+remain unchanged. All six worker tests pass locally; production code before cfg(test)
+is byte-identical. Independent GPT-6.1 Sol High read-only review finds no actionable
+correction defect; diagnosis is consistent with the retained failure, and Windows must
+confirm it. No reviewer writes/tests/packages/editor launches.
+
+Actual artifacts audited: Windows11681444634,37 manifest hashes; Mac11681780109,13
+manifest hashes. Both245input inventories match exact head/tree, with only repository-
+prescribed CRLF .ps1 checkout normalization. Raw Windows renderer129/core26/prompts5/
+references12/transport8/controller pass; native-worker5/6 fails. Package/privacy passes,
+binary SHA256f2d706c5f6831738c2b07050254fee9df5f406545eae2670a924ed65d945b2d4.
+Ledger proves one package attempt, no editor launch; native stage skipped and both
+phase reports absent, so no Windows acceptance/cleanup claim. No fixture was started.
+Mac actual9checks includes worker6/controller/reference12; no package/editor launch.
+SDK receipts explicitly reuse prior qualified runtime evidence; no new SDK execution.
+Downloaded artifact privacy52files passes. Failure/results/manifests retained unchanged
+in ignored evidence; no gate weakened. Repository validation496files/diff check pass.
+
+Current actual totals Windows1/4packages,0/6launches,1/4dispatches; Mac1/4,2/6,1/4.
+First correction of this hypothesis passes locally; no repeated unsuccessful correction.
+Next fresh focused dispatch2 selects build ordinal2/first launch1, no reuse/upload/
+generic matrix. Windows reserves one package and two launches; Mac automated repeat
+checks the changed test only, signed native evidence remains valid because production
+code is unchanged. Required corrected CI/native proof and final evidence review pending.

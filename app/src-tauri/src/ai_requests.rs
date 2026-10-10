@@ -594,18 +594,22 @@ mod tests {
         for project in [false, true] {
             let (listener, port) = stalled();
             let (root, host, input) = setup(port);
+            // Fixture construction is unrelated to the cancellation deadline.
+            // Prepare before starting the stalled socket; keep the host session
+            // unopened so the request still captures None and open_path expires it.
+            let project_root = project.then(|| {
+                let fixture =
+                    LifecycleService::prepare_source_foundation_probe(root.path().join("fixture"))
+                        .unwrap();
+                fixture.ai_data_root().join("synthetic-project")
+            });
             let service = Arc::new(Service::default());
             let (received, server) = accept(listener);
             let started = service.send_fixture(&host, input).unwrap();
             received.recv_timeout(Duration::from_secs(2)).unwrap();
             if project {
                 // The active request captured None; opening a real synthetic project invalidates it.
-                let fixture =
-                    LifecycleService::prepare_source_foundation_probe(root.path().join("fixture"))
-                        .unwrap();
-                let project_root = fixture.ai_data_root().join("synthetic-project");
-                drop(fixture);
-                host.with_service(|s| s.open_path(&project_root))
+                host.with_service(|s| s.open_path(project_root.as_ref().unwrap()))
                     .unwrap()
                     .unwrap();
             } else {
