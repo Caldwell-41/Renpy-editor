@@ -213,7 +213,7 @@ def prepare(output):
         ('renderer', ['npm', 'run', 'check'], None),
         ('renderer-build', ['npm', 'run', 'build'], None),
         ('core-rewrite', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'rewrite'], 26),
-        ('transport', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'ai_request::tests'], 8),
+        ('transport', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'ai_request::tests', '--', '--nocapture'], 8),
         ('native-worker', ['cargo', 'test', '-p', 'loomlight-desktop', '--release', '--locked', 'ai_requests::tests'], 6),
         ('controller-build', ['cargo', 'build', '-p', 'loomlight-desktop', '--release', '--locked', '--example', 'rewrite-controller-driver'], None),
         ('literal-build', ['cargo', 'build', '-p', 'loomlight-core', '--release', '--locked', '--example', 'draft-literal-driver' if drafting() else 'continue-literal-driver' if continuing() else 'rewrite-literal-driver'], None),
@@ -338,8 +338,9 @@ def cleanup_owned(output, root):
 
 def finish(output):
     # Preserve a scanned binary even when the package command produced it before
-    # failing. Never promote a failed/skipped case to acceptance.
-    retain(output)
+    # failing. A skipped build cannot claim a possibly cached executable as its own.
+    if os.environ.get('PACKAGE_OUTCOME') != 'skipped':
+        retain(output)
     output.mkdir(parents=True, exist_ok=True)
     reports = {}; errors = []
     for phase in (1, 2):

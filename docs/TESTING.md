@@ -1533,7 +1533,15 @@ support before approval and subsequent inclusion. No hostile/crash experiments.
 
 Manual `production-scaffold.yml` selector `generate_card=true` isolates Windows x64
 package/native input and Mac ARM64 automated checks; other selectors/reuse IDs remain
-false/empty. Hosted Mac lacks approved signing credentials, so only the named signed
+false/empty. Its Windows package step requires the raw focused prerequisite outcome
+to pass. If skipped, terminal retention cannot promote a cached executable; required
+skipped cases still fail the audit and failure artifacts remain available. Transport
+cancellation diagnostics distinguish stalled headers/partial body, socket ownership,
+shutdown result/raw OS error and cancellation/completion/server EOF elapsed time.
+Worker completion and actual EOF share the cancellation instant and each retain the
+two-second bound; cancellation remains immediate at request readiness, without waiting
+for body reception. Both recipes retain these observations with `--nocapture`.
+Hosted Mac lacks approved signing credentials, so only the named signed
 changed-action native case runs on the retained approved local Mac. No signing fallback.
 Packaged `dialogue-rewrite-probe.py --generate-card` requires25distinct phase1 and3
 separate-process reopen assertions, five exact reviewed/HTTP bodies, all-source hashes,

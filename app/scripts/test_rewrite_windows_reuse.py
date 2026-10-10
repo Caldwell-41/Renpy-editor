@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('windows_rewrite', Path(__file__).with_name('qualify-rewrite-windows.py'))
 recipe = importlib.util.module_from_spec(spec)
@@ -15,6 +16,24 @@ spec.loader.exec_module(recipe)
 
 
 class RetainedEvidenceGate(unittest.TestCase):
+    def test_skipped_package_cannot_promote_cache_or_pass_terminal_audit(self):
+        for outcome in ('skipped', 'failure'):
+            with self.subTest(outcome=outcome), tempfile.TemporaryDirectory() as temp:
+                output = Path(temp)
+                env = {'GITHUB_SHA': 'a'*40, 'GITHUB_RUN_ID': 'diagnostic',
+                       'PACKAGE_OUTCOME': outcome, 'FOCUSED_OUTCOME': 'failure',
+                       'NATIVE_OUTCOME': 'skipped', 'SDK_OUTCOME': 'success',
+                       'CAPABILITY_OUTCOME': 'success'}
+                with patch.dict(os.environ, env), patch.object(recipe, 'retain') as retain, \
+                        patch.object(recipe, 'run', return_value=''):
+                    with self.assertRaises(RuntimeError):
+                        recipe.finish(output)
+                    self.assertEqual(retain.call_count, 0 if outcome == 'skipped' else 1)
+                terminal = json.loads((output/'terminal-audit.json').read_text())
+                self.assertFalse(terminal['passed'])
+                self.assertEqual(terminal['outcomes']['PACKAGE_OUTCOME'], outcome)
+                self.assertFalse(any(terminal['reportsPresent'].values()))
+
     def test_continue_renderer_gate_executes_and_rejects_partial_or_unsuccessful_runs(self):
         for prefix, newline in (('ℹ', '\n'), ('#', '\r\n')):
             passed = newline.join(f'{prefix} {name} {count}' for name, count in

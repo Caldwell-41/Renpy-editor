@@ -147,6 +147,8 @@ pub fn prepare_reviewed(profile: StudioProfile, key: Secret, timeout_seconds: u3
 struct CancelInner {
     cancelled: AtomicBool,
     socket: Mutex<Option<TcpStream>>,
+    #[cfg(test)]
+    shutdown_observation: Mutex<Option<std::result::Result<(), (std::io::ErrorKind, Option<i32>)>>>,
 }
 #[derive(Clone, Default)]
 pub struct Cancel(Arc<CancelInner>);
@@ -166,7 +168,12 @@ impl Cancel {
     pub fn close_socket(&self) {
         if let Ok(mut socket) = self.0.socket.lock() {
             if let Some(s) = socket.take() {
-                let _ = s.shutdown(Shutdown::Both);
+                let _shutdown = s.shutdown(Shutdown::Both);
+                #[cfg(test)]
+                {
+                    *self.0.shutdown_observation.lock().unwrap() =
+                        Some(_shutdown.map_err(|error| (error.kind(), error.raw_os_error())));
+                }
             }
         }
     }
@@ -800,9 +807,11 @@ mod tests {
             Err(Failure::Cancelled)
         );
         for body in [false, true] {
+            let phase = if body { "partial body" } else { "stalled headers" };
             let listener = TcpListener::bind("127.0.0.1:0").unwrap();
             let port = listener.local_addr().unwrap().port();
             let (tx, rx) = std::sync::mpsc::channel();
+            let (cancel_tx, cancel_rx) = std::sync::mpsc::channel::<Instant>();
             let server = thread::spawn(move || {
                 let (mut stream, _) = listener.accept().unwrap();
                 request(&mut stream);
@@ -810,32 +819,53 @@ mod tests {
                     stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 999\r\n\r\n{").unwrap();
                 }
                 tx.send(()).unwrap();
+                // Do not spend the cancellation/EOF budget waiting for the test
+                // thread to receive readiness. Cancellation still happens at the
+                // first request-ready signal, without waiting for a client read.
+                let start = cancel_rx.recv_timeout(Duration::from_secs(2)).unwrap();
                 stream
-                    .set_read_timeout(Some(Duration::from_secs(2)))
+                    .set_read_timeout(Some((start + Duration::from_secs(2))
+                        .saturating_duration_since(Instant::now())
+                        .max(Duration::from_millis(1))))
                     .unwrap();
-                let mut byte = [0];
-                assert_eq!(
-                    stream.read(&mut byte).unwrap(),
-                    0,
-                    "owned client socket closed"
-                );
+                let eof = stream.read(&mut [0])
+                    .map_err(|error| (error.kind(), error.raw_os_error()));
+                (eof, start.elapsed())
             });
             let cancel = Cancel::default();
             let worker_cancel = cancel.clone();
+            let (completion_tx, completion_rx) = std::sync::mpsc::channel();
             let worker = thread::spawn(move || {
-                execute(
+                let result = execute(
                     prepare(profile(port), Secret::new("public".into()), 30).unwrap(),
                     &worker_cancel,
                     |_| {},
                     &mut None,
-                )
+                );
+                let _ = completion_tx.send(result);
             });
-            rx.recv_timeout(Duration::from_secs(2)).unwrap();
+            rx.recv_timeout(Duration::from_secs(2)).expect(phase);
+            let owned = cancel.0.socket.lock().unwrap().is_some();
             let start = Instant::now();
+            cancel_tx.send(start).unwrap();
             cancel.cancel();
-            assert_eq!(worker.join().unwrap(), Err(Failure::Cancelled));
-            assert!(start.elapsed() < Duration::from_secs(2));
-            server.join().unwrap();
+            let cancel_elapsed = start.elapsed();
+            let completion = completion_rx.recv_timeout(
+                Duration::from_secs(2).saturating_sub(start.elapsed()));
+            let completion_elapsed = start.elapsed();
+            let (eof, eof_elapsed) = server.join().unwrap();
+            worker.join().unwrap();
+            let shutdown = *cancel.0.shutdown_observation.lock().unwrap();
+            let diagnostic = format!("{phase}: owned={owned}, shutdown={shutdown:?}, \
+                cancel={cancel_elapsed:?}, completion={completion_elapsed:?}, \
+                eof={eof:?} after {eof_elapsed:?}");
+            eprintln!("{diagnostic}");
+            assert!(owned, "{diagnostic}");
+            assert_eq!(shutdown, Some(Ok(())), "{diagnostic}");
+            assert_eq!(completion, Ok(Err(Failure::Cancelled)), "{diagnostic}");
+            assert!(completion_elapsed < Duration::from_secs(2), "{diagnostic}");
+            assert_eq!(eof, Ok(0), "{diagnostic}");
+            assert!(eof_elapsed < Duration::from_secs(2), "{diagnostic}");
         }
     }
     #[test]

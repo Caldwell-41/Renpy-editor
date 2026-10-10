@@ -625,6 +625,7 @@ jobs:
           }
       - name: Verify retained package or record one bounded Windows build
         id: rewrite-package
+        if: ${{ !inputs.generate_card || steps.focused.outcome == 'success' }}
         continue-on-error: true
         env:
           BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}

@@ -39,7 +39,7 @@ try:
  run('renderer',['npm','run','check']);run('frontend',['npm','run','build'])
  run('core',['cargo','test','-p','loomlight-core','--locked','rewrite'],26)
  run('prompts',['cargo','test','-p','loomlight-core','--locked','prompts::tests'],5)
- run('transport',['cargo','test','-p','loomlight-core','--locked','ai_request::tests'],8)
+ run('transport',['cargo','test','-p','loomlight-core','--locked','ai_request::tests','--','--nocapture'],8)
  run('native-worker',['cargo','test','-p','loomlight-desktop','--locked','ai_requests::tests'],6)
  run('controller-build',['cargo','build','-p','loomlight-desktop','--locked','--example','rewrite-controller-driver'])
  run('controller',['node','tests/rewrite-controller.dispatch.mjs','target/debug/examples/rewrite-controller-driver','--generate-card' if card else '--draft-scene' if drafting else '--continue-scene'])

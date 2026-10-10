@@ -4245,3 +4245,77 @@ identities, Mac9actual automated checks, privacy/cleanup and allowance. Valid si
 Mac proof remains reusable; test-only change does not require another signed package.
 Complete remaining independent evidence review and in-scope fixes, then bounded closure,
 commit/push and next proposal-only prompt. No next deliverable started.
+
+### Generated card second CI audit and independent reassessment — 2026-10-11
+
+User resumed recorded run38085719737 attempt1 and requested a fresh GPT-6.1 Sol High
+subagent assessment of both failures and milestone changes, with a concrete fix plan.
+Fresh local/origin refs reconcile atbc9a9c2; clean checkout retained. Exact tested
+candidatef1a1a8b. Terminal overall failure, Windows job114311669919 failed, Mac job
+114311669778 passed. The first worker correction is established: Windows worker6/6
+passes in1.12seconds. Second failure is a different hypothesis, transport7/8:
+`cancellation_aborts_stalled_headers_and_body_and_before_connect` reports server read
+TimedOut/Windows10060 at ai_request.rs818, then client elapsed<2seconds assertion837
+fails; total2.03seconds. It is unclear whether headers/body or transport/test timing.
+Cancelled return alone cannot establish prompt cancellation: server timeout/drop may
+have released the client. No harmless-harness or product-defect conclusion yet.
+
+Actual artifacts11682841627Windows/11682252169Mac audited:37/13manifest hashes,
+245input hashes each match head/tree with only prescribed PowerShell CRLF. Windows
+renderer129/core26/prompts5/references12/worker6/controller pass; transport7/8 fails.
+Package/privacy pass, binary SHA256
+2db3be3277a9a85ff6cfee072d6973b9a3c9f973263885de116da052ee4a6de3.
+Ledger records package ordinal2 only, no editor launch. Native stage skipped, both
+phase reports absent; no Windows acceptance/cleanup claim, no fixture started. Mac
+actual9checks pass, no packages/launches. SDK receipts explicitly reuse prior runtime
+evidence. Downloaded privacy52files passes; original failure evidence retained unchanged.
+
+Actual cumulative Windows2/4packages,0/6launches,2/4dispatches; Mac1/4,2/6,2/4.
+Remaining Windows2packages/6launches/2dispatches, Mac3packages/4launches/2dispatches.
+No pending CI/reservation/owned local process/listener/fixture. No third dispatch or
+runtime mutation during assessment. Fresh independent reviewer is read-only, no tests/
+builds/launches/network; its reviewed plan follows before any new execution selection.
+First hypothesis corrected successfully; second newly observed cancellation failure
+requires evidence-based discrimination, preserving two-second gates and no blind retry.
+
+#### Independent plan and reviewed diagnostic correction
+
+Fresh GPT-6.1 Sol High subagent independently assessed both failed artifacts, the full
+milestone diff and prior correction. No additional actionable generated-card defect:
+closed schema/nullable target, core IDs/provenance, one metadata mutation, passive review,
+separate approval/prior text preservation, extension/staleness/history/source boundaries
+remain sound. Windows changed-action integration is missing, especially physical Approve
+scroll/focus/UIA, exact Save/review text and six receipts/nine captures. The first fixture
+correction is established; second transport diagnosis remains provisional. Socket
+publication/cancel flag share the correct mutex handoff; no obvious lost-cancel race.
+Ignored shutdown errors and unlabelled header/body phases prevent precise diagnosis.
+
+Reviewed plan:1 preserve failure as separate hypothesis;2 add test-only phase/shutdown/
+elapsed diagnostics and synchronize server EOF deadline to cancellation, keeping
+immediate request-ready cancellation and both two-second gates;3 require raw focused
+success before generated-card packaging and prevent cache promotion on skip;4 review
+and focused local checks;5 one coherent both-target CI attempt, continuing to native
+only after focused passes. A separate diagnostic-only dispatch wastes finite allowance.
+If it fails, discriminate from new phase/raw-OS/shutdown/elapsed evidence before final
+dispatch; a demonstrated production socket failure requires a narrow transport repair
+and affected native requalification. No deadline inflation/sleep/retry/blanket test skip.
+
+Owner implemented this plan. Test-only shutdown observation and header/body messages,
+bounded completion channel, common cancellation instant for worker and actual EOF;
+socket ownership/successful shutdown/Cancelled/EOF are explicit. Cancellation still
+immediate after original request-ready, no wait for reception. Production shutdown
+behavior is unchanged. `--nocapture` both recipes retains phase observations and raw OS
+errors. Workflow build prerequisite scoped to generate_card; terminal audit remains
+always, retains produced partial failures but never a skipped build's cached executable.
+Regression proves skipped/failed cases cannot pass terminal audit or promote cache.
+
+Independent exact-patch review reports no blocker/weakened gate; optional raw OS error
+detail included. Reviewer performed no edits/tests/builds/launches/network/dispatch.
+Local final transport8/8: both phases owned socket, shutdownOk/EOF, completion<0.2ms;
+worker6/6 passes. Package gate7pass/oneWindows-only case pending there; syntax/actionlint/
+repository496files/diff checks pass. Python bytecode sandbox-cache refusal repaired by
+workspace cache prefix, no expensive allowance consumed. Local green does not establish
+Windows root cause. Next fresh dispatch3/build3/firstlaunch1; Windows conditional package
+3 and launches1–2 reserved only if prerequisites pass. Existing signed Mac proof retained:
+test observation/fixture and workflow changes introduce no production cancellation policy
+change. Acceptance remains pending actual corrected Windows/native and final artifact audit.
