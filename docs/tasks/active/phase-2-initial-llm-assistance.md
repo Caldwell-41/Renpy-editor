@@ -4319,3 +4319,31 @@ Windows root cause. Next fresh dispatch3/build3/firstlaunch1; Windows conditiona
 3 and launches1–2 reserved only if prerequisites pass. Existing signed Mac proof retained:
 test observation/fixture and workflow changes introduce no production cancellation policy
 change. Acceptance remains pending actual corrected Windows/native and final artifact audit.
+
+### Generated card independently reassessed CI wait — 2026-10-11
+
+Reviewed diagnostic/prerequisite plan and patch published as
+3246190b5052966035796758619748397197f0c5. Confirmed fresh workflow357322921,
+[run38090637300](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38090637300),
+attempt1, `workflow_dispatch`, branch `codex/provider-qualification`, exact head3246190
+above. Created2026-10-10T22:13:56Z; observed22:14:01Z overall queued,
+Windows114326170036 setup/in_progress, Mac114326169859 queued. Inputs generate_card=true;
+draft/continue/dialogue/upload_packages=false; build3/firstlaunch1, both reuse IDs empty.
+Generic jobs deliberately skipped; required focused cases pending.
+
+Actual confirmed Windows2/4packages,0/6launches,3/4dispatches; Mac1/4,2/6,3/4.
+Windows conditionally reserves package3/launches1–2 after successful prerequisites;
+Mac has no package/native reservation. Unreserved Windows1package/4launches/1dispatch,
+Mac3packages/4launches/1dispatch. Actual new starts/skips/failures must be reconciled
+from artifacts; reservation is not execution. Prior failures remain separate, first
+worker hypothesis corrected, second cancellation hypothesis now instrumented, no
+production cancellation-policy repair claimed. No local owned process/listener/fixture.
+
+Manual same-thread end of normal turn; no autonomous Goal/watcher/polling. Resume audits
+exact recorded run/attempt/head, raw header/body owned/shutdown/OS/elapsed observations,
+transport8/worker6/core26/prompts5/references12/renderer129/controller, actual conditional
+package inputs/binary, Windows native25+3/five exact bodies/six stages/nine captures,
+Mac9checks, privacy and cleanup. If focused fails, skipped package/native remain missing
+and cache cannot be promoted. Classify new evidence before selecting the final dispatch.
+If all required cases pass, complete independent artifact review/acceptance and publish
+closure/result/limits/next proposal-only prompt. No following deliverable started.
