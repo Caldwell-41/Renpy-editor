@@ -21,13 +21,14 @@ are cleaned; prior failed launch-1 evidence is retained. SDK smoke needed a diag
 fixture correction; no production change or rebuild was necessary.
 
 **Usage:** Mac **1/4 builds, 3/6 launches**; Windows **0/4 builds, 0/6 launches**.
-Focused Windows CI is prepared in the existing production workflow: selected checks,
-pinned SDK, one package and evidence-gated native input/observations plus dependent
-reopen. Generic matrix and Mac jobs are excluded. Native driver rejection tests 4/4,
-report-gate tests 2/2 and local repository checks pass; actual Windows capability
-remains unverified. Publish/verify before dispatch, then follow manual same-thread
-wait/resume. Up to one Windows build/two launches are reserved; runner records actual
-consumption. [HANDOVER](HANDOVER.md) owns operation identity and terminal audit.
+**State: awaiting_ci.** Published candidate `a2e82f4` has confirmed
+[focused run 38023888008](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38023888008),
+attempt 1, observed in progress at **2026-10-10 04:23:32 UTC**. Only Windows x64
+is running; generic jobs are skipped. Local evidence-gate and repository checks pass;
+actual Windows capability/results remain pending. Up to one build/two launches are
+reserved; known Windows use was zero at the initial checkout observation. Audit
+actual consumption from terminal artifacts before retry. Manual same-thread resume
+is required; no autonomous polling. [HANDOVER](HANDOVER.md) owns exact identity and audit.
 [PROMPTS_CONTEXT](../PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite), [UI](../UI.md)
 and [ARCHITECTURE](../ARCHITECTURE.md#first-safe-dialogue-rewrite-boundary) own behavior.
 Prior prompt/context/manual-reference outcomes remain qualified on both targets.

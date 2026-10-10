@@ -141,6 +141,35 @@ failures and complete bounded fixes/review only within remaining allowance. Loca
 handoff is requested only for a specifically demonstrated missing native case after
 all feasible CI work; no handoff is currently inferred.
 
+### Confirmed focused Windows dispatch — 2026-10-10
+
+**State: awaiting_ci.** Instruction/CI preparation and diagnosed workflow correction
+are published; remote branch was verified at source candidate
+`a2e82f4d27ef4ad5154027b2d63899d42e1d730d` before dispatch. Confirmed workflow
+**357322921**, `production-scaffold.yml` (Phase 1 production gates),
+[run **38023888008**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38023888008),
+**attempt 1**, event `workflow_dispatch`, branch `codex/provider-qualification`,
+exact head matches that candidate. Created **2026-10-10 04:23:22 UTC**; last observed
+**in_progress at 04:23:32 UTC**. Windows x64 job `114130507223` started and setup
+passed; checkout was in progress. Generic preflight and package matrix are skipped.
+Material inputs: `dialogue_rewrite_windows=true`, `upload_packages=false`,
+`rewrite_build_ordinal=1`, `rewrite_first_launch_ordinal=1` (phase 2 ordinal 2).
+
+Artifact selection: `rewrite-windows-38023888008-1`, **7 days retention after upload**;
+upload/completion are not yet observed. Known Windows consumption at checkout was
+**0/4 builds, 0/6 launches**, with up to one build/two launches reserved; reconcile
+actual terminal attempt entries and logs before any further dispatch. Mac remains
+**1/4 builds, 3/6 launches**, with unchanged production inputs/evidence reused.
+All Windows required cases remain pending until terminal artifact audit, including
+actual runner capability; no marker/acceptance is claimed from dispatch.
+
+Publish this coherent docs-only wait successor and stop active model polling.
+Manual user resume in the same chat triggers inspection of this exact run/attempt,
+fresh refs/local changes and the terminal audit listed above. A newer docs-only
+branch head does not replace the tested source candidate. No autonomous polling,
+wake-up, duplicate dispatch, merge or release. The zero-job validation failure at
+`3451137` remains recorded as a harness failure, not a qualification attempt/pass.
+
 ## First safe dialogue rewrite selection — 2026-10-10
 
 **Routing superseded:** the [CI-first amendment](#ci-first-platform-qualification-amendment--2026-10-10)
