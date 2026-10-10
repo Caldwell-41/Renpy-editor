@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-10. **Selected outcome: Continue Scene, in progress** on
+**Updated:** 2026-10-10. **Selected outcome: Continue Scene, awaiting CI** on
 `codex/provider-qualification`. Accepted first rewrite and provider/reference/prompt/
 literal/transaction foundations remain the baseline; main remains `5f448ca`.
 
@@ -13,11 +13,17 @@ text after shared Undo/Redo. Final renderer **126/126**, frontend build, evidenc
 and official pinned SDK runtime **8/8** pass. Required Windows native/SDK and hosted Mac
 corrected automated proof remain pending; implementation is not yet accepted.
 
-Cumulative selected allowance use: Windows **1/4 package builds, 0/6 editor launches,
-1/4 CI dispatches**; Mac **0/4, 0/6, 1/4**. Prior slice counts remain separate.
-The next step is the named local approved signed Mac native case, which hosted Mac CI
-cannot establish, followed by focused qualification of the repaired candidate. Retain
-this Mac session; no signing-policy changes. No active CI polling or editor fixture.
+Repair candidate **8931fa8** is pushed. Signed Mac package **1/4** passes existing
+identity/signature/installer/privacy gates. Native observation is blocked by the locked
+Mac desktop; manual unlock requested, zero editor launches and no owned fixture.
+
+[Run 38039472619](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38039472619),
+attempt 1, exact candidate 8931fa8, was **in_progress** at **08:54:05 UTC**.
+Cumulative CI use **2/4 per target**. Known actual Windows use **1/4 builds, 0/6
+launches**, with build 2/launches 1–2 reserved pending audit. Mac use **1/4 builds,
+0/6 launches**. Prior slice counts remain separate. Resume this thread manually to
+audit actual artifacts/cases and complete the named Mac native case after unlock.
+No active model polling, signing-policy changes or next feature.
 
 [The task](../tasks/active/phase-2-initial-llm-assistance.md#continue-scene-failed-run-audit-and-review-repairs--2026-10-10)
 owns actual evidence, failures and allowances. [HANDOVER](HANDOVER.md) owns recovery.

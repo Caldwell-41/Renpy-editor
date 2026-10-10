@@ -3410,3 +3410,63 @@ cleanup, and fix any evidenced in-scope issue. No signing or Keychain policy cha
 Then publish and dispatch the coherent repaired candidate within this same allowance;
 Windows build ordinal 2 and first launch 1 remain available. Record exact new run,
 inputs and consumption; follow manual same-thread wait/resume. No next deliverable.
+
+
+### Continue Scene repaired candidate, Mac capability stop and second CI wait — 2026-10-10
+
+State: `awaiting_ci`. Reviewed repair candidate **8931fa85178ca22430fa5984e693f609970f4995**
+committed/pushed to the same branch; remote identity verified and working tree clean.
+No next deliverable or unrelated work was started.
+
+Mac package **1/4** built this exact candidate through the unchanged approved wrapper.
+Strict/deep signature, exact pinned certificate/designated requirement, permanent
+bundle/installer identity and installer contents all pass. Executable SHA256
+`921c33f2e06c1e78719416e39d63092d006f061875354875cbcf232ec5218f59`;
+installer SHA256 `55c467310a514c7d6cba72e92ffafc71d9d1a00100e2721150d24ee437f87b9a`.
+Privacy scan passes; candidate/runtime input inventory and receipts remain ignored
+under `.toolchains/releases/continue-mac-01`. Public certificate pin and policy unchanged.
+Sandbox identity lookup was unavailable; authorized native read confirms the existing
+approved identity. No signing fallback or trust/namespace/provisioning change.
+
+Native inventory succeeds and says Loomlight is not running. Prelaunch Finder native
+observation returns **“The Mac is locked and automatic unlock could not unlock it.”**
+This is an environment capability blocker; manual unlock requested. **Zero Mac editor
+launches**, no owned native fixture, credentials, server or process. No retry on a
+locked desktop. The named native proof remains missing; available package proof is
+retained and reusable. CI continues independently under the user's fix/review/new-run
+request. User unlock response must precede any dependent native launch.
+
+Confirmed new [run **38039472619**](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38039472619),
+workflow **357322921**, attempt **1**, `workflow_dispatch`, branch
+`codex/provider-qualification`, exact head **8931fa85178ca22430fa5984e693f609970f4995**.
+Created **2026-10-10 08:53:52 UTC**, updated **08:54:02 UTC**, initial identity observed
+**08:54:05 UTC**, status **in_progress**. Material inputs: `continue_scene=true`,
+`dialogue_rewrite_windows=false`, `rewrite_build_ordinal=2`,
+`rewrite_first_launch_ordinal=1` (dependent reopen 2), both reuse IDs empty,
+`upload_packages=false`. Only focused Windows and Mac automated jobs selected.
+Existing run inventory was terminal before dispatch; no job/run rerun or duplicate send.
+
+Cumulative dispatch use **2/4 per target**. Known actual Windows build use **1/4**,
+editor launches **0/6**; active run reserves build **2** and launches **1/2**, with actual
+consumption to audit from retained attempt ledger. Mac use **1/4 builds, 0/6 launches,
+2/4 dispatches**. Conservative unreserved remainder: Windows **2 builds/4 launches/2
+CI**, Mac **3 builds/6 launches/2 CI**. Reservations do not convert to actual attempts
+until evidence; failure/cancel/implicit attempts count. Earlier allowances unchanged.
+
+Pending audit: exact run/attempt/head, target architecture/pinned tools, **126** renderer
+passes/zero unsuccessful cases, 15 core/5 Mac prompts/8 transport/6 native worker,
+actual Continue controller, corrected official pinned SDK compile/lint/literal/runtime
+and exact three say payloads/return, Windows package/input hashes, 22 native phase-1
+checks/five exact bodies/all five action-specific stages/seven captures, process phase-2
+three checks/zero HTTP/unchanged project bytes, privacy and owned credential/fixture/
+process/listener cleanup. Expected artifacts `rewrite-windows-38039472619-1` and
+`continue-macos-38039472619-1`; IDs/expiry unknown until actual production. Required
+Mac native observation/physical send/accept/reopen remains pending on manual unlock.
+
+Publish this docs-only wait successor, then **end active model polling** under
+WORKFLOW manual same-thread resume. No watcher, automation or autonomous Goal lifecycle
+pause is invoked/claimed. Next prompt: **“Resume Continue Scene; audit run 38039472619
+and continue the existing outcome. The Mac is unlocked.”** Reconcile fresh refs and
+actual counts; reuse candidate 8931fa8's unchanged signed Mac bundle after input/hash
+verification, complete only authorized fixes/native proof/review/closure. No new
+run/job retry without a diagnosed case and available cumulative allowance.
