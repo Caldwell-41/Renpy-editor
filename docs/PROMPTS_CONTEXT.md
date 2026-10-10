@@ -264,6 +264,9 @@ the new file and restores metadata; Redo restores the same IDs/bytes; reopen pre
 the result. No incoming connection is created. Cancels, malformed/unsafe/stale/draft/
 external-edit refusal writes nothing; competing prepared reviews consume old identity.
 
+This bounded action is qualified on Windows x64 and macOS ARM64; the
+[task closure](tasks/active/phase-2-initial-llm-assistance.md#draft-scene-qualified-closure--2026-10-11)
+records exact candidate, native/source/history/refusal and pinned-SDK evidence.
 Generated Character cards/lore, incoming/terminal replacement and custom source remain
 separately selected deliverables. SDK validation is a separate explicit execution
 action; ordinary preview never invokes Ren'Py.

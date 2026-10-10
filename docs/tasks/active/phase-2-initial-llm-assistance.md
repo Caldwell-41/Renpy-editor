@@ -3928,3 +3928,157 @@ required actual cases, package/runtime-input/SDK/native receipt/manifest hashes,
 failed/skipped/cancelled outcomes, privacy/cleanup and actual cumulative consumption.
 Then finish only in-scope fixes within remaining allowance and publish qualified
 closure/limitations/next prompt. No next deliverable is selected or started.
+
+
+### Draft Scene qualified closure — 2026-10-11
+
+State: **`accepted` for this selected bounded agent-owned outcome**. User resumed this
+same chat to audit run38056790759 and continue Draft Scene. Fresh local/remote match
+published wait checkpoint3e614cb008d27e6c7731c4dda6c6bb39c28b649c; main remains
+5f448ca683a905f4ea77d4580bbc89fda69f2b93. Checkout clean, no reset/unrelated work.
+Retained Mac ARM64 session, one serial GPT-6.1 Sol High owner; implementation and
+required independent read-only reviews closed. Full Phase2/final human acceptance
+remain incomplete; no subsequent deliverable selected or started.
+
+#### Exact CI identity and actual artifacts
+
+Production scaffold357322921, [run38056790759]
+(https://github.com/Caldwell-41/Renpy-editor/actions/runs/38056790759), attempt1,
+event workflow_dispatch, branch codex/provider-qualification, exact implementation
+**1320d0a6507625abdd3fa20aa6a3eccffaccfcd6**, tree
+**42b36ee3e6180419837774300c9626a600ade328**, completed **success** at
+**2026-10-10 13:56:50 UTC**. Windows job114226816944 and Mac job114226816763 both
+succeed; generic Preflight/matrix intentionally unselected. Material input selection
+matches recorded isolated Draft true, other actions false, buildordinal2/firstlaunch2,
+reuse IDs empty, upload_packages=false. No second attempt or ambiguous redispatch.
+
+Downloaded retained ignored artifacts .toolchains/draft-ci-38056790759:
+Windows rewrite-windows-38056790759-1 ID11671427645, archive digest
+c86a394a0277f9387ab430416f8d7910f747ade42a1f0a0d507ea75449326ef2;
+Mac continue-macos-38056790759-1 ID11671108253, digest
+cf3f7e49e2ca059a2b9cfd442b0b1c8f00e73b0fda8f98f4087101bad6668f1c.
+Legacy artifact names are not action evidence: both identities explicitly draftScene,
+exact candidate/run/attempt, correct AMD64/arm64 and locked Node24.19.0/npm11.9.0/
+Rust1.90.0. Verified **76Windows/23Mac manifest file hashes**,243 candidate checkout
+input hashes each and Windows244package runtime inputs/binary. The audit's initial
+raw-Git/current-file comparison rejected the PowerShell hash; .gitattributes explicitly
+requires CRLF on both hosts. Exact candidate blob plus declared checkout transform
+matches the recorded hash; this is expected checkout representation, no product/evidence
+waiver or changed source. No tests/builds/launches/CI rerun occurred during this audit.
+
+Actual raw logs on both targets: core21, renderer127, transport8, native-worker6 and
+actual frontend controller/native credential/strict loopback HTTP pass with zero
+failures/cancellations/skips/ignored. Mac prompt5 also passes; all10required Mac
+cases succeed and disposable SDK root removed. Windows target rejection gates4+4+7=
+15pass, including PowerShell child-context; interactive/UIA desktop preflight passes
+and native prelaunch is rechecked. Actual Windows job log retained ignored separately.
+
+Both official SDK archive hashes match published SHA256
+eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45.
+Compile/lint and actual metadata-free standard-template runtime pass on accepted disk
+source (driver verifies exact preview equality), Ren'Py8.5.3.26051504. Raw named
+runtime cases/hooks each1/1, **8/8 assertions**, zero failed/skipped/not-run on each
+target. SDK Python Windows3.12.7/Mac3.12.8, Mac runtime macOS26.6.2 ARM64. Harmless
+literal expressions/action tags display literally and explicit Return executes.
+
+#### Changed-action native and source/history proof
+
+Windows package attempt2 passes; executable SHA256
+9453ab9cb7f566e4ec87efee7d7ad0748fcc859b889dd69d97f33ab122c88f99,
+244inputs match exact candidate/checkout. Actual ledger records one build2 and exactly
+launch2PID8816/launch3PID8560. All five native stage receipts pass action/PID/binary/
+capture hash/nonblank/viewport/UIA/OSSendInput validation. Physically generated inert
+proposal and accepted-once captures plus compact capture inspected; plain title/Chapter/
+Character review and passive exact source/metadata remain available. **22distinct**
+phase1 checks pass, five exact reviewed/HTTP body digests match; one acceptance/Undo,
+repaired Redo, all existing source/BOM/custom byte preservation, duplicate refusal and
+malformed/unsafe/cancel/stale external zero writes pass. Separate process reopen **3/3**,
+zeroHTTP and unchanged whole project bytes. Both native terminal cleanup reports and
+owned fixture credential-reference/root removal receipt pass; terminal audit contains
+no errors, all actual outcomes success. Artifact privacy74files passes.
+
+Retain final signed Mac package3/native launches4–5 exact1320d0a evidence from the
+prior same-thread wait record: approved pin/strict signature/installer and244matching
+runtime inputs; actual light/dark/compact/physical Generate/Accept22distinct checks,
+five exact bodies, oneUndo/Redo/refusals and separate process reopen3/3. Processes
+exited, credential references/queue/records cleared, owned root cleanup complete;
+privacy6files passes. Mac automated artifact privacy22files passes. This named local
+signed/native case is required because hosted Mac lacks approved signing capability;
+no additional handoff or duplicate native repeat. Signing/trust/ACL/names unchanged.
+
+#### Acceptance, limits and final allowance
+
+Selected acceptance met: explicit saved Chapter/reviewed title, one bounded1–8
+supported dialogue/narration Scene and reviewed existing Characters, core-owned IDs/
+label/path and explicit Return; exact prompt/context/body dispatch and inert semantic/
+source/project/map review; one transaction/Undo entry, duplicate refusal, byte-exact
+all existing source, Undo/Redo/project and process reopen. Closed malformed/unsafe/
+cancel/stale Chapter/session/prompt/project, competing prepared request/draft and
+ordinary external-edited/disappeared-source states refuse with zero writes, including
+retained drafts. Empty saved Chapter materializes only on acceptance. Changed-action
+native and official pinned SDK proof qualify both targets. Clear main UI uses reviewed
+names and plain ending text; detailed exact disclosures remain available.
+
+Independent implementation, Redo correction and clear UI reviews reported no actionable
+blockers. Final independent GPT-6.1 Sol High read-only audit finds no actionable
+evidence gap or improper bounded acceptance claim: manifest/input/capture identities,
+native22+3/five bodies, SDK8/8, signed Mac receipts/cleanup and cumulative totals
+confirmed. Reviewer performed no tests/writes/network/builds/launches; full Phase2/
+human acceptance distinction retained. Unique prior failures remain honest: run38046543055 Windows Redo defect
+reproduced/fixed, first Mac locked-desktop observe timeout, initial malformed terminal
+extra-field and helper compile/harness count corrections. No gate weakening or claim
+that earlier failed native acceptance passed. Unchanged foundation/recovery evidence
+reused; no broad matrix, hostile/crash experiment or further provider/live calls.
+
+| Target | Actual cumulative packages | Actual editor launches | Focused dispatches | Unused remainder |
+| --- | --- | --- | --- | --- |
+| Windows x64 | **2/4** | **3/6** | **2/4** | 2packages,3launches,2dispatches |
+| Mac ARM64 | **3/4** | **5/6** | **2/4** | 1package,1launch,2dispatches |
+
+No outstanding reservation, pending CI or owned native process/fixture/listener. All
+failures/cancellations/implicit launches count; prior allowances closed. This outcome's
+unused allowance closes here and does not silently carry into another deliverable.
+Agent/automated native acceptance is distinct from final human/full Phase2/2C.4
+acceptance and remaining independent phase review. No paid/public calls, provider/route
+expansion, generated refs, custom source, incoming connection/edge replacement,
+signing-policy changes, merge or release. Canonical UI/context/testing and live status
+updated; docs-only closure does not replace the qualified implementation candidate.
+
+#### Next-outcome prompt — proposal only, not executed
+
+```text
+Deliver Generated Character cards: draft or propose an update to one editor-only
+Character card, review exact changes, accept once, explicitly approve, Undo/Redo and
+reopen without changing runnable source or an existing approved revision silently.
+Repository: Caldwell-41/Renpy-editor
+Continuation: codex/provider-qualification, published Draft Scene closure atop qualified
+implementation1320d0a; reconcile fresh refs, preserve unrelated work, do not reset.
+Codex machine: retain the current Mac ARM64 session.
+Reason: manual reference records, prompts/context, proposal/transaction lifetimes and
+bounded Scene assistance are qualified; the next queue target is Character-card generation.
+Read AGENTS.md, CURRENT, HANDOVER and phase-2-initial-llm-assistance.md sections6–11
+and20, including the manual-library correction and latest Draft Scene closure.
+Record selection/acceptance in the existing task. Use one GPT-6.1 Sol High owner;
+shared implementation serial, retain required independent review.
+Scope: one bounded card draft/update from explicitly reviewed saved context, core-owned
+ID/revision, closed field groups, provenance/citations/status, passive semantic and
+exact metadata review. Preserve the current approved record until explicit replacement
+approval; generated content cannot approve itself. Reuse exact-send, draft/stale guards
+and shared metadata history. No runnable Character/Appearance/asset/source change,
+lore generation, external-card import, retrieval expansion, paid/public calls,
+provider/route expansion, signing changes, merge or release.
+Prove exact dispatch, inert review, one transaction/Undo entry, duplicate refusal,
+approval separation, no unapproved/stale inclusion, zero writes for malformed/unsafe/
+cancel/stale/competing-draft/external changes, byte-exact all runnable source and
+unrelated references, Undo/Redo/reopen. Verify capabilities before focused Windows x64/
+macOS ARM64 CI and changed-action native checks. Local handoff only for a named
+required case CI cannot establish; reuse unchanged SDK/source/signing evidence.
+Proposed new cumulative allowance per target:4package attempts,6editor launches,
+4focused dispatches, effective only when this distinct outcome is selected. Draft Scene
+allowance remains closed; count failures/cancellations/implicit launches and reassess
+after two unsuccessful corrections of one hypothesis.
+Complete implementation, focused checks, review and in-scope fixes; commit/push to the
+existing branch and update canonical contracts/task/CURRENT/HANDOVER. Follow WORKFLOW
+manual same-thread CI wait/resume and audit actual cases/artifacts. Return result,
+limitations and next prompt; do not start the following deliverable.
+```

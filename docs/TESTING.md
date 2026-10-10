@@ -1500,3 +1500,19 @@ substitution/tokens and exact two generated say payloads, then executes the expl
 Return with editor metadata absent. Review raw logs/cases/input/binary/artifact hashes,
 not badges. Reject missing/partial/unsafe/skipped required evidence. Reuse unchanged
 prior foundations; manual same-thread wait/resume applies.
+
+
+Draft Scene changed-action qualification is complete for implementation
+**1320d0a6507625abdd3fa20aa6a3eccffaccfcd6**. Focused
+[run38056790759](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38056790759)
+attempt1 is audited, including76Windows/23Mac manifest hashes, exact candidate inputs
+(with repository-required CRLF PowerShell checkout), real core21/renderer127/transport8/
+worker6/controller checks and official SDK8/8 runtime assertions on both targets.
+Windows package2/native launches2–3 passes22distinct phase1 plus3reopen checks, five
+exact reviewed/HTTP bodies, source/history/refusal and native PID/binary/capture receipts.
+Final signed Mac package3/native launches4–5 proves the same changed-action22+3 cases;
+CI supplies its automated/SDK proof. Exact candidate and native/SDK identities, privacy,
+cleanup, prior honest failures and cumulative allowances are in the
+[closure ledger](tasks/active/phase-2-initial-llm-assistance.md#draft-scene-qualified-closure--2026-10-11).
+No remaining required case is skipped or waived. Agent/native proof is distinct from
+final human/full Phase2 acceptance; no docs-only package rerun is required.

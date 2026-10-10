@@ -1167,7 +1167,7 @@ Source/source-map before/after. All content uses passive text. Ordinary Story Un
 and reopened source/history use the shared transaction layer. Settings' assistance
 selector edits/restores each action's saved prompt with draft protection. Continue Scene
 is qualified on both supported targets; [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#continue-scene)
-owns bounds and source/lifetime rules. Generated references stay unavailable. Draft Scene is implemented with target qualification pending.
+owns bounds and source/lifetime rules. Generated references stay unavailable. Draft Scene is qualified on both supported targets; its bounded contract is documented below.
 
 
 ### Draft Scene authoring

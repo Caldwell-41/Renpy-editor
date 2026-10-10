@@ -1,27 +1,28 @@
 # Current status
 
-**Updated:** 2026-10-10. **Draft Scene is `awaiting_ci`** on
-`codex/provider-qualification`, retained Mac ARM64 session and one serial owner.
-Reviewed candidate **1320d0a** includes CI Redo repair and clearer Draft UI. Full Phase2
-and bounded acceptance remain incomplete; no following deliverable selected.
+**Updated:** 2026-10-11. **Draft Scene is `accepted` for the selected bounded outcome**
+on `codex/provider-qualification`. Qualified implementation1320d0a includes the CI
+Redo repair and clear Draft UI. Retained Mac ARM64 session, one serial owner. Full
+Phase2/final human acceptance remain pending; no following deliverable selected.
 
 | Capability | State |
 | --- | --- |
 | Provider/reference/prompt/literal/Continue foundations | Qualified unchanged evidence retained |
-| Draft exact send and passive preview | Core21/renderer127/controller/HTTP pass; clearer title/Chapter/Character review independently reviewed |
-| Creation/preservation/history/refusal | Local one transaction/Undo/Redo/reopen and zero-write refusals pass; CI Redo defect repaired |
-| Official pinned SDK | Prior both-target saved-byte runtime8/8 audited; final candidate CI audit pending |
-| Changed-action native | Final signed Mac package3/native22+3 passes with cleanup; final Windows package/native pending CI audit |
+| Draft exact send and passive preview | Core21/renderer127/transport8/worker6/controller both targets; independent reviews close |
+| Creation/preservation/history/refusal | One transaction/Undo/Redo/reopen, byte-exact existing source and zero-write refusals pass |
+| Official pinned SDK | Both targets actual accepted saved-byte runtime8/8, compile/lint and explicit Return pass |
+| Changed-action native | Windows package2/launches2–3 and signed Mac package3/launches4–5 each22+3 cases pass; cleanup complete |
 
 [Run38056790759](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38056790759)
-attempt1/head1320d0a confirmed in_progress at13:43:09UTC. Isolated second focused
-Windows x64/macOS ARM64 dispatch; actual artifacts/cases must be audited on same-chat
-manual resume. No model polling/watcher/Goal. Run1 failure and correction retained.
-Actual Windows1/4 packages,1/6 launches,2/4 dispatches; run2 reserves package2/launches2–3.
-Actual Mac3/4 packages,5/6 launches,2/4 dispatches; prior allowances closed.
+attempt1/head1320d0a completed success; actual jobs,76Windows/23Mac manifest hashes,
+input/binary/native receipts/raw cases/SDK/privacy/cleanup audited. Original run1 failure
+retained and repaired; no skipped required case credited. No pending CI/reservation.
+Final cumulative Windows2/4packages,3/6launches,2/4dispatches; Mac3/4,5/6,2/4.
+Draft Scene allowance closes; unused remainder is not carried forward.
 
-[Task ledger](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-focused-ci-wait-2--2026-10-10)
-owns exact identities, evidence/selection/counts. [HANDOVER](HANDOVER.md) owns continuation.
-No provider/route expansion, generated references, incoming connection/edge replacement,
-custom source, signing changes, paid/public calls, merge/release or next deliverable.
-Agent proof does not imply final human/full Phase2 acceptance.
+[Closure ledger](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-qualified-closure--2026-10-11)
+owns selection, evidence, acceptance and proposed next prompt; [HANDOVER](HANDOVER.md)
+owns continuation. Proposed next target: one generated editor-only Character card,
+requiring a fresh user selection. No generated cards/lore, incoming connection/edge
+replacement, custom source, provider expansion, paid/public calls, signing changes,
+merge/release or following deliverable executed. Agent proof does not imply full Phase2.
