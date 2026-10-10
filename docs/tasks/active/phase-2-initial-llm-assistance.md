@@ -109,6 +109,14 @@ assertions remain unchanged. Local harmless SDK helper recheck passes. All 116 r
 Mac production-input hashes still match; completed Mac qualification remains valid.
 No demonstrated production defect or production change occurred.
 
+Published preparation candidate `3451137` was verified remotely. GitHub's push-time
+workflow validation failed before scheduling jobs: run `38023810828`, attempt 1,
+no jobs, diagnostic `(Line: 461, Col: 25): Unrecognized named-value: 'runner'`.
+The new job-level environment used a step-only context. Diagnosed harness correction
+moves the evidence path into the first runner step via `GITHUB_ENV`; native and
+acceptance gates remain unchanged. Local YAML parsing did not establish Actions
+expression-context validity. No package build or app launch was consumed.
+
 Cheap local checks: native evidence rejection tests **4/4**, original rewrite report
 gate **2/2**, Python AST, workflow YAML/isolated matrix guards and diff whitespace pass.
 Repository validation/link/privacy passes for **486 files**. Windows PowerShell/UI

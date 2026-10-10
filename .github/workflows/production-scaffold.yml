@@ -458,7 +458,6 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 60
     env:
-      REWRITE_EVIDENCE: ${{ runner.temp }}/rewrite-windows
       CARGO_TERM_COLOR: never
       PYTHONUTF8: '1'
     defaults:
@@ -476,7 +475,9 @@ jobs:
           UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
         run: |
           python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
-          New-Item -ItemType Directory -Path $env:REWRITE_EVIDENCE | Out-Null
+          $evidence=Join-Path $env:RUNNER_TEMP 'rewrite-windows'
+          New-Item -ItemType Directory -Path $evidence | Out-Null
+          "REWRITE_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Check native driver syntax and actual interactive runner capability
         id: native-capability
         continue-on-error: true
