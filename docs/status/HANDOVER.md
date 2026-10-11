@@ -19,7 +19,9 @@ qualified official SDK bytes with the unchanged published checksum pin and fresh
 runtime, retaining bootstrap/terminal failure artifacts. Confirmed [CI2run38146108645/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38146108645),
 exact candidatea16c5f701313eebb26f23fd2ab643a0a4deaf044, terminal overall failure with audited Mac automated/controller/SDK pass and Windows
 Unix expected-path fixture failure before packaging/native. Reviewed correction passes12
-local gates. Next fresh CI3 dispatchordinal3,
+local gates. Confirmed [CI3run38146640617/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38146640617),
+exact candidate78a638984118515991494755fcabc69a16ddba01, initially queued,
+dispatchordinal3,
 packageordinal1/starts1–2; actual attempts must be audited.
 
 [Owning implementation ledger](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11)
@@ -60,7 +62,7 @@ has no approved signing identity. Terminal audit must inspect manifests, exact i
 package identities, SDK results, required native receipts/captures and cleanup; green
 status alone is insufficient. Keep defects, harness failures and missing evidence distinct.
 
-Counts: **paired dispatch2/4 each; Mac and Windows0/4packages,0/8starts;
+Counts: **paired dispatch3/4 each; Mac and Windows0/4packages,0/8starts;
 live0/2total batch generations,0/1discovery.** CI1 failed before qualification;
 planned package/start reservations were unused. Prior allowances stay closed. Max
 four paired runs. Development/helper/SDK checks consume no editor/package attempt.
@@ -68,7 +70,7 @@ Notify when live checks need fresh native key entry on the existing selected end
 model; never retrieve old keys from chat/logs or read/export credential files. No live
 calls, real-provider credential operations or owned temporary editor/listener/root.
 
-CI2 audited; publish the reviewed one-line Windows fixture correction and dispatch CI3.
+CI2 audited; reviewed one-line Windows fixture correction78a6389 is in confirmed CI3.
 Continue permitted bounded
 same-chat polling, then terminal artifact/identity/SDK/native/cleanup audit. Do not
 rerun attempt2 or substitute later docs-only commits for the exact candidate. Resume

@@ -5967,3 +5967,18 @@ packages,0/8starts; paired dispatch2/4. Independent read-only review confirms th
 one-line Windows expected-path correction; all12 local gates pass. Publish that
 correction and use fresh paired CI3 with dispatchordinal3/packageordinal1/starts1–2.
 No old-run rerun, artifact substitution, or native/live/human acceptance claim.
+
+
+#### Selectable CI3 dispatch — 2026-10-12
+
+Reviewed correction published **78a638984118515991494755fcabc69a16ddba01**. Fresh
+registered workflow357322921 accepted **run38146640617/attempt1**, exact head78a6389,
+branchcodex/provider-qualification at2026-10-11T14:18:25Z, initially queued. Direct
+returned URL identity resolves; no duplicate. [Exact CI3 run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38146640617).
+Inputs remain exclusive selectable selectors/empty reuse IDs; dispatchordinal3,
+packageordinal1/starts1–2. **Paired dispatch3/4 each**; actual Mac/Windows packages0/4
+and starts0/8 until emitted attempts audit. Live0/2, discovery0/1. One paired dispatch
+remains after this accepted run. Continue bounded chat-only polling, terminal artifact
+and native evidence audit; never report planned package/launch attempts as passes.
+Mac desktop remains locked; no binding/start. Signed Mac/native/live/human/full Phase2
+acceptance remains pending, with generic/provider/signing/merge/release deferred.
