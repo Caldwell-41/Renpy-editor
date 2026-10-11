@@ -22,10 +22,11 @@ establish packaged native, live or human acceptance. CI1
 failed in official SDK acquisition before tests, packaging or native starts; no artifacts.
 The [failure audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci1-failure-audit-and-acquisition-correction--2026-10-12)
 records the corrected SHA-keyed official archive reuse and bootstrap failure retention.
-CI2 preparation is underway; user permits CI polling for this chat only.
+[CI2run38146108645/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38146108645)
+is queued on exact candidatea16c5f7; user permits CI polling for this chat only.
 Signed Mac native still requires the unlocked desktop. No editor launch occurred.
 
-Actual counts on both platforms:0/4packages,0/8starts; paired dispatch1/4 each.
+Actual counts on both platforms:0/4packages,0/8starts; paired dispatch2/4 each.
 Live0/2total batch generations,0/1discovery. Prior allowances remain closed. Notify
 when ready for fresh native key entry; no user/real-provider credential read/export
 or live call occurred. [HANDOVER](HANDOVER.md) owns continuation. Approval covers

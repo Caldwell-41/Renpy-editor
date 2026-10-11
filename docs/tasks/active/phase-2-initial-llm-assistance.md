@@ -5912,3 +5912,23 @@ refusal; actual cached official archive verification and early-failure manifest 
 No package/editor/live attempt occurred during this correction. Independent read-only
 review covers acquisition/provenance and evidence gates. CI2 will use dispatchordinal2,
 Windows packageordinal1/starts1–2, counting actual attempts from retained evidence.
+
+
+#### Selectable CI2 dispatch with chat-only polling — 2026-10-12
+
+Independent read-only correction review passes. Published candidate
+**a16c5f701313eebb26f23fd2ab643a0a4deaf044** includes SDK cache/checksum and retained
+bootstrap corrections. Gates12/12, actionlint, four-file bootstrap privacy and structure/
+links/privacy514 pass. System Python bytecode-cache write was sandbox-denied; the same
+syntax check passes with its cache routed to ignored workspace storage. No app attempt.
+
+Fresh registered workflow357322921 accepted **run38146108645/attempt1** at
+2026-10-11T14:10:26Z, exact candidatea16c5f7 and branchcodex/provider-qualification.
+The returned URL was resolved directly, no duplicate dispatch. Inputs are CI1’s
+exclusive selectors/empty reuse IDs, with selectable_dispatch_ordinal2; packageordinal1
+and starts1–2. [Exact CI2 run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38146108645).
+Initially queued. **Paired dispatch2/4 each**; actual Mac/Windows packages0/4 and
+starts0/8 until emitted attempts are audited. Live0/2, discovery0/1. Current chat-only
+polling is explicitly authorised; no automation/watcher or widened budget. Required
+failed/skipped/missing checks cannot pass; retain terminal manifests/input/native/SDK/
+cleanup audit. Signed local Mac/native/live and full Phase2/human acceptance remain pending.
