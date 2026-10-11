@@ -51,3 +51,15 @@ class CardGate(unittest.TestCase):
     with self.assertRaises(ValueError):validate_report(bad,phase,card=True)
    report['details']['action']='draftScene'
    with self.assertRaises(ValueError):validate_report(report,phase,card=True)
+
+class LoreGate(unittest.TestCase):
+ def test_lore_action_approval_and_each_case_required(self):
+  from rewrite_probe_gate import LORE_CHECKS
+  for phase in (1,2):
+   report={'case':'dialogue-rewrite','passed':True,'cleanupComplete':True,'details':{'action':'generateLore','stage':'complete','passed':True,'checks':list(LORE_CHECKS[phase]),'reviewedBodyDigests':['a'*64]*5}}
+   validate_report(report,phase,lore=True)
+   for name in LORE_CHECKS[phase]:
+    bad=copy.deepcopy(report);bad['details']['checks'].remove(name)
+    with self.assertRaises(ValueError):validate_report(bad,phase,lore=True)
+   report['details']['action']='draftScene'
+   with self.assertRaises(ValueError):validate_report(report,phase,lore=True)

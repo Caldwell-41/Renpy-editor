@@ -3,6 +3,10 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
     inputs:
+      generate_lore:
+        description: Isolated generated lore entry Windows native and Mac ARM64 automated proof
+        type: boolean
+        default: false
       generate_card:
         description: Isolated generated Character card Windows native and Mac ARM64 automated proof
         type: boolean
@@ -57,7 +61,7 @@ concurrency:
 
 jobs:
   preflight:
-    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card }}
+    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore }}
     name: Preflight
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -94,7 +98,7 @@ jobs:
         run: cargo fmt --check --all
 
   packaged-boundary:
-    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card }}
+    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore }}
     name: ${{ matrix.name }}
     needs: preflight
     strategy:
@@ -477,7 +481,7 @@ jobs:
           retention-days: 7
 
   dialogue-rewrite-windows:
-    if: ${{ inputs.dialogue_rewrite_windows || inputs.continue_scene || inputs.draft_scene || inputs.generate_card }}
+    if: ${{ inputs.dialogue_rewrite_windows || inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore }}
     name: Focused Assist — Windows x64
     runs-on: windows-2025
     timeout-minutes: 60
@@ -489,6 +493,7 @@ jobs:
       PYTHONUTF8: '1'
       CONTINUE_SCENE: ${{ inputs.continue_scene }}
       GENERATE_CARD: ${{ inputs.generate_card }}
+      GENERATE_LORE: ${{ inputs.generate_lore }}
       DRAFT_SCENE: ${{ inputs.draft_scene }}
     defaults:
       run:
@@ -507,7 +512,7 @@ jobs:
           REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
           REUSE_FOCUSED_RUN_ID: ${{ inputs.rewrite_focused_reuse_run_id }}
         run: |
-          python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert sum(os.environ.get(k)=='true' for k in ['CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','LEGACY_REWRITE'])==1; assert not ((os.environ.get('CONTINUE_SCENE')=='true' or os.environ.get('DRAFT_SCENE')=='true' or os.environ.get('GENERATE_CARD')=='true') and (os.environ['REUSE_REWRITE_RUN_ID'] or os.environ['REUSE_FOCUSED_RUN_ID'] or os.environ['LEGACY_REWRITE']=='true'));  assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
+          python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert sum(os.environ.get(k)=='true' for k in ['CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','GENERATE_LORE','LEGACY_REWRITE'])==1; assert not ((os.environ.get('CONTINUE_SCENE')=='true' or os.environ.get('DRAFT_SCENE')=='true' or os.environ.get('GENERATE_CARD')=='true' or os.environ.get('GENERATE_LORE')=='true') and (os.environ['REUSE_REWRITE_RUN_ID'] or os.environ['REUSE_FOCUSED_RUN_ID'] or os.environ['LEGACY_REWRITE']=='true'));  assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
           if ($LASTEXITCODE -ne 0) { throw 'Branch, fresh attempt or cumulative ordinal guard failed' }
           python -c "import os; value=os.environ['REUSE_REWRITE_RUN_ID']; assert not value or value.isdecimal()"
           if ($LASTEXITCODE -ne 0) { throw 'Package reuse run identity guard failed' }
@@ -595,13 +600,13 @@ jobs:
         run: python scripts/qualify-rewrite-windows.py prepare --output "$env:REWRITE_EVIDENCE"
       - name: Restore official pinned SDK archive
         id: rewrite-sdk-cache
-        if: ${{ inputs.rewrite_reuse_run_id == '' && !inputs.generate_card }}
+        if: ${{ inputs.rewrite_reuse_run_id == '' && !inputs.generate_card && !inputs.generate_lore }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
           key: phase-1c-renpy-Windows-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
       - name: Download official published checksums and SDK on cache miss
-        if: ${{ inputs.rewrite_reuse_run_id == '' && !inputs.generate_card }}
+        if: ${{ inputs.rewrite_reuse_run_id == '' && !inputs.generate_card && !inputs.generate_lore }}
         shell: bash
         run: |
           set -euo pipefail
@@ -625,7 +630,7 @@ jobs:
           }
       - name: Verify retained package or record one bounded Windows build
         id: rewrite-package
-        if: ${{ !inputs.generate_card || steps.focused.outcome == 'success' }}
+        if: ${{ (!inputs.generate_card && !inputs.generate_lore) || steps.focused.outcome == 'success' }}
         continue-on-error: true
         env:
           BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}
@@ -663,13 +668,14 @@ jobs:
 
 
   continue-scene-macos:
-    if: ${{ (inputs.continue_scene || inputs.draft_scene || inputs.generate_card) && !inputs.dialogue_rewrite_windows }}
+    if: ${{ (inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore) && !inputs.dialogue_rewrite_windows }}
     name: Focused Scene automated — macOS ARM64
     runs-on: macos-26
     timeout-minutes: 30
     env:
       CARGO_TERM_COLOR: never
       GENERATE_CARD: ${{ inputs.generate_card }}
+      GENERATE_LORE: ${{ inputs.generate_lore }}
       DRAFT_SCENE: ${{ inputs.draft_scene }}
       CONTINUE_SCENE: ${{ inputs.continue_scene }}
       LEGACY_REWRITE: ${{ inputs.dialogue_rewrite_windows }}
@@ -681,7 +687,7 @@ jobs:
           REUSE_RUN: ${{ inputs.rewrite_reuse_run_id }}
           FOCUSED_REUSE: ${{ inputs.rewrite_focused_reuse_run_id }}
         run: |
-          python3 -c "import os,platform; assert platform.machine()=='arm64'; assert sum(os.environ.get(k)=='true' for k in ['CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','LEGACY_REWRITE'])==1; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert not os.environ['REUSE_RUN'] and not os.environ['FOCUSED_REUSE']"
+          python3 -c "import os,platform; assert platform.machine()=='arm64'; assert sum(os.environ.get(k)=='true' for k in ['CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','GENERATE_LORE','LEGACY_REWRITE'])==1; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert not os.environ['REUSE_RUN'] and not os.environ['FOCUSED_REUSE']"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24.19.0
@@ -699,7 +705,7 @@ jobs:
           workspaces: app -> target
           cache-bin: 'false'
       - name: Fetch official pinned SDK archive and published checksums
-        if: ${{ !inputs.generate_card }}
+        if: ${{ !inputs.generate_card && !inputs.generate_lore }}
         run: |
           curl --fail --location --max-time 300 --output "$RUNNER_TEMP/continue-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
           curl --fail --location --max-time 300 --output "$RUNNER_TEMP/continue-sdk.tar.bz2" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2

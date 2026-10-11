@@ -20,7 +20,7 @@ export interface ReferenceDocument { schemaVersion: 1; projectId: string; cards:
 export interface ReferenceEntity { kind: EntityLink["type"]; id: string; title: string; revision: string | null }
 export interface ReferenceIssue { recordId: string; revisionId: string; field: string; index: number; state: "missing" | "stale" }
 export interface ReferenceWorkspace { document: ReferenceDocument | null; revision: string; diagnostic: string | null; entities: ReferenceEntity[]; issues: ReferenceIssue[]; canUndo: boolean; canRedo: boolean }
-export type ReferenceCommand = {type:"reviewCard";recordId:string;revisionId:string;approve:boolean} | { type: "save"; kind: ReferenceKind; recordId: string | null; fields: ReferenceContent } | { type: "move"; kind: ReferenceKind; recordId: string; direction: "up" | "down" } | { type: "undo" | "redo" };
+export type ReferenceCommand = {type:"reviewCard"|"reviewLore";recordId:string;revisionId:string;approve:boolean} | { type: "save"; kind: ReferenceKind; recordId: string | null; fields: ReferenceContent } | { type: "move"; kind: ReferenceKind; recordId: string; direction: "up" | "down" } | { type: "undo" | "redo" };
 export interface ReferenceActions {
   apply(command: ReferenceCommand, expectedRevision: string): Promise<ReferenceWorkspace>;
   load(): Promise<ReferenceWorkspace>; current(): boolean; guard(): Promise<boolean>;
@@ -136,15 +136,16 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
     const citations=el("div");sources.append(citations);drawCitations(citations);
     const issues=model.issues.filter(i=>i.recordId===selected);if(issues.length)sources.append(el("p",`${issues.length} missing or changed link${issues.length===1?"":"s"}. Your notes and saved links have been kept.`,"reference-link-warning"));
     const revision=records().find(r=>r.id===selected);
-    if(kind==="card"&&revision&&currentRevision(revision).status==="proposed"){
+    if(revision&&currentRevision(revision).status==="proposed"){
       editor.querySelectorAll<HTMLButtonElement>("button:not(.reference-back)").forEach(c=>{c.dataset.proposed="true";});
       const next=currentRevision(revision),approved=revision.revisions.find(v=>v.id===revision.approvedRevisionId);
-      const review=details("Review proposed card and approved text");review.open=true;
-      review.append(el("p","This proposed card is saved but unapproved. Approving replaces the current approved text; rejection keeps it. Undo is available."));
+      const noun=kind==="card"?"card":"lore entry";
+      const review=details(`Review proposed ${noun} and approved text`);review.open=true;
+      review.append(el("p",`This proposed ${noun} is saved but unapproved. Approving replaces the current approved text; rejection keeps it. Undo is available.`));
       for(const [title,value] of [["Current approved text",approved?.content??null],["Proposed text",next.content]]){review.append(el("h4",String(title)),el("pre",JSON.stringify(value,null,2)));}
-      const approve=button("Approve this card revision",()=>{if(!dirty())void mutate({type:"reviewCard",recordId:revision.id,revisionId:next.id,approve:true});});
+      const approve=button(kind==="card"?"Approve this card revision":"Approve this lore revision",()=>{if(!dirty())void mutate({type:kind==="card"?"reviewCard":"reviewLore",recordId:revision.id,revisionId:next.id,approve:true});});
       approve.disabled=model.issues.some(i=>i.recordId===revision.id&&i.revisionId===next.id&&(i.field==="citations"||i.field==="supportingReadSet"));
-      review.append(approve,button("Reject proposed card",()=>{if(!dirty())void mutate({type:"reviewCard",recordId:revision.id,revisionId:next.id,approve:false});}));
+      review.append(approve,button(kind==="card"?"Reject proposed card":"Reject proposed lore entry",()=>{if(!dirty())void mutate({type:kind==="card"?"reviewCard":"reviewLore",recordId:revision.id,revisionId:next.id,approve:false});}));
       editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>("input,textarea,select").forEach(c=>{c.dataset.proposed="true";});
     }
     if(revision){const versions=details("Earlier saved text");for(const v of [...revision.revisions].reverse()){const entry=el("details");entry.append(el("summary",`Saved version ${v.number} · ${v.status}`));const prose=el("pre",Object.entries(v.content).filter(([,value])=>typeof value==="string").map(([key,value])=>`${key}: ${value}`).join("\n"));entry.append(prose);versions.append(entry);}}

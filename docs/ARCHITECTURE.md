@@ -741,3 +741,20 @@ acceptance guards. Explicit manual replacement clears generated source bindings.
 Unknown content/provenance/revision extensions survive; core-owned support snapshots
 replace their predecessor. See [context contract](PROMPTS_CONTEXT.md#generated-character-card)
 and [focused qualification](TESTING.md#generated-character-card-focused-qualification).
+
+### Generated lorebook entry boundary
+
+`generateLore` uses the same transient prepared-send/proposal owner and generated
+reference planner as cards. One saved ordinary Beat, a new/existing entry, reviewed
+title and author-selected applicability define the target. Full-source guards protect
+acceptance without sending other source. Core accepts only five bounded descriptive
+fields and owns IDs, inferred provenance, source support and citations. Preview is
+passive; Save writes one proposed references.json revision through shared history.
+`references.apply/reviewLore` separately approves/rejects the exact current revision.
+Prior approval survives Save/Reject; approval supersedes it. Unknown extensions,
+knowledge annotations and unresolved links survive. Citation updates preserve matching
+extensions and retain unselected/unresolved support. Supporting-source freshness is
+checked for both collections and propagates through explicit reference citations;
+this is eligibility validation without retrieval or context injection. Stale support
+blocks approval/inclusion. See [context](PROMPTS_CONTEXT.md#generated-lorebook-entry)
+and [focused proof](TESTING.md#generated-lorebook-entry-focused-qualification).

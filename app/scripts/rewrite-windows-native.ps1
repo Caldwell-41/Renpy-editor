@@ -6,6 +6,7 @@ param(
     [string]$Executable,
     [switch]$ContinueScene,
     [switch]$DraftScene,
+    [switch]$GenerateLore,
     [switch]$GenerateCard
 )
 # CI-only native driver. Never creates .done files or invokes a renderer bridge.
@@ -46,10 +47,11 @@ public static class RewriteNative {
 '@
 [void][RewriteNative]::SetProcessDPIAware()
 New-Item -ItemType Directory -Path $Output -Force | Out-Null
-$acceptName=if($GenerateCard){'Save proposed card'}elseif($DraftScene){'Accept Scene'}elseif($ContinueScene){'Accept Beat group'}else{'Accept 1 change'}
-$actionTitle=if($GenerateCard){'Draft Character card'}elseif($DraftScene){'Draft Scene'}elseif($ContinueScene){'Continue Scene'}else{'Rewrite dialogue'}
+$approveName=if($GenerateLore){'Approve this lore revision'}else{'Approve this card revision'}
+$acceptName=if($GenerateLore){'Save proposed lore entry'}elseif($GenerateCard){'Save proposed card'}elseif($DraftScene){'Accept Scene'}elseif($ContinueScene){'Accept Beat group'}else{'Accept 1 change'}
+$actionTitle=if($GenerateLore){'Draft lore entry'}elseif($GenerateCard){'Draft Character card'}elseif($DraftScene){'Draft Scene'}elseif($ContinueScene){'Continue Scene'}else{'Rewrite dialogue'}
 $receipt = [ordered]@{
-    action=if($GenerateCard){'generateCard'}elseif($DraftScene){'draftScene'}elseif($ContinueScene){'continueScene'}else{'rewriteDialogue'};
+    action=if($GenerateLore){'generateLore'}elseif($GenerateCard){'generateCard'}elseif($DraftScene){'draftScene'}elseif($ContinueScene){'continueScene'}else{'rewriteDialogue'};
     stage=$Stage; passed=$false; processId=$ProcessId; executableSHA256=$null
     inputDesktop=$null; layer='Windows UI Automation observation and OS SendInput; automated, not human acceptance'
     checks=[ordered]@{}; captures=@(); controls=@(); uiaStaleRetries=0
@@ -180,10 +182,10 @@ try {
         [void][RewriteNative]::SetForegroundWindow($script:handle)
         Wait-Native { [RewriteNative]::GetForegroundWindow() -eq $script:handle }
         $receipt.checks.ownedWindow=$true
-        $controlName=if($Stage -eq 'physical-approve'){'Approve this card revision'}elseif($Stage -eq 'physical-accept') { $acceptName } else {'Generate proposal'}
+        $controlName=if($Stage -eq 'physical-approve'){$approveName}elseif($Stage -eq 'physical-accept') { $acceptName } else {'Generate proposal'}
         Wait-Native { $null -ne (Button $controlName) }
         Focus-Control (Button $controlName)
-        if($Stage -eq 'physical-approve'){Assert-Native ((Has-Text 'Current approved text') -and (Has-Text 'Proposed text') -and $null -ne (Button 'Approve this card revision')) 'Required native approval review missing'}else{Assert-Native ((Has-Text $actionTitle) -and $null -ne (Button 'Generate proposal') -and $null -ne (Button $acceptName)) 'Required native rewrite controls missing'}
+        if($Stage -eq 'physical-approve'){Assert-Native ((Has-Text 'Current approved text') -and (Has-Text 'Proposed text') -and $null -ne (Button $approveName)) 'Required native approval review missing'}else{Assert-Native ((Has-Text $actionTitle) -and $null -ne (Button 'Generate proposal') -and $null -ne (Button $acceptName)) 'Required native rewrite controls missing'}
         $receipt.checks.nativeControls=$true
         $before=Capture ($Stage+'-before') (Window-Rect $script:handle)
         $receipt.captures=@($before); $receipt.checks.captureNonblank=$true
@@ -197,17 +199,17 @@ try {
             Assert-Native (($before.width*96/$dpi) -le 800) 'Compact native width not observed'; $receipt.checks.compactWidth=$true
         } elseif($Stage -eq 'physical-send') {
             Click-Control 'Generate proposal'
-            Wait-Native { (Has-Text $(if($GenerateCard){'Proposal received. Nothing saved or approved.'}else{'Proposal received. No source changed.'})) -and (Has-ButtonState $acceptName $true) }
+            Wait-Native { (Has-Text $(if($GenerateCard -or $GenerateLore){'Proposal received. Nothing saved or approved.'}else{'Proposal received. No source changed.'})) -and (Has-ButtonState $acceptName $true) }
             $receipt.checks.inertProposalObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         } elseif($Stage -eq 'physical-accept') {
-            if($GenerateCard){Assert-Native ((Has-Text 'Exact metadata changes') -and (Has-Text 'Unescaped [str(7)] {a=jump:label}')) 'Exact native card metadata review missing'}else{Assert-Native ((Has-Text 'Exact Source changes') -and (Has-Text 'New [[str(7)] {{a=jump:label}')) 'Exact native source review missing'}
+            if($GenerateCard -or $GenerateLore){Assert-Native ((Has-Text 'Exact metadata changes') -and (Has-Text 'Unescaped [str(7)] {a=jump:label}')) 'Exact native card metadata review missing'}else{Assert-Native ((Has-Text 'Exact Source changes') -and (Has-Text 'New [[str(7)] {{a=jump:label}')) 'Exact native source review missing'}
             Click-Control $acceptName
-            Wait-Native { (Has-Text $(if($GenerateCard){'Proposed card saved as one change.'}else{'Accepted and saved as one change.'})) -and (Has-ButtonState $acceptName $false) }
+            Wait-Native { (Has-Text $(if($GenerateLore){'Proposed lore entry saved as one change.'}elseif($GenerateCard){'Proposed card saved as one change.'}else{'Accepted and saved as one change.'})) -and (Has-ButtonState $acceptName $false) }
             $receipt.checks.savedOnceObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         }
-        if($Stage -eq 'physical-approve'){Click-Control 'Approve this card revision';Wait-Native { $null -eq (Button 'Approve this card revision') -and (Has-Text 'Saved') };$receipt.checks.approvalObserved=$true;$receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)}
+        if($Stage -eq 'physical-approve'){Click-Control $approveName;Wait-Native { $null -eq (Button $approveName) -and (Has-Text 'Saved') };$receipt.checks.approvalObserved=$true;$receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)}
         Wait-Native {
             $receipt.controls=@(foreach($node in (Nodes)) {
                 $current=$node.Current; $bounds=$current.BoundingRectangle

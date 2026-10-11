@@ -10,15 +10,17 @@ NATIVE_STAGES = {'observe-light', 'observe-dark', 'observe-narrow', 'physical-se
 def required_stages(card=False):
     return NATIVE_STAGES | ({"physical-approve"} if card else set())
 
-def validate_native_stage(directory, stage, pid, executable_digest, continuing=False, drafting=False, card=False):
+def validate_native_stage(directory, stage, pid, executable_digest, continuing=False, drafting=False, card=False, lore=False):
     directory = Path(directory)
     receipt = json.loads((directory / f'{stage}.json').read_text(encoding='utf-8-sig'))
-    if stage not in required_stages(card) or receipt.get('stage') != stage or receipt.get('passed') is not True:
+    if stage not in required_stages(card or lore) or receipt.get('stage') != stage or receipt.get('passed') is not True:
         raise ValueError('Successful exact native stage required')
     if receipt.get('processId') != pid or receipt.get('executableSHA256') != executable_digest:
         raise ValueError('Owned native process/binary evidence mismatch')
     if receipt.get('inputDesktop') != 'Default' or receipt.get('layer') != 'Windows UI Automation observation and OS SendInput; automated, not human acceptance':
         raise ValueError('Interactive native evidence required')
+    if lore and receipt.get('action') != 'generateLore':
+        raise ValueError('Generated lore native evidence required')
     if card and receipt.get('action') != 'generateCard':
         raise ValueError('Generated card native evidence required')
     if drafting and receipt.get('action') != 'draftScene':

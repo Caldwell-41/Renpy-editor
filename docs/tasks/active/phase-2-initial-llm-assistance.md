@@ -4619,3 +4619,79 @@ fixes; commit/push and update canonical contracts/task/CURRENT/HANDOVER. Follow 
 same-thread CI wait/resume and audit actual artifacts. Return result, limitations and
 next prompt. Do not start the following deliverable.
 ```
+
+
+### Generated lorebook entries selection — 2026-10-11
+
+User selects one bounded new/update editor-only lore entry on qualified candidate
+`8a230a9`/run `38093296977`, closure `f25605d`. Fresh origin refs match the clean
+retained Mac ARM64 checkout on `codex/provider-qualification`; main remains `5f448ca`.
+No reset or unrelated edits. One GPT-6.1 Sol High owner; serial shared implementation
+and independent GPT-6.1 Sol High read-only review. Reuse reference/prompt/proposal/
+approval/history foundations. Core owns IDs, provenance and supporting citations;
+author reviews applicability. Exact passive semantic/metadata review precedes one
+Save of proposed text. Separate explicit approval supersedes existing approved text;
+Reject retains it. Unknown extensions and unresolved links survive. Stale support
+blocks approval/inclusion. No model approval or runnable-source mutation authority.
+
+Acceptance: exact dispatch, inert preview, one Save transaction/Undo, duplicate refusal,
+approval separation, zero-write malformed/cancelled/stale/competing/draft/external
+refusal, byte-exact runnable source, Undo/Redo and project/process reopen. Focused
+Windows x64/macOS ARM64 CI and changed-action native proof; the named approved signed
+Mac native capability remains local because hosted CI lacks that signing identity.
+Fresh per-target allowance: 4 packages, 6 editor launches, 4 focused dispatches;
+Windows 0/4,0/6,0/4; Mac 0/4,0/6,0/4. Prior allowances closed. Count failed/cancelled/
+implicit attempts and reassess after two unsuccessful corrections of one hypothesis.
+Commit/push authorized; manual same-thread CI wait/resume and actual artifact audit.
+No keyword/recursive injection, embeddings, runtime inference, runnable Character/
+Appearance/source changes, provider expansion, paid/public calls, signing changes,
+merge/release or following deliverable. Implementation/evidence/final human acceptance
+remain distinct.
+
+
+### Generated lore implementation and independent review — 2026-10-11
+
+Implemented `generateLore` using the exact-send/strict-response/session proposal owner
+and shared generated-reference planner/history. Author-selected applicability is
+reviewed; model returns only text/category/subject/tags/knowledge notes. Core owns
+IDs/provenance/support/citations. One Save creates proposed text; separate reviewLore
+approves/rejects the exact revision, retaining prior approval through Save/Reject.
+Plain Story/Assist/Lorebook/Settings controls provide passive semantic and exact
+metadata review. Unknown extensions, scope/knowledge and unresolved links/citations
+remain. Supporting-source and cited-reference freshness blocks approval/inclusion.
+Canonical architecture/context/data/UI/testing contracts updated.
+
+Independent GPT-6.1 Sol High read-only review identified scope validation rejecting
+every prepare (product defect), lore support issues checked only for cards (product),
+stale cited-reference support behind unchanged approved IDs (shared product defect),
+and Windows SDK-reuse action label (harness). Owner repaired each before packaging.
+Reviewer then found old route Scene IDs restored by recursive revision merge after
+selecting whole project (product); owner assigns already-merged content exactly and
+adds semantic/exact/saved scope equality with extension preservation. Final independent
+pre-package re-review finds no actionable blocker. Reviewer made no shared edits or
+package/launch/dispatch attempts.
+
+Renderer131 passes; controller through actual native credential reader/HTTP/core passes
+exact send, inert review, held-owner refusal, one Save/Undo/Redo, explicit approval,
+malformed/cancelled/stale zero writes and responsive Save. Sandbox loopback EPERM was
+an environment limitation, resolved by authorized focused execution. Initial lore
+core failures reproduced the empty synthetic scope defect; one later cited-support
+fixture expected a Character path absent from selected narration's read set (harness),
+corrected to an extra guard-only source excluded from sent/persistent own support.
+The cited-support and route-to-project regressions pass. Full focused final run in
+progress; earlier full34 already passes. Rejecting gates28 pass with one explicit
+Windows-only native polling skip requiring Windows. Repository validation, actionlint,
+JS/Python syntax and diff checks pass. No broad formatting pass is claimed.
+
+No package/editor launch or CI dispatch yet: Windows0/4,0/6,0/4; Mac0/4,0/6,0/4.
+Existing approved public signing identity is available through the package script's
+matching-identity query; its known self-signed trust status is unchanged. Next is final
+focused verification, signed Mac package1/native1–2, then isolated both-target CI1.
+No bounded acceptance claim until actual native/CI artifacts are audited.
+
+Final local focused inputs: core34/reference12/prompt5/renderer131 pass; transport8
+and worker6 pass with exact loopback capability (initial sandbox four-listener
+PermissionDenied failures classified environment, no product repair). Final actual
+controller and build pass. All product/harness repairs were confirmed before any
+package/editor launch or CI dispatch. Current remote workflow inventory has no
+pending operation; last run remains the qualified Character cards run38093296977.

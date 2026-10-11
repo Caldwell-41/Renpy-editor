@@ -1205,3 +1205,16 @@ reference staleness prevents approval or later inclusion. Both Save and review d
 use shared Undo/Redo; reopen retains the exact saved revision. Settings edits/restores
 the action prompt. The [qualified task closure](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
 records Windows and signed Mac native evidence; final human acceptance remains separate.
+
+### Generated lorebook entry review
+
+A saved ordinary Beat offers **Assist · Draft lore entry**. Choose a new/existing
+entry, title and **Applies to**, enter the task and select approved references. Review
+the complete send, then **Generate proposal**. Field changes, provenance, citations
+and applicability render as passive text; expandable **Exact metadata changes** shows
+the actual references.json mutation. **Save proposed lore entry** saves once without
+approving. Open **Lorebook** to inspect current approved and proposed text. The frozen
+proposed form requires separate **Approve this lore revision** or **Reject proposed
+lore entry**. Stale supporting material disables approval and inclusion; missing
+ordinary links remain visible. Save and review decisions use shared Undo/Redo and
+survive project/process reopen. Settings provides the Lorebook entry action prompt.

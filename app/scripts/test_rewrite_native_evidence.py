@@ -95,3 +95,14 @@ class CardNativeGate(NativeEvidenceGate):
             with self.assertRaises(ValueError):validate_native_stage(self.root,'physical-approve',42,'a'*64,card=True)
         value['action']='draftScene';path.write_text(json.dumps(value))
         with self.assertRaises(ValueError):validate_native_stage(self.root,'physical-approve',42,'a'*64,card=True)
+
+class LoreNativeGate(NativeEvidenceGate):
+    def test_separate_physical_approval_requires_own_action_and_observation(self):
+        value=self.receipt('physical-approve');value['action']='generateLore';value['checks']['approvalObserved']=True
+        path=self.root/'physical-approve.json';path.write_text(json.dumps(value))
+        validate_native_stage(self.root,'physical-approve',42,'a'*64,lore=True)
+        for key in ('approvalObserved','osMouseInput'):
+            bad=copy.deepcopy(value);bad['checks'][key]=False;path.write_text(json.dumps(bad))
+            with self.assertRaises(ValueError):validate_native_stage(self.root,'physical-approve',42,'a'*64,lore=True)
+        value['action']='draftScene';path.write_text(json.dumps(value))
+        with self.assertRaises(ValueError):validate_native_stage(self.root,'physical-approve',42,'a'*64,lore=True)

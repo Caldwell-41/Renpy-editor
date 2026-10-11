@@ -175,8 +175,11 @@ def entry(output, kind, ordinal):
         stream.write(json.dumps({'kind': kind, 'ordinal': ordinal, 'runId': identity['runId'], 'attempt': 1, 'sha': identity['candidate']})+'\n')
 
 
+def lore():
+    return os.environ.get("GENERATE_LORE") == "true"
+
 def generating():
-    return os.environ.get("GENERATE_CARD") == "true"
+    return lore() or os.environ.get("GENERATE_CARD") == "true"
 
 def drafting():
     return os.environ.get("DRAFT_SCENE") == "true"
@@ -185,7 +188,7 @@ def continuing():
     return os.environ.get("CONTINUE_SCENE") == "true"
 
 def validate_continue_renderer(text):
-    assert re.search(r'(?:ℹ|#) tests 129(?:\r?\n)', text) and re.search(r'(?:ℹ|#) pass 129(?:\r?\n)', text), 'Required renderer cases missing'
+    assert re.search(r'(?:ℹ|#) tests 131(?:\r?\n)', text) and re.search(r'(?:ℹ|#) pass 131(?:\r?\n)', text), 'Required renderer cases missing'
     for outcome in ('fail', 'cancelled', 'skipped', 'todo'):
         assert re.search(r'(?:ℹ|#) '+outcome+r' 0(?:\r?\n)', text), 'Unsuccessful renderer cases cannot pass'
 
@@ -199,7 +202,7 @@ def prepare(output):
     paths = subprocess.check_output(['git', 'ls-files', 'app', '.github/workflows/production-scaffold.yml', 'spikes/renpy-sdk'], cwd=REPO, text=True).splitlines()
     output.mkdir(parents=True, exist_ok=True)
     assert not (output / 'identity.json').exists(), 'Fresh evidence required'
-    identity = {'candidate': candidate, 'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=REPO, text=True).strip(), 'runId': os.environ['GITHUB_RUN_ID'], 'attempt': 1, 'runnerImage': os.environ.get('ImageVersion'), 'os': platform.system(), 'architecture': platform.machine(), 'inputs': {path: digest(REPO/path) for path in paths}, 'toolchains': {tool: subprocess.check_output(command([tool, '--version']), cwd=APP, text=True).strip() for tool in ('node', 'npm', 'rustc', 'cargo')}, 'python': platform.python_version(), 'action': 'generateCard' if generating() else 'draftScene' if drafting() else 'continueScene' if continuing() else 'rewriteDialogue'}
+    identity = {'candidate': candidate, 'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=REPO, text=True).strip(), 'runId': os.environ['GITHUB_RUN_ID'], 'attempt': 1, 'runnerImage': os.environ.get('ImageVersion'), 'os': platform.system(), 'architecture': platform.machine(), 'inputs': {path: digest(REPO/path) for path in paths}, 'toolchains': {tool: subprocess.check_output(command([tool, '--version']), cwd=APP, text=True).strip() for tool in ('node', 'npm', 'rustc', 'cargo')}, 'python': platform.python_version(), 'action': 'generateLore' if lore() else 'generateCard' if generating() else 'draftScene' if drafting() else 'continueScene' if continuing() else 'rewriteDialogue'}
     (output / 'identity.json').write_text(json.dumps(identity, indent=2)+'\n')
     validate_toolchains(identity['toolchains'])
     if (output/'focused-reuse.json').is_file():
@@ -212,7 +215,7 @@ def prepare(output):
     checks = [
         ('renderer', ['npm', 'run', 'check'], None),
         ('renderer-build', ['npm', 'run', 'build'], None),
-        ('core-rewrite', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'rewrite'], 26),
+        ('core-rewrite', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'rewrite'], 34),
         ('transport', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'ai_request::tests', '--', '--nocapture'], 8),
         ('native-worker', ['cargo', 'test', '-p', 'loomlight-desktop', '--release', '--locked', 'ai_requests::tests'], 6),
         ('controller-build', ['cargo', 'build', '-p', 'loomlight-desktop', '--release', '--locked', '--example', 'rewrite-controller-driver'], None),
@@ -231,7 +234,7 @@ def prepare(output):
             failures.append(str(error))
     if (APP / 'target/release/examples/rewrite-controller-driver.exe').is_file():
         try:
-            text = run(output, 'controller', ['node', 'tests/rewrite-controller.dispatch.mjs', 'target/release/examples/rewrite-controller-driver.exe', *(['--generate-card'] if generating() else ['--draft-scene'] if drafting() else ['--continue-scene'] if continuing() else [])])
+            text = run(output, 'controller', ['node', 'tests/rewrite-controller.dispatch.mjs', 'target/release/examples/rewrite-controller-driver.exe', *(['--generate-lore'] if lore() else ['--generate-card'] if generating() else ['--draft-scene'] if drafting() else ['--continue-scene'] if continuing() else [])])
             assert 'PASS: actual controller/native credentials/exact strict-schema HTTP' in text
         except Exception as error:
             failures.append(str(error))
@@ -245,7 +248,7 @@ def prepare(output):
 def sdk(output, archive, checksums):
     if generating():
         # No runnable mutation: source-byte assertions are new; unchanged SDK evidence is reused.
-        (output/'sdk-reuse.json').write_text(json.dumps({'action':'generateCard','sourceOnly':True,'newSDKExecution':False,'qualifiedImplementation':'1320d0a6507625abdd3fa20aa6a3eccffaccfcd6','qualifiedRun':'38056790759','reason':'Editor-only metadata mutation; core/controller/native assert all runnable source bytes unchanged.'},indent=2)+'\n')
+        (output/'sdk-reuse.json').write_text(json.dumps({'action':'generateLore' if lore() else 'generateCard','sourceOnly':True,'newSDKExecution':False,'qualifiedImplementation':'1320d0a6507625abdd3fa20aa6a3eccffaccfcd6','qualifiedRun':'38056790759','reason':'Editor-only metadata mutation; core/controller/native assert all runnable source bytes unchanged.'},indent=2)+'\n')
         return
 
     sys.path.insert(0, str(REPO / 'spikes/renpy-sdk'))
@@ -254,7 +257,7 @@ def sdk(output, archive, checksums):
     destination = Path(tempfile.gettempdir()) / ('loomlight-rewrite-sdk-ci-' + os.environ['GITHUB_RUN_ID'])
     install_verified_tar(archive, SDK_HASH, destination)
     try:
-        text = run(output, 'sdk', [sys.executable, str(APP/'scripts/rewrite-literal-sdk.py'), '--sdk', str(destination/'renpy-8.5.3-sdk'), '--driver', str(APP/('target/release/examples/draft-literal-driver.exe' if drafting() else 'target/release/examples/continue-literal-driver.exe' if continuing() else 'target/release/examples/rewrite-literal-driver.exe')), '--output', str(output/'sdk-commands'), *(['--generate-card'] if generating() else ['--draft-scene'] if drafting() else ['--continue-scene'] if continuing() else [])], timeout=400)
+        text = run(output, 'sdk', [sys.executable, str(APP/'scripts/rewrite-literal-sdk.py'), '--sdk', str(destination/'renpy-8.5.3-sdk'), '--driver', str(APP/('target/release/examples/draft-literal-driver.exe' if drafting() else 'target/release/examples/continue-literal-driver.exe' if continuing() else 'target/release/examples/rewrite-literal-driver.exe')), '--output', str(output/'sdk-commands'), *(['--generate-lore'] if lore() else ['--generate-card'] if generating() else ['--draft-scene'] if drafting() else ['--continue-scene'] if continuing() else [])], timeout=400)
         assert 'PASS: pinned Ren' in text
         (output/'sdk-identity.json').write_text(json.dumps({'version': '8.5.3', 'officialPublishedSHA256': SDK_HASH, 'archiveSHA256': digest(archive), 'literalDriverSHA256': digest(APP/('target/release/examples/draft-literal-driver.exe' if drafting() else 'target/release/examples/continue-literal-driver.exe' if continuing() else 'target/release/examples/rewrite-literal-driver.exe')), 'passed': True}, indent=2)+'\n')
     finally:
@@ -307,13 +310,13 @@ def native(output, first_launch):
     run(output, 'native-driver-prelaunch', ['powershell.exe', '-NoProfile', '-File', str(APP/'scripts/rewrite-windows-native.ps1'), '-Stage', 'preflight', '-Executable', str(executable), '-Output', str(prelaunch)], timeout=75)
     preflight = json.loads((prelaunch/'preflight.json').read_text(encoding='utf-8-sig'))
     assert preflight['passed'] is True and preflight['executableSHA256'] == digest(executable)
-    common = [sys.executable, 'scripts/dialogue-rewrite-probe.py', '--executable', str(executable), '--root', str(root), '--output', str(output/'walkthrough'), '--native-driver', str(APP/'scripts/rewrite-windows-native.ps1'), *(['--generate-card'] if generating() else ['--draft-scene'] if drafting() else ['--continue-scene'] if continuing() else [])]
+    common = [sys.executable, 'scripts/dialogue-rewrite-probe.py', '--executable', str(executable), '--root', str(root), '--output', str(output/'walkthrough'), '--native-driver', str(APP/'scripts/rewrite-windows-native.ps1'), *(['--generate-lore'] if lore() else ['--generate-card'] if generating() else ['--draft-scene'] if drafting() else ['--continue-scene'] if continuing() else [])]
     try:
         for phase in (1, 2):
             entry(output, 'app-launch', first_launch+phase-1)
             run(output, f'phase-{phase}', [*common, '--phase', str(phase)], timeout=960)
             report = json.loads((output/'walkthrough'/f'phase-{phase}.json').read_text())
-            validate_report(report, phase, continuing(), drafting(), generating())
+            validate_report(report, phase, continuing(), drafting(), generating() and not lore(), lore())
     finally:
         cleanup_owned(output, root)
 
@@ -348,7 +351,7 @@ def finish(output):
         reports[str(phase)] = path.is_file()
         try:
             report = json.loads(path.read_text())
-            validate_report(report, phase, continuing(), drafting(), generating())
+            validate_report(report, phase, continuing(), drafting(), generating() and not lore(), lore())
             assert len(report['requestBodySHA256']) == (5 if phase == 1 else 0)
             if phase == 1:
                 from rewrite_native_evidence import NATIVE_STAGES, required_stages

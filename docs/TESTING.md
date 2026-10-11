@@ -1564,3 +1564,30 @@ Windows native 25 + 3 checks, renewed signed Mac native proof, and final actual 
 Windows stalled-header and partial-body shutdown/Cancelled/EOF both pass the unchanged
 two-second gates. This bounded card action is accepted; generated lore and full Phase 2
 remain separately selected work. A docs-only closure requires no package or CI repeat.
+
+## Generated lorebook entry focused qualification
+
+The [selection](tasks/active/phase-2-initial-llm-assistance.md#generated-lorebook-entries-selection--2026-10-11)
+owns allowance and acceptance. `cargo test -p loomlight-core --locked rewrite` requires
+34 cases (including eight lore cases); reference12/prompt5 and renderer131 remain
+focused shared checks. `node tests/rewrite-controller.dispatch.mjs <compiled native
+rewrite-controller-driver> --generate-lore` exercises the actual renderer/native
+credential reader/HTTP worker/core path: exact reviewed body, inert preview, held
+owner refusal, one Save/Undo/Redo, approval separation, malformed/cancelled/stale
+zero writes and responsive Save. Core adds new/update, Reject retains approval,
+closed schema/bounds, core IDs, source bytes/history/reopen, draft/session/external
+refusal, extensions/knowledge/links and stale own/cited support.
+
+`production-scaffold.yml generate_lore=true` isolates Windows x64 package/native
+and Mac ARM64 automated proof. Other action selectors, reuse IDs and upload_packages
+are false/empty. Cheap rejecting gates run before packaging. Required counts, missing
+results, failed/skipped/cancelled cases and wrong action identities cannot pass.
+`dialogue-rewrite-probe.py --generate-lore` requires25 distinct phase1 checks,3 reopen
+checks, five exact reviewed/HTTP body hashes and all six native stages, including
+physical Generate, Save and separate approval. Windows uses actual UIA/OS input, PID/
+binary-bound receipts and nine intact captures. The named signed native Mac case stays
+on the retained approved local host; CI does not have the signing identity. Process
+reopen sends zero HTTP and changes zero project bytes. Editor-only metadata mutation
+reuses unchanged pinned SDK evidence1320d0a/run38056790759 with explicit zero new SDK
+execution, backed by all-source byte assertions. Final native/artifact acceptance is
+pending until recorded in the owning task. No new live/generic-provider claim.

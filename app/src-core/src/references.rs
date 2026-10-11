@@ -45,6 +45,13 @@ pub(crate) fn content_keys(kind: &str) -> Vec<&'static str> {
  COMMON.iter().chain(if kind == "card" { CARD } else { LORE }).copied().collect()
 }
 
+pub(crate) fn validate_generated_scope(scope: &Value) -> Result<(), ReferenceError> {
+    let keys = object(scope)?;
+    if keys.keys().any(|k| !["type","sceneIds"].contains(&k.as_str())) { return invalid(); }
+    let mut content = json!({"title":"Scope","tags":[],"scope":scope,"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"text":"Scope validation","category":"","subject":"","knowledge":[]});
+    // The ordinary validator is authoritative for finite scope shape and bounds.
+    validate_content(&mut content, Kind::Lore)
+}
 #[derive(Debug)]
 pub enum ReferenceError {
     Invalid,
@@ -92,6 +99,7 @@ pub enum Command {
         record_id: String,
         direction: Direction,
     },
+    ReviewLore { record_id: String, revision_id: String, approve: bool },
     ReviewCard { record_id: String, revision_id: String, approve: bool },
     Undo,
     Redo,
@@ -563,7 +571,7 @@ impl AuthoringService {
             .map(|v| issues(v, &entities))
             .unwrap_or_default();
         if let Some(doc) = document.as_ref() {
-            for record in doc["cards"].as_array().into_iter().flatten() {
+            for record in ["cards","loreEntries"].iter().flat_map(|key|doc[*key].as_array().into_iter().flatten()) {
                 for revision in record["revisions"].as_array().into_iter().flatten() {
                     if let Some(set)=revision.get("supportingReadSet") {
                         let fresh = set.as_object().is_some_and(|set| set.iter().all(|(path, expected)| {
@@ -575,6 +583,26 @@ impl AuthoringService {
                         if !fresh { issues.push(Issue {record_id:record["id"].as_str().unwrap_or_default().into(),revision_id:revision["id"].as_str().unwrap_or_default().into(),field:"supportingReadSet",index:0,state:"stale"}); }
                     }
                 }
+            }
+        }
+        if let Some(doc)=document.as_ref() {
+            // Propagate freshness only across explicit citations; never retrieve or send content.
+            // Each iteration adds an issue to a finite saved revision, so cycles terminate.
+            loop {
+                let mut added=vec![];
+                for record in ["cards","loreEntries"].iter().flat_map(|key|doc[*key].as_array().into_iter().flatten()) {
+                    for revision in record["revisions"].as_array().into_iter().flatten() {
+                        for (index,citation) in revision["content"]["citations"].as_array().into_iter().flatten().enumerate() {
+                            if !["card","lore"].contains(&citation["target"]["type"].as_str().unwrap_or_default()) { continue; }
+                            if issues.iter().any(|i| i.record_id==citation["target"]["id"].as_str().unwrap_or_default() && i.revision_id==citation["revision"].as_str().unwrap_or_default() && (i.field=="citations"||i.field=="supportingReadSet"))
+                                && !issues.iter().chain(added.iter()).any(|i|i.record_id==record["id"].as_str().unwrap_or_default() && i.revision_id==revision["id"].as_str().unwrap_or_default() && i.field=="citations" && i.index==index) {
+                                added.push(Issue {record_id:record["id"].as_str().unwrap_or_default().into(),revision_id:revision["id"].as_str().unwrap_or_default().into(),field:"citations",index,state:"stale"});
+                            }
+                        }
+                    }
+                }
+                if added.is_empty() { break; }
+                issues.extend(added);
             }
         }
         let histories = self.scene_history.lock().map_err(|_| ReferenceError::Io)?;
@@ -649,15 +677,15 @@ impl AuthoringService {
         }
         Ok(out)
     }
-    pub(crate) fn prepare_generated_card(
-        &self, project: &ProjectId, project_id: &str, record_id: Option<&str>,
+    pub(crate) fn prepare_generated_reference(
+        &self, project: &ProjectId, project_id: &str, kind: Kind, record_id: Option<&str>,
         fields: Value, citations: Value, provenance: Value, supporting_read_set: Value,
     ) -> Result<(TransactionProposal, Value), ReferenceError> {
         let (bytes, revision) = self.reference_snapshot(project)?;
         let mut doc = if revision == Revision::expected_absence() { empty(project_id) }
             else { crate::ai_discovery::strict_json(&bytes).map_err(|_| ReferenceError::Invalid)? };
         validate(&doc, project_id)?;
-        let records = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+        let records = doc[kind.collection()].as_array_mut().ok_or(ReferenceError::Invalid)?;
         let index = if let Some(id) = record_id {
             records.iter().position(|r| r["id"] == id).ok_or(ReferenceError::Invalid)?
         } else {
@@ -667,11 +695,19 @@ impl AuthoringService {
         let record = &mut records[index];
         let old = array(&record["revisions"] )?.iter().find(|r| r["id"] == record["currentRevisionId"]);
         let before = old.map(|r| r["content"].clone()).unwrap_or(Value::Null);
-        let defaults = json!({"title":"","tags":[],"scope":{"type":"project"},"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"linkedCharacterId":null,"aliases":[],"description":"","appearanceNotes":"","personality":"","motivations":"","background":"","relationships":[],"speakingStyle":"","exampleDialogue":"","linkedLoreIds":[]});
+        let mut defaults = json!({"title":"","tags":[],"scope":{"type":"project"},"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"linkedCharacterId":null,"aliases":[],"description":"","appearanceNotes":"","personality":"","motivations":"","background":"","relationships":[],"speakingStyle":"","exampleDialogue":"","linkedLoreIds":[]});
+        if kind == Kind::Lore { defaults = json!({"title":"","tags":[],"scope":{"type":"project"},"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"text":"","category":"","subject":"","knowledge":[]}); }
         let mut content = merge(if before.is_null() { &defaults } else { &before }, &fields);
-        content["citations"] = citations;
+        if content["scope"]["type"]=="project" { content["scope"].as_object_mut().ok_or(ReferenceError::Invalid)?.remove("sceneIds"); }
+        let mut retained = content["citations"].as_array().cloned().unwrap_or_default();
+        for citation in array(&citations)? {
+            if let Some(existing) = retained.iter_mut().find(|c| c["target"]["type"]==citation["target"]["type"] && c["target"]["id"]==citation["target"]["id"]) {
+                *existing = merge(existing,citation);
+            } else { retained.push(citation.clone()); }
+        }
+        content["citations"] = json!(retained);
         content["provenance"] = merge(&content["provenance"], &provenance);
-        validate_content(&content, Kind::Card)?;
+        validate_content(&content, kind)?;
         let number = record["revisionCounter"].as_u64().unwrap_or(0).checked_add(1)
             .filter(|n| *n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
         let id = uuid::Uuid::new_v4().to_string();
@@ -679,6 +715,8 @@ impl AuthoringService {
         let approved = record["approvedRevisionId"].clone();
         let current = record["currentRevisionId"].clone();
         let mut next = merge(old.unwrap_or(&Value::Null), &json!({"id":id,"number":number,"status":"proposed","createdAt":now(),"reviewedAt":null,"reviewNote":"","supersedes":if approved.is_null(){Value::Null}else{json!({"recordId":rid,"revisionId":approved})},"supersededBy":null,"content":content}));
+        // Content is already fully merged; do not resurrect removed known scope fields.
+        next["content"] = content.clone();
         next["supportingReadSet"] = supporting_read_set;
         let revisions = record["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
         revisions.retain(|r| r["id"] == approved || r["id"] == current);
@@ -711,14 +749,15 @@ impl AuthoringService {
             crate::ai_discovery::strict_json(&bytes).map_err(|_| ReferenceError::Invalid)?
         };
         validate(&doc, project_id)?;
+        let review_kind = if matches!(&request.command, Command::ReviewLore { .. }) { Kind::Lore } else { Kind::Card };
         match request.command {
-            Command::ReviewCard { record_id, revision_id, approve } => {
-                let entities = self.reference_entities(project, project_id, Some(&doc))?;
-                if approve && issues(&doc, &entities).iter().any(|i| i.record_id == record_id && i.revision_id == revision_id && i.field == "citations") {
+            Command::ReviewCard { record_id, revision_id, approve } | Command::ReviewLore { record_id, revision_id, approve } => {
+                let workspace = self.references(project, project_id)?;
+                if approve && workspace.issues.iter().any(|i| i.record_id == record_id && i.revision_id == revision_id && (i.field == "citations" || i.field == "supportingReadSet")) {
                     return Err(ReferenceError::Conflict);
                 }
                 if approve {
-                    let next = doc["cards"].as_array().ok_or(ReferenceError::Invalid)?.iter()
+                    let next = doc[review_kind.collection()].as_array().ok_or(ReferenceError::Invalid)?.iter()
                         .find(|r| r["id"] == record_id).and_then(|r| r["revisions"].as_array()?.iter().find(|v| v["id"] == revision_id)).ok_or(ReferenceError::Invalid)?;
                     if let Some(set) = next.get("supportingReadSet") {
                         for (path, expected) in object(set)? {
@@ -729,7 +768,7 @@ impl AuthoringService {
                         }
                     }
                 }
-                let record = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?
+                let record = doc[review_kind.collection()].as_array_mut().ok_or(ReferenceError::Invalid)?
                     .iter_mut().find(|r| r["id"] == record_id).ok_or(ReferenceError::Invalid)?;
                 if record["currentRevisionId"] != revision_id { return invalid(); }
                 let prior = record["approvedRevisionId"].clone();

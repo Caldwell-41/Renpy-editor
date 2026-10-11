@@ -308,3 +308,34 @@ This bounded action is qualified on Windows x64 and macOS ARM64. The
 [task closure](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
 records exact dispatch, passive review, approval separation, zero-write refusals,
 byte-exact source and shared history/reopen evidence.
+
+### Generated lorebook entry
+
+`generateLore` drafts/updates one editor-only entry from one saved ordinary dialogue/
+narration Beat and explicitly selected approved references. Select a new/existing
+entry and title. **Applies to** chooses this Scene or the whole project; an existing
+entry can retain its exact current Scene/finite-route applicability, including repeated
+visits and unresolved IDs. The author-selected scope is reviewed before Send and in
+the resulting metadata review; model output cannot choose it. Required speaking
+Character and variable defaults remain explicit supporting data; runtime knowledge
+is unknown. Full-source revision/draft guards do not widen outbound content.
+
+`app/src-core/prompts/v1/generate-lore.txt` owns baseline prose with ordinary saved
+overrides/restore/history. The complete strict response requires schemaVersion 1,
+action generateLore, target with explicit nullable recordId and exact reviewed title,
+and required fields text/category/subject/tags/knowledgeNotes. Unknown fields, model
+approval, scope/citation/provenance/ID/source/tool operations refuse. Generated field
+JSON is at most 10,000 UTF-8 bytes; native field/document bounds also apply. Core
+assigns IDs/revisions, inferred provenance, exact reviewed prompt/request digests,
+sent-source support and explicitly selected reference citations. Self citations are
+excluded; existing unresolved/unselected citations and matching extension values
+remain. Known current target content is disclosed as data.
+
+Passive semantic review and exact references.json before/after precede **Save proposed
+lore entry**. It consumes one review and commits one proposed revision/Undo entry.
+Separate **Approve this lore revision** supersedes prior approval; **Reject proposed
+lore entry** retains it. Stale sent-source support and stale cited references block
+approval/inclusion, including supporting staleness behind an unchanged approved ID.
+Shared Undo/Redo and reopen retain exact metadata. Runnable source is byte-exact.
+No keyword/recursive injection, embeddings, runtime inference or automatic inclusion.
+Qualification state and allowances belong to the [selected task](tasks/active/phase-2-initial-llm-assistance.md#generated-lorebook-entries-selection--2026-10-11).

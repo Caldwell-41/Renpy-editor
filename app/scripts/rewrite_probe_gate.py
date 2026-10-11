@@ -39,13 +39,15 @@ CARD_CHECKS={1:{
  'Cancelled response writes nothing and retains task','Fresh valid proposal available after refusal and cancellation',
  'Stale external source refuses acceptance with zero writes','Project reopen retains exact approved card',
 },2:{'Process reopen retains approved card and exact revision','Process reopen retains custom prompt','Process reopen retains native credential readability'}}
-def validate_report(report,phase,continuing=False,drafting=False,card=False):
+LORE_CHECKS={phase:{name.replace('Card fields','Lore fields').replace('Core card','Core lore').replace('approved card','approved lore entry') for name in checks} for phase,checks in CARD_CHECKS.items()}
+def validate_report(report,phase,continuing=False,drafting=False,card=False,lore=False):
  if not isinstance(report,dict) or report.get('case')!='dialogue-rewrite' or report.get('passed') is not True or report.get('cleanupComplete') is not True:raise ValueError('Missing successful cleaned rewrite report')
  d=report.get('details',{})
+ if lore and d.get('action')!='generateLore':raise ValueError('Generated lore action evidence required')
  if card and d.get('action')!='generateCard':raise ValueError('Generated card action evidence required')
  if drafting and d.get('action')!='draftScene':raise ValueError('Draft Scene action evidence required')
  if continuing and d.get('action')!='continueScene':raise ValueError('Continue Scene action evidence required')
- if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not (CARD_CHECKS if card else DRAFT_CHECKS if drafting else CONTINUE_CHECKS if continuing else PHASE_CHECKS)[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
+ if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not (LORE_CHECKS if lore else CARD_CHECKS if card else DRAFT_CHECKS if drafting else CONTINUE_CHECKS if continuing else PHASE_CHECKS)[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
  if phase==1:
   hashes=d.get('reviewedBodyDigests')
   if not isinstance(hashes,list) or len(hashes)!=5 or any(not isinstance(v,str) or len(v)!=64 for v in hashes):raise ValueError('Five exact reviewed body digests required')

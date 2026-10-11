@@ -38,3 +38,14 @@ test("generated proposed card freezes form mutations and requires explicit revis
  const approve=[...document.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent==="Approve this card revision")!;approve.click();approve.click();await tick();assert.deepEqual(commands,[{type:"reviewCard",recordId:"record",revisionId:"new",approve:true}]);
  }finally{controller.dispose();await browser.happyDOM.close();}
 });
+
+test("generated proposed lore freezes form mutations and requires explicit revision approval",async()=>{
+ const browser=new Window({url:"http://tauri.localhost"});Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLSelectElement:browser.HTMLSelectElement,Event:browser.Event});document.body.innerHTML='<header></header><main></main>';
+ const old=emptyReference("lore");old.title="Bec";old.text="Approved";const proposed={...old,text:"<img onerror=alert(1)> Proposed"};
+ const record={id:"record",revisionCounter:2,currentRevisionId:"new",approvedRevisionId:"old",revisions:[{id:"old",number:1,status:"approved",content:old,createdAt:"2026-10-11T00:00:00Z",reviewedAt:"2026-10-11T00:00:00Z"},{id:"new",number:2,status:"proposed",content:proposed,createdAt:"2026-10-11T00:00:00Z",reviewedAt:null}]};
+ const model:ReferenceWorkspace={document:{schemaVersion:1,projectId:"project",cards:[],loreEntries:[record]},revision:"token",diagnostic:null,entities:[],issues:[],canUndo:true,canRedo:false};const commands:ReferenceCommand[]=[];
+ const controller=renderReferenceLibrary(document.querySelector("main")!,"lore",model,{creationHost:document.querySelector("header")!,current:()=>true,guard:async()=>true,status:()=>{},load:async()=>model,apply:async command=>{commands.push(command);return {...model,document:{...model.document!,loreEntries:[{...record,approvedRevisionId:"new",revisions:record.revisions.map(v=>({...v,status:v.id==="new"?"approved":"superseded",reviewedAt:"2026-10-11T00:00:01Z"}))}]}};}});
+ try{assert.equal(document.querySelector("img,script"),null);for(const name of ["Add relationship","Add source link","Save changes"]){const b=[...document.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent===name);if(b){assert(b.disabled,name);b.click();}}assert.equal(commands.length,0);assert(document.querySelector<HTMLInputElement>('[name="text"]')!.disabled);
+ const approve=[...document.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent==="Approve this lore revision")!;approve.click();approve.click();await tick();assert.deepEqual(commands,[{type:"reviewLore",recordId:"record",revisionId:"new",approve:true}]);
+ }finally{controller.dispose();await browser.happyDOM.close();}
+});

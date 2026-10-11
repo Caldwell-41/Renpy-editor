@@ -1050,3 +1050,133 @@ fn generated_card_review_regressions_preserve_extensions_refuse_manual_bypass_an
         let before=f.snapshots();assert_eq!(f.review_card(&r,true)["ok"],false, "{dependency}");assert_snapshots(&before,&f.snapshots());let mut f=Fixture::new();let p=f.card_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.card_response(&p).to_string()).unwrap();f.accept_card(&r);assert_eq!(f.review_card(&r,true)["ok"],true);let path=f.root.join(&f.path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# changed after approval\n");fs::write(path,bytes).unwrap();let choices=f.ok("context.options",json!({}));let choice=choices["references"].as_array().unwrap().iter().find(|x|x["recordId"]==r["card"]["recordId"]).unwrap();assert_eq!(choice["eligible"],false);
     }
 }
+
+impl Fixture {
+    fn lore_prepare(&mut self, record: Value) -> Value { self.lore_prepare_scope(record,None) }
+    fn lore_prepare_scope(&mut self, record: Value, scope: Option<Value>) -> Value {
+        let o=self.ok("context.options",json!({}));let w=self.ok("scene.list",json!({}));let s=&w["scenes"][0];
+        let b=s["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="narration").or_else(||s["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="dialogue"&&b["owner"].is_null()&&b["conditionalBranch"].is_null()&&!b["protected"].as_bool().unwrap_or(true))).unwrap();
+        let store=self.service.read().unwrap();
+        self.ok("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"action":prompts::LORE,"loreId":record.as_str().unwrap_or(""),"loreScope":scope.unwrap_or_else(||json!({"type":"scenes","sceneIds":[s["id"]]})),"displayName":"Generated café 雪","expectedPromptRevision":o["lorePrompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"sceneId":s["id"],"beatId":b["id"],"expectedSourceRevision":s["sourceRevision"],"references":[],"task":"Draft one lore","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}))
+    }
+    fn lore_response(&self,p:&Value)->Value {
+        let body:Value=serde_json::from_str(p["serializedPayload"].as_str().unwrap()).unwrap();
+        let user:Value=serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+        let target=&user["story"]["loreTarget"];
+        json!({"schemaVersion":1,"action":prompts::LORE,"target":{"recordId":target["recordId"],"title":target["title"]},"fields":{"tags":["Gen"],"text":"Unescaped [str(7)] {a=jump:label} <img onerror=alert(1)> café 雪","category":"World rule","subject":"Tram","knowledgeNotes":"Author intent; runtime unknown."}})
+    }
+    fn accept_lore(&mut self,r:&Value){self.ok("rewrite.accept",json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}));}
+    fn review_lore(&mut self,r:&Value,approve:bool)->Value {
+        let w=self.ok("references.list",json!({}));
+        self.call("references.apply",json!({"expectedRevision":w["revision"],"command":{"type":"reviewLore","recordId":r["lore"]["recordId"],"revisionId":r["lore"]["revisionId"],"approve":approve}}))
+    }
+}
+#[test]
+fn generated_lore_exact_dispatch_passive_preview_one_transaction_approval_history_reopen() {
+    let mut f=Fixture::new();let before=f.snapshots();let p=f.lore_prepare(Value::Null);
+    assert_snapshots(&before,&f.snapshots());let send=f.take(&p,Cancel::default()).unwrap();assert_eq!(send.body,p["serializedPayload"].as_str().unwrap().as_bytes());assert!(f.take(&p,Cancel::default()).is_err());
+    let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();assert_snapshots(&before,&f.snapshots());
+    assert_eq!(r["patches"].as_array().unwrap().len(),1);assert_eq!(r["patches"][0]["path"],crate::references::PATH);
+    assert_eq!(r["lore"]["status"],"proposed");assert!(r["lore"]["after"]["text"].as_str().unwrap().contains("[str(7)]"));
+    f.accept_lore(&r);let saved=fs::read(f.root.join(crate::references::PATH)).unwrap();assert_eq!(saved,r["patches"][0]["after"].as_str().unwrap().as_bytes());
+    let w=f.ok("references.list",json!({}));let record=w["document"]["loreEntries"].as_array().unwrap().iter().find(|c|c["id"]==r["lore"]["recordId"]).unwrap();assert!(record["approvedRevisionId"].is_null());
+    assert_eq!(f.call("rewrite.accept",json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}))["ok"],false);
+    for(path,bytes)in before.iter().filter(|(p,_)|p.ends_with(".rpy")){assert_eq!(fs::read(f.root.join(path)).unwrap(),*bytes);}
+    f.ref_history("undo");assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),before[crate::references::PATH]);f.ref_history("redo");assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),saved);
+    assert_eq!(f.review_lore(&r,true)["ok"],true);let approved=fs::read(f.root.join(crate::references::PATH)).unwrap();assert_eq!(f.review_lore(&r,true)["ok"],false);
+    f.ref_history("undo");assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),saved);f.ref_history("redo");assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),approved);
+    f.ok("project.close",json!({}));f.session=f.service.open_path(&f.root).unwrap().session_id;
+    let w=f.ok("references.list",json!({}));assert!(w["diagnostic"].is_null());assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),approved);
+}
+#[test]
+fn generated_lore_replacement_rejection_retains_approved_and_explicit_approval_supersedes() {
+    let mut f=Fixture::new();let initial=f.ok("references.list",json!({}));let id=initial["document"]["loreEntries"][0]["id"].clone();let prior=initial["document"]["loreEntries"][0]["approvedRevisionId"].clone();let old=initial["document"]["loreEntries"][0]["revisions"].as_array().unwrap().iter().find(|v|v["id"]==prior).unwrap()["content"].clone();
+    let p=f.lore_prepare(id.clone());f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();f.accept_lore(&r);
+    let proposed=f.ok("references.list",json!({}));assert_eq!(proposed["document"]["loreEntries"][0]["approvedRevisionId"],prior);assert_eq!(proposed["document"]["loreEntries"][0]["revisions"].as_array().unwrap().iter().find(|v|v["id"]==prior).unwrap()["content"],old);
+    assert_eq!(f.review_lore(&r,false)["ok"],true);assert_eq!(f.ok("references.list",json!({}))["document"]["loreEntries"][0]["approvedRevisionId"],prior);
+    let p=f.lore_prepare(id);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();f.accept_lore(&r);assert_eq!(f.review_lore(&r,true)["ok"],true);
+    let w=f.ok("references.list",json!({}));assert_eq!(w["document"]["loreEntries"][0]["approvedRevisionId"],r["lore"]["revisionId"]);assert_eq!(w["document"]["loreEntries"][0]["revisions"].as_array().unwrap().iter().find(|v|v["id"]==prior).unwrap()["status"],"superseded");assert_eq!(w["document"]["loreEntries"][0]["revisions"].as_array().unwrap().iter().find(|v|v["id"]==prior).unwrap()["content"],old);
+}
+#[test]
+fn generated_lore_closed_schema_bounds_malformed_and_model_approval_zero_writes() {
+    for case in 0..9 {let mut f=Fixture::new();let p=f.lore_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let mut reply=f.lore_response(&p);
+        match case {0=>reply["approved"]=json!(true),1=>reply["fields"]["status"]=json!("approved"),2=>reply["fields"]["text"]=json!("x".repeat(10001)),3=>reply["target"]["recordId"]=json!(uuid::Uuid::new_v4().to_string()),4=>reply["target"]["title"]=json!("different"),5=>reply["fields"]["tags"]=json!(["x","x"]),6=>reply["fields"]["path"]=json!("game/script.rpy"),7=>reply["action"]=json!("generateCard"),_=>{reply["target"].as_object_mut().unwrap().remove("recordId");}};
+        let before=f.snapshots();assert!(f.complete(&p,reply.to_string()).is_err(),"case {case}");assert_snapshots(&before,&f.snapshots());
+    }
+    let mut f=Fixture::new();let p=f.lore_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let before=f.snapshots();assert!(f.complete(&p,"{\"schemaVersion\":1,\"schemaVersion\":1}".into()).is_err());assert_snapshots(&before,&f.snapshots());
+}
+#[test]
+fn generated_lore_cancel_stale_competing_draft_external_source_metadata_approval_zero_writes() {
+    for case in 0..8 {let mut f=Fixture::new();let p=f.lore_prepare(Value::Null);let cancel=Cancel::default();f.take(&p,cancel.clone()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();
+        match case {0=>cancel.cancel(),1=>{let _=f.lore_prepare(Value::Null);},2=>{let opened=f.ok("source.open",json!({"path":f.path}));f.ok("source.updateDraft",json!({"path":f.path,"expectedBaseRevision":opened["baseRevision"],"text":format!("{}\n#draft",opened["text"].as_str().unwrap()),"selectionStart":0,"selectionEnd":0}));},3=>{let path=f.root.join(&f.path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# external\n");fs::write(path,bytes).unwrap();},4=>{let path=f.root.join(crate::references::PATH);let bytes=fs::read(&path).unwrap();fs::remove_file(&path).unwrap();fs::write(path,bytes).unwrap();},5=>{let o=f.ok("context.options",json!({}));f.ok("prompts.apply",json!({"action":prompts::LORE,"expectedRevision":o["lorePrompt"]["revision"],"command":{"type":"save","text":"changed"}}));},6=>{f.ok("project.close",json!({}));f.session=f.service.open_path(&f.root).unwrap().session_id;},_=>{let w=f.ok("references.list",json!({}));f.ok("references.apply",json!({"expectedRevision":w["revision"],"command":{"type":"save","kind":"lore","recordId":w["document"]["loreEntries"][0]["id"],"fields":{"text":"Competing manual save"}}}));}}
+        let before=f.snapshots();assert_eq!(f.call("rewrite.accept",json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}))["ok"],false,"case {case}");assert_snapshots(&before,&f.snapshots());
+    }
+    let mut f=Fixture::new();let p=f.lore_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();f.accept_lore(&r);let path=f.root.join(&f.path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# external\n");fs::write(path,bytes).unwrap();let before=f.snapshots();assert_eq!(f.review_lore(&r,true)["ok"],false);assert_snapshots(&before,&f.snapshots());
+}
+
+#[test]
+fn generated_lore_review_regressions_preserve_extensions_refuse_manual_bypass_and_dependency_changes() {
+    for dependency in ["story", "character", "variable"] {
+        let mut f=Fixture::new();
+        if dependency=="character" {
+            let w=f.ok("scene.list",json!({}));let scene=&w["scenes"][0];let beat=scene["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="narration").unwrap();
+            f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
+        }
+        let path=f.root.join(crate::references::PATH);let mut raw:Value=serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();raw["loreEntries"][0]["revisions"][0]["content"]["provenance"]["futureGeneratedTest"]=json!({"keep":true});raw["loreEntries"][0]["revisions"][0]["futureRevisionTest"]=json!("kept");raw["loreEntries"][0]["revisions"][0]["content"]["futureContent"]=json!({"kept":true});raw["loreEntries"][0]["revisions"][0]["content"]["links"]=json!([{"type":"character","id":"60000000-0000-4000-8000-000000000001","extension":"kept"}]);fs::write(path,raw.to_string()).unwrap();let library=f.ok("references.list",json!({}));let id=library["document"]["loreEntries"][0]["id"].clone();
+        let p=f.lore_prepare(id);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();f.accept_lore(&r);
+        let w=f.ok("references.list",json!({}));let record=&w["document"]["loreEntries"][0];let next=record["revisions"].as_array().unwrap().iter().find(|v|v["id"]==record["currentRevisionId"]).unwrap();
+        assert_eq!(next["content"]["futureContent"],library["document"]["loreEntries"][0]["revisions"][0]["content"]["futureContent"]);
+        assert_eq!(next["content"]["provenance"]["futureGeneratedTest"],json!({"keep":true}));assert_eq!(next["futureRevisionTest"],"kept");
+        assert_eq!(next["content"]["links"],library["document"]["loreEntries"][0]["revisions"][0]["content"]["links"]);assert_eq!(next["content"]["knowledge"],library["document"]["loreEntries"][0]["revisions"][0]["content"]["knowledge"]);
+        let before=f.snapshots();assert_eq!(f.call("references.apply",json!({"expectedRevision":w["revision"],"command":{"type":"save","kind":"lore","recordId":record["id"],"fields":{"text":"bypass"}}}))["ok"],false);assert_snapshots(&before,&f.snapshots());
+        if dependency=="prompt" {let o=f.ok("context.options",json!({}));f.ok("prompts.apply",json!({"action":prompts::LORE,"expectedRevision":o["lorePrompt"]["revision"],"command":{"type":"save","text":"changed after save"}}));}
+        else {let w=f.ok("scene.list",json!({}));let path=if dependency=="story"{f.path.as_str()}else if dependency=="character"{w["authoring"]["characters"][0]["source"]["path"].as_str().unwrap()}else{w["authoring"]["variables"][0]["source"]["path"].as_str().unwrap()};let p=f.root.join(path);let mut bytes=fs::read(&p).unwrap();bytes.extend(b"# changed supporting source\n");fs::write(p,bytes).unwrap();}
+        let before=f.snapshots();assert_eq!(f.review_lore(&r,true)["ok"],false, "{dependency}");assert_snapshots(&before,&f.snapshots());let mut f=Fixture::new();let p=f.lore_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();f.accept_lore(&r);assert_eq!(f.review_lore(&r,true)["ok"],true);let path=f.root.join(&f.path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# changed after approval\n");fs::write(path,bytes).unwrap();let choices=f.ok("context.options",json!({}));let choice=choices["references"].as_array().unwrap().iter().find(|x|x["recordId"]==r["lore"]["recordId"]).unwrap();assert_eq!(choice["eligible"],false);
+    }
+}
+
+#[test]
+fn generated_lore_author_scope_is_reviewed_and_model_cannot_change_it() {
+    let mut f=Fixture::new();let p=f.lore_prepare(Value::Null);let body:Value=serde_json::from_str(p["serializedPayload"].as_str().unwrap()).unwrap();let user:Value=serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+    assert_eq!(user["story"]["loreTarget"]["scope"]["sceneIds"][0],user["story"]["sceneId"]);
+    f.take(&p,Cancel::default()).unwrap();let response=f.lore_response(&p);let r=f.complete(&p,response.to_string()).unwrap();assert_eq!(r["lore"]["after"]["scope"],user["story"]["loreTarget"]["scope"]);
+    let p=f.lore_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let mut response=f.lore_response(&p);response["fields"]["scope"]=json!({"type":"project"});let before=f.snapshots();assert!(f.complete(&p,response.to_string()).is_err());assert_snapshots(&before,&f.snapshots());
+    let mut f=Fixture::new();let path=f.root.join(crate::references::PATH);let mut raw:Value=serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();let record=&mut raw["loreEntries"][0];record["revisions"][0]["content"]["scope"]=json!({"type":"route","sceneIds":["50000000-0000-4000-8000-000000000001","50000000-0000-4000-8000-000000000001"],"futureScope":{"kept":true}});let id=record["id"].clone();fs::write(&path,raw.to_string()).unwrap();
+    let p=f.lore_prepare_scope(id,Some(json!({"type":"project"})));f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();let exact:Value=serde_json::from_str(r["patches"][0]["after"].as_str().unwrap()).unwrap();let record=&exact["loreEntries"][0];let next=record["revisions"].as_array().unwrap().iter().find(|v|v["id"]==record["currentRevisionId"]).unwrap();assert_eq!(next["content"],r["lore"]["after"]);assert_eq!(next["content"]["scope"],json!({"type":"project","futureScope":{"kept":true}}));f.accept_lore(&r);assert_eq!(fs::read(path).unwrap(),r["patches"][0]["after"].as_str().unwrap().as_bytes());
+
+}
+
+#[test]
+fn generated_lore_approved_supporting_definition_stale_blocks_inclusion_and_prompt_history() {
+    let mut f=Fixture::new();let w=f.ok("scene.list",json!({}));let scene=&w["scenes"][0];let beat=scene["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="narration").unwrap();
+    f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
+    let o=f.ok("context.options",json!({}));assert_eq!(o["lorePrompt"]["effectiveText"],prompts::LORE_BASELINE);
+    let custom=f.ok("prompts.apply",json!({"action":prompts::LORE,"expectedRevision":o["lorePrompt"]["revision"],"command":{"type":"save","text":"Custom lore instruction"}}));
+    f.ok("prompts.apply",json!({"action":prompts::LORE,"expectedRevision":custom["revision"],"command":{"type":"restore"}}));f.ref_history("undo");assert_eq!(f.ok("context.options",json!({}))["lorePrompt"]["effectiveText"],"Custom lore instruction");f.ref_history("redo");
+    let p=f.lore_prepare(Value::Null);f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();f.accept_lore(&r);assert_eq!(f.review_lore(&r,true)["ok"],true);
+    let path=w["authoring"]["characters"][0]["source"]["path"].as_str().unwrap();assert_ne!(path,f.path);let path=f.root.join(path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# changed supporting definition\n");fs::write(&path,bytes).unwrap();
+    let before=f.snapshots();let o=f.ok("context.options",json!({}));let choice=o["references"].as_array().unwrap().iter().find(|x|x["recordId"]==r["lore"]["recordId"]).unwrap();assert_eq!(choice["eligible"],false);assert_snapshots(&before,&f.snapshots());
+    let ws=f.ok("scene.list",json!({}));let scene=&ws["scenes"][0];let beat=scene["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="dialogue"&&b["owner"].is_null()&&b["conditionalBranch"].is_null()&&!b["protected"].as_bool().unwrap_or(true)).unwrap();
+    let refused=f.call("context.preview",json!({"action":prompts::LORE,"loreScope":{"type":"project"},"displayName":"Refused stale inclusion","expectedPromptRevision":o["lorePrompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"sceneId":scene["id"],"beatId":beat["id"],"expectedSourceRevision":scene["sourceRevision"],"references":[{"kind":"lore","recordId":r["lore"]["recordId"],"revisionId":r["lore"]["revisionId"]}],"task":"Draft","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}));assert_eq!(refused["ok"],false);assert_snapshots(&before,&f.snapshots());
+}
+
+#[test]
+fn generated_lore_cited_reference_support_stale_blocks_approval_and_inclusion() {
+    for approved in [false,true] {
+        let mut f=Fixture::new();let w=f.ok("scene.list",json!({}));let definition_path="game/reference-support.rpy";fs::write(f.root.join(definition_path),b"# Synthetic reference support; never executed.\n").unwrap();
+        let scene=&w["scenes"][0];let beat=scene["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="narration").unwrap();
+        let options=f.ok("context.options",json!({}));let preview=f.ok("context.preview",json!({"action":prompts::LORE,"displayName":"Reference token","loreScope":{"type":"project"},"expectedPromptRevision":options["lorePrompt"]["revision"],"expectedStructureRevision":options["structureRevision"],"sceneId":scene["id"],"beatId":beat["id"],"expectedSourceRevision":scene["sourceRevision"],"references":[],"task":"Reference token","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}));
+        // Guard-only inventory includes this file; it is not sent or persisted as the lore entry's own support.
+        let revision=preview["readSet"][definition_path].clone();assert!(revision.is_string());
+        let path=f.root.join(crate::references::PATH);let mut raw:Value=serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();let record=&mut raw["cards"][0];let rid=record["approvedRevisionId"].clone();let rev=record["revisions"].as_array_mut().unwrap().iter_mut().find(|v|v["id"]==rid).unwrap();rev["supportingReadSet"]=json!({definition_path:revision});fs::write(path,raw.to_string()).unwrap();
+        let o=f.ok("context.options",json!({}));
+        // Rebuild with the explicit current card selection; no linked content expands.
+        let store=f.service.read().unwrap();let scene=&w["scenes"][0];let beat=scene["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="narration").unwrap();
+        let selected=o["references"].as_array().unwrap().iter().find(|r|r["kind"]=="card").unwrap();let p=f.ok("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"action":prompts::LORE,"loreScope":{"type":"project"},"displayName":"Cited lore","expectedPromptRevision":o["lorePrompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"sceneId":scene["id"],"beatId":beat["id"],"expectedSourceRevision":scene["sourceRevision"],"references":[{"kind":"card","recordId":selected["recordId"],"revisionId":selected["revisionId"]}],"task":"Draft one entry","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}));
+        f.take(&p,Cancel::default()).unwrap();let r=f.complete(&p,f.lore_response(&p).to_string()).unwrap();f.accept_lore(&r);if approved { assert_eq!(f.review_lore(&r,true)["ok"],true); }
+        let path=f.root.join(definition_path);let mut bytes=fs::read(&path).unwrap();bytes.extend(b"# reference support changed\n");fs::write(path,bytes).unwrap();let before=f.snapshots();
+        let refs=f.ok("references.list",json!({}));assert!(refs["issues"].as_array().unwrap().iter().any(|i|i["recordId"]==r["lore"]["recordId"]&&i["field"]=="citations"));
+        if approved {let options=f.ok("context.options",json!({}));assert_eq!(options["references"].as_array().unwrap().iter().find(|x|x["recordId"]==r["lore"]["recordId"]).unwrap()["eligible"],false);} else {assert_eq!(f.review_lore(&r,true)["ok"],false);assert_snapshots(&before,&f.snapshots());assert_eq!(f.review_lore(&r,false)["ok"],true);continue;}
+        assert_snapshots(&before,&f.snapshots());
+    }
+}
