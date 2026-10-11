@@ -5475,3 +5475,21 @@ proof may be reused within that exact boundary, not described as a new full pack
 Manual same-thread wait/resume applies. No further automatic retry beyond cumulative
 limits; missing, failed or skipped required checks remain unresolved. Generic/full
 Phase2/final human acceptance and merge/release remain distinct.
+
+#### Reviewed Windows correction and final CI4 dispatch
+
+Published **3b3e8681a7bae2ddc8964409bf6f4e615b788eba**, tree
+**7a56dc5e5e2fbeff0d365216a43456345d52fdcd**, after independent final repair/evidence
+and task-record review passed. Repository503-file validation and diffcheck pass.
+Confirmed [CI4 run38134089028](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38134089028),
+workflow357322921/attempt1/head3b3e868/branchcodex/provider-qualification, created
+11:02:04Z, initial in_progress11:02:23Z. Material inputs lore+Studio true, other actions/
+upload false, build4/firstlaunch5, both reuse IDs empty. Ignored dispatch-receipt-04 and
+initial run JSON retain exact identity. Final focused dispatch4 consumed on both
+targets; Windows package4/editor5–6 reserved pending actual ledger. Mac2/4packages,
+8/8launches,4/4dispatches; Windows3/4actual packages,4/6actual launches,4/4dispatches.
+No new Mac package/editor. Required both-target exact artifact/Windows helper/native/
+reopen audit remains; no terminal claim or polling. Same-thread user resume continues
+this outcome. CI3 stays failed, Mac reuse remains at unchanged481 production/probe
+inputs, temporary credential/owned roots remain cleaned, generic/full Phase2/human
+acceptance remain distinct. No further automatic retry beyond cumulative allowances.
