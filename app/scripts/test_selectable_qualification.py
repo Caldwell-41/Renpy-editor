@@ -14,10 +14,32 @@ def seal_child(child):
     evidence.write(child/'cleanup.json',{'cleanupComplete':True})
     evidence.write(child/'manifest.json',{'schemaVersion':1,'files':{p.relative_to(child).as_posix():evidence.sha(p) for p in child.rglob('*') if p.is_file() and p.name!='manifest.json'}})
 class Gates(unittest.TestCase):
+    def test_cleanup_uses_last_attempted_phase_without_older_receipt_fallback(self):
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)/'owned';root.mkdir();walkthrough=Path(t)/'walkthrough';walkthrough.mkdir()
+            (root/'ai-profiles.json').write_text(json.dumps({'profiles':[{'credential':None}]}))
+            # Reverse receipt creation order must not make phase1 authoritative.
+            (walkthrough/'phase-2.json').write_text(json.dumps({'cleanupComplete':False}))
+            (walkthrough/'phase-1.json').write_text(json.dumps({'cleanupComplete':True}))
+            for receipt in ('failed','malformed','missing'):
+                if receipt=='malformed':(walkthrough/'phase-2.json').write_text('{broken')
+                if receipt=='missing':(walkthrough/'phase-2.json').unlink()
+                facts=q.cleanup_native_fixture(root,walkthrough,2)
+                self.assertFalse(facts['credentialReferencesRemoved']);self.assertFalse(facts['ownedRootRemoved']);self.assertTrue(root.exists())
+            facts=q.cleanup_native_fixture(root,walkthrough,1)
+            self.assertTrue(facts['credentialReferencesRemoved']);self.assertTrue(facts['ownedRootRemoved']);self.assertFalse(root.exists())
+    def test_timeout_preserves_partial_output_and_failed_check_without_running_process(self):
+        with tempfile.TemporaryDirectory() as t:
+            for stdout,stderr in ((b'partial stdout\n',b'partial stderr\n'),('partial stdout\n','partial stderr\n')):
+                checks=[];error=q.subprocess.TimeoutExpired(['public-command'],1,output=stdout,stderr=stderr)
+                with patch.object(q.subprocess,'run',side_effect=error) as run:
+                    with self.assertRaises(q.subprocess.TimeoutExpired):q.run_check(Path(t),checks,'phase-2',['cargo','test'],timeout=1)
+                run.assert_called_once();self.assertEqual((Path(t)/'phase-2.log').read_text(),'partial stdout\npartial stderr\n')
+                self.assertEqual(checks,[{'name':'phase-2','passed':False,'failure':'TimeoutExpired'}])
     def test_renderer_requires_exact_nonzero_unskipped(self):
-        good=''.join(f'ℹ {k} {v}\n' for k,v in [('tests',133),('pass',133),('fail',0),('cancelled',0),('skipped',0),('todo',0)])
+        good=''.join(f'ℹ {k} {v}\n' for k,v in [('tests',134),('pass',134),('fail',0),('cancelled',0),('skipped',0),('todo',0)])
         q.renderer_gate(good)
-        for bad in ['',good.replace('pass 133','pass 0'),good.replace('skipped 0','skipped 1'),good.replace('133','132')]:
+        for bad in ['',good.replace('pass 134','pass 0'),good.replace('skipped 0','skipped 1'),good.replace('134','133')]:
             with self.assertRaises(AssertionError):q.renderer_gate(bad)
     def test_cargo_requires_exact_passes(self):
         good='test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured;'

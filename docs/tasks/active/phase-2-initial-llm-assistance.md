@@ -6308,3 +6308,64 @@ Final independent read-only code/status release review passes with no findings.
 JavaScript/Python syntax,514-file structure/privacy validation and diff check pass;
 fresh refs still match2a3bd89/main5f448ca. Authorized publication preserves all failed
 evidence and exhausted limits; no additional native/CI/live qualification inferred.
+
+
+#### Remaining Windows suite review and approved CI7 — 2026-10-12
+
+User asks to check the rest of the Windows CI suite for similar issues, fix, then run
+another CI. This explicitly grants one additional **Windows package attempt4→5** and
+**paired focused dispatch6→7 each**, as needed for the requested run after the stated
+exhaustion. Mac package4, editor8perplatform, live2total/discovery1 caps remain unchanged.
+No cap reset, CI8/Windows package6/rerun, generic/provider/signing/merge/release or next
+outcome. Pre-CI7 actual Windows4packages/4starts, Mac0/0, paired6, live0/discovery0.
+Plan fresh attempt1 Windows package5/firststart5/reopen6 and paireddispatch7, exclusive
+selectable selectors, no upload/reuse. Current-chat polling permission persists.
+Fresh refs match4c85929 locally/origin/main5f448ca, clean baseline; unrelated work preserved.
+
+User-requested GPT-6.1 Sol High owner resumed sole serial code ownership while parent
+made no tracked writes; independent GPT-6.1 Sol High reviewer audited the entire
+remaining native/Python/PowerShell/controller/probe/evidence chain. Three concrete
+harness/failure-path gaps were found and fixed before the next package:
+
+- Watchdog used short-circuit shutdown and omitted synthetic credential cleanup.
+  Shared owner cleanup now attempts requests, bounded synthetic credential cleanup
+  and host independently, records each fact and keeps watchdog passed:false.
+  Successful phase1 native credential retention remains unchanged.
+- Qualifier selected reports[-1] from unordered glob. It now records the actual phase
+  before launch and consults only that exact phase receipt. Failed/missing/malformed
+  phase2 cannot use older phase1 success to remove the root or claim cleanup.
+- Subprocess TimeoutExpired lost partial output. Raw byte/text stdout/stderr are now
+  retained, check remains failed and timeout is rethrown.
+
+New renderer integration uses the actual production main shell, Scene, Assist/controller,
+helper and unmodified selectable JS probe through19phase1/2phase2checks, six sends/two
+Saves/UndoRedo/update/refusals/cancel/stale/project and simulated process reopen. Controlled
+IPC is explicit: this is renderer/probe sequencing, not actual core/filesystem/native
+input/credential/process qualification. Late cancelled completion and delayed preparation,
+accept/discard/history are covered. A reviewer readiness inference was challenged with
+asserted renderer status250ms and scene-list250ms versus probe15ms; it did not reproduce.
+Production RequestLane/discard sequencing supplies ordering on this chain, so no
+speculative readiness fix. No additional product/UI/core defect was established.
+
+Final raw verification passes **renderer134/134, helper3+sequence1=4/4, gates14/14,
+cleanup2/2**, zero failures/skips; exact retained-log134/14/2 gates and diff check pass.
+Ignored selectable-ci7-repair-audit.txt binds five final code/test inputs and six final
+raw logs by SHA256. Initial three sequence logs have TypeScript compile failures then
+runtime passes from a non-fail-fast shell; these are retained **failed combined checks**.
+Final checks compile clean with set-e. Formatter-only spill into unrelated files was
+removed by reverting only the owner's formatting, preserving baseline bytes; final
+code diff is five owned files. Independent final code/log review passes, no findings.
+No new package/editor/CI/network/provider/credential operation during this repair.
+
+Sole writer returned to parent. Narrow selectable workflow/qualifier caps extend to
+build5/dispatch7, editor caps stay8 and legacy gates unchanged. TESTING/current/handover
+track134/14/cleanup2 without rewriting historical132/133 evidence. Final workflow/docs
+review and structure/privacy checks precede authorized commit/push and CI7 dispatch.
+Mac remains locked with no native app binding/start/key entry. Full Phase2/generic/
+final human acceptance and signed Mac/native/live remain incomplete.
+
+Final independent workflow/docs/source/log review passes, no findings. Actionlint,
+Python syntax,515-file structure/privacy validation and diff check pass. Five source
+hashes/six successful log hashes still match owner audit. CURRENT339/HANDOVER571words
+are compact complete records. Fresh refs remain4c85929/main5f448ca. Publish reviewed
+coherent candidate, then dispatch once and audit exact identity/actual attempts.

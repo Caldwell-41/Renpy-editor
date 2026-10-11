@@ -48,6 +48,33 @@ pub fn cleanup_when_idle(host: &ApplicationHost) -> bool {
     with_idle_service(host, Duration::from_secs(10), |service| cleanup(service))
         .is_ok_and(|result| result.is_ok())
 }
+
+#[derive(serde::Serialize)]
+pub struct CleanupOwners {
+    requests: bool,
+    credentials: bool,
+    host: bool,
+}
+impl CleanupOwners {
+    pub fn complete(&self) -> bool {
+        self.requests && self.credentials && self.host
+    }
+}
+pub fn cleanup_owners(
+    requests: impl FnOnce() -> bool,
+    credentials: impl FnOnce() -> bool,
+    host: impl FnOnce() -> bool,
+) -> CleanupOwners {
+    // Each owner runs exactly once even after another owner's ordinary failure.
+    let requests = requests();
+    let credentials = credentials();
+    let host = host();
+    CleanupOwners {
+        requests,
+        credentials,
+        host,
+    }
+}
 pub fn prepare(
     root: &Path,
     endpoint: &str,
@@ -179,6 +206,39 @@ pub fn snapshot(root: &Path) -> Result<serde_json::Value, &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn probe_cleanup_owners_run_after_each_failure() {
+        for requests in [false, true] {
+            for credentials in [false, true] {
+                for host in [false, true] {
+                    let calls = std::cell::RefCell::new(Vec::new());
+                    let owners = cleanup_owners(
+                        || {
+                            calls.borrow_mut().push("requests");
+                            requests
+                        },
+                        || {
+                            calls.borrow_mut().push("credentials");
+                            credentials
+                        },
+                        || {
+                            calls.borrow_mut().push("host");
+                            host
+                        },
+                    );
+                    assert_eq!(*calls.borrow(), ["requests", "credentials", "host"]);
+                    assert_eq!(owners.complete(), requests && credentials && host);
+                    assert_eq!(
+                        serde_json::to_value(owners).unwrap(),
+                        serde_json::json!({
+                            "requests": requests, "credentials": credentials, "host": host,
+                        })
+                    );
+                }
+            }
+        }
+    }
 
     #[test]
     fn snapshot_paths_are_portable_and_bind_exact_bytes() {

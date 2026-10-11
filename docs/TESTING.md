@@ -1649,17 +1649,27 @@ The approved selectable outcome is owned by the
 same-file/subset/dependency/stable-ID/history/reopen, supported Character update,
 literal names/manual update preservation, aggregate UTF-8 boundaries, malformed whole
 batch, collision/custom interpretation, stale/cancel/draft/refusal and compound recovery.
-The broader existing rewrite suite requires43 cases; renderer check133/prompt5/native
+The broader existing rewrite suite requires43 cases; renderer check134/prompt5/native
 worker6 remain focused shared gates. Three `snapshot_paths` desktop tests require
 portable component-based keys, exact nested hashes/recovery filtering and host-checkout
-serialization with typed pre-dispatch busy. One `probe_cleanup` test requires bounded
-checkout waiting with zero task invocation on deadline and no retry of inner failures.
+serialization with typed pre-dispatch busy. Two `probe_cleanup` tests require bounded
+checkout waiting with zero task invocation on deadline and no retry of inner failures,
+and independent request/credential/host invocation and receipts after each owner failure.
 Snapshot I/O/path/link errors remain failures; recovery bytes are included. Probe
 shutdown always runs independently and records request/credential/host cleanup owners.
 The three native helper tests include a production Scene/history regression: remount
 must select an unselected fixture Beat without toggling an already selected Beat off.
 Probe mount observes the selected state; timeout diagnostics retain fixed awaited
 control/stage and bounded state/count facts without project text or credential values.
+The full selectable renderer sequence test runs the actual shell, Scene, Assist and
+injected probe through19 phase1 and2 reopen-branch checks, six sends/two Saves/history,
+refusals/cancellation and uneven render delays with controlled IPC. This establishes
+renderer/probe sequencing, not actual core/filesystem/credential/native/process proof.
+Normal reports and watchdog timeouts run cleanup owners independently; timeouts remain
+failed. Native fixture cleanup consults only the last attempted phase receipt and
+refuses missing/malformed/failed cleanup rather than using older success. Subprocess
+timeouts retain partial stdout/stderr as failed raw logs. Fourteen qualification gate
+tests reject incomplete evidence, stale renderer counts and older cleanup fallback.
 These are harness checks; they do not replace native saved-byte/cleanup proof. Loopback worker/controller tests require socket
 capability; sandbox denial before socket bind is a harness failure, never a pass.
 
@@ -1676,7 +1686,7 @@ The registered production workflow’s exclusive `selectable_proposals:true` sel
 calls `.github/workflows/selectable-proposals.yml` for one bounded fresh paired run.
 All prior selectors/upload/reuse must be false/empty; admission refuses mixed scope.
 `qualify-selectable.py` requires exact candidate/tree/tool/input identities, positive
-exact counts, twelve gate tests, SDK checksum, manifests, privacy and cleanup. Windows
+exact counts, fourteen gate tests, SDK checksum, manifests, privacy and cleanup. Windows
 adds one package and two editor starts, recording attempts before each operation.
 Mac CI supplies automated core/controller/SDK proof; a signed local Mac package and
 actual native observations remain separately required because CI has no approved

@@ -8,7 +8,7 @@ on:
         type: boolean
         default: false
       selectable_dispatch_ordinal:
-        description: Cumulative selectable paired dispatch, 1 through 6 (two approved one-run extensions)
+        description: Cumulative selectable paired dispatch, 1 through 7 (three approved one-run extensions)
         type: string
         default: '1'
       phase2_studio:
@@ -39,12 +39,12 @@ on:
         type: boolean
         default: false
       rewrite_build_ordinal:
-        description: Selected cumulative Windows package-build attempt (1 through 4)
+        description: Selected cumulative Windows package attempt (legacy 1–4; selectable 1–5)
         required: false
         type: string
         default: '1'
       rewrite_first_launch_ordinal:
-        description: Selected cumulative Windows phase-1 launch (1 through 5; phase 2 uses the next)
+        description: Selected cumulative Windows first launch (legacy 1–5; selectable 1–7; reopen uses next)
         required: false
         type: string
         default: '1'

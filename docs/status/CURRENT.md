@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-12. **Selectable proposal editing implemented; qualification blocked after CI6.**
+**Updated:** 2026-10-12. **Selectable proposal editing implemented; CI7 prepared after full Windows suite review.**
 Full Phase2, generic and final human acceptance remain incomplete.
 
 Approved scope persists:1–8 operations in one saved Scene, bound pre-send permissions,
@@ -22,18 +22,24 @@ The [owning audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-
 records the concrete remount harness defect: clicking an already selected Beat toggled
 it off and disabled Assist. Independent GPT-6.1 Sol High owner fixed idempotent probe
 selection and bounded control diagnostics; production Scene behavior is unchanged.
-Local renderer133/helper3/gate12 pass; independent code review passes. Corrected later
-Windows native proof is still missing. Unchanged core/controller/SDK evidence is valid.
+The remaining Windows chain now has a full production shell/Scene/Assist/probe sequence
+regression with controlled IPC; renderer134/helper3+sequence1/gate14/cleanup2 pass.
+Review found and fixed watchdog cleanup, latest-phase cleanup receipt selection and
+timeout log retention. No additional product/core defect or render-readiness failure
+was established. Independent code review passes; native proof remains missing.
+Unchanged core/controller/SDK evidence is valid.
 
-Actual counts: Mac0/4packages,0/8starts; Windows4/4packages,4/8starts;
-paired6/6each exhausted, including two explicitly approved extensions. Reopen5 was
-unreached. No CI7/rerun or Windows package5 authorised. Further Windows qualification
-requires both a new package and paired-CI allowance or an approved required-host route.
+Actual counts: Mac0/4packages,0/8starts; Windows4/5packages,4/8starts; paired6/7each.
+User authorised one extra Windows package and pairedCI7 after the remaining-suite
+review. Plan fresh package5/starts5–6/dispatch7; no CI8/package6/rerun authorised.
+The [new allowance and review](../tasks/active/phase-2-initial-llm-assistance.md#remaining-windows-suite-review-and-approved-ci7--2026-10-12)
+preserve all prior consumption; editor/Mac/live caps are unchanged.
 Live0/2total batch generations, discovery0/1. Prior allowances stay closed.
 Mac remains locked; no editor binding/start or key entry. Notify when signed app is
 ready for fresh native key entry; no old-key retrieval or real-provider credential
 read/export/call occurred. [HANDOVER](HANDOVER.md) owns remaining blockers.
-Current-chat polling was authorised; CI6 is terminal, no watcher/automation remains.
+Current-chat polling remains authorised; no watcher/automation. CI7 exact identity and
+terminal artifact/actual-attempt audit remain.
 
 Accepted prior Studio evidence remains reusable. Commit/push authorised; no merge/
 release/provider/signing expansion, generic or following outcome.

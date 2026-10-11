@@ -312,15 +312,13 @@ fn core_request(
             .map_err(|_| "probe state")?
             .clone()
             .ok_or("probe host")?;
-        let request_cleaned=ai_requests::service().shutdown();
-        let credential_cleaned=if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && (!passed || std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2")) {
+        let owners=rewrite_probe::cleanup_owners(||ai_requests::service().shutdown(),||if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && (!passed || std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2")) {
             rewrite_probe::cleanup_when_idle(&host)
-        } else {true};
-        let host_cleaned = host.shutdown();
-        let cleaned = request_cleaned && credential_cleaned && host_cleaned;
+        } else {true},||host.shutdown());
+        let cleaned = owners.complete();
         println!(
             "{}",
-            json!({"evidence":"runtime-ui-packaged", "case":std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap(), "passed":passed && cleaned, "cleanupComplete":cleaned, "cleanupOwners":{"requests":request_cleaned,"credentials":credential_cleaned,"host":host_cleaned}, "details":payload})
+            json!({"evidence":"runtime-ui-packaged", "case":std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap(), "passed":passed && cleaned, "cleanupComplete":cleaned, "cleanupOwners":owners, "details":payload})
         );
         let _ = std::io::stdout().flush();
         let code = if passed && cleaned { 0 } else { 1 };
@@ -907,8 +905,9 @@ fn main() {
                         && std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
                     let limit = if windows_observation { 1800 } else if matches!(case.as_str(),"branches-interactive"|"reference-library"|"prompt-context"|"dialogue-rewrite") { 900 } else { 300 };
                     while started.elapsed() < Duration::from_secs(limit) { thread::sleep(Duration::from_secs(1)); }
-                    let cleaned = ai_requests::service().shutdown() && probe_host.shutdown();
-                    println!("{}",json!({"evidence":"runtime-ui-packaged","case":case,"passed":false,"cleanupComplete":cleaned,"details":{"stage":"native-watchdog","timedOut":true}}));
+                    let owners=rewrite_probe::cleanup_owners(||ai_requests::service().shutdown(),||if case=="dialogue-rewrite" {rewrite_probe::cleanup_when_idle(&probe_host)} else {true},||probe_host.shutdown());
+                    let cleaned = owners.complete();
+                    println!("{}",json!({"evidence":"runtime-ui-packaged","case":case,"passed":false,"cleanupComplete":cleaned,"cleanupOwners":owners,"details":{"stage":"native-watchdog","timedOut":true}}));
                     let _ = std::io::stdout().flush();
                     std::process::exit(1);
                 });
