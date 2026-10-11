@@ -41,6 +41,7 @@ export const CORE_OPERATIONS = [
   "rewrite.prepare",
   "rewrite.send",
   "rewrite.accept",
+  "rewrite.select",
   "rewrite.discard",
   "references.list",
   "references.apply",

@@ -643,6 +643,72 @@ impl AuthoringService {
         )
     }
 
+    /// Compose a selected Scene candidate entirely in memory. Rebuild mappings between
+    /// patches so later targets use their stable IDs rather than stale byte offsets.
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn prepare_selected_edits(
+        &self, project: &ProjectId, project_id: &str, scene_id: &str,
+        expected: &str, replacements: Vec<(String, String)>,
+        insertion: Option<(String, Vec<(Option<String>, String)>, Vec<String>)>,
+        character: Option<(TransactionProposal, AuthoringMetadata)>,
+    ) -> Result<TransactionProposal, SceneError> {
+        let mut loaded = self.load(project, project_id)?;
+        let mut mutations = vec![];
+        if let Some((proposal, metadata)) = character {
+            loaded.authoring = metadata;
+            // New definitions must not reinterpret existing opaque source, even in
+            // other Scenes or a Character-only selection. Guard every saved mapping
+            // under the candidate authoring metadata before any durable write.
+            for scene in &loaded.project.scenes {
+                let (bytes,revision)=self.scene_snapshot(project,&scene.source_path)?;
+                let mapping=loaded.source_map.scene_mappings.iter().find(|m|m.scene_id==scene.id).ok_or(SceneError::InvalidMetadata)?;
+                require_revision(&revision,&mapping.source_revision)?;
+                build_mapping(scene,&bytes,&revision.sha256,Some(mapping),&[],Some((&loaded.project,&loaded.authoring)))?;
+            }
+            mutations = proposal.mutations;
+        }
+        if !replacements.is_empty() || insertion.is_some() {
+            let scene = loaded.project.scenes.iter().find(|s| s.id == scene_id)
+                .cloned().ok_or(SceneError::UnknownEntity)?;
+            self.ensure_source_paths_clean(project, [scene.source_path.as_str()])
+                .map_err(|_| SceneError::DirtySource)?;
+            let (original, revision) = self.scene_snapshot(project, &scene.source_path)?;
+            require_revision(&revision, expected)?;
+            let mut mapping = loaded.source_map.scene_mappings.iter().find(|m| m.scene_id == scene_id)
+                .cloned().ok_or(SceneError::InvalidMetadata)?;
+            if mapping.source_revision != expected { return Err(SceneError::SourceConflict); }
+            let mut bytes = original.clone();
+            let mut edits: Vec<_> = replacements.into_iter().map(|(id, encoded)|
+                (BeatEdit::PreparedDialogue { id, encoded }, None)).collect();
+            if let Some((before, entries, ids)) = insertion {
+                edits.push((BeatEdit::PreparedInsertion { before, entries }, Some(ids)));
+            }
+            for (edit, assigned) in edits {
+                let (_, beats) = build_mapping(&scene, &bytes, &sha256(&bytes), Some(&mapping), &[],
+                    Some((&loaded.project, &loaded.authoring)))?;
+                let (next, mut forced) = apply_beat_edit(&bytes, &beats, edit, &loaded)?;
+                if let Some(ids) = assigned {
+                    if ids.len() != forced.len() { return Err(SceneError::InvalidPayload); }
+                    for (forced, id) in forced.iter_mut().zip(ids) { forced.2 = id; }
+                }
+                let (next_map, _) = build_mapping(&scene, &next, &sha256(&next), Some(&mapping), &forced,
+                    Some((&loaded.project, &loaded.authoring)))?;
+                bytes = next;
+                mapping = next_map;
+            }
+            *loaded.source_map.scene_mappings.iter_mut().find(|m| m.scene_id == scene_id)
+                .ok_or(SceneError::InvalidMetadata)? = mapping;
+            mutations.push(replace_mutation(&scene.source_path, original, revision, bytes)?);
+            mutations.push(replace_mutation(SOURCE_MAP_PATH, loaded.source_map_bytes,
+                loaded.source_map_revision, json_bytes(&loaded.source_map)?)?);
+        }
+        let mut paths = std::collections::BTreeSet::new();
+        if mutations.is_empty() || mutations.iter().any(|m| !paths.insert(m.path.as_str())) {
+            return Err(SceneError::InvalidPayload);
+        }
+        Ok(TransactionProposal { mutations, intent: TransactionIntent::Edit })
+    }
+
     /// Static creation candidate: no directory/source/metadata writes during review.
     pub(crate) fn prepare_draft_scene(
         &self,

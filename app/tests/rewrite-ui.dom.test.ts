@@ -71,3 +71,24 @@ test("lore action reviews passive metadata and saves one proposed revision witho
  try{await tick();enter("draftSceneTitle","Bec");enter("rewriteTask","Draft notes");button("Review complete send").click();await tick();const context=calls.find(x=>x.operation==="rewrite.prepare")!.payload.context as Record<string,unknown>;assert.equal(context.action,"generateLore");assert.equal(context.loreId,"");assert.deepEqual(context.loreScope,{type:"scenes",sceneIds:["s"]});assert.equal(context.expectedPromptRevision,"lore-prompt");button("Generate proposal").click();await tick();assert.equal(document.querySelector("img,script"),null);assert.match(document.querySelector(".rewrite-result")!.textContent!,/Current approved text stays available/);assert.match(document.querySelector(".rewrite-result")!.textContent!,/Exact metadata changes/);button("Save proposed lore entry").click();button("Save proposed lore entry").click();await tick();assert.equal(calls.filter(x=>x.operation==="rewrite.accept").length,1);assert.equal(calls.some(x=>x.operation==="references.apply"),false);
  }finally{c.dispose();await w.happyDOM.close();}
 });
+
+test("selectable review binds permissions and refreshed subset, refuses missing dependency and consumes once",async()=>{
+ const w=setup();const calls:{operation:CoreOperation;payload:Record<string,unknown>}[]=[];let saved=0;
+ const batchOptions={...options,editPrompt:{revision:"edit-prompt"},anchors:[{sceneId:"s",beatId:"end",sourceRevision:"source",label:"Before Return"}],characters:[{id:"speaker",displayName:"Bec",technicalName:"bec",dialogueColor:"#ffffff"}]};
+ const ops=[{id:"text",type:"replace",beatId:"b",segments:[{literal:"<script>data</script>"}],beforeSegments:[{literal:"Old"}],protected:[],dependencies:[]},{id:"character",type:"character",displayName:"New",dialogueColor:"#aabbcc",dependencies:[]},{id:"group",type:"insert",beats:[{type:"dialogue",characterId:"proposedCharacter",text:"Hello"}],dependencies:["character"]}];
+ const batchReview={...review,operations:ops,selectedIds:["text","character","group"],valid:true,missingDependencies:[]};
+ const c=mountRewrite(document.body,"s","b",adapter(calls,(op,p)=>{
+  if(op==="context.options")return batchOptions;
+  if(op==="rewrite.send")return {requestId:"r",done:true,state:"completed",proposal:batchReview};
+  if(op==="rewrite.select"){const ids=p.selectedIds as string[],valid=ids.length>0&&(!ids.includes("group")||ids.includes("character"));return {...batchReview,selectedIds:ids,valid,previewDigest:JSON.stringify(ids),patches:valid?review.patches:[],missingDependencies:valid?[]:[{operationId:"group",requires:"character"}]};}
+  if(op==="rewrite.accept"){saved++;return {};}
+  return base(op);
+ }),"editScene");
+ try{
+  await tick();enter("rewriteTask","Edit");enter("batchAnchor","end");const choice=document.querySelector<HTMLSelectElement>('[name="batchCharacter"]')!;choice.value="create";choice.dispatchEvent(new Event("change"));enter("batchTechnicalName","new_speaker");button("Review complete send").click();await tick();
+  const context=calls.find(c=>c.operation==="rewrite.prepare")!.payload.context as Record<string,unknown>;assert.equal(context.action,"editScene");assert.deepEqual(context.batch,{replacementIds:["b"],insertionAnchor:"end",speakerIds:[],character:{type:"create",technicalName:"new_speaker"}});
+  button("Generate proposal").click();await tick();const select=(id:string)=>{const c=document.querySelector<HTMLInputElement>(`[data-operation-id="${id}"]`)!;c.checked=!c.checked;c.dispatchEvent(new Event("change"));};
+  select("character");assert(button("Save selected changes").disabled);await tick();assert(button("Save selected changes").disabled);assert.match(document.querySelector(".rewrite-result")!.textContent!,/group requires character/);assert.equal(document.querySelector<HTMLInputElement>('[data-operation-id="character"]')!.checked,false);
+  select("group");await tick();assert.equal(button("Save selected changes").disabled,false);button("Save selected changes").click();button("Save selected changes").click();await tick();assert.equal(saved,1);assert.deepEqual(calls.find(c=>c.operation==="rewrite.accept")!.payload,{proposalId:review.proposalId,previewDigest:'["text"]',selectedIds:["text"]});assert(button("Save selected changes").disabled);assert([...document.querySelectorAll<HTMLInputElement>("[data-operation-id]")].every(c=>c.disabled));assert.equal(document.querySelector("script"),null);assert.equal(c.hasWork(),false);
+ }finally{c.dispose();await w.happyDOM.close();}
+});

@@ -77,6 +77,7 @@ pub const OPERATIONS: &[&str] = &[
     "rewrite.prepare",
     "rewrite.send",
     "rewrite.accept",
+    "rewrite.select",
     "rewrite.discard",
     "references.list",
     "references.apply",
@@ -538,6 +539,9 @@ pub fn handle_application_request(
         "rewrite.prepare" => session_payload(validated.payload)
             .and_then(|(session,payload)|serde_json::from_value::<rewrite::PrepareRequest>(Value::Object(payload)).map(|r|(session,r)).map_err(|_|LifecycleError::Rewrite(rewrite::RewriteError::Invalid)))
             .and_then(|(session,r)|lifecycle.rewrite_prepare(&session,r)),
+        "rewrite.select" => session_payload(validated.payload)
+            .and_then(|(session,payload)|serde_json::from_value::<rewrite::SelectionRequest>(Value::Object(payload)).map(|r|(session,r)).map_err(|_|LifecycleError::Rewrite(rewrite::RewriteError::Invalid)))
+            .and_then(|(session,r)|lifecycle.rewrite_select(&session,r)),
         "rewrite.accept" => session_payload(validated.payload)
             .and_then(|(session,payload)|serde_json::from_value::<rewrite::AcceptRequest>(Value::Object(payload)).map(|r|(session,r)).map_err(|_|LifecycleError::Rewrite(rewrite::RewriteError::Invalid)))
             .and_then(|(session,r)|lifecycle.rewrite_accept(&session,r)),

@@ -109,6 +109,16 @@ changing what a Scene beat references. Scene beats reference the appearance vari
 (or an appearance selection), not a raw filename. Asset IDs remain stable if an asset
 path is reorganised through a supported transaction.
 
+Model-authored runnable Character create/update retains the author-visible raw
+`displayName` and uses `source.literalDisplayName:true` in the existing extensible
+SourceDefinition. This core-owned marker selects canonical literal encoding in the
+statement: JSON string quoting plus doubled opening square/curly delimiters prevents
+interpolation and text tags. Validation derives the exact statement from this marker,
+name and colour. Ordinary subsequent Character updates preserve literal mode. Existing
+unmarked manual definitions retain their prior canonical representation. Unknown
+source/Character extensions, default Appearance and technical identifier survive.
+The marker does not grant executable source authority to a response or renderer.
+
 The Phase 1 Character surface exposes technical variable, display name, dialogue
 colour, default appearance, and an `Appearances` list. Adding an appearance imports/
 copies an image into the project and assigns an expression name; filename inference may

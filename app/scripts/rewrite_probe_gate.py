@@ -41,14 +41,26 @@ CARD_CHECKS={1:{
 },2:{'Process reopen retains approved card and exact revision','Process reopen retains custom prompt','Process reopen retains native credential readability'}}
 LORE_CHECKS={phase:{name.replace('Card fields','Lore fields').replace('Core card','Core lore').replace('approved card','approved lore entry') for name in checks} for phase,checks in CARD_CHECKS.items()}
 LORE_CHECKS[1].add('Physical Close after successful save dismisses retained review without changing saved metadata')
-def validate_report(report,phase,continuing=False,drafting=False,card=False,lore=False):
+SELECTABLE_CHECKS={1:{
+ 'Preparation writes nothing','Targets speakers and Character permission bound before Send',
+ 'Native light send layout observed','Native dark send layout observed','Native compact send layout observed',
+ 'Physical Generate produces inert selectable review','Native keyboard selection exposes dependency and disables Save',
+ 'Independent text subset previews without Character','Restored selection retains stable IDs and exact preview',
+ 'Physical Save consumes one selected transaction','Exact selected files committed',
+ 'One Undo restores source and metadata','One Redo restores selected source and metadata',
+ 'Supported Character update shares the selected transaction','Malformed batch writes nothing',
+ 'Unselected target batch writes nothing','Cancelled batch writes nothing',
+ 'Stale source refuses selected Save with zero writes','Project reopen retains selected source and Character update',
+},2:{'Process reopen retains selected source and Character update','Process reopen retains native credential readability'}}
+def validate_report(report,phase,continuing=False,drafting=False,card=False,lore=False,batch=False):
  if not isinstance(report,dict) or report.get('case')!='dialogue-rewrite' or report.get('passed') is not True or report.get('cleanupComplete') is not True:raise ValueError('Missing successful cleaned rewrite report')
  d=report.get('details',{})
+ if batch and d.get('action')!='editScene':raise ValueError('Selectable action evidence required')
  if lore and d.get('action')!='generateLore':raise ValueError('Generated lore action evidence required')
  if card and d.get('action')!='generateCard':raise ValueError('Generated card action evidence required')
  if drafting and d.get('action')!='draftScene':raise ValueError('Draft Scene action evidence required')
  if continuing and d.get('action')!='continueScene':raise ValueError('Continue Scene action evidence required')
- if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not (LORE_CHECKS if lore else CARD_CHECKS if card else DRAFT_CHECKS if drafting else CONTINUE_CHECKS if continuing else PHASE_CHECKS)[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
+ if d.get('stage')!='complete' or d.get('passed') is not True or not isinstance(d.get('checks'),list) or not (SELECTABLE_CHECKS if batch else LORE_CHECKS if lore else CARD_CHECKS if card else DRAFT_CHECKS if drafting else CONTINUE_CHECKS if continuing else PHASE_CHECKS)[phase].issubset(set(d['checks'])):raise ValueError('Required rewrite results missing; partial/zero cannot pass')
  if phase==1:
   hashes=d.get('reviewedBodyDigests')
-  if not isinstance(hashes,list) or len(hashes)!=5 or any(not isinstance(v,str) or len(v)!=64 for v in hashes):raise ValueError('Five exact reviewed body digests required')
+  if not isinstance(hashes,list) or len(hashes)!=(6 if batch else 5) or any(not isinstance(v,str) or len(v)!=64 for v in hashes):raise ValueError('Every exact reviewed body digest required')

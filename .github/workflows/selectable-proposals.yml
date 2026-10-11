@@ -1,0 +1,77 @@
+name: Selectable proposal editing qualification
+on:
+  workflow_dispatch:
+    inputs:
+      windows_build_ordinal:
+        description: Cumulative Windows package attempt, 1 through 4
+        type: string
+        default: '1'
+      windows_first_launch_ordinal:
+        description: Cumulative Windows first of two editor starts, 1 through 7
+        type: string
+        default: '1'
+      dispatch_ordinal:
+        description: Cumulative paired dispatch, 1 through 4
+        type: string
+        default: '1'
+permissions:
+  contents: read
+concurrency:
+  group: selectable-proposals-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  focused:
+    name: Selectable proposals — ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: Windows x64
+            runner: windows-2025
+          - target: macOS ARM64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    env:
+      CARGO_TERM_COLOR: never
+      PYTHONUTF8: '1'
+      BUILD_ORDINAL: ${{ inputs.windows_build_ordinal }}
+      FIRST_LAUNCH_ORDINAL: ${{ inputs.windows_first_launch_ordinal }}
+      DISPATCH_ORDINAL: ${{ inputs.dispatch_ordinal }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require approved branch and fresh bounded run
+        shell: bash
+        run: python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=7; assert 1<=int(os.environ['DISPATCH_ORDINAL'])<=4"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Select pinned npm and install locked dependencies
+        working-directory: app
+        shell: bash
+        run: |
+          npm install --global npm@11.9.0
+          npm ci --ignore-scripts
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: selectable-proposals-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Fetch official pinned SDK and published checksums
+        shell: bash
+        run: |
+          curl --fail --location --max-time 300 --output "$RUNNER_TEMP/selectable-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          curl --fail --location --max-time 300 --output "$RUNNER_TEMP/selectable-sdk.tar.bz2" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+      - name: Run focused portable and changed native qualification
+        shell: bash
+        run: python app/scripts/qualify-selectable.py --output "$RUNNER_TEMP/selectable-${{ runner.os }}" --archive "$RUNNER_TEMP/selectable-sdk.tar.bz2" --checksums "$RUNNER_TEMP/selectable-checksums.txt"
+      - name: Retain exact evidence and failure logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: selectable-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/selectable-${{ runner.os }}/
+          if-no-files-found: error
+          retention-days: 7

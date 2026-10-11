@@ -339,3 +339,42 @@ approval/inclusion, including supporting staleness behind an unchanged approved 
 Shared Undo/Redo and reopen retain exact metadata. Runnable source is byte-exact.
 No keyword/recursive injection, embeddings, runtime inference or automatic inclusion.
 Qualification state and allowances belong to the [selected task](tasks/active/phase-2-initial-llm-assistance.md#generated-lorebook-entries-selection--2026-10-11).
+
+
+## Selectable Scene edits
+
+**Assist · Edit Scene** uses `editScene` for one existing saved Scene. Before Send,
+select root dialogue/narration replacement targets, optionally enable one supported
+insertion anchor, select permitted existing speakers, and separately permit either a
+new runnable Character or one exact existing Character update. The author supplies
+the new technical name; it is checked against saved source declarations and metadata.
+Core preflights supported owned definitions and every saved Scene mapping so a new
+speaker cannot reinterpret custom source. IDs, definition paths and inserted Beat IDs
+belong to core. The action baseline is `app/src-core/prompts/v1/edit-scene.txt`, version1,
+with existing override/restore/history behavior. Settings context preview directs the
+author to Story to bind these permissions.
+
+The closed response is `schemaVersion:1`, `action:"editScene"`, exact `sceneId`, and
+1–8 `operations`: selected `replace` operations contain exact Beat IDs and token/literal
+segments; one optional `insert` operation contains the exact anchor and 1–8 inseparable
+dialogue/narration Beats; one optional `character` operation supplies displayName and
+dialogueColor only. Each operation has a distinct response-local ID. Existing inserted
+speakers must be permitted; `proposedCharacter` binds only to the explicitly enabled
+new Character. No technical renames, paths, source, assets, card/lore changes or terminal
+edits are accepted. Duplicate/wrong/unselected targets, unknown fields, missing new
+Character, unsupported source and aggregate generated prose above10000 UTF-8 bytes
+refuse the entire response. Character names and generated Beat prose use literal
+Ren’Py encoding; existing replacement tokens retain their source spelling and order.
+
+Review selects operations, never individual patch lines. New-Character dialogue depends
+on the Character operation. Missing dependencies or an empty selection disable Save
+without silently adding another operation. `rewrite.select` rebuilds a fresh core
+semantic/file preview and digest, retaining allocated IDs. `rewrite.accept` binds
+proposalId, selectedIds and previewDigest, checks every captured source/metadata/
+prompt/reference/profile/session/draft revision, and consumes one proposal into one
+journalled transaction/history entry. Same-file replacements and insertion are composed
+in memory; Character source/authoring metadata and Scene source/map share the commit.
+One Undo/Redo covers the selected result. Unselected suggestions become read-only;
+further changes require a freshly prepared proposal. No preview executes project code.
+Qualification and remaining acceptance belong to the
+[selected task](tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11).

@@ -1,9 +1,10 @@
 param(
-    [ValidateSet('preflight','observe-light','observe-dark','observe-narrow','physical-send','physical-accept','physical-close','physical-approve')]
+    [ValidateSet('preflight','observe-light','observe-dark','observe-narrow','physical-send','physical-accept','physical-select','physical-close','physical-approve')]
     [string]$Stage,
     [Parameter(Mandatory=$true)][string]$Output,
     [int]$ProcessId = 0,
     [string]$Executable,
+    [switch]$SelectableEdits,
     [switch]$ContinueScene,
     [switch]$DraftScene,
     [switch]$GenerateLore,
@@ -19,7 +20,8 @@ using System.Runtime.InteropServices;
 public static class RewriteNative {
     [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left,Top,Right,Bottom; }
     [StructLayout(LayoutKind.Sequential)] public struct MOUSEINPUT { public int dx,dy; public uint mouseData,dwFlags,time; public IntPtr dwExtraInfo; }
-    [StructLayout(LayoutKind.Explicit)] public struct UNION { [FieldOffset(0)] public MOUSEINPUT mouse; }
+    [StructLayout(LayoutKind.Sequential)] public struct KEYINPUT { public ushort vk,scan; public uint flags,time; public IntPtr extra; }
+    [StructLayout(LayoutKind.Explicit)] public struct UNION { [FieldOffset(0)] public MOUSEINPUT mouse; [FieldOffset(0)] public KEYINPUT key; }
     [StructLayout(LayoutKind.Sequential)] public struct INPUT { public uint type; public UNION data; }
     [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
     [DllImport("user32.dll")] public static extern IntPtr OpenInputDesktop(uint flags,bool inherit,uint access);
@@ -38,6 +40,11 @@ public static class RewriteNative {
         var input=new INPUT[2]; input[0].data.mouse.dwFlags=2; input[1].data.mouse.dwFlags=4;
         return SendInput(2,input,Marshal.SizeOf(typeof(INPUT)))==2;
     }
+    public static bool Space() {
+        var input=new INPUT[2]; input[0].type=1; input[0].data.key.vk=0x20;
+        input[1].type=1; input[1].data.key.vk=0x20; input[1].data.key.flags=2;
+        return SendInput(2,input,Marshal.SizeOf(typeof(INPUT)))==2;
+    }
     public static string HashFile(string path) {
         using (var stream=System.IO.File.OpenRead(path))
         using (var hash=System.Security.Cryptography.SHA256.Create()) {
@@ -49,10 +56,10 @@ public static class RewriteNative {
 [void][RewriteNative]::SetProcessDPIAware()
 New-Item -ItemType Directory -Path $Output -Force | Out-Null
 $approveName=if($GenerateLore){'Approve this lore revision'}else{'Approve this card revision'}
-$acceptName=if($GenerateLore){'Save proposed lore entry'}elseif($GenerateCard){'Save proposed card'}elseif($DraftScene){'Accept Scene'}elseif($ContinueScene){'Accept Beat group'}else{'Accept 1 change'}
-$actionTitle=if($GenerateLore){'Draft lore entry'}elseif($GenerateCard){'Draft Character card'}elseif($DraftScene){'Draft Scene'}elseif($ContinueScene){'Continue Scene'}else{'Rewrite dialogue'}
+$acceptName=if($SelectableEdits){'Save selected changes'}elseif($GenerateLore){'Save proposed lore entry'}elseif($GenerateCard){'Save proposed card'}elseif($DraftScene){'Accept Scene'}elseif($ContinueScene){'Accept Beat group'}else{'Accept 1 change'}
+$actionTitle=if($SelectableEdits){'Edit Scene'}elseif($GenerateLore){'Draft lore entry'}elseif($GenerateCard){'Draft Character card'}elseif($DraftScene){'Draft Scene'}elseif($ContinueScene){'Continue Scene'}else{'Rewrite dialogue'}
 $receipt = [ordered]@{
-    action=if($GenerateLore){'generateLore'}elseif($GenerateCard){'generateCard'}elseif($DraftScene){'draftScene'}elseif($ContinueScene){'continueScene'}else{'rewriteDialogue'};
+    action=if($SelectableEdits){'editScene'}elseif($GenerateLore){'generateLore'}elseif($GenerateCard){'generateCard'}elseif($DraftScene){'draftScene'}elseif($ContinueScene){'continueScene'}else{'rewriteDialogue'};
     stage=$Stage; passed=$false; processId=$ProcessId; executableSHA256=$null
     inputDesktop=$null; layer='Windows UI Automation observation and OS SendInput; automated, not human acceptance'
     checks=[ordered]@{}; captures=@(); controls=@(); uiaStaleRetries=0
@@ -217,7 +224,7 @@ try {
         Wait-Native { [RewriteNative]::GetForegroundWindow() -eq $script:handle }
         $receipt.checks.ownedWindow=$true
         Ensure-ObservableWindow
-        $controlName=if($Stage -eq 'physical-close'){'Close Assist'}elseif($Stage -eq 'physical-approve'){$approveName}elseif($Stage -eq 'physical-accept') { $acceptName } else {'Generate proposal'}
+        $controlName=if($Stage -eq 'physical-select'){'Save selected changes'}elseif($Stage -eq 'physical-close'){'Close Assist'}elseif($Stage -eq 'physical-approve'){$approveName}elseif($Stage -eq 'physical-accept') { $acceptName } else {'Generate proposal'}
         Wait-Native { $null -ne (Button $controlName) }
         Focus-Control (Button $controlName)
         if($Stage -eq 'physical-approve'){Assert-Native ((Has-Text 'Current approved text') -and (Has-Text 'Proposed text') -and $null -ne (Button $approveName)) 'Required native approval review missing'}else{Assert-Native ((Has-Text $actionTitle) -and $null -ne (Button 'Generate proposal') -and $null -ne (Button $acceptName)) 'Required native rewrite controls missing'}
@@ -234,11 +241,23 @@ try {
             Assert-Native (($before.width*96/$dpi) -le 800) 'Compact native width not observed'; $receipt.checks.compactWidth=$true
         } elseif($Stage -eq 'physical-send') {
             Click-Control 'Generate proposal'
-            Wait-Native { (Has-Text $(if($GenerateCard -or $GenerateLore){'Proposal received. Nothing saved or approved.'}else{'Proposal received. No source changed.'})) -and (Has-ButtonState $acceptName $true) }
+            Wait-Native { (Has-Text $(if($SelectableEdits){'Nothing saved. Review the exact selected changes'}elseif($GenerateCard -or $GenerateLore){'Proposal received. Nothing saved or approved.'}else{'Proposal received. No source changed.'})) -and (Has-ButtonState $acceptName $true) }
             $receipt.checks.inertProposalObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
+        } elseif($Stage -eq 'physical-select') {
+            $condition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty,'Select Character change')
+            $control=$script:window.FindFirst([System.Windows.Automation.TreeScope]::Descendants,$condition)
+            Focus-Control $control
+            Assert-Native ([RewriteNative]::GetForegroundWindow() -eq $script:handle) 'Owned window lost foreground'
+            Assert-Native ([RewriteNative]::Space()) 'OS keyboard input failed'
+            $receipt.checks.osKeyboardInput=$true
+            Wait-Native { (Has-Text 'group requires character') -and (Has-ButtonState $acceptName $false) }
+            $receipt.checks.dependencyRefusalObserved=$true
+            Wait-Native { [System.Windows.Automation.AutomationElement]::FocusedElement.Current.Name -eq 'Select Character change' }
+            $receipt.checks.selectionFocusRetained=$true
+            $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         } elseif($Stage -eq 'physical-accept') {
-            if($GenerateCard -or $GenerateLore){Assert-Native ((Has-Text 'Exact metadata changes') -and (Has-Text 'Unescaped [str(7)] {a=jump:label}')) 'Exact native card metadata review missing'}else{Assert-Native ((Has-Text 'Exact Source changes') -and (Has-Text 'New [[str(7)] {{a=jump:label}')) 'Exact native source review missing'}
+            if($SelectableEdits){Assert-Native ((Has-Text 'Exact Source changes') -and (Has-Text 'Selectable')) 'Exact selected source review missing'}elseif($GenerateCard -or $GenerateLore){Assert-Native ((Has-Text 'Exact metadata changes') -and (Has-Text 'Unescaped [str(7)] {a=jump:label}')) 'Exact native card metadata review missing'}else{Assert-Native ((Has-Text 'Exact Source changes') -and (Has-Text 'New [[str(7)] {{a=jump:label}')) 'Exact native source review missing'}
             Click-Control $acceptName
             Wait-Native { (Has-Text $(if($GenerateLore){'Proposed lore entry saved as one change.'}elseif($GenerateCard){'Proposed card saved as one change.'}else{'Accepted and saved as one change.'})) -and (Has-ButtonState $acceptName $false) }
             $receipt.checks.savedOnceObserved=$true

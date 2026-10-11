@@ -1218,3 +1218,23 @@ proposed form requires separate **Approve this lore revision** or **Reject propo
 lore entry**. Stale supporting material disables approval and inclusion; missing
 ordinary links remain visible. Save and review decisions use shared Undo/Redo and
 survive project/process reopen. Settings provides the Lorebook entry action prompt.
+
+
+### Selectable Scene proposal review
+
+**Assist · Edit Scene** lets the author bind selected saved text targets, insertion
+anchor, permitted speakers and optional runnable Character change before reviewing
+the complete send. New technical name is author-entered; existing Character updates
+allow only display name and dialogue colour. Review presents each text replacement,
+one inseparable insertion group and the separate Character change with dependencies,
+followed by expandable exact source/metadata patches.
+
+Operation checkboxes use native keyboard focus. Every selection change refreshes the
+core preview; Save waits while it is being prepared. Excluding a required Character
+explains the missing dependency and disables **Save selected changes**. No operation
+is silently added. Empty selection also disables Save. One successful Save consumes
+the proposal, freezes every remaining suggestion and leaves shared Undo available.
+A fresh preparation is required for another save. Prompt/task/permission changes,
+staleness, cancellation and refusals retain the author’s input and ordinary guards.
+Native/platform proof is tracked in the selected task; UI availability alone does not
+establish full Phase2 or human acceptance.

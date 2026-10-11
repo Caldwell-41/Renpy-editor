@@ -7,11 +7,11 @@ from pathlib import Path
 from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from rewrite_probe_gate import validate_report
 from rewrite_native_evidence import NATIVE_STAGES,validate_native_stage,required_stages
-p=argparse.ArgumentParser();p.add_argument('--generate-lore',action='store_true');p.add_argument('--generate-card',action='store_true');p.add_argument('--continue-scene',action='store_true');p.add_argument('--draft-scene',action='store_true');p.add_argument('--executable',type=Path,required=True);p.add_argument('--root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--phase',type=int,choices=(1,2),required=True);p.add_argument('--native-driver',type=Path);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--selectable-edits',action='store_true');p.add_argument('--generate-lore',action='store_true');p.add_argument('--generate-card',action='store_true');p.add_argument('--continue-scene',action='store_true');p.add_argument('--draft-scene',action='store_true');p.add_argument('--executable',type=Path,required=True);p.add_argument('--root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--phase',type=int,choices=(1,2),required=True);p.add_argument('--native-driver',type=Path);a=p.parse_args()
 if a.native_driver and (os.name!='nt' or not a.native_driver.is_file()):raise SystemExit('Windows native driver required')
 if not a.executable.is_file() or not a.root.name.startswith('loomlight-rewrite-'):raise SystemExit('Owned executable/root required')
 if a.phase==1 and a.root.exists():raise SystemExit('Fresh fixture required')
-if a.phase==2:validate_report(json.loads((a.output/'phase-1.json').read_text()),1,a.continue_scene,a.draft_scene,a.generate_card,a.generate_lore)
+if a.phase==2:validate_report(json.loads((a.output/'phase-1.json').read_text()),1,a.continue_scene,a.draft_scene,a.generate_card,a.generate_lore,a.selectable_edits)
 a.output.mkdir(parents=True,exist_ok=True);logpath=a.output/f'phase-{a.phase}.log'
 if logpath.exists():raise SystemExit('Fresh log required; no replay')
 root=a.root/'synthetic-project';editor=root/'.renpy-editor'
@@ -29,7 +29,17 @@ class Handler(BaseHTTPRequestHandler):
    if not 0<size<=2*1024*1024:raise ValueError('Fixture body bound')
    body=self.rfile.read(size);v=json.loads(body);u=json.loads(v['messages'][1]['content']);task=u['task']
    if v['model']!='synthetic-rewrite-model' or v['response_format']['json_schema']['strict'] is not True or v['enable_tools'] is not False or v['enabled_tools']!=[] or v['stream'] is not False or len(u['references'])!=2:raise ValueError('Fixture contract mismatch')
-   if a.generate_lore:
+   if a.selectable_edits:
+    if u['responseContract']['action']!='editScene':raise ValueError('Selectable contract mismatch')
+    permissions=u['story']['batch']['permissions'];operations=[]
+    for i,target in enumerate(u['story']['batch']['targets']):
+     segments=target['segments'];segments[0]={'literal':f'Selectable {i} [str(7)] café 雪 '};operations.append({'type':'replace','id':f'text{i}','beatId':target['beatId'],'segments':segments})
+    create=permissions['character']['type']=='create'
+    operations.append({'type':'character','id':'character','displayName':'Selectable New' if create else 'Selectable Updated','dialogueColor':'#aabbcc'})
+    operations.append({'type':'insert','id':'group','beforeBeatId':permissions['insertionAnchor'],'beats':[{'type':'dialogue','characterId':'proposedCharacter' if create else permissions['speakerIds'][0],'text':'Selectable insertion [str(7)] {b}literal{/b} 雪'},{'type':'narration','text':'Selectable group narration'}]})
+    if task=='FIXTURE_UNSAFE':operations[0]['beatId']='unselected'
+    text=json.dumps({'schemaVersion':1,'action':'editScene','sceneId':u['story']['sceneId'],'operations':operations},ensure_ascii=False)
+   elif a.generate_lore:
     if u['responseContract']['action']!='generateLore':raise ValueError('Lore contract mismatch')
     result={'schemaVersion':1,'action':'generateLore','target':{'recordId':u['story']['loreTarget']['recordId'],'title':u['story']['loreTarget']['title']},'fields':{'tags':['Generated'],'text':'Unescaped [str(7)] {a=jump:label} café 雪 <img onerror=alert(1)>','category':'World rule','subject':'Tram','knowledgeNotes':'Author intent; runtime unknown.'}}
     if task=='FIXTURE_UNSAFE':result['approved']=True
@@ -66,7 +76,7 @@ class Handler(BaseHTTPRequestHandler):
 server=ThreadingHTTPServer(('127.0.0.1',0),Handler);server.daemon_threads=True
 thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
 endpoint=f'http://127.0.0.1:{server.server_address[1]}/v1'
-env=dict(os.environ,LOOMLIGHT_RUNTIME_UI_PROBE='dialogue-rewrite',LOOMLIGHT_REWRITE_PROBE_ROOT=str(a.root),LOOMLIGHT_REWRITE_PROBE_PHASE=str(a.phase),LOOMLIGHT_REWRITE_PROBE_ENDPOINT=endpoint,TMPDIR=str(a.root.parent),LOOMLIGHT_CONTINUE_SCENE='1' if a.continue_scene else '0',LOOMLIGHT_DRAFT_SCENE='1' if a.draft_scene else '0',LOOMLIGHT_GENERATE_LORE='1' if a.generate_lore else '0',LOOMLIGHT_GENERATE_CARD='1' if a.generate_card else '0')
+env=dict(os.environ,LOOMLIGHT_RUNTIME_UI_PROBE='dialogue-rewrite',LOOMLIGHT_REWRITE_PROBE_ROOT=str(a.root),LOOMLIGHT_REWRITE_PROBE_PHASE=str(a.phase),LOOMLIGHT_REWRITE_PROBE_ENDPOINT=endpoint,TMPDIR=str(a.root.parent),LOOMLIGHT_SELECTABLE_EDITS='1' if a.selectable_edits else '0',LOOMLIGHT_CONTINUE_SCENE='1' if a.continue_scene else '0',LOOMLIGHT_DRAFT_SCENE='1' if a.draft_scene else '0',LOOMLIGHT_GENERATE_LORE='1' if a.generate_lore else '0',LOOMLIGHT_GENERATE_CARD='1' if a.generate_card else '0')
 process=subprocess.Popen([str(a.executable.resolve())],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,start_new_session=True)
 executable_digest=hashlib.sha256(a.executable.read_bytes()).hexdigest()
 print(json.dumps({'evidence':'rewrite-launch','phase':a.phase,'pid':process.pid,'executableSHA256':executable_digest}),flush=True)
@@ -78,13 +88,13 @@ try:
    try:item=json.loads(line)
    except ValueError:continue
    print(json.dumps(item),flush=True)
-   if a.native_driver and item.get('evidence')=='rewrite-stage' and item.get('stage') in required_stages(a.generate_card, a.generate_lore):
+   if a.native_driver and item.get('evidence')=='rewrite-stage' and item.get('stage') in required_stages(a.generate_card, a.generate_lore, a.selectable_edits):
     stage=item['stage'];native=a.output/'native';native.mkdir(exist_ok=True)
     try:
-     result=subprocess.run(['powershell.exe','-NoProfile','-File',str(a.native_driver.resolve()),'-ProcessId',str(process.pid),'-Executable',str(a.executable.resolve()),'-Stage',stage,'-Output',str(native.resolve()),*(['-GenerateLore'] if a.generate_lore else ['-GenerateCard'] if a.generate_card else ['-DraftScene'] if a.draft_scene else ['-ContinueScene'] if a.continue_scene else [])],capture_output=True,text=True,timeout=75)
+     result=subprocess.run(['powershell.exe','-NoProfile','-File',str(a.native_driver.resolve()),'-ProcessId',str(process.pid),'-Executable',str(a.executable.resolve()),'-Stage',stage,'-Output',str(native.resolve()),*(['-SelectableEdits'] if a.selectable_edits else ['-GenerateLore'] if a.generate_lore else ['-GenerateCard'] if a.generate_card else ['-DraftScene'] if a.draft_scene else ['-ContinueScene'] if a.continue_scene else [])],capture_output=True,text=True,timeout=75)
      (native/f'{stage}.log').write_text(result.stdout+result.stderr,encoding='utf-8')
      if result.returncode:raise ValueError('Native driver failed')
-     native_receipts.append(validate_native_stage(native,stage,process.pid,executable_digest,a.continue_scene,a.draft_scene,a.generate_card,a.generate_lore))
+     native_receipts.append(validate_native_stage(native,stage,process.pid,executable_digest,a.continue_scene,a.draft_scene,a.generate_card,a.generate_lore,a.selectable_edits))
      # Only the evidence validator can acknowledge a CI-driven native stage.
      (a.root/f'{stage}.done').touch()
     except Exception as e:
@@ -101,9 +111,9 @@ try:
  # Preserve a terminal report even when the required gate rejects it.
  if report:(a.output/f'phase-{a.phase}.json').write_text(json.dumps(report,indent=2)+'\n')
  if code or not report:raise ValueError('Required packaged proof failed; diagnose before retry')
- validate_report(report,a.phase,a.continue_scene,a.draft_scene,a.generate_card,a.generate_lore)
+ validate_report(report,a.phase,a.continue_scene,a.draft_scene,a.generate_card,a.generate_lore,a.selectable_edits)
  if errors:raise ValueError('Controlled fixture or required native evidence failed: '+', '.join(errors))
- if a.native_driver and a.phase==1 and {r['stage'] for r in native_receipts}!=required_stages(a.generate_card, a.generate_lore):raise ValueError('Every native driver stage is required')
+ if a.native_driver and a.phase==1 and {r['stage'] for r in native_receipts}!=required_stages(a.generate_card, a.generate_lore, a.selectable_edits):raise ValueError('Every native driver stage is required')
  if a.phase==1 and requests!=report['details']['reviewedBodyDigests']:raise ValueError('Exact reviewed bodies do not match all five HTTP requests')
  if a.phase==2 and (requests or project_bytes()!=before):raise ValueError('Process reopen sent HTTP or changed project bytes')
  report['requestBodySHA256']=requests;report['elapsedSeconds']=round(time.monotonic()-started,2);report['metadataSHA256']={f:hashlib.sha256((editor/f).read_bytes()).hexdigest() for f in owned_files}

@@ -612,7 +612,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
           inputState:()=>({generation:authorInputGeneration,blocked:hasSceneDraft(root)||hasUnsubmittedInput()}),
           call:async <T>(operation:Parameters<typeof desktopRequestCore>[0],payload:Record<string,unknown>={}):Promise<T>=>{
             const task=()=>operation.startsWith("ai.")?value<T>(operation,payload):projectValue<T>(project,operation,payload);
-            if(operation==="rewrite.prepare"||operation==="rewrite.send"||operation==="rewrite.accept") {
+            if(operation==="rewrite.prepare"||operation==="rewrite.send"||operation==="rewrite.accept"||operation==="rewrite.select") {
               const result=await runAuthoringOperation(project,owner,async()=>{
                 if(hasSceneDraft(root)||hasUnsubmittedInput())throw new Error("Finish or discard unsubmitted author input first. Input retained.");
                 const inputGeneration=authorInputGeneration;

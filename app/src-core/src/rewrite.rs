@@ -9,6 +9,7 @@ use crate::{
     transaction::{ProjectId, RelativePath, Revision, TransactionProposal},
 };
 use serde::Deserialize;
+pub mod batch;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
@@ -42,7 +43,12 @@ pub struct PrepareRequest {
 pub struct AcceptRequest {
     pub proposal_id: String,
     pub preview_digest: String,
+    #[serde(default)]
+    pub selected_ids: Vec<String>,
 }
+#[derive(Deserialize)]
+#[serde(rename_all="camelCase",deny_unknown_fields)]
+pub struct SelectionRequest { pub proposal_id: String, pub selected_ids: Vec<String> }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Response {
@@ -203,6 +209,7 @@ pub(crate) struct Transient {
     cancel: Option<Cancel>,
     proposal: Option<TransactionProposal>,
     review: Option<Value>,
+    batch: Option<batch::Candidate>,
 }
 pub struct SendCapture {
     pub profile: StudioProfile,
@@ -286,11 +293,12 @@ impl AuthoringService {
         if !user["story"]["owner"].is_null() || !user["story"]["conditionalBranch"].is_null() {
             return Err(RewriteError::Unsupported);
         }
+        let batch = request.context.action == batch::ACTION;
         let continuing = request.context.action == prompts::CONTINUE;
         let drafting = request.context.action == prompts::DRAFT;
         let card = request.context.action == prompts::CARD;
         let lore = request.context.action == prompts::LORE;
-        let boundary = if continuing || drafting || card || lore {
+        let boundary = if continuing || drafting || card || lore || batch {
             Boundary {
                 segments: vec![],
                 protected: vec![],
@@ -305,7 +313,9 @@ impl AuthoringService {
             )
             .map_err(|_| RewriteError::Unsupported)?
         };
-        let response_schema = if lore {
+        let response_schema = if batch {
+            batch::schema(request.context.batch.as_ref().ok_or(RewriteError::Invalid)?, &request.context.scene_id, &user["story"]["batch"]["targets"])
+        } else if lore {
             lore_schema(&request.context.lore_id, &request.context.display_name)
         } else if card {
             card_schema(&request.context.card_id, &request.context.display_name)
@@ -340,7 +350,9 @@ impl AuthoringService {
                 &boundary,
             )
         };
-        user["responseContract"] = if lore {
+        user["responseContract"] = if batch {
+            json!({"version":1,"action":batch::ACTION,"schema":response_schema,"authority":"Only reviewed permissions. 1–8 typed selectable operations; no paths, arbitrary source, tools, technical renames, Appearance or reference edits. A new speaker uses proposedCharacter and depends on the Character operation. Preserve every replacement token exactly once in order. New prose is inert literal text. Maximum 10000 aggregate UTF-8 generated text bytes including Character fields. Core owns IDs, encoding and exact subset previews."})
+        } else if lore {
             json!({"version":1,"action":prompts::LORE,"schema":response_schema,"authority":"Draft exactly one editor-only lorebook entry with the reviewed title and author-selected applicability. Save creates proposed text only; explicit approval is separate. Core owns IDs, provenance and citations. Preserve links, knowledge annotations, extensions, existing approved text and ALL runnable source. No approval, scope changes, paths, definitions, assets, cards, tools or other operations. At most 10000 total UTF-8 generated field bytes."})
         } else if card {
             json!({"version":1,"action":prompts::CARD,"schema":response_schema,"authority":"Draft exactly one editor-only Character card with the reviewed name. Accept saves a proposed revision only; approval is a separate user action. Core owns IDs, provenance and citations. Preserve existing links, scope, extensions, approved text and ALL runnable source. No approval, paths, definitions, assets, lore, tools or other operations. At most 10000 total UTF-8 generated field bytes."})
@@ -357,7 +369,7 @@ impl AuthoringService {
         if !profile.settings.valid() {
             return Err(RewriteError::Invalid);
         }
-        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if lore {"loomlight_lore_v1"}else if card {"loomlight_card_v1"}else if drafting {"loomlight_draft_scene_v1"}else if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
+        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if batch {"loomlight_edit_scene_v1"}else if lore {"loomlight_lore_v1"}else if card {"loomlight_card_v1"}else if drafting {"loomlight_draft_scene_v1"}else if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
         let margin = 256.max(body.len().div_ceil(10));
         let total = body.len() + margin + request.context.maximum_response;
         if body.len() > crate::ai_request::MAX_BODY
@@ -397,6 +409,7 @@ impl AuthoringService {
             cancel: None,
             proposal: None,
             review: None,
+            batch: None,
         };
         self.rewrite_validate(
             project,
@@ -518,6 +531,15 @@ impl AuthoringService {
         }
         let parsed = crate::ai_discovery::strict_json(completion.text.as_bytes())
             .map_err(|_| RewriteError::Invalid)?;
+        if t.context.action == batch::ACTION {
+            let candidate = batch::Candidate::parse(parsed,t)?;
+            let selected = candidate.ids();
+            let (proposal,semantic) = candidate.prepare(self,project,project_id,t,&selected)?;
+            let review = selection_review(t,proposal.as_ref(),semantic);
+            self.rewrite_validate(project,project_id,session,profile_token,t)?;
+            t.batch=Some(candidate); t.proposal=proposal; t.review=Some(review.clone()); t.phase=Phase::Review;
+            return Ok(review);
+        }
         let (proposal, semantic) = if t.context.action == prompts::LORE {
             if parsed["target"].get("recordId").is_none() { return Err(RewriteError::Invalid); }
             let response: LoreResponse = serde_json::from_value(parsed).map_err(|_|RewriteError::Invalid)?;
@@ -767,6 +789,20 @@ impl AuthoringService {
         t.proposal = Some(proposal);
         Ok(review)
     }
+    pub fn rewrite_select(&self, project: &ProjectId, project_id: &str, session: &str,
+        profile_token: &str, request: SelectionRequest) -> Result<Value, RewriteError> {
+        let mut states=self.rewrites.lock().map_err(|_|RewriteError::Unavailable)?;
+        let t=states.get_mut(project).filter(|t|t.token==request.proposal_id && t.phase==Phase::Review).ok_or(RewriteError::Stale)?;
+        // Clear the old candidate even on refusal; no stale selection can be saved.
+        t.proposal=None;
+        self.rewrite_validate(project,project_id,session,profile_token,t)?;
+        let candidate=t.batch.as_ref().ok_or(RewriteError::Invalid)?;
+        let (proposal,semantic)=candidate.prepare(self,project,project_id,t,&request.selected_ids)?;
+        let review=selection_review(t,proposal.as_ref(),semantic);
+        self.rewrite_validate(project,project_id,session,profile_token,t)?;
+        t.proposal=proposal;t.review=Some(review.clone());
+        Ok(review)
+    }
     pub fn rewrite_accept(
         &self,
         project: &ProjectId,
@@ -789,6 +825,9 @@ impl AuthoringService {
         {
             return Err(RewriteError::Stale);
         }
+        if t.batch.is_some() {
+            if t.review.as_ref().is_none_or(|r| r["valid"] != true || r["selectedIds"] != json!(request.selected_ids)) { return Err(RewriteError::Invalid); }
+        } else if !request.selected_ids.is_empty() { return Err(RewriteError::Invalid); }
         self.rewrite_validate(project, project_id, session, profile_token, t)?;
         let proposal = t.proposal.take().ok_or(RewriteError::Stale)?;
         t.phase = Phase::Consumed; // Commit ambiguity is handled by ordinary recovery, not redispatch.
@@ -825,6 +864,15 @@ impl AuthoringService {
         }
         Ok(())
     }
+}
+
+fn selection_review(t: &Transient, proposal: Option<&TransactionProposal>, mut semantic: Value) -> Value {
+    let patches:Vec<_>=proposal.into_iter().flat_map(|p| &p.mutations).map(|m|json!({"path":m.path.as_str(),"before":String::from_utf8_lossy(&m.expected_bytes),"after":String::from_utf8_lossy(&m.proposed)})).collect();
+    let digest=content_digest(&serde_json::to_vec(&json!({"semantic":semantic,"patches":patches})).unwrap());
+    semantic["proposalId"]=json!(t.token);semantic["previewDigest"]=json!(digest);
+    semantic["target"]=json!({"sceneId":t.context.scene_id,"beatId":t.context.beat_id});
+    semantic["patches"]=json!(patches);semantic["uncertainty"]=json!("Static preview only. Runtime state unknown; the project has not been executed.");
+    semantic
 }
 
 #[cfg(test)]

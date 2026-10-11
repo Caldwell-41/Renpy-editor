@@ -686,6 +686,12 @@ impl LifecycleService {
         let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
         self.authoring.rewrite_complete(&authority,&id,session,&crate::ai_credentials::token(&store),token,completion).map_err(LifecycleError::Rewrite)
     }
+    pub fn rewrite_select(&self, session: &str, request: crate::rewrite::SelectionRequest) -> Result<Value,LifecycleError> {
+        self.require_session(session)?;
+        let (authority,id)=self.authoring_context()?;
+        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring.rewrite_select(&authority,&id,session,&crate::ai_credentials::token(&store),request).map_err(LifecycleError::Rewrite)
+    }
     pub fn rewrite_accept(&self, session: &str, request: crate::rewrite::AcceptRequest) -> Result<Value,LifecycleError> {
         self.require_session(session)?;
         let (authority,id)=self.authoring_context()?;

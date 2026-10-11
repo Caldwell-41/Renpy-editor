@@ -760,3 +760,24 @@ checked for both collections and propagates through explicit reference citations
 this is eligibility validation without retrieval or context injection. Stale support
 blocks approval/inclusion. See [context](PROMPTS_CONTEXT.md#generated-lorebook-entry)
 and [focused proof](TESTING.md#generated-lorebook-entry-focused-qualification).
+
+
+### Selectable proposal composition
+
+`editScene` extends the existing transient prepared-send owner with bound core
+permissions and a validated in-memory batch candidate. Character create/update now
+have non-mutating preparation shared with ordinary manual commands; manual commands
+still commit once through the same observed transaction path. Batch composition never
+loops immediate-commit handlers. A candidate stores stable allocated IDs, revision-bound
+text boundaries and validated operations. Sequential source edits rebuild the transient
+mapping between safe range patches, producing one mutation per changed path.
+
+`rewrite.select` first clears the old commit candidate, rechecks authority/revisions,
+prepares the exact selected subset and binds semantic operations plus file bytes into
+a fresh digest. Missing dependency/empty selections have no commit proposal. Acceptance
+requires exact selected IDs and digest, consumes the candidate before shared history
+commit, and retains ordinary blocking recovery on ambiguity. Candidate Character
+metadata is tested against all saved Scene mappings before source composition; custom
+regions cannot acquire a new interpretation. See
+[PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#selectable-scene-edits) for the bounded schema and
+[TESTING](TESTING.md#selectable-proposal-editing-focused-qualification) for proof ownership.

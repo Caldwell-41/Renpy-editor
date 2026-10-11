@@ -201,6 +201,7 @@ impl AuthoringMetadata {
                     &character.technical_name,
                     &character.display_name,
                     &character.dialogue_color,
+                    character.source.extra.get("literalDisplayName") == Some(&Value::Bool(true)),
                 )?
             {
                 return Err(AuthoringError::CorruptMetadata);
@@ -592,11 +593,21 @@ impl AuthoringService {
     }
 
     pub fn create_character(
+        &self, project: &ProjectId, project_uuid: &str, request: CreateCharacterRequest,
+    ) -> Result<AuthoringMetadata, AuthoringError> {
+        let (proposal, metadata) = self.prepare_create_character(project, project_uuid, request, uuid::Uuid::new_v4().to_string(), false)?;
+        committed(self.commit_observed(project, proposal))?;
+        Ok(metadata)
+    }
+
+    pub(crate) fn prepare_create_character(
         &self,
         project: &ProjectId,
         project_uuid: &str,
         request: CreateCharacterRequest,
-    ) -> Result<AuthoringMetadata, AuthoringError> {
+        assigned_id: String,
+        literal_display: bool,
+    ) -> Result<(TransactionProposal, AuthoringMetadata), AuthoringError> {
         self.ensure_ready(project)?;
         self.ensure_source_paths_clean(project, [CHARACTERS_PATH])
             .map_err(|_| AuthoringError::DirtySource)?;
@@ -620,6 +631,7 @@ impl AuthoringService {
             &request.technical_name,
             &request.display_name,
             &request.dialogue_color,
+            literal_display,
         )?;
         let new_source = append_statement(&source_bytes, &statement);
         let new_revision = hash_bytes(&new_source);
@@ -629,7 +641,7 @@ impl AuthoringService {
             }
         }
         metadata.characters.push(Character {
-            id: uuid::Uuid::new_v4().to_string(),
+            id: assigned_id,
             technical_name: request.technical_name,
             display_name: request.display_name,
             dialogue_color: request.dialogue_color.to_ascii_lowercase(),
@@ -638,11 +650,11 @@ impl AuthoringService {
                 path: CHARACTERS_PATH.into(),
                 statement,
                 source_revision: new_revision,
-                extra: Map::new(),
+                extra: if literal_display { Map::from_iter([("literalDisplayName".into(), Value::Bool(true))]) } else { Map::new() },
             },
             extra: Map::new(),
         });
-        self.commit_source_and_metadata(
+        self.prepare_source_and_metadata(
             project,
             CHARACTERS_PATH,
             source_bytes,
@@ -654,11 +666,20 @@ impl AuthoringService {
     }
 
     pub fn update_character(
+        &self, project: &ProjectId, project_uuid: &str, request: UpdateCharacterRequest,
+    ) -> Result<AuthoringMetadata, AuthoringError> {
+        let (proposal, metadata) = self.prepare_update_character(project, project_uuid, request, false)?;
+        committed(self.commit_observed(project, proposal))?;
+        Ok(metadata)
+    }
+
+    pub(crate) fn prepare_update_character(
         &self,
         project: &ProjectId,
         project_uuid: &str,
         request: UpdateCharacterRequest,
-    ) -> Result<AuthoringMetadata, AuthoringError> {
+        literal_display: bool,
+    ) -> Result<(TransactionProposal, AuthoringMetadata), AuthoringError> {
         self.ensure_ready(project)?;
         self.ensure_source_paths_clean(project, [CHARACTERS_PATH])
             .map_err(|_| AuthoringError::DirtySource)?;
@@ -686,16 +707,19 @@ impl AuthoringService {
         )?;
         ensure_safe_append(&source_bytes)?;
         let character = &mut metadata.characters[character_index];
+        let literal_display = literal_display || character.source.extra.get("literalDisplayName") == Some(&Value::Bool(true));
         let new_statement = character_statement(
             &character.technical_name,
             &request.display_name,
             &request.dialogue_color,
+            literal_display,
         )?;
         let new_source =
             replace_exact_once(&source_bytes, &character.source.statement, &new_statement)?;
         let new_revision = hash_bytes(&new_source);
         character.display_name = request.display_name;
         character.dialogue_color = request.dialogue_color.to_ascii_lowercase();
+        if literal_display { character.source.extra.insert("literalDisplayName".into(), Value::Bool(true)); }
         character.source.statement = new_statement;
         character.source.source_revision = new_revision.clone();
         for other in &mut metadata.characters {
@@ -703,7 +727,7 @@ impl AuthoringService {
                 other.source.source_revision = new_revision.clone();
             }
         }
-        self.commit_source_and_metadata(
+        self.prepare_source_and_metadata(
             project,
             CHARACTERS_PATH,
             source_bytes,
@@ -1535,6 +1559,18 @@ impl AuthoringService {
             .map_err(|_| AuthoringError::SourceConflict)
     }
 
+    pub(crate) fn ensure_batch_symbol_available(&self, project:&ProjectId, project_id:&str, name:&str) -> Result<(),AuthoringError> {
+        for file in self.source_inventory(project,project_id).map_err(|_|AuthoringError::Io)?.files {
+            let (bytes,_)=self.snapshot(project,&file.path)?;
+            for (start,end) in lexical_ranges(&bytes,false,false)? {
+                if std::str::from_utf8(&bytes[start..end]).ok().map(|line| line.trim_start_matches('\u{feff}').trim()).and_then(top_level_symbol)==Some(name) {
+                    return Err(AuthoringError::SymbolCollision);
+                }
+            }
+        }
+        Ok(())
+    }
+
     fn ensure_source_symbol_available(
         &self,
         project: &ProjectId,
@@ -1642,6 +1678,22 @@ impl AuthoringService {
         metadata: AuthoringMetadata,
         metadata_snapshot: Option<(Vec<u8>, Revision)>,
     ) -> Result<AuthoringMetadata, AuthoringError> {
+        let (proposal, metadata) = self.prepare_source_and_metadata(project, source_path, source_bytes, source_revision, new_source, metadata, metadata_snapshot)?;
+        committed(self.commit_observed(project, proposal))?;
+        Ok(metadata)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn prepare_source_and_metadata(
+        &self,
+        _project: &ProjectId,
+        source_path: &str,
+        source_bytes: Vec<u8>,
+        source_revision: Revision,
+        new_source: Vec<u8>,
+        metadata: AuthoringMetadata,
+        metadata_snapshot: Option<(Vec<u8>, Revision)>,
+    ) -> Result<(TransactionProposal, AuthoringMetadata), AuthoringError> {
         let source = FileMutation {
             path: RelativePath::new(source_path).map_err(|_| AuthoringError::Io)?,
             kind: MutationKind::ReplaceExisting,
@@ -1656,8 +1708,7 @@ impl AuthoringService {
             ],
             intent: TransactionIntent::Edit,
         };
-        committed(self.commit_observed(project, proposal))?;
-        Ok(metadata)
+        Ok((proposal, metadata))
     }
 }
 
@@ -1792,8 +1843,11 @@ fn validate_hash(value: &str) -> Result<(), AuthoringError> {
     }
 }
 
-fn character_statement(name: &str, display: &str, color: &str) -> Result<String, AuthoringError> {
-    let display = serde_json::to_string(display).map_err(|_| AuthoringError::InvalidPayload)?;
+fn character_statement(name: &str, display: &str, color: &str, literal_display: bool) -> Result<String, AuthoringError> {
+    // Model-authored display names are text, never interpolation or text tags.
+    // Keep the author-visible spelling in metadata and encode only runnable source.
+    let literal = if literal_display { display.replace('[', "[[").replace('{', "{{") } else { display.to_owned() };
+    let display = serde_json::to_string(&literal).map_err(|_| AuthoringError::InvalidPayload)?;
     let statement = format!(
         "define {name} = Character({display}, color=\"{}\")",
         color.to_ascii_lowercase()
@@ -1876,7 +1930,11 @@ fn top_level_symbol(line: &str) -> Option<&str> {
     if !remainder.chars().next().is_some_and(char::is_whitespace) {
         return None;
     }
-    let remainder = remainder.trim_start_matches(char::is_whitespace);
+    let mut remainder = remainder.trim_start_matches(char::is_whitespace);
+    // Ren’Py accepts an optional signed init priority before a define/default name.
+    if let Some((priority, rest)) = remainder.split_once(char::is_whitespace) {
+        if priority.parse::<i32>().is_ok() { remainder = rest.trim_start_matches(char::is_whitespace); }
+    }
     let end = remainder
         .find(|character: char| !(character.is_ascii_alphanumeric() || character == '_'))
         .unwrap_or(remainder.len());

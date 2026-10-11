@@ -7,18 +7,20 @@ from pathlib import Path
 NATIVE_STAGES = {'observe-light', 'observe-dark', 'observe-narrow', 'physical-send', 'physical-accept'}
 
 
-def required_stages(card=False, lore=False):
-    return NATIVE_STAGES | ({"physical-approve"} if card or lore else set()) | ({"physical-close"} if lore else set())
+def required_stages(card=False, lore=False, batch=False):
+    return NATIVE_STAGES | ({"physical-select"} if batch else set()) | ({"physical-approve"} if card or lore else set()) | ({"physical-close"} if lore else set())
 
-def validate_native_stage(directory, stage, pid, executable_digest, continuing=False, drafting=False, card=False, lore=False):
+def validate_native_stage(directory, stage, pid, executable_digest, continuing=False, drafting=False, card=False, lore=False, batch=False):
     directory = Path(directory)
     receipt = json.loads((directory / f'{stage}.json').read_text(encoding='utf-8-sig'))
-    if stage not in required_stages(card, lore) or receipt.get('stage') != stage or receipt.get('passed') is not True:
+    if stage not in required_stages(card, lore, batch) or receipt.get('stage') != stage or receipt.get('passed') is not True:
         raise ValueError('Successful exact native stage required')
     if receipt.get('processId') != pid or receipt.get('executableSHA256') != executable_digest:
         raise ValueError('Owned native process/binary evidence mismatch')
     if receipt.get('inputDesktop') != 'Default' or receipt.get('layer') != 'Windows UI Automation observation and OS SendInput; automated, not human acceptance':
         raise ValueError('Interactive native evidence required')
+    if batch and receipt.get('action') != 'editScene':
+        raise ValueError('Selectable native action required')
     if lore and receipt.get('action') != 'generateLore':
         raise ValueError('Generated lore native evidence required')
     if card and receipt.get('action') != 'generateCard':
@@ -33,6 +35,7 @@ def validate_native_stage(directory, stage, pid, executable_digest, continuing=F
     required |= {'themeDark'} if stage == 'observe-dark' else set()
     required |= {'compactWidth'} if stage == 'observe-narrow' else set()
     required |= {'osMouseInput', 'inertProposalObserved'} if stage == 'physical-send' else set()
+    required |= {'osKeyboardInput', 'dependencyRefusalObserved', 'selectionFocusRetained'} if stage == 'physical-select' else set()
     required |= {'osMouseInput', 'savedOnceObserved'} if stage == 'physical-accept' else set()
     required |= {'osMouseInput','approvalObserved'} if stage == 'physical-approve' else set()
     required |= {'osMouseInput','completedAssistClosedObserved'} if stage == 'physical-close' else set()

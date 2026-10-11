@@ -54,7 +54,7 @@ test("frontend operation list contains only bounded editor and Studio settings o
     "context.preview",
     "rewrite.prepare",
     "rewrite.send",
-    "rewrite.accept",
+    "rewrite.accept", "rewrite.select",
     "rewrite.discard",
     "references.list",
     "references.apply",

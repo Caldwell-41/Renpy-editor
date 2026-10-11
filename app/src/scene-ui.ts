@@ -571,7 +571,9 @@ export function renderSceneAuthoring(
       card.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateCard");};
       const lore=button("Assist · Draft lore entry");lore.disabled=card.disabled;
       lore.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateLore");};
-      tools.append(assist,continuation,card,lore);
+      const edits=button("Assist · Edit Scene");edits.disabled=scene.sourceConflict||(assist.disabled&&continuation.disabled);
+      edits.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"editScene");};
+      tools.append(assist,edits,continuation,card,lore);
     }
     toolbar.append(heading, tools); beatsRegion.append(toolbar);
     const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); beatsRegion.append(list);

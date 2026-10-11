@@ -1,73 +1,67 @@
 # Current outcome handover
 
-## Approved selectable proposal editing — paused for new-chat transfer
+## Selectable proposal editing — implemented, qualification in progress
 
-User explicitly approves the saved proposal-editing scope/allowance, keeps generic
-for later, then asks to stop this chat and receive a new-chat prompt. The approved
-outcome is paused for that transfer. No implementation, tests/packages/editor launches,
-provider calls or CI dispatch started. Approval persists; do not request it again.
-Fresh local/origin `codex/provider-qualification` match
-**f3346e9666bcee06b9dd3e53343af33e1a8919f5**; origin/main remains5f448ca. Retain Mac
-ARM64 session and preserve unrelated work. The approved scope/status transfer records are published under the authorized
-commit/push boundary. Implementation baseline remainsf3346e9; no code changes yet.
+Resume this approved outcome in the same thread, Mac ARM64 workspace and
+`codex/provider-qualification`. Starting fetched local/origin HEAD is
+4bcfee097df2343902fbc5fb6fae6933b08c4f28; main remains5f448ca. Initial worktree was
+clean. No reset, unrelated discard or history rewrite. Implementation publication and
+paired CI1 are the next checkpoint; exact run/head/inputs will replace this live text.
 
-[Owning proposed scope](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
-contains exact operation/acceptance/cost limits. One next outcome extends Rewrite Assist
-with explicit several-Scene-edits mode:1–8 typed operations in one existing Scene,
-selected dialogue/narration replacements, at most one1–8-Beat insertion group and one
-runnable Character creation or update. Character fields use existing display name/
-dialogue colour; new technical identifier is author-confirmed before Send, core owns
-IDs/paths, no existing identifier rename/Appearance edit. Definition-dependent dialogue
-cannot be accepted without its new Character; unrelated narration remains selectable.
-Existing update target/allowed speakers bind before Send; malformed/duplicate/
-overlapping edits refuse without writes or silently dropping operations. Character
-update and aggregate10000-byte composition require explicit proof.
-Selection never silently adds operations. Insertion remains inseparable; existing
-Draft Scene/generated card/lore whole-group flows retained. Broader batch Scene/card/
-lore creation, terminal/edge proposals and Beat families are separately selected later.
+[Owning implementation ledger](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11)
+records current changes/results and unique failed harness evidence. The
+[approved scope](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
+and its transfer selection remain authoritative. Do not request approval again.
 
-Current code prepares one text/group proposal, with AcceptRequest binding only proposal/
-preview IDs. Manual Character create/update immediately commits. Implementation needs
-non-mutating preparation and one transient candidate combining same-file edits and
-metadata through existing transaction/history, not loops of immediate apply handlers.
-Changing selection prepares a fresh core preview/digest; acceptance rechecks exact
-read/write/session/draft revisions. Stable allocated IDs, protected tokens, comments/
-BOM/newlines/custom source, one Undo/Redo, stale/cancelled zero-write refusal and ordinary
-failure/recovery guards required. Consumed proposal cannot be applied twice; remaining
-suggestions become read-only until freshly prepared. Native keyboard/theme/compact/
-selection review and pinned metadata-free SDK8.5.3 runtime required on changed inputs.
+Implemented editScene: one existing Scene,1–8 explicit selectable operations, selected
+root dialogue/narration replacements, at most one inseparable1–8-Beat insertion and
+one runnable Character create/update of display name/colour. Exact targets/anchor/
+speakers/Character permissions bind before Send; author supplies the new technical
+name. Core allocates stable IDs/paths, validates whole responses, prepares fresh
+semantic/exact file previews for selection, enforces new-Character dependencies and
+commits once through existing journal/history. Empty/invalid selection cannot Save;
+no silent additions. Partial Save consumes the proposal and remaining suggestions.
+Literal generated names use the canonical source.literalDisplayName marker and raw
+metadata spelling; existing manual updates retain literal mode. Custom/BOM/newline/
+protected syntax and unrelated extensions survive. Other whole-group actions retain
+accepted behavior. No immediate-commit handler loop.
 
-Approved maxima **per target**:4 packaged build attempts,8 editor starts,4 focused
-CI dispatches. A paired workflow counts once on each target: at most4 paired runs.
-Local/CI/failure/cancel/implicit/reopen/live attempts share cumulative totals. All new counts remain zero; ceilings are not required runs. Reuse unaffected proof,
-focused ordinary tests/development compilation included. Two unsuccessful corrections
-of one hypothesis trigger reassessment; exhaustion/material decisions stop, no reset.
-One serial GPT-6.1 Sol High owner plus independent read-only reviewer; no second writer.
-Approval covers preparation/implementation/checks/review/fixes/commit-push of this outcome;
-no merge/release/next deliverable. WORKFLOW manual same-thread CI wait, no watcher.
+Local focused proof: renderer132, rewrite43, final selectable8, authoring32, prompt5,
+native worker6, gates8, frontend/dist privacy, actual controller/native credential/
+loopback HTTP/core integration, and ten pinned SDK8.5.3 commands for accepted create/
+update source without editor metadata. Runtime asserts literal generated names/Beat
+prose, protected tokens, Return, unchanged accepted source and cleanup. Independent
+read-only review has no remaining actionable implementation findings. None substitutes
+for native/platform/live/human evidence. Failed partial-recovery expectation, final
+SDK advance timeout and sandboxed socket-denial logs remain ignored evidence, with
+concrete corrections recorded in the owning ledger.
 
-Approved live scope: at most2 synthetic batch generations total and1 explicit discovery
-on the already selected Unsloth endpoint/model, no public/paid calls/install/downloads/
-server modification. No key needed for preparation. Credential entry/access must be
-available before live calls; maintain explicit temporary-storage/cleanup policy. Never
-recover old key from chat/logs or read/export credential files. Those app starts count
-within Mac8. Confirm native Mac capability before required launches; don't let app binding
-implicitly consume a start. Generic/provider/signing expansion remains excluded.
+Native capability: supported inventory reports locked Mac with failed automatic
+unlock. User was asked to unlock. Loomlight was never bound/launched; do not let a
+capability probe implicitly consume a launch. Signed local package/native light/dark/
+compact/keyboard selection/focus/Save and process reopen remain required; approved
+Mac package identity/signing/credential policy is unchanged. New paired CI supplies
+both-target automated proof and Windows package/native receipts; Mac CI intentionally
+has no approved signing identity. Terminal audit must inspect manifests, exact input/
+package identities, SDK results, required native receipts/captures and cleanup; green
+status alone is insufficient. Keep defects, harness failures and missing evidence distinct.
 
-[Prior accepted Studio closure](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-integratedlive-qualification-and-closure--2026-10-11)
-retains all unique evidence: CI4run38134089028/attempt1/head3b3e868 success, exact23/88
-manifests/252inputs/Windows253package inputs, Windows7native stages26checks+3reopen/
-zeroHTTP/cleanup; signed Mac481 production/probe reuse251/253 inputs unchanged; all5
-live actions/9Undo-Redo/project-process reopen/metadata-free SDK. CI1/CI3 remain failed.
-Closed budgets Mac2/4packages8/8starts4/4dispatches, Windows4/4packages6/6starts4/4dispatches,
-live1/2each/discovery1/2/generic0. Unused remainder closed, not transferred. No pending
-CI, owned app/listener/root or temporary credential; historical credentials untouched.
-Internal server configuration and independent live reopen HTTP observation remain
-unverified. Full Phase2/final human/generic acceptance remains separate.
+Counts before CI1: **Mac0/4packages,0/8editor starts,0/4dispatches; Windows0/4packages,
+0/8starts,0/4dispatches; live0/2total batch generations,0/1discovery.** Max four paired
+runs. Windows planned CI1 package1/launches1–2 are not consumed until actually attempted;
+read the emitted ledger after terminal CI. Earlier allowances stay closed. Development
+compilation/helper/SDK checks consume no editor/package attempt. Notify when live
+qualification is ready for fresh native key entry on the existing selected endpoint/
+model. Never retrieve old keys from chat/logs or read/export credential files. Preserve
+explicit temporary-storage/cleanup; user native entry must be available before live
+calls. No live calls, user/real-provider credential operations or owned temporary editor/listener/root
+remain at this checkpoint.
 
-Next action: provide the user a paste-ready new-chat prompt. On their continuation,
-reconcile fresh refs/working tree and resume the already approved scope with untouched
-counts: Mac/Windows0/4packages,0/8starts,0/4dispatches; live0/2total/discovery0/1.
-Read the task’s approved-selection/transfer entry; no reset or repeated approval. Notify
-the user when implementation/live checks are ready for fresh native key entry. No new
-chat has been created automatically and no implementation has started.
+Proceed to publish and dispatch the bounded fresh paired workflow, record exact run
+ID/attempt/head/material inputs/status/time/counts, then stop under WORKFLOW manual
+same-thread wait. User returns here with the completion/resume message; do not poll or
+install a watcher. After terminal audit, continue only remaining in-scope native/live
+qualification and documentation/closure. One serial owner and read-only reviewer;
+no second writer, signing change, provider installation/public/paid calls, merge,
+release, generic or following outcome. Full Phase2 and final human acceptance remain
+separate; unchanged prior qualified evidence is reused from the accepted Studio closure.

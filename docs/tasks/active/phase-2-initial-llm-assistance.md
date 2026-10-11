@@ -5746,3 +5746,81 @@ merge/release or signing/provider expansion. Notify the user when live synthetic
 qualification is ready for fresh native key entry; do not retrieve the old key from
 chat/logs or credentials. Cleanup policy remains explicit. No key is needed for initial
 implementation preparation. No new chat has been created automatically.
+
+
+### Selectable proposal editing implementation and focused proof — 2026-10-11
+
+User resumes the approved outcome from4bcfee097df2343902fbc5fb6fae6933b08c4f28.
+Fresh fetched local/origin branch matches that continuation; origin/main remains
+5f448ca683a905f4ea77d4580bbc89fda69f2b93. Worktree was clean; no reset or unrelated
+work discarded. One serial owner and independent GPT-6.1 Sol High read-only reviewer
+implement only the approved selectable scope. Approval/allowance is unchanged; previous
+budgets remain closed. This is implementation with qualification pending, not closure.
+
+`editScene` binds one saved Scene, selected root text targets, insertion anchor,
+permitted existing speakers and exact Character create/update permission before Send.
+The response validates1–8 typed operations, at most one1–8-Beat inseparable group and
+one Character; malformed/unselected/duplicate/unknown/dangling/over-limit replies
+refuse as a whole. Non-mutating Character preparation and in-memory Scene composition
+produce one mutation per source/metadata path and one history transaction. Core owns
+stable IDs/paths, protected tokens, fresh selection previews/digest and acceptance
+rechecks. Missing dependencies/empty selection cannot Save; no implicit additions.
+Partial acceptance consumes remaining suggestions. Existing whole-group actions remain.
+
+Independent review corrected generated-name interpolation/tag encoding, BOM/signed
+priority collisions, custom-source reinterpretation preflight across all saved Scenes,
+and root-target eligibility. SourceDefinition literalDisplayName:true keeps generated
+names passive while raw displayName stays author-visible; manual updates preserve it.
+Canonical architecture/data/context/UI/testing records describe the final contract.
+A followup review finds no remaining actionable implementation issue. Reviewer performs
+no writes, tests, package/editor/live operations. Required native/CI evidence remains
+separate from this source review.
+
+Focused local Mac ARM64 proof: renderer check132/132, broader rewrite43/43 (including
+unchanged prior action regressions), final selectable8/8, authoring32/32, prompt5/5,
+native worker6/6 and gate tests8/8, all with zero skipped/ignored cases. Frontend build
+and3-file dist privacy scan pass. Real renderer/controller→native credential/loopback
+HTTP→core integration passes bound permissions, stable exact subset previews,
+held-owner/refusal/cancel/stale zero writes, create/update and one history/reopen.
+Pinned official SDK8.5.3 archive matches the saved published checksum and
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+Ten SDK commands pass exact accepted create/update source compile/lint/named execution,
+protected tokens, literal generated Beat/Character who text, Return, metadata absence,
+source hash preservation and temporary-root cleanup. Owner and reviewer audit the
+23-file ignored local evidence manifest;24-file evidence privacy scan passes.
+Undefined interpolation and markup
+in names would fail runtime if activated. These helper/SDK processes are not editor
+starts or packaged attempts.
+
+Unique failed harness evidence is retained in ignored selectable logs: the first
+recovery test incorrectly expected AcceptLoomlight to resolve a partially exchanged
+compound proposal; the existing recovery policy correctly refuses that mixed state.
+After reassessment, the final test asserts blocking/no false Save for a mixed state
+and exact explicit acceptance only after all four exchanges. SDK command5 originally
+used a final plain advance after Return and timed out after five passing assertions;
+the harness now advances until the main menu and checks every say/Character name.
+The sandboxed native-worker test failed all six at loopback bind PermissionDenied
+before product execution; the socket-authorized run passes6/6. None is normalized
+as a pass or charged as a package/editor start. No protection/signing policy changed.
+
+`.github/workflows/selectable-proposals.yml` and `qualify-selectable.py` prepare one
+fresh paired dispatch with exact head/tree/input/tool/SDK identity, positive exact
+counts, native receipts and manifests. Windows schedules one package/two launches;
+Mac CI has no approved signing identity, so signed local native proof remains required.
+Native selectable probe/driver require19 phase1 checks,2 process-reopen checks and6
+exact request body digests. Native keyboard selection must show missing-Character
+refusal, disabled Save and retained focus, alongside light/dark/compact/Generate/Save.
+Before editor launch, supported native inventory reports the Mac is locked and cannot
+unlock automatically. User was asked to unlock; no Loomlight app binding/implicit
+launch occurred. Continue unaffected CI preparation; do not claim native acceptance.
+
+Pre-dispatch cumulative totals: **Mac0/4packages,0/8editor starts,0/4dispatches;
+Windows0/4packages,0/8editor starts,0/4dispatches; live0/2batch generations total,
+0/1discovery.** No user/real-provider key requested/retrieved/read/exported; no live request.
+Existing selected endpoint/model only, fresh native user entry and explicit temporary
+storage/cleanup remain required when live qualification is ready. No owned editor,
+listener/root or temporary credential remains from controller/SDK tests. No pending CI
+was found during fresh branch run inspection. Next: publish the implementation,
+dispatch paired CI1 with exact identity, record status/counts and end polling under
+manual same-thread wait. After terminal audit, finish signed Mac/native/live checks
+when desktop/key entry capability is available. No merge/release/generic/next outcome.

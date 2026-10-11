@@ -28,6 +28,7 @@ pub fn default_action() -> String {
 fn baseline(action: &str) -> Result<&'static str, PromptError> {
     match action {
         ACTION => Ok(BASELINE),
+        crate::rewrite::batch::ACTION => Ok(include_str!("../prompts/v1/edit-scene.txt")),
         CONTINUE => Ok(CONTINUE_BASELINE),
         DRAFT => Ok(DRAFT_BASELINE),
         CARD => Ok(CARD_BASELINE),
@@ -91,6 +92,8 @@ pub struct ReferenceSelection {
 pub struct PreviewRequest {
     #[serde(default = "default_action")]
     pub action: String,
+    #[serde(default)]
+    pub batch: Option<crate::rewrite::batch::Permissions>,
     pub expected_prompt_revision: String,
     #[serde(default)]
     pub scene_id: String,
@@ -143,7 +146,7 @@ fn validate(doc: &Value, project: &str) -> Result<(), PromptError> {
     {
         return Err(PromptError::Unavailable);
     }
-    for action in [ACTION, CONTINUE, DRAFT, CARD, LORE] {
+    for action in [ACTION, CONTINUE, DRAFT, CARD, LORE, crate::rewrite::batch::ACTION] {
         if let Some(p) = doc["prompts"].get(action) {
             if !p.is_object()
                 || p["text"]
@@ -355,7 +358,7 @@ impl AuthoringService {
                         BeatPayload::Dialogue { .. } | BeatPayload::Narration { .. }
                     )
                 {
-                    targets.push(json!({"sceneId":scene.id,"beatId":beat.id,"sourceRevision":scene.source_revision,"label":format!("{} · Beat {}",scene.display_name,i+1)}));
+                    targets.push(json!({"sceneId":scene.id,"beatId":beat.id,"sourceRevision":scene.source_revision,"batchEligible":beat.owner.is_none() && beat.conditional_branch.is_none(),"label":format!("{} · Beat {}",scene.display_name,i+1)}));
                 }
             }
         }
@@ -382,7 +385,7 @@ impl AuthoringService {
             }
         }
         Ok(
-            json!({"prompt":self.prompts(project,project_id)?,"targets":targets,"anchors":anchors,"continuePrompt":self.prompts_for(project,project_id,CONTINUE)?,"draftPrompt":self.prompts_for(project,project_id,DRAFT)?,"cardPrompt":self.prompts_for(project,project_id,CARD)?,"lorePrompt":self.prompts_for(project,project_id,LORE)?,"loreEntries":references.document.as_ref().map(|d| d["loreEntries"].clone()),"cards":references.document.as_ref().map(|d| d["cards"].clone()),"chapters":ws.chapters,"structureRevision":digest(format!("{}:{}",ws.project_revision,ws.source_map_revision).as_bytes()),"references":choices,"referenceDiagnostic":references.diagnostic}),
+            json!({"characters":ws.authoring.characters,"editPrompt":self.prompts_for(project,project_id,crate::rewrite::batch::ACTION)?,"prompt":self.prompts(project,project_id)?,"targets":targets,"anchors":anchors,"continuePrompt":self.prompts_for(project,project_id,CONTINUE)?,"draftPrompt":self.prompts_for(project,project_id,DRAFT)?,"cardPrompt":self.prompts_for(project,project_id,CARD)?,"lorePrompt":self.prompts_for(project,project_id,LORE)?,"loreEntries":references.document.as_ref().map(|d| d["loreEntries"].clone()),"cards":references.document.as_ref().map(|d| d["cards"].clone()),"chapters":ws.chapters,"structureRevision":digest(format!("{}:{}",ws.project_revision,ws.source_map_revision).as_bytes()),"references":choices,"referenceDiagnostic":references.diagnostic}),
         )
     }
     pub fn context_preview(
@@ -404,6 +407,8 @@ impl AuthoringService {
             return Err(PromptError::Invalid);
         }
         let prompt = self.prompts_for(project, project_id, &r.action)?;
+        let batch = r.action == crate::rewrite::batch::ACTION;
+        if batch != r.batch.is_some() { return Err(PromptError::Invalid); }
         let drafting = r.action == DRAFT;
         let continuing = r.action == CONTINUE;
         let card = r.action == CARD;
@@ -486,7 +491,7 @@ impl AuthoringService {
                 (Some(character_id.as_str()), text.as_str())
             }
             Some(BeatPayload::Narration { text }) => (None, text.as_str()),
-            _ if continuing || drafting => (None, ""),
+            _ if continuing || drafting || batch => (None, ""),
             _ => return Err(PromptError::Invalid),
         };
         let scene_text = scene
@@ -504,7 +509,7 @@ impl AuthoringService {
                     .join("\n")
             })
             .unwrap_or_default();
-        let text = if continuing {
+        let text = if continuing || batch {
             scene_text.as_str()
         } else {
             selected_text
@@ -531,7 +536,7 @@ impl AuthoringService {
         if let Some(scene) = scene {
             paths.insert(scene.source_path.clone());
         }
-        if drafting || card || lore {
+        if drafting || card || lore || batch {
             // Preserve every existing source; revisions/drafts are guarded without sending its content.
             let inventory = self
                 .source_inventory(project, project_id)
@@ -654,7 +659,7 @@ impl AuthoringService {
         if let Some(scene)=scene { supporting_paths.insert(scene.source_path.clone()); }
         let mut definitions = vec![];
         for c in &ws.authoring.characters {
-            if continuing || drafting || Some(c.id.as_str()) == character {
+            if continuing || drafting || (batch && (r.batch.as_ref().unwrap().speaker_ids.contains(&c.id) || matches!(&r.batch.as_ref().unwrap().character,Some(crate::rewrite::batch::CharacterPermission::Update{character_id}) if character_id==&c.id) || scene.unwrap().beats.iter().any(|b|r.batch.as_ref().unwrap().replacement_ids.contains(&b.id) && matches!(&b.payload,BeatPayload::Dialogue{character_id,..} if character_id==&c.id)))) || Some(c.id.as_str()) == character {
                 paths.insert(c.source.path.clone());
                 supporting_paths.insert(c.source.path.clone());
                 definitions
@@ -681,7 +686,7 @@ impl AuthoringService {
                 .map_err(|_| PromptError::Unavailable)?;
             if let Some(c) = ws.authoring.characters.iter().find(|c| {
                 &c.source.path == path
-                    && (continuing || drafting || Some(c.id.as_str()) == character)
+                    && (continuing || drafting || batch || Some(c.id.as_str()) == character)
             }) {
                 if c.source.source_revision != rev.sha256 {
                     return Err(PromptError::Stale);
@@ -743,6 +748,11 @@ impl AuthoringService {
                     }
                 )
                 .collect::<Vec<_>>());
+        }
+        if batch {
+            story["batch"] = self.batch_context(project,project_id,&r.scene_id,&r.expected_source_revision,r.batch.as_ref().unwrap()).map_err(|_|PromptError::Invalid)?;
+            // The selected saved Beat provides context only; permissions bind every mutation.
+            story["source"] = Value::Null;
         }
         let contract = json!({"version":1,"action":r.action,"target":{"sceneId":r.scene_id,"beatId":r.beat_id},"authority":"Preview only; no operation may be executed or applied","runtimeState":"Unknown; defaults and conditional ownership are not observed runtime facts"});
         if card {
@@ -840,7 +850,7 @@ impl AuthoringService {
             read_set.insert(path.clone(), token(revision));
         }
         Ok(
-            json!({"action":r.action,"projectId":project_id,"sessionId":session,"supportingReadSet":read_set.iter().filter(|(path,_)|supporting_paths.contains(*path)).map(|(k,v)|(k.clone(),v.clone())).collect::<BTreeMap<_,_>>(),"payload":body,"serializedPayload":serialized,"payloadDigest":digest(serialized.as_bytes()),"promptDigest":digest(prompt.effective_text.as_bytes()),"baselineVersion":prompt.baseline_version,"baselineDigest":prompt.baseline_digest,"savedBaselineVersion":prompt.saved_baseline_version,"savedBaselineDigest":prompt.saved_baseline_digest,"readSet":read_set,"included":selected,"excluded":exclusions,"dependencies":dependencies,"unrelatedDraftsExcluded":unrelated_drafts,"exclusionPolicy":[if continuing {"Other Scenes"} else {"Other Beats and Scenes"},"Custom code (marker only; never executed)","Asset binaries","Unknown metadata extensions","Hidden/unapproved files, credentials, Git history, external files"],"characterNames":ws.authoring.characters.iter().filter(|c|definitions.iter().any(|d|d["kind"]=="character"&&d["id"]==c.id)).map(|c|json!({"id":c.id,"displayName":c.display_name})).collect::<Vec<_>>(),"customCodeMarker":if scene.is_some_and(|s|s.partial){"Custom/unsupported source excluded"}else{"No custom text selected"},"uncertainty":"Runtime state, conditions and non-simple interpolation dependencies are unknown; no evaluation or automatic retrieval","size":{"estimator":"UTF-8 byte upper estimate; not measured model tokens","componentBytes":component_bytes,"serializedBytes":input,"estimatedInputTokens":input,"maximumResponse":r.maximum_response,"margin":margin,"total":total,"contextBudget":r.context_budget,"contextCeiling":r.context_ceiling},"sendAvailable":false}),
+            json!({"action":r.action,"projectId":project_id,"sessionId":session,"supportingReadSet":read_set.iter().filter(|(path,_)|supporting_paths.contains(*path)).map(|(k,v)|(k.clone(),v.clone())).collect::<BTreeMap<_,_>>(),"payload":body,"serializedPayload":serialized,"payloadDigest":digest(serialized.as_bytes()),"promptDigest":digest(prompt.effective_text.as_bytes()),"baselineVersion":prompt.baseline_version,"baselineDigest":prompt.baseline_digest,"savedBaselineVersion":prompt.saved_baseline_version,"savedBaselineDigest":prompt.saved_baseline_digest,"readSet":read_set,"included":selected,"excluded":exclusions,"dependencies":dependencies,"unrelatedDraftsExcluded":unrelated_drafts,"exclusionPolicy":[if continuing {"Other Scenes"} else if batch {"Unselected Beats and other Scenes"} else {"Other Beats and Scenes"},"Custom code (marker only; never executed)","Asset binaries","Unknown metadata extensions","Hidden/unapproved files, credentials, Git history, external files"],"characterNames":ws.authoring.characters.iter().filter(|c|definitions.iter().any(|d|d["kind"]=="character"&&d["id"]==c.id)).map(|c|json!({"id":c.id,"displayName":c.display_name})).collect::<Vec<_>>(),"customCodeMarker":if scene.is_some_and(|s|s.partial){"Custom/unsupported source excluded"}else{"No custom text selected"},"uncertainty":"Runtime state, conditions and non-simple interpolation dependencies are unknown; no evaluation or automatic retrieval","size":{"estimator":"UTF-8 byte upper estimate; not measured model tokens","componentBytes":component_bytes,"serializedBytes":input,"estimatedInputTokens":input,"maximumResponse":r.maximum_response,"margin":margin,"total":total,"contextBudget":r.context_budget,"contextCeiling":r.context_ceiling},"sendAvailable":false}),
         )
     }
 }

@@ -1639,3 +1639,41 @@ approved signed local Mac/live capability remains local. Both artifacts identify
 SDK archive/checksum validation remains mandatory; prior metadata-only SDK reuse cannot
 substitute for this new combined accepted source. Real Studio compatibility is recorded
 separately with exact provider/model/configuration and at most2attempts per action.
+
+
+## Selectable proposal editing focused qualification
+
+The approved selectable outcome is owned by the
+[active task](tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11).
+`cargo test -p loomlight-core --locked selectable` requires8 ordinary focused cases:
+same-file/subset/dependency/stable-ID/history/reopen, supported Character update,
+literal names/manual update preservation, aggregate UTF-8 boundaries, malformed whole
+batch, collision/custom interpretation, stale/cancel/draft/refusal and compound recovery.
+The broader existing rewrite suite requires43 cases; renderer check132/prompt5/native
+worker6 remain focused shared gates. Loopback worker/controller tests require socket
+capability; sandbox denial before socket bind is a harness failure, never a pass.
+
+`node tests/selectable-controller.dispatch.mjs <rewrite-controller-driver>
+--game-output <owned-output>` exercises the actual controller/native credential/HTTP/core
+path, exact pre-send permissions, fresh selection previews, held-owner refusal,
+Character create/update, one Undo/Redo and zero-write malformed/cancel/stale paths.
+`selectable-sdk.py` runs exact accepted create/update source, with editor metadata
+absent, through pinned SDK8.5.3 compile/lint/named test. It asserts protected tokens,
+literal generated dialogue and Character `who` text (including undefined interpolation
+and markup), Return, unchanged accepted source and owned temporary-root cleanup.
+
+`.github/workflows/selectable-proposals.yml` dispatches one bounded fresh paired run.
+`qualify-selectable.py` requires exact candidate/tree/tool/input identities, positive
+exact counts, eight gate tests, SDK checksum, manifests, privacy and cleanup. Windows
+adds one package and two editor starts, recording attempts before each operation.
+Mac CI supplies automated core/controller/SDK proof; a signed local Mac package and
+actual native observations remain separately required because CI has no approved
+signing identity. `dialogue-rewrite-probe.py --selectable-edits` requires19 phase1 checks,
+2 process-reopen checks and6 exact reviewed HTTP body digests. Windows native receipts
+include light/dark/compact, physical Generate, keyboard selection/dependency refusal/
+retained focus and physical Save, with intact before/after captures. All gates reject
+partial/failed/zero/skipped or unclean results. Native receipt/PNG/input/artifact audit
+is required after terminal CI; green status alone is insufficient. Manual same-thread
+wait/resume applies, with cumulative user-approved counts; prior budgets stay closed.
+No specialist crash or hostile-filesystem testing is added. Live selected Unsloth
+batch sends, final human and full Phase2 acceptance remain distinct proof layers.
