@@ -8,7 +8,10 @@ from rewrite_native_evidence import required_stages,validate_native_stage
 def module(name,file):
     spec=importlib.util.spec_from_file_location(name,Path(__file__).parent/file)
     value=importlib.util.module_from_spec(spec);spec.loader.exec_module(value);return value
-q=module('qualification','qualify-selectable.py');sdk=module('sdk_test','selectable-sdk.py')
+q=module('qualification','qualify-selectable.py');sdk=module('sdk_test','selectable-sdk.py');evidence=module('evidence','selectable-evidence.py')
+def seal_child(child):
+    evidence.write(child/'cleanup.json',{'cleanupComplete':True})
+    evidence.write(child/'manifest.json',{'schemaVersion':1,'files':{p.relative_to(child).as_posix():evidence.sha(p) for p in child.rglob('*') if p.is_file() and p.name!='manifest.json'}})
 class Gates(unittest.TestCase):
     def test_renderer_requires_exact_nonzero_unskipped(self):
         good=''.join(f'ℹ {k} {v}\n' for k,v in [('tests',132),('pass',132),('fail',0),('cancelled',0),('skipped',0),('todo',0)])
@@ -45,6 +48,34 @@ class Gates(unittest.TestCase):
         with self.assertRaises(AssertionError):sdk.validate({'schemaVersion':1,'cases':[]})
         case={'schemaVersion':1,'source':{'game/../../escape.rpy':'x'},'sourceSHA256':{'game/../../escape.rpy':'a'*64},'scenes':[{'id':'a','label':'wrong','path':'game/../../escape.rpy'}]}
         with self.assertRaises(AssertionError):sdk.validate({'schemaVersion':1,'cases':[case,case]})
+    def test_bootstrap_failure_is_retained_without_qualification_or_attempts(self):
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)/'fresh';evidence.prepare(root,{'candidate':'a'*40,'runId':'1'})
+            self.assertFalse(evidence.finish(root))
+            value=json.loads((root/'pipeline.json').read_text());self.assertFalse(value['passed']);self.assertFalse(value['qualificationPresent']);self.assertEqual(value['packageBuilds'],0);self.assertEqual(value['appLaunches'],0)
+            manifest=json.loads((root/'artifact-manifest.json').read_text());self.assertIn('bootstrap.json',manifest['files']);self.assertIn('pipeline.json',manifest['files'])
+            with self.assertRaises(FileExistsError):evidence.prepare(root,{'candidate':'a'*40,'runId':'1'})
+    def test_wrong_cached_archive_refuses_and_retains_failed_receipt(self):
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)/'fresh';evidence.prepare(root,{'candidate':'a'*40,'runId':'1'});archive=Path(t)/evidence.SDK_NAME;archive.write_bytes(b'wrong public fixture')
+            with self.assertRaises(AssertionError):evidence.acquire(root,archive)
+            receipt=json.loads((root/'bootstrap.json').read_text());self.assertFalse(receipt['sdkAcquisitionPassed']);self.assertIn('differs from published pin',receipt['failure']);self.assertFalse(evidence.finish(root))
+    def test_pipeline_attempt_ledger_cannot_be_replaced_by_success_flag(self):
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)/'fresh';evidence.prepare(root,{'candidate':'a'*40,'runId':'1'});receipt=json.loads((root/'bootstrap.json').read_text());receipt['sdkAcquisitionPassed']=True;evidence.write(root/'bootstrap.json',receipt)
+            child=root/'qualification';child.mkdir();evidence.write(child/'identity.json',receipt);evidence.write(child/'result.json',{'passed':True,'packageBuilds':0,'appLaunches':0});evidence.write(child/'attempt-ledger.json',[{'kind':'package-build','ordinal':1}])
+            seal_child(child);self.assertFalse(evidence.finish(root));evidence.write(child/'result.json',{'passed':True,'packageBuilds':1,'appLaunches':0});seal_child(child);self.assertTrue(evidence.finish(root))
+            evidence.write(child/'cleanup.json',{'cleanupComplete':False});seal={p.relative_to(child).as_posix():evidence.sha(p) for p in child.rglob('*') if p.is_file() and p.name!='manifest.json'};evidence.write(child/'manifest.json',{'schemaVersion':1,'files':seal});self.assertFalse(evidence.finish(root))
+            seal_child(child);(child/'unexpected.txt').write_text('public fixture');self.assertFalse(evidence.finish(root))
+            manifest=json.loads((root/'artifact-manifest.json').read_text());self.assertIn('qualification/attempt-ledger.json',manifest['files'])
+    def test_pipeline_rejects_malformed_evidence_and_mismatched_identity(self):
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)/'fresh';identity={'candidate':'a'*40,'runId':'1','attempt':1,'os':'Darwin','architecture':'arm64'};evidence.prepare(root,identity)
+            receipt=json.loads((root/'bootstrap.json').read_text());receipt['sdkAcquisitionPassed']=True;evidence.write(root/'bootstrap.json',receipt)
+            child=root/'qualification';child.mkdir();evidence.write(child/'identity.json',{**identity,'candidate':'b'*40});evidence.write(child/'result.json',{'passed':True,'packageBuilds':0,'appLaunches':0})
+            seal_child(child);self.assertFalse(evidence.finish(root));evidence.write(child/'identity.json',identity);(child/'attempt-ledger.json').write_text('{broken');seal_child(child)
+            self.assertFalse(evidence.finish(root));self.assertIn('attempt-ledger.json',json.loads((root/'pipeline.json').read_text())['failure'])
+            evidence.write(child/'attempt-ledger.json',['invalid']);self.assertFalse(evidence.finish(root))
     def test_npm_routes_through_pinned_node_cli_without_shell(self):
         with tempfile.TemporaryDirectory() as t:
             cli=Path(t)/'npm-cli.js';cli.write_text('// public test')

@@ -5880,3 +5880,35 @@ status-only commits do not replace this candidate. No automatic polling, watcher
 retry or new outcome. Continue in-scope fixes and remaining native/live qualification
 only within existing cumulative caps; notify when ready for fresh native user key entry.
 Retain old Studio/full Phase2/generic/human distinctions and unchanged evidence.
+
+
+#### Selectable CI1 failure audit and acquisition correction — 2026-10-12
+
+User explicitly authorised reviewing/fixing CI and another run, and **polling CI for
+this chat only**. This overrides manual waiting only here; no watcher/automation or
+new allowance. Fresh refs match local/origin f03bfb5; main remains5f448ca. No reset.
+
+CI1 run38144885050/attempt1/head54ac943 completed **failure** at
+2026-10-11T13:54:23Z. Admission passed and four older jobs intentionally skipped.
+Required Mac job114486071577 and Windows job114486071616 both failed curl28 connecting
+to the official checksum host before qualification. All tests/package/native steps
+were skipped; artifact count is zero. Actual Mac and Windows **packages0/4,
+editor starts0/8**, paired dispatches**1/4**; live**0/2**, discovery**0/1**. No
+qualification pass is claimed. Ignored complete failed-job log SHA256: `a4225506c14bc8017f67b6f8f9ffdb994616ab0216b0d1b5c45128217d3f6c43`.
+
+Bounded local www/apex/explicit-IPv4 probes also timed out; no IPv6 diagnosis or
+unverified alternate download is assumed. Reuse the previously qualified official
+SDK8.5.3 archive in existing Mac/Windows SHA-keyed caches, preserving the same published
+archive pin. Retain the identical public official checksum manifest with provenance;
+verify full snapshot and archive bytes. Fresh controller/SDK runtime remains required.
+Cache miss permits one bounded official HTTPS download; corrupted cache is refused.
+
+Bootstrap receipts now precede tool/network acquisition, and always-run sealing/upload
+retains early failures, zero actual attempts and complete outer manifest. The qualifier
+uses a fresh child directory, with no stale-output or qualification reuse. Terminal
+promotion binds candidate/run/attempt/platform, child manifest, cleanup and ledger.
+Twelve focused gates pass without skips, including malformed/identity/cleanup/manifest
+refusal; actual cached official archive verification and early-failure manifest pass.
+No package/editor/live attempt occurred during this correction. Independent read-only
+review covers acquisition/provenance and evidence gates. CI2 will use dispatchordinal2,
+Windows packageordinal1/starts1–2, counting actual attempts from retained evidence.

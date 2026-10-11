@@ -1666,7 +1666,7 @@ The registered production workflow’s exclusive `selectable_proposals:true` sel
 calls `.github/workflows/selectable-proposals.yml` for one bounded fresh paired run.
 All prior selectors/upload/reuse must be false/empty; admission refuses mixed scope.
 `qualify-selectable.py` requires exact candidate/tree/tool/input identities, positive
-exact counts, eight gate tests, SDK checksum, manifests, privacy and cleanup. Windows
+exact counts, twelve gate tests, SDK checksum, manifests, privacy and cleanup. Windows
 adds one package and two editor starts, recording attempts before each operation.
 Mac CI supplies automated core/controller/SDK proof; a signed local Mac package and
 actual native observations remain separately required because CI has no approved
@@ -1675,7 +1675,14 @@ signing identity. `dialogue-rewrite-probe.py --selectable-edits` requires19 phas
 include light/dark/compact, physical Generate, keyboard selection/dependency refusal/
 retained focus and physical Save, with intact before/after captures. All gates reject
 partial/failed/zero/skipped or unclean results. Native receipt/PNG/input/artifact audit
-is required after terminal CI; green status alone is insufficient. Manual same-thread
+is required after terminal CI; green status alone is insufficient. `selectable-evidence.py`
+records bootstrap identity before acquisition, verifies the unchanged public checksum
+snapshot and SHA-keyed official archive cache, and seals early failures as failed.
+The fresh `qualification/` child retains its own manifest; the outer artifact manifest
+includes every child file and manifest. Terminal promotion requires matching candidate/
+run/attempt/platform, complete child manifest, cleanup and actual attempt counts.
+Cache misses allow one bounded official download; corrupt cache bytes are refused.
+The [snapshot provenance](../spikes/renpy-sdk/published/README.md) owns retained checksum evidence. Manual same-thread
 wait/resume applies, with cumulative user-approved counts; prior budgets stay closed.
 No specialist crash or hostile-filesystem testing is added. Live selected Unsloth
 batch sends, final human and full Phase2 acceptance remain distinct proof layers.

@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-11. **Selectable proposal editing implemented; qualification in
+**Updated:** 2026-10-12. **Selectable proposal editing implemented; qualification in
 progress.** Full Phase2/generic/final human acceptance remains incomplete.
 
 Retain Mac ARM64 development and `codex/provider-qualification`. Fresh local/origin
@@ -14,23 +14,22 @@ The [implementation ledger](../tasks/active/phase-2-initial-llm-assistance.md#se
 owns focused results, failed harness diagnoses and remaining qualification.
 
 Local automated proof passes renderer132, rewrite43, final selectable8, authoring32,
-prompt5, native worker6, gate8, actual controller/HTTP integration and pinned SDK8.5.3
+prompt5, native worker6, current gate12, actual controller/HTTP integration and pinned SDK8.5.3
 exact create/update runtime with literal Character names and editor metadata absent.
 Independent review has no remaining implementation finding. Automated proof does not
-establish packaged native, live or human acceptance. Published candidate**54ac943** is in paired CI1
-[run38144885050/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38144885050),
-last observed in_progress at2026-10-11T13:52:50Z. Manual same-thread wait is active;
-terminal artifacts/identity/native captures/cleanup still require audit. Signed Mac
-native qualification needs the unlocked desktop; the control tool currently reports
-it locked. No editor launch occurred.
+establish packaged native, live or human acceptance. CI1
+[run38144885050/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38144885050)
+failed in official SDK acquisition before tests, packaging or native starts; no artifacts.
+The [failure audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci1-failure-audit-and-acquisition-correction--2026-10-12)
+records the corrected SHA-keyed official archive reuse and bootstrap failure retention.
+CI2 preparation is underway; user permits CI polling for this chat only.
+Signed Mac native still requires the unlocked desktop. No editor launch occurred.
 
-Current counts: Mac0/4packages,0/8starts; paired dispatch1/4 on each target.
-Windows package/start attempts await the CI1 emitted ledger audit (planned ordinal1
-package and starts1–2). Live0/2total batch generations,0/1discovery. Prior allowances remain closed. Fresh native
-key entry is needed only when live checks are ready; no user/real-provider credential read/export or live
-call occurred. [HANDOVER](HANDOVER.md) owns exact pending operation and same-thread
-resume. Approval covers in-scope continuation and commit/push, with manual CI waits;
-no merge/release/signing/provider expansion or following deliverable.
+Actual counts on both platforms:0/4packages,0/8starts; paired dispatch1/4 each.
+Live0/2total batch generations,0/1discovery. Prior allowances remain closed. Notify
+when ready for fresh native key entry; no user/real-provider credential read/export
+or live call occurred. [HANDOVER](HANDOVER.md) owns continuation. Approval covers
+in-scope fixes and commit/push; no merge/release/signing/provider expansion or next outcome.
 
 The [accepted Studio closure](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-integratedlive-qualification-and-closure--2026-10-11)
 retains unchanged qualified five-action evidence, unique prior CI failures and cleanup.

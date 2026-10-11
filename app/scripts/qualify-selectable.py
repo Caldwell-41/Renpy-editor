@@ -50,7 +50,7 @@ def main():
         run('renderer',['npm','run','check'],renderer_gate);run('frontend',['npm','run','build'])
         run('core',['cargo','test','-p','loomlight-core','--locked','selectable','--','--nocapture'],lambda t:cargo_gate(t,8))
         run('prompts',['cargo','test','-p','loomlight-core','--locked','prompts::tests'],lambda t:cargo_gate(t,5))
-        run('gates',[sys.executable,'-m','unittest','discover','-s','scripts','-p','test_selectable_qualification.py','-v'],lambda t:unittest_gate(t,8))
+        run('gates',[sys.executable,'-m','unittest','discover','-s','scripts','-p','test_selectable_qualification.py','-v'],lambda t:unittest_gate(t,12))
         run('native-worker',['cargo','test','-p','loomlight-desktop','--locked','ai_requests::tests'],lambda t:cargo_gate(t,6))
         run('controller-build',['cargo','build','-p','loomlight-desktop','--locked','--example','rewrite-controller-driver'])
         driver='target/debug/examples/rewrite-controller-driver'+('.exe' if win else '')
@@ -78,7 +78,7 @@ def main():
     except Exception as error:failure=type(error).__name__+': '+str(error);raise
     finally:
         if sdkroot and sdkroot.exists():shutil.rmtree(sdkroot)
-        cleanup={'sdkRootRemoved':not sdkroot or not sdkroot.exists(),'ownedRootRemoved':not root or not root.exists(),'credentialReferencesRemoved':not win}
+        cleanup={'sdkRootRemoved':not sdkroot or not sdkroot.exists(),'ownedRootRemoved':not root or not root.exists(),'credentialReferencesRemoved':not win or root is None}
         if root and root.exists():
             # The application owns deletion. Read only redacted profile references,
             # never keys/ciphertext. Missing failure receipts keep cleanup unresolved.

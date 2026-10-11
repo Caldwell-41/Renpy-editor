@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Selectable proposal editing — CI1 pending, manual same-thread wait
+## Selectable proposal editing — CI1 audited, CI2 correction
 
 Resume this approved outcome in the same thread, Mac ARM64 workspace and
 `codex/provider-qualification`. Starting fetched local/origin HEAD is
@@ -9,16 +9,15 @@ clean. No reset, unrelated discard or history rewrite. Implementationdcb106c and
 exact candidate**54ac943dda15f55d353f359fd3785d52f89ecdc5**. A later status-only
 commit preserves that candidate; do not replace it with current HEAD during audit.
 
-**Pending:** registered workflow357322921 production-scaffold.yml,
-[run38144885050](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38144885050),
-attempt1, exact head54ac943, branchcodex/provider-qualification. API accepted the
-single dispatch and returned the exact URL; one delayed-list identity read confirms
-it. Last observed in_progress/no conclusion at2026-10-11T13:52:50.420970Z
-(updated13:52:23Z). Inputs selectable_proposals:true, selectable_dispatch_ordinal:1,
-rewrite_build_ordinal:1, rewrite_first_launch_ordinal:1; all older action/upload
-selectorsfalse and both reuse IDs empty. Exclusive admission calls the same-commit
-selectable-proposals.yml recipe. Artifacts retain7days after completion; inspect expiry
-on resume. No autonomous polling/watcher or second dispatch.
+**CI1 audited:** run38144885050/attempt1/head54ac943 completed failure13:54:23Z.
+Both required platform jobs failed curl28 before qualification; no artifacts, package
+or editor starts. Ignored full log and exact failure identity are in the
+[owning failure audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci1-failure-audit-and-acquisition-correction--2026-10-12).
+User authorised fix/retry and CI polling for this chat only. Preserve global manual
+wait policy for other chats; no watcher/automation. CI2 correction reuses unchanged
+qualified official SDK bytes with the unchanged published checksum pin and fresh
+runtime, retaining bootstrap/terminal failure artifacts. Planned dispatchordinal2,
+packageordinal1/starts1–2; actual attempts must be audited.
 
 [Owning implementation ledger](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11)
 records current changes/results and unique failed harness evidence. The
@@ -39,7 +38,7 @@ protected syntax and unrelated extensions survive. Other whole-group actions ret
 accepted behavior. No immediate-commit handler loop.
 
 Local focused proof: renderer132, rewrite43, final selectable8, authoring32, prompt5,
-native worker6, gates8, frontend/dist privacy, actual controller/native credential/
+native worker6, current gates12, frontend/dist privacy, actual controller/native credential/
 loopback HTTP/core integration, and ten pinned SDK8.5.3 commands for accepted create/
 update source without editor metadata. Runtime asserts literal generated names/Beat
 prose, protected tokens, Return, unchanged accepted source and cleanup. Independent
@@ -58,27 +57,17 @@ has no approved signing identity. Terminal audit must inspect manifests, exact i
 package identities, SDK results, required native receipts/captures and cleanup; green
 status alone is insufficient. Keep defects, harness failures and missing evidence distinct.
 
-Counts: **paired dispatch1/4 on each target; Mac0/4packages,0/8editor starts;
-live0/2total batch generations,0/1discovery.** Windows actual package/start attempts
-are not yet observed; audit the CI1 emitted attempt ledger. Packageordinal1 and
-launches1–2 are the authorised plan, not a pass or an actual-count assertion. Max four paired
-runs. Windows planned CI1 package1/launches1–2 are not consumed until actually attempted;
-read the emitted ledger after terminal CI. Earlier allowances stay closed. Development
-compilation/helper/SDK checks consume no editor/package attempt. Notify when live
-qualification is ready for fresh native key entry on the existing selected endpoint/
-model. Never retrieve old keys from chat/logs or read/export credential files. Preserve
-explicit temporary-storage/cleanup; user native entry must be available before live
-calls. No live calls, user/real-provider credential operations or owned temporary editor/listener/root
-remain at this checkpoint.
+Counts: **paired dispatch1/4 each; Mac and Windows0/4packages,0/8starts;
+live0/2total batch generations,0/1discovery.** CI1 failed before qualification;
+planned package/start reservations were unused. Prior allowances stay closed. Max
+four paired runs. Development/helper/SDK checks consume no editor/package attempt.
+Notify when live checks need fresh native key entry on the existing selected endpoint/
+model; never retrieve old keys from chat/logs or read/export credential files. No live
+calls, real-provider credential operations or owned temporary editor/listener/root.
 
-Stop under WORKFLOW manual same-thread wait. User returns here with a completion/
-resume message; check only this exact run/attempt/head and reconcile fresh refs. Do not
-poll or install a watcher. Download and audit both required target artifacts and the
-admission result, rejecting failed/cancelled/skipped/missing/zero evidence. Audit source/
-input/package hashes, manifests, SDK/runtime results, native receipts/PNGs and cleanup
-before recording actual counts or qualification. Later docs-only commits do not require
-repeating unchanged native/package inputs. After terminal audit, continue only remaining in-scope native/live
-qualification and documentation/closure. One serial owner and read-only reviewer;
-no second writer, signing change, provider installation/public/paid calls, merge,
-release, generic or following outcome. Full Phase2 and final human acceptance remain
-separate; unchanged prior qualified evidence is reused from the accepted Studio closure.
+Continue reviewed correction, commit/push, fresh paired CI2 and permitted bounded
+same-chat polling, then terminal artifact/identity/SDK/native/cleanup audit. Do not
+rerun attempt2 or substitute later docs-only commits for the exact candidate. Resume
+remaining signed Mac/native/live qualification within caps after desktop unlock.
+One serial owner and independent read-only reviewer. No merge/release/provider/signing
+expansion or following outcome. Full Phase2/generic/final human acceptance remain separate.
