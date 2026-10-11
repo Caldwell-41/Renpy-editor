@@ -6100,3 +6100,21 @@ Fresh native key entry is needed only when the unlocked signed app is ready for 
 remaining live checks; never retrieve old keys/read or export credentials. No watcher,
 provider/signing/merge/release expansion or following deliverable. Full Phase2/generic/
 final human acceptance remains incomplete; unchanged prior evidence remains reusable.
+
+
+#### Selectable CI5 additional paired allowance — 2026-10-12
+
+User explicitly approved “another ci run” after the CI4 audit and published portable
+snapshot correction2446501. This grants **one additional paired focused run**, extending
+the selectable cumulative dispatch ceiling **4→5 per target**; package4/editor8 and
+live2total/discovery1 ceilings remain unchanged. Prior outcome allowances remain closed.
+Current-chat polling permission persists; no watcher or automatic follow-up.
+
+Fresh refs match2446501 locally/origin; main remains5f448ca, clean worktree, no reset.
+Only selectable workflow dispatch guards/descriptions extend to5. Plan fresh attempt1
+CI5 with Windows packageordinal3/firststart3 (reopen4 if reached), exclusive selectable
+selectors, no prior-run reuse/uploads. Actual pre-dispatch totals: Windows2/4packages,
+2/8starts; Mac0/4packages,0/8starts; paired4/5 each; live0/2, discovery0/1.
+Published candidate will include the reviewed snapshot fix and its exact2-test gate.
+Independent read-only review before publication/dispatch; then terminal artifact audit.
+Mac signed native/live remains blocked by locked desktop; no fresh key entry yet.

@@ -8,7 +8,7 @@ on:
         type: boolean
         default: false
       selectable_dispatch_ordinal:
-        description: Cumulative selectable paired dispatch, 1 through 4
+        description: Cumulative selectable paired dispatch, 1 through 5 (one approved extension)
         type: string
         default: '1'
       phase2_studio:

@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Selectable proposal editing — qualification blocked after final CI4 audit
+## Selectable proposal editing — approved CI5 preparation after CI4 audit
 
 Continue the approved outcome on Mac ARM64, `codex/provider-qualification`, preserving
 unrelated work and never resetting. Initial4bcfee0 continuation/main5f448ca reconciled.
@@ -36,12 +36,12 @@ fix joins normal UTF8 relative components with `/`, preserves hashes/containment
 refusal and rejects duplicate keys. Local snapshot_paths2/2 pass; future qualifier gates2.
 No product patch logic changed; no post-fix Windows native/packaged acceptance claimed.
 
-**Consumed:** paired4/4 each (exhausted); Windows2/4packages,2/8starts;
+**Consumed:** paired4/5 each after explicit one-run extension; Windows2/4packages,2/8starts;
 Mac0/4packages,0/8starts; live0/2total batch generations, discovery0/1.
-CI3/4 unreached reopen starts were unused. Earlier allowances stay closed. No CI5 or
-old-run rerun under this allowance. Additional paired allowance or a named required-host
-capability decision is needed before further CI; original scope approval is not needed.
-Current-chat polling was authorised only here and ended at terminal audit; no automation/
+CI3/4 unreached reopen starts were unused. Earlier allowances stay closed. User approved one additional paired CI5;
+workflow ceiling extends4→5 only. Plan Windows package3/starts3–4, fresh attempt1, no
+reuse/uploads. No sixth run or old-run rerun; original scope approval is not needed.
+Current-chat polling remains authorised through the additional run; no automation/
 watcher. Other chats retain WORKFLOW manual same-thread wait unless freshly amended.
 
 Mac control still reports locked; asynchronous unlock request unanswered, no app binding/
