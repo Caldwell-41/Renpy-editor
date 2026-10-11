@@ -4695,3 +4695,52 @@ PermissionDenied failures classified environment, no product repair). Final actu
 controller and build pass. All product/harness repairs were confirmed before any
 package/editor launch or CI dispatch. Current remote workflow inventory has no
 pending operation; last run remains the qualified Character cards run38093296977.
+
+
+### Generated lore native audit and CI1 — 2026-10-11
+
+State **`awaiting_ci`**. Published implementation candidate
+**`233454b4a0ae4c369d00c2dcd352c789829290b2`**, tree
+`e467eeeea0b83d92ea799b54e7751b8fbe185a11`. Fresh remote branch still matches this
+candidate; main remains5f448ca. No other pending workflow existed before dispatch.
+
+Signed Mac package1 passed strict signature, approved identity/designated requirement
+and mounted-installer content verification. Executable SHA256
+`6bd847ea76c4bb279ace79ae4cfcf0baa1c892192034253e42c2729f04e09b49`, installer
+`b6f3db892b1cffe827ef3848eceb2ba0921a023e14fb6bbadbe2bdcd82fc3ca1`.
+Native launches1–2 passed25 distinct phase1 +3 process-reopen checks. Owner observed
+light/dark/compact send UI and physically clicked Generate, Save and separate Approve
+through CUA. Passive semantic and exact metadata disclosure, inert markup, one Save,
+duplicate refusal, proposed/approved separation, approval Undo/Redo, unchanged runnable
+source, malformed/model-approval/cancelled/stale-external zero writes and project reopen
+passed. Five actual HTTP body digests equal reviewed digests. Process reopen sends zero
+HTTP and preserves all metadata hashes/custom prompt/credential readability.
+
+Owner and independent GPT-6.1 Sol High reviewer audited248 exact Git input hashes,
+matching tree/binary/installer and complete reports. No native acceptance blocker.
+Reviewer sandbox could not establish certificate trust/process inspection; owner
+approved-host strict verification and exited-process/listener checks establish those
+capabilities. No signing/trust change. Disposable profile/credential development
+generation and fixture removed after probe credential-record cleanup. Local evidence
+retained under ignored `.toolchains/lore-mac-native-01`, output logs, package receipts,
+privacy reports and attempt ledger. Visual actions are owner-observed agent evidence,
+separate from final human acceptance. No new SDK execution: unchanged source/runtime
+proof1320d0a/run38056790759 reused because this action changes no runnable bytes.
+
+User expressly authorized polling **all CI runs in this chat** and review/fix/rerun,
+overriding earlier manual same-thread no-polling directions for this chat. Finite
+allowance remains unchanged; failures must be classified before corrections/redispatch.
+Confirmed focused run[38105665896](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38105665896),
+workflow357322921 (`production-scaffold.yml`), attempt1, branch
+`codex/provider-qualification`, head233454b4a0ae4c369d00c2dcd352c789829290b2,
+created/last observed queued2026-10-11T02:35:48Z. Exact inputs: generate_lore=true;
+generate_card/draft_scene/continue_scene/dialogue_rewrite_windows/upload_packages=false;
+rewrite_build_ordinal=1, rewrite_first_launch_ordinal=1; both reuse IDs empty.
+Windows x64 package/native and macOS ARM64 automated jobs only; generic matrix skipped
+by selected scope, packages not published. Actual jobs/artifacts must be audited.
+
+Cumulative actual use: Mac1/4packages,2/6launches,1/4dispatches; Windows0/4packages,
+0/6launches,1/4dispatches before runner artifact audit. Windows build1/launches1–2
+reserved by CI1; count actual failed/cancelled/implicit attempts from artifacts.
+Review/fixes remain serial. No full bounded acceptance claim until required CI cases,
+input identity, native artifacts and independent final audit pass. No next deliverable.

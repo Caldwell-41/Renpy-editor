@@ -1,40 +1,48 @@
 # Current outcome handover
 
-## Generated lorebook entries — in progress
+## Generated lorebook entries — awaiting CI
 
 Repository `Caldwell-41/Renpy-editor`, branch `codex/provider-qualification`, retained
-Mac ARM64 session. Fresh refs match clean baseline `f25605d`; no reset or unrelated
-work. Prior Generated Character cards closure remains qualified at8a230a9/run38093296977.
-The [selected task](../tasks/active/phase-2-initial-llm-assistance.md#generated-lorebook-entries-selection--2026-10-11)
-owns selection, acceptance, finite allowance and detailed implementation/failure record.
+Mac ARM64 session. Published candidate **233454b4a0ae4c369d00c2dcd352c789829290b2**,
+tree e467eeeea0b83d92ea799b54e7751b8fbe185a11. Fresh origin branch matches; main 5f448ca.
+No reset or unrelated work. Prior Generated Character cards closure f25605d remains
+qualified at8a230a9/run38093296977. The
+[selected task](../tasks/active/phase-2-initial-llm-assistance.md#generated-lore-native-audit-and-ci1--2026-10-11)
+owns scope, acceptance, exact evidence and finite allowance.
 
-Implemented bounded `generateLore` on shared prompts/context/proposals/references and
-one journalled metadata transaction/history. Author reviews title/applicability and
-explicit reference selections. Passive semantic/exact metadata review precedes Save
-once as proposed; separate explicit reviewLore approval supersedes existing approval,
-while Reject retains it. Core owns IDs/provenance/citations/support. Unknown extensions
-and unresolved scope/knowledge/links/citations survive. Stale own/cited supporting
-material blocks approval/inclusion; runnable source remains byte-exact. No model
-approval, automatic retrieval/injection or runtime-state inference.
+Implemented one bounded generateLore on shared prompts/context/proposals/references
+and transactional history. Author reviews applicability; passive semantic/exact metadata
+review precedes Save once as proposed. Separate exact revision approval replaces old
+approval; Reject retains it. Core owns IDs/provenance/citations/support. Unknown
+extensions/unresolved links survive; stale own/cited support blocks approval/inclusion.
+Runnable source byte-exact. No automatic retrieval/injection or runtime inference.
 
-One GPT-6.1 Sol High owner, shared edits serial; independent GPT-6.1 Sol High read-only
-review identified and confirmed fixes for scope validation, lore freshness, cited
-reference freshness, exact scope merge and SDK evidence label. No remaining actionable
-pre-package finding. Renderer131, actual controller/native credentials/HTTP/core and
-28 rejecting-gate tests pass (one required Windows-only polling test unavailable
-locally). Final core34/reference12/prompt5, transport8/worker6 and actual controller pass. No package/native/CI acceptance claim yet. Implementation is published in this preparation checkpoint before packaging/dispatch; this handover does not qualify a runtime candidate.
+One GPT-6.1 Sol High owner, serial shared edits and independent GPT-6.1 Sol High reviewer.
+All scope/freshness/merge product findings and SDK-evidence harness finding repaired and
+regression-checked before packaging. Focused local suites and actual controller pass.
+Signed Mac package1 +native1–2 pass25 distinct+3 checks;248 exact Git inputs/binary,
+five reviewed=HTTP digests, zero reopen HTTP/equal metadata and cleanup audited by
+owner/reviewer. Approved host establishes signature and exited-process/listener proof;
+reviewer sandbox limitations recorded. Owner CUA light/dark/compact/physical Generate,
+Save and Approve evidence remains agent evidence, not final human acceptance. Disposable
+fixture/profile/development credential generation removed; ignored evidence retained.
+Hosted CI lacks approved Mac identity; named signed native case completed locally.
+SDK 1320d0a/run38056790759 is explicit unchanged reuse, zero new SDK execution.
 
-Next: signed Mac package1/native launches1–2 on this retained host. Approved matching signing identity exists; no Keychain/trust/policy change.
-Hosted Mac lacks that approved signing capability, so only the named signed native
-case is local. Then dispatch `production-scaffold.yml generate_lore=true` with all
-other action selectors/upload false, reuse IDs empty, Windows build1/first launch1.
-Record exact run/attempt/head/inputs, publish wait checkpoint and end this normal turn.
-Resume same thread manually; audit actual artifacts and continue remaining in-scope
-fixes/review/acceptance within the unchanged allowance. No watcher/model polling.
+Pending [run38105665896](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38105665896),
+workflow357322921 production-scaffold.yml, attempt1, head 233454b4a0ae4c369d00c2dcd352c789829290b2,
+created/last observed queued2026-10-11T02:35:48Z. Inputs generate_lore=true; other five
+booleans false; Windows build1/first launch1; both reuse IDs empty. Required Windows
+x64 focused/native and Mac ARM64 automated artifacts remain unaudited. No acceptance
+claim from queued status. User subsequently expressly permits polling all CI runs in
+this chat and review/fix/rerun, overriding manual no-polling for this chat. Monitor
+with spaced checks, audit actual artifacts, classify failures before any correction or
+redispatch, then independent final review/in-scope fixes and bounded closure.
 
-New cumulative use per target currently0/4packages,0/6launches,0/4dispatches. All failed/
-cancelled/implicit attempts count; prior allowances stay closed. No pending CI or owned
-editor/listener/fixture. SDK source evidence1320d0a/run38056790759 is explicit unchanged
-reuse, not new execution. Full Phase2/2C.3/2C.4/live provider/final human acceptance
-remain outside this bounded closure. No signing/provider expansion, paid/public calls,
-merge/release or following deliverable.
+Actual cumulative use: Mac1/4packages,2/6launches,1/4dispatches; Windows0/4packages,
+0/6launches,1/4dispatches before artifact audit. CI reserves Windows build1/launches1–2;
+actual failed/cancelled/implicit attempts count. Prior allowances closed; reassess after
+two unsuccessful corrections of one hypothesis. Docs-only successors do not replace
+runtime candidate. No pending owned local editor/listener/fixture. Full Phase2/2C.3/2C.4,
+live provider/final human acceptance remain outside closure. No signing/provider
+expansion, paid/public calls, merge/release or following deliverable.
