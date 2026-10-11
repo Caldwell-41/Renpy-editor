@@ -106,3 +106,11 @@ class LoreNativeGate(NativeEvidenceGate):
             with self.assertRaises(ValueError):validate_native_stage(self.root,'physical-approve',42,'a'*64,lore=True)
         value['action']='draftScene';path.write_text(json.dumps(value))
         with self.assertRaises(ValueError):validate_native_stage(self.root,'physical-approve',42,'a'*64,lore=True)
+        value=self.receipt('physical-close');value['action']='generateLore';value['checks']['completedAssistClosedObserved']=True
+        path=self.root/'physical-close.json';path.write_text(json.dumps(value))
+        validate_native_stage(self.root,'physical-close',42,'a'*64,lore=True)
+        for key in ('completedAssistClosedObserved','osMouseInput'):
+            bad=copy.deepcopy(value);bad['checks'][key]=False;path.write_text(json.dumps(bad))
+            with self.assertRaises(ValueError):validate_native_stage(self.root,'physical-close',42,'a'*64,lore=True)
+        path.write_text(json.dumps(value))
+        with self.assertRaises(ValueError):validate_native_stage(self.root,'physical-close',42,'a'*64,card=True)

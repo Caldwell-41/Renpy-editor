@@ -381,7 +381,7 @@ def finish(output):
             assert len(report['requestBodySHA256']) == (5 if phase == 1 else 0)
             if phase == 1:
                 from rewrite_native_evidence import NATIVE_STAGES, required_stages
-                assert set(report['nativeStageReceipts']) == required_stages(generating())
+                assert set(report['nativeStageReceipts']) == required_stages(generating() and not lore(), lore())
                 assert report['requestBodySHA256'] == report['details']['reviewedBodyDigests']
         except Exception as error:
             errors.append(f'Phase {phase}: {type(error).__name__}')

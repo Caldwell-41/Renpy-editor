@@ -5316,3 +5316,61 @@ package1/editor1 and CI2 package2/editor2–3 reserved until actual ledger audit
 0/2 per action,0/2discoveries; generic0. Mac unlock and CI2 are actual blockers; storage
 approval is resolved. Preserve running owned launch5/fixture for reuse after unlock;
 if it exits, reassess the single remaining launch rather than silently replacing it.
+
+
+### Studio-only CI2 audit, live progress and completed-Assist repair — 2026-10-11
+
+CI2 run38114055500/attempt1/headfd2872e completed success05:27:56Z. Owner and
+independent reviewer audited required Mac/Windows artifacts11693300722/11693301650:
+23/84-entry manifests intact,252 candidate inputs and253 Windows package inputs match
+with PS1 checkout CRLF accounted. Windows executable31aac7a7 matches native PIDs4584/5884.
+Native25 distinct checks plus3 reopen pass, six physical/layout stages, five reviewed
+body digests equal actual HTTP digests, exact metadata preserved and zero reopen HTTP.
+Both actual five-action renderer/native credential/private-LAN chains and pinned8.5.3
+metadata-free accepted-source runtime pass. Raw Windows log confirms all9 reuse tests
+pass, including actual polling/placement helper regressions; no skips. Placement receipts
+are in bounds without a move; the clamp branch is established by the actual-helper
+regression. Owned native credentials/root cleanup passes. CI1 failure is retained.
+
+User unlocked the Mac and saved the temporary key through the native modal. Owner
+observed configured/API-key-saved status without reading/exporting its value. Storage
+and cleanup are explicitly authorized; historical credentials remain untouched. Exact
+owned live launch5 PID58371 and signed4d1120d package verified before reuse. Explicit
+discovery1/2 found the exact selected Gemma model. Ordinary real Studio generation
+card1/lore1/rewrite1/continue1 each returned valid production proposals. Card/lore were
+saved unapproved, then separately approved through their libraries. Rewrite explicitly
+included both generated approved revisions and the seed references, using a saved
+custom prompt and changed limits; acceptance retained all protected tokens. Installed
+rewrite baseline restored through explicit confirmation. Continue accepted one narration
+before the unchanged terminal. Generated references then correctly became unavailable
+because their supporting source read-set was stale; no forced inclusion. Draft remains
+0/2: the Mac locked again before its review/send. Manual unlock requested.
+
+Live evidence and public synthetic snapshots remain ignored. Provider-internal tool
+suppression/configuration is still unknown; reviewed client bodies disable tools,
+streaming and thinking and require strict schema. Live HTTP-body equality has not been
+independently captured; controlled integration/CI establishes that transport assertion.
+Live mixed history, project/process reopen, exact accepted-source SDK and credential/root
+cleanup remain required. No full qualification or final human acceptance claim.
+
+Observed product defect: successful Save leaves Assist classified as unfinished, so
+ordinary Close retains the panel. Clearing completed fields safely dismissed it in the
+old package; a WKWebView-confirm cause remains unproven. Repair marks completion only
+after successful acceptance, uses one unfinished predicate for Close/navigation, and
+resets completion on edit/reprepare. Failed accept/cancel guards remain. Renderer131
+passes, build/desktop check pass; tests cover saved Close without confirmation, refused
+accept/cancel and reprepare/edit guards. Independent reviewer finds no blocking UI issue.
+New lore native stage physically clicks Close after successful Save, requires panel
+dismissal and unchanged full public snapshot, before existing Undo/Redo/approval. Seven
+Windows stages and the new named result are mandatory; old stale/refused cleanup remains.
+Rejecting native14/probe6 gates pass; reuse7 pass with2 Windows-only skips, requiring CI.
+Final independent harness review and fresh coherent package/native/CI evidence remain.
+
+Actual cumulative allowance: Mac1/4packages,5/6launches,2/4dispatches; Windows2/4packages,
+3/6launches,2/4dispatches. Live card/lore/rewrite/continue1/2 each, draft0/2, discovery1/2.
+Final Maclaunch6 remains reserved for existing live reopen. Conventional fixed-candidate
+native acceptance plus process reopen needs two additional Mac launches; no extension
+is implied. Prepare the reviewed fix/package within existing build allowance, then ask
+for the concrete launch-limit change6→8. Fresh CI3 package3/editor4–5/dispatch3 fits
+Windows allowances; Mac automated dispatch3 fits. Preserve same problem/allowance,
+manual CI wait/resume, credential cleanup, serial owner and independent reviewer.

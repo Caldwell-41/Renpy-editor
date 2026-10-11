@@ -78,7 +78,7 @@ try:
    try:item=json.loads(line)
    except ValueError:continue
    print(json.dumps(item),flush=True)
-   if a.native_driver and item.get('evidence')=='rewrite-stage' and item.get('stage') in required_stages(a.generate_card or a.generate_lore):
+   if a.native_driver and item.get('evidence')=='rewrite-stage' and item.get('stage') in required_stages(a.generate_card, a.generate_lore):
     stage=item['stage'];native=a.output/'native';native.mkdir(exist_ok=True)
     try:
      result=subprocess.run(['powershell.exe','-NoProfile','-File',str(a.native_driver.resolve()),'-ProcessId',str(process.pid),'-Executable',str(a.executable.resolve()),'-Stage',stage,'-Output',str(native.resolve()),*(['-GenerateLore'] if a.generate_lore else ['-GenerateCard'] if a.generate_card else ['-DraftScene'] if a.draft_scene else ['-ContinueScene'] if a.continue_scene else [])],capture_output=True,text=True,timeout=75)
@@ -103,7 +103,7 @@ try:
  if code or not report:raise ValueError('Required packaged proof failed; diagnose before retry')
  validate_report(report,a.phase,a.continue_scene,a.draft_scene,a.generate_card,a.generate_lore)
  if errors:raise ValueError('Controlled fixture or required native evidence failed: '+', '.join(errors))
- if a.native_driver and a.phase==1 and {r['stage'] for r in native_receipts}!=required_stages(a.generate_card or a.generate_lore):raise ValueError('Every native driver stage is required')
+ if a.native_driver and a.phase==1 and {r['stage'] for r in native_receipts}!=required_stages(a.generate_card, a.generate_lore):raise ValueError('Every native driver stage is required')
  if a.phase==1 and requests!=report['details']['reviewedBodyDigests']:raise ValueError('Exact reviewed bodies do not match all five HTTP requests')
  if a.phase==2 and (requests or project_bytes()!=before):raise ValueError('Process reopen sent HTTP or changed project bytes')
  report['requestBodySHA256']=requests;report['elapsedSeconds']=round(time.monotonic()-started,2);report['metadataSHA256']={f:hashlib.sha256((editor/f).read_bytes()).hexdigest() for f in owned_files}

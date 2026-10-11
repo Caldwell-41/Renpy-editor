@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('preflight','observe-light','observe-dark','observe-narrow','physical-send','physical-accept','physical-approve')]
+    [ValidateSet('preflight','observe-light','observe-dark','observe-narrow','physical-send','physical-accept','physical-close','physical-approve')]
     [string]$Stage,
     [Parameter(Mandatory=$true)][string]$Output,
     [int]$ProcessId = 0,
@@ -206,7 +206,7 @@ try {
         Wait-Native { [RewriteNative]::GetForegroundWindow() -eq $script:handle }
         $receipt.checks.ownedWindow=$true
         Ensure-ObservableWindow
-        $controlName=if($Stage -eq 'physical-approve'){$approveName}elseif($Stage -eq 'physical-accept') { $acceptName } else {'Generate proposal'}
+        $controlName=if($Stage -eq 'physical-close'){'Close Assist'}elseif($Stage -eq 'physical-approve'){$approveName}elseif($Stage -eq 'physical-accept') { $acceptName } else {'Generate proposal'}
         Wait-Native { $null -ne (Button $controlName) }
         Focus-Control (Button $controlName)
         if($Stage -eq 'physical-approve'){Assert-Native ((Has-Text 'Current approved text') -and (Has-Text 'Proposed text') -and $null -ne (Button $approveName)) 'Required native approval review missing'}else{Assert-Native ((Has-Text $actionTitle) -and $null -ne (Button 'Generate proposal') -and $null -ne (Button $acceptName)) 'Required native rewrite controls missing'}
@@ -231,6 +231,13 @@ try {
             Click-Control $acceptName
             Wait-Native { (Has-Text $(if($GenerateLore){'Proposed lore entry saved as one change.'}elseif($GenerateCard){'Proposed card saved as one change.'}else{'Accepted and saved as one change.'})) -and (Has-ButtonState $acceptName $false) }
             $receipt.checks.savedOnceObserved=$true
+            $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
+        }
+        if($Stage -eq 'physical-close'){
+            Assert-Native ($GenerateLore -and (Has-Text 'Proposed lore entry saved as one change.') -and (Has-ButtonState $acceptName $false)) 'Completed saved lore review required before Close'
+            Click-Control 'Close Assist'
+            Wait-Native { $null -eq (Button 'Close Assist') -and $null -eq (Button 'Generate proposal') -and $null -eq (Button $acceptName) -and $null -ne (Button 'Assist · Draft lore entry') -and (Has-Text 'Saved') }
+            $receipt.checks.completedAssistClosedObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         }
         if($Stage -eq 'physical-approve'){Click-Control $approveName;Wait-Native { $null -eq (Button $approveName) -and (Has-Text 'Saved') };$receipt.checks.approvalObserved=$true;$receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)}

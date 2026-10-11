@@ -40,6 +40,7 @@ CARD_CHECKS={1:{
  'Stale external source refuses acceptance with zero writes','Project reopen retains exact approved card',
 },2:{'Process reopen retains approved card and exact revision','Process reopen retains custom prompt','Process reopen retains native credential readability'}}
 LORE_CHECKS={phase:{name.replace('Card fields','Lore fields').replace('Core card','Core lore').replace('approved card','approved lore entry') for name in checks} for phase,checks in CARD_CHECKS.items()}
+LORE_CHECKS[1].add('Physical Close after successful save dismisses retained review without changing saved metadata')
 def validate_report(report,phase,continuing=False,drafting=False,card=False,lore=False):
  if not isinstance(report,dict) or report.get('case')!='dialogue-rewrite' or report.get('passed') is not True or report.get('cleanupComplete') is not True:raise ValueError('Missing successful cleaned rewrite report')
  d=report.get('details',{})

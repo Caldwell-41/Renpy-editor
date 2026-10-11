@@ -278,7 +278,7 @@ fn core_request(
     }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && request["operation"]=="probe.rewriteStage" {
         let stage=request["payload"]["stage"].as_str().ok_or("Rewrite stage required")?;
-        if !["snapshot","physical-send","physical-accept","physical-approve","observe-light","observe-dark","observe-narrow","external-source","restore-source","server-delay"].contains(&stage){return Err("Rewrite stage refused");}
+        if !["snapshot","physical-send","physical-accept","physical-close","physical-approve","observe-light","observe-dark","observe-narrow","external-source","restore-source","server-delay"].contains(&stage){return Err("Rewrite stage refused");}
         let root=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REWRITE_PROBE_ROOT").ok_or("Rewrite root required")?);
         let done=root.join(format!("{stage}.done")).is_file();
         if stage=="snapshot" {
