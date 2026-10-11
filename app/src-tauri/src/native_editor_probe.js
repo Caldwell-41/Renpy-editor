@@ -24,6 +24,14 @@ window.__loomlightProbeFindButton = label => [...document.querySelectorAll('butt
     : button.textContent;
   return text === label;
 });
+// Beat disclosure buttons toggle selection. Acceptance and history refreshes can
+// retain the fixture target, so clicking it unconditionally would deselect it.
+window.__loomlightProbeSelectBeat = beatId => {
+  const cards = [...document.querySelectorAll('.beat-card')].filter(card => card.dataset.beatId === beatId);
+  const select = cards.length === 1 && cards[0].querySelector('.beat-select');
+  if (!select) throw Error('Unique rendered fixture Beat required');
+  if (select.ariaExpanded !== 'true') select.click();
+};
 // Only use for reads or explicitly idempotent preference writes. Busy is a
 // pre-dispatch rejection; other failures and the deadline remain failures.
 window.__loomlightProbeRetryBusy = async (task, timeoutMs = 10000) => {

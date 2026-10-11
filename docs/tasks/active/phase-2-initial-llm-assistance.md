@@ -6221,3 +6221,90 @@ allowances stay closed; no CI7/rerun authorised. Current-chat polling permission
 persists, no watcher/automation. Publish reviewed allowance amendment after independent
 read-only review, then dispatch and audit exact candidate/run/artifact/actual attempts.
 Mac inventory still locked; no local editor binding/start or key entry.
+
+
+#### Selectable CI6 confirmed dispatch — 2026-10-12
+
+Reviewed independent-review/allowance amendment published2a3bd895c5dd3e941cae06191c385d541751d448.
+[CI6run38174608600](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38174608600),
+workflow357322921/attempt1/exacthead2a3bd89/branchcodex/provider-qualification, created
+2026-10-11T21:01:05Z, initialqueued/no conclusion. Direct returned URL resolved once;
+no duplicate dispatch. Inputs selectabletrue/dispatch6/build4/firststart4, all older
+selectors/uploadfalse, both reuseIDs empty. Ignored selectable-ci6-dispatch.json retains
+exact receipt/identity. **Paired6/6each consumed**; no CI7/rerun. Actual pre-terminal
+Windows3packages/3starts, Mac0/0; final build4/starts4–5 await emitted-attempt audit.
+Live0/2/discovery0/1 unchanged; prior allowances closed. Current-chat polling permitted.
+
+
+#### Selectable CI6 terminal audit and idempotent remount correction — 2026-10-12
+
+CI6run38174608600/attempt1/head2a3bd895c5dd3e941cae06191c385d541751d448 completed
+**overall failure2026-10-11T21:15:45Z**. Mac job114574226140/artifact11715536298
+passes all12 automated/controller/SDK checks;33files, outer32/child28 manifests.
+Windows job114574226187/artifact11716160731 contains64files, outer63/child59
+manifests. Both exact candidate/tree/run/attempt/platform/pinned-tool identities,
+264material input hashes with declared PS1CRLF transformation and all artifact hashes
+verify. Historical CI6 raw counts are renderer132/core8/prompts5/gates12/snapshot3/
+cleanup1/workers6; controller build/dispatch and SDK pass. SDK8.5.3 two metadata-free
+cases/ten commands/17 assertions, exact accepted exports and unchanged source verify.
+Owner final privacy33/64 passes, including Windows where terminal pipeline privacy
+was unreached. Independent read-only artifact audit agrees; failure remains failure.
+
+Windows copied executable SHA256
+`e34fa263383bdf955c7fba8a9cd03852ff7a8c08b5e1fb69144bed095da9813a`
+matches package4/nativePID2244. All6native light/dark/compact/Generate/selection/Save
+receipts and intact captures pass. **Exact selected files committed, one Undo and
+one Redo pass**, establishing the earlier ownership/snapshot correction. Phase1 stops
+after13/19 with `Error: Timeout at physical-accept`, a stale stage label; only1reviewed
+body digest. Supported Character update, later refusals/project/process reopen and
+phase2 remain unpassed. Do not infer later native qualification from controller proof.
+
+CI6 **cleanup passes**: request/credential/host owners alltrue, SDKroot/ownedroot/public
+synthetic credential references removed and cleanupComplete true. This establishes the
+6246b8b cleanup correction, not retrospective CI5 cleanup; CI5 remains unresolved.
+No real-provider key or credential operation occurred. Ignored terminal receipts, exact
+artifacts, owner audits and complete Windows job log retain the unique failure.
+Windows job log SHA256 `bf74523eba38b969d51cc416bf828006b57f358f72ca141fe7abdf1ea30d3980`.
+
+The user-requested fresh **GPT-6.1 Sol High independent owner** resumed sole serial
+code ownership after CI6. It found a concrete downstream **harness defect**:
+mount(false) unconditionally clicks the narration Beat disclosure. Production Scene
+selection toggles; accepted Save selects that Beat and Undo/Redo preserve it. The
+remount click therefore deselects it and disables Assist Edit Scene. A regression
+using actual production Scene/history controls reproduces this exact failure.
+
+In-scope five-file correction adds an idempotent rendered fixture selection helper,
+requires unique target, clicks only when unselected and observes selected state before
+Assist. Mount records create/update stage; wait records the fixed awaited control.
+Failure diagnostics retain bounded panel/control/state/count facts without project text,
+paths or credentials. Production toggle/core/transaction behavior is unchanged. The
+new regression covers fresh/already-selected behavior, missing-target refusal, actual
+probe timeout reporting and private DOM text absence. Exact renderer gate is now133,
+and rejects old132; historical CI6 evidence remains132.
+
+Local **renderer133/133, native helper3/3 and gate12/12 pass**, zero failed/cancelled/
+skipped/todo. Exact final renderer log gate and diff check pass. Ignored raw focused,
+renderer-final and gate logs plus selectable-ci6-repair-audit.txt retain commands,
+results and hashes. Initial renderer test failed because HappyDOM did not reflect the
+production ariaExpanded property through getAttribute; helper/wait/test now use the
+production property. Initial failed log retained. Initial direct Python verification
+lacked scripts import path and did not invoke its gate; corrected invocation passes.
+Independent read-only code review passes with no findings. Sole writer returned to
+parent; no new package/editor/CI/network/provider/credential operation for this repair.
+This is local harness/renderer proof, **not post-fix Windows native qualification**.
+
+Actual cumulative **Windows4/4packages,4/8starts**, including CI6 package4/start4;
+reopen5 unreached. **Mac0/4packages,0/8starts; paired6/6each exhausted**, including both
+explicit one-run extensions. Live0/2total batch generations, discovery0/1. Prior
+allowances closed. **No CI7/rerun or Windows package5 authorised**. Corrected Windows
+native update/refusal/reopen proof requires both a new Windows package and paired-CI
+allowance or approved required-host capability decision; original scope approval
+persists. CI6 polling completed, no watcher/automation remains. Mac inventory is still
+locked, no app binding/start/key entry; fresh native entry needed only when signed app
+is ready. Never retrieve old keys/read or export credentials. Publish reviewed repair
+and accurate blocked records. Full Phase2/generic/final human acceptance remain incomplete.
+
+Final independent read-only code/status release review passes with no findings.
+JavaScript/Python syntax,514-file structure/privacy validation and diff check pass;
+fresh refs still match2a3bd89/main5f448ca. Authorized publication preserves all failed
+evidence and exhausted limits; no additional native/CI/live qualification inferred.

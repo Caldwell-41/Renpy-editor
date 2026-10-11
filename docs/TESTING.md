@@ -1649,13 +1649,17 @@ The approved selectable outcome is owned by the
 same-file/subset/dependency/stable-ID/history/reopen, supported Character update,
 literal names/manual update preservation, aggregate UTF-8 boundaries, malformed whole
 batch, collision/custom interpretation, stale/cancel/draft/refusal and compound recovery.
-The broader existing rewrite suite requires43 cases; renderer check132/prompt5/native
+The broader existing rewrite suite requires43 cases; renderer check133/prompt5/native
 worker6 remain focused shared gates. Three `snapshot_paths` desktop tests require
 portable component-based keys, exact nested hashes/recovery filtering and host-checkout
 serialization with typed pre-dispatch busy. One `probe_cleanup` test requires bounded
 checkout waiting with zero task invocation on deadline and no retry of inner failures.
 Snapshot I/O/path/link errors remain failures; recovery bytes are included. Probe
 shutdown always runs independently and records request/credential/host cleanup owners.
+The three native helper tests include a production Scene/history regression: remount
+must select an unselected fixture Beat without toggling an already selected Beat off.
+Probe mount observes the selected state; timeout diagnostics retain fixed awaited
+control/stage and bounded state/count facts without project text or credential values.
 These are harness checks; they do not replace native saved-byte/cleanup proof. Loopback worker/controller tests require socket
 capability; sandbox denial before socket bind is a harness failure, never a pass.
 

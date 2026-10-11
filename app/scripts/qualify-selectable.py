@@ -9,7 +9,7 @@ def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def cargo_gate(text,count):
     assert re.search(rf'test result: ok\. {count} passed; 0 failed; 0 ignored; 0 measured;',text)
 def renderer_gate(text):
-    for k,n in [('tests',132),('pass',132),('fail',0),('cancelled',0),('skipped',0),('todo',0)]:assert re.search(r'(?:ℹ|#) '+k+' '+str(n)+r'(?:\r?\n)',text)
+    for k,n in [('tests',133),('pass',133),('fail',0),('cancelled',0),('skipped',0),('todo',0)]:assert re.search(r'(?:ℹ|#) '+k+' '+str(n)+r'(?:\r?\n)',text)
 def manifest_gate(directory,value):
     assert value['schemaVersion']==1 and value['files']
     assert {p.relative_to(directory).as_posix():sha(p) for p in directory.rglob('*') if p.is_file() and p.name!='manifest.json'}==value['files']

@@ -15,9 +15,9 @@ def seal_child(child):
     evidence.write(child/'manifest.json',{'schemaVersion':1,'files':{p.relative_to(child).as_posix():evidence.sha(p) for p in child.rglob('*') if p.is_file() and p.name!='manifest.json'}})
 class Gates(unittest.TestCase):
     def test_renderer_requires_exact_nonzero_unskipped(self):
-        good=''.join(f'ℹ {k} {v}\n' for k,v in [('tests',132),('pass',132),('fail',0),('cancelled',0),('skipped',0),('todo',0)])
+        good=''.join(f'ℹ {k} {v}\n' for k,v in [('tests',133),('pass',133),('fail',0),('cancelled',0),('skipped',0),('todo',0)])
         q.renderer_gate(good)
-        for bad in ['',good.replace('pass 132','pass 0'),good.replace('skipped 0','skipped 1')]:
+        for bad in ['',good.replace('pass 133','pass 0'),good.replace('skipped 0','skipped 1'),good.replace('133','132')]:
             with self.assertRaises(AssertionError):q.renderer_gate(bad)
     def test_cargo_requires_exact_passes(self):
         good='test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured;'
