@@ -1203,4 +1203,5 @@ card and approved text** shows both versions. **Approve this card revision** exp
 replaces approved text; **Reject proposed card** retains it. Supporting source and
 reference staleness prevents approval or later inclusion. Both Save and review decisions
 use shared Undo/Redo; reopen retains the exact saved revision. Settings edits/restores
-the action prompt. Platform evidence and bounded acceptance belong to the active task.
+the action prompt. The [qualified task closure](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
+records Windows and signed Mac native evidence; final human acceptance remains separate.

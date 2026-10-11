@@ -86,7 +86,14 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 **Outcome:** Unsloth Studio and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Persistent Character cards and a lorebook support manual and LLM-generated content for selected context; system prompts are editable/resettable to baseline, with explicit context and response limits. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
 
-The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records the provider contracts, official Unsloth documentation, selected-context rules, proposal/partial-acceptance design, lore lifecycle and separately gated execution checkpoints. The bounded source foundation is qualified and integrated; provider/AI implementation remains unstarted. Phase 1 acceptance and explicit checkpoint approval remain entry requirements.
+The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records provider contracts,
+selected-context rules, proposal/history ownership and separately selected execution.
+The bounded source foundation, settings/credentials, synthetic request lifecycle,
+manual references, prompts/context, first rewrite, Continue Scene, Draft Scene and
+[Generated Character cards](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
+are implemented and qualified within their recorded scopes. Generated lore, remaining
+provider/action coverage and integrated acceptance remain incomplete. Existing bounded
+evidence does not select or authorize the remaining Phase 2 work.
 
 The selected delivery sequence brings forward bounded 3A source foundations alongside
 provider feasibility, then targets a complete reviewed dialogue rewrite using manual

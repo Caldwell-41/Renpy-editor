@@ -6,9 +6,11 @@ foundation are accepted; Phase 2 remains incomplete. Studio settings and credent
 are implemented; the selected Windows remembered-credential qualification and cleanup are complete. [CURRENT](../../status/CURRENT.md) owns
 project status; [HANDOVER](../../status/HANDOVER.md) owns continuation and recovery.
 
-The selected first safe rewrite and bounded Continue Scene are qualified on both
-targets; see the [first rewrite audit](#final-pinned-windows-audit-and-both-target-qualification--2026-10-10)
-and [Continue Scene closure](#continue-scene-both-target-qualification-and-closure--2026-10-10).
+The bounded first rewrite, Continue Scene, Draft Scene and Generated Character cards
+are qualified on both targets. See the [first rewrite audit](#final-pinned-windows-audit-and-both-target-qualification--2026-10-10),
+[Continue Scene closure](#continue-scene-both-target-qualification-and-closure--2026-10-10),
+[Draft Scene closure](#draft-scene-qualified-closure--2026-10-11) and
+[Generated Character cards closure](#generated-character-cards-qualified-closure--2026-10-11).
 Read its CI-first amendment/selection only when continuing or reviewing that slice,
 then only the relevant requirement sections. Completed credential/request selections below
 are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
@@ -4465,3 +4467,155 @@ record diagnosed blocker and stop dispatch execution under exhausted allowance;
 remaining cheap in-scope review/fixes do not imply extra CI. No next deliverable,
 merge/release, provider/signing expansion, paid/public calls, generated lore or runnable
 Character/Appearance changes. Full Phase2/final human acceptance remain separate.
+
+### Generated Character cards qualified closure — 2026-10-11
+
+User resumed recorded run38093296977 to audit actual evidence and close only this
+selected outcome within its allowance. Fresh local/origin branch refs reconcile at
+728c7cddb71206b6dd4f2fd68766349e1858ae3d, origin/main5f448ca unchanged; clean retained
+Mac ARM64 checkout, repository-only noreply identity, no reset. Runtime candidate
+8a230a9619ec7504f1a91dc8504e6e9667108190 (treeed3934caeac5cc5aa8513965d3dfada0b61b91af)
+contains implementation67faeaa, worker fixture correctionf1a1a8b, diagnostics/package
+prerequisite3246190 and independently reviewed exact-handle cancellation repair.
+Successor728c7cd changes only task/CURRENT/HANDOVER; runtime inputs remain identical.
+This docs-only closure does not replace the tested candidate or require another package.
+
+#### Final CI and actual artifact audit
+
+Workflow357322921, [run38093296977](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38093296977),
+attempt1, workflow_dispatch, branchcodex/provider-qualification, exact8a230a9 candidate
+above, terminal **success** at2026-10-10T23:08:17Z. Required Windows114333962162
+succeeded23:08:16Z; Mac114333962141 succeeded22:59:41Z. Actual inputs generate_card=true,
+all other selectors/upload_packages=false, build3/firstlaunch1, both reuse IDs empty.
+Generic Preflight/matrix deliberately skipped; no required focused/native case skipped.
+SDK download/execution omitted; prior qualified runtime evidence explicitly reused
+under the selected metadata-only contract.
+
+Artifacts11685720298Windows/11684614330Mac retained and downloaded. API artifact digests
+SHA2560dc897e5a024ca110b9dac4cca4d670e39db3a1edc8ac6f460b951446d1b16f6 and
+fbf0d67c2acdf49f9538d1fc72073c24e9b5459d5a04dd7397308fec97e6600b respectively.
+All71Windows/13Mac manifest hashes verified against actual files;245focused input hashes
+per target and246Windows packaged input hashes verified against the exact Git candidate.
+Only .gitattributes-prescribed PowerShell CRLF conversion differs on both hosts; no
+blanket source normalization/exemption. Package/identity/tree/action/run/attempt bindings
+match. Windows retained executable SHA256
+3838e4f300e4457bc8dfce7f7f6dd6693ea2dc63f6e5fba05a3a50e9eb1f0ebb;
+setup SHA256d838dd2e76c9b5f6ee08e388fbac7d5c3563d7f48a8c99da607de539bff68385;
+MSI SHA256ae7b3d0325c440b34269c30d461c454c54d5f64cf570beee1da8a08c1cbf4bab.
+Actual package build3 passes; no cache/reuse promotion substitutes for this build.
+
+Both targets establish core26/prompts5/references12/renderer129/transport8/worker6 and
+actual controller exact-schema HTTP proof. Mac9actual automated checks all pass with
+0package/0editor launches. Windows worker6 completes0.89seconds. Decisive raw transport
+observations: stalled headers owned/shutdownOk, completion344.2microseconds/serverEOF37;
+partial body owned/shutdownOk, completion153.2microseconds/serverEOF22.4. Both return
+Cancelled and satisfy unchanged <2second worker/EOF bounds. Mac observations likewise
+prompt/Ok. This establishes the repaired Windows cancellation behavior; it does not
+prove a general Rust clone defect or the precise internal Winsock cause.
+
+Windows native wrapper records launch1PID7944 and separate reopenlaunch2PID3460, same
+exact packaged binary.25distinct phase1 checks (26listed, one repeated foundation check)
+and3separate-process checks pass; five reviewed/actual HTTP body hashes match exactly.
+Six generateCard stage receipts bind action/PID/binary, actual UI Automation/OSSendInput,
+viewport and light/dark/compact evidence; nine captures pass SHA256/PNG/dimension/
+nonblank/change validation. Compact and physical Approve before/after pixels inspected:
+Approve is visible and the approved saved state follows the action. Generate creates
+an inert preview; Save creates proposed metadata once with old approval retained;
+separate Approve supersedes it. One acceptance Undo/Redo and separate approval Undo/Redo
+restore exact library bytes. All runnable source stays byte exact. Malformed/model
+approval/cancelled/stale external cases refuse without writes. Reopen sends0HTTP and
+changes0project bytes; all four reported metadata hashes equal both phases and cleanup
+receipt. Terminal audit has all actual outcomes success and no errors. Owned fixture
+root removal and credential-reference removal reported, both native terminal cleanup
+reports pass; no surviving fixture/controller/editor operation is pending.
+
+CI privacy scans Windows69evidence/6package and Mac12files pass. Downloaded combined
+artifact privacy86files passes. SDK receipts explicitly reuse qualified official pinned
+runtime candidate1320d0a6507625abdd3fa20aa6a3eccffaccfcd6/run38056790759; this card-only
+metadata mutation adds byte-exact source proof, not a new SDK execution claim.
+
+Renewed signed Mac package2/native launches3–4 on exact8a230a9 remains the coherent
+changed-action native proof. Approved identity/name/requirement/signing policy unchanged;
+strict signature and actual installer contents verified.246exact inputs, retained
+binaryf917c0c3/DMG05860d27 full hashes in prior proof section, CUA physical Generate/
+Save/Approve, light/dark/720logical compact,25distinct+3/five exact bodies/0HTTP reopen,
+history/refusals/source preservation and scoped credential/process/root cleanup pass.
+Package7/native5file privacy passes. This named local capability is required because
+hosted Mac lacks approved signing credentials; no further local handoff/repeated launch.
+
+#### Acceptance, review and closed allowance
+
+Selected outcome **accepted and complete**: one bounded new/update editor-only Character
+card from a saved ordinary Beat and explicitly selected approved references, core-owned
+IDs/revision/provenance/supporting citations, passive field/exact metadata review,
+exact prepared dispatch, one Save transaction/Undo and duplicate refusal. Generation
+cannot approve itself. Existing approved text remains until separate explicit replacement
+approval; Reject retains it. Shared history and reopen preserve IDs/status/provenance/
+unknown extensions and all runnable source bytes. Focused core/controller assertions
+also establish new-card acceptance, replacement rejection, malformed responses, missing
+recordId/wrong target/unsafe/oversized fields, competing request/draft/session/prompt/reference/source-identity/
+external-edit zero writes, generated manual-approval bypass refusal, stale supporting
+story/Character/default-source approval and later reference-inclusion refusal.
+
+Independent GPT-6.1 Sol High implementation/failure reassessment/exact-repair reviews
+and final read-only actual-artifact audit find no actionable acceptance blocker. Final
+review separately verifies manifest/input/package/capture identities, raw cancellation
+bounds, native25+3/five bodies, source/history/approval boundaries, cleanup and totals.
+Reviewer performed read-only hash/gate validation, no writes/network/tests/builds/apps/
+dispatch. Owner audited the same evidence and inspected native captures; no broad tests
+or expensive repeats. Canonical context/UI/testing/architecture/ADR/data contracts retain
+the delivered semantics; closure links and roadmap/live status reconciled.
+
+Unique failed evidence remains unchanged: run38083896396 worker fixture setup consumed
+its deadline, corrected and later6/6; run38085719737 partial-response cancellation failed;
+run38090637300 instrumentation left production unchanged and diagnosed the same Windows
+shutdown10057/noEOF fault. Third run was diagnostic progress, not a production fix or
+native pass. Final exact-handle repair establishes successful cancellation without
+deadline inflation, ignored errors, sleep, polling, retry or skipped required gates.
+Pre-existing broad cargo fmt differences were not reformatted or claimed as a pass.
+
+| Target | Actual cumulative package attempts | Actual editor launches | Focused dispatches | Unused remainder, now closed |
+| --- | --- | --- | --- | --- |
+| Windows x64 | **3/4** | **2/6** | **4/4** | 1package,4launches,0dispatches |
+| Mac ARM64 | **2/4** | **4/6** | **4/4** | 2packages,2launches,0dispatches |
+
+Actual attempt ledgers include failures/cancellations/implicit starts; reservations
+were never counted as execution. No outstanding reservation, pending CI, owned native
+process/listener/fixture or required in-scope work. Prior allowances remain closed;
+this outcome's unused remainder closes here and cannot fund the following deliverable.
+No runnable Character/Appearance/asset changes, generated lore, provider expansion,
+paid/public provider calls, signing changes, merge or release. Agent/automated native
+acceptance is distinct from full Phase2/2C.3/2C.4 and final human acceptance. Controlled
+synthetic loopback evidence does not establish live Studio or generic-provider coverage.
+The following deliverable is proposed only, not started.
+
+#### Generated lorebook entries next prompt — proposal only
+
+```text
+Deliver Generated lorebook entries: draft/update one bounded editor-only entry, review
+exact changes, accept once, explicitly approve, Undo/Redo and reopen while preserving
+runnable source and existing approved reference text until replacement approval.
+Repository: Caldwell-41/Renpy-editor
+Continuation: codex/provider-qualification, published Generated Character cards closure
+atop qualified8a230a9619ec7504f1a91dc8504e6e9667108190/run38093296977. Reconcile fresh refs;
+do not reset. Retain the current Mac ARM64 session.
+Read AGENTS.md, CURRENT, HANDOVER and the active phase-2 task sections6–11 and20.
+Record selection/acceptance in that task. One GPT-6.1 Sol High owner; shared edits
+serial, independent review. Reuse qualified references/prompts/context/proposals/history.
+Scope one entry with core-owned ID/revision, provenance, explicit applicability and
+supporting citations; passive semantic/exact metadata review. Generation cannot approve
+itself. Preserve prior approval until separate replacement approval; Reject retains it.
+Keep UI wording plain. Prove exact dispatch, inert preview, one transaction/Undo,
+duplicate refusal, approval separation, zero-write malformed/cancelled/stale/competing/
+external refusal, byte-exact runnable source, Undo/Redo and reopen.
+Use focused Windows x64/macOS ARM64 CI and changed-action native checks. Local handoff
+only for a named required capability CI cannot establish. Proposed fresh allowance per
+target:4package attempts,6editor launches,4focused dispatches. Prior allowances closed;
+count failures/cancellations/implicit launches, reassess after two unsuccessful
+corrections of one hypothesis. No automatic keyword/recursive injection, runtime-state
+inference, runnable Character/Appearance/source changes, provider expansion, paid/public
+calls, signing changes, merge or release. Complete implementation/checks/review/in-scope
+fixes; commit/push and update canonical contracts/task/CURRENT/HANDOVER. Follow manual
+same-thread CI wait/resume and audit actual artifacts. Return result, limitations and
+next prompt. Do not start the following deliverable.
+```

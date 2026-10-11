@@ -1557,3 +1557,10 @@ reuse unchanged qualified official SDK source/runtime evidence from1320d0a/run38
 new all-source-byte assertions establish this scope, with no new SDK execution claim.
 Audit actual cases, manifests, binaries, input hashes and cleanup; green badges alone
 are insufficient. Final human/full Phase2 acceptance remains separate.
+
+The [qualified closure](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
+records candidate `8a230a9`, run `38093296977` attempt 1, both-target focused results,
+Windows native 25 + 3 checks, renewed signed Mac native proof, and final actual budgets.
+Windows stalled-header and partial-body shutdown/Cancelled/EOF both pass the unchanged
+two-second gates. This bounded card action is accepted; generated lore and full Phase 2
+remain separately selected work. A docs-only closure requires no package or CI repeat.

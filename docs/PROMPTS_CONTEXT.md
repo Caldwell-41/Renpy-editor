@@ -303,3 +303,8 @@ identities/revisions and gates approval and approved inclusion; full existing so
 read/draft guards remain transient acceptance protection. Generated proposals remain
 memory-only until accepted. Reopen retains saved statuses/provenance/revisions.
 No runnable Character, Appearance, asset, lore or source change is in this action.
+
+This bounded action is qualified on Windows x64 and macOS ARM64. The
+[task closure](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
+records exact dispatch, passive review, approval separation, zero-write refusals,
+byte-exact source and shared history/reopen evidence.

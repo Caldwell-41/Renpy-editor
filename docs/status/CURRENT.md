@@ -1,24 +1,30 @@
 # Current status
 
-**Updated:** 2026-10-11. **Generated Character cards implemented; exact-handle repair, final CI pending**
-on `codex/provider-qualification`, retained Mac ARM64 session, one GPT-6.1 Sol High
-serial owner and independent review. Draft closure f03ea0f foundations retained.
+**Updated:** 2026-10-11. **Generated Character cards accepted and closed** on
+`codex/provider-qualification`, atop qualified implementation
+`8a230a9619ec7504f1a91dc8504e6e9667108190`. Retained Mac ARM64 session; one
+GPT-6.1 Sol High implementation owner and independent review. Fresh refs reconciled
+without reset; no local-only implementation remains.
 
-| Capability | State |
+| Capability | Accepted state |
 | --- | --- |
-| Generated card draft/update | Editor-only, exact passive review, one proposed transaction; separate approval retains prior text |
-| Third CI audit | run38090637300 failed Windows partial-body shutdown10057/EOF timeout; Mac9checks pass |
-| Prior worker failure | Corrected fixture construction; later Windows worker6/6 establishes fix |
-| Narrow transport repair | Cancellation/IO share exact socket handle; independent review and local8/6/controller pass |
-| Native proof | Renewed signed package2/native25+3/five exact bodies/physical actions/reopen/cleanup pass |
-| Windows acceptance | Package/native skipped third run; no Windows native pass or closure claim |
+| Reference/prompt/proposal/transaction foundations | Qualified baseline retained; Draft Scene closure `f03ea0f` |
+| Generated Character cards | One new/update editor-only card; exact passive review; Save once as proposed; separate Approve/Reject retains prior text until approval |
+| Source and history | Byte-exact runnable source, one Save transaction/Undo, separate approval history, Undo/Redo and reopen |
+| Refusals | Malformed, cancelled, stale, competing/draft/session and ordinary external changes write nothing; stale supporting references block approval/inclusion |
+| Windows x64 | Final CI focused checks, package and native 25 + 3/five exact bodies/six receipts/nine captures pass |
+| macOS ARM64 | Nine CI checks plus renewed signed native 25 + 3/five exact bodies/physical actions and cleanup pass |
 
-[Task final wait](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-exact-handle-final-ci-wait--2026-10-11)
-owns decisive evidence and reassessment. Third run instrumented the second fault;
-production was unchanged. Renewed signed Mac native proof and independent evidence review passed.
-Final run38093296977 attempt1/head8a230a9 in_progress at22:57:22Z. Actual
-Windows2packages/0launches/4dispatches; Mac2/4/4. Limits each4/6/4; no dispatch remains. No reservations counted as execution, prior allowances closed.
+[Qualified closure](../tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
+owns acceptance, artifact identities and preserved failures. Final
+[run 38093296977](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38093296977),
+attempt 1, exact `8a230a9`, succeeded. Windows cancellation now passes both unchanged
+two-second shutdown/Cancelled/EOF gates. Independent final artifact review found no blocker.
 
-[HANDOVER](HANDOVER.md) owns continuation. No model polling/watcher, runnable Character/
-Appearance changes, generated lore, paid/public calls, provider/signing expansion,
-merge/release or following deliverable. Full Phase2/human acceptance remain separate.
+Final usage: Windows **3/4 packages, 2/6 launches, 4/4 dispatches**; Mac **2/4, 4/6, 4/4**.
+Unused remainder closes with this outcome; prior allowances stay closed. No pending CI
+or owned native process/listener/fixture. [HANDOVER](HANDOVER.md) owns recovery and the
+proposed next prompt. Generated lore is proposed only, not started. Full Phase 2/2C.3/
+2C.4, live/generic-provider coverage and final human acceptance remain incomplete.
+No runnable Character/Appearance changes, provider/signing expansion, paid/public calls,
+merge or release occurred.
