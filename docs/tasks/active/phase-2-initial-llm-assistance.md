@@ -5202,10 +5202,15 @@ native1/implicit2 preserved and consumed. Audit the exact required Windows/macOS
 identities, manifest/input hashes and actual native/SDK/controller artifacts; missing,
 failed or skipped proof remains unresolved. Keep one serial owner and independent
 GPT-6.1 Sol High review for in-scope fixes/final artifact acceptance. Temporary Studio
-key is still pending; user authorized agent native entry and later rotation. Use only
+key was supplied; explicit temporary local-storage/cleanup approval is pending after
+automatic review rejected native Remember. Do not repeat or export the key. After
+approval, inspect the recorded owned launch5 before UI binding and reuse it if alive;
+the launcher has a 20-minute bound. Never implicitly relaunch; if stopped, reassess the
+live/reopen requirement against the single remaining launch. User authorized native
+entry and later rotation. Use only
 the existing exact local Studio/Gemma configuration and disposable synthetic content;
 no echo/export of key, no paid/public calls or generic/provider installation/expansion.
-Real Studio allowance0/2 per action, discovery0/2; Mac1/4packages4/6launches1/4dispatches,
+Real Studio allowance0/2 per action, discovery0/2; Mac1/4packages5/6launches1/4dispatches,
 Windows CI1/4 with package1/launch1–2 reserved for recorded run until audit. Earlier
 allowances closed. Continue authorized fixes only within actual remaining allowance;
 manual same-thread CI wait/resume unless the user explicitly amends it here. Publish
@@ -5220,3 +5225,24 @@ existing live/discovery allowance. CI remains unaudited; no polling grant inferr
 Key has not yet been entered or used at this update. Next owner's key availability
 statements above are superseded by this receipt; secret stays in the conversation/native
 entry only, never task/source/arguments/logs/reports.
+
+Native ordinary live session launch5 is running in the exact disposable fixture;
+profile saved without network, existing exact local Studio/Gemma selected with private
+HTTP opt-in, unverified capacity262144/budget32768/response2048. Key entry plus native
+Remember was rejected by automatic approval review: entry authorization was recognized,
+but persistent local credential storage requires explicit approval. The existing Mac
+development encrypted-file/local-unlock policy was disclosed in the native dialog and
+approval request; no policy workaround or alternate entry attempted. Explicit temporary
+local storage plus cleanup approval is now pending. No discovery/generation occurred,
+and no key value is recorded here. Live0/2 per action and discovery0/2 remain untouched.
+Mac package1/editor5/dispatch1; one final reopen launch remains. Do not attempt Remember
+or any dependent live connection before explicit approval arrives.
+
+Recovery: the ignored `live-studio/phase-1-launch.json` receipt identifies the exact
+owned launch5 PID, root basename/parent and owner session, with receipt timestamp and
+approximate deadline (confirm process state rather than assuming timeout completion).
+Its launcher waits at most20minutes, then terminates only that child;
+the disposable root needs explicit owner cleanup. Check process/root/dialog state
+before continuing and retain all consumed launches. Prior native cleanup receipts
+cover launches1–4 only. Final launch6 is reserved for the live process-reopen evidence;
+a stopped launch5 requires allowance reassessment, not an implicit replacement launch.

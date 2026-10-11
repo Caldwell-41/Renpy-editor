@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase2 qualification — awaiting CI; live Studio checks in progress
+## Studio-only Phase2 qualification — awaiting CI and credential-storage approval
 
 Repository `Caldwell-41/Renpy-editor`, branch `codex/provider-qualification`, retained
 Mac ARM64 session. Selected saved Phase2 qualification from closure
@@ -53,21 +53,30 @@ audit yet. Resume same thread, reconcile refs then audit exact run/head/attempt/
 required jobs, hashes/manifests and actual native/controller/SDK evidence. Missing,
 failed/cancelled/skipped checks remain unresolved. No duplicate dispatch/polling loop.
 
-Temporary key received after dispatch; native entry/live checks pending. User authorized native secure-dialog
+Temporary key received after dispatch. Native entry+Remember rejected by automatic
+approval review because persistent storage needs explicit approval; approval is pending.
+User authorized native secure-dialog
 entry and later user rotation. Never echo/export or place key in source/arguments/logs/
 reports. Historical spike credential untouched. Use existing exact local Studio/Gemma
 configuration, synthetic content and explicitly reviewed sends only; no discovery/send
 has occurred. Hosted CI proves owned interfaces, not home Studio access. Local named
-capability is real Studio/signed ordinary-UI session and reopen once key arrives.
+capability is real Studio/signed ordinary-UI session and reopen after storage approval.
+Live launch5 owns the pending native dialog and disposable fixture. Its launcher has a
+20-minute bound; the ignored `live-studio/phase-1-launch.json` identifies its exact PID,
+owned root basename/parent, owner session and receipt-based approximate deadline.
+Confirm actual process state before binding UI. Do not implicitly relaunch a stopped app. If it has exited, retain
+launch5 consumption and reassess the remaining live/reopen requirement against the one
+remaining launch; no extra launch allowance is implied. Remove any owned credential and
+fixture after the authorized tests; prior native cleanup does not cover this live root.
 Provider-internal tool suppression remains unknown without actual configuration proof.
 Generic support/access/qualification is deferred. Broader subset/new-Character and final
 human acceptance remain distinct; no full Phase2 completion claim.
 
-Allowance: Mac **1/4packages,4/6editor launches,1/4focused dispatches**. Windows
+Allowance: Mac **1/4packages,5/6editor launches,1/4focused dispatches**. Windows
 **1/4dispatches**, package1/launch1–2 reserved for the recorded run until actual attempt
 audit; do not reserve/spend them twice. Studio **0/2 attempts per action,0/2 model
-discoveries**; generic0calls. Prior allowances closed; remaining two Mac launches cover
-live session/reopen. One serial writer and independent GPT-6.1 Sol High reviewer;
+discoveries**; generic0calls. Prior allowances closed; launch5 consumed and final launch6
+remains for reopen. One serial writer and independent GPT-6.1 Sol High reviewer;
 no reviewer writes/credential access/builds/launches/dispatches. Publish checkpoint and
 pause per WORKFLOW manual same-thread wait/resume; current chat has no polling grant.
 Commit/push authorized. No signing changes, paid/public calls, installation, merge/
