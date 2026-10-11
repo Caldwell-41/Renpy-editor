@@ -17,6 +17,8 @@ The [selected Phase 2 qualification](#phase-2-qualification-selection-and-prereq
 is [qualified for the selected Studio-only integrated/live slice](#studio-only-integratedlive-qualification-and-closure--2026-10-11),
 with generic deferred. Full Phase 2 and final human acceptance remain incomplete;
 individual action qualification and this slice do not establish those broader outcomes.
+The [next proposal-editing scope and allowance](#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
+is approved and paused for user-requested new-chat transfer; execution has not started.
 Read its CI-first amendment/selection only when continuing or reviewing that slice,
 then only the relevant requirement sections. Completed credential/request selections below
 are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
@@ -5588,3 +5590,159 @@ launches5–6 occurred; no reservation remains. Real Studio**1/2 per action**, d
 remainder is closed with this outcome, not transferred to future work. A separately
 selected remaining Phase2/human/generic outcome must reconcile current refs/contracts
 and approve its own concrete scope/capability/allowance; do not restart old attempts.
+
+### Selectable proposal editing — scope and allowance proposal — 2026-10-11
+
+**State: proposal only, awaiting user approval.** User requests definition of the
+remaining proposal-editing scope and allowance; generic support stays deferred.
+This authorizes inspection/planning/local records, not implementation, native launches,
+provider calls or CI dispatch. Fresh local/origin branch matches
+**f3346e9666bcee06b9dd3e53343af33e1a8919f5**; origin/main remains5f448ca. Preserve
+unrelated work and the accepted Studio closure. Its consumed/unused allowance stays
+closed. No new execution allowance has been granted or consumed.
+
+#### One observable next outcome
+
+An author explicitly requests several edits in one existing Scene, reviews each
+operation and its exact file changes, chooses a valid subset, and saves it as one
+undoable change. A proposed new Character plus its dialogue demonstrates dependency
+selection: excluding the Character makes its dependent dialogue inapplicable, while
+unrelated narration remains selectable. This advances sections7–8/2C.1–2C.2 and the
+section11 same-file/new-Character/subset matrix; it is not full Phase2 completion.
+
+Code inspection confirms current Assist has one text replacement or an inseparable
+Beat/Scene/reference group; AcceptRequest binds only proposal ID/preview digest.
+Scene preparation already returns a transaction proposal, but manual Character
+create/update commits immediately. Preparation must be made non-mutating for compound
+review; do not call immediate-commit handlers repeatedly to simulate a batch.
+
+#### Proposed operation boundary
+
+- Extend the existing Rewrite Assist with an explicit several-Scene-edits mode.
+  The author selects text targets and separately enables an insertion anchor and/or
+  Character change before reviewing the send. Existing single-Beat behavior remains.
+- One existing saved Scene and **1–8 explicit operations** in one response. Context,
+  target Beat IDs and mutation permissions are selected/reviewed before Send.
+- Replace text in selected existing dialogue/narration Beats, preserving speakers,
+  ordering and protected tokens. Each replacement is a selectable operation.
+- At most one insertion group of1–8 dialogue/narration Beats at one selected saved
+  anchor. The group is inseparable and retains the existing terminal/custom boundary.
+- At most one separately selectable runnable Character creation **or** update.
+  Fields are the existing supported display name/dialogue colour only; new technical
+  name is entered/confirmed by the author before Send and validated for collisions.
+  Existing technical names are never renamed. Core allocates stable IDs and paths;
+  model-local references can bind inserted dialogue to the proposed new Character.
+- Exact existing Character update ID/allowed fields and permitted existing inserted-
+  dialogue speaker IDs are bound before Send. New speaker references require the
+  explicitly enabled proposed Character. Only currently supported owned definitions
+  can be updated; custom/unsupported definitions refuse without source rewrites.
+- Existing generated cards/lore and Draft Scene retain their accepted whole-group
+  semantics. No implicit card creation, card linking, lore approval or Appearance edit.
+- The eight-operation cap includes the Character/group operations. Retain current
+  aggregate generated-text limit10000 UTF-8 bytes, individual field/source/metadata
+  limits and context/output/deadline boundaries; refuse overflow, never truncate.
+
+Wrong-Scene/unselected targets, duplicate operation/target IDs, dangling references,
+identifier collisions and overlapping/conflicting edits refuse the whole malformed
+response with zero writes. Never silently drop model operations to make a reply valid.
+
+Batch creation of Scenes/cards/lore, new terminal/edge proposals and broader supported
+Beat families remain separate remaining-scope decisions. This outcome does not waive
+those original phase requirements. No arbitrary source/code, technical renames,
+asset import/generation, conditions/calls, provider expansion/SSE, signing change,
+generic implementation, merge/release or following deliverable.
+
+#### Review and acceptance contract
+
+Selection units are typed operations or declared inseparable groups, not file-diff
+lines. Display every dependency; do not silently add selected operations. Invalid
+selection explains the missing dependency and disables Save. Changing selection
+prepares a fresh core-owned semantic/file preview and digest; Save binds proposal,
+selected IDs and that exact digest, rechecking read/write/session/draft revisions.
+One transient candidate combines same-file edits and authoring/source-map metadata
+into one ordinary journalled transaction/history entry. Stable assigned IDs survive
+selection changes. Comments, BOM/newlines, custom/unsupported source and unrelated
+metadata remain byte exact. Accepted subsets consume the original proposal; remaining
+suggestions are read-only until a fresh proposal is prepared. Duplicate Save refuses.
+
+Acceptance proof covers same-file nonadjacent edits; new Character+dialogue+independent
+narration; valid partial selection and missing-Character refusal; supported existing
+Character update with exact definition/source/metadata review, one Undo/Redo, reopen
+and SDK behavior; aggregate10000-byte boundaries across replacements/insertion/
+Character fields; exact selected preview/source; one Undo/Redo across source and
+metadata; project/process reopen;
+stale source/reference/prompt/profile, cancelled/late response and competing-draft
+zero-write refusal; normal fault/recovery fixtures without false success; keyboard/
+focus/light/dark/compact native selection/review/Save; literal text/protected-token
+encoding and pinned SDK8.5.3 metadata-free runtime. Preview never executes project
+code. Existing protections remain; no specialist crash/hostile-filesystem programme.
+
+#### Proposed execution and cumulative allowance
+
+One serial GPT-6.1 Sol High owner and independent GPT-6.1 Sol High read-only reviewer.
+Retain Mac ARM64 development and `codex/provider-qualification`; reconcile fresh refs
+at execution. Implement/prepare focused checks, review, correct in-scope findings,
+qualify changed native behavior, audit actual artifacts and maintain canonical docs/
+task/CURRENT/HANDOVER through closure. Commit/push of this outcome is included in the
+requested approval; no merge/release. Follow WORKFLOW manual same-thread CI wait;
+no polling/watcher. No second writer or access to the user's other computer.
+
+| Proposed maximum for this outcome | Mac ARM64 | Windows x64 |
+| --- | --- | --- |
+| Packaged build attempts, including failures | 4 | 4 |
+| Editor process launches, including implicit/failed/reopen/live starts | 8 | 8 |
+| Focused CI dispatches, including failures/cancellations | 4 | 4 |
+
+A shared two-target workflow consumes one dispatch on each target, so at most four
+paired focused runs, not eight. CI/local attempts use the same totals. These are
+ceilings, not required repetitions; reuse unchanged valid proof. Cheap focused tests/
+development compilation and independent reviews are included within this one outcome.
+After two unsuccessful corrections of one hypothesis, reassess before continuing;
+exhaustion or a material scope/capability decision stops execution without extensions.
+
+Proposed real Unsloth budget: **two synthetic batch generations total and one explicit
+model discovery**, only the already selected endpoint/model. No key is needed for
+implementation preparation. Native credential entry must be available before live
+calls; retain explicit temporary-storage/cleanup policy and never recover the old key
+from logs/chat or read/export credential files. Live process starts count within Mac8,
+not in addition. Controlled failures remain fixture tests. No paid/public calls,
+provider/model installation or server modification. Credential/root cleanup required.
+Old server-internal/live-observer limitations remain unless actually established;
+this outcome cannot claim generic or final human/full Phase2 acceptance.
+
+Planning review: independent GPT-6.1 Sol High read-only review finds the bounded
+outcome/caps coherent; exact update/speaker authority and Character-update/aggregate-
+limit proofs were added on review. No implementation/execution allowance is inferred.
+Repository/link/privacy validation and diffcheck apply to these local-only records;
+no package matrix for planning. The proposal is ready for the user's scope/allowance
+decision; no implementation or publication has begun.
+
+
+#### Approved selection and user-requested new-chat transfer — 2026-10-11
+
+User explicitly approves the scope and allowance above, requests proposal-editing
+implementation with generic later, and asks to be notified when native key entry is
+needed for live generations. They then expressly stop this chat and request a prompt
+for a new chat. State **paused for user-requested transfer**, not a completed outcome.
+Approval persists; the next owner must not request it again or reset allowance.
+
+Only repository/code inspection and approved scope/status records have occurred.
+No implementation files changed, tests/builds/editor launches/provider discovery/
+generations or CI dispatches occurred after selection. All approved totals remain
+**Mac0/4packages,0/8editor starts,0/4focused dispatches; Windows0/4packages,
+0/8editor starts,0/4focused dispatches; Studio0/2batch generations total,0/1discovery**.
+Prior Studio qualification allowances remain closed. Planning-record503-file validation
+passed; no implementation evidence is inferred. Three owned documentation edits are
+published for this transfer within the approved commit/push boundary; unrelated work
+preserved. Implementation baseline remainsf3346e9 until a real code change.
+
+Resume from the transfer checkpoint in the same repository/Mac ARM64 session and
+existing branch. Read this selection, its exact scope/acceptance, CURRENT/HANDOVER and
+AGENTS; inspect current refs/working tree without reset. Proceed with the approved
+one-outcome preparation/implementation/focused verification/independent review/fixes/
+qualification/closure. One serial GPT-6.1 Sol High owner and independent read-only
+reviewer; no second writer. Manual same-thread CI waits. No following outcome, generic,
+merge/release or signing/provider expansion. Notify the user when live synthetic
+qualification is ready for fresh native key entry; do not retrieve the old key from
+chat/logs or credentials. Cleanup policy remains explicit. No key is needed for initial
+implementation preparation. No new chat has been created automatically.

@@ -1,31 +1,30 @@
 # Current status
 
-**Updated:** 2026-10-11. **Selected Studio-only integrated/live qualification passed;
-full Phase 2 and final human acceptance remain incomplete.** Retained Mac ARM64 and
-`codex/provider-qualification`, entryd03c117/lore233454b. User approved Unsloth only,
-private-LAN support, temporary credential storage/cleanup and Mac launch limit8.
-The [qualification closure](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-integratedlive-qualification-and-closure--2026-10-11)
-owns exact inputs, review, limits and unique failure/recovery evidence.
+**Updated:** 2026-10-11. **Studio-only qualification passed; selectable proposal editing
+approved and paused for user-requested new-chat transfer.** Full Phase2/generic/final human acceptance incomplete.
+Retain Mac ARM64 and `codex/provider-qualification`; local/origin **f3346e9**, main5f448ca.
+Unrelated work preserved. The user approved the saved proposal-editing scope/allowance, keeps generic for later,
+and then stopped this chat to request a new-chat prompt. No implementation, provider
+calls, builds/editor launches or CI dispatch have started. Approval persists across transfer.
 
-[CI4 run38134089028](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38134089028),
-attempt1/head3b3e868/tree7a56dc5, completed success on both required targets. Exact
-artifact manifests23/88, both252 inputs and Windows253 package inputs match. Both
-five-action private-LAN controller/metadata-free SDK chains pass. Windows actual
-helper9 has no skips; seven native stages,26 distinct checks, five exact sends,
-three reopen checks/unchanged metadata/zero HTTP and cleanup pass. Physical Close
-now dismisses saved Assist. CI1/CI3 failures remain retained at their actual inputs.
+The [scope and allowance proposal](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
+defines one next outcome: review1–8 edits in one existing Scene, choose a safe subset,
+and save one undoable change. It includes selected text replacements, one bounded
+insertion group and at most one separately reviewed runnable Character create/update.
+New-Character dialogue has an explicit dependency; missing dependencies disable Save.
+Core prepares fresh exact previews and combines same-file/source/metadata changes through
+one existing transaction. Broader Scene/terminal/edge/reference batch work remains
+separately scoped; this proposal is not full Phase2 completion.
 
-Signed Mac481 package/native7–8 proof covers unchanged production/Mac probe inputs;
-only Windows driver/test differ in3b3e868. No successor full Mac package claim. Real
-Unsloth all five actions, separately approved/generated references, prompt/limit
-changes, source/token preservation, nine Undo/Redo, project/process reopen and exact
-accepted-source Ren'Py8.5.3 runtime pass. Temporary credential and owned sessions/
-roots cleaned. Independent terminal/closure review passes without an acceptance blocker.
+Approved maxima per target:4 packaged attempts,8 editor launches,4 focused CI dispatches;
+at most4 paired runs. Real Studio2 synthetic batch sends total/1 discovery. All counts
+remain zero; earlier budgets remain closed. Approval includes preparation,
+implementation, focused verification, independent review, in-scope fixes and commit/push;
+manual same-thread CI waits, no merge/release. No new API key needed to start preparation.
 
-Closed totals: Mac2/4packages,8/8launches,4/4dispatches; Windows4/4packages,6/6launches,
-4/4dispatches; Studio1/2 per action, discovery1/2, generic0. Unused remainder closed.
-No pending CI or owned app/temporary credential. Server-internal configuration and
-independent live reopen HTTP observation remain unverified; controlled evidence has
-its own boundary. Generic, broader operation matrix and human/full Phase2 acceptance
-require a separate selection. Commit/push authorized; no merge/release.
-[HANDOVER](HANDOVER.md) owns recovery and next-decision boundaries.
+The [accepted Studio closure](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-integratedlive-qualification-and-closure--2026-10-11)
+retains CI4 exact both-target proof, signed Mac481 reuse, all five live actions/history/
+reopen/SDK, closed allowances and unique CI1/CI3 failures. Temporary credentials,
+owned processes/roots cleaned; no pending operation. Unknown server-internal configuration
+and absent independent live HTTP observer remain limits. [HANDOVER](HANDOVER.md) owns
+approval/continuation boundaries.
