@@ -1,12 +1,24 @@
 # Current outcome handover
 
-## Selectable proposal editing — implemented, qualification in progress
+## Selectable proposal editing — CI1 pending, manual same-thread wait
 
 Resume this approved outcome in the same thread, Mac ARM64 workspace and
 `codex/provider-qualification`. Starting fetched local/origin HEAD is
 4bcfee097df2343902fbc5fb6fae6933b08c4f28; main remains5f448ca. Initial worktree was
-clean. No reset, unrelated discard or history rewrite. Implementation publication and
-paired CI1 are the next checkpoint; exact run/head/inputs will replace this live text.
+clean. No reset, unrelated discard or history rewrite. Implementationdcb106c and exclusive routing54ac943 are published. Pending CI1 uses
+exact candidate**54ac943dda15f55d353f359fd3785d52f89ecdc5**. A later status-only
+commit preserves that candidate; do not replace it with current HEAD during audit.
+
+**Pending:** registered workflow357322921 production-scaffold.yml,
+[run38144885050](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38144885050),
+attempt1, exact head54ac943, branchcodex/provider-qualification. API accepted the
+single dispatch and returned the exact URL; one delayed-list identity read confirms
+it. Last observed in_progress/no conclusion at2026-10-11T13:52:50.420970Z
+(updated13:52:23Z). Inputs selectable_proposals:true, selectable_dispatch_ordinal:1,
+rewrite_build_ordinal:1, rewrite_first_launch_ordinal:1; all older action/upload
+selectorsfalse and both reuse IDs empty. Exclusive admission calls the same-commit
+selectable-proposals.yml recipe. Artifacts retain7days after completion; inspect expiry
+on resume. No autonomous polling/watcher or second dispatch.
 
 [Owning implementation ledger](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11)
 records current changes/results and unique failed harness evidence. The
@@ -46,8 +58,10 @@ has no approved signing identity. Terminal audit must inspect manifests, exact i
 package identities, SDK results, required native receipts/captures and cleanup; green
 status alone is insufficient. Keep defects, harness failures and missing evidence distinct.
 
-Counts before CI1: **Mac0/4packages,0/8editor starts,0/4dispatches; Windows0/4packages,
-0/8starts,0/4dispatches; live0/2total batch generations,0/1discovery.** Max four paired
+Counts: **paired dispatch1/4 on each target; Mac0/4packages,0/8editor starts;
+live0/2total batch generations,0/1discovery.** Windows actual package/start attempts
+are not yet observed; audit the CI1 emitted attempt ledger. Packageordinal1 and
+launches1–2 are the authorised plan, not a pass or an actual-count assertion. Max four paired
 runs. Windows planned CI1 package1/launches1–2 are not consumed until actually attempted;
 read the emitted ledger after terminal CI. Earlier allowances stay closed. Development
 compilation/helper/SDK checks consume no editor/package attempt. Notify when live
@@ -57,10 +71,13 @@ explicit temporary-storage/cleanup; user native entry must be available before l
 calls. No live calls, user/real-provider credential operations or owned temporary editor/listener/root
 remain at this checkpoint.
 
-Proceed to publish and dispatch the bounded fresh paired workflow, record exact run
-ID/attempt/head/material inputs/status/time/counts, then stop under WORKFLOW manual
-same-thread wait. User returns here with the completion/resume message; do not poll or
-install a watcher. After terminal audit, continue only remaining in-scope native/live
+Stop under WORKFLOW manual same-thread wait. User returns here with a completion/
+resume message; check only this exact run/attempt/head and reconcile fresh refs. Do not
+poll or install a watcher. Download and audit both required target artifacts and the
+admission result, rejecting failed/cancelled/skipped/missing/zero evidence. Audit source/
+input/package hashes, manifests, SDK/runtime results, native receipts/PNGs and cleanup
+before recording actual counts or qualification. Later docs-only commits do not require
+repeating unchanged native/package inputs. After terminal audit, continue only remaining in-scope native/live
 qualification and documentation/closure. One serial owner and read-only reviewer;
 no second writer, signing change, provider installation/public/paid calls, merge,
 release, generic or following outcome. Full Phase2 and final human acceptance remain

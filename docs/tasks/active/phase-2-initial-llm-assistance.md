@@ -5837,3 +5837,46 @@ Supplemental shared probe-gate discovery reports27pass/2Windows-only skips local
 those platform helper regressions are not claimed passed. The required new8 gates
 and listed local suites have zero skips. Cumulative dispatch/package/start/live totals
 are still zero until the recorded first dispatch/actual attempts below.
+
+
+#### Selectable CI1 dispatch and manual same-thread wait — 2026-10-11
+
+Independent narrow routing review passes after explicit Windows prefix/PATH/pinned
+npm CLI and Mac global npm CLI selection. Gate8 and actual pinned Mac npm11.9.0
+identity checks pass; structure/link/privacy validation passes511 files. Implementation
+commitdcb106c is followed by reviewed route commit
+**54ac943dda15f55d353f359fd3785d52f89ecdc5**, published on the same branch. No main
+change/merge, failed dispatch or editor/package/live attempt was needed for routing.
+
+Registered workflow**357322921** (`production-scaffold.yml`) dispatches
+**run38144885050/attempt1**, exact head**54ac943dda15f55d353f359fd3785d52f89ecdc5**,
+branch`codex/provider-qualification`, created2026-10-11T13:52:06Z. Inputs:
+`selectable_proposals:true`, `selectable_dispatch_ordinal:1`,
+`rewrite_build_ordinal:1`, `rewrite_first_launch_ordinal:1`; dialogue_rewrite_windows,
+continue_scene, draft_scene, generate_card, generate_lore, phase2_studio and
+upload_packages are allfalse; both reuse IDs empty. Exclusive admission calls the
+same-commit reusable selectable recipe. API returned the exact run URL; the immediate
+list did not yet expose it. One identity-resolution read confirms that same run;
+no second dispatch. Last observed **in_progress**, no conclusion, at
+**2026-10-11T13:52:50.420970Z**; run updated13:52:23Z. Stop polling now.
+[Exact run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38144885050).
+
+Cumulative **paired dispatch1/4 on each target**. Mac remains**0/4packages,
+0/8editor starts**; live**0/2batch generations total,0/1discovery**. Windows CI1
+is authorised for packageordinal1 and launches1–2, but actual package/start attempts
+have not yet been observed; do not report planned attempts as actual passes/counts.
+On terminal resume audit the emitted attempt ledger, including failures and early
+stops, before deciding remaining Windows counts. There are no local editor/listener/
+fixture roots or real-provider credentials owned by this continuation. Mac remains
+locked at the last supported observation; user unlock and later fresh native key
+entry are prerequisites for the remaining signed Mac/native/live work.
+
+Manual same-thread pause leaves this outcome unfinished. User returns here when CI
+is terminal; verify exact run/attempt/head and both required paired jobs, download/audit
+unexpired manifests and input/source/package hashes, positive count gates, SDK results,
+Windows real native stage receipts/PNGs/body digests and cleanup. Missing/failed/
+skipped/cancelled evidence cannot pass. Reconcile fresh refs without reset; subsequent
+status-only commits do not replace this candidate. No automatic polling, watcher,
+retry or new outcome. Continue in-scope fixes and remaining native/live qualification
+only within existing cumulative caps; notify when ready for fresh native user key entry.
+Retain old Studio/full Phase2/generic/human distinctions and unchanged evidence.
