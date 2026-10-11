@@ -5197,21 +5197,26 @@ Continue the existing Studio-only Phase 2 qualification on codex/provider-qualif
 Retain Mac ARM64 and reconcile fresh refs without reset or unrelated changes. Read the
 live CURRENT/HANDOVER and Studio-only amendment/implementation/native-CI records in
 the existing Phase2 task. Implementation candidate4d1120d/tree6e7e4a6,
-run38111920210/attempt1; signed Mac package1/native retry3+reopen4 accepted with failed
-native1/implicit2 preserved and consumed. Audit the exact required Windows/macOS jobs,
+CI1run38111920210/attempt1 audited: Mac automated passes; Windows native clipped-window
+failure/cleanup retained, actual package1/editor1 only. Reviewed harness successor
+fd2872e/tree2619824; CI2run38114055500/attempt1 initially queued05:12:49Z.
+Signed Mac package1/native retry3+reopen4 accepted with failed native1/implicit2
+preserved and consumed. Audit CI2 exact required Windows/macOS jobs,
 identities, manifest/input hashes and actual native/SDK/controller artifacts; missing,
 failed or skipped proof remains unresolved. Keep one serial owner and independent
 GPT-6.1 Sol High review for in-scope fixes/final artifact acceptance. Temporary Studio
-key was supplied; explicit temporary local-storage/cleanup approval is pending after
-automatic review rejected native Remember. Do not repeat or export the key. After
-approval, inspect the recorded owned launch5 before UI binding and reuse it if alive;
-the launcher has a 20-minute bound. Never implicitly relaunch; if stopped, reassess the
+key was supplied and user explicitly approved temporary local storage/cleanup after
+automatic review rejected native Remember. Mac unlock is now required. Do not repeat
+or export the key. After unlock, inspect recorded owned launch5 before UI binding and
+reuse it if alive; prior launcher control is unavailable and its intended timeout was
+not enforced. Never implicitly relaunch; if stopped, reassess the
 live/reopen requirement against the single remaining launch. User authorized native
 entry and later rotation. Use only
 the existing exact local Studio/Gemma configuration and disposable synthetic content;
 no echo/export of key, no paid/public calls or generic/provider installation/expansion.
-Real Studio allowance0/2 per action, discovery0/2; Mac1/4packages5/6launches1/4dispatches,
-Windows CI1/4 with package1/launch1–2 reserved for recorded run until audit. Earlier
+Real Studio allowance0/2 per action, discovery0/2; Mac1/4packages5/6launches2/4dispatches,
+WindowsCI2/4; CI1 actual package1/editor1, CI2 package2/editor2–3 reserved pending audit.
+CI1 unused reopen reservation released. Earlier
 allowances closed. Continue authorized fixes only within actual remaining allowance;
 manual same-thread CI wait/resume unless the user explicitly amends it here. Publish
 compact status/limitations; no full Phase2/human acceptance claim, merge/release or
@@ -5241,8 +5246,73 @@ or any dependent live connection before explicit approval arrives.
 Recovery: the ignored `live-studio/phase-1-launch.json` receipt identifies the exact
 owned launch5 PID, root basename/parent and owner session, with receipt timestamp and
 approximate deadline (confirm process state rather than assuming timeout completion).
-Its launcher waits at most20minutes, then terminates only that child;
+The launcher originally intended a20-minute bound; the later owner-control correction
+below supersedes that guarantee. Do not assume it terminates the child;
 the disposable root needs explicit owner cleanup. Check process/root/dialog state
 before continuing and retain all consumed launches. Prior native cleanup receipts
 cover launches1–4 only. Final launch6 is reserved for the live process-reopen evidence;
 a stopped launch5 requires allowance reassessment, not an implicit replacement launch.
+
+### Studio-only qualification CI1 audit and unlock boundary — 2026-10-11
+
+User explicitly approves temporary local credential storage and cleanup. The earlier
+automatic review rejection is resolved, but Mac UI control reports the desktop locked;
+manual unlock requested. Key remains unsaved and real Studio discoveries/generation
+remain0. Exact live launch5 PID58371 still points to signed4d1120d package, parent1,
+observed05:06:38Z. Prior owner session84533 is unavailable and the intended timeout did
+not stop the child. This is an owner-control limitation, not an app/provider failure.
+The ignored launch receipt now records this disposition. Confirm exact live PID/path
+before reuse/cleanup; do not bind a stopped app or consume an implicit replacement.
+
+Recorded CI1 run38111920210/attempt1/head4d1120d completed failure04:47:46Z. Exact
+artifacts11692111982 (Mac) and11692123047 (Windows) are present/unexpired and downloaded
+into ignored `ci1`. Owner and independent reviewer audit agree: both manifests intact
+(23/61entries);252 exact identity inputs match candidate with `.gitattributes` PS1
+checkout CRLF accounted; Windows package253 inputs and executable
+`fbdafc819864e4ae3f689b17ed81640e007647fef3881a2ba79978fc33e17a1b` match.
+Mac12 cases pass including real five-action private-LAN controller and metadata-free
+pinned SDK named runtime; Windows focused/controller/LAN/SDK/package pass. Raw suites
+core35/prompt5/transport8/worker6/reference12/renderer131 agree; no failed/cancelled/
+skipped/todo renderer cases. SDK accepted-source hashes and nine runtime assertions
+match each exact exported fixture. These passes do not supply missing native proof.
+
+Windows native failed before Generate at observe-light: full1920x1080 preflight passed,
+owned control checks passed, but whole-window capture refused `Owned window clipped
+outside observable desktop`. Phase1 reports failure/cleanup, four preliminary checks
+and one reviewed-body hash; no phase2 or real send. This is a diagnosed native geometry
+harness/environment failure; no product assertion is proven defective. Actual attempt
+ledger consumes package1/editor1 only; unused editor2 reopen reservation released.
+Failed native evidence remains failed and preserved; exact owned credential/root cleanup
+passes. Overall CI1 is not a qualification pass.
+
+Serial repair adds owned-HWND position clamping into the actual desktop after owner/
+foreground verification, records before/desktop/after bounds, preserves requested size,
+refuses oversized layouts/failed move/size drift and retains all capture/control/theme/
+compact assertions. New Windows regression executes the actual AST helper with platform
+test doubles; Mac reports7 reuse tests pass and2 Windows-only skips, native gates14 pass,
+repository503-file validation passes. Windows-only cases remain required in fresh CI2.
+Independent review before publication/dispatch; selected retry uses packageordinal2,
+firstlaunch2 (dependent reopen3), generate_lore+phase2_studio, no reuse/uploads. No
+additional Mac package/editor launch; focused dispatch2 consumes the same allowance.
+
+Independent GPT-6.1 Sol High code/terminal artifact review finds no blocking issue in
+the repair. Published harness successor **fd2872e8fba26b05e3bdeac0054fe8871bfc3c95**,
+tree**2619824ecd52fd3c7faf00b2c594dabe01af5292**. Production4d1120d code and signed Mac
+executable remain unchanged; this successor changes only native Windows driver and its
+real-helper regression, which differ from the retained Mac inventory. Keep the original
+Mac package identity; no claim that it was built from the harness successor. Source
+checks/503-file validation pass; Windows actual
+helper execution/native layout acceptance remain required.
+
+Confirmed fresh [CI2run38114055500](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38114055500),
+workflow357322921/attempt1/headfd2872e/branchcodex/provider-qualification, created
+05:12:41Z, initially queued05:12:49Z. Inputs generate_lore=true,phase2_studio=true,
+all other action/upload flags false, buildordinal2/firstlaunchordinal2, both reuse IDs
+empty. Exact initial identity and owner dispatch receipt retained in ignored
+`dispatch-receipt-02.json`. No subsequent polling or terminal claim. Required Windows
+native+reopen and both focused/controller/SDK artifacts require same-thread audit.
+Mac1/4packages,5/6editor launches,2/4dispatches; Windows2/4dispatches with actual CI1
+package1/editor1 and CI2 package2/editor2–3 reserved until actual ledger audit. Studio
+0/2 per action,0/2discoveries; generic0. Mac unlock and CI2 are actual blockers; storage
+approval is resolved. Preserve running owned launch5/fixture for reuse after unlock;
+if it exits, reassess the single remaining launch rather than silently replacing it.
