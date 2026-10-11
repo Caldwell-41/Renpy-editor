@@ -1,5 +1,16 @@
 name: Selectable proposal editing qualification
 on:
+  workflow_call:
+    inputs:
+      windows_build_ordinal:
+        type: string
+        default: '1'
+      windows_first_launch_ordinal:
+        type: string
+        default: '1'
+      dispatch_ordinal:
+        type: string
+        default: '1'
   workflow_dispatch:
     inputs:
       windows_build_ordinal:
@@ -48,12 +59,33 @@ jobs:
           node-version: 24.19.0
           cache: npm
           cache-dependency-path: app/package-lock.json
-      - name: Select pinned npm and install locked dependencies
+      - name: Select pinned Windows npm CLI and install locked dependencies
+        if: runner.os == 'Windows'
+        working-directory: app
+        shell: pwsh
+        run: |
+          npm install --global npm@11.9.0
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned npm setup failed' }
+          $npmPrefix=(npm prefix --global).Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Installed npm prefix unavailable' }
+          $npmCli=Join-Path $npmPrefix 'node_modules/npm/bin/npm-cli.js'
+          $npmVersion=(& node $npmCli --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $npmVersion -ne '11.9.0') { throw 'Installed npm version differs from pin' }
+          $env:Path="$npmPrefix;$env:Path"
+          $npmPrefix | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          "REWRITE_NPM_CLI=$npmCli" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & node $npmCli ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { throw 'Locked dependencies failed' }
+      - name: Select pinned Mac npm CLI and install locked dependencies
+        if: runner.os == 'macOS'
         working-directory: app
         shell: bash
         run: |
           npm install --global npm@11.9.0
-          npm ci --ignore-scripts
+          npm_cli="$(npm root --global)/npm/bin/npm-cli.js"
+          test "$(node "$npm_cli" --version)" = '11.9.0'
+          echo "REWRITE_NPM_CLI=$npm_cli" >> "$GITHUB_ENV"
+          node "$npm_cli" ci --ignore-scripts
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         with:
           key: selectable-proposals-${{ matrix.runner }}

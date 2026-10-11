@@ -16,7 +16,9 @@ def manifest_gate(directory,value):
 def command(argv):
     if argv[0]=='npm':
         node=Path(shutil.which('node'))
-        npm_cli=os.environ.get('REWRITE_NPM_CLI') or str(Path(shutil.which('npm')).parent/'node_modules/npm/bin/npm-cli.js')
+        shim=Path(shutil.which('npm'))
+        resolved=shim.resolve()
+        npm_cli=os.environ.get('REWRITE_NPM_CLI') or str(resolved if resolved.name=='npm-cli.js' else shim.parent/'node_modules/npm/bin/npm-cli.js')
         assert Path(npm_cli).is_file(), 'Selected npm CLI unavailable'
         return [str(node),npm_cli,*argv[1:]]
     return argv
@@ -29,7 +31,7 @@ def main():
     win=platform.system()=='Windows';assert (win and platform.machine()=='AMD64') or (platform.system()=='Darwin' and platform.machine()=='arm64')
     assert os.environ['GITHUB_RUN_ATTEMPT']=='1' and os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'
     candidate=subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip();assert candidate==os.environ['GITHUB_SHA']
-    paths=subprocess.check_output(['git','ls-files','app','tests/fixtures/source-foundation','.github/workflows/selectable-proposals.yml','spikes/renpy-sdk'],cwd=REPO,text=True).splitlines()
+    paths=subprocess.check_output(['git','ls-files','app','tests/fixtures/source-foundation','.github/workflows/selectable-proposals.yml','.github/workflows/production-scaffold.yml','spikes/renpy-sdk'],cwd=REPO,text=True).splitlines()
     identity={'candidate':candidate,'tree':subprocess.check_output(['git','rev-parse','HEAD^{tree}'],cwd=REPO,text=True).strip(),'runId':os.environ['GITHUB_RUN_ID'],'attempt':1,'os':platform.system(),'architecture':platform.machine(),'action':'editScene','inputs':{path:sha(REPO/path) for path in paths},'toolchains':{t:subprocess.check_output(command([t,'--version']),cwd=APP,text=True).strip() for t in ('node','npm','cargo','rustc')}}
     assert identity['toolchains']['node']=='v24.19.0' and identity['toolchains']['npm']=='11.9.0' and identity['toolchains']['rustc'].startswith('rustc 1.90.0 ')
     (a.output/'identity.json').write_text(json.dumps(identity,indent=2)+'\n');checks=[];ledger=[];sdkroot=None;root=None;failure=None

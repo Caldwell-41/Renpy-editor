@@ -1662,7 +1662,9 @@ absent, through pinned SDK8.5.3 compile/lint/named test. It asserts protected to
 literal generated dialogue and Character `who` text (including undefined interpolation
 and markup), Return, unchanged accepted source and owned temporary-root cleanup.
 
-`.github/workflows/selectable-proposals.yml` dispatches one bounded fresh paired run.
+The registered production workflow’s exclusive `selectable_proposals:true` selector
+calls `.github/workflows/selectable-proposals.yml` for one bounded fresh paired run.
+All prior selectors/upload/reuse must be false/empty; admission refuses mixed scope.
 `qualify-selectable.py` requires exact candidate/tree/tool/input identities, positive
 exact counts, eight gate tests, SDK checksum, manifests, privacy and cleanup. Windows
 adds one package and two editor starts, recording attempts before each operation.

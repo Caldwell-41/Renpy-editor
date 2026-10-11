@@ -5824,3 +5824,16 @@ was found during fresh branch run inspection. Next: publish the implementation,
 dispatch paired CI1 with exact identity, record status/counts and end polling under
 manual same-thread wait. After terminal audit, finish signed Mac/native/live checks
 when desktop/key entry capability is available. No merge/release/generic/next outcome.
+
+
+First implementation is published asdcb106c06b9fa1d9fda6de3b6ed6d4d0be39aaae.
+GitHub callable workflow inventory does not expose the new branch-only recipe; no
+failed dispatch was attempted. Add an exclusive selectable_proposals selector to the
+registered production workflow357322921, which calls the branch-local reusable recipe.
+This changes no main/default branch and runs no older/package matrix selectors.
+Admission refuses mixed action/upload/reuse inputs; the recipe still owns paired
+bounds/identities. Both wrapper and recipe are captured as material input hashes.
+Supplemental shared probe-gate discovery reports27pass/2Windows-only skips locally;
+those platform helper regressions are not claimed passed. The required new8 gates
+and listed local suites have zero skips. Cumulative dispatch/package/start/live totals
+are still zero until the recorded first dispatch/actual attempts below.

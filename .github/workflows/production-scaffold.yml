@@ -3,6 +3,14 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
     inputs:
+      selectable_proposals:
+        description: Only approved selectable proposal paired proof; all older selectors false
+        type: boolean
+        default: false
+      selectable_dispatch_ordinal:
+        description: Cumulative selectable paired dispatch, 1 through 4
+        type: string
+        default: '1'
       phase2_studio:
         description: Add integrated Studio LAN and metadata-free SDK proof with generate_lore selected
         type: boolean
@@ -65,7 +73,7 @@ concurrency:
 
 jobs:
   preflight:
-    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
+    if: ${{ !inputs.selectable_proposals && !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
     name: Preflight
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -102,7 +110,7 @@ jobs:
         run: cargo fmt --check --all
 
   packaged-boundary:
-    if: ${{ !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
+    if: ${{ !inputs.selectable_proposals && !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
     name: ${{ matrix.name }}
     needs: preflight
     strategy:
@@ -485,7 +493,7 @@ jobs:
           retention-days: 7
 
   dialogue-rewrite-windows:
-    if: ${{ inputs.dialogue_rewrite_windows || inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio }}
+    if: ${{ !inputs.selectable_proposals && (inputs.dialogue_rewrite_windows || inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) }}
     name: Focused Assist — Windows x64
     runs-on: windows-2025
     timeout-minutes: 60
@@ -673,7 +681,7 @@ jobs:
 
 
   continue-scene-macos:
-    if: ${{ (inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) && !inputs.dialogue_rewrite_windows }}
+    if: ${{ !inputs.selectable_proposals && (inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) && !inputs.dialogue_rewrite_windows }}
     name: Focused Scene automated — macOS ARM64
     runs-on: macos-26
     timeout-minutes: 30
@@ -725,3 +733,31 @@ jobs:
           path: ${{ runner.temp }}/continue-macos/
           if-no-files-found: error
           retention-days: 7
+
+  selectable-admission:
+    if: ${{ inputs.selectable_proposals }}
+    name: Selectable outcome exclusive admission
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LEGACY_REWRITE: ${{ inputs.dialogue_rewrite_windows }}
+      CONTINUE_SCENE: ${{ inputs.continue_scene }}
+      DRAFT_SCENE: ${{ inputs.draft_scene }}
+      GENERATE_CARD: ${{ inputs.generate_card }}
+      GENERATE_LORE: ${{ inputs.generate_lore }}
+      PHASE2_STUDIO: ${{ inputs.phase2_studio }}
+      UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
+      REUSE_PACKAGE: ${{ inputs.rewrite_reuse_run_id }}
+      REUSE_FOCUSED: ${{ inputs.rewrite_focused_reuse_run_id }}
+    steps:
+      - name: Refuse mixed selectors or prior-run reuse
+        run: python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert all(os.environ[k]=='false' for k in ['LEGACY_REWRITE','CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','GENERATE_LORE','PHASE2_STUDIO','UPLOAD_PACKAGES']); assert not os.environ['REUSE_PACKAGE'] and not os.environ['REUSE_FOCUSED']"
+
+  selectable-proposals:
+    if: ${{ inputs.selectable_proposals }}
+    needs: selectable-admission
+    uses: ./.github/workflows/selectable-proposals.yml
+    with:
+      windows_build_ordinal: ${{ inputs.rewrite_build_ordinal }}
+      windows_first_launch_ordinal: ${{ inputs.rewrite_first_launch_ordinal }}
+      dispatch_ordinal: ${{ inputs.selectable_dispatch_ordinal }}
