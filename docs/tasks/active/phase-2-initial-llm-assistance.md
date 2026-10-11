@@ -6047,3 +6047,56 @@ ledger audit, including early failures. Live0/2/discovery0/1. Continue only this
 run’s bounded current-chat polling and terminal artifact audit. Signed Mac/native/live
 remain blocked by the locked host pending user unlock; no native entry or live call.
 No approval extension, watcher, provider/signing change, merge/release or next outcome.
+
+
+#### Selectable CI4 terminal audit and portable snapshot correction — 2026-10-12
+
+CI4run38148312472/attempt1/head923d9aad644ccc01bde3f087f3bd7888eee96e6d completed
+**overall failure** at2026-10-11T14:57:30Z. Mac job114496251905/artifact11705730682 passes
+all automated/controller/SDK proof;31files, outer30/child26 manifests,264inputs and
+privacy audited. Windows job114496251860/artifact11706505640 contains62files with exact
+outer61/child57 manifests,264inputs (declared PowerShell CRLF), candidate/run/attempt/
+platform/tool identities, copied executable/package hash and privacy62 verified.
+Independent audit agrees. SDK8.5.3 two metadata-free cases/ten commands/17 runtime
+assertions and accepted export/source digests pass on both targets; cleanup complete.
+
+All **six Windows native stages pass**: light/dark/compact/Generate, stricter typed
+checkbox selection and physical Save. Exact native PID/executable ownership, receipts
+and before/after PNG hashes verify. Character checkbox keyboard focus and ToggleOn→Off,
+dependency refusal/disabledSave and retained focus observed; physical Save consumed
+one transaction and disabled controls. The keyboard correction is established.
+Full phase1 still **fails** after10/19 checks at `Exact selected patch differs`; phase2
+is unreached. Do not infer exact saved bytes, native Undo/Redo/update/failure-path/project/
+process reopen qualification from those partial passes.
+
+Independent read-only diagnosis confirms a deterministic **probe path-key defect**:
+Rust snapshot used native relative Path string (`game\...` on Windows), while the
+renderer probe indexes core forwardslash preview paths (`game/...`), comparing an
+absent value to a SHA. Recovery prefix filtering has the same mismatch. This is a
+sufficient cause for this failure; no product transaction change is indicated, and
+artifact does not retain a post-Save source snapshot that could prove every saved byte.
+
+In-scope correction joins UTF8 normal relative path components with `/`, retaining
+containment/link refusal and exact bytes/digests; duplicate keys refuse. Product patch
+logic is unchanged. **Two local Mac snapshot_paths tests pass**, covering actual nested
+BOM/mixed-newline hashes, preview-key/recovery-filter shape and Unicode/nonrelative
+refusal. Independent correction review passes; future qualifier explicitly gates2tests.
+This is a locally verified harness correction, **not post-fix Windows native proof**.
+No new package/editor/live attempt or additional CI dispatch for this correction.
+
+Actual cumulative **Windows2/4packages,2/8editor starts**: CI3 ordinal1/1 and CI4
+ordinal2/2. Reopen reservations were unused. Mac**0/4packages,0/8starts**.
+**Paired CI4/4 on each target, exhausted**; no CI5/rerun under this allowance.
+Live**0/2batch generations,0/1discovery**. Prior allowances remain closed.
+Ignored CI4 Windows complete-job log SHA256: `a0be89f04795cb540a8ae75760316b15622bd9563cd12b53539bdcb56a09d206`.
+
+Qualification is **blocked by the exhausted focused CI allowance** for corrected
+Windows native proof, and locked Mac for signed local native/live work. User unlock
+request remains unanswered; no native app binding or key entry. Publish reviewed
+snapshot fix and accurate current/handover records. A concrete additional paired-run
+allowance or named alternative required-host capability decision is necessary before
+another CI operation; do not request original scope approval again or extend limits.
+Fresh native key entry is needed only when the unlocked signed app is ready for the
+remaining live checks; never retrieve old keys/read or export credentials. No watcher,
+provider/signing/merge/release expansion or following deliverable. Full Phase2/generic/
+final human acceptance remains incomplete; unchanged prior evidence remains reusable.

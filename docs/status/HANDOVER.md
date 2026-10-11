@@ -1,62 +1,54 @@
 # Current outcome handover
 
-## Selectable proposal editing — final CI4 pending
+## Selectable proposal editing — qualification blocked after final CI4 audit
 
-Continue the approved outcome in this same Mac ARM64 workspace on
-`codex/provider-qualification`. Preserve unrelated work; never reset. Initial continuation
-4bcfee0 and main5f448ca reconciled before implementation. Implementationdcb106c,
-route54ac943, acquisitiona16c5f7 and fixture78a6389 are published. Later status-only
-commits do not change the audited candidate. Scope and approved cumulative caps persist;
-do not ask approval again. One serial owner and independent read-only reviewer.
+Continue the approved outcome on Mac ARM64, `codex/provider-qualification`, preserving
+unrelated work and never resetting. Initial4bcfee0 continuation/main5f448ca reconciled.
+Original scope/allowance approval persists; one serial owner and independent read-only
+reviewer. [Selected contract](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
+remains authoritative; no generic/provider/signing/paid-public/merge/release/next outcome.
 
-[Selected scope and transfer](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
-owns the 1–8-operation saved Scene outcome. Implementation covers replacements, one
-inseparable insertion and one supported runnable Character create/update; pre-send
-permissions, core IDs/paths, explicit dependencies, fresh exact subset preview/digest,
-one transaction/history and literal/protected/custom/unrelated metadata preservation.
-Generic/provider installation/signing changes/paid-public calls/merge/release/next outcome
-remain excluded. Full Phase2 and final human acceptance remain separate.
+Implementationdcb106c, route54ac943, acquisitiona16c5f7, Windows fixture78a6389 and native
+focus923d9aa are published. Current branch additionally carries the reviewed portable
+snapshot correction; it is not covered by the older exact candidate’s native proof.
+Later docs-only commits never replace candidate identity during audit.
 
-CI1run38144885050/head54ac943 failed official acquisition before qualification, no
-artifacts/package/starts. Correction verifies unchanged official SDK8.5.3 cache and
-retained published checksum snapshot, with fresh SDK/runtime proof and bootstrap failure
-retention. CI2run38146108645/heada16c5f7 Mac passed; Windows failed Unix-path fixture
-assertion before package/start, fixed78a6389. Both artifacts/identities/manifests audited.
+CI1run38144885050 failed official acquisition before tests/package/starts, no artifacts.
+SDK cache/checksum/bootstrap correction passed CI2 acquisition; CI2run38146108645 Mac
+passed, Windows Unix-path fixture assertion failed before package/start. CI3run38146640617
+Mac passed and Windows passed package/start1 but keyboard selection lacked preinput
+focus proof. All unique evidence/diagnoses retained in owning task; failures remain failures.
 
-CI3run38146640617/attempt1/head78a638984118515991494755fcabc69a16ddba01 is terminal
-**failure** at2026-10-11T14:34:43Z. Mac job114491300060/artifact11704998015 passes automated/
-controller/SDK and independent31file audit. Windows job114491300090/artifact11705393402
-passed all automated/controller/SDK/package/privacy and native light/dark/compact/Generate,
-then failed physical-select. Driver did not prove Character checkbox focus before Space;
-no product defect or native selection/Save pass inferred. Exact57file manifests,
-264inputs, declared PowerShell CRLF checkout, package/executable hashes and cleanup pass.
+**Final CI4run38148312472/attempt1/head923d9aad644ccc01bde3f087f3bd7888eee96e6d**
+completed overall failure2026-10-11T14:57:30Z. Mac job114496251905/artifact11705730682
+passes automated/controller/SDK proof with audited31files. Windows job114496251860/
+artifact11706505640 audited62files; exact manifests/264inputs (declaredPS1CRLF), copied
+exe/package identity, native receipts/PNG hashes and cleanup pass. Six native stages
+pass light/dark/compact/Generate/typed keyboard selection/physical Save. Focused checkbox
+ToggleOn→Off, dependency refusal/disabledSave and retained focus are proven. Full phase1
+stops after10/19 checks at exact saved-file assertion; phase2 is unreached. Exact saved
+bytes/native UndoRedo/update/refusal/project/process reopen remain missing proof.
 
-The [owning CI3 failure audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci3-windows-native-selection-failure-and-correction--2026-10-12)
-retains unique failures and actual counts. Reviewed correction uses unique typed checked
-checkbox, OS Tab from verified Save, actual keyboard focus/viewport before Space and
-unchecked/dependency/disabledSave/retained-focus observations. Temporary absent control
-retries while duplicate remains failure. Failure diagnostics/captures persist. Gate12
-and native-evidence14 pass; PowerShell5.1 compatibility is reviewed by inspection, not
-local Windows runtime proof. Published native correction923d9aad644ccc01bde3f087f3bd7888eee96e6d is in confirmed
-[final CI4run38148312472/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38148312472),
-created2026-10-11T14:43:05Z, initially queued. Dispatchordinal4,
-packageordinal2/editor starts2–3. No old-run rerun or subsequent dispatch allowance. CI4 actual attempts await audit;
-only its exact head923d9aa/attempt1 counts as this pending candidate.
+[Terminal owning audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci4-terminal-audit-and-portable-snapshot-correction--2026-10-12)
+confirms a deterministic probe mismatch: native Windows snapshot backslash keys versus
+core preview forwardslash paths, also affecting recovery-prefix filtering. The reviewed
+fix joins normal UTF8 relative components with `/`, preserves hashes/containment/link
+refusal and rejects duplicate keys. Local snapshot_paths2/2 pass; future qualifier gates2.
+No product patch logic changed; no post-fix Windows native/packaged acceptance claimed.
 
-Actual consumed: **paired4/4 each (fully consumed); Mac0/4packages,0/8starts; Windows1/4packages,
-1/8starts; live0/2batch generations, discovery0/1**. CI3 unreached reopen reservation
-is unused. Audit new emitted ledger including failures/implicit starts, manifests,
-exact source/tool/input/package identity, positive counts, SDK results, native receipt/
-PNG/body digests and cleanup before claiming qualification. Green status alone is
-insufficient; failed/skipped/missing evidence never passes.
+**Consumed:** paired4/4 each (exhausted); Windows2/4packages,2/8starts;
+Mac0/4packages,0/8starts; live0/2total batch generations, discovery0/1.
+CI3/4 unreached reopen starts were unused. Earlier allowances stay closed. No CI5 or
+old-run rerun under this allowance. Additional paired allowance or a named required-host
+capability decision is needed before further CI; original scope approval is not needed.
+Current-chat polling was authorised only here and ended at terminal audit; no automation/
+watcher. Other chats retain WORKFLOW manual same-thread wait unless freshly amended.
 
-User explicitly permits CI polling for this chat only, overriding manual same-thread
-waiting here. No watcher/automation or widened budget; global waiting policy persists
-elsewhere. Continue bounded polling and terminal audit, then remaining signed local
-Mac/native/live qualification within caps. Supported inventory still reports locked Mac;
-user unlock requested again while CI continued. No Loomlight binding/local Mac start.
-Preserve approved Mac signing/credential policy. Notify when app is ready for fresh
-native key entry on existing selected endpoint/model; never retrieve old keys from
-chat/logs or read/export credential files. No live or real-provider credential operation.
-Temporary-root/credential cleanup remains required. Reuse unchanged qualified prior
-Studio evidence; retain original Phase2/generic/human distinctions.
+Mac control still reports locked; asynchronous unlock request unanswered, no app binding/
+local editor start. Remaining signed Mac/native/live requires unlock and approved package
+identity/credential policy. Notify when ready for fresh native key entry on existing
+selected endpoint/model; never retrieve old keys from chat/logs or read/export credentials.
+No real-provider credential operation/live call; explicit temporary-root/credential
+cleanup remains. No owned temporary editor/listener/fixture remains. Core/controller/
+SDK/partial native proof and unchanged accepted Studio evidence remain reusable;
+full Phase2/generic/final human acceptance remain incomplete.

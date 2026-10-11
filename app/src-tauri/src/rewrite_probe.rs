@@ -74,6 +74,21 @@ pub fn cleanup(service: &LifecycleService) -> Result<(), &'static str> {
     }
     Ok(())
 }
+fn snapshot_key(relative: &Path) -> Result<String, &'static str> {
+    // Match core preview paths on every host without rewriting filename bytes.
+    // The owned fixture walker supplies only contained normal components.
+    let parts = relative
+        .components()
+        .map(|part| match part {
+            std::path::Component::Normal(name) => name.to_str().ok_or("Fixture path refused"),
+            _ => Err("Fixture path refused"),
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    if parts.is_empty() {
+        return Err("Fixture path refused");
+    }
+    Ok(parts.join("/"))
+}
 pub fn snapshot(root: &Path) -> Result<serde_json::Value, &'static str> {
     if root.parent() != Some(std::env::temp_dir().as_path())
         || !root
@@ -96,16 +111,18 @@ pub fn snapshot(root: &Path) -> Result<serde_json::Value, &'static str> {
             if p.is_dir() {
                 walk(&p, base, files)?;
             } else {
-                files.insert(
-                    p.strip_prefix(base)
-                        .map_err(|_| "Fixture path refused")?
-                        .to_str()
-                        .ok_or("Fixture path refused")?
-                        .into(),
-                    loomlight_core::rewrite::content_digest(
-                        &std::fs::read(p).map_err(|_| "Fixture unavailable")?,
-                    ),
-                );
+                let key = snapshot_key(p.strip_prefix(base).map_err(|_| "Fixture path refused")?)?;
+                if files
+                    .insert(
+                        key,
+                        loomlight_core::rewrite::content_digest(
+                            &std::fs::read(p).map_err(|_| "Fixture unavailable")?,
+                        ),
+                    )
+                    .is_some()
+                {
+                    return Err("Duplicate fixture snapshot path");
+                }
             }
         }
         Ok(())
@@ -114,4 +131,62 @@ pub fn snapshot(root: &Path) -> Result<serde_json::Value, &'static str> {
     let mut files = std::collections::BTreeMap::new();
     walk(&base, &base, &mut files)?;
     Ok(serde_json::json!({"files":files}))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn snapshot_paths_are_portable_and_bind_exact_bytes() {
+        let root = tempfile::Builder::new()
+            .prefix("loomlight-rewrite-paths-")
+            .tempdir()
+            .unwrap();
+        let base = root.path().join("synthetic-project");
+        let files = [
+            (
+                "game/chapters/scene.rpy",
+                b"\xef\xbb\xbf# exact\r\nlabel scene:\n    return\r\n".as_slice(),
+            ),
+            (
+                ".renpy-editor/recovery/transaction.json",
+                b"{}\n".as_slice(),
+            ),
+        ];
+        for (key, bytes) in files {
+            let path = key.split('/').fold(base.clone(), |p, part| p.join(part));
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            std::fs::write(&path, bytes).unwrap();
+        }
+        let result = snapshot(root.path()).unwrap();
+        let actual = result["files"].as_object().unwrap();
+        assert_eq!(actual.len(), files.len());
+        for (key, bytes) in files {
+            assert_eq!(actual[key], loomlight_core::rewrite::content_digest(bytes));
+        }
+        assert_eq!(
+            actual
+                .keys()
+                .filter(|key| !key.starts_with(".renpy-editor/recovery/"))
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn snapshot_paths_reject_non_relative_components() {
+        assert_eq!(
+            snapshot_key(&Path::new("game").join("café.rpy")).unwrap(),
+            "game/café.rpy"
+        );
+        for path in [
+            Path::new(""),
+            Path::new("."),
+            Path::new("../escape"),
+            Path::new("/absolute"),
+        ] {
+            assert!(snapshot_key(path).is_err());
+        }
+    }
 }

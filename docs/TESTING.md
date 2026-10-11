@@ -1650,7 +1650,9 @@ same-file/subset/dependency/stable-ID/history/reopen, supported Character update
 literal names/manual update preservation, aggregate UTF-8 boundaries, malformed whole
 batch, collision/custom interpretation, stale/cancel/draft/refusal and compound recovery.
 The broader existing rewrite suite requires43 cases; renderer check132/prompt5/native
-worker6 remain focused shared gates. Loopback worker/controller tests require socket
+worker6 remain focused shared gates. Two `snapshot_paths` desktop tests require
+portable component-based snapshot keys and exact nested file hashes, with recovery
+subtree filtering. These are harness checks; they do not replace native saved-byte proof. Loopback worker/controller tests require socket
 capability; sandbox denial before socket bind is a harness failure, never a pass.
 
 `node tests/selectable-controller.dispatch.mjs <rewrite-controller-driver>
