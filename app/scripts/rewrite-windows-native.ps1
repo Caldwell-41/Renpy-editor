@@ -124,6 +124,17 @@ function Button([string]$Name) {
     $condition=[System.Windows.Automation.AndCondition]::new([System.Windows.Automation.Condition[]]@($nameCondition,$typeCondition))
     return $script:window.FindFirst([System.Windows.Automation.TreeScope]::Descendants,$condition)
 }
+function Completed-Assist-Close-State {
+    # Keep source ASCII: Windows PowerShell 5.1 reads BOM-less -File as ANSI.
+    $storyLabel='Assist '+[char]0x00B7+' Draft lore entry'
+    return [ordered]@{
+        closeAbsent=($null -eq (Button 'Close Assist'))
+        generateAbsent=($null -eq (Button 'Generate proposal'))
+        acceptAbsent=($null -eq (Button $acceptName))
+        storyPresent=($null -ne (Button $storyLabel))
+        savedPresent=(Has-Text 'Saved')
+    }
+}
 function Wait-Native([scriptblock]$Check) {
     $timer=[System.Diagnostics.Stopwatch]::StartNew()
     do {
@@ -236,7 +247,7 @@ try {
         if($Stage -eq 'physical-close'){
             Assert-Native ($GenerateLore -and (Has-Text 'Proposed lore entry saved as one change.') -and (Has-ButtonState $acceptName $false)) 'Completed saved lore review required before Close'
             Click-Control 'Close Assist'
-            Wait-Native { $null -eq (Button 'Close Assist') -and $null -eq (Button 'Generate proposal') -and $null -eq (Button $acceptName) -and $null -ne (Button 'Assist · Draft lore entry') -and (Has-Text 'Saved') }
+            Wait-Native { $receipt.closePostconditions=Completed-Assist-Close-State; return ($false -notin $receipt.closePostconditions.Values) }
             $receipt.checks.completedAssistClosedObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         }
@@ -256,6 +267,13 @@ try {
     $receipt.failureId=$_.FullyQualifiedErrorId
     $receipt.failureStack=$_.ScriptStackTrace
     $receipt.failurePosition=$_.InvocationInfo.PositionMessage
+    if($Stage -eq 'physical-close') {
+        # Preserve failure. Diagnostics never acknowledge or normalize the stage.
+        try { $receipt.closePostconditions=Completed-Assist-Close-State }
+        catch { $receipt.closeDiagnosticError=$_.Exception.GetType().FullName }
+        try { $receipt.captures+=Capture 'physical-close-failure' (Window-Rect $script:handle) }
+        catch { $receipt.closeCaptureError=$_.Exception.GetType().FullName }
+    }
 }
 $receipt | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $Output ($Stage+'.json')) -Encoding UTF8
 Write-Output ($Stage+': passed='+$receipt.passed)

@@ -98,6 +98,46 @@ Write-Output 'PASS: real native polling rejects absent proof and propagates real
                                 capture_output=True, text=True, timeout=45)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('PASS: real native polling', result.stdout)
+        # Exercise the production helper via the same BOM-less 5.1 -File reader.
+        text = driver.read_text(encoding='utf-8')
+        helper = text[text.index('function Completed-Assist-Close-State'):text.index('function Wait-Native')]
+        self.assertTrue(helper.isascii())
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)/'close-state.ps1'
+            path.write_text(helper + r"""
+$ErrorActionPreference='Stop'
+Set-StrictMode -Version Latest
+$script:acceptName='Save proposed lore entry'
+$script:storyLabel='Assist '+[char]0x00B7+' Draft lore entry'
+function Assert-Test($Condition,$Message) { if(-not $Condition) { throw $Message } }
+function Button($Name) { $script:queried+=@($Name);return $script:buttons[$Name] }
+function Has-Text($Text) { Assert-Test ($Text -eq 'Saved') 'Unexpected result predicate';return $script:saved }
+function Reset-State {
+    $script:queried=@();$script:buttons=@{};$script:buttons[$script:storyLabel]=[pscustomobject]@{Present=$true};$script:saved=$true
+}
+Reset-State
+$state=Completed-Assist-Close-State
+Assert-Test ($state.Count -eq 5 -and $false -notin $state.Values) 'Complete closure was not recognized'
+Assert-Test ($script:queried[3] -ceq $script:storyLabel -and [int][char]$script:queried[3][7] -eq 183) 'Exact middle-dot UI label corrupted by -File encoding'
+foreach($missing in @('closeAbsent','generateAbsent','acceptAbsent','storyPresent','savedPresent')) {
+    Reset-State
+    switch($missing) {
+        closeAbsent { $script:buttons['Close Assist']=[pscustomobject]@{Present=$true} }
+        generateAbsent { $script:buttons['Generate proposal']=[pscustomobject]@{Present=$true} }
+        acceptAbsent { $script:buttons[$script:acceptName]=[pscustomobject]@{Present=$true} }
+        storyPresent { $script:buttons.Remove($script:storyLabel) }
+        savedPresent { $script:saved=$false }
+    }
+    $state=Completed-Assist-Close-State
+    Assert-Test ($state[$missing] -eq $false -and $false -in $state.Values) ('Partial closure accepted: '+$missing)
+}
+Write-Output 'PASS: actual -File close helper preserves exact Unicode label and rejects every missing postcondition'
+""", encoding='utf-8')
+            self.assertFalse(path.read_bytes().startswith(b'\xef\xbb\xbf'))
+            result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-File', str(path)],
+                                    capture_output=True, text=True, timeout=45)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn('PASS: actual -File close helper', result.stdout)
 
     def test_recorded_toolchain_drift_is_rejected_before_checks_or_reuse(self):
         engines = json.loads((recipe.APP/'package.json').read_text())['engines']

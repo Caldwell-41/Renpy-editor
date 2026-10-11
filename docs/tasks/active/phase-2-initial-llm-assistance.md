@@ -14,8 +14,8 @@ are qualified on both targets. See the [first rewrite audit](#final-pinned-windo
 [Generated Character cards closure](#generated-character-cards-qualified-closure--2026-10-11)
 and [Generated lorebook entries closure](#generated-lorebook-entries-qualified-closure--2026-10-11).
 The [selected Phase 2 qualification](#phase-2-qualification-selection-and-prerequisite-audit--2026-10-11)
-continues as Studio-only with generic deferred. The [current audit and continuation](#studio-only-ci2-audit-live-progress-and-completed-assist-repair--2026-10-11)
-records CI3/native acceptance still pending; individual action qualification does not
+continues as Studio-only with generic deferred. The [current audit and continuation](#studio-only-live-completion-mac-native-and-ci3-repair--2026-10-11)
+records live/Mac completion and the final Windows CI correction; individual action qualification does not
 establish integrated/live acceptance.
 Read its CI-first amendment/selection only when continuing or reviewing that slice,
 then only the relevant requirement sections. Completed credential/request selections below
@@ -5404,3 +5404,74 @@ live Draft/history/reopen6 and credential/root cleanup after unlock. If extensio
 approved, run updated signed native acceptance/ordinary Close and process reopen7–8;
 otherwise retain missing updated Mac native evidence. Publish status, pause and resume
 the same outcome; no full acceptance, generic calls, signing change, merge or release.
+
+### Studio-only live completion, Mac native and CI3 repair — 2026-10-11
+
+User unlocked/saved the key and explicitly approved two additional Mac launches,
+changing this outcome's Mac launch limit6→8, and requested CI audit/continuation.
+No other allowance changes. Fresh refs reconcile at b981303; origin/main remains
+5f448ca. Unrelated work preserved; no reset or new outcome.
+
+Real Studio Draft1 returned two valid narrations plus terminal, reviewed and accepted
+once into a second Scene. All five live actions now1/2 each; discovery1/2, generic0.
+Together with the earlier separately approved card/lore, generated-reference inclusion,
+custom/restore prompt, changed limits and protected-token rewrite/Continue, nine Undo
+operations restored all11 baseline public files exactly and removed the new Scene;
+nine Redo restored all12 accepted public files exactly. Ordinary project reopen and
+live process reopen launch6/PID69463 preserved both Scenes and all12 hashes. This is
+package1 live evidence, not proof of the completed-Assist fix. No ambient provider
+operation was initiated on live reopen; independently observed zero HTTP is not claimed
+for that live session. Provider-internal configuration remains unknown; controlled
+CI/native transport establishes exact sends, client strict schema/tools behavior and
+zero reopen HTTP separately.
+
+Pinned official Ren'Py8.5.3 ran compile/lint and eight named startup/first-Scene rewrite
+and Continue/terminal/new-Scene two narrations/terminal assertions in five commands using
+the exact eight accepted `.rpy` files, preserving UTF-8 BOM/CRLF. Editor metadata was
+absent; only existing empty GUI scaffold files received SDK defaults. Accepted source
+hashes unchanged. Ignored `live-studio/sdk-01/result.json` and command logs retain proof.
+The user-entered temporary credential was removed through ordinary Settings; missing
+credential/disabled profile observed. Exact owned live PIDs58371/69463 stopped and
+owned temporary root removed. Historical credentials untouched; no secret read/export.
+Only public synthetic accepted fixture and nonsecret receipts are retained.
+
+Updated signed Macpackage2/native launches7/PID69512 and8/PID69576 use exact481c64b
+executableb49959bd. Owner observed all seven native stages, including ordinary physical
+Close immediately after Save without clearing fields: Assist disappeared, Story/Saved
+remained and full public snapshot was unchanged before history/separate approval.
+Phase1 passes26 distinct checks/27 rows and five reviewed/actual body digests; phase2
+passes all three reopen checks, four identical metadata hashes and observed zero HTTP.
+Owned synthetic credential/root and both processes cleaned. Ignored `native-mac-03`
+phase receipts/public fixture/outer-cleanup retain exact proof. Mac launches8/8 exhausted.
+
+CI3 run38129660338/attempt1/head481c64b is terminal failure. Owner and independent
+audit retain intact23/79-entry manifests,252 exact inputs each and253 Windows package
+inputs with `.gitattributes` PS1 CRLF on both targets. Windows executable5aeca5ca matches
+native PID5932. Both integrated five-action/controller/SDK chains and raw suites pass;
+Windows actual polling/placement regressions9 pass/no skips. Native passes13 checks
+through physical Save, then physical-close five-condition gate times out; no phase2.
+Only pre-Close state was captured, so neither a product Close failure nor successful
+panel closure is proven. Preserve original failure; overall CI3 is not a pass. Cleanup
+passes. Actual Windows package3/editor4 consumed; unused editor5 reservation released.
+Ignored `ci3/owner-terminal-audit.json` records hashes/failed disposition and raw job log.
+
+Concrete harness hazard: BOM-less driver contained exactly one non-ASCII literal in
+the exact Story-name Close predicate; launcher uses Windows PowerShell5.1 `-File`,
+which interprets such source as ANSI ([Microsoft encoding documentation](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_character_encoding?view=powershell-7.6)).
+This fits CI3 but is not proven its sole cause. Narrow repair constructs the same label
+with `[char]0x00B7` in ASCII source, retains all five individual postconditions and
+captures failure state without acknowledging/normalizing a failed stage. Regression
+executes the actual helper through BOM-less `powershell.exe -File`, verifies exact
+label code point and rejects each missing condition. Mac reuse7 pass/2 Windows-only
+skips; native gate14 pass. Actual Windows regression/native success requires fresh CI.
+
+Independent GPT-6.1 Sol High final repair/native/live SDK receipt review finds no
+blocking issue. All12 accepted public hashes match; eight named SDK assertions pass.
+Current totals Mac2/4packages,8/8launches,3/4dispatches; Windows3/4packages,4/6launches,
+3/4dispatches. Final permitted CI4 selects fresh package4/editor5–6/dispatch4, lore+
+Studio integrated, no reuse/uploads; Mac automated dispatch4 without package/editor.
+Only Windows driver/test inputs change from481; retained Mac production/probe/native
+proof may be reused within that exact boundary, not described as a new full package.
+Manual same-thread wait/resume applies. No further automatic retry beyond cumulative
+limits; missing, failed or skipped required checks remain unresolved. Generic/full
+Phase2/final human acceptance and merge/release remain distinct.
