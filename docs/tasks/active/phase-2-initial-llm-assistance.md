@@ -6,11 +6,16 @@ foundation are accepted; Phase 2 remains incomplete. Studio settings and credent
 are implemented; the selected Windows remembered-credential qualification and cleanup are complete. [CURRENT](../../status/CURRENT.md) owns
 project status; [HANDOVER](../../status/HANDOVER.md) owns continuation and recovery.
 
-The bounded first rewrite, Continue Scene, Draft Scene and Generated Character cards
+The bounded first rewrite, Continue Scene, Draft Scene, Generated Character cards
+and Generated lorebook entries
 are qualified on both targets. See the [first rewrite audit](#final-pinned-windows-audit-and-both-target-qualification--2026-10-10),
 [Continue Scene closure](#continue-scene-both-target-qualification-and-closure--2026-10-10),
-[Draft Scene closure](#draft-scene-qualified-closure--2026-10-11) and
-[Generated Character cards closure](#generated-character-cards-qualified-closure--2026-10-11).
+[Draft Scene closure](#draft-scene-qualified-closure--2026-10-11),
+[Generated Character cards closure](#generated-character-cards-qualified-closure--2026-10-11)
+and [Generated lorebook entries closure](#generated-lorebook-entries-qualified-closure--2026-10-11).
+The [selected Phase 2 qualification](#phase-2-qualification-selection-and-prerequisite-audit--2026-10-11)
+is blocked on production provider prerequisites and an authorized generic configuration;
+individual action qualification does not establish integrated/live acceptance.
 Read its CI-first amendment/selection only when continuing or reviewing that slice,
 then only the relevant requirement sections. Completed credential/request selections below
 are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
@@ -4892,4 +4897,134 @@ commit/push and update canonical contracts/task/CURRENT/HANDOVER. Follow WORKFLO
 wait/resume; express polling authorization applies only if continuing this same
 chat. Audit actual artifacts. Return result/limitations/next prompt; do not start
 another deliverable. Keep final human acceptance distinct.
+```
+
+
+### Phase 2 qualification selection and prerequisite audit — 2026-10-11
+
+User selects the saved Phase 2 qualification next prompt above, continuing closure
+**d03c1173d6a7493353a4df01463175a1404d545d**, retaining the Mac ARM64 development
+session. Fresh authenticated fetch/remote refs match the clean local branch
+`codex/provider-qualification`; origin/main remains
+`5f448ca683a905f4ea77d4580bbc89fda69f2b93`. No reset, unrelated edits or open branch PR.
+Latest branch run38105665896 is completed/success on exact233454b; the three latest
+branch runs are terminal. Restricted-shell `gh auth status` initially reported an
+invalid token; authenticated approved-network fetch/API calls succeeded. This was
+an environment limitation, not lost GitHub access or a failed dispatch.
+
+Selected scope: one coherent integrated five-action qualification on Studio and one
+representative generic endpoint, with in-scope existing-action defects only. Reuse
+accepted references/prompts/proposals/history, credentials and unchanged action proof.
+One serial owner and independent GPT-6.1 Sol High read-only reviewer; no second writer.
+No provider/signing expansion, provider installation/model download, paid/public calls,
+runnable Character/Appearance changes, retrieval/embeddings/runtime inference,
+merge/release or following deliverable. Commit/push of this outcome is authorized.
+Polling permission from the prior chat is not inherited; WORKFLOW manual same-thread
+wait/resume applies unless the user expressly changes it here.
+
+Acceptance still requires exact production sends and strict schema/tools behavior,
+passive semantic/exact review, zero-write refusals, separate proposed/approved reference
+revisions, preserved source/custom text, mixed source/reference/prompt Undo/Redo,
+project/process reopen, responsive Save/cancel and metadata-free SDK game behavior.
+An integrated session must exercise all five actions with reviewed approved references,
+customize/restore prompts, vary context/output limits, and persist/approve generated
+cards/lore before reviewing their exact inclusion in later actions. Both client targets
+require coherent candidate/input/native evidence; live synthetic inference may use one
+controlled host. Existing single-action closures are reuse evidence, not that integrated
+session or live provider proof. Final human acceptance remains distinct. The broader section11 subset/new-Character
+operation matrix is not implemented by the current one-operation/inseparable-group
+actions. It is not permission to add multi-operation or runnable Character features
+here; reconcile that broader requirement before a full Phase2 completion claim.
+
+#### Evidence reuse and remaining proof
+
+| Accepted bounded action | Existing candidate / successful run | Reuse boundary |
+| --- | --- | --- |
+| First rewrite | 95ce9c4 / 38031993657 | Qualified bounded native/source/token path; later shared changes need final coherent-input assessment. |
+| Continue Scene | 8931fa8 / 38039472619 | Qualified group/source/history action; no live endpoint claim. |
+| Draft Scene | 1320d0a / 38056790759 | Qualified Scene creation/history and pinned-SDK literal/metadata-free behavior. |
+| Generated Character card | 8a230a9 / 38093296977 | Qualified metadata/proposed/approval path and repaired native cancellation. |
+| Generated lore entry | 233454b / 38105665896 | Current coherent shared/action automated inputs and signed Mac/native Windows proof; no integrated/live claim. |
+
+Closure d03c117 changes documentation only after233454b. No implementation has changed
+in this selection. Do not rerun all individual cases or package solely for this record.
+New integrated cross-action and live results remain missing; SDK reuse must be assessed
+against the eventual integrated accepted source, not inferred from unchanged metadata.
+
+#### Concrete prerequisite blockers
+
+State **blocked**, not accepted. Two prerequisites cannot be established inside the
+saved qualification-only/no-provider-expansion boundary:
+
+1. **Studio production destination — requirement mismatch.** The recorded local Studio
+   configuration in the historical ledger uses direct private-LAN HTTP, exact model
+   `unsloth/gemma-4-12B-it-qat-GGUF`, API-advertised UD-Q4_K_XL/context262144 and
+   user-reported v0.1.902-beta. Those are historical observations; current availability,
+   version/model configuration and credential readability have not been verified.
+   The shared production `rewrite.send` calls `ai_request::prepare_reviewed`, which
+   requires literal loopback HTTP and rejects LAN before dispatch. This is the deliberate
+   accepted bounded transport contract, not a newly introduced product regression.
+   The existing offline exact test
+   `ai_request::tests::immutable_body_context_and_destination_refusal` passes **1/1**,
+   **0 skipped**, at d03c117 and proves LAN/hostname/HTTPS refusal without HTTP.
+   No supported local inference listener was identified on the retained Mac; this
+   observation does not test the recorded LAN server. The old Python live spike cannot
+   substitute for production five-action/client qualification. Smallest prerequisite:
+   an explicitly agreed existing supported Studio configuration, or a bounded approved
+   production LAN completion preserving address/origin, credential, no-proxy/no-redirect,
+   immutable consent, cancellation and resource guarantees. No tunnel/proxy workaround.
+2. **Generic production capability/access — missing implementation and evidence.**
+   Production records expose only StudioSettings/StudioProfile; the request path requires
+   a bound nonempty credential. Shared action serialization unconditionally emits Studio
+   extensions. No generic kind/auth/capability selection or generic wire mapping exists;
+   ADR0013 still records generic deferred. Entering a generic URL as Studio cannot qualify
+   the distinct generic contract. No selected exact endpoint/model/auth/schema configuration
+   or expressly authorized free/local access is available. Smallest prerequisite: select
+   that configuration and explicitly amend scope to implement its production generic
+   profile/auth/capability and wire behavior. No automatic fallback or provider installation.
+
+Independent read-only review confirms both prerequisite findings and the no-expansion
+scope conflict. Reviewer made no writes, sends, packages, editor launches or dispatches.
+Final independent review of this docs-only selection/status diff finds no actionable
+finding. Repository/link/privacy validation passes498files and `git diff --check`
+passes; CURRENT291words/HANDOVER536words are compact complete recovery records.
+No package matrix is required for this documentation-only prerequisite record.
+Owner requested the missing nonsecret generic configuration/free-local authorization and
+an explicit scope decision for the two production prerequisites. No API key requested in
+chat, credential read/export/change, discovery or generation attempted. Existing owned
+qualification credential/reference is untouched; historical access is not current proof.
+
+Fresh selected cumulative allowance remains **Windows0/4packages,0/6editor launches,
+0/4focused dispatches; Mac0/4packages,0/6editor launches,0/4focused dispatches**.
+Live probes **0/2 per action per endpoint**; discovery allowance/configuration must be
+made explicit before connection. Earlier allowances stay closed; no reservation,
+ambiguous dispatch or unsuccessful correction. Validate cheap rejecting gates before
+any package. Reassess after two unsuccessful corrections of one hypothesis.
+No new process/listener/fixture, package or CI operation is owned by this selection.
+
+Resume this same outcome after the user supplies the selected free/local generic
+configuration and resolves the prerequisite scope. Retain the same allowance and Mac
+session; reconcile fresh refs, implement only an authorized amendment, then complete
+focused rejecting/integrated checks, independent review, necessary both-target/native
+qualification and live attempts. Missing live access remains missing evidence. No
+following deliverable is selected.
+
+#### Qualification continuation prompt — blocked outcome
+
+```text
+Resume the selected Phase 2 qualification on codex/provider-qualification from its
+published prerequisite-audit checkpoint, retaining this Mac ARM64 session. Read
+CURRENT, HANDOVER and the Phase 2 task's “Phase 2 qualification selection and
+prerequisite audit — 2026-10-11”. Preserve qualified233454b/run38105665896 and
+unrelated work; reconcile fresh refs without reset. Resolve the recorded production
+LAN/generic scope amendment and exact expressly authorized free/local endpoint/model/
+auth/capability access before dependent implementation or calls. No installation,
+paid/public calls, signing expansion, merge/release or next deliverable.
+Continue the same selected five-action integrated/live outcome, serial owner and
+independent GPT-6.1 Sol High reviewer. Existing allowance remains per target
+0/4packages,0/6editor launches,0/4focused dispatches; live0/2 per action per endpoint.
+Reuse unchanged proof, establish missing rejecting/integrated/native/live evidence,
+audit actual artifacts and keep final human acceptance distinct. Follow WORKFLOW
+manual same-thread CI wait/resume unless expressly authorized otherwise here.
+Commit/push authorized results and maintain the existing task/CURRENT/HANDOVER.
 ```
