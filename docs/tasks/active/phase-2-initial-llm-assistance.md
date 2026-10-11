@@ -4744,3 +4744,152 @@ Cumulative actual use: Mac1/4packages,2/6launches,1/4dispatches; Windows0/4packa
 reserved by CI1; count actual failed/cancelled/implicit attempts from artifacts.
 Review/fixes remain serial. No full bounded acceptance claim until required CI cases,
 input identity, native artifacts and independent final audit pass. No next deliverable.
+
+
+### Generated lorebook entries qualified closure — 2026-10-11
+
+Selected outcome **accepted and complete** on implementation candidate
+**233454b4a0ae4c369d00c2dcd352c789829290b2**, tree
+`e467eeeea0b83d92ea799b54e7751b8fbe185a11`. Published checkpoint c3be621 changes only
+task/CURRENT/HANDOVER; this closure also changes documentation only and does not replace
+the tested runtime candidate. Retained Mac ARM64 host; origin/main 5f448ca unchanged,
+repository-only noreply identity, clean candidate/refs and no reset/unrelated changes.
+User expressly authorized polling all CI in this chat, superseding earlier no-polling;
+no new allowance or following outcome authorization was inferred.
+
+#### Required CI and artifact evidence
+
+Workflow 357322921 production-scaffold.yml,
+[run38105665896](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38105665896),
+attempt1, workflow_dispatch, branch codex/provider-qualification, exact candidate above,
+terminal **success** at 2026-10-11T02:48:47Z. Windows job 114370557450 succeeded at 02:48:46Z;
+Mac ARM64 job 114370557543 succeeded at 02:38:18Z. Inputs generate_lore=true; other action
+selectors/upload_packages=false; Windows build1/firstlaunch1; both reuse IDs empty.
+Generic Preflight/matrix skipped by explicit focused scope; no required case skipped.
+No CI failure, correction, package retry or second dispatch.
+
+Downloaded artifacts 11689597279 Windows and 11690086025 Mac, API SHA256 digests
+`d7e3d0ff71ba9b8c9d38f852ecce3e897432c53d7bcd7bf83bcc54beb24ca683` and
+`e0bceb1381c1ce98dee6f135f10d9f43890eaaf1a9ea4ba91ddb4f58366e0d1d` respectively.
+All 71 Windows/13 Mac manifest hashes verified.247 exact focused checkout inputs per target
+and 248 Windows packaged inputs bind to Git candidate, action/run/attempt/tree/toolchains.
+Only committed .gitattributes PowerShell CRLF transformation differs from canonical Git
+LF bytes; exact transformed bytes verified, no blanket normalization/exemption. Initial
+Mac literal-blob comparison refused that path; classified owner audit-harness mismatch,
+corrected expected checkout comparison without source/artifact mutation or CI rerun.
+Windows executable SHA256
+`c6151ea6281e8e34e35bbad90ced722845676fc94d3be5801cbc31b3c6e4d7fd`;
+setup `004eec0f1d65f5cb3d84fdf8440045aea4b151525b2372539809c29f14ddf1e6`;
+MSI `617df5156097c79a488a69a23b4f710b69255bc7a2200e9d3b4b1f8596ec5436`.
+Actual package build1 succeeds; no cached or skipped result substitutes for it.
+
+Both targets pass core34 (eight lore cases), references12/prompts5/renderer131,
+transport8/worker6 and actual renderer/native-credential/HTTP/core controller proof.
+Mac nine actual automated cases pass, zero packages/editor launches/new SDK execution.
+Windows rejecting gates14+6+8=28 pass, including actual native polling regression.
+Clarification of earlier local gate wording:28 total,27 passed and one Windows-only
+skip; the required skipped capability is now proved on Windows. Windows cancellation
+raw observations remain shutdownOk/Cancelled within unchanged <2second completion/EOF
+bounds: stalled headers341.2microseconds/EOF54.2; partial body209.6/EOF46. Worker six
+cases finish in 0.84 seconds. Mac corresponding cancellation gates also pass.
+
+Windows native launch1 PID 7924 and separate process-reopen launch2 PID 2164 use the same
+exact package.25 distinct phase1 checks (26listed, one repeated availability label) and
+three reopen checks pass; five reviewed/actual HTTP body digests match. Six generateLore
+receipts bind action/PID/binary, UI Automation/OS SendInput and viewport observations;
+nine intact PNG captures pass hashes/dimensions/nonblank/change validation. Owner and
+reviewer inspect native captures, including compact send disclosure, physical Generate,
+Save and separate Approve before/after. Inert generated markup, passive semantic/exact
+metadata review, one Save/duplicate refusal, proposed versus approved text, separate
+approval, both Undo/Redo boundaries, all-source byte preservation, malformed/model
+approval/cancelled/stale-external zero writes and project reopen pass. Process reopen
+sends zero HTTP and preserves four metadata hashes. Terminal audit outcomes all success,
+no errors; credentials/owned root removed and both terminal cleanup reports pass.
+
+Signed local Mac package1/native launches1–2 remain coherent changed-action evidence:
+248 exact input hashes, approved certificate/name/designated requirement, strict signature,
+actual mounted installer contents, retained binary/DMG hashes in prior native audit.
+CUA light/dark/756logical compact and physical Generate/Save/Approve,25 distinct+3 checks,
+five exact bodies/zero reopen HTTP, history/refusals/source preservation and owned
+credential/profile/generation/process/listener/root cleanup pass. Reviewer sandbox trust/
+process restrictions are capability limitations covered by owner approved-host receipts;
+no identity/trust/policy change. No further local handoff or repeated launch required.
+
+CI privacy Windows69evidence/6package, combined downloaded artifact89files and local
+package7/native8files pass. Ignored raw logs, receipts, manifests, attempt ledgers and
+owner audits retained; no secrets, private content, binaries/logs or user paths committed.
+Qualified unchanged SDK source/runtime1320d0a/run38056790759 reused explicitly; this
+metadata-only outcome proves runnable bytes unchanged, not new SDK execution.
+
+#### Acceptance, independent review and closed allowance
+
+Delivered one bounded new/update editor-only lore entry with core ID/revision/provenance
+and supporting citations, author-reviewed applicability, exact prepared dispatch,
+passive semantic/exact metadata review and one Save transaction/Undo. Generation cannot
+approve itself. Existing approved text remains through Save until separate explicit
+replacement approval; Reject retains it. Duplicate acceptance refuses. Unknown
+extensions/knowledge/scope and unresolved links/citations survive. Stale own/cited
+support blocks approval/inclusion. Core/controller proof also establishes new-entry
+acceptance, Reject retains old approval, strict schema/target/bounds, competing request,
+draft/session/prompt/reference/source identity/external zero-write refusal and reopen.
+
+Independent GPT-6.1 Sol High implementation/re-review and final read-only actual native/
+CI artifact review find no actionable acceptance blocker. Shared edits remained serial;
+reviewer made no shared writes, package/editor/dispatch attempts. Owner audited actual
+artifacts and captures, corrected only the checkout comparison expectation during audit.
+All implementation findings were repaired and focused-checked before expensive attempts.
+No package matrix or runtime rerun for docs-only successors. Canonical contracts,
+TESTING and live CURRENT/HANDOVER reconciled.
+
+| Target | Actual cumulative package attempts | Editor launches | Focused dispatches | Unused remainder, now closed |
+| --- | --- | --- | --- | --- |
+| Windows x64 | **1/4** | **2/6** | **1/4** | 3packages,4launches,3dispatches |
+| Mac ARM64 | **1/4** | **2/6** | **1/4** | 3packages,4launches,3dispatches |
+
+No outstanding reservation, pending CI, owned process/listener/fixture or required
+in-scope work. Failed/cancelled/implicit attempts counted; no failed expensive attempt
+for this outcome. Earlier product/harness/environment findings remain recorded above.
+Prior allowances and this unused remainder stay closed; no transfer to following work.
+Full Phase2/2C.3/2C.4/live Studio or generic-provider/final human acceptance remain
+separate and incomplete. Synthetic controlled loopback qualification cannot claim
+live provider coverage. No runnable Character/Appearance/source changes, provider/
+signing expansion, paid/public calls, merge or release. Next outcome proposed only.
+
+#### Phase 2 qualification next prompt — proposal only
+
+```text
+Deliver Phase 2 qualification: qualify one coherent candidate through the five
+implemented Assist actions on Studio and one representative generic endpoint,
+including an integrated authoring/review/acceptance/Undo/Redo/reopen workflow.
+Repository: Caldwell-41/Renpy-editor
+Continuation: codex/provider-qualification, published Generated lorebook entries
+closure atop qualified 233454b4a0ae4c369d00c2dcd352c789829290b2/run38105665896.
+Reconcile fresh refs and preserve unrelated work; never reset. Retain current Mac
+ARM64 development session. Use focused Windows x64/macOS ARM64 CI; local handoff
+only for a named required capability CI cannot establish.
+Read AGENTS.md, WORKFLOW, CURRENT, HANDOVER and existing Phase2 task sections 6–11,
+20 and this next prompt. Record selection/acceptance in that existing task.
+Use one GPT-6.1 Sol High owner and independent GPT-6.1 Sol High reviewer; shared
+implementation serial. Reuse accepted references/prompts/proposals/history,
+credentials/request service and each action's valid unchanged evidence.
+Scope integrated qualification and in-scope defects of existing five actions.
+Identify available local Studio and a representative generic configuration;
+record exact provider/model/capability/configuration and required access. Missing
+live access stays missing evidence; do not substitute loopback or install/expand
+providers. Use only synthetic content on expressly authorized local/free endpoints.
+No paid/public calls, runnable Character/Appearance changes, embeddings/retrieval,
+runtime inference, signing changes, new feature sweep, merge or release.
+Prove exact sends, schema/tool behavior, passive review, zero-write refusals,
+proposal/approval separation, source/custom preservation, shared Undo/Redo,
+project/process reopen, metadata-free game behavior and responsive Save/cancel.
+Reuse unchanged cases; distinguish product/harness/environment/missing evidence.
+Proposed fresh per-target allowance4packages,6editor launches,4focused dispatches;
+prior allowances stay closed. Bound live probes to2 synthetic attempts per action
+per selected endpoint. Count failed/cancelled/implicit attempts and reassess after
+two unsuccessful corrections of one hypothesis. Validate cheap rejecting gates
+before packaging. Complete focused verification, independent review/in-scope fixes;
+commit/push and update canonical contracts/task/CURRENT/HANDOVER. Follow WORKFLOW
+wait/resume; express polling authorization applies only if continuing this same
+chat. Audit actual artifacts. Return result/limitations/next prompt; do not start
+another deliverable. Keep final human acceptance distinct.
+```

@@ -1546,7 +1546,7 @@ successful shutdown and prompt completion/EOF for both phases. A local Mac pass 
 waive that target-specific gate.
 Hosted Mac lacks approved signing credentials, so only the named signed
 changed-action native case runs on the retained approved local Mac. No signing fallback.
-Packaged `dialogue-rewrite-probe.py --generate-card` requires25distinct phase1 and3
+Packaged `dialogue-rewrite-probe.py --generate-card` requires25 distinct phase1 and3
 separate-process reopen assertions, five exact reviewed/HTTP bodies, all-source hashes,
 saved proposed text, physical Save and separate physical Approve, history/refusals and
 owned credential/process/root cleanup. Windows requires six PID/binary/action-bound
@@ -1589,5 +1589,9 @@ binary-bound receipts and nine intact captures. The named signed native Mac case
 on the retained approved local host; CI does not have the signing identity. Process
 reopen sends zero HTTP and changes zero project bytes. Editor-only metadata mutation
 reuses unchanged pinned SDK evidence1320d0a/run38056790759 with explicit zero new SDK
-execution, backed by all-source byte assertions. Final native/artifact acceptance is
-pending until recorded in the owning task. No new live/generic-provider claim.
+execution, backed by all-source byte assertions. Bounded native/artifact acceptance is
+recorded in the [qualified closure](tasks/active/phase-2-initial-llm-assistance.md#generated-lorebook-entries-qualified-closure--2026-10-11):
+candidate 233454b/run38105665896 attempt1, both focused targets pass, signed local Mac
+native proof and Windows25 distinct+3/six receipts/nine captures independently audited.
+Exact manifests/checkout inputs and cleanup verified. No new live/generic-provider or
+final human acceptance claim; no rerun for documentation-only closure.
