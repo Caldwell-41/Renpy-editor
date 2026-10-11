@@ -28,11 +28,11 @@ packaging/native. Exact manifests/264input hashes/cleanup/privacy audited both t
 The reviewed one-line platform-native expected path passes12 local gates; [CI3run38146640617/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38146640617)
 is terminal overall failure on exact candidate78a6389: Mac automated/controller/SDK artifact audited
 and independently reviewed passing; Windows failed native keyboard selection after package/start1, with cleanup complete.
-The reviewed native driver correction is preparing the final paired CI4.
+Reviewed native correction923d9aa is in [final CI4run38148312472/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38148312472), initially queued.
 User permits CI polling for this chat only.
 Signed Mac native still requires the unlocked desktop. No local Mac editor launch occurred.
 
-Actual counts: Mac0/4packages,0/8starts; Windows1/4packages,1/8starts; paired dispatch3/4 each.
+Actual counts: Mac0/4packages,0/8starts; Windows1/4packages,1/8starts; paired dispatch4/4 each, fully consumed. CI4 actual package/start ledger awaits audit.
 Live0/2total batch generations,0/1discovery. Prior allowances remain closed. Notify
 when ready for fresh native key entry; no user/real-provider credential read/export
 or live call occurred. [HANDOVER](HANDOVER.md) owns continuation. Approval covers

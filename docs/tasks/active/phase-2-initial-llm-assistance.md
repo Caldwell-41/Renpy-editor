@@ -6031,3 +6031,19 @@ pass. PowerShell5.1 syntax reviewed by inspection; native runtime remains requir
 CI4. Fresh Mac inventory still locked; user unlock requested asynchronously while
 continuing CI. No local Mac build/start or real-provider operation. Publish this
 reviewed correction, preserving CI3 failure and final remaining dispatch boundary.
+
+
+#### Selectable CI4 final dispatch — 2026-10-12
+
+Reviewed native correction published **923d9aad644ccc01bde3f087f3bd7888eee96e6d**.
+Fresh registered workflow357322921 accepted **run38148312472/attempt1**, exact head923d9aa,
+branchcodex/provider-qualification, created2026-10-11T14:43:05Z, initially queued.
+Direct returned URL identity confirms; no duplicate dispatch. [Exact final CI4 run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38148312472).
+Inputs retain exclusive selectable selectors/empty reuse IDs; dispatchordinal4,
+packageordinal2/firststart2 (reopen3). **Paired4/4 each, fully consumed**. No further
+CI dispatch/rerun without a real new allowance decision. Last audited actual Mac
+0/4packages,0/8starts; Windows1/4packages,1/8starts; CI4 actual attempts await emitted
+ledger audit, including early failures. Live0/2/discovery0/1. Continue only this exact
+run’s bounded current-chat polling and terminal artifact audit. Signed Mac/native/live
+remain blocked by the locked host pending user unlock; no native entry or live call.
+No approval extension, watcher, provider/signing change, merge/release or next outcome.

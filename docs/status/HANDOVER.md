@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Selectable proposal editing — reviewed native correction, final CI4 next
+## Selectable proposal editing — final CI4 pending
 
 Continue the approved outcome in this same Mac ARM64 workspace on
 `codex/provider-qualification`. Preserve unrelated work; never reset. Initial continuation
@@ -37,10 +37,13 @@ checkbox, OS Tab from verified Save, actual keyboard focus/viewport before Space
 unchecked/dependency/disabledSave/retained-focus observations. Temporary absent control
 retries while duplicate remains failure. Failure diagnostics/captures persist. Gate12
 and native-evidence14 pass; PowerShell5.1 compatibility is reviewed by inspection, not
-local Windows runtime proof. Publish correction and use final fresh CI4 dispatchordinal4,
-packageordinal2/editor starts2–3. No old-run rerun or subsequent dispatch allowance.
+local Windows runtime proof. Published native correction923d9aad644ccc01bde3f087f3bd7888eee96e6d is in confirmed
+[final CI4run38148312472/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38148312472),
+created2026-10-11T14:43:05Z, initially queued. Dispatchordinal4,
+packageordinal2/editor starts2–3. No old-run rerun or subsequent dispatch allowance. CI4 actual attempts await audit;
+only its exact head923d9aa/attempt1 counts as this pending candidate.
 
-Actual consumed: **paired3/4 each; Mac0/4packages,0/8starts; Windows1/4packages,
+Actual consumed: **paired4/4 each (fully consumed); Mac0/4packages,0/8starts; Windows1/4packages,
 1/8starts; live0/2batch generations, discovery0/1**. CI3 unreached reopen reservation
 is unused. Audit new emitted ledger including failures/implicit starts, manifests,
 exact source/tool/input/package identity, positive counts, SDK results, native receipt/
