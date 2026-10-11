@@ -1,67 +1,74 @@
 # Current outcome handover
 
-## Phase 2 qualification — Studio-only amendment in progress
+## Studio-only Phase2 qualification — awaiting CI; live Studio checks in progress
 
 Repository `Caldwell-41/Renpy-editor`, branch `codex/provider-qualification`, retained
-Mac ARM64 session. User selected the existing Phase2 next prompt from closure
-**d03c1173d6a7493353a4df01463175a1404d545d**. Fresh authenticated entry fetch matched
-branch/main5f448ca; no reset, unrelated changes or open branch PR. Published docs-only
-prerequisite audit **d17570557c93d272aa5bd451525a2b44f97689f8**. The
-[Studio-only amendment](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-qualification-amendment--2026-10-11)
-owns current scope and acceptance; historical blocked audit remains evidence.
+Mac ARM64 session. Selected saved Phase2 qualification from closure
+**d03c1173d6a7493353a4df01463175a1404d545d**; prerequisite audit d175705. User approved
+production LAN completion and agent temporary-key entry, confirmed Unsloth and deferred
+generic. The [owning current audit and continuation](../tasks/active/phase-2-initial-llm-assistance.md#studio-qualification-signed-mac-evidence-and-ci1--2026-10-11)
+records exact scope, history and allowances. Preserve unrelated work; never reset.
 
-Qualified individual baseline **233454b4a0ae4c369d00c2dcd352c789829290b2**, tree
-`e467eeeea0b83d92ea799b54e7751b8fbe185a11`, run38105665896/attempt1. Earlier
-rewrite/Continue/Draft/cards/lore closures retain acceptance within their actual input
-boundaries. Changed shared transport/preparation/renderer/native fixture inputs need
-new focused candidate proof; no old package is promoted to the changed candidate.
+Published implementation **4d1120dbb6f8d85dc861554ba93e8d26db6c1f82**, tree
+`6e7e4a63f80ba7f12526c388866bedb6f7117052`;253 exact candidate inputs inventoried.
+Fresh publication matched branch/main5f448ca; no open branch PR. Qualified individual
+baseline233454b/run38105665896 remains valid within unchanged input boundaries; changed
+transport/preparation/renderer/native inputs require current proof. Docs-only successors
+retain candidate/package/run identity. No merge/release authorized.
 
-User confirmed Unsloth availability, approved production LAN support and agent entry
-of a temporary API key, and deferred generic (“just do unsloth initially”). Exact
-selected endpoint/model remain the existing local Studio/Gemma configuration. No key
-has been supplied; async key request is pending. Enter through the native secure
-credential dialog only; never echo/export it or put it in source, command arguments,
-logs or reports. User intends to rotate it afterward. Historical spike credential
-remains untouched. Generic implementation/access/qualification is deferred, not a
-current Studio blocker. No provider/model installation, proxy/tunnel or paid/public
-call is authorized. Provider-internal tools remain unknown without actual proof.
+Pure shared admission allows literal loopback HTTP or saved opt-in private LAN HTTP,
+fixed SocketAddr; DNS/public/link-local/CGNAT/multicast/unspecified/HTTPS/proxy/redirect/
+retry refuse. All five reviews show unencrypted transport and unknown inference
+locality. Credential origin and revision/consent changes refuse stale sends. Local
+core35/transport8/worker6/references12/prompts5/renderer131/build and integrated actual
+native-worker/renderer private-interface five-action chain pass. Proposed card/lore
+Save/separate approval, later exact inclusion/custom prompt, source-caused staleness,
+prompt restore/limits, Continue/Draft, mixed history/reopen/zero HTTP pass. Pinned8.5.3
+compile/lint/named runtime uses exact accepted synthetic source without editor metadata.
+SDK synchronization/reference-order harness failures were repaired, not misclassified
+as product defects. New rejecting gates4 pass; existing28 include one Windows-only skip.
+Review found Draft disclosure/harness waits; both repaired/re-reviewed before packages.
 
-Current local implementation admits literal private LAN HTTP only with saved opt-in
-through the existing address policy and fixed SocketAddr. DNS/HTTPS/public HTTP,
-proxy/redirect/retry remain unsupported. Every action's passive send review discloses
-unencrypted transport and unknown inference locality. Stale endpoint/consent changes
-invalidate preparation before dispatch. Normal private LAN use remains subject to
-explicit author initiation and exact request review.
+Signed Mac package1 passes host strict signature, permanent identity/approved
+certificate-leaf requirement and installer contents. Executable SHA256
+`f79d46cedd6ec664fe8a9d69d5d37df2ff035757610c0b3996d530d25673f7b7`; installer
+`56e887fdc37adfed8d330629dcab77c7d55499cb34864c6d8bc6e8e3de8d100d`.
+Native1 exited without terminal report; implicit CUA relaunch2 observed and stopped.
+Suspected stale UI binding remains an observation hypothesis, no product crash claim.
+Failure log/actual helper cleanup retained. Serial fresh-state retry native3/reopen4
+passes25 distinct+3checks, physical Generate/Save/separate Approve, passive light/dark/
+compact review, five exact digests, zero reopen HTTP and unchanged metadata. Independent
+read-only native/receipt review passes. Reviewer sandbox CSSMERR_TP_NOT_TRUSTED is the
+established host boundary; retained host strict receipt applies, no trust changes.
+All four owned PIDs absent; failed/successful temp roots and owned credentials/listeners
+cleaned. Local ignored evidence retains exact inventories/logs/receipts/synthetic game.
 
-Local core35/transport8/worker6/reference12/prompt5/renderer131 and frontend build pass.
-Integrated actual native credential/HTTP/core/renderer session passes all five actions
-on an owned private LAN interface: proposed card/lore Save and separate approval,
-their exact later inclusion with custom rewrite prompt, generated support staleness,
-prompt restore/limit change, Continue/Draft, mixed Undo/Redo, project/process reopen,
-zero reopen HTTP and owned cleanup. Pinned8.5.3 compile/lint/named runtime passes on
-exact accepted synthetic source copied without editor metadata. First SDK attempt
-failed harness synchronization; second passes after waiting for the exact say scope.
-No product repair was inferred from that harness failure.
+Confirmed [run38111920210](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38111920210),
+workflow357322921 `production-scaffold.yml`, attempt1/head4d1120d, created04:32:41Z,
+initially in_progress2026-10-11T04:32:50Z. Inputs generate_lore=true,phase2_studio=true,
+all other action/upload flags false, build/first-launch ordinal1, both reuse IDs empty.
+Required jobs Focused Assist—Windows x64 and Focused Scene automated—macOS ARM64 add
+integrated/LAN/SDK; Windows adds new package/native proof. No terminal result/artifact
+audit yet. Resume same thread, reconcile refs then audit exact run/head/attempt/inputs,
+required jobs, hashes/manifests and actual native/controller/SDK evidence. Missing,
+failed/cancelled/skipped checks remain unresolved. No duplicate dispatch/polling loop.
 
-Independent GPT-6.1 Sol High read-only review found Draft's missing connection
-disclosure and driver startup/reply waits lacking exit/deadline handling. Owner
-repaired both before packaging; actual five-action visible review and ordinary fake
-driver startup/reply/malformed/timeout/spawn failures pass with cleanup. New rejecting
-gates4 pass; existing gates28 pass with one explicit Windows-only skip. Repository,
-workflow and diff validation passed before these final harness edits and were
-rechecked successfully. Final re-review finds no code/harness blocker. Reviewer performed no writes/builds/launches/dispatches.
+Temporary key received after dispatch; native entry/live checks pending. User authorized native secure-dialog
+entry and later user rotation. Never echo/export or place key in source/arguments/logs/
+reports. Historical spike credential untouched. Use existing exact local Studio/Gemma
+configuration, synthetic content and explicitly reviewed sends only; no discovery/send
+has occurred. Hosted CI proves owned interfaces, not home Studio access. Local named
+capability is real Studio/signed ordinary-UI session and reopen once key arrives.
+Provider-internal tool suppression remains unknown without actual configuration proof.
+Generic support/access/qualification is deferred. Broader subset/new-Character and final
+human acceptance remain distinct; no full Phase2 completion claim.
 
-Next: final re-review/validation, commit/push one candidate, approved-identity signed
-Mac package and representative native1–2, focused both-target CI with
-`generate_lore=true,phase2_studio=true`, no reuse/uploads. Hosted CI establishes an
-owned private interface, not access to home Studio. Local Mac establishes named live
-Studio/signing capabilities after the key arrives. Audit exact run/head/inputs and
-actual required artifacts; failed/skipped checks are not passes. Keep full Phase2
-subset/new-Character/final human acceptance distinct.
-
-Usage: **Windows0/4packages,0/6editor launches,0/4focused dispatches;
-Mac0/4packages,0/6editor launches,0/4focused dispatches; Studio0/2 per action,
-0/2 model discoveries**. Earlier allowances closed. No owned process/listener/fixture
-or pending operation. WORKFLOW requires manual same-thread CI wait/resume; current
-chat grants no autonomous polling. Commit/push authorized, no merge/release or next
-outcome. Preserve existing signing identity/credential namespaces and unrelated work.
+Allowance: Mac **1/4packages,4/6editor launches,1/4focused dispatches**. Windows
+**1/4dispatches**, package1/launch1–2 reserved for the recorded run until actual attempt
+audit; do not reserve/spend them twice. Studio **0/2 attempts per action,0/2 model
+discoveries**; generic0calls. Prior allowances closed; remaining two Mac launches cover
+live session/reopen. One serial writer and independent GPT-6.1 Sol High reviewer;
+no reviewer writes/credential access/builds/launches/dispatches. Publish checkpoint and
+pause per WORKFLOW manual same-thread wait/resume; current chat has no polling grant.
+Commit/push authorized. No signing changes, paid/public calls, installation, merge/
+release or next deliverable. Continue only authorized in-scope fixes within allowance.

@@ -5120,3 +5120,103 @@ and0/2 model discoveries. No temporary key supplied or real Studio HTTP/credenti
 entry. Existing owned synthetic processes/listeners/fixtures cleaned; no CI pending.
 Next publish candidate, build approved-identity Mac package1, native1–2, then focused
 both-target CI1. User key is required only for the remaining real Studio checks.
+
+### Studio qualification signed Mac evidence and CI1 — 2026-10-11
+
+State **awaiting_ci** plus missing real Studio access. Published candidate
+**4d1120dbb6f8d85dc861554ba93e8d26db6c1f82**, tree
+`6e7e4a63f80ba7f12526c388866bedb6f7117052`;253 exact app/workflow/fixture inputs
+inventoried locally. Fresh remote branch publication matched candidate and main5f448ca;
+last three prior focused runs were terminal before dispatch. Docs-only successors must
+retain this implementation/package/run identity, not promote an untested candidate.
+
+Mac package1 passes host strict signature, approved certificate-leaf designated
+requirement and mounted installer contents. Executable SHA256
+`f79d46cedd6ec664fe8a9d69d5d37df2ff035757610c0b3996d530d25673f7b7`;
+installer SHA256
+`56e887fdc37adfed8d330629dcab77c7d55499cb34864c6d8bc6e8e3de8d100d`.
+Identity/names/signing/Keychain policy unchanged. Independent reviewer matches identity
+and executable; reviewer-sandbox CSSMERR_TP_NOT_TRUSTED is the established host trust
+boundary, not a requested workaround. Host strict verification receipt is retained.
+
+Mac native1 reached six stage-ready rows but exited before terminal report; it remains
+incomplete/unsuccessful. A following CUA action showed a normal workspace and exact
+process inventory identified an implicit candidate relaunch2. Suspected stale CUA
+identity/window binding is an observation/ownership hypothesis, not a proven product
+crash. No new crash report was found. Failed raw log retained, exact native credential
+cleanup helper exited0 and removed only that owned root; exact implicit app PID was
+stopped. Both launches count. CUA state was refreshed and owner/reviewer observation
+made serial before physical actions; no production/package edit or rebuild required.
+
+Same-package retry native3 and process reopen4 pass:25 distinct phase1 checks
+(26 rows includes repeated reference availability) plus3 reopen checks. Owner physically
+clicked Generate, Save and separate Approve; observed light/dark/compact send, passive
+literal metadata and proposed-versus-approved forms. Independent read-only native
+inspection confirms the explicit separate approval and passive compact review; actual
+terminal receipts/raw logs agree. Five HTTP digests equal all reviewed digests; all four
+project metadata hashes are unchanged across process reopen, which sends zero HTTP.
+Malformed/model-approval/cancelled/stale-external refusals preserve bytes/task, shared
+history and project reopen pass, runnable source stays exact. Both terminal reports
+confirm service/credential cleanup. Outer failed/successful temp roots removed after
+retaining synthetic evidence locally; exact four consumed editor PIDs are absent.
+No owned listener/process/credential remains. These controlled native checks do not
+prove real Studio compatibility or final human acceptance.
+
+Focused both-target dispatch1 is confirmed:
+[run38111920210](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38111920210),
+workflow357322921 `production-scaffold.yml`, attempt1, exact candidate4d1120d,
+branch `codex/provider-qualification`, created2026-10-11T04:32:41Z; initial API status
+**in_progress** at04:32:50Z. Inputs `phase2_studio=true,generate_lore=true`, all other
+action selectors/upload false, build ordinal1/first launch ordinal1, both reuse IDs
+empty. Required jobs Focused Assist—Windows x64 and Focused Scene automated—macOS ARM64
+must establish current integrated/controller/private-LAN/SDK proof; Windows adds new
+package and native physical evidence. Generic matrix is deliberately unselected, not
+a missing required job. Neither success nor artifacts have been audited yet.
+
+Cumulative allowance: Mac **1/4packages,4/6editor launches,1/4focused dispatches**;
+Windows **1/4focused dispatches**, package1/editor1–2 reserved for this run until actual
+terminal attempt audit (do not spend them again). Studio **0/2 live attempts per action,
+0/2 discoveries**; generic0calls. First failed/implicit Mac launches stay consumed;
+remaining two Mac launches cover the selected ordinary live session/reopen only.
+No temporary key supplied or real Studio connection made. User-approved key entry is
+still pending. Earlier allowances closed; no additional package/launch/dispatch grant.
+
+Independent GPT-6.1 Sol High implementation/re-review and actual Mac receipt review
+find no remaining actionable blocker to this focused CI dispatch. Shared edits stayed
+serial; reviewer performed no writes/builds/editor launches/dispatches or credential
+access. Commit/push checkpoint authorized. WORKFLOW manual same-thread wait/resume
+applies; no autonomous polling/watcher. Pause now, then audit exact run/head/attempt/
+required artifacts on user resume and continue real Studio only after key availability.
+Generic qualification, broader subset/new-Character requirements and final human
+acceptance remain distinct. No merge/release/following outcome.
+
+#### Same-outcome continuation prompt
+
+```text
+Continue the existing Studio-only Phase 2 qualification on codex/provider-qualification.
+Retain Mac ARM64 and reconcile fresh refs without reset or unrelated changes. Read the
+live CURRENT/HANDOVER and Studio-only amendment/implementation/native-CI records in
+the existing Phase2 task. Implementation candidate4d1120d/tree6e7e4a6,
+run38111920210/attempt1; signed Mac package1/native retry3+reopen4 accepted with failed
+native1/implicit2 preserved and consumed. Audit the exact required Windows/macOS jobs,
+identities, manifest/input hashes and actual native/SDK/controller artifacts; missing,
+failed or skipped proof remains unresolved. Keep one serial owner and independent
+GPT-6.1 Sol High review for in-scope fixes/final artifact acceptance. Temporary Studio
+key is still pending; user authorized agent native entry and later rotation. Use only
+the existing exact local Studio/Gemma configuration and disposable synthetic content;
+no echo/export of key, no paid/public calls or generic/provider installation/expansion.
+Real Studio allowance0/2 per action, discovery0/2; Mac1/4packages4/6launches1/4dispatches,
+Windows CI1/4 with package1/launch1–2 reserved for recorded run until audit. Earlier
+allowances closed. Continue authorized fixes only within actual remaining allowance;
+manual same-thread CI wait/resume unless the user explicitly amends it here. Publish
+compact status/limitations; no full Phase2/human acceptance claim, merge/release or
+next deliverable.
+```
+
+User subsequently supplied the authorized temporary key while this checkpoint was
+being finalized. Receipt is acknowledged without recording the value. Real Studio
+ordinary native session/reopen may proceed within remaining Mac launches5–6 and
+existing live/discovery allowance. CI remains unaudited; no polling grant inferred.
+Key has not yet been entered or used at this update. Next owner's key availability
+statements above are superseded by this receipt; secret stays in the conversation/native
+entry only, never task/source/arguments/logs/reports.
