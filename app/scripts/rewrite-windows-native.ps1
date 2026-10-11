@@ -26,6 +26,7 @@ public static class RewriteNative {
     [DllImport("user32.dll",CharSet=CharSet.Unicode)] public static extern bool GetUserObjectInformation(IntPtr handle,int index,System.Text.StringBuilder text,int size,out int needed);
     [DllImport("user32.dll")] public static extern bool CloseDesktop(IntPtr handle);
     [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr handle,out RECT rect);
+    [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr handle,IntPtr after,int x,int y,int width,int height,uint flags);
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr handle);
     [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y);
@@ -91,6 +92,28 @@ function Window-Rect($Handle) {
     $rect=New-Object RewriteNative+RECT
     Assert-Native ([RewriteNative]::GetWindowRect($Handle,[ref]$rect)) 'Owned window bounds unavailable'
     return New-Object System.Drawing.Rectangle $rect.Left,$rect.Top,($rect.Right-$rect.Left),($rect.Bottom-$rect.Top)
+}
+function Ensure-ObservableWindow {
+    # Resizing the test layout can extend the window past the runner desktop.
+    # Move only the already verified owned window; preserve its requested size.
+    $bounds=New-Object System.Drawing.Rectangle ([RewriteNative]::GetSystemMetrics(76)),([RewriteNative]::GetSystemMetrics(77)),([RewriteNative]::GetSystemMetrics(78)),([RewriteNative]::GetSystemMetrics(79))
+    $rect=Window-Rect $script:handle
+    $receipt.windowPlacement=[ordered]@{before=@($rect.Left,$rect.Top,$rect.Width,$rect.Height);desktop=@($bounds.Left,$bounds.Top,$bounds.Width,$bounds.Height);moved=$false}
+    Assert-Native ($rect.Width -ge 100 -and $rect.Height -ge 100 -and $rect.Width -le $bounds.Width -and $rect.Height -le $bounds.Height) 'Required owned layout does not fit observable desktop'
+    $left=[Math]::Max($bounds.Left,[Math]::Min($rect.Left,$bounds.Right-$rect.Width))
+    $top=[Math]::Max($bounds.Top,[Math]::Min($rect.Top,$bounds.Bottom-$rect.Height))
+    if($left -ne $rect.Left -or $top -ne $rect.Top) {
+        # SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE; no change to DPI/layout.
+        Assert-Native ([RewriteNative]::SetWindowPos($script:handle,[IntPtr]::Zero,$left,$top,0,0,0x15)) 'Owned window placement failed'
+        $receipt.windowPlacement.moved=$true
+        Wait-Native {
+            $current=Window-Rect $script:handle
+            return ($current.Left -ge $bounds.Left -and $current.Top -ge $bounds.Top -and $current.Right -le $bounds.Right -and $current.Bottom -le $bounds.Bottom)
+        }
+    }
+    $after=Window-Rect $script:handle
+    $receipt.windowPlacement.after=@($after.Left,$after.Top,$after.Width,$after.Height)
+    Assert-Native ($after.Width -eq $rect.Width -and $after.Height -eq $rect.Height) 'Owned window placement changed required layout size'
 }
 function Nodes {
     return $script:window.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition)
@@ -182,6 +205,7 @@ try {
         [void][RewriteNative]::SetForegroundWindow($script:handle)
         Wait-Native { [RewriteNative]::GetForegroundWindow() -eq $script:handle }
         $receipt.checks.ownedWindow=$true
+        Ensure-ObservableWindow
         $controlName=if($Stage -eq 'physical-approve'){$approveName}elseif($Stage -eq 'physical-accept') { $acceptName } else {'Generate proposal'}
         Wait-Native { $null -ne (Button $controlName) }
         Focus-Control (Button $controlName)

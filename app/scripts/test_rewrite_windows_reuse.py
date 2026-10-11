@@ -107,6 +107,67 @@ Write-Output 'PASS: real native polling rejects absent proof and propagates real
             with self.subTest(tool=tool), self.assertRaises(AssertionError):
                 recipe.validate_toolchains(dict(pinned, **{tool: value}))
 
+    @unittest.skipUnless(os.name == 'nt', 'Actual window-placement helper regression requires Windows')
+    def test_native_window_placement_preserves_layout_and_rejects_unobservable_states(self):
+        driver = Path(__file__).with_name('rewrite-windows-native.ps1').resolve()
+        script = r'''
+$ErrorActionPreference='Stop'
+Set-StrictMode -Version Latest
+Add-Type -AssemblyName System.Drawing
+Add-Type @'
+using System;
+public static class RewriteNative {
+    public static int X,Y,Width,Height,Moves;
+    public static bool AllowMove=true;
+    public static bool Resize=false;
+    public static int GetSystemMetrics(int index) { return index==78 ? 1920 : index==79 ? 1080 : 0; }
+    public static bool SetWindowPos(IntPtr handle,IntPtr after,int x,int y,int width,int height,uint flags) {
+        if(handle!=new IntPtr(42) || flags!=0x15 || width!=0 || height!=0) throw new Exception("Unexpected ownership/resize flags");
+        Moves++;
+        if(!AllowMove) return false;
+        X=x;Y=y;if(Resize) Width--;
+        return true;
+    }
+}
+'@
+$tokens=$null;$errors=$null
+$ast=[System.Management.Automation.Language.Parser]::ParseFile('__DRIVER__',[ref]$tokens,[ref]$errors)
+if($errors.Count) { throw ($errors | Out-String) }
+foreach($name in @('Assert-Native','Ensure-ObservableWindow')) {
+    $function=$ast.Find({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name},$true)
+    if($null -eq $function) { throw ('Missing real helper: '+$name) }
+    . ([scriptblock]::Create($function.Extent.Text))
+}
+function Window-Rect($Handle) { return [System.Drawing.Rectangle]::new([RewriteNative]::X,[RewriteNative]::Y,[RewriteNative]::Width,[RewriteNative]::Height) }
+function Wait-Native([scriptblock]$Check) { if(-not (& $Check)) { throw 'Placement still clipped' } }
+function Reset-Test($X,$Y,$Width,$Height) {
+    [RewriteNative]::X=$X;[RewriteNative]::Y=$Y;[RewriteNative]::Width=$Width;[RewriteNative]::Height=$Height
+    [RewriteNative]::Moves=0;[RewriteNative]::AllowMove=$true;[RewriteNative]::Resize=$false
+    $script:handle=[IntPtr]42;$script:receipt=@{}
+}
+Reset-Test 400 300 1280 900
+Ensure-ObservableWindow
+Assert-Native ([RewriteNative]::X -eq 400 -and [RewriteNative]::Y -eq 180 -and [RewriteNative]::Moves -eq 1) 'Clipped layout was not placed wholly on desktop'
+Assert-Native ($receipt.windowPlacement.moved -and $receipt.windowPlacement.after[2] -eq 1280 -and $receipt.windowPlacement.after[3] -eq 900) 'Placement receipt lost exact layout'
+Reset-Test 50 50 1280 900
+Ensure-ObservableWindow
+Assert-Native (-not $receipt.windowPlacement.moved -and [RewriteNative]::Moves -eq 0) 'Already observable window moved'
+foreach($failure in @('oversize','move','resize')) {
+    Reset-Test -10 -20 1280 900
+    if($failure -eq 'oversize') { [RewriteNative]::Width=1921 }
+    if($failure -eq 'move') { [RewriteNative]::AllowMove=$false }
+    if($failure -eq 'resize') { [RewriteNative]::Resize=$true }
+    $caught=$false
+    try { Ensure-ObservableWindow } catch { $caught=$true }
+    Assert-Native $caught ('Unobservable/changed layout supplied proof: '+$failure)
+}
+Write-Output 'PASS: actual placement helper preserves required layout and rejects invalid states'
+'''.replace('__DRIVER__', driver.as_posix().replace("'", "''"))
+        result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script],
+                                capture_output=True, text=True, timeout=45)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('PASS: actual placement helper', result.stdout)
+
     def inputs(self):
         return {p: 'original' for p in (
             'app/Cargo.lock', 'app/package-lock.json', 'app/package.json',
