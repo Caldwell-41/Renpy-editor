@@ -6192,3 +6192,32 @@ Independent final read-only correction/gate/status review passes. The Undo probe
 uses the production button’s DOM click; OS-native input proof covers Generate/selection/
 Save. Local4probe/12gate, actionlint, rustfmt, Python syntax and514-file validation pass;
 no post-correction native/cleanup acceptance or additional execution is inferred.
+
+
+#### Independent Sol review and approved CI6 allowance — 2026-10-12
+
+User requests an independent GPT-6.1 Sol review/fix of CI5 issues and then explicitly
+authorises one additional CI run. Fresh refs/worktree matched6246b8b locally/origin,
+main5f448ca; no reset/discard. A fresh GPT-6.1 Sol High agent held sole serial code
+ownership while the parent made no writes. It independently inspected CI5 evidence,
+6246b8b and downstream Undo/Redo, Character update, malformed/unselected/cancel/stale,
+project/process reopen and cleanup. Existing correction addresses the grounded race
+hypothesis and definite shutdown short circuit; no additional concrete defect found.
+No artificial code changes. Sole-writer ownership returned;6246b8b retained.
+
+Independent focused checks passed4/4desktop rewrite_probe,2/2native helper/busy retry,
+12/12selectable rejection gates and clean-tree/diff check. Ignored
+selectable-ci6-independent-review.txt records commands/observed results, not raw stdout.
+Agent used zero packages/editor starts/CI/network/provider/credential operations.
+Post-fix Windows native and cleanup remain missing proof; CI5 cleanup remains unresolved.
+
+One new paired run extends dispatch ceiling**5→6 each**, preserving cumulative prior
+consumption and package4/editor8/live2total/discovery1 ceilings. Plan fresh attempt1
+CI6, Windows packageordinal4/firststart4 (process reopen5 if reached), exclusive
+selectable selectors/no upload/no old-run reuse. This is the last remaining Windows
+package attempt under the original cap. Pre-dispatch totals: Windows3/4packages,3/8
+starts; Mac0/4packages,0/8starts; paired5/6each; live0/2, discovery0/1. Prior outcome
+allowances stay closed; no CI7/rerun authorised. Current-chat polling permission
+persists, no watcher/automation. Publish reviewed allowance amendment after independent
+read-only review, then dispatch and audit exact candidate/run/artifact/actual attempts.
+Mac inventory still locked; no local editor binding/start or key entry.

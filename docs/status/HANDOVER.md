@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Selectable proposal editing — blocked after CI5 terminal audit
+## Selectable proposal editing — preparing approved CI6 after independent Sol review
 
 Continue the approved outcome on Mac ARM64, codex/provider-qualification, preserving
 unrelated work and never resetting. Initial4bcfee0/main5f448ca reconciled; fresh refs
@@ -38,12 +38,13 @@ per-owner facts remain explicit. Local4probe tests pass (3snapshot/1cleanup), fu
 qualifier gates3+1. Current correction needs post-fix Windows packaged/native/cleanup
 proof; older candidate evidence does not qualify it.
 
-**Consumed:** paired5/5each exhausted after user’s one added CI5; Windows3/4packages,
+**Consumed:** paired5/6each after user’s second one-run extension; Windows3/4packages,
 3/8starts; Mac0/4packages,0/8starts. CI3/4/5 unreached reopen reservations unused.
-Live0/2total batch generations, discovery0/1; earlier allowances closed. No CI6/rerun
-authorised. Further CI requires a concrete extra-run allowance or named required-host
-capability decision; original scope approval persists. Current-chat polling ended at
-terminal audit, no automation/watcher; other chats use manual same-thread wait/resume.
+Live0/2total batch generations, discovery0/1; earlier allowances closed. CI6 is authorised after fresh GPT-6.1 Sol High review/focused checks (4desktop/2helper/
+12gate); no further defect or code edit found,6246b8b retained. Plan package4/starts4–5,
+fresh attempt1/exclusive selectable/no reuse or upload. No CI7/rerun authorised;
+original scope approval persists. Current-chat polling remains authorised through CI6,
+no automation/watcher; other chats use manual same-thread wait/resume.
 
 Mac remains locked; no native app binding/start or credential entry. Remaining signed
 Mac/native/live requires unlock and approved package identity/credential policy. Notify

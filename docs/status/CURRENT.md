@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-12. **Selectable proposal editing implemented; qualification blocked.**
+**Updated:** 2026-10-12. **Selectable proposal editing implemented; qualification preparing approved CI6.**
 Full Phase2, generic and final human acceptance remain incomplete.
 
 Approved scope persists:1–8 operations in one saved Scene, bound pre-send permissions,
@@ -19,16 +19,18 @@ Both artifact manifests/264inputs/package/PNGs and final privacy scans were audi
 
 The [owning audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci5-terminal-audit-and-probe-ownership-correction--2026-10-12)
 records a likely unguarded snapshot/Undo race and concrete shutdown short circuit.
-The reviewed probe ownership/cleanup correction passes4local tests; it is not
+Independent GPT-6.1 Sol High inspection and4desktop/2helper/12gate checks confirm
+the existing probe ownership/cleanup correction; it is not
 post-fix Windows native or cleanup proof. Unchanged core/controller/SDK evidence remains valid.
 
-Actual counts: Mac0/4packages,0/8starts; Windows3/4packages,3/8starts; paired5/5each
-exhausted after the explicit one-run extension. No sixth run/rerun authorised.
+Actual counts: Mac0/4packages,0/8starts; Windows3/4packages,3/8starts; paired5/6each
+after the user approved CI6 following independent Sol review. CI6 reserves Windows
+package4/starts4–5; no seventh run or old-run rerun authorised.
 Live0/2total batch generations, discovery0/1. Prior allowances stay closed.
 Mac remains locked; no editor start or key entry. Notify when signed app is ready
 for fresh native key entry; no old-key retrieval or real-provider credential read/
 export/call occurred. [HANDOVER](HANDOVER.md) owns continuation and remaining blockers.
-Current-chat polling ended at terminal audit; no watcher/automation.
+Current-chat polling remains authorised through CI6; no watcher/automation.
 
 Accepted prior Studio evidence remains reusable. Commit/push authorised; no merge/
 release/provider/signing expansion, generic or following outcome.
