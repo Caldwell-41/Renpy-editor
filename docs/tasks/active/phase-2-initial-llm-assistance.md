@@ -5028,3 +5028,95 @@ audit actual artifacts and keep final human acceptance distinct. Follow WORKFLOW
 manual same-thread CI wait/resume unless expressly authorized otherwise here.
 Commit/push authorized results and maintain the existing task/CURRENT/HANDOVER.
 ```
+
+
+### Studio-only qualification amendment — 2026-10-11
+
+User confirms the recorded Unsloth Studio LAN address remains available, authorizes
+required production LAN support, offers a temporary API key for agent native entry
+with later user rotation, and explicitly defers generic: “just do unsloth initially”.
+This supersedes the prerequisite scope stop for Studio only. Generic implementation,
+access and two-provider qualification remain deferred; no full Phase2 completion.
+Retain the existing exact selected Gemma model unless refreshed discovery or user
+configuration requires a concrete decision. No other model/provider or installation.
+
+State **in_progress** on clean published d175705; fresh fetch and latest branch run
+still match recorded refs/terminal baseline. Owner implements literal private-LAN
+HTTP with saved opt-in through the existing address policy and fixed SocketAddr;
+DNS/HTTPS/public HTTP, proxy/redirect/retry remain unsupported. Native temporary-key
+entry/storage and exact-owned cleanup use existing policy; never echo/commit keys.
+The user authorization for agent entry supersedes the prior no-chat-key direction;
+no key has yet been supplied. Historical spike credentials remain untouched.
+
+One shared writer/independent GPT-6.1 Sol High reviewer, integrated five-action
+controller/history/reopen and metadata-free SDK workflow, focused both-target
+CI/native proof and separately bounded real Studio synthetic attempts. New native
+inputs invalidate transport reuse; unchanged individual semantic/theme/credential
+proof remains subject to exact input assessment. Hosted CI is not assumed to access
+home LAN; local Mac can establish named required live/signed capabilities. Internal
+server tool suppression remains unknown absent actual configuration/monitor proof.
+
+Allowance unchanged: each target0/4packages,0/6editor launches,0/4focused dispatches;
+Studio0/2live attempts per action. Up to2explicit model discoveries selected for this
+amendment (preflight and post-live), count errors/ambiguous sends, no automatic retries.
+Generic0calls. Cheap destination admission/refusal tests precede packages. No signing
+changes, runnable Character/Appearance edits, paid/public calls, merge/release or next
+outcome. WORKFLOW manual same-thread CI wait/resume still applies.
+
+### Studio LAN implementation and integrated local proof — 2026-10-11
+
+Production preparation and native dispatch now share pure literal-address admission:
+loopback HTTP or saved opt-in private LAN HTTP through existing address policy,
+with one fixed SocketAddr. DNS/public/link-local/CGNAT/multicast/unspecified/HTTPS
+refuse. Credential origin and profile revision/consent remain bound; no proxy,
+redirect/retry or trust/signing change. All five passive reviews disclose unencrypted
+transport and unknown inference locality. Generic remains explicitly deferred.
+
+Focused local final inputs pass core35, transport8, native worker6, references12,
+prompts5, renderer131, frontend build and existing actual native lore controller.
+New five-action controller passes on an owned RFC1918 interface with actual native
+credential reader/HTTP/core: exact reviewed body digests, strict schema/tools off,
+passive zero writes, card/lore proposed Save plus separate approval, later exact
+approved inclusion with custom rewrite prompt, generated-reference staleness,
+prompt restore/limit overrides, source/custom preservation, mixed transactional
+Undo/Redo, project/process reopen with zero HTTP, retained extensions and cleanup.
+Controlled responses are not real Studio compatibility evidence.
+
+Pinned Ren'Py8.5.3 compile/lint/named integrated runtime passes on the reviewed
+controller's exact accepted synthetic source without editor metadata. Fixture SHA256
+`839268cfcbae49c73d637ded118433c1a1c601a44886ba26016b61b65615c236`;
+five SDK commands, exact source hashes retained. Standard-template scaffolding fills
+only initially empty GUI files. Actual entry rewrite, Continue group, terminal Return
+and new Draft Scene run; generated brackets/tags remain passive and original protected
+formatting stays active. First SDK attempt failed harness say-screen synchronization;
+waiting for the exact expected scope fixes it. Earlier controller failure was a
+harness reference-order mismatch, repaired with canonical kind/ID order and server
+error capture; owned retained fixture/credential cleanup completed. Neither was
+promoted to product or acceptance success.
+
+Independent GPT-6.1 Sol High read-only review found Draft hid the connection disclosure
+and new driver startup/reply reads could hang after exit. Owner repaired both before
+packages. Five-action controller asserts visible transport/locality on every review;
+new bounded driver observes spawn/exit/error/invalid lines/deadlines, reaps its exact
+child and attempts exact-owned cleanup once, recording incomplete cleanup honestly.
+Ordinary fake startup/reply/malformed/timeout/missing executable failures pass. New
+rejecting gates4 pass; existing gates28 pass with one explicit Windows-only polling
+skip that requires Windows. Repository503-file validation, actionlint, Python syntax
+and diff checks pass. A mistaken npm alias did not execute any check; documented
+`npm test` then passed131/131 with no unsuccessful cases.
+
+Final independent re-review finds no remaining code/harness blocker before packaging;
+reviewer made no writes, credential access, builds, launches or dispatches. Exact
+candidate Windows/macOS/native and real Studio evidence remain pending. Package and
+focused CI recipes add required integrated LAN/SDK gates without hosted Mac signing
+or package uploads; Windows representative native action stays generateLore while
+artifact qualification is phase2Studio. Prior package proof is not reused across
+changed production inputs. New live ordinary-UI fixture creates only disposable
+synthetic project state and never auto-creates a profile/key/discovery/send.
+
+Usage before packaging: Windows0/4packages,0/6editor launches,0/4focused dispatches;
+Mac0/4packages,0/6editor launches,0/4focused dispatches; Studio0/2 attempts per action
+and0/2 model discoveries. No temporary key supplied or real Studio HTTP/credential
+entry. Existing owned synthetic processes/listeners/fixtures cleaned; no CI pending.
+Next publish candidate, build approved-identity Mac package1, native1–2, then focused
+both-target CI1. User key is required only for the remaining real Studio checks.

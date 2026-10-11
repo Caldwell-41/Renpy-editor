@@ -1180,3 +1180,57 @@ fn generated_lore_cited_reference_support_stale_blocks_approval_and_inclusion() 
         assert_snapshots(&before,&f.snapshots());
     }
 }
+
+
+#[test]
+fn all_actions_private_lan_disclosure_and_configuration_change_refuse_stale_send() {
+    for action in [prompts::ACTION, prompts::CONTINUE, prompts::DRAFT, prompts::CARD, prompts::LORE] {
+        let mut f = Fixture::new();
+        let old = f.service.read().unwrap();
+        let mut store = old.clone();
+        store.revision += 1;
+        store.profiles[0].revision += 1;
+        store.profiles[0].settings.endpoint = "http://192.168.10.20:8888/v1".into();
+        store.profiles[0].settings.private_http = true;
+        store.profiles[0].credential.as_mut().unwrap().origin = "http://192.168.10.20:8888".into();
+        store.profiles[0].credential.as_mut().unwrap().credential_id = uuid::Uuid::new_v4().to_string();
+        store.profiles[0].credential.as_mut().unwrap().revision += 1;
+        f.service.write(&store, &old).unwrap();
+        let before = f.snapshots();
+        let p = match action {
+            prompts::ACTION => f.prepare(),
+            prompts::CONTINUE => f.continue_prepare(),
+            prompts::DRAFT => f.draft_prepare(),
+            prompts::CARD => f.card_prepare(Value::Null),
+            _ => f.lore_prepare(Value::Null),
+        };
+        assert!(p["destination"]["connectionLocation"].as_str().unwrap().contains("Private LAN HTTP (unencrypted)"));
+        assert_eq!(p["destination"]["inferenceLocality"], "Unknown");
+        assert_snapshots(&before, &f.snapshots());
+        let captured = f.take(&p, Cancel::default()).unwrap();
+        assert_eq!(captured.body, p["serializedPayload"].as_str().unwrap().as_bytes());
+        let prepared = crate::ai_request::prepare_reviewed(captured.profile, crate::ai_credentials::Secret::new("public".into()), captured.timeout_seconds, captured.body).unwrap();
+        assert_eq!(prepared.profile.settings.endpoint, store.profiles[0].settings.endpoint);
+        assert_snapshots(&before, &f.snapshots());
+        let p = match action {
+            prompts::ACTION => f.prepare(),
+            prompts::CONTINUE => f.continue_prepare(),
+            prompts::DRAFT => f.draft_prepare(),
+            prompts::CARD => f.card_prepare(Value::Null),
+            _ => f.lore_prepare(Value::Null),
+        };
+        let old = f.service.read().unwrap();
+        let mut changed = old.clone();
+        changed.revision += 1;
+        changed.profiles[0].revision += 1;
+        // Move back to an individually valid loopback profile without LAN consent.
+        changed.profiles[0].settings.private_http = false;
+        changed.profiles[0].settings.endpoint = "http://127.0.0.1:8888/v1".into();
+        changed.profiles[0].credential.as_mut().unwrap().origin = "http://127.0.0.1:8888".into();
+        changed.profiles[0].credential.as_mut().unwrap().credential_id = uuid::Uuid::new_v4().to_string();
+        changed.profiles[0].credential.as_mut().unwrap().revision += 1;
+        f.service.write(&changed, &old).unwrap();
+        assert!(f.take(&p, Cancel::default()).is_err());
+        assert_snapshots(&before, &f.snapshots());
+    }
+}

@@ -759,6 +759,20 @@ fn main() {
                     let root=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REWRITE_PROBE_ROOT").ok_or("Rewrite root required")?);
                     let endpoint=std::env::var("LOOMLIGHT_REWRITE_PROBE_ENDPOINT").map_err(|_|"Rewrite endpoint required")?;
                     rewrite_probe::prepare(&root,&endpoint,std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2"))?
+                } else if case == "phase2-studio" {
+                    // Disposable ordinary UI for explicitly authorized live synthetic
+                    // qualification. No profile, key, discovery or send is created here.
+                    let root = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REWRITE_PROBE_ROOT").ok_or("Studio qualification root required")?);
+                    if root.parent() != Some(std::env::temp_dir().as_path())
+                        || !root.file_name().is_some_and(|n| n.to_string_lossy().starts_with("loomlight-rewrite-live-"))
+                        || root.is_symlink()
+                    { return Err("Studio qualification root refused".into()); }
+                    if std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref() == Ok("2") {
+                        LifecycleService::new(root).map_err(|_| "Studio qualification reopen failed")?
+                    } else {
+                        if root.exists() { return Err("Studio qualification root must be fresh".into()); }
+                        LifecycleService::prepare_dialogue_rewrite_probe(root).map_err(std::io::Error::other)?
+                    }
                 } else if case == "reference-library" {
                     let data=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REFERENCE_PROBE_ROOT").ok_or("Reference probe root required")?);
                     if !data.starts_with(std::env::temp_dir()) || !data.file_name().is_some_and(|n|n.to_string_lossy().starts_with("loomlight-reference-")){return Err("Reference probe root refused".into());}
@@ -839,7 +853,7 @@ fn main() {
             if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
                 let main = app.get_webview_window("main").ok_or("probe main window missing")?;
                 if case == "route-b" { main.set_size(tauri::LogicalSize::new(640.0,720.0)).map_err(std::io::Error::other)?; }
-                if development_phase.is_some() || case == "studio-request" {
+                if development_phase.is_some() || matches!(case.as_str(), "studio-request" | "phase2-studio") {
                     main.show().expect("development fixture show");
                     main.set_focus().expect("development fixture focus");
                 } else {

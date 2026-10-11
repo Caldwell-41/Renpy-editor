@@ -8,7 +8,7 @@ function node<K extends keyof HTMLElementTagNameMap>(tag:K,text=""):HTMLElementT
 export function openStudioRequest(sessionId:string|null):void {
   if(document.querySelector('.studio-request'))return;
   const panel=node('aside');panel.className='studio-request';panel.ariaLabel='Studio synthetic request';
-  const title=node('h3','Studio request'),copy=node('p','Send a fixed synthetic message. No project content is included. Literal loopback HTTP only; thinking and tools are off.');
+  const title=node('h3','Studio request'),copy=node('p','Send a fixed synthetic message. No project content is included. Literal loopback or explicitly opted-in private LAN HTTP; thinking and tools are off.');
   const profile=node('select');profile.ariaLabel='Request profile';
   const timeoutLabel=node('label','Response deadline (seconds)'),timeout=node('input');timeout.type='number';timeout.min='30';timeout.max='1800';timeout.step='1';timeout.value='600';timeout.ariaLabel='Response deadline (seconds)';timeoutLabel.append(timeout);
   const preview=node('p'),status=node('p','Loading saved request profiles…');status.role='status';status.className='studio-request-status';status.ariaLive='polite';

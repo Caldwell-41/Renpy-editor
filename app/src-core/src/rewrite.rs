@@ -261,20 +261,16 @@ impl AuthoringService {
             return Err(RewriteError::Unavailable);
         }
         // Reuse destination validation without reading a key or connecting.
-        let uri: ureq::http::Uri = profile
-            .settings
-            .endpoint
-            .parse()
-            .map_err(|_| RewriteError::Unsupported)?;
-        let ip: std::net::IpAddr = uri
-            .host()
-            .unwrap_or("")
-            .trim_matches(['[', ']'])
-            .parse()
-            .map_err(|_| RewriteError::Unsupported)?;
-        if uri.scheme_str() != Some("http") || !ip.is_loopback() {
+        if !profile.settings.valid() {
             return Err(RewriteError::Unsupported);
         }
+        let address = crate::ai_request::destination(&profile.settings)
+            .map_err(|_| RewriteError::Unsupported)?;
+        let connection_location = if crate::ai_profiles::http_address_allowed(address.ip(), false) {
+            "Literal loopback HTTP (unencrypted); inference locality unknown"
+        } else {
+            "Private LAN HTTP (unencrypted); explicitly opted in; inference locality unknown"
+        };
         let context = self
             .context_preview(project, project_id, session, request.context.clone())
             .map_err(RewriteError::Prompt)?;
@@ -385,7 +381,7 @@ impl AuthoringService {
             .source_draft_versions(project, &paths)
             .map_err(|_| RewriteError::Stale)?;
         let token = uuid::Uuid::new_v4().to_string();
-        let result = json!({"action":request.context.action,"anchor":user["story"]["anchor"],"terminal":user["story"]["terminal"],"chapter":if drafting {user["story"].clone()}else{Value::Null},"token":token,"payloadDigest":content_digest(&body),"serializedPayload":std::str::from_utf8(&body).unwrap(),"context":context,"protected":boundary.protected,"segments":boundary.segments,"destination":{"provider":"Unsloth Studio","endpoint":profile.settings.endpoint,"model":profile.settings.model,"connectionLocation":"Literal loopback HTTP","inferenceLocality":"Unknown","retention":"Provider may retain supplied content; cancellation may not stop server computation."},"size":{"serializedBytes":body.len(),"estimatedInputTokens":body.len(),"maximumResponse":request.context.maximum_response,"margin":margin,"total":total,"contextBudget":request.context.context_budget,"contextCeiling":request.context.context_ceiling},"responseMode":"Strict JSON schema; no fallback"});
+        let result = json!({"action":request.context.action,"anchor":user["story"]["anchor"],"terminal":user["story"]["terminal"],"chapter":if drafting {user["story"].clone()}else{Value::Null},"token":token,"payloadDigest":content_digest(&body),"serializedPayload":std::str::from_utf8(&body).unwrap(),"context":context,"protected":boundary.protected,"segments":boundary.segments,"destination":{"provider":"Unsloth Studio","endpoint":profile.settings.endpoint,"model":profile.settings.model,"connectionLocation":connection_location,"inferenceLocality":"Unknown","retention":"Provider may retain supplied content; cancellation may not stop server computation."},"size":{"serializedBytes":body.len(),"estimatedInputTokens":body.len(),"maximumResponse":request.context.maximum_response,"margin":margin,"total":total,"contextBudget":request.context.context_budget,"contextCeiling":request.context.context_ceiling},"responseMode":"Strict JSON schema; no fallback"});
         let transient = Transient {
             token,
             session: session.into(),

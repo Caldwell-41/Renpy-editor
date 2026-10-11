@@ -6,6 +6,19 @@
 first remembered-profile/settings/credential slice. Generation, project sends,
 generic completion and screen implementation remain outside that selection.
 
+## Studio-only production LAN amendment — 2026-10-11
+
+The user approved the required Studio LAN completion and explicitly deferred generic
+qualification. Shared non-streaming production generation admits literal RFC1918/IPv6
+ULA HTTP only with saved private-HTTP opt-in, alongside loopback. The same pure address
+helper owns passive Assist preparation and native request admission. It preserves
+credential-origin/configuration binding, exact SocketAddr connection, no DNS, ambient
+proxy, redirect or retry, and bounded socket cancellation. Review discloses unencrypted
+LAN transport; inference locality/internal server tools remain separately unknown.
+HTTPS/hostname support and generic production modes remain outside this amendment.
+Implementation and actual live/native evidence are recorded in the existing Phase2 task;
+this amendment alone is not a successful live qualification or full Phase2 acceptance.
+
 ## Context
 
 [ADR 0011](0011-ai-settings-secrets-and-reference-storage.md) owns credential and

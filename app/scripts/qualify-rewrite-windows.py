@@ -175,6 +175,15 @@ def entry(output, kind, ordinal):
         stream.write(json.dumps({'kind': kind, 'ordinal': ordinal, 'runId': identity['runId'], 'attempt': 1, 'sha': identity['candidate']})+'\n')
 
 
+INTEGRATED_CONTROLLER_MARKER = 'PASS: integrated five actions/exact sends/passive review/separate approvals/generated-reference staleness/mixed source-reference-prompt Undo-Redo/project-process reopen/zero reopen HTTP/owned cleanup'
+PRIVATE_LAN_MARKER = 'PASS: actual opted-in private LAN HTTP/exact address/native credential worker/five actions/owned interface'
+
+def validate_integrated_controller(text):
+    assert INTEGRATED_CONTROLLER_MARKER in text and PRIVATE_LAN_MARKER in text, 'Required integrated/LAN cases missing'
+
+def phase2():
+    return os.environ.get('PHASE2_STUDIO') == 'true'
+
 def lore():
     return os.environ.get("GENERATE_LORE") == "true"
 
@@ -203,6 +212,9 @@ def prepare(output):
     output.mkdir(parents=True, exist_ok=True)
     assert not (output / 'identity.json').exists(), 'Fresh evidence required'
     identity = {'candidate': candidate, 'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=REPO, text=True).strip(), 'runId': os.environ['GITHUB_RUN_ID'], 'attempt': 1, 'runnerImage': os.environ.get('ImageVersion'), 'os': platform.system(), 'architecture': platform.machine(), 'inputs': {path: digest(REPO/path) for path in paths}, 'toolchains': {tool: subprocess.check_output(command([tool, '--version']), cwd=APP, text=True).strip() for tool in ('node', 'npm', 'rustc', 'cargo')}, 'python': platform.python_version(), 'action': 'generateLore' if lore() else 'generateCard' if generating() else 'draftScene' if drafting() else 'continueScene' if continuing() else 'rewriteDialogue'}
+    if phase2():
+        assert lore(), 'Studio qualification uses the selected representative lore native case'
+        identity['qualification'] = 'phase2Studio'
     (output / 'identity.json').write_text(json.dumps(identity, indent=2)+'\n')
     validate_toolchains(identity['toolchains'])
     if (output/'focused-reuse.json').is_file():
@@ -215,7 +227,7 @@ def prepare(output):
     checks = [
         ('renderer', ['npm', 'run', 'check'], None),
         ('renderer-build', ['npm', 'run', 'build'], None),
-        ('core-rewrite', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'rewrite'], 34),
+        ('core-rewrite', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'rewrite'], 35),
         ('transport', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', 'ai_request::tests', '--', '--nocapture'], 8),
         ('native-worker', ['cargo', 'test', '-p', 'loomlight-desktop', '--release', '--locked', 'ai_requests::tests'], 6),
         ('controller-build', ['cargo', 'build', '-p', 'loomlight-desktop', '--release', '--locked', '--example', 'rewrite-controller-driver'], None),
@@ -223,6 +235,8 @@ def prepare(output):
     ]
     if generating():
         checks=[c for c in checks if c[0]!='literal-build'] + [('references',['cargo','test','-p','loomlight-core','--release','--locked','references::tests'],None),('prompts',['cargo','test','-p','loomlight-core','--release','--locked','prompts::tests'],5)]
+    if phase2():
+        checks.append(('integrated-gates', [sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_phase2_qualification.py', '-v'], None))
     for name, argv, count in checks:
         try:
             text = run(output, name, argv)
@@ -240,13 +254,19 @@ def prepare(output):
             failures.append(str(error))
     else:
         failures.append('controller executable missing')
+    if phase2() and not failures:
+        try:
+            text = run(output, 'integrated-controller', ['node', 'tests/phase2-controller.dispatch.mjs', 'target/release/examples/rewrite-controller-driver.exe', '--private-lan', '--game-output', str(output/'integrated-game.json')])
+            validate_integrated_controller(text)
+        except Exception as error:
+            failures.append(str(error))
     (output / 'focused-result.json').write_text(json.dumps({'passed': not failures, 'failures': failures}, indent=2)+'\n')
     if failures:
         raise RuntimeError('; '.join(failures))
 
 
 def sdk(output, archive, checksums):
-    if generating():
+    if generating() and not phase2():
         # No runnable mutation: source-byte assertions are new; unchanged SDK evidence is reused.
         (output/'sdk-reuse.json').write_text(json.dumps({'action':'generateLore' if lore() else 'generateCard','sourceOnly':True,'newSDKExecution':False,'qualifiedImplementation':'1320d0a6507625abdd3fa20aa6a3eccffaccfcd6','qualifiedRun':'38056790759','reason':'Editor-only metadata mutation; core/controller/native assert all runnable source bytes unchanged.'},indent=2)+'\n')
         return
@@ -257,9 +277,15 @@ def sdk(output, archive, checksums):
     destination = Path(tempfile.gettempdir()) / ('loomlight-rewrite-sdk-ci-' + os.environ['GITHUB_RUN_ID'])
     install_verified_tar(archive, SDK_HASH, destination)
     try:
-        text = run(output, 'sdk', [sys.executable, str(APP/'scripts/rewrite-literal-sdk.py'), '--sdk', str(destination/'renpy-8.5.3-sdk'), '--driver', str(APP/('target/release/examples/draft-literal-driver.exe' if drafting() else 'target/release/examples/continue-literal-driver.exe' if continuing() else 'target/release/examples/rewrite-literal-driver.exe')), '--output', str(output/'sdk-commands'), *(['--generate-lore'] if lore() else ['--generate-card'] if generating() else ['--draft-scene'] if drafting() else ['--continue-scene'] if continuing() else [])], timeout=400)
-        assert 'PASS: pinned Ren' in text
-        (output/'sdk-identity.json').write_text(json.dumps({'version': '8.5.3', 'officialPublishedSHA256': SDK_HASH, 'archiveSHA256': digest(archive), 'literalDriverSHA256': digest(APP/('target/release/examples/draft-literal-driver.exe' if drafting() else 'target/release/examples/continue-literal-driver.exe' if continuing() else 'target/release/examples/rewrite-literal-driver.exe')), 'passed': True}, indent=2)+'\n')
+        if phase2():
+            text = run(output, 'sdk', [sys.executable, 'scripts/phase2-integrated-sdk.py', '--sdk', str(destination/'renpy-8.5.3-sdk'), '--fixture', str(output/'integrated-game.json'), '--output', str(output/'sdk-commands')], timeout=400)
+            assert 'PASS: pinned Ren’Py integrated exact accepted source' in text
+            identity = {'passed': True, 'version': '8.5.3', 'officialPublishedSHA256': SDK_HASH, 'archiveSHA256': digest(archive), 'controllerSHA256': digest(APP/'target/release/examples/rewrite-controller-driver.exe'), 'fixtureSHA256': digest(output/'integrated-game.json')}
+            (output/'sdk-identity.json').write_text(json.dumps(identity, indent=2)+'\n')
+        else:
+            text = run(output, 'sdk', [sys.executable, str(APP/'scripts/rewrite-literal-sdk.py'), '--sdk', str(destination/'renpy-8.5.3-sdk'), '--driver', str(APP/('target/release/examples/draft-literal-driver.exe' if drafting() else 'target/release/examples/continue-literal-driver.exe' if continuing() else 'target/release/examples/rewrite-literal-driver.exe')), '--output', str(output/'sdk-commands'), *(['--generate-lore'] if lore() else ['--generate-card'] if generating() else ['--draft-scene'] if drafting() else ['--continue-scene'] if continuing() else [])], timeout=400)
+            assert 'PASS: pinned Ren' in text
+            (output/'sdk-identity.json').write_text(json.dumps({'version': '8.5.3', 'officialPublishedSHA256': SDK_HASH, 'archiveSHA256': digest(archive), 'literalDriverSHA256': digest(APP/('target/release/examples/draft-literal-driver.exe' if drafting() else 'target/release/examples/continue-literal-driver.exe' if continuing() else 'target/release/examples/rewrite-literal-driver.exe')), 'passed': True}, indent=2)+'\n')
     finally:
         shutil.rmtree(destination)
 

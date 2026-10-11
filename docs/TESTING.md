@@ -1595,3 +1595,47 @@ candidate 233454b/run38105665896 attempt1, both focused targets pass, signed loc
 native proof and Windows25 distinct+3/six receipts/nine captures independently audited.
 Exact manifests/checkout inputs and cleanup verified. No new live/generic-provider or
 final human acceptance claim; no rerun for documentation-only closure.
+
+
+## Studio-only integrated Phase 2 qualification
+
+The [Studio-only amendment](tasks/active/phase-2-initial-llm-assistance.md#studio-only-qualification-amendment--2026-10-11)
+owns scope and cumulative allowance; generic/live two-provider/full Phase2 acceptance
+remain deferred. Focused core `rewrite` now requires35cases, including all-five-action
+LAN passive disclosure, exact capture and profile/consent-change stale-send refusal.
+Transport8 covers opt-in RFC1918/ULA/mapped-private admission and public/link-local/
+CGNAT/unspecified/multicast/hostname/HTTPS refusal without network. Existing renderer131,
+worker6/reference12/prompt5 remain focused shared gates.
+
+`node tests/phase2-controller.dispatch.mjs <native-driver> --private-lan --game-output
+<ignored-evidence>/integrated-game.json` uses one actual controller/native-credential/
+HTTP/core session across five actions. It binds an owned RFC1918 interface (missing
+capability fails, never skips), checks exact reviewed request hashes/schema/tools,
+passive zero-mutation preview, separate generated-reference Save/approval, later exact
+approved inclusion, source-caused reference staleness, mixed source/reference/prompt
+history and ordinary project/process reopen with zero HTTP. Final driver cleanup owns
+its credential/fixture. Existing focused per-action rejecting/Source/cancel cases are
+reused only when unchanged; the integrated chain is separate from live inference.
+
+`phase2-integrated-sdk.py` validates the exported source/hash/Scene manifest before
+execution, copies exact nonempty accepted source into the already established pinned
+standard-template fixture, and runs compile/lint plus the named
+`loomlight_phase2_integrated` entry/Continue/new-Draft/Return test without editor
+metadata. Empty GUI scaffolding is supplied by that standard template; no accepted
+source is rewritten. SDK substitution/token assertions distinguish passive generated
+text from retained original formatting. Source hashes must remain exact afterward.
+`test_phase2_qualification.py` cheaply rejects missing/wrong hash/path/Scene evidence
+and absent integrated/LAN markers before packages. It also executes ordinary fake
+driver startup/reply/invalid-line/timeout/spawn failures; owned protocol waits and
+shutdown are bounded, and failures retain cleanup/root-remains outcomes. Every action
+review must visibly show unencrypted transport and unknown inference locality.
+
+Workflow `phase2_studio=true` requires `generate_lore=true`, all other selectors/reuse/
+upload false; existing focused Windows package/native lore flow supplies a representative
+changed executable path, while integrated controller/LAN/SDK cases exercise all actions.
+Mac ARM64 adds the same integrated12automated cases without hosted packages/launches;
+approved signed local Mac/live capability remains local. Both artifacts identify
+`qualification=phase2Studio` and representative native `action=generateLore` separately.
+SDK archive/checksum validation remains mandatory; prior metadata-only SDK reuse cannot
+substitute for this new combined accepted source. Real Studio compatibility is recorded
+separately with exact provider/model/configuration and at most2attempts per action.

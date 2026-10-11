@@ -38,8 +38,12 @@ project content; loading profiles, project open/edit and Save never send it. Sel
 endpoint/model, saved credential/configuration revision, project session, response
 reserve, context budget and response deadline are captured immutably in Rust. The
 renderer receives status and literal final text, never the credential. This bounded
-slice supports literal loopback HTTP only; HTTPS, hostnames and LAN destinations
-refuse before dispatch. It does not qualify live Studio or the complete 2A.2 service.
+transport supports literal loopback HTTP and literal RFC1918/IPv6 ULA HTTP with
+saved private-HTTP opt-in. HTTPS, hostnames and other addresses refuse before dispatch.
+LAN HTTP is unencrypted; inference locality remains unknown. Passive Assist review
+and native dispatch share this admission check and bind the exact address, profile
+and credential origin. Live Studio qualification is recorded separately from the
+controlled synthetic service checks; generic providers remain deferred.
 
 The pinned `ureq` worker owns one socket and one request (no queue), releases the
 project service before networking and closes the socket on completion/cancellation.

@@ -6,6 +6,7 @@ from pathlib import Path
 REPO=Path(__file__).resolve().parents[2];APP=REPO/'app'
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);p.add_argument('--archive',type=Path,required=True);p.add_argument('--checksums',type=Path,required=True);a=p.parse_args()
 a.output.mkdir(parents=True,exist_ok=False)
+phase2=os.environ.get('PHASE2_STUDIO')=='true'
 drafting=os.environ.get('DRAFT_SCENE')=='true'
 lore=os.environ.get('GENERATE_LORE')=='true'
 card=lore or os.environ.get('GENERATE_CARD')=='true'
@@ -14,6 +15,9 @@ identity={'candidate':subprocess.check_output(['git','rev-parse','HEAD'],cwd=REP
 assert identity['architecture']=='arm64' and identity['os']=='Darwin' and identity['attempt']==1 and identity['candidate']==os.environ['GITHUB_SHA']
 assert identity['toolchains']['node']=='v24.19.0' and identity['toolchains']['npm']=='11.9.0' and identity['toolchains']['rustc'].startswith('rustc 1.90.0 ')
 paths=subprocess.check_output(['git','ls-files','app','.github/workflows/production-scaffold.yml','spikes/renpy-sdk'],cwd=REPO,text=True).splitlines();identity['inputs']={path:sha(REPO/path) for path in paths}
+if phase2:
+ assert lore
+ identity['qualification']='phase2Studio'
 (a.output/'identity.json').write_text(json.dumps(identity,indent=2)+'\n')
 checks=[]
 def run(name,argv,count=None,timeout=600):
@@ -25,6 +29,10 @@ def run(name,argv,count=None,timeout=600):
    assert re.search(r'(?:ℹ|#) tests 131(?:\r?\n)',r.stdout) and re.search(r'(?:ℹ|#) pass 131(?:\r?\n)',r.stdout), 'Required renderer cases missing'
    for outcome in ('fail','cancelled','skipped','todo'):
     assert re.search(r'(?:ℹ|#) '+outcome+r' 0(?:\r?\n)',r.stdout), 'Unsuccessful renderer cases are not acceptance'
+  if name=='integrated-controller':
+   import importlib.util
+   spec=importlib.util.spec_from_file_location('phase2_recipe',APP/'scripts/qualify-rewrite-windows.py');recipe=importlib.util.module_from_spec(spec);spec.loader.exec_module(recipe);recipe.validate_integrated_controller(r.stdout)
+  if name=='integrated-sdk':assert 'PASS: pinned Ren’Py integrated exact accepted source' in r.stdout
   if name=='sdk':assert ('PASS: pinned Ren’Py actual accepted Draft Scene' if drafting else 'PASS: pinned Ren’Py actual accepted Continue Scene group') in r.stdout
   if count is not None:assert f'test result: ok. {count} passed; 0 failed; 0 ignored;' in r.stdout,name
   checks.append({'name':name,'passed':True,'command':argv})
@@ -38,17 +46,27 @@ def run(name,argv,count=None,timeout=600):
 sdkroot=Path(tempfile.gettempdir())/('loomlight-continue-sdk-'+identity['runId'])
 try:
  run('renderer',['npm','run','check']);run('frontend',['npm','run','build'])
- run('core',['cargo','test','-p','loomlight-core','--locked','rewrite'],34)
+ run('core',['cargo','test','-p','loomlight-core','--locked','rewrite'],35)
  run('prompts',['cargo','test','-p','loomlight-core','--locked','prompts::tests'],5)
  run('transport',['cargo','test','-p','loomlight-core','--locked','ai_request::tests','--','--nocapture'],8)
  run('native-worker',['cargo','test','-p','loomlight-desktop','--locked','ai_requests::tests'],6)
  run('controller-build',['cargo','build','-p','loomlight-desktop','--locked','--example','rewrite-controller-driver'])
  run('controller',['node','tests/rewrite-controller.dispatch.mjs','target/debug/examples/rewrite-controller-driver','--generate-lore' if lore else '--generate-card' if card else '--draft-scene' if drafting else '--continue-scene'])
  assert 'PASS: actual controller/native credentials/exact strict-schema HTTP' in (a.output/'controller.log').read_text()
+ if phase2:
+  run('integrated-gates',[sys.executable,'-m','unittest','discover','-s','scripts','-p','test_phase2_qualification.py','-v'])
+  run('integrated-controller',['node','tests/phase2-controller.dispatch.mjs','target/debug/examples/rewrite-controller-driver','--private-lan','--game-output',str(a.output/'integrated-game.json')])
  if card:
   run('references',['cargo','test','-p','loomlight-core','--locked','references::tests'])
-  (a.output/'sdk-reuse.json').write_text(json.dumps({'newSDKExecution':False,'qualifiedRun':'38056790759','reason':'Editor-only metadata; all runnable source bytes remain exact.'},indent=2)+'\n')
- else:
+  if not phase2:(a.output/'sdk-reuse.json').write_text(json.dumps({'newSDKExecution':False,'qualifiedRun':'38056790759','reason':'Editor-only metadata; all runnable source bytes remain exact.'},indent=2)+'\n')
+ if phase2:
+  sys.path.insert(0,str(REPO/'spikes/renpy-sdk'));from archive_safety import expected_sha256,install_verified_tar
+  expected='eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45'
+  assert sha(a.archive)==expected_sha256(a.checksums.read_text(),'renpy-8.5.3-sdk.tar.bz2')==expected
+  assert not sdkroot.exists();install_verified_tar(a.archive,expected,sdkroot)
+  run('integrated-sdk',[sys.executable,'scripts/phase2-integrated-sdk.py','--sdk',str(sdkroot/'renpy-8.5.3-sdk'),'--fixture',str(a.output/'integrated-game.json'),'--output',str(a.output/'sdk-commands')],timeout=400)
+  (a.output/'sdk-identity.json').write_text(json.dumps({'passed':True,'version':'8.5.3','archiveSHA256':sha(a.archive),'controllerSHA256':sha(APP/'target/debug/examples/rewrite-controller-driver'),'fixtureSHA256':sha(a.output/'integrated-game.json')},indent=2)+'\n')
+ elif not card:
   run('literal-build',['cargo','build','-p','loomlight-core','--locked','--example','draft-literal-driver' if drafting else 'continue-literal-driver'])
   sys.path.insert(0,str(REPO/'spikes/renpy-sdk'));from archive_safety import expected_sha256,install_verified_tar
   expected='eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45'
@@ -58,7 +76,7 @@ try:
   (a.output/'sdk-identity.json').write_text(json.dumps({'passed':True,'version':'8.5.3','archiveSHA256':sha(a.archive),'literalDriverSHA256':sha(APP/('target/debug/examples/draft-literal-driver' if drafting else 'target/debug/examples/continue-literal-driver'))},indent=2)+'\n')
 finally:
  if sdkroot.exists():shutil.rmtree(sdkroot)
- (a.output/'cases.json').write_text(json.dumps({'passed':len(checks)==(9 if card else 10) and all(c['passed'] for c in checks),'checks':checks,'sdkRootRemoved':not sdkroot.exists()},indent=2)+'\n')
+ (a.output/'cases.json').write_text(json.dumps({'passed':len(checks)==(12 if phase2 else 9 if card else 10) and all(c['passed'] for c in checks),'checks':checks,'sdkRootRemoved':not sdkroot.exists()},indent=2)+'\n')
  # Store actual failures as failures. Artifact privacy is enforced before upload.
  r=subprocess.run(['node','scripts/scan-artifacts.mjs',str(a.output)],cwd=APP,capture_output=True,text=True);(a.output/'privacy.log').write_text(r.stdout+r.stderr)
  (a.output/'manifest.json').write_text(json.dumps({p.relative_to(a.output).as_posix():sha(p) for p in a.output.rglob('*') if p.is_file()},indent=2)+'\n')

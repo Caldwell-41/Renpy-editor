@@ -35,14 +35,34 @@ use loomlight_core::{
 use serde_json::{json, Value};
 use std::io::{self, BufRead, Write};
 fn main() {
-    let endpoint = std::env::args()
+    let args: Vec<String> = std::env::args().collect();
+    let endpoint = args.iter()
         .nth(1)
         .expect("Synthetic loopback endpoint required");
-    let root = std::env::temp_dir().join(format!(
+    let root = args.iter().position(|a| a == "--root").map(|i| std::path::PathBuf::from(&args[i + 1])).unwrap_or_else(|| std::env::temp_dir().join(format!(
         "loomlight-rewrite-controller-{}",
         uuid::Uuid::new_v4()
-    ));
-    let mut service = rewrite_probe::prepare(&root, &endpoint, false).unwrap();
+    )));
+    let reopen = args.iter().any(|a| a == "--reopen");
+    let retain = args.iter().any(|a| a == "--retain");
+    assert!(!(reopen || retain) || args.iter().any(|a| a == "--root"));
+    let private_lan = args.iter().any(|a| a == "--private-lan");
+    let seed = if private_lan { "http://127.0.0.1:8765/v1" } else { endpoint.as_str() };
+    let mut service = rewrite_probe::prepare(&root, seed, reopen).unwrap();
+    if private_lan && !reopen {
+        let store = service.read().unwrap();
+        let mut settings = store.profiles[0].settings.clone();
+        settings.endpoint = endpoint.to_owned();
+        settings.private_http = true;
+        // The owned-interface fixture selects literal IPv4 only. Core also validates ULA.
+        let ip = endpoint.strip_prefix("http://").unwrap().split(':').next().unwrap().parse().unwrap();
+        assert!(loomlight_core::ai_profiles::http_address_allowed(ip, true)
+            && !loomlight_core::ai_profiles::http_address_allowed(ip, false));
+        ai_credentials::save(&service, &ai_credentials::token(&store), Some(&store.profiles[0].profile_id), settings).unwrap();
+        let store = service.read().unwrap();
+        let secrets = ai_native::secrets(&root).unwrap();
+        ai_credentials::replace(&service, &secrets, &ai_credentials::token(&store), &store.profiles[0].profile_id, "loomlight-public-rewrite-fixture").unwrap();
+    }
     let p = service.open_path(&root.join("synthetic-project")).unwrap();
     let host = ApplicationHost::new(service);
     let worker = std::sync::Arc::new(ai_requests::Service::default());
@@ -51,6 +71,16 @@ fn main() {
     let mut held = None;
     for line in io::stdin().lock().lines() {
         let request: Value = serde_json::from_str(&line.unwrap()).unwrap();
+        if request["driver"] == "reopen" {
+            let _changing = worker.change();
+            let reopened = host.with_service(|s| {
+                s.close().unwrap();
+                s.open_path(&root.join("synthetic-project")).unwrap()
+            }).unwrap();
+            println!("{}", json!({"sessionId":reopened.session_id}));
+            io::stdout().flush().unwrap();
+            continue;
+        }
         if request["driver"] == "hold" {
             assert!(held.is_none());
             let (tx, rx) = std::sync::mpsc::channel();
@@ -125,10 +155,10 @@ fn main() {
         t.join().unwrap();
     }
     assert!(worker.shutdown());
-    host.with_service(|s| rewrite_probe::cleanup(s))
-        .unwrap()
-        .unwrap();
+    if !retain {
+        host.with_service(|s| rewrite_probe::cleanup(s)).unwrap().unwrap();
+    }
     assert!(host.shutdown());
     drop(host);
-    std::fs::remove_dir_all(root).unwrap();
+    if !retain { std::fs::remove_dir_all(root).unwrap(); }
 }

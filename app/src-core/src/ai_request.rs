@@ -1,4 +1,4 @@
-//! Bounded Studio synthetic JSON request. No project text, edits, DNS, TLS fallback,
+//! Bounded Studio JSON transport. No edits, DNS, TLS fallback,
 //! redirects, provider retries or persistent replies. Other destinations refuse use.
 use crate::{
     ai_credentials::{valid_key, Secret},
@@ -64,7 +64,7 @@ impl Failure {
     pub fn message(self) -> &'static str {
         match self {
         Self::Configuration=>"Saved request settings are invalid or unsupported.",
-        Self::UnsupportedDestination=>"Synthetic requests currently support literal loopback HTTP only. This saved destination is unsupported.",
+        Self::UnsupportedDestination=>"Studio requests require a literal loopback HTTP address or a private LAN HTTP address with explicit opt-in. This saved destination is unsupported.",
         Self::Context=>"Synthetic input, visible margin and response reserve exceed the saved context budget.",
         Self::Credential=>"Credential is missing, unavailable, disabled or bound to another origin.",
         Self::Connection=>"Studio server is unavailable or the connection was interrupted.",
@@ -105,21 +105,7 @@ pub fn prepare_reviewed(profile: StudioProfile, key: Secret, timeout_seconds: u3
     if !profile.credential_bound() || !valid_key(&key) {
         return Err(Failure::Credential);
     }
-    let uri: ureq::http::Uri = profile
-        .settings
-        .endpoint
-        .parse()
-        .map_err(|_| Failure::Configuration)?;
-    let ip: IpAddr = uri
-        .host()
-        .unwrap_or("")
-        .trim_matches(['[', ']'])
-        .parse()
-        .map_err(|_| Failure::UnsupportedDestination)?;
-    if uri.scheme_str() != Some("http") || !ip.is_loopback() {
-        return Err(Failure::UnsupportedDestination);
-    }
-    let address = SocketAddr::new(ip, uri.port_u16().ok_or(Failure::Configuration)?);
+    let address = destination(&profile.settings)?;
     if body.len() > MAX_BODY {
         return Err(Failure::Context);
     }
@@ -142,6 +128,27 @@ pub fn prepare_reviewed(profile: StudioProfile, key: Secret, timeout_seconds: u3
         address,
         key,
     })
+}
+
+/// Pure address admission shared by passive send review and native dispatch.
+/// No hostname resolution, network access or secret read occurs here.
+pub(crate) fn destination(settings: &crate::ai_profiles::StudioSettings) -> Result<SocketAddr> {
+    let uri: ureq::http::Uri = settings
+        .endpoint
+        .parse()
+        .map_err(|_| Failure::Configuration)?;
+    let ip: IpAddr = uri
+        .host()
+        .unwrap_or("")
+        .trim_matches(['[', ']'])
+        .parse()
+        .map_err(|_| Failure::UnsupportedDestination)?;
+    if uri.scheme_str() != Some("http")
+        || !crate::ai_profiles::http_address_allowed(ip, settings.private_http)
+    {
+        return Err(Failure::UnsupportedDestination);
+    }
+    Ok(SocketAddr::new(ip, uri.port_u16().ok_or(Failure::Configuration)?))
 }
 #[derive(Default)]
 struct CancelInner {
@@ -211,7 +218,7 @@ impl Connector for AbortConnector {
         {
             return Err(ureq::Error::ConnectionFailed);
         }
-        // One literal-loopback connect attempt. A one-second deadline also bounds
+        // One reviewed literal-address connect attempt. A one-second deadline also bounds
         // cancellation while the OS is connecting, before a socket can be owned.
         let stream = Arc::new(TcpStream::connect_timeout(
             &self.address,
@@ -566,7 +573,6 @@ mod tests {
         ));
         for endpoint in [
             "http://localhost:8888/v1",
-            "http://192.168.1.2:8888/v1",
             "https://example.com:443/v1",
         ] {
             let mut p = profile(8888);
@@ -580,6 +586,48 @@ mod tests {
                 prepare(p, Secret::new("public".into()), 30),
                 Err(Failure::UnsupportedDestination)
             ))
+        }
+        // Preparation validates the exact destination without opening a socket.
+        // Saved private-HTTP consent and credential origin remain mandatory.
+        for endpoint in [
+            "http://10.0.0.1:8888/v1",
+            "http://172.16.0.1:8888/v1",
+            "http://192.168.1.2:8888/v1",
+            "http://[fd00::1]:8888/v1",
+            "http://[::ffff:192.168.1.2]:8888/v1",
+        ] {
+            let mut p = profile(8888);
+            p.settings.endpoint = endpoint.into();
+            p.settings.private_http = true;
+            p.credential.as_mut().unwrap().origin =
+                crate::ai_profiles::canonical_endpoint(endpoint, true).unwrap().1;
+            let prepared = prepare(p.clone(), Secret::new("public".into()), 30).unwrap();
+            assert_eq!(prepared.address.ip(), endpoint.parse::<ureq::http::Uri>().unwrap().host().unwrap().trim_matches(['[', ']']).parse::<IpAddr>().unwrap());
+            p.settings.private_http = false;
+            assert!(prepare(p.clone(), Secret::new("public".into()), 30).is_err());
+            p.settings.private_http = true;
+            p.credential.as_mut().unwrap().origin = "http://127.0.0.1:8888".into();
+            assert!(matches!(prepare(p, Secret::new("public".into()), 30), Err(Failure::Credential)));
+        }
+        for endpoint in [
+            "http://8.8.8.8:8888/v1",
+            "http://100.64.0.1:8888/v1",
+            "http://169.254.1.1:8888/v1",
+            "http://0.0.0.0:8888/v1",
+            "http://224.0.0.1:8888/v1",
+            "http://[fe80::1]:8888/v1",
+            "http://[::]:8888/v1",
+            "http://[::ffff:8.8.8.8]:8888/v1",
+            "http://studio.local:8888/v1",
+            "https://192.168.1.2:8888/v1",
+        ] {
+            let mut p = profile(8888);
+            p.settings.endpoint = endpoint.into();
+            p.settings.private_http = true;
+            if let Ok((_, origin)) = crate::ai_profiles::canonical_endpoint(endpoint, true) {
+                p.credential.as_mut().unwrap().origin = origin;
+            }
+            assert!(prepare(p, Secret::new("public".into()), 30).is_err(), "{endpoint}");
         }
         let mut p = profile(8888);
         p.disabled = true;

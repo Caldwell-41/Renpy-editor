@@ -666,9 +666,11 @@ Each staged import still uses the existing typed transaction operation.
 The current bounded non-streaming slice uses `ai.sendSynthetic`, `ai.requestStatus`
 and `ai.cancelRequest` through the existing main-window typed IPC. Core captures a
 fixed synthetic body and saved Studio profile/credential, validates the supported
-literal-loopback HTTP destination and context/response limits, then a native worker
+literal loopback or explicitly opted-in RFC1918/IPv6 ULA HTTP destination and
+context/response limits, then a native worker
 executes pinned `ureq` away from the UI/service boundary. A single publication guard
-arbitrates cancellation and profile/project/shutdown invalidation. No network wait
+arbitrates cancellation and profile/project/shutdown invalidation. Passive Assist review and dispatch use one pure literal-address admission helper.
+LAN review discloses unencrypted transport and unknown inference locality. No network wait
 owns the project service; ordinary editing and Source Save remain independent.
 
 Cancellation and transport IO share the exact connected socket through `Arc<TcpStream>`;
