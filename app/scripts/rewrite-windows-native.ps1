@@ -45,6 +45,11 @@ public static class RewriteNative {
         input[1].type=1; input[1].data.key.vk=0x20; input[1].data.key.flags=2;
         return SendInput(2,input,Marshal.SizeOf(typeof(INPUT)))==2;
     }
+    public static bool Tab() {
+        var input=new INPUT[2]; input[0].type=1; input[0].data.key.vk=0x09;
+        input[1].type=1; input[1].data.key.vk=0x09; input[1].data.key.flags=2;
+        return SendInput(2,input,Marshal.SizeOf(typeof(INPUT)))==2;
+    }
     public static string HashFile(string path) {
         using (var stream=System.IO.File.OpenRead(path))
         using (var hash=System.Security.Cryptography.SHA256.Create()) {
@@ -130,6 +135,29 @@ function Button([string]$Name) {
     $typeCondition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty,[System.Windows.Automation.ControlType]::Button)
     $condition=[System.Windows.Automation.AndCondition]::new([System.Windows.Automation.Condition[]]@($nameCondition,$typeCondition))
     return $script:window.FindFirst([System.Windows.Automation.TreeScope]::Descendants,$condition)
+}
+function Selection-Checkbox([switch]$AllowAbsent) {
+    $name=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty,'Select Character change')
+    $type=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty,[System.Windows.Automation.ControlType]::CheckBox)
+    $condition=[System.Windows.Automation.AndCondition]::new([System.Windows.Automation.Condition[]]@($name,$type))
+    $controls=$script:window.FindAll([System.Windows.Automation.TreeScope]::Descendants,$condition)
+    if($AllowAbsent -and $controls.Count -eq 0) { return $null }
+    Assert-Native ($controls.Count -eq 1) 'Exactly one typed Character selection checkbox required'
+    return $controls[0]
+}
+function Selection-State {
+    $control=Selection-Checkbox -AllowAbsent
+    if($null -eq $control) { return [ordered]@{present=$false;enabled=$false;focusable=$false;focused=$false;toggle='Absent';focusedName=$null} }
+    $focused=[System.Windows.Automation.AutomationElement]::FocusedElement
+    $toggle=$null
+    Assert-Native ($control.TryGetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern,[ref]$toggle)) 'Selection checkbox TogglePattern unavailable'
+    return [ordered]@{
+        present=$true
+        enabled=$control.Current.IsEnabled; focusable=$control.Current.IsKeyboardFocusable
+        focused=($control.Current.HasKeyboardFocus -and $null -ne $focused -and $focused.Current.Name -eq 'Select Character change' -and $focused.Current.ControlType -eq [System.Windows.Automation.ControlType]::CheckBox)
+        toggle=$toggle.Current.ToggleState.ToString()
+        focusedName=if($null -ne $focused){$focused.Current.Name}else{$null}
+    }
 }
 function Completed-Assist-Close-State {
     # Keep source ASCII: Windows PowerShell 5.1 reads BOM-less -File as ANSI.
@@ -245,15 +273,31 @@ try {
             $receipt.checks.inertProposalObserved=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         } elseif($Stage -eq 'physical-select') {
-            $condition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty,'Select Character change')
-            $control=$script:window.FindFirst([System.Windows.Automation.TreeScope]::Descendants,$condition)
-            Focus-Control $control
+            $control=Selection-Checkbox
+            $initial=Selection-State
+            Assert-Native ($initial.enabled -and $initial.focusable -and $initial.toggle -eq 'On') 'Enabled focusable checked selection required before input'
+            $receipt.checks.selectionInitiallyChecked=$true
+            # Begin at the observed Save button and navigate the owned review
+            # with real Tab input. Never send
+            # Space until the unique typed checkbox actually owns keyboard focus.
+            Wait-Native { (Button $acceptName).Current.HasKeyboardFocus -and [System.Windows.Automation.AutomationElement]::FocusedElement.Current.Name -eq $acceptName }
+            for($step=0;$step -lt 32 -and -not (Selection-State).focused;$step++) {
+                Assert-Native ([RewriteNative]::Tab()) 'OS keyboard navigation failed'
+                Start-Sleep -Milliseconds 100
+            }
+            Wait-Native { $receipt.selectionBefore=Selection-State; return $receipt.selectionBefore.focused }
+            $bounds=(Selection-Checkbox).Current.BoundingRectangle; $rect=Window-Rect $script:handle
+            Assert-Native (-not (Selection-Checkbox).Current.IsOffscreen -and $bounds.Width -gt 0 -and $bounds.Height -gt 0 -and $bounds.Left -ge $rect.Left -and $bounds.Right -le $rect.Right -and $bounds.Top -ge $rect.Top -and $bounds.Bottom -le $rect.Bottom) 'Keyboard selection outside observable viewport'
+            Assert-Native ($receipt.selectionBefore.toggle -eq 'On') 'Keyboard navigation changed selection before Space'
+            $receipt.checks.selectionInputFocusObserved=$true
+            $receipt.captures=@(Capture ($Stage+'-before') (Window-Rect $script:handle))
             Assert-Native ([RewriteNative]::GetForegroundWindow() -eq $script:handle) 'Owned window lost foreground'
             Assert-Native ([RewriteNative]::Space()) 'OS keyboard input failed'
             $receipt.checks.osKeyboardInput=$true
-            Wait-Native { (Has-Text 'group requires character') -and (Has-ButtonState $acceptName $false) }
+            Wait-Native { $receipt.selectionAfter=Selection-State; return $receipt.selectionAfter.toggle -eq 'Off' -and (Has-Text 'group requires character') -and (Has-ButtonState $acceptName $false) }
+            $receipt.checks.selectionUncheckedObserved=$true
             $receipt.checks.dependencyRefusalObserved=$true
-            Wait-Native { [System.Windows.Automation.AutomationElement]::FocusedElement.Current.Name -eq 'Select Character change' }
+            Wait-Native { $receipt.selectionAfter=Selection-State; return $receipt.selectionAfter.focused }
             $receipt.checks.selectionFocusRetained=$true
             $receipt.captures+=Capture ($Stage+'-after') (Window-Rect $script:handle)
         } elseif($Stage -eq 'physical-accept') {
@@ -286,6 +330,12 @@ try {
     $receipt.failureId=$_.FullyQualifiedErrorId
     $receipt.failureStack=$_.ScriptStackTrace
     $receipt.failurePosition=$_.InvocationInfo.PositionMessage
+    if($Stage -eq 'physical-select') {
+        try { $receipt.selectionFailure=Selection-State }
+        catch { $receipt.selectionDiagnosticError=$_.Exception.GetType().FullName }
+        try { $receipt.captures+=Capture 'physical-select-failure' (Window-Rect $script:handle) }
+        catch { $receipt.selectionCaptureError=$_.Exception.GetType().FullName }
+    }
     if($Stage -eq 'physical-close') {
         # Preserve failure. Diagnostics never acknowledge or normalize the stage.
         try { $receipt.closePostconditions=Completed-Assist-Close-State }

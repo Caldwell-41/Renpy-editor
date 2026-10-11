@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 from rewrite_probe_gate import SELECTABLE_CHECKS,validate_report
 from rewrite_native_evidence import required_stages,validate_native_stage
+from test_rewrite_native_evidence import png
 
 def module(name,file):
     spec=importlib.util.spec_from_file_location(name,Path(__file__).parent/file)
@@ -44,6 +45,13 @@ class Gates(unittest.TestCase):
             r={'stage':'physical-select','passed':True,'processId':123,'executableSHA256':'a'*64,'action':'editScene','inputDesktop':'Default','layer':'Windows UI Automation observation and OS SendInput; automated, not human acceptance','checks':{'ownedWindow':True,'nativeControls':True,'captureNonblank':True,'controlsInViewport':True},'captures':[]}
             (Path(t)/'physical-select.json').write_text(json.dumps(r))
             with self.assertRaisesRegex(ValueError,'native observation/action'):validate_native_stage(t,'physical-select',123,'a'*64,batch=True)
+            for key in ('selectionInitiallyChecked','selectionInputFocusObserved','osKeyboardInput','selectionUncheckedObserved','dependencyRefusalObserved','selectionFocusRetained'):r['checks'][key]=True
+            for i in range(2):
+                data=png(i);name=f'physical-select-{i}.png';(Path(t)/name).write_bytes(data);r['captures'].append({'file':name,'width':200,'height':100,'sha256':q.sha(Path(t)/name),'sampleRange':80})
+            (Path(t)/'physical-select.json').write_text(json.dumps(r));validate_native_stage(t,'physical-select',123,'a'*64,batch=True)
+            for key in ('selectionInitiallyChecked','selectionInputFocusObserved','selectionUncheckedObserved','selectionFocusRetained'):
+                bad=copy.deepcopy(r);bad['checks'][key]=False;(Path(t)/'physical-select.json').write_text(json.dumps(bad))
+                with self.assertRaisesRegex(ValueError,'native observation/action'):validate_native_stage(t,'physical-select',123,'a'*64,batch=True)
     def test_sdk_requires_two_exact_contained_cases(self):
         with self.assertRaises(AssertionError):sdk.validate({'schemaVersion':1,'cases':[]})
         case={'schemaVersion':1,'source':{'game/../../escape.rpy':'x'},'sourceSHA256':{'game/../../escape.rpy':'a'*64},'scenes':[{'id':'a','label':'wrong','path':'game/../../escape.rpy'}]}

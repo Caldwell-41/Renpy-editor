@@ -35,7 +35,7 @@ def validate_native_stage(directory, stage, pid, executable_digest, continuing=F
     required |= {'themeDark'} if stage == 'observe-dark' else set()
     required |= {'compactWidth'} if stage == 'observe-narrow' else set()
     required |= {'osMouseInput', 'inertProposalObserved'} if stage == 'physical-send' else set()
-    required |= {'osKeyboardInput', 'dependencyRefusalObserved', 'selectionFocusRetained'} if stage == 'physical-select' else set()
+    required |= {'selectionInitiallyChecked', 'selectionInputFocusObserved', 'osKeyboardInput', 'selectionUncheckedObserved', 'dependencyRefusalObserved', 'selectionFocusRetained'} if stage == 'physical-select' else set()
     required |= {'osMouseInput', 'savedOnceObserved'} if stage == 'physical-accept' else set()
     required |= {'osMouseInput','approvalObserved'} if stage == 'physical-approve' else set()
     required |= {'osMouseInput','completedAssistClosedObserved'} if stage == 'physical-close' else set()

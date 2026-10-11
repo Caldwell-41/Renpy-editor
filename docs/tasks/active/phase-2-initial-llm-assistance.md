@@ -5982,3 +5982,52 @@ remains after this accepted run. Continue bounded chat-only polling, terminal ar
 and native evidence audit; never report planned package/launch attempts as passes.
 Mac desktop remains locked; no binding/start. Signed Mac/native/live/human/full Phase2
 acceptance remains pending, with generic/provider/signing/merge/release deferred.
+
+
+CI3 Mac job114491300060 **success**, artifact11704998015 audited31files. Independent
+read-only audit agrees: exact outer30-entry/child26-entry file sets and hashes,
+264material inputs versus78a6389 with declared PowerShell CRLF checkout, exact run/
+attempt/DarwinARM64/pinned tools. All10 receipts pass; raw counts renderer132/core8/
+prompts5/gates12/workers6 and controller marker verify. SDK8.5.3 ten commands/two
+metadata-free cases/17 runtime assertions, fixture/export/source hashes, accepted
+source unchanged and cleanup verify. Artifact privacy31 passes. Mac CI no package
+or editor start. Windows job114491300090 remains running; overall CI3 not yet passed.
+Signed local Mac/native/live/final human/full Phase2 remain separate pending.
+
+
+#### Selectable CI3 Windows native selection failure and correction — 2026-10-12
+
+CI3 overall **failure**, terminal2026-10-11T14:34:43Z. Windows job114491300090 passed
+renderer132/frontend/core8/prompts5/gates12/workers6/controller/SDK/preflight/package/
+package privacy and native light/dark/compact/physical Generate. It failed physical-select
+postconditions at native driver line254. Receipt proves Space injection but no prior
+checkbox keyboard focus observation. The before capture shows Save focused; the earlier
+UIA inventory contains enabled typed Character CheckBox. Which control received Space
+is not proven; do not declare a product defect or completed native selection/Save.
+
+Artifact11705393402 contains57files. Exact outer56-entry/child52-entry manifests,
+264material inputs with declared PowerShell CRLF checkout, exact candidate78a6389/run/
+attempt/WindowsAMD64, copied executable/package-input hash and privacy57 pass. Owned
+SDK/root/credential-reference cleanup passes. Emitted ledger charges **Windows package1/4
+and editor start1/8**; reopen was unreached. Mac actual0/4packages,0/8starts; paired
+3/4 each. Prior reservations do not charge unused starts. Live0/2, discovery0/1.
+
+Independent read-only diagnosis confirms absent preinput focus proof. Correction uses
+unique typed CheckBox, enabled/focusable/ToggleOn, actual OS Tab navigation from observed
+Save, typed keyboard focus and viewport before Space, ToggleOff/dependency/disabledSave
+and retained focus after re-render. Strengthened gate requires all new observations.
+Failed selection retains focus/toggle diagnostics and PNG. Product/core/probe behavior
+is unchanged. Local gate12 and native-evidence14 pass with no skips; required new
+focus/toggle fields cannot be omitted or false. No local Windows native proof is
+claimed; the required host remains CI. Review before the **last paired CI4**, planned
+dispatchordinal4/packageordinal2/starts2–3. No allowance extension or later dispatch.
+
+
+Final independent driver review passes after treating temporary checkbox absence as
+not ready during bounded re-render waits, preserving strict preinput uniqueness and
+duplicate-control refusal. OS Tab begins at verified Save; no UIA checkbox SetFocus
+assumption. Gate12/native14 pass, workflow actionlint and repository514 validation
+pass. PowerShell5.1 syntax reviewed by inspection; native runtime remains required on
+CI4. Fresh Mac inventory still locked; user unlock requested asynchronously while
+continuing CI. No local Mac build/start or real-provider operation. Publish this
+reviewed correction, preserving CI3 failure and final remaining dispatch boundary.

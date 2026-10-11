@@ -1673,7 +1673,10 @@ actual native observations remain separately required because CI has no approved
 signing identity. `dialogue-rewrite-probe.py --selectable-edits` requires19 phase1 checks,
 2 process-reopen checks and6 exact reviewed HTTP body digests. Windows native receipts
 include light/dark/compact, physical Generate, keyboard selection/dependency refusal/
-retained focus and physical Save, with intact before/after captures. All gates reject
+retained focus and physical Save, with intact before/after captures. Selection input
+requires a unique typed checked checkbox, actual native keyboard focus after Tab
+navigation, observed unchecked state/dependency refusal and focus after re-render;
+failed selection retains focus/toggle diagnostics and an additional failure capture. All gates reject
 partial/failed/zero/skipped or unclean results. Native receipt/PNG/input/artifact audit
 is required after terminal CI; green status alone is insufficient. `selectable-evidence.py`
 records bootstrap identity before acquisition, verifies the unchanged public checksum
