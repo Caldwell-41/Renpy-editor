@@ -6384,3 +6384,181 @@ Actual pre-terminal Windows4packages/4starts, Mac0/0; package5/starts5–6 await
 attempt ledger audit, including failures. Live0/2/discovery0/1 unchanged; prior caps
 persist. Current-chat polling explicitly authorised, no automation/watcher.
 Terminal exact artifacts/native reports/privacy/cleanup/actual counts remain to audit.
+
+
+#### Selectable CI7 terminal qualification and unlocked Mac continuation — 2026-10-12
+
+CI7run38178036314/attempt1/head5f593225fad2ebdb2970663d56ee83631b27ecef completed
+**overall success2026-10-11T22:07:44Z**. Mac job114584496211/artifact11716217918
+passes12checks;33files, outer32/child28 manifests. Windows job114584496091/artifact
+11717112693 passes17checks;68files, outer67/child63 manifests. Both exact candidate/
+tree/run/attempt/platform/tools,265material inputs with declared PS1CRLF, child/outer
+file sets and hashes verify. Raw renderer134/core8/prompts5/gates14/snapshot3/cleanup2/
+workers6 and actual controller/native HTTP pass. SDK8.5.3 two metadata-free cases,
+ten commands/17runtime assertions, exact accepted exports/unchanged source/cleanup pass.
+Owner final privacy33/68 passes separately from pre-sealing artifact privacy logs.
+Independent Mac read-only audit agrees; Windows independent audit follows.
+
+Windows package5 copied executable SHA256
+`5fd03b0f8f3080ea3d258d30ff23eadaf8d3aa3ce05ca631670265f0327605ae`
+matches native PIDs9260/6908. All6native receipts/capture hashes verify. **All19phase1
+and2phase2 checks pass**, six exact reviewed/HTTP bodies and zero HTTP on phase2;
+four metadata hashes match. Exact selected Save/UndoRedo, supported Character update,
+malformed/unselected/cancelled/stale zero-write refusal, project/process reopen and
+native credential readability are established on Windows. The remount correction is
+qualified; full-sequence local regression complements actual native/core proof.
+Both phases' requests/credentials/host cleanup owners true; SDKroot/ownedroot/public
+synthetic credential references removed. CI5 remains historically unresolved cleanup;
+new success does not relabel earlier failures. Watchdog failure path is unit-tested,
+not deliberately timed out or crashed for acceptance.
+
+CI7-terminal pre-build totals **Windows5/5packages,6/8starts; Mac0/4packages,0/8starts;
+paired7/7each exhausted**. CI7 package5/start5/reopen6 emitted; old unused reservations
+stay unused. No CI8/Windows package6/rerun authorised. Live0/2total/discovery0/1 remains.
+No watcher or CI process remains after terminal current-chat polling. Source candidate
+5f59322 is qualified; docs-only successors do not replace that evidence identity.
+
+User answered prior unlock request: Mac now unlocked. Supported inventory verifies
+access and Loomlight stopped; no implicit app binding/launch. Public approved signing
+fingerprint availability preflight passes without credential reads/exports. Existing
+certificate/names/Keychain policy unchanged. Proceed to named signed local Mac package/
+19+2 native selectable proof within Mac4packages/8starts, then notify when ready for
+fresh native key entry for existing selected endpoint/model and remaining live2/GET1.
+Do not retrieve old keys/read or export credentials. Preserve temporary-storage and
+owned cleanup rules, historical cross-update/signing limitations and unchanged proof.
+Full Phase2/generic/final human acceptance remains incomplete.
+
+Independent Windows read-only audit passes, no findings:68files/265inputs, package
+hash/PIDs/six receipts/PNGs,19+2checks/six bodies/metadata, SDK17 assertions and cleanup
+all verify. Pre-sealing privacy60files differs from the owner final68-file scan; both
+pass. Both platforms are audited, not merely green. Signed Mac/native/live remains.
+
+#### Selectable signed Mac qualification and fresh live entry — 2026-10-12
+
+Mac package1 passes strict existing certificate-leaf identity/names/signature and
+read-only mounted installer contents; no signing/Keychain change. Executable SHA256
+`724a405c34c43ee7659785fda4132b001d2037c0440c33bb0c668cb136fc01d9`; installer SHA256
+`f06c21b2a95855c3ba449c695bc0e31bcb8d23c2ec6cab3fb28cdf4e2344a611`.
+All265material inputs match qualified5f59322 with only declared PS1CRLF comparison.
+Initial local comparison refused that known transform before reserving/building; no
+attempt consumed by preflight. Package privacy5 passes; no implicit editor start.
+
+Same bundle native1/PID412 and process reopen2/PID485 pass19+2checks: bound permissions,
+inert proposal, keyboard Character unchecked/dependency refusal/disabledSave/retained
+focus, independent subset/stable restored preview, exact selected files, one UndoRedo,
+Character update and zero-write malformed/unselected/cancel/stale, project/process
+reopen/native credential readability. Owner CUA observes light/dark/720logical compact,
+physically Generate/keyboard selection/Save; raw AX/PNG and launcher PID/hash receipts
+are retained. All six reviewed/HTTP body hashes match; process reopen sends zero HTTP,
+four metadata hashes identical. Both cleanup request/credential/host owners true;
+credential references/owned root removed and exact PIDs exited. Public accepted fixture
+retained; native privacy115 passes before audit-manifest addition. Independent audit
+follows; native automation/owner observations do not establish final human acceptance.
+
+Live start3/PID659 uses same bundle/fresh public disposable fixture. Existing selected
+Studio endpoint/model saved without connection and native credential entry requested;
+user notified to enter/save fresh key natively and keep it out of chat. Pending user
+handoff, no credential read/export, discovery or generation occurred. Owned launcher
+has actual one-hour wait/group termination; timeout would not establish credential/root
+cleanup. No screenshot or AX read of real native entry. Temporary storage/cleanup
+consent persists. Next bounded live proof remains two synthetic batch generations total,
+one discovery, subset/history/reopen/exact-sourceSDK and ordinary credential/root cleanup.
+Actual Mac1/4packages,3/8starts; Windows5/5packages,6/8starts; paired7/7each exhausted.
+No CI8/Windows package6/rerun. FullPhase2/generic/final human remains incomplete.
+
+Independent Mac read-only audit agrees: all265inputs, exact bundle/executable/installer,
+launch receipts/PIDs,115native manifest hashes,19+2checks/six exact bodies/metadata,
+AX/captures/dependency/focus/Save and cleanup verify. Final native privacy116 passes.
+Reviewer sandbox strict verification returns CSSMERR_TP_NOT_TRUSTED; original package
+and approved-host read-only strict app/DMG reverify pass without policy changes. Both
+contexts retained; no universal trust claim or signing/Keychain workaround.
+
+User confirmed fresh native entry/save; UI configured/API key saved. Discovery1/1
+passes exact selected Gemma availability. Synthetic selectable create generation1/2
+sent, explicit narration/Character technical name/insertion authority, references and
+reviewed payload digest retained. Public baseline copied before Send, no file/key read
+outside synthetic project and no credential export. Result/acceptance remain pending.
+
+#### Selectable live qualification and outcome closure — 2026-10-12
+
+Selected implementation and owner qualification complete; independent live artifact
+review precedes closure publication. Coherent code5f59322/CI7 remains the qualification
+identity; documentary successors do not trigger new package/CI attempts. Implementation
+contracts/core/controller/SDK/native evidence together establish the bounded outcome,
+not fullPhase2/generic/final human acceptance.
+
+User fresh native key entry/save was observed only as configured/API key saved;
+no key retrieval from chat/logs or credential-file read/export. Discovery1/1 found exact
+existing selected Gemma. Exactly two synthetic selectable generations total returned
+valid3operation proposals. First: narration replacement plus new Mira Character and
+one2-Beat group; removing Character disables Save/explains dependency with zero writes.
+A valid Character+group subset excludes the narration replacement; fresh core preview/
+digest is reviewed and saved once. Original protected narration remains byte exact.
+Second: two nonadjacent narration replacements plus supported Mira update, no insertion.
+Text-only subset preview changes file set/digest; restored full selection retains exact
+digest/stable IDs, then saves once. Character technical name/ID stay stable. Both exact
+source results match reviewed patches, preserving custom neighbours/comments/BOM/mixed
+newlines and protected tokens; unrelated authority remains unchanged. Consumed proposals
+are read-only and ordinary Close works without clearing completed fields.
+
+Each single Undo/Redo restores all12authoritative source/metadata files to corresponding
+baseline/accepted hashes. Initial first-Undo comparison failed because recovery was
+excluded only from actual; both-sided ordinary authoritative comparison passes and
+receipt retains that failure. Ordinary project reopen and actual same-package process
+reopen preserve all12final files; native configured credential readability survives.
+Live start3/PID659 and4/PID1334 quit0. No owner discovery/generation initiated on reopen;
+independently captured zero live HTTP or exact live transport-body equality is not
+claimed. Controlled native/controller evidence separately establishes those assertions;
+server-internal configuration and historical cross-update limitations remain unknown.
+
+Two exact seven-file live accepted exports, metadata absent, run pinned officialSDK8.5.3
+compile/lint/named runtime in ten commands. Existing SDK archive matches published
+SHA256; actual protected interpolation/bold/literal escapes, Character who names,
+dialogue/narration and Return are asserted; accepted source hashes remain unchanged and
+SDK temporary roots removed. Both named runtime logs show6assertions each (12total),
+plus startup literal/name assertions. Only the existing three empty GUI scaffold files
+receive standard SDK template contents; all nonempty accepted source stays byte exact.
+Eight unrelated authoritative paths remain byte exact; only four selected Scene/Character/
+authoring/source-map paths change. Ignored live harness adapts qualified adapter/assertions
+to actual public source and does not rewrite accepted source. Initial Python syntax
+check cache destination was sandbox-denied; approved workspace cache syntax check passed
+before any SDK execution. No package/editor attempt consumed by that preparation failure.
+
+Temporary key removed through ordinary Settings, missing/disabled observed; cleared
+profile removed/not configured observed. Exact owned live root deleted without reading
+credential files; old/historical credentials untouched. Cleanup receipts, public-only
+snapshots/AX/launcher receipts/SDK commands/hashes retained ignored. Live privacy223
+passes before223-entry manifest; final scan follows. All required selected layers pass;
+independent final live/harness review is pending. Earlier unique CI/harness failures
+remain failed, including CI5's unresolved cleanup; later cleanup does not relabel it.
+
+Final cumulative actual **Mac1/4packages,4/8starts; Windows5/5packages,6/8starts;
+paired7/7each; live2/2batch generations total, discovery1/1**. Explicit extensions remain
+accounted and prior budgets closed. No CI8/rerun/Windows package6/merge/release/provider/
+signing expansion/generic/following outcome authorised. After independent audit and
+record validation, commit/push only documentation and verify refs/clean worktree.
+No requested selectable implementation or qualification work then remains; fullPhase2/
+generic/final human acceptance continues to be distinct incomplete future scope.
+
+Live discovery and first-send retained AX files initially contained only later unchanged-
+state diffs. Labeled retrospectively retained verbatim relevant excerpts from the original
+successful current-chat CUA tool results supply exact model-available/destination/body-
+digest evidence; original empty diffs stay intact. These excerpts are not fresh captures,
+new discovery or replay. No live HTTP/body equality or final human proof is inferred.
+
+Final independent live/harness audit agrees with no findings:12authoritative snapshots/
+hashes, recomputed exact selected patches, stable Character/Beat IDs/order, eight untouched
+paths, seven-source exports, harness/fixture hashes, ten SDK commands/6+6named assertions
+and ordinary cleanup/exit receipts verify. Three empty GUI scaffold exception and original
+retrospective excerpt provenance are explicit. Final live manifest226entries matches the
+exact file set/hashes; final privacy227files passes. Macnative manifest115/finalprivacy116,
+packageprivacy5 and both CI terminal audited artifacts remain valid exact evidence.
+
+**Selected outcome implemented and qualified; closure approved for publication.** No
+implementation, in-scope correction or selected qualification remains. Original scope/
+allowance approval and commit/push authorisation persist. Repository515-file validation,
+privacy and diffcheck pass; CURRENT/HANDOVER are compact live records, full unique failure/
+recovery evidence stays here. Publish only the three owned documentary records on the
+existing branch, preserve code candidate5f59322 and reconcile fresh refs without reset.
+Human acceptance/fullPhase2/generic and any following deliverable remain incomplete and
+unselected; no further execution is inferred from unused Mac/Windows start allowance.

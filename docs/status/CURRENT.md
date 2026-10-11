@@ -1,46 +1,36 @@
 # Current status
 
-**Updated:** 2026-10-12. **Selectable proposal editing implemented; qualification awaiting CI7.**
-Full Phase2, generic and final human acceptance remain incomplete.
+**Updated:** 2026-10-12. **Selectable proposal editing implemented and qualified.**
+Full Phase2, generic support and final human acceptance remain incomplete; no following
+outcome is selected.
 
-Approved scope persists:1–8 operations in one saved Scene, bound pre-send permissions,
-core IDs/paths, explicit dependencies, fresh exact subset previews and one transaction/
-history Save, preserving protected/custom source and unrelated metadata. Retain Mac
-ARM64 development and codex/provider-qualification; fresh refs reconciled, no reset.
-One serial owner and independent read-only reviewer; original approval persists.
+Approved outcome: review1–8 operations in one existing saved Scene, pre-Send bound
+text/speaker/Character authority, core-owned IDs/paths, dependency-valid subsets and
+fresh exact previews, saved as one journalled transaction/history entry. At most one
+1–8-Beat insertion group and one supported runnable Character create/update. Protected
+source/custom syntax/comments/formatting and unrelated metadata remain preserved.
 
-[CI6run38174608600/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38174608600)
-on exact candidate2a3bd89 completed overall failure. Mac automated/controller/pinned
-SDK proof passes. Windows passes all six native stages, exact selected Save, one Undo
-and one Redo; all cleanup owners and temporary-root removal pass. The snapshot/cleanup
-correction6246b8b is established. Phase1 fails after13/19 before Character update;
-refusals/project/process reopen remain unpassed. CI5 cleanup remains unresolved.
-Both artifacts' exact manifests/264inputs/package/native captures/SDK exports and
-final privacy33/64 verify, with independent read-only audit.
+Coherent published code5f593225fad2ebdb2970663d56ee83631b27ecef is qualified by
+[CI7run38178036314/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38178036314).
+Both automated/controller/pinnedSDK chains and artifact audits pass. Windows package5/
+starts5–6 passes19+2checks/all6native receipts: exact Save/UndoRedo, update, refusal,
+project/process reopen and cleanup. Signed local Mac package1/native starts1–2 passes
+strict host identity/installer/privacy and same19+2native chain; independent audit agrees.
+Reviewer sandbox trust failure and passing unchanged host verification remain distinct.
 
-The [owning audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci6-terminal-audit-and-idempotent-remount-correction--2026-10-12)
-records the concrete remount harness defect: clicking an already selected Beat toggled
-it off and disabled Assist. Independent GPT-6.1 Sol High owner fixed idempotent probe
-selection and bounded control diagnostics; production Scene behavior is unchanged.
-The remaining Windows chain now has a full production shell/Scene/Assist/probe sequence
-regression with controlled IPC; renderer134/helper3+sequence1/gate14/cleanup2 pass.
-Review found and fixed watchdog cleanup, latest-phase cleanup receipt selection and
-timeout log retention. No additional product/core defect or render-readiness failure
-was established. Independent code review passes; native proof remains missing.
-Unchanged core/controller/SDK evidence is valid.
+Live selected Studio: user fresh native key entry, discovery1 and two valid synthetic
+batches. Create subset saves Character+insertion while excluding narration; update saves
+two nonadjacent replacements+same Character. Fresh previews, dependency refusal, exact
+source, one UndoRedo each and project/process reopen preserve12authoritative files.
+Exact two accepted source cases pass pinnedSDK8.5.3 compile/lint/named runtime without
+metadata and with unchanged hashes. Ordinary credential/profile removal, root/process
+cleanup and privacy pass. Independent final live review agrees; sealed manifest226/finalprivacy227 pass.
 
-Actual counts: Mac0/4packages,0/8starts; Windows4/5packages,4/8starts; paired7/7each, consumed.
-User authorised one extra Windows package and pairedCI7 after the remaining-suite
-review. CI7 package5/starts5–6 actual attempts await audit; no CI8/package6/rerun authorised.
-The [new allowance and review](../tasks/active/phase-2-initial-llm-assistance.md#remaining-windows-suite-review-and-approved-ci7--2026-10-12)
-preserve all prior consumption; editor/Mac/live caps are unchanged.
-Live0/2total batch generations, discovery0/1. Prior allowances stay closed.
-Mac remains locked; no editor binding/start or key entry. Notify when signed app is
-ready for fresh native key entry; no old-key retrieval or real-provider credential
-read/export/call occurred. [HANDOVER](HANDOVER.md) owns remaining blockers.
-[CI7run38178036314/attempt1/head5f59322](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38178036314)
-was confirmed queued at2026-10-11T21:50:49Z; terminal artifact/actual-attempt audit remains.
-Current-chat polling remains authorised; no watcher/automation.
-
-Accepted prior Studio evidence remains reusable. Commit/push authorised; no merge/
-release/provider/signing expansion, generic or following outcome.
+Cumulative actual totals: Windows5/5packages,6/8starts; Mac1/4packages,4/8starts;
+paired7/7each; live2/2total batches, discovery1/1. User-approved extensions are consumed;
+prior budgets stay closed. No CI8/Windows package6/rerun or next deliverable authorised.
+Earlier failures stay failed, including CI5's historically unresolved cleanup.
+[Closure record](../tasks/active/phase-2-initial-llm-assistance.md#selectable-live-qualification-and-outcome-closure--2026-10-12)
+retains evidence limits and counts. [HANDOVER](HANDOVER.md) owns continuation.
+Commit/push authorised on codex/provider-qualification; unrelated work preserved,
+no reset/merge/release/provider/signing expansion or credential read/export.
