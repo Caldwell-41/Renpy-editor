@@ -14,9 +14,9 @@ are qualified on both targets. See the [first rewrite audit](#final-pinned-windo
 [Generated Character cards closure](#generated-character-cards-qualified-closure--2026-10-11)
 and [Generated lorebook entries closure](#generated-lorebook-entries-qualified-closure--2026-10-11).
 The [selected Phase 2 qualification](#phase-2-qualification-selection-and-prerequisite-audit--2026-10-11)
-continues as Studio-only with generic deferred. The [current audit and continuation](#studio-only-live-completion-mac-native-and-ci3-repair--2026-10-11)
-records live/Mac completion and the final Windows CI correction; individual action qualification does not
-establish integrated/live acceptance.
+is [qualified for the selected Studio-only integrated/live slice](#studio-only-integratedlive-qualification-and-closure--2026-10-11),
+with generic deferred. Full Phase 2 and final human acceptance remain incomplete;
+individual action qualification and this slice do not establish those broader outcomes.
 Read its CI-first amendment/selection only when continuing or reviewing that slice,
 then only the relevant requirement sections. Completed credential/request selections below
 are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
@@ -5493,3 +5493,98 @@ reopen audit remains; no terminal claim or polling. Same-thread user resume cont
 this outcome. CI3 stays failed, Mac reuse remains at unchanged481 production/probe
 inputs, temporary credential/owned roots remain cleaned, generic/full Phase2/human
 acceptance remain distinct. No further automatic retry beyond cumulative allowances.
+
+### Studio-only integrated/live qualification and closure — 2026-10-11
+
+User resumed the recorded CI4 with “audit CI and continue”. Fresh authenticated refs
+match clean local/origin35792e3; origin/main remains5f448ca. No reset, unrelated work
+discard, new outcome, extra build/launch/dispatch or credential operation. State:
+**qualified/accepted for the selected bounded Studio integrated/live slice**, subject
+to the exact evidence boundaries below; generic/full Phase2/final human acceptance
+remain distinct. This does not certify unknown server-internal configuration.
+
+#### Final CI4 exact artifact audit
+
+[CI4 run38134089028](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38134089028),
+workflow357322921/attempt1/head**3b3e8681a7bae2ddc8964409bf6f4e615b788eba**,
+tree**7a56dc5e5e2fbeff0d365216a43456345d52fdcd**, completed success. Required Mac job
+114454280091 completed11:05:51Z, Windows114454279985 completed11:15:20Z. Unselected
+generic matrix/preflight skipped by the focused selector; no required check skipped.
+Material inputs remain lore+Studio true, other actions/upload false, build4/firstlaunch5,
+reuse IDs empty. Downloaded exact unexpired artifacts11700481279 Mac and11700921379
+Windows;23/88-entry manifests intact. Both252 identity inputs and Windows253 package
+inputs match3b3e868 with `.gitattributes` PS1 CRLF on both target checkouts. Windows
+executable SHA256 **b3754ed9ce0d1f790fbf3b6aa7eb7863abfd58cc4ab34ef63e3b4b211e0a458d**
+matches native PID3832/reopen9936. Owner receipt `ci4/owner-terminal-audit.json` retains
+full manifests/input/source/job-log hashes and acceptance measurements in ignored storage.
+
+Both targets pass actual integrated five-action renderer/native credential/private-LAN
+HTTP/core chain, immutable exact sends/passive review, separate generated approvals,
+supporting-reference staleness, mixed source/reference/prompt Undo/Redo and project/
+process reopen with controlled zero HTTP/cleanup. Raw renderer131/core35/prompts5/
+transport8/native-worker6/references12 all pass, no failed/ignored/skipped required
+cases. Each exact exported eight-file accepted game, with editor metadata absent,
+passes pinned official Ren'Py8.5.3 compile/lint and nine named runtime assertions in
+five commands. Source hashes remain exact; empty GUI scaffolding only uses SDK defaults.
+
+Actual Windows prelaunch regression9 tests pass/no skips, including production helper
+through BOM-less PowerShell5.1 `-File`, exact U+00B7 label and refusal of each missing
+Close predicate. All seven native stage receipts pass owned process/executable and
+intact capture checks; the four physical stages record OS input and distinct before/
+after captures, while three observation stages each retain one capture. Physical Close
+immediately after Save passes all five recorded postconditions; owner inspected screenshots showing
+saved review before and Story/Saved afterward. Whole public snapshot unchanged.
+Phase1 passes all26 required distinct named checks/27 rows, five reviewed body hashes
+equal five actual HTTP hashes. Refusals/cancel/stale-source checks remain zero-write;
+separate approval/history/project reopen pass. Phase2 passes all three reopen checks,
+four unchanged metadata hashes and independently observed zero HTTP. Terminal audit,
+owned credential/root cleanup and actual attempt ledger pass. CI1/CI3 failures remain
+failed at their original inputs; CI4 establishes success of the corrected Windows path.
+The encoding hazard is no longer a pending hypothesis requiring another attempt.
+
+#### Coherent input, live evidence and limits
+
+Retained signed Mac481c64b package2 and native7–8 proof match unchanged production/
+Mac probe inputs. Explicit253-input inventory comparison finds only Windows driver
+and Windows helper test changed in3b3e868; other251 inputs unchanged. Ignored
+`ci4/mac-input-reuse-audit.json` retains that assessment. No claim that the complete
+Mac package was built from3b3e868. Final shared behavior is covered by fresh both-target
+CI4 plus481 signed/native proof; earlier individual action closures retain their exact
+unchanged semantic/theme/credential boundaries.
+
+Previously independently reviewed real Unsloth synthetic session covers all five
+actions1/2 each, discovery1/2, exact selected Gemma, separately saved/approved generated
+card/lore and explicit later inclusion, custom/restore prompt, varied limits and
+protected-token/source preservation. Nine Undo/Redo restore11/12 exact public files;
+project/process reopen and exact metadata-free live accepted-source SDK8.5.3 runtime
+pass. Live package1 evidence covers those inputs; completed-Assist repair is proved
+by updated Mac481/native and fresh Windows CI4. Real temporary credential was removed
+through ordinary Settings, exact owned live/native processes stopped and roots cleaned.
+No key was read/exported or included in committed evidence; historical credentials
+remain untouched. No owned pending CI, app process/listener/root or temporary credential.
+
+Reviewed client bodies disable tools/streaming/thinking and require strict schema;
+observed live responses satisfy the five action contracts. Server version/internal
+tools configuration and independent live reopen HTTP observation remain unverified.
+Do not generalize controlled CI/native transport observations into those claims.
+Generic provider capability/endpoint, broader section11 operation matrix/new-Character,
+final human acceptance and full Phase2 remain open; none is selected for execution here.
+No merge/release or following deliverable is authorized by this closure.
+
+#### Independent review and closed allowance
+
+Independent GPT-6.1 Sol High terminal-artifact review finds no qualification blocker;
+final closure-record review finds only a corrected wording overstatement about captures
+in observation versus physical stages. No acceptance blocker remains. Reviewer made
+no writes/tests/builds/launches/sends/dispatches/credential reads. Owner audit,
+repository/link/privacy validation (503 files) and diffcheck pass. CURRENT227words/
+HANDOVER589words retain complete compact recovery/acceptance boundaries. This is a
+docs-only closeout; no additional package matrix.
+
+Actual cumulative totals: Mac**2/4packages,8/8editor launches,4/4focused dispatches**;
+Windows**4/4packages,6/6editor launches,4/4focused dispatches**. Both CI4 Windows
+launches5–6 occurred; no reservation remains. Real Studio**1/2 per action**, discovery
+**1/2**, generic**0**. Prior failure/implicit launch counts retained. All unused
+remainder is closed with this outcome, not transferred to future work. A separately
+selected remaining Phase2/human/generic outcome must reconcile current refs/contracts
+and approve its own concrete scope/capability/allowance; do not restart old attempts.
