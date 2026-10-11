@@ -4,7 +4,50 @@ use loomlight_core::{
     ai_profiles::{ProfileStore, StudioSettings},
     lifecycle::LifecycleService,
 };
+use loomlight_core::{dispatch::ApplicationHost, CoreResponse};
 use std::path::Path;
+use std::time::{Duration, Instant};
+
+pub fn snapshot_response(
+    host: &ApplicationHost,
+    root: &Path,
+    request_id: String,
+) -> Result<CoreResponse, &'static str> {
+    // A snapshot must own the same checkout as source/history mutations.
+    match host.with_service(|_| snapshot(root)) {
+        Ok(files) => Ok(CoreResponse::success(request_id, files?)),
+        Err("Another request is in progress.") => Ok(CoreResponse::failure(
+            request_id,
+            "RUNTIME_BUSY",
+            "Another request is in progress.",
+        )),
+        Err(error) => Err(error),
+    }
+}
+
+fn with_idle_service<T>(
+    host: &ApplicationHost,
+    timeout: Duration,
+    task: impl FnOnce(&mut LifecycleService) -> T,
+) -> Result<T, &'static str> {
+    let deadline = Instant::now() + timeout;
+    let mut task = Some(task);
+    loop {
+        // Checkout refusal happens before the closure is invoked. Never repeat
+        // cleanup after it entered the service, even when its inner result failed.
+        match host.with_service(|service| task.take().unwrap()(service)) {
+            Err("Another request is in progress.") if Instant::now() < deadline => {
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            result => return result,
+        }
+    }
+}
+
+pub fn cleanup_when_idle(host: &ApplicationHost) -> bool {
+    with_idle_service(host, Duration::from_secs(10), |service| cleanup(service))
+        .is_ok_and(|result| result.is_ok())
+}
 pub fn prepare(
     root: &Path,
     endpoint: &str,
@@ -188,5 +231,75 @@ mod tests {
         ] {
             assert!(snapshot_key(path).is_err());
         }
+    }
+
+    #[test]
+    fn snapshot_paths_refuse_checked_out_mutation_then_read_exact_result() {
+        let root = tempfile::Builder::new()
+            .prefix("loomlight-rewrite-paths-")
+            .tempdir()
+            .unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(root.path().join("data")).unwrap());
+        let worker = host.clone();
+        let path = root.path().join("synthetic-project/game/scene.rpy");
+        let (held, ready) = std::sync::mpsc::sync_channel(0);
+        let (release, resume) = std::sync::mpsc::sync_channel(0);
+        let thread = std::thread::spawn(move || {
+            worker
+                .with_service(|_| {
+                    // The fixture is deliberately absent until mutation finishes.
+                    held.send(()).unwrap();
+                    resume.recv().unwrap();
+                    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+                    std::fs::write(path, b"# committed\r\n").unwrap();
+                })
+                .unwrap();
+        });
+        ready.recv().unwrap();
+        let busy =
+            serde_json::to_value(snapshot_response(&host, root.path(), "busy".into()).unwrap())
+                .unwrap();
+        assert_eq!(busy["error"]["code"], "RUNTIME_BUSY");
+        release.send(()).unwrap();
+        thread.join().unwrap();
+        let response =
+            serde_json::to_value(snapshot_response(&host, root.path(), "complete".into()).unwrap())
+                .unwrap();
+        assert_eq!(
+            response["value"]["files"]["game/scene.rpy"],
+            loomlight_core::rewrite::content_digest(b"# committed\r\n")
+        );
+    }
+
+    #[test]
+    fn probe_cleanup_checkout_deadline_does_not_repeat_inner_failure() {
+        let root = tempfile::tempdir().unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(root.path().join("data")).unwrap());
+        let worker = host.clone();
+        let (held, ready) = std::sync::mpsc::sync_channel(0);
+        let (release, resume) = std::sync::mpsc::sync_channel(0);
+        let thread = std::thread::spawn(move || {
+            worker
+                .with_service(|_| {
+                    held.send(()).unwrap();
+                    resume.recv().unwrap();
+                })
+                .unwrap()
+        });
+        ready.recv().unwrap();
+        let calls = std::sync::atomic::AtomicUsize::new(0);
+        let refused = with_idle_service(&host, Duration::from_millis(20), |_| {
+            calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        });
+        assert_eq!(refused, Err("Another request is in progress."));
+        assert_eq!(calls.load(std::sync::atomic::Ordering::SeqCst), 0);
+        release.send(()).unwrap();
+        thread.join().unwrap();
+        let failed = with_idle_service(&host, Duration::from_secs(1), |_| {
+            calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            Err::<(), _>("Fixture I/O failed")
+        });
+        assert_eq!(failed, Ok(Err("Fixture I/O failed")));
+        assert_eq!(calls.load(std::sync::atomic::Ordering::SeqCst), 1);
     }
 }

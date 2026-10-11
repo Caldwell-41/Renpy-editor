@@ -1,54 +1,53 @@
 # Current outcome handover
 
-## Selectable proposal editing — approved CI5 preparation after CI4 audit
+## Selectable proposal editing — blocked after CI5 terminal audit
 
-Continue the approved outcome on Mac ARM64, `codex/provider-qualification`, preserving
-unrelated work and never resetting. Initial4bcfee0 continuation/main5f448ca reconciled.
-Original scope/allowance approval persists; one serial owner and independent read-only
-reviewer. [Selected contract](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
-remains authoritative; no generic/provider/signing/paid-public/merge/release/next outcome.
+Continue the approved outcome on Mac ARM64, codex/provider-qualification, preserving
+unrelated work and never resetting. Initial4bcfee0/main5f448ca reconciled; fresh refs
+matched published2446501 before approved CI5 amendment8174811. One serial owner and
+independent read-only reviewer. [Selected contract](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
+owns scope; no generic/provider/signing/paid-public/merge/release/next outcome.
 
-Implementationdcb106c, route54ac943, acquisitiona16c5f7, Windows fixture78a6389 and native
-focus923d9aa are published. Current branch additionally carries the reviewed portable
-snapshot correction; it is not covered by the older exact candidate’s native proof.
-Later docs-only commits never replace candidate identity during audit.
+Implementationdcb106c, route54ac943, acquisitiona16c5f7, Windows fixture78a6389, native
+focus923d9aa and portable snapshot2446501 are published. CI1 official acquisition,
+CI2 Windows fixture, CI3 keyboard focus and CI4 snapshot path failures retain unique
+audits in the owning task. CI5 establishes the CI4 path correction, not full acceptance.
 
-CI1run38144885050 failed official acquisition before tests/package/starts, no artifacts.
-SDK cache/checksum/bootstrap correction passed CI2 acquisition; CI2run38146108645 Mac
-passed, Windows Unix-path fixture assertion failed before package/start. CI3run38146640617
-Mac passed and Windows passed package/start1 but keyboard selection lacked preinput
-focus proof. All unique evidence/diagnoses retained in owning task; failures remain failures.
+[CI5run38172627199/attempt1/head8174811](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38172627199)
+completed overall failure2026-10-11T20:46:25Z. Macjob114568274597/artifact11715280446
+passes11automated/controller/SDK checks including snapshot2/2, with32audited files.
+Windowsjob114568274585/artifact11715256960 contains63files. Both exact manifests/264
+inputs (declaredPS1CRLF)/identities/pinnedtools/SDK exports and finalprivacy32/63 verify,
+with independent audit. Windowspackage3/exe matches nativePID1232; all6native stages
+pass selection/focus/physical Save. Exact selected files committed now passes.
+Phase1 fails after11/19 at Fixture unavailable during Undo/snapshot waiting; phase2
+is unreached. Native Undo/Redo/update/refusals/project/process reopen remain unpassed.
 
-**Final CI4run38148312472/attempt1/head923d9aad644ccc01bde3f087f3bd7888eee96e6d**
-completed overall failure2026-10-11T14:57:30Z. Mac job114496251905/artifact11705730682
-passes automated/controller/SDK proof with audited31files. Windows job114496251860/
-artifact11706505640 audited62files; exact manifests/264inputs (declaredPS1CRLF), copied
-exe/package identity, native receipts/PNG hashes and cleanup pass. Six native stages
-pass light/dark/compact/Generate/typed keyboard selection/physical Save. Focused checkbox
-ToggleOn→Off, dependency refusal/disabledSave and retained focus are proven. Full phase1
-stops after10/19 checks at exact saved-file assertion; phase2 is unreached. Exact saved
-bytes/native UndoRedo/update/refusal/project/process reopen remain missing proof.
+[Terminal owning audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci5-terminal-audit-and-probe-ownership-correction--2026-10-12)
+records a grounded race inference: snapshot bypassed ApplicationHost checkout while
+Undo mutates files asynchronously. Exact failing read is unknown. Concrete cleanup
+short circuit skipped host shutdown when credential cleanup failed. CI5 cleanup is
+**unresolved**, owned root/public synthetic credential references unconfirmed; SDK
+root removed. No real-provider key was involved. Runner termination does not prove
+application cleanup. No owned local editor/listener/fixture remains.
 
-[Terminal owning audit](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci4-terminal-audit-and-portable-snapshot-correction--2026-10-12)
-confirms a deterministic probe mismatch: native Windows snapshot backslash keys versus
-core preview forwardslash paths, also affecting recovery-prefix filtering. The reviewed
-fix joins normal UTF8 relative components with `/`, preserves hashes/containment/link
-refusal and rejects duplicate keys. Local snapshot_paths2/2 pass; future qualifier gates2.
-No product patch logic changed; no post-fix Windows native/packaged acceptance claimed.
+Current correction serializes snapshots with host checkout and typed pre-dispatch
+busy; preserves inner errors/all recovery data. Probe cleanup waits bounded10seconds
+only for outer busy, never repeats an entered task; host shutdown always runs and
+per-owner facts remain explicit. Local4probe tests pass (3snapshot/1cleanup), future
+qualifier gates3+1. Current correction needs post-fix Windows packaged/native/cleanup
+proof; older candidate evidence does not qualify it.
 
-**Consumed:** paired4/5 each after explicit one-run extension; Windows2/4packages,2/8starts;
-Mac0/4packages,0/8starts; live0/2total batch generations, discovery0/1.
-CI3/4 unreached reopen starts were unused. Earlier allowances stay closed. User approved one additional paired CI5;
-workflow ceiling extends4→5 only. Plan Windows package3/starts3–4, fresh attempt1, no
-reuse/uploads. No sixth run or old-run rerun; original scope approval is not needed.
-Current-chat polling remains authorised through the additional run; no automation/
-watcher. Other chats retain WORKFLOW manual same-thread wait unless freshly amended.
+**Consumed:** paired5/5each exhausted after user’s one added CI5; Windows3/4packages,
+3/8starts; Mac0/4packages,0/8starts. CI3/4/5 unreached reopen reservations unused.
+Live0/2total batch generations, discovery0/1; earlier allowances closed. No CI6/rerun
+authorised. Further CI requires a concrete extra-run allowance or named required-host
+capability decision; original scope approval persists. Current-chat polling ended at
+terminal audit, no automation/watcher; other chats use manual same-thread wait/resume.
 
-Mac control still reports locked; asynchronous unlock request unanswered, no app binding/
-local editor start. Remaining signed Mac/native/live requires unlock and approved package
-identity/credential policy. Notify when ready for fresh native key entry on existing
-selected endpoint/model; never retrieve old keys from chat/logs or read/export credentials.
-No real-provider credential operation/live call; explicit temporary-root/credential
-cleanup remains. No owned temporary editor/listener/fixture remains. Core/controller/
-SDK/partial native proof and unchanged accepted Studio evidence remain reusable;
-full Phase2/generic/final human acceptance remain incomplete.
+Mac remains locked; no native app binding/start or credential entry. Remaining signed
+Mac/native/live requires unlock and approved package identity/credential policy. Notify
+when ready for fresh native key entry on existing selected endpoint/model; never
+retrieve old keys or read/export credentials. No real-provider credential operation/
+live call. Preserve temporary-storage/cleanup rules and unchanged accepted Studio/core/
+controller/SDK evidence. Full Phase2/generic/final human acceptance remains incomplete.

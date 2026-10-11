@@ -282,7 +282,8 @@ fn core_request(
         let root=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REWRITE_PROBE_ROOT").ok_or("Rewrite root required")?);
         let done=root.join(format!("{stage}.done")).is_file();
         if stage=="snapshot" {
-            return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),rewrite_probe::snapshot(&root)?));
+            let host=state.0.lock().map_err(|_|"probe state")?.clone().ok_or("probe host")?;
+            return rewrite_probe::snapshot_response(&host,&root,request["requestId"].as_str().unwrap_or_default().into());
         }
         if request["payload"]["announce"]==true {
             if stage.starts_with("observe-"){let size=if stage=="observe-narrow"{tauri::LogicalSize::new(720.0,780.0)}else{tauri::LogicalSize::new(1280.0,900.0)};window.set_size(size).map_err(|_|"Rewrite resize failed")?;}
@@ -313,12 +314,13 @@ fn core_request(
             .ok_or("probe host")?;
         let request_cleaned=ai_requests::service().shutdown();
         let credential_cleaned=if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && (!passed || std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2")) {
-            host.with_service(|s|rewrite_probe::cleanup(s)).is_ok_and(|r|r.is_ok())
+            rewrite_probe::cleanup_when_idle(&host)
         } else {true};
-        let cleaned = request_cleaned && credential_cleaned && host.shutdown();
+        let host_cleaned = host.shutdown();
+        let cleaned = request_cleaned && credential_cleaned && host_cleaned;
         println!(
             "{}",
-            json!({"evidence":"runtime-ui-packaged", "case":std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap(), "passed":passed && cleaned, "cleanupComplete":cleaned, "details":payload})
+            json!({"evidence":"runtime-ui-packaged", "case":std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap(), "passed":passed && cleaned, "cleanupComplete":cleaned, "cleanupOwners":{"requests":request_cleaned,"credentials":credential_cleaned,"host":host_cleaned}, "details":payload})
         );
         let _ = std::io::stdout().flush();
         let code = if passed && cleaned { 0 } else { 1 };

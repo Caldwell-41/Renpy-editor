@@ -6118,3 +6118,77 @@ selectors, no prior-run reuse/uploads. Actual pre-dispatch totals: Windows2/4pac
 Published candidate will include the reviewed snapshot fix and its exact2-test gate.
 Independent read-only review before publication/dispatch; then terminal artifact audit.
 Mac signed native/live remains blocked by locked desktop; no fresh key entry yet.
+
+
+#### Selectable CI5 confirmed dispatch — 2026-10-12
+
+Reviewed amendment published as8174811e9a06a6e6cfa3aa684077f1c39f1b4e49.
+[CI5run38172627199](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38172627199),
+workflow357322921, attempt1, exact head8174811, branchcodex/provider-qualification,
+created2026-10-11T20:32:19Z; initial statusqueued, no conclusion. Direct returned URL
+resolved once; no duplicate dispatch. Inputs selectabletrue/dispatch5/build3/firststart3,
+all older selectors/uploadfalse, both reuseIDs empty. Ignored selectable-ci5-dispatch.json
+retains receipt/exact identity. Paired5/5 each now consumed; no sixth run or rerun.
+Actual pre-terminal Windows2builds/2starts, Mac0/0; emitted attempts await audit.
+Live0/2, discovery0/1. Current-chat polling explicitly permitted through terminal audit.
+
+
+#### Selectable CI5 terminal audit and probe ownership correction — 2026-10-12
+
+CI5run38172627199/attempt1/head8174811e9a06a6e6cfa3aa684077f1c39f1b4e49 completed
+**overall failure2026-10-11T20:46:25Z**. Mac job114568274597/artifact11715280446
+passes11 automated/controller/SDK checks, including2snapshot tests; audited32files,
+outer31/child27 manifests,264inputs. Windows job114568274585/artifact11715256960
+audited63files, outer62/child58 manifests,264inputs. Both exact candidate/tree/run/
+attempt/platform/tool/SDK identities and declared PS1CRLF transform verify. Independent
+read-only audit agrees; local final privacy scans32/63 pass, because Windows terminal
+evidence-privacy gate was unreached. SDK8.5.3 two cases/ten commands/17 assertions,
+exact exported source hashes, metadata absence and unchanged accepted source pass.
+
+Windows package3 copied executable SHA256
+`0bfb6e5829d47b0fd24d10bafc0e3130e5efdd4c1315af05cf9105d43f921c13`
+matches nativePID1232 and all6 exact receipts/intact PNGs. **Exact selected files
+committed now passes**, establishing the portable path fix. Phase1 stops after11/19
+at `Fixture unavailable` during async Undo/snapshot waiting; phase2 is unreached.
+Native Undo/Redo/update/refusal/project/process reopen still have missing proof.
+
+Diagnosis is a grounded **probe race inference**: snapshot stage bypassed the host
+checkout while the probe Undo click starts asynchronous source/history mutation;
+recursive snapshot reads can overlap file exchange or recovery cleanup. The generic
+error omits operation/path/OS error, so the exact failing filesystem read is unknown.
+A separate concrete cleanup defect short-circuited host.shutdown when credential
+cleanup failed; credential cleanup also lacked pre-dispatch busy waiting.
+CI5 cleanup is explicitly **unresolved**: SDKroot removed, owned root and public
+synthetic credential references unconfirmed. No real-provider credential or key
+was involved; do not relabel the failed report clean from runner termination.
+
+In-scope correction serializes snapshot through ApplicationHost checkout, returning
+typed RUNTIME_BUSY only for pre-dispatch checkout contention so existing bounded
+read retry applies. Inner I/O/path/link errors stay failures; recovery bytes remain
+included. Probe credential cleanup waits up to10seconds only for outer checkout-busy
+and executes once after entry; inner failure is never retried. Host shutdown always
+executes independently; terminal report records each cleanup owner and cannot pass
+when any owner fails. No product transaction behavior or provider authority changed.
+
+**Four focused local probe tests pass**:3snapshot paths/ownership and1cleanup deadline/
+inner-failure case. Held-host test refuses a deliberately absent in-flight fixture with
+typed busy, then hashes exact committed bytes after release; cleanup deadline invokes
+zero tasks and inner failure invokes exactly once. Future qualifier gates exact3+1.
+Initial local compile function-signature mismatch was corrected with the owned-service
+closure; ignored compile1 log retained. Local gate12, actionlint, structure/privacy
+and diff checks apply; no new package/editor/live/CI operation for this correction.
+Independent correction review precedes publication.
+
+Actual cumulative **Windows3/4packages,3/8starts** (CI5 package3/start3; reopen4 unused);
+**Mac0/4packages,0/8starts**. Paired**5/5 each exhausted**, including explicitly granted
+CI5; no CI6 or old-run rerun. Live0/2total generations, discovery0/1. Windows complete
+job log SHA256 `e72b91bfbff45ad11bb73474884b74f59020baee2dc3c24bff079020052c1180`.
+Post-correction Windows/native cleanup proof needs a new allowance decision or approved
+required-host capability. Mac remains locked, no app binding or fresh key entry.
+Publish reviewed correction and accurate blocked records, preserving all unique failed
+artifacts. Full Phase2/generic/final human acceptance remains incomplete.
+
+Independent final read-only correction/gate/status review passes. The Undo probe step
+uses the production button’s DOM click; OS-native input proof covers Generate/selection/
+Save. Local4probe/12gate, actionlint, rustfmt, Python syntax and514-file validation pass;
+no post-correction native/cleanup acceptance or additional execution is inferred.
