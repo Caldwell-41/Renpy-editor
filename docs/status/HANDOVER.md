@@ -17,7 +17,9 @@ User authorised fix/retry and CI polling for this chat only. Preserve global man
 wait policy for other chats; no watcher/automation. CI2 correction reuses unchanged
 qualified official SDK bytes with the unchanged published checksum pin and fresh
 runtime, retaining bootstrap/terminal failure artifacts. Confirmed [CI2run38146108645/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38146108645),
-exact candidatea16c5f701313eebb26f23fd2ab643a0a4deaf044, initially queued. Dispatchordinal2,
+exact candidatea16c5f701313eebb26f23fd2ab643a0a4deaf044, terminal overall failure with audited Mac automated/controller/SDK pass and Windows
+Unix expected-path fixture failure before packaging/native. Reviewed correction passes12
+local gates. Next fresh CI3 dispatchordinal3,
 packageordinal1/starts1–2; actual attempts must be audited.
 
 [Owning implementation ledger](../tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11)
@@ -66,7 +68,8 @@ Notify when live checks need fresh native key entry on the existing selected end
 model; never retrieve old keys from chat/logs or read/export credential files. No live
 calls, real-provider credential operations or owned temporary editor/listener/root.
 
-Published correctiona16c5f7 is in confirmed paired CI2. Continue permitted bounded
+CI2 audited; publish the reviewed one-line Windows fixture correction and dispatch CI3.
+Continue permitted bounded
 same-chat polling, then terminal artifact/identity/SDK/native/cleanup audit. Do not
 rerun attempt2 or substitute later docs-only commits for the exact candidate. Resume
 remaining signed Mac/native/live qualification within caps after desktop unlock.

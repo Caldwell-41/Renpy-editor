@@ -80,6 +80,6 @@ class Gates(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             cli=Path(t)/'npm-cli.js';cli.write_text('// public test')
             with patch.dict('os.environ',{'REWRITE_NPM_CLI':str(cli)}),patch.object(q.shutil,'which',return_value='/public/node'):
-                self.assertEqual(q.command(['npm','run','check']),['/public/node',str(cli),'run','check'])
+                self.assertEqual(q.command(['npm','run','check']),[str(Path('/public/node')),str(cli),'run','check'])
         self.assertEqual(q.command(['cargo','test']),['cargo','test'])
 if __name__=='__main__':unittest.main()

@@ -5932,3 +5932,38 @@ starts0/8 until emitted attempts are audited. Live0/2, discovery0/1. Current cha
 polling is explicitly authorised; no automation/watcher or widened budget. Required
 failed/skipped/missing checks cannot pass; retain terminal manifests/input/native/SDK/
 cleanup audit. Signed local Mac/native/live and full Phase2/human acceptance remain pending.
+
+
+#### Selectable CI2 Windows harness failure and narrow correction — 2026-10-12
+
+CI2 Windows job114489708098 completed failure after successful SDK cache acquisition,
+renderer132/frontend/selectable8/prompts5. Gate suite had11 passes and1 failure:
+the npm argument-array test expected Unix `/public/node`, while Windows `Path`
+correctly produces native separators. This is a fixture assertion defect; no product
+failure is inferred. Correct the expected argument with `str(Path('/public/node'))`,
+retaining direct pinned Node/npm invocation without shell. Local gates12/12 pass.
+
+Artifact11705176491 has13 files. Exact outer/child manifests, candidatea16c5f7/run/
+attempt1, every input hash and cleanup pass audit. The only git-blob byte difference
+is the explicit `.gitattributes` CRLF checkout for rewrite-windows-native.ps1; its
+checkout hash verifies. Failed result remains failed. No package/editor attempt
+ledger exists because both operations were unreached; Windows actual packages0/4,
+starts0/8. Artifact privacy13 passes. Ignored full Windows job log SHA256: `68fcb7da8f0cd34f68b0bfb1d4771027171ffce8a794d11cb2d9f39dcc058b12`.
+Mac CI2 remains running pending its required audit. Paired dispatch2/4; no CI3 yet,
+no live call or broader scope. Review the narrow fixture correction independently,
+await Mac terminal result, then publish and dispatch within the remaining two paired
+runs. Original caps remain; chat-only polling permission persists.
+
+
+CI2 terminal at2026-10-11T14:16:38Z is overall **failure**, with Mac job114489707995
+**success** and the diagnosed Windows harness gate failure. Mac artifact11704517908
+contains31files: outer30-entry/child26-entry manifests,264material inputs with the
+same declared PowerShell CRLF transform, exact a16c5f7/run/attempt/platform and privacy
+all verify. Renderer132/selectable8/prompts5/gates12/nativeworker6, actual controller,
+pinned SDK8.5.3 ten commands/two metadata-free create/update cases all pass; literal
+Character/Beat/protected-text runtime, accepted-source hashes and cleanup pass.
+Mac CI contributes no package/editor launch. Both actual platform counts remain0/4
+packages,0/8starts; paired dispatch2/4. Independent read-only review confirms the
+one-line Windows expected-path correction; all12 local gates pass. Publish that
+correction and use fresh paired CI3 with dispatchordinal3/packageordinal1/starts1–2.
+No old-run rerun, artifact substitution, or native/live/human acceptance claim.
