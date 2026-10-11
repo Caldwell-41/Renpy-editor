@@ -14,8 +14,9 @@ are qualified on both targets. See the [first rewrite audit](#final-pinned-windo
 [Generated Character cards closure](#generated-character-cards-qualified-closure--2026-10-11)
 and [Generated lorebook entries closure](#generated-lorebook-entries-qualified-closure--2026-10-11).
 The [selected Phase 2 qualification](#phase-2-qualification-selection-and-prerequisite-audit--2026-10-11)
-is blocked on production provider prerequisites and an authorized generic configuration;
-individual action qualification does not establish integrated/live acceptance.
+continues as Studio-only with generic deferred. The [current audit and continuation](#studio-only-ci2-audit-live-progress-and-completed-assist-repair--2026-10-11)
+records CI3/native acceptance still pending; individual action qualification does not
+establish integrated/live acceptance.
 Read its CI-first amendment/selection only when continuing or reviewing that slice,
 then only the relevant requirement sections. Completed credential/request selections below
 are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
@@ -5374,3 +5375,32 @@ is implied. Prepare the reviewed fix/package within existing build allowance, th
 for the concrete launch-limit change6→8. Fresh CI3 package3/editor4–5/dispatch3 fits
 Windows allowances; Mac automated dispatch3 fits. Preserve same problem/allowance,
 manual CI wait/resume, credential cleanup, serial owner and independent reviewer.
+
+
+#### Reviewed repair package2 and CI3 dispatch checkpoint
+
+Independent final code/harness review finds no blocking issue. Published candidate
+**481c64bd210719365a18fc753e9d55eae0a88d27**, tree
+**e273c897fb7d5b5c091b22be89a266ce4e087b53**. Signed Macpackage2 passes strict
+signature/permanent identity/approved leaf requirement and installer contents;
+253 exact inputs match committed candidate before/after build. Executable SHA256
+`b49959bd367701d6de321e5088ecc9c20a84f05f5492f42b323c220d2b60ae52`; installer
+`dc3cf6203218fe778c08962e57e93d7f32c58b660097be4d683ff0e156cd33e7`.
+No updated-package launch has occurred. Original live package1 remains unchanged.
+
+Confirmed [CI3 run38129660338](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38129660338),
+workflow357322921/attempt1/head481c64b/branchcodex/provider-qualification, created
+09:48:04Z, initially in_progress09:48:31Z. Inputs generate_lore=true,phase2_studio=true,
+all other actions/upload false, buildordinal3/firstlaunch4, both reuse IDs empty.
+Windows package3/editor4–5 are reserved until actual audit; dispatch3 consumed on both
+targets. Audit required Windows/macOS artifacts and seven native stages on user resume;
+no polling. Earlier CI2 success remains valid only within its exact inputs.
+
+Mac now2/4packages,5/6launches,3/4dispatches; Windows2/4actual packages,3/6actual launches,
+3/4dispatches with CI3 package3/editor4–5 reserved. Studio counts unchanged. Owner
+requested Mac unlock and concrete launch-limit6→8 approval after reviewed fix and
+verified package were ready. No reply/extension or cleanup is assumed. Finish existing
+live Draft/history/reopen6 and credential/root cleanup after unlock. If extension is
+approved, run updated signed native acceptance/ordinary Close and process reopen7–8;
+otherwise retain missing updated Mac native evidence. Publish status, pause and resume
+the same outcome; no full acceptance, generic calls, signing change, merge or release.

@@ -1,105 +1,82 @@
 # Current outcome handover
 
-## Studio-only Phase2 qualification — awaiting CI2 and Mac unlock
+## Studio-only qualification — CI3 and native continuation pending
 
-Repository `Caldwell-41/Renpy-editor`, branch `codex/provider-qualification`, retained
-Mac ARM64 session. Selected saved Phase2 qualification from closure
-**d03c1173d6a7493353a4df01463175a1404d545d**; prerequisite audit d175705. User approved
-production LAN completion, agent temporary-key entry and temporary storage/cleanup,
-confirmed Unsloth and deferred
-generic. The [owning current audit and continuation](../tasks/active/phase-2-initial-llm-assistance.md#studio-qualification-signed-mac-evidence-and-ci1--2026-10-11)
-records exact scope, history and allowances. Preserve unrelated work; never reset.
+Retain Mac ARM64 session and `codex/provider-qualification`, repository
+Caldwell-41/Renpy-editor. Entryclosure d03c117, accepted individual lore233454b/
+run38105665896. [Owning task](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-ci2-audit-live-progress-and-completed-assist-repair--2026-10-11)
+owns exact current scope/evidence/allowances. User approved bounded private-LAN
+production completion, temporary credential storage/cleanup and Unsloth only; generic
+is deferred. Preserve unrelated work and reconcile fresh refs, never reset. Serial
+owner and independent GPT-6.1 Sol High read-only reviewer. Commit/push authorized;
+no paid/public calls, installation/provider/signing expansion, merge/release or next
+outcome. Broader operation subset/new-Character and final human acceptance distinct.
 
-Published implementation **4d1120dbb6f8d85dc861554ba93e8d26db6c1f82**, tree
-`6e7e4a63f80ba7f12526c388866bedb6f7117052`;253 exact candidate inputs inventoried.
-Fresh publication matched branch/main5f448ca; no open branch PR. Qualified individual
-baseline233454b/run38105665896 remains valid within unchanged input boundaries; changed
-transport/preparation/renderer/native inputs require current proof. Docs-only successors
-retain candidate/package/run identity. No merge/release authorized.
+Published repair **481c64bd210719365a18fc753e9d55eae0a88d27**, tree
+**e273c897fb7d5b5c091b22be89a266ce4e087b53**, supersedes production4d1120d/Windows
+harnessfd2872e. Successful Save now marks completed work; Close/navigation share one
+unfinished predicate, edits/reprepare reset it and failed acceptance/cancel guards
+remain. Independent final review passes. Renderer131/build/desktop and native14/probe6
+rejecting gates pass; reuse7 pass with2 Windows-only skips. Lore native adds required
+physical-close stage after successful Save, ordinary OS click, absent Assist/visible
+Story and distinct captures, then full public snapshot unchanged before Undo/Redo/
+separate approval. Seven stages,26 distinct/27 rows; five send hashes and3reopen remain.
 
-Reviewed harness successor **fd2872e8fba26b05e3bdeac0054fe8871bfc3c95**, tree
-`2619824ecd52fd3c7faf00b2c594dabe01af5292`, published. Only Windows native driver and
-its regression changed; signed Mac package/production behavior remains4d1120d.
+Signed Macpackage2 under ignored `.toolchains/releases/phase2-studio-02` passes strict
+identity/signature/installer;253 exact inputs match481c64b. Executable SHA256
+`b49959bd367701d6de321e5088ecc9c20a84f05f5492f42b323c220d2b60ae52`,
+installer `dc3cf6203218fe778c08962e57e93d7f32c58b660097be4d683ff0e156cd33e7`.
+Approved permanent names/leaf policy unchanged. No package2 launch yet. Existing
+live session uses package1, executablef79d46ce; retain both identities.
 
-Pure shared admission allows literal loopback HTTP or saved opt-in private LAN HTTP,
-fixed SocketAddr; DNS/public/link-local/CGNAT/multicast/unspecified/HTTPS/proxy/redirect/
-retry refuse. All five reviews show unencrypted transport and unknown inference
-locality. Credential origin and revision/consent changes refuse stale sends. Local
-core35/transport8/worker6/references12/prompts5/renderer131/build and integrated actual
-native-worker/renderer private-interface five-action chain pass. Proposed card/lore
-Save/separate approval, later exact inclusion/custom prompt, source-caused staleness,
-prompt restore/limits, Continue/Draft, mixed history/reopen/zero HTTP pass. Pinned8.5.3
-compile/lint/named runtime uses exact accepted synthetic source without editor metadata.
-SDK synchronization/reference-order harness failures were repaired, not misclassified
-as product defects. New rejecting gates4 pass; existing28 include one Windows-only skip.
-Review found Draft disclosure/harness waits; both repaired/re-reviewed before packages.
+CI2 run38114055500/attempt1/headfd2872e terminal success05:27:56Z, owner/reviewer
+audit passes exact artifacts11693300722/11693301650,23/84 manifest entries,252 inputs/
+253 Windows package inputs (PS1 CRLF accounted). Windows25distinct+3reopen, six native
+stages, exact5body hashes, metadata unchanged/zero reopen HTTP/cleanup pass. Actual
+polling and placement helper regressions all9 pass/no skips. Both five-action actual
+private-LAN renderer/native credential/core chains and exact metadata-free pinned8.5.3
+SDK named runtime pass. Clamp branch is regression proof; native placement stayed
+in bounds without moving. CI1 run38111920210 failed clipped window before sends; raw
+failure preserved and unused reopen reservation released. Prior failed/implicit Mac
+launches1–2 retained/counted; native3/reopen4 pass and all prior roots/credentials
+cleaned. Owning task/ignored evidence retains unique failures and recovery details.
 
-Signed Mac package1 passes host strict signature, permanent identity/approved
-certificate-leaf requirement and installer contents. Executable SHA256
-`f79d46cedd6ec664fe8a9d69d5d37df2ff035757610c0b3996d530d25673f7b7`; installer
-`56e887fdc37adfed8d330629dcab77c7d55499cb34864c6d8bc6e8e3de8d100d`.
-Native1 exited without terminal report; implicit CUA relaunch2 observed and stopped.
-Suspected stale UI binding remains an observation hypothesis, no product crash claim.
-Failure log/actual helper cleanup retained. Serial fresh-state retry native3/reopen4
-passes25 distinct+3checks, physical Generate/Save/separate Approve, passive light/dark/
-compact review, five exact digests, zero reopen HTTP and unchanged metadata. Independent
-read-only native/receipt review passes. Reviewer sandbox CSSMERR_TP_NOT_TRUSTED is the
-established host boundary; retained host strict receipt applies, no trust changes.
-All four owned PIDs absent; failed/successful temp roots and owned credentials/listeners
-cleaned. Local ignored evidence retains exact inventories/logs/receipts/synthetic game.
+Confirmed [CI3run38129660338](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38129660338),
+workflow357322921/attempt1/head481c64b, created09:48:04Z, initial in_progress09:48:31Z.
+Inputs generate_lore+phase2_studio true, other actions/upload false, build3/firstlaunch4,
+reuse IDs empty. Audit exact required Windows/macOS artifacts/seven native stages on
+user resume. No polling loop or watcher; WORKFLOW manual same-thread wait applies.
+Windows package3/editor4–5 reserved pending actual audit; missing/skipped/failure is
+not pass. Earlier accepted proof retains its actual input boundaries.
 
-Confirmed [run38111920210](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38111920210),
-workflow357322921 `production-scaffold.yml`, attempt1/head4d1120d, created04:32:41Z,
-initially in_progress2026-10-11T04:32:50Z. Inputs generate_lore=true,phase2_studio=true,
-all other action/upload flags false, build/first-launch ordinal1, both reuse IDs empty.
-Required jobs Focused Assist—Windows x64 and Focused Scene automated—macOS ARM64 add
-integrated/LAN/SDK; Windows adds new package/native proof. Terminal failure04:47:46Z:
-Mac12 automated cases pass; Windows focused/SDK/package pass, native observe-light
-fails on clipped owned window before any send/reopen. Owner and independent reviewer
-audited both manifests (23/61entries),252 exact inputs with required PS1 checkout CRLF,
-all-five actual controller and named SDK runtime/source hashes. Windows package253
-inputs and exe `fbdafc819864e4ae3f689b17ed81640e007647fef3881a2ba79978fc33e17a1b`
-match native receipt. Cleanup passes. Actual ledger consumes package1/editor1 only;
-release the unused reopen reservation. No product assertion failed; geometry is a
-native harness/environment issue, and native acceptance remains missing. Prepared
-repair moves only the owned HWND into visible desktop bounds without resizing; full
-capture/control/layout assertions remain. Independent review passes; required Windows
-regression is not a Mac pass. Confirmed [CI2 run38114055500](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38114055500),
-workflow357322921/attempt1/headfd2872e, created05:12:41Z, initially queued05:12:49Z.
-Same generate_lore+phase2_studio, fresh packageordinal2/editor2–3, no reuse/uploads;
-all other action flags false. Audit exact required Windows/macOS retry artifacts on
-same-thread resume; no polling loop. Missing/failed/skipped proof stays unresolved.
+User unlocked and saved the key through the native modal; configured/key-saved status
+observed without reading/exporting secret. Storage+cleanup approval resolved. Real
+Studio discovery1 found exact selected Gemma; card1/lore1/rewrite1/continue1 pass
+production proposals. Save unapproved then separate approval observed. Rewrite included
+both generated revisions and seed references with customized prompt/changed limits,
+preserved protected tokens; installed rewrite baseline restored explicitly. Continue
+inserts one narration before unchanged terminal. Source change correctly makes
+generated references unavailable through supporting read-set staleness. Mac locked
+again before Draft review/send; unlock requested. Draft0, live mixed history/reopen/
+accepted-source SDK and credential/root cleanup remain. Provider-internal tools/config
+unknown; reviewed client bodies strict schema/tools disabled. Live HTTP-body equality
+not independently captured; controlled CI proves the transport assertion.
 
-Temporary key received after dispatch. Native entry+Remember was rejected by automatic
-approval review because persistent storage needed explicit approval; user now explicitly
-approves temporary local storage and cleanup. The approval boundary is resolved.
-User authorized native secure-dialog
-entry and later user rotation. Never echo/export or place key in source/arguments/logs/
-reports. Historical spike credential untouched. Use existing exact local Studio/Gemma
-configuration, synthetic content and explicitly reviewed sends only; no discovery/send
-has occurred. Hosted CI proves owned interfaces, not home Studio access. Local named
-capability is real Studio/signed ordinary-UI session and reopen after the Mac is unlocked.
-Native UI control reports Mac locked; manual unlock requested. Live launch5 owns the
-pending native dialog and disposable fixture. The prior intended20-minute timeout was
-not enforced: launcher session unavailable, PID58371 remains alive with parent1 at
-05:06:38Z. Ignored `live-studio/phase-1-launch.json` records exact PID/executable,
-owned root basename/parent and owner-control limitation. Do not rely on its historical
-deadline. Confirm actual process identity before UI/cleanup and do not implicitly
-relaunch a stopped app. If it has exited, retain
-launch5 consumption and reassess the remaining live/reopen requirement against the one
-remaining launch; no extra launch allowance is implied. Remove any owned credential and
-fixture after the authorized tests; prior native cleanup does not cover this live root.
-Provider-internal tool suppression remains unknown without actual configuration proof.
-Generic support/access/qualification is deferred. Broader subset/new-Character and final
-human acceptance remain distinct; no full Phase2 completion claim.
+Live launch5 PID58371, exact package1 executable, parent1, disposable root basename
+`loomlight-rewrite-live-phase2-studio-01` under private temp. Old launcher session
+84533 unavailable; intended20-minute timeout was not enforced. Confirm actual PID/path
+before UI/cleanup; CUA binding may implicitly launch a stopped app, so never assume
+reuse. Root/public synthetic fixture and native temporary credential still owned.
+Do not read/copy credential files or key value; remove via ordinary Settings then
+stop exact owned process and clean owned root. Historical credentials untouched.
+Ignored `.toolchains/phase2-studio-01/live-studio` owns attempt/hash receipts.
 
-Allowance: Mac **1/4packages,5/6editor launches,2/4focused dispatches**. Windows
-**2/4dispatches**; CI1 actual package1/editor1, unused reopen reservation released;
-CI2 package2/editor2–3 reserved pending actual attempt audit. Do not spend twice.
-Studio **0/2 attempts per action,0/2 model
-discoveries**; generic0calls. Prior allowances closed; launch5 consumed and final launch6
-remains for reopen. One serial writer and independent GPT-6.1 Sol High reviewer;
-no reviewer writes/credential access/builds/launches/dispatches. Publish checkpoint and
-pause per WORKFLOW manual same-thread wait/resume; current chat has no polling grant.
-Commit/push authorized. No signing changes, paid/public calls, installation, merge/
-release or next deliverable. Continue only authorized in-scope fixes within allowance.
+Actual allowance Mac2/4packages,5/6launches,3/4dispatches; Windows2/4packages,3/6launches,
+3/4dispatches plus CI3 reservations above. Studio1/2 each except Draft0/2, discovery1/2;
+generic0. Final launch6 reserved for existing live reopen. Reviewed/package-ready fix
+needs two additional Mac launches for acceptance/ordinary Close+process reopen; user
+asked to approve limit6→8, response pending. Do not exceed6 without approval or treat
+old package live evidence as fixed-candidate proof. After unlock finish existinglive/
+reopen6/cleanup; if extension approved perform updated native7–8. AuditCI3 on resume,
+record evidence and reassess remaining capability/allowance. Full qualification remains
+incomplete.

@@ -1,40 +1,35 @@
 # Current status
 
-**Updated:** 2026-10-11. **Studio-only Phase2 qualification awaiting CI2; live Studio blocked by locked Mac.** User approved production LAN support, agent temporary-key entry and temporary local storage/cleanup, confirmed
-Unsloth availability and deferred generic. Retained Mac ARM64/branch
-`codex/provider-qualification`; entry d03c117/audit d175705. Reviewed implementation
-**4d1120d**, tree6e7e4a6; reviewed harness successor **fd2872e**, tree2619824,
-published for CI2. Fresh refs matched/main5f448ca. Unrelated work
-preserved. The [owning task](../tasks/active/phase-2-initial-llm-assistance.md#studio-qualification-signed-mac-evidence-and-ci1--2026-10-11)
-owns evidence, acceptance and continuation.
+**Updated:** 2026-10-11. **Studio-only qualification awaiting CI3, Mac unlock and a launch-limit decision.**
+Retained Mac ARM64/`codex/provider-qualification`, entryd03c117 and lore baseline
+233454b/run38105665896. User approved production private-LAN support and temporary
+credential storage/cleanup; generic is deferred. Unrelated work preserved. The
+[owning task](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-ci2-audit-live-progress-and-completed-assist-repair--2026-10-11)
+owns scope, exact evidence and allowances.
 
-| Capability | Evidence | Remaining acceptance |
-| --- | --- | --- |
-| Five bounded Assist actions | Local and CI1 integrated actual renderer/native credential/HTTP/core chain pass over owned private LAN; exact source metadata-free Ren'Py runtime passes | Required Windows native retry and real Studio results |
-| Studio production generation | Opt-in literal private LAN HTTP, fixed address, all-action unencrypted transport/unknown locality disclosure, stale-send refusal | Storage/cleanup approved; Mac unlock required before native key entry/live proof |
-| Signed Mac/native | Approved-identity package1, native retry3/reopen4 pass independent audit; first failed/implicit launches1–2 retained and counted | Real Studio ordinary-UI live/reopen, final human acceptance |
-| Generic/full Phase2 | User explicitly deferred generic; individual baseline233454b/run38105665896 remains accepted within actual inputs | Generic support/qualification and broader subset/new-Character/final acceptance deferred |
+CI2 run38114055500/headfd2872e passes owner and independent audit: both integrated
+five-action/controller/metadata-free SDK chains; Windows25 distinct native+3reopen,
+exact sends, zero reopen HTTP and cleanup. CI1 clipped-window failure is retained.
 
-Local core35/transport8/worker6/reference12/prompt5/renderer131/build and integrated
-LAN/SDK checks pass. Review findings repaired/re-reviewed. Native25 distinct+3reopen
-pass, five exact sends, zero reopen HTTP, prior native cleanup confirmed. Rejecting
-fixtures pass locally; two Windows-only helper regressions remain required in CI2.
-New integrated gates4 pass. Temporary key received; no real Studio
-calls/discovery or credential entry occurred yet.
+User saved the temporary key natively. Ordinary real Unsloth discovery1 and card/lore/
+rewrite/continue1 each pass; separate proposed Save/approval, later exact generated
+reference inclusion, custom/restore prompt and protected tokens observed. Source edits
+correctly make generated references stale. Mac locked again before Draft send.
+Live Draft/history/reopen/SDK and credential/root cleanup remain required.
 
-[CI38111920210](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38111920210),
-attempt1/head4d1120d, terminal failure2026-10-11T04:47:46Z. Exact artifacts audited:
-Mac12 automated cases pass; Windows focused/SDK/package pass, native observe-light
-failed on clipped window before any send/reopen. Visibility assertions retained;
-owned-window placement repair and rejecting Windows helper test independently reviewed.
-[CI2 38114055500](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38114055500),
-attempt1/headfd2872e, initially queued05:12:49Z; same selected fresh proof, no reuse/uploads.
-Required Windows/macOS results unaudited.
-Manual same-thread resume; no autonomous polling authorization. Live launch5 remains
-alive; prior launcher control is unavailable and intended timeout was not enforced.
-Check exact PID/executable before reuse; Mac locked, no credential saved or HTTP attempted.
-Mac1/4packages,5/6launches,2/4dispatches; Windows2/4dispatches with CI1 actual
-package1/editor1 and CI2 package2/editor2–3 reserved pending audit;
-Studio0/2 per action,0/2discoveries. Prior allowances closed. Commit/push authorized;
-no signing changes, paid/public calls, merge/release or next outcome.
+Reviewed completed-Assist Close fix **481c64b**, treee273c89, passes renderer131/build/
+desktop and rejecting gates. New signed Macpackage2 passes exact253 inputs, strict
+identity/signature/installer. New required native stage physically closes a saved
+review and verifies unchanged project. [CI3 38129660338](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38129660338),
+attempt1/head481c64b, initially in_progress09:48:31Z; exact artifacts unaudited.
+No autonomous polling; manual same-thread resume.
+
+Mac2/4packages,5/6launches,3/4dispatches; Windows2/4packages,3/6launches,3/4dispatches
+actual, CI3 package3/editor4–5 reserved. Final Maclaunch6 is reserved for live reopen;
+requested limit6→8 for fixed-candidate native acceptance/reopen is pending. Live1/2
+each except Draft0/2; discovery1/2. Key remains saved only in owned native storage;
+cleanup is authorized and pending unlock. Check exact retained PID/path before reuse.
+
+Provider-internal configuration remains unknown; generic/full Phase2 and final human
+acceptance remain distinct. Commit/push authorized; no merge/release/signing changes.
 [HANDOVER](HANDOVER.md) owns recovery.
