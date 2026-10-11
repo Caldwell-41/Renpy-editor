@@ -6369,3 +6369,18 @@ Python syntax,515-file structure/privacy validation and diff check pass. Five so
 hashes/six successful log hashes still match owner audit. CURRENT339/HANDOVER571words
 are compact complete records. Fresh refs remain4c85929/main5f448ca. Publish reviewed
 coherent candidate, then dispatch once and audit exact identity/actual attempts.
+
+
+#### Selectable CI7 confirmed dispatch — 2026-10-12
+
+Reviewed coherent candidate5f593225fad2ebdb2970663d56ee83631b27ecef is published.
+[CI7run38178036314](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38178036314),
+workflow357322921/attempt1/exacthead5f59322/branchcodex/provider-qualification, created
+2026-10-11T21:50:49Z, initialqueued/no conclusion. Direct returned URL resolved once,
+no duplicate dispatch; ignored selectable-ci7-dispatch.json retains exact receipt.
+Inputs selectabletrue/dispatch7/build5/firststart5, all older selectors/uploadfalse,
+both reuseIDs empty. **Paired7/7each consumed**; no CI8/rerun or Windows package6.
+Actual pre-terminal Windows4packages/4starts, Mac0/0; package5/starts5–6 await emitted
+attempt ledger audit, including failures. Live0/2/discovery0/1 unchanged; prior caps
+persist. Current-chat polling explicitly authorised, no automation/watcher.
+Terminal exact artifacts/native reports/privacy/cleanup/actual counts remain to audit.

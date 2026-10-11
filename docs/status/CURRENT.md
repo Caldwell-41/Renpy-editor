@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-12. **Selectable proposal editing implemented; CI7 prepared after full Windows suite review.**
+**Updated:** 2026-10-12. **Selectable proposal editing implemented; qualification awaiting CI7.**
 Full Phase2, generic and final human acceptance remain incomplete.
 
 Approved scope persists:1–8 operations in one saved Scene, bound pre-send permissions,
@@ -29,17 +29,18 @@ timeout log retention. No additional product/core defect or render-readiness fai
 was established. Independent code review passes; native proof remains missing.
 Unchanged core/controller/SDK evidence is valid.
 
-Actual counts: Mac0/4packages,0/8starts; Windows4/5packages,4/8starts; paired6/7each.
+Actual counts: Mac0/4packages,0/8starts; Windows4/5packages,4/8starts; paired7/7each, consumed.
 User authorised one extra Windows package and pairedCI7 after the remaining-suite
-review. Plan fresh package5/starts5–6/dispatch7; no CI8/package6/rerun authorised.
+review. CI7 package5/starts5–6 actual attempts await audit; no CI8/package6/rerun authorised.
 The [new allowance and review](../tasks/active/phase-2-initial-llm-assistance.md#remaining-windows-suite-review-and-approved-ci7--2026-10-12)
 preserve all prior consumption; editor/Mac/live caps are unchanged.
 Live0/2total batch generations, discovery0/1. Prior allowances stay closed.
 Mac remains locked; no editor binding/start or key entry. Notify when signed app is
 ready for fresh native key entry; no old-key retrieval or real-provider credential
 read/export/call occurred. [HANDOVER](HANDOVER.md) owns remaining blockers.
-Current-chat polling remains authorised; no watcher/automation. CI7 exact identity and
-terminal artifact/actual-attempt audit remain.
+[CI7run38178036314/attempt1/head5f59322](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38178036314)
+was confirmed queued at2026-10-11T21:50:49Z; terminal artifact/actual-attempt audit remains.
+Current-chat polling remains authorised; no watcher/automation.
 
 Accepted prior Studio evidence remains reusable. Commit/push authorised; no merge/
 release/provider/signing expansion, generic or following outcome.

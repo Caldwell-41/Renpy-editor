@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Selectable proposal editing — CI7 prepared after remaining Windows suite review
+## Selectable proposal editing — awaiting exact CI7 after remaining-suite fixes
 
 Continue the approved outcome on Mac ARM64, codex/provider-qualification, preserving
 unrelated work and never resetting. Initial4bcfee0/main5f448ca reconciled; latest CI6
@@ -55,16 +55,19 @@ Ignored selectable-ci7-repair-audit.txt binds final source and raw log hashes. N
 native/core/filesystem/credential/process qualification is inferred from controlled IPC.
 Sole writer returned to parent for allowance/docs/publication/dispatch.
 
-**Consumed before CI7:** Windows4/5packages,4/8starts; Mac0/4packages,0/8starts;
-paired6/7each. User explicitly requested remaining-suite fixes then another CI run,
+**Consumed at CI7 dispatch:** Windows4/5packages,4/8starts; Mac0/4packages,0/8starts;
+paired7/7each, exhausted. User explicitly requested remaining-suite fixes then another CI run,
 granting one extra Windows package and paired run, ceilings4→5/6→7. Previous totals
 persist; CI3–6 reopen reservations unused. Plan fresh attempt1/exclusive selectable/
 no reuse/no upload, packageordinal5/firststart5/reopen6/dispatch7. No CI8/rerun or
 Windows package6 authorised. Original approval persists; live0/2total/discovery0/1,
 other caps/prior closed allowances unchanged. Workflow/qualifier gates agree; legacy
 caps remain unchanged. Current-chat polling explicitly permitted; no watcher/automation.
-CI7 exact dispatch identity/terminal artifacts/attempt ledger remain to audit; other
-chats use manual same-thread wait/resume. Native update/refusal/reopen proof is pending.
+[CI7run38178036314/attempt1/head5f593225fad2ebdb2970663d56ee83631b27ecef](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38178036314)
+confirmed queued at2026-10-11T21:50:49Z, exclusive selectors and direct receipt verified.
+Actual package5/starts5–6 remain ledger reservations until emitted. Terminal artifacts/
+privacy/native reports/cleanup/actual counts remain to audit; no duplicate dispatch.
+Other chats use manual same-thread wait/resume. Native update/refusal/reopen proof pending.
 
 Mac inventory remains locked; no native app binding/start or credential entry.
 Remaining signed Mac/native/live requires unlock and approved package identity/
