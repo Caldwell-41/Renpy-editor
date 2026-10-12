@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — CI9 prepared; child-control repair independently reviewed
+## Studio-only Phase 2 closeout — awaiting exact child-control CI9 audit
 
 The requested Sol chat remains sole writer/executor. User directs audit of the whole
 native sequence, fix and as many CI runs as needed; expressly confirms needed Windows
@@ -12,11 +12,20 @@ completedfailure2026-10-12T22:01:53Z. No external operation pending. User now ex
 unreached steps, platform/production assumptions, cleanup/diagnostics, meaningful
 checks and independent review before CI. Necessary CI/Windows starts remain authorized.
 
+**Pending CI9:** [run38317425509](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38317425509),
+attempt1/workflow_dispatch/harness30b18f2e0f4aec7e6a228c21e337778373921f03/tree
+7cef4bf5c7f67de6bb5468afb617ccd692525f20, in_progress2026-10-12T22:34:37Z.
+Reviewed repair published normally/origin verified; seven canonical harness digest
+483edea674ed4dbc3581747f31a589e2dd20410794d66052a4ba3f1a50e5710e/PS1CRLF
+receipt ignoredci-09-dispatch.json/ci-09-confirmed.json. Windows starts8–9 planned
+from actual7; all reservations await audit. No builds/owner sends. Record and end
+turn under manual wait; same-chat user resume audits exact run, no polling/auto-wake.
+
 **Branch/state:** codex/provider-qualification. Fresh local/origin
 8b9a5e5b08e099c1eb6adb21a49646d834381761 and main
 5f448ca683a905f4ea77d4580bbc89fda69f2b93 matched on entry; clean tree then.
 Published alignment3d69b96/CI7 and docs0ac9fa1 retained; whole-sequence
-external repairb42b1b7 published; current child/control and cleanup repairs are local pending publication. Preserve unrelated
+external repairb42b1b7 published; reviewed child/control/cleanup repair30b18f2 published; current successor is wait record. Preserve unrelated
 work, no reset. Normal publication is authorized; no merge/release.
 
 **Exact product:**929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
@@ -107,7 +116,7 @@ outer dialog tested, child controls mocked. Every historical failure remains fai
 
 **Limits/next:** paired8 dispatched; Windowsstarts7, package1/3; Macpackage1/3,
 ownerstarts5/6; live8/10/Rewrite3/4/extra1of2used/discovery0. Needed further CI/Windows
-starts explicitly authorized; workingbatch remainingCI9–10/Windowsup to12, totals
+starts explicitly authorized; workingbatch remainingCI10/Windowsup to12, totals
 do not reset. Prepared child observation uses Win32 GetDlgItem/EnumChildWindows IDs100/1/2,
 unique direct parent/PID/class/WS_CHILD/style/visibility/enabled-state; ES_PASSWORD
 and nonreadonly Edit; pushbuttons only. Actual GetGUIThreadInfo focused handle and

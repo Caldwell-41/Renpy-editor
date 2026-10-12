@@ -8242,3 +8242,33 @@ CI9/start8–9 and Win18+11/Mac18+7 aligned. No further supported blocker by ins
 Exact hosted focus/input/preview/unreached setup/reopen/cleanup remain hypotheses and
 required proof. No production/native acceptance inferred from fixtures. Final syntax,
 actionlint/whitespace and changed-source/document privacy9files pass before commit.
+
+#### Child-control CI9 confirmed dispatch and manual wait — 2026-10-13
+
+Reviewed30b18f2e0f4aec7e6a228c21e337778373921f03/tree
+7cef4bf5c7f67de6bb5468afb617ccd692525f20 published normally/origin verified.
+Seven canonical harness digest483edea674ed4dbc3581747f31a589e2dd20410794d66052a4ba3f1a50e5710e
+and declaredPS1CRLF alternative retained in ignored ci-09-dispatch.json.
+Fresh preceding local/origin334b694 and main5f448ca matched; unrelated preserved.
+Frozen929/269digest3c244/CI1 executable/product/signing/ordinary profile unchanged.
+
+[CI9run38317425509](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38317425509)
+confirmed attempt1/workflow_dispatch/exact30b18f2/branchcodex/provider-qualification,
+created2026-10-12T22:34:24Z, last observedin_progress2026-10-12T22:34:37Z.
+Only selectable_proposals/studio_setup_only true, dispatch9/firststart8;
+other selectorsfalse/default, no builds/owner launches/live sends. Windows18+11
+actual child/physical focus/Cancel fixtures precede editor; Mac18+7 only fixtures.
+Windows actualstarts7 before run, planned8–9 await all reservations. PairedCI9
+cumulative/workingbatch up to10, Windowsbatchup to12; package1/3 each/Macstarts5/6/
+live8/10/Rewrite3/4/discovery0 unchanged. One more run in current working batch
+remains if supported; reassess after two unsuccessful same-hypothesis corrections.
+
+State awaiting_ci: record and END TURN under manual same-chat wait. No model
+polling/watcher/auto-wake/duplicate. User resume cues exact38317425509/attempt1 audit
+of jobs/ZIP/manifests/product269/harness7/PSCRLF/reused exe/Win18+11/Mac18+7,
+real controlled child fixture results and nine production native stages/support
+baseline, safe child identities/focus/clicks/dismissal, complete preview/sampling/
+setup/invalidation/cancel/reopen/captures/source/normal exits/credential-root-listener
+cleanup and every reservation even failed/missing terminal. Pending means pause;
+failed/missing/skipped remains unresolved. All CI8 failed cleanup retained. No human
+sign-off, following outcome or UI refinement execution; prompt follows technical success.
