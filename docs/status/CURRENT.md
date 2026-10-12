@@ -2,7 +2,8 @@
 
 **Updated:** 2026-10-13. **Studio-only Phase 2 technical closeout is review_ready.**
 CI9 and its independent artifact/native audit pass. Final human acceptance remains
-unclaimed; UI refinement and later guided feedback are separate, unstarted outcomes.
+unclaimed. The approved UI refinement is implemented with independent-review fixes;
+focused changed-input CI is being prepared. Guided feedback has not started.
 
 | Capability | Exact evidence | Disposition |
 | --- | --- | --- |
@@ -10,7 +11,8 @@ unclaimed; UI refinement and later guided feedback are separate, unstarted outco
 | Sampling/setup/HTTPS | Both-target CI1 core/renderer/worker/TLS proof; owner saved-key setup; CI9 actual Windows defaults/sampling/native credential/setup/invalidation/cancel/readiness/reopen. | Scoped technical gap closed. Literal IPv6 HTTPS remains unsupported; live TLS not newly measured. |
 | Game and SDK | Owner native Validate/Run/Stop and exact metadata-free SDK05 named12+init12 assertions independently audited. | Passed on final authored source; earlier failures retained. |
 | Packages and cleanup | Signed Mac package1 and exact CI1 Windows executable reused. CI9 two normal exits0, owned profile/reference/root/listener cleanup, source/profile preservation and privacy pass. | Ordinary saved Studio profile/key preserved; no new product build. |
-| Human/following work | Independent reviews pass. Requested UI-refinement prompt prepared in owning task. | Human acceptance unclaimed; no following outcome started. |
+| UI refinement | Approved boards, Sol6.1/high research/review fixes, complete local before/after renderer captures. | Implemented; final32DOM/build/both-target renderer/service proof pending. Local3/3 and browser5/5 spent; no new package/native UI proof claimed. |
+| Human/following work | Technical reviews pass; refinement implementation follows design approval. | Human acceptance unclaimed; guided feedback unstarted. |
 
 Behavioral baseline5f593225fad2ebdb2970663d56ee83631b27ecef; frozen product
 929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree9f034ca6cae69ef11e87d6a95a332152a9998eaa/

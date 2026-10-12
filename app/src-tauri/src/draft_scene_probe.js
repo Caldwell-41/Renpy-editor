@@ -38,11 +38,11 @@
    await pause('observe-narrow');check(true,'Native compact send layout observed');
    find('Generate proposal').focus();await pause('physical-send');await wait(()=>!find('Accept Scene').disabled);
    check(await snapshot()===before,'Physical Generate produces inert review with no writes');
-   check(root().textContent.includes('New [str(7)] {a=jump:label}')&&root().textContent.includes('Dialogue and narration')&&root().textContent.includes('New Scene')&&root().textContent.includes('Ends here. No connection is added.')&&root().textContent.includes('Bec: A second line.')&&root().querySelector('img,script')===null&&root().querySelector('details summary').textContent.includes('Exact Source changes'),'Whole Scene and exact source metadata diff are inert and disclose Chapter title and Return');
+   check(root().textContent.includes('New [str(7)] {a=jump:label}')&&root().textContent.includes('Dialogue and narration')&&root().textContent.includes('New Scene')&&root().textContent.includes('Ends here. No connection is added.')&&root().textContent.includes('Bec: A second line.')&&root().querySelector('img,script')===null&&root().querySelector('.rewrite-result details[data-exact-change] summary').textContent.includes('Exact Source changes'),'Whole Scene and exact source metadata diff are inert and disclose Chapter title and Return');
    const projectDiff=[...root().querySelectorAll('details')].find(d=>d.querySelector('summary').textContent.includes('.renpy-editor/project.json'));
    const previewProject=JSON.parse([...projectDiff.querySelectorAll('section')].find(s=>s.querySelector('h4').textContent==='After').querySelector('pre').textContent);
    const previewScene=previewProject.scenes.at(-1);
-   root().querySelector('details').open=true;find('Accept Scene').focus();const sequence=Number(root().dataset.acceptSequence??0);await pause('physical-accept');await wait(()=>Number(root().dataset.acceptSequence??0)>sequence);
+   root().querySelector('.rewrite-result details[data-exact-change]').open=true;find('Accept Scene').focus();const sequence=Number(root().dataset.acceptSequence??0);await pause('physical-accept');await wait(()=>Number(root().dataset.acceptSequence??0)>sequence);
    check(root().dataset.acceptOutcome==='accepted'&&find('Accept Scene').disabled,'Physical acceptance saves once and blocks duplicate click');
    const accepted=await read('scene.list',p());const authored=accepted.scenes.find(s=>s.displayName==='Native Draft café 雪');
    let saved=await read('source.open',{...p(),path:authored.sourcePath});const acceptedText=saved.text;

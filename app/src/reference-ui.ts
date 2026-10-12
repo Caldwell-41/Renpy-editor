@@ -1,4 +1,5 @@
 import { icon } from "./icons.ts";
+import { referenceComparison, referenceFieldName, referenceValue } from "./reference-presentation.ts";
 
 export type ReferenceKind = "card" | "lore";
 export interface EntityLink { type: "scene" | "character" | "card" | "lore"; id: string }
@@ -64,14 +65,16 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
   const dirty=():boolean=>JSON.stringify(draft)!==baseline;
   const disabledBeforeBusy=new Map<HTMLButtonElement,boolean>();
   let saveButton:HTMLButtonElement|undefined, discardButton:HTMLButtonElement|undefined, state:HTMLElement|undefined;
+  const fieldValidators=new Map<HTMLInputElement|HTMLTextAreaElement,()=>boolean>();
   function label(text:string,control:HTMLElement):HTMLLabelElement{const l=el("label","","field");l.append(el("span",text),control);return l;}
   function active():boolean{return !disposed&&actions.current();}
+  function focusEditor():void{const proposed=selected!==null&&records().some(r=>r.id===selected&&currentRevision(r).status==="proposed");if(proposed)editor.querySelector<HTMLElement>(".reference-identity")?.focus();else editor.querySelector<HTMLInputElement>('input[name="title"]')?.focus();}
   function feedback(text:string,error=false):void{notice.textContent=text;notice.dataset.kind=error?"error":"normal";actions.status(text,error?"error":"normal");}
   function synchronize():void{
     root.dataset.busy=String(busy);if(dirty())editor.dataset.unsubmitted="true";else delete editor.dataset.unsubmitted;
     const proposed=selected!==null&&records().some(r=>r.id===selected&&currentRevision(r).status==="proposed");
     if(saveButton)saveButton.disabled=busy||!dirty()||proposed;if(discardButton)discardButton.disabled=busy||(!dirty()&&selected!==null);
-    if(state)state.textContent=busy?"Saving…":dirty()?"Unsaved changes":selected===null?"New entry":"Saved";
+    if(state)state.textContent=busy?"Saving…":dirty()?"Unsaved changes":proposed?"Proposed · needs approval":selected===null?"New entry":"Saved";
     undo.disabled=busy||dirty()||!model.canUndo;redo.disabled=busy||dirty()||!model.canRedo;create.disabled=busy||!model.document;reload.disabled=busy;
     for(const control of root.querySelectorAll<HTMLButtonElement>(".reference-editor button,.reference-order button")){if(control===saveButton||control===discardButton)continue;if(control.dataset.proposed==="true"){control.disabled=true;continue;}if(busy){if(!disabledBeforeBusy.has(control))disabledBeforeBusy.set(control,control.disabled);control.disabled=true;}else if(disabledBeforeBusy.has(control)){control.disabled=disabledBeforeBusy.get(control)!;disabledBeforeBusy.delete(control);}}
     root.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>(".reference-editor input,.reference-editor textarea,.reference-editor select").forEach(e=>e.disabled=busy||e.dataset.proposed==="true");
@@ -86,6 +89,7 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
     let composing=false;control.addEventListener("compositionstart",()=>{composing=true;});control.addEventListener("compositionend",()=>{composing=false;});
     control.addEventListener("input",()=>{(draft as unknown as Record<string,unknown>)[key]=control.value;if(error.textContent&&!composing)validate();changed();});control.addEventListener("blur",()=>{if(!composing)validate();});
     control.dataset.referenceRequired=String(required);const wrapper=label(text,control);wrapper.append(error);parent.append(wrapper);
+    fieldValidators.set(control,validate);
   }
   function stringList(parent:HTMLElement,key:"tags"|"aliases",text:string):void{
     const input=el("input");input.value=(draft[key]??[]).join(", ");input.name=key;
@@ -104,13 +108,14 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
     for(const value of [...options].sort())filter.append(option(value,value));filter.value=options.has(previous)?previous:"";
     const needle=search.value.toLocaleLowerCase();const visible=records().filter(r=>{const c=currentRevision(r).content;return (!filter.value||c.tags.includes(filter.value)||c.category===filter.value)&&JSON.stringify(c).toLocaleLowerCase().includes(needle);});
     if(!visible.length)rows.append(el("p",records().length?"No matching entries.":kind==="card"?"No cards yet. Choose New character card to start.":"No lore yet. Choose New lore entry to start.","muted"));
-    for(const r of visible){const c=currentRevision(r).content;const row=button("",()=>{void select(r.id);},"reference-entry");row.dataset.referenceId=r.id;row.ariaPressed=String(r.id===selected);row.append(el("strong",c.title),el("small",[c.category,...c.tags].filter(Boolean).join(" · ")));rows.append(row);}
+    for(const r of visible){const revision=currentRevision(r),c=revision.content;const row=button("",()=>{void select(r.id);},"reference-entry");row.dataset.referenceId=r.id;row.ariaPressed=String(r.id===selected);row.append(el("strong",c.title),el("small",[c.category,...c.tags].filter(Boolean).join(" · ")),el("small",revision.status==="proposed"?"Proposed · needs approval":revision.status==="approved"?"Approved":revision.status));rows.append(row);}
   }
   function drawEditor():void{
     list.querySelector(".reference-order")?.remove();
-    editor.replaceChildren();saveButton=discardButton=undefined;state=undefined;
+    editor.replaceChildren();fieldValidators.clear();saveButton=discardButton=undefined;state=undefined;
     if(!model.document){editor.append(el("p",model.diagnostic??"The library is unavailable.","error-message"));synchronize();return;}
     const back=button(kind==="card"?"All character cards":"All lore entries",()=>{void (async()=>{if(busy)return;if(dirty())await discard();if(dirty())return;root.dataset.browsing="true";search.focus();})();},"text-button reference-back");back.prepend(icon("back"));editor.append(back);
+    const heading=el("h2",`${draft.title||"New entry"} · ${kind==="card"?"Character card":"Lore entry"}`,"reference-identity");heading.tabIndex=-1;editor.append(heading);
     const identity=el("div","","reference-two-fields");editor.append(identity);field(identity,"title",kind==="card"?"Name":"Title",false,true);
     if(kind==="card")stringList(identity,"aliases","Aliases (optional)");else field(identity,"category","Category (optional)");
     stringList(editor,"tags","Tags (comma separated)");
@@ -141,16 +146,25 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
       const next=currentRevision(revision),approved=revision.revisions.find(v=>v.id===revision.approvedRevisionId);
       const noun=kind==="card"?"card":"lore entry";
       const review=details(`Review proposed ${noun} and approved text`);review.open=true;
+      review.classList.add("reference-proposal-review");
       review.append(el("p",`This proposed ${noun} is saved but unapproved. Approving replaces the current approved text; rejection keeps it. Undo is available.`));
-      for(const [title,value] of [["Current approved text",approved?.content??null],["Proposed text",next.content]]){review.append(el("h4",String(title)),el("pre",JSON.stringify(value,null,2)));}
+      review.append(el("p",`Saved version ${next.number} · ${referenceValue(next.content.scope)}`));
+      for(const [key,value] of Object.entries(next.content).sort(([a],[b])=>{const order=["title","description","text","personality","appearanceNotes","motivations","background","speakingStyle","exampleDialogue","tags","category","subject","scope","provenance","citations"];return (order.includes(a)?order.indexOf(a):99)-(order.includes(b)?order.indexOf(b):99);})){const previous=(approved?.content as unknown as Record<string,unknown>|undefined)?.[key];if(JSON.stringify(previous)!==JSON.stringify(value))review.append(referenceComparison(referenceFieldName(key),previous,value));}
+      const exact=el("details");exact.append(el("summary","Exact metadata comparison"),el("h4","Current approved text"),el("pre",JSON.stringify(approved?.content??null,null,2)),el("h4","Proposed text"),el("pre",JSON.stringify(next.content,null,2)));review.append(exact);
       const approve=button(kind==="card"?"Approve this card revision":"Approve this lore revision",()=>{if(!dirty())void mutate({type:kind==="card"?"reviewCard":"reviewLore",recordId:revision.id,revisionId:next.id,approve:true});});
-      approve.disabled=model.issues.some(i=>i.recordId===revision.id&&i.revisionId===next.id&&(i.field==="citations"||i.field==="supportingReadSet"));
+      approve.classList.add("primary");approve.disabled=model.issues.some(i=>i.recordId===revision.id&&i.revisionId===next.id&&(i.field==="citations"||i.field==="supportingReadSet"));
+      if(approve.disabled)review.append(el("p","Approval unavailable: supporting material is missing or changed. Review fresh material before approving this revision.","error-message"));
       review.append(approve,button(kind==="card"?"Reject proposed card":"Reject proposed lore entry",()=>{if(!dirty())void mutate({type:kind==="card"?"reviewCard":"reviewLore",recordId:revision.id,revisionId:next.id,approve:false});}));
       editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>("input,textarea,select").forEach(c=>{c.dataset.proposed="true";});
     }
     if(revision){const versions=details("Earlier saved text");for(const v of [...revision.revisions].reverse()){const entry=el("details");entry.append(el("summary",`Saved version ${v.number} · ${v.status}`));const prose=el("pre",Object.entries(v.content).filter(([,value])=>typeof value==="string").map(([key,value])=>`${key}: ${value}`).join("\n"));entry.append(prose);versions.append(entry);}}
     const footer=el("div","","reference-form-footer");state=el("span");const buttons=el("div","","row-actions");discardButton=button(selected?"Discard changes":"Cancel",()=>{void discard();});saveButton=button(selected?"Save changes":kind==="card"?"Create card":"Create lore entry",()=>{void save();},"button primary");buttons.append(discardButton,saveButton);footer.append(state,buttons);editor.append(footer);
     if(selected){const order=el("div","","reference-order");order.append(el("span","List order"));const index=records().findIndex(r=>r.id===selected);const up=button("Move up",()=>{void mutate({type:"move",kind,recordId:selected!,direction:"up"});});const down=button("Move down",()=>{void mutate({type:"move",kind,recordId:selected!,direction:"down"});});up.disabled=index<=0;down.disabled=index>=records().length-1;order.append(up,down);list.append(order);}
+    if(revision&&currentRevision(revision).status==="proposed"){
+      const review=editor.querySelector<HTMLElement>(".reference-proposal-review")!,frozen=el("details","","reference-details reference-frozen-fields");frozen.append(el("summary","Saved proposed fields and earlier versions"));
+      for(const child of [...editor.children])if(child!==back&&child!==heading&&child!==review)frozen.append(child);
+      editor.append(review,frozen);
+    }
     synchronize();
   }
   function drawRelationships(parent:HTMLElement):void{parent.replaceChildren();for(const [i,item]of (draft.relationships??[]).entries()){const row=el("div","","reference-link-row");const target=entitySelect(["character","card","lore","scene"],item.target);target.onchange=()=>{const next=chosen(target);item.target=next?{...item.target,...next}:null;changed();};const notes=el("textarea");notes.rows=2;notes.value=item.text;notes.oninput=()=>{item.text=notes.value;changed();};row.append(label("Related character or entry",target),label("Relationship",notes),button("Remove relationship",()=>{draft.relationships!.splice(i,1);drawRelationships(parent);changed();}));parent.append(row);}parent.append(button("Add relationship",()=>{draft.relationships!.push({target:null,text:""});drawRelationships(parent);changed();}));}
@@ -159,15 +173,15 @@ export function renderReferenceLibrary(host:HTMLElement,kind:ReferenceKind,initi
   function drawKnowledge(parent:HTMLElement):void{parent.replaceChildren();for(const [i,item]of (draft.knowledge??[]).entries()){const row=el("div","","reference-link-row");const picker=entitySelect(["character"],{type:"character",id:item.characterId},false);picker.onchange=()=>{item.characterId=chosen(picker)!.id;changed();};const notes=el("textarea");notes.value=item.notes;notes.rows=2;notes.oninput=()=>{item.notes=notes.value;changed();};row.append(label("Character",picker),label("What this character knows",notes),button("Remove knowledge note",()=>{draft.knowledge!.splice(i,1);drawKnowledge(parent);changed();}));parent.append(row);}const picker=entitySelect(["character"],null);parent.append(label("Character for a knowledge note",picker),button("Add knowledge note",()=>{const target=chosen(picker);if(!target)return;draft.knowledge!.push({characterId:target.id,notes:""});drawKnowledge(parent);changed();}));}
   function drawEntityLinks(parent:HTMLElement):void{parent.replaceChildren(el("p","Related story items"));for(const [i,target]of draft.links.entries()){const row=el("div","","reference-route-row");row.append(el("span",model.entities.find(e=>e.kind===target.type&&e.id===target.id)?.title??`Missing ${target.type}`),button("Remove link",()=>{draft.links.splice(i,1);drawEntityLinks(parent);changed();}));parent.append(row);}const picker=entitySelect(["scene","character","card","lore"],null);parent.append(label("Item to link",picker),button("Add link",()=>{const target=chosen(picker);if(!target)return;draft.links.push(target);drawEntityLinks(parent);changed();}));}
   function drawCitations(parent:HTMLElement):void{parent.replaceChildren();for(const [i,item]of draft.citations.entries()){const entity=model.entities.find(e=>e.kind===item.target.type&&e.id===item.target.id);const row=el("div","","reference-link-row");const status=!entity?.revision?"Missing source":entity.revision!==item.revision?"Source changed":"Source unchanged";row.append(el("p",`${entity?.title??`Missing ${item.target.type}`} · ${status}`));const notes=el("textarea");notes.rows=2;notes.value=item.notes;notes.oninput=()=>{item.notes=notes.value;changed();};row.append(label("Source note",notes));if(entity?.revision&&entity.revision!==item.revision)row.append(button("Use current source version",()=>{item.revision=entity.revision!;drawCitations(parent);changed();}));row.append(button("Remove source link",()=>{draft.citations.splice(i,1);drawCitations(parent);changed();}));parent.append(row);}const picker=entitySelect(["scene","character","card","lore"],null);parent.append(label("Supporting story item",picker),button("Add source link",()=>{const target=chosen(picker);const entity=model.entities.find(e=>e.kind===target?.type&&e.id===target.id);if(!target||!entity?.revision){feedback("Choose an available story item with a saved version.",true);return;}draft.citations.push({target,revision:entity.revision,notes:""});drawCitations(parent);changed();}));}
-  async function select(id:string|null,creating=false):Promise<void>{if(busy||!active()||!await actions.guard())return;if(!model.document)return;selected=id;const record=records().find(r=>r.id===id);draft=record?knownContent(currentRevision(record).content,kind):emptyReference(kind);baseline=JSON.stringify(draft);root.dataset.browsing="false";list.querySelector(".reference-order")?.remove();redrawList();drawEditor();if(creating||id)editor.querySelector<HTMLInputElement>('input[name="title"]')?.focus();}
+  async function select(id:string|null,creating=false):Promise<void>{if(busy||!active()||!await actions.guard())return;if(!model.document)return;selected=id;const record=records().find(r=>r.id===id);draft=record?knownContent(currentRevision(record).content,kind):emptyReference(kind);baseline=JSON.stringify(draft);root.dataset.browsing="false";list.querySelector(".reference-order")?.remove();redrawList();drawEditor();if(creating||id)focusEditor();}
   async function discard():Promise<void>{if(busy)return;if(dirty()&&!await actions.guard())return;await select(selected===null?(records()[0]?.id??null):selected);feedback("Returned to saved text.");}
   async function save():Promise<void>{if(busy||!active()||!dirty())return;
-    const formInvalid=Array.from(editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('input[data-reference-required],textarea[data-reference-required]')).find(input=>input.required&&!input.value.trim());
-    if(formInvalid){formInvalid.setAttribute("aria-invalid","true");const error=editor.querySelector(`#${formInvalid.getAttribute("aria-describedby")}`);if(error)error.textContent="Enter a value before saving.";feedback("Complete the required fields before saving.",true);formInvalid.focus();return;}
+    let formInvalid:HTMLInputElement|HTMLTextAreaElement|undefined;for(const [input,validate] of fieldValidators)if(!validate())formInvalid??=input;
+    if(formInvalid){for(const details of Array.from(editor.querySelectorAll<HTMLDetailsElement>("details")))if(details.contains(formInvalid))details.open=true;feedback("Correct the marked fields before saving. Your changes are retained.",true);formInvalid.focus();return;}
     await mutate({type:"save",kind,recordId:selected,fields:knownContent(draft,kind)});
   }
   async function mutate(command:ReferenceCommand):Promise<void>{if(busy||!active()||!model.document)return;if(command.type!=="save"&&dirty()){feedback("Save or discard your changes first.",true);return;}busy=true;root.dataset.mutationCommand=command.type;root.dataset.mutationOutcome="pending";delete root.dataset.mutationErrorCode;synchronize();actions.status("Saving…");
-    try{const next=await actions.apply(command,model.revision);root.dataset.mutationOutcome="committed";if(!active())return;model=next;if(command.type==="save"&&command.recordId===null)selected=records().at(-1)?.id??null;const record=records().find(r=>r.id===selected);if(!record)selected=records()[0]?.id??null;draft=record?knownContent(currentRevision(record).content,kind):selected?knownContent(currentRevision(records()[0]!).content,kind):emptyReference(kind);baseline=JSON.stringify(draft);list.querySelector(".reference-order")?.remove();redrawList();drawEditor();feedback(next.diagnostic??"Saved");busy=false;synchronize();editor.querySelector<HTMLInputElement>('input[name="title"]')?.focus();}
+    try{const next=await actions.apply(command,model.revision);root.dataset.mutationOutcome="committed";if(!active())return;model=next;if(command.type==="save"&&command.recordId===null)selected=records().at(-1)?.id??null;const record=records().find(r=>r.id===selected);if(!record)selected=records()[0]?.id??null;draft=record?knownContent(currentRevision(record).content,kind):selected?knownContent(currentRevision(records()[0]!).content,kind):emptyReference(kind);baseline=JSON.stringify(draft);list.querySelector(".reference-order")?.remove();redrawList();drawEditor();feedback(next.diagnostic??"Saved");busy=false;synchronize();focusEditor();}
     catch(error){root.dataset.mutationOutcome="refused";const code=(error as {code?:unknown})?.code;root.dataset.mutationErrorCode=typeof code==="string"&&/^[A-Z_]+$/.test(code)?code:"REFERENCE_ACTION_FAILED";if(active())feedback(errorMessage(error),true);}
     finally{root.dataset.mutationSequence=String(++mutationSequence);busy=false;if(active())synchronize();}
   }

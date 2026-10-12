@@ -1241,3 +1241,38 @@ A fresh preparation is required for another save. Prompt/task/permission changes
 staleness, cancellation and refusals retain the author’s input and ordinary guards.
 Native/platform proof is tracked in the selected task; UI availability alone does not
 establish full Phase2 or human acceptance.
+
+## Studio assistance refinement — 2026-10-13 implementation, qualification pending
+
+The user approved the [refinement direction](design/phase-2-llm/studio-refinement-2026-10-13/README.md).
+Settings groups Connection, Saved key and Response defaults, with advanced and
+maintenance controls disclosed on demand. Save stays reachable. Profile changes,
+reload, owned cleanup and Settings navigation/close preserve drafts unless the
+author confirms discard; active writes/setup tests retain ownership. Format/range
+feedback appears on completion and submission without silently coercing input.
+Native key entry/storage, saved-key reuse and exact configuration-bound readiness
+are unchanged. Saving/opening does not send. Test setup remains an explicit fixed
+synthetic send, and Refresh models is the existing explicit discovery action.
+
+Assist shows its captured target and Prepare/Inspect send/Review changes stage,
+with a scrolling body and reachable actions. Task has full width; additional limits
+are expandable. Prepared review exposes destination/model/locality, reference
+selection/exclusions and total/budget before Generate, plus the complete immutable
+request in explicit details. Review leads with plain saved/proposed prose and exact
+Source/metadata disclosure. Single rewrite **Apply and save 1 change** retains the
+existing transaction; other action-specific acceptance labels remain. Required
+operation dependencies are still explicit, never auto-selected. Keyboard focus
+enters Assist and returns to its invoker where valid. Async completion only moves
+focus while it still belongs to Assist; unfinished polls preserve it.
+
+Manual cards/lore retain direct Save/Discard. Generated saved proposals lead with
+readable comparisons and exact revision approval; the frozen form and full metadata
+remain inspectable. Missing/changed supporting material explains approval refusal.
+Selection has a visible highlight and status text. Comparisons stack at compact
+widths. Prompt/scope tabs have arrow/Home/End traversal and associated panels;
+prompt save/restore/Undo and draft protection retain their existing contract.
+
+The [owning task](tasks/active/phase-2-initial-llm-assistance.md#studio-ui-refinement-selection-and-finite-allowance--2026-10-13)
+owns changed-input evidence and limits. These are implemented UI contracts, not
+native qualification or final human acceptance claims. Frozen929 technical proof
+remains valid for unchanged core/source/storage/SDK behavior.

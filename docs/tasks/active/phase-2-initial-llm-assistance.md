@@ -8328,6 +8328,108 @@ context or AI ending/connection implementation. Saved ordinary profile/key persi
 Requested next UI-refinement prompt follows below; not selected/executed by this audit.
 Later guided feedback is separate and must not be represented as human acceptance.
 
+#### Studio UI refinement selection and finite allowance — 2026-10-13
+
+The user selected the prepared refinement outcome on `codex/provider-qualification`,
+with one GPT-6.1 Sol/high research subagent and imagegen mockups **for approval**.
+Entry is clean `357eb87`; native macOS ARM64 remains the implementation owner.
+Frozen929/CI9 technical qualification above remains unchanged evidence, not proof
+of changed renderer inputs. State: `in_progress`, preparation only. Mockup approval
+is the user's explicit design boundary before product implementation.
+
+Finite cumulative allowance, selected before execution: three focused local
+type/build/affected-DOM verification rounds; two full affected-journey browser
+capture/check rounds plus one correction round; two imagegen concept calls plus
+one targeted revision; one research agent reused for independent design/code review
+and one correction re-review. If changed inputs require platform proof, at most two
+paired focused Windows/macOS CI batches, two signed owner Mac builds and four owner
+native starts. No package/CI/native execution for planning or docs alone. A failed
+attempt counts; reassess after two unsuccessful corrections of one hypothesis.
+Checks use disposable public fixtures, never the ordinary saved profile/key or
+paid/live sends. No model discovery/installations, provider/Phase3/route/ending/
+streaming expansion, signing/storage changes, merge or release. Publication is not
+selected by this prompt; work remains local unless later authorized.
+
+Before approval: capture existing Settings, Assist/complete-send/proposal and
+card/lore screens in both themes and compact/wide layouts; record measurable
+overflow/density, research recommendations and exact mockup prompts. After approval:
+implement the bounded hierarchy/layout/language/focus corrections, check relevant
+dirty/failure/stale/cancel/reopen behavior and obtain independent review. Reuse
+unchanged core/service evidence; changed renderer/native inputs need appropriate
+new proof. Prepare a plain-language guided-feedback prompt only after delivery;
+do not start that session or claim final human acceptance.
+
+Usage at entry: local rounds0/3, browser0/3, images0/3, CI0/2 paired,
+signed builds0/2, native starts0/4. Next: baseline capture and approval-ready concepts.
+
+Preparation checkpoint: one requested Sol6.1/high agent completed primary-source
+research and independent visual review; both boards are approval-ready with explicit
+written corrections. [Concepts, exact prompts and review constraints](../../design/phase-2-llm/studio-refinement-2026-10-13/README.md)
+retain two generated images/manifests. Source inspection found absent Studio draft
+guards, incomplete tab/focus behavior, incidental Task width and JSON-heavy review.
+No product repair is implemented yet. Partial public-fixture screenshots demonstrate
+Settings actions below the1440×900 initial viewport and Assist limits crowding out
+references/actions at600×720; these do not establish measured horizontal overflow.
+
+Browser attempts3/3 spent: localhostEPERM(environment); nonexistent fixture preview
+method(harness); then hidden compact reference-list click timeout(harness). Last
+attempt produced24 screenshots across Settings/Assist/send/proposal light/dark,
+wide/compact/large-interface. Full metrics and card/lore captures are missing; no
+passing check claimed. Corrected viewport/list handling is unexecuted. Frozen929
+and ordinary profile/key untouched. `git diff --check` passes for current docs/assets.
+Counts now local0/3,browser3/3,images2/3,CI0/2,signed builds0/2,native starts0/4.
+State remains `in_progress`, paused for **user-requested mockup approval** and spent
+browser allowance. Requested two additional browser attempts(total5), not yet granted,
+covering corrected complete baseline and final affected-journey before/after proof.
+No budget reset, package matrix, publication or feedback session started. Next:
+receive design decision/allowance; implement only after approval and retain the same
+agent for independent code/whole-journey review. Guided-feedback preparation follows
+delivery; final human acceptance remains unclaimed.
+
+2026-10-13 user: **“Approved keep going”**. This approves the two mockup boards with
+written corrections and the requested two additional browser attempts(total5).
+Implementation continues on the existing macOS ARM64 owner; remaining allowance
+local3,browser2,images1,pairedCI2,signed builds2,native starts4. No publication,
+live sends, provider expansion or final human acceptance implied.
+
+Implementation checkpoint: grouped Studio Connection/Saved key/Response defaults with
+advanced/maintenance disclosure and reachable Save; guarded dirty/busy navigation,
+reload/profile switch/cleanup; completion/submission field feedback. Assist has a
+stable target/stage/header, scrolling body and reachable stage-specific footer;
+Task is full-width, limits collapse, complete exact request remains inspectable,
+prose review leads exact changes. Proposed card/lore comparisons precede frozen
+fields, show exact revision/status and stale-support refusal. Tabs use keyboard
+focus and panel associations. Async completion preserves unrelated authoring focus.
+Core request/storage/source/transaction code is unchanged. Existing native probe
+selectors were adjusted for exact-change disclosure and the clearer rewrite label;
+frozen929 artifacts and records remain untouched.
+
+Counts: local3/3 spent(product typecheck passed each); round1DOM24/25 with one
+stage-label harness assertion fixed; rounds2/3 new fixture TypeScript errors, corrected
+but not locally rerun. Baseline browser4 passed36captures; browser5 passed36captures,
+runtimeerrors0/no viewport overflow/Assist primary visible in every recorded layout.
+Some rapid-resize light screenshots show compositor framing artifacts and closed
+details inflated raw control metrics. Retain them as limitations; updated CI harness
+waits two animation frames and filters closed details. Later key-group/prose-order
+changes require current-candidate CI images. No native/app builds or launches used.
+
+Reserved pairedCI0/2 now selected for focused32DOM cases/build/36renderer captures
+and actual same-project controller→native service all-five/selectable/history/reopen
+proof on Windowsx64/macOSARM64. CI-contained checks consume the paired-batch allowance;
+local browser allowance remains5/5 and is not reset. No SDK/game behavior or native
+credential/signing/store code changed, so unchanged frozen SDK/package evidence is
+reused; no new editor/package matrix selected. Debug native driver is not an editor
+launch or native UI proof. Exact current CI candidate and images establish portable
+renderer evidence; final human acceptance remains unclaimed.
+
+Original user authorization explicitly includes necessary focused CI; publishing its
+candidate to the existing branch is necessary for that operation. This supersedes
+the entry's conservative local-only interpretation, not a new publish/merge/release
+permission. No existing open PR or active branch CI was found on entry to dispatch.
+Workflow lint initially caught a runner-context placement error, fixed before dispatch;
+syntax/diff checks pass. Next: publish reviewed candidate, dispatch paired attempt1
+and retain exact results; no duplicate or unchanged matrix.
+
 #### Requested next UI-refinement prompt — prepared, not executed
 
 ```text

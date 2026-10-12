@@ -1,7 +1,7 @@
 import { preferenceError, readPreferences, subscribePreferences, updatePreferences } from "./preferences.ts";
 import { requestCore } from "./bridge.ts";
 import { mountPromptPreparation, type PromptActions, type PromptController } from "./prompt-ui.ts";
-import { mountStudioSettings } from "./ai-settings-ui.ts";
+import { mountStudioSettings, type StudioSettingsController } from "./ai-settings-ui.ts";
 interface SettingsContext { title: string; sdkVersion: string; resolution: { width: number; height: number }; runtime: () => void; prompts?: PromptActions }
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text = "", className = ""): HTMLElementTagNameMap[K] { const el = document.createElement(tag); el.textContent = text; el.className = className; return el; }
 export function openSettings(context?: SettingsContext): void {
@@ -26,8 +26,9 @@ export function openSettings(context?: SettingsContext): void {
   const footer = node("footer", "", "settings-footer"); footer.role = "status";
   const notify = (): void => { footer.textContent = preferenceError() || "Preferences save automatically on this device."; footer.dataset.kind = preferenceError() ? "error" : "normal"; };
   const unsubscribe = subscribePreferences(notify);
-  let promptController:PromptController|undefined;
-  const finish = (): void => { if(promptController&&!promptController.canLeave())return;promptController?.dispose(); unsubscribe(); overlay.remove(); if (background) background.inert = false; previous?.focus(); };
+  let promptController:PromptController|undefined,studioController:StudioSettingsController|undefined;
+  const canLeave=():boolean=>(!studioController||studioController.canLeave())&&(!promptController||promptController.canLeave());
+  const finish = (): void => { if(!canLeave())return;promptController?.dispose();studioController?.dispose(); unsubscribe(); overlay.remove(); if (background) background.inert = false; previous?.focus(); };
   close.addEventListener("click", finish);
   function row(label: string, description: string, control: HTMLElement): void {
     const line = node("div", "", "setting-row"); const copy = node("div"); const text = node("label", label); const id = `setting-${label.toLowerCase().replace(/[^a-z]+/g, "-")}`; text.htmlFor = id; control.id = id;control.ariaLabel=label;
@@ -39,11 +40,12 @@ export function openSettings(context?: SettingsContext): void {
     values.forEach(([value,label])=>{const b=node("button",label);b.role="radio";b.ariaChecked=String(value===chosen);b.tabIndex=value===chosen?0:-1;const choose=():void=>{group.querySelectorAll<HTMLButtonElement>("button").forEach(button=>{button.ariaChecked=String(button===b);button.tabIndex=button===b?0:-1;});change(value);};b.addEventListener("click",choose);b.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight"].includes(e.key))return;e.preventDefault();const buttons=[...group.querySelectorAll<HTMLButtonElement>("button")];const next=buttons[(buttons.indexOf(b)+(e.key==="ArrowRight"?1:buttons.length-1))%buttons.length]!;next.click();next.focus();});group.append(b);});return group;
   }
   function draw(category: string): void {
-    if(promptController&&!promptController.canLeave())return;promptController?.dispose();promptController=undefined;
+    if(!canLeave()){categorySelect.value=applicationCategory;return;}promptController?.dispose();promptController=undefined;studioController?.dispose();studioController=undefined;
     content.replaceChildren(); const prefs = readPreferences();
     const projectScope=category==="Current project";
     if(!projectScope)applicationCategory=category;
     application.ariaSelected=String(!projectScope);project.ariaSelected=String(projectScope);
+    application.tabIndex=projectScope?-1:0;project.tabIndex=projectScope?0:-1;content.role="tabpanel";content.id="settings-scope-panel";content.setAttribute("aria-labelledby",projectScope?"settings-project-tab":"settings-application-tab");
     rail.hidden=projectScope;categorySelect.hidden=projectScope;body.classList.toggle("project-settings",projectScope);categorySelect.value=category;
     rail.querySelectorAll("button").forEach(b => b.ariaCurrent = b.textContent === category ? "page" : "false");
     content.append(node("h2", category));
@@ -57,7 +59,7 @@ export function openSettings(context?: SettingsContext): void {
       content.append(node("h3","Source text"));row("Source text size","Adjust code text independently of the interface.",select([10,12,14,16,18,20,24].map(n=>[String(n),`${n} px`]),String(prefs.sourceFontSize),v=>void updatePreferences({sourceFontSize:Number(v)})));content.append(node("pre",'label start:\n    scene bg apartment_night\n    "Another long day…"',"source-sample"));
       const source=node("button","More Source editor preferences","text-button");source.addEventListener("click",()=>draw("Source editor"));content.append(source);
     } else if (category === "AI providers") {
-      mountStudioSettings(content,footer);
+      studioController=mountStudioSettings(content,footer);
     } else if (category === "Source editor") {
       row("Text size", "Change code text without changing the rest of the interface.", select([10,12,14,16,18,20,24].map(n => [String(n), `${n} px`]),String(prefs.sourceFontSize),v => void updatePreferences({sourceFontSize:Number(v)})));
       content.append(node("pre", 'label start:\n    scene bg apartment_night\n    "Another long day…"', "source-sample"));
@@ -85,8 +87,9 @@ export function openSettings(context?: SettingsContext): void {
     if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="s"&&promptController){event.preventDefault();event.stopPropagation();content.querySelector<HTMLButtonElement>(".prompt-actions .primary")?.click();return;}
     if(event.key==="Escape"){event.preventDefault();finish();}
     if(event.key!=="Tab")return;
-    const controls=[...overlay.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"]')].filter(n=>!n.closest('[hidden]')); const first=controls[0],last=controls.at(-1);
+    const controls=[...overlay.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),summary,[tabindex="0"]')].filter(n=>n.tabIndex>=0&&!n.closest('[hidden]')&&n.getClientRects().length>0); const first=controls[0],last=controls.at(-1);
     if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
   });
+  application.id="settings-application-tab";project.id="settings-project-tab";for(const tab of [application,project]){tab.setAttribute("aria-controls","settings-scope-panel");tab.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;e.preventDefault();const next=e.key==="Home"?application:e.key==="End"?project:tab===application?project:application;if(next.disabled)return;next.click();if(next.ariaSelected==="true")next.focus();});}
   body.append(categorySelect,rail,content); overlay.append(header,body,footer); document.body.append(overlay); draw("Workspace");notify();close.focus();
 }

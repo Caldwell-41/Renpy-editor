@@ -15,7 +15,7 @@ test("reference forms retain refused drafts, serialize saves and preserve nested
   const commands:ReferenceCommand[]=[];let resolve!:(v:ReferenceWorkspace)=>void;let reject!:(e:Error)=>void;
   let leave=false;const controller=renderReferenceLibrary(document.querySelector("main")!,"card",model,{creationHost:document.querySelector("header")!,current:()=>true,guard:async()=>leave,status:()=>{},load:async()=>model,apply:async(command,expected)=>{assert.equal(expected,"token");commands.push(command);return new Promise((a,b)=>{resolve=a;reject=b;});}});
   const enter=(name:string,value:string)=>{const input=document.querySelector<HTMLInputElement|HTMLTextAreaElement>(`[name="${name}"]`)!;input.value=value;input.dispatchEvent(new window.Event("input",{bubbles:true}));};
-  const click=(label:string)=>{const b=[...document.querySelectorAll("button")].find(b=>b.textContent===label);assert.ok(b,label);b.click();};
+  const click=(label:string)=>{const b=[...document.querySelectorAll("button")].find(b=>b.textContent===label||b.querySelector("strong")?.textContent===label);assert.ok(b,label);b.click();};
   assert.equal([...document.querySelectorAll("button")].some(b=>["Edit","Approve","Reject","Supersede"].includes(b.textContent!)),false);
   const relationshipTarget=[...document.querySelectorAll("label")].find(l=>l.querySelector("span")?.textContent==="Related character or entry")!.querySelector("select")!;relationshipTarget.value="card:new";relationshipTarget.dispatchEvent(new window.Event("change"));
   enter("description","Draft café 雪");const first=controller.save();assert.equal(controller.isBusy(),true);await controller.save();assert.equal(commands.length,1);

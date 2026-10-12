@@ -61,7 +61,7 @@ public static class RewriteNative {
 [void][RewriteNative]::SetProcessDPIAware()
 New-Item -ItemType Directory -Path $Output -Force | Out-Null
 $approveName=if($GenerateLore){'Approve this lore revision'}else{'Approve this card revision'}
-$acceptName=if($SelectableEdits){'Save selected changes'}elseif($GenerateLore){'Save proposed lore entry'}elseif($GenerateCard){'Save proposed card'}elseif($DraftScene){'Accept Scene'}elseif($ContinueScene){'Accept Beat group'}else{'Accept 1 change'}
+$acceptName=if($SelectableEdits){'Save selected changes'}elseif($GenerateLore){'Save proposed lore entry'}elseif($GenerateCard){'Save proposed card'}elseif($DraftScene){'Accept Scene'}elseif($ContinueScene){'Accept Beat group'}else{'Apply and save 1 change'}
 $actionTitle=if($SelectableEdits){'Edit Scene'}elseif($GenerateLore){'Draft lore entry'}elseif($GenerateCard){'Draft Character card'}elseif($DraftScene){'Draft Scene'}elseif($ContinueScene){'Continue Scene'}else{'Rewrite dialogue'}
 $receipt = [ordered]@{
     action=if($SelectableEdits){'editScene'}elseif($GenerateLore){'generateLore'}elseif($GenerateCard){'generateCard'}elseif($DraftScene){'draftScene'}elseif($ContinueScene){'continueScene'}else{'rewriteDialogue'};

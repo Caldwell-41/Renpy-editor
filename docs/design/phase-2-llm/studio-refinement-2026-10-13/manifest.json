@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-13",
+  "mode": "built-in imagegen",
+  "state": "design direction approved 2026-10-13; implementation qualification pending",
+  "calls": 2,
+  "artifacts": [
+    {
+      "file": "workflow-proposed-v1.png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "5774e215abb582ca327418e8165808245e5d00eade9f605d63840870b6a94603",
+      "prompt": "workflow-proposed-v1.txt"
+    },
+    {
+      "file": "references-compact-proposed-v1.png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "f9bb41094082bb0a55dd8a299798a67ca6c780c333a3d7407bde2d847ff04739",
+      "prompt": "references-compact-proposed-v1.txt"
+    }
+  ]
+}

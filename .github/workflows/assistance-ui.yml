@@ -1,0 +1,92 @@
+name: Studio assistance UI refinement
+on:
+  workflow_call:
+    inputs:
+      ordinal:
+        type: string
+        default: '1'
+permissions:
+  contents: read
+concurrency:
+  group: assistance-ui-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  focused:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            target: Windows x64
+          - runner: macos-26
+            target: macOS ARM64
+    name: Assistance UI — ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    env:
+      CARGO_TERM_COLOR: never
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require selected branch and finite fresh attempt
+        shell: bash
+        env:
+          ORDINAL: ${{ inputs.ordinal }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/provider-qualification
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$ORDINAL" = 1 -o "$ORDINAL" = 2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: assistance-ui-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Pinned dependencies and focused UI/service proof
+        shell: bash
+        working-directory: app
+        run: |
+          mkdir -p "$RUNNER_TEMP/assistance-ui"
+          npm install --global npm@11.9.0
+          npm_cli="$(npm root --global)/npm/bin/npm-cli.js"
+          test "$(node "$npm_cli" --version)" = 11.9.0
+          node "$npm_cli" ci --ignore-scripts
+          node "$npm_cli" run typecheck
+          node "$npm_cli" run build:tests
+          node --test --test-concurrency=1 dist-tests/tests/assistance-refinement.dom.test.js dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/rewrite-ui.dom.test.js dist-tests/tests/reference-ui.dom.test.js dist-tests/tests/prompt-ui.dom.test.js > "$RUNNER_TEMP/assistance-ui/dom.log" 2>&1
+          cat "$RUNNER_TEMP/assistance-ui/dom.log"
+          python -c "import os,re,pathlib; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/dom.log').read_text(encoding='utf-8'); assert re.search(r'(?:ℹ|#) tests 32\s',s); assert re.search(r'(?:ℹ|#) pass 32\s',s); assert re.search(r'(?:ℹ|#) fail 0\s',s); assert re.search(r'(?:ℹ|#) skipped 0\s',s)"
+          node "$npm_cli" run build
+          export LOOMLIGHT_UI_OUTPUT="$RUNNER_TEMP/assistance-ui/browser"
+          node node_modules/playwright/cli.js install chromium
+          node tests/assistance-refinement.browser.mjs > "$RUNNER_TEMP/assistance-ui/browser.log" 2>&1
+          cat "$RUNNER_TEMP/assistance-ui/browser.log"
+          python -c "import os,json,pathlib; p=pathlib.Path(os.environ['LOOMLIGHT_UI_OUTPUT']); v=json.loads((p/'metrics.json').read_text()); assert len(v['receipts'])==36 and not v['errors']; assert all(not r['viewportOverflow'] for r in v['receipts']); assert len(list(p.glob('*.png')))==36"
+          rustup toolchain install 1.90.0 --profile minimal
+          export RUSTUP_TOOLCHAIN=1.90.0
+          cargo build -p loomlight-desktop --locked --example rewrite-controller-driver
+          driver=target/debug/examples/rewrite-controller-driver
+          if test "$RUNNER_OS" = Windows; then driver="$driver.exe"; fi
+          node tests/phase2-controller.dispatch.mjs "$driver" --selectable-integrated --game-output "$RUNNER_TEMP/assistance-ui/fixture-game.json" > "$RUNNER_TEMP/assistance-ui/controller.log" 2>&1
+          cat "$RUNNER_TEMP/assistance-ui/controller.log"
+          python -c "import os,pathlib; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/controller.log').read_text(encoding='utf-8'); assert 'PASS: same-project integrated selectable multi-operation/dependency-invalid zero writes/valid partial subset accepted once/custom preservation/Undo-Redo/export/project-process reopen' in s"
+          node scripts/scan-artifacts.mjs "$RUNNER_TEMP/assistance-ui"
+      - name: Retain actual candidate and partial or complete evidence
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/assistance-ui"
+          git rev-parse HEAD > "$RUNNER_TEMP/assistance-ui/candidate.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/assistance-ui/tree.txt"
+          python -c "import hashlib,json,pathlib,os; p=pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui'; (p/'manifest.json').write_text(json.dumps({str(f.relative_to(p)).replace(chr(92),'/'):hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file() and f.name!='manifest.json'},indent=2))"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: assistance-ui-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/assistance-ui/
+          if-no-files-found: error
+          retention-days: 7

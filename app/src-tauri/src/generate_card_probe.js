@@ -34,7 +34,7 @@
    await pause('observe-narrow');check(true,'Native compact send layout observed');
    find('Generate proposal').focus();await pause('physical-send');await wait(()=>!find('Save proposed card').disabled);check(await snapshot()===before,'Physical Generate produces inert review with no writes');
    check(root().textContent.includes('Unescaped [str(7)] {a=jump:label}')&&root().textContent.includes('Current approved text stays available')&&root().querySelector('img,script')===null&&root().textContent.includes('Exact metadata changes'),'Card fields provenance and exact metadata review are passive');
-   const diff=root().querySelector('details');diff.open=true;const exact=JSON.parse([...diff.querySelectorAll('section')].find(s=>s.querySelector('h4').textContent==='After').querySelector('pre').textContent),preview=exact.cards[0];
+   const diff=root().querySelector('.rewrite-result details[data-exact-change]');diff.open=true;const exact=JSON.parse([...diff.querySelectorAll('section')].find(s=>s.querySelector('h4').textContent==='After').querySelector('pre').textContent),preview=exact.cards[0];
    find('Save proposed card').focus();const seq=Number(root().dataset.acceptSequence??0);await pause('physical-accept');await wait(()=>Number(root().dataset.acceptSequence??0)>seq);check(root().dataset.acceptOutcome==='accepted'&&find('Save proposed card').disabled,'Physical acceptance saves once and blocks duplicate click');
    let w=await read('references.list',p()),record=w.document.cards[0],revision=record.revisions.find(v=>v.id===record.currentRevisionId);
    check(record.id===old.id&&record.currentRevisionId===preview.currentRevisionId&&JSON.stringify(w.document)===JSON.stringify(exact),'Core card revision and exact prepared metadata survive');

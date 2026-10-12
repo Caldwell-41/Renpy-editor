@@ -5,7 +5,7 @@ import {createInterface} from 'node:readline';
 import {createServer} from 'node:http';
 import {Window} from 'happy-dom';
 import {mountRewrite} from '../dist-tests/src/rewrite-ui.js';
-const lore=process.argv.includes('--generate-lore'),card=process.argv.includes('--generate-card'),drafting=process.argv.includes('--draft-scene'),continuing=process.argv.includes('--continue-scene'),acceptName=lore?'Save proposed lore entry':card?'Save proposed card':drafting?'Accept Scene':continuing?'Accept Beat group':'Accept 1 change';
+const lore=process.argv.includes('--generate-lore'),card=process.argv.includes('--generate-card'),drafting=process.argv.includes('--draft-scene'),continuing=process.argv.includes('--continue-scene'),acceptName=lore?'Save proposed lore entry':card?'Save proposed card':drafting?'Accept Scene':continuing?'Accept Beat group':'Apply and save 1 change';
 const path=process.argv[2];assert(path,'Pass compiled native integration driver');
 let mode='valid',received=[],heldResponse;
 const server=createServer(async(req,res)=>{

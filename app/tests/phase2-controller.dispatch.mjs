@@ -100,7 +100,7 @@ async function mount(nextAction,includeGenerated=false){
  }
  return options;
 }
-const acceptName=()=>({generateCard:'Save proposed card',generateLore:'Save proposed lore entry',rewriteDialogue:'Accept 1 change',continueScene:'Accept Beat group',draftScene:'Accept Scene',editScene:'Save selected changes'})[action];
+const acceptName=()=>({generateCard:'Save proposed card',generateLore:'Save proposed lore entry',rewriteDialogue:'Apply and save 1 change',continueScene:'Accept Beat group',draftScene:'Accept Scene',editScene:'Save selected changes'})[action];
 async function prepare(){
  await click('Review complete send');await wait(()=>button('Generate proposal')&&!button('Generate proposal').disabled);
  const disclosure=document.querySelector('.rewrite-result').textContent;
