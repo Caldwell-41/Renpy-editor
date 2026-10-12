@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — focused Windows Settings and owner live proof remain
+## Studio-only Phase 2 closeout — awaiting focused CI2; owner Mac unlock/live remain
 
 The user expressly authorizes CI publication/dispatch and native/live verification.
 Continue this same outcome; no merge/release, signing changes, generic provider,
@@ -36,9 +36,12 @@ new Temperature/Top-p/Test setup/cancel/readiness/persistence controls still nee
 native Windows input proof. External studio-setup-native.py/studio-setup-windows.ps1
 and receipt tests are being prepared. Focused paired CI2 must reuse frozen929/CI1's
 exact package, separate product and harness refs/inputs, reserve Windows starts3–4,
-and run Mac fixture/identity gates with zero builds/starts. No CI2 dispatched yet;
-local17+7rejecting gates, workflow syntax, seven-file source privacy and independent
-re-review pass. Publish the reviewed harness then dispatch within allowance. Existing production-scaffold exclusive
+and run Mac fixture/identity gates with zero builds/starts. Local17+7rejecting gates, workflow syntax, seven-file source privacy and independent
+re-review pass. Published external harness36a11c9822b400143bc593232af17067cd963ed0,
+treeec20bc685998cc5af7c61643f72890a98ed502a0. Confirmed [focused pairedCI2
+run38232733035](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38232733035),
+attempt1/exact harness, queued at2026-10-12T09:52:54UTC. Product checkout remains929;
+Windows package remains the audited CI1 executable. No retry/duplicate dispatch. Existing production-scaffold exclusive
 selector calls the focused reusable workflow; subselector alone must fail closed.
 CI never receives the Studio key. After dispatch, follow manual same-thread wait.
 
@@ -72,11 +75,20 @@ The native receipt is `phase2-closeout-01/native-saved-profile-01.json`.
 
 **Cumulative allowance:** Mac1/3packages, **3/6starts conservatively charged**
 (first ordinary process19193, possible implicit CUA lookup, reopened process21809).
-Windows actual1/3packages and2/6starts; pairedCI1/3each target. Proposed focused CI2
-reserves Windows starts3–4, no builds; hostedMac no starts/builds. Live setup0,
+Windows actual1/3packages and2/6starts beforeCI2; pairedCI2/3each target. Focused CI2
+reserves Windows starts3–4, no builds; hostedMac no starts/builds. Audit actual
+CI2 reservations even on missing/malformed terminal receipts before updating counts. Live setup0,
 each five-action0/2, total0/10; discovery0/0. Test setup counts toward ten separately.
 Keep earlier failed attempts; no automatic retries. Ordinary saved credential is
 preserved and never deleted as temporary cleanup.
+
+**Next resume:** audit exactCI2 run38232733035/attempt1 and both required target
+artifacts, product/harness/input/ZIP/exe bindings, native Settings receipts/PNGs,
+three fixture requests, actual reservations, failure logs and cleanup. Mac fixture
+gates are automated proof only. Missing/failed/skipped native cases remain failed.
+Manual same-thread wait applies; no autonomous polling/watcher or next outcome.
+Ignored ci-02-preflight/dispatch/confirmed receipts own operation admission and
+identity. Then continue owner native/live on unlock, within unchanged caps.
 
 **Owner UI blocker:** the Mac is locked; CUA inventory confirms native access
 unavailable. An unlock question is pending. Process21809 is already running the exact

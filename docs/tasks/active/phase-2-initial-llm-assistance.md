@@ -7276,3 +7276,36 @@ Exact local pre-dispatch checks17+7 pass, actionlint and seven-file changed-sour
 privacy pass; product renderer/core/desktop/dependency inputs remain unchangedvs929.
 Focused CI2 will validate actual Windows behavior; local fixture/review results do
 not establish native success or cleanup. Publication is covered by express CI authority.
+
+
+#### Focused closeout CI2 confirmed dispatch — 2026-10-12
+
+Published reviewed external harness36a11c9822b400143bc593232af17067cd963ed0,
+treeec20bc685998cc5af7c61643f72890a98ed502a0. Fresh local/origin match; no unrelated
+changes/reset/force-push. Explicit CI authority covers this publication/dispatch.
+No active prior workflow or existing run for this harness SHA was found.
+[Run38232733035](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38232733035),
+attempt1, workflow_dispatch, branchcodex/provider-qualification, exact harness36a11c9;
+created2026-10-12T09:52:52UTC, confirmed queued2026-10-12T09:52:54UTC.
+Selectors selectable_proposals=true/studio_setup_only=true, dispatchordinal2,
+Windows firstlaunch3; older selectors false, upload false, legacy reuse inputs empty.
+No duplicate request or retry. Product checkout explicitly929; existing Windows
+CI1 package/executable reused. Separate seven-file harness inventory/digest is recorded
+alongside frozen269product inputs at execution. No build/SDK acquisition/live key.
+
+Cumulative paired dispatches now2/3 each target, one remaining. Actual beforeCI2:
+Windows package1/3/starts2/6; CI2 reserves starts3–4, no package. OwnerMac package1/3/
+starts3/6, hostedMacCI2 zero packages/starts. Live setup0, five actions0/2 each,
+total0/10; discovery0/0. Actual CI2 attempts/failures and cleanup require terminal
+artifact audit; independent reservation counts survive missing/malformed terminal.
+Owner Mac remains locked, ordinary saved profile/key preserved, synthetic project
+retained for authorized continuation, no fresh credential entry needed. No final
+native/live acceptance or human sign-off claimed.
+
+Manual same-thread pause: on user resume audit this exact run/attempt and both
+required artifacts, exact product/harness/ZIP/input/executable bindings, new native
+Settings controls/PNG/request/cancellation/reopen evidence, reservations and cleanup.
+Retain every failure; do not retry or claim skips/missing proof pass. Reuse CI1's
+unchanged integrated evidence. Finish owner native/live after unlock, then independently
+review integrated execution for the user's final decision. Requested UI prompt/guided
+feedback handoff follows verification; no new outcome has begun.

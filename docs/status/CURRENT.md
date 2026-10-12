@@ -1,8 +1,7 @@
 # Current status
 
 **Updated:** 2026-10-12. **Studio-only Phase2 closeout: first paired CI passed and
-independently audited; focused Windows Settings proof and owner native/live completion
-remain.** Generic providers/Phase3, selected-route context and AI ending/connection
+independently audited; focused Windows Settings CI2 is queued; owner native/live completion remains.** Generic providers/Phase3, selected-route context and AI ending/connection
 expansion are outside this outcome. Full Phase2 and final human acceptance remain incomplete.
 
 | Capability | Evidence | Acceptance |
@@ -22,15 +21,18 @@ SDK results and cleanup independently audited. Verification scripts/workflows fo
 remaining Windows Settings proof use a separate harness ref and reuse CI1's exact
 Windows executable; no new product build or broader matrix is required.
 
-Fresh local/origin continuation ref1d03e45be39c0ac73ce3618f5aeb00c7876b2dce;
+Published verification harness36a11c9822b400143bc593232af17067cd963ed0,
+treeec20bc685998cc5af7c61643f72890a98ed502a0; product remains frozen929.
+Fresh local/origin continuation matched that ref before dispatch;
 origin/main5f448ca683a905f4ea77d4580bbc89fda69f2b93. Current edits are external
 verification/status only. Express CI publication/dispatch and native/live authority
 remain; no reset, force-push, merge, release, signing or provider expansion.
 
 Counts: Mac1/3packages,3/6starts conservatively charged, including the earlier
 possible implicit lookup; process21809 already running. Windows1/3packages,2/6starts
-actual; pairedCI1/3 each target. Proposed focused CI2 uses Windows starts3–4, zero
-new packages; hosted Mac zero editor starts. No CI2 dispatch yet. Live setup0,
+actual; pairedCI2/3 each target. Confirmed [focused run38232733035](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38232733035),
+attempt1/exact harness36a11c9, queued. Windows starts3–4 reserved, zero new packages;
+hosted Mac zero editor starts. Actual CI2 consumption/results await artifact audit. Live setup0,
 each action0/2, total0/10; discovery0/0. The Mac is locked, so owner UI/live cannot
 continue until the user unlocks it. Ordinary saved profile/key remains preserved.
 Synthetic native project is prepared; no live send or model discovery occurred.
