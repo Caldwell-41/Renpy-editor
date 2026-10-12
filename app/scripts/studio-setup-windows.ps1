@@ -59,10 +59,15 @@ function Assert-FieldOwner {
     Assert-Native ($script:window.Current.ProcessId -eq $ProcessId) 'Field owner window/PID mismatch'
     Assert-Native ([RewriteNative]::GetForegroundWindow() -eq $script:handle) 'Owned window lost foreground before typing'
 }
+function Field-TypeAllowed([string]$Name,$Type) {
+    # Model ID is a text input with a datalist in the frozen product. WebView
+    # exposes that editable input as ComboBox; other fields must stay typed.
+    return ($Type -in @([System.Windows.Automation.ControlType]::Edit,[System.Windows.Automation.ControlType]::Spinner) -or ($Name -eq 'Model ID' -and $Type -eq [System.Windows.Automation.ControlType]::ComboBox))
+}
 function Field-FocusReady($Control) {
     $focused=[System.Windows.Automation.AutomationElement]::FocusedElement
     if($null -eq $focused -or $focused.Current.IsPassword -or -not $focused.Current.HasKeyboardFocus) {return $false}
-    if($focused.Current.ControlType -notin @([System.Windows.Automation.ControlType]::Edit,[System.Windows.Automation.ControlType]::Spinner)) {return $false}
+    if(-not (Field-TypeAllowed $Control.Current.Name $focused.Current.ControlType)) {return $false}
     if([System.Windows.Automation.Automation]::Compare($Control,$focused)) {return $true}
     foreach($child in $Control.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition)) {
         if([System.Windows.Automation.Automation]::Compare($child,$focused)) {return $true}
@@ -78,9 +83,10 @@ function Set-Field([string]$Name,[string]$Text) {
     Assert-Native ($Name -in @('Profile name','Endpoint','Model ID','Temperature','Top-p')) 'Nonsecret fixture field whitelist required'
     $receipt.pendingNativeAction='Set field: '+$Name
     $control=Control $Name
-    Assert-Native (-not $control.Current.IsPassword -and $control.Current.ControlType -in @([System.Windows.Automation.ControlType]::Edit,[System.Windows.Automation.ControlType]::Spinner)) 'Typed nonpassword field required'
-    $diagnostic=[ordered]@{name=$Name;expected=$Text;before=(Value $Name);lastReadback=$null;type=$control.Current.ControlType.ProgrammaticName;physicalClick=$false;keyboardFocusConfirmed=$false;readbackMatched=$false}
+    $diagnostic=[ordered]@{name=$Name;expected=$Text;before=$null;lastReadback=$null;type=$control.Current.ControlType.ProgrammaticName;physicalClick=$false;keyboardFocusConfirmed=$false;readbackMatched=$false}
     $receipt.fieldEntries+=@($diagnostic)
+    Assert-Native (-not $control.Current.IsPassword -and (Field-TypeAllowed $Name $control.Current.ControlType)) 'Typed nonpassword field required'
+    $diagnostic.before=Value $Name
     Assert-FieldOwner
     Click-Any $Name
     $diagnostic.physicalClick=$true

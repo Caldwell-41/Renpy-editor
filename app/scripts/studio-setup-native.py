@@ -168,7 +168,7 @@ def validate_stage(receipt, stage, pid, directory):
         entries = receipt.get('fieldEntries', [])
         assert [e.get('name') for e in entries] == names, 'Exact field input proof missing'
         for entry in entries:
-            assert entry.get('type') in ('ControlType.Edit', 'ControlType.Spinner')
+            assert entry.get('type') in ('ControlType.Edit', 'ControlType.Spinner') or (entry.get('name') == 'Model ID' and entry.get('type') == 'ControlType.ComboBox')
             assert all(entry.get(k) is True for k in ('physicalClick', 'keyboardFocusConfirmed', 'readbackMatched'))
             assert isinstance(entry.get('expected'), str) and entry.get('lastReadback') == entry['expected']
     if stage in ('seed', 'reopen'):

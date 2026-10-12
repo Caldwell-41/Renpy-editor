@@ -7912,3 +7912,59 @@ needed extension before invoking them. It can fix/review/run controlled fixtures
 within scope in the meantime. No key entry/read/export, signing/provider changes,
 merge/release or Phase3. Preserve all failed evidence; missing cleanup stays failed.
 Final human acceptance and UI-refinement/feedback outcome remain unstarted.
+
+#### Independent Sol CI6 audit and Model ID harness repair — 2026-10-13
+
+New requested review chat is sole writer/executor. Fresh remote refs match local
+8b9a5e5b08e099c1eb6adb21a49646d834381761 and main5f448ca; working tree was clean.
+No reset, product/package/signing change or unrelated work lost.
+CI6run38296502071/attempt1/exact b0d24b641363cec1cc90a5f1b3203f27753f3647
+completed **failure** at2026-10-12T19:17:12Z. Windows114968781118 failed;
+Mac114968781197 passed. Required Win18+9/Mac18+7 fixtures pass with no skips;
+Mac native skips are intentional. All nine required Windows native stages remain
+incomplete (0/9), so a fixture pass is not native qualification.
+
+Exact artifacts Windows11768083378/digest965f2806f0a22837484b376157e52104c99f848d7d3896b53f40cd42a904b131
+and Mac11768492749/digest0a80406b463db49f0a1e636ae888dc0de421be07baa68c2f7e0d40f8473648fc
+are downloaded and independently checked. Outer/reuse/qualification manifest
+counts W106/82/78, M54/47/43; all269 frozen929 product blobs/canonical digest,
+seven harness blobs/declared PS1CRLF, package identity and CI1 executable match.
+Artifacts expire2026-10-19; ignored ci-06-artifacts and independent-ci-06-audit.py/json
+retain exact bindings. Both actual PNGs viewed and framing/hashes verified.
+
+Windows reserves/starts **5 only**, PID7408. Defaults1/.95 and Profile name/Endpoint
+physical click, keyboard focus and exact readback pass. Seed fails **Set field:
+Model ID / Typed nonpassword field required** before profile save/credential entry;
+zero HTTP, 0/9 complete stages. The exact rejected type was not recorded. Frozen
+ai-settings-ui.ts uses a text input with a datalist, supporting editable ComboBox
+as the next discriminating harness hypothesis. No product defect established.
+Cleanup UI shows no configured credential; normal exit0/forcedfalse and listener
+stop are retained. Root remains for absent ai-profiles.json: cleanup is still
+incomplete, not an inferred pass. Native privacy15files passes. Browser class
+unregistration message in the app log does not establish a product defect or
+invalidate the observed exit0; native functional proof remains missing separately.
+
+Reviewed local repair permits ComboBox **only for Model ID**, keeps ordinary typed
+fields and physical click/focus/readback/PID/executable/foreground/viewport guards,
+and logs safe whitelisted type before rejection/value reads. ValuePattern remains
+observation only; no renderer injection or secret diagnostics. Gate mirrors the
+narrow type rule. Actual Windows helper fixture tests the shared type predicate,
+wrong ComboBox and nontyping-control rejection, production focus predicate wiring,
+API owners, delayed/blocked focus and exact input order. Mocked focus does not
+claim actual native proof. TESTING replaces stale starts3–4 with approved cumulative
+reservations. Independent read-only code/artifact review and focused re-review pass;
+no further supported blocker found. Local18+7 portable gates, Python syntax,
+actionlint, changed-source privacy3files and whitespace pass. Windows9 actual
+helper cases await the next authorized CI; no app/provider operation consumed.
+
+**Exact blocker:** pairedCI6/7 each target, Windows starts5/6 and package1/3;
+Mac starts5/6/package1/3, live8/10/Rewrite3/4/discovery0 unchanged. CI7 is authorized,
+but successful native proof requires initial start6 and process reopen7. The
+transfer expressly retained editor ceiling6. Asked user for **Windows-only ceiling
+6→7**; approval is pending. No CI7 dispatch/native invocation or ordinal-cap change
+has occurred. Continue in this same chat after the answer: if approved, bind
+CI7/start6–7 across preparation/controller/parser/terminal/sealing/fixtures, check
+and review exact changes, publish normally and dispatch exactly once. If declined,
+retain native proof incomplete; do not spend CI7 on an incomplete sequence unless
+user selects fixtures only. No new owner launch/send/SDK, merge/release, Phase3 or
+UI refinement execution. Final human acceptance remains unclaimed.

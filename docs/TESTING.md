@@ -1767,7 +1767,8 @@ registered production workflow with both `selectable_proposals` and
 This verification checks out frozen929 separately from its harness ref, verifies
 CI1's pinned artifact ZIP/complete manifests and269product inputs, and reuses the
 exact audited executable. It performs no build, SDK acquisition or model discovery.
-Windows reserves cumulative starts3–4 before process creation; paired Mac checks
+Windows reserves the approved cumulative start ordinals before process creation;
+all reservations count even when terminal proof is missing. Paired Mac checks
 only new fixture/receipt and artifact identity gates with zero packages/editor starts.
 The ordinary isolated UI receives a known public fixture key through its native
 masked dialog; a loopback fixture accepts only three exact synthetic Test setup POSTs

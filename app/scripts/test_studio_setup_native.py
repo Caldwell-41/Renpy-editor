@@ -136,8 +136,9 @@ class NativeSettingsGate(unittest.TestCase):
             receipt = {'passed': True, 'stage': 'seed', 'processId': 123, 'executableSHA256': h.EXE_SHA, 'inputDesktop': 'Default', 'checks': {k: True for k in ['ownedWindow', 'osMouseInput', 'osKeyboardInput', 'controlsInViewport', 'navigationControlsReady', *h.CHECKS['seed']]}, 'captures': [{'file': 'native.png', 'sha256': h.sha(image), 'width': 200, 'height': 100, 'sampleRange': 40}], 'preview': {'raw': raw, 'rawSHA256': hashlib.sha256(raw.encode()).hexdigest(), 'body': body}}
             receipt['fieldEntries'] = [{'name': n, 'type': 'ControlType.Edit', 'physicalClick': True, 'keyboardFocusConfirmed': True, 'readbackMatched': True, 'expected': 'public fixture', 'lastReadback': 'public fixture'} for n in ['Profile name', 'Endpoint', 'Model ID', 'Temperature', 'Top-p']]
             receipt['controls'] = [{'name': n, 'value': v, 'enabled': True, 'owner': 123} for n, v in [('Temperature', '1'), ('Top-p', '0.95'), ('Temperature', '0.8'), ('Top-p', '0.9')]]
+            receipt['fieldEntries'][2]['type'] = 'ControlType.ComboBox'
             h.validate_stage(receipt, 'seed', 123, root)
-            for kind in ['pid', 'image', 'input', 'preview', 'missing', 'duplicate', 'field', 'defaults', 'navigation', 'field-focus', 'field-readback', 'field-type']:
+            for kind in ['pid', 'image', 'input', 'preview', 'missing', 'duplicate', 'field', 'defaults', 'navigation', 'field-focus', 'field-readback', 'field-type', 'wrong-combo']:
                 value = copy.deepcopy(receipt)
                 if kind == 'pid': value['processId'] = 321
                 elif kind == 'image': value['captures'][0]['sha256'] = '0' * 64
@@ -146,6 +147,7 @@ class NativeSettingsGate(unittest.TestCase):
                 elif kind == 'navigation': value['checks']['navigationControlsReady'] = False
                 elif kind == 'field-focus': value['fieldEntries'][0]['keyboardFocusConfirmed'] = False
                 elif kind == 'field-readback': value['fieldEntries'][0]['lastReadback'] = 'different'
+                elif kind == 'wrong-combo': value['fieldEntries'][0]['type'] = 'ControlType.ComboBox'
                 elif kind == 'field-type': value['fieldEntries'][0]['type'] = 'ControlType.Text'
                 elif kind == 'field': value['controls'][-1]['value'] = '0.95'
                 elif kind == 'defaults': value['controls'] = value['controls'][2:]
@@ -183,12 +185,26 @@ foreach($call in $comparisons) {
     if($null -eq $compare -or -not $compare.IsStatic) {throw 'Production Compare API owner/overload invalid'}
     if(-not $compare.Invoke($null,[object[]]@($root,$root))) {throw 'Actual production Compare API did not match identical observed elements'}
 }
-$function=$ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Set-Field'},$true)
-. ([scriptblock]::Create($function.Extent.Text))
+foreach($name in @('Field-TypeAllowed','Set-Field')) {
+    $function=$ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
+    if($null -eq $function) {throw ('Missing actual field helper: '+$name)}
+    . ([scriptblock]::Create($function.Extent.Text))
+}
+# Exercise the actual type predicate shared by guard and focus, including
+# rejecting all other combo boxes. Mocked focus sequencing is not native proof.
+foreach($name in @('Profile name','Endpoint','Model ID','Temperature','Top-p')) {
+    if(-not (Field-TypeAllowed $name ([System.Windows.Automation.ControlType]::Edit))) {throw 'Typed edit rejected'}
+    if((Field-TypeAllowed $name ([System.Windows.Automation.ControlType]::ComboBox)) -ne ($name -eq 'Model ID')) {throw 'Overbroad combo admission'}
+    foreach($type in @([System.Windows.Automation.ControlType]::Text,[System.Windows.Automation.ControlType]::Button,[System.Windows.Automation.ControlType]::List)) {
+        if(Field-TypeAllowed $name $type) {throw 'Nontyping control admitted'}
+    }
+}
+$predicates=$focus.FindAll({param($n) $n -is [System.Management.Automation.Language.CommandAst] -and $n.GetCommandName() -eq 'Field-TypeAllowed'},$true)
+if($predicates.Count -ne 1) {throw 'Actual focus must use reviewed type predicate'}
 $receipt=[ordered]@{checks=[ordered]@{};fieldEntries=@()}
-$script:events=@();$script:polls=0;$script:blocked=$false;$script:value='before'
+$script:events=@();$script:polls=0;$script:blocked=$false;$script:value='before';$script:type=[System.Windows.Automation.ControlType]::Edit
 function Assert-Native($State,$Message) {if(-not $State) {throw $Message}}
-function Control($Name) {return [pscustomobject]@{Current=[pscustomobject]@{IsPassword=$false;ControlType=[System.Windows.Automation.ControlType]::Edit}}}
+function Control($Name) {return [pscustomobject]@{Current=[pscustomobject]@{IsPassword=$false;ControlType=$script:type}}}
 function Value($Name) {return $script:value}
 function Assert-FieldOwner {$script:events+=@('owner')}
 function Click-Any($Name) {$script:events+=@('click')}
@@ -205,6 +221,12 @@ if($entry.before -ne 'before' -or $entry.lastReadback -ne 'public fixture' -or -
 $script:events=@();$script:polls=0;$script:blocked=$true;$caught=$false
 try {Set-Field 'Profile name' 'public fixture'} catch {$caught=$_.Exception.Message -eq 'Bounded focus timeout'}
 if(-not $caught -or $script:events -contains 'keys' -or $receipt.fieldEntries[1].keyboardFocusConfirmed) {throw 'Wrong focus allowed typing'}
+$script:events=@();$script:polls=0;$script:blocked=$false;$script:type=[System.Windows.Automation.ControlType]::ComboBox
+Set-Field 'Model ID' 'closeout-synthetic-setup'
+if(($script:events -join ',') -ne 'owner,click,owner,keys' -or -not $receipt.fieldEntries[-1].readbackMatched) {throw 'Editable model combo missing physical focus/readback'}
+$script:events=@();$caught=$false
+try {Set-Field 'Endpoint' 'public fixture'} catch {$caught=$_.Exception.Message -eq 'Typed nonpassword field required'}
+if(-not $caught -or $script:events.Count -ne 0 -or $receipt.fieldEntries[-1].type -ne 'ControlType.ComboBox' -or $null -ne $receipt.fieldEntries[-1].before) {throw 'Unlisted combo allowed typing/value read or missed diagnostics'}
 $script:events=@();$caught=$false
 try {Set-Field 'Credential' 'forbidden'} catch {$caught=$_.Exception.Message -eq 'Nonsecret fixture field whitelist required'}
 if(-not $caught -or $script:events.Count -ne 0) {throw 'Unlisted field allowed input or diagnostics'}
