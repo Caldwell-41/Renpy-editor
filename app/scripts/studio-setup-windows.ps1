@@ -69,10 +69,67 @@ function Observe-Field([string]$Name,[string]$Expected) {
     $receipt.controls+=@([ordered]@{name=$Name;value=(Value $Name);type=$control.Current.ControlType.ProgrammaticName;enabled=$control.Current.IsEnabled;owner=$script:window.Current.ProcessId;elementProcessId=$control.Current.ProcessId})
 }
 function Capture-Stage([string]$Name) { $receipt.captures+=@(Capture $Name (Window-Rect $script:handle)) }
-function Open-Settings {
-    if($null -eq (Button 'Close settings')) {Click-Control 'Settings';Wait-Native {$null -ne (Button 'AI providers')};Click-Control 'AI providers'}
-    Wait-Native {$null -ne (Button 'Save profile')}
+function Wait-ButtonReady([string]$Name) {
+    $receipt.pendingNativeAction=$Name
+    # A native window/foreground handle does not establish WebView readiness.
+    # Re-query the exact typed button using the qualified bounded polling helper.
+    Wait-Native {Has-ButtonState $Name $true}
 }
+function Open-Settings {
+    if($null -eq (Button 'Close settings')) {
+        Wait-ButtonReady 'Settings';Click-Control 'Settings'
+        Wait-ButtonReady 'AI providers';Click-Control 'AI providers'
+    }
+    Wait-ButtonReady 'Save profile'
+    $receipt.checks.navigationControlsReady=$true
+}
+function Failure-CaptureAllowed([bool]$ForegroundOwned,[int]$OwnedWindowCount,[bool]$MainWindowObserved,[bool]$PasswordPresent) {
+    return ($ForegroundOwned -and $OwnedWindowCount -eq 1 -and $MainWindowObserved -and -not $PasswordPresent)
+}
+function Observe-FailureState {
+    # Observation only: no focus change, clicking, ValuePattern, TextPattern,
+    # password text, OS credentials or renderer bridge. Failures stay failed.
+    $snapshot=[ordered]@{ownedWindowVerified=$false;selectedWindowIsMain=$false;foregroundOwned=$false;ownedTopLevelCount=0;mainWindowObserved=$false;expectedButtons=@();observedButtons=@();otherButtonCount=0;passwordControlPresent=$false;capture=$null;captureSuppressed=$true}
+    $receipt.failureSnapshot=$snapshot
+    if($ProcessId -le 0 -or -not $receipt.checks.Contains('ownedWindow')) {return}
+    $owned=Get-Process -Id $ProcessId
+    Assert-Native ([IO.Path]::GetFullPath($owned.Path) -eq [IO.Path]::GetFullPath($Executable)) 'Failure observation owner mismatch'
+    Assert-Native ($script:window.Current.ProcessId -eq $ProcessId) 'Failure observation window/PID mismatch'
+    $snapshot.ownedWindowVerified=$true
+    $snapshot.selectedWindowIsMain=($script:handle -eq $script:mainWindowHandle)
+    $snapshot.foregroundOwned=($snapshot.selectedWindowIsMain -and [RewriteNative]::GetForegroundWindow() -eq $script:mainWindowHandle)
+    # Native secure entry is a separate top-level window. Observe every owned
+    # top-level tree, including hidden/modal windows; never read control values.
+    $ownerCondition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty,$ProcessId)
+    $ownedWindows=[System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Children,$ownerCondition)
+    $passwordCondition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::IsPasswordProperty,$true)
+    foreach($ownedWindow in $ownedWindows) {
+        $snapshot.ownedTopLevelCount++
+        if([int64]$ownedWindow.Current.NativeWindowHandle -eq $script:mainWindowHandle.ToInt64()) {$snapshot.mainWindowObserved=$true}
+        if($ownedWindow.Current.IsPassword -or $ownedWindow.FindAll([System.Windows.Automation.TreeScope]::Descendants,$passwordCondition).Count -gt 0) {$snapshot.passwordControlPresent=$true}
+    }
+    $names=@('Settings','AI providers','Close settings','Save profile','Test setup','Cancel setup test','Remove profile','Remember','Cancel')
+    foreach($name in $names) {
+        $control=Button $name
+        $snapshot.expectedButtons+=@([ordered]@{name=$name;present=($null -ne $control);enabled=($null -ne $control -and $control.Current.IsEnabled)})
+    }
+    foreach($node in (Nodes)) {
+        if($node.Current.IsPassword) {$snapshot.passwordControlPresent=$true;continue}
+        if($node.Current.ControlType -eq [System.Windows.Automation.ControlType]::Button) {
+            if($node.Current.Name -in $names) {
+                $snapshot.observedButtons+=@([ordered]@{name=$node.Current.Name;enabled=$node.Current.IsEnabled;offscreen=$node.Current.IsOffscreen;type=$node.Current.ControlType.ProgrammaticName})
+            } else {$snapshot.otherButtonCount++}
+        }
+    }
+    # An overlapping secure dialog or unrelated foreground window suppresses
+    # pixels. Recheck foreground immediately before capture; never change focus.
+    $snapshot.foregroundOwned=($snapshot.selectedWindowIsMain -and [RewriteNative]::GetForegroundWindow() -eq $script:mainWindowHandle)
+    if(Failure-CaptureAllowed $snapshot.foregroundOwned $snapshot.ownedTopLevelCount $snapshot.mainWindowObserved $snapshot.passwordControlPresent) {
+        $snapshot.capture=Capture 'failure-owned-window' (Window-Rect $script:mainWindowHandle)
+        $snapshot.captureSuppressed=$false
+    }
+}
+
 function Preview {
     Click-Any 'Synthetic setup test request'
     Wait-Native {Has-Text 'loomlight_compatibility_v1'}
@@ -125,6 +182,7 @@ function Secure-Entry {
 function Select-MainWindow {
     Wait-Native {(Get-Process -Id $ProcessId).MainWindowHandle -ne [IntPtr]::Zero}
     $script:handle=(Get-Process -Id $ProcessId).MainWindowHandle
+    $script:mainWindowHandle=$script:handle
     $script:window=[System.Windows.Automation.AutomationElement]::FromHandle($script:handle)
     Assert-Native ($script:window.Current.ProcessId -eq $ProcessId) 'Owned window/PID mismatch'
     [void][RewriteNative]::SetForegroundWindow($script:handle)
@@ -209,6 +267,7 @@ try {
     $receipt.passed=$true
 } catch {
     $receipt.error=$_.Exception.Message
+    try {Observe-FailureState} catch {$receipt.failureSnapshotError=$_.Exception.Message}
 } finally {
     $receipt | ConvertTo-Json -Depth 24 | Out-File -FilePath (Join-Path $Output 'receipt.json') -Encoding utf8
 }

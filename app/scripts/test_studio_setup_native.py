@@ -3,6 +3,8 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
+import subprocess
 import struct
 import zlib
 from pathlib import Path
@@ -23,7 +25,7 @@ def png(width=200, height=100):
 
 def terminal():
     hashes = ['a' * 64, 'b' * 64, 'b' * 64]
-    value = {'passed': True, 'candidate': h.CANDIDATE, 'tree': h.TREE, 'executableSHA256': h.EXE_SHA, 'artifact': copy.deepcopy(h.ARTIFACT), 'materialInputCount': 269, 'materialInputDigest': h.INPUT_DIGEST, 'launchOrdinals': [3, 4], 'appLaunches': 2, 'packageAttempts': 0, 'completedStages': list(h.STAGES), 'normalExits': [0, 0], 'requests': [{'sequence': n, 'accepted': True, 'method': 'POST', 'path': '/v1/chat/completions', 'bodySHA256': hashes[n-1], **({'clientClosed': True} if n == 2 else {'responseSent': True})} for n in (1, 2, 3)], 'requestPreviewSHA256': hashes}
+    value = {'passed': True, 'candidate': h.CANDIDATE, 'tree': h.TREE, 'executableSHA256': h.EXE_SHA, 'artifact': copy.deepcopy(h.ARTIFACT), 'materialInputCount': 269, 'materialInputDigest': h.INPUT_DIGEST, 'launchOrdinals': [4, 5], 'appLaunches': 2, 'packageAttempts': 0, 'completedStages': list(h.STAGES), 'normalExits': [0, 0], 'requests': [{'sequence': n, 'accepted': True, 'method': 'POST', 'path': '/v1/chat/completions', 'bodySHA256': hashes[n-1], **({'clientClosed': True} if n == 2 else {'responseSent': True})} for n in (1, 2, 3)], 'requestPreviewSHA256': hashes}
     for name in ['noSaveHTTP', 'cancelProfileUnchanged', 'reopenNoHTTP', 'reopenProfileUnchanged', 'sourceUnchanged', 'profileReferencesRemoved', 'rootRemoved', 'listenerStopped', 'noCredentialRead', 'noDiscovery']:
         value[name] = True
     return value
@@ -56,7 +58,7 @@ class NativeSettingsGate(unittest.TestCase):
         with self.assertRaises(AssertionError): h.validate_terminal(v)
 
     def test_no_extra_launch_build_discovery_or_request(self):
-        mutations = [('launchOrdinals', [3, 4, 5]), ('launchOrdinals', [1, 2]), ('appLaunches', 3), ('packageAttempts', 1), ('artifact', {**h.ARTIFACT, 'attempt': 2})]
+        mutations = [('launchOrdinals', [4, 5, 6]), ('launchOrdinals', [3, 4]), ('launchOrdinals', [1, 2]), ('appLaunches', 3), ('packageAttempts', 1), ('artifact', {**h.ARTIFACT, 'attempt': 2})]
         for key, bad in mutations:
             v = terminal(); v[key] = bad
             with self.subTest(key=key), self.assertRaises(AssertionError): h.validate_terminal(v)
@@ -126,21 +128,81 @@ class NativeSettingsGate(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); image = root / 'native.png'; image.write_bytes(png())
             body = h.expected_body(.8, .9); raw = json.dumps(body, separators=(',', ':'))
-            receipt = {'passed': True, 'stage': 'seed', 'processId': 123, 'executableSHA256': h.EXE_SHA, 'inputDesktop': 'Default', 'checks': {k: True for k in ['ownedWindow', 'osMouseInput', 'osKeyboardInput', 'controlsInViewport', *h.CHECKS['seed']]}, 'captures': [{'file': 'native.png', 'sha256': h.sha(image), 'width': 200, 'height': 100, 'sampleRange': 40}], 'preview': {'raw': raw, 'rawSHA256': hashlib.sha256(raw.encode()).hexdigest(), 'body': body}}
+            receipt = {'passed': True, 'stage': 'seed', 'processId': 123, 'executableSHA256': h.EXE_SHA, 'inputDesktop': 'Default', 'checks': {k: True for k in ['ownedWindow', 'osMouseInput', 'osKeyboardInput', 'controlsInViewport', 'navigationControlsReady', *h.CHECKS['seed']]}, 'captures': [{'file': 'native.png', 'sha256': h.sha(image), 'width': 200, 'height': 100, 'sampleRange': 40}], 'preview': {'raw': raw, 'rawSHA256': hashlib.sha256(raw.encode()).hexdigest(), 'body': body}}
             receipt['controls'] = [{'name': n, 'value': v, 'enabled': True, 'owner': 123} for n, v in [('Temperature', '1'), ('Top-p', '0.95'), ('Temperature', '0.8'), ('Top-p', '0.9')]]
             h.validate_stage(receipt, 'seed', 123, root)
-            for kind in ['pid', 'image', 'input', 'preview', 'missing', 'duplicate', 'field', 'defaults']:
+            for kind in ['pid', 'image', 'input', 'preview', 'missing', 'duplicate', 'field', 'defaults', 'navigation']:
                 value = copy.deepcopy(receipt)
                 if kind == 'pid': value['processId'] = 321
                 elif kind == 'image': value['captures'][0]['sha256'] = '0' * 64
                 elif kind == 'input': value['checks']['osKeyboardInput'] = False
                 elif kind == 'preview': value['preview']['body']['enable_tools'] = True
+                elif kind == 'navigation': value['checks']['navigationControlsReady'] = False
                 elif kind == 'field': value['controls'][-1]['value'] = '0.95'
                 elif kind == 'defaults': value['controls'] = value['controls'][2:]
                 elif kind == 'duplicate':
                     raw = value['preview']['raw'].replace('"stream":false', '"stream":true,"stream":false');value['preview']['raw'] = raw;value['preview']['rawSHA256'] = hashlib.sha256(raw.encode()).hexdigest()
                 else: value['captures'] = []
                 with self.subTest(kind=kind), self.assertRaises((AssertionError, ValueError, zlib.error)): h.validate_stage(value, 'seed', 123, root)
+
+
+# Windows executes the actual PowerShell helper test; Mac collects only portable gates.
+if os.name == 'nt':
+    class NativeReadinessPolling(unittest.TestCase):
+        def test_actual_navigation_helper_waits_for_enabled_controls_without_early_input(self):
+            script_path = Path(__file__).with_name('studio-setup-windows.ps1').resolve()
+            script = r"""
+    $ErrorActionPreference='Stop'
+    Set-StrictMode -Version Latest
+    $tokens=$null;$errors=$null
+    $ast=[System.Management.Automation.Language.Parser]::ParseFile('__SCRIPT__',[ref]$tokens,[ref]$errors)
+    if($errors.Count) {throw 'External native harness syntax invalid'}
+    foreach($name in @('Wait-ButtonReady','Open-Settings','Failure-CaptureAllowed')) {
+        $function=$ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
+        if($null -eq $function) {throw ('Missing navigation helper: '+$name)}
+        . ([scriptblock]::Create($function.Extent.Text))
+    }
+    $receipt=[ordered]@{checks=[ordered]@{}}
+    $script:clicks=@();$script:polls=@{};$script:ready=@{};$script:blocked=$false
+    function Button($Name) {return $null}
+    function Has-ButtonState($Name,$Enabled) {
+        if(-not $script:polls.ContainsKey($Name)) {$script:polls[$Name]=0}
+        $script:polls[$Name]++
+        if($script:blocked) {return $false}
+        $ready=$script:polls[$Name] -ge 3
+        $script:ready[$Name]=$ready
+        return $ready
+    }
+    function Wait-Native([scriptblock]$Check) {
+        for($i=0;$i -lt 5;$i++) {if(& $Check) {return}}
+        throw 'Bounded readiness timeout'
+    }
+    function Click-Control($Name) {
+        if(-not $script:ready.ContainsKey($Name) -or -not $script:ready[$Name]) {throw 'Input before readiness'}
+        $script:clicks+=@($Name)
+    }
+    Open-Settings
+    if(($script:clicks -join ',') -ne 'Settings,AI providers' -or $receipt.checks.navigationControlsReady -ne $true) {throw 'Missing observed navigation'}
+    foreach($name in @('Settings','AI providers','Save profile')) {if($script:polls[$name] -ne 3) {throw 'Missing/disabled control released wait'}}
+    $script:clicks=@();$script:blocked=$true;$receipt.checks.Clear();$caught=$false
+    try {Open-Settings} catch {$caught=$_.Exception.Message -eq 'Bounded readiness timeout'}
+    if(-not $caught -or $script:clicks.Count -ne 0 -or $receipt.checks.Contains('navigationControlsReady')) {throw 'Unavailable controls allowed input or passed readiness'}
+    if(-not (Failure-CaptureAllowed $true 1 $true $false)) {throw 'Single foreground owned nonpassword window rejected'}
+    foreach($foreground in @($false,$true)) {
+        foreach($count in @(0,1,2)) {
+            foreach($main in @($false,$true)) {
+                foreach($password in @($false,$true)) {
+                    $expected=($foreground -and $count -eq 1 -and $main -and -not $password)
+                    if((Failure-CaptureAllowed $foreground $count $main $password) -ne $expected) {throw 'Unsafe failure screenshot admission'}
+                }
+            }
+        }
+    }
+    Write-Output 'PASS: actual native navigation helper delays input until readiness and rejects bounded absence'
+    """.replace('__SCRIPT__', script_path.as_posix().replace("'", "''"))
+            result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script], capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn('PASS: actual native navigation helper', result.stdout)
 
 if __name__ == '__main__':
     unittest.main()

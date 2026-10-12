@@ -7610,3 +7610,139 @@ Run proves startup/Stop lifecycle; copy named oracle proves text and Return beha
 No reviewer execution/credential access/polling. Cleanup wording corrected from
 “cleaned” to verified absent: native save namespace already absent, zero files deleted.
 Ordinary Studio credential/profile and synthetic source/evidence remain preserved.
+
+#### CI4 terminal audit and two-send blocker recheck authority — 2026-10-13
+
+User explicitly requested the exact CI audit and **two additional synthetic sends**
+to recheck the live blocker. Only Rewrite-family ceiling2→4 changes; total10, zero
+discovery, editor/package and CI ceilings unchanged. Before recheck live7/10,
+Rewrite2/4, extension0/2. No provider/model/key/signing expansion.
+Fresh fetch matches local/origin65e937d0a4e115eb721649628af924de840ffcdd and
+main5f448ca; no unrelated work/reset. Existing MacPID29432 verified exact package.
+
+CI4 run38283334874/attempt1/harness8b0efbb/product929 is terminal **failure**.
+Independent exact ZIP/manifest/input/executable audit passes: Windows104outer/82reuse/
+78child files, Mac54/47/43;269canonical product inputs and seven separate harness
+inputs/declaredPSCRLF match. Both18+7 fixture validators pass; Mac fixture job passes.
+Windows reserves/starts only ordinal3/PID1188, no ordinal4, no package build.
+Cumulative Windows package1/3, starts3/6; pairedCI4/4 exhausted.
+Native seed fails “Native action control unavailable” before first Settings action,
+no native Settings controls/defaults or captures and0/9 stages completed. Exact UI
+state is unavailable; initial window selection alone does not prove UI readiness.
+No product defect inferred. Actual preflight1920×1080PNG was viewed: desktop/runner
+terminal, not a Settings screen. Native privacy13files passes; HTTP0/discovery0.
+Listener stopped, but terminal forcedExittrue/rootRemovedfalse; successful close-after-
+failure receipt cannot override forced terminal exit. Cleanup remains failed/missing.
+Ignored independent-ci-04-audit.json/helper and exact downloads own the complete proof.
+No rerun/poll/dispatch or owner credential access during audit.
+
+First authorized live recheck uses exactly the previous three-operation task,
+permissions/references/model with response override2048→8192 and unchanged context
+32768, capacity262144, temperature1/topP.95/deadline600. Native review shows
+10912input+8192response+1092margin=20196; destination selected192.168.1.13:8888.
+Payloadce05eeb0be358b79a0123161631f152bff2587268b3232a6b23ce7d0669617f2.
+Potential incomplete completion/response allowance is a hypothesis, not proven cause.
+Original failed7 remains failed with zero writes; code locates its generic status at
+response-envelope validation, exact offending field unknown. Historical5f59322
+two live batches already succeeded; retain their narrower identity as reused proof.
+Send8 reserved before native click: total8/10, Rewrite3/4, extension1/2, discovery0.
+Native recheck result pending at this checkpoint; no source acceptance yet.
+
+#### Live blocker recheck closes owner integrated chain — 2026-10-13
+
+First of two newly authorized sends succeeds with8192 response reserve. Native
+valid three-operation proposal includes Sol Character (assignedc88a748c-3023-43c4-8803-e21a60cb6ee6),
+dialogue insertion and separately selectable narration replacement. No project writes
+before Save: all208snapshot file hashes match. Deselecting Character leaves insertion
+selected; native Save disables and reports “insert-sol-dialogue requires sol”; all208
+hashes still match. Restoring Character returns exact full preview digest
+98e95664f191e0a7c516a18ed3da187c43019ce555922ffadd9f7326809cc121.
+Deselect narration replacement; selected sol+insert-sol-dialogue subset preview
+df91a4f2ae613f80ae177530d76c38d4add240c713f05a122ebebd065c4e7b58 is reviewed,
+including exact Character/source patches and unchanged Return, then saved once.
+Native proposal consumed/Save disabled. Exact source is only one CRLF dialogue
+insertion before Return plus Character define append; original narration, Continue
+lines, Draft, custom/comments/BOM/mixedlines remain untouched. Only four existing
+files change: Scene1, Characters, authoring and source-map. All other existing
+files/references/prompts/extensions/assets remain byte exact.
+
+One native Undo restores104 authoritative hashes exactly; one Redo restores accepted
+104hashes. Project close/reopen and normal process33969/start5 reopen preserve
+accepted104files, generated approvals and edited prompts. Ordinary Settings shows
+Credential:configured and original saved model/endpoint/limits/sampling, including
+saved2048response: request8192override did not mutate profile. No key reentry/read/
+export, new discovery or automatic send. Exact Mac package executable remains
+618d31e5ba6ff817dcfcb5353c5938689d172fa123e6b90361508724f8878215.
+
+Native Validate4 finishesexit0. Run5 reports Running/LOOMLIGHT_RUNTIME_READY_V1,
+then Stop finishesexit0, launch revision
+410a6464bec0c1370f4ec7a3e1a0e98b1b392720024fb362ed97ad80677a9e0d.
+Native validation SDK revisionc093b2bc82e2f29840e0917dc2c1a2f54a1208dcf5f4b66c8243b5b8fc1e26c9;
+Run SDK revisionbdeadfc2947433443f7f69022f483612c21fe3bca001daba4bf9dfd25cd2e1b0.
+Final nine .rpy/52GUI asset/five core metadata hashes unchanged after SDK actions.
+Total native Validate4/Run5 requests retain all earlier failures.
+
+Changed-input SDK05 clones qualified04 assets and copies exact final9source bytes,
+no GUI override or editor metadata; only changed Scene/Character source differs.
+Compile/lint/named runtime3commands pass, actual12/12named+12init assertions include
+Sol's displayed speaker/dialogue, rewrite/protected formatting, Continue2, Draft2
+and Return. Receiptf91d148e20b0ef631f4c931a52b76f14fed475195e7ef9ad4490edaf3b3f9fb4;
+exactexport2deeb7f5273de5d7b9125a18dfde4f5d063abbcf3151021204024317a28f4ff1;
+oraclef5c51115785d687f20d37cddb3fe97a74eeccf166298fa00b5d07fd9e1ab5808;
+driver0636e651254326fbbc4601da34e0b5edf9572bb29f82b2391e6382fd34b7db3b.
+Prior04 evidence remains intact. Support SDK total11commands across five attempts,
+including failed01preflight0 and02command1; no complete unchanged matrix rerun.
+Owned saves removed by SDK driver; ordinary Studio profile/key preserved.
+Independent live/subset/history/reopen/nativeSDK/exact-copy review passes with no
+open owner findings. Ignored native-batch-recheck-01-* and owner-live-sdk-05 receipts
+own exact identities and byte proofs.
+
+Owner five-action-plus-selectable chain is now **passed** on exact929. Historical
+failed send7 stays failed with zero writes, cause unknown; successful send8 does not
+prove token truncation. Second newly authorized send remains unused; no reason to
+repeat a successful unchanged live check. Current live8/10, Rewrite3/4, extension1/2,
+discovery0; Mac package1/3/starts5/6; Windows package1/3/starts3/6; CI4/4 exhausted.
+Sole remaining technical gap: successful Windows native Settings stages and cleanup,
+failed in CI4. Final full-phase/human acceptance remains unclaimed.
+
+User explicitly approves **two more CI runs** for this same outcome. Paired CI
+ceiling4→6 per target; four consumed/two remaining before new dispatch. Other
+package/editor/live/discovery caps remain unchanged. Next focused run must be
+dispatchordinal5/startordinal4, attempt1, frozen929/reusedCI1package, no builds/
+Studio credential. Admission is advanced to that exact pair only; sixth run is
+not dispatched or automatically authorized as a rerun of the same attempt.
+No approval question is needed for this already-authorized next focused run.
+
+#### Reviewed Windows CI5 readiness repair — 2026-10-13
+
+The concrete external repair waits for enabled typed UIA Settings/AIproviders/
+Saveprofile controls using the existing bounded helper, before input. Exact PID/
+executable/foreground/viewport guards remain. Startup window existence alone
+previously allowed the first action too early; actual CI4 UI state/root cause is
+still unknown, so no product defect is inferred. Useful failure observation now
+records only whitelisted button presence/state; no credential values/TextPattern
+reads or focus changes. Screenshot admission requires saved main HWND foreground,
+exactly one same-PID top-level window with main observed and no passwords across
+all owned trees; foreground rechecked immediately before capture. Additional
+secure dialog/other foreground suppresses screenshot, leaving safe state evidence.
+Cleanup remains conservative/fail-closed and explains retained root.
+
+Retain preparation review failures: initial diagnostics inspected only main window
+and lacked foreground ownership; independent review rejected that gap, corrected
+to owned top-level/password/foreground guards. Initial Windows-only skip decorator
+would violate paired Mac no-skips gate; selection corrected to Windows-only class
+discovery (Mac7 no skips; Windows8 required). Parent advanced admission before all
+launch identities; review caught stale3–4 parser/controller/terminal/finish/fixtures,
+now all exact4–5. No editor/CI/provider attempts consumed by those reviews/fixes.
+Windows-only actual PowerShell test exercises delayed/absent navigation plus24
+screenshot-admission combinations; not executable on ownerMac and still pending
+Windows proof. First syntax cache destination denied by sandbox, then in-memory
+compilation passes, no runtime attempt. Local18+7 tests, syntax/actionlint/diff and
+ten-file changed-source privacy pass. Final independent repair review passes.
+
+No product/runtime/package/signing/input changes to frozen929; separate next harness
+identity owns these seven verification paths. CI5 dispatch5/start4/attempt1 admits
+only the authorized next run; Wstarts4–5 fit actual3/6, no builds or Studio credential,
+Mac fixtures only. If both starts consume, onlyWindowsstart6 remains and a full two-
+start CI6 cannot run under unchanged editor cap. Reassess actual reservations before
+any next run despite the second unused CI authorization. No blind retry/reset.
