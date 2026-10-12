@@ -3,7 +3,8 @@
 **Updated:** 2026-10-13. **Owner Studio-only integrated workflow passed on frozen929.
 CI4 remains failed; Windows native Settings and cleanup are the remaining technical
 gap. CI5 failed field-entry/readback after reaching Settings; the final focused
-CI6 repair passed independent review; the final authorized paired run is queued.**
+CI6 repair passed independent review; its last observed status is queued.
+User requests transfer to a new GPT-6.1 Sol audit/fix chat and one additional paired CI.**
 Final human acceptance is unclaimed. Generic providers/Phase3, selected-route
 context and AI ending/connection changes remain excluded or user-deferred.
 
@@ -44,7 +45,7 @@ prevent complete cleanup proof. No product defect inferred. All input/package/
 ZIP/manifest identities verified. CI5 stays failed.
 
 Counts: Mac package1/3, starts5/6 (one conservative implicit lookup), process33969;
-Windows package1/3, actual starts4/6 before CI6. **PairedCI6/6 each target exhausted.**
+Windows package1/3, actual starts4/6 before CI6. **PairedCI6/7 each target; one further pair expressly authorized on transfer.**
 [Final CI6run38296502071](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38296502071)
 confirmed attempt1/workflow_dispatch/exact harnessb0d24b641363cec1cc90a5f1b3203f27753f3647/
 tree554a377e58b7bb56446f30f07bd06d50b5831d64, queued2026-10-12T19:16:04Z.
@@ -53,9 +54,11 @@ declared PS1CRLF alternatives in ignored receipt. Final driver physically clicks
 confirms field focus before typing, records safe exact readback and failure exit;
 independent review/local18+7/syntax/actionlint/privacy pass. Windows18+9 required,
 Mac18+7 only; Wstarts5–6 planned, frozen929/CI1package, zero builds/Studio credential.
-Manual same-thread wait: END TURN, no polling/watcher/duplicate. On user resume,
-audit exact run/attempt/artifacts/native receipts and all reservations. Stop/report
-if last proof fails or caps block recovery. No new owner launch/send needed.
+New GPT-6.1 Sol chat owns the independent audit/fix continuation. First audit exact
+CI6/run/attempt/artifacts/native receipts and all reservations. Parent stops writing
+after transfer; no polling/watcher/duplicate. Additional CI does not extend editor
+cap6; explain and request an extension only if audited starts leave insufficient
+room for required native proof. No new owner launch/send needed.
 
 Live8/10: setup1, card1/2,lore1/2,Continue1/2,Draft1/2,Rewrite3/4 including batches.
 User's two-send extension consumed1/2; second unused because recheck passed.

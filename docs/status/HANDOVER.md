@@ -114,19 +114,21 @@ unchanged, only selectable_proposals/studio_setup_only true, dispatch6/start5.
 
 **Counts/next:** Mac packages1/3, starts5/6 including conservative implicit lookup;
 Windows packages1/3, actual starts4/6 beforeCI6; planned5–6 await terminal reservations.
-**PairedCI6/6 each target exhausted.** Zero builds/Studio credential/hostedMacstarts;
+**PairedCI6/7 each target; one further pair expressly authorized on transfer.** Zero builds/Studio credential/hostedMacstarts;
 Win18+9/Mac18+7 required without skips. Live8/10/Rewrite3/4, setup1, Continue1/2,
 Draft1/2,card1/2,lore1/2,extra1/2used,discovery0. Windows Settings proof sole technical
 gap. Final independent review/local focused checks passed; exactCI6 dispatched.
-**Manual same-thread pause: END TURN**, no polling/watcher/duplicate or auto-wake.
-User resume cues exact38296502071/attempt1 terminal audit: paired jobs/ZIP/manifests/
+**User-requested transfer to new GPT-6.1 Sol review/fix chat; sole writer/executor.**
+Parent stops outcome work after creation. First read exact38296502071/attempt1 terminal audit: paired jobs/ZIP/manifests/
 269product/sevenharness/PSCRLF/executable, Win18+9/Mac18+7 validators, all nine
 native stages and actual PNGs/defaults/field focus/readback/sampling/setup/cancel/
 readiness/reopen/owned credential-root cleanup, every reservation even failed or
 missing terminal. If pending, pause again. Failed/missing/skipped stays unresolved.
-No seventh run/editor start. Reassess after two unsuccessful same-hypothesis
-corrections; if final proof fails or caps prevent recovery, report concrete blocker
-before any new outcome. No owner native/SDK work needed; ordinary profile/key
+One additional paired CI7 is authorized after supported fixes/review. Editor
+ceiling6 remains unchanged: audit actual CI6 reservations before any next native
+invocation; request an exact extension only if necessary. No duplicate/unchanged
+full matrices, polling/watcher or auto-wake. Reassess after two unsuccessful same-
+hypothesis corrections; report concrete blockers before exceeding other caps. No owner native/SDK work needed; ordinary profile/key
 preserved. Technical success permits matrix closeout and requested UI-refinement
 prompt; final human acceptance remains explicit/unclaimed. No following outcome
 or feedback chat started.

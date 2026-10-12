@@ -7889,3 +7889,26 @@ Pending means pause again; failed/missing/skipped proof remains unresolved. No C
 or cap extension inferred. Successful audit closes technical gap, then requested
 UI-refinement prompt can be prepared. Final human sign-off stays explicit/unclaimed;
 no following outcome or feedback chat started.
+
+#### User-requested GPT-6.1 Sol review transfer — 2026-10-13
+
+User explicitly requests a new GPT-6.1 Sol chat to review the error, independently
+audit the changes and CI for other errors, fix supported issues, then run another
+CI. This authorizes **one additional paired CI run** for the same Studio-only
+outcome: paired ceiling6→7 per target, six dispatched before transfer. CI6
+run38296502071/attempt1/exact harnessb0d24b6 remains the first audit target; this
+transfer does not assert its terminal status or replace its identity. Read exact
+terminal artifacts and reservations before any further run; no duplicate dispatch
+or unchanged broad matrices. New Sol chat becomes sole writer/executor; parent
+stops outcome work after creating it. Local/originc98b500 matched before this
+status-only transfer update; frozen product929/CI1 package and owner proof unchanged.
+
+Other explicit allowances are unchanged: package3/editor6 per target, live10 and
+Rewrite4 with one unused blocker send, discovery0. Before CI6 actual Windowsstarts4;
+CI6 planned5–6 must be audited. One extra CI authorization does not silently extend
+editor/package/live/provider scope. If next necessary native proof needs starts
+beyond6, the reviewer must explain that exact remaining blocker and obtain the
+needed extension before invoking them. It can fix/review/run controlled fixtures
+within scope in the meantime. No key entry/read/export, signing/provider changes,
+merge/release or Phase3. Preserve all failed evidence; missing cleanup stays failed.
+Final human acceptance and UI-refinement/feedback outcome remain unstarted.
