@@ -8124,3 +8124,50 @@ Supported fixes and necessary retries within remaining selected batch are author
 reassess after two unsuccessful same-hypothesis corrections. No final human sign-off,
 UI refinement execution, provider expansion or Phase3. UI-refinement prompt follows
 technical success; later guided feedback remains user-owned.
+
+#### CI8 terminal review — native child-control observation gap — 2026-10-13
+
+User asks **CI8 failed, review and tell me why**. This turn reviews evidence only:
+no fixes, qualification/editor/provider operations or new CI dispatch. Earlier
+whole-sequence/fix/needed-CI-and-Windows-start authorization remains available.
+Exact38314054057/attempt1/harnessb42b1b76b08245ed9163b7a3f990a88d25e33c2c
+completedfailure2026-10-12T22:01:53Z. Windows115026395582 failed;
+Mac115026395432 passed. Win18+11/Mac18+7 validators pass without skips.
+Wartifact11776141481/6942dce38fba142ed7cc60c3060c9c6df87c6b5ac7e36f1ef0de5ab5f00e54df,
+M11775877372/e38e2c9f14cc2df80167d3836e5be8112e46b217249df6118d151eb975ac761e,
+ZIP/manifests W107/82/78 M54/47/43, frozen269product/sevenharness/declaredPSCRLF/
+CI1 executable independently verified. Ignored independent-ci-08-audit.py/json,
+ci-08-artifacts retain exact evidence; expiry2026-10-19.
+
+Only Windowsstart7/PID4868; no8, zero builds/HTTP/credential typing. Observe-initial
+and sourceBaselineBeforeSeed pass; all five physical field inputs/readbacks and
+savedControlsReady/sampling.8/.9 pass. Native dialog **was found**: HWND66066,
+owner196748, PID4868, class#32770, ownedtrue/foregroundConfirmedtrue. Thus the
+lookup/foreground repair progressed beyond CI7. Seed then fails **One owned masked
+native entry field required**. This compound guard requires exactly one Edit,
+IsPasswordtrue and matchingPID; individual failed predicate/count not recorded.
+Observed dialog UIA buttons are empty (Remember/Cancel absent); no password
+control observed. This supports a native child-control observation/admission gap,
+not a proven empty tree, wrong PID, absent physical control or product defect.
+Both failure cleanup and close find the same owned dialog, then time out waiting
+for native Cancel. failureCleanupUI/failureCloseUIfalse, forcedexit1/rootretained,
+listenerStoppedtrue/privacy16filespass. Cleanup and all nine required stages stay
+failed/incomplete; no readiness/cancel/reopen proof.
+
+Independent whole-sequence/artifact re-review confirms a predictable fixture gap:
+actual Win32 fixture creates/tests the **outer** standard dialog, while Secure-Entry
+fixture supplies mocked child controls. Neither observes actual masked Edit and
+Remember/Cancel children. This remained unqualified despite previous broad review.
+Do not equate outer HWND identity or mocked orchestration with native control proof.
+Next discriminating repair should expose safe counts/type/PID/password-state and
+observe exact owned Win32 child-control identities/focus without reading field
+values, then exercise those actual children and cleanup in controlled fixtures.
+Do not merely relax password/ownership guards or add timeout retries. No supported
+production/signing/storage-policy change established.
+
+Current pairedCI8 dispatched, Windowsstarts7 (workingbatch up to12), Windowspackage1/3,
+Macpackage1/3/ownerstarts5/6, live8/10/Rewrite3/4/discovery0 unchanged. Remaining
+workingbatch CI9–10; necessary fixes/Windowsstarts remain authorized, reassess
+before broadening batch or after two unsuccessful same-hypothesis corrections.
+No external operation pending, no watcher/polling/auto-wake. Technical/human acceptance
+unclaimed; frozen929/package/ordinary profile/key preserved.

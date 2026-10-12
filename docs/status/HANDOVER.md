@@ -1,26 +1,22 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — awaiting whole-sequence CI8 terminal audit
+## Studio-only Phase 2 closeout — CI8 reviewed; native child-control observation unresolved
 
 The requested Sol chat remains sole writer/executor. User directs audit of the whole
 native sequence, fix and as many CI runs as needed; expressly confirms needed Windows
 editor starts. This supersedes prior pairedCI7/Windowseditor7 ceilings. Other package,
 Mac/live/provider/signing/scope limits remain. Work in finite internal batchCI8–10 /
 Windowsstarts7–12, reassess after two unsuccessful corrections of one hypothesis.
-**Pending:** [CI8run38314054057](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38314054057),
-attempt1/workflow_dispatch/exact harnessb42b1b76b08245ed9163b7a3f990a88d25e33c2c/
-treee455a8d2a98357dfe7586f6c7a5f79ef5b33ca96, queued2026-10-12T22:00:01Z.
-Reviewed whole-sequence repair published normally/origin verified; seven canonical
-harness digest33956ba87af70a0010db33aea29f885c1c5a1caab92f732fbdd76d6fd2848514,
-PS1CRLF alternative and exact run in ignored ci-08-dispatch.json/ci-08-confirmed.json.
-CI8/start7–8 planned, actual reservations await audit. Manual same-chat wait: record
-and end turn, no polling/auto-wake/duplicate.
+**CI8 terminal:**run38314054057/attempt1/exactb42b1b7/treee455a8d,
+completedfailure2026-10-12T22:01:53Z. No external operation pending. User requested
+review/explanation only this turn; no fixes or new execution. Prior needed fixes,
+CI and Windows starts remain authorized within the working batch.
 
 **Branch/state:** codex/provider-qualification. Fresh local/origin
 8b9a5e5b08e099c1eb6adb21a49646d834381761 and main
 5f448ca683a905f4ea77d4580bbc89fda69f2b93 matched on entry; clean tree then.
 Published alignment3d69b96/CI7 and docs0ac9fa1 retained; whole-sequence
-external repairb42b1b7 published; current successor records wait only. Preserve unrelated
+external repairb42b1b7 published; current successor records exactCI8 review only. Preserve unrelated
 work, no reset. Normal publication is authorized; no merge/release.
 
 **Exact product:**929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
@@ -96,16 +92,34 @@ and package remain unchanged. See latest
 for every finding/repair/authority. Local18+7/syntax/actionlint/privacy11files/whitespace and final independent review
 passed before dispatch. Actual native stages/cleanup remain unproved.
 
-**Limits/next:** paired7 dispatched; Windowsstarts6, package1/3; Macpackage1/3,
-ownerstarts5/6; live8/10/Rewrite3/4/extra1of2used/discovery0. New user-approved
-Windows starts/CI cover the necessary native runs; working batchCI8–10/starts7–12.
-DispatchedCI8/start7–8 identities align across preparation/controller/parser/terminal/seal/
-fixtures. Preserve every failed/missing-terminal reservation. On dispatch, publish
-exact run/attempt/harness/product and pause. User resume cues terminal audit of jobs,
-ZIP/manifests, required fixtures, every native phase/capture/default/sampling/setup/
-invalidation/cancel/reopen/cleanup/normal exits/HTTP and counts. Pending means pause
-again; missing/failed/skipped proof stays failed. No owner launch/send/SDK, generic
-provider expansion/discovery/installations, signing changes, merge/release or Phase3.
-Ordinary saved key/profile remains preserved; never read/export/re-request configured
-key. Route/AI endings/connections remain deferred. Final human acceptance unclaimed;
-UI-refinement prompt follows technical success, refinement/feedback unstarted.
+**CI8 exact result:** Windows115026395582 failed; Mac115026395432 passed.
+Win18+11/Mac18+7 fixtures pass; exact artifacts11776141481/11775877372 and ZIP/
+W107/82/78/M54/47/43 manifests/product269/harness7/PSCRLF/CI1 executable audited.
+Onlystart7/PID4868; allfivefield/asyncsavedcontrols/sampling/sourcebaseline pass.
+Owned dialog HWND66066/owner196748/class#32770/PID4868/foreground confirmed.
+Seed fails compound masked Edit count/password/PID guard; failed predicate unknown.
+Remember/Cancel absent from observed UIA buttons. Both cleanup/close fail waiting
+Cancel on the owned modal, forcedexit1/rootretained/listenerstopped/privacy16pass,
+no credential typing/HTTP/complete stages. No product defect established.
+Ignored independent-ci-08-audit.py/json and ci-08-artifacts retain exact evidence;
+artifacts expire2026-10-19. Independent review confirms fixture coverage gap: actual
+outer dialog tested, child controls mocked. Every historical failure remains failed.
+
+**Limits/next:** paired8 dispatched; Windowsstarts7, package1/3; Macpackage1/3,
+ownerstarts5/6; live8/10/Rewrite3/4/extra1of2used/discovery0. Needed further CI/Windows
+starts explicitly authorized; workingbatch remainingCI9–10/Windowsup to12, totals
+do not reset. Next discriminator needs safe child count/type/PID/password metadata,
+exact owned native child identities/focus and real child-control fixtures/cleanup,
+without reading field values or weakening guards. Reassess after two unsuccessful
+same-hypothesis corrections and before broadening working batch. Latest request is
+review/explanation; no new run occurred in this turn. Preserve product929/CI1 package.
+
+On future supported repair, focused checks/independent review precede normal
+publication/one exact CI dispatch, then manual same-chat wait. No polling/watcher/
+auto-wake/duplicates. Audit all reservations/required jobs/artifacts/native phases/
+source/captures/HTTP/credential-root cleanup/normal exits; missing/failed/skipped
+stays unresolved. No owner launch/send/SDK, provider expansion/discovery/installations,
+signing changes, merge/release or Phase3. Ordinary saved profile/key must never be
+read/exported/erased/re-requested while configured. Route/AI endings/connections
+remain deferred. Final human acceptance unclaimed; UI-refinement prompt follows
+technical success, refinement/feedback unstarted.

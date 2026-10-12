@@ -1,8 +1,8 @@
 # Current status
 
-**Updated:** 2026-10-13. **Studio-only Phase 2 native closeout is awaiting CI8.** Owner integrated live/SDK workflow passed on
-frozen929. CI7 passed all five field inputs/saved sampling, then failed native
-credential-dialog acquisition or focus. Reviewed whole-sequence repairs are published.
+**Updated:** 2026-10-13. **CI8 failed native credential child-control observation; review complete.** Owner integrated live/SDK workflow passed on
+frozen929. CI8 passed fields/saved sampling and owned-dialog discovery/foreground, then
+failed the masked-field guard. No product defect is established.
 Final human acceptance is unclaimed.
 
 | Capability | Evidence | Remaining disposition |
@@ -20,26 +20,21 @@ product929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
 Continuation codex/provider-qualification; fresh local/origin8b9a5e5 matched,
 main5f448ca. Changes are external harness/status only, no product/package repair.
 
-[CI7](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38309795814)
-attempt1/3d69b96 failed Windows, passed Mac; Win18+9/Mac18+7 fixtures passed.
-Exact ZIPs/manifests/inputs/executable audited. Windows start6/PID4636 only,
-all five inputs and saved.8/.9 passed. Dialog lookup/focus timed out before key
-input, 0/9 complete stages. Failure cleanup timed out; forced exit1/root retained,
-listener stopped. Exact substep unknown because waits shared one diagnostic.
-No product defect established. Whole-sequence driver fixes cover ownership/focus,
-modal cleanup, async readiness, complete preview, capture roles and pre-seed source.
+[CI8](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38314054057)
+attempt1/b42b1b7 failed Windows, passed Mac; Win18+11/Mac18+7 fixtures passed.
+Exact ZIPs/manifests/269product/sevenharness/executable audited. Windowsstart7/PID4868
+only; all five inputs/saved sampling and owned native dialog/foreground passed.
+Masked Edit guard fails; Remember/Cancel absent from observed UIA controls. Individual
+failed guard predicate unrecorded. No credential typing/HTTP, 0/9 complete stages.
+Cleanup/close failed, forcedexit1/rootretained/listenerstopped; failed evidence retained.
+Independent review finds fixtures tested real outer window but mocked child controls.
 
-Counts: pairedCI8 dispatched each target, packages1/3 each, Windowsstarts6,
-ownerMacstarts5/6/live8/10/Rewrite3/4/discovery0. User explicitly authorizes needed
-further CI and Windows starts. Working batch up to CI8–10/Windowsstarts7–12;
-reassess after two unsuccessful same-cause corrections. CI8/start7–8 dispatched,
-Win18+11/Mac18+7 required, no builds or owner sends. Manual wait policy preserved.
+Counts: pairedCI8 dispatched each target, packages1/3 each, Windowsstarts7,
+ownerMacstarts5/6/live8/10/Rewrite3/4/discovery0. Further needed CI/Windows starts
+are user-authorized; workingbatch remainingCI9–10/up toWindows12. Next discriminator:
+actual owned masked/button child controls and safe focus/metadata, no field values.
+This turn review-only; no new execution. No external operation pending.
 Generic providers/Phase3,
 route context and AI ending/connection changes remain excluded or user-deferred.
 [Owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#independent-sol-ci6-audit-and-model-id-harness-repair--2026-10-13)
 retains exact failures and limits; [HANDOVER](HANDOVER.md) owns continuation.
-
-[CI8run38314054057](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38314054057),
-attempt1/harnessb42b1b7/treee455a8d, last observedqueued2026-10-12T22:00:01Z.
-Published reviewed repair; exact native terminal evidence pending. Resume this same
-chat to audit; no polling/auto-wake or duplicate dispatch.
