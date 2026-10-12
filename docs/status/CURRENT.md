@@ -1,51 +1,31 @@
 # Current status
 
-**Updated:** 2026-10-13. **CI9 running after reviewed native child-control repair and full-flow audit.** Owner integrated live/SDK workflow passed on
-frozen929. CI8 passed fields/saved sampling and owned-dialog discovery/foreground, then
-failed the masked-field guard. No product defect is established.
-Final human acceptance is unclaimed.
+**Updated:** 2026-10-13. **Studio-only Phase 2 technical closeout is review_ready.**
+CI9 and its independent artifact/native audit pass. Final human acceptance remains
+unclaimed; UI refinement and later guided feedback are separate, unstarted outcomes.
 
-| Capability | Evidence | Remaining disposition |
+| Capability | Exact evidence | Disposition |
 | --- | --- | --- |
-| Five actions, references, prompts, selectable subset | Same-candidate owner native/live chain, exact approved revisions, zero-write invalid subset, one valid save, Undo/Redo and project/process reopen passed. CI1 controlled Windows chain reused. | Owner gap closed; retained failed send7. |
-| Writing controls, setup readiness, HTTPS | Both-target CI1 core/renderer/worker/TLS fixtures and owner Settings/setup passed. | Windows nine native Settings stages and complete cleanup remain missing. |
-| Final game and SDK | Native Validate/Run/Stop, exact metadata-free SDK05 copy and named12+init12 assertions passed; independently audited. | Authored/custom source preserved; earlier failures retained. |
-| Packages and credentials | Frozen signed Mac package1 and CI1 Windows executable reused. Ordinary saved Studio key survives sessions. | Preserve ordinary profile/key; no new owner key entry/send/launch needed. |
-| Human decision | Independent reviews pass for scoped repair and existing owner chain. | Explicit sign-off, UI refinement and later guided feedback remain unstarted. |
+| Five actions, generated references, prompts, selectable subset | Frozen929 owner live/native chain; separately approved exact revisions, zero-write invalid subset, one valid save, Undo/Redo and project/process reopen. CI1 controlled Windows integration reused. | Scoped technical proof passed; failed live send7 retained. |
+| Sampling/setup/HTTPS | Both-target CI1 core/renderer/worker/TLS proof; owner saved-key setup; CI9 actual Windows defaults/sampling/native credential/setup/invalidation/cancel/readiness/reopen. | Scoped technical gap closed. Literal IPv6 HTTPS remains unsupported; live TLS not newly measured. |
+| Game and SDK | Owner native Validate/Run/Stop and exact metadata-free SDK05 named12+init12 assertions independently audited. | Passed on final authored source; earlier failures retained. |
+| Packages and cleanup | Signed Mac package1 and exact CI1 Windows executable reused. CI9 two normal exits0, owned profile/reference/root/listener cleanup, source/profile preservation and privacy pass. | Ordinary saved Studio profile/key preserved; no new product build. |
+| Human/following work | Independent reviews pass. Requested UI-refinement prompt prepared in owning task. | Human acceptance unclaimed; no following outcome started. |
 
-Qualified behavioral baseline5f593225fad2ebdb2970663d56ee83631b27ecef; frozen
-product929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
-9f034ca6cae69ef11e87d6a95a332152a9998eaa/269input digest
-3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd.
-Continuation codex/provider-qualification; fresh local/origin8b9a5e5 matched,
-main5f448ca. Changes are external harness/status only, no product/package repair.
-
-[CI8](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38314054057)
-attempt1/b42b1b7 failed Windows, passed Mac; Win18+11/Mac18+7 fixtures passed.
-Exact ZIPs/manifests/269product/sevenharness/executable audited. Windowsstart7/PID4868
-only; all five inputs/saved sampling and owned native dialog/foreground passed.
-Masked Edit guard fails; Remember/Cancel absent from observed UIA controls. Individual
-failed guard predicate unrecorded. No credential typing/HTTP, 0/9 complete stages.
-Cleanup/close failed, forcedexit1/rootretained/listenerstopped; failed evidence retained.
-Independent review finds fixtures tested real outer window but mocked child controls.
-
-Counts: pairedCI9 dispatched each target, packages1/3 each, Windowsstarts7,
-ownerMacstarts5/6/live8/10/Rewrite3/4/discovery0. Further needed CI/Windows starts
-are user-authorized; workingbatch remainingCI9–10/up toWindows12. Next discriminator:
-actual owned masked/button child controls and safe focus/metadata, no field values.
-Supported child-handle and active/dirty cleanup repairs are prepared and independently
-reviewed. CI9/start8–9 is dispatched; exact terminal evidence pending.
-Generic providers/Phase3,
-route context and AI ending/connection changes remain excluded or user-deferred.
-[Owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#independent-sol-ci6-audit-and-model-id-harness-repair--2026-10-13)
-retains exact failures and limits; [HANDOVER](HANDOVER.md) owns continuation.
-
-Native children now use frozen Win32 IDs/classes/styles/parent/PID and GUI-thread
-focus, with safe diagnostics and physical input. Real child fixtures include Cancel
-dismissal; active/dirty cleanup and delayed reload are covered. Local18+7 checks,
-syntax/actionlint/privacy pass; Windows18+11 and actual stages remain to be proved.
+Behavioral baseline5f593225fad2ebdb2970663d56ee83631b27ecef; frozen product
+929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree9f034ca6cae69ef11e87d6a95a332152a9998eaa/
+269input digest3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd.
+External native-driver repair30b18f2 is separate from that packaged product.
 
 [CI9run38317425509](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38317425509),
-attempt1/harness30b18f2/tree7cef4bf, last observedin_progress2026-10-12T22:34:37Z.
-Reviewed repair published; actual start reservations/native proof pending. Manual
-same-chat resume for audit, no polling/auto-wake/duplicate dispatch.
+attempt1/harness30b18f2/tree7cef4bf, completedsuccess2026-10-12T22:36:00Z.
+Both jobs/ZIPs/manifests/product269/harness7/PSCRLF/CI1exe audited. Win18+11,
+Mac18+7 no skips; all nine required Windows stages and actual screenshots pass.
+Starts8/PID9272 and9/PID8824 exit0; exactly3 synthetic POSTs/cancelled socket,
+zero save/reopenHTTP and complete owned cleanup. CI2–8 remain historical failures.
+
+Counts: pairedCI9 per target; Windowspackage1/3/starts9; ownerMacpackage1/3/starts5/6;
+hostedMacstarts0; live8/10/Rewrite3/4/discovery0. No further CI needed or pending.
+No merge/release, provider expansion/Phase3, route context or AI ending/connection
+changes. [Final audit and next prompt](../tasks/active/phase-2-initial-llm-assistance.md#ci9-terminal-audit-and-scoped-technical-closeout--2026-10-13)
+own exact proof/failures/limits; [HANDOVER](HANDOVER.md) owns continuation.

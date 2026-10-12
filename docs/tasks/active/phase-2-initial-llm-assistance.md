@@ -20,8 +20,9 @@ qualification execution; see the
 Earlier slice exclusions are not automatic full-phase waivers. The subsequent
 [user decisions and sampling implementation](#closeout-user-decisions-and-local-sampling-implementation--2026-10-12)
 select sampling work, remove session-only credentials from the product requirement,
-and commission separate read-only route feasibility research. Final integrated
-qualification remains pending.
+and commission separate read-only route feasibility research. Final same-candidate technical qualification is now complete through CI1, owner
+live/SDK and [CI9 final audit](#ci9-terminal-audit-and-scoped-technical-closeout--2026-10-13).
+Explicit final human acceptance remains pending.
 The user's subsequent deferral of AI Scene-ending/connection changes removes that
 family from Phase 2 closeout; it remains possible separately selected future work.
 See [the deferral record](#ai-scene-ending-and-connection-changes-deferred--2026-10-12).
@@ -8272,3 +8273,89 @@ setup/invalidation/cancel/reopen/captures/source/normal exits/credential-root-li
 cleanup and every reservation even failed/missing terminal. Pending means pause;
 failed/missing/skipped remains unresolved. All CI8 failed cleanup retained. No human
 sign-off, following outcome or UI refinement execution; prompt follows technical success.
+
+#### CI9 terminal audit and scoped technical closeout — 2026-10-13
+
+User resumes exactCI9 audit. run38317425509/attempt1/workflow_dispatch/harness
+30b18f2e0f4aec7e6a228c21e337778373921f03/tree7cef4bf5c7f67de6bb5468afb617ccd692525f20
+completedsuccess2026-10-12T22:36:00Z. Windows115037310378 and Mac115037310307
+both success. Windows18+11/Mac18+7 fixtures pass with no skips; actual owned native
+children/physical GUI focus/Cancel destruction rejecting fixture passes before editor.
+
+Exact artifacts W11777147146/40b559e97ebfc580ab207d31f9fcdb5288aef8aed6272c4975ce74de184e25fc,
+M11777542095/be1e9ed076c7a83e10b96db56b5bc52f6a8c005bea250f2e32ca0c9a5d611714
+ZIPs/digests/manifests independently verified: W130/82/78, M54/47/43 outer/reused/
+qualification files. All269 frozen929 product blobs/tree/canonical digest3c244,
+seven external30b18f2 harness blobs/digest483edea/declaredPS1CRLF and exactCI1
+executable match. External harness SHA is not packaged product SHA. Ignored
+independent-ci-09-audit.py/json and ci-09-artifacts retain complete evidence;
+artifacts expire2026-10-19. No new package build or product input change.
+
+All **nine required Windows native stages** and observe-initial/preflight pass.
+Start8/PID9272 and start9/PID8824 each exit normally0; exactly two reservations,
+no implicit/extra editor launch or forced exit. Safe native child receipts prove
+Edit100/password/style/parent/PID/unique/visible/enabled, exact GUI focus and physical
+clicks100/1, then native credential saved/configured. Defaults1/.95, saved.8/.9,
+changed.7/.85, exact complete synthetic previews, explicit Test setup, readiness,
+sampling invalidation, stalled request cancellation, final readiness and process
+reopen with saved credential/readiness/sampling all pass. Both observers viewed all
+actual capture roles; eight stage PNGs plus preflight framing/digests validated.
+
+Exactly three accepted POST/v1/chat/completions: sequence1/3 responseSenttrue,
+sequence2clientClosedtrue;554/555/555body bytes and hashes match previews. No save
+or process-reopen HTTP. Initialized source baseline beforeseed and exact source/
+profile preservation after operations/reopen pass. Explicit native Remove profile
+returns noConfiguredCredential; core-owned profile/cleanup references empty,
+rootRemovedtrue/listenerStoppedtrue. Both normal exits and nativeprivacy39filespass.
+No assistant credential read/export or ordinary profile/key change. Controlled
+public fixture, not a new owner Studio send or discovery.
+
+Independent read-only terminal-artifact/native re-review **passes, no blocker**.
+This closes the sole remaining scoped Windows Settings technical gap. CI1 exact
+combined controlled/worker/TLS/SDK proof and owner frozen929 live/all-five/reference/
+prompt/selectable/source/history/reopen/nativeSDK05 proof remain valid and reused;
+no unchanged matrix rerun needed. CI2–8, forced exits, retained roots and preparation
+failures remain historical failures, not converted into passes. The complete native
+sequence passing supports the revised driver; CI8's exact UIA provider/tree cause
+remains unknown and need not be invented. No product defect was established.
+
+Current outcome **review_ready**: scoped technical closeout complete, **final human
+acceptance unclaimed**. No operation pending or further CI needed. Counts: pairedCI9
+per target; Windowspackage1/3/starts9, ownerMacpackage1/3/starts5/6, hostedMacstarts0;
+live8/10/Rewrite3/4/extra1of2used/discovery0. Unused workingbatchCI10/Windowsup to12
+is unused, not a reason to run. No merge/release, generic providers/Phase3, route
+context or AI ending/connection implementation. Saved ordinary profile/key persists.
+Requested next UI-refinement prompt follows below; not selected/executed by this audit.
+Later guided feedback is separate and must not be represented as human acceptance.
+
+#### Requested next UI-refinement prompt — prepared, not executed
+
+```text
+Refine the existing Studio-only Phase 2 assistance UI in Caldwell-41/Renpy-editor,
+continuing codex/provider-qualification. Read AGENTS.md, CURRENT/HANDOVER, the
+active Phase 2 task's section 18 and its latest technical closeout, and docs/UI.md's
+accepted UI/UX guidelines. Section 18 is a design proposal; written current contracts
+and later scope decisions take precedence.
+
+Codex machine: prefer the current macOS ARM64 owner for signed-package capability.
+Use focused local UI checks and affected Windows/macOS CI/native checks where needed;
+select and record a finite verification allowance before execution. Preserve the
+qualified frozen929 behavior and technical evidence; changed inputs need their own
+appropriate proof. No package matrix for planning/docs alone.
+
+Refine the implemented Settings, Assist, proposal review, Character-card and Lorebook
+journeys for clear hierarchy, plain language, responsive layout, keyboard/focus,
+visible selection and explicit prepare/send/review/apply actions. Preserve accepted
+paper/teal and charcoal/copper themes, source/transaction/history safeguards, reference
+approval, truthful readiness/cancellation, saved-key reuse and exact-send inspection.
+Resolve observed overflow and density using the accepted guidelines, with concrete
+before/after evidence. Review the whole affected journey, including failure/stale/
+dirty/reopen paths; obtain independent review and fix supported issues.
+
+No generic providers, Phase3, selected-route context, AI ending/connection changes,
+thinking/streaming expansion, model discovery/installations, signing/storage-policy
+changes, paid/live sends, merge or release. Preserve the configured ordinary key;
+never request it again while configured or read/export it. Final human acceptance
+is still unclaimed. Deliver the bounded refinement with honest verification, then
+prepare a separate plain-language guided feedback session; do not start that session.
+```
