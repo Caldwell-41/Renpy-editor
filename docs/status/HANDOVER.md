@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — CI2 audited failed; CI3 repair ready; native live in progress
+## Studio-only Phase 2 closeout — awaiting final CI3 audit; native live needs renewed unlock
 
 The user expressly authorizes CI publication/dispatch and native/live verification.
 Continue this same outcome; no merge/release, signing changes, generic provider,
@@ -45,9 +45,15 @@ refuses raw/normalized name differences before extraction; regression emulates W
 normalization. Local18+7, workflow syntax, changed-source privacy and independent
 re-review pass. No product repair/build/launch. The last authorized pairedCI3 must
 reuse frozen929 and CI1 exact Windows package, reserve Windows starts3–4 (unused),
-Maczero packages/starts. Admission requires dispatchordinal3; no CI3 dispatch yet.
-Publish only reviewed external verification/status under express CI authority; after
-dispatch record exact run/head/inputs and end turn for manual same-thread audit.
+Maczero packages/starts. Published harness934decc1e402b96dc7d795e22c69bf8f24aecbe1/
+treed699336efc0af4397bd57dc34265e26e86377c6f. Confirmed last paired [CI3
+run38277737024](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38277737024),
+attempt1/workflow_dispatch/exact934decc, in_progress at2026-10-12T16:29:47UTC.
+Initial list confirmation lacked an unambiguous head match; the CLI returned exact
+run URL, then one direct run-ID read confirmed identity without redispatch. Retain
+that confirmation failure. Frozen product929/CI1 executable remains unchanged.
+Manual same-thread pause; no polling/watcher/fourth dispatch. Ignored ci-03-dispatch
+and ci-03-confirmed receipts own operation identity.
 
 **Local proof:** renderer138/138, sampling2/2, compatibility3/3, nativeworker8/8,
 readiness-discovery1/1, transport15/15, exact-context integers1/1, rejecting gates14/14
@@ -79,11 +85,20 @@ The native receipt is `phase2-closeout-01/native-saved-profile-01.json`.
 
 **Cumulative allowance:** Mac1/3packages, **3/6starts conservatively charged**
 (first ordinary process19193, possible implicit CUA lookup, reopened process21809).
-Windows actual1/3packages and2/6starts after auditedCI2; pairedCI2/3each target.
-CI3 may reserve Windows starts3–4, no builds; hostedMac no starts/builds. Live setup1,
+Windows actual1/3packages and2/6starts beforeCI3; pairedCI3/3each target, zero
+dispatches remaining. CI3 reserves Windows starts3–4, no builds; hostedMac no starts/builds. Live setup1,
 card1/2,lore1/2,otherfamilies0/2,total3/10;discovery0/0. Test setup counts toward ten separately.
 Keep earlier failed attempts; no automatic retries. Ordinary saved credential is
 preserved and never deleted as temporary cleanup.
+
+**Next resume:** audit exactCI3 run38277737024/attempt1, both required artifacts,
+product/harness/ZIP/input/executable bindings,18+7fixture gates, actual Windows native
+Settings/defaults/sampling/setup/cancel/readiness/reopen receipts and PNGs, reservations
+and cleanup. Missing/failed/skipped proof stays failed; do not dispatch again. Update
+actual starts from reservations even if terminal missing/malformed. If CI passes, finish
+owner native/live after unlock within remaining Mac starts/live sends, then independently
+review full execution for human decision. If another CI correction is required, report
+exhausted dispatch allowance before any new attempt.
 
 **Owner progress / renewed lock:** user unlocked; process21809 rebound without
 launch, native Settings confirmed saved configuration/Credential:configured. One actual

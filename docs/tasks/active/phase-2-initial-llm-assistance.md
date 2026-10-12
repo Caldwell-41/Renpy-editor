@@ -7378,3 +7378,28 @@ requested; source/project/user key preserved. Actual totals setup1/card1/lore1=3
 otherfamilies0, discovery0; Macstarts3 and Windowsstarts2 unchanged. No CI3 yet.
 A local receipt-writing Python syntax error failed before execution; corrected
 snapshot/ledger write passes. This preparation failure is retained, no extra send.
+
+
+#### Final allowed paired CI3 confirmed dispatch — 2026-10-13
+
+Reviewed external harness published934decc1e402b96dc7d795e22c69bf8f24aecbe1,
+treed699336efc0af4397bd57dc34265e26e86377c6f, exact local/origin before dispatch.
+Product remains929, CI1Windows executable reused. No active prior workflow or prior
+run for this harness found. [Run38277737024](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38277737024),
+attempt1/eventworkflow_dispatch/branchcodex/provider-qualification/head934decc,
+created2026-10-12T16:29:22UTC, confirmed in_progress2026-10-12T16:29:47UTC.
+Primary+studio_setup_only selectors true, dispatchordinal3/Windows firstlaunch3;
+older selectors false/uploadfalse/legacyreuseempty. Single dispatch accepted and
+returned exact run URL. Initial list-based identity assertion failed due missing/
+ambiguous head match; direct returned run-ID read confirms exact head/attempt/event.
+Retain initial confirmation failure; no duplicate dispatch/retry.
+
+PairedCI now3/3 each target, zero further dispatches allowed. New builds0;
+Windows starts3–4 reserved (actual beforeCI3 package1/starts2), hostedMaczero starts/
+packages; ownerMacpackage1/starts3. Live setup1/card1/lore1 total3/10, otherfamilies0;
+discovery0. Lore result still unobserved during renewed Maclock, synthetic root and
+saved user key preserved. Required native proof/results/cleanup await exact terminal
+artifact audit. Full Phase2/final human acceptance unclaimed. Manual same-thread
+wait: audit exactCI3 on resume, retain failures and actual reservations, then finish
+owner chain after unlock if within caps. Any new CI attempt needs a real allowance
+decision; do not infer renewed caps or start the requested later UI outcome.
