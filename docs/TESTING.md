@@ -1599,6 +1599,28 @@ final human acceptance claim; no rerun for documentation-only closure.
 
 ## Studio-only integrated Phase 2 qualification
 
+The subsequent local sampling selection adds focused core `sampling_` (2 cases),
+`immutable_body_context_and_destination_refusal` (1 affected synthetic-body case),
+frontend typecheck/test compilation, SettingsDOM (5 cases) and desktop test compilation.
+These check missing-field legacy bytes, numeric/null/finite bounds, saved defaults and
+custom values, all five actions plus selectable exact bodies, credential preservation,
+stale-send refusal and no implicit inference. New body fields invalidate affected
+exact-body/package-input qualification; Windows/native/live acceptance remains pending.
+Do not automatically rerun unrelated matrices or infer a new CI dispatch from these
+commands. Session-only tests are outside the active product requirement by explicit
+user decision; saved-key reuse remains required.
+
+**Current full-phase closeout, 2026-10-12:** the user selected a separate residual
+matrix/final workflow outcome. Its
+[entry map](tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+records exact reused evidence, missing proof and exclusions, and stops before expensive
+qualification for a material scope decision. Historical slice exclusions do not become
+full-phase passes. CI4's five-action chain and CI7's selectable chain have different
+integrated inputs; neither alone is the final combined workflow. Zero closeout package,
+editor-start, dispatch, discovery or live-send attempts have occurred at this audit.
+The selectors below describe the previously qualified bounded Studio slice, not a
+completed full Studio-only phase or a new CI dispatch.
+
 The [Studio-only amendment](tasks/active/phase-2-initial-llm-assistance.md#studio-only-qualification-amendment--2026-10-11)
 owns scope and cumulative allowance; generic/live two-provider/full Phase2 acceptance
 remain deferred. Focused core `rewrite` now requires35cases, including all-five-action
@@ -1709,3 +1731,31 @@ The [snapshot provenance](../spikes/renpy-sdk/published/README.md) owns retained
 wait/resume applies, with cumulative user-approved counts; prior budgets stay closed.
 No specialist crash or hostile-filesystem testing is added. Live selected Unsloth
 batch sends, final human and full Phase2 acceptance remain distinct proof layers.
+
+### Studio closeout readiness, sampling and HTTPS
+
+The 2026-10-12 amendment selects these local changes while deferring selected-route
+context and AI ending/connection changes. Focused selectors are `sampling_` (2),
+`compatibility` in core (3), `ai_request::` (15), `readiness_tests` in desktop (1),
+and `ai_requests::tests` (8). Transport/native worker fixtures need approved local
+socket capability; denied sandbox binds remain failed harness evidence. The public
+synthetic TLS server lives under `tests/fixtures/studio-request` and uses existing host
+OpenSSL to generate an ephemeral CA/leaf/keys in a Rust-owned disposable root. No keys
+or certificates are tracked; only the test seam trusts the public runtime CA. Tests prove trusted
+HTTPS exact body, unknown CA/wrong hostname refusal, cancellation/owned socket cleanup,
+DNS set changes, literal IPv6 refusal and absolute deadlines without a provider.
+Production trust/signing policy is unchanged. Core/native tests prove configuration
+and key invalidation, strict preflight publication/reopen and zero readiness writes
+after cancellation/change; DOM tests cover explicit entry, preview, failure and late
+status/cancellation. Controlled fixture readiness seeding is not live Test setup proof.
+
+Renderer check now requires138 passes with no failures/skips. The retained failed
+138/137 run exposed a stale thrown-status race, repaired and focused rechecked; the
+owning ledger retains the failure. These source checks do not replace packaged
+Windows/signed Mac, actual owner-machine Studio sends or explicit human acceptance.
+Live setup preflight consumes the same ten-send ceiling and is recorded separately;
+zero new discoveries or automatic probes/retries are permitted in the closeout.
+Windows must establish existing PATH/Git OpenSSL capability in CI; missing capability
+fails rather than installs/skips. A focused context assertion retains exact integer
+defaults above JavaScript's safe range and both signed64 boundaries in the serialized
+payload, with runtime value explicitly unknown.

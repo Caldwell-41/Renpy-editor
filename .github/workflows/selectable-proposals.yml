@@ -14,15 +14,15 @@ on:
   workflow_dispatch:
     inputs:
       windows_build_ordinal:
-        description: Cumulative Windows package attempt, 1 through 5 (one approved extra package)
+        description: Studio closeout cumulative Windows package attempt, 1 through 3
         type: string
         default: '1'
       windows_first_launch_ordinal:
-        description: Cumulative Windows first of two editor starts, 1 through 7
+        description: Studio closeout cumulative Windows first of two editor starts, 1 through 5 (6 total maximum)
         type: string
         default: '1'
       dispatch_ordinal:
-        description: Cumulative paired dispatch, 1 through 7 (three approved one-run extensions)
+        description: Studio closeout cumulative paired dispatch, 1 through 3
         type: string
         default: '1'
 permissions:
@@ -56,7 +56,7 @@ jobs:
         run: python app/scripts/selectable-evidence.py prepare --output "$RUNNER_TEMP/selectable-${{ runner.os }}"
       - name: Require approved branch and fresh bounded run
         shell: bash
-        run: python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert 1<=int(os.environ['BUILD_ORDINAL'])<=5; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=7; assert 1<=int(os.environ['DISPATCH_ORDINAL'])<=7"
+        run: python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert 1<=int(os.environ['BUILD_ORDINAL'])<=3; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5; assert 1<=int(os.environ['DISPATCH_ORDINAL'])<=3"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24.19.0

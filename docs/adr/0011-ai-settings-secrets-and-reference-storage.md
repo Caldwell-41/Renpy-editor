@@ -2,6 +2,15 @@
 
 **Status:** Accepted design with selected temporary Mac development file-store exception; implemented with bounded synthetic packaged Mac and Windows remembered-credential qualification passed. Full 2A.1/both-target provider qualification remains incomplete.
 **Date:** 2026-10-07.
+**Current closeout disposition, 2026-10-12:** Phase 2 is Studio-only. Remembered
+credential slices remain qualified within their exact evidence; full-phase integrated
+saved-key qualification remains incomplete as recorded in the
+[closeout map](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
+The user's subsequent 2026-10-12 decision removes session-only credentials from the
+product requirement: reuse the saved profile key across sessions. This supersedes
+earlier session-mode design clauses below; it does not change the approved Mac storage
+exception or Windows remembered-store implementation. No signing, namespace or
+credential-access policy changes are selected.
 **Authority:** on 2026-10-08 the user supplied the development credential implementation prompt, selecting source/docs and focused synthetic tests only. A subsequent explicit allowance selected the bounded native fixture, now passed; publication remains separate. The earlier user selected project-local prompts, native references with basic
 scope/notes, localhost/LAN/HTTPS and adaptive helpers; accepted the omission/credential
 review and requested the agreed plan be recorded. The original documentation selection granted no provider operation; the temporary
@@ -19,8 +28,8 @@ but had no renderer or native entry dialog. It is not production credential UX e
 - Keep versioned provider/model settings and project-to-profile bindings in device-local
   `ai-profiles.json` under the existing application-data root. Store no key values.
 - Baseline design uses macOS Keychain / Windows Credential Manager for **Remember on this computer**; the selected temporary Mac development exception below replaces Mac API-key calls while preserving native ownership.
-  Add explicit **Use for this app session** with backend-memory-only keys cleared on
-  app exit/removal. Generic compatible servers can select **No authentication**;
+  Use the saved key across sessions; session-only mode is excluded by the user's
+  2026-10-12 decision. Generic compatible servers can select **No authentication**;
   Studio requires its key. Authenticated v1 profiles use Bearer authentication.
 - Native entry/replace/delete returns status only to the WebView. Request code injects
   keys; no read-secret IPC, plaintext fallback, key export or subprocess inheritance.

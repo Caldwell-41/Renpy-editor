@@ -1,36 +1,31 @@
 # Current status
 
-**Updated:** 2026-10-12. **Selectable proposal editing implemented and qualified.**
-Full Phase2, generic support and final human acceptance remain incomplete; no following
-outcome is selected.
+**Updated:** 2026-10-12. **Studio-only Phase 2 closeout selected; local sampling, setup test
+and HTTPS implemented; integrated qualification pending.** Generic/OpenAI-compatible providers and Phase 3 are
+outside this outcome. Full Phase 2 and final human acceptance remain incomplete.
 
-Approved outcome: review1–8 operations in one existing saved Scene, pre-Send bound
-text/speaker/Character authority, core-owned IDs/paths, dependency-valid subsets and
-fresh exact previews, saved as one journalled transaction/history entry. At most one
-1–8-Beat insertion group and one supported runnable Character create/update. Protected
-source/custom syntax/comments/formatting and unrelated metadata remain preserved.
+| Capability | Implementation / evidence | Acceptance |
+| --- | --- | --- |
+| Five Studio actions, native references, prompts/limits | Bounded slices qualified on both targets; historical integrated/live chain qualified. | Exact scoped evidence retained; not final combined-candidate proof. |
+| Selectable 1–8-operation source/Character proposal | Qualified code5f593225fad2ebdb2970663d56ee83631b27ecef, CI7run38178036314/attempt1, signed Mac/Windows native/live/SDK proof. | Scoped qualification complete; human sign-off remains separate. |
+| Sampling controls | Local Temperature/Top-p implementation and focused checks pass; defaults1.0/0.95. | Both-target native/live qualification pending. |
+| Setup readiness and HTTPS | Local explicit synthetic Test setup, saved configuration-bound readiness and verified HTTPS/hostnames; focused core/native/TLS/DOM proof. | Both-target package/live proof pending; literal IPv6 HTTPS explicitly unsupported by pinned adapter. |
+| Full Studio Phase 2 contract | Selected-route context and AI ending/connection changes are user-deferred beyond Phase 2. Session-only credentials excluded; saved key reused. | Final qualification and explicit human acceptance required. |
+| Final all-five-plus-selectable workflow | Same-project synthetic native/controller workflow and exact metadata-free SDK run pass locally; independent source review complete. | Both-target packaged workflow, owner-machine live proof, independent execution review and explicit human acceptance pending. |
 
-Coherent published code5f593225fad2ebdb2970663d56ee83631b27ecef is qualified by
-[CI7run38178036314/attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38178036314).
-Both automated/controller/pinnedSDK chains and artifact audits pass. Windows package5/
-starts5–6 passes19+2checks/all6native receipts: exact Save/UndoRedo, update, refusal,
-project/process reopen and cleanup. Signed local Mac package1/native starts1–2 passes
-strict host identity/installer/privacy and same19+2native chain; independent audit agrees.
-Reviewer sandbox trust failure and passing unchanged host verification remain distinct.
+Fresh local/origin continuation is c1e14bf7756a550a0ecaf8fd3b8b736baf07018d on
+`codex/provider-qualification`; origin/main5f448ca683a905f4ea77d4580bbc89fda69f2b93.
+The entry audit verified both265input inventories and retained CI7/CI4 manifests against
+qualified5f59322. Current local sampling/readiness/transport changes those inputs and exact outbound bodies;
+previous package/body proof is historical for affected behavior. No new candidate frozen.
+Historical failures remain failed, including CI5's unresolved cleanup and thinking
+truncation. Prior budgets stay closed.
 
-Live selected Studio: user fresh native key entry, discovery1 and two valid synthetic
-batches. Create subset saves Character+insertion while excluding narration; update saves
-two nonadjacent replacements+same Character. Fresh previews, dependency refusal, exact
-source, one UndoRedo each and project/process reopen preserve12authoritative files.
-Exact two accepted source cases pass pinnedSDK8.5.3 compile/lint/named runtime without
-metadata and with unchanged hashes. Ordinary credential/profile removal, root/process
-cleanup and privacy pass. Independent final live review agrees; sealed manifest226/finalprivacy227 pass.
+Closeout actuals per target: **0/3packages,0/6editor launches,0/3paired CI**;
+live **0/10total,0/2each action**, discovery **0/0**. Disposable core test fixtures
+cleaned; no native app, temporary credential, provider connection or CI was created. Existing scope edits are preserved; updated records
+remain local and uncommitted. No merge/release/signing/provider expansion occurred.
 
-Cumulative actual totals: Windows5/5packages,6/8starts; Mac1/4packages,4/8starts;
-paired7/7each; live2/2total batches, discovery1/1. User-approved extensions are consumed;
-prior budgets stay closed. No CI8/Windows package6/rerun or next deliverable authorised.
-Earlier failures stay failed, including CI5's historically unresolved cleanup.
-[Closure record](../tasks/active/phase-2-initial-llm-assistance.md#selectable-live-qualification-and-outcome-closure--2026-10-12)
-retains evidence limits and counts. [HANDOVER](HANDOVER.md) owns continuation.
-Commit/push authorised on codex/provider-qualification; unrelated work preserved,
-no reset/merge/release/provider/signing expansion or credential read/export.
+[Requirement map and decision](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+owns detailed dispositions, exact evidence, counts and cleanup. [HANDOVER](HANDOVER.md)
+owns continuation: freeze/review one candidate and complete remaining qualification within caps.

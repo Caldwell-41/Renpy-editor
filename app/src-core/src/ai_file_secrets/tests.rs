@@ -34,6 +34,8 @@ impl Fixture {
                 context_ceiling: 8192,
                 context_budget: 4096,
                 maximum_response: 1024,
+                temperature: None,
+                top_p: None,
             },
         )
         .unwrap();

@@ -37,6 +37,7 @@ def main():
     parser.add_argument('--sdk', type=Path, required=True)
     parser.add_argument('--fixture', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--selectable-integrated', action='store_true')
     args = parser.parse_args()
     source, scenes = validate_fixture(json.loads(args.fixture.read_text()))
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'spikes/renpy-sdk'))
@@ -78,6 +79,12 @@ def main():
         dialogue_rows = [line.strip().partition('"')[2] for text in source.values() for line in text.splitlines() if line.strip().startswith('bec "Second literal')]
         assert dialogue_rows and len(set(dialogue_rows)) == 1
         dialogue_text = ast.literal_eval('"' + dialogue_rows[0])
+        cases = [(rewrite_text, 'Integrated literal [str(7)] {a=jump:label} café 雪 True friend [literal] {brace}', ['b', '/b']), (new_text, 'Integrated new [str(7)] {b}literal{/b} café 雪', []), (dialogue_text, 'Second literal [flag] {b}line{/b}', [])]
+        if args.selectable_integrated:
+            rows = [line.strip() for text in source.values() for line in text.splitlines() if line.strip().startswith('integrated_new "Closeout selectable dialogue')]
+            assert len(rows) == 1
+            cases.append((ast.literal_eval('"' + rows[0].partition('"')[2]), 'Closeout selectable dialogue [str(7)] {b}literal{/b} 雪', []))
+            cases.append((narration('Closeout selectable narration'), 'Closeout selectable narration', []))
         runtime = """init 999 python:
     from renpy import substitutions as _phase2_substitutions
     from renpy.text import textsupport as _phase2_textsupport
@@ -89,7 +96,14 @@ def main():
         assert [v for k, v in _tokens if k == TAG] == _tags, "Integrated generated markup became active"
         assert "".join(v for k, v in _tokens if k == TEXT) == _expected, "Integrated prose changed display meaning"
         _phase2_runtime.append(_value)
-""".replace('CASES', repr([(rewrite_text, 'Integrated literal [str(7)] {a=jump:label} café 雪 True friend [literal] {brace}', ['b', '/b']), (new_text, 'Integrated new [str(7)] {b}literal{/b} café 雪', []), (dialogue_text, 'Second literal [flag] {b}line{/b}', [])]))
+""".replace('CASES', repr(cases))
+        if args.selectable_integrated:
+            runtime += '''init 999 python:
+    _who = _phase2_substitutions.substitute(integrated_new.name, force=True, translate=False)[0]
+    _who_tokens = _phase2_textsupport.tokenize(_who)
+    assert not [v for k, v in _who_tokens if k == TAG], "Selectable Character markup became active"
+    assert "".join(v for k, v in _who_tokens if k == TEXT) == "Closeout selectable Character [str(7)] {b}literal{/b}", "Selectable Character display changed"
+'''
         test = runtime + '''testcase loomlight_phase2_integrated:
     assert screen "main_menu"
     click "Start"
@@ -118,6 +132,17 @@ testsuite global:
     teardown:
         exit
 '''.replace('DRAFT_LABEL', repr(scenes[1]['label']))
+        if args.selectable_integrated:
+            marker = '    advance until screen "main_menu"'
+            extra = '''    advance
+    pause until eval (renpy.get_screen("say") and renpy.get_screen("say").scope["what"] == _phase2_runtime[3]) timeout 10
+    assert eval (renpy.get_screen("say").scope["what"] == _phase2_runtime[3])
+    assert eval (renpy.get_screen("say").scope["who"] == _who)
+    advance
+    pause until eval (renpy.get_screen("say") and renpy.get_screen("say").scope["what"] == _phase2_runtime[4]) timeout 10
+    assert eval (renpy.get_screen("say").scope["what"] == _phase2_runtime[4])
+'''
+            test = test.replace(marker, extra + marker, 1)
         (root / 'game/phase2_test.rpy').write_text(test)
         run([root, 'compile'])
         run([root, 'lint', '--error-code'])
@@ -129,6 +154,8 @@ testsuite global:
             assert (root / path).read_bytes() == text.encode(), 'SDK changed accepted source'
         (args.output / 'result.json').write_text(json.dumps({'passed': True, 'sdkVersion': '8.5.3', 'commands': count, 'metadataAbsent': True, 'acceptedSourceUnchanged': True, 'sourceSHA256': {p: hashlib.sha256(t.encode()).hexdigest() for p,t in source.items()}, 'scaffoldOnly': sorted(scaffold)}, indent=2) + '\n')
     print('PASS: pinned Ren’Py integrated exact accepted source/entry rewrite/Continue/Draft/Return/literal text/metadata-free runtime/owned cleanup')
+    if args.selectable_integrated:
+        print('PASS: pinned Ren’Py same-project selectable subset/Character literal name/dependent dialogue/metadata-free runtime')
 
 
 if __name__ == '__main__':

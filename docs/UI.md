@@ -920,14 +920,17 @@ over-budget input requires a visible correction. Prompt reset is undoable and do
 not reset references, credentials or size settings. These controls are not Phase 1 UI.
 
 Planned AI Settings separates Application connections from Current project prompts.
-Offer **Remember on this computer**, explicit **Use for this app session**, and generic
-**No authentication**. Session means app lifetime; native entry never returns key text
+The user's 2026-10-12 Studio-only amendment offers one saved credential reused across
+sessions; session-only mode and generic provider setup are excluded. Native entry never returns key text
 to the WebView. Report incomplete removal and explain provider revocation separately.
 Private-network HTTP needs unencrypted-transport opt-in. Project prompts show saved/
 installed baseline versions, text comparison and undoable Restore baseline. No shared
 personal template library in v1. References show approved and proposed revisions,
 stale/missing citations, basic Scene/route scope and written knowledge/spoiler notes.
-These are Phase 2 plans, not implemented Phase 1 controls.
+Selected-route context and AI ending/connection changes are user-deferred beyond Phase2.
+Explicit Test setup, saved Temperature/Top-p and verified HTTPS now have local
+implementation; qualification and final human/UI acceptance remain separate. These
+are Phase 2 controls, not Phase 1 claims.
 
 The selected [project prompts/context surface](PROMPTS_CONTEXT.md) implements
 **Settings → Current project → System prompts / Context preparation** for Dialogue

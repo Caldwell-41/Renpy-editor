@@ -47,6 +47,8 @@ impl Fixture {
                 context_ceiling: 8192,
                 context_budget: 4096,
                 maximum_response: 1024,
+                temperature: None,
+                top_p: None,
             },
         )
         .unwrap();
@@ -317,4 +319,22 @@ fn retained_entry_retry_rechecks_origin_and_settings_and_cancel_does_not_write()
     assert_eq!(f.writes.get(), writes);
     drop(entry);
     assert_eq!(f.writes.get(), writes);
+}
+
+#[test]
+fn compatibility_saved_configuration_reopen_rotation_controls_and_clear_are_bound() {
+    let f=Fixture::new();let id=f.init();f.replace(&id,"public-synthetic-alpha").unwrap();
+    let before=f.read().unwrap();let credential=before.profiles[0].credential.clone();
+    assert!(!before.profiles[0].compatibility_ready());
+    let checked=record_compatibility(&f,&token(&before),&id).unwrap();
+    assert!(checked.profiles[0].compatibility_ready());assert_eq!(checked.profiles[0].credential,credential);
+    let reopened=crate::ai_profiles::decode(&serde_json::to_vec(&checked).unwrap()).unwrap();assert!(reopened.profiles[0].compatibility_ready());
+    let mut changed=checked.profiles[0].settings.clone();changed.temperature=Some(0.8);
+    save(&f,&token(&checked),Some(&id),changed).unwrap();let changed=f.read().unwrap();assert!(!changed.profiles[0].compatibility_ready());
+    assert!(record_compatibility(&f,&token(&checked),&id).is_err());assert_eq!(f.read().unwrap(),changed);
+    let checked=record_compatibility(&f,&token(&changed),&id).unwrap();assert!(checked.profiles[0].compatibility_ready());
+    f.replace(&id,"public-synthetic-beta").unwrap();assert!(!f.read().unwrap().profiles[0].compatibility_ready());
+    let before=f.read().unwrap();let checked=record_compatibility(&f,&token(&before),&id).unwrap();assert!(checked.profiles[0].compatibility_ready());
+    let cleared=clear_compatibility(&f,&token(&checked),&id).unwrap();assert!(!cleared.profiles[0].compatibility_ready());
+    assert_eq!(f.keys.borrow().len(),1);
 }

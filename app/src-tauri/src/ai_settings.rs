@@ -462,6 +462,8 @@ mod tests {
                     context_ceiling: 8192,
                     context_budget: 4096,
                     maximum_response: 1024,
+                    temperature: None,
+                    top_p: None,
                 },
             )
             .unwrap();
@@ -693,6 +695,8 @@ mod tests {
                 context_ceiling: 8192,
                 context_budget: 4096,
                 maximum_response: 1024,
+                temperature: None,
+                top_p: None,
             },
         )
         .unwrap();
@@ -868,6 +872,33 @@ mod tests {
         );
     }
 }
+fn discovery_invalidates(previous: Option<&loomlight_core::ai_discovery::Discovery>, current:&loomlight_core::ai_discovery::Discovery)->bool {
+    !current.selected_available || previous.is_some_and(|old|{
+        let mut a=old.models.clone();let mut b=current.models.clone();a.sort();b.sort();a!=b || old.selected_available!=current.selected_available
+    })
+}
+fn discovery_status(d:&loomlight_core::ai_discovery::Discovery, credential_status:&str)->&'static str {
+    if d.models.is_empty(){"No models returned by Studio; loaded state unknown"}
+    else if d.selected_available&&credential_status=="configured"{"model available; discovery only"}
+    else{"selected model unavailable"}
+}
+#[cfg(test)]
+mod readiness_tests {
+    use super::*;
+    #[test]
+    fn compatibility_discovery_unavailable_changed_and_ordered_availability_disposition() {
+        let value=|models:Vec<&str>,available|loomlight_core::ai_discovery::Discovery{models:models.into_iter().map(str::to_owned).collect(),selected_available:available,addresses:vec![]};
+        let old=value(vec!["a","b"],true);
+        assert!(!discovery_invalidates(None,&old));
+        assert!(!discovery_invalidates(Some(&old),&value(vec!["b","a"],true)));
+        assert!(discovery_invalidates(Some(&old),&value(vec!["a"],true)));
+        assert!(discovery_invalidates(Some(&old),&value(vec![],false)));
+        assert!(discovery_invalidates(None,&value(vec![],false)));
+        assert_eq!(discovery_status(&value(vec![],false),"configured"),"No models returned by Studio; loaded state unknown");
+        assert_eq!(discovery_status(&value(vec!["other"],false),"configured"),"selected model unavailable");
+        assert_eq!(discovery_status(&old,"configured"),"model available; discovery only");
+    }
+}
 fn view(host: &ApplicationHost) -> credentials::Result<Value> {
     view_store(host, snapshot(host)?)
 }
@@ -880,7 +911,7 @@ fn view_store(host: &ApplicationHost, store: ProfileStore) -> credentials::Resul
     let profiles=store.profiles.iter().map(|p| {
         let (status, access_error) = credential_view(p, &secrets);
         let discovery=evidence.get(&p.profile_id).filter(|(t,_)|t==&token);
-        json!({"profileId":p.profile_id,"revision":p.revision,"settings":p.settings,"credentialStatus":status,"credentialError":access_error,"disabled":p.disabled,"discovery":discovery.map(|(_,d)|json!({"models":d.models,"selectedAvailable":d.selected_available,"status":if d.selected_available&&status=="configured"{"model available; discovery only"}else{"selected model unavailable"}}))})
+        json!({"profileId":p.profile_id,"revision":p.revision,"settings":p.settings,"credentialStatus":status,"credentialError":access_error,"disabled":p.disabled,"compatibilityPayload":String::from_utf8(loomlight_core::ai_compatibility::body(p)).unwrap(),"compatibilityState":if p.compatibility_ready(){"ready"}else{"untested"},"compatibilityCheckedAt":p.compatibility.as_ref().filter(|_|p.compatibility_ready()).map(|c|c.checked_at_unix_seconds),"discovery":discovery.map(|(_,d)|json!({"models":d.models,"selectedAvailable":d.selected_available,"status":discovery_status(d,status)}))})
     }).collect::<Vec<_>>();
     Ok(
         json!({"token":token,"profiles":profiles,"storageNotice":if cfg!(target_os = "macos") { "Temporary Mac development storage: encrypted local files plus a saved unencrypted unlock key. Software under the same login may decrypt your keys. Healthy storage is intended to survive app quit/reopen and replacement." } else { "Native credential storage" },"cleanup":store.cleanup.iter().map(|c|json!({"profileId":c.profile_id,"deferred":c.credential.storage.is_native() && cfg!(target_os = "macos")})).collect::<Vec<_>>()}),
@@ -1046,18 +1077,34 @@ fn dispatch_settings_with_fixture(
                 .map_err(|_| "Discovery status unavailable.")?
                 .remove(&p.profile_id)
                 .filter(|(t, _)| t == &p.token)
-                .map(|(_, d)| d.addresses);
+                .map(|(_, d)| d);
             let key = secrets
                 .read(&p.profile_id, profile.credential.as_ref().unwrap())?
                 .ok_or("Credential missing.")?;
-            let discovered = loomlight_core::ai_discovery::discover(profile, &key, previous)?;
+            let discovered = loomlight_core::ai_discovery::discover(profile, &key, previous.as_ref().map(|d|d.addresses.clone()));
+            let discovered=match discovered {
+                Ok(value)=>value,
+                Err(error)=>{
+                    if snapshot(host)?==before {
+                        let _changing=crate::ai_requests::service().change();
+                        host.with_service(|s|credentials::clear_compatibility(s,&p.token,&p.profile_id)).map_err(|_|"Settings unavailable.")??;
+                    }
+                    return Err(error);
+                }
+            };
             if snapshot(host)? != before {
                 return Err("Settings changed during discovery; result discarded.");
             }
+            let changed=discovery_invalidates(previous.as_ref(),&discovered);
+            let current_token=if changed {
+                let _changing=crate::ai_requests::service().change();
+                let store=host.with_service(|s|credentials::clear_compatibility(s,&p.token,&p.profile_id)).map_err(|_|"Settings unavailable.")??;
+                credentials::token(&store)
+            }else{p.token};
             evidence()
                 .lock()
                 .map_err(|_| "Discovery status unavailable.")?
-                .insert(p.profile_id.clone(), (p.token, discovered));
+                .insert(p.profile_id.clone(), (current_token, discovered));
         } else {
             return Err("AI operation unavailable.");
         }

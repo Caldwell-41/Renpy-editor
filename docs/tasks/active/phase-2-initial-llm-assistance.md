@@ -1,5 +1,34 @@
 # Phase 2 — Initial LLM assistance
 
+## Active scope amendment — Unsloth Studio only — 2026-10-12
+
+The user revised Phase 2 to **Unsloth Studio only**. This amendment supersedes the
+generic/OpenAI-compatible provider requirements and two-provider acceptance gates in
+this plan, the ROADMAP and PRODUCT. Generic provider profiles, auth/wire adapters,
+compatibility modes and live qualification are deferred outside Phase 2; their earlier
+design and execution records remain historical evidence. Do not implement or test a
+generic provider as part of Phase 2 closeout.
+
+The Studio integrated/live slice and selectable proposal-editing slice are already
+qualified. The remaining outcome is to reconcile the residual applicable verification
+matrix, then run the final integrated Studio workflow on one coherent candidate and
+complete the required final human acceptance. Reuse valid evidence from the exact
+candidate and unchanged inputs. The user selected the closeout prompt and its finite
+allowance on 2026-10-12. The entry audit identified material Studio scope gaps before
+qualification execution; see the
+[requirement map and decision](#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
+Earlier slice exclusions are not automatic full-phase waivers. The subsequent
+[user decisions and sampling implementation](#closeout-user-decisions-and-local-sampling-implementation--2026-10-12)
+select sampling work, remove session-only credentials from the product requirement,
+and commission separate read-only route feasibility research. Final integrated
+qualification remains pending.
+The user's subsequent deferral of AI Scene-ending/connection changes removes that
+family from Phase 2 closeout; it remains possible separately selected future work.
+See [the deferral record](#ai-scene-ending-and-connection-changes-deferred--2026-10-12).
+The subsequent user direction also **defers selected-route context (item 1)** and
+selects the remaining sampling, explicit setup-readiness test and verified HTTPS
+changes (items 2–5). See [the current amendment](#route-deferral-and-remaining-studio-changes--2026-10-12).
+
 **Scope owner:** Phase 2 requirements, acceptance and the shared delivery sequence;
 [ROADMAP](../../ROADMAP.md) owns phase boundaries. Phase 1 and the bounded nested-source
 foundation are accepted; Phase 2 remains incomplete. Studio settings and credentials
@@ -14,11 +43,14 @@ are qualified on both targets. See the [first rewrite audit](#final-pinned-windo
 [Generated Character cards closure](#generated-character-cards-qualified-closure--2026-10-11)
 and [Generated lorebook entries closure](#generated-lorebook-entries-qualified-closure--2026-10-11).
 The [selected Phase 2 qualification](#phase-2-qualification-selection-and-prerequisite-audit--2026-10-11)
-is [qualified for the selected Studio-only integrated/live slice](#studio-only-integratedlive-qualification-and-closure--2026-10-11),
-with generic deferred. Full Phase 2 and final human acceptance remain incomplete;
-individual action qualification and this slice do not establish those broader outcomes.
-The [next proposal-editing scope and allowance](#selectable-proposal-editing--scope-and-allowance-proposal--2026-10-11)
-is approved and paused for user-requested new-chat transfer; execution has not started.
+is [qualified for the selected Studio-only integrated/live slice](#studio-only-integratedlive-qualification-and-closure--2026-10-11).
+The user has now made Studio the complete Phase 2 provider scope; generic support is
+deferred outside the phase. Residual verification and final human acceptance remain
+incomplete; individual action qualification and the Studio slice do not establish
+those broader outcomes.
+The [selectable proposal-editing outcome](#selectable-live-qualification-and-outcome-closure--2026-10-12)
+is implemented and qualified. Studio-only closeout execution is selected, with its
+allowance unconsumed at the material-scope stop recorded below.
 Read its CI-first amendment/selection only when continuing or reviewing that slice,
 then only the relevant requirement sections. Completed credential/request selections below
 are evidence, not current execution instructions. Detailed planning/source/provider/native attempts through `015579a` are in
@@ -2216,13 +2248,18 @@ rewrite early, then overlap the remaining AI work with richer Story logic.
 
 An author can select narrative content, choose an assistance action, inspect the exact proposed context/destination, generate a structured proposal, review semantic and file changes, accept a dependency-valid subset, and undo normally. Runnable truth remains authoritative Ren'Py source. All writes use the existing core transaction, revision, history and recovery boundary.
 
-The required provider paths are **Unsloth Studio** and **configurable OpenAI-compatible**. Ollama support was removed by user direction on 2026-10-02; no dedicated adapter, preset, documentation or acceptance gate is planned for it. Unsloth is a named product capability with dedicated setup, settings, diagnostics, documentation, fixtures and live acceptance; its wire codec may share tested code with the generic adapter.
+The only Phase 2 provider is **Unsloth Studio**. Generic/OpenAI-compatible adapters,
+profiles, auth modes, wire compatibility and live qualification are deferred outside
+this phase by the 2026-10-12 scope amendment above. Studio remains a named product
+capability with dedicated setup, settings, diagnostics, documentation, fixtures and
+live acceptance. Older generic-provider material below is retained as historical
+design unless a clause is explicitly included in the Studio-only gates.
 
 | Action | Bounded initial behavior |
 | --- | --- |
 | Rewrite dialogue | Replace selected dialogue/narration. Preserve speaker, order and staging unless another supported change is explicitly included in the request scope. |
-| Continue Scene | Insert supported beats at an explicit anchor. Retain the terminal beat unless a reviewed operation replaces it. Refuse insertions across ambiguous/custom boundaries. |
-| Draft Scene | Propose one new Scene in a selected Chapter. Any incoming connection is a separate visible operation. Preserve nonempty and explicit terminal invariants. |
+| Continue Scene | Insert supported beats at an explicit anchor. Retain the existing terminal beat; AI terminal/connection changes are deferred. Refuse insertions across ambiguous/custom boundaries. |
+| Draft Scene | Propose one new Scene in a selected Chapter with its explicit Return ending. AI-created incoming connections are deferred. Preserve nonempty and explicit terminal invariants. |
 | Draft/update Character | Propose a new or revised Character card; optionally propose supported runnable definition fields and existing Appearance references as separate visible operations. Allocate real IDs in core; validate identifiers and collisions. |
 | Draft/update lorebook | Propose individually reviewable entries or revisions from selected material or instructions, with provenance and explicit applicability. |
 
@@ -2254,7 +2291,7 @@ One API-page reasoning example has contradictory prose/flag direction. Use the H
 | --- | --- |
 | U1 | Named Unsloth Studio provider, setup instructions and dedicated connection diagnostics. It is not presented as an untested generic preset. |
 | U2 | Accept the actual Studio endpoint; normalise an origin or /v1 base exactly once, preserve explicitly configured proxy prefixes, and reject ambiguous completion-path input with useful guidance. Never assume one fixed port or scan ports. |
-| U3 | Native secret entry; OS-backed remembered or explicit app-session-only keys; core injects Bearer authentication. Never read Studio's credential database, scrape its console or retain API keys in renderer/project/config/log data. |
+| U3 | Native secret entry; a saved key is reused across application sessions through the approved remembered-storage policy. No session-only mode. Core injects Bearer authentication. Never read Studio's credential database, scrape its console or retain API keys in renderer/project/config/log data. |
 | U4 | Explicit authenticated Refresh models; use returned IDs unchanged, keep friendly names separate, allow manual IDs when discovery is unavailable. Do not treat loaded models as a complete downloadable catalogue. |
 | U5 | Distinguish untested, ready, no loaded model, selected model unavailable, authentication failure, unreachable, busy, interrupted and unsupported capability. Only show loading/OOM/version claims when actual evidence supports them. |
 | U6 | JSON-schema output is the preferred tested mode. Validate a synthetic schema probe against the selected configuration; invalidate capability evidence after relevant changes. A capability test is evidence, not a proof of every future response. |
@@ -2291,9 +2328,10 @@ Keep existing HTTP infrastructure if it meets cancellation and streaming require
 
 A provider profile stores a UUID, provider kind, label, canonical endpoint, optional selected model, authentication/storage mode, opaque credential reference, transport choice, capability evidence and bounded generation settings. Profiles and project-to-profile bindings are machine-local. Moving a project requires explicit profile selection and credential setup; project text never imports or activates an endpoint. [ADR 0011](../../adr/0011-ai-settings-secrets-and-reference-storage.md) records the accepted design, not implemented behavior.
 
-Credential entry, replace and delete use native controls. Offer **Remember on this
-computer** (OS store, default) and **Use for this app session** (backend memory only,
-cleared on app exit or explicit removal; no automatic fallback from a remembered key).
+Credential entry, replace and delete use native controls. Use **Remember on this
+computer** under the approved storage policy and reuse the saved key across sessions.
+The user's 2026-10-12 correction removes **Use for this app session** from the product
+requirement; no session-only implementation or automatic fallback is selected.
 A generic profile may choose **No authentication**; Studio requires its API key.
 Authenticated v1 profiles use Bearer keys, not arbitrary headers or OAuth. OS-store
 failure is actionable and cannot fall back to plaintext. Renderer sees only mode and
@@ -2314,7 +2352,7 @@ own evidence boundary in the [independent review](../archive/2026-10-09-phase-2-
 | --- | --- |
 | Profiles and device-local project bindings | Versioned `ai-profiles.json` under the existing application-data root; validated safe replacement, separate from UI preferences. Defaults/capability evidence bind to model/configuration. |
 | Remembered keys | Baseline macOS Keychain / Windows Credential Manager design; the selected temporary Mac development exception uses encrypted local files and an unencrypted local unlock key, retaining all native ownership as deferred. |
-| Session-only keys | Trusted backend memory, cleared on app exit/removal; no project/config/history persistence. Closing a project is not app exit; disclose the lifetime before entry. |
+| Session-only keys | Excluded by the user's 2026-10-12 saved-key-only decision; earlier session-mode designs are historical. |
 | Bundled prompts | One versioned packaged prompts resource directory; no duplicate handler literals. |
 | Project prompts/style notes | Versioned `.renpy-editor/ai.json`, full override text plus baseline version/digest; existing metadata transaction/history/recovery. |
 | Cards/lore | Versioned `.renpy-editor/references.json`, shared record service with separate collections; section 9 owns the format. |
@@ -2386,7 +2424,13 @@ Start with non-streaming complete responses. SSE adds bounded incremental parsin
 
 Prepare context from committed source plus validated editor metadata; unresolved target drafts/conflicts must be resolved before an applicable request. Unrelated drafts may remain but are excluded and disclosed.
 
-The manifest records project/session identity, action/targets, allowed mutation scope, selected ordered beats/Scenes/route, all source and metadata revisions read, approved Character-card and lorebook revisions, referenced entity IDs, prompt/schema version, exclusions, uncertainty and size estimate. A route is a selected sequence with explicit repeated visits and a finite scope, not a claim of runtime reachability.
+The manifest records project/session identity, action/targets, allowed mutation scope,
+selected ordered beats/Scenes, all source and metadata revisions read, approved
+Character-card and lorebook revisions, referenced entity IDs, prompt/schema version,
+exclusions, uncertainty and size estimate. The user's 2026-10-12 direction defers
+selected-route context, repeated visits and bounded route cycles beyond Phase 2.
+Stored reference applicability may still use a finite route; that does not assemble
+route context or claim runtime reachability.
 
 Defaults: selected narrative content, relevant runnable Character definitions, approved cards linked to selected Characters, explicitly selected approved lorebook entries, and the necessary variable/asset references. Show suggested card inclusion and allow the author to exclude it before Send; list every included entry and its revision. Lorebook scope/Character tags help selection but do not silently inject every matching entry. Dependency expansion is visible in the review; its inclusion grants no mutation authority. Variables are labelled as defaults or supported scene-local observations. Unknown conditions/custom effects are not invented as known state. No automatic asset binary, whole-project, hidden file, credential, Git history or external-file inclusion.
 
@@ -2428,7 +2472,7 @@ A prepared-send token binds the exact request body, profile/model/capability con
 
 ## 7. Structured proposals and source preparation
 
-Use a versioned, closed proposal schema with typed semantic operations and proposal-local references. Core owns real UUID allocation and source/path derivation. Initial operation families are dialogue/narration replacement, supported beat insertion, one Scene creation, reviewed terminal/edge replacement, runnable Character creation/update within scope, and Character-card/lorebook entry proposals. Approval is an explicit user operation; model output cannot approve itself.
+Use a versioned, closed proposal schema with typed semantic operations and proposal-local references. Core owns real UUID allocation and source/path derivation. Initial operation families are dialogue/narration replacement, supported beat insertion, one Scene creation with Return, runnable Character creation/update within scope, and Character-card/lorebook entry proposals. AI replacement of existing terminal Beats or story connections is deferred by the user's 2026-10-12 decision. Approval is an explicit user operation; model output cannot approve itself.
 
 Responses cannot choose arbitrary paths, patch custom source, rename technical identifiers implicitly, execute code, import assets, invoke tools or write outside the allowed target set. Enforce existing string/metadata/integer/source bounds, including exact decimal representation for large integers.
 
@@ -2466,7 +2510,9 @@ Validation order:
 5. Revalidate all context and target revisions, lifecycle identity and current draft/recovery state.
 6. Compile the selected semantic operations into one previewed final mutation set using the existing source/transaction primitives.
 
-A documented explicit text-JSON compatibility mode may be available for generic endpoints after qualification; it still uses strict complete-document parsing and identical validation. First-class Unsloth acceptance must demonstrate its documented schema mode. No silent downgrade when a schema request fails.
+The former text-JSON compatibility mode was for generic endpoints and is deferred
+outside Phase 2. Studio acceptance uses its documented schema mode, with the same
+strict local validation. No silent downgrade when a schema request fails.
 
 Build a non-mutating proposal planner over the actual accepted Phase 1 services. Existing single-operation apply handlers must not be looped to simulate a batch. Prepare a transient candidate, apply supported semantic intents in dependency order, combine changes to the same file, check final invariants, and produce exact minimal source/metadata patches. This transient object exists only for review; it is not a competing runnable document.
 
@@ -2580,22 +2626,25 @@ external JSON/PNG import/export.
 
 These are dependency checkpoints, not mandatory chat boundaries. Select one coherent
 outcome with internal implementation/test/review checkpoints under [WORKFLOW](../../WORKFLOW.md);
-resume that same outcome/chat after a wait. Section 25 owns the selected first
-Studio 2A.1 preparation/access state; remaining production checkpoints stay `not_started`.
-The original provider requirements and approval boundaries remain; planning does not
-authorize provider connections or execution.
+resume that same outcome/chat after a wait. The completed bounded selections linked
+at the top own current evidence; historical first-Studio preparation records are not
+current `not_started` status. The table below retains the applicable Studio
+requirements baseline; completed Studio/selectable slices do not establish every
+operation/evidence cell. The original generic-provider requirements are superseded
+by the active scope amendment above. Planning does not authorize provider connections
+or execution.
 
 | Checkpoint | Deliverable | Acceptance and next boundary |
 | --- | --- | --- |
-| 2A.0 — Provider qualification and contracts | Bounded synthetic Studio/generic probes; version/capability matrix; request/credential/transport ADR; confirm limits and management-API findings. | Record actual success/failure/unknown per provider. Prove Studio schema mode and tools-disabled behavior or record a blocker. No project sends. Return for review before production integration. |
-| 2A.1 — Settings and credentials | Two provider types, native credential entry, explicit context/response settings, connection/model tests and Unsloth-specific setup/readiness/error UX. | Production native entry/store/request/replace/delete, session-only/no-auth, packaged reopen/identity, controlled unavailable-store failures, zero reflection, no requests on project open, origin binding and invalidation. Physical locked-store/signed-upgrade behavior is proved where accessible or retained as a limit; no enterprise-policy gate. |
-| 2A.2 — Request service | Background transport, non-streaming and qualified SSE, cancellation/timeouts/resource bounds, settings mapping and usage results. | Delayed/out-of-order responses, cancellation races, dead server, bad auth, request limits and Save responsiveness. Test each adapter without project writes. |
-| 2B.1 — Context and prompts | Manual Character-card/lorebook storage and editing, deterministic manifests, budgets, dependency disclosure, revisions/provenance and system-prompt editing/baseline reset. | Golden payloads; exact selected card/lore revisions; prompt edit/reset/undo/reopen; no whole-project leakage; bounded route cycles; no silent truncation; input/output budget accounting. |
+| 2A.0 — Studio qualification and contracts | Bounded synthetic Studio probes; version/capability matrix; request/credential/transport contract; confirm limits and management-API findings. | Record actual Studio success/failure/unknown. Prove Studio schema mode and tools-disabled behavior or record a blocker. No project sends. Return for review before production integration. |
+| 2A.1 — Studio settings and credentials | One Studio provider, native credential entry, explicit context/response settings, connection/model tests and dedicated setup/readiness/error UX. | Production native entry/store/request/replace/delete, saved-key reuse across sessions, packaged reopen/identity, controlled unavailable-store failures, zero reflection, no requests on project open, origin binding and invalidation. Session-only mode is excluded by the 2026-10-12 user decision. Physical locked-store/signed-upgrade behavior is proved where accessible or retained as a limit; no enterprise-policy gate. |
+| 2A.2 — Studio request service | Background Studio transport, qualified non-streaming behavior, cancellation/timeouts/resource bounds, settings mapping and usage results. | Delayed/out-of-order responses, cancellation races, dead server, bad auth, request limits and Save responsiveness. Test the Studio adapter without project writes. SSE remains outside the active outcome unless already selected and qualified. |
+| 2B.1 — Context and prompts | Manual Character-card/lorebook storage and editing, deterministic manifests, budgets, dependency disclosure, revisions/provenance and system-prompt editing/baseline reset. | Golden payloads; exact selected card/lore revisions; prompt edit/reset/undo/reopen; no whole-project leakage; no silent truncation; input/output budget accounting. Selected-route context/repeated visits/bounded cycles are user-deferred beyond Phase 2. |
 | 2B.2 — Assistance and send review | Five action entry points, context/destination preview and request snapshot binding. | Exact reviewed payload sent once; relevant changes force renewed review; sensitive/locality disclosures; session and pending-draft safeguards. |
 | 2C.1 — Proposal planner | Strict schemas, semantic/dependency checks, literal generated text/protected existing tokens and non-mutating batch-to-patch preparation. | Malicious/invalid output writes nothing; interpolation/tag and token-tampering checks, same-file batch edits, new IDs, terminal constraints, Unicode/custom preservation and exact previewed mutations. |
 | 2C.2 — Proposal acceptance | Semantic/file review, dependency-valid subsets, stale rejection, one transaction/undo and explicit transient lifetime. | Core/renderer/native acceptance, duplicate-click/retry protection, concurrent drafts, external edits, interrupted-acceptance recovery using non-crashing fault/state fixtures, no partial success claims. |
 | 2C.3 — Character and lore completion | LLM draft/update of Character cards and lorebook entries, separate runnable definitions, statuses, provenance and approvals on the manual foundation from 2B.1. | No implicit lore approval or source execution; migration/reopen, stale citations, missing entities, repeated undo/redo and metadata-free game behavior. |
-| 2C.4 — Integrated acceptance | Real authoring workflow through every action/provider and supported client target. | Required matrix below passes; remaining limitations explicit; complete independent review; no automatic merge or new execution scope. Selected 3A overlap follows section 19. |
+| 2C.4 — Integrated Studio acceptance | Real authoring workflow through all five actions on Studio and both supported client targets. | Applicable Studio matrix below passes; remaining limitations explicit; complete independent review and final human acceptance; no automatic merge or new execution scope. Selected 3A overlap follows section 19. |
 
 Dependency detail: 2B.1 supplies manual cards/lorebook and their approved-reference selection before the first rewrite. 2C.1 defines their proposal operations; 2C.3 completes LLM generation/update and lifecycle UX. Until each generated action is complete it is visibly unavailable; the five-action release claim is made only at 2C.4. Confirm schema ownership during 2A.0 to avoid circular prerequisites.
 
@@ -2605,13 +2654,13 @@ At each checkpoint, update its ledger and canonical behavior/ADRs, run cheap rel
 
 | Layer | Required evidence |
 | --- | --- |
-| Provider fixtures | Auth redaction; endpoint/base-path normalization; redirects/proxies; unavailable/no-model/busy errors; parameter/capability mismatch; exact model IDs; structured and plain malformed results; tools-disabled fields; SSE splits/UTF-8/unknown events; missing usage and finish reasons. |
-| Lifecycle/concurrency | Provider change, key rotation, model switch, project switch, cancel/complete race, old-session callback, competing Source draft, accepted source/card/lore change, prompt reset, size-setting change, stale send token and duplicate acceptance. Save remains responsive during a stalled request. |
-| Context | Manual and LLM-generated cards/lorebook; exact approved inclusions/exclusions; stale reference rejection; prompt customization, baseline reset and reopen; context/output boundary refusal; deterministic order, selected route repeats, dependency accounting, excluded custom code/assets, unknown state, exact large integers, stale summaries/lore, over-budget rejection and no implicit sends. |
+| Studio fixtures | Auth redaction; endpoint/base-path normalization; redirect/proxy refusal; unavailable/no-model/busy errors; capability mismatch; exact model IDs; malformed schema responses; tools-disabled fields; qualified transport framing and usage/finish-reason handling. Generic compatibility parsing and provider-specific adapters are outside Phase 2. |
+| Lifecycle/concurrency | Studio profile/model change, key rotation, project switch, cancel/complete race, old-session callback, competing Source draft, accepted source/card/lore change, prompt reset, size-setting change, stale send token and duplicate acceptance. Save remains responsive during a stalled request. |
+| Context | Manual and LLM-generated cards/lorebook; exact approved inclusions/exclusions; stale reference rejection; prompt customization, baseline reset and reopen; context/output boundary refusal; deterministic order, dependency accounting, excluded custom code/assets, unknown state, exact large integers, stale summaries/lore, over-budget rejection and no implicit sends. Selected-route context/repeats/cycles are user-deferred; stored reference route applicability remains supported. |
 | Transactions | Multiple operations touching one file; new Character plus dialogue; partial dependency refusal; terminal beat validity; external edits; Unicode/BOM/newline preservation; undo/redo; failed commit; ordinary interrupted-save/recovery fixtures; metadata limits and reopen. |
 | Security/privacy | Native credentials absent from renderer/project/logs/artifacts; prompt-injection fixtures cannot expand authority; unsafe names/paths/HTML refused; no ambient WebView HTTP/shell privilege; no tool execution; provider retention disclosure. |
 | UX/native | Windows x64 and macOS ARM64 packaged action/context/diff/accept workflow; keyboard/focus; small window/overflow; readable status; cancel/error/retry; authoritative native credential interaction. Browser tests support but do not replace packaged evidence. |
-| Live compatibility | Record exact client commit, provider/version or unknown, model ID/quantization where known, configured context/output, transport and actual results. Test Studio and one representative generic endpoint using synthetic content. Do not require identical prose. |
+| Live Studio compatibility | Record exact client commit, Studio version or unknown, selected model ID/quantization where known, configured context/output, transport and actual results. Use synthetic content on the selected Studio configuration. Generic endpoint testing is outside Phase 2. |
 | Integrated product | Rewrite with selected cards/lorebook and a customized system prompt, restore baseline, vary context/response limits, continue/create Scene, draft/update Character cards and lorebook, approve references, inspect both diffs, accept subset, undo/redo, close/reopen, explicit SDK validate/run, and execute a copy without editor metadata. |
 
 Both client platforms may connect to the same controlled inference host; GPU inference does not need to run on every CI worker. Deterministic CI uses a bounded fake server. Required live evidence is separately recorded, not replaced by mocks or an unavailable-provider skip. No paid/public-provider calls or GPU downloads occur in routine CI without explicit setup.
@@ -2627,8 +2676,8 @@ Share source/transaction fixtures and test the narrowest actual controller/servi
 
 | Component | Decisive focused proof | Native/live boundary |
 | --- | --- | --- |
-| Profiles/keys | Persistence, replacement/removal failure ordering, unavailable store, session exit/clear, no-auth, origin/redirect refusal and no reflection | Early packaged entry/store/request/reopen path on both targets; mocks do not prove physical locked stores or signed upgrades. |
-| Requests | Final response, auth/protocol error, timeout/cancel, stale completion and responsive Save | Fake-server failures routinely; bounded synthetic Studio and one representative generic configuration live. |
+| Profiles/keys | Persistence, replacement/removal failure ordering, unavailable store, session exit/clear, origin/redirect refusal and no reflection | Early packaged entry/store/request/reopen path on both targets; mocks do not prove physical locked stores or signed upgrades. |
+| Requests | Final response, auth/protocol error, timeout/cancel, stale completion and responsive Save | Fake-server failures routinely; bounded synthetic Studio configuration live. |
 | Prompts/context | Exact payload, edit/reset/undo/reopen/update, selected approved revisions, exclusions and budget refusal | Controller/dispatch integration and milestone native send review; no exhaustive models/providers. |
 | References | Manual/generated review, rejected replacement retains approved text, stale/missing links, malformed/newer schema refusal and migration | Shared deterministic fixtures and representative native forms. |
 | Proposals | Literal text/protected-token emission, rewrite/same-file batch, valid subset, invalid/stale output writes nothing, external conflict, one undo and ordinary interrupted acceptance | First complete user action early, including harmless pinned-SDK literal-display proof, then integrated milestone. |
@@ -2904,8 +2953,9 @@ revision IDs; a reference editor's scope is guidance, not a runtime knowledge cl
 
 ### Settings, prompts and baseline restore
 
-Provider profiles offer only Unsloth Studio and OpenAI-compatible. Show endpoint input
-and normalized destination, authentication mode, OS-remembered/session-only credential
+Provider profiles offer only Unsloth Studio in Phase2. Generic setup and session-only
+credentials are user-excluded. Show endpoint input
+and normalized destination, saved credential reused across sessions,
 status, native Manage credential entry, exact loaded model discovery/manual ID, transport and qualified
 settings. No renderer API-key text field or provider buttons implying extra verified
 support. Distinguish Refresh models, synthetic connection/capability tests and a project
@@ -3013,9 +3063,9 @@ are author references and never become runtime state implicitly.
 
 | Delivery stage | Implementation lane 1 | Implementation lane 2 | Dependency/proof before expansion |
 | --- | --- | --- | --- |
-| 1 — Foundation and provider feasibility | Minimum source structure/locations from 3A.1/3A.2; introduce only the relevant reusable edit-preparation seams. | 2A.0 provider qualification, followed by approved 2A.1/2A.2 credentials/request work. | One nested child edit through dispatch, undo and reopen preserves source/IDs; one qualified provider yields a valid bounded synthetic response. 2A.0's review boundary remains before provider production integration. |
+| 1 — Foundation and Studio feasibility | Minimum source structure/locations from 3A.1/3A.2; introduce only the relevant reusable edit-preparation seams. | 2A.0 Studio qualification, followed by approved 2A.1/2A.2 credentials/request work. | One nested child edit through dispatch, undo and reopen preserves source/IDs; qualified Studio yields a valid bounded synthetic response. 2A.0's review boundary remains before provider production integration. |
 | 2 — First useful AI workflow | Deterministic context and strict proposal planning/acceptance using stage 1 locations/preparation (necessary 2B/2C parts). | Shared manual card/lore records/forms, prompt/limit settings and Assist preparation/review UI against agreed interfaces. | One complete rewrite with selected manual references: exact reviewed send, valid proposal, acceptance, undo and reopen. No hidden draft acceptance or shortened context. Native credentials and affected target checks remain required. |
-| 3 — Overlap milestone completion | Complete 3A conditions/calls, flow/history and Story/Branches controls against the shared model. | Remaining Phase 2 actions, generated cards/lorebook, second-provider coverage and 2C.4 preparation/qualification. | Reconcile every shared-model change with context/proposal targeting. Existing Phase 2 operations remain correct or visibly refuse unsupported boundaries; complete each milestone's own gates. 3A may be selected after the first safe rewrite without waiting for all 2C.4 work. |
+| 3 — Overlap milestone completion | Complete 3A conditions/calls, flow/history and Story/Branches controls against the shared model. | Residual Studio verification and 2C.4 integrated/final acceptance. | Reconcile every shared-model change with context/proposal targeting. Existing Phase 2 operations remain correct or visibly refuse unsupported boundaries; complete each milestone's own gates. 3A may be selected after the first safe rewrite without waiting for all 2C.4 work. |
 | 4 — Visual authoring | 3B Screen source adapters, canvas/hierarchy/properties and runtime comparison. | 3C static staging → PNG/ATL idles → native video → supplied transparency → play-once controls, then remaining Timeline/audio inventory. Reuse shared assets/appearances and runtime comparison. | Accepted 3A and Phase 2; stable source/asset/history contracts. Integrate one shared runtime job before independent preview expansion. Each lane proves one real round trip before broadening its inventory. |
 | 5 — State and integrated release | 3D trace/state inspection and isolated launch, using accepted 3A semantics and qualified 3C effects. | Remaining cross-workspace/UI and affected-target release qualification; fix bounded integrated findings. | Normal-run comparison for supported entry points, then 3F's integrated release gate. Unknown state/timing still refuses unsupported launch; release acceptance follows all required capabilities. |
 
@@ -3065,7 +3115,7 @@ migration work remain serial; the owner can implement them directly.
 Record the first paired assignment's useful output, waiting, integration rework and
 duplicate checks in the existing ledger. Report timing/usage only when available;
 never invent speedup/cost savings. Continue parallelism where output outweighs overhead.
-Source versus provider feasibility and Screens versus Timeline are suitable candidates;
+Source versus Studio feasibility and Screens versus Timeline are suitable candidates;
 shared schema/transaction/runtime changes need a single writer. No recursive agent tree.
 
 Technical prerequisites differ from scheduling defaults. Missing provider access need
@@ -3098,8 +3148,7 @@ do not silently turn it into delivery of the remaining phase.
 | Target | Finished result and decisive proof | Requirement/dependency |
 | --- | --- | --- |
 | Shared source foundation | One nested child edit preserves surrounding source and stable locations through undo/reopen. Introduce minimum structure/preparation only. | Bounded 3A.1/3A.2; Phase 1/1H entry. Can overlap provider qualification. |
-| Provider qualification | Synthetic Studio/generic results and concrete request/credential contracts; report failures/unknowns. | 2A.0; return for its existing review before production integration. No project sends. |
-| Provider settings and credentials | Configure provider/model/credentials/limits and explicitly check readiness; native credential storage and failures follow the declared contract. | 2A.1 after 2A.0 review. |
+| Studio-only Phase 2 closeout | Reconcile the applicable 2A–2C/Section 11 gaps, then run all five actions and selectable proposal editing in one coherent candidate; prove review, valid acceptance, Undo/Redo, reopen and metadata-free SDK behavior on both targets. | Reuse exact unchanged evidence; complete independent review and final human acceptance. Generic provider work is outside Phase 2. |
 | Request lifecycle | Complete/cancel a bounded synthetic request; failures, limits and late replies preserve responsiveness. | 2A.2 using accepted settings/credentials. Scope streaming to qualified behavior. |
 | Manual reference library | Create/edit/approve manual cards and lore on shared records/forms, undo and reopen with exact statuses/revisions. | Necessary 2B.1. Can overlap provider settings work after contracts agree. |
 | Prompts and context preparation | Edit/restore a prompt and save/reopen; select exact reference revisions and inspect a bounded payload without silent truncation. | Remaining necessary 2B.1 on the manual library; shared prompt/limit settings. |
@@ -3108,7 +3157,6 @@ do not silently turn it into delivery of the remaining phase.
 | Draft Scene | Review/create one new Scene with core IDs and explicit terminal state; any incoming connection stays a separate visible operation. | Next bounded 2B.2/2C.1/2C.2 increment on the same proposal path. |
 | Generated Character cards | Draft/update a card with explicit acceptance/approval, provenance and undo/reopen; any selected runnable definition/Appearance operation is separate and reviewed. | Character portion of 2C.3 on manual records/proposal infrastructure. |
 | Generated lorebook entries | Draft/update reviewable entries with applicability, citations, approval/staleness and undo/reopen. | Lore portion of 2C.3; reuse the same reference lifecycle. |
-| Phase 2 qualification | Complete all selected actions on Studio and one qualified generic endpoint, plus affected native targets and the integrated workflow. | 2C.4; no phase completion claim from the first rewrite alone. |
 | Conditional Story logic | Author supported nested conditions/choice guards; Story, Source and Branches agree; native routes match the declared variables. | Necessary 3A.1–3A.4 after shared foundation/first rewrite. Can overlap remaining Phase 2. |
 | Scene calls and Story completion | Call a Scene, return to the following Beat and preserve guarded continuation/return labels through edits and persistence; qualify 3A's combined behavior. | Remaining 3A.1–3A.4; build on conditional source/flow. |
 | Screen round trip | One supported custom screen can be edited via synchronized canvas/tree/properties, undone and reopened; unsupported neighbors survive and native layout agrees. | Bounded 3B.1/3B.2/3B.4; accepted Phase 2 and 3A. Introduce shared scratch runtime job once. |
@@ -6562,3 +6610,489 @@ recovery evidence stays here. Publish only the three owned documentary records o
 existing branch, preserve code candidate5f59322 and reconcile fresh refs without reset.
 Human acceptance/fullPhase2/generic and any following deliverable remain incomplete and
 unselected; no further execution is inferred from unused Mac/Windows start allowance.
+
+### Generic deferral clarification — 2026-10-12
+
+User explicitly reiterates generic support is deferred. The local generic scope/allowance
+proposal is withdrawn; it was not selected, committed or published and triggered no
+implementation, package, editor launch, provider call or CI. No new allowance exists.
+Qualified Studio/selectable outcomes, exact evidence and closed actual counts remain
+unchanged. Any next Phase2 scope proposal must respect this deferral; no following
+outcome is selected by the clarification. This correction is local documentation only.
+
+### Studio-only Phase 2 closeout proposal — 2026-10-12
+
+**State: scope revision approved; closeout execution and allowance are proposed, not
+active.** The user revises Phase 2 to Unsloth Studio only and requests a prompt to close
+the remaining applicable verification-matrix gaps and run the final integrated
+workflow on one coherent candidate. This supersedes the preceding generic-deferral
+note's statement that no following scope is selected. Generic support remains deferred
+outside Phase 2. No implementation, check, package, launch, Studio request or CI was
+started for this documentation change.
+
+#### Proposed finite allowance
+
+| Maximum for this closeout outcome | Windows x64 | macOS ARM64 |
+| --- | ---: | ---: |
+| Package attempts, including failures | 3 | 3 |
+| Editor launches, including reopen/implicit/failed starts | 6 | 6 |
+| Focused CI dispatches | 3 | 3 |
+
+The three CI dispatches are **three paired Windows+Mac runs**, not six independent runs.
+Reuse exact successful package/native/SDK evidence wherever inputs are unchanged; the
+caps are ceilings, not a target. The budget permits one full focused closeout attempt
+and up to two correction/confirmation attempts per platform, matching WORKFLOW's
+reassessment point. After two unsuccessful corrections of one hypothesis, reassess
+before continuing. All local and CI attempts consume the same per-target totals.
+
+Live allowance: at most **two synthetic generations per each of the five Studio
+actions** (10 total). This permits one integrated send per action and at most one
+diagnosed retry per action. Reuse the previously selected Studio model; allow **zero
+new model discoveries**. If its configuration has changed, it is unavailable, or
+rediscovery is needed, stop and request a scoped allowance amendment. Use only the
+selected Studio endpoint/model and disposable synthetic project. No paid/public calls,
+provider expansion, model installation, or key read/export. If credentials are absent,
+pause for the user to enter them through native Settings; never request a secret in chat
+or retrieve an earlier key. Remove any temporary credential and owned fixture/root
+during cleanup.
+
+This allowance is sized for a residual-matrix audit, one coherent two-target integrated
+qualification, and up to two bounded corrections. If the audit shows material product work or the
+remaining matrix cannot fit, return the gap and evidence before expanding scope or cap.
+Prior package/start/dispatch/live allowances remain closed and do not roll into these
+proposed counters.
+
+#### Paste-ready closeout prompt
+
+```text
+Close the remaining Studio-only Phase 2 verification matrix and final integrated workflow.
+Repository: Caldwell-41/Renpy-editor
+Continuation: codex/provider-qualification. Reconcile fresh local/origin refs and preserve unrelated work; never reset. Use qualified code 5f593225fad2ebdb2970663d56ee83631b27ecef as the behavioral baseline, then identify one exact coherent candidate for the final workflow.
+
+Read AGENTS.md, WORKFLOW, TESTING, PRODUCT, ROADMAP, CURRENT, HANDOVER, ADR 0011/0013, and this task's active Studio-only amendment plus sections 1–12, 19–20 and the closeout proposal. The user revised Phase 2 to Unsloth Studio only. Generic/OpenAI-compatible providers are out of scope. Do not implement provider expansion or Phase 3 features.
+
+First map every applicable 2A–2C and Section 11 requirement to reused exact evidence, missing proof, or excluded/out-of-scope with a reason. Retain failed evidence as failed. Reuse unchanged valid evidence; do not rerun complete matrices for unchanged inputs. Close only the identified Studio-only gaps. Add focused tests or make the smallest in-scope repair only where evidence demonstrates a real gap/defect. Independently review the resulting candidate.
+
+On the same exact candidate, run the integrated Studio workflow across both supported targets: review the exact destination/context/payload; exercise rewrite, Continue Scene, Draft Scene, generated Character card and lorebook actions; include the selectable multi-operation proposal and dependency-valid subset; separately approve generated references and use the selected revisions later; edit/restore prompts and vary context/response limits; reject malformed/stale/cancelled proposals with zero writes; accept a valid subset once; verify source/custom preservation, Undo/Redo, project and process reopen, explicit SDK validate/run, and a game copy without editor metadata. Use synthetic content. Run actual Studio live sends only from the authorized owner machine and selected Studio configuration; CI uses controlled fixtures and never receives the Studio credential. Capture exact candidate/input/package identities and native evidence.
+
+Allowance for this outcome: at most 3 package attempts, 6 editor launches and 3 focused CI dispatches per target; CI dispatches must be paired Windows+Mac runs. All failures, retries, implicit starts and local/CI attempts count. Live Studio ceiling: 2 synthetic sends per action, 10 total across the five actions; zero new model discoveries. Reassess after two unsuccessful corrections of one hypothesis. Reuse exact unchanged evidence; stop and report before exceeding any cap or if model discovery, new provider access, or material scope is required. No paid/public calls, key in chat, credential-file reads/exports, provider/model installation, signing changes, merge or release. If credentials are absent, pause for fresh user entry through native Settings; clean up temporary credentials/owned roots.
+
+Run the required focused checks, CI/native qualification and independent review within these caps. Update canonical contracts, this ledger and CURRENT/HANDOVER with matrix disposition, exact refs, failures, limits, counts and cleanup. Do not claim final human acceptance without the user's explicit sign-off; present the concrete integrated evidence for that final decision. Keep the work local unless current publication authorization explicitly covers it. Stop before any new outcome.
+```
+
+Selecting this prompt activates only the stated scope and caps. This record itself does
+not authorize execution or publication.
+
+### Studio-only closeout entry audit and requirement map — 2026-10-12
+
+**Selected, then blocked at the required material-scope decision.** The user supplied
+the preceding closeout prompt verbatim, activating residual Studio-only verification,
+the final coherent workflow, independent review and its finite allowance. Generic and
+Phase 3 remain excluded. No publication authority for this new outcome was established;
+this audit and status/contract clarifications remain local and uncommitted.
+
+Fresh `git fetch origin --prune` succeeded without resetting or changing source. Local
+HEAD and origin continuation both equal **c1e14bf7756a550a0ecaf8fd3b8b736baf07018d**;
+origin/main equals **5f448ca683a905f4ea77d4580bbc89fda69f2b93**. Preserve the six
+pre-existing scope-document edits and the unrelated planning worktree. The one code
+candidate assessed for the final workflow is the already qualified exact
+**5f593225fad2ebdb2970663d56ee83631b27ecef**, tree
+**e8a455ca224943b9079a7fd0cedbeeb7dcd71647**. HEAD and the working app/workflows
+have zero delta from that candidate; documentary successors do not change its identity.
+This identifies a coherent candidate, not an accepted final Phase 2 candidate.
+
+#### Exact evidence inventory and reuse boundary
+
+`R` means reused proof only for the named exact inputs/behavior. `M` means missing
+proof or implementation, with the reason stated. `X` means an explicit exclusion or
+conditional limit, not a pass. A mixed row retains all three dispositions as needed.
+These symbols are local to this map and introduce no new requirement IDs.
+
+| Evidence | Exact identity and usable boundary |
+| --- | --- |
+| E-S | [Selectable CI7/native/live closure](#selectable-ci7-terminal-qualification-and-unlocked-mac-continuation--2026-10-12), run38178036314/attempt1, candidate5f593225fad2ebdb2970663d56ee83631b27ecef. Mac job114584496211/artifact11716217918; Windows job114584496091/artifact11717112693. Fresh read-only audit verifies both265input inventories, declared PS1CRLF only, outer32/67 and child28/63 manifest hashes. Renderer134/core8/prompts5/workers6 and controller/SDK proof retain exact scope. |
+| E-N | Same E-S candidate: Windows executable5fd03b0f8f3080ea3d258d30ff23eadaf8d3aa3ce05ca631670265f0327605ae, starts5–6; signed Mac executable724a405c34c43ee7659785fda4132b001d2037c0440c33bb0c668cb136fc01d9, installerf06c21b2a95855c3ba449c695bc0e31bcb8d23c2ec6cab3fb28cdf4e2344a611, starts1–2. All19+2checks/six native stages/six bodies, zero reopenHTTP and cleanup qualified. Mac live starts3–4/two selectable batches and exact-sourceSDK follow in [closure](#selectable-live-qualification-and-outcome-closure--2026-10-12). Agent/native input is not final human acceptance. |
+| E-I | [Studio integrated CI4](#studio-only-integratedlive-qualification-and-closure--2026-10-11), run38134089028/attempt1, candidate3b3e8681a7bae2ddc8964409bf6f4e615b788eba, tree7a56dc5e5e2fbeff0d365216a43456345d52fdcd. Mac job114454280091/artifact11700481279 and Windows job114454279985/artifact11700921379. Fresh audit verifies declared23/88manifest entries. Five-action exact-body/private-LAN/controller/history/approval/reopen and metadata-freeSDK proof applies to those historical inputs. There are33changed app/workflow paths between E-I and E-S, including dispatch, prompts, planner and renderer; E-I is **not** final integrated proof for E-S. |
+| E-A | Exact bounded action closures: rewrite95ce9c4fbad12cec24e8eda851b1baff1c4beec8/run38031993657; Continue8931fa85178ca22430fa5984e693f609970f4995/run38039472619; Draft1320d0a6507625abdd3fa20aa6a3eccffaccfcd6/run38056790759; card8a230a9619ec7504f1a91dc8504e6e9667108190/run38093296977; lore233454b4a0ae4c369d00c2dcd352c789829290b2/run38105665896. See [prior reuse table](#evidence-reuse-and-remaining-proof). They retain individual historical qualification; no wholesale cross-SHA final-workflow pass is inferred. |
+| E-C | [Windows credential closure](#final-windows-acceptance-and-cleanup--2026-10-09), exact executable98fe719010dd029965401dd09ae7919dcf27b0f45f99aae8bf0b65c10d925fc6; native entry/replace/remove/reload-required/reopen. [Mac development store result](../archive/2026-10-09-phase-2-execution-history.md#development-file-native-qualification-result--2026-10-08) and its independent corrections retain their exact package boundaries. Credential services/ownership are unchanged in E-I→E-S; E-N supplements current-package remembered readability/entry/removal. Neither proves session-only, Mac Keychain update reuse or physical locked-store behavior. |
+| E-R | [Windows request closure](#final-windows-request-acceptance--2026-10-09) and [focused Mac recheck](#focused-mac-shared-request-verification--2026-10-09), exact sharedde29e496f52a42194f528a57293d5aa06aae4967. Controlled Save under stalled request/cancel/auth/usage/exit. E-I transport8 and native-worker6 retain exact service-input proof: ai_request/ai_discovery/profile/credential service files are unchanged E-I→E-S. E-S also runs workers6; no live server-stop guarantee. |
+| E-P | E-S prompts5 cover exact payload/references/dependency/budget/stale/draft and save/reset/history/reopen/baseline-update preservation. E-I reference12 covers shared lifecycle/bounds/extensions/malformed/newer/external/recovery/missing/stale citations; reference service/tests are unchanged E-I→E-S. E-I integrated approves generated card/lore and sends their exact revisions later; this integration still requires fresh E-S proof. |
+| E-L | E-I live selection used4d1120dbb6f8d85dc861554ba93e8d26db6c1f82/signed Macpackage1/executablef79d46cedd6ec664fe8a9d69d5d37df2ff035757610c0b3996d530d25673f7b7: exact selected Gemma, all five actions1send each, fresh native key, later approved references, prompt/reset/limits/history/reopen and exact accepted-sourceSDK. E-N adds two live selectable batches on E-S. Historical reported Studiov0.1.902-beta, exact modelunsloth/gemma-4-12B-it-qat-GGUF, advertisedUD-Q4_K_XL/context262144; current installed/server-internal state remains unknown. These are distinct sessions, not one final integrated workflow on E-S. |
+
+Ignored `phase2-closeout-01/entry-audit.json` owns the fresh public-evidence hash/input
+audit, entry diff digest, refs and counters. An initial audit failed with `KeyError:
+files` because historical CI4 uses a flat manifest and CI7 uses a versioned envelope.
+That harness assumption is retained as failed; corrected format-aware verification
+passes. It was no package, launch, dispatch, product test or provider attempt.
+
+#### Applicable 2A–2C gate disposition
+
+| Gate / requirement clauses | Disposition and remaining work |
+| --- | --- |
+| 2A.0 actual Studio version/configuration, schema, tool policy, limits, lifecycle findings | R E-L/ADR0013 records exact selected configuration, successful off/JSON and failed thinking/default probes; unknown backend/server tools remain unknown. M U5/U6 configuration-bound product capability readiness, and final E-S integrated live proof. X undocumented model management/installation; zero new discovery in this outcome. |
+| 2A.1 native entry/store/request/replace/delete; zero reflection; origin binding; no open sends | R E-C/E-N remembered paths and unchanged ownership/origin services. M configuration/schema readiness and full-phase disposition of Windows session-only/HTTPS generation. X temporary Mac file-store policy expressly defers Keychain/session escape; locked store, signed upgrade and enterprise policy retain limitations. |
+| 2A.2 delayed/out-of-order/late responses, cancel races, dead server, bad auth, size/deadline/cleanup; Save responsiveness | R E-R/E-I exact controlled service inputs and E-S workers6. M final same-candidate workflow integration; no re-run of unchanged complete worker matrix. X product SSE not selected/qualified by §10; spike SSE is not production proof, server-stop remains unknown. |
+| 2B.1 manual references, deterministic manifests, exact approved revisions, provenance/staleness, prompt edit/reset/undo/reopen, no leakage/truncation, accounting | R E-P; E-I integrated chain provides historical generated-reference/prompt proof. M fresh E-S integration and selected finite-route context/repeated visits/bounded cycles, absent from production request shape. Stored reference route applicability is not route context assembly. |
+| 2B.2 all five entries, destination/locality/sensitive disclosure, exact reviewed send once, stale token/session/draft guards | R E-A/E-I historical five-action workflow; E-S/E-N current selectable binding and guards. M one final all-five-plus-selectable chain on E-S and configuration capability readiness. |
+| 2C.1 closed schemas, strict protocol/JSON, semantic ownership/dependencies, literal/protected text, same-file preparation/core IDs/Unicode/custom/exact patches | R E-S/E-N current selectable8core tests/controller/native and two metadata-freeSDK cases; E-A/E-I retain individual action/SDK cases. M final combined E-S game/chain. X arbitrary code/assets/Phase3 operations. Wider terminal/edge replacement family in §7 has no full-phase disposition; current Continue retains terminal, Draft creates Return only. |
+| 2C.2 semantic/file/selection review, valid subset/dependency refusal, stale/external/draft/recovery guards, one transaction/Undo, duplicate refusal, transient lifetime | R E-S/E-N exact current dependency subsets/consumption/one history entry/zero-write refusals/reopen; ordinary fault-state recovery case passes, no crash experiment. M same final integrated chain. |
+| 2C.3 manual/generated cards/lore, proposed Save versus approval, current approved replacement/rejection/supersession, provenance, extensions/migration/missing/stale citations/history/reopen | R E-P/E-A/E-I lifecycle proof; card/lore services unchanged; separate runnable Character create/update R E-S. M later exact approved generated revisions within final E-S chain. X external formats/automatic retrieval/implicit source or lore approval; Appearance operations remain outside selected bounded authority. |
+| 2C.4 both-target five-action+selectable integrated Studio acceptance and independent/final human review | M required final chain, exact exported accepted game/SDK, both-target native disposition and explicit human sign-off. E-I and E-N cannot be joined into a claim that this same final chain already ran. Independent entry scope review is complete; final execution review remains pending. |
+
+#### U1–U12 and remaining contract disposition
+
+| Requirement | Disposition |
+| --- | --- |
+| U1 named Studio/setup/diagnostics | R dedicated Settings/Assist and E-C/E-R/E-N; no generic preset substituted. |
+| U2 endpoint normalization/prefix/exact port/useful refusal/no scanning | R canonical_endpoint and E-I transport/profile input proof. M §4 verified-HTTPS/hostname **generation**; discovery's checked resolver/TLS path is a different service. |
+| U3 native secret/Bearer/renderer exclusion | R E-C/E-N; X explicitly selected Mac development exception. M Windows session-only full-phase decision; CredentialStorage has Native/DevelopmentFile only. No fallback/key export permitted. |
+| U4 explicit authenticated exact-ID discovery/manual IDs | R E-C/E-L; model text is entered directly or taken unchanged from discovery. X zero new discoveries/current availability unmeasured; loaded list is not catalogue. |
+| U5 distinct readiness/availability/auth/unreachable/busy/interruption/unsupported | R discovery-only status and safe transport categories E-R. M full configuration readiness/capability state: current Settings explicitly says generation compatibility remains unverified. No loading/OOM/version fact invented. |
+| U6 selected synthetic schema probe, configuration-bound capability evidence/invalidation | R E-L historical measured probe and strict local validation. M product capability/version/schema/tool-policy record and admission gate; StudioProfile contains no such record. Binding a send to profile revisions is not capability evidence. |
+| U7 qualified thinking default/on/off; final versus reasoning | R off-only action bodies, separate response handling E-R/E-L. X on/default are unqualified; their output-cap failures stay failed, not unsupported. Any new control/config qualification requires a decision. |
+| U8 server ceiling/input/output separation; no invented resize fields | R E-P/E-S exact serialized byte estimate/margin/reserve and refusals; user ceiling labelled unverified. X capacity/tokenizer measurement is not inferred from advertised metadata. |
+| U9 local/network nonstreaming/SSE/tunnel | R literal loopback and opted-in RFC1918/ULA nonstreaming E-I/E-N. X SSE/tunnel/explicit proxy not selected in production. M verified-HTTPS/hostname full-phase boundary; previous LAN amendment excluded them only from its slice. |
+| U10 disable server tools; no client tools; reject returned tools | R exact strict wire fields and returned-tool refusal E-R/E-I/E-S/E-L. X stronger internal/server-wide suppression is a retained unknown limitation under ADR0013, not an additional implementation blocker. A benign tool-free reply proves neither server-stop nor internal suppression. |
+| U11 safe revoked-key/model/server/field/truncation/interruption recovery with retained input | R E-R categories/retained input, E-A invalid/cancel/stale cases, E-S zero-write refusals. M any unproved provider-specific readiness distinctions; interrupted SSE excluded with product SSE. |
+| U12 live exact Studio and both-client package evidence | R E-L/E-N bounded actions; M final same-candidate integrated workflow and human acceptance, current configuration confirmation without discovery. |
+| §4 profile/model/project binding, storage/version/malformed/cleanup ordering, narrow IPC and origin consent | R E-C/E-N/E-P existing profiles/binding/transaction/refusal. M Windows session-only, config capability evidence, TLS/hostname generation. X generic/no-auth/OAuth/headers/export/sync/native Mac migration/signing changes. |
+| §5 lock release/one worker/no queue, states/cancel/deadlines/bounds/usage/latency/finish | R E-R/E-I/E-S worker and bounded JSON path; absent usage unknown. X monetary catalogue/SSE/automatic retry/repair. Limits are application bounds, not measured server maximums. |
+| §5 editable temperature/top-p/output and qualified thinking | R output controls. M editable temperature/top-p: StudioSettings has no fields and all action bodies omit sampling. Qualified off-only thinking remains a recorded limit; historical on/default failures retained. Implementing/mapping/qualifying new controls is material work. |
+| §6 committed source/read set/ordered dedup/default definitions/explicit approved references/exclusions/unknown/custom/budget | R E-P/E-S bounded target context. M selected finite multi-Scene/route context; PreviewRequest has one Scene/Beat/Chapter, no route/repeated visits. X automatic summaries/embeddings/whole project/binaries/Git/external files/runtime state inference. |
+| §6 action prompt resources/full overrides/style/baseline comparison/update/reset/history/reopen/stale send | R E-P five tests and E-S selection guard; M final integrated customization/reset on exact candidate. No executable template or prompt-supplied authority. |
+| §7–8 literal encoding/token refusal/strict schema/core IDs/path ownership/passive rendering/batch subset/exact diff/journal/history/consumption/transience/recovery | R E-S/E-N; E-A/E-I historical individual families. M final combined chain and wider terminal/edge-family scope disposition. X arbitrary code/Phase3/assets/persistent reply archives/specialist crashes. |
+| §9 native manual/generated records, stable IDs/links/revisions/scopes/knowledge notes/citations/statuses/unknown extensions/bounds/newer refusal | R E-P/E-A/E-I; source-free acceptance and separate generated approval retain boundary. Stored finite-route scope is supported; M route **context** assembly is separate. X external card/PNG formats, contradiction detection/keyword injection/inferred runtime knowledge. |
+
+#### Section 11 cell-by-cell disposition
+
+| Matrix layer / cells | Disposition |
+| --- | --- |
+| Studio fixtures: auth redaction, base-path normalization, redirect/proxy refusal, exact model IDs, qualified framing, usage/finish | R E-C/E-R/E-I unchanged service inputs. M generation TLS/hostname and capability mismatch/readiness; X generic adapters/parsing. No public provider fixture needed or allowed. |
+| Studio fixtures: unavailable/no-model/busy, malformed schema, disabled tools | R controlled error/protocol cases E-R/E-I, schema refusals E-S/E-A. M distinction between availability-only diagnostics and qualified generation readiness; internal tools remain unknown. |
+| Lifecycle: profile/model/key changes, project switch/old-session callback, cancel/complete race | R E-R/E-S workers, stale profile/reference/prompt/draft selectable test and E-N refusal. No implicit send on open/reopen. |
+| Lifecycle: competing Source draft, accepted source/card/lore change, reset/limits/stale send, duplicate acceptance | R E-P/E-S exact rejecting/consume cases; E-I historical cross-action integration. M final combined E-S integration. |
+| Lifecycle: responsive Save while request stalls | R E-R actual packaged Windows Save280ms and accepted Mac controlled path; transport/worker inputs unchanged. No complete stalled-request matrix rerun selected. |
+| Context: manual/generated refs, exact inclusions/exclusions/stale rejection, prompts/reset/reopen, context/output refusal | R E-P/E-I bounded proof. M final E-S chain with generated revisions and customized prompt/varied limits. |
+| Context: order/dependencies/custom/assets/unknown/no implicit sends | R E-P exact payload and E-S authority; X executable custom inclusion/asset binaries/runtime state inference. |
+| Context: selected route repeats/bounded cycles | M production context shape/selector absent; reference applicability route does not pass it. This is a material 2B.1 capability gap. |
+| Context: exact large integers | M no explicit phase2 variable-in-context large-integer assertion identified in the inspected focused evidence; existing Phase1 JSON bounds alone are not relabelled as this proof. Narrow assertion can follow scope disposition if needed. |
+| Context: stale summaries/lore, overbudget/no silent truncation | R stale lore/budget E-P; X summaries/embeddings expressly deferred by §6. |
+| Transactions: same-file multiple edits/new Character+dialogue/partial dependency/terminal/custom/Unicode/BOM/newlines | R E-S/E-N exact source cases. Wider terminal/edge replacement remains an unresolved contract boundary, not a passing case. |
+| Transactions: external edits/history/failed commit/interrupted recovery/metadata bounds/reopen | R E-S ordinary compound fault-state recovery and external/draft guards, E-P bounds/history; X deliberate crash/hostile filesystem programme. M final mixed chain reopen on exact accepted game. |
+| Security/privacy: native secret exclusion, injection authority, names/paths/HTML, narrow WebView, no tools, retention | R E-C/E-S/E-N/E-P passive rendering/exact authority/scanned fixtures/disclosures. No credential file read/export, live credential in CI, automatic HTML or tool action. X server-internal suppression remains an explicitly retained unknown limitation, not client permission. |
+| UX/native: both packages/context/diff/accept, focus/keyboard, compact overflow/status/cancel/error/retry/native credentials | R E-N exact current selectable stages plus scoped E-A/E-C native interactions. M final same-candidate combined all-five chain/native coverage disposition; browser support cannot replace it. Subjective final human acceptance stays missing. |
+| Live compatibility: exact client/version-or-unknown/model/quant/context/output/transport/results | R E-L historical scoped results. M final E-S all-five-plus-selectable session with current nonsecret configuration confirmation and exact candidate/input identities, zero discovery. No live body capture/server certification inferred from controlled tests. |
+| Integrated: approved refs+custom prompt/reset/limits, five actions, both diffs/subset once/refusals/history/source/reopens | M one coherent E-S combined workflow across targets. E-I/E-N remain reusable scoped evidence, not a composite final pass. |
+| Integrated: explicit pinnedSDK validate/run and metadata-free game | R E-I exact eight-file integrated games and E-S two exact selectable games passed SDK8.5.3. M SDK of final combined accepted-source export; old exports cannot substitute for a new combined game. |
+
+#### Independent review, stop decision, counts and cleanup
+
+Independent read-only review agrees the baseline is narrower than the retained full
+Studio contract. Reviewer inspected real profile/request/prompt/dispatch/UI shapes and
+the explicit older exclusions; no edits/tests/packages/launches/dispatches/sends or
+credential access. Decisive source: `PreviewRequest` in `app/src-core/src/prompts.rs`
+has no finite-route input; `StudioSettings` and `StudioProfile` in `ai_profiles.rs`
+have no sampling/capability state; `ai_request::destination` requires literal HTTP;
+`CredentialStorage` has no session variant; `rewrite_prepare` has no capability gate
+and all action bodies fix thinking off. The recorded prompt slice excluded finite-route
+expansion/full2B.1, LAN slice excluded TLS/hostnames, and Mac exception deferred session
+escape. None automatically removes the corresponding full-phase requirement.
+
+**Concrete decision needed:** either explicitly narrow the full Studio Phase 2 boundary
+to the implemented literal-HTTP/remembered/off-only/single-target capability and name
+the deferred route/sampling/capability/TLS/session/terminal-edge requirements, or select
+the missing capabilities as material implementation with concrete qualification scope
+and allowance. This audit makes neither decision for the user. A verification rerun
+cannot implement them. The original outcome says to stop if material scope is required;
+therefore no expensive/native/live work was started and no final acceptance requested.
+
+Historical failures remain failed: Studio thinking-on/default truncation; earlier
+per-action/native/CI failures; selectableCI5 historically unresolved cleanup; reviewer
+sandbox trust failure alongside unchanged approved-host strict signature success. Fresh
+audit format failure above remains a harness failure. No unsuccessful product correction
+or new qualification hypothesis was attempted; two-correction allowance remains intact.
+
+| Closeout actual / ceiling | Windows x64 | macOS ARM64 |
+| --- | ---: | ---: |
+| Package attempts | 0/3 | 0/3 |
+| Editor launches, including implicit/process reopen | 0/6 | 0/6 |
+| Paired focused CI dispatches | 0/3 | 0/3 |
+
+Live closeout counts: rewrite0/2, Continue0/2, Draft0/2, card0/2, lore0/2; **0/10total**,
+**0/0new discovery**. Prior closed counts remain separate. No owned process, listener,
+synthetic project, temporary credential, SDK install, CI operation or watcher was created;
+only ignored public audit evidence remains. No credential files were read/exported or
+native Settings opened. Fresh entry, if later needed, belongs in native Settings.
+No push/merge/release/signing/provider access/next outcome occurred. Final candidate
+workflow, final execution review and explicit final human sign-off remain incomplete.
+
+Independent final documentary review agrees with the material-scope stop and truthful
+exact-reuse/missing-proof boundaries. Its one wording finding was corrected above:
+stronger server-internal suppression is an ADR0013-permitted unknown limitation, not
+another mandatory gap. No other actionable finding; reviewer performed no writes or
+execution. Repository structural/privacy/relative-link validation passes515files;
+103Markdown fragment links resolve and diff whitespace passes. CURRENT270words and
+HANDOVER543words retain compact current recovery without repeating the historical ledger.
+
+### Closeout user decisions and local sampling implementation — 2026-10-12
+
+The user responds to the entry map: (1) create a new chat to investigate selected-route
+feasibility and return a decision/proposal; (2) sampling is required and should be
+implemented with sensible creative-writing defaults; (3) explain whether capability
+readiness is possible/needed and model/provider dependent; (4) explain whether HTTPS
+can be tested without an actual provider; (5) **no session-only credentials**, just the
+saved key reused across sessions; (6) explain terminal/connection changes further.
+These directions select local sampling implementation and remove session-only from
+the active contract. They do not select route/TLS/capability/terminal-edge implementation,
+publication, another provider/model, discovery or more expensive allowance.
+
+Created user-owned chat **Investigate selected-route context feasibility**, local
+thread `01a12eb3-214e-7810-83f4-773eae1fc621`, same Loomlight project. Initial snapshot
+confirms active read-only investigation. Its brief permits source/contract research and
+a feasibility decision/bounded proposal only; no writer/build/launch/CI/Studio/credential
+operation. The user follows its report there; no messaging back to another chat is
+inferred. The sampling owner remains the only writer. Route research returned
+**feasible with constraints** and a bounded proposal; user subsequently requested a
+workflow explanation there. Neither research nor explanation selects implementation.
+
+Local sampling now adds saved **Temperature** and **Top-p** to Studio Settings. Defaults
+are **1.0/0.95**, editable finite ranges **0–2/0–1**. They match the selected Gemma's
+[published sampling guidance](https://huggingface.co/unsloth/gemma-4-12B-it-qat-GGUF);
+Studio's [current request schema](https://github.com/unslothai/unsloth/blob/main/studio/backend/models/inference.py)
+and [client serializer](https://github.com/unslothai/unsloth/blob/main/unsloth_cli/_inference.py)
+support the named fields. This is a documented starting point, not a measured creative
+quality result or installed-Studio compatibility pass. No hardcoded model catalogue,
+top-k/other sampling control, thinking-mode change, automatic probe or retry is added.
+
+Old profiles omit both fields and retain identical serialized shape until explicit
+Save. Missing fields use the stated effective defaults in the reviewed outgoing body;
+explicit null/string/bool/nonfinite/out-of-range values refuse. Explicit Save uses the
+existing profile transaction/revision and preserves the credential origin/reference;
+changes invalidate prepared sends. All five actions plus selectable editing, and the
+synthetic diagnostic, send `temperature`/`top_p` in their core-owned exact body. Assist
+full-body review reveals the effective values before Send. No read/save initiates inference.
+
+Independent read-only review found an overbroad constructor edit accidentally adding
+sampling fields to native Pending; corrected before the desktop check, without adding
+new request state. Reviewer then found no further code defect, and requested explicit
+default/custom assertions for the second synthetic serializer; those were added.
+No reviewer tests/launches/builds/dispatches/sends/credential operations occurred.
+
+Focused local evidence: frontend typecheck/test compilation; Settings DOM **5/5**,
+no skips; core sampling **2/2**, no skips, covering legacy exact serialization/ranges,
+all six action envelopes, actual profile Save/readback, credential preservation,
+stale-review refusal and no source writes; affected synthetic-body **1/1**, no skips,
+with default/custom fields; desktop `cargo check --tests --locked --offline` passes.
+Existing unused Windows selector warning remains. Rustfmt applied only to the changed
+profile module; no broad source reformat or package matrix. Source-level checks do not
+establish both-target native or live Studio acceptance.
+
+Failed preparation evidence is retained: an incorrect relative activation path prevented
+the first Cargo invocation; the first new DOM test used a non-reflected Happy DOM aria
+selector, then a non-bubbling synthetic input event; an incorrect edit working-directory
+path left that event correction unapplied on one retry. The corrected label association
+and realistic bubbling event pass. These are harness/command failures, not product
+passes or editor/package attempts. No repeated unsuccessful product-correction hypothesis
+or expensive attempt occurred.
+
+Qualified5f59322 remains the behavioral baseline; current sampling code is local and
+uncommitted on HEADc1e14bf. Earlier265input/exact-body/package receipts remain historical
+for changed inputs, not current-candidate qualification. Final coherent candidate must
+be frozen after scope/implementation settles. Source-bound literal/custom/history
+evidence remains reusable only within unchanged boundaries; do not join earlier chains
+into a final pass. Capability readiness and TLS/terminal scope decisions remain pending;
+session-only is now **X/user-excluded**, superseding the earlier map's open disposition.
+
+Closeout counters remain Windows/Mac **0/3packages,0/6editor launches,0/3paired CI**;
+live **0/2each,0/10total**, new discovery **0/0**. Only disposable core test roots were
+created and cleaned by their fixtures; no real credential file read/export, provider
+call, native Settings, package/SDK installation, app process/listener, merge/release or
+publication. The route research and explanation are complete; no further implementation
+is selected by that chat's creation. Ordinary saved-key storage/signing/namespaces are unchanged.
+
+Final independent review found the existing qualification renderer gate still expected
+134cases. Updated it and its rejecting fixture to135; old134/zero/skipped results are
+refused. Added the focused sampling2/synthetic-body1 stages to the existing bounded
+selector without dispatching it. Actual `npm run check` passes **135/135**, no skips;
+qualification rejection fixtures pass **14/14**, no skips. Documentation/privacy
+validation passes515files and diff whitespace passes; CURRENT313words/HANDOVER667words.
+The source/synthetic-only ignored `phase2-closeout-01/sampling-local.json` owns the
+local265input snapshot/digest, focused results, failed preparations and zero expensive
+counters. The final workflow candidate is still unfrozen/local; no publication or
+qualified native/live sampling result is claimed. Independent product review has no
+remaining finding; its harness/document precision findings were corrected.
+
+### AI Scene-ending and connection changes deferred — 2026-10-12
+
+The user explicitly chooses to hold off on item6, because it may introduce additional
+complexity while remaining desirable later. Defer AI proposals that replace existing
+Scene endings, alter outgoing Choice/Jump connections or create incoming connections
+to a new Scene. This removes that wider terminal/edge operation family from Phase 2
+closeout; the entry map's previously unresolved disposition is now **X/user-deferred**,
+not missing required proof and not an implemented/pass claim.
+
+Continue retains the existing ending; Draft creates an unconnected Scene with Return.
+Terminal validity, supported text/Beat/Character operations, source preservation and
+ordinary manual Scene/connection authoring remain governed by their existing contracts.
+Keep the deferred AI capability as possible future work, with no automatic phase
+assignment or implementation authority; a future selection must define permissions,
+separate visible structural operations, dependencies, source/history and qualification.
+
+Only active scope/status/contracts were corrected. Sampling source/tests and all
+unrelated edits remain intact. No package, editor launch, CI, provider send/discovery,
+credential operation, commit/push or allowance change occurred. Remaining route,
+capability-readiness and TLS decisions, sampling native/live proof and final integrated
+acceptance remain separate pending work. Prior failures/evidence and zero expensive
+closeout counters retain their actual disposition.
+
+### Route deferral and remaining Studio changes — 2026-10-12
+
+The user now says **“Defer 1 as well. Make the other changes if you haven’t already.”**
+This defers selected-route context/repeated visits/bounded cycles beyond Phase 2,
+alongside item6 AI ending/connection changes. The separate route feasibility chat
+and proposal remain available as future research; no route implementation is selected.
+Items2–5 select editable writing defaults, an explicit saved-configuration setup test,
+verified HTTPS/hostname generation and one saved credential reused across sessions.
+Generic providers, thinking expansion, Phase3 and signing/storage-policy changes
+remain excluded. This supersedes the entry audit's scope-blocked disposition, while
+retaining its evidence map and failed results as history.
+
+| Entry map cell | Current disposition |
+| --- | --- |
+| 2B.1, §6, §11 selected-route context/repeats/cycles | **X/user-deferred**; not a pass. Existing Scene/Beat/Chapter manifests and stored reference route applicability remain in scope. |
+| §7/2C terminal/edge replacement/connection family | **X/user-deferred**; Continue retains ending, Draft unconnected Return; terminal validity remains required. |
+| U3/2A.1 session-only credentials | **X/user-excluded**; existing remembered key reused across sessions; no storage adapter/signing change. |
+| §5/U7 editable sampling | Local implementation/proof; defaults1.0/.95; native/Windows/live exact-body qualification still missing. |
+| 2A.0–2/U5/U6/U11/§11 configuration readiness | Local explicit Test setup and strict publication implemented/proved with fixtures; actual selected Studio and packaged proof still missing. Internal tools/backend/loaded capacity remain unknown. |
+| U2/U9/§4/§11 HTTPS/hostnames | Local verified transport and controlled TLS proof; native/Windows/live proof still missing. Literal IPv6 HTTPS explicitly unsupported by pinned adapter; no insecure fallback/dependency replacement. |
+| 2B.2/2C.4/§11 integrated all-five plus selectable | Same-candidate source integration preparation in progress; final both-target native/SDK/live evidence and independent execution review remain missing. |
+
+Implementation adds optional legacy-safe saved sampling, configuration-digest readiness
+with a checked timestamp, and narrow `ai.testCompatibility` IPC. The tiny synthetic
+request/closed response is core-owned, previewed and uses the same single cancellable
+worker. Relevant saved configuration/key changes and unavailable/changed discovery
+clear readiness. Cancelled/stale/replaced sessions cannot publish; completed durable
+publication wins late cancellation. Project review requires a tested setup; fixtures
+seed public controlled readiness explicitly and never masquerade as live proof.
+The core/native credential boundary remains unchanged; renderer receives no key.
+
+HTTPS resolves and validates all answers, binds the sorted set to exact reviewed
+addresses, rechecks before connecting and refuses ordinary DNS changes. Native DNS
+runs outside the project lock, with one global OS worker maximum and bounded waits.
+Certificate/hostname validation retains production WebPKI roots. DNS, connect, TLS,
+reads, partial writes and validation share one absolute deadline. Public synthetic
+fixture CA/server certificates/key are test-only; CA issuance key deleted; no trust
+installation, provider connection, management/discovery call or dependency change.
+Pinned ureq3.1.4's bracketed literalIPv6 certificate-name limit receives a useful
+refusal; HTTPIPv6 and HTTPS DNS names resolvingIPv6 remain supported.
+
+Focused Mac checks: core compatibility3/3, sampling2/2, affected rewrite45/45;
+desktop readiness-discovery1/1 and native compatibility3/3 (two worker tests plus
+the discovery selector); desktop tests/examples compile; TLS transport15/15;
+SettingsDOM8/8; final renderer138/138; qualification rejecting gates14/14. No skips.
+The first final renderer run failed138total/137pass on a stale thrown-status error
+overwriting the late-cancel success message. Added a generation check in the catch
+and after profile reload; Settings8/8 and final138/138 then pass. This is one successful
+correction, not an erased failure. Independent review found discovery invalidation,
+late-cancel truthfulness and deadline gaps; those are repaired with focused fixtures.
+Final re-review after the thrown-status finding remains required.
+
+Retained preparation failures: initial desktop compile before API adaptation; sandbox
+native/TLS listener denial; wrong-host fixture127.0.0.2 bind unavailable on Mac,
+replaced with a wrong certificate on127.0.0.1; cancellation assertion accepted actual
+TCPreset as closed only while still requiring owned socket shutdown. These are failed
+harness/preparation results, not native/provider passes. The TLS deadline correction
+passed15/15 after explicit partial-write recalculation. No hypothesis received two
+unsuccessful corrections. Prior audit/sampling/CI5/thinking/signing failures stay failed.
+
+Closeout counts remain per-target packages0/3, editorstarts0/6, pairedCI0/3; all five
+live action counters0/2, total0/10, discovery0/0. Any live setup test consumes this same
+ten-send total and has a separate counter; no automatic preflight or retry. One setup
+plus up to nine action sends can fit the ceiling, with each action still capped2;
+exact configuration changes that need additional setup must be planned within it or
+stop before sending. Current selected Studio credentials are not assumed available;
+fresh user entry through native Settings is required if absent. No credential files
+were read/exported. Disposable fixtures/listeners/workers cleaned; no actual editor,
+new SDK install, package, CI, live send, commit or push yet. Local changes preserve
+the six pre-existing scope edits; candidate freeze/publication and remaining native
+qualification are still pending, with no final human acceptance claimed.
+
+#### Combined source workflow and final review
+
+Optional `phase2-controller.dispatch.mjs --selectable-integrated` passed on its first
+synthetic run: same project, five actions then a full selectable replacement/Character/
+insertion proposal; missing Character dependency refuses with zero writes; selection
+returns to the exact full preview, then declines all replacements and accepts only
+Character+dependent insertion once. Earlier five-action prose, custom/BOM/newline
+source, shared Undo/Redo, separate generated-reference approvals, later exact selected
+revisions, project/process reopen and cleanup pass. Six fixture HTTP bodies match
+the exact reviewed destination/model/sampling/body. The affected selectable controller
+also passes malformed/cancelled/stale/held-owner zero-write checks and create/update
+selection cases. These are native-service/controller evidence, not editor launches
+or actual provider sends. Public exact game exports remain ignored local evidence.
+
+The combined export passed pinned SDK8.5.3 compile/lint/normal entry, Continue, Draft,
+Return, generated Character name and dependent dialogue/narration checks in a game
+copy without editor metadata; accepted source hashes remain unchanged. SDK attempt1
+failed its7th assertion because the oracle compared displayed `who` with escaped
+source `Character.name`. Corrected to the SDK's substituted name, already checked for
+literal text/no active generated tags; attempt2 passed all five SDK commands. Retain
+both receipts. This is one successful harness correction; no source defect or erased
+failed result. No new SDK install or editor start occurred.
+
+Final source review additionally found uncaught thrown IPC errors in Cancel setup.
+Guarded catch retains Cancel for explicit retry; generation/active checks prevent
+late callbacks after profile reload. Existing DOM fixture now proves bridge failure,
+explicit retry with completed publication and stale thrown status. Renderer138/138
+passes after this fix, no skips. Independent source/combined SDK/CI review has no
+remaining concrete defect. Final native/execution review remains pending. Reviewer
+caught ignored PEM fixture files; the four intentionally public synthetic files must
+be explicitly force-added and inventoried before freezing, never production trust.
+
+The existing paired selectable workflow now includes core compatibility3, transport15,
+readiness invalidation1, nativeworker8, combined controller and combined SDK gates,
+alongside unchanged selectable checks. It includes TLS fixture inputs and enforces
+this outcome's package3/editor6/paired-dispatch3 ceilings, retaining all failed artifacts
+and attempt ledgers. Mac CI still cannot supply an approved signed package; local signed
+Mac/native and actual Studio evidence remain separate. No dispatch or publication yet.
+
+#### Privacy fixture repair, exact-value proof and next requested handoff
+
+The unchanged artifact privacy scanner rejected the static synthetic TLS PEM/key
+files. Rather than waive the scanner, remove those four owned new files from the
+candidate. The fixture now uses existing host OpenSSL to generate an ephemeral CA
+and CA-issued leaf/keys under a Rust-owned temporary root. Only the public CA enters
+test trust; child kill/wait precedes root removal, including panic/cancellation.
+No certificate/key is tracked, no system trust/signing policy changes and no install.
+Windows PATH/existing Git OpenSSL capability is still pending CI and fails closed.
+The first ephemeral run failed12pass/3fail because CA:true self-signed leaf was refused
+by strict WebPKI. One correction issues a CA:false leaf from a separate runtime CA;
+transport15/15 and owned-root cleanup pass. Both failures remain failures. Unchanged
+artifact scanner now passes the two fixture source files; repository validator passes.
+This supersedes the preceding static fixture/force-add plan without erasing its findings.
+
+U5 now distinguishes an empty model list (“No models returned by Studio; loaded state
+unknown”) from a missing selected ID and available/discovery-only; focused unit passes.
+This invents no loaded-state/version/OOM information. The remaining exact-large-integer
+context proof passes for9007199254740993 and both signed64 boundaries: exact source
+default statements survive serialized body/digest, runtime values remain unknown.
+Initial external-edit fixture failedSourceConflict; the next full-Source fixture
+failedINVALID_SOURCE; semantic Scene.apply then exposed a wrong selected Beat in the
+test. After explicit reassessment, bind the fresh context input to the saved narration
+Beat being edited; focused1/1 passes. Retain all three fixture failures; no numeric
+product defect or source-recovery relaxation is claimed. Independent review confirms
+the exact target/revisions and raw-source string serialization. Prompt CI selector is6.
+
+Actual live Studio remains the selected owner-machine LAN configuration; controlled
+TLS proof does not require new live HTTPS access/provider/tunnel. Actual TLS live
+compatibility remains unmeasured. Native package proof must cover the changed Settings
+sampling/setup/cancel/readiness controls; fixture readiness seeding alone is insufficient.
+
+The user requests a UI refinement prompt **after this closeout**, then a separate
+agent-guided test-client/feedback session after refinement. Relevant plan is section18
+and `docs/UI.md`, especially the accepted UI/UX guidelines. Prepare those handoffs
+from the exact completed candidate/evidence; do not start a following outcome or
+claim final human acceptance. Refinement must retain the revised Studio-only scope,
+saved-key-only behavior and both user deferrals, with its own bounded verification
+selection. A guided client should explain each step plainly, collect the user's
+feedback, and distinguish observations from explicit acceptance.

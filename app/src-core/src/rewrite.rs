@@ -200,6 +200,7 @@ pub(crate) struct Transient {
     profile_token: String,
     profile: StudioProfile,
     timeout: u32,
+    destination: crate::ai_request::Destination,
     context: PreviewRequest,
     preview: Value,
     body: Vec<u8>,
@@ -215,6 +216,7 @@ pub struct SendCapture {
     pub profile: StudioProfile,
     pub body: Vec<u8>,
     pub timeout_seconds: u32,
+    pub destination: crate::ai_request::Destination,
 }
 fn quoted_content(source: &str) -> Result<&str, RewriteError> {
     let start = source.find('"').ok_or(RewriteError::Unsupported)?;
@@ -253,6 +255,13 @@ impl AuthoringService {
         store: &crate::ai_profiles::ProfileStore,
         request: PrepareRequest,
     ) -> Result<Value, RewriteError> {
+        self.rewrite_prepare_bound(project,project_id,session,store,request,None)
+    }
+    pub fn rewrite_prepare_bound(
+        &self, project: &ProjectId, project_id: &str, session: &str,
+        store: &crate::ai_profiles::ProfileStore, request: PrepareRequest,
+        reviewed: Option<crate::ai_request::Destination>,
+    ) -> Result<Value, RewriteError> {
         if ai_credentials::token(store) != request.expected_profile_token
             || !(30..=1800).contains(&request.timeout_seconds)
         {
@@ -271,9 +280,18 @@ impl AuthoringService {
         if !profile.settings.valid() {
             return Err(RewriteError::Unsupported);
         }
-        let address = crate::ai_request::destination(&profile.settings)
-            .map_err(|_| RewriteError::Unsupported)?;
-        let connection_location = if crate::ai_profiles::http_address_allowed(address.ip(), false) {
+        crate::ai_request::destination(&profile.settings).map_err(|_| RewriteError::Unsupported)?;
+        if !profile.compatibility_ready() { return Err(RewriteError::Unavailable); }
+        let destination=if let Some(value)=reviewed { value } else {
+            // Core-only callers are static: DNS is owned by desktop preparation outside its project lock.
+            let uri: ureq::http::Uri=profile.settings.endpoint.parse().map_err(|_|RewriteError::Unsupported)?;
+            uri.host().unwrap_or("").trim_matches(['[',']']).parse::<std::net::IpAddr>().map_err(|_|RewriteError::Unsupported)?;
+            crate::ai_request::resolve_destination(&profile.settings).map_err(|_|RewriteError::Unsupported)?
+        };
+        if destination.addresses.is_empty(){return Err(RewriteError::Unsupported);}
+        let connection_location = if profile.settings.endpoint.starts_with("https://") {
+            "Verified HTTPS; certificate and hostname checked before sending; inference locality unknown"
+        } else if crate::ai_profiles::http_address_allowed(destination.addresses[0].ip(), false) {
             "Literal loopback HTTP (unencrypted); inference locality unknown"
         } else {
             "Private LAN HTTP (unencrypted); explicitly opted in; inference locality unknown"
@@ -369,7 +387,7 @@ impl AuthoringService {
         if !profile.settings.valid() {
             return Err(RewriteError::Invalid);
         }
-        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if batch {"loomlight_edit_scene_v1"}else if lore {"loomlight_lore_v1"}else if card {"loomlight_card_v1"}else if drafting {"loomlight_draft_scene_v1"}else if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
+        let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[messages[0].clone(),{"role":"user","content":serde_json::to_string(&user).map_err(|_|RewriteError::Invalid)?}],"response_format":{"type":"json_schema","json_schema":{"name":if batch {"loomlight_edit_scene_v1"}else if lore {"loomlight_lore_v1"}else if card {"loomlight_card_v1"}else if drafting {"loomlight_draft_scene_v1"}else if continuing {"loomlight_continue_v1"}else{"loomlight_rewrite_v1"},"strict":true,"schema":response_schema}},"stream":false,"max_tokens":profile.settings.maximum_response,"temperature":profile.settings.temperature(),"top_p":profile.settings.top_p(),"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|RewriteError::Invalid)?;
         let margin = 256.max(body.len().div_ceil(10));
         let total = body.len() + margin + request.context.maximum_response;
         if body.len() > crate::ai_request::MAX_BODY
@@ -393,13 +411,14 @@ impl AuthoringService {
             .source_draft_versions(project, &paths)
             .map_err(|_| RewriteError::Stale)?;
         let token = uuid::Uuid::new_v4().to_string();
-        let result = json!({"action":request.context.action,"anchor":user["story"]["anchor"],"terminal":user["story"]["terminal"],"chapter":if drafting {user["story"].clone()}else{Value::Null},"token":token,"payloadDigest":content_digest(&body),"serializedPayload":std::str::from_utf8(&body).unwrap(),"context":context,"protected":boundary.protected,"segments":boundary.segments,"destination":{"provider":"Unsloth Studio","endpoint":profile.settings.endpoint,"model":profile.settings.model,"connectionLocation":connection_location,"inferenceLocality":"Unknown","retention":"Provider may retain supplied content; cancellation may not stop server computation."},"size":{"serializedBytes":body.len(),"estimatedInputTokens":body.len(),"maximumResponse":request.context.maximum_response,"margin":margin,"total":total,"contextBudget":request.context.context_budget,"contextCeiling":request.context.context_ceiling},"responseMode":"Strict JSON schema; no fallback"});
+        let result = json!({"action":request.context.action,"anchor":user["story"]["anchor"],"terminal":user["story"]["terminal"],"chapter":if drafting {user["story"].clone()}else{Value::Null},"token":token,"payloadDigest":content_digest(&body),"serializedPayload":std::str::from_utf8(&body).unwrap(),"context":context,"protected":boundary.protected,"segments":boundary.segments,"destination":{"provider":"Unsloth Studio","reviewedAddresses":destination.addresses,"endpoint":profile.settings.endpoint,"model":profile.settings.model,"connectionLocation":connection_location,"inferenceLocality":"Unknown","retention":"Provider may retain supplied content; cancellation may not stop server computation."},"size":{"serializedBytes":body.len(),"estimatedInputTokens":body.len(),"maximumResponse":request.context.maximum_response,"margin":margin,"total":total,"contextBudget":request.context.context_budget,"contextCeiling":request.context.context_ceiling},"responseMode":"Strict JSON schema; no fallback"});
         let transient = Transient {
             token,
             session: session.into(),
             profile_token: request.expected_profile_token,
             profile,
             timeout: request.timeout_seconds,
+            destination,
             context: request.context,
             preview: context,
             body,
@@ -502,6 +521,7 @@ impl AuthoringService {
             profile: t.profile.clone(),
             body: t.body.clone(),
             timeout_seconds: t.timeout,
+            destination: t.destination.clone(),
         })
     }
     pub fn rewrite_complete(

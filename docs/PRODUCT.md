@@ -92,7 +92,29 @@ LLM-generatable through reviewed proposals. Authors choose the approved referenc
 used for generation. Character cards are separate from runnable Character definitions.
 System prompts are viewable/editable with a Restore baseline setting; context budget
 and maximum response tokens are explicit controls with an inspectable usage estimate.
-These are planned Phase 2 capabilities, not current Phase 1 functionality.
+The bounded Studio actions, references, prompts and limits are implemented and
+qualified within their recorded scopes. Full Phase 2 scope disposition, the final
+coherent integrated workflow and explicit human acceptance remain incomplete; the
+[closeout map](tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+distinguishes implemented behavior from retained requirements.
+
+Studio Settings now has local Temperature and Top-p controls with editable defaults
+1.0/0.95; final packaged/live qualification is pending. The saved credential is reused
+across sessions; session-only credential mode is excluded by the user's 2026-10-12
+decision. Changes to sampling appear in the exact send review and require renewed
+review before transmission.
+
+Settings also has an explicit **Test setup** action. It sends a visible tiny synthetic
+JSON request using the saved configuration, checks the response strictly, and records
+readiness for that configuration. Project opening sends nothing. Relevant settings,
+key or discovered availability changes clear readiness and require another test.
+It proves the observed response, not model quality, loaded capacity or internal server
+tool behavior. Verified HTTPS/hostnames are locally implemented with certificate and
+address checks; native/Windows/live qualification remains pending. Literal IPv6 HTTPS
+is refused with a useful message because of the pinned adapter's certificate-name limit.
+
+Selected-route context and AI changes to Scene endings/connections are deferred beyond
+Phase 2. Continue preserves its ending; Draft creates an unconnected Scene with Return.
 
 ## Required authoring capabilities
 
@@ -105,7 +127,7 @@ These are planned Phase 2 capabilities, not current Phase 1 functionality.
   Video/animation imports use pinned-Ren'Py-supported profiles only; conversion is deferred.
 - Source editor with bidirectional navigation and lossless unsupported regions.
 - Branch-aware characters, variables, lore, state simulation, and run-from-here.
-- First-class Unsloth Studio support plus configurable OpenAI-compatible adapters, without hardcoded model names. Unsloth Studio has dedicated setup, diagnostics and acceptance tests; see the [Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md).
+- First-class Unsloth Studio support without hardcoded model names. Studio has dedicated setup, diagnostics and acceptance tests; generic/OpenAI-compatible adapters are deferred outside Phase 2. See the [Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md).
 
 ## Constraints and principles
 
@@ -123,6 +145,11 @@ These are planned Phase 2 capabilities, not current Phase 1 functionality.
 
 Local Git status/diff/checkpoints and GitHub authentication/remotes remain optional
 later work, selected separately. Their absence does not block the initial release.
+
+AI proposals to change existing Scene endings or story connections are deferred beyond
+Phase 2 by the user's 2026-10-12 decision, while remaining possible future work. Current
+Continue retains the ending and Draft creates an unconnected Scene with Return.
+Ordinary manual Scene/connection authoring remains available within its existing scope.
 
 After the initial editor release, the high-priority optional open-world capability
 adds maps, points of interest, travel, day/time, schedules, reachable-state previews,

@@ -9,6 +9,11 @@ automatic retrieval, destination expansion and full Phase 2 remain separate.
 The [owning selection and ledger](tasks/active/phase-2-initial-llm-assistance.md#prompts-and-context-preparation-selection--2026-10-10)
 own acceptance and target evidence.
 
+The 2026-10-12 closeout amendment defers selected-route context, repeated visits and
+bounded route cycles beyond Phase 2. Existing Scene/Beat/Chapter context and explicit
+approved references remain selected. Stored reference route applicability remains
+supported and does not assemble route context.
+
 ## First safe dialogue rewrite
 
 Story offers Assist → Rewrite dialogue for one saved ordinary root dialogue/narration

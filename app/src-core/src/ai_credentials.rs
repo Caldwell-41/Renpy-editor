@@ -132,6 +132,7 @@ pub fn save(
             return Ok(());
         }
         p.settings = settings;
+        p.compatibility = None;
         bump(p)?;
     } else {
         next.profiles.push(StudioProfile {
@@ -140,6 +141,7 @@ pub fn save(
             settings,
             credential: None,
             disabled: false,
+            compatibility: None,
         });
     }
     advance(&mut next)?;
@@ -396,3 +398,17 @@ impl CredentialEntry {
 
 #[cfg(test)]
 mod tests;
+
+/// Native verified preflight publication. Renderer cannot supply an evidence record.
+pub fn clear_compatibility(records: &impl Records, expected: &str, id: &str) -> Result<ProfileStore> {
+    let old=checked(records,expected)?;let mut next=old.clone();
+    let p=next.profiles.iter_mut().find(|p|p.profile_id==id).ok_or("Profile missing.")?;
+    if p.compatibility.take().is_some(){bump(p)?;advance(&mut next)?;publish(records,&next,&old)?;}
+    Ok(next)
+}
+pub fn record_compatibility(records: &impl Records, expected: &str, id: &str) -> Result<ProfileStore> {
+    let old=checked(records,expected)?;let mut next=old.clone();
+    let p=next.profiles.iter_mut().find(|p|p.profile_id==id).filter(|p|p.credential_bound()).ok_or("Profile unavailable.")?;
+    p.compatibility=Some(CompatibilityEvidence {schema_version:1,configuration_digest:p.compatibility_digest(),checked_at_unix_seconds:std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|_|"Clock unavailable.")?.as_secs()});
+    bump(p)?;advance(&mut next)?;publish(records,&next,&old)?;Ok(next)
+}

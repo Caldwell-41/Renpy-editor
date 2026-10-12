@@ -103,6 +103,8 @@ pub fn prepare(
         context_budget: 32768,
         context_ceiling: 32768,
         maximum_response: 1024,
+        temperature: None,
+        top_p: None,
     };
     if !settings.valid() || !endpoint.starts_with("http://127.0.0.1:") || !endpoint.ends_with("/v1")
     {
@@ -124,6 +126,9 @@ pub fn prepare(
         &store.profiles[0].profile_id,
         "loomlight-public-rewrite-fixture",
     )?;
+    // Explicit controlled-fixture evidence; this is not live provider qualification.
+    let store=service.read()?;
+    ai_credentials::record_compatibility(&service,&ai_credentials::token(&store),&store.profiles[0].profile_id)?;
     Ok(service)
 }
 pub fn cleanup(service: &LifecycleService) -> Result<(), &'static str> {

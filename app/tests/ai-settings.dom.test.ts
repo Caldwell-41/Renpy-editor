@@ -126,3 +126,80 @@ test("public one-shot reload fixture keeps all controls disabled until read-only
     assert.equal(document.querySelectorAll('input[type="password"]').length,0);
   } finally {await browser.happyDOM.close();}
 });
+
+test("sampling defaults, explicit save, invalid refusal and saved reload never send inference", async () => {
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document});
+  const calls:{operation:string;payload:Record<string,unknown>}[]=[];
+  let settings={label:"Studio",endpoint:"http://127.0.0.1:8888/v1",model:"fixture",privateHttp:false,contextCeiling:8192,contextBudget:4096,maximumResponse:1024} as Record<string,unknown>;
+  Object.assign(browser,{__TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}})=>{
+    calls.push(request);if(request.operation==="ai.saveProfile")settings={...request.payload.settings as Record<string,unknown>};
+    return {protocolVersion:1,requestId:request.requestId,ok:true,value:{token:"saved",cleanup:[],profiles:[{profileId:"saved-profile",revision:1,disabled:false,credentialStatus:"configured",settings,discovery:null}]}};
+  }}});
+  const settle=()=>new Promise(r=>setTimeout(r,20));
+  try{
+    document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await settle();
+    const input=(label:string)=>document.getElementById([...document.querySelectorAll("label")].find(n=>n.textContent===label)!.htmlFor) as HTMLInputElement;
+    const button=(label:string)=>[...document.querySelectorAll('button')].find(b=>b.textContent===label)!;
+    assert.equal(input("Temperature").value,"1");assert.equal(input("Top-p").value,"0.95");
+    assert.deepEqual(calls.map(c=>c.operation),["ai.profiles"]);
+    input("Temperature").value="0.8";input("Top-p").value="0.9";input("Temperature").dispatchEvent(new window.Event("input",{bubbles:true}));
+    assert(button("Refresh models").disabled);button("Save profile").click();await settle();
+    assert.equal((calls[1]!.payload.settings as Record<string,unknown>).temperature,0.8);
+    assert.equal((calls[1]!.payload.settings as Record<string,unknown>).topP,0.9);
+    button("Reload saved profiles").click();await settle();assert.equal(input("Temperature").value,"0.8");assert.equal(input("Top-p").value,"0.9");
+    for(const bad of ["","-0.1","1.1","NaN"]){input("Top-p").value=bad;button("Save profile").click();await settle();assert.equal(calls.length,3);}
+    assert.deepEqual(calls.map(c=>c.operation),["ai.profiles","ai.saveProfile","ai.profiles"]);
+  }finally{await browser.happyDOM.close();}
+});
+
+test("setup preflight is explicit, previews synthetic body and reloads configuration-bound readiness", async()=>{
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document});
+  const calls:{operation:string;payload:Record<string,unknown>}[]=[];let ready=false;
+  Object.assign(browser,{__TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}})=>{
+    calls.push(request);
+    const value=request.operation==="ai.testCompatibility"?{requestId:"test-id"}:request.operation==="ai.requestStatus"?(ready=true,{done:true,state:"completed",message:null}):{token:ready?"tested":"untested",cleanup:[],profiles:[{profileId:"saved",revision:1,disabled:false,credentialStatus:"configured",compatibilityState:ready?"ready":"untested",compatibilityPayload:'{"messages":[{"content":"synthetic"}],"enable_tools":false}',settings:{label:"Studio",endpoint:"http://127.0.0.1:8888/v1",model:"fixture",privateHttp:false,contextCeiling:8192,contextBudget:4096,maximumResponse:1024},discovery:null}]};
+    return {protocolVersion:1,requestId:request.requestId,ok:true,value};
+  }}});
+  try{
+    document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await new Promise(r=>setTimeout(r,20));
+    const button=(label:string)=>[...document.querySelectorAll('button')].find(b=>b.textContent===label)!;
+    assert.deepEqual(calls.map(c=>c.operation),["ai.profiles"]);assert(document.querySelector('details pre')!.textContent!.includes('"enable_tools":false'));
+    button("Test setup").click();await new Promise(r=>setTimeout(r,40));
+    assert.deepEqual(calls.map(c=>c.operation),["ai.profiles","ai.testCompatibility","ai.requestStatus","ai.profiles"]);
+    assert.deepEqual(calls[1]!.payload,{token:"untested",profileId:"saved",sessionId:null,timeoutSeconds:60});
+    assert(document.querySelector('[role="status"]')!.textContent!.includes("Setup tested"));assert(button("Cancel setup test").disabled);
+  }finally{await browser.happyDOM.close();}
+});
+
+test("failed setup probe remains untested without discovery, automatic retry or proposal",async()=>{
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document});const calls:string[]=[];
+  Object.assign(browser,{__TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string}})=>{
+    calls.push(request.operation);const value=request.operation==="ai.testCompatibility"?{requestId:"test-id"}:request.operation==="ai.requestStatus"?{done:true,state:"failed",message:"Unsupported structured response."}:{token:"untested",cleanup:[],profiles:[{profileId:"saved",revision:1,disabled:false,credentialStatus:"configured",compatibilityState:"untested",settings:{label:"Studio",endpoint:"http://127.0.0.1:8888/v1",model:"fixture",privateHttp:false,contextCeiling:8192,contextBudget:4096,maximumResponse:1024},discovery:null}]};return {protocolVersion:1,requestId:request.requestId,ok:true,value};
+  }}});
+  try{document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await new Promise(r=>setTimeout(r,20));
+    [...document.querySelectorAll('button')].find(b=>b.textContent==="Test setup")!.click();await new Promise(r=>setTimeout(r,40));
+    assert.equal(document.querySelector('[role="status"]')!.textContent,"Unsupported structured response.");
+    assert.deepEqual(calls,["ai.profiles","ai.testCompatibility","ai.requestStatus","ai.profiles"]);
+  }finally{await browser.happyDOM.close();}
+});
+
+test("setup cancel preserves completed publication and ignores a stale awaited status",async()=>{
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document});
+  let resolveStatus:((value:unknown)=>void)|undefined;const calls:string[]=[];let failCancel=true;
+  Object.assign(browser,{__TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string}})=>{
+    calls.push(request.operation);
+    if(request.operation==="ai.requestStatus")return await new Promise(r=>{resolveStatus=r;});
+    if(request.operation==="ai.cancelRequest"&&failCancel){failCancel=false;throw Error("Native bridge unavailable; retry Cancel.");}
+    const value=request.operation==="ai.testCompatibility"?{requestId:"test-id"}:request.operation==="ai.cancelRequest"?{state:"completed",done:true}:{token:"saved",cleanup:[],profiles:[{profileId:"saved",revision:1,disabled:false,credentialStatus:"configured",compatibilityState:"ready",settings:{label:"Studio",endpoint:"http://127.0.0.1:8888/v1",model:"fixture",privateHttp:false,contextCeiling:8192,contextBudget:4096,maximumResponse:1024},discovery:null}]};return {protocolVersion:1,requestId:request.requestId,ok:true,value};
+  }}});
+  try{document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await new Promise(r=>setTimeout(r,20));
+    const button=(label:string)=>[...document.querySelectorAll('button')].find(b=>b.textContent===label)!;
+    button("Test setup").click();await new Promise(r=>setTimeout(r,20));assert(resolveStatus);button("Cancel setup test").click();await new Promise(r=>setTimeout(r,20));
+    assert.equal(document.querySelector('[role="status"]')!.textContent,"Native bridge unavailable; retry Cancel.");assert.equal(button("Cancel setup test").disabled,false);
+    button("Cancel setup test").click();await new Promise(r=>setTimeout(r,20));
+    assert.equal(document.querySelector('[role="status"]')!.textContent,"Setup test already completed. Its result remains recorded.");
+    resolveStatus!({protocolVersion:1,requestId:"late-status",ok:true,value:{done:true,state:"failed",message:"Late failure"}});await new Promise(r=>setTimeout(r,20));
+    assert.equal(document.querySelector('[role="status"]')!.textContent,"Setup test already completed. Its result remains recorded.");
+    assert.deepEqual(calls,["ai.profiles","ai.testCompatibility","ai.requestStatus","ai.cancelRequest","ai.cancelRequest","ai.profiles"]);
+  }finally{await browser.happyDOM.close();}
+});

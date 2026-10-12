@@ -37,9 +37,9 @@ class Gates(unittest.TestCase):
                 run.assert_called_once();self.assertEqual((Path(t)/'phase-2.log').read_text(),'partial stdout\npartial stderr\n')
                 self.assertEqual(checks,[{'name':'phase-2','passed':False,'failure':'TimeoutExpired'}])
     def test_renderer_requires_exact_nonzero_unskipped(self):
-        good=''.join(f'ℹ {k} {v}\n' for k,v in [('tests',134),('pass',134),('fail',0),('cancelled',0),('skipped',0),('todo',0)])
+        good=''.join(f'ℹ {k} {v}\n' for k,v in [('tests',138),('pass',138),('fail',0),('cancelled',0),('skipped',0),('todo',0)])
         q.renderer_gate(good)
-        for bad in ['',good.replace('pass 134','pass 0'),good.replace('skipped 0','skipped 1'),good.replace('134','133')]:
+        for bad in ['',good.replace('pass 138','pass 0'),good.replace('skipped 0','skipped 1'),good.replace('138','137')]:
             with self.assertRaises(AssertionError):q.renderer_gate(bad)
     def test_cargo_requires_exact_passes(self):
         good='test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured;'

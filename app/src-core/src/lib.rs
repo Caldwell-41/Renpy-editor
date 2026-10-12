@@ -1,3 +1,4 @@
+pub mod ai_compatibility;
 pub mod ai_credentials;
 pub mod ai_discovery;
 pub mod ai_file_secrets;
@@ -49,6 +50,7 @@ pub const OPERATIONS: &[&str] = &[
     "ai.cleanup",
     "ai.discover",
     "ai.sendSynthetic",
+    "ai.testCompatibility",
     "ai.requestStatus",
     "ai.cancelRequest",
     "probe.denied",

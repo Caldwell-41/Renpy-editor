@@ -37,6 +37,8 @@ fn main() {
             context_budget: 32768,
             context_ceiling: 32768,
             maximum_response: 1024,
+            temperature: None,
+            top_p: None,
         },
     )
     .unwrap();

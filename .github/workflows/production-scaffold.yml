@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       selectable_proposals:
-        description: Only approved selectable proposal paired proof; all older selectors false
+        description: Only approved Studio closeout/selectable paired proof; all older selectors false
         type: boolean
         default: false
       selectable_dispatch_ordinal:
-        description: Cumulative selectable paired dispatch, 1 through 7 (three approved one-run extensions)
+        description: Studio closeout cumulative paired dispatch, 1 through 3
         type: string
         default: '1'
       phase2_studio:

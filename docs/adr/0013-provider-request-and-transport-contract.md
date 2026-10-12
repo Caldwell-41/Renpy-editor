@@ -2,9 +2,69 @@
 
 **Status:** Studio-scoped reference/design accepted for the first bounded 2A.1 slice on 2026-10-08. Generic deferred; full live/production qualification incomplete.
 **Date:** 2026-10-07.
+**Current closeout disposition, 2026-10-12:** Phase 2 is Studio-only. The selected
+literal-HTTP/nonstreaming/off-only client slices are qualified; full-phase scope and
+final integrated acceptance remain incomplete. The
+[closeout map](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+identifies missing configuration-bound capability readiness, editable sampling and
+the unresolved full-phase TLS/hostname boundary. The LAN amendment's exclusions apply
+to that slice, not automatically to the entire phase. Thinking-on/default failures,
+unknown server-internal tools and all other exact evidence limits remain intact.
+The user's subsequent decision selects local Temperature/Top-p implementation with
+saved creative-writing defaults1.0/0.95 and finite bounds0–2/0–1. Both fields are visible
+in exact reviewed action bodies; saved changes invalidate prepared sends through the
+existing profile revision/token. Legacy absent fields remain omitted until explicit
+profile Save, with effective defaults used for new reviewed sends. Installed-Studio
+sampling acceptance and both-target native qualification remain pending. No capability,
+TLS, thinking-mode or provider expansion is selected by this change.
+The user's subsequent 2026-10-12 decision defers AI changes to existing Scene endings
+and story connections beyond Phase 2. Continue preserves its ending; Draft creates
+an unconnected Scene with Return. Terminal validity remains required. The wider
+operation family is possible future separately selected work, not a closeout blocker.
 **Prior authority:** the user accepted the corrected Studio disposition and selected the
 first remembered-profile/settings/credential slice. Generation, project sends,
 generic completion and screen implementation remain outside that selection.
+
+## Remaining Studio closeout changes — 2026-10-12
+
+The user subsequently defers selected-route context as well as AI ending/connection
+changes and directs implementation of the remaining items 2–5. This supersedes the
+earlier unselected readiness/TLS disposition above. The local implementation adds
+explicit **Test setup**, configuration-bound saved readiness, verified HTTPS generation
+and hostname resolution. It keeps one saved credential reused across sessions and the
+existing approved Windows/Mac storage and package identities. Native/Windows/live and
+final integrated acceptance remain pending; local fixture success is not Studio proof.
+
+Test setup shows its complete tiny synthetic closed-JSON request, with strict schema,
+tools disabled, thinking off, nonstreaming response and the saved sampling/output
+settings. It sends only after an explicit click, through the existing single owned
+worker, cancellation, timeout, credential-origin and publication guards. It records
+success only for the exact closed `{"ok":true}` response. Evidence binds the profile,
+normalized endpoint, exact model, credential reference/revision, settings and preflight
+contract version. Settings/key changes and changed/unavailable discovery retire it;
+opening Settings/project or preparing a send never probes automatically. Project
+preparation requires readiness. Cancellation/configuration change cannot publish;
+an already durably completed probe wins a late cancellation truthfully. This proves
+only observed protocol compatibility, not server-internal tools, loaded context,
+backend/version, writing quality or every action's correctness.
+
+Generation validates every resolved address, captures a sorted bounded set in the
+one-use review and shows the reviewed addresses. The worker re-resolves before send
+and refuses a changed set. Native resolution occurs outside the project mutation
+lock; globally at most one bounded OS resolver worker exists. DNS, connect, TLS,
+reads, partial writes and final validation share one absolute request deadline.
+Production uses the pinned WebPKI roots with certificate/hostname verification and
+no insecure fallback, trust installation, proxy, redirect or retry. Only isolated
+tests trust the public synthetic fixture CA. Plaintext remains literal loopback or
+explicitly opted-in RFC1918/ULA. Literal IPv6 HTTPS is explicitly unsupported because
+the pinned ureq3.1.4 adapter cannot validate its bracketed certificate name; HTTPS
+DNS names resolving IPv6 and literal IPv4 HTTPS retain verification. This limit is
+reported, not bypassed by disabling TLS or replacing dependencies.
+
+Any live Test setup counts toward the existing ten-send ceiling, separately from
+the five action counters. No live preflight or generation has occurred in this
+closeout. Fresh native credential entry and the exact selected Studio configuration
+are required before owner-machine live qualification; CI gets only public fixtures.
 
 ## Studio-only production LAN amendment — 2026-10-11
 

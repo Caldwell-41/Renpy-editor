@@ -84,41 +84,59 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 ## Phase 2 — Initial LLM assistance
 
-**Outcome:** Unsloth Studio and configurable OpenAI-compatible adapters support user-initiated structured scene, Character and proposed-lore actions, with reviewable semantic/file changes. Persistent Character cards and a lorebook support manual and LLM-generated content for selected context; system prompts are editable/resettable to baseline, with explicit context and response limits. Unsloth Studio is a first-class provider with dedicated setup, capability qualification, diagnostics and live acceptance. No hardcoded model catalogue or automatic application.
+**Outcome:** Unsloth Studio alone supports user-initiated structured scene, Character
+and proposed-lore actions, with reviewable semantic/file changes. Persistent Character
+cards and a lorebook support manual and LLM-generated content for selected context;
+system prompts are editable/resettable to baseline, with explicit context and response
+limits. Studio is a first-class provider with dedicated setup, capability qualification,
+diagnostics and live acceptance. Generic/OpenAI-compatible adapters are deferred outside
+Phase 2. No hardcoded model catalogue or automatic application.
 
 The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records provider contracts,
 selected-context rules, proposal/history ownership and separately selected execution.
 The bounded source foundation, settings/credentials, synthetic request lifecycle,
-manual references, prompts/context, first rewrite, Continue Scene, Draft Scene and
-[Generated Character cards](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
-are implemented and qualified within their recorded scopes. Generated lore, remaining
-provider/action coverage and integrated acceptance remain incomplete. Existing bounded
-evidence does not select or authorize the remaining Phase 2 work.
+manual references, prompts/context, first rewrite, Continue Scene, Draft Scene,
+[Generated Character cards](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11),
+Generated lorebook entries, the Studio integrated/live slice and selectable proposal
+editing are qualified within their recorded scopes. The remaining Phase 2 outcome is
+Studio-only closure: reconcile the residual verification-matrix gaps and complete the
+integrated workflow and final human acceptance on one coherent candidate. Generic
+provider support is explicitly outside this phase. The selected closeout entry audit
+identified material requirements before qualification execution. The user selected
+sampling implementation, now locally implemented with focused proof, and explicitly
+removed session-only credentials. Route research concluded feasible with constraints;
+the user subsequently deferred selected-route context beyond Phase 2. Explicit
+configuration-bound setup readiness and verified HTTPS/hostname generation are now
+selected and locally implemented, with qualification pending. AI changes to existing Scene endings/connections
+are explicitly deferred beyond Phase 2, as possible future work. Earlier slice
+exclusions do not waive the remaining phase requirements. See the
+[requirement map](tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
 
-The selected delivery sequence brings forward bounded 3A source foundations alongside
-provider feasibility, then targets a complete reviewed dialogue rewrite using manual
-cards/lorebook and configurable prompts/limits. Remaining Phase 2 actions/provider
-coverage and 3A Story logic can then overlap.
+The selected delivery sequence brought forward bounded 3A source foundations alongside
+Studio feasibility, then completed the reviewed dialogue workflow using manual
+cards/lorebook and configurable prompts/limits. Residual Studio verification and 3A
+Story logic may overlap under separately selected bounded outcomes.
 [Shared foundations and lane assignments](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
 own the detailed gates and GPT-6.1 Sol High owner with zero to two useful independent helpers.
-Phase 2 still requires final integrated acceptance; these stages do not enlarge its
-AI operation allowlist or authorize implementation.
+Phase 2 still requires residual verification and final integrated acceptance; these
+stages do not enlarge its AI operation allowlist or authorize implementation.
 [The deliverable queue](tasks/active/phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
-maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio, the generic-compatible provider path and five actions. Checkpoints use internal commits in the same outcome/chat
-under WORKFLOW, not mandatory chat transfers.
+maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio
+and its five actions. Generic-compatible providers are deferred. Checkpoints use
+internal commits in the same outcome/chat under WORKFLOW, not mandatory chat transfers.
 
 Execute separately scoped internal briefs after Phase 1 acceptance and explicit approval:
 
 | Checkpoint | Scope and gate |
 | --- | --- |
 | 2A — Provider and credential boundary | Core-owned provider configuration, explicit context/response limits, endpoint/locality disclosure, reviewed OS credential adapter, bounded requests/cancellation and redacted errors. Test no renderer/project/log credential leakage, no implicit sends, and safe endpoint/redirect handling. |
-| 2B — Deterministic selected-context assembly | Manual Character cards/lorebook, editable system prompts with baseline reset, and explicit user-selected Scene/route/slice/reference context with source revisions, provenance, dependency disclosure and size estimate. Route-aware means a selected documented scope, not proof of reachable runtime state. Unknown conditions/custom effects remain marked unknown; stale summaries invalidate. |
+| 2B — Deterministic selected-context assembly | Manual Character cards/lorebook, editable system prompts with baseline reset, and explicit user-selected Scene/Beat/Chapter/reference context with source revisions, provenance, dependency disclosure and size estimate. Selected-route context/repeated visits/bounded cycles are user-deferred beyond Phase 2. Stored reference applicability retains finite routes. Unknown conditions/custom effects remain marked unknown; stale summaries invalidate. |
 | 2C — Structured proposals and acceptance | Scene, runnable Character, Character-card and lorebook draft/update actions produce validated proposals against exact revisions. Show semantic/file diffs, permit dependency-valid partial acceptance, reject stale proposals, and route all accepted changes through the existing transaction/history boundary. Lore remains proposed until approved. |
 
 **Exit criteria:** every send reveals destination/locality/context/estimated size; remote sensitive-content warnings and explicit consent work; unsupported schemas/paths/identifiers and malicious output are refused; partial acceptance cannot omit required definitions or dependencies; stale/cancelled responses cannot mutate a replacement session. No source or lore becomes canonical without review. Credentials and these safety gates are Phase 2 prerequisites, not deferred Phase 3 release polish.
 
 The 2026-10-07 refinement selects native references/basic Scene/route scope and knowledge
-notes, project prompts, device-local profiles and OS/session-only keys. [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md)
+notes, project prompts, device-local profiles and saved keys reused across sessions (session-only excluded). [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md)
 owns persistence/privacy. External interoperability and a shared prompt library stay
 deferred. Component tests reuse existing gates, early risk proofs and combined milestone
 qualification rather than full package matrices at every increment.

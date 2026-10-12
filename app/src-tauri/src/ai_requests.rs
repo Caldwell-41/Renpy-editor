@@ -46,6 +46,7 @@ struct Pending {
     maximum_response: u32,
     rewrite_token: Option<String>,
     proposal: Option<Value>,
+    compatibility_profile: Option<String>,
 }
 #[derive(Default)]
 struct State {
@@ -133,10 +134,17 @@ impl Service {
             &loomlight_core::ai_profiles::StudioProfile,
         ) -> credentials::Result<credentials::Secret>,
     ) -> Result<Value, &'static str> {
+        self.send_kind(host,payload,rewrite,false,read)
+    }
+    fn send_kind(
+        self: &Arc<Self>, host: &ApplicationHost, payload: Value, rewrite: bool, compatibility: bool,
+        read: impl FnOnce(&loomlight_core::lifecycle::LifecycleService,&loomlight_core::ai_profiles::StudioProfile)->credentials::Result<credentials::Secret>,
+    ) -> Result<Value, &'static str> {
         let rewrite_input: Option<RewriteSend> = if rewrite { Some(serde_json::from_value(payload.clone()).map_err(|_| "Invalid reviewed send payload.")?) } else { None };
-        let input: Send = if let Some(r)=&rewrite_input {
+        let mut input: Send = if let Some(r)=&rewrite_input {
             Send { token: String::new(), profile_id:String::new(), session_id:Some(r.session_id.clone()), timeout_seconds:0 }
         } else { serde_json::from_value(payload).map_err(|_| "Invalid synthetic request payload.")? };
+        if !rewrite && !(30..=1800).contains(&input.timeout_seconds) {return Err(Failure::Configuration.message());}
         let cancel = Cancel::default();
         let mut state = self
             .state
@@ -153,34 +161,30 @@ impl Service {
                 let _ = worker.join();
             }
         }
-        let (prepared, profile_token) = host
+        let (profile,key,body,timeout_seconds,reviewed,profile_token) = host
             .with_service(|s| {
-                if s.current().map(|p| p.session_id) != input.session_id {
-                    return Err("Project changed; reopen the request panel.");
-                }
-                let store = s.read()?;
+                if compatibility {input.session_id=s.current().map(|p|p.session_id);}
+                if s.current().map(|p| p.session_id) != input.session_id {return Err("Project changed; reopen the request panel.");}
+                let mut store = s.read()?;
                 if let Some(r)=&rewrite_input {
                     let capture=s.rewrite_take_send(&r.session_id,&r.token,&r.payload_digest,cancel.clone()).map_err(|_|"Project or review changed; prepare and review again. No request sent.")?;
                     let key=read(s,&capture.profile)?;
-                    return ai_request::prepare_reviewed(capture.profile,key,capture.timeout_seconds,capture.body)
-                        .map(|p|(p,credentials::token(&store))).map_err(Failure::message);
+                    return Ok((capture.profile,key,capture.body,capture.timeout_seconds,Some(capture.destination),credentials::token(&store)));
                 }
-                if credentials::token(&store) != input.token {
-                    return Err("Settings changed; reload the request profile.");
-                }
-                let profile = store
-                    .profiles
-                    .iter()
-                    .find(|p| p.profile_id == input.profile_id)
-                    .ok_or("Profile missing.")?
-                    .clone();
-                if !profile.credential_bound() {
-                    return Err(Failure::Credential.message());
-                }
-                let key = read(s, &profile)?;
-                ai_request::prepare(profile, key, input.timeout_seconds).map(|p|(p,input.token.clone())).map_err(Failure::message)
-            })
-            .map_err(|_| "Project service is busy; no request was sent.")??;
+                if credentials::token(&store) != input.token {return Err("Settings changed; reload the request profile.");}
+                if compatibility {store=credentials::clear_compatibility(s,&input.token,&input.profile_id)?;}
+                let profile=store.profiles.iter().find(|p|p.profile_id==input.profile_id).ok_or("Profile missing.")?.clone();
+                if !profile.credential_bound(){return Err(Failure::Credential.message());}
+                let key=read(s,&profile)?;
+                let body=if compatibility {loomlight_core::ai_compatibility::body(&profile)}else{Vec::new()};
+                Ok((profile,key,body,input.timeout_seconds,None,credentials::token(&store)))
+            }).map_err(|_|"Project service is busy; no request was sent.")??;
+        let compatibility_profile=compatibility.then(||profile.profile_id.clone());
+        // Resolution/transport construction is outside the project mutation lock.
+        let prepared=if let Some(destination)=reviewed {
+            ai_request::prepare_reviewed_bound(profile,key,timeout_seconds,body,destination)
+        }else if compatibility {ai_request::prepare_reviewed(profile,key,timeout_seconds,body)}
+        else {ai_request::prepare(profile,key,timeout_seconds)}.map_err(Failure::message)?;
         let id = uuid::Uuid::new_v4().to_string();
         state.pending = Some(Pending {
             id: id.clone(),
@@ -200,6 +204,7 @@ impl Service {
             maximum_response: prepared.profile.settings.maximum_response,
             rewrite_token: rewrite_input.map(|r|r.token),
             proposal: None,
+            compatibility_profile,
         });
         let service = self.clone();
         let host = host.clone();
@@ -257,6 +262,13 @@ impl Service {
                                                 Ok(review)=> { p.state="completed"; p.proposal=Some(review); }
                                                 Err(_)=> { p.state="failed"; p.failure=Some(Failure::UnsupportedResponse); }
                                             }
+                                        } else if let Some(id)=&p.compatibility_profile {
+                                            if loomlight_core::ai_compatibility::validate(&value).is_ok() {
+                                                match credentials::record_compatibility(native,&p.token,id) {
+                                                    Ok(store)=>{p.token=credentials::token(&store);p.state="completed";}
+                                                    Err(_)=>{p.state="failed";p.failure=Some(Failure::Configuration);}
+                                                }
+                                            }else{p.state="failed";p.failure=Some(Failure::UnsupportedResponse);}
                                         } else { p.state = "completed"; p.result = Some(value); }
                                     }
                                     Err(e) => {
@@ -335,7 +347,10 @@ impl Service {
             .as_mut()
             .filter(|p| p.id == input.request_id)
             .ok_or("Request is no longer owned.")?;
-        // Also discard already-published output. A later Cancel may never expose it.
+        // A completed compatibility test has already durably published evidence.
+        // Preserve that winner rather than report a cancelled, unrecorded test.
+        if p.compatibility_profile.is_some() && p.done && p.state == "completed" {return Ok(view(p));}
+        // Also discard already-published proposal/text output.
         p.cancel.cancel();
         p.state = "cancelled";
         p.result = None;
@@ -380,6 +395,20 @@ impl Service {
         }
         true
     }
+    fn prepare_rewrite(&self, host:&ApplicationHost, mut payload:Value)->Result<Value,&'static str> {
+        let object=payload.as_object_mut().ok_or("Invalid review payload.")?;
+        let session=object.remove("sessionId").and_then(|v|v.as_str().map(str::to_owned)).ok_or("Project session missing.")?;
+        let request:loomlight_core::rewrite::PrepareRequest=serde_json::from_value(payload).map_err(|_|"Invalid review payload.")?;
+        let profile=host.with_service(|s|{
+            s.require_session(&session).map_err(|_|"Project changed.")?;
+            let store=credentials::checked(s,&request.expected_profile_token)?;
+            let profile=store.profiles.iter().find(|p|p.profile_id==request.profile_id).ok_or("Profile missing.")?.clone();
+            if !profile.compatibility_ready(){return Err("Test this Studio setup in Settings before preparing a project send.");}
+            Ok(profile)
+        }).map_err(|_|"Project service is busy.")??;
+        let destination=ai_request::resolve_destination(&profile.settings).map_err(Failure::message)?;
+        host.with_service(|s|s.rewrite_prepare_bound(&session,request,destination).map_err(|_|"Project or configuration changed; review a fresh send.")).map_err(|_|"Project service is busy.")?
+    }
     pub fn dispatch(
         self: &Arc<Self>,
         host: &ApplicationHost,
@@ -389,6 +418,10 @@ impl Service {
     ) -> CoreResponse {
         let result = match op {
             "ai.sendSynthetic" => self.send(host, payload),
+            "ai.testCompatibility" => self.send_kind(host,payload,false,true,|s,profile|{
+                crate::ai_native::secrets(s.ai_data_root())?.read(&profile.profile_id,profile.credential.as_ref().unwrap())?.ok_or(Failure::Credential.message())
+            }),
+            "rewrite.prepare"=>self.prepare_rewrite(host,payload),
             "rewrite.send" => self.send_with_reader(host, payload, true, |s,profile| {
                 crate::ai_native::secrets(s.ai_data_root())?.read(&profile.profile_id,profile.credential.as_ref().unwrap())?.ok_or(Failure::Credential.message())
             }),
@@ -441,6 +474,8 @@ mod tests {
                 context_ceiling: 8192,
                 context_budget: 4096,
                 maximum_response: 1024,
+                temperature: None,
+                top_p: None,
             },
         )
         .unwrap();
@@ -503,6 +538,62 @@ mod tests {
             }
             assert!(Instant::now() < until);
             thread::sleep(Duration::from_millis(5));
+        }
+    }
+    #[test]
+    fn compatibility_native_worker_exact_probe_and_strict_publication_no_project_writes() {
+        for valid in [true,false] {
+            let(listener,port)=stalled();let(root,host,input)=setup(port);let service=Arc::new(Service::default());
+            let server=thread::spawn(move||{
+                let(mut socket,_)=listener.accept().unwrap();let mut bytes=Vec::new();let mut b=[0;4096];
+                let body=loop {
+                    let n=socket.read(&mut b).unwrap();assert!(n>0);bytes.extend_from_slice(&b[..n]);
+                    if let Some(pos)=bytes.windows(4).position(|b|b==b"\r\n\r\n") {
+                        let headers=String::from_utf8_lossy(&bytes[..pos]);let len:usize=headers.lines().find_map(|l|l.to_ascii_lowercase().strip_prefix("content-length:").map(|v|v.trim().parse().unwrap())).unwrap();
+                        if bytes.len()>=pos+4+len {break serde_json::from_slice::<Value>(&bytes[pos+4..pos+4+len]).unwrap();}
+                    }
+                };
+                assert_eq!(body["response_format"]["json_schema"]["strict"],true);assert_eq!(body["enable_tools"],false);assert_eq!(body["enabled_tools"],json!([]));
+                assert_eq!(body["enable_thinking"],false);assert_eq!(body["temperature"],1.0);assert_eq!(body["top_p"],0.95);assert!(body.get("session_id").is_none());
+                let response=serde_json::to_vec(&json!({"model":"synthetic-model","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":if valid{"{\"ok\":true}"}else{"{\"ok\":true,\"extra\":1}"}}}]})).unwrap();
+                write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",response.len()).unwrap();socket.write_all(&response).unwrap();
+            });
+            let started=service.send_kind(&host,input,false,true,|_,_|Ok(credentials::Secret::new("public-fixture".into()))).unwrap();
+            let done=finish(&service,&host,&started["requestId"]);assert_eq!(done["state"],if valid{"completed"}else{"failed"});
+            assert_eq!(done["completion"],Value::Null);assert_eq!(done["proposal"],Value::Null);
+            if valid {
+                let late_cancel=service.cancel(json!({"requestId":started["requestId"]})).unwrap();
+                assert_eq!(late_cancel["state"],"completed");
+            }
+            let store=host.with_service(|s|s.read()).unwrap().unwrap();assert_eq!(store.profiles[0].compatibility_ready(),valid);
+            let reopened=LifecycleService::new(root.path().to_owned()).unwrap();assert_eq!(reopened.read().unwrap().profiles[0].compatibility_ready(),valid);
+            assert!(!root.path().join("synthetic-project").exists());server.join().unwrap();assert!(service.shutdown());
+        }
+    }
+
+    #[test]
+    fn compatibility_cancel_and_configuration_change_never_publish_readiness() {
+        for change in [false, true] {
+            let (listener, port) = stalled();
+            let (_root, host, input) = setup(port);
+            let service = Arc::new(Service::default());
+            let (received, server) = accept(listener);
+            let started = service.send_kind(&host, input, false, true, |_, _| {
+                Ok(credentials::Secret::new("public-fixture".into()))
+            }).unwrap();
+            received.recv_timeout(Duration::from_secs(2)).unwrap();
+            let before = host.with_service(|s| s.read()).unwrap().unwrap();
+            if change {
+                drop(service.change());
+                assert_eq!(finish(&service, &host, &started["requestId"])["state"], "expired");
+            } else {
+                assert_eq!(service.cancel(json!({"requestId":started["requestId"]})).unwrap()["state"], "cancelled");
+            }
+            let after = host.with_service(|s| s.read()).unwrap().unwrap();
+            assert_eq!(before, after, "cancelled test must never publish evidence");
+            assert!(!after.profiles[0].compatibility_ready());
+            server.join().unwrap();
+            assert!(service.shutdown());
         }
     }
     #[test]

@@ -27,6 +27,7 @@ test("frontend operation list contains only bounded editor and Studio settings o
     "ai.cleanup",
     "ai.discover",
     "ai.sendSynthetic",
+    "ai.testCompatibility",
     "ai.requestStatus",
     "ai.cancelRequest",
     "probe.denied",

@@ -53,7 +53,7 @@ impl CredentialService {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct StudioSettings {
     pub label: String,
@@ -64,6 +64,25 @@ pub struct StudioSettings {
     pub context_ceiling: u32,
     pub context_budget: u32,
     pub maximum_response: u32,
+    // Absent fields retain old serialized profiles until an explicit Settings save.
+    #[serde(
+        default,
+        deserialize_with = "sampling_value",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub temperature: Option<f64>,
+    #[serde(
+        default,
+        deserialize_with = "sampling_value",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub top_p: Option<f64>,
+}
+fn sampling_value<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<f64>, D::Error> {
+    // Missing is supported; explicit null/string/bool is not a sampling setting.
+    f64::deserialize(deserializer).map(Some)
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -104,7 +123,7 @@ pub struct OwnedCredential {
     pub storage: CredentialStorage,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct StudioProfile {
     pub profile_id: String,
@@ -112,6 +131,16 @@ pub struct StudioProfile {
     pub settings: StudioSettings,
     pub credential: Option<OwnedCredential>,
     pub disabled: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub compatibility: Option<CompatibilityEvidence>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CompatibilityEvidence {
+    pub schema_version: u32,
+    pub configuration_digest: String,
+    pub checked_at_unix_seconds: u64,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -121,7 +150,7 @@ pub struct CleanupReference {
     pub credential: OwnedCredential,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ProfileStore {
     pub schema_version: u32,
@@ -244,6 +273,12 @@ pub fn http_address_allowed(ip: IpAddr, private_http: bool) -> bool {
 }
 
 impl StudioSettings {
+    pub fn temperature(&self) -> f64 {
+        self.temperature.unwrap_or(1.0)
+    }
+    pub fn top_p(&self) -> f64 {
+        self.top_p.unwrap_or(0.95)
+    }
     pub fn valid(&self) -> bool {
         !self.label.trim().is_empty()
             && self.label.len() <= 80
@@ -258,12 +293,24 @@ impl StudioSettings {
                 .maximum_response
                 .checked_add(128)
                 .is_some_and(|n| n < self.context_budget)
+            && self.temperature().is_finite()
+            && (0.0..=2.0).contains(&self.temperature())
+            && self.top_p().is_finite()
+            && (0.0..=1.0).contains(&self.top_p())
             && canonical_endpoint(&self.endpoint, self.private_http)
                 .is_ok_and(|(canonical, _)| canonical == self.endpoint)
     }
 }
 
 impl StudioProfile {
+    pub fn compatibility_digest(&self) -> String {
+        use sha2::{Digest, Sha256};
+        let bytes=serde_json::to_vec(&("studio-json-preflight-v1", &self.profile_id, &self.settings, &self.credential, self.disabled)).unwrap();
+        format!("{:x}", Sha256::digest(bytes))
+    }
+    pub fn compatibility_ready(&self) -> bool {
+        self.credential_bound() && self.compatibility.as_ref().is_some_and(|c| c.schema_version==1 && c.configuration_digest==self.compatibility_digest())
+    }
     pub fn credential_bound(&self) -> bool {
         !self.disabled
             && self.credential.as_ref().is_some_and(|c| {
@@ -311,6 +358,7 @@ impl ProfileStore {
                 && profiles.insert(&p.profile_id)
                 && p.revision > 0
                 && p.settings.valid()
+                && p.compatibility.as_ref().is_none_or(|c| c.schema_version==1 && c.checked_at_unix_seconds>0 && c.configuration_digest.len()==64 && c.configuration_digest.bytes().all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase()))
                 && p.credential
                     .as_ref()
                     .is_none_or(|c| valid_credential(c) && entries.insert(&c.credential_id))
@@ -356,6 +404,7 @@ mod tests {
                 profile_id: uuid::Uuid::new_v4().to_string(),
                 revision: 1,
                 disabled: false,
+                compatibility: None,
                 settings: StudioSettings {
                     label: "Isolated Studio".into(),
                     endpoint: "http://127.0.0.1:8888/v1".into(),
@@ -364,6 +413,8 @@ mod tests {
                     context_ceiling: 8192,
                     context_budget: 4096,
                     maximum_response: 1024,
+                    temperature: None,
+                    top_p: None,
                 },
                 credential: Some(OwnedCredential {
                     credential_id: uuid::Uuid::new_v4().to_string(),
@@ -374,6 +425,43 @@ mod tests {
                 }),
             }],
             ..ProfileStore::default()
+        }
+    }
+
+    #[test]
+    fn sampling_legacy_roundtrip_defaults_and_invalid_values_are_refused() {
+        let store = fixture();
+        let bytes = serde_json::to_vec(&store).unwrap();
+        let reopened = decode(&bytes).unwrap();
+        assert_eq!(serde_json::to_vec(&reopened).unwrap(), bytes);
+        assert_eq!(reopened.profiles[0].settings.temperature(), 1.0);
+        assert_eq!(reopened.profiles[0].settings.top_p(), 0.95);
+        let mut saved = store.clone();
+        saved.profiles[0].settings.temperature = Some(0.8);
+        saved.profiles[0].settings.top_p = Some(0.9);
+        let bytes = serde_json::to_vec(&saved).unwrap();
+        assert_eq!(decode(&bytes).unwrap(), saved);
+        for (temperature, top_p) in [(0.0, 0.0), (2.0, 1.0)] {
+            saved.profiles[0].settings.temperature = Some(temperature);
+            saved.profiles[0].settings.top_p = Some(top_p);
+            assert!(saved.valid());
+        }
+        for field in ["temperature", "topP"] {
+            for value in [
+                serde_json::json!(null),
+                serde_json::json!("0.9"),
+                serde_json::json!(true),
+                serde_json::json!(-0.01),
+                serde_json::json!(2.01),
+            ] {
+                let mut value_store = serde_json::to_value(&store).unwrap();
+                value_store["profiles"][0]["settings"][field] = value;
+                assert!(decode(&serde_json::to_vec(&value_store).unwrap()).is_err());
+            }
+        }
+        for value in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            saved.profiles[0].settings.temperature = Some(value);
+            assert!(!saved.valid());
         }
     }
 

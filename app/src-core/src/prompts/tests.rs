@@ -67,6 +67,34 @@ impl Fixture {
     }
 }
 #[test]
+fn context_exact_large_integer_defaults_survive_serialized_payload_without_runtime_claims() {
+    for value in [9_007_199_254_740_993i64, i64::MAX, i64::MIN] {
+        let mut f = Fixture::new();
+        f.service.authoring_create_variable(crate::authoring::CreateVariableRequest {
+            technical_name: "precision".into(),
+            variable_type: crate::authoring::VariableType::Int,
+            default_value: json!(value),
+        }).unwrap();
+        // Use the established semantic transaction fixture rather than an external
+        // source edit, which intentionally requires reconciliation of its map.
+        let workspace = f.ok("scene.list", json!({}));
+        let scene = &workspace["scenes"][0];
+        let beat = scene["beats"].as_array().unwrap().iter().find(|b| b["payload"]["type"] == "narration").unwrap();
+        f.ok("scene.apply", json!({"expectedProjectRevision":workspace["projectRevision"],"expectedSourceMapRevision":workspace["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"narration","text":"Exact [precision]"}}}));
+        let mut input = f.selection();
+        input["beatId"] = beat["id"].clone();
+        let preview = f.ok("context.preview", input);
+        let serialized = preview["serializedPayload"].as_str().unwrap();
+        let messages: Value = serde_json::from_str(serialized).unwrap();
+        let user: Value = serde_json::from_str(messages["messages"][1]["content"].as_str().unwrap()).unwrap();
+        let definition = user["definitions"].as_array().unwrap().iter().find(|d| d["kind"] == "variableDefault").unwrap();
+        assert_eq!(definition["statement"], format!("default precision = {value}"));
+        assert_eq!(definition["runtimeValue"], "unknown");
+        assert!(serialized.contains(&value.to_string()));
+        assert_eq!(preview["payloadDigest"], digest(serialized.as_bytes()));
+    }
+}
+#[test]
 fn production_prompt_save_restore_history_reopen_isolation_and_extensions() {
     let mut f = Fixture::new();
     let baseline = f.prompt();

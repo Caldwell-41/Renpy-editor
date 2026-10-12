@@ -13,6 +13,7 @@ export const CORE_OPERATIONS = [
   "ai.cleanup",
   "ai.discover",
   "ai.sendSynthetic",
+  "ai.testCompatibility",
   "ai.requestStatus",
   "ai.cancelRequest",
   "probe.denied",

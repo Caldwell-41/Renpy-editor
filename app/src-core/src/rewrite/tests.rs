@@ -35,6 +35,8 @@ impl Fixture {
                 context_budget: 32768,
                 context_ceiling: 32768,
                 maximum_response: 1024,
+                temperature: None,
+                top_p: None,
             },
         )
         .unwrap();
@@ -44,6 +46,7 @@ impl Fixture {
         store.profiles[0].revision += 1;
         store.profiles[0].credential=Some(serde_json::from_value(json!({"credentialId":uuid::Uuid::new_v4().to_string(),"revision":1,"origin":"http://127.0.0.1:8765"})).unwrap());
         service.write(&store, &old).unwrap();
+        let store=service.read().unwrap();ai_credentials::record_compatibility(&service,&ai_credentials::token(&store),&store.profiles[0].profile_id).unwrap();
         let w = service.scene_workspace().unwrap();
         let path = w.scenes[0].source_path.clone();
         let mut f = Self {
@@ -1196,6 +1199,7 @@ fn all_actions_private_lan_disclosure_and_configuration_change_refuse_stale_send
         store.profiles[0].credential.as_mut().unwrap().credential_id = uuid::Uuid::new_v4().to_string();
         store.profiles[0].credential.as_mut().unwrap().revision += 1;
         f.service.write(&store, &old).unwrap();
+        let configured=f.service.read().unwrap();ai_credentials::record_compatibility(&f.service,&ai_credentials::token(&configured),&configured.profiles[0].profile_id).unwrap();
         let before = f.snapshots();
         let p = match action {
             prompts::ACTION => f.prepare(),
@@ -1364,4 +1368,44 @@ fn selectable_compound_candidate_ordinary_fault_recovers_without_false_success()
     for patch in review["patches"].as_array().unwrap(){assert_eq!(fs::read(f.root.join(patch["path"].as_str().unwrap())).unwrap(),patch["after"].as_str().unwrap().as_bytes());}
     assert_ne!(before[&f.path],fs::read(f.root.join(&f.path)).unwrap());
     }
+}
+
+#[test]
+fn sampling_all_actions_exact_body_persisted_defaults_and_change_invalidates_review() {
+    for action in [prompts::ACTION,prompts::CONTINUE,prompts::DRAFT,prompts::CARD,prompts::LORE,batch::ACTION] {
+        let mut f=if action==batch::ACTION {Fixture::batch_new()}else{Fixture::new()};
+        let prepare=|f:&mut Fixture|match action {
+            prompts::ACTION=>f.prepare(),prompts::CONTINUE=>f.continue_prepare(),prompts::DRAFT=>f.draft_prepare(),
+            prompts::CARD=>f.card_prepare(Value::Null),prompts::LORE=>f.lore_prepare(Value::Null),_=>f.batch_prepare(true).0,
+        };
+        let before=f.snapshots();
+        let reviewed=prepare(&mut f);
+        let body:Value=serde_json::from_str(reviewed["serializedPayload"].as_str().unwrap()).unwrap();
+        assert_eq!(body["temperature"],1.0);assert_eq!(body["top_p"],0.95);
+        let original=f.service.read().unwrap();let credential=original.profiles[0].credential.clone();
+        let mut settings=original.profiles[0].settings.clone();settings.temperature=Some(0.8);settings.top_p=Some(0.9);
+        ai_credentials::save(&f.service,&ai_credentials::token(&original),Some(&original.profiles[0].profile_id),settings).unwrap();
+        let saved=f.service.read().unwrap();assert_eq!(saved.profiles[0].credential,credential);
+        assert_eq!(saved.profiles[0].settings.temperature(),0.8);assert_eq!(saved.profiles[0].settings.top_p(),0.9);
+        assert!(f.take(&reviewed,Cancel::default()).is_err());assert_snapshots(&before,&f.snapshots());
+        ai_credentials::record_compatibility(&f.service,&ai_credentials::token(&saved),&saved.profiles[0].profile_id).unwrap();
+        let saved=f.service.read().unwrap();
+        let fresh=prepare(&mut f);let capture=f.take(&fresh,Cancel::default()).unwrap();
+        let body:Value=serde_json::from_slice(&capture.body).unwrap();assert_eq!(body["temperature"],0.8);assert_eq!(body["top_p"],0.9);
+        assert_eq!(capture.body,fresh["serializedPayload"].as_str().unwrap().as_bytes());
+        let mut invalid=saved.profiles[0].settings.clone();invalid.top_p=Some(1.01);
+        assert!(ai_credentials::save(&f.service,&ai_credentials::token(&saved),Some(&saved.profiles[0].profile_id),invalid).is_err());
+        assert_eq!(f.service.read().unwrap(),saved);assert_snapshots(&before,&f.snapshots());
+    }
+}
+
+#[test]
+fn compatibility_untested_profile_refuses_preparation_without_writes() {
+    let mut f=Fixture::new();let store=f.service.read().unwrap();
+    ai_credentials::clear_compatibility(&f.service,&ai_credentials::token(&store),&store.profiles[0].profile_id).unwrap();
+    let before=f.snapshots();
+    let o=f.ok("context.options",json!({}));let w=f.ok("scene.list",json!({}));let scene=&w["scenes"][0];
+    let beat=scene["beats"].as_array().unwrap().iter().find(|b|b["payload"]["type"]=="narration").unwrap();
+    let store=f.service.read().unwrap();
+    let result=f.call("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":60,"context":{"expectedPromptRevision":o["prompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"expectedSourceRevision":scene["sourceRevision"],"sceneId":scene["id"],"beatId":beat["id"],"references":[],"task":"Synthetic rewrite","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}));assert_eq!(result["ok"],false);assert_snapshots(&before,&f.snapshots());
 }

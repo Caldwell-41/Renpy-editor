@@ -57,16 +57,17 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Published 0.1.0 preview, approved exception and verified assets | [Release task](tasks/archive/2026-10-07-release-0.1.0.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
-| Planned Phase 2 LLM assistance, first-class Unsloth Studio and provider/proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
+| Planned Phase 2 LLM assistance, Studio-only provider scope and proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
+| Selected Studio-only closeout, requirement/evidence map and material-scope stop | [Closeout entry audit](tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12) |
 | Selected dialogue rewrite and CI-first qualification authority | [CI-first amendment](tasks/active/phase-2-initial-llm-assistance.md#ci-first-platform-qualification-amendment--2026-10-10), [CURRENT](status/CURRENT.md), [HANDOVER](status/HANDOVER.md) |
 | Completed Windows remembered-credential outcome and its evidence/limits | [Windows credential contract](tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract) |
 | Historical Phase 2 source/provider/native attempts; outcomes not automatically accepted | [Execution history](tasks/archive/2026-10-09-phase-2-execution-history.md) |
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
 | Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |
-| Planned AI settings, OS/session keys, project prompts and references | [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) |
+| AI settings, remembered keys, project prompts and references | [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) |
 | Selected temporary Mac file credentials, recovery workflow and implementation prompt; code/native proof not started | [Development credential plan](tasks/active/2026-10-08-macos-development-credential-storage.md) |
-| Studio-scoped accepted provider/credential contract; partial first settings slice, incomplete native proof | [ADR 0013](adr/0013-provider-request-and-transport-contract.md), [provider ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#25-provider-qualification-ledger--2026-10-07) |
+| Studio-scoped provider/credential contract and qualification history | [ADR 0013](adr/0013-provider-request-and-transport-contract.md), [provider ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#25-provider-qualification-ledger--2026-10-07) |
 | Source foundation integration closure | [tasks/archive/2026-10-07-source-foundation-integration.md](tasks/archive/2026-10-07-source-foundation-integration.md) |
 | Accepted bounded source target: nested child edit | [Source foundation](tasks/archive/2026-10-09-phase-2-execution-history.md#21-first-bounded-source-foundation-assignment) |
 | Product scope and workflows | [PRODUCT.md](PRODUCT.md) |

@@ -62,6 +62,7 @@ fn main() {
         let store = service.read().unwrap();
         let secrets = ai_native::secrets(&root).unwrap();
         ai_credentials::replace(&service, &secrets, &ai_credentials::token(&store), &store.profiles[0].profile_id, "loomlight-public-rewrite-fixture").unwrap();
+        let store=service.read().unwrap();ai_credentials::record_compatibility(&service,&ai_credentials::token(&store),&store.profiles[0].profile_id).unwrap();
     }
     let p = service.open_path(&root.join("synthetic-project")).unwrap();
     let host = ApplicationHost::new(service);
@@ -139,10 +140,10 @@ fn main() {
         let id = request["requestId"].as_str().unwrap().to_owned();
         let op = request["operation"].as_str().unwrap();
         let payload = request["payload"].clone();
-        let response = if ["rewrite.send", "ai.requestStatus", "ai.cancelRequest"].contains(&op) {
+        let response = if ["rewrite.prepare", "rewrite.send", "ai.testCompatibility", "ai.requestStatus", "ai.cancelRequest"].contains(&op) {
             worker.dispatch(&host, id, op, payload)
         } else if op == "ai.profiles" {
-            let view=host.with_service(|s|{let store=s.read().unwrap();let secrets=ai_native::secrets(s.ai_data_root()).unwrap();json!({"token":ai_credentials::token(&store),"profiles":store.profiles.iter().map(|p|json!({"profileId":p.profile_id,"disabled":p.disabled,"credentialStatus":if secrets.status(&p.profile_id,p.credential.as_ref().unwrap()).0==ai_credentials::CredentialStatus::Configured{"configured"}else{"unavailable"},"settings":p.settings})).collect::<Vec<_>>()})}).unwrap();
+            let view=host.with_service(|s|{let store=s.read().unwrap();let secrets=ai_native::secrets(s.ai_data_root()).unwrap();json!({"token":ai_credentials::token(&store),"profiles":store.profiles.iter().map(|p|json!({"profileId":p.profile_id,"disabled":p.disabled,"credentialStatus":if secrets.status(&p.profile_id,p.credential.as_ref().unwrap()).0==ai_credentials::CredentialStatus::Configured{"configured"}else{"unavailable"},"settings":p.settings,"compatibilityState":if p.compatibility_ready(){"ready"}else{"untested"}})).collect::<Vec<_>>()})}).unwrap();
             loomlight_core::CoreResponse::success(id, view)
         } else {
             host.dispatch(request, false)

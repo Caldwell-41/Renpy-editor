@@ -9,7 +9,7 @@ def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def cargo_gate(text,count):
     assert re.search(rf'test result: ok\. {count} passed; 0 failed; 0 ignored; 0 measured;',text)
 def renderer_gate(text):
-    for k,n in [('tests',134),('pass',134),('fail',0),('cancelled',0),('skipped',0),('todo',0)]:assert re.search(r'(?:ℹ|#) '+k+' '+str(n)+r'(?:\r?\n)',text)
+    for k,n in [('tests',138),('pass',138),('fail',0),('cancelled',0),('skipped',0),('todo',0)]:assert re.search(r'(?:ℹ|#) '+k+' '+str(n)+r'(?:\r?\n)',text)
 def manifest_gate(directory,value):
     assert value['schemaVersion']==1 and value['files']
     assert {p.relative_to(directory).as_posix():sha(p) for p in directory.rglob('*') if p.is_file() and p.name!='manifest.json'}==value['files']
@@ -60,7 +60,7 @@ def main():
     win=platform.system()=='Windows';assert (win and platform.machine()=='AMD64') or (platform.system()=='Darwin' and platform.machine()=='arm64')
     assert os.environ['GITHUB_RUN_ATTEMPT']=='1' and os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'
     candidate=subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip();assert candidate==os.environ['GITHUB_SHA']
-    paths=subprocess.check_output(['git','ls-files','app','tests/fixtures/source-foundation','.github/workflows/selectable-proposals.yml','.github/workflows/production-scaffold.yml','spikes/renpy-sdk'],cwd=REPO,text=True).splitlines()
+    paths=subprocess.check_output(['git','ls-files','app','tests/fixtures/source-foundation','tests/fixtures/studio-request','.github/workflows/selectable-proposals.yml','.github/workflows/production-scaffold.yml','spikes/renpy-sdk'],cwd=REPO,text=True).splitlines()
     identity={'candidate':candidate,'tree':subprocess.check_output(['git','rev-parse','HEAD^{tree}'],cwd=REPO,text=True).strip(),'runId':os.environ['GITHUB_RUN_ID'],'attempt':1,'os':platform.system(),'architecture':platform.machine(),'action':'editScene','inputs':{path:sha(REPO/path) for path in paths},'toolchains':{t:subprocess.check_output(command([t,'--version']),cwd=APP,text=True).strip() for t in ('node','npm','cargo','rustc')}}
     assert identity['toolchains']['node']=='v24.19.0' and identity['toolchains']['npm']=='11.9.0' and identity['toolchains']['rustc'].startswith('rustc 1.90.0 ')
     (a.output/'identity.json').write_text(json.dumps(identity,indent=2)+'\n');checks=[];ledger=[];sdkroot=None;root=None;failure=None;last_phase=None
@@ -71,21 +71,29 @@ def main():
     try:
         run('renderer',['npm','run','check'],renderer_gate);run('frontend',['npm','run','build'])
         run('core',['cargo','test','-p','loomlight-core','--locked','selectable','--','--nocapture'],lambda t:cargo_gate(t,8))
-        run('prompts',['cargo','test','-p','loomlight-core','--locked','prompts::tests'],lambda t:cargo_gate(t,5))
+        run('prompts',['cargo','test','-p','loomlight-core','--locked','prompts::tests'],lambda t:cargo_gate(t,6))
+        run('sampling',['cargo','test','-p','loomlight-core','--locked','sampling_'],lambda t:cargo_gate(t,2))
+        run('synthetic-sampling',['cargo','test','-p','loomlight-core','--locked','immutable_body_context_and_destination_refusal'],lambda t:cargo_gate(t,1))
+        run('compatibility',['cargo','test','-p','loomlight-core','--locked','compatibility'],lambda t:cargo_gate(t,3))
+        run('studio-transport',['cargo','test','-p','loomlight-core','--locked','ai_request::','--','--test-threads=1'],lambda t:cargo_gate(t,15))
+        run('readiness-invalidation',['cargo','test','-p','loomlight-desktop','--locked','readiness_tests'],lambda t:cargo_gate(t,1))
         run('gates',[sys.executable,'-m','unittest','discover','-s','scripts','-p','test_selectable_qualification.py','-v'],lambda t:unittest_gate(t,14))
+        run('integrated-gates',[sys.executable,'-m','unittest','discover','-s','scripts','-p','test_phase2_qualification.py','-v'],lambda t:unittest_gate(t,4))
         run('probe-snapshot',['cargo','test','-p','loomlight-desktop','--locked','snapshot_paths'],lambda t:cargo_gate(t,3))
         run('probe-cleanup',['cargo','test','-p','loomlight-desktop','--locked','probe_cleanup'],lambda t:cargo_gate(t,2))
-        run('native-worker',['cargo','test','-p','loomlight-desktop','--locked','ai_requests::tests'],lambda t:cargo_gate(t,6))
+        run('native-worker',['cargo','test','-p','loomlight-desktop','--locked','ai_requests::tests','--','--test-threads=1'],lambda t:cargo_gate(t,8))
         run('controller-build',['cargo','build','-p','loomlight-desktop','--locked','--example','rewrite-controller-driver'])
         driver='target/debug/examples/rewrite-controller-driver'+('.exe' if win else '')
         run('controller',['node','tests/selectable-controller.dispatch.mjs',driver,'--game-output',str(a.output/'games.json')],lambda t: (_ for _ in ()).throw(AssertionError('Controller marker missing')) if 'PASS: selectable actual controller/native HTTP' not in t else None)
+        run('integrated-controller',['node','tests/phase2-controller.dispatch.mjs',driver,'--selectable-integrated','--game-output',str(a.output/'integrated-game.json')],lambda t: (_ for _ in ()).throw(AssertionError('Combined controller marker missing')) if 'PASS: same-project integrated selectable multi-operation/dependency-invalid zero writes/valid partial subset accepted once/custom preservation/Undo-Redo/export/project-process reopen' not in t else None)
         sys.path.insert(0,str(REPO/'spikes/renpy-sdk'));from archive_safety import expected_sha256,install_verified_tar
         assert sha(a.archive)==expected_sha256(a.checksums.read_text(),'renpy-8.5.3-sdk.tar.bz2')==SDK_HASH
         sdkroot=Path(tempfile.gettempdir())/('loomlight-selectable-sdk-'+identity['runId']);assert not sdkroot.exists();install_verified_tar(a.archive,SDK_HASH,sdkroot)
         run('sdk',[sys.executable,'scripts/selectable-sdk.py','--sdk',str(sdkroot/'renpy-8.5.3-sdk'),'--fixture',str(a.output/'games.json'),'--output',str(a.output/'sdk-commands')],lambda t: (_ for _ in ()).throw(AssertionError('SDK marker missing')) if 'PASS: pinned Ren’Py selectable create/update' not in t else None,400)
+        run('integrated-sdk',[sys.executable,'scripts/phase2-integrated-sdk.py','--sdk',str(sdkroot/'renpy-8.5.3-sdk'),'--fixture',str(a.output/'integrated-game.json'),'--output',str(a.output/'integrated-sdk-commands'),'--selectable-integrated'],lambda t: (_ for _ in ()).throw(AssertionError('Combined SDK marker missing')) if 'PASS: pinned Ren’Py same-project selectable subset/Character literal name/dependent dialogue/metadata-free runtime' not in t else None,400)
         (a.output/'sdk-identity.json').write_text(json.dumps({'passed':True,'version':'8.5.3','archiveSHA256':sha(a.archive),'fixtureSHA256':sha(a.output/'games.json'),'driverSHA256':sha(APP/driver)},indent=2)+'\n')
         if win:
-            build=int(os.environ['BUILD_ORDINAL']);first=int(os.environ['FIRST_LAUNCH_ORDINAL']);assert 1<=build<=5 and 1<=first<=7
+            build=int(os.environ['BUILD_ORDINAL']);first=int(os.environ['FIRST_LAUNCH_ORDINAL']);assert 1<=build<=3 and 1<=first<=5
             run('native-preflight',['powershell.exe','-NoProfile','-File','scripts/rewrite-windows-native.ps1','-Stage','preflight','-Output',str(a.output/'native-preflight')],timeout=75)
             entry('package-build',build);run('package',['npm','exec','--','tauri','build','--','--locked'],timeout=1800)
             executable=APP/'target/release/loomlight.exe';run('package-privacy',['node','scripts/scan-artifacts.mjs','dist',str(executable),'target/release/bundle'])

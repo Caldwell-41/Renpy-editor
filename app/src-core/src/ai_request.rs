@@ -1,4 +1,4 @@
-//! Bounded Studio JSON transport. No edits, DNS, TLS fallback,
+//! Bounded Studio JSON transport. Verified HTTPS and reviewed DNS sets; no edits, TLS fallback,
 //! redirects, provider retries or persistent replies. Other destinations refuse use.
 use crate::{
     ai_credentials::{valid_key, Secret},
@@ -7,16 +7,18 @@ use crate::{
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::{
-    net::{IpAddr, Shutdown, SocketAddr, TcpStream},
+    net::{IpAddr, Shutdown, SocketAddr, TcpStream, ToSocketAddrs},
     sync::{
         atomic::{AtomicBool, Ordering},
-        Arc, Mutex,
+        mpsc, Arc, Mutex,
     },
-    time::Duration,
+    time::{Duration, Instant},
 };
 use ureq::unversioned::{
     resolver::{ResolvedSocketAddrs, Resolver},
-    transport::{Buffers, ConnectionDetails, Connector, LazyBuffers, NextTimeout, Transport},
+    transport::{
+        Buffers, ConnectionDetails, Connector, LazyBuffers, NextTimeout, RustlsConnector, Transport,
+    },
 };
 
 pub const MAX_BODY: usize = 2 * 1024 * 1024;
@@ -27,6 +29,8 @@ pub const SYNTHETIC_PROMPT: &str = "This is a synthetic Loomlight connection tes
 pub enum Failure {
     Configuration,
     UnsupportedDestination,
+    UnsupportedTlsIpv6,
+    DestinationChanged,
     Context,
     Credential,
     Connection,
@@ -46,6 +50,8 @@ impl Failure {
         match self {
             Self::Configuration => "configuration",
             Self::UnsupportedDestination => "unsupported_destination",
+            Self::UnsupportedTlsIpv6 => "unsupported_tls_ipv6",
+            Self::DestinationChanged => "destination_changed",
             Self::Context => "context_limit",
             Self::Credential => "credential",
             Self::Connection => "connection",
@@ -64,7 +70,9 @@ impl Failure {
     pub fn message(self) -> &'static str {
         match self {
         Self::Configuration=>"Saved request settings are invalid or unsupported.",
-        Self::UnsupportedDestination=>"Studio requests require a literal loopback HTTP address or a private LAN HTTP address with explicit opt-in. This saved destination is unsupported.",
+        Self::UnsupportedDestination=>"Studio requests require verified HTTPS or a literal loopback/private opted-in HTTP address. This destination is unsupported.",
+        Self::UnsupportedTlsIpv6=>"The pinned Studio TLS adapter cannot verify literal IPv6 HTTPS destinations. Use a certificate-matching HTTPS hostname instead.",
+        Self::DestinationChanged=>"Studio destination addresses changed. Prepare and review the request again.",
         Self::Context=>"Synthetic input, visible margin and response reserve exceed the saved context budget.",
         Self::Credential=>"Credential is missing, unavailable, disabled or bound to another origin.",
         Self::Connection=>"Studio server is unavailable or the connection was interrupted.",
@@ -89,23 +97,50 @@ pub struct Prepared {
     pub estimated_input: u32,
     pub margin: u32,
     pub timeout: Duration,
-    address: SocketAddr,
+    destination: Destination,
     key: Secret,
 }
 pub fn prepare(profile: StudioProfile, key: Secret, timeout_seconds: u32) -> Result<Prepared> {
-    let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[{"role":"user","content":SYNTHETIC_PROMPT}],"stream":false,"max_tokens":profile.settings.maximum_response,"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|Failure::Configuration)?;
+    let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[{"role":"user","content":SYNTHETIC_PROMPT}],"stream":false,"max_tokens":profile.settings.maximum_response,"temperature":profile.settings.temperature(),"top_p":profile.settings.top_p(),"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|Failure::Configuration)?;
     prepare_reviewed(profile, key, timeout_seconds, body)
 }
 
 /// Body is obtained from the core-owned, consumed review token, never renderer JSON.
-pub fn prepare_reviewed(profile: StudioProfile, key: Secret, timeout_seconds: u32, body: Vec<u8>) -> Result<Prepared> {
+pub fn prepare_reviewed(
+    profile: StudioProfile,
+    key: Secret,
+    timeout_seconds: u32,
+    body: Vec<u8>,
+) -> Result<Prepared> {
+    // Reject invalid or unbound explicit diagnostics before any DNS lookup.
     if !profile.settings.valid() || !(30..=1800).contains(&timeout_seconds) {
         return Err(Failure::Configuration);
     }
     if !profile.credential_bound() || !valid_key(&key) {
         return Err(Failure::Credential);
     }
-    let address = destination(&profile.settings)?;
+    let destination = resolve_destination(&profile.settings)?;
+    prepare_reviewed_bound(profile, key, timeout_seconds, body, destination)
+}
+
+/// The destination is captured by the native, one-use review token, never renderer JSON.
+pub fn prepare_reviewed_bound(
+    profile: StudioProfile,
+    key: Secret,
+    timeout_seconds: u32,
+    body: Vec<u8>,
+    reviewed: Destination,
+) -> Result<Prepared> {
+    if !profile.settings.valid() || !(30..=1800).contains(&timeout_seconds) {
+        return Err(Failure::Configuration);
+    }
+    if !profile.credential_bound() || !valid_key(&key) {
+        return Err(Failure::Credential);
+    }
+    destination(&profile.settings)?;
+    if !reviewed.valid_for(&profile.settings) {
+        return Err(Failure::UnsupportedDestination);
+    }
     if body.len() > MAX_BODY {
         return Err(Failure::Context);
     }
@@ -114,8 +149,10 @@ pub fn prepare_reviewed(profile: StudioProfile, key: Secret, timeout_seconds: u3
     let margin = 128.max(estimated_input.div_ceil(10));
     if u64::from(estimated_input) + u64::from(margin) + u64::from(profile.settings.maximum_response)
         > u64::from(profile.settings.context_budget)
-        || u64::from(estimated_input) + u64::from(margin) + u64::from(profile.settings.maximum_response)
-        > u64::from(profile.settings.context_ceiling)
+        || u64::from(estimated_input)
+            + u64::from(margin)
+            + u64::from(profile.settings.maximum_response)
+            > u64::from(profile.settings.context_ceiling)
     {
         return Err(Failure::Context);
     }
@@ -125,30 +162,199 @@ pub fn prepare_reviewed(profile: StudioProfile, key: Secret, timeout_seconds: u3
         estimated_input,
         margin,
         timeout: Duration::from_secs(timeout_seconds.into()),
-        address,
+        destination: reviewed,
         key,
     })
 }
 
-/// Pure address admission shared by passive send review and native dispatch.
-/// No hostname resolution, network access or secret read occurs here.
-pub(crate) fn destination(settings: &crate::ai_profiles::StudioSettings) -> Result<SocketAddr> {
+/// Pure endpoint admission. Saving or checking settings never resolves DNS.
+pub fn destination(settings: &crate::ai_profiles::StudioSettings) -> Result<()> {
     let uri: ureq::http::Uri = settings
         .endpoint
         .parse()
         .map_err(|_| Failure::Configuration)?;
-    let ip: IpAddr = uri
+    let host = uri
         .host()
-        .unwrap_or("")
-        .trim_matches(['[', ']'])
+        .ok_or(Failure::Configuration)?
+        .trim_matches(['[', ']']);
+    match uri.scheme_str() {
+        Some("http") => {
+            let ip = host.parse().map_err(|_| Failure::UnsupportedDestination)?;
+            if !crate::ai_profiles::http_address_allowed(ip, settings.private_http) {
+                return Err(Failure::UnsupportedDestination);
+            }
+        }
+        Some("https") => {
+            if let Ok(ip) = host.parse::<IpAddr>() {
+                // Pinned ureq 3.1.4 forwards bracketed IPv6 authority text into
+                // Rustls ServerName. Refuse explicitly rather than accept a setup
+                // that cannot verify its IP SAN. Hostnames resolving IPv6 work.
+                if ip.is_ipv6() {
+                    return Err(Failure::UnsupportedTlsIpv6);
+                }
+                if !https_address_allowed(ip) {
+                    return Err(Failure::UnsupportedDestination);
+                }
+            }
+        }
+        _ => return Err(Failure::UnsupportedDestination),
+    }
+    if uri.port_u16().is_none_or(|p| p == 0) {
+        return Err(Failure::Configuration);
+    }
+    Ok(())
+}
+
+/// The complete reviewed address set, sorted and deduplicated. No credential or body.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Destination {
+    pub addresses: Vec<SocketAddr>,
+}
+impl Destination {
+    fn valid_for(&self, settings: &crate::ai_profiles::StudioSettings) -> bool {
+        let Ok(uri) = settings.endpoint.parse::<ureq::http::Uri>() else {
+            return false;
+        };
+        let mut sorted = self.addresses.clone();
+        sorted.sort_unstable();
+        sorted.dedup();
+        if sorted != self.addresses || sorted.is_empty() || sorted.len() > 32 {
+            return false;
+        }
+        let literal = uri
+            .host()
+            .unwrap_or("")
+            .trim_matches(['[', ']'])
+            .parse::<IpAddr>()
+            .ok();
+        sorted.iter().all(|a| {
+            Some(a.port()) == uri.port_u16()
+                && literal.is_none_or(|ip| a.ip() == ip)
+                && if uri.scheme_str() == Some("https") {
+                    https_address_allowed(a.ip())
+                } else {
+                    literal.is_some()
+                        && crate::ai_profiles::http_address_allowed(a.ip(), settings.private_http)
+                }
+        })
+    }
+}
+
+// Admit ordinary unicast public HTTPS as well as loopback/LAN. Refuse misrouting
+// classes even under TLS, including mapped IPv4 equivalents.
+fn https_address_allowed(ip: IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(v4) => {
+            let [a, b, c, _] = v4.octets();
+            !(a == 0
+                || a >= 224
+                || v4.is_link_local()
+                || v4.is_broadcast()
+                || (a == 100 && (64..=127).contains(&b))
+                || (a == 192 && b == 0 && (c == 0 || c == 2))
+                || (a == 198 && (b == 18 || b == 19 || (b == 51 && c == 100)))
+                || (a == 203 && b == 0 && c == 113))
+        }
+        IpAddr::V6(v6) => {
+            if let Some(v4) = v6.to_ipv4_mapped() {
+                return https_address_allowed(IpAddr::V4(v4));
+            }
+            let octets = v6.octets();
+            v6.is_loopback()
+                || v6.is_unique_local()
+                || (octets[0] & 0xe0 == 0x20 && !(octets[..4] == [0x20, 0x01, 0x0d, 0xb8]))
+        }
+    }
+}
+
+static DNS_ACTIVE: AtomicBool = AtomicBool::new(false);
+/// Resolve only for an explicit user operation, outside project/native service locks.
+/// A stalled system resolver is isolated to one secret-free worker globally. The
+/// caller waits at most one second; no queued retry or abandoned-worker accumulation.
+pub fn resolve_destination(settings: &crate::ai_profiles::StudioSettings) -> Result<Destination> {
+    resolve_destination_until(settings, Instant::now() + Duration::from_secs(1))
+}
+
+fn remaining(deadline: Instant) -> Result<Duration> {
+    let remaining = deadline.saturating_duration_since(Instant::now());
+    if remaining.is_zero() {
+        Err(Failure::Timeout)
+    } else {
+        Ok(remaining)
+    }
+}
+
+fn receive_resolved(
+    receive: mpsc::Receiver<std::io::Result<Vec<SocketAddr>>>,
+    deadline: Instant,
+) -> Result<Vec<SocketAddr>> {
+    receive
+        .recv_timeout(remaining(deadline)?.min(Duration::from_secs(1)))
+        .map_err(|_| Failure::Timeout)?
+        .map_err(|_| Failure::Connection)
+}
+
+fn resolve_destination_until(
+    settings: &crate::ai_profiles::StudioSettings,
+    deadline: Instant,
+) -> Result<Destination> {
+    remaining(deadline)?;
+    destination(settings)?;
+    let uri: ureq::http::Uri = settings
+        .endpoint
         .parse()
-        .map_err(|_| Failure::UnsupportedDestination)?;
-    if uri.scheme_str() != Some("http")
-        || !crate::ai_profiles::http_address_allowed(ip, settings.private_http)
-    {
+        .map_err(|_| Failure::Configuration)?;
+    let host = uri
+        .host()
+        .ok_or(Failure::Configuration)?
+        .trim_matches(['[', ']']);
+    let port = uri.port_u16().ok_or(Failure::Configuration)?;
+    let addresses = if let Ok(ip) = host.parse() {
+        vec![SocketAddr::new(ip, port)]
+    } else {
+        if DNS_ACTIVE
+            .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+            .is_err()
+        {
+            return Err(Failure::Busy);
+        }
+        let (send, receive) = mpsc::sync_channel(1);
+        let host = host.to_owned();
+        if std::thread::Builder::new()
+            .name("studio-destination".into())
+            .spawn(move || {
+                let resolved = (host.as_str(), port)
+                    .to_socket_addrs()
+                    .map(|a| a.take(33).collect::<Vec<_>>());
+                DNS_ACTIVE.store(false, Ordering::SeqCst);
+                let _ = send.send(resolved);
+            })
+            .is_err()
+        {
+            DNS_ACTIVE.store(false, Ordering::SeqCst);
+            return Err(Failure::Connection);
+        }
+        receive_resolved(receive, deadline)?
+    };
+    admitted_destination(settings, addresses)
+}
+
+fn admitted_destination(
+    settings: &crate::ai_profiles::StudioSettings,
+    mut addresses: Vec<SocketAddr>,
+) -> Result<Destination> {
+    // Every returned answer must be admitted; reject oversized sets rather than hide answers.
+    if addresses.len() > 32 {
         return Err(Failure::UnsupportedDestination);
     }
-    Ok(SocketAddr::new(ip, uri.port_u16().ok_or(Failure::Configuration)?))
+    addresses.sort_unstable();
+    addresses.dedup();
+    let resolved = Destination { addresses };
+    if !resolved.valid_for(settings) {
+        return Err(Failure::UnsupportedDestination);
+    }
+    Ok(resolved)
 }
 #[derive(Default)]
 struct CancelInner {
@@ -202,6 +408,7 @@ impl Resolver for FixedResolver {
 #[derive(Debug)]
 struct AbortConnector {
     address: SocketAddr,
+    deadline: Instant,
     cancel: Cancel,
 }
 impl Connector for AbortConnector {
@@ -211,19 +418,13 @@ impl Connector for AbortConnector {
         details: &ConnectionDetails,
         _: Option<()>,
     ) -> std::result::Result<Option<OwnedTransport>, ureq::Error> {
-        if self.cancel.cancelled()
-            || details.needs_tls()
-            || details.addrs.len() != 1
-            || details.addrs[0] != self.address
-        {
+        if self.cancel.cancelled() || details.addrs.len() != 1 || details.addrs[0] != self.address {
             return Err(ureq::Error::ConnectionFailed);
         }
-        // One reviewed literal-address connect attempt. A one-second deadline also bounds
+        // One reviewed exact-address connect attempt. A one-second deadline also bounds
         // cancellation while the OS is connecting, before a socket can be owned.
-        let stream = Arc::new(TcpStream::connect_timeout(
-            &self.address,
-            Duration::from_secs(1),
-        )?);
+        let connect_budget = io_budget(self.deadline, details.timeout)?.min(Duration::from_secs(1));
+        let stream = Arc::new(TcpStream::connect_timeout(&self.address, connect_budget)?);
         let mut owned = self
             .cancel
             .0
@@ -239,6 +440,7 @@ impl Connector for AbortConnector {
         *owned = Some(Arc::clone(&stream));
         Ok(Some(OwnedTransport {
             stream,
+            deadline: self.deadline,
             buffers: LazyBuffers::new(
                 details.config.input_buffer_size(),
                 details.config.output_buffer_size(),
@@ -248,6 +450,7 @@ impl Connector for AbortConnector {
 }
 struct OwnedTransport {
     stream: Arc<TcpStream>,
+    deadline: Instant,
     buffers: LazyBuffers,
 }
 impl std::fmt::Debug for OwnedTransport {
@@ -255,6 +458,21 @@ impl std::fmt::Debug for OwnedTransport {
         f.write_str("OwnedRequestTransport")
     }
 }
+fn io_budget(
+    deadline: Instant,
+    timeout: NextTimeout,
+) -> std::result::Result<Duration, ureq::Error> {
+    let remaining = remaining(deadline).map_err(|_| ureq::Error::Timeout(ureq::Timeout::Global))?;
+    // NextTimeout::not_zero extends an already expired timeout to one second.
+    // Preserve the actual remaining duration instead of extending the deadline.
+    let budget = remaining.min(*timeout.after);
+    if budget.is_zero() {
+        Err(ureq::Error::Timeout(timeout.reason))
+    } else {
+        Ok(budget)
+    }
+}
+
 impl Transport for OwnedTransport {
     fn buffers(&mut self) -> &mut dyn Buffers {
         &mut self.buffers
@@ -265,25 +483,31 @@ impl Transport for OwnedTransport {
         timeout: NextTimeout,
     ) -> std::result::Result<(), ureq::Error> {
         use std::io::Write;
-        self.stream
-            .set_write_timeout(timeout.not_zero().map(|d| *d))?;
-        match (&*self.stream).write_all(&self.buffers.output()[..amount]) {
-            Ok(()) => Ok(()),
-            Err(e)
-                if matches!(
-                    e.kind(),
-                    std::io::ErrorKind::TimedOut | std::io::ErrorKind::WouldBlock
-                ) =>
-            {
-                Err(ureq::Error::Timeout(timeout.reason))
+        let mut sent = 0;
+        while sent < amount {
+            self.stream
+                .set_write_timeout(Some(io_budget(self.deadline, timeout)?))?;
+            match (&*self.stream).write(&self.buffers.output()[sent..amount]) {
+                Ok(0) => return Err(std::io::Error::from(std::io::ErrorKind::WriteZero).into()),
+                Ok(n) => sent += n,
+                Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+                Err(e)
+                    if matches!(
+                        e.kind(),
+                        std::io::ErrorKind::TimedOut | std::io::ErrorKind::WouldBlock
+                    ) =>
+                {
+                    return Err(ureq::Error::Timeout(timeout.reason));
+                }
+                Err(e) => return Err(e.into()),
             }
-            Err(e) => Err(e.into()),
         }
+        Ok(())
     }
     fn await_input(&mut self, timeout: NextTimeout) -> std::result::Result<bool, ureq::Error> {
         use std::io::Read;
         self.stream
-            .set_read_timeout(timeout.not_zero().map(|d| *d))?;
+            .set_read_timeout(Some(io_budget(self.deadline, timeout)?))?;
         let count = match (&*self.stream).read(self.buffers.input_append_buf()) {
             Ok(n) => n,
             Err(e)
@@ -426,27 +650,56 @@ pub fn execute(
     stage: impl Fn(&str),
     http_status: &mut Option<u16>,
 ) -> Result<Completion> {
+    execute_with_tls(
+        prepared,
+        cancel,
+        stage,
+        http_status,
+        ureq::tls::TlsConfig::default(),
+    )
+}
+
+fn execute_with_tls(
+    prepared: Prepared,
+    cancel: &Cancel,
+    stage: impl Fn(&str),
+    http_status: &mut Option<u16>,
+    tls: ureq::tls::TlsConfig,
+) -> Result<Completion> {
+    // DNS, connect, TLS and response IO share one absolute generation deadline.
+    let deadline = Instant::now() + prepared.timeout;
     // This scope drops the entire agent/response/buffers before the completion is published.
     let result = (|| {
         if cancel.cancelled() {
             return Err(Failure::Cancelled);
         }
+        let current = resolve_destination_until(&prepared.profile.settings, deadline)?;
+        if current != prepared.destination {
+            return Err(Failure::DestinationChanged);
+        }
+        if cancel.cancelled() {
+            return Err(Failure::Cancelled);
+        }
+        let address = current.addresses[0];
         let config = ureq::Agent::config_builder()
+            .tls_config(tls)
             .proxy(None)
             .max_redirects(0)
             .http_status_as_error(false)
             .max_idle_connections(0)
-            .timeout_global(Some(prepared.timeout))
+            .timeout_global(Some(remaining(deadline)?))
             .timeout_connect(Some(Duration::from_secs(1)))
             .max_response_header_size(32 * 1024)
             .build();
         let agent = ureq::Agent::with_parts(
             config,
             AbortConnector {
-                address: prepared.address,
+                address,
+                deadline,
                 cancel: cancel.clone(),
-            },
-            FixedResolver(prepared.address),
+            }
+            .chain(RustlsConnector::default()),
+            FixedResolver(address),
         );
         let mut response = agent
             .post(format!(
@@ -499,6 +752,7 @@ pub fn execute(
         if cancel.cancelled() {
             return Err(Failure::Cancelled);
         }
+        remaining(deadline)?;
         stage("validating");
         let completion = parse(&bytes, &prepared.profile.settings.model)?;
         if completion
@@ -520,6 +774,7 @@ pub fn execute(
         {
             return Err(Failure::Oversized);
         }
+        remaining(deadline)?;
         Ok(completion)
     })();
     cancel.close_socket();
@@ -539,7 +794,7 @@ mod tests {
         thread,
         time::Instant,
     };
-    fn profile(port: u16) -> StudioProfile {
+    pub(super) fn profile(port: u16) -> StudioProfile {
         serde_json::from_value(json!({"profileId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","revision":1,"disabled":false,"settings":{"label":"Synthetic request","endpoint":format!("http://127.0.0.1:{port}/v1"),"model":"synthetic-model","privateHttp":false,"contextCeiling":8192,"contextBudget":4096,"maximumResponse":1024},"credential":{"credentialId":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","revision":1,"origin":format!("http://127.0.0.1:{port}")}})).unwrap()
     }
     fn valid() -> Value {
@@ -554,11 +809,20 @@ mod tests {
         let body: Value = serde_json::from_slice(&p.body).unwrap();
         assert_eq!(body["stream"], false);
         assert_eq!(body["max_tokens"], 1024);
+        assert_eq!(body["temperature"], 1.0);
+        assert_eq!(body["top_p"], 0.95);
         assert_eq!(body["enable_thinking"], false);
         assert_eq!(body["enable_tools"], false);
         assert_eq!(body["enabled_tools"], json!([]));
         assert!(body.get("session_id").is_none());
         assert!(!String::from_utf8_lossy(&p.body).contains("public-fixture"));
+        let mut customized = profile(8888);
+        customized.settings.temperature = Some(0.8);
+        customized.settings.top_p = Some(0.9);
+        let customized = prepare(customized, Secret::new("public-fixture".into()), 600).unwrap();
+        let body: Value = serde_json::from_slice(&customized.body).unwrap();
+        assert_eq!(body["temperature"], 0.8);
+        assert_eq!(body["top_p"], 0.9);
         for seconds in [0, 29, 1801] {
             assert!(matches!(
                 prepare(profile(8888), Secret::new("public".into()), seconds),
@@ -571,10 +835,7 @@ mod tests {
             prepare(narrow, Secret::new("public".into()), 30),
             Err(Failure::Context)
         ));
-        for endpoint in [
-            "http://localhost:8888/v1",
-            "https://example.com:443/v1",
-        ] {
+        for endpoint in ["http://localhost:8888/v1"] {
             let mut p = profile(8888);
             p.settings.endpoint = endpoint.into();
             p.settings.private_http = true;
@@ -600,14 +861,29 @@ mod tests {
             p.settings.endpoint = endpoint.into();
             p.settings.private_http = true;
             p.credential.as_mut().unwrap().origin =
-                crate::ai_profiles::canonical_endpoint(endpoint, true).unwrap().1;
+                crate::ai_profiles::canonical_endpoint(endpoint, true)
+                    .unwrap()
+                    .1;
             let prepared = prepare(p.clone(), Secret::new("public".into()), 30).unwrap();
-            assert_eq!(prepared.address.ip(), endpoint.parse::<ureq::http::Uri>().unwrap().host().unwrap().trim_matches(['[', ']']).parse::<IpAddr>().unwrap());
+            assert_eq!(
+                prepared.destination.addresses[0].ip(),
+                endpoint
+                    .parse::<ureq::http::Uri>()
+                    .unwrap()
+                    .host()
+                    .unwrap()
+                    .trim_matches(['[', ']'])
+                    .parse::<IpAddr>()
+                    .unwrap()
+            );
             p.settings.private_http = false;
             assert!(prepare(p.clone(), Secret::new("public".into()), 30).is_err());
             p.settings.private_http = true;
             p.credential.as_mut().unwrap().origin = "http://127.0.0.1:8888".into();
-            assert!(matches!(prepare(p, Secret::new("public".into()), 30), Err(Failure::Credential)));
+            assert!(matches!(
+                prepare(p, Secret::new("public".into()), 30),
+                Err(Failure::Credential)
+            ));
         }
         for endpoint in [
             "http://8.8.8.8:8888/v1",
@@ -619,7 +895,6 @@ mod tests {
             "http://[::]:8888/v1",
             "http://[::ffff:8.8.8.8]:8888/v1",
             "http://studio.local:8888/v1",
-            "https://192.168.1.2:8888/v1",
         ] {
             let mut p = profile(8888);
             p.settings.endpoint = endpoint.into();
@@ -627,7 +902,10 @@ mod tests {
             if let Ok((_, origin)) = crate::ai_profiles::canonical_endpoint(endpoint, true) {
                 p.credential.as_mut().unwrap().origin = origin;
             }
-            assert!(prepare(p, Secret::new("public".into()), 30).is_err(), "{endpoint}");
+            assert!(
+                prepare(p, Secret::new("public".into()), 30).is_err(),
+                "{endpoint}"
+            );
         }
         let mut p = profile(8888);
         p.disabled = true;
@@ -860,7 +1138,11 @@ mod tests {
             Err(Failure::Cancelled)
         );
         for body in [false, true] {
-            let phase = if body { "partial body" } else { "stalled headers" };
+            let phase = if body {
+                "partial body"
+            } else {
+                "stalled headers"
+            };
             let listener = TcpListener::bind("127.0.0.1:0").unwrap();
             let port = listener.local_addr().unwrap().port();
             let (tx, rx) = std::sync::mpsc::channel();
@@ -877,11 +1159,14 @@ mod tests {
                 // first request-ready signal, without waiting for a client read.
                 let start = cancel_rx.recv_timeout(Duration::from_secs(2)).unwrap();
                 stream
-                    .set_read_timeout(Some((start + Duration::from_secs(2))
-                        .saturating_duration_since(Instant::now())
-                        .max(Duration::from_millis(1))))
+                    .set_read_timeout(Some(
+                        (start + Duration::from_secs(2))
+                            .saturating_duration_since(Instant::now())
+                            .max(Duration::from_millis(1)),
+                    ))
                     .unwrap();
-                let eof = stream.read(&mut [0])
+                let eof = stream
+                    .read(&mut [0])
                     .map_err(|error| (error.kind(), error.raw_os_error()));
                 (eof, start.elapsed())
             });
@@ -903,15 +1188,17 @@ mod tests {
             cancel_tx.send(start).unwrap();
             cancel.cancel();
             let cancel_elapsed = start.elapsed();
-            let completion = completion_rx.recv_timeout(
-                Duration::from_secs(2).saturating_sub(start.elapsed()));
+            let completion =
+                completion_rx.recv_timeout(Duration::from_secs(2).saturating_sub(start.elapsed()));
             let completion_elapsed = start.elapsed();
             let (eof, eof_elapsed) = server.join().unwrap();
             worker.join().unwrap();
             let shutdown = *cancel.0.shutdown_observation.lock().unwrap();
-            let diagnostic = format!("{phase}: owned={owned}, shutdown={shutdown:?}, \
+            let diagnostic = format!(
+                "{phase}: owned={owned}, shutdown={shutdown:?}, \
                 cancel={cancel_elapsed:?}, completion={completion_elapsed:?}, \
-                eof={eof:?} after {eof_elapsed:?}");
+                eof={eof:?} after {eof_elapsed:?}"
+            );
             eprintln!("{diagnostic}");
             assert!(owned, "{diagnostic}");
             assert_eq!(shutdown, Some(Ok(())), "{diagnostic}");
@@ -988,3 +1275,7 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "ai_request/tls_tests.rs"]
+mod tls_tests;
