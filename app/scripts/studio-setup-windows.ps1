@@ -25,9 +25,41 @@ public static class StudioNative {
     [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr window, out uint pid);
     [DllImport("user32.dll")] public static extern IntPtr GetWindow(IntPtr window, uint command);
     [DllImport("user32.dll")] public static extern IntPtr GetAncestor(IntPtr window, uint flags);
+    [DllImport("user32.dll")] public static extern IntPtr GetParent(IntPtr window);
+    [DllImport("user32.dll")] public static extern IntPtr GetDlgItem(IntPtr dialog,int id);
+    [DllImport("user32.dll")] public static extern int GetDlgCtrlID(IntPtr window);
+    [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr window);
+    [DllImport("user32.dll")] public static extern bool EnumChildWindows(IntPtr window,WindowVisitor visitor,IntPtr data);
+    [DllImport("user32.dll",EntryPoint="GetWindowLongPtrW",ExactSpelling=true)] public static extern IntPtr GetWindowLongPtr(IntPtr window,int index);
+    [StructLayout(LayoutKind.Sequential)] public struct RECT {public int Left,Top,Right,Bottom;}
+    [StructLayout(LayoutKind.Sequential)] public struct GUIINFO {
+        public uint size,flags; public IntPtr active,focus,capture,menuOwner,moveSize,caret; public RECT caretRect;
+    }
+    [DllImport("user32.dll")] public static extern bool GetGUIThreadInfo(uint thread,ref GUIINFO info);
     [DllImport("user32.dll", CharSet=CharSet.Unicode,ExactSpelling=true)] public static extern int GetWindowTextW(IntPtr window, StringBuilder text, int count);
     [DllImport("user32.dll", CharSet=CharSet.Unicode,ExactSpelling=true)] public static extern int GetClassNameW(IntPtr window, StringBuilder text, int count);
     public static uint PID(IntPtr window) { uint pid; GetWindowThreadProcessId(window, out pid); return pid; }
+    public static string Class(IntPtr window) {var text=new StringBuilder(64);GetClassNameW(window,text,text.Capacity);return text.ToString();}
+    public class ChildInfo {
+        public int id,count; public long handle,parent,style; public uint processId;
+        public string kind; public bool visible,enabled,password,matched;
+    }
+    public static ChildInfo Child(IntPtr dialog,int id,uint pid) {
+        if(id!=100 && id!=1 && id!=2) throw new InvalidOperationException("Unlisted native child ID");
+        var child=GetDlgItem(dialog,id); var info=new ChildInfo();info.id=id;info.handle=child.ToInt64();
+        EnumChildWindows(dialog,delegate(IntPtr h,IntPtr data) {if(GetParent(h)==dialog && GetDlgCtrlID(h)==id) info.count++;return true;},IntPtr.Zero);
+        info.parent=GetParent(child).ToInt64();info.processId=PID(child);info.kind=Class(child);
+        info.style=GetWindowLongPtr(child,-16).ToInt64();info.password=(info.style&0x20)!=0;
+        info.visible=IsWindowVisible(child);info.enabled=IsWindowEnabled(child);
+        bool typed=id==100 ? info.kind=="Edit" && info.password && (info.style&0x800)==0 : info.kind=="Button" && (info.style&15)<=1;
+        info.matched=info.count==1 && child!=IntPtr.Zero && IsWindow(child) && info.parent==dialog.ToInt64() && info.processId==pid && info.visible && info.enabled && (info.style&0x40000000)!=0 && typed;
+        return info;
+    }
+    public static bool Focused(IntPtr dialog,IntPtr child) {
+        uint pid;uint thread=GetWindowThreadProcessId(dialog,out pid);
+        var info=new GUIINFO();info.size=(uint)Marshal.SizeOf(typeof(GUIINFO));
+        return thread!=0 && GetGUIThreadInfo(thread,ref info) && info.active==dialog && info.focus==child;
+    }
     public static bool EntryMatches(IntPtr window, uint pid, IntPtr owner) {
         if (!IsWindow(window) || !IsWindowVisible(window) || PID(window)!=pid || GetWindow(window,4)!=owner) return false;
         var title=new StringBuilder(128); var kind=new StringBuilder(64);
@@ -60,18 +92,30 @@ function Assert-EntryOwner($Handle) {
 }
 function Entry-Exists($Handle) {return [StudioNative]::IsWindow($Handle)}
 function Entry-Foreground($Handle) {return [RewriteNative]::GetForegroundWindow() -eq $Handle}
-function Masked-FocusReady($Edit) {
-    $focused=[System.Windows.Automation.AutomationElement]::FocusedElement
-    return ($null -ne $focused -and $focused.Current.IsPassword -and $focused.Current.HasKeyboardFocus -and [System.Windows.Automation.Automation]::Compare($Edit,$focused))
+function Entry-Control($Dialog,[int]$Id) {
+    Assert-EntryOwner $Dialog
+    $info=[StudioNative]::Child($Dialog,$Id,[uint32]$ProcessId)
+    if(-not $receipt.dialog.Contains('children')) {$receipt.dialog.children=@()}
+    $receipt.dialog.children=@($receipt.dialog.children | Where-Object {$_.id -ne $Id})+@($info)
+    Assert-Native $info.matched ('Native child identity rejected: '+$Id)
+    return [IntPtr]$info.handle
 }
-function Click-MaskedField($Edit) {
-    Focus-Control $Edit
-    Assert-EntryOwner $script:handle
-    Assert-Native (Entry-Foreground $script:handle) 'Native entry lost foreground before masked mouse input'
-    $bounds=$Edit.Current.BoundingRectangle
+function Masked-FocusReady($Edit) {
+    return ([StudioNative]::Focused($script:handle,$Edit))
+}
+function Click-EntryControl($Dialog,[int]$Id) {
+    $receipt.pendingNativeAction='Physical native child click: '+$Id
+    $child=Entry-Control $Dialog $Id
+    $bounds=Window-Rect $child;$dialogBounds=Window-Rect $Dialog
+    Assert-Native ($bounds.Width -gt 0 -and $bounds.Height -gt 0 -and $bounds.Left -ge $dialogBounds.Left -and $bounds.Right -le $dialogBounds.Right -and $bounds.Top -ge $dialogBounds.Top -and $bounds.Bottom -le $dialogBounds.Bottom) 'Native child outside owned dialog viewport'
+    Assert-EntryOwner $Dialog
+    Assert-Native (Entry-Foreground $Dialog) 'Native entry lost foreground before native child click'
     Assert-Native ([RewriteNative]::Click([int]($bounds.Left+$bounds.Width/2),[int]($bounds.Top+$bounds.Height/2))) 'Masked field physical click failed'
     $receipt.checks.osMouseInput=$true
+    if(-not $receipt.dialog.Contains('clickedChildIds')) {$receipt.dialog.clickedChildIds=@()}
+    $receipt.dialog.clickedChildIds+=@($Id)
 }
+function Click-MaskedField($Edit) {Click-EntryControl $script:handle 100}
 function Send-PublicFixture {[System.Windows.Forms.SendKeys]::SendWait('loomlight-public-setup-fixture')}
 function Select-Entry($Handle) {
     Assert-EntryOwner $Handle
@@ -88,7 +132,7 @@ function Cancel-OwnedEntry {
     $entry=Entry-Handle
     if($entry -eq [IntPtr]::Zero) {return}
     Select-Entry $entry
-    Wait-ButtonReady 'Cancel';Click-Control 'Cancel'
+    Click-EntryControl $entry 2
     Wait-Step 'Native credential dialog cancelled' {-not (Entry-Exists $entry)}
     $receipt.checks.nativeDialogCancelled=$true
 }
@@ -200,12 +244,31 @@ function Wait-SavedControls([string]$Phase,[string]$Text,[string]$ButtonName='Sa
     Wait-Step $Phase {(Has-Text $Text) -and (Has-ButtonState $ButtonName $true)}
 }
 function Open-Settings {
+    param([switch]$AllowCancel)
     if($null -eq (Button 'Close settings')) {
         Wait-ButtonReady 'Settings';Click-Control 'Settings'
         Wait-ButtonReady 'AI providers';Click-Control 'AI providers'
     }
-    Wait-ButtonReady 'Save profile'
+    if($AllowCancel) {
+        Wait-Step 'Cleanup Settings ready for Save or Cancel' {(Has-ButtonState 'Save profile' $true) -or (Has-ButtonState 'Cancel setup test' $true)}
+    } else {Wait-ButtonReady 'Save profile'}
     $receipt.checks.navigationControlsReady=$true
+}
+function Cleanup-Profile {
+    if(Has-ButtonState 'Cancel setup test' $true) {
+        Click-Control 'Cancel setup test'
+        Wait-Step 'Cleanup request cancelled' {(Has-ButtonState 'Cancel setup test' $false) -and (Has-ButtonState 'Save profile' $true)}
+    }
+    # Only the fresh, controller-owned synthetic root uses this helper. Reload
+    # discards failed fixture field edits so the owned profile can be removed.
+    Wait-ButtonReady 'Reload saved profiles';Click-Control 'Reload saved profiles'
+    Wait-Step 'Cleanup saved profile reloaded and clean' {
+        (Has-ButtonState 'Save profile' $true) -and (Has-ButtonState 'Cancel setup test' $false) -and
+        ((Has-ButtonState 'Remove profile' $true) -or ((Has-Text 'Credential: not configured') -and -not (Has-Text 'Unsaved changes; save before credential or discovery actions.')))
+    }
+    if(Has-ButtonState 'Remove profile' $true) {Click-Control 'Remove profile';Wait-SavedControls 'Owned profile removed and controls enabled' 'Credential: not configured'}
+    Assert-Native (Has-Text 'Credential: not configured') 'Owned profile cleanup incomplete'
+    $receipt.checks.profileRemoved=$true;$receipt.checks.noConfiguredCredential=$true;Capture-Stage 'removed'
 }
 function Failure-CaptureAllowed([bool]$ForegroundOwned,[int]$OwnedWindowCount,[bool]$MainWindowObserved,[bool]$PasswordPresent) {
     return ($ForegroundOwned -and $OwnedWindowCount -eq 1 -and $MainWindowObserved -and -not $PasswordPresent)
@@ -296,21 +359,24 @@ function Secure-Entry {
     Wait-ButtonReady ('Enter credential'+[char]0x2026);Click-Control ('Enter credential'+[char]0x2026)
     Wait-Step 'Native credential dialog lookup' {$script:entryHandle=Entry-Handle;$script:entryHandle -ne [IntPtr]::Zero}
     $dialogHandle=$script:entryHandle;Select-Entry $dialogHandle
-    $dialog=$script:window
-    $edits=$dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty,[System.Windows.Automation.ControlType]::Edit))
-    Assert-Native ($edits.Count -eq 1 -and $edits[0].Current.IsPassword -and $edits[0].Current.ProcessId -eq $ProcessId) 'One owned masked native entry field required'
+    $receipt.pendingNativeAction='Observe owned native child identities'
+    $edit=Entry-Control $dialogHandle 100
+    [void](Entry-Control $dialogHandle 1);[void](Entry-Control $dialogHandle 2)
     # Only write the known public fixture value. Never request its ValuePattern,
     # text, native window text, OS credential, or renderer key data.
-    Click-MaskedField $edits[0]
-    Wait-Step 'Native masked field keyboard focus' {Masked-FocusReady $edits[0]}
+    Click-MaskedField $edit
+    Wait-Step 'Native masked field keyboard focus' {Masked-FocusReady $edit}
     Assert-EntryOwner $dialogHandle
+    Assert-Native ((Entry-Control $dialogHandle 100) -eq $edit) 'Masked field handle changed before typing'
+    Assert-Native (Masked-FocusReady $edit) 'Masked field focus changed before typing'
     Assert-Native (Entry-Foreground $dialogHandle) 'Native entry lost foreground before public fixture typing'
     $receipt.dialog.maskedFieldFocusConfirmed=$true
+    $receipt.dialog.focusedFieldHandle=$edit.ToInt64()
     $receipt.pendingNativeAction='Type public fixture into verified native masked field'
     Send-PublicFixture
     Assert-EntryOwner $dialogHandle
     Assert-Native (Entry-Foreground $dialogHandle) 'Native entry lost foreground before Remember'
-    Click-Control 'Remember'
+    Click-EntryControl $dialogHandle 1
     Wait-Step 'Native credential dialog saved and dismissed' {-not (Entry-Exists $dialogHandle)}
     $receipt.checks.nativeCredentialEntry=$true;$receipt.checks.osKeyboardInput=$true
     Select-MainWindow
@@ -348,7 +414,8 @@ try {
         Select-MainWindow -ObserveOnly
         if($Stage -in @('cleanup','cleanup-after-failure','close','close-reopen','close-after-failure')) {Cancel-OwnedEntry}
         Select-MainWindow
-        if($Stage -notin @('observe-initial','close','close-reopen','close-after-failure')) {Open-Settings}
+        if($Stage -in @('cleanup','cleanup-after-failure')) {Open-Settings -AllowCancel}
+        elseif($Stage -notin @('observe-initial','close','close-reopen','close-after-failure')) {Open-Settings}
         switch($Stage) {
             'observe-initial' {
                 Wait-ButtonReady 'Settings'
@@ -401,10 +468,7 @@ try {
                 Preview
             }
             {$_ -in @('cleanup','cleanup-after-failure')} {
-                if(Has-ButtonState 'Cancel setup test' $true) {Click-Control 'Cancel setup test';Wait-Step 'Cleanup request cancelled' {(Has-ButtonState 'Cancel setup test' $false) -and (Has-ButtonState 'Save profile' $true)}}
-                if(Has-ButtonState 'Remove profile' $true) {Click-Control 'Remove profile';Wait-SavedControls 'Owned profile removed and controls enabled' 'Credential: not configured'}
-                Assert-Native (Has-Text 'Credential: not configured') 'Owned profile cleanup incomplete'
-                $receipt.checks.profileRemoved=$true;$receipt.checks.noConfiguredCredential=$true;Capture-Stage 'removed'
+                Cleanup-Profile
             }
             {$_ -in @('close','close-reopen','close-after-failure')} {
                 if($null -ne (Button 'Close settings')) {Click-Control 'Close settings'}

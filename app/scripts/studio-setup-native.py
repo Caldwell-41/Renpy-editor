@@ -191,6 +191,19 @@ def validate_stage(receipt, stage, pid, directory):
         assert type(dialog.get('handle')) is int and dialog['handle'] > 0
         assert type(dialog.get('owner')) is int and dialog['owner'] > 0
         assert all(dialog.get(k) is True for k in ('owned', 'foregroundConfirmed', 'maskedFieldFocusConfirmed'))
+        children = dialog.get('children', [])
+        assert len(children) == 3 and sorted(c.get('id') for c in children) == [1, 2, 100], 'Exact native children missing'
+        for child in children:
+            assert child.get('parent') == dialog['handle'] and child.get('processId') == pid and child.get('count') == 1
+            assert type(child.get('handle')) is int and child['handle'] > 0
+            assert all(child.get(k) is True for k in ('matched', 'visible', 'enabled'))
+            assert type(child.get('style')) is int and child['style'] & 0x40000000
+            if child['id'] == 100:
+                assert child.get('kind') == 'Edit' and child.get('password') is True and child['style'] & 0x20 and not child['style'] & 0x800
+                assert dialog.get('focusedFieldHandle') == child['handle']
+            else:
+                assert child.get('kind') == 'Button' and child['style'] & 15 <= 1
+        assert dialog.get('clickedChildIds') == [100, 1], 'Native physical child clicks missing'
     if stage in ('seed', 'invalidate', 'reopen'):
         values = {c['name']: c['value'] for c in receipt.get('controls', [])}
         expected_sampling = ('0.8', '0.9') if stage == 'seed' else ('0.7', '0.85')
@@ -210,7 +223,7 @@ def validate_terminal(value):
     assert value.get('passed') is True and value.get('candidate') == CANDIDATE and value.get('tree') == TREE
     assert value.get('executableSHA256') == EXE_SHA and value.get('artifact') == ARTIFACT
     assert value.get('materialInputCount') == 269 and value.get('materialInputDigest') == INPUT_DIGEST
-    assert value.get('launchOrdinals') == [7, 8] and value.get('packageAttempts') == 0 and value.get('appLaunches') == 2
+    assert value.get('launchOrdinals') == [8, 9] and value.get('packageAttempts') == 0 and value.get('appLaunches') == 2
     assert value.get('completedStages') == STAGES and value.get('normalExits') == [0, 0]
     events = value.get('requests', [])
     assert len(events) == 3 and [e.get('sequence') for e in events] == [1, 2, 3]
@@ -298,7 +311,7 @@ def sources(root):
 def run(args):
     assert os.name == 'nt', 'Actual Windows required; Mac runs validator tests only'
     output, root, product, executable = args.output, args.root, args.product_repo, args.executable
-    assert args.first_launch_ordinal == 7
+    assert args.first_launch_ordinal == 8
     assert re.fullmatch(r'[0-9a-f]{40}', args.harness_ref), 'Exact external harness ref required'
     assert not output.exists() and not root.exists() and not root.is_symlink()
     assert root.parent.resolve() == Path(tempfile.gettempdir()).resolve() and root.name.startswith('loomlight-rewrite-live-')
@@ -361,7 +374,7 @@ def run(args):
         result = subprocess.run(['powershell.exe', '-NoProfile', '-File', ps, '-Stage', 'preflight', '-Output', str(preflight), '-ProductRepo', str(product), '-Executable', str(executable)], capture_output=True, text=True, timeout=90)
         (preflight / 'harness.log').write_text(result.stdout + result.stderr, encoding='utf-8')
         assert result.returncode == 0 and json.loads((preflight / 'receipt.json').read_text(encoding='utf-8-sig'))['passed'] is True
-        launch(7, False)
+        launch(8, False)
         observed = stage('observe-initial', False)
         assert observed['passed'] is True and observed['checks']['sourceBaselineReady'] is True and observed['processId'] == child.pid
         baseline = sources(root)
@@ -378,7 +391,7 @@ def run(args):
         terminal['requestPreviewSHA256'] = [seed['preview']['rawSHA256'], changed['preview']['rawSHA256'], changed['preview']['rawSHA256']]
         stage('close'); exit_owned()
         count = len(fixture.events)
-        launch(8, True); stage('reopen')
+        launch(9, True); stage('reopen')
         terminal['reopenNoHTTP'] = len(fixture.events) == count == 3
         terminal['reopenProfileUnchanged'] = read_profiles(root) == final
         terminal['sourceUnchanged'] = sources(root) == baseline
@@ -454,7 +467,7 @@ def main():
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--input-manifest', type=Path, required=True)
     parser.add_argument('--harness-ref', required=True)
-    parser.add_argument('--first-launch-ordinal', type=int, choices=[7], required=True)
+    parser.add_argument('--first-launch-ordinal', type=int, choices=[8], required=True)
     run(parser.parse_args())
 
 if __name__ == '__main__':

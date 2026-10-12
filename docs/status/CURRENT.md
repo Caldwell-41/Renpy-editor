@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-13. **CI8 failed native credential child-control observation; review complete.** Owner integrated live/SDK workflow passed on
+**Updated:** 2026-10-13. **CI9 prepared after native child-control repair and full-flow review.** Owner integrated live/SDK workflow passed on
 frozen929. CI8 passed fields/saved sampling and owned-dialog discovery/foreground, then
 failed the masked-field guard. No product defect is established.
 Final human acceptance is unclaimed.
@@ -33,8 +33,14 @@ Counts: pairedCI8 dispatched each target, packages1/3 each, Windowsstarts7,
 ownerMacstarts5/6/live8/10/Rewrite3/4/discovery0. Further needed CI/Windows starts
 are user-authorized; workingbatch remainingCI9–10/up toWindows12. Next discriminator:
 actual owned masked/button child controls and safe focus/metadata, no field values.
-This turn review-only; no new execution. No external operation pending.
+Supported child-handle and active/dirty cleanup repairs are prepared and independently
+reviewed. CI9/start8–9 is next; no external operation pending.
 Generic providers/Phase3,
 route context and AI ending/connection changes remain excluded or user-deferred.
 [Owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#independent-sol-ci6-audit-and-model-id-harness-repair--2026-10-13)
 retains exact failures and limits; [HANDOVER](HANDOVER.md) owns continuation.
+
+Native children now use frozen Win32 IDs/classes/styles/parent/PID and GUI-thread
+focus, with safe diagnostics and physical input. Real child fixtures include Cancel
+dismissal; active/dirty cleanup and delayed reload are covered. Local18+7 checks,
+syntax/actionlint/privacy pass; Windows18+11 and actual stages remain to be proved.

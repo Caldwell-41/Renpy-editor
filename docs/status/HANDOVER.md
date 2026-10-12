@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — CI8 reviewed; native child-control observation unresolved
+## Studio-only Phase 2 closeout — CI9 prepared; child-control repair independently reviewed
 
 The requested Sol chat remains sole writer/executor. User directs audit of the whole
 native sequence, fix and as many CI runs as needed; expressly confirms needed Windows
@@ -8,15 +8,15 @@ editor starts. This supersedes prior pairedCI7/Windowseditor7 ceilings. Other pa
 Mac/live/provider/signing/scope limits remain. Work in finite internal batchCI8–10 /
 Windowsstarts7–12, reassess after two unsuccessful corrections of one hypothesis.
 **CI8 terminal:**run38314054057/attempt1/exactb42b1b7/treee455a8d,
-completedfailure2026-10-12T22:01:53Z. No external operation pending. User requested
-review/explanation only this turn; no fixes or new execution. Prior needed fixes,
-CI and Windows starts remain authorized within the working batch.
+completedfailure2026-10-12T22:01:53Z. No external operation pending. User now explicitly requests the fix, entire affected-workflow audit including
+unreached steps, platform/production assumptions, cleanup/diagnostics, meaningful
+checks and independent review before CI. Necessary CI/Windows starts remain authorized.
 
 **Branch/state:** codex/provider-qualification. Fresh local/origin
 8b9a5e5b08e099c1eb6adb21a49646d834381761 and main
 5f448ca683a905f4ea77d4580bbc89fda69f2b93 matched on entry; clean tree then.
 Published alignment3d69b96/CI7 and docs0ac9fa1 retained; whole-sequence
-external repairb42b1b7 published; current successor records exactCI8 review only. Preserve unrelated
+external repairb42b1b7 published; current child/control and cleanup repairs are local pending publication. Preserve unrelated
 work, no reset. Normal publication is authorized; no merge/release.
 
 **Exact product:**929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
@@ -108,11 +108,20 @@ outer dialog tested, child controls mocked. Every historical failure remains fai
 **Limits/next:** paired8 dispatched; Windowsstarts7, package1/3; Macpackage1/3,
 ownerstarts5/6; live8/10/Rewrite3/4/extra1of2used/discovery0. Needed further CI/Windows
 starts explicitly authorized; workingbatch remainingCI9–10/Windowsup to12, totals
-do not reset. Next discriminator needs safe child count/type/PID/password metadata,
-exact owned native child identities/focus and real child-control fixtures/cleanup,
-without reading field values or weakening guards. Reassess after two unsuccessful
-same-hypothesis corrections and before broadening working batch. Latest request is
-review/explanation; no new run occurred in this turn. Preserve product929/CI1 package.
+do not reset. Prepared child observation uses Win32 GetDlgItem/EnumChildWindows IDs100/1/2,
+unique direct parent/PID/class/WS_CHILD/style/visibility/enabled-state; ES_PASSWORD
+and nonreadonly Edit; pushbuttons only. Actual GetGUIThreadInfo focused handle and
+owned foreground before physical clicks/key. Safe metadata before rejection, no values.
+Real Windows fixture creates children and checks physical focus/Cancel destruction,
+rejecting wrong identity/class/password/readonly/hidden/disabled/duplicate/viewport/
+foreground. Lower orchestration fixture covers active setup/dirty-field cleanup and
+delayed reload. Open cleanup with enabled Cancel even when Save disabled; after cancel,
+reload only controlled fixture and wait clean Remove readiness, then remove profile.
+Entire unreached preview/setup/invalidate/cancel/reopen/capture/source/root sequence
+reviewed against production/API contracts; no supported product fix established. Reassess after two unsuccessful
+same-hypothesis corrections and before broadening working batch. CI9/start8–9 aligns across all gates; old7–8 refused. Independent final review
+passes; local18+7/syntax/actionlint/whitespace/privacy pass. Windows18+11/native
+sequence remains required, no inferred pass. Preserve product929/CI1 package.
 
 On future supported repair, focused checks/independent review precede normal
 publication/one exact CI dispatch, then manual same-chat wait. No polling/watcher/

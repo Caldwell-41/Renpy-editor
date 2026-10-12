@@ -1789,3 +1789,13 @@ must be observable. Required capture roles and normal process exits remain expli
 Record the initialized source baseline before Settings operations. Windows18+11
 and Mac18+7 fixtures reject ordinary failed ownership/readiness/evidence states;
 these fixtures do not replace actual native qualification.
+
+Native credential children use only the frozen masked Edit100 and pushbutton1/2 IDs,
+with unique direct parent/PID/class/style/visibility/enabled-state checks. GUI-thread
+focus and exact owned foreground precede physical input; diagnostics never read
+password text. The Windows fixture exercises actual children, physical focus/click
+and Cancel destruction, plus rejecting identity/password/style/viewport cases.
+Failure cleanup permits request Cancel while Save is disabled, then reloads only the
+controlled fixture's saved profile to discard dirty fields before explicit removal.
+Wait for clean removal readiness, not only pre-existing Save state. Preserve failed
+cleanup/forced exits/root references as failures; ordinary user profiles are untouched.

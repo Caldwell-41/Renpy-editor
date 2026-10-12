@@ -8171,3 +8171,74 @@ workingbatch CI9–10; necessary fixes/Windowsstarts remain authorized, reassess
 before broadening batch or after two unsuccessful same-hypothesis corrections.
 No external operation pending, no watcher/polling/auto-wake. Technical/human acceptance
 unclaimed; frozen929/package/ordinary profile/key preserved.
+
+#### CI8 child-control fix and complete affected-flow audit — 2026-10-13
+
+User explicitly selects the fix and requires an entire affected-workflow audit,
+including unreached steps, production/platform assumptions, failure cleanup,
+diagnostics, meaningful checks, independent review then CI. Scope remains native
+Studio closeout; previous necessaryCI/Windowsstarts authority retained. Fresh local
+334b694 preserves frozen929/package/ordinary profile and all failed evidence.
+
+**Proven:** CI8 owned outer dialog/foreground passed; masked UIA child guard failed,
+Remember/Cancel absent from observed controls. **Unknown:** which compound guard
+predicate failed, actual UIA provider/tree cause. **Correction:** resolve native
+children by documented Win32 IDs/parent/class/style/PID/visibility and actual thread
+focus, without relying on their UIA exposure or weakening password/ownership checks.
+No supported product defect or source/signing/storage change established.
+
+Frozen ai_native/windows.rs builds masked Edit FIELD100 with ES_PASSWORD,
+RememberIDOK1/defaultpushbutton, CancelIDCANCEL2/pushbutton, all direct children.
+ai_settings.rs obtains the main HWND and executes enter_owned on its main thread.
+Microsoft GetDlgItem, EnumChildWindows, GetParent, GetDlgCtrlID, GetWindowLongPtrW,
+Edit styles and GetGUIThreadInfo/GUITHREADINFO contracts checked. x64 struct layout/
+PInvoke explicitW names/size/GUI thread ID are correct by inspection; real Windows
+fixtures invoke them. No GetDlgItemText/WM_GETTEXT/ValuePattern/TextPattern/password
+value read; only safe child handle/ID/count/class/style/PID/parent/visible/enabled/
+password-flag metadata. Known outer dialog title is the only native window text read.
+
+| Sequence | Audited contract and current proof/disposition |
+| --- | --- |
+| Frozen inputs/package/preflight | Exact269/sevenharness/PSCRLF/CI1exe admission; fixtures before editor; owned desktop/window/viewport checks. CI8 bindings pass. |
+| Initial baseline/Settings/fields/save | Observe-initial before any seed source baseline; existing UIA normal fields qualifiedCI8. Saved text plus enabled controls prevent async race; no save HTTP. |
+| Native entry | Unique outer HWND/owner/PID/title/class qualifiedCI8. New Child resolves IDs100/1/2, unique immediate child, exact parent/PID/class/WS_CHILD/visible/enabled, masked/nonreadonly Edit and pushbutton styles; safe diagnostics before rejection. Physical click/viewport/foreground and GetGUIThreadInfo exact active dialog/focusedfield before known public typing. Actual new child proof pendingCI9. |
+| Native Remember/Cancel | Physical input to verified ID1/2; no WM_COMMAND injection. Dialog dismissal must be observed; configured status plus enabled main controls. Owned Cancel also precedes failure cleanup/close. Actual new cancellation proof pendingCI9. |
+| Preview | Main UIA only, password refusal, bounded poll for complete exact JSON; strict duplicate/body/digest validator and required synthetic-preview capture. Unreached real path still pending. |
+| Setup/readiness/invalidate | Only public exact synthetic body and accepted literal loopback; success states plus enabled controls, changed saved sampling/digest readiness refusal. No public/paid Studio/model discovery. Actual missing native proof remains. |
+| Request cancel/final ready | Native explicit click, exact stalled request2 receipt, cancel state/controls, profile bytes unchanged, third exact body and clientClosed final validator after fixture joins. Existing fixture admission is sound; actual native proof pending. |
+| Close/reopen | Owned main close keyboard proof plus actual child exit0; new start reserved before process creation; exact saved profile/credential/readiness/body/source and zero reopen HTTP. No implied pass from close input alone. |
+| Cleanup | New cleanup readiness admits Cancel while testing (Save is disabled), cancels pending work, reloads only the owned disposable fixture to discard dirty fields, waits clean Remove readiness or clean empty state, then explicit Remove profile. Core references/cleanup empty and actual child exit before root deletion; fail-closed retention. |
+| Captures/diagnostics/failures | Exact per-stage role/hash/frame/nonblank gate; owned foreground main/no secure modal/password before pixels. Safe named steps/child metadata; every failed cleanup/close UI outcome, normal/forced exit, listener and every reservation retained. No secret snapshot. |
+
+Audit found two additional deterministic cleanup blockers, repaired together:
+Open-Settings previously required Save even during active testing, preventing Cancel;
+dirty field failure disabled Remove profile. New AllowCancel entry and owned-fixture
+reload solve those paths. Independent preparation review found post-reload Save/Cancel
+state could already hold before draw; now clean Remove readiness or clean empty-state
+is also required. Delayed fixture demonstrates that drawn text/old Save state cannot
+skip cleanup. Preserve caught preparation failures/fixture limits as evidence.
+
+Real Windows fixture now creates/disposes actual maskedEdit100 and buttons1/2,
+validates actual helper APIs and rejects wrong PID/parent/class/style/password,
+readonly/disabled/hidden/duplicate ID and out-of-dialog viewport. It uses physical
+OS clicks and actual GUI-thread focus (wrong focus/foreground rejected), then actual
+Cancel click observed through a controlled fixture window callback/destruction.
+No editor/provider/credential-store operation in that fixture. Lower mocked helper
+fixtures still reject missing dialog/owner/focus/foreground and now prove active+dirty
+cleanup, delayed reload, complete preview and cleanup entry during testing. Gate
+requires exact child proof/focus/click receipts. Mocked helpers remain not native proof.
+
+CI9/start8–9 aligned across preparation/parser/controller/terminal/sealing/fixtures,
+old7–8 and extra starts rejected. Win18+11/Mac18+7 gates unchanged; no broad product
+matrix/build/live call. Local18+7 portable fixtures, four-file Python syntax,
+actionlint/whitespace/privacy5files pass; actual Windows11/native sequence awaitCI9.
+Independent final re-review required before publication. Working batch pairedCI9–10
+remaining, actualWindowsstarts7/up to12; package1/3 each/Macstarts5/6/live8/10/
+Rewrite3/4/discovery0 unchanged. No reset, provider expansion, merge/release or Phase3.
+
+Final independent whole-flow re-review passes: delayed clean reload, guarded WndProc,
+actual child/focus/physical Cancel and rejecting viewport/foreground fixtures coherent;
+CI9/start8–9 and Win18+11/Mac18+7 aligned. No further supported blocker by inspection.
+Exact hosted focus/input/preview/unreached setup/reopen/cleanup remain hypotheses and
+required proof. No production/native acceptance inferred from fixtures. Final syntax,
+actionlint/whitespace and changed-source/document privacy9files pass before commit.
