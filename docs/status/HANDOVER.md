@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — awaiting first paired CI audit
+## Studio-only Phase 2 closeout — focused Windows Settings and owner live proof remain
 
 The user expressly authorizes CI publication/dispatch and native/live verification.
 Continue this same outcome; no merge/release, signing changes, generic provider,
@@ -20,15 +20,27 @@ CI4five-action and CI7selectable evidence remain distinct, not a final combined 
 The [owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
 retains the complete requirement map, source proof, exact hashes and all failures.
 
-**CI:** [run38224940778](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38224940778),
-fresh attempt1, exact929af6f, first paired dispatch. Confirmed in_progress; exclusive
-admission passed, both required selectable Windows/macOS jobs in_progress. Older
-nonapplicable jobs are intentionally skipped and do not stand in for required proof.
-No retries or status polling. Ignored `phase2-closeout-01/ci-01-dispatch.json` and
-`ci-01-confirmed.json` own dispatch/head/status receipts. Follow WORKFLOW's manual
-same-thread wait: on user resume, audit this exact run/attempt, both manifests,
-269input hashes, actual package/start counts, required cases, native captures and
-cleanup; only then continue the remaining authorized native/live work.
+**CI1 audited:** [run38224940778](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38224940778),
+fresh attempt1/exact929. Both required jobs terminal success. Independent audit
+matches product tree/269input paths/hashes, outer/child manifests, nonzero focused
+cases, Windows native PNGs, integrated SDK5commands/12assertions, selectable SDK
+10commands/two cases, actual package/start counts and cleanup. Windows25checks,
+82outer/78child manifest files; Mac20checks,47outer/43child. Only the declared
+rewrite-windows-native.ps1 CRLF transform occurs on both checkout targets; retain
+initial auditor Windows-only transform assumption as failed, corrected without a waiver.
+Windows executable0231a7cd751cd2c52c63c5936db532a2cc156cb020ba46f990a78142c0419b76.
+Ignored independent-ci-01-audit.json and ci-01-artifacts own the detailed receipts.
+
+**Remaining Windows gap:** CI1 packaged captures exercise selectable proposals;
+new Temperature/Top-p/Test setup/cancel/readiness/persistence controls still need
+native Windows input proof. External studio-setup-native.py/studio-setup-windows.ps1
+and receipt tests are being prepared. Focused paired CI2 must reuse frozen929/CI1's
+exact package, separate product and harness refs/inputs, reserve Windows starts3–4,
+and run Mac fixture/identity gates with zero builds/starts. No CI2 dispatched yet;
+local17+7rejecting gates, workflow syntax, seven-file source privacy and independent
+re-review pass. Publish the reviewed harness then dispatch within allowance. Existing production-scaffold exclusive
+selector calls the focused reusable workflow; subselector alone must fail closed.
+CI never receives the Studio key. After dispatch, follow manual same-thread wait.
 
 **Local proof:** renderer138/138, sampling2/2, compatibility3/3, nativeworker8/8,
 readiness-discovery1/1, transport15/15, exact-context integers1/1, rejecting gates14/14
@@ -58,26 +70,30 @@ Do not create a fresh temporary credential profile or delete the user's key as t
 cleanup. Only app-reported missing/unreadable credentials justify fresh entry.
 The native receipt is `phase2-closeout-01/native-saved-profile-01.json`.
 
-**Cumulative allowance:** Mac1/3packages, **2/6starts conservatively charged** (one
-confirmed launch plus possible implicit display-name CUA lookup that timed out;
-exact-path binding reused the owned process). Windows CI reserves package1 and
-starts1–2; actual consumption awaits terminal artifact audit. PairedCI1/3each target.
-Live setup0, each five-action0/2, total0/10; discovery0/0. Count any Test setup toward
-ten total separately; plan one setup and remaining action slots with no automatic
-retry. Preserve all failed/implicit/reopen/local/CI attempts. Prior outcome totals do
-not roll over. No active owned local app/listener/root/SDK install/watcher remains;
-user's ordinary saved credential deliberately remains.
+**Cumulative allowance:** Mac1/3packages, **3/6starts conservatively charged**
+(first ordinary process19193, possible implicit CUA lookup, reopened process21809).
+Windows actual1/3packages and2/6starts; pairedCI1/3each target. Proposed focused CI2
+reserves Windows starts3–4, no builds; hostedMac no starts/builds. Live setup0,
+each five-action0/2, total0/10; discovery0/0. Test setup counts toward ten separately.
+Keep earlier failed attempts; no automatic retries. Ordinary saved credential is
+preserved and never deleted as temporary cleanup.
 
-**After CI audit:** reopen exact signed package (next conservatively charged Mac
-start3), confirm saved credential without entry, create/open only an owned synthetic
-project, inspect exact setup/action destinations/context/bodies, then run live setup
-and five actions/selectable subset within the remaining caps. Cover new Settings,
-prompt edits/restores/limits, separate reference approvals and later exact inclusions,
-invalid/stale/cancel zero writes, valid subset once, source/custom preservation,
-Undo/Redo, project/process reopen, explicit SDK validate/run and metadata-free copy.
-Reuse controlled unchanged proof; live sends use only the owner machine/selected
-Studio configuration. Independently review resulting execution evidence; keep human
-acceptance pending.
+**Owner UI blocker:** the Mac is locked; CUA inventory confirms native access
+unavailable. An unlock question is pending. Process21809 is already running the exact
+signed Mac package; do not launch again to bind it. Once unlocked, bind exact bundle
+path through CUA, confirm saved credential/configuration without reentry, inspect
+exact setup body, then charge one setup before sending. No Refresh models/discovery.
+The owned synthetic project phase2-closeout-01/live-project is prepared from qualified
+controller source/metadata; no project credentials copied. Baseline receipt has seven
+source files/35metadata files and full/source/metadata digests; seeded fake-profile
+roots were cleaned. These source driver processes are not editor starts.
+
+On exact frozen product, finish owner five actions + selectable dependency-valid
+subset, separately approve generated references and include their exact revisions
+later, prompts/restores/limits, zero-write refusals, single acceptance, source/custom
+preservation, history/project/process reopen, explicit SDK validate/run and metadata-free
+copy. Reuse existing controlled negative proof rather than resending unchanged cases.
+Review final execution evidence independently; human acceptance stays pending.
 
 The user requests a section18/docsUI refinement prompt after this closeout, then a
 separate guided test-client/feedback agent after refinement. Prepare those handoffs

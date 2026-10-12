@@ -1,0 +1,96 @@
+name: Frozen Studio native Settings qualification
+on:
+  workflow_call:
+    inputs:
+      first_launch_ordinal:
+        type: string
+        required: true
+      dispatch_ordinal:
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    name: Studio Settings — ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: Windows x64 native
+            runner: windows-2025
+          - target: macOS ARM64 fixture gates
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    env:
+      PYTHONUTF8: '1'
+      FIRST_LAUNCH_ORDINAL: ${{ inputs.first_launch_ordinal }}
+      DISPATCH_ORDINAL: ${{ inputs.dispatch_ordinal }}
+    steps:
+      - name: Check out the exact qualified product, without building
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 929af6f23f1fe79af2665a4cc71c276a64ffd80d
+          path: product
+      - name: Check out external verification separately
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: harness
+      - name: Acquire only audited CI1 evidence and verify exact inputs and package
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python harness/app/scripts/studio-settings-evidence.py prepare --product-repo product --harness-repo harness --output "$RUNNER_TEMP/studio-settings-${{ runner.os }}"
+      - name: Run only new fixture and rejecting receipt tests
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, re, subprocess
+          output=pathlib.Path(os.environ['RUNNER_TEMP'])/'studio-settings-${{ runner.os }}'
+          checks=[]
+          for name,minimum in [('test_studio_settings_evidence.py',17),('test_studio_setup_native.py',7)]:
+              r=subprocess.run(['python','harness/app/scripts/'+name],capture_output=True,text=True,timeout=120)
+              text=r.stdout+r.stderr
+              (output/(name+'.log')).write_text(text,encoding='utf-8')
+              counts=re.findall(r'Ran (\d+) tests?',text)
+              passed=r.returncode==0 and len(counts)==1 and int(counts[0])>=minimum and 'OK' in text and 'skipped' not in text.lower()
+              checks.append({'name':name,'passed':passed,'exitCode':r.returncode,'tests':int(counts[0]) if counts else 0})
+          passed=all(c['passed'] for c in checks)
+          (output/'validator-result.json').write_text(json.dumps({'passed':passed,'checks':checks},indent=2)+'\n')
+          assert passed, 'New fixture/receipt gate failed'
+          PY
+      - name: Exercise only missing Settings controls on reused Windows executable
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          python harness/app/scripts/studio-setup-native.py --product-repo product --executable "$RUNNER_TEMP/studio-settings-Windows/reuse/qualification/package/loomlight.exe" --output "$RUNNER_TEMP/studio-settings-Windows/native" --root "$RUNNER_TEMP/loomlight-rewrite-live-settings-$GITHUB_RUN_ID" --first-launch-ordinal "$FIRST_LAUNCH_ORDINAL" --input-manifest "$RUNNER_TEMP/studio-settings-Windows/identity.json" --harness-ref "$GITHUB_SHA"
+      - name: Scan only new native evidence using the unchanged product privacy gate
+        if: ${{ always() && runner.os == 'Windows' }}
+        shell: bash
+        run: |
+          python - <<'PYSCAN'
+          import json, os, pathlib, re, subprocess
+          output=pathlib.Path(os.environ['RUNNER_TEMP'])/'studio-settings-Windows'
+          output.mkdir(parents=True,exist_ok=True)
+          r=subprocess.run(['node','product/app/scripts/scan-artifacts.mjs',str(output/'native')],capture_output=True,text=True,timeout=120)
+          (output/'native-privacy.log').write_text(r.stdout+r.stderr,encoding='utf-8')
+          counts=re.findall(r'Artifact privacy scan passed for (\d+) files',r.stdout)
+          passed=r.returncode==0 and len(counts)==1 and int(counts[0])>0
+          (output/'native-privacy.json').write_text(json.dumps({'passed':passed,'exitCode':r.returncode,'files':int(counts[0]) if counts else 0})+'\n')
+          assert passed, 'New native evidence privacy gate failed'
+          PYSCAN
+      - name: Seal positive or failed exact evidence
+        if: always()
+        shell: bash
+        run: python harness/app/scripts/studio-settings-evidence.py finish --output "$RUNNER_TEMP/studio-settings-${{ runner.os }}"
+      - name: Retain Settings proof and all failed attempts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: studio-settings-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/studio-settings-${{ runner.os }}/
+          if-no-files-found: error
+          retention-days: 7

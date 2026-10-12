@@ -1759,3 +1759,22 @@ Windows must establish existing PATH/Git OpenSSL capability in CI; missing capab
 fails rather than installs/skips. A focused context assertion retains exact integer
 defaults above JavaScript's safe range and both signed64 boundaries in the serialized
 payload, with runtime value explicitly unknown.
+
+The remaining native Windows Settings cell uses external `studio-setup-native.py`
+and `studio-setup-windows.ps1`, called by `studio-settings-native.yml` through the
+registered production workflow with both `selectable_proposals` and
+`studio_setup_only`. Subselector alone is refused; older jobs remain excluded.
+This verification checks out frozen929 separately from its harness ref, verifies
+CI1's pinned artifact ZIP/complete manifests and269product inputs, and reuses the
+exact audited executable. It performs no build, SDK acquisition or model discovery.
+Windows reserves cumulative starts3–4 before process creation; paired Mac checks
+only new fixture/receipt and artifact identity gates with zero packages/editor starts.
+The ordinary isolated UI receives a known public fixture key through its native
+masked dialog; a loopback fixture accepts only three exact synthetic Test setup POSTs
+(success, stalled cancellation, success). Capture native defaults/saved sampling,
+exact body, ready/invalidation/cancel, saved-key/readiness process reopen and owned
+profile/key/root/listener cleanup. Never use this isolated fixture for the owner's
+live profile: the user's ordinary saved Studio key must be preserved across sessions.
+Reject missing/failed native evidence, count failed starts, and seal failure artifacts.
+This focused proof closes only the new Settings gap; unchanged integrated CI1 proof
+is reused. Owner signed-Mac/native/live and final human acceptance remain separate.

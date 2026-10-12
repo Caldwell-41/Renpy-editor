@@ -7,6 +7,10 @@ on:
         description: Only approved Studio closeout/selectable paired proof; all older selectors false
         type: boolean
         default: false
+      studio_setup_only:
+        description: Only missing native Settings proof; reuse frozen closeout executable; requires selectable_proposals
+        type: boolean
+        default: false
       selectable_dispatch_ordinal:
         description: Studio closeout cumulative paired dispatch, 1 through 3
         type: string
@@ -73,7 +77,7 @@ concurrency:
 
 jobs:
   preflight:
-    if: ${{ !inputs.selectable_proposals && !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
+    if: ${{ !inputs.selectable_proposals && !inputs.studio_setup_only && !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
     name: Preflight
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -110,7 +114,7 @@ jobs:
         run: cargo fmt --check --all
 
   packaged-boundary:
-    if: ${{ !inputs.selectable_proposals && !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
+    if: ${{ !inputs.selectable_proposals && !inputs.studio_setup_only && !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
     name: ${{ matrix.name }}
     needs: preflight
     strategy:
@@ -493,7 +497,7 @@ jobs:
           retention-days: 7
 
   dialogue-rewrite-windows:
-    if: ${{ !inputs.selectable_proposals && (inputs.dialogue_rewrite_windows || inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) }}
+    if: ${{ !inputs.selectable_proposals && !inputs.studio_setup_only && (inputs.dialogue_rewrite_windows || inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) }}
     name: Focused Assist — Windows x64
     runs-on: windows-2025
     timeout-minutes: 60
@@ -681,7 +685,7 @@ jobs:
 
 
   continue-scene-macos:
-    if: ${{ !inputs.selectable_proposals && (inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) && !inputs.dialogue_rewrite_windows }}
+    if: ${{ !inputs.selectable_proposals && !inputs.studio_setup_only && (inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) && !inputs.dialogue_rewrite_windows }}
     name: Focused Scene automated — macOS ARM64
     runs-on: macos-26
     timeout-minutes: 30
@@ -735,11 +739,12 @@ jobs:
           retention-days: 7
 
   selectable-admission:
-    if: ${{ inputs.selectable_proposals }}
+    if: ${{ inputs.selectable_proposals || inputs.studio_setup_only }}
     name: Selectable outcome exclusive admission
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
+      PRIMARY_SELECTABLE: ${{ inputs.selectable_proposals }}
       LEGACY_REWRITE: ${{ inputs.dialogue_rewrite_windows }}
       CONTINUE_SCENE: ${{ inputs.continue_scene }}
       DRAFT_SCENE: ${{ inputs.draft_scene }}
@@ -751,13 +756,24 @@ jobs:
       REUSE_FOCUSED: ${{ inputs.rewrite_focused_reuse_run_id }}
     steps:
       - name: Refuse mixed selectors or prior-run reuse
-        run: python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert all(os.environ[k]=='false' for k in ['LEGACY_REWRITE','CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','GENERATE_LORE','PHASE2_STUDIO','UPLOAD_PACKAGES']); assert not os.environ['REUSE_PACKAGE'] and not os.environ['REUSE_FOCUSED']"
+        run: python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['PRIMARY_SELECTABLE']=='true'; assert all(os.environ[k]=='false' for k in ['LEGACY_REWRITE','CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','GENERATE_LORE','PHASE2_STUDIO','UPLOAD_PACKAGES']); assert not os.environ['REUSE_PACKAGE'] and not os.environ['REUSE_FOCUSED']"
 
   selectable-proposals:
-    if: ${{ inputs.selectable_proposals }}
+    if: ${{ inputs.selectable_proposals && !inputs.studio_setup_only }}
     needs: selectable-admission
     uses: ./.github/workflows/selectable-proposals.yml
     with:
       windows_build_ordinal: ${{ inputs.rewrite_build_ordinal }}
       windows_first_launch_ordinal: ${{ inputs.rewrite_first_launch_ordinal }}
+      dispatch_ordinal: ${{ inputs.selectable_dispatch_ordinal }}
+
+  studio-settings-native:
+    if: ${{ inputs.selectable_proposals && inputs.studio_setup_only }}
+    needs: selectable-admission
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/studio-settings-native.yml
+    with:
+      first_launch_ordinal: ${{ inputs.rewrite_first_launch_ordinal }}
       dispatch_ordinal: ${{ inputs.selectable_dispatch_ordinal }}

@@ -7201,3 +7201,78 @@ count the explicit setup probe toward ten total, do no new model discovery. Pres
 ordinary key/profile; only app-reported unreadability/missing data warrants re-entry.
 Final execution review and explicit human sign-off remain pending. Future UI refinement
 and guided feedback prompts remain queued; no following outcome started.
+
+
+#### Closeout CI1 independent terminal audit and remaining native gap — 2026-10-12
+
+Fresh refs reconcile local/origin1d03e45be39c0ac73ce3618f5aeb00c7876b2dce,
+origin/main5f448ca683a905f4ea77d4580bbc89fda69f2b93; no reset/unrelated work loss.
+Frozen product929/tree9f034ca/269input digest3c244dc remains unchanged.
+Paired run38224940778 attempt1 succeeds on both required targets; independent audit
+validates both manifests/identities/positive cases, actual Windows package1/starts1–2,
+MacCI0packages/starts, combined SDK5commands/12assertions and selectable SDK10commands/
+two cases. Windows executable0231a7cd751cd2c52c63c5936db532a2cc156cb020ba46f990a78142c0419b76.
+Windows artifact11736026789 ZIPe6fbc03a1ab74749724c038614ccccaf044873187d28e4a75200e718e2ff4345;
+Macartifact11735996238 ZIPfbcc886ed660e0a3b5f9f58610185ef5d5143a69c8d07606633d10fd04c7ee80.
+Windows25checks/82outer78child files; Mac20checks/47outer43child files; cleanup passes.
+Nine native PNGs independently inspected. Only declared PowerShell CRLF input
+normalization occurs on both targets. Retain auditor's initial Windows-only
+normalization assumption as failed; evidence corrected, protections unchanged.
+
+Matrix advancement: applicable automated 2A/2B/2C and Section11 new-controls/TLS/
+readiness/integer cells now have exact both-target controlled CI proof; combined
+five-action-plus-selectable source/reference/prompt/history/export/SDK cells pass
+on both targets. New packaged Windows Settings controls remain missing proof;
+CI1 native images cover selectable review, not these controls. External focused
+harness plus receipt tests are being prepared to reuse this same executable on
+Windows starts3–4, paired with Mac fixture/identity gates. Separate harness ref/input
+identity prevents labeling verification-script changes as a new product candidate.
+No new package/full unchanged matrix is proposed. No CI2 dispatch yet.
+
+Owner signed Mac ordinary process reopen is charged start3; native UI access is
+blocked by the locked Mac, confirmed through CUA. No setup/action request sent.
+User unlock is the sole immediate owner UI prerequisite; the saved Studio key remains
+preserved and needs no entry unless the app actually reports unavailable. Synthetic
+project prepared: seven source/35metadata files, full digest
+aaba4fbcea3125a4248d9b2700b53dd13829314927c7443148147d08b469146d,
+source5fd3d8d721c35a8db5a2a52bda234c300746fcbf3ec9f0c173b3f00cb14f44d4,
+metadata8b207c06733572ca7855d52075fb40bcc409df925744c56ac786a0e3c19ef694.
+Seed driver and reopen used public fake key only; owned fake credential/root cleanup
+passes. No Studio credentials copied/read/exported and no model discovery.
+
+Cumulative consumption: ownerMac1/3packages,3/6starts (including possible implicit
+lookup); Windows1/3packages,2/6starts; pairedCI1/3 each target; setup0, five families
+0/2 each, total0/10, discovery0/0. Temporary source-fixture roots cleaned, synthetic
+live root retained for authorized workflow, ordinary user profile/key preserved.
+Source baseline and final human acceptance remain distinct; final owner integrated
+native/live/SDK evidence and explicit human sign-off are still pending.
+
+External proof preparation failures remain failed: first workflow edit selected an
+older similarly named environment line and failed YAML indentation; repaired before
+any dispatch, actionlint passes. Default local py_compile attempted its OS cache and
+hit sandbox denial; task-owned temporary pycache syntax check passes. No package,
+editor start, dispatch, live send or product defect resulted from either preparation
+failure. Acquisition/receipt rejecting gates14/14 pass locally; harness native gates
+and independent review remain in progress.
+
+
+Independent external-harness review found two evidence defects before dispatch:
+PNG signature-only validation admitted a fake image, and terminal-only count
+collection could lose reserved starts on early cleanup failure. Both findings are
+retained as failed harness evidence. PNG gates now check actual IHDR dimensions,
+minimum bytes, checksum/chunk/compressed pixel integrity and claimed dimensions;
+public positive fixture is a real generated PNG. Failure sealing counts reserved
+starts independently of missing/malformed terminal reports, retains conservative
+terminal counts, and revalidates nine native receipts/images against actual launch
+PIDs. Acquisition/failure gates17/17 and native receipt gates7/7 pass locally;
+workflow syntax and six-file source privacy scan pass. No native launch, package,
+CI dispatch, Studio send or product repair was used for these harness corrections.
+Independent re-review is pending; no CI2 dispatch yet.
+
+
+Independent external-harness re-review passes: no remaining publication/pairedCI2
+blocker. The two earlier review findings remain failed evidence with focused repairs.
+Exact local pre-dispatch checks17+7 pass, actionlint and seven-file changed-source
+privacy pass; product renderer/core/desktop/dependency inputs remain unchangedvs929.
+Focused CI2 will validate actual Windows behavior; local fixture/review results do
+not establish native success or cleanup. Publication is covered by express CI authority.
