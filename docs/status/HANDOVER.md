@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — awaiting focused CI2; owner Mac unlock/live remain
+## Studio-only Phase 2 closeout — CI2 audited failed; CI3 repair ready; native live in progress
 
 The user expressly authorizes CI publication/dispatch and native/live verification.
 Continue this same outcome; no merge/release, signing changes, generic provider,
@@ -31,19 +31,23 @@ initial auditor Windows-only transform assumption as failed, corrected without a
 Windows executable0231a7cd751cd2c52c63c5936db532a2cc156cb020ba46f990a78142c0419b76.
 Ignored independent-ci-01-audit.json and ci-01-artifacts own the detailed receipts.
 
-**Remaining Windows gap:** CI1 packaged captures exercise selectable proposals;
-new Temperature/Top-p/Test setup/cancel/readiness/persistence controls still need
-native Windows input proof. External studio-setup-native.py/studio-setup-windows.ps1
-and receipt tests are being prepared. Focused paired CI2 must reuse frozen929/CI1's
-exact package, separate product and harness refs/inputs, reserve Windows starts3–4,
-and run Mac fixture/identity gates with zero builds/starts. Local17+7rejecting gates, workflow syntax, seven-file source privacy and independent
-re-review pass. Published external harness36a11c9822b400143bc593232af17067cd963ed0,
-treeec20bc685998cc5af7c61643f72890a98ed502a0. Confirmed [focused pairedCI2
-run38232733035](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38232733035),
-attempt1/exact harness, queued at2026-10-12T09:52:54UTC. Product checkout remains929;
-Windows package remains the audited CI1 executable. No retry/duplicate dispatch. Existing production-scaffold exclusive
-selector calls the focused reusable workflow; subselector alone must fail closed.
-CI never receives the Studio key. After dispatch, follow manual same-thread wait.
+**CI2 audited failed:** run38232733035 attempt1/external harness36a11c9,
+product929 unchanged. Both artifact ZIP/manifests and269product/sevenharness inputs
+pass independent audit. Mac17+7fixture gates pass; Windows archive17 has one failed
+unsafe-backslash case, nativevalidator7passes. Actual Windows native execution skipped,
+no native directory/reservations: zero added starts/packages; Maczero too. Preserve
+missing-native privacy/terminal failures. Ignored independent-ci-02-audit.json owns audit.
+
+**Remaining Windows gap/CI3 repair:** a writer-only ZipInfo fixture repair was rejected
+by independent review because reading also normalizes Windows separators. Retain this
+unsuccessful correction. Reassessment uses orig_filename for raw fixture assertion and
+refuses raw/normalized name differences before extraction; regression emulates Windows
+normalization. Local18+7, workflow syntax, changed-source privacy and independent
+re-review pass. No product repair/build/launch. The last authorized pairedCI3 must
+reuse frozen929 and CI1 exact Windows package, reserve Windows starts3–4 (unused),
+Maczero packages/starts. Admission requires dispatchordinal3; no CI3 dispatch yet.
+Publish only reviewed external verification/status under express CI authority; after
+dispatch record exact run/head/inputs and end turn for manual same-thread audit.
 
 **Local proof:** renderer138/138, sampling2/2, compatibility3/3, nativeworker8/8,
 readiness-discovery1/1, transport15/15, exact-context integers1/1, rejecting gates14/14
@@ -75,30 +79,39 @@ The native receipt is `phase2-closeout-01/native-saved-profile-01.json`.
 
 **Cumulative allowance:** Mac1/3packages, **3/6starts conservatively charged**
 (first ordinary process19193, possible implicit CUA lookup, reopened process21809).
-Windows actual1/3packages and2/6starts beforeCI2; pairedCI2/3each target. Focused CI2
-reserves Windows starts3–4, no builds; hostedMac no starts/builds. Audit actual
-CI2 reservations even on missing/malformed terminal receipts before updating counts. Live setup0,
-each five-action0/2, total0/10; discovery0/0. Test setup counts toward ten separately.
+Windows actual1/3packages and2/6starts after auditedCI2; pairedCI2/3each target.
+CI3 may reserve Windows starts3–4, no builds; hostedMac no starts/builds. Live setup1,
+card1/2,lore1/2,otherfamilies0/2,total3/10;discovery0/0. Test setup counts toward ten separately.
 Keep earlier failed attempts; no automatic retries. Ordinary saved credential is
 preserved and never deleted as temporary cleanup.
 
-**Next resume:** audit exactCI2 run38232733035/attempt1 and both required target
-artifacts, product/harness/input/ZIP/exe bindings, native Settings receipts/PNGs,
-three fixture requests, actual reservations, failure logs and cleanup. Mac fixture
-gates are automated proof only. Missing/failed/skipped native cases remain failed.
-Manual same-thread wait applies; no autonomous polling/watcher or next outcome.
-Ignored ci-02-preflight/dispatch/confirmed receipts own operation admission and
-identity. Then continue owner native/live on unlock, within unchanged caps.
+**Owner progress / renewed lock:** user unlocked; process21809 rebound without
+launch, native Settings confirmed saved configuration/Credential:configured. One actual
+Studio Test setup succeeded using the saved key. No reentry/read/export/model discovery.
+Prompt edit/save, baseline restore, Undo/Redo and Undo back to edited custom prompt pass.
+First synthetic open failed due root/metadata folderName mismatch; rename owned root
+live-project to synthetic-project with all42file bytes unchanged. Second open succeeds.
+Active project is phase2-closeout-01/synthetic-project; do not use old live-project path.
 
-**Owner UI blocker:** the Mac is locked; CUA inventory confirms native access
-unavailable. An unlock question is pending. Process21809 is already running the exact
-signed Mac package; do not launch again to bind it. Once unlocked, bind exact bundle
-path through CUA, confirm saved credential/configuration without reentry, inspect
-exact setup body, then charge one setup before sending. No Refresh models/discovery.
-The owned synthetic project phase2-closeout-01/live-project is prepared from qualified
-controller source/metadata; no project credentials copied. Baseline receipt has seven
-source files/35metadata files and full/source/metadata digests; seeded fake-profile
-roots were cleaned. These source driver processes are not editor starts.
+Card Iona send1 succeeds. All project files unchanged before Save, source unchanged
+through Save and separate approval. Save button then disabled. Exact approved card
+record035aa71f-f732-467f-8910-fccf90586ec2, revision2711eca8-eab9-4cdc-85b5-47be42980f99,
+number1. Its exact revision is explicitly included with The last tram lore1 in the
+Night bell lore send1, scopeWhole project, budget16384/response768/payloaddigest
+c5ef30a277c3d89df2e5b3783b1207b83d51709a9ba19cc1945afc6f747eb23e. Native Mac locked
+again while that send runs; result unobserved, all synthetic files still unchanged.
+An unlock question is pending; bind only existing process and inspect result, do not
+relaunch/resend. If valid, Save lore once and separately approve it, then use exact
+generated card/lore revisions in later requests. Live setup1, card1/2, lore1/2, other
+fourfamilies0/2, total3/10; discovery0. Ignored live-send-ledger.json and native-card/
+lore snapshots own reserved attempts/digests/IDs/proofs. A receipt-writing Python
+syntax error failed before execution, corrected; no writes/send/relaunch resulted.
+
+Compact Settings setup preview exceeds line/AX512limit; fixed compiled core probe and
+visible prefix/config reviewed, no full native setup text-capture claim. Main Assist
+wrapped body/schema was inspected with native scrolling and exact payload digest.
+Keep this presentation issue for requested later UI refinement; product remains929.
+User ordinary saved key stays preserved; only owned fake credential roots are cleaned.
 
 On exact frozen product, finish owner five actions + selectable dependency-valid
 subset, separately approve generated references and include their exact revisions

@@ -34,6 +34,7 @@ def extract(archive, destination):
  with zipfile.ZipFile(archive) as z:
   seen=set(); total=0
   for e in z.infolist():
+   assert e.orig_filename==e.filename, 'Raw archive name was normalized'
    p=PurePosixPath(e.filename)
    assert e.filename and '\\' not in e.filename and not p.is_absolute() and all(x not in ('..','.') and ':' not in x for x in p.parts), 'Unsafe archive entry'
    assert e.filename == p.as_posix()+('/' if e.is_dir() else ''), 'Noncanonical archive entry'
@@ -73,7 +74,7 @@ def prepare(product, harness, output):
  report={'passed':False,'productCandidate':CANDIDATE,'harnessCandidate':git(harness,'rev-parse','HEAD').decode().strip(),'runId':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT'),'os':platform.system(),'architecture':platform.machine(),'packageBuilds':0,'appLaunches':0}
  try:
   assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification' and os.environ['GITHUB_RUN_ATTEMPT']=='1' and report['harnessCandidate']==os.environ['GITHUB_SHA']
-  assert os.environ['DISPATCH_ORDINAL']=='2' and os.environ['FIRST_LAUNCH_ORDINAL']=='3'
+  assert os.environ['DISPATCH_ORDINAL']=='3' and os.environ['FIRST_LAUNCH_ORDINAL']=='3'
   assert (report['os'],report['architecture']) in [('Windows','AMD64'),('Darwin','arm64')]
   report['harnessInputs']={p:digest((harness/p).read_bytes()) for p in HARNESS}
   report['harnessInputDigest']=digest(json.dumps(report['harnessInputs'],sort_keys=True,separators=(',',':')).encode())

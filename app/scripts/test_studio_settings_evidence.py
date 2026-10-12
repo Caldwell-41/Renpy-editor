@@ -5,6 +5,7 @@ from pathlib import Path
 import stat
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 spec=importlib.util.spec_from_file_location('evidence',Path(__file__).with_name('studio-settings-evidence.py'))
@@ -16,13 +17,22 @@ class EvidenceTests(unittest.TestCase):
  def archive(self,name='ok.txt',mode=0):
   p=self.root/'artifact.zip'
   with zipfile.ZipFile(p,'w') as z:
-   i=zipfile.ZipInfo(name);i.external_attr=mode<<16;z.writestr(i,b'fixture')
+   i=zipfile.ZipInfo(name)
+   # ZipInfo normalizes backslashes on Windows; preserve the intentionally unsafe fixture.
+   i.filename=name;i.orig_filename=name;i.external_attr=mode<<16;z.writestr(i,b'fixture')
+  with zipfile.ZipFile(p) as z: self.assertEqual([i.orig_filename for i in z.infolist()],[name])
   return p
  def test_safe_archive(self):
   e.extract(self.archive(),self.root/'out');self.assertEqual((self.root/'out/ok.txt').read_bytes(),b'fixture')
  def test_unsafe_archive(self):
   for i,name in enumerate(('../x','/x','C:/x','a\\x','a//x','./x')):
    with self.subTest(name=name),self.assertRaises(AssertionError):e.extract(self.archive(name),self.root/str(i))
+ def test_windows_normalization_cannot_hide_unsafe_filename(self):
+  with mock.patch.object(zipfile.os,'sep','\\'):
+   archive=self.archive('a\\x')
+   with zipfile.ZipFile(archive) as z:
+    entry=z.infolist()[0];self.assertEqual(entry.orig_filename,'a\\x');self.assertEqual(entry.filename,'a/x')
+   with self.assertRaises(AssertionError): e.extract(archive,self.root/'out')
  def test_symlink_archive(self):
   with self.assertRaises(AssertionError):e.extract(self.archive(mode=stat.S_IFLNK|0o777),self.root/'out')
  def test_duplicate_archive(self):

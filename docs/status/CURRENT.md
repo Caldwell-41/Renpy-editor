@@ -1,14 +1,15 @@
 # Current status
 
-**Updated:** 2026-10-12. **Studio-only Phase2 closeout: first paired CI passed and
-independently audited; focused Windows Settings CI2 is queued; owner native/live completion remains.** Generic providers/Phase3, selected-route context and AI ending/connection
+**Updated:** 2026-10-13. **Studio-only Phase2 closeout: CI1 passed; CI2 failed in
+an external Windows archive gate before native launch. Reviewed focused CI3 repair
+is ready; owner native/live has progressed but the Mac locked again.** Generic providers/Phase3, selected-route context and AI ending/connection
 expansion are outside this outcome. Full Phase2 and final human acceptance remain incomplete.
 
 | Capability | Evidence | Acceptance |
 | --- | --- | --- |
 | Five actions/references/prompts and selectable proposals | Same-project combined controller and metadata-free SDK pass on both targets; Windows packaged native selectable subset passes. | Owner Mac native/live integrated chain remains. |
 | Writing controls, setup readiness, HTTPS | Focused source/renderer/DOM/worker/transport tests pass on both targets, including verified HTTPS fixtures. | New Windows native Settings controls need focused external proof; owner native/live remains. Literal IPv6 HTTPS explicitly unsupported. |
-| Saved-key reuse | User saved the selected Studio key through ordinary native Settings; profile/key preserved after normal quit. | Already-running reopen awaits unlocked Mac to observe reuse and send. No repeated key entry is planned. |
+| Saved-key reuse | Ordinary native process reopen reports configured; actual Studio setup and generated card succeed using the saved key. | Reuse established; preserve profile/key through remaining reopen checks. No repeated key entry. |
 | Mac package | Package1 strict pinned signature/installer contents/privacy pass. | Native workflow/new Settings/live completion remains. |
 | Human acceptance | No explicit sign-off. | Pending; requested UI refinement prompt and guided feedback handoff follow verification. |
 
@@ -31,11 +32,14 @@ remain; no reset, force-push, merge, release, signing or provider expansion.
 Counts: Mac1/3packages,3/6starts conservatively charged, including the earlier
 possible implicit lookup; process21809 already running. Windows1/3packages,2/6starts
 actual; pairedCI2/3 each target. Confirmed [focused run38232733035](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38232733035),
-attempt1/exact harness36a11c9, queued. Windows starts3–4 reserved, zero new packages;
-hosted Mac zero editor starts. Actual CI2 consumption/results await artifact audit. Live setup0,
-each action0/2, total0/10; discovery0/0. The Mac is locked, so owner UI/live cannot
-continue until the user unlocks it. Ordinary saved profile/key remains preserved.
-Synthetic native project is prepared; no live send or model discovery occurred.
+attempt1/exact harness36a11c9, failed. Audited CI2 adds zero packages/starts on both
+targets; Windows native execution was skipped. The archive fixture/raw-name guard
+repair passes18+7focused tests and independent review; last pairedCI3 not yet dispatched.
+Live setup1, card1/2 saved then separately approved, lore1/2 sent/result unobserved;
+other actions0/2, total3/10; discovery0/0. Generated card exact revision is included
+in the lore send. Prompt edit/restore/Undo/Redo pass; game source unchanged. Mac
+locked again, so UI/live continuation needs unlock. Ordinary saved profile/key and
+already-running process21809 are preserved.
 
 [Requirement map/ledger](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
 owns dispositions, exact evidence and retained failures. [HANDOVER](HANDOVER.md)

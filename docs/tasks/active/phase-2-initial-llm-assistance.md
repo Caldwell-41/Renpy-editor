@@ -7309,3 +7309,72 @@ Retain every failure; do not retry or claim skips/missing proof pass. Reuse CI1'
 unchanged integrated evidence. Finish owner native/live after unlock, then independently
 review integrated execution for the user's final decision. Requested UI prompt/guided
 feedback handoff follows verification; no new outcome has begun.
+
+
+#### CI2 terminal audit and unlocked owner continuation — 2026-10-13
+
+Fresh local/origin5273e3b5d899b1087eb3255f70c6f5cf087eb76d; main unchanged5f448ca.
+Exact CI2run38232733035/attempt1/harness36a11c9 remains FAILED. Both downloaded ZIP
+identities, complete outer/reused manifests and269canonical product inputs validate;
+seven harness inputs bind to36a11c9 with declared PS1CRLF. Windows91outer/82reused/
+78child entries; Mac54outer/47reused/43child. Windows acquisition passes, native
+validator7 passes, but archive gate17 has one failure: ZipInfo normalizes unsafe
+backslash names on Windows. Native execution is skipped, no native directory or
+reservations; zero new starts/packages. Mac17+7passes, zero starts/packages.
+Windows cumulative remains package1/start2; Macowner package1/start3; dispatch2/3.
+Retain privacy/terminal failures caused by missing native execution as failed too.
+Ignored independent-ci-02-audit.json and ci-02-artifacts own exact receipts.
+
+First narrow repair preserved writer filename but still asserted normalized
+namelist; independent review rejected it before dispatch. This unsuccessful correction
+remains failed evidence. Reassessment inspected writer AND reader normalization:
+ZipInfo.orig_filename retains raw input, filename may normalize it. Second repair
+asserts raw fixture names and rejects raw/normalized differences before safe extraction.
+An explicit Windows-separator normalization regression proves raw a-backslash-x can
+become a/x and must still be refused. Local18/18pass and independent re-review pass;
+workflow now requires18+7 and admits only last paired dispatch3 with Windows start3
+(still unused). No frozen product change/build/launch/send for this correction.
+Initial 'fixture-only' audit classification is corrected to fixture plus external
+extractor raw-name guard; no product defect. No CI3 dispatch yet.
+
+User unlocked Mac. Already-running signed process21809 was rebound without a launch.
+Ordinary native Settings shows the selected endpoint/model/limits/sampling unchanged
+and Credential:configured after process reopen. No key read/export/reentry or model
+refresh. Fixed synthetic Test setup reviewed and explicitly sent once; native result
+is Setup tested for structured proposals. Every generated result still needs review.
+Saved credential is reused successfully. Setup consumes1/10, discovery0; no project
+content in that probe. The compact Settings preview exceeds the visual line and AX
+text is limited to512characters; qualified core fixed payload/visible prefix/config
+were reviewed. Record this presentation issue for the later UI refinement; do not
+claim full native text capture of this tiny setup preview.
+
+First synthetic native open failed because preparation renamed its root live-project
+while metadata folderName remained synthetic-project. Rename only the owned root to
+synthetic-project; all42file bytes unchanged. Native second open succeeds, no source
+execution. Retain the first invalid-fixture open as failed, not a product defect or
+extra editor start. Native prompt edit/save, explicit baseline restore, Undo/Redo,
+then Undo to the edited custom prompt pass; original protected source unchanged.
+Generated-card action reviewed exact selected Studio/address/model, Iona target,
+manual Mara card revision2/The last tram lore revision1, budget8192/response1024,
+strict schema/tools/thinking off and payloaddigest
+0722950ce1b2bd5b2679319f925d36865cd675d61038e99079985baf356864a4.
+Native scrolling inspects wrapped manifest/body/schema and tail sampling. Card send1
+reserved and sent once; total2/10, card1/2, other four families0/2. Result, separate
+Save/approval and later inclusion remain pending. Saved user profile/key preserved;
+owned synthetic root retained for continuing the authorized chain.
+
+
+Owner generated card1 successfully received with zero project writes before Save.
+Saved once, duplicate Save disabled; separately approved through native Characters.
+Iona record035aa71f-f732-467f-8910-fccf90586ec2, approved revision
+2711eca8-eab9-4cdc-85b5-47be42980f99/number1. Original seven game source hashes remain
+unchanged; futureLibrary extensions remain preserved. Lore Night bell send1 includes
+this exact approved card revision plus The last tram lore1, explicit project scope,
+budget16384/response768, estimate6301+768+631=7700, strict closedschema and actual
+digestc5ef30a277c3d89df2e5b3783b1207b83d51709a9ba19cc1945afc6f747eb23e.
+Native Mac locked again during lore send; result unobserved. All synthetic files
+remain equal to pre-send snapshot. No automatic resend/relaunch/key entry. Unlock
+requested; source/project/user key preserved. Actual totals setup1/card1/lore1=3/10,
+otherfamilies0, discovery0; Macstarts3 and Windowsstarts2 unchanged. No CI3 yet.
+A local receipt-writing Python syntax error failed before execution; corrected
+snapshot/ledger write passes. This preparation failure is retained, no extra send.
