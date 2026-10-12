@@ -8018,3 +8018,77 @@ setup/invalidation/cancel/readiness/process reopen, credential/root/listener cle
 and every launch reservation. If pending pause again; failed/missing/skipped proof
 remains unresolved. Historical CI6 and failed cleanup remain failed. Final human
 sign-off unclaimed; UI-refinement prompt only follows successful technical audit.
+
+#### CI7 terminal audit and whole-sequence reassessment — 2026-10-13
+
+CI7run38309795814/attempt1/exact3d69b96 completedfailure2026-10-12T21:20:28Z.
+Windows115012480691 failed; Mac115012480733 passed. Win18+9/Mac18+7 fixtures
+passed/no skips. Exact artifacts W11773664124/070e2b1759a2fc99673af4841e9f06ecdcc65cdb73e39721e9547a1a15490a78,
+M11774466688/a5a7c945c58b352a9aaaa3e5ae654fef3506ea92241636ddb0d420eae64b3a57;
+ZIPs/manifests W105/82/78/M54/47/43, all269product/sevenharness/declaredPSCRLF
+and CI1 executable match. Ignored independent-ci-07-audit.py/json and ci-07-artifacts
+retain exact evidence; artifacts expire2026-10-19. Native defaults PNG viewed.
+
+Only initial Windowsstart6/PID4636 reserved/started; no7, zero build/HTTP.
+All five fields pass physical focus/readback, including actual ModelID ComboBox;
+sampling.8/.9 is saved and observed. Thus CI6 field guard is resolved. Seed then
+times out before fixture-key input in credential-dialog lookup OR foreground
+confirmation. Both waits have the same error/pending label: exact failed substep
+unknown. Main loses foreground, Settings remains busy; no complete native stage.
+Root.Children lookup mismatch is plausible, not proven; no product defect established.
+Failure cleanup also times out, close-input receipt passes but child does not exit;
+forced terminationexit1, listener stoptrue/rootRemovedfalse/privacy14filespass.
+Cleanup remains failed. Windowsstarts6/7, pairedCI7/7 exhausted under prior limits.
+
+The user asks why failures continue and whether predictable, then expressly directs:
+**Audit the whole native sequence, fix, then run as many CI runs as needed.** Asked
+once whether this covers necessary Windows editor starts; user answers **Yes, needed
+Windows starts**. This supersedes the previous pairedCI7/Windowseditor7 ceilings
+for this same native closeout. Packages3 each/Maceditor6/live10/Rewrite4/discovery0,
+no production/provider/signing expansion, no merge/release remain unchanged.
+Choose a finite working batch of **up to three additional paired runs** (cumulative
+8–10) and their **up to six Windows starts** (cumulative7–12); reassess after two
+unsuccessful corrections of one hypothesis and before widening that working batch.
+This is an internal investigation bound, not another per-run approval requirement.
+Manual same-thread CI wait policy remains; no autonomous polling or auto-wake.
+
+Whole-sequence owner and independent read-only audit identifies foreseeable harness
+gaps: unqualified native dialog tree assumptions and indistinguishable waits;
+text-only saved-state waits before renderer re-enables controls; masked typing lacks
+actual focus/foreground confirmation; failure cleanup drives main Settings while
+modal may remain; preview JSON extraction happens once; normal capture lacks modal
+admission; arbitrary valid PNG can satisfy a missing stage capture; close keyboard
+proof missing; source baseline starts after seed; failed cleanup receipts ignored.
+These were reviewable before dispatch. Exact hosted modal behavior still needs
+native observation. Earlier green mocked fixtures did not prove the later sequence.
+
+Prepared external-only correction uses Win32 enumeration of an exact standard dialog
+by owned PID, direct owner, title/class and unique HWND; UIA derives from that handle,
+without assuming desktop tree depth. Root-owner main identity and separate phase
+receipts retained. Lookup/foreground/maskedfocus/save-dismiss waits distinguish errors.
+Masked field receives physical click plus exact focus/owner/foreground rechecks;
+only known public fixture typed, no password ValuePattern/TextPattern/read/export.
+Verified owned native Cancel precedes failed cleanup and close, with modal disappearance
+and saved-control readiness. Async saved/readiness states require enabled controls;
+complete observable preview JSON is polled. Stage captures require owned foreground
+main/no masked field/no native entry; exact roles required. Controller observes
+initialized source baseline beforeseed and retains failed cleanup/close outcomes,
+normal child exits/forced status separately. Nine required stages stay mandatory.
+
+New Windows fixtures invoke actual declared Win32 APIs against created/disposed
+controlled standard windows, rejecting PID/owner/title/class/duplicate/absence;
+actual Secure-Entry/Cancel orchestration rejects missing lookup, wrong owner,
+foreground/focus loss before typing; shared wait proves disabled controls do not
+pass drawn text, preview poll rejects partial JSON until complete. Mocked focus is
+still not native evidence. Gate now Win18+11/Mac18+7. Next identity CI8/start7–8,
+old6–7 rejected; zero builds/live calls/owner starts. Independent re-review and
+focused checks precede publication/dispatch; no production change justified.
+
+Final independent whole-sequence/re-review passes: masked-click ownership/foreground
+guard added; CI8/start7–8 all gates agree, previous6–7 rejected. No further supported
+blocker found by inspection. P/Invoke names endingW explicitly use ExactSpelling;
+new native API fixtures remain required Windows proof. Local18+7 portable tests,
+four-file Python syntax, actionlint and whitespace pass. Final changed-source privacy
+11files passes. Windows11 helper fixtures run before any new editor launch, so a
+fixture failure consumes CI but no editor start. CURRENT/HANDOVER now agree
+with terminalCI7 and new user authorization. Whole sequence still needs native proof.

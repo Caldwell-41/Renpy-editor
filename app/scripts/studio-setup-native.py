@@ -163,6 +163,7 @@ def validate_stage(receipt, stage, pid, directory):
     for name in ['ownedWindow', 'osMouseInput', 'controlsInViewport', *CHECKS[stage]]:
         assert checks.get(name) is True, 'Missing native check: ' + name
     if stage in ('seed', 'invalidate'):
+        assert checks.get('savedControlsReady') is True
         assert checks.get('osKeyboardInput') is True
         names = ['Profile name', 'Endpoint', 'Model ID', 'Temperature', 'Top-p'] if stage == 'seed' else ['Temperature', 'Top-p']
         entries = receipt.get('fieldEntries', [])
@@ -175,12 +176,21 @@ def validate_stage(receipt, stage, pid, directory):
         assert checks.get('navigationControlsReady') is True, 'Native navigation readiness missing'
     if stage not in ('close', 'close-reopen'):
         captures = receipt.get('captures', [])
-        assert captures, 'Native screenshot missing'
+        expected_captures = {'seed': ['defaults.png', 'synthetic-preview.png'], 'ready-first': ['ready.png'], 'invalidate': ['synthetic-preview.png'], 'cancel': ['cancelled.png'], 'ready-final': ['ready.png'], 'reopen': ['synthetic-preview.png'], 'cleanup': ['removed.png']}
+        assert [c.get('file') for c in captures] == expected_captures[stage], 'Exact native stage captures missing'
         for capture in captures:
             name = capture['file']
             assert Path(name).name == name and name.endswith('.png')
             path = Path(directory) / name
             validate_capture(path, capture)
+    else:
+        assert checks.get('osKeyboardInput') is True, 'Close keyboard input proof missing'
+    if stage == 'seed':
+        dialog = receipt.get('dialog', {})
+        assert dialog.get('processId') == pid and dialog.get('class') == '#32770'
+        assert type(dialog.get('handle')) is int and dialog['handle'] > 0
+        assert type(dialog.get('owner')) is int and dialog['owner'] > 0
+        assert all(dialog.get(k) is True for k in ('owned', 'foregroundConfirmed', 'maskedFieldFocusConfirmed'))
     if stage in ('seed', 'invalidate', 'reopen'):
         values = {c['name']: c['value'] for c in receipt.get('controls', [])}
         expected_sampling = ('0.8', '0.9') if stage == 'seed' else ('0.7', '0.85')
@@ -200,13 +210,13 @@ def validate_terminal(value):
     assert value.get('passed') is True and value.get('candidate') == CANDIDATE and value.get('tree') == TREE
     assert value.get('executableSHA256') == EXE_SHA and value.get('artifact') == ARTIFACT
     assert value.get('materialInputCount') == 269 and value.get('materialInputDigest') == INPUT_DIGEST
-    assert value.get('launchOrdinals') == [6, 7] and value.get('packageAttempts') == 0 and value.get('appLaunches') == 2
+    assert value.get('launchOrdinals') == [7, 8] and value.get('packageAttempts') == 0 and value.get('appLaunches') == 2
     assert value.get('completedStages') == STAGES and value.get('normalExits') == [0, 0]
     events = value.get('requests', [])
     assert len(events) == 3 and [e.get('sequence') for e in events] == [1, 2, 3]
     assert all(e.get('accepted') is True and e.get('method') == 'POST' and e.get('path') == '/v1/chat/completions' for e in events)
     assert events[1].get('clientClosed') is True and events[0].get('responseSent') is True and events[2].get('responseSent') is True
-    for name in ['noSaveHTTP', 'cancelProfileUnchanged', 'reopenNoHTTP', 'reopenProfileUnchanged', 'sourceUnchanged', 'profileReferencesRemoved', 'rootRemoved', 'listenerStopped', 'noCredentialRead', 'noDiscovery']:
+    for name in ['sourceBaselineBeforeSeed', 'noSaveHTTP', 'cancelProfileUnchanged', 'reopenNoHTTP', 'reopenProfileUnchanged', 'sourceUnchanged', 'profileReferencesRemoved', 'rootRemoved', 'listenerStopped', 'noCredentialRead', 'noDiscovery']:
         assert value.get(name) is True, 'Missing terminal proof: ' + name
     for event, preview in zip(events, value['requestPreviewSHA256']):
         assert event['bodySHA256'] == preview
@@ -288,7 +298,7 @@ def sources(root):
 def run(args):
     assert os.name == 'nt', 'Actual Windows required; Mac runs validator tests only'
     output, root, product, executable = args.output, args.root, args.product_repo, args.executable
-    assert args.first_launch_ordinal == 6
+    assert args.first_launch_ordinal == 7
     assert re.fullmatch(r'[0-9a-f]{40}', args.harness_ref), 'Exact external harness ref required'
     assert not output.exists() and not root.exists() and not root.is_symlink()
     assert root.parent.resolve() == Path(tempfile.gettempdir()).resolve() and root.name.startswith('loomlight-rewrite-live-')
@@ -351,9 +361,14 @@ def run(args):
         result = subprocess.run(['powershell.exe', '-NoProfile', '-File', ps, '-Stage', 'preflight', '-Output', str(preflight), '-ProductRepo', str(product), '-Executable', str(executable)], capture_output=True, text=True, timeout=90)
         (preflight / 'harness.log').write_text(result.stdout + result.stderr, encoding='utf-8')
         assert result.returncode == 0 and json.loads((preflight / 'receipt.json').read_text(encoding='utf-8-sig'))['passed'] is True
-        launch(6, False)
-        seed = stage('seed'); terminal['noSaveHTTP'] = fixture.events == []
+        launch(7, False)
+        observed = stage('observe-initial', False)
+        assert observed['passed'] is True and observed['checks']['sourceBaselineReady'] is True and observed['processId'] == child.pid
         baseline = sources(root)
+        assert baseline and any(p.endswith('.rpy') for p in baseline), 'Initialized source baseline missing'
+        terminal['sourceBaselineBeforeSeed'] = True
+        seed = stage('seed'); terminal['noSaveHTTP'] = fixture.events == []
+        assert sources(root) == baseline, 'Initial Settings operations changed source'
         initial = read_profiles(root); validate_profile(initial, fixture.endpoint, (.8, .9), False)
         stage('ready-first'); first = read_profiles(root); validate_profile(first, fixture.endpoint, (.8, .9), True)
         changed = stage('invalidate'); before_cancel = read_profiles(root); validate_profile(before_cancel, fixture.endpoint, (.7, .85), False)
@@ -363,7 +378,7 @@ def run(args):
         terminal['requestPreviewSHA256'] = [seed['preview']['rawSHA256'], changed['preview']['rawSHA256'], changed['preview']['rawSHA256']]
         stage('close'); exit_owned()
         count = len(fixture.events)
-        launch(7, True); stage('reopen')
+        launch(8, True); stage('reopen')
         terminal['reopenNoHTTP'] = len(fixture.events) == count == 3
         terminal['reopenProfileUnchanged'] = read_profiles(root) == final
         terminal['sourceUnchanged'] = sources(root) == baseline
@@ -380,11 +395,15 @@ def run(args):
         terminal['cleanupAttempted'] = True
         if child and child.poll() is None:
             try:
-                stage('cleanup-after-failure', False)
+                cleanup = stage('cleanup-after-failure', False)
+                terminal['failureCleanupUI'] = cleanup.get('passed') is True
+                if not terminal['failureCleanupUI']:
+                    terminal['cleanupFailure'] = 'Native cleanup receipt failed'
             except Exception as error:
                 terminal['cleanupFailure'] = type(error).__name__ + ': ' + str(error)
             try:
-                stage('close-after-failure', False)
+                close = stage('close-after-failure', False)
+                terminal['failureCloseUI'] = close.get('passed') is True
                 code = child.wait(15)
                 terminal['normalExits'].append(code)
                 terminal['failureExit'] = {'pid': child.pid, 'exitCode': code, 'forced': False}
@@ -435,7 +454,7 @@ def main():
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--input-manifest', type=Path, required=True)
     parser.add_argument('--harness-ref', required=True)
-    parser.add_argument('--first-launch-ordinal', type=int, choices=[6], required=True)
+    parser.add_argument('--first-launch-ordinal', type=int, choices=[7], required=True)
     run(parser.parse_args())
 
 if __name__ == '__main__':

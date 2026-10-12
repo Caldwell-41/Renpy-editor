@@ -1779,3 +1779,13 @@ live profile: the user's ordinary saved Studio key must be preserved across sess
 Reject missing/failed native evidence, count failed starts, and seal failure artifacts.
 This focused proof closes only the new Settings gap; unchanged integrated CI1 proof
 is reused. Owner signed-Mac/native/live and final human acceptance remain separate.
+
+The Studio Settings harness resolves the native credential dialog by verified
+window handle/PID/direct owner/title/class rather than assuming UIA tree depth.
+Distinct lookup/foreground/masked-focus/dismissal receipts precede public-fixture
+input. On failure, cancel only the verified owned modal before Settings cleanup.
+Saved/readiness text must coincide with enabled controls; complete preview JSON
+must be observable. Required capture roles and normal process exits remain explicit.
+Record the initialized source baseline before Settings operations. Windows18+11
+and Mac18+7 fixtures reject ordinary failed ownership/readiness/evidence states;
+these fixtures do not replace actual native qualification.

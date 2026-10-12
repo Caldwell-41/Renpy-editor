@@ -1,23 +1,21 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — awaiting exact CI7 terminal audit
+## Studio-only Phase 2 closeout — whole-sequence repair and CI8 preparation
 
-The user-requested Sol review chat is sole writer/executor; parent stopped after
-transfer. Continue the same outcome here. User authorizes supported fixes, publication
-and **one additional paired CI7**. CI6 is terminal, independently audited failure.
-**Pending CI7:** [run38309795814](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38309795814),
-attempt1/workflow_dispatch/exact harness3d69b96e748e092f1f348a7348f416e65c6ec90b/
-tree17a1c3f2953571b75ae6be4b69385a228a1933f3, last observed in_progress
-2026-10-12T21:18:42Z. User approved Windows-only ceiling7; planned starts6–7.
-Dispatch receipt/confirmed raw run in ignored ci-07-dispatch.json/ci-07-confirmed.json;
-seven canonical harness digest a5ae8cd2d68e507d9e7daff9a744da0f92cdfe4aac9eaca3d90a0f2c1209fe06,
-declared PS1CRLF alternatives retained. No further paired CI authorized.
+The requested Sol chat remains sole writer/executor. User directs audit of the whole
+native sequence, fix and as many CI runs as needed; expressly confirms needed Windows
+editor starts. This supersedes prior pairedCI7/Windowseditor7 ceilings. Other package,
+Mac/live/provider/signing/scope limits remain. Work in finite internal batchCI8–10 /
+Windowsstarts7–12, reassess after two unsuccessful corrections of one hypothesis.
+No external operation currently pending. Whole-sequence repair and independent
+review precede exactly one CI8/start7–8 publication/dispatch. Manual same-chat wait
+policy still applies: record run then end turn, no polling/auto-wake.
 
 **Branch/state:** codex/provider-qualification. Fresh local/origin
 8b9a5e5b08e099c1eb6adb21a49646d834381761 and main
 5f448ca683a905f4ea77d4580bbc89fda69f2b93 matched on entry; clean tree then.
-Reviewed external harness alignment3d69b96 published normally and verified;
-current successor records the wait only. Preserve unrelated
+Published alignment3d69b96/CI7 and docs0ac9fa1 retained; current whole-sequence
+external harness/docs repairs are local pending final review/publication. Preserve unrelated
 work, no reset. Normal publication is authorized; no merge/release.
 
 **Exact product:**929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
@@ -70,17 +68,39 @@ Independent read-only code/artifact review and fixture re-review pass; local18+7
 Python syntax/actionlint/privacy3files/diff pass. Windows9 cases await CI7 terminal evidence.
 No product defect or production change justified.
 
-**Limits/next:** pairedCI7/7 each target; packagesWindows1/3Mac1/3;
-Windowsstarts5/7, ownerMacstarts5/6 including conservative implicit lookup.
-Live8/10/Rewrite3/4/extra blocker1of2used/discovery0. **Windows-only
-editor ceiling7 approved**; CI7 initial6/reopen7 reservations await audit.
-Preparation/controller/parser/terminal/sealing/fixtures are aligned and independently
-reviewed; local18+7/syntax/actionlint/privacy8files/diff pass. Paired allowance exhausted.
-End turn under manual same-thread wait policy; resume only on user command. No polling/watcher/auto-wake,
-CI8 or old-run rerun. On user resume, audit terminal jobs/artifacts/native stages,
-all reservations and credential/root cleanup. Failed/missing/skipped remains
-unresolved. No new owner operations, provider expansion/discovery/installations,
-signing changes, Phase3, route or AI ending/connection implementation. Ordinary key
-must never be read/exported/erased or requested again while configured. Technical
-success permits requested UI-refinement prompt referencing task UI section18/docsUI;
-refinement and later guided feedback are separate user-owned outcomes.
+**CI7 exact failure:**run38309795814/attempt1/harness3d69b96/tree17a1c3f,
+completedfailure2026-10-12T21:20:28Z. Windows115012480691 failed; Mac115012480733
+passed. Exact ZIPs/manifests/269product/sevenharness/PSCRLF/CI1exe audited;
+W105/82/78, M54/47/43; Win18+9/Mac18+7 pass. Onlystart6/PID4636, all five fields
+including ComboBox passed; saved sampling.8/.9 observed. Dialog lookup OR focus
+failed before typing, exact substep unknown. Failure cleanup timed out; close input
+passed but process required forcedexit1. Root retained/listener stopped/privacy14pass.
+0/9 complete stages/zeroHTTP. CI7 remains failed. Ignored independent-ci-07-audit.py/json
+and ci-07-artifacts retain exact receipts/ZIPs; artifacts expire2026-10-19.
+
+**Whole-sequence fix:** direct HWND dialog lookup verifies exact PID/executable,
+direct owner/title/class/unique match; separate lookup/foreground/maskedfocus/dismissal
+phases. Physical masked click and exact focused-field/foreground rechecks before
+public fixture typing; never read password. Owned native Cancel before cleanup/close;
+wait dismissal and enabled saved controls. Poll complete preview; guard normal captures
+and exact capture roles. Controller baseline beforeseed, failed cleanup/close outcomes
+and real child exits remain explicit. New actual Win32 controlled-window and
+production-helper rejecting fixtures; Win18+11/Mac18+7 required. Source/product929
+and package remain unchanged. See latest
+[owning audit](../tasks/active/phase-2-initial-llm-assistance.md#ci7-terminal-audit-and-whole-sequence-reassessment--2026-10-13)
+for every finding/repair/authority. Local focused checks and final independent review
+precede dispatch. Actual native stages/cleanup remain unproved.
+
+**Limits/next:** paired7 dispatched; Windowsstarts6, package1/3; Macpackage1/3,
+ownerstarts5/6; live8/10/Rewrite3/4/extra1of2used/discovery0. New user-approved
+Windows starts/CI cover the necessary native runs; working batchCI8–10/starts7–12.
+NextCI8/start7–8 identities align across preparation/controller/parser/terminal/seal/
+fixtures. Preserve every failed/missing-terminal reservation. On dispatch, publish
+exact run/attempt/harness/product and pause. User resume cues terminal audit of jobs,
+ZIP/manifests, required fixtures, every native phase/capture/default/sampling/setup/
+invalidation/cancel/reopen/cleanup/normal exits/HTTP and counts. Pending means pause
+again; missing/failed/skipped proof stays failed. No owner launch/send/SDK, generic
+provider expansion/discovery/installations, signing changes, merge/release or Phase3.
+Ordinary saved key/profile remains preserved; never read/export/re-request configured
+key. Route/AI endings/connections remain deferred. Final human acceptance unclaimed;
+UI-refinement prompt follows technical success, refinement/feedback unstarted.

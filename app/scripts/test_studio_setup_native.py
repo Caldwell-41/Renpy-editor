@@ -25,8 +25,8 @@ def png(width=200, height=100):
 
 def terminal():
     hashes = ['a' * 64, 'b' * 64, 'b' * 64]
-    value = {'passed': True, 'candidate': h.CANDIDATE, 'tree': h.TREE, 'executableSHA256': h.EXE_SHA, 'artifact': copy.deepcopy(h.ARTIFACT), 'materialInputCount': 269, 'materialInputDigest': h.INPUT_DIGEST, 'launchOrdinals': [6, 7], 'appLaunches': 2, 'packageAttempts': 0, 'completedStages': list(h.STAGES), 'normalExits': [0, 0], 'requests': [{'sequence': n, 'accepted': True, 'method': 'POST', 'path': '/v1/chat/completions', 'bodySHA256': hashes[n-1], **({'clientClosed': True} if n == 2 else {'responseSent': True})} for n in (1, 2, 3)], 'requestPreviewSHA256': hashes}
-    for name in ['noSaveHTTP', 'cancelProfileUnchanged', 'reopenNoHTTP', 'reopenProfileUnchanged', 'sourceUnchanged', 'profileReferencesRemoved', 'rootRemoved', 'listenerStopped', 'noCredentialRead', 'noDiscovery']:
+    value = {'passed': True, 'candidate': h.CANDIDATE, 'tree': h.TREE, 'executableSHA256': h.EXE_SHA, 'artifact': copy.deepcopy(h.ARTIFACT), 'materialInputCount': 269, 'materialInputDigest': h.INPUT_DIGEST, 'launchOrdinals': [7, 8], 'appLaunches': 2, 'packageAttempts': 0, 'completedStages': list(h.STAGES), 'normalExits': [0, 0], 'requests': [{'sequence': n, 'accepted': True, 'method': 'POST', 'path': '/v1/chat/completions', 'bodySHA256': hashes[n-1], **({'clientClosed': True} if n == 2 else {'responseSent': True})} for n in (1, 2, 3)], 'requestPreviewSHA256': hashes}
+    for name in ['sourceBaselineBeforeSeed', 'noSaveHTTP', 'cancelProfileUnchanged', 'reopenNoHTTP', 'reopenProfileUnchanged', 'sourceUnchanged', 'profileReferencesRemoved', 'rootRemoved', 'listenerStopped', 'noCredentialRead', 'noDiscovery']:
         value[name] = True
     return value
 
@@ -63,7 +63,7 @@ class NativeSettingsGate(unittest.TestCase):
         with self.assertRaises(AssertionError): h.validate_terminal(v)
 
     def test_no_extra_launch_build_discovery_or_request(self):
-        mutations = [('launchOrdinals', [6, 7, 8]), ('launchOrdinals', [5, 6]), ('launchOrdinals', [4, 5]), ('launchOrdinals', [3, 4]), ('launchOrdinals', [1, 2]), ('appLaunches', 3), ('packageAttempts', 1), ('artifact', {**h.ARTIFACT, 'attempt': 2})]
+        mutations = [('launchOrdinals', [7, 8, 9]), ('launchOrdinals', [6, 7]), ('launchOrdinals', [5, 6]), ('launchOrdinals', [4, 5]), ('launchOrdinals', [3, 4]), ('launchOrdinals', [1, 2]), ('appLaunches', 3), ('packageAttempts', 1), ('artifact', {**h.ARTIFACT, 'attempt': 2})]
         for key, bad in mutations:
             v = terminal(); v[key] = bad
             with self.subTest(key=key), self.assertRaises(AssertionError): h.validate_terminal(v)
@@ -133,12 +133,15 @@ class NativeSettingsGate(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); image = root / 'native.png'; image.write_bytes(png())
             body = h.expected_body(.8, .9); raw = json.dumps(body, separators=(',', ':'))
-            receipt = {'passed': True, 'stage': 'seed', 'processId': 123, 'executableSHA256': h.EXE_SHA, 'inputDesktop': 'Default', 'checks': {k: True for k in ['ownedWindow', 'osMouseInput', 'osKeyboardInput', 'controlsInViewport', 'navigationControlsReady', *h.CHECKS['seed']]}, 'captures': [{'file': 'native.png', 'sha256': h.sha(image), 'width': 200, 'height': 100, 'sampleRange': 40}], 'preview': {'raw': raw, 'rawSHA256': hashlib.sha256(raw.encode()).hexdigest(), 'body': body}}
+            receipt = {'passed': True, 'stage': 'seed', 'processId': 123, 'executableSHA256': h.EXE_SHA, 'inputDesktop': 'Default', 'checks': {k: True for k in ['ownedWindow', 'osMouseInput', 'osKeyboardInput', 'controlsInViewport', 'navigationControlsReady', 'savedControlsReady', *h.CHECKS['seed']]}, 'captures': [{'file': 'native.png', 'sha256': h.sha(image), 'width': 200, 'height': 100, 'sampleRange': 40}], 'preview': {'raw': raw, 'rawSHA256': hashlib.sha256(raw.encode()).hexdigest(), 'body': body}}
+            receipt['dialog'] = {'processId':123,'class':'#32770','handle':55,'owner':44,'owned':True,'foregroundConfirmed':True,'maskedFieldFocusConfirmed':True}
+            for name in ['defaults.png','synthetic-preview.png']:(root/name).write_bytes(png())
+            receipt['captures'] = [{**receipt['captures'][0], 'file': name} for name in ['defaults.png','synthetic-preview.png']]
             receipt['fieldEntries'] = [{'name': n, 'type': 'ControlType.Edit', 'physicalClick': True, 'keyboardFocusConfirmed': True, 'readbackMatched': True, 'expected': 'public fixture', 'lastReadback': 'public fixture'} for n in ['Profile name', 'Endpoint', 'Model ID', 'Temperature', 'Top-p']]
             receipt['controls'] = [{'name': n, 'value': v, 'enabled': True, 'owner': 123} for n, v in [('Temperature', '1'), ('Top-p', '0.95'), ('Temperature', '0.8'), ('Top-p', '0.9')]]
             receipt['fieldEntries'][2]['type'] = 'ControlType.ComboBox'
             h.validate_stage(receipt, 'seed', 123, root)
-            for kind in ['pid', 'image', 'input', 'preview', 'missing', 'duplicate', 'field', 'defaults', 'navigation', 'field-focus', 'field-readback', 'field-type', 'wrong-combo']:
+            for kind in ['pid', 'image', 'input', 'preview', 'missing', 'duplicate', 'field', 'defaults', 'navigation', 'field-focus', 'field-readback', 'field-type', 'wrong-combo', 'capture-role', 'saved-ready', 'dialog-focus']:
                 value = copy.deepcopy(receipt)
                 if kind == 'pid': value['processId'] = 321
                 elif kind == 'image': value['captures'][0]['sha256'] = '0' * 64
@@ -148,6 +151,9 @@ class NativeSettingsGate(unittest.TestCase):
                 elif kind == 'field-focus': value['fieldEntries'][0]['keyboardFocusConfirmed'] = False
                 elif kind == 'field-readback': value['fieldEntries'][0]['lastReadback'] = 'different'
                 elif kind == 'wrong-combo': value['fieldEntries'][0]['type'] = 'ControlType.ComboBox'
+                elif kind == 'capture-role': value['captures'] = value['captures'][:1]
+                elif kind == 'saved-ready': value['checks']['savedControlsReady'] = False
+                elif kind == 'dialog-focus': value['dialog']['maskedFieldFocusConfirmed'] = False
                 elif kind == 'field-type': value['fieldEntries'][0]['type'] = 'ControlType.Text'
                 elif kind == 'field': value['controls'][-1]['value'] = '0.95'
                 elif kind == 'defaults': value['controls'] = value['controls'][2:]
@@ -235,6 +241,144 @@ Write-Output 'PASS: actual field entry requires physical target focus and record
             result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script], capture_output=True, text=True, timeout=30)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn('PASS: actual field entry', result.stdout)
+
+        def test_actual_owned_dialog_api_uses_handle_pid_class_and_owner(self):
+            script_path = Path(__file__).with_name('studio-setup-windows.ps1').resolve()
+            script = r"""
+$ErrorActionPreference='Stop'
+Set-StrictMode -Version Latest
+$tokens=$null;$errors=$null
+$ast=[System.Management.Automation.Language.Parser]::ParseFile('__SCRIPT__',[ref]$tokens,[ref]$errors)
+if($errors.Count) {throw 'Native harness syntax invalid'}
+$types=$ast.FindAll({param($n) $n -is [System.Management.Automation.Language.CommandAst] -and $n.GetCommandName() -eq 'Add-Type'},$true)
+if($types.Count -ne 1) {throw 'Exact native API declaration required'}
+. ([scriptblock]::Create($types[0].Extent.Text))
+Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class NativeDialogFixture {
+    [DllImport("user32.dll",CharSet=CharSet.Unicode,ExactSpelling=true)] public static extern IntPtr CreateWindowExW(uint extended,string kind,string title,uint style,int x,int y,int width,int height,IntPtr owner,IntPtr menu,IntPtr instance,IntPtr data);
+    [DllImport("user32.dll")] public static extern bool DestroyWindow(IntPtr window);
+    public static IntPtr Create(string kind,string title,IntPtr owner) {
+        var result=CreateWindowExW(0,kind,title,0x90000000,20,20,240,160,owner,IntPtr.Zero,IntPtr.Zero,IntPtr.Zero);
+        if(result==IntPtr.Zero) throw new InvalidOperationException("Fixture window unavailable"); return result;
+    }
+}
+'@
+$handles=New-Object System.Collections.Generic.List[IntPtr]
+try {
+    $owner=[NativeDialogFixture]::Create('STATIC','Controlled owner',[IntPtr]::Zero);$handles.Add($owner)
+    $other=[NativeDialogFixture]::Create('STATIC','Other controlled owner',[IntPtr]::Zero);$handles.Add($other)
+    $title='Remember Studio API key on this computer'
+    $dialog=[NativeDialogFixture]::Create('#32770',$title,$owner);$handles.Add($dialog)
+    $pidValue=[uint32]$PID
+    if(-not [StudioNative]::EntryMatches($dialog,$pidValue,$owner)) {throw 'Actual owned standard dialog rejected'}
+    if([StudioNative]::EntryMatches($dialog,0,$owner) -or [StudioNative]::EntryMatches($dialog,$pidValue,$other)) {throw 'Foreign PID/owner admitted'}
+    if([StudioNative]::GetAncestor($dialog,3) -ne $owner) {throw 'Actual root owner API differs'}
+    foreach($kind in @('STATIC','#32770')) {
+        $wrongTitle=if($kind -eq '#32770') {'Wrong title'} else {$title}
+        $wrong=[NativeDialogFixture]::Create($kind,$wrongTitle,$owner);$handles.Add($wrong)
+        if([StudioNative]::EntryMatches($wrong,$pidValue,$owner)) {throw 'Wrong class/title admitted'}
+    }
+    $ProcessId=$PID;$Executable=(Get-Process -Id $ProcessId).Path;$script:mainWindowHandle=$owner
+    function Assert-Native($State,$Message) {if(-not $State) {throw $Message}}
+    $function=$ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Entry-Handle'},$true)
+    . ([scriptblock]::Create($function.Extent.Text))
+    if((Entry-Handle) -ne $dialog) {throw 'Actual enumerated dialog missing'}
+    $duplicate=[NativeDialogFixture]::Create('#32770',$title,$owner);$handles.Add($duplicate)
+    $caught=$false;try {Entry-Handle} catch {$caught=$_.Exception.Message -eq 'Ambiguous owned native entry dialogs'}
+    if(-not $caught) {throw 'Ambiguous owned dialogs admitted'}
+    [void][NativeDialogFixture]::DestroyWindow($duplicate)
+    [void][NativeDialogFixture]::DestroyWindow($dialog)
+    if((Entry-Handle) -ne [IntPtr]::Zero) {throw 'Missing dialog incorrectly admitted'}
+    Write-Output 'PASS: actual Win32 owned dialog lookup rejects wrong PID owner class title ambiguity and absence'
+} finally {foreach($handle in $handles) {if([StudioNative]::IsWindow($handle)) {[void][NativeDialogFixture]::DestroyWindow($handle)}}}
+""".replace('__SCRIPT__', script_path.as_posix().replace("'", "''"))
+            result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script], capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn('PASS: actual Win32 owned dialog lookup', result.stdout)
+
+        def test_actual_secure_entry_and_modal_cleanup_reject_missing_focus(self):
+            script_path = Path(__file__).with_name('studio-setup-windows.ps1').resolve()
+            script = r"""
+$ErrorActionPreference='Stop'
+Set-StrictMode -Version Latest
+Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes
+$tokens=$null;$errors=$null
+$ast=[System.Management.Automation.Language.Parser]::ParseFile('__SCRIPT__',[ref]$tokens,[ref]$errors)
+if($errors.Count) {throw 'Native helper syntax invalid'}
+foreach($name in @('Wait-Step','Wait-SavedControls','Secure-Entry','Cancel-OwnedEntry','Preview-Raw','Preview')) {
+    $f=$ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
+    if($null -eq $f) {throw ('Missing actual helper '+$name)}
+    . ([scriptblock]::Create($f.Extent.Text))
+}
+$mask=$ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Masked-FocusReady'},$true)
+$call=$mask.Find({param($n) $n -is [System.Management.Automation.Language.InvokeMemberExpressionAst] -and $n.Static -and $n.Member.Value -eq 'Compare'},$true)
+$owner=[type]$call.Expression.TypeName.FullName
+$compare=$owner.GetMethod('Compare',[type[]]@([System.Windows.Automation.AutomationElement],[System.Windows.Automation.AutomationElement]))
+$root=[System.Windows.Automation.AutomationElement]::RootElement
+if(-not $compare.Invoke($null,[object[]]@($root,$root))) {throw 'Masked-focus actual comparison API wrong'}
+$ProcessId=123;$script:mode='ok';$script:events=@();$script:polls=0;$script:active=$true
+$receipt=[ordered]@{checks=[ordered]@{}}
+function Assert-Native($State,$Message) {if(-not $State) {throw $Message}}
+function Wait-Native([scriptblock]$Check) {for($i=0;$i -lt 5;$i++) {if(& $Check) {return}};throw 'Bounded timeout'}
+function Wait-ButtonReady($Name) {$script:events+=@('ready:'+ $Name)}
+function Click-Control($Name) {$script:events+=@('click:'+ $Name);if($Name -in @('Remember','Cancel')) {$script:active=$false}}
+function Entry-Handle {$script:polls++;if($script:mode -eq 'missing' -or $script:polls -lt 3) {return [IntPtr]::Zero};return [IntPtr]55}
+function Assert-EntryOwner($Handle) {if($script:mode -eq 'wrong-owner') {throw 'Native entry handle/owner changed'};$script:events+=@('owner')}
+function Select-Entry($Handle) {
+    Assert-EntryOwner $Handle
+    if($script:mode -eq 'foreground') {throw 'Native wait failed: Native credential dialog foreground / Bounded timeout'}
+    $receipt.dialog=[ordered]@{maskedFieldFocusConfirmed=$false}
+    $script:window=New-Object PSObject
+    $script:window | Add-Member ScriptMethod FindAll {param($Scope,$Condition) return ,@([pscustomobject]@{Current=[pscustomobject]@{IsPassword=$true;ProcessId=123}})}
+}
+function Click-MaskedField($Edit) {$script:events+=@('masked-click')}
+function Masked-FocusReady($Edit) {$script:events+=@('focus');return ($script:mode -ne 'focus')}
+function Entry-Foreground($Handle) {return ($script:mode -ne 'lost-foreground')}
+function Send-PublicFixture {$script:events+=@('keys')}
+function Entry-Exists($Handle) {return $script:active}
+function Select-MainWindow {$script:events+=@('main')}
+function Has-Text($Text) {return $true}
+function Has-ButtonState($Name,$Enabled) {return $true}
+Secure-Entry
+if(-not $receipt.dialog.maskedFieldFocusConfirmed -or $script:events -notcontains 'keys' -or $script:events -notcontains 'click:Remember' -or $script:events[-1] -ne 'main') {throw 'Secure entry sequence incomplete'}
+foreach($mode in @('missing','wrong-owner','foreground','focus','lost-foreground')) {
+    $script:mode=$mode;$script:events=@();$script:polls=0;$script:active=$true;$receipt=[ordered]@{checks=[ordered]@{}};$caught=$false
+    try {Secure-Entry} catch {$caught=$true}
+    if(-not $caught -or $script:events -contains 'keys' -or $receipt.checks.Contains('nativeCredentialEntry')) {throw ('Unsafe native typing on '+$mode)}
+    if($mode -eq 'missing' -and $receipt.pendingNativeAction -ne 'Native credential dialog lookup') {throw 'Lookup failure phase missing'}
+    if($mode -eq 'focus' -and $receipt.pendingNativeAction -ne 'Native masked field keyboard focus') {throw 'Focus failure phase missing'}
+}
+$script:mode='ok';$script:polls=3;$script:active=$true;$script:events=@();$receipt=[ordered]@{checks=[ordered]@{}}
+Cancel-OwnedEntry
+if($script:events -notcontains 'click:Cancel' -or $script:active -or -not $receipt.checks.nativeDialogCancelled) {throw 'Owned modal not cancelled before main cleanup'}
+$script:mode='missing';$script:events=@();Cancel-OwnedEntry
+if($script:events.Count -ne 0) {throw 'Absent modal caused input'}
+$script:controlPolls=0;$script:controlsBlocked=$false
+function Has-ButtonState($Name,$Enabled) {$script:controlPolls++;return (-not $script:controlsBlocked -and $script:controlPolls -ge 3)}
+Wait-SavedControls 'Saved async fixture' 'Already drawn text'
+if($script:controlPolls -ne 3) {throw 'Saved text bypassed enabled-control readiness'}
+$script:controlsBlocked=$true;$caught=$false
+try {Wait-SavedControls 'Blocked async fixture' 'Already drawn text'} catch {$caught=$true}
+if(-not $caught -or $receipt.pendingNativeAction -ne 'Blocked async fixture') {throw 'Disabled saved state passed'}
+$script:previewPolls=0
+function Nodes {
+    $script:previewPolls++
+    $text=if($script:previewPolls -lt 3) {'{"model":"closeout-synthetic-setup","response_format":{"json_schema":{"name":"loomlight_compatibility_v1"'} else {'{"model":"closeout-synthetic-setup","response_format":{"json_schema":{"name":"loomlight_compatibility_v1"}}}'}
+    $node=[pscustomobject]@{Current=[pscustomobject]@{Name=$text;IsPassword=$false}}
+    $node | Add-Member ScriptMethod TryGetCurrentPattern {param($Pattern,$Result) return $false}
+    return @($node)
+}
+function Click-Any($Name) {$script:events+=@('preview-toggle')}
+function Capture-Stage($Name) {$script:events+=@('capture:'+ $Name)}
+$script:events=@();Preview
+if($script:previewPolls -ne 3 -or $receipt.preview.body.model -ne 'closeout-synthetic-setup' -or ($script:events -join ',') -ne 'ready:Save profile,preview-toggle,capture:synthetic-preview,preview-toggle') {throw 'Incomplete preview was accepted or no observed preview capture'}
+Write-Output 'PASS: actual secure entry sequence rejects missing ownership foreground and masked focus; modal cleanup cancels owned dialog'
+""".replace('__SCRIPT__', script_path.as_posix().replace("'", "''"))
+            result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script], capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn('PASS: actual secure entry sequence', result.stdout)
 
         def test_actual_navigation_helper_waits_for_enabled_controls_without_early_input(self):
             script_path = Path(__file__).with_name('studio-setup-windows.ps1').resolve()

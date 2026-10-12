@@ -1,8 +1,8 @@
 # Current status
 
-**Updated:** 2026-10-13. **Studio-only Phase 2 closeout is awaiting CI7.** Owner integrated live/SDK workflow passed on
-frozen929. CI6 failed its native driver’s Model ID control-type guard; Mac fixtures
-passed. Reviewed harness repair is prepared; CI7 is dispatched; terminal evidence is pending.
+**Updated:** 2026-10-13. **Studio-only Phase 2 native closeout is in progress after CI7 failed.** Owner integrated live/SDK workflow passed on
+frozen929. CI7 passed all five field inputs/saved sampling, then failed native
+credential-dialog acquisition or focus. Whole-sequence harness repairs are prepared.
 Final human acceptance is unclaimed.
 
 | Capability | Evidence | Remaining disposition |
@@ -20,21 +20,21 @@ product929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
 Continuation codex/provider-qualification; fresh local/origin8b9a5e5 matched,
 main5f448ca. Changes are external harness/status only, no product/package repair.
 
-[CI6](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38296502071)
-attempt1/b0d24b6 failed Windows, passed Mac; Win18+9/Mac18+7 fixtures passed.
-Exact ZIPs/manifests/inputs/executable audited. Windows start5/PID7408 only:
-Profile name/Endpoint focus/readback passed; Model ID rejected before save/key/HTTP,
-0/9 complete stages. Normal exit0/listener stop passed; absent profile store leaves
-root cleanup incomplete. ComboBox support only for Model ID is reviewed, with safe
-type diagnostics and rejecting fixtures; actual next native proof remains required.
+[CI7](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38309795814)
+attempt1/3d69b96 failed Windows, passed Mac; Win18+9/Mac18+7 fixtures passed.
+Exact ZIPs/manifests/inputs/executable audited. Windows start6/PID4636 only,
+all five inputs and saved.8/.9 passed. Dialog lookup/focus timed out before key
+input, 0/9 complete stages. Failure cleanup timed out; forced exit1/root retained,
+listener stopped. Exact substep unknown because waits shared one diagnostic.
+No product defect established. Whole-sequence driver fixes cover ownership/focus,
+modal cleanup, async readiness, complete preview, capture roles and pre-seed source.
 
-Counts: pairedCI7/7 per target, packages1/3 each, Windows starts5/7, ownerMacstarts5/6,
-live8/10/Rewrite3/4/discovery0. CI7 plans starts6–7 under the approved Windows ceiling7; actual counts await receipts. No duplicate dispatch, polling or auto-wake. Generic providers/Phase3,
+Counts: pairedCI7 dispatched each target, packages1/3 each, Windowsstarts6,
+ownerMacstarts5/6/live8/10/Rewrite3/4/discovery0. User explicitly authorizes needed
+further CI and Windows starts. Working batch up to CI8–10/Windowsstarts7–12;
+reassess after two unsuccessful same-cause corrections. CI8/start7–8 prepared,
+Win18+11/Mac18+7 required, no builds or owner sends. Manual wait policy preserved.
+Generic providers/Phase3,
 route context and AI ending/connection changes remain excluded or user-deferred.
 [Owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#independent-sol-ci6-audit-and-model-id-harness-repair--2026-10-13)
 retains exact failures and limits; [HANDOVER](HANDOVER.md) owns continuation.
-
-[CI7run38309795814](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38309795814),
-attempt1/harness3d69b96/tree17a1c3f, last observed in_progress
-2026-10-12T21:18:42Z. Paired allowance exhausted. Resume this same chat for the
-exact terminal audit; no polling/auto-wake or further dispatch is authorized.

@@ -1,5 +1,5 @@
 param(
-    [Parameter(Mandatory=$true)][ValidateSet('preflight','seed','ready-first','invalidate','cancel','ready-final','close','reopen','cleanup','close-reopen','cleanup-after-failure','close-after-failure')][string]$Stage,
+    [Parameter(Mandatory=$true)][ValidateSet('preflight','observe-initial','seed','ready-first','invalidate','cancel','ready-final','close','reopen','cleanup','close-reopen','cleanup-after-failure','close-after-failure')][string]$Stage,
     [Parameter(Mandatory=$true)][string]$Output,
     [Parameter(Mandatory=$true)][string]$ProductRepo,
     [Parameter(Mandatory=$true)][string]$Executable,
@@ -12,6 +12,86 @@ param(
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 $receipt=[ordered]@{stage=$Stage;passed=$false;processId=$ProcessId;executableSHA256=$null;inputDesktop=$null;checks=[ordered]@{};captures=@();controls=@();fieldEntries=@();uiaStaleRetries=0;layer='Windows UIA observation and physical OS keyboard/mouse input; not human acceptance'}
+Add-Type @'
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+public static class StudioNative {
+    public delegate bool WindowVisitor(IntPtr window, IntPtr data);
+    [DllImport("user32.dll")] public static extern bool EnumWindows(WindowVisitor visitor, IntPtr data);
+    [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr window);
+    [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr window);
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr window, out uint pid);
+    [DllImport("user32.dll")] public static extern IntPtr GetWindow(IntPtr window, uint command);
+    [DllImport("user32.dll")] public static extern IntPtr GetAncestor(IntPtr window, uint flags);
+    [DllImport("user32.dll", CharSet=CharSet.Unicode,ExactSpelling=true)] public static extern int GetWindowTextW(IntPtr window, StringBuilder text, int count);
+    [DllImport("user32.dll", CharSet=CharSet.Unicode,ExactSpelling=true)] public static extern int GetClassNameW(IntPtr window, StringBuilder text, int count);
+    public static uint PID(IntPtr window) { uint pid; GetWindowThreadProcessId(window, out pid); return pid; }
+    public static bool EntryMatches(IntPtr window, uint pid, IntPtr owner) {
+        if (!IsWindow(window) || !IsWindowVisible(window) || PID(window)!=pid || GetWindow(window,4)!=owner) return false;
+        var title=new StringBuilder(128); var kind=new StringBuilder(64);
+        GetWindowTextW(window,title,title.Capacity); GetClassNameW(window,kind,kind.Capacity);
+        return kind.ToString()=="#32770" && title.ToString()=="Remember Studio API key on this computer";
+    }
+    public static IntPtr[] Entries(uint pid, IntPtr owner) {
+        var found=new List<IntPtr>();
+        if (!EnumWindows(delegate(IntPtr window, IntPtr data) {
+            if (EntryMatches(window,pid,owner)) found.Add(window); return true;
+        }, IntPtr.Zero)) throw new InvalidOperationException("Owned window enumeration failed");
+        return found.ToArray();
+    }
+}
+'@
+function Wait-Step([string]$Name,[scriptblock]$Check) {
+    $receipt.pendingNativeAction=$Name
+    try {Wait-Native $Check} catch {throw ('Native wait failed: '+$Name+' / '+$_.Exception.Message)}
+}
+function Entry-Handle {
+    $owned=Get-Process -Id $ProcessId
+    Assert-Native ([IO.Path]::GetFullPath($owned.Path) -eq [IO.Path]::GetFullPath($Executable)) 'Dialog owner executable mismatch'
+    $handles=@([StudioNative]::Entries([uint32]$ProcessId,$script:mainWindowHandle))
+    Assert-Native ($handles.Count -le 1) 'Ambiguous owned native entry dialogs'
+    if($handles.Count -eq 1) {return $handles[0]}
+    return [IntPtr]::Zero
+}
+function Assert-EntryOwner($Handle) {
+    Assert-Native ((Entry-Handle) -eq $Handle -and $Handle -ne [IntPtr]::Zero) 'Native entry handle/owner changed'
+}
+function Entry-Exists($Handle) {return [StudioNative]::IsWindow($Handle)}
+function Entry-Foreground($Handle) {return [RewriteNative]::GetForegroundWindow() -eq $Handle}
+function Masked-FocusReady($Edit) {
+    $focused=[System.Windows.Automation.AutomationElement]::FocusedElement
+    return ($null -ne $focused -and $focused.Current.IsPassword -and $focused.Current.HasKeyboardFocus -and [System.Windows.Automation.Automation]::Compare($Edit,$focused))
+}
+function Click-MaskedField($Edit) {
+    Focus-Control $Edit
+    Assert-EntryOwner $script:handle
+    Assert-Native (Entry-Foreground $script:handle) 'Native entry lost foreground before masked mouse input'
+    $bounds=$Edit.Current.BoundingRectangle
+    Assert-Native ([RewriteNative]::Click([int]($bounds.Left+$bounds.Width/2),[int]($bounds.Top+$bounds.Height/2))) 'Masked field physical click failed'
+    $receipt.checks.osMouseInput=$true
+}
+function Send-PublicFixture {[System.Windows.Forms.SendKeys]::SendWait('loomlight-public-setup-fixture')}
+function Select-Entry($Handle) {
+    Assert-EntryOwner $Handle
+    $receipt.dialog=[ordered]@{handle=$Handle.ToInt64();owner=$script:mainWindowHandle.ToInt64();processId=$ProcessId;class='#32770';owned=$true;foregroundConfirmed=$false;maskedFieldFocusConfirmed=$false}
+    [void][RewriteNative]::SetForegroundWindow($Handle)
+    Wait-Step 'Native credential dialog foreground' {Entry-Foreground $Handle}
+    Assert-EntryOwner $Handle
+    $script:window=[System.Windows.Automation.AutomationElement]::FromHandle($Handle);$script:handle=$Handle
+    Assert-Native ($script:window.Current.ProcessId -eq $ProcessId) 'Native entry UIA/PID mismatch'
+    $receipt.dialog.foregroundConfirmed=$true
+    Ensure-ObservableWindow
+}
+function Cancel-OwnedEntry {
+    $entry=Entry-Handle
+    if($entry -eq [IntPtr]::Zero) {return}
+    Select-Entry $entry
+    Wait-ButtonReady 'Cancel';Click-Control 'Cancel'
+    Wait-Step 'Native credential dialog cancelled' {-not (Entry-Exists $entry)}
+    $receipt.checks.nativeDialogCancelled=$true
+}
 function Frozen-Definitions {
     $path=Join-Path $ProductRepo 'app/scripts/rewrite-windows-native.ps1'
     $tokens=$null;$errors=$null
@@ -104,12 +184,20 @@ function Observe-Field([string]$Name,[string]$Expected) {
     Assert-Native ((Value $Name) -eq $Expected) ('Native saved value mismatch: '+$Name)
     $receipt.controls+=@([ordered]@{name=$Name;value=(Value $Name);type=$control.Current.ControlType.ProgrammaticName;enabled=$control.Current.IsEnabled;owner=$script:window.Current.ProcessId;elementProcessId=$control.Current.ProcessId})
 }
-function Capture-Stage([string]$Name) { $receipt.captures+=@(Capture $Name (Window-Rect $script:handle)) }
+function Capture-Stage([string]$Name) {
+    Assert-Native ($script:handle -eq $script:mainWindowHandle -and [RewriteNative]::GetForegroundWindow() -eq $script:mainWindowHandle) 'Capture requires owned foreground main window'
+    Assert-Native ((Entry-Handle) -eq [IntPtr]::Zero) 'Native entry dialog suppresses stage capture'
+    Assert-Native ($script:window.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::IsPasswordProperty,$true)).Count -eq 0) 'Password field suppresses stage capture'
+    $receipt.captures+=@(Capture $Name (Window-Rect $script:handle))
+}
 function Wait-ButtonReady([string]$Name) {
     $receipt.pendingNativeAction=$Name
     # A native window/foreground handle does not establish WebView readiness.
     # Re-query the exact typed button using the qualified bounded polling helper.
     Wait-Native {Has-ButtonState $Name $true}
+}
+function Wait-SavedControls([string]$Phase,[string]$Text,[string]$ButtonName='Save profile') {
+    Wait-Step $Phase {(Has-Text $Text) -and (Has-ButtonState $ButtonName $true)}
 }
 function Open-Settings {
     if($null -eq (Button 'Close settings')) {
@@ -167,19 +255,10 @@ function Observe-FailureState {
 }
 
 function Preview {
+    Wait-ButtonReady 'Save profile'
     Click-Any 'Synthetic setup test request'
-    Wait-Native {Has-Text 'loomlight_compatibility_v1'}
-    $raw=$null
-    foreach($node in (Nodes)) {
-        $text=$node.Current.Name
-        if($text -and $text.Trim().StartsWith('{') -and $text.Contains('loomlight_compatibility_v1')) {$raw=$text.Trim();break}
-        $pattern=$null
-        if($node.TryGetCurrentPattern([System.Windows.Automation.TextPattern]::Pattern,[ref]$pattern)) {
-            $text=$pattern.DocumentRange.GetText(4096).Trim()
-            if($text.StartsWith('{') -and $text.Contains('loomlight_compatibility_v1')) {$raw=$text;break}
-        }
-    }
-    Assert-Native ($null -ne $raw) 'Complete exact synthetic request not exposed natively'
+    Wait-Step 'Complete synthetic preview JSON' {$script:previewRaw=Preview-Raw;$null -ne $script:previewRaw}
+    $raw=$script:previewRaw
     $body=$raw | ConvertFrom-Json
     Assert-Native ($body.model -eq 'closeout-synthetic-setup' -and $body.response_format.json_schema.name -eq 'loomlight_compatibility_v1') 'Synthetic native preview identity mismatch'
     $bytes=[Text.Encoding]::UTF8.GetBytes($raw)
@@ -188,44 +267,66 @@ function Preview {
     $receipt.preview=[ordered]@{raw=$raw;rawSHA256=$digest;body=$body}
     $receipt.checks.syntheticPreview=$true
     Capture-Stage 'synthetic-preview'
-    # Keep the normal Settings viewport usable for the following action.
     Click-Any 'Synthetic setup test request'
+}
+function Preview-Raw {
+    foreach($node in (Nodes)) {
+        if($node.Current.IsPassword) {continue}
+        $text=$node.Current.Name
+        $candidates=@($text)
+        $pattern=$null
+        if($node.TryGetCurrentPattern([System.Windows.Automation.TextPattern]::Pattern,[ref]$pattern)) {
+            $candidates+=@($pattern.DocumentRange.GetText(4096))
+        }
+        foreach($candidate in $candidates) {
+            if(-not $candidate) {continue}
+            $candidate=$candidate.Trim()
+            if(-not $candidate.StartsWith('{') -or -not $candidate.Contains('loomlight_compatibility_v1')) {continue}
+            try {
+                $body=$candidate | ConvertFrom-Json -ErrorAction Stop
+                if($body.model -eq 'closeout-synthetic-setup' -and $body.response_format.json_schema.name -eq 'loomlight_compatibility_v1') {return $candidate}
+            } catch {continue}
+        }
+    }
+    return $null
 }
 function Secure-Entry {
     $receipt.pendingNativeAction='Enter public fixture credential'
     $receipt.checks.credentialEntryAttempted=$true
-    Click-Control ('Enter credential'+[char]0x2026)
-    $pidCondition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty,$ProcessId)
-    $nameCondition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty,'Remember Studio API key on this computer')
-    $condition=[System.Windows.Automation.AndCondition]::new([System.Windows.Automation.Condition[]]@($pidCondition,$nameCondition))
-    $dialog=$null
-    Wait-Native {$script:secureDialog=[System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Children,$condition);$null -ne $script:secureDialog}
-    $dialog=$script:secureDialog
-    Assert-Native ($dialog.Current.ProcessId -eq $ProcessId) 'Secure entry owner mismatch'
-    $dialogHandle=[IntPtr]$dialog.Current.NativeWindowHandle
-    [void][RewriteNative]::SetForegroundWindow($dialogHandle)
-    Wait-Native {[RewriteNative]::GetForegroundWindow() -eq $dialogHandle}
-    $script:window=$dialog;$script:handle=$dialogHandle
+    Wait-ButtonReady ('Enter credential'+[char]0x2026);Click-Control ('Enter credential'+[char]0x2026)
+    Wait-Step 'Native credential dialog lookup' {$script:entryHandle=Entry-Handle;$script:entryHandle -ne [IntPtr]::Zero}
+    $dialogHandle=$script:entryHandle;Select-Entry $dialogHandle
+    $dialog=$script:window
     $edits=$dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty,[System.Windows.Automation.ControlType]::Edit))
-    Assert-Native ($edits.Count -eq 1 -and $edits[0].Current.IsPassword) 'One masked native entry field required'
+    Assert-Native ($edits.Count -eq 1 -and $edits[0].Current.IsPassword -and $edits[0].Current.ProcessId -eq $ProcessId) 'One owned masked native entry field required'
     # Only write the known public fixture value. Never request its ValuePattern,
     # text, native window text, OS credential, or renderer key data.
-    Focus-Control $edits[0]
-    [System.Windows.Forms.SendKeys]::SendWait('loomlight-public-setup-fixture')
+    Click-MaskedField $edits[0]
+    Wait-Step 'Native masked field keyboard focus' {Masked-FocusReady $edits[0]}
+    Assert-EntryOwner $dialogHandle
+    Assert-Native (Entry-Foreground $dialogHandle) 'Native entry lost foreground before public fixture typing'
+    $receipt.dialog.maskedFieldFocusConfirmed=$true
+    $receipt.pendingNativeAction='Type public fixture into verified native masked field'
+    Send-PublicFixture
+    Assert-EntryOwner $dialogHandle
+    Assert-Native (Entry-Foreground $dialogHandle) 'Native entry lost foreground before Remember'
     Click-Control 'Remember'
+    Wait-Step 'Native credential dialog saved and dismissed' {-not (Entry-Exists $dialogHandle)}
     $receipt.checks.nativeCredentialEntry=$true;$receipt.checks.osKeyboardInput=$true
     Select-MainWindow
-    Wait-Native {Has-Text 'Credential: configured'}
+    Wait-SavedControls 'Saved credential status and enabled Settings' 'Credential: configured'
 }
 function Select-MainWindow {
+    param([switch]$ObserveOnly)
     Wait-Native {(Get-Process -Id $ProcessId).MainWindowHandle -ne [IntPtr]::Zero}
-    $script:handle=(Get-Process -Id $ProcessId).MainWindowHandle
+    $script:handle=[StudioNative]::GetAncestor((Get-Process -Id $ProcessId).MainWindowHandle,3)
     $script:mainWindowHandle=$script:handle
     $script:window=[System.Windows.Automation.AutomationElement]::FromHandle($script:handle)
     Assert-Native ($script:window.Current.ProcessId -eq $ProcessId) 'Owned window/PID mismatch'
+    $receipt.checks.ownedWindow=$true
+    if($ObserveOnly) {return}
     [void][RewriteNative]::SetForegroundWindow($script:handle)
     Wait-Native {[RewriteNative]::GetForegroundWindow() -eq $script:handle}
-    $receipt.checks.ownedWindow=$true
     Ensure-ObservableWindow
 }
 try {
@@ -244,26 +345,36 @@ try {
     } else {
         $owned=Get-Process -Id $ProcessId
         Assert-Native ([IO.Path]::GetFullPath($owned.Path) -eq [IO.Path]::GetFullPath($Executable)) 'Owned executable/PID mismatch'
+        Select-MainWindow -ObserveOnly
+        if($Stage -in @('cleanup','cleanup-after-failure','close','close-reopen','close-after-failure')) {Cancel-OwnedEntry}
         Select-MainWindow
-        if($Stage -notin @('close','close-reopen','close-after-failure')) {Open-Settings}
+        if($Stage -notin @('observe-initial','close','close-reopen','close-after-failure')) {Open-Settings}
         switch($Stage) {
+            'observe-initial' {
+                Wait-ButtonReady 'Settings'
+                $receipt.checks.sourceBaselineReady=$true
+            }
             'seed' {
                 Observe-Field 'Temperature' '1';Observe-Field 'Top-p' '0.95';$receipt.checks.defaults=$true;Capture-Stage 'defaults'
                 Set-Field 'Profile name' 'Closeout native setup';Set-Field 'Endpoint' $Endpoint;Set-Field 'Model ID' 'closeout-synthetic-setup'
                 Set-Field 'Temperature' '0.8';Set-Field 'Top-p' '0.9'
                 $receipt.checks.profileSaveAttempted=$true
-                Click-Control 'Save profile';Wait-Native {Has-Text 'Credential: missing'}
+                Click-Control 'Save profile'
+                Wait-SavedControls 'Initial profile saved and fields enabled' 'Credential: missing'
+                Wait-ButtonReady ('Enter credential'+[char]0x2026)
+                $receipt.checks.savedControlsReady=$true
                 Observe-Field 'Temperature' '0.8';Observe-Field 'Top-p' '0.9';$receipt.checks.samplingSaved=$true
                 Secure-Entry;Preview
             }
             'ready-first' {
                 Click-Control 'Test setup';$receipt.checks.explicitSetup=$true
-                Wait-Native {Has-Text 'Setup tested for structured proposals. Every generated result still needs review.'}
+                Wait-SavedControls 'First setup ready and controls enabled' 'Setup tested for structured proposals. Every generated result still needs review.' 'Test setup'
                 $receipt.checks.ready=$true;Capture-Stage 'ready'
             }
             'invalidate' {
                 Set-Field 'Temperature' '0.7';Set-Field 'Top-p' '0.85';Click-Control 'Save profile'
-                Wait-Native {Has-Text 'Setup untested; run Test setup before a project send'}
+                Wait-SavedControls 'Sampling saved, invalidated and fields enabled' 'Setup untested; run Test setup before a project send'
+                $receipt.checks.savedControlsReady=$true
                 Observe-Field 'Temperature' '0.7';Observe-Field 'Top-p' '0.85';$receipt.checks.samplingSaved=$true;$receipt.checks.readinessInvalidated=$true
                 Preview
             }
@@ -273,12 +384,13 @@ try {
                 Wait-Native {Test-Path -LiteralPath $FixtureSignal}
                 $received=Get-Content -LiteralPath $FixtureSignal -Raw | ConvertFrom-Json
                 Assert-Native ($received.sequence -eq 2 -and $received.accepted -eq $true) 'Exact stalled synthetic POST was not received'
-                Click-Control 'Cancel setup test';Wait-Native {Has-Text 'Setup test cancelled. No compatibility recorded.'}
+                Click-Control 'Cancel setup test'
+                Wait-Step 'Setup cancelled and controls enabled' {(Has-Text 'Setup test cancelled. No compatibility recorded.') -and (Has-ButtonState 'Test setup' $true) -and (Has-ButtonState 'Cancel setup test' $false)}
                 $receipt.checks.cancelled=$true;$receipt.checks.untested=$true;Capture-Stage 'cancelled'
             }
             'ready-final' {
                 Click-Control 'Test setup';$receipt.checks.explicitSetup=$true
-                Wait-Native {Has-Text 'Setup tested for structured proposals. Every generated result still needs review.'}
+                Wait-SavedControls 'Final setup ready and controls enabled' 'Setup tested for structured proposals. Every generated result still needs review.' 'Test setup'
                 $receipt.checks.ready=$true;Capture-Stage 'ready'
             }
             'reopen' {
@@ -289,8 +401,8 @@ try {
                 Preview
             }
             {$_ -in @('cleanup','cleanup-after-failure')} {
-                if(Has-ButtonState 'Cancel setup test' $true) {Click-Control 'Cancel setup test';Wait-Native {Has-ButtonState 'Cancel setup test' $false}}
-                if(Has-ButtonState 'Remove profile' $true) {Click-Control 'Remove profile';Wait-Native {Has-Text 'Credential: not configured'}}
+                if(Has-ButtonState 'Cancel setup test' $true) {Click-Control 'Cancel setup test';Wait-Step 'Cleanup request cancelled' {(Has-ButtonState 'Cancel setup test' $false) -and (Has-ButtonState 'Save profile' $true)}}
+                if(Has-ButtonState 'Remove profile' $true) {Click-Control 'Remove profile';Wait-SavedControls 'Owned profile removed and controls enabled' 'Credential: not configured'}
                 Assert-Native (Has-Text 'Credential: not configured') 'Owned profile cleanup incomplete'
                 $receipt.checks.profileRemoved=$true;$receipt.checks.noConfiguredCredential=$true;Capture-Stage 'removed'
             }
@@ -299,6 +411,7 @@ try {
                 Select-MainWindow
                 Assert-Native ([RewriteNative]::GetForegroundWindow() -eq $script:handle) 'Owned close lost foreground'
                 [System.Windows.Forms.SendKeys]::SendWait('%{F4}')
+                $receipt.pendingNativeAction='Owned main close input sent; child exit checked by controller'
                 $receipt.checks.normalClose=$true;$receipt.checks.osKeyboardInput=$true
             }
         }
