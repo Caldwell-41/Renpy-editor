@@ -7989,3 +7989,32 @@ Local18+7 portable tests, four-file Python syntax, actionlint, privacy8files and
 whitespace pass. Existing dispatches checked once; latest is terminal CI6, no
 CI7 duplicate. Windows18+9/Mac18+7 and nine actual native stages remain required.
 Zero new package/editor/provider operations before dispatch.
+
+#### CI7 confirmed dispatch and manual wait — 2026-10-13
+
+Reviewed alignment3d69b96e748e092f1f348a7348f416e65c6ec90b/tree
+17a1c3f2953571b75ae6be4b69385a228a1933f3 published normally; origin verified.
+Seven canonical harness digest
+a5ae8cd2d68e507d9e7daff9a744da0f92cdfe4aac9eaca3d90a0f2c1209fe06
+and declared PS1CRLF alternative retained in ignored ci-07-dispatch.json.
+Product frozen929/269digest3c244 and CI1 executable unchanged.
+
+[CI7run38309795814](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38309795814)
+confirmed attempt1/workflow_dispatch/exact3d69b96/branchcodex/provider-qualification;
+created2026-10-12T21:18:26Z, last observedin_progress2026-10-12T21:18:42Z.
+Only selectable_proposals/studio_setup_only true; dispatch7/firststart6,
+all older selectors false/default, zero new builds or Studio credential.
+PairedCI7/7 each target exhausted. Windows actualstarts5/7 before run;
+planned6–7 must be counted from every terminal/reservation including failures.
+Mac package1/3/ownerstarts5/6, Windowspackage1/3, live8/10/Rewrite3/4/discovery0
+unchanged. No additional attempt/launch/send is authorized.
+
+State **awaiting_ci**. Manual same-thread wait: record and end turn; no model
+polling, watcher, auto-wake or duplicate dispatch. User resume cues one exact
+38309795814/attempt1 terminal audit: both required jobs, ZIP/manifests, product269/
+harness7/CRLF, reused executable, Win18+9/Mac18+7 without required skips, all nine
+native stages/actual PNGs/Model ID type/physical focus/readback/defaults/sampling/
+setup/invalidation/cancel/readiness/process reopen, credential/root/listener cleanup
+and every launch reservation. If pending pause again; failed/missing/skipped proof
+remains unresolved. Historical CI6 and failed cleanup remain failed. Final human
+sign-off unclaimed; UI-refinement prompt only follows successful technical audit.

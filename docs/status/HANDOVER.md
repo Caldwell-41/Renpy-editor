@@ -1,17 +1,23 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — reviewed repair; CI7/start6–7 approved
+## Studio-only Phase 2 closeout — awaiting exact CI7 terminal audit
 
 The user-requested Sol review chat is sole writer/executor; parent stopped after
 transfer. Continue the same outcome here. User authorizes supported fixes, publication
 and **one additional paired CI7**. CI6 is terminal, independently audited failure.
-No current CI operation is pending. User approved Windows-only editor ceiling6→7. Native proof uses initial start6
-and process reopen7; no further editor or paired CI allowance is implied.
+**Pending CI7:** [run38309795814](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38309795814),
+attempt1/workflow_dispatch/exact harness3d69b96e748e092f1f348a7348f416e65c6ec90b/
+tree17a1c3f2953571b75ae6be4b69385a228a1933f3, last observed in_progress
+2026-10-12T21:18:42Z. User approved Windows-only ceiling7; planned starts6–7.
+Dispatch receipt/confirmed raw run in ignored ci-07-dispatch.json/ci-07-confirmed.json;
+seven canonical harness digest a5ae8cd2d68e507d9e7daff9a744da0f92cdfe4aac9eaca3d90a0f2c1209fe06,
+declared PS1CRLF alternatives retained. No further paired CI authorized.
 
 **Branch/state:** codex/provider-qualification. Fresh local/origin
 8b9a5e5b08e099c1eb6adb21a49646d834381761 and main
 5f448ca683a905f4ea77d4580bbc89fda69f2b93 matched on entry; clean tree then.
-Current repair/status changes are external harness/docs only. Preserve unrelated
+Reviewed external harness alignment3d69b96 published normally and verified;
+current successor records the wait only. Preserve unrelated
 work, no reset. Normal publication is authorized; no merge/release.
 
 **Exact product:**929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
@@ -61,17 +67,16 @@ Windows helper fixture tests actual shared type predicate/production focus wirin
 API owners, delayed/blocked focus and input order. Mocked focus is not native proof.
 TESTING stale start ordinals corrected to approved cumulative reservations.
 Independent read-only code/artifact review and fixture re-review pass; local18+7,
-Python syntax/actionlint/privacy3files/diff pass. Windows9 cases await CI7.
+Python syntax/actionlint/privacy3files/diff pass. Windows9 cases await CI7 terminal evidence.
 No product defect or production change justified.
 
-**Limits/next:** pairedCI6/7 each target; packagesWindows1/3Mac1/3;
+**Limits/next:** pairedCI7/7 each target; packagesWindows1/3Mac1/3;
 Windowsstarts5/7, ownerMacstarts5/6 including conservative implicit lookup.
 Live8/10/Rewrite3/4/extra blocker1of2used/discovery0. **Windows-only
-editor ceiling7 approved**; CI7 needs initial6/reopen7. Align
-preparation/controller/parser/terminal/sealing/fixtures to CI7/start6–7, focused
-check and independent review, publish normally, verify exact refs, check existing
-operations and dispatch exactly once. Record run/attempt/harness/product/receipt,
-then end turn under manual same-thread wait policy. No polling/watcher/auto-wake,
+editor ceiling7 approved**; CI7 initial6/reopen7 reservations await audit.
+Preparation/controller/parser/terminal/sealing/fixtures are aligned and independently
+reviewed; local18+7/syntax/actionlint/privacy8files/diff pass. Paired allowance exhausted.
+End turn under manual same-thread wait policy; resume only on user command. No polling/watcher/auto-wake,
 CI8 or old-run rerun. On user resume, audit terminal jobs/artifacts/native stages,
 all reservations and credential/root cleanup. Failed/missing/skipped remains
 unresolved. No new owner operations, provider expansion/discovery/installations,

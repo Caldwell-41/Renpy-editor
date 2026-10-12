@@ -1,9 +1,8 @@
 # Current status
 
-**Updated:** 2026-10-13. **Studio-only Phase 2 closeout has an approved Windows
-editor-start ceiling of 7.** Owner integrated live/SDK workflow passed on
+**Updated:** 2026-10-13. **Studio-only Phase 2 closeout is awaiting CI7.** Owner integrated live/SDK workflow passed on
 frozen929. CI6 failed its native driver’s Model ID control-type guard; Mac fixtures
-passed. Reviewed harness repair is prepared; CI7 is authorized and being prepared.
+passed. Reviewed harness repair is prepared; CI7 is dispatched; terminal evidence is pending.
 Final human acceptance is unclaimed.
 
 | Capability | Evidence | Remaining disposition |
@@ -29,8 +28,13 @@ Profile name/Endpoint focus/readback passed; Model ID rejected before save/key/H
 root cleanup incomplete. ComboBox support only for Model ID is reviewed, with safe
 type diagnostics and rejecting fixtures; actual next native proof remains required.
 
-Counts: pairedCI6/7 per target, packages1/3 each, Windows starts5/7, ownerMacstarts5/6,
-live8/10/Rewrite3/4/discovery0. CI7 needs starts6–7; **Windows-only ceiling7 approved**. No duplicate dispatch, polling or auto-wake. Generic providers/Phase3,
+Counts: pairedCI7/7 per target, packages1/3 each, Windows starts5/7, ownerMacstarts5/6,
+live8/10/Rewrite3/4/discovery0. CI7 plans starts6–7 under the approved Windows ceiling7; actual counts await receipts. No duplicate dispatch, polling or auto-wake. Generic providers/Phase3,
 route context and AI ending/connection changes remain excluded or user-deferred.
 [Owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#independent-sol-ci6-audit-and-model-id-harness-repair--2026-10-13)
 retains exact failures and limits; [HANDOVER](HANDOVER.md) owns continuation.
+
+[CI7run38309795814](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38309795814),
+attempt1/harness3d69b96/tree17a1c3f, last observed in_progress
+2026-10-12T21:18:42Z. Paired allowance exhausted. Resume this same chat for the
+exact terminal audit; no polling/auto-wake or further dispatch is authorized.
