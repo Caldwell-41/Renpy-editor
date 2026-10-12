@@ -8092,3 +8092,35 @@ four-file Python syntax, actionlint and whitespace pass. Final changed-source pr
 11files passes. Windows11 helper fixtures run before any new editor launch, so a
 fixture failure consumes CI but no editor start. CURRENT/HANDOVER now agree
 with terminalCI7 and new user authorization. Whole sequence still needs native proof.
+
+#### Whole-sequence CI8 confirmed dispatch and manual wait — 2026-10-13
+
+Reviewed repairb42b1b76b08245ed9163b7a3f990a88d25e33c2c/tree
+e455a8d2a98357dfe7586f6c7a5f79ef5b33ca96 published normally and origin verified.
+Seven canonical harness digest33956ba87af70a0010db33aea29f885c1c5a1caab92f732fbdd76d6fd2848514
+and declared PS1CRLF alternative retained in ignored ci-08-dispatch.json.
+Fresh preceding local/origin0ac9fa1 and main5f448ca matched; unrelated work preserved.
+No product/package/signing changes; frozen929/269digest3c244/CI1 executable unchanged.
+
+[CI8run38314054057](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38314054057)
+confirmed attempt1/workflow_dispatch/exactb42b1b7/branchcodex/provider-qualification,
+created2026-10-12T21:59:55Z, last observedqueued2026-10-12T22:00:01Z.
+Only selectable_proposals/studio_setup_only true; dispatch8/firststart7, other
+selectors false/default. Win18+11/Mac18+7 fixtures before Windows editor start;
+all nine required native stages plus observe-initial support receipt mandatory.
+Windows actualstarts6 beforeCI8; planned7–8 await every reservation/terminal audit.
+PairedCI8 cumulative (workingbatch8–10); Windowspackage1/3/Macpackage1/3,
+ownerMacstarts5/6/live8/10/Rewrite3/4/discovery0 unchanged. Zero new builds/owner
+launches/live provider calls. Public synthetic fixture only.
+
+State awaiting_ci. End turn under manual same-thread wait: no polling/watcher/
+auto-wake/duplicate dispatch. User resume cues exact38314054057/attempt1 audit of
+required jobs/ZIP/manifests/product269/harness7/PSCRLF/reused executable and tests,
+all required captures/dialog phase+ownership+focus/readback/async save/preview/setup/
+invalidation/cancel/reopen/normal exits/pre-seed source/credential-root cleanup,
+and all reservations including failures or missing terminal. Pending means pause.
+Failed/missing/skipped stays unresolved; preserve all CI7 forced-exit/root evidence.
+Supported fixes and necessary retries within remaining selected batch are authorized;
+reassess after two unsuccessful same-hypothesis corrections. No final human sign-off,
+UI refinement execution, provider expansion or Phase3. UI-refinement prompt follows
+technical success; later guided feedback remains user-owned.

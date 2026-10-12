@@ -1,21 +1,26 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — whole-sequence repair and CI8 preparation
+## Studio-only Phase 2 closeout — awaiting whole-sequence CI8 terminal audit
 
 The requested Sol chat remains sole writer/executor. User directs audit of the whole
 native sequence, fix and as many CI runs as needed; expressly confirms needed Windows
 editor starts. This supersedes prior pairedCI7/Windowseditor7 ceilings. Other package,
 Mac/live/provider/signing/scope limits remain. Work in finite internal batchCI8–10 /
 Windowsstarts7–12, reassess after two unsuccessful corrections of one hypothesis.
-No external operation currently pending. Whole-sequence repair and independent
-review precede exactly one CI8/start7–8 publication/dispatch. Manual same-chat wait
-policy still applies: record run then end turn, no polling/auto-wake.
+**Pending:** [CI8run38314054057](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38314054057),
+attempt1/workflow_dispatch/exact harnessb42b1b76b08245ed9163b7a3f990a88d25e33c2c/
+treee455a8d2a98357dfe7586f6c7a5f79ef5b33ca96, queued2026-10-12T22:00:01Z.
+Reviewed whole-sequence repair published normally/origin verified; seven canonical
+harness digest33956ba87af70a0010db33aea29f885c1c5a1caab92f732fbdd76d6fd2848514,
+PS1CRLF alternative and exact run in ignored ci-08-dispatch.json/ci-08-confirmed.json.
+CI8/start7–8 planned, actual reservations await audit. Manual same-chat wait: record
+and end turn, no polling/auto-wake/duplicate.
 
 **Branch/state:** codex/provider-qualification. Fresh local/origin
 8b9a5e5b08e099c1eb6adb21a49646d834381761 and main
 5f448ca683a905f4ea77d4580bbc89fda69f2b93 matched on entry; clean tree then.
-Published alignment3d69b96/CI7 and docs0ac9fa1 retained; current whole-sequence
-external harness/docs repairs are local pending final review/publication. Preserve unrelated
+Published alignment3d69b96/CI7 and docs0ac9fa1 retained; whole-sequence
+external repairb42b1b7 published; current successor records wait only. Preserve unrelated
 work, no reset. Normal publication is authorized; no merge/release.
 
 **Exact product:**929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
@@ -88,13 +93,13 @@ and real child exits remain explicit. New actual Win32 controlled-window and
 production-helper rejecting fixtures; Win18+11/Mac18+7 required. Source/product929
 and package remain unchanged. See latest
 [owning audit](../tasks/active/phase-2-initial-llm-assistance.md#ci7-terminal-audit-and-whole-sequence-reassessment--2026-10-13)
-for every finding/repair/authority. Local focused checks and final independent review
-precede dispatch. Actual native stages/cleanup remain unproved.
+for every finding/repair/authority. Local18+7/syntax/actionlint/privacy11files/whitespace and final independent review
+passed before dispatch. Actual native stages/cleanup remain unproved.
 
 **Limits/next:** paired7 dispatched; Windowsstarts6, package1/3; Macpackage1/3,
 ownerstarts5/6; live8/10/Rewrite3/4/extra1of2used/discovery0. New user-approved
 Windows starts/CI cover the necessary native runs; working batchCI8–10/starts7–12.
-NextCI8/start7–8 identities align across preparation/controller/parser/terminal/seal/
+DispatchedCI8/start7–8 identities align across preparation/controller/parser/terminal/seal/
 fixtures. Preserve every failed/missing-terminal reservation. On dispatch, publish
 exact run/attempt/harness/product and pause. User resume cues terminal audit of jobs,
 ZIP/manifests, required fixtures, every native phase/capture/default/sampling/setup/
