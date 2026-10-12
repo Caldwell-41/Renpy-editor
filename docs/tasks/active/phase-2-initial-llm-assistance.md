@@ -7484,3 +7484,129 @@ scan pass. Review found stale HANDOVER wording about Windows OpenSSL capability;
 corrected to reuse independently audited CI1 transport15, with no rerun.
 Native Run is currently blocked by renewed Mac lock; unlock requested, savedkey
 and process29432 preserved. No new launch/send/discovery from this lock.
+
+#### Explicitly extended paired CI4 confirmed dispatch — 2026-10-13
+
+Reviewed external harness8b0efbb9143fdc4c68c7a7ee5d074f1a96e00a0c, tree
+99082f98f2fd1a30cf8de80dd5d96ac04879e13f, published normally from fresh matched
+b5fd4f3 local/origin, no reset/unrelated loss. Frozen product929/tree9f034ca/269digest
+unchanged. Seven separate harness input digest
+db547aec3cc0333ffcb1dc3dc68d3c16f6c1413bfcaf0a1bd10de39fec936279.
+User-approved one-run extension is consumed: paired CI4/4 per target, zero further
+dispatches. [Run38283334874](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38283334874)
+is confirmed attempt1/workflow_dispatch/exact8b0efbb/branchcodex/provider-qualification,
+queued2026-10-12T17:18:40Z. Both selectorsselectable_proposals/studio_setup_onlytrue,
+dispatchordinal4, firstWindowsstart3. Other selectors defaultfalse; no builds/credential.
+Reuse CI1 exact Windows package; Windows actualstarts2 beforeCI4, starts3–4 planned;
+hostedMac0packages/starts. OwnerMac package1/starts4, live7/10 Rewrite2/2 and
+discovery0 unchanged. CI3 failure and all earlier failed corrections remain failed.
+
+Support owner metadata-free copy compile/lint/named runtime is reported passed on
+exact accepted live source; independent exact-receipt audit remains. First preflight
+literal-brace oracle failed before any SDK command; corrected from actual bytes.
+Second attempt SDKcommand1 failed from inherited working directory/relative launcher;
+absolute launcher and SDK cwd correction succeeds in third attempt5commands. Keep
+both distinct external-driver failures; neither demonstrates a product defect. Native
+Validateexit0 passed; nativeRun remains blocked by renewed Mac lock/unlock pending.
+
+Manual same-thread pause under WORKFLOW: end turn after recording this checkpoint,
+no watcher/polling/redispatch. User resume cues one terminal identity/artifact audit,
+then remaining nativeRun after unlock and exact-copy independent review. Failed live
+subset and exhausted family allowance require a final user decision, not automatic
+retry or a claim of complete integrated acceptance. Human sign-off/UI refinement/
+guided feedback remain subsequent decisions; no new outcome started.
+
+#### Owner SDK runtime and synthetic scaffolding correction — 2026-10-13
+
+Independent SDK-copy audit passes owner-live-sdk-03: receipt SHA
+26579d51947a5104aa4373b71defee5d5d1bad7317244fb9884074643e27cc9c; exact eight-file
+export4e2d90d9efb8e5bbccdb3081394aaa94f6ceda197a44d356cbdcd20df7304b11 and
+driver0a0981dd54a654571bc72e2d222167c76cb3d2d2b958a35e55d86f4bfaf1b5ac.
+All five SDK commands exit0;10/10 named assertions plus10 executed init text/tag
+assertions. Initially declared12init count was a receipt-only mistake counting two
+statements; original receipt preserved and metadata corrected without SDK rerun.
+Original nonempty eight-file accepted game bytes match; three empty GUI files
+explicitly replaced in copy with hashed standard scaffold. No editor metadata;
+owned saves removed. Two distinct driver failures remain; six commands total.
+
+User unlock reply arrived after CI4 dispatch, allowing remaining owner native work
+without CI polling/new launches/sends. Native Run preparation first failed before
+execution because the synthetic fixture lacked the reviewed runtime policy. Native
+Enable controlled play/Add helper explicitly saves game/loomlight_runtime.rpy via
+normal transaction, SHA5505dcbf86946fdf22bdd279c6faf5a6b8d3f1019b3566b1d600f2bf90910b22.
+Retry produced Running/LOOMLIGHT_RUNTIME_READY_V1 at launch revision
+9f112a3fb6ff467625020930754d914583d26e0f5c045c4201bdb6dc30e683e4, but ended with
+runtime error while original fixture GUI files were empty. Native fault/Stop, raw
+traceback/log and source hashes retained in native-sdk-run-failed receipts; no pass
+claimed. Original eight .rpy files remain unchanged at that point.
+
+Smallest owned-fixture correction: close project normally, assert options/gui/screens
+are exactly empty, copy only those three already-qualified SDK8.5.3 scaffold files
+from owner-live-sdk-03, then reopen normally. All authored source/custom/comments/
+BOM/mixedlines and the helper remain unchanged. Before/after nine .rpy hashes are
+native-fixture-gui-correction.json. No product source/build/launch/signing repair.
+Final metadata-free copy04 adds the exact helper and uses this final nine-file game;
+only changed-input compile/runtime are selected, reusing03GUI/lint evidence. Final
+native Validate/Run on corrected game and04independent audit remain pending here.
+
+#### Final owner native SDK proof and current matrix disposition — 2026-10-13
+
+The first GUI fixture correction supplied scripts but omitted their required assets;
+native Run3 failed on gui/window_icon.png and emitted bounded repetitive diagnostics.
+Retain native-sdk-run-gui-assets-failed JSON/log/trace. Second correction closes
+project normally and copies52 hashed standard GUI assets from the already-qualified
+SDK copy into previously absent game/gui. All nine .rpy bytes unchanged. This is
+the second correction of the GUI hypothesis: another failure would require reassessment.
+Native Run4 now passes: Running/LOOMLIGHT_RUNTIME_READY_V1; Stop finishes
+Cancelled/stopped exit0. Launch revision
+47c06b4294f15b088d9d2b0b6c8b973155e6c9ecd19a697022240f933f5a86d3. Final source9/assets52
+remain unchanged. Native Validate3 on the final source/assets also finishes exit0.
+Observed SDK revision f6ec879ab2cc0189c6b053eededf254feb5c4ad734d9378dc44a198b27e20a70,
+version8.5.3; earlier displayed SDK revisions are retained in native receipts.
+Three native Validate actions and four Run requests (one no-execution preparation
+failure, two runtime fixture failures, one successful Run/Stop) are all counted.
+No added editor starts/packages/Studio sends/discovery.
+
+Final metadata-free SDK04 independently passes: receipt
+bac953553531284a2e87a40dc014f65273e12665937507146ba8b7689dd3aa78, exact nine-file
+export323211ce2c1a4e91fa9bbc3fca0a54a0caaeac30c35622182412b0a20381ed46.
+Both focused compile/test commands exit0; actual10/10named+10init assertions.
+Final nine scripts and52GUI assets match the owner fixture; no editor metadata.
+Original authored five nonempty scripts/custom/BOM/newlines and helper remain exact.
+Three formerly empty GUI scripts are explicit synthetic-input corrections. Original
+SDK03 evidence remains untouched; cumulative support commands8 across attempts
+01(preflight0),02(failed1),03(passed5),04(passed2). Reviewer initially used an incorrect
+repair receipt filename; read-only FileNotFoundError retained, corrected audit passes.
+Owned generated SDK save namespace metadata-free-game-1791825457 verified absent
+after nativeRun (already absent; zero files deleted), source/copy evidence retained ignored. Ordinary Studio profile/key preserved.
+No new credential files read/exported, model discoveries/installations, signing changes,
+merges/releases or following outcome.
+
+| Applicable gate / Section11 cells | Current exact disposition on frozen929 |
+| --- | --- |
+| 2A.0 readiness/configuration/schema/tools/limits | Controlled CI1 both targets passed; owner selected saved Studio setup and five live actions passed. Windows new Settings native proof awaits CI4 audit. Server-internal version/tools/loaded capacity remain explicit unknowns; no discovery. |
+| 2A.1 saved native credential/origin/no-open-send | Existing exact unchanged credential evidence reused; owner configured key survives process reopen and all live sends without entry/read/export. Windows Settings/reopen proof awaits CI4. Session-only excluded by user. |
+| 2A.2 lifecycle/cancel/deadlines/late/Save/transport | Exact CI1 worker/transport/controller/native matrices reused; malformed/stale/cancelled refusals and zero-write protection remain passes. Failed actual batch also proves zero writes, not valid-subset success. No matrix rerun. |
+| 2B.1 refs/prompts/order/accounting/integer/context limits | CI1 exact both-target fixtures reused; owner separately approves generated card/lore, uses exact revisions later, edits/restores/history, varies limits and reopens. Source-derived staleness correctly disables references later. Route repeats/cycles user-deferred; summaries/embeddings excluded. |
+| 2B.2 destinations/entries/exact send/stale/drafts | All five owner actions reviewed against exact destination/model/target/context/body digest and accepted once; actual seven sends counted. CI1 guards reused. Live batch failed; same-candidate all-five-plus-live-subset chain remains incomplete. |
+| 2C.1 closed schemas/ownership/dependencies/protected source | Both-target CI1 combined/selectable controllers and SDK/native subsets passed. Owner rewrite/Continue/Draft exact patches preserve source/custom/comments/BOM/newlines. Arbitrary code/assets/Phase3 and ending/connection expansion excluded/deferred. |
+| 2C.2 subset/transactions/Undo/duplicate/external/recovery | CI1 controlled valid/dependency-invalid subsets and native history/reopen reused. Owner five saves/history/reopens pass; actual rejected batch writes zero. Successful owner live dependency-valid subset remains **failed/missing**, never relabelled from CI1. |
+| 2C.3 cards/lore lifecycle/provenance/extensions | Unchanged lifecycle CI1 evidence reused; owner separate Save/Approve, later exact revisions, future metadata and reopen passed. Automatic retrieval/external formats/implicit approval excluded. |
+| 2C.4 both-target integrated/independent/human | Combined controlled CI1 source/SDK and Windows native subset pass; owner five-action/nativeSDK/copy reviewed, live batch failed. CI4 Windows new-controls artifact audit pending. Final integrated closeout and human sign-off are **not complete**. |
+| Section11 security/UX/live/integrated SDK cells | Exact unchanged auth/privacy/injection/HTML/IPC/zero-write fixtures reused; owner Settings/review/source/history/reopen/nativeValidate/Run and exact metadata-free game passed with retained fixture failures. Subjective UI/final human acceptance pending; failed live subset is the specific remaining owner gap. |
+
+Current cumulative allowance: Mac package1/3, starts4/6 (including conservative
+implicit lookup); Windows package1/3, actualstarts2/6 beforeCI4, planned3–4;
+pairedCI4/4 each target (explicit one-run extension consumed); live7/10, Rewrite2/2,
+Continue1/2,Draft1/2,card1/2,lore1/2,setup1,discovery0/0. CI4 exact recorded run
+38283334874/attempt1/harness8b0efbb remains last observed queued; no polling.
+Pending terminal CI artifact audit and failed live subset disposition are concrete
+blockers. Retry needs a new explicit family allowance; no retry or new outcome starts.
+UI refinement prompt follows this technical closeout; guided feedback follows refinement.
+
+Final independent native receipt audit confirms Validate3exit0 and Run4 readiness/
+Stopexit0 bind the same final nine sources/52assets and qualifiedSDK04copy. Native
+Run proves startup/Stop lifecycle; copy named oracle proves text and Return behavior.
+No reviewer execution/credential access/polling. Cleanup wording corrected from
+“cleaned” to verified absent: native save namespace already absent, zero files deleted.
+Ordinary Studio credential/profile and synthetic source/evidence remain preserved.

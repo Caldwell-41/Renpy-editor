@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — finish owner native chain, then approved CI4
+## Studio-only Phase 2 closeout — await exact CI4; live subset remains failed
 
 The user expressly authorizes CI publication/dispatch and native/live verification.
 Continue this same outcome; no merge/release, signing changes, generic provider,
@@ -51,9 +51,13 @@ duplicate dispatch. Independent-ci-03-audit.json owns exact audit receipts.
 Containment/prefix/fresh-root guards remain; Python and inherited Rust child use one
 parent. Independent review and local temp smoke pass; smoke is not Windows proof.
 User explicitly approved one additional paired run. Only CI ceiling3→4 per target;
-three consumed/one remains. Admission now requires4, startordinal3 and attempt1
+four consumed/zero remain after the confirmed dispatch below. Admission now requires4, startordinal3 and attempt1
 unchanged. Reuse frozen929 and CI1 exact Windows executable; no builds, Studio
-credentials, model discoveries or hostedMac editor starts. No CI4 dispatched yet.
+credentials, model discoveries or hostedMac editor starts. Confirmed [CI4run38283334874](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38283334874),
+attempt1/workflow_dispatch/exact harness8b0efbb9143fdc4c68c7a7ee5d074f1a96e00a0c/
+tree99082f98f2fd1a30cf8de80dd5d96ac04879e13f, queued2026-10-12T17:18:40Z.
+Seven harness input digestdb547aec3cc0333ffcb1dc3dc68d3c16f6c1413bfcaf0a1bd10de39fec936279.
+Ignored ci-04-dispatch/confirmed receipts own identity. No redispatch or polling.
 Retain the failed writer-only ZipInfo correction and subsequent reviewed raw-name
 repair from CI2 history in the owning ledger.
 
@@ -88,8 +92,8 @@ The native receipt is `phase2-closeout-01/native-saved-profile-01.json`.
 
 **Cumulative allowance:** Mac1/3packages, **4/6starts conservatively charged**
 (first ordinary19193, possible implicit CUA lookup, reopened21809, final29432). Windows
-actual1/3packages,2/6starts; planned CI4 starts3–4 still unused. PairedCI3/4 each
-target, one explicit additional paired dispatch remains. Live setup1, card1/2,
+actual1/3packages,2/6starts; planned CI4 starts3–4 still unused. PairedCI4/4 each
+target, no further dispatch allowance. Live setup1, card1/2,
 lore1/2, rewrite2/2 (batch charged second), Continue1/2, Draft1/2,total7/10,discovery0.
 All failures count. Preserve ordinary saved credential; never delete it as temporary
 cleanup or ask for reentry while configured.
@@ -124,17 +128,35 @@ process29432 reopen shows original saved endpoint/model/limits/sampling and
 Credential:configured; no entry/send/discovery. Native explicit Validate finishes
 exit0 using registered verifiedSDK8.5.3 revision
 8bb3d5b7102f9069e4fa13f385303113807cc9b11a86b0a31c56f3e65defbe58 after synthetic-session
-trust. All prior project bytes unchanged;14 SDK output/cache files added. Native Run is blocked by renewed Mac lock, confirmed through CUA; an unlock
-question is pending. Preserve running29432 and key; no restart/resend needed.
-Metadata-free copy qualification/audit remains pending. Ignored live-send-ledger.json
+trust. All prior project bytes unchanged;14 SDK output/cache files added. User unlocked; native Run required explicit controlled-play helper, then failed
+with empty fixture GUI, then failed with missing standard GUI assets. All failures
+retained. Close/reopen owned fixture after copying only three asserted-empty GUI
+scripts and52hashed assets from qualifiedSDKcopy; authored source/helper preserved.
+Native Run4 readiness/Stopexit0 and final asset-inclusive Validate3exit0 pass.
+Three native Validate actions/four Run requests counted, no editor/package/send
+increase. Final SDK revision observedf6ec879ab2cc0189c6b053eededf254feb5c4ad734d9378dc44a198b27e20a70.
+Final metadata-free nine-file copy04 independently passes compile/runtime10named+10init;
+receiptbac953553531284a2e87a40dc014f65273e12665937507146ba8b7689dd3aa78,
+export323211ce2c1a4e91fa9bbc3fca0a54a0caaeac30c35622182412b0a20381ed46.
+03evidence unchanged; supportSDK8commands cumulative across four attempts, two
+failed. Owned generatedSDKsave namespace verified absent (already absent, zero files deleted);
+ordinaryStudio profile/key preserved.
+Ignored live-send-ledger.json
 and native-* receipts own source/digests/counts. Reuse exact CI1 malformed/stale/
 cancelled zero-write proof; do not rerun unchanged matrices.
 
-**Next:** finish native Run/copy within remaining counts, independent execution review,
-then focused CI4 publication/dispatch (express authority covers harness/docs only).
-Before dispatch reconcile fresh local/origin without reset; no product changes/build.
-Record exact harness ref and dispatch identity/status then end turn under WORKFLOW
-manual waiting policy. On user resume audit terminal artifacts once; no watcher/polling.
-Update owning matrix/ledger and live records with actual counts/cleanup. Human
-acceptance remains pending. Prepare requested UI refinement prompt after technical
-verification; do not start UI work or feedback chat as a new outcome.
+**Manual same-thread wait / next resume:** read exact run38283334874/attempt1 once
+on user resume, verify required jobs, exact product/harness/ZIP/input/package bindings,
+18+7 gates, actual Windows native receipts/PNGs/defaults/sampling/setup/cancel/
+readiness/reopen/cleanup and all reservations, including failures. No further dispatch,
+watcher or automatic polling. Update actual Windows starts from all reservations
+even if terminal missing. Owner final SDK copy/nativeValidate/Run passed and were independently reviewed.
+Keep process29432/profile/key and retained ignored synthetic evidence; no owner
+launch/send needed for the pending CI audit.
+Failed live batch cannot be called complete: Rewrite2/2 exhausted and successful
+owner dependency-valid subset remains missing. Preserve controlled CI1 proof as
+separate reused evidence. A final decision on that failed live gap is required after
+concrete remaining evidence; do not silently retry or waive it. Final human acceptance
+is unclaimed. UI refinement prompt follows technical closeout; no following outcome
+or feedback chat started. Published8b0efbb contains external CI repair/evidence only,
+product929 unchanged. No reset/discard/merge/release or signing/provider change.
