@@ -1,13 +1,12 @@
 # Current outcome handover
 
-## Approved Studio UI refinement — implemented; focused qualification prepared
+## Approved Studio UI refinement — awaiting CI1 terminal audit
 
 The user approved both imagegen boards/written corrections and the two additional
 local browser attempts on2026-10-13 (“Approved keep going”). Continue
-`codex/provider-qualification` on the macOS ARM64 owner. State `in_progress`; no
-external operation pending yet. Product refinement, canonical UI contract and focused
-CI are prepared locally; next is publication and the authorized paired attempt1.
-No existing open PR or active branch CI found; remote branch verified357eb87.
+`codex/provider-qualification` on the macOS ARM64 owner. State `awaiting_ci`. Product refinement/canonical UI contract/focused CI published
+as462cf0897eb84d34390d68634f0b8cb2345d7a48. No existing open PR or unrelated
+active branch CI was found. One confirmed focused operation is pending; no polling.
 
 **Implemented:** grouped Connection/Saved key/Response defaults and advanced/maintenance
 Settings; reachable Save, profile draft/busy guards and blur/submit field feedback.
@@ -39,22 +38,29 @@ Rapid-resize light images/closed-detail raw metrics have stated limitations; cur
 CI harness waits frames and filters closed fields. Last prose/key grouping changes
 require current CI images. Ignored `.toolchains/phase2-ui-refinement/` retains receipts.
 Repository validation535files, workflow lint, syntax and diff checks pass.
-Images2/3, pairedCI0/2, signed owner builds0/2, editor native starts0/4. CI-contained
+Images2/3, pairedCI1/2, signed owner builds0/2, editor native starts0/4. CI-contained
 checks consume paired-batch allowance; local counts are not reset. Native debug driver
 is not an editor launch or native UI proof.
 
-**Next:** publish the candidate needed for explicitly authorized CI, then dispatch
-`quality.yml` with `assistance_ui=true`, ordinal1 and other selectorsfalse. It calls
-only `assistance-ui.yml`:32focused DOM cases/build/36renderer captures and real native
-service/controller five-action/selectable/reference/history/project-process-reopen
-proof on Windowsx64/macOSARM64. No package or SDK matrix: native/credential/game paths
-are unchanged and qualified frozen evidence is reused. Record exact run/attempt/SHA,
-remaining paired allowance1, then actually pause under WORKFLOW. Resume the same chat
-on user command for terminal artifact/candidate/screenshot/cleanup audit and in-scope
-fixes within remaining allowance. Missing proof stays missing. Prepare the separate
-plain-language guided-feedback session after delivery; do not start it or claim human
-acceptance. CI authorization includes publication needed for its candidate, superseding
-the entry's conservative local-only interpretation. No merge or release.
+**Pending:** [run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511),
+attempt1/workflow_dispatch/exact462cf08, created2026-10-12T23:52:26Z; observed
+in_progress2026-10-12T23:52:48Z. Required Windows115059587083 and Mac115059587332
+both in_progress. `quality.yml` assistance_ui=true/ordinal1/all old selectorsfalse;
+unrelated jobs intentionally skipped, not required passes. Focused workflow selects
+32DOM cases/build/36renderer captures and real native service/controller five-action/
+selectable/reference/history/project-process-reopen. No new package or SDK matrix.
+Current docs-only successor records this candidate, not new tested product inputs.
+
+**Next:** actually pause under WORKFLOW; resume this same chat on user command.
+Read exact terminal run/attempt/SHA, both required jobs/ZIPs/manifests/privacy,
+32positive no-skip cases, renderer screenshots/current layout metrics, native driver
+integration markers and owned cleanup. Do not accept a green badge alone or substitute
+frozen929 for462cf08. Fix supported issues within the remaining paired allowance1;
+local rounds/browser are exhausted, no duplicate dispatch or budget reset. Missing,
+failed/cancelled/skipped required proof remains incomplete. Reuse unchanged core/SDK/
+credential evidence and preserve all prior failures. After delivery, prepare the
+separate plain-language guided-feedback session but do not start it or claim human
+acceptance. No auto-polling, watcher, wake-up, merge or release.
 
 ## Reusable Studio-only technical baseline — review_ready
 

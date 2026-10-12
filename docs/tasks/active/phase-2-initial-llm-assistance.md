@@ -8430,6 +8430,27 @@ Workflow lint initially caught a runner-context placement error, fixed before di
 syntax/diff checks pass. Next: publish reviewed candidate, dispatch paired attempt1
 and retain exact results; no duplicate or unchanged matrix.
 
+#### UI refinement paired CI1 confirmed — 2026-10-13
+
+Approved refinement published as462cf0897eb84d34390d68634f0b8cb2345d7a48.
+`quality.yml` assistance_ui=true/ordinal1, all old selectorsfalse, dispatch accepted.
+[Run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511),
+attempt1/workflow_dispatch/exact462cf08 created2026-10-12T23:52:26Z, observed
+in_progress2026-10-12T23:52:48Z. Windows115059587083 and Mac115059587332
+in_progress; unrelated jobs intentionally skipped, not counted as required passes.
+Required focused DOM count is32 (the final unfinished-poll focus regression added).
+It uses the existing quality dispatcher and a new reusable focused workflow; no
+default-branch registration or unrelated job/package/SDK selection is required.
+
+State `awaiting_ci`. Counts: pairedCI1/2(local3/3,browser5/5,images2/3,
+signed builds0/2,editor starts0/4). No new qualifying pass or native/package proof
+claimed; source462cf08 is distinct from frozen929 and from this docs-only wait record.
+Exact-source controller/browser/artifact/privacy/cleanup terminal audit remains, then
+in-scope fixes within paired allowance1 and guided-feedback prompt preparation.
+No more local test/browser rounds, duplicate CI, automatic polling/wake or feedback
+session. Actual manual same-thread pause follows WORKFLOW; resume on user command.
+Human acceptance remains unclaimed; ordinary profile/key and frozen evidence intact.
+
 #### Requested next UI-refinement prompt — prepared, not executed
 
 ```text
