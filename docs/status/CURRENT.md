@@ -3,7 +3,7 @@
 **Updated:** 2026-10-13. **Owner Studio-only integrated workflow passed on frozen929.
 CI4 remains failed; Windows native Settings and cleanup are the remaining technical
 gap. CI5 failed field-entry/readback after reaching Settings; the final focused
-CI6 repair passed independent review within the existing allowance.**
+CI6 repair passed independent review; the final authorized paired run is queued.**
 Final human acceptance is unclaimed. Generic providers/Phase3, selected-route
 context and AI ending/connection changes remain excluded or user-deferred.
 
@@ -44,13 +44,18 @@ prevent complete cleanup proof. No product defect inferred. All input/package/
 ZIP/manifest identities verified. CI5 stays failed.
 
 Counts: Mac package1/3, starts5/6 (one conservative implicit lookup), process33969;
-Windows package1/3, starts4/6. PairedCI5/6 each target, one authorized pair remains.
-Reviewed final repair will bind CI6/start5–6, physically click and confirm field
-focus before typing, record safe exact field/readback and observed failure exit.
-Actual profile path is correct; missing store stays fail-closed. Local18+7 gates
-pass; Windows9 actual PowerShell tests await CI. Reuse frozen929/CI1package,
-zero builds/Studio credentials/owner launches. Final independent review passes; dispatch follows;
-then manual same-thread wait, no polling/watcher. Stop at caps if proof fails.
+Windows package1/3, actual starts4/6 before CI6. **PairedCI6/6 each target exhausted.**
+[Final CI6run38296502071](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38296502071)
+confirmed attempt1/workflow_dispatch/exact harnessb0d24b641363cec1cc90a5f1b3203f27753f3647/
+tree554a377e58b7bb56446f30f07bd06d50b5831d64, queued2026-10-12T19:16:04Z.
+Seven canonical harness digest78275f34e984e8564672d89b07bca73570e3f00ed7e1960c7a16f3e14ea36eab;
+declared PS1CRLF alternatives in ignored receipt. Final driver physically clicks/
+confirms field focus before typing, records safe exact readback and failure exit;
+independent review/local18+7/syntax/actionlint/privacy pass. Windows18+9 required,
+Mac18+7 only; Wstarts5–6 planned, frozen929/CI1package, zero builds/Studio credential.
+Manual same-thread wait: END TURN, no polling/watcher/duplicate. On user resume,
+audit exact run/attempt/artifacts/native receipts and all reservations. Stop/report
+if last proof fails or caps block recovery. No new owner launch/send needed.
 
 Live8/10: setup1, card1/2,lore1/2,Continue1/2,Draft1/2,Rewrite3/4 including batches.
 User's two-send extension consumed1/2; second unused because recheck passed.

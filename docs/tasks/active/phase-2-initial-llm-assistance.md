@@ -7856,3 +7856,36 @@ remains pending; no qualification operations executed by review. Final Python
 syntax/actionlint/diff and changed-source privacy9files pass. Fresh refs still
 local/origin526a854, main5f448ca; repository noreply identity retained. Exactly one
 paired run/two Windows starts fit; no implicit extension or subsequent outcome.
+
+#### Final authorized paired CI6 confirmed checkpoint — 2026-10-13
+
+Reviewed repair/status commitb0d24b641363cec1cc90a5f1b3203f27753f3647/tree
+554a377e58b7bb56446f30f07bd06d50b5831d64 published normally to continuation;
+fresh preceding local/origin526a854 matched and unrelated work preserved. No
+reset/history rewrite/product/runtime/package/signing changes. Seven canonical
+external harness digest78275f34e984e8564672d89b07bca73570e3f00ed7e1960c7a16f3e14ea36eab
+uses Git blob bytes; declared PS1CRLF alternative recorded in ignored
+ci-06-dispatch.json. Exact frozen929/tree9f034ca/269digest3c244 and pinned CI1
+Windows executable unchanged. Existing operations checked once, no duplicate.
+
+[CI6run38296502071](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38296502071)
+confirmed attempt1/workflow_dispatch/branchcodex/provider-qualification/exact
+b0d24b641363cec1cc90a5f1b3203f27753f3647, queued2026-10-12T19:16:04Z.
+Only selectable_proposals/studio_setup_only true; dispatchordinal6/startordinal5,
+other selectors false, zero builds/Studio credential/discovery. Windows starts5–6
+planned from actual4/6, Mac fixtures only. Win18+9/Mac18+7 validators required,
+no skipped tests. **PairedCI6/6 each target exhausted** after this dispatch;
+Windows actual starts await terminal reservations (do not assume both occurred).
+PackagesMac1/3Windows1/3, ownerMacstarts5/6, live8/10/Rewrite3/4/extra1of2used,
+discovery0. Original/extended failed runs and rejected preparations remain failed.
+No further owner launch/send/SDK execution needed; ordinary saved key preserved.
+
+Manual same-thread wait under WORKFLOW: record and END TURN, no polling/watcher/
+auto-notification/redispatch. User resume cues one exact38296502071/attempt1 terminal
+audit: paired jobs, artifacts/ZIP/manifests/product269/harness7/PSCRLF/executable,
+Win18+9/Mac18+7 and nine native stages, real PNGs/defaults/field focus/sampling/
+setup/invalidation/cancel/reopen/owned credential-root cleanup, all launch reservations.
+Pending means pause again; failed/missing/skipped proof remains unresolved. No CI7
+or cap extension inferred. Successful audit closes technical gap, then requested
+UI-refinement prompt can be prepared. Final human sign-off stays explicit/unclaimed;
+no following outcome or feedback chat started.

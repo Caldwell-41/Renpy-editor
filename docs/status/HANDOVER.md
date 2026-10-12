@@ -3,7 +3,7 @@
 ## Studio-only Phase 2 closeout — owner chain passed; finish Windows Settings proof
 
 User authorizes CI publication/dispatch and owner native/live. Latest extensions:
-two extra blocker sends (one consumed) and two further paired CI runs (one dispatched).
+two extra blocker sends (one consumed) and two further paired CI runs (both dispatched).
 Keep the same outcome; no generic providers/Phase3, new discoveries/installations,
 signing changes, merge/release or following outcome. Route context and AI endings/
 connections are user-deferred. One ordinary saved credential across sessions; no
@@ -102,21 +102,31 @@ save namespace previously verified absent, zero files deleted. Ignored
 native-batch-recheck-01-* and owner-live-sdk-05 own exact proof; independent audit
 passes. Success with more response room does not prove prior truncation.
 
+**Final CI6 confirmed:**
+[run38296502071](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38296502071),
+attempt1/workflow_dispatch/branchcodex/provider-qualification, exact harness
+b0d24b641363cec1cc90a5f1b3203f27753f3647/tree554a377e58b7bb56446f30f07bd06d50b5831d64,
+queued2026-10-12T19:16:04Z. Reviewed repair published normally after fresh refs,
+no unrelated loss/reset. Seven canonical digest
+78275f34e984e8564672d89b07bca73570e3f00ed7e1960c7a16f3e14ea36eab and declared
+PS1CRLF alternatives recorded in ignored ci-06-dispatch.json. Frozen929/package
+unchanged, only selectable_proposals/studio_setup_only true, dispatch6/start5.
+
 **Counts/next:** Mac packages1/3, starts5/6 including conservative implicit lookup;
-Windows packages1/3, starts4/6. PairedCI5/6 each target, one authorized pair remains.
-FinalCI6 must use Windows starts5–6/no builds/Studio credential, Mac fixtures only;
-both starts fit exactly. No seventh run/editor start. Live8/10/Rewrite3/4, setup1,
-Continue1/2,Draft1/2,card1/2,lore1/2,extra1/2used,discovery0. Windows Settings proof
-sole technical gap. Final review/focused checks passed; publication/dispatch proceeds under
-existing express authority. After confirmed dispatch, record exact harness/tree/
-seven canonical and PS1CRLF input alternatives/run/attempt and END TURN; manual
-same-thread wait, no polling/watcher/duplicate. User resume cues exact CI6 terminal
-audit: required paired jobs/ZIP/manifests/269product/sevenharness/executable,
-Win18+9/Mac18+7 validators, all nine native stages and actual PNGs/defaults/
-sampling/setup/cancel/readiness/reopen/cleanup, every reservation even failed or
-missing terminal. If pending, pause again. Reassess after two unsuccessful same-
-hypothesis corrections; if final proof fails or caps prevent recovery, report
-concrete blocker before new outcome. No further owner native work is required;
-ordinary profile/key preserved. Technical success can close matrix and enable
-requested UI refinement prompt; final human acceptance remains explicit/unclaimed.
-No following outcome or feedback chat started.
+Windows packages1/3, actual starts4/6 beforeCI6; planned5–6 await terminal reservations.
+**PairedCI6/6 each target exhausted.** Zero builds/Studio credential/hostedMacstarts;
+Win18+9/Mac18+7 required without skips. Live8/10/Rewrite3/4, setup1, Continue1/2,
+Draft1/2,card1/2,lore1/2,extra1/2used,discovery0. Windows Settings proof sole technical
+gap. Final independent review/local focused checks passed; exactCI6 dispatched.
+**Manual same-thread pause: END TURN**, no polling/watcher/duplicate or auto-wake.
+User resume cues exact38296502071/attempt1 terminal audit: paired jobs/ZIP/manifests/
+269product/sevenharness/PSCRLF/executable, Win18+9/Mac18+7 validators, all nine
+native stages and actual PNGs/defaults/field focus/readback/sampling/setup/cancel/
+readiness/reopen/owned credential-root cleanup, every reservation even failed or
+missing terminal. If pending, pause again. Failed/missing/skipped stays unresolved.
+No seventh run/editor start. Reassess after two unsuccessful same-hypothesis
+corrections; if final proof fails or caps prevent recovery, report concrete blocker
+before any new outcome. No owner native/SDK work needed; ordinary profile/key
+preserved. Technical success permits matrix closeout and requested UI-refinement
+prompt; final human acceptance remains explicit/unclaimed. No following outcome
+or feedback chat started.
