@@ -58,22 +58,22 @@ class EvidenceTests(unittest.TestCase):
  def test_missing_windows_native_not_pass(self):
   self.identity('Windows');self.assertFalse(e.finish(self.root))
  def test_failed_windows_native_not_pass(self):
-  self.identity('Windows');(self.root/'native').mkdir();e.write(self.root/'native/terminal.json',{'passed':False,'launchOrdinals':[4,5]});self.assertFalse(e.finish(self.root))
+  self.identity('Windows');(self.root/'native').mkdir();e.write(self.root/'native/terminal.json',{'passed':False,'launchOrdinals':[5,6]});self.assertFalse(e.finish(self.root))
  def test_failed_launch_counts_retained(self):
-  self.identity('Windows');(self.root/'native').mkdir();e.write(self.root/'native/terminal.json',{'passed':False,'launchOrdinals':[4]});self.assertFalse(e.finish(self.root));self.assertEqual(e.load(self.root/'pipeline.json')['appLaunches'],1)
+  self.identity('Windows');(self.root/'native').mkdir();e.write(self.root/'native/terminal.json',{'passed':False,'launchOrdinals':[5]});self.assertFalse(e.finish(self.root));self.assertEqual(e.load(self.root/'pipeline.json')['appLaunches'],1)
  def test_boolean_only_native_refused(self):
-  self.identity('Windows');(self.root/'native').mkdir();e.write(self.root/'native/terminal.json',{'passed':True,'launchOrdinals':[4,5]});self.assertFalse(e.finish(self.root))
+  self.identity('Windows');(self.root/'native').mkdir();e.write(self.root/'native/terminal.json',{'passed':True,'launchOrdinals':[5,6]});self.assertFalse(e.finish(self.root))
  def test_missing_preparation_is_sealed_failure(self):
   self.assertFalse(e.finish(self.root));self.assertTrue((self.root/'artifact-manifest.json').is_file())
  def test_reserved_starts_count_without_terminal(self):
   self.identity('Windows');(self.root/'native').mkdir()
-  for ordinal in (4,5): e.write(self.root/f'native/launch-{ordinal}-reserved.json',{'ordinal':ordinal})
+  for ordinal in (5,6): e.write(self.root/f'native/launch-{ordinal}-reserved.json',{'ordinal':ordinal})
   self.assertFalse(e.finish(self.root));self.assertEqual(e.load(self.root/'pipeline.json')['appLaunches'],2)
  def test_reserved_starts_count_with_malformed_terminal(self):
-  self.identity('Windows');(self.root/'native').mkdir();e.write(self.root/'native/launch-4-reserved.json',{'ordinal':4})
+  self.identity('Windows');(self.root/'native').mkdir();e.write(self.root/'native/launch-5-reserved.json',{'ordinal':5})
   (self.root/'native/terminal.json').write_text('malformed')
   self.assertFalse(e.finish(self.root));self.assertEqual(e.load(self.root/'pipeline.json')['appLaunches'],1)
  def test_mac_reservation_is_failure_and_counted(self):
-  self.identity();(self.root/'native').mkdir();e.write(self.root/'native/launch-4-reserved.json',{'ordinal':4})
+  self.identity();(self.root/'native').mkdir();e.write(self.root/'native/launch-5-reserved.json',{'ordinal':5})
   self.assertFalse(e.finish(self.root));self.assertEqual(e.load(self.root/'pipeline.json')['appLaunches'],1)
 if __name__=='__main__':unittest.main()

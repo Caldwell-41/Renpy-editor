@@ -11,7 +11,7 @@ param(
 # app build, process creation, or implicit retry occurs in this script.
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
-$receipt=[ordered]@{stage=$Stage;passed=$false;processId=$ProcessId;executableSHA256=$null;inputDesktop=$null;checks=[ordered]@{};captures=@();controls=@();uiaStaleRetries=0;layer='Windows UIA observation and physical OS keyboard/mouse input; not human acceptance'}
+$receipt=[ordered]@{stage=$Stage;passed=$false;processId=$ProcessId;executableSHA256=$null;inputDesktop=$null;checks=[ordered]@{};captures=@();controls=@();fieldEntries=@();uiaStaleRetries=0;layer='Windows UIA observation and physical OS keyboard/mouse input; not human acceptance'}
 function Frozen-Definitions {
     $path=Join-Path $ProductRepo 'app/scripts/rewrite-windows-native.ps1'
     $tokens=$null;$errors=$null
@@ -53,15 +53,45 @@ function Value([string]$Name) {
     if($control.TryGetCurrentPattern([System.Windows.Automation.RangeValuePattern]::Pattern,[ref]$pattern)) {return $pattern.Current.Value.ToString([Globalization.CultureInfo]::InvariantCulture)}
     throw ('Observable nonsecret value pattern unavailable: '+$Name)
 }
-function Set-Field([string]$Name,[string]$Text) {
-    $control=Control $Name;Assert-Native (-not $control.Current.IsPassword) 'WebView password input refused'
-    Focus-Control $control
+function Assert-FieldOwner {
+    $owned=Get-Process -Id $ProcessId
+    Assert-Native ([IO.Path]::GetFullPath($owned.Path) -eq [IO.Path]::GetFullPath($Executable)) 'Field owner executable mismatch'
+    Assert-Native ($script:window.Current.ProcessId -eq $ProcessId) 'Field owner window/PID mismatch'
     Assert-Native ([RewriteNative]::GetForegroundWindow() -eq $script:handle) 'Owned window lost foreground before typing'
+}
+function Field-FocusReady($Control) {
+    $focused=[System.Windows.Automation.AutomationElement]::FocusedElement
+    if($null -eq $focused -or $focused.Current.IsPassword -or -not $focused.Current.HasKeyboardFocus) {return $false}
+    if($focused.Current.ControlType -notin @([System.Windows.Automation.ControlType]::Edit,[System.Windows.Automation.ControlType]::Spinner)) {return $false}
+    if([System.Windows.Automation.Automation]::Compare($Control,$focused)) {return $true}
+    foreach($child in $Control.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition)) {
+        if([System.Windows.Automation.Automation]::Compare($child,$focused)) {return $true}
+    }
+    return $false
+}
+function Send-FieldKeys([string]$Text) {
     [System.Windows.Forms.SendKeys]::SendWait('^a')
     [System.Windows.Forms.SendKeys]::SendWait($Text)
     [System.Windows.Forms.SendKeys]::SendWait('{TAB}')
+}
+function Set-Field([string]$Name,[string]$Text) {
+    Assert-Native ($Name -in @('Profile name','Endpoint','Model ID','Temperature','Top-p')) 'Nonsecret fixture field whitelist required'
+    $receipt.pendingNativeAction='Set field: '+$Name
+    $control=Control $Name
+    Assert-Native (-not $control.Current.IsPassword -and $control.Current.ControlType -in @([System.Windows.Automation.ControlType]::Edit,[System.Windows.Automation.ControlType]::Spinner)) 'Typed nonpassword field required'
+    $diagnostic=[ordered]@{name=$Name;expected=$Text;before=(Value $Name);lastReadback=$null;type=$control.Current.ControlType.ProgrammaticName;physicalClick=$false;keyboardFocusConfirmed=$false;readbackMatched=$false}
+    $receipt.fieldEntries+=@($diagnostic)
+    Assert-FieldOwner
+    Click-Any $Name
+    $diagnostic.physicalClick=$true
+    Wait-Native {Field-FocusReady (Control $Name)}
+    $diagnostic.keyboardFocusConfirmed=$true
+    Assert-FieldOwner
+    Send-FieldKeys $Text
     $receipt.checks.osKeyboardInput=$true
-    Wait-Native { (Value $Name) -eq $Text }
+    $receipt.pendingNativeAction='Read back field: '+$Name
+    Wait-Native {$diagnostic.lastReadback=Value $Name;$diagnostic.lastReadback -eq $Text}
+    $diagnostic.readbackMatched=$true
 }
 function Observe-Field([string]$Name,[string]$Expected) {
     $control=Control $Name;Focus-Control $control
@@ -156,6 +186,8 @@ function Preview {
     Click-Any 'Synthetic setup test request'
 }
 function Secure-Entry {
+    $receipt.pendingNativeAction='Enter public fixture credential'
+    $receipt.checks.credentialEntryAttempted=$true
     Click-Control ('Enter credential'+[char]0x2026)
     $pidCondition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty,$ProcessId)
     $nameCondition=[System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty,'Remember Studio API key on this computer')
@@ -213,6 +245,7 @@ try {
                 Observe-Field 'Temperature' '1';Observe-Field 'Top-p' '0.95';$receipt.checks.defaults=$true;Capture-Stage 'defaults'
                 Set-Field 'Profile name' 'Closeout native setup';Set-Field 'Endpoint' $Endpoint;Set-Field 'Model ID' 'closeout-synthetic-setup'
                 Set-Field 'Temperature' '0.8';Set-Field 'Top-p' '0.9'
+                $receipt.checks.profileSaveAttempted=$true
                 Click-Control 'Save profile';Wait-Native {Has-Text 'Credential: missing'}
                 Observe-Field 'Temperature' '0.8';Observe-Field 'Top-p' '0.9';$receipt.checks.samplingSaved=$true
                 Secure-Entry;Preview

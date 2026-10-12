@@ -164,6 +164,13 @@ def validate_stage(receipt, stage, pid, directory):
         assert checks.get(name) is True, 'Missing native check: ' + name
     if stage in ('seed', 'invalidate'):
         assert checks.get('osKeyboardInput') is True
+        names = ['Profile name', 'Endpoint', 'Model ID', 'Temperature', 'Top-p'] if stage == 'seed' else ['Temperature', 'Top-p']
+        entries = receipt.get('fieldEntries', [])
+        assert [e.get('name') for e in entries] == names, 'Exact field input proof missing'
+        for entry in entries:
+            assert entry.get('type') in ('ControlType.Edit', 'ControlType.Spinner')
+            assert all(entry.get(k) is True for k in ('physicalClick', 'keyboardFocusConfirmed', 'readbackMatched'))
+            assert isinstance(entry.get('expected'), str) and entry.get('lastReadback') == entry['expected']
     if stage in ('seed', 'reopen'):
         assert checks.get('navigationControlsReady') is True, 'Native navigation readiness missing'
     if stage not in ('close', 'close-reopen'):
@@ -193,7 +200,7 @@ def validate_terminal(value):
     assert value.get('passed') is True and value.get('candidate') == CANDIDATE and value.get('tree') == TREE
     assert value.get('executableSHA256') == EXE_SHA and value.get('artifact') == ARTIFACT
     assert value.get('materialInputCount') == 269 and value.get('materialInputDigest') == INPUT_DIGEST
-    assert value.get('launchOrdinals') == [4, 5] and value.get('packageAttempts') == 0 and value.get('appLaunches') == 2
+    assert value.get('launchOrdinals') == [5, 6] and value.get('packageAttempts') == 0 and value.get('appLaunches') == 2
     assert value.get('completedStages') == STAGES and value.get('normalExits') == [0, 0]
     events = value.get('requests', [])
     assert len(events) == 3 and [e.get('sequence') for e in events] == [1, 2, 3]
@@ -281,7 +288,7 @@ def sources(root):
 def run(args):
     assert os.name == 'nt', 'Actual Windows required; Mac runs validator tests only'
     output, root, product, executable = args.output, args.root, args.product_repo, args.executable
-    assert args.first_launch_ordinal == 4
+    assert args.first_launch_ordinal == 5
     assert re.fullmatch(r'[0-9a-f]{40}', args.harness_ref), 'Exact external harness ref required'
     assert not output.exists() and not root.exists() and not root.is_symlink()
     assert root.parent.resolve() == Path(tempfile.gettempdir()).resolve() and root.name.startswith('loomlight-rewrite-live-')
@@ -344,7 +351,7 @@ def run(args):
         result = subprocess.run(['powershell.exe', '-NoProfile', '-File', ps, '-Stage', 'preflight', '-Output', str(preflight), '-ProductRepo', str(product), '-Executable', str(executable)], capture_output=True, text=True, timeout=90)
         (preflight / 'harness.log').write_text(result.stdout + result.stderr, encoding='utf-8')
         assert result.returncode == 0 and json.loads((preflight / 'receipt.json').read_text(encoding='utf-8-sig'))['passed'] is True
-        launch(4, False)
+        launch(5, False)
         seed = stage('seed'); terminal['noSaveHTTP'] = fixture.events == []
         baseline = sources(root)
         initial = read_profiles(root); validate_profile(initial, fixture.endpoint, (.8, .9), False)
@@ -356,7 +363,7 @@ def run(args):
         terminal['requestPreviewSHA256'] = [seed['preview']['rawSHA256'], changed['preview']['rawSHA256'], changed['preview']['rawSHA256']]
         stage('close'); exit_owned()
         count = len(fixture.events)
-        launch(5, True); stage('reopen')
+        launch(6, True); stage('reopen')
         terminal['reopenNoHTTP'] = len(fixture.events) == count == 3
         terminal['reopenProfileUnchanged'] = read_profiles(root) == final
         terminal['sourceUnchanged'] = sources(root) == baseline
@@ -378,10 +385,16 @@ def run(args):
                 terminal['cleanupFailure'] = type(error).__name__ + ': ' + str(error)
             try:
                 stage('close-after-failure', False)
-                child.wait(15)
+                code = child.wait(15)
+                terminal['normalExits'].append(code)
+                terminal['failureExit'] = {'pid': child.pid, 'exitCode': code, 'forced': False}
             except Exception:
                 child.kill(); child.wait(10)
                 terminal['forcedExit'] = True
+                terminal['failureExit'] = {'pid': child.pid, 'exitCode': child.returncode, 'forced': True}
+        elif child:
+            terminal['normalExits'].append(child.returncode)
+            terminal['failureExit'] = {'pid': child.pid, 'exitCode': child.returncode, 'forced': False}
         child = None
         try:
             fixture.close(); terminal['listenerStopped'] = True
@@ -422,7 +435,7 @@ def main():
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--input-manifest', type=Path, required=True)
     parser.add_argument('--harness-ref', required=True)
-    parser.add_argument('--first-launch-ordinal', type=int, choices=[4], required=True)
+    parser.add_argument('--first-launch-ordinal', type=int, choices=[5], required=True)
     run(parser.parse_args())
 
 if __name__ == '__main__':

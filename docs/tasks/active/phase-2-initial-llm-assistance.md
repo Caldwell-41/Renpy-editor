@@ -7773,3 +7773,86 @@ Manual same-thread pause under WORKFLOW: record and END TURN; no polling/watcher
 automatic notification/redispatch. User resume cues one terminal identity/artifact
 audit, then remaining Windows gap disposition. Final human sign-off/UI refinement
 feedback remain subsequent decisions; no following outcome started.
+
+#### CI5 terminal audit and final focused correction — 2026-10-13
+
+User resumes with “Audit CI, review and fix issues.” Exact
+[CI5run38290650602](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38290650602)/
+attempt1/harness5a297cf7309164d28c02456549ba51c1b0c034e1/tree
+669a09e99bc46f46377a8057a481d436d4ebae69 is terminal: required Windows job
+114949696125 **failed**, Mac114949696261 **passed**. Admission passed; unrelated
+jobs skipped as intended. Independent audit verifies artifact ZIPs/manifests,
+269 frozen929 product inputs, seven separate harness inputs (declared PS1CRLF on
+both targets), pinned CI1 package and zero builds. Windows artifact11764714159/
+ZIPb89a50dd70fd228ee2a53028a70f384cbc4ba5950e6b340af84d037870792240:
+106outer/82reuse/78child files; Mac11765072260/ZIP
+148c81b234f7df97fa58a7ecddfc35cac4882bec822d086d7f2af65723c5f426:
+54outer/47reuse/43child. Windows18+8 and Mac18+7 validators passed without skips.
+
+Windows consumed launch4/PID8828 only, no launch5. Seed reached native Settings,
+enabled navigation and actual Temperature1/Top-p0.95 Spinner controls. Defaults
+PNG1116×759 independently viewed; response1024 also visible. Then native field
+entry/readback timed out after20seconds; exact failed field was not recorded.
+The last pending “Save profile” label describes navigation, not proof a save was
+attempted. No completed required stage (0/9), credential entry or HTTP request.
+No application defect or malformed provider request is established. Failure PNG
+was correctly suppressed for three owned top-level windows. Cleanup UI shows no
+configured credential and profile removal; listener stopped. Close-after-failure
+receipt passed, but process exit code was not recorded. Root retained because
+absent ai-profiles.json prevented ownership-reference verification. Those cleanup
+gaps remain failed, not inferred passes. Native privacy15files passed.
+Ignored independent-ci-05-audit.json owns exact bindings/visual review/counts.
+
+Fresh local/origin526a854cbe4c937c1b54dfda797ca998944b962c matched;
+origin/main5f448ca683a905f4ea77d4580bbc89fda69f2b93. Preserve unrelated work,
+no reset. Current repair is external test driver only: support owner checks
+physical field focus/readback and safe field-specific diagnostics, actual nonsecret
+profile-path contract and observed exit-code retention. Product929 and existing
+packages unchanged. Independent review precedes the last authorized paired run.
+
+Actual cumulative counts: pairedCI5/6 each target, Windows package1/3 and starts4/6,
+Mac package1/3 and starts5/6; live8/10, Rewrite3/4, extra blocker allowance1/2used,
+discovery0/0. One paired run and Windows starts5–6 remain; all admission/controller/
+terminal/auditor identities must advance coherently to CI6/start5–6. No build,
+owner launch, Studio send or discovery is needed. CI4 startup-readiness failure
+is now resolved by partial CI5 navigation/defaults proof; field-entry/readback is
+an independently evidenced next gap. Preserve CI5 failure and all older failures;
+reassess after two unsuccessful corrections of one hypothesis. No seventh run or
+editor start, final human sign-off or following outcome is authorized.
+
+#### CI6 focused preparation review — 2026-10-13
+
+External field entry now physically clicks the exact nonpassword Edit/Spinner,
+waits actual keyboard focus on that target or its typed descendant, then types and
+verifies the readback. Safe exact whitelisted field/before/expected/last-readback
+and pending action replace ambiguous navigation labels. PID/executable/foreground/
+viewport containment remain. Receipt gate requires all five seed/two invalidation
+entries with physical click, focus and matching readback. No renderer injection,
+ValuePattern writes or credential diagnostics. Failure exit now records actual
+child PID/exitCode/forced status; failed required stages remain failures.
+
+The nonsecret profile path was verified correct against frozen929 main.rs
+phase2-studio Lifecycle root and lifecycle.rs root/ai-profiles.json. Missing store
+still throws FileNotFoundError; it is not empty ownership proof or permission to
+remove recovery references. No application/profile-path repair was justified.
+
+Retain rejected preparation: independent review caught Field-FocusReady calling
+AutomationElement.Compare; the actual .NET API belongs to Automation.Compare.
+Both production-driver calls corrected. Windows fixture must exercise the actual
+API owner from the helper, not only mocked focus readiness. No CI/editor attempt
+was consumed by this caught preparation error. Final independent review remains
+required before dispatch. Parent aligns admission6/start5, parser/controller/
+terminal/finish/reservations/fixtures5–6. Windows gate18+9 (actual helper/API tests),
+Mac18+7, no skips. Local portable18+7, four-file in-memory Python compilation,
+workflow actionlint/diff checks pass. No broad unchanged product matrices rerun.
+
+Final independent re-review **passes**: both corrected Automation.Compare calls
+and ninth Windows test resolve the actual production helper's two static API
+owners/overloads and invoke them on observed UIA RootElement before mocks. Wrong
+owner now fails without editor start/focus mutation. Physical input/readback,
+whitelist/privacy/capture and conservative ownership cleanup guards remain sound.
+Dispatch6/start5–6 and Windows9/Mac7 counts are coherent. Actual Windows proof
+remains pending; no qualification operations executed by review. Final Python
+syntax/actionlint/diff and changed-source privacy9files pass. Fresh refs still
+local/origin526a854, main5f448ca; repository noreply identity retained. Exactly one
+paired run/two Windows starts fit; no implicit extension or subsequent outcome.

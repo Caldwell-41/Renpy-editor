@@ -14,7 +14,7 @@ a separate guided feedback session after refinement.
 **Exact product:**929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
 9f034ca6cae69ef11e87d6a95a332152a9998eaa/269input digest
 3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd.
-Baseline5f593225fad2ebdb2970663d56ee83631b27ecef. Fresh local/origin65e937d
+Baseline5f593225fad2ebdb2970663d56ee83631b27ecef. Fresh local/origin526a854cbe4c937c1b54dfda797ca998944b962c
 matched on resume, main5f448ca683a905f4ea77d4580bbc89fda69f2b93. Never reset.
 New working edits are external harness/status only. Mac package1 executable
 618d31e5ba6ff817dcfcb5353c5938689d172fa123e6b90361508724f8878215, installer
@@ -40,22 +40,32 @@ viewed; exact failed UI state absent. Native privacy13files pass/listener stoppe
 forced exittrue/rootRemovedfalse keep cleanup failed. No product defect inferred.
 Ignored independent-ci-04-audit.json/artifacts/helper own exact receipts.
 
-**Reviewed local CI5 repair:** bounded enabled-button readiness before
-Settings/AI providers/Save profile; safe failure observations and conservative root
-retention reason. Independent review found main-window-only password/foreground
-checks insufficient for failure PNG; the repaired guards now require exact main HWND foreground, one same-PID top-level
-window and no password controls across all owned trees. Final review passes. No credential
-values/TextPattern reads or focus changes in diagnostics. Portable tests select
-Mac7 without skips, Windows8 including actual PowerShell helper test; workflow
-requires those counts. Windows PS execution remains unproven locally. Parent
-admission requires dispatch5/start4; controller/terminal/finish/fixtures all use starts4–5 consistently, independently
-reviewed. Old3–4 terminal identities are rejected; previous CI4 remains historical.
-Confirmed [CI5run38290650602](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38290650602),
-attempt1/workflow_dispatch/exact harness5a297cf7309164d28c02456549ba51c1b0c034e1/
-tree669a09e99bc46f46377a8057a481d436d4ebae69, in_progress2026-10-12T18:24:24Z.
-Canonical seven harness input digest57ba4dceca12c931f726cde7c827d8d063daf9c8a73ddd13c2f5d0c7ed82373a;
-declared PS1CRLF checkout alternatives captured in ignored ci-05-dispatch.json.
-No product build.
+**CI5 audited failed:**run38290650602/attempt1/harness
+5a297cf7309164d28c02456549ba51c1b0c034e1/tree669a09e99bc46f46377a8057a481d436d4ebae69.
+RequiredWindows114949696125 failed; Mac114949696261 passed. Both exact artifact
+ZIPs/manifests/269frozen929/sevenharnessPSCRLF/CI1executable verified independently.
+W106outer/82reuse78child, M54/47/43; Win18+8/Mac18+7 validators pass, no skips.
+Windows start4/PID8828 only, no5/build/HTTP. Settings navigation and actual
+Temperature1/Top-p.95 Spinner/defaultsPNG1116×759 partial proof pass. Seed fails
+field-entry/readback after20seconds; exact field unknown, last pending Saveprofile
+label is navigation, not proof of save. No credential entry, 0/9required stages.
+No product defect inferred. Failure PNG suppressed for three owned top-level windows.
+Cleanup UI/remove/noConfiguredCredential PNG observed and listener stopped, but
+normal exit code unrecorded and root retained for FileNotFoundError ai-profiles.json.
+Native privacy15files pass. Ignored independent-ci-05-audit.json/ci-05-artifacts
+own exact identity/visual evidence; historical failure and cleanup stay failed.
+
+**Final CI6 repair reviewed:** physical OS click on exact whitelisted typed
+nonpassword field, wait physical keyboard focus before SendKeys, preserve PID/
+exe/foreground/viewport guards; safe pending field/before/expected/readback proof.
+No ValuePattern writes/renderer injection/secret diagnostics. Exact profile path
+is correct (frozen main phase2-studio Lifecycle root and root/ai-profiles.json);
+missing store remains fail-closed retention. Failure-close actual child exit code
+is now retained without passing failed stages. Coherent dispatch6/start5–6 across
+admission/parser/controller/terminal/finish/fixtures; old4–5 rejected. Local18+7
+portable gates/syntax/actionlint pass; Windows9 actual helper tests await CI. No
+new runtime/package/product inputs. Final independent review passes; next is last authorized
+paired CI6; no owner launch/send/SDK execution needed.
 
 **Owner integrated pass:** same Mac package ordinary profile. Saved key survives
 process reopen and actual setup/all five actions without read/export/reentry. Owned
@@ -93,21 +103,20 @@ native-batch-recheck-01-* and owner-live-sdk-05 own exact proof; independent aud
 passes. Success with more response room does not prove prior truncation.
 
 **Counts/next:** Mac packages1/3, starts5/6 including conservative implicit lookup;
-Windows packages1/3, starts3/6. PairedCI5/6 each target, one newly approved remains.
-NextCI5 plannedWindows4–5/no builds/Studio credential, Mac fixtures only. CI6 may
-not fit if CI5 consumes both remaining-planned starts; preserve editor cap6 and
-reassess actual reservations before any further run. Live8/10/Rewrite3/4, setup1,
-Continue1/2,Draft1/2,card1/2,lore1/2,extra1/2used,discovery0. Final Windows proof
-sole technical gap. Reviewed repair/checks passed and were published under express
-CI authority; exactCI5 dispatched and confirmed above. **Manual same-thread pause:**
-END TURN, no polling/watcher or duplicate. On user resume read exact38290650602/
-attempt1 once; audit terminal required jobs, exact product/harness/ZIP/269inputs/
-PSCRLF/executable bindings, Win18+8/Mac18+7 validators, Windows nine native stages
-and actualPNGs/defaults/sampling/setup/cancel/readiness/reopen/cleanup, all start
-reservations including failed/missing terminal. If pending, pause again. If terminal,
-classify failures before any repair and reassess after two unsuccessful same-hypothesis
-corrections. One further paired dispatch allowance is not an editor-cap extension.
-No owner app launch/Studio send needed for pending audit; profile/key preserved.
-Successful CI proof can close technical matrix and enable requested UI refinement
-prompt, while final human acceptance remains explicit/unclaimed. No following
-outcome or feedback chat started.
+Windows packages1/3, starts4/6. PairedCI5/6 each target, one authorized pair remains.
+FinalCI6 must use Windows starts5–6/no builds/Studio credential, Mac fixtures only;
+both starts fit exactly. No seventh run/editor start. Live8/10/Rewrite3/4, setup1,
+Continue1/2,Draft1/2,card1/2,lore1/2,extra1/2used,discovery0. Windows Settings proof
+sole technical gap. Final review/focused checks passed; publication/dispatch proceeds under
+existing express authority. After confirmed dispatch, record exact harness/tree/
+seven canonical and PS1CRLF input alternatives/run/attempt and END TURN; manual
+same-thread wait, no polling/watcher/duplicate. User resume cues exact CI6 terminal
+audit: required paired jobs/ZIP/manifests/269product/sevenharness/executable,
+Win18+9/Mac18+7 validators, all nine native stages and actual PNGs/defaults/
+sampling/setup/cancel/readiness/reopen/cleanup, every reservation even failed or
+missing terminal. If pending, pause again. Reassess after two unsuccessful same-
+hypothesis corrections; if final proof fails or caps prevent recovery, report
+concrete blocker before new outcome. No further owner native work is required;
+ordinary profile/key preserved. Technical success can close matrix and enable
+requested UI refinement prompt; final human acceptance remains explicit/unclaimed.
+No following outcome or feedback chat started.
