@@ -1,9 +1,10 @@
 # Current status
 
-**Updated:** 2026-10-13. **Studio-only Phase2 closeout: CI1 passed; CI2 failed in
-an external Windows archive gate before native launch. Reviewed focused CI3 is running; owner native/live has progressed but the Mac
-locked again.** Generic providers/Phase3, selected-route context and AI ending/connection
-expansion are outside this outcome. Full Phase2 and final human acceptance remain incomplete.
+**Updated:** 2026-10-13. **Studio-only Phase2 closeout: CI1 passed; CI2 and CI3
+failed before Windows native launch. One additional paired run is explicitly approved.
+Owner native/live passed five actions; the selectable response was rejected with zero writes.**
+Generic providers/Phase3, selected-route context and AI ending/connection expansion
+are outside this outcome. Full Phase2 and final human acceptance remain incomplete.
 
 | Capability | Evidence | Acceptance |
 | --- | --- | --- |
@@ -29,19 +30,23 @@ origin/main5f448ca683a905f4ea77d4580bbc89fda69f2b93. Current edits are external
 verification/status only. Express CI publication/dispatch and native/live authority
 remain; no reset, force-push, merge, release, signing or provider expansion.
 
-Counts: Mac1/3packages,3/6starts conservatively charged, including the earlier
-possible implicit lookup; process21809 already running. Windows1/3packages,2/6starts
-actual beforeCI3; pairedCI3/3 each target, no further dispatch allowance. Confirmed [focused run38232733035](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38232733035),
-attempt1/exact harness36a11c9, failed. Audited CI2 adds zero packages/starts on both
-targets; Windows native execution was skipped. The archive fixture/raw-name guard
-repair passes18+7focused tests and independent review. Last paired [CI3run38277737024](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38277737024),
-attempt1/exact harness934decc, confirmed in_progress. Zero builds, Windows starts3–4
-reserved; actual execution/results/cleanup await terminal artifact audit.
-Live setup1, card1/2 saved then separately approved, lore1/2 sent/result unobserved;
-other actions0/2, total3/10; discovery0/0. Generated card exact revision is included
-in the lore send. Prompt edit/restore/Undo/Redo pass; game source unchanged. Mac
-locked again, so UI/live continuation needs unlock. Ordinary saved profile/key and
-already-running process21809 are preserved.
+Counts: Mac1/3packages,4/6starts conservatively charged, including the earlier
+possible implicit lookup; process29432 reopened normally. Windows1/3packages,2/6starts.
+Paired CI3/4 each target: user explicitly approved one additional paired run; no CI4
+dispatch yet. CI2 archive/raw-name failure remains failed. Audited [CI3run38277737024](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38277737024),
+attempt1/harness934decc/product929, passed18+7 fixture checks per target but Windows
+rejected differing temporary parents before native output/listener/launch. Added
+builds/starts/reservations0. Reviewed external repair binds TMPDIR/TEMP/TMP to
+runner.temp; dispatch admission now requires4, first Windows start3 unchanged.
+Windows native Settings proof remains pending.
+
+Live setup1, card1/2, lore1/2, rewrite2/2 (including selectable Edit Scene),
+Continue1/2, Draft1/2; total7/10, discovery0. Generated card/lore saved once and
+separately approved; exact approved revisions used in later rewrite. Prompt
+edit/restore/history, exact rewrite/Undo/Redo, Continue insertion and standalone
+Draft source preservation pass. Project/process reopen and native Validate exit0 pass. The live batch/subset remains
+failed/missing, with Rewrite2/2 exhausted; no retry. Native Run is blocked by renewed Mac lock; an unlock question is pending.
+SDK-copy proof and final independent audit remain. Ordinary saved profile/key is preserved and reused.
 
 [Requirement map/ledger](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
 owns dispositions, exact evidence and retained failures. [HANDOVER](HANDOVER.md)

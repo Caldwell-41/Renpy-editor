@@ -65,6 +65,10 @@ jobs:
       - name: Exercise only missing Settings controls on reused Windows executable
         if: runner.os == 'Windows'
         shell: bash
+        env:
+          TMPDIR: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
         run: |
           python harness/app/scripts/studio-setup-native.py --product-repo product --executable "$RUNNER_TEMP/studio-settings-Windows/reuse/qualification/package/loomlight.exe" --output "$RUNNER_TEMP/studio-settings-Windows/native" --root "$RUNNER_TEMP/loomlight-rewrite-live-settings-$GITHUB_RUN_ID" --first-launch-ordinal "$FIRST_LAUNCH_ORDINAL" --input-manifest "$RUNNER_TEMP/studio-settings-Windows/identity.json" --harness-ref "$GITHUB_SHA"
       - name: Scan only new native evidence using the unchanged product privacy gate

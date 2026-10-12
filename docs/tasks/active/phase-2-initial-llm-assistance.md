@@ -7403,3 +7403,84 @@ artifact audit. Full Phase2/final human acceptance unclaimed. Manual same-thread
 wait: audit exactCI3 on resume, retain failures and actual reservations, then finish
 owner chain after unlock if within caps. Any new CI attempt needs a real allowance
 decision; do not infer renewed caps or start the requested later UI outcome.
+
+#### CI3 terminal audit and explicit CI allowance extension — 2026-10-13
+
+CI3 run38277737024/attempt1/harness934decc/product929 remains **failed**.
+Independent audit confirms both exact artifact ZIPs, manifests, 269 product inputs
+and seven external harness inputs. Both targets pass18+7 focused fixture validators.
+Windows rejected the native root before output/listener/launch: RUNNER_TEMP and
+Python's temporary parent differed. No product defect is demonstrated; added
+builds, starts and reservations are all zero. Mac fixture job passed. Preserve
+missing native terminal/privacy evidence as failed. Ignored independent-ci-03-audit.json
+owns exact receipts.
+
+The smallest external repair binds TMPDIR, TEMP and TMP to runner.temp in the
+Windows native step; Python and the inherited Rust child then use the same parent.
+Existing containment, prefix and fresh-root checks remain. Independent review and
+local temporary-parent smoke pass; local smoke is not Windows native evidence.
+The user explicitly approved **one additional paired run** after reviewing this
+concrete correction. Only the cumulative CI ceiling increases3→4 per target;
+three are consumed and exactly one remains. Admission now requires dispatchordinal4;
+startordinal3 and attempt1 remain. Frozen929/existing CI1 package are reused, no builds
+or Studio credentials in CI. Windows actual package1/starts2; planned starts3–4.
+Mac package1/starts3, all other ceilings unchanged. No CI4 dispatch yet.
+
+Owner process21809 continues with the ordinary saved Studio key and no reentry.
+Generated Night bell lore was saved once and separately approved; Iona card1 and
+Night bell lore1 exact revisions were then selected in Rewrite. Rewrite accepted
+once as an exact single prose patch; native Undo/Redo restores exact source/metadata.
+After that source change, the generated references correctly become unavailable
+because their supporting source is stale. Continue uses selected manual Mara2 and
+The last tram1, makes zero writes before acceptance, then inserts exactly two
+narrations before the unchanged Return, preserving all other source bytes.
+Ignored native-lore-approved, native-rewrite-before/accepted/undo/redo and
+native-continue-before/accepted receipts own hashes and actual source text.
+Live setup1, card1/2, lore1/2, rewrite1/2, Continue1/2, Draft1/2 reserved/sent;
+total6/10, discovery0. Draft is pending; no batch send yet. Human acceptance pending.
+
+#### Owner live batch refusal and reopen — 2026-10-13
+
+All five action families now have valid owner-native Studio results on exact929.
+Draft Scene send1 creates standalone Platform after midnight Scene
+3d2f6fcc-a522-4016-b384-930f2a20e363 with two narrations and Return.
+All existing game bytes remain unchanged; zero project writes before acceptance;
+Accept becomes disabled after the single save.
+
+Selectable Edit Scene send7 (charged second Rewrite-family send) is **failed live
+evidence**: native status “Studio response is unsupported or incomplete. Response
+discarded.” Complete project hash snapshot before/after proves zero writes. No raw
+response is exposed, so the exact provider/model/schema failure cannot be diagnosed
+from this evidence. Do not call it a product defect, a model limitation, a token
+truncation or a pass. No retry is permitted: Rewrite-family ceiling2 is exhausted
+although total7/10 leaves other-family headroom. Successful controlled CI1 native
+subset/dependency and combined-controller tests remain reused evidence, distinct
+from missing successful owner live batch/subset proof. Final live integrated workflow
+cannot be claimed complete while this remains failed.
+
+After refusal Close Assist did not visibly close while task text remained; clearing
+the disposable task through its native field allowed closure, without source writes.
+Retain this observation for a future UI refinement; root cause unproven.
+Project close/reopen preserves all project bytes. Normal process21809 quit succeeds;
+Mac start4 is reserved before invocation, same exact package starts29432. Settings
+shows persisted Studio endpoint/model/limits/sampling and Credential:configured,
+without key reentry, new send or discovery. Original approved references and edited
+prompts persist. Native explicit Validate uses registered verifiedSDK8.5.3 revision
+8bb3d5b7102f9069e4fa13f385303113807cc9b11a86b0a31c56f3e65defbe58, after explicit
+synthetic-project session trust; native status validation exit0. Existing project
+bytes unchanged;14 SDK cache/output files added. Native Run and metadata-free copy
+audit remain pending at this checkpoint. Ignored native-* receipts own exact details.
+
+Independent owner receipt review confirms all114 project hashes match through live
+batch refusal and both reopens; exact single rewrite, Continue insertion and Draft
+new file/meta changes preserve existing bytes, reference/prompt/authoring extensions.
+Native Validate preserves prior114files and adds14 SDK outputs. Tracked current
+changes are external harness/status only: one frozen269 path, production-scaffold.yml,
+has an input-description delta in the harness checkout; frozen product checkout929
+is unchanged. New harness ref must bind this distinction. Fresh origin reconciliation
+leaves local/origin continuationb5fd4f3 and main5f448ca unchanged. No reset/discard.
+Focused external checks18+7, actionlint, diff check and six-file changed-source privacy
+scan pass. Review found stale HANDOVER wording about Windows OpenSSL capability;
+corrected to reuse independently audited CI1 transport15, with no rerun.
+Native Run is currently blocked by renewed Mac lock; unlock requested, savedkey
+and process29432 preserved. No new launch/send/discovery from this lock.

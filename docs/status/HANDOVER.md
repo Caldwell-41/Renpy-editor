@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — awaiting final CI3 audit; native live needs renewed unlock
+## Studio-only Phase 2 closeout — finish owner native chain, then approved CI4
 
 The user expressly authorizes CI publication/dispatch and native/live verification.
 Continue this same outcome; no merge/release, signing changes, generic provider,
@@ -38,22 +38,24 @@ unsafe-backslash case, nativevalidator7passes. Actual Windows native execution s
 no native directory/reservations: zero added starts/packages; Maczero too. Preserve
 missing-native privacy/terminal failures. Ignored independent-ci-02-audit.json owns audit.
 
-**Remaining Windows gap/CI3 repair:** a writer-only ZipInfo fixture repair was rejected
-by independent review because reading also normalizes Windows separators. Retain this
-unsuccessful correction. Reassessment uses orig_filename for raw fixture assertion and
-refuses raw/normalized name differences before extraction; regression emulates Windows
-normalization. Local18+7, workflow syntax, changed-source privacy and independent
-re-review pass. No product repair/build/launch. The last authorized pairedCI3 must
-reuse frozen929 and CI1 exact Windows package, reserve Windows starts3–4 (unused),
-Maczero packages/starts. Published harness934decc1e402b96dc7d795e22c69bf8f24aecbe1/
-treed699336efc0af4397bd57dc34265e26e86377c6f. Confirmed last paired [CI3
-run38277737024](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38277737024),
-attempt1/workflow_dispatch/exact934decc, in_progress at2026-10-12T16:29:47UTC.
-Initial list confirmation lacked an unambiguous head match; the CLI returned exact
-run URL, then one direct run-ID read confirmed identity without redispatch. Retain
-that confirmation failure. Frozen product929/CI1 executable remains unchanged.
-Manual same-thread pause; no polling/watcher/fourth dispatch. Ignored ci-03-dispatch
-and ci-03-confirmed receipts own operation identity.
+**CI3 audited failed:** [run38277737024](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38277737024),
+attempt1/harness934decc1e402b96dc7d795e22c69bf8f24aecbe1, product929. Both exact ZIPs,
+manifests/269product/sevenharness inputs pass audit; both18+7 fixture gates pass.
+Windows native root rejected before output/listener/launch because RUNNER_TEMP and
+Python temporary parent differed. No product defect shown; zero added packages,
+starts or reservations. Native terminal/privacy evidence remains failed.
+Initial CI3 list confirmation failure was resolved by direct run-ID read without
+duplicate dispatch. Independent-ci-03-audit.json owns exact audit receipts.
+
+**Approved CI4 repair:** Windows native step binds TMPDIR/TEMP/TMP to runner.temp.
+Containment/prefix/fresh-root guards remain; Python and inherited Rust child use one
+parent. Independent review and local temp smoke pass; smoke is not Windows proof.
+User explicitly approved one additional paired run. Only CI ceiling3→4 per target;
+three consumed/one remains. Admission now requires4, startordinal3 and attempt1
+unchanged. Reuse frozen929 and CI1 exact Windows executable; no builds, Studio
+credentials, model discoveries or hostedMac editor starts. No CI4 dispatched yet.
+Retain the failed writer-only ZipInfo correction and subsequent reviewed raw-name
+repair from CI2 history in the owning ledger.
 
 **Local proof:** renderer138/138, sampling2/2, compatibility3/3, nativeworker8/8,
 readiness-discovery1/1, transport15/15, exact-context integers1/1, rejecting gates14/14
@@ -63,7 +65,8 @@ runtime pass (five SDK commands,12assertions); source review has no open defect.
 Retain the first SDK/display oracle, renderer stale-status, privacy/static-key,
 ephemeral TLS CA:trueleaf and three integer fixture failures/reassessment. No source
 scanner/trust/recovery waiver. TLS keys/certificates are generated only in test-owned
-roots using existing OpenSSL; Windows capability still needs CI. Literal IPv6 HTTPS
+roots using existing OpenSSL; CI1 Windows transport15 passed and was independently
+audited. Literal IPv6 HTTPS
 is explicitly unsupported; the actual live target remains the selected Studio LAN.
 
 **Mac package1:** strict approved signature/designated requirement, installer contents,
@@ -83,60 +86,55 @@ Do not create a fresh temporary credential profile or delete the user's key as t
 cleanup. Only app-reported missing/unreadable credentials justify fresh entry.
 The native receipt is `phase2-closeout-01/native-saved-profile-01.json`.
 
-**Cumulative allowance:** Mac1/3packages, **3/6starts conservatively charged**
-(first ordinary process19193, possible implicit CUA lookup, reopened process21809).
-Windows actual1/3packages and2/6starts beforeCI3; pairedCI3/3each target, zero
-dispatches remaining. CI3 reserves Windows starts3–4, no builds; hostedMac no starts/builds. Live setup1,
-card1/2,lore1/2,otherfamilies0/2,total3/10;discovery0/0. Test setup counts toward ten separately.
-Keep earlier failed attempts; no automatic retries. Ordinary saved credential is
-preserved and never deleted as temporary cleanup.
+**Cumulative allowance:** Mac1/3packages, **4/6starts conservatively charged**
+(first ordinary19193, possible implicit CUA lookup, reopened21809, final29432). Windows
+actual1/3packages,2/6starts; planned CI4 starts3–4 still unused. PairedCI3/4 each
+target, one explicit additional paired dispatch remains. Live setup1, card1/2,
+lore1/2, rewrite2/2 (batch charged second), Continue1/2, Draft1/2,total7/10,discovery0.
+All failures count. Preserve ordinary saved credential; never delete it as temporary
+cleanup or ask for reentry while configured.
 
-**Next resume:** audit exactCI3 run38277737024/attempt1, both required artifacts,
-product/harness/ZIP/input/executable bindings,18+7fixture gates, actual Windows native
-Settings/defaults/sampling/setup/cancel/readiness/reopen receipts and PNGs, reservations
-and cleanup. Missing/failed/skipped proof stays failed; do not dispatch again. Update
-actual starts from reservations even if terminal missing/malformed. If CI passes, finish
-owner native/live after unlock within remaining Mac starts/live sends, then independently
-review full execution for human decision. If another CI correction is required, report
-exhausted dispatch allowance before any new attempt.
+**Owner native progress:** process29432 is the final normally reopened ordinary signed package1.
+User key saved in native Settings and reused across process reopen, actual setup and
+all live actions without reading/export/reentry. Owned synthetic root renamed
+live-project→synthetic-project after folderName mismatch; all42bytes unchanged.
+Current root is phase2-closeout-01/synthetic-project. Prompt edit/save/restore and
+Undo/Redo pass; edited rewrite prompt is actually used.
+Iona card record035aa71f-f732-467f-8910-fccf90586ec2/revision2711eca8-eab9-4cdc-85b5-47be42980f99/1
+and Night bell lore record25ef2e43-4a97-4985-b37b-a37cd3bcf2c1/revision1a3bcbed-8481-4f13-a6e2-5fbf811cc64a/1
+were saved once, separately approved and selected in later rewrite. Generated
+references correctly become unavailable after their supporting source changes.
+Rewrite is an exact single prose patch; Undo/Redo restore source and core metadata
+exactly. Continue accepts exactly two narration insertions before unchanged Return,
+all other source bytes preserved. Draft creates Platform after midnight standalone
+Scene3d2f6fcc-a522-4016-b384-930f2a20e363 with two narrations/Return, preserving
+all existing game bytes. Zero project writes before each acceptance.
 
-**Owner progress / renewed lock:** user unlocked; process21809 rebound without
-launch, native Settings confirmed saved configuration/Credential:configured. One actual
-Studio Test setup succeeded using the saved key. No reentry/read/export/model discovery.
-Prompt edit/save, baseline restore, Undo/Redo and Undo back to edited custom prompt pass.
-First synthetic open failed due root/metadata folderName mismatch; rename owned root
-live-project to synthetic-project with all42file bytes unchanged. Second open succeeds.
-Active project is phase2-closeout-01/synthetic-project; do not use old live-project path.
+**Live batch failed:** sendordinal7/payloaddigest
+81e3fef968bb729712016e91588e4ae4dee5dc93abed689901b155ce93b36368, budget32768/response2048.
+Native response unsupported/incomplete and discarded. Full114file snapshot proves
+zero writes. Rewrite-family2/2 is exhausted; no resend. Exact failed provider/model/
+schema cause is unavailable because no raw response is exposed. Controlled CI1
+subset/dependency proof remains passed; successful owner live subset is still missing
+and cannot be waived. Close with task present did not visibly close; clearing the
+disposable task allowed Close Assist. Preserve this observation for future UI review.
 
-Card Iona send1 succeeds. All project files unchanged before Save, source unchanged
-through Save and separate approval. Save button then disabled. Exact approved card
-record035aa71f-f732-467f-8910-fccf90586ec2, revision2711eca8-eab9-4cdc-85b5-47be42980f99,
-number1. Its exact revision is explicitly included with The last tram lore1 in the
-Night bell lore send1, scopeWhole project, budget16384/response768/payloaddigest
-c5ef30a277c3d89df2e5b3783b1207b83d51709a9ba19cc1945afc6f747eb23e. Native Mac locked
-again while that send runs; result unobserved, all synthetic files still unchanged.
-An unlock question is pending; bind only existing process and inspect result, do not
-relaunch/resend. If valid, Save lore once and separately approve it, then use exact
-generated card/lore revisions in later requests. Live setup1, card1/2, lore1/2, other
-fourfamilies0/2, total3/10; discovery0. Ignored live-send-ledger.json and native-card/
-lore snapshots own reserved attempts/digests/IDs/proofs. A receipt-writing Python
-syntax error failed before execution, corrected; no writes/send/relaunch resulted.
+Project and process reopen preserve all114project file bytes. Native Settings after
+process29432 reopen shows original saved endpoint/model/limits/sampling and
+Credential:configured; no entry/send/discovery. Native explicit Validate finishes
+exit0 using registered verifiedSDK8.5.3 revision
+8bb3d5b7102f9069e4fa13f385303113807cc9b11a86b0a31c56f3e65defbe58 after synthetic-session
+trust. All prior project bytes unchanged;14 SDK output/cache files added. Native Run is blocked by renewed Mac lock, confirmed through CUA; an unlock
+question is pending. Preserve running29432 and key; no restart/resend needed.
+Metadata-free copy qualification/audit remains pending. Ignored live-send-ledger.json
+and native-* receipts own source/digests/counts. Reuse exact CI1 malformed/stale/
+cancelled zero-write proof; do not rerun unchanged matrices.
 
-Compact Settings setup preview exceeds line/AX512limit; fixed compiled core probe and
-visible prefix/config reviewed, no full native setup text-capture claim. Main Assist
-wrapped body/schema was inspected with native scrolling and exact payload digest.
-Keep this presentation issue for requested later UI refinement; product remains929.
-User ordinary saved key stays preserved; only owned fake credential roots are cleaned.
-
-On exact frozen product, finish owner five actions + selectable dependency-valid
-subset, separately approve generated references and include their exact revisions
-later, prompts/restores/limits, zero-write refusals, single acceptance, source/custom
-preservation, history/project/process reopen, explicit SDK validate/run and metadata-free
-copy. Reuse existing controlled negative proof rather than resending unchanged cases.
-Review final execution evidence independently; human acceptance stays pending.
-
-The user requests a section18/docsUI refinement prompt after this closeout, then a
-separate guided test-client/feedback agent after refinement. Prepare those handoffs
-when verification completes; neither following outcome has started. The completed
-user-owned chat Investigate selected-route context feasibility is future research;
-its proposal remains deferred.
+**Next:** finish native Run/copy within remaining counts, independent execution review,
+then focused CI4 publication/dispatch (express authority covers harness/docs only).
+Before dispatch reconcile fresh local/origin without reset; no product changes/build.
+Record exact harness ref and dispatch identity/status then end turn under WORKFLOW
+manual waiting policy. On user resume audit terminal artifacts once; no watcher/polling.
+Update owning matrix/ledger and live records with actual counts/cleanup. Human
+acceptance remains pending. Prepare requested UI refinement prompt after technical
+verification; do not start UI work or feedback chat as a new outcome.

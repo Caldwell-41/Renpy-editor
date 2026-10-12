@@ -12,7 +12,7 @@ on:
         type: boolean
         default: false
       selectable_dispatch_ordinal:
-        description: Studio closeout cumulative paired dispatch, 1 through 3
+        description: Studio closeout cumulative paired dispatch, 1 through 4 (one explicit extension)
         type: string
         default: '1'
       phase2_studio:

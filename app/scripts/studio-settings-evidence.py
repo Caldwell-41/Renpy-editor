@@ -74,7 +74,7 @@ def prepare(product, harness, output):
  report={'passed':False,'productCandidate':CANDIDATE,'harnessCandidate':git(harness,'rev-parse','HEAD').decode().strip(),'runId':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT'),'os':platform.system(),'architecture':platform.machine(),'packageBuilds':0,'appLaunches':0}
  try:
   assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification' and os.environ['GITHUB_RUN_ATTEMPT']=='1' and report['harnessCandidate']==os.environ['GITHUB_SHA']
-  assert os.environ['DISPATCH_ORDINAL']=='3' and os.environ['FIRST_LAUNCH_ORDINAL']=='3'
+  assert os.environ['DISPATCH_ORDINAL']=='4' and os.environ['FIRST_LAUNCH_ORDINAL']=='3'
   assert (report['os'],report['architecture']) in [('Windows','AMD64'),('Darwin','arm64')]
   report['harnessInputs']={p:digest((harness/p).read_bytes()) for p in HARNESS}
   report['harnessInputDigest']=digest(json.dumps(report['harnessInputs'],sort_keys=True,separators=(',',':')).encode())
