@@ -3,7 +3,7 @@
 ## Studio-only Phase 2 closeout — owner chain passed; finish Windows Settings proof
 
 User authorizes CI publication/dispatch and owner native/live. Latest extensions:
-two extra blocker sends (one consumed) and two further paired CI runs (none yet).
+two extra blocker sends (one consumed) and two further paired CI runs (one dispatched).
 Keep the same outcome; no generic providers/Phase3, new discoveries/installations,
 signing changes, merge/release or following outcome. Route context and AI endings/
 connections are user-deferred. One ordinary saved credential across sessions; no
@@ -50,7 +50,12 @@ Mac7 without skips, Windows8 including actual PowerShell helper test; workflow
 requires those counts. Windows PS execution remains unproven locally. Parent
 admission requires dispatch5/start4; controller/terminal/finish/fixtures all use starts4–5 consistently, independently
 reviewed. Old3–4 terminal identities are rejected; previous CI4 remains historical.
-No CI5 dispatch yet; no new product build.
+Confirmed [CI5run38290650602](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38290650602),
+attempt1/workflow_dispatch/exact harness5a297cf7309164d28c02456549ba51c1b0c034e1/
+tree669a09e99bc46f46377a8057a481d436d4ebae69, in_progress2026-10-12T18:24:24Z.
+Canonical seven harness input digest57ba4dceca12c931f726cde7c827d8d063daf9c8a73ddd13c2f5d0c7ed82373a;
+declared PS1CRLF checkout alternatives captured in ignored ci-05-dispatch.json.
+No product build.
 
 **Owner integrated pass:** same Mac package ordinary profile. Saved key survives
 process reopen and actual setup/all five actions without read/export/reentry. Owned
@@ -88,14 +93,21 @@ native-batch-recheck-01-* and owner-live-sdk-05 own exact proof; independent aud
 passes. Success with more response room does not prove prior truncation.
 
 **Counts/next:** Mac packages1/3, starts5/6 including conservative implicit lookup;
-Windows packages1/3, starts3/6. PairedCI4/6 each target, two newly approved remain.
+Windows packages1/3, starts3/6. PairedCI5/6 each target, one newly approved remains.
 NextCI5 plannedWindows4–5/no builds/Studio credential, Mac fixtures only. CI6 may
 not fit if CI5 consumes both remaining-planned starts; preserve editor cap6 and
 reassess actual reservations before any further run. Live8/10/Rewrite3/4, setup1,
 Continue1/2,Draft1/2,card1/2,lore1/2,extra1/2used,discovery0. Final Windows proof
-sole technical gap. Finish reviewed local repair and focused checks, reconcile
-fresh refs, publish authorized harness/docs normally, dispatch pairedCI5 exact
-identity, then record and END TURN under manual same-thread waiting policy. No
-CI polling/watcher/ambiguous duplicate. On user resume audit exact terminal run/
-attempt/artifacts including all failed stages/reservations/cleanup before closing
-matrix. No owner app launch or Studio send needed for CI wait/audit.
+sole technical gap. Reviewed repair/checks passed and were published under express
+CI authority; exactCI5 dispatched and confirmed above. **Manual same-thread pause:**
+END TURN, no polling/watcher or duplicate. On user resume read exact38290650602/
+attempt1 once; audit terminal required jobs, exact product/harness/ZIP/269inputs/
+PSCRLF/executable bindings, Win18+8/Mac18+7 validators, Windows nine native stages
+and actualPNGs/defaults/sampling/setup/cancel/readiness/reopen/cleanup, all start
+reservations including failed/missing terminal. If pending, pause again. If terminal,
+classify failures before any repair and reassess after two unsuccessful same-hypothesis
+corrections. One further paired dispatch allowance is not an editor-cap extension.
+No owner app launch/Studio send needed for pending audit; profile/key preserved.
+Successful CI proof can close technical matrix and enable requested UI refinement
+prompt, while final human acceptance remains explicit/unclaimed. No following
+outcome or feedback chat started.

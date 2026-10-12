@@ -7746,3 +7746,30 @@ only the authorized next run; Wstarts4–5 fit actual3/6, no builds or Studio cr
 Mac fixtures only. If both starts consume, onlyWindowsstart6 remains and a full two-
 start CI6 cannot run under unchanged editor cap. Reassess actual reservations before
 any next run despite the second unused CI authorization. No blind retry/reset.
+
+#### Authorized paired CI5 confirmed checkpoint — 2026-10-13
+
+Fresh refs again matched65e937d local/origin, main5f448ca; reviewed harness/status
+publication5a297cf7309164d28c02456549ba51c1b0c034e1/tree
+669a09e99bc46f46377a8057a481d436d4ebae69 pushed normally, no unrelated loss/reset.
+Frozen product929/tree9f034ca/269digest3c244 unchanged. Seven external canonical
+harness input digest57ba4dceca12c931f726cde7c827d8d063daf9c8a73ddd13c2f5d0c7ed82373a
+uses Git blob bytes; explicit PS1CRLF checkout alternatives recorded separately.
+Existing operations read once before dispatch; no duplicate.
+[CI5run38290650602](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38290650602)
+confirmed attempt1/workflow_dispatch/exact5a297cf/branchcodex/provider-qualification,
+in_progress2026-10-12T18:24:24Z. Onlyselectable_proposals/studio_setup_only true;
+dispatchordinal5/startordinal4, otherselectorsfalse, no package build/Studio credential.
+Existing CI1 exact executable reused; Wstarts4–5 planned from actual3/6, Mac fixtures
+18+7 only (Win18+8 including actualPowerShell helper test). PairedCI5/6 each target
+consumed, one remaining subject to editor cap. Actual starts await terminal audit;
+count all reservations even if terminal missing/malformed.
+
+Owner integrated chain and independent exactSDK05 review already passed; no second
+extra Studio send, build/owner launch needed. Live8/10/Rewrite3/4/extension1of2used,
+discovery0; Macpackage1/starts5, Windowspackage1/starts3beforeCI5. CI4 failure/
+root retention/forced exit and all earlier failed corrections remain failed.
+Manual same-thread pause under WORKFLOW: record and END TURN; no polling/watcher/
+automatic notification/redispatch. User resume cues one terminal identity/artifact
+audit, then remaining Windows gap disposition. Final human sign-off/UI refinement
+feedback remain subsequent decisions; no following outcome started.

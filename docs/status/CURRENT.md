@@ -2,7 +2,7 @@
 
 **Updated:** 2026-10-13. **Owner Studio-only integrated workflow passed on frozen929.
 CI4 remains failed; Windows native Settings and cleanup are the remaining technical
-gap. User approved two further paired CI runs; the next repair passed independent review.**
+gap. User approved two further paired CI runs; the reviewed CI5 run is in progress.**
 Final human acceptance is unclaimed. Generic providers/Phase3, selected-route
 context and AI ending/connection changes remain excluded or user-deferred.
 
@@ -18,7 +18,8 @@ Frozen product **929af6f23f1fe79af2665a4cc71c276a64ffd80d**, tree
 9f034ca6cae69ef11e87d6a95a332152a9998eaa;269input canonical digest
 3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd.
 Qualified5f593225fad2ebdb2970663d56ee83631b27ecef remains behavioral baseline.
-Fresh local/origin continuation65e937d0a4e115eb721649628af924de840ffcdd,
+Fresh local/origin continuation65e937d0a4e115eb721649628af924de840ffcdd before
+reviewed harness publication5a297cf7309164d28c02456549ba51c1b0c034e1,
 origin/main5f448ca683a905f4ea77d4580bbc89fda69f2b93; unrelated work preserved.
 Current local edits are external harness and status only; no product repair/build.
 Express CI publication authority covers reviewed harness/evidence; no merge/release.
@@ -33,10 +34,15 @@ product/sevenharness inputs/executable pass independent audit. No product defect
 established; missing initial UI readiness wait motivates the local harness repair.
 
 Counts: Mac package1/3, starts5/6 (one conservative implicit lookup), process33969;
-Windows package1/3, starts3/6. Paired CI4/6 each target: user explicitly approved
-two more, two remain. Next CI5 requires dispatch5/start4, reused package, no build
-or Studio credential; Windows starts4–5 planned, Mac fixtures only. CI6 may run
-only if remaining editor starts fit after CI5 audit. No CI5 dispatch yet.
+Windows package1/3, starts3/6. Paired CI5/6 each target: user explicitly approved
+two more, one now remains. Confirmed [CI5run38290650602](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38290650602),
+attempt1/workflow_dispatch/exact harness5a297cf7309164d28c02456549ba51c1b0c034e1,
+tree669a09e99bc46f46377a8057a481d436d4ebae69, in_progress2026-10-12T18:24:24Z.
+Seven canonical harness input digest57ba4dceca12c931f726cde7c827d8d063daf9c8a73ddd13c2f5d0c7ed82373a,
+with declared PS1CRLF checkout alternatives. Frozen929/reused package/no build
+or Studio credential; Wstarts4–5 planned, Mac fixtures only. CI6 may run only
+if remaining editor starts fit after CI5 audit. Manual same-thread wait: no polling/
+watcher; user resume cues terminal artifact audit.
 
 Live8/10: setup1, card1/2,lore1/2,Continue1/2,Draft1/2,Rewrite3/4 including batches.
 User's two-send extension consumed1/2; second unused because recheck passed.
