@@ -1,109 +1,86 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — remaining selected changes implemented locally
+## Studio-only Phase 2 closeout — awaiting first paired CI audit
 
-The user selected the saved closeout prompt on 2026-10-12: reconcile every applicable
-2A–2C/Section11 cell, close only residual Studio gaps, then run the five actions plus
-selectable proposals on one exact candidate across both targets. Generic providers,
-Phase 3, model discovery/installation, signing changes, merge/release and a following
-outcome remain excluded. Final human acceptance requires explicit user sign-off.
+The user expressly authorizes CI publication/dispatch and native/live verification.
+Continue this same outcome; no merge/release, signing changes, generic provider,
+Phase3, model installation/discovery or following outcome. Selected-route context
+and AI ending/connection changes are user-deferred beyond Phase2. Session-only keys
+are excluded; use one saved credential across sessions. Final human acceptance is
+unclaimed and requires explicit sign-off.
 
-Read the owning
-[entry requirement map](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
-for the current disposition; older closeout proposal text is historical, not inactive
-authority. One owner retains this Mac ARM64 session. Independent read-only entry review
-is complete; final candidate execution review is still pending.
+Frozen behavioral candidate **929af6f23f1fe79af2665a4cc71c276a64ffd80d**, tree
+**9f034ca6cae69ef11e87d6a95a332152a9998eaa**, is published to
+`codex/provider-qualification`. Entry origin wasc1e14bf; no reset/force-push or
+unrelated work loss. Last refreshed origin/main is5f448ca683a905f4ea77d4580bbc89fda69f2b93.
+269material inputs have canonical JSON SHA256
+3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd.
+Qualified5f593225fad2ebdb2970663d56ee83631b27ecef remains the historical baseline;
+CI4five-action and CI7selectable evidence remain distinct, not a final combined run.
+The [owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+retains the complete requirement map, source proof, exact hashes and all failures.
 
-Fresh fetch succeeded. Local HEAD and origin/codex/provider-qualification equal
-**c1e14bf7756a550a0ecaf8fd3b8b736baf07018d**; origin/main is
-**5f448ca683a905f4ea77d4580bbc89fda69f2b93**. No reset, branch change or unrelated
-worktree mutation. The six pre-existing Studio-only scope-document edits are preserved.
-Sampling/readiness/HTTPS source/tests and audit/status/contract clarifications are local; no
-publication authorization was established for it and nothing was committed/pushed.
+**CI:** [run38224940778](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38224940778),
+fresh attempt1, exact929af6f, first paired dispatch. Confirmed in_progress; exclusive
+admission passed, both required selectable Windows/macOS jobs in_progress. Older
+nonapplicable jobs are intentionally skipped and do not stand in for required proof.
+No retries or status polling. Ignored `phase2-closeout-01/ci-01-dispatch.json` and
+`ci-01-confirmed.json` own dispatch/head/status receipts. Follow WORKFLOW's manual
+same-thread wait: on user resume, audit this exact run/attempt, both manifests,
+269input hashes, actual package/start counts, required cases, native captures and
+cleanup; only then continue the remaining authorized native/live work.
 
-The exact coherent historical code baseline assessed at entry is
-**5f593225fad2ebdb2970663d56ee83631b27ecef**, tree
-**e8a455ca224943b9079a7fd0cedbeeb7dcd71647**. The entry audit confirmed zero app/workflow delta.
-Current local sampling/readiness/HTTPS changes those inputs and payloads;5f59322 remains the historical
-behavioral baseline, not qualification for new changes. At entry both CI7 target265input
-inventories matched, only declared PS1CRLF normalization; the read-only
-audit verifies outer32/67 and child28/63 manifests. Windows executable
-5fd03b0f8f3080ea3d258d30ff23eadaf8d3aa3ce05ca631670265f0327605ae and signed Mac
-executable724a405c34c43ee7659785fda4132b001d2037c0440c33bb0c668cb136fc01d9 retain
-their qualified native19+2checks/six exact bodies/subset/history/reopen/cleanup proof.
-No new package was built. The ignored public audit receipt is
-`phase2-closeout-01/entry-audit.json`; no credential files were read/exported.
+**Local proof:** renderer138/138, sampling2/2, compatibility3/3, nativeworker8/8,
+readiness-discovery1/1, transport15/15, exact-context integers1/1, rejecting gates14/14
+plus integrated gates4/4 pass; desktop tests/examples compile. Same-project five-action
+plus selectable controller/export and pinned metadata-free SDK8.5.3 compile/lint/
+runtime pass (five SDK commands,12assertions); source review has no open defect.
+Retain the first SDK/display oracle, renderer stale-status, privacy/static-key,
+ephemeral TLS CA:trueleaf and three integer fixture failures/reassessment. No source
+scanner/trust/recovery waiver. TLS keys/certificates are generated only in test-owned
+roots using existing OpenSSL; Windows capability still needs CI. Literal IPv6 HTTPS
+is explicitly unsupported; the actual live target remains the selected Studio LAN.
 
-CI4run38134089028/attempt1 at3b3e8681a7bae2ddc8964409bf6f4e615b788eba retains
-historical five-action/controller/LAN/approval/prompt/history/reopen/metadata-freeSDK
-proof. Its23/88declared manifest hashes verify. There are33changed app/workflow paths
-between it and the selected candidate, including dispatch, planner, prompts and UI.
-Do not present CI4 plus selectableCI7run38178036314 as one final integrated run.
-Earlier live five-action and later live selectable sessions remain distinct evidence.
-Final combined accepted-game SDK/native/live proof is missing.
+**Mac package1:** strict approved signature/designated requirement, installer contents,
+detach and seven-file privacy scan pass. Executable
+618d31e5ba6ff817dcfcb5353c5938689d172fa123e6b90361508724f8878215; installer
+fb449b8f77a60d1fcddd236ecf40ffe7097474d097a1e614d1316e1fa55124b1.
+Ignored `phase2-closeout-01/candidate.json` owns exact inputs/package/check receipts.
 
-The user settled the material scope gaps: selected-route context/repeated visits and
-AI ending/connection changes are deferred beyond Phase2. Profiles now have editable
-Temperature/Top-p and explicit configuration-bound Test setup readiness. Generation
-now verifies HTTPS certificates/hostnames and reviewed address sets. These local
-changes require new qualification; literal IPv6 HTTPS remains explicitly unsupported
-by the pinned adapter, without insecure fallback. The user explicitly
-removed session-only credentials: saved keys must be reused across sessions.
-The user also deferred AI changes to Scene endings/connections beyond Phase 2, as
-possible future work. Continue retains the ending; Draft creates an unconnected Scene
-with Return. Terminal validity remains required; the wider terminal/edge family is
-no longer a closeout blocker. Earlier slice exclusions do not automatically waive
-remaining selected requirements; deferrals above are explicit user decisions.
+**Saved credential correction:** ordinary signed client launched, existing profile
+list was empty. Earlier disposable live roots had been cleaned, so there was no key
+for this ordinary client to reuse. The selected Studio configuration was saved in
+its ordinary persistent profile without network. User entered the key in native
+Settings and clicked Remember; native UI then reported Credential:configured and
+API key saved. No key was read/exported/reflected. Native-owned process19193 quit
+normally; preserve that saved profile/key and reuse it for reopen/live verification.
+Do not create a fresh temporary credential profile or delete the user's key as test
+cleanup. Only app-reported missing/unreadable credentials justify fresh entry.
+The native receipt is `phase2-closeout-01/native-saved-profile-01.json`.
 
-The user selected local sampling implementation: defaults1.0/0.95, saved finite values,
-legacy exact serialization retained, exact body preview and stale-send invalidation.
-Focused Mac source checks pass: core sampling2/2 plus synthetic-body1/1, SettingsDOM5/5,
-frontend typecheck/test compilation and desktop check with tests. Independent review's
-constructor spill and synthetic-body assertion findings are corrected; no remaining
-code finding. Packaged/Windows/live acceptance remains pending; no old exact-body
-receipt is reused as proof of the changed serializer. Failed commands/DOM harness
-attempts are retained in the owning ledger.
+**Cumulative allowance:** Mac1/3packages, **2/6starts conservatively charged** (one
+confirmed launch plus possible implicit display-name CUA lookup that timed out;
+exact-path binding reused the owned process). Windows CI reserves package1 and
+starts1–2; actual consumption awaits terminal artifact audit. PairedCI1/3each target.
+Live setup0, each five-action0/2, total0/10; discovery0/0. Count any Test setup toward
+ten total separately; plan one setup and remaining action slots with no automatic
+retry. Preserve all failed/implicit/reopen/local/CI attempts. Prior outcome totals do
+not roll over. No active owned local app/listener/root/SDK install/watcher remains;
+user's ordinary saved credential deliberately remains.
 
-Core compatibility3/3, sampling2/2, affected rewrite45/45, transport15/15, native
-compatibility3/3 (two worker tests plus discovery), Settings8/8 and final renderer138/138
-pass; desktop tests/examples compile. A failed renderer138/137 run exposed stale
-thrown-status overwrite after cancellation, repaired with guarded catch/reload and
-focused confirmation. Discovery invalidation, completed-cancel truthfulness and
-absolute transport deadline review findings are repaired. Final source/execution
-review and integrated native/Windows/live proof remain pending. Controlled fixture
-readiness seeding is not actual Studio preflight proof.
+**After CI audit:** reopen exact signed package (next conservatively charged Mac
+start3), confirm saved credential without entry, create/open only an owned synthetic
+project, inspect exact setup/action destinations/context/bodies, then run live setup
+and five actions/selectable subset within the remaining caps. Cover new Settings,
+prompt edits/restores/limits, separate reference approvals and later exact inclusions,
+invalid/stale/cancel zero writes, valid subset once, source/custom preservation,
+Undo/Redo, project/process reopen, explicit SDK validate/run and metadata-free copy.
+Reuse controlled unchanged proof; live sends use only the owner machine/selected
+Studio configuration. Independently review resulting execution evidence; keep human
+acceptance pending.
 
-Same-project synthetic five-action+selectable controller/export and metadata-free
-SDK8.5.3 compile/lint/runtime pass. First SDK oracle failed displayedwho-versus-escaped
-source comparison; corrected substituted-display assertion passes on attempt2, failed
-receipt retained. Nativeworker8/8 and renderer138/138 pass. Final source/SDK/CI review
-has no remaining concrete finding. Privacy rejected storing TLS test keys; fixtures now
-generate ephemeral CA/leaf/keys with existing host OpenSSL, use only the public CA in
-test trust, and clean owned roots. No certificates/keys are tracked. Windows OpenSSL
-capability remains pending CI; the initial12/15 ephemeral run is retained, corrected
-CA-issued leaf passes15/15. Empty model discovery now has distinct truthful status.
-
-**Next action:** freeze exact reviewed local candidate, then qualify within caps. The
-user-owned route feasibility chat **Investigate selected-route context feasibility**
-(`01a12eb3-214e-7810-83f4-773eae1fc621`) is completed future research; do not implement
-its proposal now. No publication authorization has been established for this outcome.
-Windows paired CI requires publication of the exact reviewed candidate; owner-machine
-live testing requires the selected Studio configuration and fresh native key entry
-if absent. Count setup preflights toward ten total, separately from action counters.
-No material unselected feature, route/provider/thinking/signing expansion is permitted.
-
-Closeout counters: **Windows0/3packages,0/6starts,0/3paired CI; Mac0/3packages,
-0/6starts,0/3paired CI**. Live **0/2each five actions,0/10total**; discovery **0/0**.
-All local/CI failures, implicit starts, retries and process reopen must count if work
-resumes. Prior closed selectable totals remain Windows5packages/6starts,
-Mac1package/4starts,7paired runs,2live batches/1discovery; no rollover.
-
-No owned native app/process/listener/temporary credential/SDK install/CI/watcher was
-created; disposable core test roots cleaned. Local source changes and ignored public
-evidence remain. Historical CI5 cleanup,
-thinking/default truncation and sandbox trust failures stay failed; approved-host
-strict signing success remains distinct. Initial audit manifest-format assumption
-failed before qualification, then corrected public read-only verification passed;
-the ledger retains it. No unsuccessful product correction occurred. Continue this same
-outcome after remaining scope disposition, preserving caps and unchanged valid proof; any later
-absent credential requires fresh native Settings entry and ordinary owned cleanup.
+The user requests a section18/docsUI refinement prompt after this closeout, then a
+separate guided test-client/feedback agent after refinement. Prepare those handoffs
+when verification completes; neither following outcome has started. The completed
+user-owned chat Investigate selected-route context feasibility is future research;
+its proposal remains deferred.

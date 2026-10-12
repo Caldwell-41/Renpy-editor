@@ -2332,6 +2332,12 @@ Credential entry, replace and delete use native controls. Use **Remember on this
 computer** under the approved storage policy and reuse the saved key across sessions.
 The user's 2026-10-12 correction removes **Use for this app session** from the product
 requirement; no session-only implementation or automatic fallback is selected.
+Qualification uses the ordinary saved Studio profile through native/core access;
+do not create a disposable credential store for each live session or delete the
+user's saved key as test cleanup. Owned synthetic project/test roots and explicitly
+temporary fixture credentials remain disposable. Only an app-reported missing or
+unreadable saved credential requires fresh native entry; never read/export the key
+through tools or chat.
 A generic profile may choose **No authentication**; Studio requires its API key.
 Authenticated v1 profiles use Bearer keys, not arbitrary headers or OAuth. OS-store
 failure is actionable and cannot fall back to plaintext. Renderer sees only mode and
@@ -7096,3 +7102,102 @@ claim final human acceptance. Refinement must retain the revised Studio-only sco
 saved-key-only behavior and both user deferrals, with its own bounded verification
 selection. A guided client should explain each step plainly, collect the user's
 feedback, and distinguish observations from explicit acceptance.
+
+#### Frozen candidate and signed Mac package1
+
+Fresh ref fetch again leaves origin/codex/provider-qualification at
+c1e14bf7756a550a0ecaf8fd3b8b736baf07018d and origin/main at
+5f448ca683a905f4ea77d4580bbc89fda69f2b93. Freeze independently reviewed local
+candidate **929af6f23f1fe79af2665a4cc71c276a64ffd80d**, tree
+**9f034ca6cae69ef11e87d6a95a332152a9998eaa**. No reset/unrelated work loss/push.
+269tracked material app/workflow/source/SDK/TLS fixture inputs have canonical sorted
+JSON SHA256 **3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd**;
+ignored `phase2-closeout-01/candidate.json` owns exact hashes and local receipts.
+No TLS key/certificate is tracked. This is the one candidate selected for remaining
+qualification; historical5f59322 remains the behavioral baseline, not new-input proof.
+
+Approved-host public identity/owned-process preflight passes (the earlier sandbox
+process query failed capability and remains failed). Reserve Mac package attempt1
+before invocation. Existing approved certificate-backed `macos-package.py` builds
+Loomlight.app/Loomlight.dmg once, passes strict pinned bundle signature/designated
+requirement, installer signature/included-app inspection and detach. Executable SHA256
+**618d31e5ba6ff817dcfcb5353c5938689d172fa123e6b90361508724f8878215**; installer SHA256
+**fb449b8f77a60d1fcddd236ecf40ffe7097474d097a1e614d1316e1fa55124b1**.
+Unchanged artifact privacy scanner passes7files. No signing identity/trust/ACL change,
+installation, editor start or live provider request. Retain local signed artifacts.
+
+Actual closeout consumption is now **Mac1/3packages**, Windows0/3packages;
+both0/6editorstarts,0/3pairedCI; each action0/2, setup0, total0/10; discovery0/0.
+No user/temp Studio credential was created or read/exported. Test workers/listeners/
+owned roots cleaned; no editor/watcher/CI active. Final canonical evidence updates
+are local docs-only changes after the frozen material candidate. Remaining proof:
+paired Windows/Mac CI, actual packaged workflow/new Settings behavior, owner-machine
+selected Studio preflight/actions and independent execution-evidence review. Final
+human acceptance remains pending explicit sign-off. Publication requires concrete
+user permission under “keep the work local unless current publication authorization
+explicitly covers it”; current closeout has no such authorization. No following
+UI/test-client outcome starts while this qualification is pending.
+
+### Express CI authority and ordinary saved-profile correction — 2026-10-12
+
+The user expressly authorizes CI and reiterates native/live verification. Publication
+of the reviewed candidate and one focused paired dispatch are now authorized; no
+merge/release/signing/provider expansion. User objects to repeated key entry: one
+saved credential must persist and be reused. Prior disposable qualification roots
+were cleaned, so asking for a new key merely because the next test root was fresh
+was a workflow mistake, not evidence that the product's remembered storage failed.
+
+Fresh ref reconciliation before publication leaves origin atc1e14bf and main5f448ca;
+push929af6f23f1fe79af2665a4cc71c276a64ffd80d fast-forwards the selected branch, no
+reset/force-push. Pre-dispatch listing finds no active matching run. Reserve first
+paired dispatch before invocation; registered production selector is exclusively
+selectable_proposals, dispatch/package/first-start ordinals1, all older selectors
+false/empty. GitHub returns
+[run38224940778](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38224940778).
+Initial exact-commit list is empty during indexing, not a failed dispatch or a reason
+to duplicate it; one identity confirmation proves fresh attempt1/exact929af6f and
+in_progress. Exclusive admission succeeds; required Windows/macOS jobs in_progress,
+nonapplicable older jobs skipped. No Studio credential is provided to CI. No rerun,
+terminal success or package/start completion inferred. Ignored dispatch/confirmed
+receipts retain exact run/head/branch/status/jobs; audit on manual same-thread resume.
+
+Reserve Mac editor start1, launch exact signed package in the **ordinary application
+profile**, with no disposable live profile/key/root or automatic provider send.
+Owned PID19193/executable hash matches package1. CUA display-name lookup times out;
+retain the failure and conservatively charge one possible implicit start asMac2/6.
+Exact bundle-path binding selects the already-owned process, no further start.
+Initial native blank/loading observation later resolves to the normal app. Native
+Settings reports only New Studio profile/credential not configured; no prior saved
+profile exists there. Earlier cleaned temporary keys cannot be silently recovered.
+Do not inspect credential files or ask for a key merely from this assumption.
+
+Save the exact previously selected Studio LAN/model configuration in the ordinary
+profile without network: unverified ceiling262144, budget32768, response2048,
+Temperature1/Top-p.95 and private-HTTP opt-in. Initial AX Save clicks only focus/scroll
+without submission; native Tab focus plus Return submits successfully. Retain this
+input/harness observation rather than call it a numeric/product defect. Saved profile
+then reports Credential:missing, which establishes an actual native entry prerequisite.
+User takes over native secure dialog, clicks Remember and replies Saved. Native
+Settings confirms Credential:configured/API key saved. No renderer key field/value,
+key in chat, raw credential read/export, discovery or Studio send. Native saved-profile
+receipt records only metadata/status, never the key. Preserve this user's profile/key
+through later sessions and cleanup; it is not a temporary test credential.
+
+Ordinary native Quit succeeds and read-only PID check confirms process exited. No
+post-quit UI observer reacquires/relaunches it. **Counts:** Mac1/3packages,2/6starts
+conservatively charged (one confirmed plus possible implicit lookup); pairedCI1/3each
+target. Windows CI reserves package1/starts1–2, actual ledger consumption pending
+terminal artifact audit. Live setup0, each action0/2,total0/10; discovery0/0. Temporary
+test workers/listeners/roots are cleaned; ordinary saved Studio credential deliberately
+remains, no local app/watcher active. Next Mac launch is conservatively ordinal3.
+
+WORKFLOW's manual same-thread CI wait now applies: no autonomous polling or watcher.
+On user resume audit this exact run, both required jobs/artifacts/manifests/269inputs,
+native PNG/control/input evidence, package/start attempts and cleanup. Then reopen
+the exact local signed candidate, confirm configured credential without asking for
+entry, and complete remaining native/live all-five/selectable integrated workflow
+within caps. Use synthetic project content and the selected owner-machine Studio,
+count the explicit setup probe toward ten total, do no new model discovery. Preserve
+ordinary key/profile; only app-reported unreadability/missing data warrants re-entry.
+Final execution review and explicit human sign-off remain pending. Future UI refinement
+and guided feedback prompts remain queued; no following outcome started.

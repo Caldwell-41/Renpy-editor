@@ -1,31 +1,32 @@
 # Current status
 
-**Updated:** 2026-10-12. **Studio-only Phase 2 closeout selected; local sampling, setup test
-and HTTPS implemented; integrated qualification pending.** Generic/OpenAI-compatible providers and Phase 3 are
-outside this outcome. Full Phase 2 and final human acceptance remain incomplete.
+**Updated:** 2026-10-12. **Studio-only Phase2 closeout: first paired CI running;
+saved Studio credential established for reuse; native/live completion pending.**
+Generic providers/Phase3, selected-route context and AI ending/connection expansion
+are outside this outcome. Full Phase2 and final human acceptance remain incomplete.
 
-| Capability | Implementation / evidence | Acceptance |
+| Capability | Evidence | Acceptance |
 | --- | --- | --- |
-| Five Studio actions, native references, prompts/limits | Bounded slices qualified on both targets; historical integrated/live chain qualified. | Exact scoped evidence retained; not final combined-candidate proof. |
-| Selectable 1–8-operation source/Character proposal | Qualified code5f593225fad2ebdb2970663d56ee83631b27ecef, CI7run38178036314/attempt1, signed Mac/Windows native/live/SDK proof. | Scoped qualification complete; human sign-off remains separate. |
-| Sampling controls | Local Temperature/Top-p implementation and focused checks pass; defaults1.0/0.95. | Both-target native/live qualification pending. |
-| Setup readiness and HTTPS | Local explicit synthetic Test setup, saved configuration-bound readiness and verified HTTPS/hostnames; focused core/native/TLS/DOM proof. | Both-target package/live proof pending; literal IPv6 HTTPS explicitly unsupported by pinned adapter. |
-| Full Studio Phase 2 contract | Selected-route context and AI ending/connection changes are user-deferred beyond Phase 2. Session-only credentials excluded; saved key reused. | Final qualification and explicit human acceptance required. |
-| Final all-five-plus-selectable workflow | Same-project synthetic native/controller workflow and exact metadata-free SDK run pass locally; independent source review complete. | Both-target packaged workflow, owner-machine live proof, independent execution review and explicit human acceptance pending. |
+| Five actions/references/prompts and selectable proposals | Earlier bounded slices qualified; new same-project synthetic combined controller/metadata-free SDK pass. | New both-target/native/live integrated proof pending. |
+| Writing controls, setup readiness, HTTPS | Editable defaults1.0/.95, strict explicit Test setup, saved configuration binding and verified HTTPS implemented; focused tests/source review pass. | First paired CI/native/live gates pending; literal IPv6 HTTPS explicitly unsupported. |
+| Saved-key reuse | Ordinary signed client had no profile; selected configuration saved, user entered key natively, UI reports configured/API key saved; normal quit preserves it. | Process reopen/live use still to prove; do not recreate temporary credential stores or delete user's saved key. |
+| Mac package | Package1 strict pinned signature/installer contents/privacy pass. | Native workflow/new Settings/live completion pending. |
+| Human acceptance | No explicit sign-off. | Pending; UI refinement and guided test-client prompts follow verification. |
 
-Fresh local/origin continuation is c1e14bf7756a550a0ecaf8fd3b8b736baf07018d on
-`codex/provider-qualification`; origin/main5f448ca683a905f4ea77d4580bbc89fda69f2b93.
-The entry audit verified both265input inventories and retained CI7/CI4 manifests against
-qualified5f59322. Current local sampling/readiness/transport changes those inputs and exact outbound bodies;
-previous package/body proof is historical for affected behavior. No new candidate frozen.
-Historical failures remain failed, including CI5's unresolved cleanup and thinking
-truncation. Prior budgets stay closed.
+Published exact candidate929af6f23f1fe79af2665a4cc71c276a64ffd80d on
+`codex/provider-qualification`, tree9f034ca6cae69ef11e87d6a95a332152a9998eaa.
+269input digest3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd.
+[Paired run38224940778](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38224940778),
+fresh attempt1, exact candidate, last confirmed in_progress. Express CI authority
+received; no force-push/merge/release or signing/provider expansion. Later status
+updates are docs-only; source/package/CI material identity remains frozen.
 
-Closeout actuals per target: **0/3packages,0/6editor launches,0/3paired CI**;
-live **0/10total,0/2each action**, discovery **0/0**. Disposable core test fixtures
-cleaned; no native app, temporary credential, provider connection or CI was created. Existing scope edits are preserved; updated records
-remain local and uncommitted. No merge/release/signing/provider expansion occurred.
+Counts: Mac1/3packages,2/6starts conservatively charged (one confirmed, one possible
+implicit CUA lookup); pairedCI1/3each target. Windows package1/starts1–2 reserved by
+active CI; actual counts require artifact audit. Live setup0, each action0/2,
+total0/10; discovery0/0. Owned Mac process exited; temporary test roots cleaned;
+ordinary saved Studio profile/key preserved. Retained failures remain failed.
 
-[Requirement map and decision](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
-owns detailed dispositions, exact evidence, counts and cleanup. [HANDOVER](HANDOVER.md)
-owns continuation: freeze/review one candidate and complete remaining qualification within caps.
+[Requirement map/ledger](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+owns dispositions and complete evidence. [HANDOVER](HANDOVER.md) owns manual same-thread
+CI resume/audit, saved-key reuse and remaining native/live work. No next outcome started.
