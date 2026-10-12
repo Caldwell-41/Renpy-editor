@@ -1,9 +1,9 @@
 # Current status
 
-**Updated:** 2026-10-13. **Studio-only Phase 2 closeout is blocked on one Windows
-editor-start allowance decision.** Owner integrated live/SDK workflow passed on
+**Updated:** 2026-10-13. **Studio-only Phase 2 closeout has an approved Windows
+editor-start ceiling of 7.** Owner integrated live/SDK workflow passed on
 frozen929. CI6 failed its native driver’s Model ID control-type guard; Mac fixtures
-passed. Reviewed harness repair is prepared; CI7 is authorized but undispatched.
+passed. Reviewed harness repair is prepared; CI7 is authorized and being prepared.
 Final human acceptance is unclaimed.
 
 | Capability | Evidence | Remaining disposition |
@@ -29,9 +29,8 @@ Profile name/Endpoint focus/readback passed; Model ID rejected before save/key/H
 root cleanup incomplete. ComboBox support only for Model ID is reviewed, with safe
 type diagnostics and rejecting fixtures; actual next native proof remains required.
 
-Counts: pairedCI6/7 per target, packages1/3 each, Windows starts5/6, ownerMacstarts5/6,
-live8/10/Rewrite3/4/discovery0. CI7 needs starts6–7; **Windows-only ceiling7 approval
-pending**. No duplicate dispatch, polling or auto-wake. Generic providers/Phase3,
+Counts: pairedCI6/7 per target, packages1/3 each, Windows starts5/7, ownerMacstarts5/6,
+live8/10/Rewrite3/4/discovery0. CI7 needs starts6–7; **Windows-only ceiling7 approved**. No duplicate dispatch, polling or auto-wake. Generic providers/Phase3,
 route context and AI ending/connection changes remain excluded or user-deferred.
 [Owning ledger](../tasks/active/phase-2-initial-llm-assistance.md#independent-sol-ci6-audit-and-model-id-harness-repair--2026-10-13)
 retains exact failures and limits; [HANDOVER](HANDOVER.md) owns continuation.

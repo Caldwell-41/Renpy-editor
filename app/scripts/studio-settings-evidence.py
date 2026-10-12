@@ -74,7 +74,7 @@ def prepare(product, harness, output):
  report={'passed':False,'productCandidate':CANDIDATE,'harnessCandidate':git(harness,'rev-parse','HEAD').decode().strip(),'runId':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT'),'os':platform.system(),'architecture':platform.machine(),'packageBuilds':0,'appLaunches':0}
  try:
   assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification' and os.environ['GITHUB_RUN_ATTEMPT']=='1' and report['harnessCandidate']==os.environ['GITHUB_SHA']
-  assert os.environ['DISPATCH_ORDINAL']=='6' and os.environ['FIRST_LAUNCH_ORDINAL']=='5'
+  assert os.environ['DISPATCH_ORDINAL']=='7' and os.environ['FIRST_LAUNCH_ORDINAL']=='6'
   assert (report['os'],report['architecture']) in [('Windows','AMD64'),('Darwin','arm64')]
   report['harnessInputs']={p:digest((harness/p).read_bytes()) for p in HARNESS}
   report['harnessInputDigest']=digest(json.dumps(report['harnessInputs'],sort_keys=True,separators=(',',':')).encode())
@@ -114,9 +114,9 @@ def finish(output):
    assert native['harnessRef']==report['harnessCandidate']
    expected={Path(p).name:h for p,h in report['harnessInputs'].items() if Path(p).name in ('studio-setup-native.py','studio-setup-windows.ps1','test_studio_setup_native.py')}
    assert native['harnessFiles']==expected
-   assert len(reservations)==2 and consumed==2 and native['launchOrdinals']==[5,6], 'Attempt reservations differ'
+   assert len(reservations)==2 and consumed==2 and native['launchOrdinals']==[6,7], 'Attempt reservations differ'
    pids={}
-   for ordinal,phase in ((5,1),(6,2)):
+   for ordinal,phase in ((6,1),(7,2)):
     reserved=load(output/f'native/launch-{ordinal}-reserved.json')
     assert reserved=={'ordinal':ordinal,'candidate':CANDIDATE,'executableSHA256':EXE,'phase':phase}
     started=load(output/f'native/launch-{ordinal}-started.json')
@@ -124,7 +124,7 @@ def finish(output):
     pids[ordinal]=started['pid']
    for stage in module.STAGES:
     folder=output/'native'/stage
-    module.validate_stage(load(folder/'receipt.json'),stage,pids[6 if stage in ('reopen','cleanup','close-reopen') else 5],folder)
+    module.validate_stage(load(folder/'receipt.json'),stage,pids[7 if stage in ('reopen','cleanup','close-reopen') else 6],folder)
   else: assert not reservations and consumed==0, 'Unexpected Mac editor attempts'
  except Exception as error: failure=str(error) or type(error).__name__
  report.update(passed=failure is None,failure=failure,appLaunches=consumed,reservedAppLaunches=len(reservations))

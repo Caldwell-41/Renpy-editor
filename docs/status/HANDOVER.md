@@ -1,13 +1,12 @@
 # Current outcome handover
 
-## Studio-only Phase 2 closeout — reviewed repair; Windows start-cap decision pending
+## Studio-only Phase 2 closeout — reviewed repair; CI7/start6–7 approved
 
 The user-requested Sol review chat is sole writer/executor; parent stopped after
 transfer. Continue the same outcome here. User authorizes supported fixes, publication
 and **one additional paired CI7**. CI6 is terminal, independently audited failure.
-No current CI operation is pending. Native proof requires two Windows starts, but
-only one remains: a Windows-only ceiling6→7 request is pending. No dispatch or native
-invocation may exceed the existing cap before approval.
+No current CI operation is pending. User approved Windows-only editor ceiling6→7. Native proof uses initial start6
+and process reopen7; no further editor or paired CI allowance is implied.
 
 **Branch/state:** codex/provider-qualification. Fresh local/origin
 8b9a5e5b08e099c1eb6adb21a49646d834381761 and main
@@ -66,17 +65,16 @@ Python syntax/actionlint/privacy3files/diff pass. Windows9 cases await CI7.
 No product defect or production change justified.
 
 **Limits/next:** pairedCI6/7 each target; packagesWindows1/3Mac1/3;
-Windowsstarts5/6, ownerMacstarts5/6 including conservative implicit lookup.
-Live8/10/Rewrite3/4/extra blocker1of2used/discovery0. Ask remains **Windows-only
-editor ceiling6→7** because CI7 needs initial6/reopen7. After approval, align
+Windowsstarts5/7, ownerMacstarts5/6 including conservative implicit lookup.
+Live8/10/Rewrite3/4/extra blocker1of2used/discovery0. **Windows-only
+editor ceiling7 approved**; CI7 needs initial6/reopen7. Align
 preparation/controller/parser/terminal/sealing/fixtures to CI7/start6–7, focused
 check and independent review, publish normally, verify exact refs, check existing
 operations and dispatch exactly once. Record run/attempt/harness/product/receipt,
 then end turn under manual same-thread wait policy. No polling/watcher/auto-wake,
 CI8 or old-run rerun. On user resume, audit terminal jobs/artifacts/native stages,
 all reservations and credential/root cleanup. Failed/missing/skipped remains
-unresolved. If cap declined, preserve incomplete proof; fixtures-only CI7 needs
-user selection. No new owner operations, provider expansion/discovery/installations,
+unresolved. No new owner operations, provider expansion/discovery/installations,
 signing changes, Phase3, route or AI ending/connection implementation. Ordinary key
 must never be read/exported/erased or requested again while configured. Technical
 success permits requested UI-refinement prompt referencing task UI section18/docsUI;

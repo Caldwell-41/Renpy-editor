@@ -7968,3 +7968,24 @@ and review exact changes, publish normally and dispatch exactly once. If decline
 retain native proof incomplete; do not spend CI7 on an incomplete sequence unless
 user selects fixtures only. No new owner launch/send/SDK, merge/release, Phase3 or
 UI refinement execution. Final human acceptance remains unclaimed.
+
+#### Approved Windows start extension and CI7 preparation — 2026-10-13
+
+User answered **Approved** to the Windows-only editor cap6→7 request and authorized
+CI7 execution. Paired ceiling remains7 per target (six dispatched), packages3 each,
+Mac editor6, live10/Rewrite4/discovery0 unchanged. Current Windowsstarts5/7;
+CI7 reserves initial6 and reopen7, with no builds or owner/provider operations.
+Fresh local/origina211adda5b840d20130ff238a322b11ef2368017 and main5f448ca match.
+Reviewed Model ID repair remains external harness only; frozen929 and CI1 executable
+unchanged. Preparation/parser/controller/terminal/sealing/fixtures align to
+CI7/start6–7; old5–6 is rejected. Production dispatch description now reflects7.
+Focused checks and independent review precede exactly one normal publication/dispatch.
+No CI8, old attempt rerun or automatic wake/polling authorized.
+
+CI7 preparation independent re-review passes: dispatch7/start6 admission,
+parser/controller/terminal/reservations/stagePID mappings6–7 and explicit old5–6
+rejection are coherent. Failure/missing-terminal reservations still count.
+Local18+7 portable tests, four-file Python syntax, actionlint, privacy8files and
+whitespace pass. Existing dispatches checked once; latest is terminal CI6, no
+CI7 duplicate. Windows18+9/Mac18+7 and nine actual native stages remain required.
+Zero new package/editor/provider operations before dispatch.
