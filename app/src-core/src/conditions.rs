@@ -517,6 +517,99 @@ pub fn evaluate(condition: &Condition, values: &HashMap<String, Value>) -> Condi
     }
 }
 
+/// Emit only the supported tree, resolving IDs and types against current definitions.
+pub fn render(
+    expression: &Expression,
+    authoring: &AuthoringMetadata,
+) -> Result<String, ConditionError> {
+    validate_expression(expression)?;
+    if expression_type(expression)? != VariableType::Bool {
+        return Err(ConditionError::TypeMismatch);
+    }
+    fn emit(
+        expression: &Expression,
+        authoring: &AuthoringMetadata,
+    ) -> Result<String, ConditionError> {
+        use Expression::*;
+        Ok(match expression {
+            Bool { value } => if *value { "True" } else { "False" }.into(),
+            Int { value } => value.clone(),
+            String { value } => {
+                if value
+                    .chars()
+                    .any(|ch| ch.is_control() && !matches!(ch, '\n' | '\r' | '\t'))
+                {
+                    return Err(ConditionError::UnsupportedSyntax);
+                }
+                serde_json::to_string(value).map_err(|_| ConditionError::InvalidValue)?
+            }
+            Variable {
+                variable_id,
+                variable_type,
+            } => {
+                let variable = authoring
+                    .variables
+                    .iter()
+                    .find(|v| &v.id == variable_id)
+                    .ok_or(ConditionError::MissingVariable)?;
+                if variable.variable_type != *variable_type {
+                    return Err(ConditionError::TypeMismatch);
+                }
+                variable.technical_name.clone()
+            }
+            Compare {
+                operator,
+                left,
+                right,
+            } => format!(
+                "({} {} {})",
+                comparison_operand(left, authoring)?,
+                match operator {
+                    Comparison::Equal => "==",
+                    Comparison::NotEqual => "!=",
+                    Comparison::Less => "<",
+                    Comparison::LessEqual => "<=",
+                    Comparison::Greater => ">",
+                    Comparison::GreaterEqual => ">=",
+                },
+                comparison_operand(right, authoring)?
+            ),
+            Not { operand } => format!("not {}", emit(operand, authoring)?),
+            And { left, right } => format!(
+                "({} and {})",
+                emit(left, authoring)?,
+                emit(right, authoring)?
+            ),
+            Or { left, right } => format!(
+                "({} or {})",
+                emit(left, authoring)?,
+                emit(right, authoring)?
+            ),
+        })
+    }
+    fn comparison_operand(
+        expression: &Expression,
+        authoring: &AuthoringMetadata,
+    ) -> Result<String, ConditionError> {
+        let source = emit(expression, authoring)?;
+        Ok(if matches!(expression, Expression::Not { .. }) {
+            format!("({source})")
+        } else {
+            source
+        })
+    }
+    let source = emit(expression, authoring)?;
+    if source.len() > MAX_EXPRESSION_BYTES {
+        return Err(ConditionError::LimitExceeded);
+    }
+    match parse(&source, authoring) {
+        Condition::Supported {
+            expression: roundtrip,
+        } if &roundtrip == expression => Ok(source),
+        _ => Err(ConditionError::UnsupportedSyntax),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -605,6 +698,44 @@ mod tests {
             ConditionResult::Unknown {
                 diagnostic: ConditionError::InvalidValue
             }
+        );
+    }
+    #[test]
+    fn phase3a_expression_render_resolves_types_and_roundtrips_full_depth() {
+        let definitions = definitions();
+        let mut expression = Expression::Bool { value: true };
+        for _ in 0..15 {
+            expression = Expression::Not {
+                operand: Box::new(expression),
+            };
+        }
+        let source = render(&expression, &definitions).unwrap();
+        assert_eq!(
+            parse(&source, &definitions),
+            Condition::Supported { expression }
+        );
+        for source in ["(not flag) == True", "True == (not flag)"] {
+            let Condition::Supported { expression } = parse(source, &definitions) else {
+                panic!("supported Not comparison operand: {source}");
+            };
+            let rendered = render(&expression, &definitions).unwrap();
+            assert_eq!(
+                parse(&rendered, &definitions),
+                Condition::Supported { expression }
+            );
+        }
+        let variable = &definitions.variables[1];
+        let spoofed = Expression::Compare {
+            operator: Comparison::Equal,
+            left: Box::new(Expression::Variable {
+                variable_id: variable.id.clone(),
+                variable_type: VariableType::String,
+            }),
+            right: Box::new(Expression::String { value: "0".into() }),
+        };
+        assert_eq!(
+            render(&spoofed, &definitions),
+            Err(ConditionError::TypeMismatch)
         );
     }
 }
@@ -704,7 +835,10 @@ mod source_tests {
         service.open_path(&root).unwrap();
         service.close().unwrap();
         let migrated: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
-        assert_eq!(migrated["schemaVersion"], 4);
+        assert_eq!(
+            migrated["schemaVersion"],
+            crate::metadata::SOURCE_MAP_SCHEMA_VERSION
+        );
         assert_eq!(ids(&migrated), before_ids);
         assert!(migrated["sceneMappings"][0]["beats"]
             .as_array()

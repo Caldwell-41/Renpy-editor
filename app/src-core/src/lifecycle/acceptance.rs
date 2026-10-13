@@ -312,10 +312,12 @@ pub(crate) fn create_authored_game(data: &Path, parent: &Path, sdk: &Path) -> Li
         Beat::Choice {
             options: vec![
                 crate::scene::ChoiceOption {
+                    condition: None,
                     text: "Rooftop".into(),
                     destination_scene_id: scenes["Rooftop"].clone(),
                 },
                 crate::scene::ChoiceOption {
+                    condition: None,
                     text: "Riverside".into(),
                     destination_scene_id: scenes["Riverside"].clone(),
                 },

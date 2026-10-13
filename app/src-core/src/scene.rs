@@ -6,6 +6,7 @@
 //! Scene file through the journalled transaction service.
 
 pub mod flow;
+mod logic;
 
 use crate::{
     authoring::{AssetKind, AuthoringMetadata, AuthoringService, VariableType},
@@ -105,6 +106,11 @@ pub enum BeatPayload {
     Jump {
         scene_id: String,
     },
+    Call {
+        scene_id: String,
+        #[serde(default)]
+        return_label: Option<String>,
+    },
     Return,
     CustomCode {
         source: String,
@@ -129,17 +135,24 @@ impl BeatPayload {
             Self::SetVariable { .. } => "setVariable",
             Self::Choice { .. } => "choice",
             Self::Jump { .. } => "jump",
+            Self::Call { .. } => "call",
             Self::Return => "return",
             Self::CustomCode { .. } => "customCode",
         }
     }
 }
 
+pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
+    matches!(payload, BeatPayload::Call { .. })
+        || matches!(payload, BeatPayload::Choice { options } if options.iter().any(|o| o.condition.is_some()))
+}
+
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
     matches!(
         payload,
-        BeatPayload::Choice { .. } | BeatPayload::Jump { .. } | BeatPayload::Return
+        BeatPayload::Jump { .. } | BeatPayload::Return
     )
+        || matches!(payload, BeatPayload::Choice { options } if !logic::choice_may_continue(options))
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -147,6 +160,8 @@ fn is_terminal_payload(payload: &BeatPayload) -> bool {
 pub struct ChoiceOption {
     pub text: String,
     pub destination_scene_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<crate::conditions::Condition>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -322,6 +337,8 @@ pub enum SceneError {
     UnknownEntity,
     ReferenceBlocked,
     InvariantBlocked,
+    UnsupportedCallRoute,
+    AmbiguousReturnLabel,
     OpaqueBoundary,
     HistoryBoundary,
     RecoveryRequired,
@@ -430,7 +447,7 @@ impl AuthoringService {
             if let Some(old) = legacy.as_mut() {
                 // Migration may refine an old opaque child, never rewrite source.
                 // Reuse IDs only for exactly matching source ranges and bytes.
-                let (_, _, parsed) = parse_scene_mode(scene, &bytes, Some((&metadata, &authoring)), previous_schema < 4)?;
+                let (_, _, parsed) = parse_scene_mode(scene, &bytes, Some((&metadata, &authoring)), previous_schema )?;
                 if old.source_revision != revision.sha256 {
                     return Err(SceneError::SourceConflict);
                 }
@@ -448,22 +465,8 @@ impl AuthoringService {
                     return Err(SceneError::InvalidMetadata);
                 }
                 let (_, _, parsed) = parse_scene(scene, &bytes, Some((&metadata, &authoring)))?;
-                for parsed in parsed {
-                    let hash = sha256(&bytes[parsed.start..parsed.end]);
-                    if let Some(mapped) = old.beats.iter().find(|m| {
-                        m.byte_start as usize == parsed.start
-                            && m.byte_end as usize == parsed.end
-                            && m.source_sha256 == hash
-                    }) {
-                        forced.push((
-                            parsed.payload.kind().into(),
-                            hash,
-                            mapped.id.clone(),
-                            Some(parsed.start),
-                        ));
-                    }
-                }
-                old.source_revision.clear();
+                forced = logic::refine_legacy_ids(old, &parsed , &bytes)?;
+                    old.source_revision.clear();
             }
             let (mapping, _) = build_mapping(
                 scene,
@@ -479,7 +482,7 @@ impl AuthoringService {
             .validate(project_id)
             .map_err(|_| SceneError::InvalidMetadata)?;
         let proposed_project = json_bytes(&metadata)?;
-        let proposed_map = json_bytes(&source_map)?;
+        let proposed_map = source_map_bytes(&source_map)?;
         match self.commit_observed(
             project,
             TransactionProposal {
@@ -705,7 +708,7 @@ impl AuthoringService {
                 .ok_or(SceneError::InvalidMetadata)? = mapping;
             mutations.push(replace_mutation(&scene.source_path, original, revision, bytes)?);
             mutations.push(replace_mutation(SOURCE_MAP_PATH, loaded.source_map_bytes,
-                loaded.source_map_revision, json_bytes(&loaded.source_map)?)?);
+                loaded.source_map_revision, source_map_bytes(&loaded.source_map)?)?);
         }
         let mut paths = std::collections::BTreeSet::new();
         if mutations.is_empty() || mutations.iter().any(|m| !paths.insert(m.path.as_str())) {
@@ -777,7 +780,7 @@ impl AuthoringService {
         loaded.source_map.sources.push(path.clone());
         loaded.source_map.scene_mappings.push(mapping);
         let project_bytes = json_bytes(&loaded.project)?;
-        let map_bytes = json_bytes(&loaded.source_map)?;
+        let map_bytes = source_map_bytes(&loaded.source_map)?;
         Ok(TransactionProposal {
             mutations: vec![
                 create_mutation(&path, bytes)?,
@@ -1113,7 +1116,7 @@ impl AuthoringService {
         loaded.source_map.sources.push(path.clone());
         loaded.source_map.scene_mappings.push(mapping);
         let project_bytes = json_bytes(&loaded.project)?;
-        let map_bytes = json_bytes(&loaded.source_map)?;
+        let map_bytes = source_map_bytes(&loaded.source_map)?;
         Ok(TransactionProposal {
             mutations: vec![
                 create_mutation(&path, bytes)?,
@@ -1214,6 +1217,7 @@ impl AuthoringService {
             extra: Map::new(),
         };
         options.push(ChoiceOption {
+            condition: None,
             text: option_text,
             destination_scene_id: destination_id.clone(),
         });
@@ -1277,7 +1281,7 @@ impl AuthoringService {
                     SOURCE_MAP_PATH,
                     loaded.source_map_bytes,
                     loaded.source_map_revision,
-                    json_bytes(&loaded.source_map)?,
+                    source_map_bytes(&loaded.source_map)?,
                 )?,
             ],
             intent: TransactionIntent::Edit,
@@ -1361,7 +1365,7 @@ impl AuthoringService {
             SOURCE_MAP_PATH,
             loaded.source_map_bytes,
             loaded.source_map_revision,
-            json_bytes(&loaded.source_map)?,
+            source_map_bytes(&loaded.source_map)?,
         )?);
         Ok(TransactionProposal {
             mutations,
@@ -1436,7 +1440,7 @@ impl AuthoringService {
             SOURCE_MAP_PATH,
             loaded.source_map_bytes,
             loaded.source_map_revision,
-            json_bytes(&loaded.source_map)?,
+            source_map_bytes(&loaded.source_map)?,
         )?);
         Ok(TransactionProposal {
             mutations,
@@ -1472,7 +1476,10 @@ impl AuthoringService {
             if beats.iter().any(|beat| {
                 beat.protected
                     || match &beat.payload {
-                        BeatPayload::Jump { scene_id: target } => target == scene_id,
+                        BeatPayload::Jump { scene_id: target }
+                        | BeatPayload::Call {
+                            scene_id: target, ..
+                        } => target == scene_id,
                         BeatPayload::Choice { options } => options
                             .iter()
                             .any(|option| option.destination_scene_id == scene_id),
@@ -1528,7 +1535,9 @@ impl AuthoringService {
         {
             return Err(SceneError::InvariantBlocked);
         }
+        let edit = self.prepare_call_labels(project, &loaded, scene_id, &beats, edit)?;
         let (proposed_source, forced) = apply_beat_edit(&source_bytes, &beats, edit, &loaded)?;
+        logic::validate_conditional_completion(&proposed_source, &scene, &loaded)?;
         let proposed_revision = sha256(&proposed_source);
         let (new_mapping, _) = build_mapping(
             &scene,
@@ -1556,7 +1565,7 @@ impl AuthoringService {
                     SOURCE_MAP_PATH,
                     loaded.source_map_bytes,
                     loaded.source_map_revision,
-                    json_bytes(&loaded.source_map)?,
+                    source_map_bytes(&loaded.source_map)?,
                 )?,
             ],
             intent: TransactionIntent::Edit,
@@ -1675,7 +1684,7 @@ impl AuthoringService {
                 SOURCE_MAP_PATH,
                 loaded.source_map_bytes,
                 loaded.source_map_revision,
-                json_bytes(&loaded.source_map)?,
+                source_map_bytes(&loaded.source_map)?,
             )?);
         }
         Ok(mutations)
@@ -2150,7 +2159,45 @@ fn apply_beat_edit(
             {
                 return Err(SceneError::InvariantBlocked);
             }
-            let rendered = render_payload(&payload, loaded, newline)?;
+            let rendered = if let (
+                BeatPayload::Call {
+                    return_label: previous,
+                    ..
+                },
+                BeatPayload::Call {
+                    scene_id,
+                    return_label,
+                },
+            ) = (&beat.payload, &payload)
+            {
+                if previous != return_label {
+                    return Err(SceneError::InvariantBlocked);
+                }
+                logic::patch_call_target(
+                    &source[beat.byte_start as usize..beat.byte_end as usize],
+                    &loaded
+                        .project
+                        .scenes
+                        .iter()
+                        .find(|s| &s.id == scene_id)
+                        .ok_or(SceneError::UnknownEntity)?
+                        .technical_label,
+                )?
+            } else if let (
+                BeatPayload::Choice { options: previous },
+                BeatPayload::Choice { options },
+            ) = (&beat.payload, &payload)
+            {
+                logic::patch_menu(
+                    &source[beat.byte_start as usize..beat.byte_end as usize],
+                    previous,
+                    options,
+                    loaded,
+                )?
+                .unwrap_or(render_payload(&payload, loaded, newline)?)
+            } else {
+                render_payload(&payload, loaded, newline)?
+            };
             let mut output = source.to_vec();
             output.splice(
                 beat.byte_start as usize..beat.byte_end as usize,
@@ -2428,8 +2475,9 @@ fn render_payload(
                     .find(|scene| scene.id == option.destination_scene_id)
                     .ok_or(SceneError::UnknownEntity)?;
                 text.push_str(&format!(
-                    "        \"{}\":{}            jump {}",
+                    "        \"{}\"{}:{}            jump {}",
                     escape_string(&option.text)?,
+                    logic::render_guard(option.condition.as_ref(), &loaded.authoring)?,
                     newline,
                     destination.technical_label
                 ));
@@ -2445,6 +2493,22 @@ fn render_payload(
                 .find(|scene| scene.id == *scene_id)
                 .ok_or(SceneError::UnknownEntity)?;
             format!("    jump {}", destination.technical_label)
+        }
+        BeatPayload::Call {
+            scene_id,
+            return_label,
+        } => {
+            let target = loaded
+                .project
+                .scenes
+                .iter()
+                .find(|scene| &scene.id == scene_id)
+                .ok_or(SceneError::UnknownEntity)?;
+            let label = return_label
+                .as_deref()
+                .filter(|label| logic::identifier(label))
+                .ok_or(SceneError::InvalidPayload)?;
+            format!("    call {} from {label}", target.technical_label)
         }
         BeatPayload::Return => "    return".into(),
         BeatPayload::CustomCode { .. } => return Err(SceneError::InvalidPayload),
@@ -2465,6 +2529,7 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
             }
             for option in options {
                 validate_text(&option.text)?;
+                logic::render_guard(option.condition.as_ref(), &loaded.authoring)?;
                 if !loaded
                     .project
                     .scenes
@@ -2475,7 +2540,7 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
                 }
             }
         }
-        BeatPayload::Jump { scene_id } => {
+        BeatPayload::Jump { scene_id } | BeatPayload::Call { scene_id, .. } => {
             if !loaded
                 .project
                 .scenes
@@ -2645,6 +2710,7 @@ fn parse_condition_group(
     lines: &[(usize, usize, &str)], index: usize,
     loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>, indent: usize,
     parent: Option<(usize, usize)>, depth: usize, lexical: &HashSet<usize>,
+rich_logic: bool,
 ) -> Option<(usize, Vec<ParsedBeat>)> {
     if depth >= MAX_CONDITION_NESTING || !lexical.contains(&lines[index].0) { return None; }
     let first = condition_header(lines[index].2, indent, "if ")?;
@@ -2677,14 +2743,30 @@ fn parse_condition_group(
             }
             if indentation(body) <= indent { break; }
             if indentation(body) != indent + 4 || body.starts_with('\t') { return None; }
-            if let Some((after, nested)) = parse_condition_group(lines, next, loaded, indent + 4, Some((group_start, branch_start)), depth + 1, lexical) {
+            if let Some((after, nested)) = parse_condition_group(lines, next, loaded, indent + 4, Some((group_start, branch_start)), depth + 1, lexical,
+                rich_logic,
+            ) {
                 result.extend(nested); next = after; statements += 1; continue;
+            }
+            if rich_logic {
+                if let Some((after, mut menu)) =
+                    logic::parse_menu(lines, next, indent + 4, loaded, lexical)
+                {
+                    menu.nesting = Some(ParsedNesting::Child {
+                        group_start,
+                        branch_start,
+                    });
+                    result.push(menu);
+                    next = after;
+                    statements += 1;
+                    continue;
+                }
             }
             let normalized = format!("    {}", &body[indent + 4..]);
             let payload = if !lexical.contains(&start) { None } else if let Some((_, quote_end)) = dialogue_quotes(&normalized) {
                 let suffix = normalized[quote_end + 1..].trim();
-                if suffix.is_empty() || suffix.starts_with('#') { parse_line(&normalized[..quote_end + 1], loaded) } else { None }
-            } else { parse_line(&normalized, loaded) };
+                if suffix.is_empty() || suffix.starts_with('#') { parse_line_version(&normalized[..quote_end + 1], loaded, rich_logic) } else { None }
+            } else { parse_line_version(&normalized, loaded, rich_logic) };
             let payload = payload.unwrap_or_else(|| BeatPayload::CustomCode { source: body.into(), reason: "Unsupported or runtime-dependent Ren'Py source".into() });
             // Unsupported indented blocks are opaque as a unit. In particular, Python
             // internals must never become editable dialogue or conditional children.
@@ -2712,15 +2794,17 @@ fn parse_scene(
     bytes: &[u8],
     loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
 ) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
-    parse_scene_mode(scene, bytes, loaded, false)
+    parse_scene_mode(scene, bytes, loaded, SOURCE_MAP_SCHEMA_VERSION)
 }
 
 fn parse_scene_mode(
     scene: &SceneMetadata,
     bytes: &[u8],
     loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-    legacy: bool,
+    source_version: u32,
 ) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
+    let legacy = source_version < 4;
+    let rich_logic = source_version >= 5;
     let bom = usize::from(bytes.starts_with(&[0xef, 0xbb, 0xbf])) * 3;
     let source = std::str::from_utf8(&bytes[bom..]).map_err(|_| SceneError::UnsupportedSource)?;
     let lines = physical_lines(source)
@@ -2757,12 +2841,19 @@ fn parse_scene_mode(
         if body.starts_with("label ") && body.ends_with(':') {
             return Err(SceneError::UnsupportedSource);
         }
-        if let Some((next, nested)) = if legacy { parse_bool_group(&lines, index, loaded) } else { parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical) } {
+        if let Some((next, nested)) = if legacy { parse_bool_group(&lines, index, loaded) } else { parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical, rich_logic) } {
             beats.extend(nested);
             index = next;
             continue;
         }
-        if body == "    menu:" && (legacy || lexical.contains(&start)) {
+        if rich_logic {
+            if let Some((next, menu)) = logic::parse_menu(&lines, index, 4, loaded, &lexical) {
+                beats.push(menu);
+                index = next;
+                continue;
+            }
+        }
+        if !rich_logic && body == "    menu:" {
             let menu_start = start;
             index += 1;
             let mut options = Vec::new();
@@ -2791,6 +2882,7 @@ fn parse_scene_mode(
                 options.push(ChoiceOption {
                     text: option_text,
                     destination_scene_id,
+                condition: None,
                 });
                 menu_end = jump_end.max(option_end);
                 index += 2;
@@ -2807,7 +2899,7 @@ fn parse_scene_mode(
             beats.push(custom(start, end, body));
             continue;
         }
-        let payload = (if legacy || lexical.contains(&start) { parse_line(body, loaded) } else { None }).unwrap_or_else(|| BeatPayload::CustomCode {
+        let payload = (if legacy || lexical.contains(&start) { parse_line_version(body, loaded, rich_logic) } else { None }).unwrap_or_else(|| BeatPayload::CustomCode {
             source: body.into(),
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         });
@@ -2832,6 +2924,17 @@ fn choice_option_text(line: &str) -> Option<String> {
         .and_then(unescape_string)
 }
 
+fn parse_line_version(
+    body: &str,
+    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    rich_logic: bool,
+) -> Option<BeatPayload> {
+    if !rich_logic && body.trim_start().starts_with("call ") {
+        return None;
+    }
+    parse_line(body, loaded)
+}
+
 fn parse_line(
     body: &str,
     loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
@@ -2845,6 +2948,17 @@ fn parse_line(
     }
     if let Some(value) = line.strip_prefix("with ") {
         return parse_transition(value).map(|transition| BeatPayload::Transition { transition });
+    }
+    if let Some((label, return_label)) = logic::parse_call(line) {
+        let target = loaded?
+            .0
+            .scenes
+            .iter()
+            .find(|s| s.technical_label == label)?;
+        return Some(BeatPayload::Call {
+            scene_id: target.id.clone(),
+            return_label: Some(return_label.into()),
+        });
     }
     if let Some(label) = line.strip_prefix("jump ") {
         return loaded
@@ -3594,7 +3708,8 @@ pub(crate) fn continue_anchor(beats: &[SceneBeat], before: &str) -> Result<usize
         return Err(SceneError::InvariantBlocked);
     }
     for b in beats[index.saturating_sub(1)..=index].iter() {
-        if b.protected || b.owner.is_some() || b.conditional_branch.is_some() {
+        if b.protected || b.owner.is_some() || b.conditional_branch.is_some() || logic_boundary(&b.payload)
+        {
             return Err(SceneError::OpaqueBoundary);
         }
     }
@@ -3606,6 +3721,11 @@ pub(crate) fn continue_anchor(beats: &[SceneBeat], before: &str) -> Result<usize
 }
 
 fn root_insertion_is_nested(beats: &[SceneBeat], insertion: usize) -> bool {
+    conditional_extents(beats)
+        .values()
+        .any(|(start, end)| *start < insertion && insertion < *end)
+}
+fn conditional_extents(beats: &[SceneBeat]) -> HashMap<&str, (usize, usize)> {
     let by_id: HashMap<_, _> = beats.iter().map(|beat| (beat.id.as_str(), beat)).collect();
     let mut groups: HashMap<&str, (usize, usize)> = HashMap::new();
     for beat in beats {
@@ -3628,13 +3748,20 @@ fn root_insertion_is_nested(beats: &[SceneBeat], insertion: usize) -> bool {
             owner = by_id.get(parent.branch_id.as_str()).and_then(|header| header.owner.as_ref());
         }
     }
-    groups.values().any(|(start, end)| *start < insertion && insertion < *end)
-}
+    groups}
 
 fn boundary_is_opaque(beats: &[SceneBeat], insertion: usize) -> bool {
     beats.iter().any(|beat| {
         beat.protected && insertion > beat.byte_start as usize && insertion < beat.byte_end as usize
     })
+}
+
+pub(crate) fn source_map_bytes(map: &SourceMapMetadata) -> Result<Vec<u8>, SceneError> {
+    let bytes = json_bytes(map)?;
+    if bytes.len() > crate::metadata::MAX_SOURCE_MAP_BYTES {
+        return Err(SceneError::InvalidMetadata);
+    }
+    Ok(bytes)
 }
 
 fn json_bytes(value: &impl Serialize) -> Result<Vec<u8>, SceneError> {
@@ -4529,14 +4656,17 @@ mod tests {
             BeatPayload::Choice {
                 options: vec![
                     ChoiceOption {
+                        condition: None,
                         text: "One".into(),
                         destination_scene_id: destination_id.clone(),
                     },
                     ChoiceOption {
+                        condition: None,
                         text: "Two".into(),
                         destination_scene_id: destination_id.clone(),
                     },
                     ChoiceOption {
+                        condition: None,
                         text: "Three".into(),
                         destination_scene_id: destination_id.clone(),
                     },
@@ -4853,6 +4983,7 @@ mod tests {
                     before_beat_id: None,
                     beat: BeatPayload::Choice {
                         options: vec![ChoiceOption {
+                            condition: None,
                             text: "Take the first path".into(),
                             destination_scene_id: existing.id.clone(),
                         }],
@@ -5346,10 +5477,12 @@ mod tests {
                     beat: BeatPayload::Choice {
                         options: vec![
                             ChoiceOption {
+                                condition: None,
                                 text: "Garden".into(),
                                 destination_scene_id: garden_id.clone(),
                             },
                             ChoiceOption {
+                                condition: None,
                                 text: "Library".into(),
                                 destination_scene_id: library_id.clone(),
                             },
@@ -5845,10 +5978,12 @@ mod tests {
                 BeatPayload::Choice {
                     options: vec![
                         ChoiceOption {
+                            condition: None,
                             text: "Same".into(),
                             destination_scene_id: left.id.clone(),
                         },
                         ChoiceOption {
+                            condition: None,
                             text: "Same".into(),
                             destination_scene_id: right.id.clone(),
                         },

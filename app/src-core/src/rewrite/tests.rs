@@ -1429,3 +1429,45 @@ fn phase3a_new_nested_targets_do_not_expand_ai_allowlist() {
     assert_eq!(f.call("rewrite.prepare", json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"action":prompts::ACTION,"expectedPromptRevision":options["prompt"]["revision"],"expectedStructureRevision":options["structureRevision"],"expectedSourceRevision":scene["sourceRevision"],"sceneId":scene["id"],"beatId":beat["id"],"references":[],"task":"Rejected nested target","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}))["ok"], false);
     assert_snapshots(&before, &f.snapshots());
 }
+#[test]
+fn phase3a_logic_context_and_generated_fields_keep_ai_allowlist_closed() {
+    for extra in [
+        json!({"type":"call","sceneId":"unsupported","returnLabel":null}),
+        json!({"type":"narration","text":"No new field authority","condition":{"status":"supported","expression":{"type":"bool","value":true}}}),
+    ] {
+        let mut f = Fixture::new();
+        let w = f.ok("scene.list", json!({}));
+        let scene = &w["scenes"][0];
+        let source=format!("label {}:\n    call {} from frozen_call\n    menu:\n        \"Conditional\" if flag:\n            jump {}\n    \"Ordinary root one\"\n    \"Ordinary root two\"\n    return\n",scene["technicalLabel"].as_str().unwrap(),scene["technicalLabel"].as_str().unwrap(),scene["technicalLabel"].as_str().unwrap());
+        let opened = f.ok("source.open", json!({"path":f.path}));
+        let draft=f.ok("source.updateDraft",json!({"path":f.path,"expectedBaseRevision":opened["baseRevision"],"text":source,"selectionStart":0,"selectionEnd":0}));
+        f.ok("source.save",json!({"path":f.path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}));
+        let before = f.snapshots();
+        let prepared = f.continue_prepare();
+        let body: Value =
+            serde_json::from_str(prepared["serializedPayload"].as_str().unwrap()).unwrap();
+        let user: Value =
+            serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+        assert_eq!(
+            user["story"]["sceneBeats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|b| b["excluded"].is_string())
+                .count(),
+            2
+        );
+        assert!(!user["story"]["sceneBeats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(
+                |b| b["payload"]["type"] == "call" || b["payload"]["options"].as_array().is_some()
+            ));
+        f.take(&prepared, Cancel::default()).unwrap();
+        let mut response = f.continue_response(&prepared);
+        response["beats"] = json!([extra]);
+        assert!(f.complete(&prepared, response.to_string()).is_err());
+        assert_snapshots(&before, &f.snapshots());
+    }
+}

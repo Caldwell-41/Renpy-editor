@@ -2,6 +2,7 @@
 use super::*;
 use crate::authoring::{lexical_lines, lexical_ranges};
 use std::collections::BTreeMap;
+mod structure;
 #[cfg(test)]
 thread_local! { pub(super) static ACCEPTED_AT: std::cell::Cell<Option<std::time::Instant>> = const { std::cell::Cell::new(None) }; }
 pub const MAX_FLOW_SCENES: usize = 500;
@@ -45,6 +46,26 @@ pub enum FlowDestination {
         location: Option<FlowLocation>,
     },
     Terminal,
+Body {
+        scene_id: String,
+        beat_id: Option<String>,
+        owner: Option<crate::metadata::BeatOwner>,
+        location: Option<FlowLocation>,
+    },
+}
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FlowGuard {
+    pub branch_id: String,
+    pub branch: crate::metadata::ConditionalBranch,
+}
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FlowBody {
+    pub scene_id: String,
+    pub beat_id: Option<String>,
+    pub owner: Option<crate::metadata::BeatOwner>,
+    pub location: Option<FlowLocation>,
 }
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -58,6 +79,13 @@ pub struct FlowEdge {
     pub location: FlowLocation,
     pub destination: FlowDestination,
     pub editable: bool,
+    pub guard_path: Vec<FlowGuard>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub condition: Option<crate::conditions::Condition>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub continuation: Option<FlowBody>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub return_label: Option<String>,
 }
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -526,6 +554,10 @@ impl AuthoringService {
             result.partial |= partial;
             result.edges.extend(edges);
         }
+        structure::diagnose_calls(&mut result);
+        if result.edges.len() > MAX_FLOW_EDGES {
+            return Ok(over_limit(result));
+        }
         profile_mark("edge_projection");
         // One acquisition describes the bytes read, not an atomic disk snapshot.
         // No second all-source read or final namespace proof for display (ADR 0010).
@@ -549,7 +581,7 @@ impl AuthoringService {
             result.notice = "Stale projection: source changed or could not be reconciled. Refresh or inspect Source.".into();
         } else if result.partial {
             result.notice =
-                "Partial flow: custom, dynamic or unmapped source remains unknown.".into();
+                "Partial flow: custom, dynamic or unsupported control flow remains unknown.".into();
         }
         profile_mark("finalize");
         if profile_enabled {
@@ -615,6 +647,18 @@ fn collect_labels(path: &str, bytes: &[u8], revision: &str, inventory: &mut Inve
     };
     for (start, end) in lines {
         let line = std::str::from_utf8(&bytes[start..end]).unwrap();
+        if let Some((_, from_label)) = super::logic::parse_call(line.trim()) {
+            inventory
+                .labels
+                .entry(from_label.into())
+                .or_default()
+                .push(FlowLocation {
+                    path: path.into(),
+                    revision: revision.into(),
+                    byte_start: (start + bom) as u64,
+                    byte_end: (end + bom) as u64,
+                });
+        }
         // Story labels are top-level declarations. Indented screen-language
         // label controls (including translated text) are not story destinations.
         if line.starts_with([' ', '\t']) {
@@ -643,6 +687,17 @@ fn collect_labels(path: &str, bytes: &[u8], revision: &str, inventory: &mut Inve
     }
 }
 fn project_scene(
+    scene: &SceneMetadata,
+    bytes: &[u8],
+    revision: &str,
+    beats: &[SceneBeat],
+    inventory: &Inventory,
+    nodes: &[FlowNode],
+) -> Vec<FlowEdge> {
+    structure::project(scene, bytes, revision, beats, inventory, nodes)
+}
+
+fn project_scene_legacy(
     scene: &SceneMetadata,
     bytes: &[u8],
     revision: &str,
@@ -762,6 +817,10 @@ fn project_scene(
             inventory.destination(label, nodes)
         };
         edges.push(FlowEdge {
+            guard_path: vec![],
+            condition: None,
+            continuation: None,
+            return_label: None,
             id: if option.is_none() {
                 mapped
                     .map(|beat| format!("{}:{}", scene.id, beat.id))
@@ -788,6 +847,10 @@ fn project_scene(
     }
     if unknown_block || edges.is_empty() {
         edges.push(FlowEdge {
+            guard_path: vec![],
+            condition: None,
+            continuation: None,
+            return_label: None,
             id: format!("{}:{revision}:unknown", scene.id),
             scene_id: scene.id.clone(),
             beat_id: None,

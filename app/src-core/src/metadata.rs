@@ -3,7 +3,8 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 4;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 5;
+pub(crate) const MAX_SOURCE_MAP_BYTES: usize = 1_000_000;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
 
@@ -306,7 +307,7 @@ impl ProjectMetadata {
 
 impl SourceMapMetadata {
     pub(crate) fn read_bytes(bytes: &[u8], project_id: &str) -> Result<Self, MetadataError> {
-        if bytes.len() > 1_000_000 {
+        if bytes.len() > MAX_SOURCE_MAP_BYTES {
             return Err(MetadataError::Corrupt);
         }
         let value: Self = serde_json::from_slice(bytes).map_err(|_| MetadataError::Corrupt)?;
@@ -317,7 +318,7 @@ impl SourceMapMetadata {
     pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
         if !matches!(
             self.schema_version,
-            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | SOURCE_MAP_SCHEMA_VERSION
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id
             || self.sources.len() > 4096

@@ -4060,10 +4060,12 @@ mod tests {
                 beat: crate::scene::BeatPayload::Choice {
                     options: vec![
                         crate::scene::ChoiceOption {
+                            condition: None,
                             text: "Garden".into(),
                             destination_scene_id: garden_id.clone(),
                         },
                         crate::scene::ChoiceOption {
+                            condition: None,
                             text: "Library".into(),
                             destination_scene_id: library_id.clone(),
                         },

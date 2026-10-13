@@ -741,7 +741,8 @@ impl AuthoringService {
                 .beats
                 .iter()
                 .map(
-                    |b| if b.protected || b.owner.is_some() || b.conditional_branch.is_some() {
+                    |b| if b.protected || b.owner.is_some() || b.conditional_branch.is_some()
+                        || crate::scene::logic_boundary(&b.payload) {
                         json!({"id":b.id,"excluded":"Custom/nested source; runtime unknown"})
                     } else {
                         json!({"id":b.id,"payload":b.payload})

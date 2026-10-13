@@ -1001,7 +1001,7 @@ impl AuthoringService {
                 kind: MutationKind::ReplaceExisting,
                 base: map_revision,
                 expected_bytes: map_bytes,
-                proposed: serde_json::to_vec_pretty(&source_map).map_err(|_| SourceError::Io)?,
+                proposed: crate::scene::source_map_bytes(&source_map).map_err(scene_source_error)?,
             });
         }
         Ok(TransactionProposal {
@@ -1100,8 +1100,8 @@ impl AuthoringService {
                     kind: MutationKind::ReplaceExisting,
                     base: map_revision,
                     expected_bytes: map_bytes,
-                    proposed: serde_json::to_vec_pretty(&source_map)
-                        .map_err(|_| SourceError::Io)?,
+                    proposed: crate::scene::source_map_bytes(&source_map)
+                        .map_err(scene_source_error)?,
                 }],
                 intent: TransactionIntent::Edit,
             },

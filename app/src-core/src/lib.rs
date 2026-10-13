@@ -973,6 +973,14 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
             "INCOMING_REFERENCE",
             "The Scene has incoming or unknown references and cannot be deleted safely.",
         ),
+        AmbiguousReturnLabel => (
+            "AMBIGUOUS_RETURN_LABEL",
+            "This return label is duplicated or conflicts with another label. Inspect Source before editing the Call.",
+        ),
+        UnsupportedCallRoute => (
+            "UNSUPPORTED_CALL_ROUTE",
+            "This call may recurse or exceed the supported call depth. Edit unsupported routes in Source.",
+        ),
         InvariantBlocked => (
             "SCENE_INVARIANT",
             "That operation would break a required Chapter or Scene invariant.",
