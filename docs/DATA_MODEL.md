@@ -426,6 +426,21 @@ unknown, never false or evidence of unreachable branches. The core projection do
 not execute Python or infer a route from default values. This first local slice does
 not yet supply condition-authoring controls or complete Phase 3A qualification.
 
+The subsequent 3A.2 candidate advances source maps to v5 for supported Call statements
+and guarded menus; [ADR 0015](adr/0015-guarded-choices-and-stable-call-continuations.md)
+owns its pending qualification. Older maps use their version's recognizer before
+refinement. Exact tiled menu merges retain the header identity and preserve removed
+records in non-authoritative `refinedChildMappings` extras. Every old record must be
+accounted for; split ranges, reserved-key collisions and output exceeding the unchanged
+1,000,000-byte reader cap refuse without writes. Source bytes are not migrated.
+
+`Call` carries a target Scene UUID and stable `returnLabel`; insertion generates the
+label, and target edits preserve it. Choice options may carry the shared `Condition`.
+An all-guarded menu can continue when no option is available, so authoring cannot
+assume every Choice is terminal. Early renderer support presents Calls and guarded
+Choices read-only with revision-bound Source navigation; full Story controls and
+runtime/save qualification remain pending.
+
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing
 metadata does not authorize reconstruction from `.rpy` files. IDs are UUIDs and paths
@@ -497,6 +512,13 @@ options after an unknown destination are retained with an explicit incomplete bo
 Additional labels remain unmapped, not invented Scenes. The unique accepted `start`
 label's canonical unconditional jump establishes the entry badge; custom/missing/
 ambiguous entry does not fall back to metadata or tree ordering.
+
+The 3A.2 candidate adds supported branch guards and option conditions, Call edges with
+stable return labels, and exact body continuations. A body location carries Scene ID,
+optional Beat ID/owner and optional revision-bound Source range. Missing continuations,
+ambiguous return labels and possible recursive Call routes remain partial/unknown.
+These fields do not evaluate availability or establish reachability. Dynamic and
+otherwise unsupported forms retain their existing opaque boundary.
 
 Under the selected [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md)
 contract, observation identity describes source bytes, inventory and metadata actually

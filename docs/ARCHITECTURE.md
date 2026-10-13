@@ -389,6 +389,17 @@ edits remain minimal and transactional. Phase 2 proposal permissions do not expa
 [ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md) owns this extension;
 Story condition controls, call/flow work and SDK/target qualification remain in progress.
 
+The locally checked 3A.2 candidate extends this through source-map v5, stable returning
+Calls, guarded Choices and observed body continuations under
+[ADR 0015](adr/0015-guarded-choices-and-stable-call-continuations.md). Metadata refinement
+accounts for every old record or refuses without writes; minimal Call/Choice field
+patches preserve unchanged source formatting. Call insertion/target edits inspect a
+bounded possible-route graph, while source-defined or later transfer-created recursion
+is visibly unknown. This early command boundary is not general reachability analysis;
+the structural slice must close the later transfer-edit gap before 3A acceptance.
+Renderer compatibility preserves the AI allowlist, draft handling and revision-bound
+Source navigation. Real SDK and supported-target qualification remain pending.
+
 The Scene recognizer follows the same rule: supported canonical Beats retain stable
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become
 protected Custom Code. Insert, replace, remove, and reorder refuse ambiguous ownership

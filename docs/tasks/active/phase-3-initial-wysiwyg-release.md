@@ -986,3 +986,118 @@ rounds 1/4; paired CI 0/3; packages/native-owner starts/live model calls 0. No S
 or 3A CI has run. Documentation selection is locally committed as `f0c0ce3`; core
 checkpoint `d97ca99` is integrated locally as `e235d3d` (six exact code/test files). No product publication or 3A acceptance claimed. Next:
 integrate reviewed core checkpoint, then implement calls/flow and early paired proof.
+
+**Publication boundary:** first-slice integration is `e235d3d`; reviewed contracts and
+evidence are committed locally through `e5bfa25`. Automatic approval review rejected
+the attempted push to `Caldwell-41/Renpy-editor`, branch `codex/phase3a-story-logic`,
+judging external destination/payload authorization insufficient. No push occurred.
+Explicit publication approval was requested asynchronously; no delegated push or CI
+dispatch may bypass that pending decision. Local calls/flow and harness work continues.
+
+**Validation round 2/4:** first core checkpoint integrated into the isolated harness
+worktree; release locked lib `--no-run` compiled successfully (28.89 seconds), five
+rejecting-oracle fixtures and both workflow actionlint checks passed. This compiles
+the SDK gate but does not execute the SDK. Call insertion is being changed from seeded
+source to the real `scene.apply` command with generated stable return labels. CI remains
+0/3; no SDK operation or native/package launch occurred.
+
+The user then explicitly authorized reviewed Phase 3A branch pushes. Root published
+`e5bfa2599e94523fce330914040669f642090d45` to the named branch and verified that exact
+remote head with Git. The publication blocker is resolved; the earlier rejection and
+no-push outcome remain historical. No PR, merge, release or CI dispatch occurred.
+This authorization covers reviewed Phase 3A branch updates, not Phase 2 resumption.
+
+**3A.2 first local check:** 9 passed, zero failed/ignored (6.97 seconds): existing
+condition proofs plus generated distinct Call labels, minimal target edits preserving
+custom labels/comments/history/reopen, guarded-menu ending refusal and v3/v4 mixed
+Call/menu metadata refinement. Calls/flow are not frozen or accepted yet. Review
+requires source-map v5 with actual old-version recognizers: silently changing recognition
+under v4 would invalidate older maps. Proven merged menu ranges preserve the old header
+identity/extras and removed child records as non-authoritative legacy data; collisions,
+unproved splits or exceeding the existing 1,000,000-byte reader limit refuse without
+writes. Source bytes remain unchanged. Self/indirect authored recursion is outside the
+subset; observed possible recursion stays explicit unknown/unsupported, not reachability
+analysis or a restriction on deliberate source execution.
+
+**Renderer compatibility assignment:** a separate Sol 6.1 High renderer writer uses
+an isolated `phase3a-renderer` worktree, with four focused local rounds, coordinated
+with the sole core writer. This is safe display compatibility before early SDK proof,
+not broad 3A.3 controls. Calls/guarded choices remain read-only with revision-bound
+Source links; the old option editor cannot drop guards. Preview becomes partial/unknown
+without filtering options or expanding callees. Branches accepts body/continuation
+locations without manufacturing graph authority. Independent review is clear pending
+final core JSON agreement. Round 1 passed 35 focused tests/typecheck/compile; round 2
+passed 58 with two harness assertion failures; corrected round 3 passed all 60, with
+zero failed/cancelled/skipped. Source revision forwarding includes captured-target and
+existing draft/refusal tests plus static main wiring; no new browser/native proof is
+claimed. Preserve the two failed assertions, and wait for final DTO match before commit.
+
+Current active usage: core first slice 8 plus calls/flow 1/6 (9/14 cumulative), renderer
+3/4, validation 2/4, paired CI 0/3. Phase 2 remains **PAUSED — INCOMPLETE**.
+
+**3A.2 check 2:** 11 passed, zero failed/ignored (8.61 seconds), including exact
+guarded Call/menu continuations and source-cycle diagnostics. The depth rule counts
+active Call frames separately from the entry Scene: 16 supported, a 17th refused.
+Final serialized flow fields are supplied to renderer for agreement before its commit.
+Old aggregate splits, reserved stash keys, map-size refusal, unchanged AI field/context
+permissions and minimal guarded-menu updates still require final coverage/review.
+Usage is core 10/14 cumulative (calls/flow 2/6), renderer 3/4, validation 2/4, CI 0/3.
+No SDK execution or Phase 3A acceptance is claimed.
+
+**Renderer final contract check:** core Flow DTO agreement is confirmed. Round 4/4
+passed typecheck/test compilation and all 61 focused tests (zero failed/cancelled/
+skipped). The final changed inputs distinguish branch guard conditions from Choice
+availability, preserve nullable body navigation and prioritize missing Call targets
+over generic return text. Final delta review precedes integration; the earlier two
+harness assertion failures remain recorded. The four-round compatibility allowance
+is exhausted, with no additional execution required by the current passing result.
+Independent review cleared that delta. Delegated commits `9847735` and `52c238c`
+are integrated locally as `461441c` and `a9c3406`; these renderer changes are not yet
+published. The isolated renderer worktree is clean and preserved.
+
+**3A.2 ongoing review:** inspection supports the version-specific map validation,
+complete old-record coverage/stash refusal, unchanged reader cap, incoming Call
+references, minimal target patches and mixed-edge recursion boundary. Before freeze,
+source-authored missing continuations and duplicate `from` labels must remain lossless
+but visibly partial/unknown; supported target edits must not accept ambiguous return
+labels. Recursion regressions must assert their specific refusing gate. Final AI
+permission and guarded-menu preservation coverage is still pending. These are in-scope
+review corrections, not Phase 2 work or additional execution authority.
+
+**Following slices, gated by early SDK proof:** first freeze explicit source-derived
+body/anchor and expected-owner command contracts for structural edits. Implement and
+review condition insertion/branch edits, ordinary nested Beat edits and whole-subtree
+move/delete/selected-branch unwrap through the existing transaction/history service.
+Then wire the typed builder, Call/guarded Choice controls, hierarchy, explicit moves
+and manual preview into Story, with one renderer writer and stable core interfaces.
+The frontend-to-core proof must cover retained drafts and ordinary stale/external edits,
+not just disconnected renderer/core tests. Final qualification still includes saved
+callee return after a safe surrounding edit, actual runtime outcomes and both targets.
+This staging records the already selected 3A scope; it neither starts broad UI before
+the early gate nor transfers unused Phase 2 or compatibility-check allowances.
+
+**3A.2 check 3:** 16 passed, zero failed/ignored (13.06 seconds), exit zero. Follow-up
+review closed missing-continuation, duplicate-label and refinement findings by inspection.
+One remaining emitter defect refuses a valid boolean comparison containing `not` as
+an operand because rendered source fails the round-trip check. It fails without source
+writes; operand parentheses and left/right regressions are the next bounded correction.
+Core usage is calls/flow 3/6, cumulative 11/14; renderer 4/4, validation 2/4, CI 0/3.
+
+**3A.2 check 4 and early boundary:** the emitter correction passed all 16 Phase 3A
+tests, 16 Source tests and two exact migration/mapping baselines (34 total, all passed).
+Second-slice usage is 4/6, cumulative core 12/14. Review clarified that recursive-route
+refusal applies to Call insertion/target edits. Later ordinary Jump/Choice edits can
+introduce possible Call recursion, which observed flow reports as unknown. The early
+candidate claims that narrower boundary; it does not claim all authored transfers are
+bounded. Close this gap in the structural slice before 3A acceptance while preserving
+pure Jump loops. No extra current-slice invocation or acceptance waiver is selected.
+
+**Reviewed core integration:** independent final review cleared the stated early
+boundary. Delegated `e97be13e69501aab2e7b5f65de1841acabfa56c8` is integrated locally as
+`1029bd8`, after reviewed renderer `461441c`/`a9c3406`. Existing-file formatting cleanup
+was normalized against the tested candidate; the two new files were unchanged.
+The final focused selections passed 16 Phase 3A tests (16.13 seconds), 16 Source tests
+(3.52 seconds), one migration (0.16 seconds) and one source-range baseline (0.00 seconds).
+The core worktree is clean and preserved. [ADR 0015](../../adr/0015-guarded-choices-and-stable-call-continuations.md)
+records the reviewed decision and limits. Validation now integrates this exact code for
+its next local harness round; no SDK/CI run or 3A acceptance has occurred.
