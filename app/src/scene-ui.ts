@@ -1,5 +1,5 @@
 import { layoutFor, saveLayout } from "./preferences.ts";
-import { buildAvailabilityEditor, validateField } from "./story-condition-editor.ts";
+import { buildAvailabilityEditor, buildConditionEditor, validateField } from "./story-condition-editor.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -44,6 +44,7 @@ export interface ConditionalBranch { readonly groupId: string; readonly variable
 export interface SceneBeat {
   readonly owner?: BeatOwner;
   readonly conditionalBranch?: ConditionalBranch;
+  readonly structuralPlaceholder?: boolean;
   readonly id: string;
   readonly byteStart: number;
   readonly byteEnd: number;
@@ -61,15 +62,23 @@ function sameBody(beat: SceneBeat, body: BodyRef): boolean {
   return body.type === "root" ? !beat.owner : beat.owner?.groupId === body.groupId && beat.owner.branchId === body.branchId;
 }
 function bodyNodes(scene: SceneDocument, body: BodyRef): readonly SceneBeat[] {
-  return scene.beats.filter(beat => sameBody(beat, body) && (!beat.conditionalBranch || (!beat.conditionalBranch.otherwise && !beat.conditionalBranch.ordinal))
+  return scene.beats.filter(beat => !beat.structuralPlaceholder && sameBody(beat, body) && (!beat.conditionalBranch || (!beat.conditionalBranch.otherwise && !beat.conditionalBranch.ordinal))
     && !(beat.payload.type === "customCode" && !beat.conditionalBranch && (!beat.payload.source.trim() || beat.payload.source.trimStart().startsWith("#"))));
 }
 function nodeRef(beat: SceneBeat): NodeRef {
   return beat.conditionalBranch ? { type: "condition", groupId: beat.conditionalBranch.groupId } : { type: "beat", beatId: beat.id };
 }
+function terminates(beat: SceneBeat, scene: SceneDocument, depth = 0): boolean {
+  if (depth > 16) return false;
+  if (beat.conditionalBranch) {
+    const groupId = beat.conditionalBranch.groupId;
+    const branches = scene.beats.filter(item => item.conditionalBranch?.groupId === groupId);
+    return branches.some(branch => branch.conditionalBranch?.otherwise) && branches.every(branch => bodyNodes(scene, { type: "branch", groupId: beat.conditionalBranch!.groupId, branchId: branch.id }).some(child => terminates(child, scene, depth + 1)));
+  }
+  return ["jump", "return"].includes(beat.payload.type) || (beat.payload.type === "choice" && beat.payload.options.some(option => !option.condition));
+}
 function defaultInsertion(scene: SceneDocument, body: BodyRef): Position {
-  const terminal = bodyNodes(scene, body).find(beat => ["jump", "return"].includes(beat.payload.type)
-    || (beat.payload.type === "choice" && beat.payload.options.some(option => !option.condition)));
+  const terminal = bodyNodes(scene, body).find(beat => terminates(beat, scene));
   return terminal ? { type: "before", anchor: nodeRef(terminal) } : { type: "end" };
 }
 function rootInsertionIsNested(scene: SceneDocument, beforeBeatId: string | null): boolean {
@@ -84,10 +93,27 @@ function rootInsertionIsNested(scene: SceneDocument, beforeBeatId: string | null
 }
 
 function bodyCaption(scene: SceneDocument, body: BodyRef, model: SceneWorkspace): string {
-  if (body.type === "root") return `${scene.displayName} / Scene body`;
-  const branch = scene.beats.find(beat => beat.id === body.branchId && beat.conditionalBranch?.groupId === body.groupId);
-  return `${scene.displayName} / Condition / ${branch?.conditionalBranch ? branchCaption(branch.conditionalBranch, model) : "Missing branch"}`;
+  const parts: string[] = [];
+  let parent = body;
+  const seen = new Set<string>();
+  while (parent.type === "branch" && !seen.has(parent.branchId)) {
+    seen.add(parent.branchId);
+    const owner = parent;
+    const branch = scene.beats.find(beat => beat.id === owner.branchId && beat.conditionalBranch?.groupId === owner.groupId);
+    parts.unshift(branch?.conditionalBranch ? branchCaption(branch.conditionalBranch, model) : "Missing branch");
+    parent = branch ? beatBody(branch) : { type: "root" };
+  }
+  return `${scene.displayName} / ${parts.length ? parts.join(" / ") : "Scene body"}`;
 }
+function insideCondition(scene: SceneDocument, body: BodyRef, groupId: string): boolean {
+  let current = body; const seen = new Set<string>();
+  while (current.type === "branch" && !seen.has(current.branchId)) {
+    if (current.groupId === groupId) return true;
+    const branchId = current.branchId; seen.add(branchId); const header = scene.beats.find(beat => beat.id === branchId); current = header ? beatBody(header) : { type: "root" };
+  }
+  return false;
+}
+export interface StoryTarget { readonly sceneId: string; readonly beatId?: string; readonly expectedSourceRevision?: string; readonly body?: BodyRef; readonly caller?: StoryTarget }
 
 export interface SceneDocument {
   readonly id: string;
@@ -199,7 +225,7 @@ export interface ScenePreviewState {
   readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return"; readonly text: string; readonly beatId: string };
 }
 
-export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string): ScenePreviewState {
+export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string, manualBranches?: ReadonlyMap<string, string>): ScenePreviewState {
   const stop = throughBeatId === undefined ? scene.beats.length - 1 : scene.beats.findIndex((beat) => beat.id === throughBeatId);
   const limit = stop < 0 ? scene.beats.length - 1 : stop;
   let background: ScenePreviewState["background"];
@@ -212,14 +238,31 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string)
   let variablesUnknown = false;
   let overlay: ScenePreviewState["overlay"];
   const unknownBeatIds: string[] = [];
+  let lastVisitedBeatId: string | undefined;
   for (const beat of scene.beats.slice(0, limit + 1)) {
     const payload = beat.payload;
-    if (beat.owner && beat.id !== throughBeatId) continue;
+    if (manualBranches) {
+      let body = beatBody(beat); let active = true; const seen = new Set<string>();
+      while (body.type === "branch" && !seen.has(body.branchId)) {
+        if (manualBranches.get(body.groupId) !== body.branchId) { active = false; break; }
+        const branchId = body.branchId; seen.add(branchId); const header = scene.beats.find(item => item.id === branchId); body = header ? beatBody(header) : { type: "root" };
+      }
+      if (!active) continue;
+      if (beat.conditionalBranch) {
+        if (beat.conditionalBranch.ordinal || beat.conditionalBranch.otherwise) continue;
+        const groupId = beat.conditionalBranch.groupId;
+        const selected = manualBranches.get(groupId);
+        const branches = scene.beats.filter(item => item.conditionalBranch?.groupId === groupId);
+        if (branches.some(branch => branch.id === selected) || (selected === "no-match" && !branches.some(branch => branch.conditionalBranch?.otherwise))) { lastVisitedBeatId = beat.id; continue; }
+      }
+    } else if (beat.owner && beat.id !== throughBeatId) continue;
+    lastVisitedBeatId = beat.id;
+    if (beat.structuralPlaceholder) continue;
     if (payload.type === "customCode" || previewLogicBoundary(beat)) {
       unknownBeatIds.push(beat.id); background = undefined; backgroundUnknown = true;
       characters = []; charactersUnknown = true; music = undefined; musicUnknown = true;
       variables = {}; variablesUnknown = true; overlay = undefined;
-      if (payload.type === "customCode") continue;
+      if (payload.type === "customCode") { if (manualBranches && beat.conditionalBranch) break; continue; }
     }
     switch (payload.type) {
       case "background": background = { assetId: payload.assetId, beatId: beat.id }; backgroundUnknown = false; characters = []; charactersUnknown = false; break;
@@ -242,8 +285,10 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string)
       case "return": overlay = { kind: "return", text: "Return / End", beatId: beat.id }; break;
       case "playSfx": case "transition": break;
     }
+    if (payload.type === "choice") { if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id); break; }
+    if (payload.type === "jump" || payload.type === "return") break;
   }
-  return { throughBeatId: scene.beats[limit]?.id, partial: unknownBeatIds.length > 0, unknownBeatIds, background, backgroundUnknown, characters, charactersUnknown, music, musicUnknown, variables, variablesUnknown, overlay };
+  return { throughBeatId: lastVisitedBeatId, partial: unknownBeatIds.length > 0, unknownBeatIds, background, backgroundUnknown, characters, charactersUnknown, music, musicUnknown, variables, variablesUnknown, overlay };
 }
 
 export type SceneCommand = Readonly<Record<string, unknown>> & { readonly type: string };
@@ -261,6 +306,9 @@ export interface RecoveryReport { readonly items: readonly RecoveryItem[] }
 
 export interface SceneActions {
   readonly current?: () => boolean;
+  readonly caller?: StoryTarget;
+  readonly viewScene?: (target: StoryTarget) => void;
+  readonly viewContinuation?: (sceneId: string, beatId: string, expectedSourceRevision: string) => void;
   readonly assist?: (sceneId: string, beatId: string, action?: string) => void;
   readonly layoutKey?: string;
   readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>;
@@ -327,9 +375,9 @@ function selectOf<T extends string>(values: readonly { readonly value: T; readon
     const option = document.createElement("option");
     option.value = item.value;
     option.textContent = item.label;
-    option.selected = selected === item.value;
     control.append(option);
   }
+  if (selected !== undefined) control.value = selected;
   return control;
 }
 
@@ -349,7 +397,7 @@ function dirtyDraft(group: HTMLElement, controls: readonly HTMLElement[]): void 
   for (const control of controls) if (!trackedDraftControls.has(control)) { trackedDraftControls.add(control); for (const event of ["input", "change"]) control.addEventListener(event, () => { group.dataset.unsubmitted = "true"; }); }
   if (trackedDrafts.has(group)) return;
   trackedDrafts.add(group);
-  for (const event of ["input", "change"]) group.addEventListener(event, () => { group.dataset.unsubmitted = "true"; });
+  for (const event of ["input", "change"]) group.addEventListener(event, event => { if (event.target instanceof HTMLElement && event.target.closest(".scene-draft") === group) group.dataset.unsubmitted = "true"; });
 }
 
 export function hasSceneDraft(root: ParentNode = document): boolean {
@@ -393,6 +441,9 @@ export function renderSceneAuthoring(
   let disposed = false;
   let writingFocus = false;
   const collapsedChapters=new Set<string>();
+  const collapsedConditions = new Set<string>();
+  const manualBranches = new Map<string, string>();
+  let focusedBranch: string | undefined;
   const previewObservers:ResizeObserver[]=[];
   let resetPreviewAllocation:(()=>void)|undefined;
   let cancelBeatDrag:(()=>void)|undefined;
@@ -401,18 +452,26 @@ export function renderSceneAuthoring(
   let saveDialogue: (()=>Promise<boolean>) | undefined;
   let settling: Promise<boolean> | undefined;
   let composing = false;
+  let pendingWrites = 0;
+  const drafts = (): HTMLElement[] => [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLElement>('.scene-draft[data-unsubmitted="true"]')]);
+  const hasDraft = (): boolean => drafts().length > 0;
+  const focusDraft = (): void => { if (hasSceneDraft(host)) focusSceneDraft(host); else focusSceneDraft(treeHost); };
   const settle = (): Promise<boolean> => {
     if(settling)return settling;
-    if(!hasSceneDraft(host))return Promise.resolve(true);
-    if(composing || !saveDialogue){focusSceneDraft(host);return Promise.resolve(false);}
+    if (pendingWrites || hasSceneDraft(treeHost)) { focusDraft(); return Promise.resolve(false); }
+    if(!hasDraft())return Promise.resolve(true);
+    if(composing || !saveDialogue){focusDraft();return Promise.resolve(false);}
     settling=saveDialogue().finally(()=>{settling=undefined;});return settling;
   };
   draftSettlers.set(host,settle);
 
-  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision"> = model): Promise<boolean> => {
+  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision"> = model, owner?: HTMLElement): Promise<boolean> => {
     if(disposed || actions.current?.() === false)return false;
-    if(hasSceneDraft(host)&&["reorderBeat","moveBeat","removeBeat","moveScene","deleteScene","deleteChapter","undo","redo"].includes(command.type)){actions.status("Complete or cancel the current edit first.","error");focusSceneDraft(host);return false;}
+    if (drafts().some(draft => draft !== owner)) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
+    if (pendingWrites) { actions.status("Wait for the current change to finish.", "error"); return false; }
     const before = model;
+    const locks = [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")]).map(control => ({ control, disabled: control.disabled }));
+    locks.forEach(({ control }) => { control.disabled = true; }); pendingWrites++;
     actions.status("Saving…");
     try {
       const next = await actions.apply(command, expected);
@@ -424,17 +483,17 @@ export function renderSceneAuthoring(
       return true;
     } catch (error) {
       if (disposed || actions.current?.() === false) return false;
-      actions.status(friendlyError(error, "Scene change could not be saved"), "error");
-      focusSceneDraft(host);
+      actions.status(`${friendlyError(error, "Scene change could not be saved")} Input retained. If this source structure cannot be moved safely, edit it in Source.`, "error");
+      focusDraft();
       return false;
-    }
+    } finally { pendingWrites--; locks.forEach(({ control, disabled }) => { if (control.isConnected) control.disabled = disabled; }); }
   };
 
   const draftGuard = (): boolean => {
-    if (settling) { actions.status("Wait for the current Beat change to finish.", "error"); focusSceneDraft(host); return false; }
-    if (!hasSceneDraft(host)) return true;
+    if (settling || pendingWrites) { actions.status("Wait for the current Beat change to finish.", "error"); focusDraft(); return false; }
+    if (!hasDraft()) return true;
     actions.status("Commit or cancel the Scene editor before navigating.", "error");
-    focusSceneDraft(host);
+    focusDraft();
     return false;
   };
 
@@ -454,11 +513,20 @@ export function renderSceneAuthoring(
     drawBeats(selectedScene);
   };
 
+  const treeName = (target: HTMLElement, label: string, initial: string, command: (displayName: string) => SceneCommand): void => {
+    if (!draftGuard()) return;
+    const expected = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
+    inlineName(target, label, initial, displayName => {
+      const panel = target.querySelector<HTMLElement>(":scope > .tree-inline");
+      if (!panel || disposed || actions.current?.() === false) return Promise.resolve(false);
+      return mutate(command(displayName), undefined, expected, panel);
+    });
+  };
   const drawTree = (selectedScene: SceneDocument): void => {
     const heading = document.createElement("div"); heading.className = "tree-heading";
     const label = document.createElement("p"); label.className = "eyebrow"; label.textContent = "Story tree";
     const create = button("New Chapter", "text-button");
-    create.addEventListener("click", () => inlineName(treeHost, "Chapter name", "New Chapter", (displayName) => mutate({ type: "createChapter", displayName })));
+    create.addEventListener("click", () => treeName(treeHost, "Chapter name", "New Chapter", displayName => ({ type: "createChapter", displayName })));
     heading.append(label, create); treeHost.append(heading);
     model.chapters.forEach((chapter, chapterIndex) => {
       const chapterGroup = document.createElement("section"); chapterGroup.className = "tree-chapter";
@@ -466,7 +534,7 @@ export function renderSceneAuthoring(
       const name = document.createElement("strong"); name.textContent = chapter.displayName;
       const tools = document.createElement("div"); tools.className = "tree-tools";
       const rename = button("Rename", "icon-button"); rename.ariaLabel = `Rename chapter ${chapter.displayName}`;
-      rename.addEventListener("click", () => inlineName(chapterGroup, "Chapter name", chapter.displayName, (displayName) => mutate({ type: "renameChapter", chapterId: chapter.id, displayName })));
+      rename.addEventListener("click", () => treeName(chapterGroup, "Chapter name", chapter.displayName, displayName => ({ type: "renameChapter", chapterId: chapter.id, displayName })));
       const up = button("↑", "icon-button"); up.ariaLabel = `Move chapter ${chapter.displayName} up`; up.disabled = chapterIndex === 0;
       up.addEventListener("click", () => void mutate({ type: "moveChapter", chapterId: chapter.id, direction: "up" }));
       const down = button("↓", "icon-button"); down.ariaLabel = `Move chapter ${chapter.displayName} down`; down.disabled = chapterIndex === model.chapters.length - 1;
@@ -484,7 +552,7 @@ export function renderSceneAuthoring(
         open.addEventListener("click",()=>{if(scene.id!==selectedScene.id)void settle().then(ok=>{if(ok)void mutate({type:"selectScene",sceneId:scene.id});else actions.status("Complete or cancel this edit before changing scenes.","error");});});
         const controls = document.createElement("div"); controls.className = "tree-tools";
         const renameScene = button("Rename", "icon-button"); renameScene.ariaLabel = `Rename scene ${scene.displayName}`;
-        renameScene.addEventListener("click", () => inlineName(sceneRow, "Scene name", scene.displayName, (displayName) => mutate({ type: "renameScene", sceneId: scene.id, displayName })));
+        renameScene.addEventListener("click", () => treeName(sceneRow, "Scene name", scene.displayName, displayName => ({ type: "renameScene", sceneId: scene.id, displayName })));
         const moveUp = button("↑", "icon-button"); moveUp.ariaLabel = `Move scene ${scene.displayName} up`; moveUp.disabled = sceneIndex === 0;
         moveUp.addEventListener("click", () => void mutate({ type: "moveScene", sceneId: scene.id, chapterId: chapter.id, direction: "up", expectedSourceRevision: scene.sourceRevision }));
         const moveDown = button("↓", "icon-button"); moveDown.ariaLabel = `Move scene ${scene.displayName} down`; moveDown.disabled = sceneIndex === scenes.length - 1;
@@ -502,7 +570,7 @@ export function renderSceneAuthoring(
         sceneRow.append(open, treeMenu(controls)); chapterGroup.append(sceneRow);
       });
       const newScene = button("+ New Scene", "tree-new-scene");
-      newScene.addEventListener("click", () => inlineName(chapterGroup, "Scene name", "New Scene", (displayName) => mutate({ type: "createScene", chapterId: chapter.id, displayName })));
+      newScene.addEventListener("click", () => treeName(chapterGroup, "Scene name", "New Scene", displayName => ({ type: "createScene", chapterId: chapter.id, displayName })));
       if(actions.assist){const draft=button("Assist · Draft Scene","tree-new-scene");draft.ariaLabel=`Draft Scene in ${chapter.displayName}`;draft.onclick=()=>{if(draftGuard())actions.assist?.(chapter.id,"","draftScene");};chapterGroup.append(draft);}
       chapterGroup.append(newScene);chapterGroup.querySelectorAll<HTMLElement>(".tree-scene-row,.tree-new-scene").forEach(e=>e.hidden=collapsedChapters.has(chapter.id)); treeHost.append(chapterGroup);
     });
@@ -561,7 +629,22 @@ export function renderSceneAuthoring(
   };
 
   const renderPreview = (preview: HTMLElement, scene: SceneDocument): void => {
-    const state = deriveScenePreview(scene, selectedBeatId);
+    const hasConditions = scene.beats.some(beat => beat.conditionalBranch);
+    const state = deriveScenePreview(scene, hasConditions ? undefined : selectedBeatId, hasConditions ? manualBranches : undefined);
+    if (hasConditions) {
+      const manual = document.createElement("div"); manual.className = "illustrative-preview";
+      const heading = document.createElement("h3"); heading.textContent = "Illustrative branch preview";
+      const note = document.createElement("p"); note.textContent = "Manual selection · not a playthrough. Choose each encountered fork. Conditions and Choice availability are not evaluated."; manual.append(heading, note);
+      for (const first of scene.beats.filter(beat => beat.conditionalBranch && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise)) {
+        const groupId = first.conditionalBranch!.groupId;
+        const branches = scene.beats.filter(beat => beat.conditionalBranch?.groupId === groupId);
+        const choices = [{ value: "", label: "Choose a branch" }, ...branches.map(branch => ({ value: branch.id, label: branchCaption(branch.conditionalBranch!, model) })), ...(!branches.some(branch => branch.conditionalBranch!.otherwise) ? [{ value: "no-match", label: "No branch matches · continue" }] : [])];
+        const selector = selectOf(choices, manualBranches.get(groupId) ?? ""); selector.setAttribute("aria-label", `Illustrative branch ${groupId}`); selector.dataset.previewGroupId = groupId;
+        selector.addEventListener("change", () => { if (selector.value) manualBranches.set(groupId, selector.value); else manualBranches.delete(groupId); mediaGeneration++; preview.replaceChildren(); renderPreview(preview, scene); });
+        manual.append(labelled(`Preview condition ${conditionCaption(first.conditionalBranch!.condition ?? { status: "supported", expression: { type: "bool", value: true } }, model.authoring.variables)}`, selector));
+      }
+      preview.append(manual);
+    }
     const selectedIndex = state.throughBeatId ? scene.beats.findIndex((beat) => beat.id === state.throughBeatId) : scene.beats.length - 1;
     const header = document.createElement("div"); header.className = "preview-header";
     const heading = document.createElement("h2"); heading.textContent = "Scene Preview";
@@ -612,6 +695,134 @@ export function renderSceneAuthoring(
     details.append(media); preview.append(details);
   };
 
+  const operation = (scene: SceneDocument, target: HTMLElement, title: string, fields: readonly HTMLElement[], read: () => SceneCommand, actionLabel: string, focusId?: string): HTMLElement => {
+    const expected = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
+    const panel = document.createElement("section"); panel.className = "story-operation scene-draft"; panel.setAttribute("aria-label", title);
+    const heading = document.createElement("h3"); heading.textContent = title;
+    const breadcrumb = document.createElement("p"); breadcrumb.className = "story-breadcrumb"; breadcrumb.textContent = `${scene.displayName} · changes apply once and can be undone`;
+    const row = document.createElement("div"); row.className = "row-actions";
+    const cancel = button("Cancel", "text-button"); const apply = button(actionLabel, "button primary"); apply.disabled = scene.sourceConflict;
+    let pending = false;
+    const close = (): void => { if (pending) return; panel.remove(); selectedBeatId = undefined; composing = false; target.querySelector<HTMLElement>(".beat-select")?.focus(); };
+    cancel.addEventListener("click", close);
+    panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; });
+    panel.addEventListener("keydown", event => { if (event.key !== "Escape") return; event.preventDefault(); if (pending) return; if (panel.dataset.unsubmitted === "true") { actions.status("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } else close(); });
+    apply.addEventListener("click", () => {
+      if (pending || settling || composing) return;
+      const save = async (): Promise<boolean> => {
+        let locks: { control: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement; disabled: boolean }[] = [];
+        try {
+          const command = read(); pending = true; panel.dataset.unsubmitted = "true"; panel.setAttribute("aria-busy", "true");
+          locks = [...panel.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")].map(control => ({ control, disabled: control.disabled })); locks.forEach(({ control }) => { control.disabled = true; });
+          const saved = await mutate({ sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...command }, () => { selectedBeatId = undefined; }, expected, panel);
+          if (saved && focusId) { const row = [...host.querySelectorAll<HTMLElement>("[data-beat-id]")].find(item => item.dataset.beatId === focusId); row?.scrollIntoView?.({ block: "nearest" }); row?.querySelector<HTMLElement>(".beat-select")?.focus(); }
+          return saved;
+        } catch (error) { actions.status(friendlyError(error, "Check these details. Input retained."), "error"); return false; }
+        finally { pending = false; if (panel.isConnected) { panel.removeAttribute("aria-busy"); locks.forEach(({ control, disabled }) => { control.disabled = disabled; }); (panel.querySelector<HTMLElement>('[aria-invalid="true"]') ?? panel.querySelector<HTMLElement>("input,select,textarea"))?.focus(); } }
+      };
+      settling = save().finally(() => { settling = undefined; });
+    });
+    row.append(cancel, apply); panel.append(heading, breadcrumb, ...fields, row); dirtyDraft(panel, []); target.append(panel);
+    panel.querySelector<HTMLElement>("input,select,textarea")?.focus(); return panel;
+  };
+  const prepareOperation = (scene: SceneDocument, beat?: SceneBeat): HTMLElement | undefined => {
+    if (!draftGuard()) return;
+    selectedBeatId = undefined;
+    if (beat?.conditionalBranch) collapsedConditions.delete(beat.conditionalBranch.groupId);
+    let parent = beat ? beatBody(beat) : { type: "root" } as BodyRef;
+    while (parent.type === "branch") { const owner = parent; collapsedConditions.delete(owner.groupId); const header = scene.beats.find(item => item.id === owner.branchId); parent = header ? beatBody(header) : { type: "root" }; }
+    draw();
+    return beat ? [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id) : host.querySelector<HTMLElement>(".beats-list") ?? undefined;
+  };
+  const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
+    const panel = document.createElement("div"); panel.className = "story-destination";
+    const parents: { key: string; body: BodyRef; label: string }[] = [{ key: "root", body: { type: "root" }, label: bodyCaption(scene, { type: "root" }, model) }];
+    for (const branch of scene.beats.filter(beat => beat.conditionalBranch)) {
+      const body: BodyRef = { type: "branch", groupId: branch.conditionalBranch!.groupId, branchId: branch.id };
+      if (exclude?.conditionalBranch && insideCondition(scene, body, exclude.conditionalBranch.groupId)) continue;
+      parents.push({ key: branch.id, body, label: bodyCaption(scene, body, model) });
+    }
+    const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialBody.type === "root" ? "root" : initialBody.branchId); parent.setAttribute("aria-label", "Destination body");
+    const position = document.createElement("select"); position.setAttribute("aria-label", "Destination position");
+    const summary = document.createElement("p"); summary.className = "story-insertion";
+    let placements: { key: string; position: Position; label: string }[] = [];
+    const show = (): void => { summary.textContent = `Move to ${parents.find(item => item.key === parent.value)?.label ?? "Missing body"} · ${placements.find(item => item.key === position.value)?.label ?? "Choose a position"}`; };
+    const rebuild = (): void => {
+      const body = parents.find(item => item.key === parent.value)!.body;
+      const siblings = bodyNodes(scene, body).filter(beat => beat.id !== exclude?.id);
+      placements = siblings.filter(beat => (!beat.protected || !!beat.conditionalBranch) && (!exclude || !terminates(exclude, scene))).map(beat => ({ key: beat.id, position: { type: "before", anchor: nodeRef(beat) } as Position, label: `Before ${beat.conditionalBranch ? "Condition" : beatLabels[beat.payload.type]} · ${beatSummary(beat.payload, model)}` }));
+      if (!siblings.some(beat => terminates(beat, scene))) placements.push({ key: "end", position: { type: "end" }, label: "End of body" });
+      position.replaceChildren(...placements.map(item => { const option = document.createElement("option"); option.value = item.key; option.textContent = item.label; return option; }));
+      const preferred = defaultInsertion(scene, body); const match = placements.find(item => JSON.stringify(item.position) === JSON.stringify(preferred)); position.value = match?.key ?? placements[0]?.key ?? ""; show();
+    };
+    parent.addEventListener("change", rebuild); position.addEventListener("change", show); rebuild(); panel.append(labelled("Destination body", parent), labelled("Destination position", position), summary);
+    const validate = validateField(position, () => { if (!placements.some(item => item.key === position.value)) throw Error("Choose an available position in this body."); });
+    return { host: panel, read: () => { validate(); return { body: parents.find(item => item.key === parent.value)!.body, position: placements.find(item => item.key === position.value)!.position }; } };
+  };
+  const openConditionForm = (scene: SceneDocument, body: BodyRef, position: Position): void => {
+    const branch = body.type === "branch" ? scene.beats.find(beat => beat.id === body.branchId) : undefined;
+    const target = prepareOperation(scene, branch); if (!target) return;
+    const builder = buildConditionEditor(model.authoring.variables);
+    const otherwise = document.createElement("input"); otherwise.type = "checkbox"; otherwise.setAttribute("aria-label", "Include Otherwise");
+    const location = document.createElement("p"); location.className = "story-insertion";
+    const anchor = position.type === "before" ? position.anchor : undefined;
+    location.textContent = `Insert Condition in ${bodyCaption(scene, body, model)} · ${anchor ? `Before ${anchor.type === "condition" ? "Condition" : beatLabels[scene.beats.find(beat => beat.id === anchor.beatId)!.payload.type]}` : "End of body"}`;
+    operation(scene, target, "Add Condition", [location, builder.host, labelled("Include Otherwise", otherwise)], () => ({ type: "insertCondition", body, position, condition: builder.read(), otherwise: otherwise.checked }), "Create Condition");
+  };
+  const groupHeader = (scene: SceneDocument, groupId: string): SceneBeat => scene.beats.find(beat => beat.conditionalBranch?.groupId === groupId && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise)!;
+  const groupCount = (scene: SceneDocument, groupId: string): number => scene.beats.filter(beat => !beat.conditionalBranch && !beat.structuralPlaceholder && insideCondition(scene, beatBody(beat), groupId)).length;
+  const addBranchForm = (scene: SceneDocument, header: SceneBeat, otherwise: boolean): void => {
+    const target = prepareOperation(scene, header); if (!target) return;
+    const groupId = header.conditionalBranch!.groupId, expectedBody = beatBody(header);
+    const branches = scene.beats.filter(beat => beat.conditionalBranch?.groupId === groupId);
+    const builder = otherwise ? undefined : buildConditionEditor(model.authoring.variables);
+    const positions = branches.slice(1).map(branch => ({ value: branch.id, label: `Before ${branchCaption(branch.conditionalBranch!, model)}` }));
+    if (!branches.some(branch => branch.conditionalBranch!.otherwise)) positions.push({ value: "end", label: "After the last Else If" });
+    const position = selectOf(positions, branches.find(branch => branch.conditionalBranch!.otherwise)?.id ?? "end"); position.setAttribute("aria-label", "Branch position");
+    const info = document.createElement("p"); info.textContent = otherwise ? "Otherwise goes last and runs when no earlier branch matches." : "The first matching branch wins. Choose this Else If's position.";
+    const validate = validateField(position, () => { if (!positions.some(item => item.value === position.value)) throw Error("Choose a branch position."); });
+    operation(scene, target, otherwise ? "Add Otherwise" : "Add Else If", [info, ...(builder ? [builder.host, labelled("Branch position", position)] : [])], () => { if (builder) validate(); return { type: "addConditionBranch", groupId, expectedBody, beforeBranchId: otherwise || position.value === "end" ? null : position.value, condition: builder?.read() ?? null }; }, otherwise ? "Create Otherwise" : "Create Else If", header.id);
+  };
+  const renderConditionBranch = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat): void => {
+    const branch = beat.conditionalBranch!, header = groupHeader(scene, branch.groupId);
+    const note = document.createElement("p"); note.className = "story-breadcrumb"; note.textContent = `${bodyCaption(scene, { type: "branch", groupId: branch.groupId, branchId: beat.id }, model)} · Branch ${(branch.ordinal ?? 0) + 1}. First matching branch wins.`; card.append(note);
+    if (!branch.otherwise && branch.condition?.status === "supported") {
+      const builder = buildConditionEditor(model.authoring.variables, branch.condition);
+      operation(scene, card, branch.ordinal ? "Edit Else If" : "Edit Condition", [builder.host], () => ({ type: "updateConditionBranch", groupId: branch.groupId, branchId: beat.id, expectedBody: beatBody(header), condition: builder.read() }), "Apply condition", beat.id);
+    } else if (!branch.otherwise) { const source = button("View condition in Source"); source.disabled = !actions.viewSource; source.addEventListener("click", () => { if (draftGuard()) actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision); }); card.append(source); }
+    if (branch.ordinal || branch.otherwise) {
+      const remove = button("Delete branch"); remove.disabled = scene.sourceConflict;
+      remove.addEventListener("click", () => { const target = prepareOperation(scene, beat); if (!target) return; const copy = document.createElement("p"); copy.textContent = `Delete ${branchCaption(branch, model)} and its contained Beats. Other branches remain.`; operation(scene, target, "Delete branch", [copy], () => ({ type: "removeConditionBranch", groupId: branch.groupId, branchId: beat.id, expectedBody: beatBody(header) }), "Delete this branch", header.id); }); card.append(remove);
+    }
+  };
+  const moveNodeForm = (scene: SceneDocument, beat: SceneBeat): void => {
+    const target = prepareOperation(scene, beat); if (!target) return;
+    const destination = destinations(scene, beatBody(beat), beat);
+    const note = document.createElement("p"); note.textContent = beat.conditionalBranch ? "Moves the entire condition and every branch together." : "Moves this Beat to the chosen body and position.";
+    operation(scene, target, "Move story content", [note, destination.host], () => ({ type: "moveStoryNode", node: nodeRef(beat), expectedBody: beatBody(beat), ...destination.read() }), "Move to destination", beat.id);
+  };
+  const moveSibling = (scene: SceneDocument, beat: SceneBeat, direction: "up" | "down"): void => {
+    if (!draftGuard()) return;
+    const siblings = bodyNodes(scene, beatBody(beat)), index = siblings.findIndex(item => item.id === beat.id);
+    if (index < 0 || (direction === "up" ? index === 0 : index === siblings.length - 1)) return;
+    const anchor = direction === "up" ? siblings[index - 1] : siblings[index + 2];
+    const position: Position = anchor ? { type: "before", anchor: nodeRef(anchor) } : { type: "end" };
+    void mutate({ type: "moveStoryNode", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, node: nodeRef(beat), expectedBody: beatBody(beat), body: beatBody(beat), position }, () => { selectedBeatId = undefined; }).then(saved => { if (saved) [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id)?.querySelector<HTMLElement>(".beat-select")?.focus(); });
+  };
+  const removeNodeForm = (scene: SceneDocument, beat: SceneBeat): void => {
+    const target = prepareOperation(scene, beat); if (!target) return;
+    const copy = document.createElement("p"); copy.textContent = beat.conditionalBranch ? `Delete ${branchCaption(beat.conditionalBranch, model)} and all ${groupCount(scene, beat.conditionalBranch.groupId)} contained Beats. Use Unwrap to keep one selected branch instead.` : `Delete this ${beatLabels[beat.payload.type]} Beat. If its branch becomes empty, Source keeps pass.`;
+    operation(scene, target, beat.conditionalBranch ? "Delete entire condition" : "Delete Beat", [copy], () => ({ type: "removeStoryNode", node: nodeRef(beat), expectedBody: beatBody(beat) }), beat.conditionalBranch ? "Delete entire condition" : "Delete this Beat");
+  };
+  const unwrapForm = (scene: SceneDocument, header: SceneBeat): void => {
+    const target = prepareOperation(scene, header); if (!target) return;
+    const groupId = header.conditionalBranch!.groupId;
+    const branches = scene.beats.filter(beat => beat.conditionalBranch?.groupId === groupId);
+    const branch = selectOf(branches.map(item => ({ value: item.id, label: branchCaption(item.conditionalBranch!, model) })), branches[0]?.id); branch.setAttribute("aria-label", "Branch to keep");
+    const copy = document.createElement("p"); const show = (): void => { copy.textContent = `Keep only ${branches.find(item => item.id === branch.value)?.conditionalBranch ? branchCaption(branches.find(item => item.id === branch.value)!.conditionalBranch!, model) : "the selected branch"} in ${bodyCaption(scene, beatBody(header), model)}. Remove the condition and all other branches; their bodies are not combined.`; }; branch.addEventListener("change", show); show();
+    operation(scene, target, "Unwrap one branch", [labelled("Branch to keep", branch), copy], () => ({ type: "unwrapCondition", groupId, branchId: required(branch), expectedBody: beatBody(header) }), "Unwrap selected branch");
+  };
+
   const drawBeats = (scene: SceneDocument): void => {
     const header = document.createElement("header"); header.className = "scene-header";
     const titleBlock = document.createElement("div");
@@ -625,6 +836,8 @@ export function renderSceneAuthoring(
     const undo = button("Undo"); undo.disabled = !model.canUndo; undo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "undo" }); });
     const redo = button("Redo"); redo.disabled = !model.canRedo; redo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "redo" }); });
     const focus = button(writingFocus ? "Exit Writing focus" : "Writing focus");focus.ariaPressed=String(writingFocus);focus.addEventListener("click",()=>{writingFocus=!writingFocus;host.dataset.writingFocus=String(writingFocus);host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus",String(writingFocus));focus.textContent=writingFocus?"Exit Writing focus":"Writing focus";focus.ariaPressed=String(writingFocus);});
+    if (actions.caller && actions.viewScene) { const caller = button("Back to caller"); caller.addEventListener("click", () => { if (draftGuard()) actions.viewScene?.(actions.caller!); }); history.append(caller); }
+    if (focusedBranch) { const all = button("Show whole Scene"); all.addEventListener("click", () => { if (draftGuard()) { focusedBranch = undefined; draw(); } }); history.append(all); }
     history.append(viewSource, focus, undo, redo); header.append(titleBlock, history); host.append(header);
     if (scene.sourceConflict) {
       const conflict = document.createElement("section"); conflict.className = "state-banner error-state"; conflict.role = "alert";
@@ -649,6 +862,8 @@ export function renderSceneAuthoring(
     divider.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();adjust(allocation+(e.key==="ArrowUp"?-2:2),true);}});
     let dragging=false;divider.addEventListener("pointerdown",e=>{dragging=true;divider.setPointerCapture(e.pointerId);});divider.addEventListener("pointermove",e=>{if(dragging){const b=stack.getBoundingClientRect();adjust((e.clientY-b.top)/b.height*100);}});divider.addEventListener("pointerup",()=>{dragging=false;adjust(allocation,true);});divider.addEventListener("pointercancel",()=>{dragging=false;});stack.insertBefore(divider,beatsRegion);
     const tools = document.createElement("div"); tools.className = "beats-tools";tools.append(add);
+    const addCondition = button("Add Condition"); addCondition.disabled = scene.sourceConflict;
+    addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultInsertion(scene, { type: "root" }))); tools.append(addCondition);
     if (actions.assist) {
       const selected=scene.beats.find(b=>b.id===selectedBeatId);
       const assist=button("Assist · Rewrite dialogue");
@@ -723,29 +938,48 @@ export function renderSceneAuthoring(
       if (beat.conditionalBranch) card.classList.add("conditional-branch");
       const compact = document.createElement("div"); compact.className = "beat-compact";
       const select = button(`${index + 1}. ${beat.conditionalBranch ? branchCaption(beat.conditionalBranch, model) : beatLabels[beat.payload.type]}`, "beat-select"); select.ariaExpanded = String(selectedBeatId === beat.id);
-      const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beat.conditionalBranch ? "Read-only condition branch" : beatSummary(beat.payload, model);
-      select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();};if(!hasSceneDraft(host)&&!settling){selectBeat();return;}void settle().then(ok=>{if(ok)selectBeat();else actions.status("Complete or cancel the current edit before changing Beats.","error");});});
+      const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beat.structuralPlaceholder ? "Empty branch" : beat.conditionalBranch ? `Branch ${(beat.conditionalBranch.ordinal ?? 0) + 1} · first match wins` : beatSummary(beat.payload, model);
+      select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();[...host.querySelectorAll<HTMLElement>(".beat-card")].find(item=>item.dataset.beatId===beat.id)?.querySelector<HTMLElement>(".beat-select")?.focus();};if(!hasDraft()&&!settling&&!pendingWrites){selectBeat();return;}void settle().then(ok=>{if(ok)selectBeat();else actions.status("Complete or cancel the current edit before changing Beats.","error");});});
       const controls = document.createElement("div"); controls.className = "beat-controls";
-      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || !!beat.owner || beat.protected || previewLogicBoundary(beat) || !!scene.beats[index - 1]?.owner || scene.beats[index - 1]?.protected === true || (index > 0 && previewLogicBoundary(scene.beats[index - 1]!)) || scene.sourceConflict;
-      up.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "up" }));
-      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || !!beat.owner || beat.protected || previewLogicBoundary(beat) || !!scene.beats[index + 1]?.owner || scene.beats[index + 1]?.protected === true || (index < scene.beats.length - 1 && previewLogicBoundary(scene.beats[index + 1]!)) || scene.sourceConflict;
-      down.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "down" }));
-      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !!beat.owner || beat.protected || previewLogicBoundary(beat) || beat.payload.type === "return" || scene.sourceConflict;
-      remove.addEventListener("click", () => confirmAction(card, `Delete Beat ${index + 1}?`, () => mutate({ type: "removeBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id })));
+      const nodeEditable = !readOnlyLogic(beat) && !beat.structuralPlaceholder && (!beat.protected || !!beat.conditionalBranch && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise);
+      const siblings = bodyNodes(scene, beatBody(beat)); const ordinal = siblings.findIndex(item => item.id === beat.id);
+      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = !nodeEditable || ordinal <= 0 || terminates(beat, scene) || !!siblings[ordinal - 1]?.protected && !siblings[ordinal - 1]?.conditionalBranch || scene.sourceConflict;
+      up.addEventListener("click", () => moveSibling(scene, beat, "up"));
+      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = !nodeEditable || ordinal < 0 || ordinal === siblings.length - 1 || terminates(beat, scene) || !!siblings[ordinal + 1] && terminates(siblings[ordinal + 1]!, scene) || !!siblings[ordinal + 1]?.protected && !siblings[ordinal + 1]?.conditionalBranch || scene.sourceConflict;
+      down.addEventListener("click", () => moveSibling(scene, beat, "down"));
+      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !nodeEditable || beat.payload.type === "return" && !beat.owner || scene.sourceConflict;
+      remove.addEventListener("click", () => removeNodeForm(scene, beat));
+      const move = button("Move to…", "text-button"); move.disabled = !nodeEditable || scene.sourceConflict; move.addEventListener("click", () => moveNodeForm(scene, beat));
+      select.addEventListener("keydown", event => { if (event.altKey && ["ArrowUp", "ArrowDown"].includes(event.key)) { event.preventDefault(); const direction = event.key === "ArrowUp" ? "up" : "down"; if (!(direction === "up" ? up : down).disabled) moveSibling(scene, beat, direction); } });
       const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=!!beat.owner||beat.protected||previewLogicBoundary(beat)||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
       grip.addEventListener("lostpointercapture",e=>{if(drag?.pointerId===e.pointerId)cancelDrag();});
-      grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasSceneDraft(host)||settling){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
-      controls.append(up, down, remove); compact.append(grip,select, controls); card.append(compact);
+      grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasDraft()||settling){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
+      controls.append(up, down, remove, move); compact.append(grip,select, controls); card.append(compact);
       if (selectedBeatId === beat.id) renderExistingBeat(card, scene, beat, index);
       if (beat.conditionalBranch) {
         const branch = beat.conditionalBranch;
         let group = groupHosts.get(branch.groupId);
         if (!group) {
           group = document.createElement("section"); group.className = "story-condition-group"; group.dataset.conditionGroupId = branch.groupId;
+          let depth = 0, parent = beatBody(beat); while (parent.type === "branch" && depth < 16) { depth++; const owner = parent; const header = scene.beats.find(item => item.id === owner.branchId); parent = header ? beatBody(header) : { type: "root" }; }
+          if (depth >= 3) group.style.paddingInlineStart = "0";
+          const heading = document.createElement("div"); heading.className = "story-group-heading";
+          const selected = scene.beats.find(item => item.id === selectedBeatId);
+          if (selected && (selected.conditionalBranch?.groupId === branch.groupId || insideCondition(scene, beatBody(selected), branch.groupId))) group.classList.add("selected");
+          const caption = document.createElement("strong"); caption.textContent = `Condition · ${branch.condition ? conditionCaption(branch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === branch.groupId).length} branches / ${groupCount(scene, branch.groupId)} Beats${group.classList.contains("selected") ? " · Contains selection" : ""}`;
+          const collapse = button(collapsedConditions.has(branch.groupId) ? "Expand condition" : "Collapse condition"); collapse.setAttribute("aria-expanded", String(!collapsedConditions.has(branch.groupId))); collapse.dataset.collapseGroupId = branch.groupId;
+          collapse.addEventListener("click", () => { if (!draftGuard()) return; if (collapsedConditions.has(branch.groupId)) collapsedConditions.delete(branch.groupId); else collapsedConditions.add(branch.groupId); draw(); [...host.querySelectorAll<HTMLElement>("[data-collapse-group-id]")].find(item => item.dataset.collapseGroupId === branch.groupId)?.focus(); });
+          const elseif = button("Add Else If"); elseif.disabled = scene.sourceConflict; elseif.addEventListener("click", () => addBranchForm(scene, beat, false));
+          const otherwise = button("Add Otherwise"); otherwise.disabled = scene.sourceConflict || scene.beats.some(item => item.conditionalBranch?.groupId === branch.groupId && item.conditionalBranch.otherwise); otherwise.addEventListener("click", () => addBranchForm(scene, beat, true));
+          const unwrap = button("Unwrap…"); unwrap.disabled = scene.sourceConflict; unwrap.addEventListener("click", () => unwrapForm(scene, beat));
+          const remove = button("Delete condition"); remove.disabled = scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, beat));
+          heading.append(caption, collapse, elseif, otherwise, unwrap, remove);
+          const branches = document.createElement("div"); branches.className = "story-branches"; branches.hidden = collapsedConditions.has(branch.groupId); group.append(heading, branches);
           (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(group); groupHosts.set(branch.groupId, group);
+          const continuation = document.createElement("p"); continuation.className = "story-continuation"; continuation.textContent = "Continue after condition · reached by branches that fall through"; group.after(continuation);
         }
         const body = document.createElement("section"); body.className = "story-branch-body"; body.dataset.branchId = beat.id;
-        body.append(card); group.append(body); branchHosts.set(beat.id, body);
+        body.append(card); group.querySelector(".story-branches")!.append(body); branchHosts.set(beat.id, body);
         const addChild = button(`Add Beat to ${branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If"}`);
         addChild.disabled = scene.sourceConflict || branch.condition?.status === "unknown";
         addChild.addEventListener("click", () => {
@@ -753,9 +987,17 @@ export function renderSceneAuthoring(
           selectedBeatId = undefined; draw();
           const target = [...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node => node.dataset.branchId === beat.id);
           if (target) { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; renderNewBeat(target, scene, "dialogue", parent, defaultInsertion(scene, parent)); }
-        }); body.append(addChild);
+        });
+        const addCondition = button(`Add Condition to ${branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If"}`); addCondition.disabled = scene.sourceConflict;
+        addCondition.addEventListener("click", () => { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; openConditionForm(scene, parent, defaultInsertion(scene, parent)); });
+        const focus = button("Focus this branch", "text-button"); focus.addEventListener("click", () => { if (draftGuard()) { focusedBranch = beat.id; collapsedConditions.delete(branch.groupId); draw(); } });
+        body.append(addChild, addCondition, focus);
       } else (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(card);
     });
+    if (focusedBranch) {
+      const target = branchHosts.get(focusedBranch);
+      if (target) { for (const child of [...list.children]) if (!child.contains(target) && child !== target) (child as HTMLElement).hidden = true; for (const body of branchHosts.values()) if (body !== target && !body.contains(target) && !target.contains(body)) body.hidden = true; const breadcrumb = document.createElement("p"); breadcrumb.className = "story-breadcrumb"; const header = scene.beats.find(beat => beat.id === focusedBranch)!; breadcrumb.textContent = bodyCaption(scene, { type: "branch", groupId: header.conditionalBranch!.groupId, branchId: header.id }, model); list.prepend(breadcrumb); }
+    }
   };
 
   const renderExistingBeat = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat, index: number): void => {
@@ -776,6 +1018,8 @@ export function renderSceneAuthoring(
       const source = button("View in Source", "button secondary"); source.disabled = !actions.viewSource;
       source.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision)); panel.append(source); card.append(panel); return;
     }
+    if (beat.conditionalBranch) { renderConditionBranch(card, scene, beat); return; }
+    if (beat.structuralPlaceholder) { const empty = document.createElement("p"); empty.textContent = "Empty branch · source keeps pass until a Beat is added."; card.append(empty); return; }
     if (beat.protected) {
       const protectedPanel = document.createElement("div"); protectedPanel.className = "protected-code";
       const explanation = document.createElement("p"); explanation.textContent = beat.payload.type === "customCode" ? beat.payload.reason : "Protected source";
@@ -787,6 +1031,12 @@ export function renderSceneAuthoring(
     const editor = buildBeatEditor(model, beat.payload, true);
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     const parent = document.createElement("p"); parent.className = "story-breadcrumb"; parent.textContent = bodyCaption(scene, expectedBody, model); panel.prepend(parent);
+    if (beat.payload.type === "call") {
+      const called = model.scenes.find(item => beat.payload.type === "call" && item.id === beat.payload.sceneId);
+      const open = button("Open called Scene"); open.disabled = !actions.viewScene || !called || called.sourceConflict;
+      open.addEventListener("click", () => { if (called && draftGuard()) actions.viewScene?.({ sceneId: called.id, expectedSourceRevision: called.sourceRevision, caller: { sceneId: scene.id, beatId: beat.id, expectedSourceRevision: scene.sourceRevision, caller: actions.caller } }); });
+      const continuation = button("View Call continuation"); continuation.disabled = !actions.viewContinuation; continuation.addEventListener("click", () => { if (draftGuard()) actions.viewContinuation?.(scene.id, beat.id, scene.sourceRevision); }); panel.append(open, continuation);
+    }
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; });
     if (beat.payload.type === "choice") {
       const createDestination = button("Create New Scene", "button secondary");
@@ -805,7 +1055,7 @@ export function renderSceneAuthoring(
         const createNew = button("Create Scene and option", "button primary");
         createNew.addEventListener("click", () => {
           try {
-            void mutate({ type: "createSceneFromChoice", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, choiceBeatId: beat.id, optionText: requiredText(optionText, "Choice text"), chapterId: required(chapter), displayName: requiredText(sceneName, "Scene name") });
+            void mutate({ type: "createSceneFromChoice", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, choiceBeatId: beat.id, optionText: requiredText(optionText, "Choice text"), chapterId: required(chapter), displayName: requiredText(sceneName, "Scene name") }, undefined, captured, form);
           } catch (error) { actions.status(friendlyError(error, "New Scene details are invalid"), "error"); optionText.focus(); }
         });
         cancelNew.className="button secondary";
@@ -832,9 +1082,9 @@ export function renderSceneAuthoring(
           const oldIds = new Set(model.scenes.find((item) => item.id === scene.id)?.beats.map((item) => item.id));
           await mutate({ type: "continueDialogue", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, characterId: payload.characterId, text: payload.text }, (_before, next) => {
             saved=true;selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => item.payload.type === "dialogue" && !oldIds.has(item.id))?.id;
-          }, captured);
+          }, captured, panel);
         } else {
-          await mutate({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, expectedBody, beat: payload }, () => { saved=true;selectedBeatId = undefined; }, captured);
+          await mutate({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, expectedBody, beat: payload }, () => { saved=true;selectedBeatId = undefined; }, captured, panel);
         }
       } catch (error) {
         actions.status(friendlyError(error, `Beat ${index + 1} is invalid`), "error");
@@ -885,7 +1135,7 @@ export function renderSceneAuthoring(
           selectedBeatId = undefined;
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
           insertedId=next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
-        }, captured);
+        }, captured, panel);
         if(saved&&insertedId){const row=[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===insertedId);row?.scrollIntoView?.({block:"nearest"});row?.querySelector<HTMLElement>(".beat-select")?.focus({preventScroll:true});}
         if(!saved&&panel.isConnected){locks.forEach(({control,disabled})=>{control.disabled=disabled;});editor.focus();}
       } catch (error) {

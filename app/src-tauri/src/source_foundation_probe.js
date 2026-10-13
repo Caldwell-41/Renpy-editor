@@ -22,7 +22,7 @@
     check(children.length === 2 && children[0].owner.groupId === children[1].owner.groupId && children[0].owner.branchId !== children[1].owner.branchId, 'Two dialogue children have one group and distinct branches');
     check(original.hasBom && original.text.includes('\r\n') && original.text.includes('café 雪'), 'BOM, mixed newlines and Unicode fixture observed');
     const card = () => [...document.querySelectorAll('.beat-card')].find(c => c.dataset.beatId === children[0].id);
-    check(card().querySelector('.beat-grip').disabled && [...card().querySelectorAll('.beat-controls button')].every(b => b.disabled), 'Child structural operations disabled');
+    check(card().querySelector('.beat-grip').disabled && [...card().querySelectorAll('.beat-controls button')].some(b => b.textContent === 'Move to…' && !b.disabled), 'Child drag stays unavailable; explicit body moves are offered');
     card().querySelector('.beat-select').click();
     await wait(() => card().querySelector('textarea'));
     details.stage = 'commit-child';

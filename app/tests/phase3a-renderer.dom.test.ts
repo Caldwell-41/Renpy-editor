@@ -102,14 +102,15 @@ test("mapped Story source revision is forwarded through main and retained by Sou
   controller.dispose(); await browser.happyDOM.close();
 });
 
-test("ordinary neighbors cannot move through read-only Call and guarded Choice rows", async () => {
+test("ordinary neighbors use explicit immediate-sibling moves around Call and Choice rows", async () => {
   const { browser, host, tree } = setup();
   const first: SceneBeat = { id: "before", byteStart: 0, byteEnd: 40, protected: false, payload: { type: "narration", text: "Before" } };
   const after: SceneBeat = { id: "after", byteStart: 180, byteEnd: 210, protected: false, payload: { type: "narration", text: "After" } };
-  let writes = 0;
-  const dispose = renderSceneAuthoring(host, tree, model([first, call, choice, after]), { apply: async () => { writes++; throw Error("Unexpected move"); }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 } });
-  const down = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 1 down")!; const up = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 4 up")!;
-  assert.equal(down.disabled, true); assert.equal(up.disabled, true); down.click(); up.click(); assert.equal(writes, 0);
+  const commands: unknown[] = []; const workspace = model([first, call, choice, after]);
+  const dispose = renderSceneAuthoring(host, tree, workspace, { apply: async command => { commands.push(command); return workspace; }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 } });
+  const down = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 1 down")!; assert.equal(down.disabled, false); down.click(); await tick();
+  const up = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 4 up")!; assert.equal(up.disabled, false); up.click(); await tick();
+  assert.deepEqual(commands, [{ type: "moveStoryNode", sceneId: "one", expectedSourceRevision: "saved", node: { type: "beat", beatId: "before" }, expectedBody: { type: "root" }, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "choice" } } }, { type: "moveStoryNode", sceneId: "one", expectedSourceRevision: "saved", node: { type: "beat", beatId: "after" }, expectedBody: { type: "root" }, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "choice" } } }]);
   dispose(); await browser.happyDOM.close();
 });
 

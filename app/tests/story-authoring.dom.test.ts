@@ -50,7 +50,7 @@ test("guarded Choice validates exact integer at blur/submission; IME and failed 
   value.dispatchEvent(new Event("blur")); assert.equal(value.getAttribute("aria-invalid"), "true"); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0); assert.equal(value.value, "9223372036854775808"); assert.equal(document.activeElement, value);
   value.dispatchEvent(new Event("compositionstart", { bubbles: true })); value.value = "9223372036854775807"; value.dispatchEvent(new Event("input", { bubbles: true })); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0);
   value.dispatchEvent(new Event("compositionend", { bubbles: true })); value.dispatchEvent(new Event("blur")); assert.equal(value.hasAttribute("aria-invalid"), false); click(s.host, "Commit Beat"); await tick();
-  const payload = writes[0]!.beat as {options:{condition:{expression:{right:{value:string}}}}[]}; assert.equal(payload.options[0]!.condition.expression.right.value, "9223372036854775807"); assert.ok(value.isConnected && !value.disabled && hasSceneDraft(s.host));
+  const payload = writes[0]!.beat as {options:{condition:{expression:{operator:string;right:{value:string}}}}[]}; assert.equal(payload.options[0]!.condition.expression.right.value, "9223372036854775807"); assert.equal(payload.options[0]!.condition.expression.operator, "greaterEqual"); assert.ok(value.isConnected && !value.disabled && hasSceneDraft(s.host));
   await s.close();
 });
 
@@ -58,7 +58,7 @@ test("explicit branch insertion preserves body, before-terminator position, and 
   const header: SceneBeat = { id: "if", byteStart: 0, byteEnd: 10, protected: true, conditionalBranch: { groupId: "group", ordinal: 0, otherwise: false, condition: guard }, payload: { type: "customCode", source: "if trust >= 5:", reason: "Condition" } };
   const nestedEnd = { ...ending, id: "nested-end", owner: { groupId: "group", branchId: "if" } };
   const writes: SceneCommand[] = []; const s = setup([header, nestedEnd, ending], async command => { writes.push(command); throw Error("Source changed"); });
-  click(s.host, "Add Beat to If"); assert.match(s.host.querySelector('.story-insertion')!.textContent!, /Arrival \/ Condition \/ If.*Before Return/);
+  click(s.host, "Add Beat to If"); assert.match(s.host.querySelector('.story-insertion')!.textContent!, /Arrival \/ If.*Before Return/);
   const type = s.host.querySelector<HTMLSelectElement>('.new-beat > .field select')!; type.value = "narration"; type.dispatchEvent(new Event("change"));
   const text = s.host.querySelector<HTMLTextAreaElement>('.new-beat textarea')!; text.value = "Retained narration"; text.dispatchEvent(new Event("input"));
   type.value = "call"; type.dispatchEvent(new Event("change")); type.value = "narration"; type.dispatchEvent(new Event("change")); assert.equal(s.host.querySelector<HTMLTextAreaElement>('.new-beat textarea')!.value, "Retained narration");

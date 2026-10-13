@@ -92,7 +92,8 @@ test("nested child commits carry owner and retain input on stale/session refusal
   let card = document.querySelector<HTMLElement>('[data-beat-id="child"]')!;
   assert.ok(card.classList.contains("nested-dialogue"));
   assert.equal(document.querySelectorAll(".conditional-branch").length, 2);
-  assert.ok([...card.querySelectorAll<HTMLButtonElement>(".beat-controls button,.beat-grip")].every(b=>b.disabled));
+  assert.ok(card.querySelector<HTMLButtonElement>(".beat-grip")!.disabled);
+  assert.ok([...card.querySelectorAll<HTMLButtonElement>(".beat-controls button")].some(button => button.textContent === "Move to…" && !button.disabled));
   card.querySelector<HTMLButtonElement>(".beat-select")!.click();
   card = document.querySelector<HTMLElement>('[data-beat-id="child"]')!;
   const text = card.querySelector<HTMLTextAreaElement>("textarea")!;
@@ -137,7 +138,7 @@ test("root controls respect nested children and conditional insertion boundaries
   try {
     const root = host.querySelector<HTMLElement>('[data-beat-id="root-one"]')!;
     const controls = root.querySelectorAll<HTMLButtonElement>(".beat-controls button");
-    assert.equal(controls[0]!.disabled, true, "root cannot move above an Otherwise child");
+    assert.equal(controls[0]!.disabled, false, "root moves over the whole condition as one immediate sibling");
     assert.equal(controls[1]!.disabled, false, "root-to-root move stays available");
     const grip = root.querySelector<HTMLButtonElement>(".beat-grip")!;
     const child = host.querySelector<HTMLElement>('[data-beat-id="other"]')!;
@@ -254,7 +255,7 @@ test("failed Beat validation preserves the draft and restores focus", async () =
   click("Commit Beat"); await tick();
   assert.equal(document.querySelector<HTMLTextAreaElement>("textarea")?.value, "Unsaved words");
   assert.equal(document.activeElement, document.querySelector(".expanded-beat select"));
-  assert.equal(status, "Source revision changed");
+  assert.match(status, /^Source revision changed Input retained\..*edit it in Source\.$/);
 });
 
 test("preview reconstruction is Beat-local, provenance-aware, and truthful after Custom Code", () => {
@@ -417,7 +418,7 @@ test("new Beat waits for its receipt, restores failure input, and focuses the sa
  const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,model,{status:text=>status=text,resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>{calls++;if(fail)throw Error('Source changed');return receipt.promise;}});
  click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;const type=form.querySelector<HTMLSelectElement>('select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
  const confirm=[...form.querySelectorAll('button')].find(b=>b.textContent==='Add Beat')!;const cancel=[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!;
- confirm.click();await tick();assert.equal(status,'Source changed');assert.equal(confirm.disabled,false);assert.equal(text.value,'Keep this text');
+ confirm.click();await tick();assert.match(status,/^Source changed Input retained\..*edit it in Source\.$/);assert.equal(confirm.disabled,false);assert.equal(text.value,'Keep this text');
  fail=false;confirm.click();confirm.click();cancel.click();assert.equal(calls,2);assert.equal(confirm.disabled,true);assert.equal(cancel.disabled,true);assert.equal(form.isConnected,true);
  const next=structuredClone(model);const beats=[...next.scenes[0]!.beats];beats.splice(1,0,{id:'added',byteStart:35,byteEnd:40,protected:false,payload:{type:'narration',text:'Keep this text'}});receipt.resolve({...next,scenes:next.scenes.map((scene,i)=>i?scene:{...scene,beats})});await tick();
  const row=host.querySelector<HTMLElement>('[data-beat-id="added"]')!;assert.ok(row);assert.equal(document.activeElement,row.querySelector('.beat-select'));assert.equal(row.querySelector('.expanded-beat'),null);assert.equal(host.querySelector('.new-beat'),null);assert.equal(status,'Saved');dispose();await browser.happyDOM.close();

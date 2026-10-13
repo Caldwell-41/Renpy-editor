@@ -52,7 +52,7 @@ interface AuthoringMetadata { schemaVersion: number; projectId: string; characte
 interface ImportChoice { authorityId: string; displayName: string; byteCount: number; extension: string; cancelled?: boolean }
 type ProjectSurface = "story" | "source" | "branches" | "characters" | "lorebook" | "assets" | "variables";
 type PersistenceStatus = "saved" | "pendingValidation" | "conflict" | "recoveryRequired";
-interface SceneTarget { readonly sceneId: string; readonly beatId: string; readonly expectedSourceRevision?: string }
+type SceneTarget = import("./scene-ui.ts").StoryTarget;
 type ProjectTarget = SourceTarget | SceneTarget;
 
 const rootElement = document.querySelector<HTMLDivElement>("#app");
@@ -493,7 +493,8 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
       layoutKey,
       load: (refresh) => projectValue<FlowWorkspace>(project, "flow.list", { refresh }),
       source: (location) => { void requestProjectNavigation(project, "source", location ? { path: location.path, byteStart: location.byteStart, byteEnd: location.byteEnd, expectedRevision: location.revision } : undefined); },
-      scene: (node, edge) => { void requestProjectNavigation(project, "story", { sceneId: node.sceneId, beatId: edge?.beatId ?? "", expectedSourceRevision: node.location?.revision }); },
+      scene: (node, edge) => { void requestProjectNavigation(project, "story", { sceneId: node.sceneId, beatId: edge?.beatId ?? "", expectedSourceRevision: edge?.location.revision ?? node.location?.revision }); },
+      body: body => { if (!body.location) { setStatus("This body has no current mapped Source location. Refresh Branches or open Source.", "error"); return; } void requestProjectNavigation(project, "story", { sceneId: body.sceneId, beatId: body.beatId ?? body.owner?.branchId, body: body.owner ? { type: "branch", ...body.owner } : { type: "root" }, expectedSourceRevision: body.location.revision }); },
       status: setStatus,
     });
     void refreshPersistenceStatus(project, generation);
@@ -591,7 +592,10 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     if (target?.expectedSourceRevision) {
       const scene = model.scenes.find((item) => item.id === target.sceneId);
-      if (!scene || scene.sourceConflict || scene.sourceRevision !== target.expectedSourceRevision || (target.beatId && !scene.beats.some((beat) => beat.id === target.beatId))) {
+      const mapped = scene?.beats.find(beat => beat.id === (target.beatId || (target.body?.type === "branch" ? target.body.branchId : "")));
+      const body = target.body;
+      const bodyMatches = !body || (body.type === "root" ? !mapped?.owner : (mapped?.owner?.groupId === body.groupId && mapped.owner.branchId === body.branchId) || (mapped?.id === body.branchId && mapped.conditionalBranch?.groupId === body.groupId));
+      if (!scene || scene.sourceConflict || scene.sourceRevision !== target.expectedSourceRevision || (target.beatId && !mapped) || !bodyMatches) {
         setStatus("The mapped origin changed. Return to Branches and refresh the selection.", "error");
         const back = button("Return to Branches"); back.addEventListener("click", () => { void requestProjectNavigation(project, "branches"); }); workspace.append(back);
         return;
@@ -603,6 +607,20 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
     }
     disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
       current: () => generation === viewGeneration && currentProject?.sessionId === project.sessionId,
+      caller: target?.caller,
+      viewScene: next => { void requestProjectNavigation(project, "story", next); },
+      viewContinuation: (sceneId, beatId, expectedSourceRevision) => {
+        void (async () => {
+          try {
+            const flow = await projectValue<FlowWorkspace>(project, "flow.list", { refresh: false });
+            if (generation !== viewGeneration || currentProject?.sessionId !== project.sessionId) return;
+            const edge = flow.edges.find(edge => edge.sceneId === sceneId && edge.beatId === beatId && edge.kind === "call");
+            const body = edge?.continuation;
+            if (flow.stale || edge?.location.revision !== expectedSourceRevision || !body?.location) { setStatus("The Call continuation has no current mapped location. Refresh Branches or open Source.", "error"); return; }
+            await requestProjectNavigation(project, "story", { sceneId: body.sceneId, beatId: body.beatId ?? body.owner?.branchId, body: body.owner ? { type: "branch", ...body.owner } : { type: "root" }, expectedSourceRevision: body.location.revision, caller: target?.caller });
+          } catch (error) { if (generation === viewGeneration && currentProject?.sessionId === project.sessionId) setStatus(message(error, "Call continuation could not be read"), "error"); }
+        })();
+      },
       assist: (sceneId,beatId,action="rewriteDialogue") => {
         if (rewriteController?.busy()) { setStatus("Finish or cancel the current Assist operation first.","error"); return; }
         if (rewriteController?.hasWork() && !window.confirm("Discard the unfinished Assist task/proposal and select this Beat?")) return;
@@ -649,7 +667,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
           });
         } finally { finishAuthoringCompletion(operationToken); }
       },
-    }, target?.beatId);
+    }, target?.beatId || (target?.body?.type === "branch" ? target.body.branchId : undefined));
     setStatus(persistence === "pendingValidation" ? "Unsaved Source draft" : persistence === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : "Saved", persistence === "conflict" ? "error" : "normal");
   } catch (error) {
     if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");

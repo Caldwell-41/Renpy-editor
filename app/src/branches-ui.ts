@@ -12,6 +12,7 @@ export interface BranchesActions {
   readonly load: (refresh: boolean) => Promise<FlowWorkspace>;
   readonly source: (location?: FlowLocation) => void;
   readonly scene: (node: FlowNode, edge?: FlowEdge) => void;
+  readonly body?: (body: FlowBody) => void;
   readonly status: (message: string, kind?: "normal" | "error") => void;
 }
 export interface Point { readonly x: number; readonly y: number }
@@ -92,15 +93,16 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
     const edge = routes.find((item) => item.id === selectedEdge);
     const editable = edge?.editable && ["choice", "jump"].includes(edge.kind) && !edge.condition && !edge.guardPath?.length && !edge.continuation && edge.destination.kind !== "body";
     const stale = Boolean(model?.stale || node.stale);
-    const openScene = button(editable ? "Edit Choice / Jump" : "Open Scene", () => { void navigate(() => actions.scene(node, editable ? edge : undefined)); }); openScene.disabled = stale || !node.location; details.append(openScene);
+    const openScene = button(editable ? "Edit Choice / Jump" : "Open Scene", () => { void navigate(() => actions.scene(node, edge)); }); openScene.disabled = stale || !node.location; details.append(openScene);
     const sourceLink = (label: string, location: FlowLocation | null | undefined): void => {
       const source = button(label, () => { if (location) navigate(() => actions.source(location)); }); source.disabled = stale || !location; details.append(source);
     };
     if (edge || node.location) sourceLink("View origin in Source", edge?.location ?? node.location);
     if (edge?.destination.kind === "resolved") { const id = edge.destination.sceneId; const destination = model?.nodes.find((item) => item.sceneId === id); if (destination) { const open = button("Open destination", () => { void navigate(() => actions.scene(destination)); }); open.disabled = stale || destination.stale || !destination.location; details.append(open); } }
     if (edge?.destination.kind === "unknown" && edge.destination.location) sourceLink("View unmapped destination", edge.destination.location);
-    if (edge?.destination.kind === "body") sourceLink("View destination body in Source", edge.destination.location);
-    if (edge?.continuation) sourceLink("View continuation in Source", edge.continuation.location);
+    const storyBody = (label: string, body: FlowBody): void => { const open = button(label, () => { if (actions.body) navigate(() => actions.body!(body)); }); open.disabled = stale || !actions.body || !body.location; details.append(open); };
+    if (edge?.destination.kind === "body") { sourceLink("View destination body in Source", edge.destination.location); storyBody("Open destination body in Story", edge.destination); }
+    if (edge?.continuation) { sourceLink("View continuation in Source", edge.continuation.location); storyBody("Open continuation in Story", edge.continuation); }
     if (edge) {
       const text = document.createElement("p"); text.textContent = edge.destination.kind === "missing" ? `Missing label: ${edge.destination.label}` : edge.destination.kind === "unknown" ? "Unresolved / custom flow. This graph does not prove every route."
         : edge.kind === "call" ? "Call Scene returns to its continuation. This graph does not execute the called Scene." : edge.destination.kind === "terminal" ? "Return / End has no destination edge." : edge.destination.kind === "body" ? "Possible flow within this Scene. Open its exact source body to inspect." : editable ? "Use the existing Scene controls to change or create a destination." : "Read-only observed flow. Open Source to inspect.";
