@@ -1,7 +1,8 @@
 # Current status
 
 **Updated:** 2026-10-14. **Phase 2: PAUSED — INCOMPLETE. Phase 3A: ACTIVE — INCOMPLETE.**
-One agent owns Phase3A; no subagents or CI polling. Reviewed pushes to
+One agent implements Phase3A; the user allowed one independent review-only agent.
+No implementation delegation or CI polling. Reviewed pushes to
 `codex/phase3a-story-logic` are authorized; no merge/release. Existing independent
 reviews are reused for unchanged inputs; the user accepted clearly labelled self-review
 and cumulative local/renderer caps14. All earlier failures/usage remain retained.
@@ -24,20 +25,17 @@ old201 receipts are unchanged. Rust/preflight/frontend evidence was reused only 
 exact dependency/binary/output hashes. Detailed receipts belong in the
 [latest task continuation](../tasks/active/phase-3-initial-wysiwyg-release.md#approved-cumulative-cap14-and-self-review--2026-10-14).
 
-Cumulative usage: **core16/18, local10/14, renderer11/14, pairedCI3/3**. Local SDK,
-owner native starts, packages, credentials and live model calls stay zero. Reviewed candidate `9a6dbcd` is published and Git-verified.
-[CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
-attempt1/ordinal3/exact9a6dbcd, is audited **failed** on both hosts. Both passed core30,
-renderer51 and all ten production controller cases/two processes. SDK setup stopped
-on a harness BOM assertion while importing generated scaffolding, before compile/lint
-or any runtime case; final saved-callee proof is missing. A narrow import conversion
-and extended zero-SDK preflight are self-reviewed and ready for authorized local11.
-Paired allowance3/3 is exhausted; no retry/CI4 dispatch without a budget decision.
-No polling/watchers. See the
-[terminal audit and correction](../tasks/active/phase-3-initial-wysiwyg-release.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14).
-[HANDOVER](HANDOVER.md) owns recovery; the separate
-[Phase2 pause backlog](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13)
-remains untouched. Phase3A completion still awaits required CI3 evidence.
+Cumulative usage: **core16/18, local11/14, renderer11/14, pairedCI3/5**. Local SDK,
+owner native starts, packages, credentials and live calls stay zero. CI3 on published
+`9a6dbcd` is audited failed: both hosts pass core30/renderer51/ten controller cases,
+but SDK setup stopped on a harness import-BOM assertion before compile/lint/runtime.
+Local11 passes the narrow fix/preflight. The user authorized two additional paired
+runs and one review-only independent agent. Complete workflow corrections have no
+remaining supported static-review blocker; local12 checks and actual both-host saved-
+callee/caller-edit/load-return proof remain outstanding. Reviewed fixes are local-only.
+See [whole-workflow audit](../tasks/active/phase-3-initial-wysiwyg-release.md#whole-workflow-audit-independent-review-and-ci-cap5--2026-10-14).
+[HANDOVER](HANDOVER.md) owns recovery. No polling/watchers or automatic retries.
+Phase3A remains incomplete; the separate Phase2 pause remains untouched.
 
 | Capability | Evidence | Disposition |
 | --- | --- | --- |

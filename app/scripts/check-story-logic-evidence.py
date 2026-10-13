@@ -188,7 +188,7 @@ def sdk_ok(text):
     if len(terminals) != 1:
         raise ValueError('exact terminal report required')
     terminal = terminals[0]
-    for key in ('passed', 'cleanupComplete', 'metadataAbsent', 'acceptedSourceUnchanged', 'savedCallee', 'safeEditQualified', 'loadedReturn', 'structuralConditionQualified'):
+    for key in ('passed', 'cleanupComplete', 'metadataAbsent', 'acceptedSourceUnchanged', 'savedCallee', 'safeEditQualified', 'loadedReturn', 'structuralConditionQualified', 'storageIsolated'):
         if terminal.get(key) is not True:
             raise ValueError('terminal success/cleanup/source guarantees missing: ' + key)
     for key, count in (('sdkInstalls', 1), ('guiGenerations', 1), ('compileCommands', 1), ('lintCommands', 1), ('runtimeCases', len(CASES)), ('versionChecks', 2), ('guiImageCommands', 1), ('adapterSpawns', 12)):
@@ -228,7 +228,11 @@ def sdk_ok(text):
             or condition.get('expectedBody') != {'type': 'root'} or condition.get('bomPreserved') is not True
             or condition.get('allOtherBytesPreserved') is not True):
         raise ValueError('actual structural header emitter proof required')
-    return {'cases': cases, 'terminal': terminal, 'save': save, 'safeEdit': edit, 'load': load, 'structuralCondition': condition}
+    storage = records(text, 'phase-3a-sdk-storage: ')
+    if [r.get('case') for r in storage] != list(CASES) or any(
+            r.get('savedirIsolated') is not True or r.get('tokensIsolated') is not True for r in storage):
+        raise ValueError('exact six actual isolated save/token storage witnesses required')
+    return {'cases': cases, 'terminal': terminal, 'save': save, 'safeEdit': edit, 'load': load, 'structuralCondition': condition, 'storage': storage}
 
 
 def one_record(text, prefix):
@@ -267,11 +271,42 @@ def sdk_artifacts_ok(directory, report):
     for source, label in ((before, edit['entryReturnLabel']), (after, edit['entryReturnLabel']), (callee, edit['calleeReturnLabel'])):
         if source.count((' from ' + label).encode()) != 1:
             raise ValueError('stable return label missing or duplicated in accepted bytes')
+    baseline_digests = json.loads((directory / (CASES[0] + '-source-digests.json')).read_text(encoding='utf-8'))
+    if len(baseline_digests) != 11 or hashlib.sha256(callee).hexdigest() not in baseline_digests.values():
+        raise ValueError('complete eleven-file accepted source set and callee digest required')
     for case in CASES:
         digests = json.loads((directory / (case + '-source-digests.json')).read_text(encoding='utf-8'))
+        if set(digests) != set(baseline_digests) or any(
+                not isinstance(v, str) or not re.fullmatch('[a-f0-9]{64}', v) for v in digests.values()):
+            raise ValueError('complete stable accepted source-file set required in every runtime case')
+        if any(digests[p] != baseline_digests[p] for p in digests if p not in (edit['path'], 'game/definitions/variables.rpy')):
+            raise ValueError('runtime case changed a source outside caller/defaults')
         entry = after if case in ('nested-call-return', 'reject-wrong-outcome') else before
         if digests.get(edit['path']) != hashlib.sha256(entry).hexdigest():
             raise ValueError('runtime case must seal its current accepted caller snapshot')
+        storage = json.loads((directory / (case + '-storage.json')).read_text(encoding='utf-8'))
+        if storage != next(r for r in report['storage'] if r['case'] == case):
+            raise ValueError('storage witness file/log mismatch')
+        process = json.loads((directory / (case + '-process.json')).read_text(encoding='utf-8'))
+        outcome = next(r for r in report['cases'] if r['case'] == case)
+        if (process.get('case') != case or type(process.get('exitCode')) is not int or process.get('exitCode') != outcome['exitCode']
+                or process.get('timedOut') is not False or process.get('outputLimited') is not False
+                or process.get('outputSHA256') != hashlib.sha256((directory / (case + '.log')).read_bytes()).hexdigest()):
+            raise ValueError('retained raw runtime output/process receipt mismatch')
+    for name in ('gui', 'screens', 'options'):
+        imported = (directory / 'scaffold-inputs' / (name + '.rpy')).read_bytes()
+        body = imported.removeprefix(b'\xef\xbb\xbf')
+        receipt = json.loads((directory / 'scaffold-inputs' / (name + '.json')).read_text(encoding='utf-8'))
+        if (body.startswith(b'\xef\xbb\xbf') or receipt.get('passed') is not True
+                or receipt.get('bodyBytesPreserved') is not True or receipt.get('destinationHasBom') is not False
+                or receipt.get('importHasBom') is not imported.startswith(b'\xef\xbb\xbf')
+                or receipt.get('path') != 'game/' + name + '.rpy' or receipt.get('operation') != 'source.save'
+                or receipt.get('importSHA256') != hashlib.sha256(imported).hexdigest()
+                or receipt.get('beforeSHA256') != hashlib.sha256(b'').hexdigest()
+                or receipt.get('afterSHA256') != hashlib.sha256(body).hexdigest()):
+            raise ValueError('SDK scaffold input/encoding/body receipt mismatch')
+        if baseline_digests.get('game/' + name + '.rpy') != receipt['afterSHA256']:
+            raise ValueError('runtime source set must consume the exact imported SDK scaffold body')
     for path in directory.rglob('*'):
         if path.is_file() and (path.suffix not in ('.rpy', '.json', '.log') or any(
                 part.lower() in ('saves', "ren'py data", 'savetoken') for part in path.relative_to(directory).parts)):

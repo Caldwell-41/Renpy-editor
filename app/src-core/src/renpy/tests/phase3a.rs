@@ -19,6 +19,7 @@ struct Counts {
     safe_edit_qualified: bool,
     loaded_return: bool,
     structural_condition_qualified: bool,
+    storage_isolated: bool,
 }
 
 #[test]
@@ -45,7 +46,8 @@ fn phase3a_conditions_calls_sdk_gate() {
             "acceptedSourceUnchanged": counts.source_unchanged,
             "savedCallee": counts.saved_callee, "safeEditQualified": counts.safe_edit_qualified,
             "loadedReturn": counts.loaded_return,
-            "structuralConditionQualified": counts.structural_condition_qualified
+            "structuralConditionQualified": counts.structural_condition_qualified,
+            "storageIsolated": counts.storage_isolated
         })
     );
     if let Err(error) = result {
@@ -534,6 +536,51 @@ fn validated_save_receipt(output: &str) -> Value {
     receipt
 }
 
+fn validated_load_receipt(output: &str, saved: &Value) -> Value {
+    let receipts = output.lines().filter_map(|line| line.strip_prefix("PHASE3A_LOADED "))
+        .map(|line| serde_json::from_str::<Value>(line).unwrap()).collect::<Vec<_>>();
+    assert_eq!(receipts.len(), 1, "one actual loaded-return receipt required");
+    let loaded = receipts.into_iter().next().unwrap();
+    for key in ["slot", "flag", "trust", "precision", "mood"] { assert_eq!(loaded[key], saved[key]); }
+    assert_eq!(loaded["savedCalleeDepth"], saved["calleeDepth"]);
+    assert_eq!(loaded["baseDepth"], saved["baseDepth"]);
+    assert_eq!(loaded["returnedDepth"], saved["baseDepth"]);
+    assert_eq!(loaded["editedContinuation"], "Caller safely edited");
+    loaded
+}
+
+fn isolated_runtime_driver(driver: String, name: &str, saves: &Path, tokens: &Path) -> String {
+    let boundary = "        assert screen \"main_menu\" timeout 10\n";
+    assert_eq!(driver.matches(boundary).count(), 1);
+    let saves = serde_json::to_string(&saves.to_string_lossy()).unwrap();
+    let tokens = serde_json::to_string(&tokens.to_string_lossy()).unwrap();
+    let checks = format!("{boundary}        assert eval (os.path.samefile(renpy.config.savedir, {saves})) timeout 10\n        assert eval (renpy.savetoken.token_dir is not None and os.path.samefile(renpy.savetoken.token_dir, {tokens})) timeout 10\n        $ print(\"PHASE3A_STORAGE \" + __import__(\"json\").dumps(dict(case={name:?}, savedirIsolated=True, tokensIsolated=True)), flush=True)\n");
+    driver.replacen(boundary, &checks, 1)
+}
+
+fn retain_runtime_result(evidence: Option<&Path>, name: &str, result: &ProcessResult) {
+    if let Some(path) = evidence {
+        fs::write(path.join(format!("{name}.log")), &result.output).unwrap();
+        let receipt = json!({"case":name,"exitCode":result.exit_code,"timedOut":result.timed_out,
+            "outputLimited":result.output_limited,"outputSHA256":format!("{:x}",Sha256::digest(result.output.as_bytes()))});
+        fs::write(path.join(format!("{name}-process.json")), serde_json::to_vec_pretty(&receipt).unwrap()).unwrap();
+    }
+}
+
+fn sdk_setup<T>(stage: &str, result: Result<T, RenpyError>, evidence: Option<&Path>) -> T {
+    match result {
+        Ok(value) => value,
+        Err(error) => {
+            if let Some(path) = evidence {
+                // Production setup APIs return typed errors, not their raw child output.
+                let receipt = json!({"stage":stage,"error":format!("{error:?}"),"rawProcessOutputAvailable":false});
+                fs::write(path.join("setup-failure.json"), serde_json::to_vec_pretty(&receipt).unwrap()).unwrap();
+            }
+            panic!("SDK setup {stage}: {error:?}")
+        }
+    }
+}
+
 fn saved_runtime_driver(receipt: &Value) -> String {
     // Literal expectations are validated before editing Source; never assign loaded state.
     let base = receipt["baseDepth"].as_u64().unwrap();
@@ -715,6 +762,30 @@ fn phase3a_sdk_fixture_source_save_preserves_bom() {
     assert!(load_driver.contains("Caller safely edited"));
     assert!(!load_driver.contains("click \"Start\""));
     assert!(!load_driver.contains("$ flag ="));
+    let loaded = format!("PHASE3A_LOADED {}\n", json!({"slot":"phase3a-callee","flag":true,
+        "trust":"5","precision":"9007199254740993","mood":"ready","baseDepth":1,
+        "savedCalleeDepth":3,"returnedDepth":1,"editedContinuation":"Caller safely edited"}));
+    assert_eq!(validated_load_receipt(&loaded, &receipt)["returnedDepth"], 1);
+    for bad in [String::new(), format!("{loaded}{loaded}"), loaded.replace("\"returnedDepth\":1", "\"returnedDepth\":3")] {
+        assert!(std::panic::catch_unwind(|| validated_load_receipt(&bad, &receipt)).is_err());
+    }
+    let diagnostics = temporary.path().join("receipt-failure-evidence");
+    fs::create_dir(&diagnostics).unwrap();
+    let result = ProcessResult { exit_code:Some(0), output:"completed SDK process; missing save receipt\n".into(),
+        timed_out:false, output_limited:false, diagnostics:vec![] };
+    retain_runtime_result(Some(&diagnostics), "conditions-high", &result);
+    assert!(std::panic::catch_unwind(|| validated_save_receipt(&result.output)).is_err());
+    assert_eq!(fs::read(diagnostics.join("conditions-high.log")).unwrap(), result.output.as_bytes());
+    assert!(diagnostics.join("conditions-high-process.json").exists());
+    assert!(std::panic::catch_unwind(|| sdk_setup::<()>("generation", Err(RenpyError::ProcessFailed), Some(&diagnostics))).is_err());
+    let setup:Value=serde_json::from_slice(&fs::read(diagnostics.join("setup-failure.json")).unwrap()).unwrap();
+    assert_eq!(setup["stage"],"generation");
+    assert_eq!(setup["rawProcessOutputAvailable"],false);
+    let isolated = isolated_runtime_driver(load_driver, "nested-call-return", &root.join("game/saves"),
+        &temporary.path().join("Ren'Py Data/tokens"));
+    assert!(isolated.contains("os.path.samefile(renpy.config.savedir"));
+    assert!(isolated.contains("renpy.savetoken.token_dir is not None"));
+    assert!(isolated.contains("PHASE3A_STORAGE"));
     assert_eq!(
         process_spawn_count_for_test(),
         before_spawns,
@@ -738,7 +809,7 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
         Path::new(&archive),
     );
     counts.version_checks = process_spawn_count_for_test() - adapter_start;
-    let sdk = installed.unwrap();
+    let sdk = sdk_setup("install/version", installed, evidence.as_deref());
     // Project creation's implicit starter compile/lint is qualified separately.
     // Use the existing zero-execution service fixture, then generate standard GUI
     // scaffolding once so this gate spends its only compile/lint on accepted 3A source.
@@ -752,7 +823,7 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
     let gui_start = process_spawn_count_for_test();
     let generated = RenpyAdapter::generate_starter(&sdk, &scaffold, 1280, 720);
     counts.gui_image_commands = (process_spawn_count_for_test() - gui_start).saturating_sub(1);
-    generated.unwrap();
+    sdk_setup("GUI generation", generated, evidence.as_deref());
     for path in ["game/gui.rpy", "game/screens.rpy", "game/options.rpy"] {
         import_scaffold(&mut service, &root, evidence.as_deref(), path,
             &fs::read_to_string(scaffold.join(path)).unwrap());
@@ -948,12 +1019,16 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
             assert_eq!(receipt["canLoad"], true);
             let relative = entry["sourcePath"].as_str().unwrap();
             let before = fs::read(root.join(relative)).unwrap();
+            let before_sources = sources(&root);
             let before_text = std::str::from_utf8(&before).unwrap();
             assert_eq!(before_text.matches("\"Caller resumed\"").count(), 1);
             let expected = before_text.replacen("\"Caller resumed\"", "\"Caller safely edited\"", 1);
             save(&mut service, relative, &expected);
             let after = fs::read(root.join(relative)).unwrap();
             assert_eq!(after, expected.as_bytes(), "safe surrounding edit must touch only caller narration");
+            let mut expected_sources = before_sources;
+            expected_sources.insert(PathBuf::from(relative), after.clone());
+            assert_eq!(sources(&root), expected_sources, "safe caller edit preserves every other source file and byte");
             assert!(after.starts_with(&[0xef, 0xbb, 0xbf]));
             for call in [&entry_call, &b_call] {
                 let label = call["payload"]["returnLabel"].as_str().unwrap();
@@ -979,6 +1054,8 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
         let driver = if name == "nested-call-return" {
             saved_runtime_driver(saved_receipt.as_ref().expect("saved-callee receipt missing"))
         } else { runtime_driver(name, flag, trust, mood, expected, ending) };
+        let driver = isolated_runtime_driver(driver, name, &without_metadata.join("game/saves"),
+            &temporary.path().join("Ren'Py Data/tokens"));
         fs::write(without_metadata.join("game/zz_phase3a_test.rpy"), &driver).unwrap();
         if let Some(path) = &evidence {
             fs::write(path.join(format!("{name}-driver.rpy")), &driver).unwrap();
@@ -1041,6 +1118,19 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
             Duration::from_secs(60),
         )
         .unwrap();
+        // Preserve diagnostics even if storage/save/load receipt validation then panics.
+        retain_runtime_result(evidence.as_deref(), name, &result);
+        let storage = result.output.lines().filter_map(|line| line.strip_prefix("PHASE3A_STORAGE "))
+            .map(|line| serde_json::from_str::<Value>(line).unwrap()).collect::<Vec<_>>();
+        assert_eq!(storage.len(), 1, "one actual SDK storage witness required");
+        let storage = &storage[0];
+        assert_eq!(storage["case"], name);
+        assert_eq!(storage["savedirIsolated"], true);
+        assert_eq!(storage["tokensIsolated"], true);
+        println!("phase-3a-sdk-storage: {storage}");
+        if let Some(path) = &evidence {
+            fs::write(path.join(format!("{name}-storage.json")), serde_json::to_vec_pretty(storage).unwrap()).unwrap();
+        }
         let marker = format!("PHASE3A_ROUTE {name}");
         let passed = !result.timed_out
             && !result.output_limited
@@ -1067,16 +1157,7 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
             counts.saved_callee = true;
         }
         if name == "nested-call-return" && passed {
-            let lines = result.output.lines().filter_map(|line| line.strip_prefix("PHASE3A_LOADED ")).collect::<Vec<_>>();
-            assert_eq!(lines.len(), 1);
-            let loaded:Value = serde_json::from_str(lines[0]).unwrap();
-            let saved = saved_receipt.as_ref().unwrap();
-            assert_eq!(loaded["slot"], saved["slot"]);
-            assert_eq!(loaded["savedCalleeDepth"], saved["calleeDepth"]);
-            assert_eq!(loaded["baseDepth"], saved["baseDepth"]);
-            assert_eq!(loaded["returnedDepth"], saved["baseDepth"]);
-            for key in ["flag","trust","precision","mood"] { assert_eq!(loaded[key], saved[key]); }
-            assert_eq!(loaded["editedContinuation"], "Caller safely edited");
+            let loaded = validated_load_receipt(&result.output, saved_receipt.as_ref().unwrap());
             println!("phase-3a-sdk-load: {loaded}");
             if let Some(path) = &evidence {
                 fs::write(path.join("load-receipt.json"), serde_json::to_vec_pretty(&loaded).unwrap()).unwrap();
@@ -1094,13 +1175,10 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
             )
             .unwrap();
         }
-        for (relative, bytes) in &accepted_sources {
-            assert_eq!(
-                fs::read(without_metadata.join(relative)).unwrap(),
-                *bytes,
-                "SDK changed accepted source"
-            );
-        }
+        let mut expected_runtime_sources = accepted_sources.clone();
+        expected_runtime_sources.insert(PathBuf::from("game/zz_phase3a_test.rpy"), driver.as_bytes().to_vec());
+        assert_eq!(sources(&without_metadata), expected_runtime_sources,
+            "SDK must neither change accepted source nor add or remove an .rpy file");
         assert_eq!(
             sources(&root),
             accepted_sources,
@@ -1118,4 +1196,5 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
         reports.iter().all(|r| r["passed"] == true),
         "required SDK runtime case failed"
     );
+    counts.storage_isolated = true;
 }

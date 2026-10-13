@@ -11,7 +11,7 @@ on:
         type: boolean
         default: false
       story_logic_ordinal:
-        description: Cumulative Phase 3A paired attempt, 1 through 3
+        description: Cumulative Phase 3A paired attempt, 1 through 5
         type: string
         default: '1'
       assistance_ui:

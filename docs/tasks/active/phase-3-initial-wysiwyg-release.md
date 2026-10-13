@@ -5,7 +5,7 @@
 both-target CI2 audit. The early gate, structural core30 and full renderer51/build
 are established. Local validation10 passes all ten actual frontend/core cases/two processes. Focused
 renderer11 passes20 captures and image self-review, closing portable vertical clipping.
-The user approved cumulative local/renderer caps14 and clearly labelled self-review; final CI3 dispatched with terminal audit pending; no 3A acceptance. Preserve the reviewed commits,
+The user approved cumulative local/renderer caps14 and clearly labelled self-review. CI3 is audited failed; two additional paired runs raise the cap to5. One review-only independent agent is explicitly authorized for the whole-workflow corrections; no 3A acceptance. Preserve the reviewed commits,
 worktrees, failed run and cumulative allowances. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
@@ -22,9 +22,9 @@ Phase 2 final acceptance. 3A reuses source-map v3, exact-range preparation, tran
 history, variables and observed flow. Shared changes must preserve the existing AI
 allowlist or visibly refuse unsupported targets; no provider request is needed.
 
-**Execution:** one agent, with no spawning, delegation, messaging or resuming
-subagents, as explicitly selected by the user on takeover. Reuse existing independent
-reviews; label new self-review honestly. Earlier delegated execution and CI-polling
+**Execution:** one implementation agent. The user explicitly allows one review-only
+subagent for independent workflow review; no implementation delegation or additional
+subagents. Reuse existing independent reviews; label self-review honestly. Earlier delegated execution and CI-polling
 exceptions are superseded. CI follows WORKFLOW's manual same-thread waiting policy:
 record dispatch, pause, audit on user resume. No polling loops or background watchers.
 Reviewed pushes to `codex/phase3a-story-logic` remain authorized. No merge, release,
@@ -2271,3 +2271,60 @@ PairedCI remains3/3 exhausted; a concrete extra paired-batch decision is require
 only after this correction is reviewable/locally checked. No CI4 dispatch permitted.
 Current usage core16/18, renderer11/14, local10/14. Phase3A remains incomplete;
 Phase2 paused; no merge/release.
+
+### Whole-workflow audit, independent review and CI cap5 — 2026-10-14
+
+The user required auditing the complete affected journey, including steps CI3 never
+reached, failure cleanup and diagnostics, against production and platform APIs before
+rerun. Two further paired attempts are authorized: cumulative cap5, usage3/5. The
+explicit one-review-only-subagent exception supersedes the absolute single-agent
+restriction only for this review. Root remains the sole implementation/test/CI owner.
+
+Local11 on `de26fcbd2f8a686401d49214faced948846cc286`, tree
+`1f70f36a7ea00b8625f7d20f3f298fadd01b876a`, passed locked/offline SDK-test no-run
+compilation22.62s and the exact expanded zero-SDK scaffold/caller preflight5.12s.
+213 inputs remained unchanged. Ignored `local-round11/` retains identity/seals/logs/
+runner/result. No SDK execution/helper/native/package/credential/live operation.
+
+**Proven cause:** strict destination transport-BOM helper was incorrectly used for
+external scaffold import. CI3 program order and assertion prove this harness defect;
+actual failed raw input was lost, so its exact file/bytes remain unknown. Source
+production validation remains unchanged. The imported-file conversion and strict
+original caller transport refusal remain distinct.
+
+**Complete audit:** traced authoring/revisions/structural ownership and stable labels;
+full source-set/metadata-free copy; compilation/lint; all six runtime outcomes; actual
+callee save, only safe caller narration edit, subsequent FileLoad and literal return;
+SDK storage, subprocess ownership, diagnostics, cleanup, privacy and final artifact
+gates. Read-only archive/source inspection verified pinned8.5.3 APIs/checksum; no SDK
+was run locally. Raw slot actions, separate save/token directories, ancestor Ren'Py
+Data lookup and content-based recompilation are source-supported assumptions. Actual
+new save/edit/load-return and storage witnesses remain missing until both-host CI.
+No arbitrary sleeps, timeout expansion, production bypass or product change is used.
+
+Corrections jointly cover exact added/deleted source detection and eleven-file
+artifact digests, scaffold-to-runtime hashes, retained raw runtime output before
+receipt validation, strict process exit types, owned save/token identity assertions
+in every SDK case, loaded receipt refusals, setup typed-error breadcrumbs, outer
+recipe failure diagnostics/environment restoration, and full51 DOM/controller/eight
+checks for ordinals4/5. Setup APIs do not expose raw failed child output; receipts
+explicitly say so. Existing extraordinary descendant/reader limitations have no
+demonstrated routine pinned-SDK cause; excluded crash experiments are not selected.
+
+**Review:** root's separate self-review is not independent. The sole independent
+read-only reviewer audited the whole path and latest six-file patch, raised the Debug
+format/source-membership/evidence-binding/exit-type/ordinal findings, and confirmed
+no supported blocker after correction. Static review is not execution proof. Ignored
+`whole-workflow-audit/` retains pinned source, frozen patch/input hashes and the review.
+Reviewed patchSHA256 `92f2a360bfed715d5254cacccfe16b2cbc9a3f771c947644c9b1efeca347e97a`
+versus CI3 candidate9a6dbcd.
+
+Next one bounded local12: affected checker suite, locked/offline SDK-test no-run, exact
+expanded zero-SDK preflight. Reuse unchanged passed frontend/core/renderer/controller
+evidence; no broader local rerun. On pass and reviewed hash match, publish coherent
+candidate and dispatch pairedCI4 once with six SDK cases/twelve adapter processes
+per host. CI5 is remaining allowance for a justified reviewed correction, not an
+automatic retry. Current local11/14, renderer11/14, core16/18, pairedCI3/5. Preserve
+all failure evidence and stop to reassess any failed round. No polling/watchers;
+publish wait record and audit only on manual user resume. Phase3A remains incomplete,
+Phase2 paused, no merge/release.

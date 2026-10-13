@@ -1,98 +1,62 @@
 # Current outcome handover
 
-## Phase 3A — local/visual proof passed; CI3 audited failed; scaffold correction next
+## Phase 3A — whole-workflow corrections reviewed; local12 then CI4
 
-Phase3A is **ACTIVE — INCOMPLETE**; Phase2 stays **PAUSED — INCOMPLETE** and needs its
-own explicit resume. One agent only: no spawning/delegation/messaging/resuming
-subagents. The user accepted clearly labelled self-review and cumulative local
-validation/renderer caps14 on2026-10-14. Existing independent reviews are reused for
-unchanged inputs; new reviews are self-review. Reviewed branch pushes are authorized;
-no merge/release. CI uses manual same-thread waiting/resume, with no polling/watchers.
+Phase3A is **ACTIVE — INCOMPLETE**; Phase2 remains **PAUSED — INCOMPLETE**. One
+implementation agent owns work. The user explicitly authorized one independent
+review-only agent, cumulative local/renderer caps14, self-review and two additional
+paired CI runs (cap5). Reviewed pushes to `codex/phase3a-story-logic` are authorized;
+no merge/release. No CI polling/watchers: record dispatch, publish wait record, end
+turn and audit on manual same-thread user resume.
 
-### Checkout and preservation
+Root is `codex/phase3a-story-logic`, published docs successor `b13ea6e` following CI3
+candidate `9a6dbcd`; local-only scaffold fix `de26fcb` and six-file whole-workflow
+corrections follow. Live Git owns the exact latest HEAD/dirty state. Never reset to an
+old prompt SHA. Validation74a0361 retains its original dirty oracle, renderer421a241
+its original dirty CSS. Coree160464, planning2c5a164/two unpublished commits, Phase2
+work, original/additive preservation refs and all failures remain intact. Root reused
+60 exact frontend outputs against69 input hashes;14 older outputs remain ignored in
+`root-adapter-prior/`. Do not overwrite preserved worktrees or relabel old201 receipts.
 
-Root branch is `codex/phase3a-story-logic`. Corrections were committed as `be06333`,
-followed by the focused visual harness/local proof record `6ef6314`; later documentation
-successors do not change their tested production inputs. Published candidate `9a6dbcd` is remote Git-verified; a docs-only wait successor follows.
-Never reset to an old prompt SHA. Validation worktree remains at74a0361 with its
-preserved dirty oracle; renderer421a241 retains the exact dirty CSS draft. Coree160464
-and planning worktree/two unpublished commits are preserved. All original/additive
-`refs/codex-preserved/`, Phase2 work and failures remain intact. Root reused60 exact
-frontend outputs after matching69 inputs;14 older generated outputs were preserved
-under ignored `root-adapter-prior/`. No new compile/install was needed.
-
-### Evidence now established
-
-[CI2 run38351419387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
-attempt1/exactcba3c0e, passes both-host artifact audits and establishes the early SDK
-gate. CI1 remains failed; no repeated historical audit/dispatch. Structural core30
-and renderer51 DOM/typecheck/test compilation/build proof is retained.
-
-Local validation10 passed on `be0633352c1e36931b99cc86799e891663c4fcef`, tree
-`2836ed584e0afa20aaeb18d49118bfd479c9748c`: checker11, all ten production frontend/
-ApplicationHost cases,243 typed requests, two normal exit0/observed/reaped helpers,
-owned cleanup and unchanged213-input seal. This covers exact source/ownership,
-protected deletion/Undo/pass/selected unwrap, preview/mapped Source navigation,
-pending/draft and ordinary external-edit zero-write refusals, actual Undo/Redo and
-second-process reopen/map persistence/session-history reset/stale-session refusal.
-No local SDK/native editor/package/credential/live action. Ignored `local-round10/`
-retains identity, seals, reuse receipt, logs, reports and transcript. Round9's five
-passes and failed pre-deletion oracle remain separately preserved, with actual failed
-snapshot SHA256 `ce5b127b00d42db2715245d3e530b2eeb3f0ab5f546857631cbcee5b3fa34b49`.
-The prior201-input receipt is unchanged; final213 recipe adds twelve exact verified
-embedded SDK compilation dependencies and its coverage oracle passes. No production
-core behavior was changed to accommodate the stale count oracle.
-
-Renderer11 passed on `6ef631481715da0fb012a495e6ab5e52502963a4`, tree
-`9e8cdb86e8d4c97e5d2d1e807d3788909e28d9fb`:20 actual captures, both themes/four
-default layouts, default/scaled readable canvas/unknown-state message, seven-selector
-focus/internal scrolling, divider20/default/70/clamping and Writing focus. Canvas
-minimum128px/160px scaled; zero runtime errors/horizontal page or authoring overflow.
-PNG CRC/decompression/hash audit and actual images inspected; four representative
-originals at full resolution. Portable clipping finding is closed by self-review
-under user approval. No packaged WebView physical input or human acceptance claimed.
-Ignored `renderer-round11/` retains actual captures, seals, terminal/result/log/hash
-and self-review records. Earlier independent CSS static review remains applicable.
-
-### Final candidate, budget and waiting route
-
-Cumulative usage: **core16/18, local10/14, renderer11/14, pairedCI3/3**. Unused allowance
-is not a reason to rerun passed checks. Review of the complete final candidate reuses
-unchanged Rust/preflight and actual frontend/core proof, binding exact inputs/binaries/
-outputs. Canonical UI/TESTING now record the implemented preview sizing and proof limits;
-[the task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#approved-cumulative-cap14-and-self-review--2026-10-14)
-owns detailed attempts/receipts. No pending local process or agent work.
-
-### Audited CI3 failure and correction route
+CI2 exactcba3c0e established the early both-host SDK gate. Local10 exactbe06333 passes
+all ten actual frontend/core cases,243 requests, two normal observed/reaped helpers,
+source/refusals/history/reopen and cleanup. Renderer11 exact6ef6314 passes20 captures
+and actual image self-review, closing portable clipping; no packaged physical/human
+acceptance claimed. Local11 exactde26fcb passes SDK-test no-run and extended exact
+zero-SDK scaffold/caller preflight. Original round9 failure/snapshot, all receipts and
+213-input seals remain ignored under `.toolchains/phase3a-validation/`.
 
 [CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
-attempt1/ordinal3/exact9a6dbcd, ended failure2026-10-13T16:21:01Z. Full terminal
-self-audit matched both jobs/ZIPs/36 files/35 hashes/213 exact inputs/identity/privacy.
-Windows115405351728 and Mac115405351521 pass checker11/core30/renderer51/build and
-all ten actual controller cases/two normal separately reaped processes/owned cleanup.
-SDK setup panicked at transport-BOM assertion during GUI import: four adapter spawns,
-zero compile/lint/runtime cases. Cleanup passed; final structural/saved-callee/safe-
-edit/loaded-return/source/metadata proof remains unestablished. The exact failed GUI
-input/path was not retained; no reconstructed snapshot is claimed. Artifact IDs,
-ZIP hashes/expiry and detailed diagnosis belong in the
-[CI3 terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14).
-Ignored `ci3-audit/` retains originals, extracted artifacts and audit code/results.
+attempt1/ordinal3/exact9a6dbcd/tree d5ace1a4, is terminal failed. Both hosts pass
+checker11/core30/renderer51/build/full ten-case controller/two reaped processes.
+SDK setup stopped at strict transport-BOM assertion importing separately encoded GUI
+scaffolding: four adapter processes; no compile/lint/runtime cases. Cleanup passed.
+This is a proven harness setup defect; actual failed input/path was not retained.
+Final saved-callee/safe caller edit/load-return/source proof remains unestablished.
+Exact jobs/artifact IDs/ZIP hashes/expiry and original audit reside in the
+[CI3 ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14)
+and ignored `ci3-audit/`. Existing audit must not be blindly rerun with a changed checker.
 
-This is a harness import/setup defect; no production defect is established. Prepared
-one-file SDK-test correction separates incoming scaffold encoding from destination
-BOM, rejecting multiple BOMs and preserving normal Source save/body bytes. Existing
-caller transport checks stay strict. Raw scaffold bytes are captured before assertions,
-with acceptance receipts; the shared zero-SDK preflight covers all three imports,
-CRLF/Unicode/plain/BOM, exact source-set/retention/refusal, then original caller labels.
-New review is self-review under user approval. No retry, polling or watcher occurred.
+The complete remaining SDK journey, platform API assumptions, failure diagnostics,
+cleanup and artifact gate were jointly audited against production and pinned8.5.3
+archive source without local SDK execution. Corrections are confined to tests,
+recipe/checker and CI ordinal selection: imported BOM conversion, exact source-set
+and scaffold bindings, retained output before assertions, storage witnesses, strict
+receipts, setup failure breadcrumbs and final full checks at ordinals4/5. Production
+Source behavior/timeouts remain unchanged. Independent read-only review found no
+remaining supported static blocker; root self-review is separately labelled. Source-
+supported assumptions do not establish actual runtime outcomes. See
+[whole-workflow ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#whole-workflow-audit-independent-review-and-ci-cap5--2026-10-14)
+and ignored `whole-workflow-audit/` for patch hashes/review/source evidence and limits.
 
-Next: commit the reviewed correction and run one local11 round consisting of locked
-SDK-test `--no-run` and the extended exact zero-SDK preflight only. Local cap14 permits
-this; current usage10/14, renderer11/14, core16/18, pairedCI3/3. Unchanged passed product/
-renderer/controller evidence remains reusable. No local SDK/native editor/package/
-credential/live call. After local proof, request a concrete extra paired CI allowance;
-no CI4 dispatch is authorized. Phase3A remains ACTIVE — INCOMPLETE, Phase2 PAUSED —
-INCOMPLETE, no merge/release. No active CI or helper process to resume.
+Next commit coherent reviewed patch and perform one local12 round: changed checker,
+locked/offline SDK-test no-run, exact zero-SDK preflight. Reuse unchanged passed local
+frontend/core/renderer/controller proof. On pass/hash match publish candidate and
+dispatch pairedCI4 once: exact six SDK cases/twelve adapter processes per host,
+required full30 core/51 DOM/controller gates. Preserve failure and reassess; no blind
+retry. Usage **core16/18, local11/14, renderer11/14, pairedCI3/5**. CI5 is unused,
+not automatic authorization to retry. No local SDK/helper/native/package/credential/
+live action selected. No active CI or local test process; independent review completed.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 

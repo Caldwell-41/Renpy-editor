@@ -41,7 +41,7 @@ jobs:
           test "$GITHUB_REF" = refs/heads/codex/phase3a-story-logic
           test "$GITHUB_RUN_ATTEMPT" = 1
           test "$EXCLUDED" = false
-          test "$ORDINAL" = 1 -o "$ORDINAL" = 2 -o "$ORDINAL" = 3
+          test "$ORDINAL" = 1 -o "$ORDINAL" = 2 -o "$ORDINAL" = 3 -o "$ORDINAL" = 4 -o "$ORDINAL" = 5
           "$STORY_PYTHON" -c "import platform; assert platform.machine().lower() in ('arm64','aarch64') if platform.system()=='Darwin' else platform.machine().lower() in ('amd64','x86_64')"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:

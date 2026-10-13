@@ -53,17 +53,48 @@ def input_manifest(repo):
             for p in sorted(files) if p.is_file()}
 
 
+def run_check(output, checks, name, argv, timeout=600, env=None, required=()):
+    record = {'name': name, 'passed': False}
+    checks.append(record)
+    before_env = dict(os.environ)
+    before_cwd = Path.cwd()
+    try:
+        os.chdir(APP)
+        if env is not None:
+            os.environ.clear()
+            os.environ.update(env)
+        result = run_bounded(tuple(command(argv)), timeout_seconds=timeout, output_limit=2_000_000)
+        text = result.output
+        (output.resolve() / (name + '.log')).write_text(text, encoding='utf-8')
+        print(text, end='', flush=True)
+        record.update(exitCode=result.exit_code, timedOut=result.timed_out,
+                      outputLimited=result.output_limited, processReaped=True)
+        if result.timed_out or result.output_limited or result.exit_code != 0:
+            raise RuntimeError(name + ' failed, exceeded deadline or output budget')
+        if argv[0] == 'cargo' and argv[1] == 'test':
+            record['passedTests'] = gate.cargo_ok(text, required)
+        record['passed'] = True
+        return text
+    except Exception as error:
+        record['failure'] = {'type':type(error).__name__, 'message':str(error)}
+        raise
+    finally:
+        os.chdir(before_cwd)
+        os.environ.clear()
+        os.environ.update(before_env)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--archive', type=Path, required=True)
     parser.add_argument('--checksums', type=Path, required=True)
-    parser.add_argument('--ordinal', type=int, choices=(1, 2, 3), required=True)
+    parser.add_argument('--ordinal', type=int, choices=(1, 2, 3, 4, 5), required=True)
     args = parser.parse_args()
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=False)
     checks = []
     sdk = None
+    failure = None
     identity = {'candidate': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
                 'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=REPO, text=True).strip(),
                 'runId': os.environ.get('GITHUB_RUN_ID'), 'attempt': os.environ.get('GITHUB_RUN_ATTEMPT'),
@@ -74,31 +105,7 @@ def main():
     (args.output / 'inputs.json').write_text(json.dumps(input_manifest(REPO), indent=2) + '\n', encoding='utf-8')
 
     def run(name, argv, timeout=600, env=None, required=()):
-        record = {'name': name, 'passed': False}
-        checks.append(record)
-        before_env = dict(os.environ)
-        before_cwd = Path.cwd()
-        try:
-            os.chdir(APP)
-            if env is not None:
-                os.environ.clear()
-                os.environ.update(env)
-            result = run_bounded(tuple(command(argv)), timeout_seconds=timeout, output_limit=2_000_000)
-            text = result.output
-            (args.output.resolve() / (name + '.log')).write_text(text, encoding='utf-8')
-            print(text, end='', flush=True)
-            record.update(exitCode=result.exit_code, timedOut=result.timed_out,
-                          outputLimited=result.output_limited, processReaped=True)
-            if result.timed_out or result.output_limited or result.exit_code != 0:
-                raise RuntimeError(name + ' failed, exceeded deadline or output budget')
-            if argv[0] == 'cargo' and argv[1] == 'test':
-                record['passedTests'] = gate.cargo_ok(text, required)
-            record['passed'] = True
-            return text
-        finally:
-            os.chdir(before_cwd)
-            os.environ.clear()
-            os.environ.update(before_env)
+        return run_check(args.output, checks, name, argv, timeout, env, required)
 
     try:
         sys.path.insert(0, str(REPO / 'spikes/renpy-sdk'))
@@ -110,15 +117,15 @@ def main():
         identity['sdkArchiveSHA256'] = expected
         run('renderer-typecheck', ['npm', 'run', 'typecheck'])
         run('renderer-test-compile', ['npm', 'run', 'build:tests'])
-        dom_files = gate.FINAL_DOM_FILES if args.ordinal == 3 else ('dist-tests/tests/phase3a-renderer.dom.test.js',)
-        dom_names = gate.FINAL_DOM_TESTS if args.ordinal == 3 else gate.DOM_TESTS
+        dom_files = gate.FINAL_DOM_FILES if args.ordinal >= 3 else ('dist-tests/tests/phase3a-renderer.dom.test.js',)
+        dom_names = gate.FINAL_DOM_TESTS if args.ordinal >= 3 else gate.DOM_TESTS
         text = run('renderer-dom', ['node', '--test', '--test-concurrency=1', *dom_files])
         checks[-1]['passed'] = False
         checks[-1]['passedTests'] = gate.dom_ok(text, dom_names)
         checks[-1]['passed'] = True
         run('renderer-build', ['npm', 'run', 'build'])
         run('focused-core', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', '--lib', 'phase3a_', '--', '--skip', gate.SDK_TEST, '--nocapture'], required=gate.CORE_TESTS)
-        if args.ordinal == 3:
+        if args.ordinal >= 3:
             run('controller-driver-build', ['cargo', 'build', '-p', 'loomlight-core', '--example', 'story-controller-driver', '--release', '--locked'])
             executable = APP / 'target/release/examples' / ('story-controller-driver.exe' if platform.system() == 'Windows' else 'story-controller-driver')
             text = run('controller-dispatch', ['node', 'scripts/story-controller.mjs', '--driver', str(executable),
@@ -128,14 +135,19 @@ def main():
             checks[-1]['passed'] = True
         env = dict(os.environ, LOOMLIGHT_RUNTIME_SDK_ARCHIVE=str(args.archive.resolve()), LOOMLIGHT_PHASE3A_EVIDENCE_DIR=str((args.output / 'sdk').resolve()))
         text = run('sdk', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', '--lib', gate.SDK_TEST, '--', '--ignored', '--exact', '--nocapture'], timeout=900, env=env, required=(gate.SDK_TEST,))
+        checks[-1]['passed'] = False
         candidate_sdk = gate.sdk_ok(text)
         gate.sdk_artifacts_ok(args.output / 'sdk', candidate_sdk)
         (args.output / 'sdk-report.json').write_text(json.dumps(candidate_sdk, indent=2) + '\n', encoding='utf-8')
         sdk = candidate_sdk  # Publish only after blocking gates and report retention succeed.
+        checks[-1]['passed'] = True
+    except Exception as error:
+        failure = {'stage':checks[-1]['name'] if checks else 'preflight', 'type':type(error).__name__, 'message':str(error)}
+        raise
     finally:
         (args.output / 'identity.json').write_text(json.dumps(identity, indent=2) + '\n', encoding='utf-8')
-        (args.output / 'result.json').write_text(json.dumps({'passed': len(checks) == (8 if args.ordinal == 3 else 6) and all(c['passed'] for c in checks) and sdk is not None,
-                                                           'checks': checks, 'sdkEvidenceValidated': sdk is not None}, indent=2) + '\n', encoding='utf-8')
+        (args.output / 'result.json').write_text(json.dumps({'passed': len(checks) == (8 if args.ordinal >= 3 else 6) and all(c['passed'] for c in checks) and sdk is not None,
+                                                           'checks': checks, 'sdkEvidenceValidated': sdk is not None, 'failure':failure}, indent=2) + '\n', encoding='utf-8')
         gate.seal(args.output)
 
 

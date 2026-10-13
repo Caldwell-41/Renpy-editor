@@ -6,6 +6,8 @@ import hashlib
 import tempfile
 from pathlib import Path
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
 
 spec = importlib.util.spec_from_file_location('story_evidence', Path(__file__).with_name('check-story-logic-evidence.py'))
 gate = importlib.util.module_from_spec(spec)
@@ -22,7 +24,7 @@ class Evidence(unittest.TestCase):
                   'exitCode': 1 if name == 'reject-wrong-outcome' else 0, 'timedOut': False, 'outputLimited': False}
                  for name in gate.CASES]
         terminal = {'passed': True, 'cleanupComplete': True, 'metadataAbsent': True, 'acceptedSourceUnchanged': True,
-                    'sdkInstalls': 1, 'guiGenerations': 1, 'compileCommands': 1, 'lintCommands': 1, 'runtimeCases': 6, 'versionChecks': 2, 'guiImageCommands': 1, 'adapterSpawns': 12, 'savedCallee': True, 'safeEditQualified': True, 'loadedReturn': True, 'structuralConditionQualified': True}
+                    'sdkInstalls': 1, 'guiGenerations': 1, 'compileCommands': 1, 'lintCommands': 1, 'runtimeCases': 6, 'versionChecks': 2, 'guiImageCommands': 1, 'adapterSpawns': 12, 'savedCallee': True, 'safeEditQualified': True, 'loadedReturn': True, 'structuralConditionQualified': True, 'storageIsolated': True}
         return cases, terminal
 
     def receipts(self):
@@ -44,6 +46,7 @@ class Evidence(unittest.TestCase):
     def log(self, cases, terminal, receipts=None):
         save, edit, load = receipts or self.receipts()
         return ('\n'.join('phase-3a-sdk-case: ' + json.dumps(c) for c in cases)
+                + '\n' + '\n'.join('phase-3a-sdk-storage: ' + json.dumps({'case':name,'savedirIsolated':True,'tokensIsolated':True}) for name in gate.CASES)
                 + '\nphase-3a-sdk-structural-condition: ' + json.dumps(self.condition_receipt())
                 + '\nphase-3a-sdk-save: ' + json.dumps(save)
                 + '\nphase-3a-sdk-safe-edit: ' + json.dumps(edit)
@@ -141,7 +144,7 @@ class Evidence(unittest.TestCase):
 
     def test_cleanup_source_metadata_and_exhausted_operations_refused(self):
         for key in ('passed', 'cleanupComplete', 'metadataAbsent', 'acceptedSourceUnchanged',
-                    'sdkInstalls', 'guiGenerations', 'compileCommands', 'lintCommands', 'runtimeCases', 'versionChecks', 'guiImageCommands', 'adapterSpawns', 'savedCallee', 'safeEditQualified', 'loadedReturn', 'structuralConditionQualified'):
+                    'sdkInstalls', 'guiGenerations', 'compileCommands', 'lintCommands', 'runtimeCases', 'versionChecks', 'guiImageCommands', 'adapterSpawns', 'savedCallee', 'safeEditQualified', 'loadedReturn', 'structuralConditionQualified', 'storageIsolated'):
             cases, terminal = self.fixture()
             terminal[key] = False if type(terminal[key]) is bool else terminal[key] + 1
             with self.subTest(key=key), self.assertRaises(ValueError):
@@ -161,6 +164,32 @@ class Evidence(unittest.TestCase):
             receipts = list(self.receipts()); receipts[which][key] = value
             with self.subTest(which=which, key=key), self.assertRaises(ValueError):
                 gate.sdk_ok(self.log(*self.fixture(), receipts=receipts))
+
+    def test_missing_duplicate_or_unisolated_storage_refused(self):
+        positive = self.log(*self.fixture())
+        first = 'phase-3a-sdk-storage: ' + json.dumps({'case':gate.CASES[0],'savedirIsolated':True,'tokensIsolated':True})
+        for bad in (positive.replace(first, ''), positive + '\n' + first,
+                    positive.replace('"tokensIsolated": true', '"tokensIsolated": false'),
+                    positive.replace('"savedirIsolated": true', '"savedirIsolated": 1')):
+            with self.assertRaises(ValueError): gate.sdk_ok(bad)
+
+    def test_recipe_retains_output_and_restores_environment_on_failure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory=Path(temporary);checks=[]
+            output='completed process but missing expected receipt\n'
+            result=SimpleNamespace(output=output,exit_code=7,timed_out=False,output_limited=False)
+            before_cwd=Path.cwd();before_env=dict(recipe.os.environ)
+            with patch.object(recipe,'run_bounded',return_value=result):
+                with self.assertRaises(RuntimeError):
+                    recipe.run_check(directory,checks,'failed-sdk',['synthetic-child'],env={'SYNTHETIC_ENV':'owned'})
+            self.assertEqual((directory/'failed-sdk.log').read_text(),output)
+            self.assertFalse(checks[0]['passed']);self.assertEqual(checks[0]['exitCode'],7)
+            self.assertIn('failure',checks[0]);self.assertEqual(Path.cwd(),before_cwd)
+            self.assertEqual(dict(recipe.os.environ),before_env)
+            with patch.object(recipe,'run_bounded',side_effect=FileNotFoundError('synthetic unavailable tool')):
+                with self.assertRaises(FileNotFoundError): recipe.run_check(directory,checks,'not-started',['synthetic-child'])
+            self.assertEqual(checks[-1]['failure']['type'],'FileNotFoundError')
+            self.assertFalse(checks[-1]['passed']);self.assertNotIn('processReaped',checks[-1])
 
     def test_controller_missing_partial_failed_or_cleanup_evidence_refused(self):
         report = {'selection':'full','passed':True,'cleanupComplete':True,'driverStarts':2,
@@ -201,15 +230,52 @@ class Evidence(unittest.TestCase):
                 (directory/filename).write_text(json.dumps(report[key]),encoding='utf-8')
             (directory/'calls-accepted-entry.rpy').write_bytes(before)
             (directory/'calls-accepted-callee.rpy').write_bytes(b'label callee:\n    call nested from _ll_call_two\n    return\n')
+            scaffold_body=b'# synthetic SDK scaffold caf\xc3\xa9\r\n'
+            baseline={'game/entry.rpy':hashlib.sha256(before).hexdigest(),
+                'game/callee.rpy':hashlib.sha256((directory/'calls-accepted-callee.rpy').read_bytes()).hexdigest(),
+                'game/definitions/variables.rpy':hashlib.sha256(b'default flag = True\n').hexdigest(),
+                **{'game/'+name+'.rpy':hashlib.sha256(scaffold_body).hexdigest() for name in ('gui','screens','options')},
+                **{'game/other'+str(i)+'.rpy':hashlib.sha256(('retained'+str(i)).encode()).hexdigest() for i in range(5)}}
             for case in gate.CASES:
                 entry=after if case in ('nested-call-return','reject-wrong-outcome') else before
-                (directory/(case+'-source-digests.json')).write_text(json.dumps({'game/entry.rpy':hashlib.sha256(entry).hexdigest()}),encoding='utf-8')
+                (directory/(case+'-source-digests.json')).write_text(json.dumps({**baseline,'game/entry.rpy':hashlib.sha256(entry).hexdigest()}),encoding='utf-8')
+                raw = ('synthetic SDK output ' + case + '\n').encode()
+                (directory/(case+'.log')).write_bytes(raw)
+                (directory/(case+'-process.json')).write_text(json.dumps({'case':case,
+                    'exitCode':next(c['exitCode'] for c in report['cases'] if c['case']==case),
+                    'timedOut':False,'outputLimited':False,'outputSHA256':hashlib.sha256(raw).hexdigest()}),encoding='utf-8')
+                (directory/(case+'-storage.json')).write_text(json.dumps(next(r for r in report['storage'] if r['case']==case)),encoding='utf-8')
+            scaffold = directory/'scaffold-inputs';scaffold.mkdir()
+            for name in ('gui','screens','options'):
+                imported=b'\xef\xbb\xbf# synthetic SDK scaffold caf\xc3\xa9\r\n';body=imported[3:]
+                (scaffold/(name+'.rpy')).write_bytes(imported)
+                (scaffold/(name+'.json')).write_text(json.dumps({'path':'game/'+name+'.rpy','operation':'source.save',
+                    'destinationHasBom':False,'importHasBom':True,'bodyBytesPreserved':True,'passed':True,
+                    'importSHA256':hashlib.sha256(imported).hexdigest(),'beforeSHA256':hashlib.sha256(b'').hexdigest(),
+                    'afterSHA256':hashlib.sha256(body).hexdigest()}),encoding='utf-8')
             target=directory/'safe-edited-entry.rpy'
             with self.assertRaises(FileNotFoundError): gate.sdk_artifacts_ok(directory,report)
             target.write_bytes(after)
             self.assertTrue(gate.sdk_artifacts_ok(directory,report))
             target.write_bytes(after+b'# unexpected SDK or fixture mutation\n')
             with self.assertRaises(ValueError): gate.sdk_artifacts_ok(directory,report)
+            target.write_bytes(after)
+            raw = directory/(gate.CASES[0]+'.log');original=raw.read_bytes();raw.write_bytes(original+b'lost or changed output')
+            with self.assertRaises(ValueError): gate.sdk_artifacts_ok(directory,report)
+            raw.write_bytes(original)
+            imported=scaffold/'gui.rpy';original=imported.read_bytes();imported.write_bytes(b'\xef\xbb\xbf'+original)
+            with self.assertRaises(ValueError): gate.sdk_artifacts_ok(directory,report)
+            imported.write_bytes(original)
+            process=directory/(gate.CASES[0]+'-process.json');original=process.read_text();bad=json.loads(original);bad['exitCode']=False;process.write_text(json.dumps(bad))
+            with self.assertRaises(ValueError): gate.sdk_artifacts_ok(directory,report)
+            process.write_text(original)
+            digests=directory/(gate.CASES[1]+'-source-digests.json');original=digests.read_text();bad=json.loads(original);bad['game/extra.rpy']='f'*64;digests.write_text(json.dumps(bad))
+            with self.assertRaises(ValueError): gate.sdk_artifacts_ok(directory,report)
+            bad=json.loads(original);bad['game/other0.rpy']='f'*64;digests.write_text(json.dumps(bad))
+            with self.assertRaises(ValueError): gate.sdk_artifacts_ok(directory,report)
+            digests.write_text(original)
+            storage=directory/(gate.CASES[0]+'-storage.json');storage.unlink()
+            with self.assertRaises(FileNotFoundError): gate.sdk_artifacts_ok(directory,report)
 
 
 if __name__ == '__main__':
