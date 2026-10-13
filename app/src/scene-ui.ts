@@ -1,4 +1,5 @@
 import { layoutFor, saveLayout } from "./preferences.ts";
+import { buildAvailabilityEditor, validateField } from "./story-condition-editor.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -50,16 +51,42 @@ export interface SceneBeat {
   readonly payload: BeatPayload;
 }
 
+export type BodyRef = { readonly type: "root" } | { readonly type: "branch"; readonly groupId: string; readonly branchId: string };
+export type NodeRef = { readonly type: "beat"; readonly beatId: string } | { readonly type: "condition"; readonly groupId: string };
+export type Position = { readonly type: "before"; readonly anchor: NodeRef } | { readonly type: "end" };
+export function beatBody(beat: SceneBeat): BodyRef {
+  return beat.owner ? { type: "branch", ...beat.owner } : { type: "root" };
+}
+function sameBody(beat: SceneBeat, body: BodyRef): boolean {
+  return body.type === "root" ? !beat.owner : beat.owner?.groupId === body.groupId && beat.owner.branchId === body.branchId;
+}
+function bodyNodes(scene: SceneDocument, body: BodyRef): readonly SceneBeat[] {
+  return scene.beats.filter(beat => sameBody(beat, body) && (!beat.conditionalBranch || (!beat.conditionalBranch.otherwise && !beat.conditionalBranch.ordinal))
+    && !(beat.payload.type === "customCode" && !beat.conditionalBranch && (!beat.payload.source.trim() || beat.payload.source.trimStart().startsWith("#"))));
+}
+function nodeRef(beat: SceneBeat): NodeRef {
+  return beat.conditionalBranch ? { type: "condition", groupId: beat.conditionalBranch.groupId } : { type: "beat", beatId: beat.id };
+}
+function defaultInsertion(scene: SceneDocument, body: BodyRef): Position {
+  const terminal = bodyNodes(scene, body).find(beat => ["jump", "return"].includes(beat.payload.type)
+    || (beat.payload.type === "choice" && beat.payload.options.some(option => !option.condition)));
+  return terminal ? { type: "before", anchor: nodeRef(terminal) } : { type: "end" };
+}
 function rootInsertionIsNested(scene: SceneDocument, beforeBeatId: string | null): boolean {
-  if (beforeBeatId === null) return false;
-  const insertion = scene.beats.find(beat => beat.id === beforeBeatId)?.byteStart;
-  if (insertion === undefined) return false;
-  let groupStart: number | undefined;
-  for (const beat of scene.beats) {
-    if (beat.conditionalBranch && !beat.conditionalBranch.otherwise) groupStart = beat.byteStart;
-    if (beat.owner && groupStart !== undefined && groupStart < insertion && insertion < beat.byteEnd) return true;
-  }
-  return false;
+  const target = scene.beats.find(beat => beat.id === beforeBeatId);
+  if (!target) return false;
+  if (target.owner || (target.conditionalBranch && (target.conditionalBranch.otherwise || target.conditionalBranch.ordinal))) return true;
+  const extent = (groupId: string, depth = 0): number => {
+    if (depth > 16) return Number.MAX_SAFE_INTEGER;
+    return Math.max(0, ...scene.beats.filter(beat => beat.owner?.groupId === groupId || beat.conditionalBranch?.groupId === groupId).map(beat => beat.conditionalBranch && beat.conditionalBranch.groupId !== groupId ? extent(beat.conditionalBranch.groupId, depth + 1) : beat.byteEnd));
+  };
+  return scene.beats.some(beat => beat.conditionalBranch && beat.byteStart < target.byteStart && target.byteStart < extent(beat.conditionalBranch.groupId));
+}
+
+function bodyCaption(scene: SceneDocument, body: BodyRef, model: SceneWorkspace): string {
+  if (body.type === "root") return `${scene.displayName} / Scene body`;
+  const branch = scene.beats.find(beat => beat.id === body.branchId && beat.conditionalBranch?.groupId === body.groupId);
+  return `${scene.displayName} / Condition / ${branch?.conditionalBranch ? branchCaption(branch.conditionalBranch, model) : "Missing branch"}`;
 }
 
 export interface SceneDocument {
@@ -130,6 +157,9 @@ function branchCaption(branch: ConditionalBranch, model: SceneWorkspace): string
 }
 
 function readOnlyLogic(beat: SceneBeat): boolean {
+  return beat.payload.type === "choice" && beat.payload.options.some(option => option.condition?.status === "unknown");
+}
+function previewLogicBoundary(beat: SceneBeat): boolean {
   return beat.payload.type === "call" || (beat.payload.type === "choice" && beat.payload.options.some(option => option.condition !== undefined));
 }
 
@@ -185,7 +215,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string)
   for (const beat of scene.beats.slice(0, limit + 1)) {
     const payload = beat.payload;
     if (beat.owner && beat.id !== throughBeatId) continue;
-    if (payload.type === "customCode" || readOnlyLogic(beat)) {
+    if (payload.type === "customCode" || previewLogicBoundary(beat)) {
       unknownBeatIds.push(beat.id); background = undefined; backgroundUnknown = true;
       characters = []; charactersUnknown = true; music = undefined; musicUnknown = true;
       variables = {}; variablesUnknown = true; overlay = undefined;
@@ -230,6 +260,7 @@ export interface RecoveryItem {
 export interface RecoveryReport { readonly items: readonly RecoveryItem[] }
 
 export interface SceneActions {
+  readonly current?: () => boolean;
   readonly assist?: (sceneId: string, beatId: string, action?: string) => void;
   readonly layoutKey?: string;
   readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>;
@@ -303,16 +334,22 @@ function selectOf<T extends string>(values: readonly { readonly value: T; readon
 }
 
 function entitySelect(values: readonly { readonly id: string; readonly label: string }[], selected?: string): HTMLSelectElement {
-  return selectOf(values.map((item) => ({ value: item.id, label: item.label })), selected);
+  const items = values.map((item) => ({ value: item.id, label: item.label }));
+  const missing = selected !== undefined && !values.some(item => item.id === selected);
+  if (missing || !items.length) items.unshift({ value: selected ?? "", label: selected ? `Unavailable · ${selected}` : "Select an item" });
+  const control = selectOf(items, selected);
+  if (missing || !values.length) control.options[0]!.dataset.unavailable = "true";
+  return control;
 }
 
+const trackedDrafts = new WeakSet<HTMLElement>();
+const trackedDraftControls = new WeakSet<HTMLElement>();
 function dirtyDraft(group: HTMLElement, controls: readonly HTMLElement[]): void {
   group.classList.add("scene-draft");
-  for (const control of controls) {
-    for (const event of ["input", "change"]) control.addEventListener(event, () => {
-      group.dataset.unsubmitted = "true";
-    });
-  }
+  for (const control of controls) if (!trackedDraftControls.has(control)) { trackedDraftControls.add(control); for (const event of ["input", "change"]) control.addEventListener(event, () => { group.dataset.unsubmitted = "true"; }); }
+  if (trackedDrafts.has(group)) return;
+  trackedDrafts.add(group);
+  for (const event of ["input", "change"]) group.addEventListener(event, () => { group.dataset.unsubmitted = "true"; });
 }
 
 export function hasSceneDraft(root: ParentNode = document): boolean {
@@ -372,19 +409,21 @@ export function renderSceneAuthoring(
   };
   draftSettlers.set(host,settle);
 
-  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void): Promise<boolean> => {
-    if(disposed)return false;
+  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision"> = model): Promise<boolean> => {
+    if(disposed || actions.current?.() === false)return false;
     if(hasSceneDraft(host)&&["reorderBeat","moveBeat","removeBeat","moveScene","deleteScene","deleteChapter","undo","redo"].includes(command.type)){actions.status("Complete or cancel the current edit first.","error");focusSceneDraft(host);return false;}
     const before = model;
     actions.status("Saving…");
     try {
-      const next = await actions.apply(command, before);
+      const next = await actions.apply(command, expected);
+      if (disposed || actions.current?.() === false) return false;
       model = next;
       after?.(before, next);
       draw();
       actions.status("Saved");
       return true;
     } catch (error) {
+      if (disposed || actions.current?.() === false) return false;
       actions.status(friendlyError(error, "Scene change could not be saved"), "error");
       focusSceneDraft(host);
       return false;
@@ -392,6 +431,7 @@ export function renderSceneAuthoring(
   };
 
   const draftGuard = (): boolean => {
+    if (settling) { actions.status("Wait for the current Beat change to finish.", "error"); focusSceneDraft(host); return false; }
     if (!hasSceneDraft(host)) return true;
     actions.status("Commit or cancel the Scene editor before navigating.", "error");
     focusSceneDraft(host);
@@ -470,15 +510,15 @@ export function renderSceneAuthoring(
 
   const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", beforeBeatId: string | null = null): void => {
     if (!draftGuard()) return;
-    if (rootInsertionIsNested(scene, beforeBeatId)) {
-      actions.status("Add a root Beat before or after the whole condition group.", "error");
-      return;
+    const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
+    if (anchor?.owner || (anchor?.conditionalBranch && (anchor.conditionalBranch.otherwise || anchor.conditionalBranch.ordinal))) {
+      actions.status("Add a root Beat before or after the whole condition group.", "error"); return;
     }
     selectedBeatId = undefined;
     draw();
     const current = model.scenes.find((item) => item.id === scene.id);
     const list = host.querySelector<HTMLElement>(".beats-list");
-    if (current && list) renderNewBeat(list, current, initialType, beforeBeatId);
+    if (current && list) renderNewBeat(list, current, initialType, { type: "root" }, anchor ? { type: "before", anchor: nodeRef(anchor) } : defaultInsertion(current, { type: "root" }));
   };
 
   const loadImage = async (assetId: string, purpose: "thumbnail" | "imagePreview", image: HTMLImageElement, errorHost: HTMLElement): Promise<void> => {
@@ -617,7 +657,7 @@ export function renderSceneAuthoring(
       const continuation=button("Assist · Continue Scene");
       const anchorIndex=scene.beats.findIndex(b=>b.id===selected?.id),terminalKinds=["return","jump","choice"];
       const adjacent=scene.beats.slice(Math.max(0,anchorIndex-1),anchorIndex+1);
-      continuation.disabled=!selected||scene.sourceConflict||scene.beats.some(readOnlyLogic)||!terminalKinds.includes(scene.beats.at(-1)?.payload.type??"")||scene.beats.slice(0,-1).some(b=>terminalKinds.includes(b.payload.type))||adjacent.some(b=>b.protected||!!b.owner||!!b.conditionalBranch)||!!scene.beats.at(-1)?.protected||!!scene.beats.at(-1)?.owner||!!scene.beats.at(-1)?.conditionalBranch;
+      continuation.disabled=!selected||scene.sourceConflict||scene.beats.some(previewLogicBoundary)||!terminalKinds.includes(scene.beats.at(-1)?.payload.type??"")||scene.beats.slice(0,-1).some(b=>terminalKinds.includes(b.payload.type))||adjacent.some(b=>b.protected||!!b.owner||!!b.conditionalBranch)||!!scene.beats.at(-1)?.protected||!!scene.beats.at(-1)?.owner||!!scene.beats.at(-1)?.conditionalBranch;
       continuation.addEventListener("click",()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"continueScene");});
       const card=button("Assist · Draft Character card");card.disabled=assist.disabled||scene.sourceConflict;
       card.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateCard");};
@@ -647,7 +687,7 @@ export function renderSceneAuthoring(
       const target=scene.beats.findIndex(b=>b.id===card.dataset.beatId);
       if(target<0||target===drag.from)return;
       const interval=scene.beats.slice(Math.min(target,drag.from),Math.max(target,drag.from)+1);
-      if(interval.some(b=>b.owner||b.protected||readOnlyLogic(b)||["choice","jump","return"].includes(b.payload.type))||interval.some((b,i)=>i>0&&interval[i-1]!.byteEnd!==b.byteStart))return;
+      if(interval.some(b=>b.owner||b.protected||previewLogicBoundary(b)||["choice","jump","return"].includes(b.payload.type))||interval.some((b,i)=>i>0&&interval[i-1]!.byteEnd!==b.byteStart))return;
       drag.target=target;card.classList.add(target>drag.from?"drop-after":"drop-before");
     };
     const scrollDrag=():void=>{
@@ -675,6 +715,8 @@ export function renderSceneAuthoring(
       else if(grip.isConnected)grip.focus();
     };
     const escapeDrag=(event:KeyboardEvent):void=>{if(event.key==="Escape"&&drag){event.preventDefault();const grip=drag.grip;cancelDrag();grip.focus();}};
+    const branchHosts = new Map<string, HTMLElement>();
+    const groupHosts = new Map<string, HTMLElement>();
     scene.beats.forEach((beat, index) => {
       const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");card.dataset.beatId=beat.id;
       if (beat.owner) { card.classList.add("nested-dialogue"); card.dataset.groupId=beat.owner.groupId; card.dataset.branchId=beat.owner.branchId; }
@@ -684,18 +726,35 @@ export function renderSceneAuthoring(
       const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beat.conditionalBranch ? "Read-only condition branch" : beatSummary(beat.payload, model);
       select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();};if(!hasSceneDraft(host)&&!settling){selectBeat();return;}void settle().then(ok=>{if(ok)selectBeat();else actions.status("Complete or cancel the current edit before changing Beats.","error");});});
       const controls = document.createElement("div"); controls.className = "beat-controls";
-      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || !!beat.owner || beat.protected || readOnlyLogic(beat) || !!scene.beats[index - 1]?.owner || scene.beats[index - 1]?.protected === true || (index > 0 && readOnlyLogic(scene.beats[index - 1]!)) || scene.sourceConflict;
+      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || !!beat.owner || beat.protected || previewLogicBoundary(beat) || !!scene.beats[index - 1]?.owner || scene.beats[index - 1]?.protected === true || (index > 0 && previewLogicBoundary(scene.beats[index - 1]!)) || scene.sourceConflict;
       up.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "up" }));
-      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || !!beat.owner || beat.protected || readOnlyLogic(beat) || !!scene.beats[index + 1]?.owner || scene.beats[index + 1]?.protected === true || (index < scene.beats.length - 1 && readOnlyLogic(scene.beats[index + 1]!)) || scene.sourceConflict;
+      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || !!beat.owner || beat.protected || previewLogicBoundary(beat) || !!scene.beats[index + 1]?.owner || scene.beats[index + 1]?.protected === true || (index < scene.beats.length - 1 && previewLogicBoundary(scene.beats[index + 1]!)) || scene.sourceConflict;
       down.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "down" }));
-      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !!beat.owner || beat.protected || readOnlyLogic(beat) || beat.payload.type === "return" || scene.sourceConflict;
+      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !!beat.owner || beat.protected || previewLogicBoundary(beat) || beat.payload.type === "return" || scene.sourceConflict;
       remove.addEventListener("click", () => confirmAction(card, `Delete Beat ${index + 1}?`, () => mutate({ type: "removeBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id })));
-      const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=!!beat.owner||beat.protected||readOnlyLogic(beat)||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
+      const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=!!beat.owner||beat.protected||previewLogicBoundary(beat)||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
       grip.addEventListener("lostpointercapture",e=>{if(drag?.pointerId===e.pointerId)cancelDrag();});
       grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasSceneDraft(host)||settling){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
       controls.append(up, down, remove); compact.append(grip,select, controls); card.append(compact);
       if (selectedBeatId === beat.id) renderExistingBeat(card, scene, beat, index);
-      list.append(card);
+      if (beat.conditionalBranch) {
+        const branch = beat.conditionalBranch;
+        let group = groupHosts.get(branch.groupId);
+        if (!group) {
+          group = document.createElement("section"); group.className = "story-condition-group"; group.dataset.conditionGroupId = branch.groupId;
+          (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(group); groupHosts.set(branch.groupId, group);
+        }
+        const body = document.createElement("section"); body.className = "story-branch-body"; body.dataset.branchId = beat.id;
+        body.append(card); group.append(body); branchHosts.set(beat.id, body);
+        const addChild = button(`Add Beat to ${branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If"}`);
+        addChild.disabled = scene.sourceConflict || branch.condition?.status === "unknown";
+        addChild.addEventListener("click", () => {
+          if (!draftGuard()) return;
+          selectedBeatId = undefined; draw();
+          const target = [...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node => node.dataset.branchId === beat.id);
+          if (target) { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; renderNewBeat(target, scene, "dialogue", parent, defaultInsertion(scene, parent)); }
+        }); body.append(addChild);
+      } else (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(card);
     });
   };
 
@@ -703,7 +762,7 @@ export function renderSceneAuthoring(
     if (readOnlyLogic(beat)) {
       const panel = document.createElement("div"); panel.className = "expanded-beat protected-code";
       const explanation = document.createElement("p");
-      explanation.textContent = beat.payload.type === "call" ? `${beatSummary(beat.payload, model)}. Call editing is available in Source. The editor preview does not execute the called Scene.` : "Choice conditions are read-only here. Availability is unknown in the editor preview. Edit this Choice in Source.";
+      explanation.textContent = "This Choice contains an unsupported condition. Edit it in Source to preserve the expression. Availability is unknown in the editor preview.";
       panel.append(explanation);
       if (beat.payload.type === "choice") {
         const options = document.createElement("ul");
@@ -723,11 +782,15 @@ export function renderSceneAuthoring(
       const source = document.createElement("pre"); source.textContent = beat.payload.type === "customCode" ? beat.payload.source : "";
       protectedPanel.append(explanation, source); card.append(protectedPanel); return;
     }
-    const editor = buildBeatEditor(model, beat.payload);
-    if (beat.owner) editor.host.querySelectorAll("select").forEach(control=>control.disabled=true);
+    const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
+    const expectedBody = beatBody(beat);
+    const editor = buildBeatEditor(model, beat.payload, true);
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
+    const parent = document.createElement("p"); parent.className = "story-breadcrumb"; parent.textContent = bodyCaption(scene, expectedBody, model); panel.prepend(parent);
+    panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; });
     if (beat.payload.type === "choice") {
       const createDestination = button("Create New Scene", "button secondary");
+      createDestination.disabled = beat.payload.options.some(option => !!option.condition);
       createDestination.addEventListener("click", () => {
         if (panel.dataset.unsubmitted === "true") {
           actions.status("Commit or cancel current Choice edits before creating a destination.", "error");
@@ -758,24 +821,26 @@ export function renderSceneAuthoring(
     const save = async (continueDialogue: boolean): Promise<boolean> => {
       if(composing)return false;
       let saved=false;
+      let restoreControls = (): void => {};
       try {
         const payload = editor.read();
-        panel.querySelectorAll<HTMLInputElement|HTMLButtonElement|HTMLSelectElement|HTMLTextAreaElement>("input,button,select,textarea").forEach(c=>c.disabled=true);
+        panel.dataset.unsubmitted = "true";
+        const locks = [...panel.querySelectorAll<HTMLInputElement|HTMLButtonElement|HTMLSelectElement|HTMLTextAreaElement>("input,button,select,textarea")].map(control => ({ control, disabled: control.disabled }));
+        locks.forEach(({ control }) => { control.disabled = true; });
+        restoreControls = () => locks.forEach(({ control, disabled }) => { control.disabled = disabled; });
         if (continueDialogue && !beat.owner && payload.type === "dialogue") {
           const oldIds = new Set(model.scenes.find((item) => item.id === scene.id)?.beats.map((item) => item.id));
           await mutate({ type: "continueDialogue", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, characterId: payload.characterId, text: payload.text }, (_before, next) => {
             saved=true;selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => item.payload.type === "dialogue" && !oldIds.has(item.id))?.id;
-          });
+          }, captured);
         } else {
-          await mutate(beat.owner && payload.type === "dialogue"
-            ? { type: "updateChildDialogue", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, expectedOwner: beat.owner, characterId: payload.characterId, text: payload.text }
-            : { type: "updateBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, beat: payload }, () => { saved=true;selectedBeatId = undefined; });
+          await mutate({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, expectedBody, beat: payload }, () => { saved=true;selectedBeatId = undefined; }, captured);
         }
       } catch (error) {
         actions.status(friendlyError(error, `Beat ${index + 1} is invalid`), "error");
         editor.focus();
       }
-      if(!saved&&panel.isConnected){panel.querySelectorAll<HTMLInputElement|HTMLButtonElement|HTMLSelectElement|HTMLTextAreaElement>("input,button,select,textarea").forEach(c=>c.disabled=!!beat.owner && c instanceof HTMLSelectElement);editor.focus();}
+      if(!saved&&panel.isConnected){restoreControls();editor.focus();}
       return saved;
     };
     if(beat.payload.type==="dialogue")saveDialogue=()=>save(false);
@@ -787,39 +852,47 @@ export function renderSceneAuthoring(
     actionsRow.append(cancel, commit); panel.append(actionsRow); dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", beforeBeatId: string | null = null): void => {
-    if (list.querySelector(".new-beat")) return;
-    const panel = document.createElement("section"); panel.className = "new-beat scene-draft"; panel.setAttribute("aria-labelledby", "new-beat-title");
+  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body)): void => {
+    if (host.querySelector(".new-beat")) return;
+    const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
+    const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
+    panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
-    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode" && type !== "call");
+    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode");
     const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType);
+    const destination = document.createElement("p"); destination.className = "story-insertion";
+    const insertionAnchor = position.type === "before" ? position.anchor : undefined;
+    const anchor = insertionAnchor ? bodyNodes(scene, body).find(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(insertionAnchor)) : undefined;
+    destination.textContent = `Insert in ${bodyCaption(scene, body, model)} · ${anchor ? `Before ${anchor.conditionalBranch ? "Condition" : beatLabels[anchor.payload.type]}` : "End of body"}`;
     const editorHost = document.createElement("div");
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model));
-    const replaceEditor = (): void => { editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model)); editorHost.replaceChildren(editor.host); dirtyDraft(panel, editor.controls); };
+    const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
+    const replaceEditor = (): void => { editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model)); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host); dirtyDraft(panel, editor.controls); };
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove());
     let pending=false;
     const commit = button("Add Beat", "button primary"); commit.addEventListener("click", async () => {
-      if(pending)return;
+      if(pending || composing)return;
       try {
         const payload = editor.read();
         pending=true;panel.dataset.unsubmitted="true";
         const controls=[...panel.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|HTMLButtonElement>("input,select,textarea,button")];
+        const locks = controls.map(control => ({ control, disabled: control.disabled }));
         controls.forEach(control=>control.disabled=true);
         let insertedId:string|undefined;
-        const saved=await mutate({ type: "insertBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beforeBeatId, beat: payload }, (before,next) => {
+        const saved=await mutate({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, body, position, beat: payload }, (before,next) => {
           selectedBeatId = undefined;
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
           insertedId=next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
-        });
+        }, captured);
         if(saved&&insertedId){const row=[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===insertedId);row?.scrollIntoView?.({block:"nearest"});row?.querySelector<HTMLElement>(".beat-select")?.focus({preventScroll:true});}
-        if(!saved&&panel.isConnected){controls.forEach(control=>control.disabled=false);editor.focus();}
+        if(!saved&&panel.isConnected){locks.forEach(({control,disabled})=>{control.disabled=disabled;});editor.focus();}
       } catch (error) {
         actions.status(friendlyError(error, "Beat is invalid"), "error"); editor.focus();
       }finally{pending=false;}
     });
-    actionsRow.append(cancel, commit); dirtyDraft(panel, [type]); panel.append(heading, labelled("Beat type", type), editorHost, actionsRow); list.prepend(panel); type.focus();
+    actionsRow.append(cancel, commit); dirtyDraft(panel, [type]); panel.append(heading, destination, labelled("Beat type", type), editorHost, actionsRow); list.prepend(panel); type.focus();
   };
 
   draw();
@@ -876,7 +949,7 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
 
 interface BeatEditor { readonly host: HTMLElement; readonly controls: readonly HTMLElement[]; readonly primary: HTMLElement; readonly read: () => BeatPayload; readonly focus: () => void }
 
-function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload): BeatEditor {
+function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing = false): BeatEditor {
   const host = document.createElement("div"); host.className = "beat-fields"; const controls: HTMLElement[] = [];
   const add = (label: string, control: HTMLElement): void => { controls.push(control); host.append(labelled(label, control)); };
   const transitions = (includeNone = true) => selectOf(([...(includeNone ? [{ value: "none" as const, label: "None" }] : []), { value: "dissolve" as const, label: "Dissolve" }, { value: "fade" as const, label: "Fade" }]), "transition" in payload ? payload.transition : "none");
@@ -905,19 +978,42 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload): BeatEdito
       read = () => { const selected = model.authoring.variables.find((item) => item.id === required(variable)); if (!selected) throw new Error("Select a Variable."); if (selected.variableType === "bool") return { type: "setVariable", variableId: selected.id, value: value.value === "true" }; if (selected.variableType === "int" && !validInt64(value.value)) throw new Error("Enter a canonical signed 64-bit decimal integer."); return { type: "setVariable", variableId: selected.id, value: value.value }; }; break;
     }
     case "choice": {
+      const countLocked = existing && payload.options.some(option => !!option.condition);
       const optionHost = document.createElement("div"); optionHost.className = "choice-options"; host.append(optionHost);
-      const rows: { text: HTMLInputElement; destination: HTMLSelectElement; row: HTMLElement }[] = [];
-      const addOption = (option: ChoiceOption = { text: "", destinationSceneId: model.scenes[0]?.id ?? "" }): void => { const row = document.createElement("div"); row.className = "choice-option"; const text = input(option.text); text.ariaLabel = "Choice option text"; const destination = scenes(option.destinationSceneId); destination.ariaLabel = "Choice destination Scene"; const markDirty = (): void => { const draft = host.closest<HTMLElement>(".scene-draft"); if (draft) draft.dataset.unsubmitted = "true"; }; text.addEventListener("input", markDirty); destination.addEventListener("change", markDirty); const remove = button("Remove", "text-button"); remove.addEventListener("click", () => { const index = rows.findIndex((item) => item.row === row); if (index >= 0) rows.splice(index, 1); row.remove(); markDirty(); }); row.append(text, destination, remove); rows.push({ text, destination, row }); controls.push(text, destination); optionHost.append(row); };
-      payload.options.forEach(addOption); if (!rows.length) addOption(); const addChoice = button("Add option", "text-button"); addChoice.addEventListener("click", () => { addOption(); const draft = host.closest<HTMLElement>(".scene-draft"); if (draft) draft.dataset.unsubmitted = "true"; }); host.append(addChoice);
-      read = () => { if (!rows.length) throw new Error("A Choice needs at least one option."); return { type: "choice", options: rows.map((row) => ({ text: requiredText(row.text, "Choice text"), destinationSceneId: required(row.destination) })) }; }; break;
+      const rows: { text: HTMLInputElement; destination: HTMLSelectElement; row: HTMLElement; guard: ReturnType<typeof buildAvailabilityEditor>; validateText: () => void; validateDestination: () => void }[] = [];
+      const addOption = (option: ChoiceOption = { text: "", destinationSceneId: model.scenes[0]?.id ?? "" }): void => {
+        const row = document.createElement("div"); row.className = "choice-option";
+        const text = input(option.text); text.setAttribute("aria-label", "Choice option text");
+        const destination = scenes(option.destinationSceneId); destination.setAttribute("aria-label", "Choice destination Scene");
+        row.append(labelled("Choice option text", text), labelled("Choice destination Scene", destination));
+        const validateText = validateField(text, () => { requiredText(text, "Choice text"); });
+        const validateDestination = validateField(destination, () => { required(destination); });
+        const guard = buildAvailabilityEditor(model.authoring.variables, option.condition); row.append(guard.host);
+        const remove = button("Remove", "text-button"); remove.disabled = countLocked; remove.addEventListener("click", () => { const index = rows.findIndex(item => item.row === row); if (index >= 0) rows.splice(index, 1); row.remove(); host.dispatchEvent(new Event("input", { bubbles: true })); });
+        row.append(remove); rows.push({ text, destination, row, guard, validateText, validateDestination }); controls.push(text, destination); optionHost.append(row);
+      };
+      payload.options.forEach(addOption); if (!rows.length) addOption();
+      const addChoice = button("Add option", "text-button"); addChoice.disabled = countLocked; addChoice.addEventListener("click", () => { addOption(); host.dispatchEvent(new Event("input", { bubbles: true })); }); host.append(addChoice);
+      const note = document.createElement("p"); note.textContent = "Availability is unknown in the editor preview. If no options are available, execution continues at the next Beat." + (countLocked ? " To change the number of options, edit this Choice in Source." : ""); host.append(note);
+      read = () => {
+        if (!rows.length) throw new Error("A Choice needs at least one option.");
+        const options = rows.map(row => { row.validateText(); row.validateDestination(); const condition = row.guard.read(); return { text: row.text.value, destinationSceneId: required(row.destination), ...(condition ? { condition } : {}) }; });
+        return { type: "choice", options };
+      }; break;
     }
     case "jump": { const destination = scenes(payload.sceneId); add("Destination Scene", destination); read = () => ({ type: "jump", sceneId: required(destination) }); break; }
-    case "call": read = () => payload; break;
+    case "call": {
+      const destination = scenes(payload.sceneId); destination.setAttribute("aria-label", "Call destination Scene");
+      const validate = validateField(destination, () => { required(destination); });
+      add("Call destination Scene", destination);
+      const note = document.createElement("p"); note.textContent = "Returns to the next Beat. The editor preview does not execute the called Scene."; host.append(note);
+      read = () => { validate(); return { type: "call", sceneId: required(destination), returnLabel: payload.returnLabel }; }; break;
+    }
     case "return": read = () => ({ type: "return" }); break;
     case "customCode": read = () => payload; break;
   }
   const primary = controls[controls.length - 1] ?? host;
-  return { host, controls, primary, read: read!, focus: () => (controls[0] as HTMLElement | undefined)?.focus() };
+  return { host, controls, primary, read: read!, focus: () => (host.querySelector<HTMLElement>('[aria-invalid="true"]') ?? controls[0] as HTMLElement | undefined)?.focus() };
 }
 
 function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace): BeatPayload {
@@ -943,7 +1039,7 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace): BeatP
   }
 }
 
-function required(control: HTMLSelectElement): string { if (!control.value) { control.focus(); throw new Error("Select an available item first."); } return control.value; }
+function required(control: HTMLSelectElement): string { if (!control.value || control.selectedOptions[0]?.dataset.unavailable === "true") { control.focus(); throw new Error("Select an available item first."); } return control.value; }
 function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) { control.focus(); throw new Error(`${name} is required.`); } return control.value.trim(); }
 function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }
 

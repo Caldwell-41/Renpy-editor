@@ -24,10 +24,10 @@ function model(beats: readonly SceneBeat[]): SceneWorkspace {
 const call: SceneBeat = { id: "call", byteStart: 40, byteEnd: 95, protected: false, payload: { type: "call", sceneId: "two", returnLabel: "_loomlight_return_stable" } };
 const choice: SceneBeat = { id: "choice", byteStart: 95, byteEnd: 180, protected: false, payload: { type: "choice", options: [{ text: "High trust", destinationSceneId: "two", condition: guard }, { text: "Custom", destinationSceneId: "two", condition: unknown }, { text: "Ordinary", destinationSceneId: "two" }] } };
 
-test("Call and guarded Choice are read-only with exact Source navigation and no mutations", async () => {
+test("Unknown guarded Choice is read-only with exact Source navigation and no mutations", async () => {
   const { browser, host, tree } = setup(); const writes: unknown[] = []; const sources: unknown[] = [];
   const dispose = renderSceneAuthoring(host, tree, model([call, choice]), { apply: async command => { writes.push(command); throw Error("Unexpected write"); }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 }, viewSource: (...args) => sources.push(args), assist: () => { throw Error("Unexpected AI action"); } });
-  for (const beat of [call, choice]) {
+  for (const beat of [choice]) {
     let card = host.querySelector<HTMLElement>(`[data-beat-id="${beat.id}"]`)!;
     assert.ok([...card.querySelectorAll<HTMLButtonElement>(".beat-controls button,.beat-grip")].every(button => button.disabled));
     card.querySelector<HTMLButtonElement>(".beat-select")!.click();
@@ -39,11 +39,11 @@ test("Call and guarded Choice are read-only with exact Source navigation and no 
     if (beat.id === "call") assert.match(card.textContent!, /Shared conversation · Returns to next Beat/);
     else { assert.match(card.textContent!, /trust is at least 9223372036854775807/); assert.match(card.textContent!, /Unknown condition: custom_check\(\)/); assert.match(card.textContent!, /Availability unknown/); }
   }
-  assert.deepEqual(sources, [["game/arrival.rpy", 40, 95, "saved"], ["game/arrival.rpy", 95, 180, "saved"]]);
+  assert.deepEqual(sources, [["game/arrival.rpy", 95, 180, "saved"]]);
   assert.deepEqual(writes, []);
   assert.equal([...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Assist · Continue Scene")!.disabled, true);
   [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Add Beat")!.click();
-  assert.ok(![...host.querySelectorAll<HTMLOptionElement>(".new-beat option")].some(option => option.value === "call"));
+  assert.ok([...host.querySelectorAll<HTMLOptionElement>(".new-beat option")].some(option => option.value === "call"));
   dispose(); await browser.happyDOM.close();
 });
 

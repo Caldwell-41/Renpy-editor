@@ -96,18 +96,18 @@ test("nested child commits carry owner and retain input on stale/session refusal
   card.querySelector<HTMLButtonElement>(".beat-select")!.click();
   card = document.querySelector<HTMLElement>('[data-beat-id="child"]')!;
   const text = card.querySelector<HTMLTextAreaElement>("textarea")!;
-  assert.ok(card.querySelector<HTMLSelectElement>("select")!.disabled);
+  assert.equal(card.querySelector<HTMLSelectElement>("select")!.disabled,false);
   text.value = "Retained café 雪"; text.dispatchEvent(new Event("input",{bubbles:true}));
   for (let n=0;n<2;n++) {
     // Shift+Enter remains a text-only child edit; it cannot create another child.
     text.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",ctrlKey:true,shiftKey:true,bubbles:true,cancelable:true}));
     await tick();
-    assert.equal(calls[n]!.type,"updateChildDialogue");
-    assert.deepEqual(calls[n]!.expectedOwner,{groupId:"group",branchId:"if"});
-    assert.equal(calls[n]!.text,"Retained café 雪");
+    assert.equal(calls[n]!.type,"updateBodyBeat");
+    assert.deepEqual(calls[n]!.expectedBody,{type:"branch",groupId:"group",branchId:"if"});
+    assert.equal((calls[n]!.beat as {text:string}).text,"Retained café 雪");
     assert.equal(calls[n]!.expectedSourceRevision,model.scenes[0]!.sourceRevision);
     assert.equal(text.value,"Retained café 雪"); assert.ok(text.isConnected && hasSceneDraft(document.querySelector("#host")!));
-    assert.ok(!text.disabled && card.querySelector<HTMLSelectElement>("select")!.disabled);
+    assert.ok(!text.disabled && !card.querySelector<HTMLSelectElement>("select")!.disabled);
   }
   const preview = deriveScenePreview(model.scenes[0]!);
   assert.equal(preview.partial,true); assert.equal(preview.variablesUnknown,true);
@@ -367,7 +367,7 @@ test("closeout: Add change here retains selected Beat anchor", async () => {
   });
   [...document.querySelectorAll("button")].find(item => item.textContent?.startsWith("2. Dialogue"))!.click();
   click("Add change here"); document.querySelector<HTMLButtonElement>(".new-beat .button.primary")!.click(); await tick();
-  assert.equal(calls.at(-1)?.beforeBeatId, "dialogue");
+  assert.deepEqual(calls.at(-1)?.position, { type: "before", anchor: { type: "beat", beatId: "dialogue" } });
 });
 
 test("Background resolves default-layer uncertainty after Custom Code without clearing music or variable uncertainty", () => {
@@ -403,7 +403,7 @@ test("dialogue navigation protects IME and shares one pending commit",async()=>{
 test("adding a Beat saves once and returns a collapsed row without a second commit",async()=>{
  const browser=installDom();let model=sceneModel();let calls=0;
  const dispose=renderSceneAuthoring(document.querySelector('#host')!,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async(assetId,purpose)=>({assetId,purpose,mimeType:'image/png',dataBase64:'',sha256:'a',byteCount:1,cacheKey:'a'}),apply:async command=>{
-  assert.equal(command.type,'insertBeat');calls++;const scene=model.scenes[0]!;model={...model,scenes:[{...scene,beats:[...scene.beats,{id:'new',byteStart:100,byteEnd:120,protected:false,payload:{type:'narration',text:'New text'}}]},model.scenes[1]!]};return model;
+  assert.equal(command.type,'insertBodyBeat');calls++;const scene=model.scenes[0]!;model={...model,scenes:[{...scene,beats:[...scene.beats,{id:'new',byteStart:100,byteEnd:120,protected:false,payload:{type:'narration',text:'New text'}}]},model.scenes[1]!]};return model;
  }});
  click('Add Beat');const type=document.querySelector<HTMLSelectElement>('.new-beat select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));
  const text=document.querySelector<HTMLTextAreaElement>('.new-beat textarea')!;text.value='New text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
@@ -508,12 +508,15 @@ test("shipped source-foundation native driver completes against strict renderer 
       case "probe.runtimeUiReport": report(payload as {passed:boolean;checks:string[]}); return {};
       case "scene.apply": {
         const command = payload.command as SceneCommand;
-        if (command.type === "updateChildDialogue") {
+        if (command.type === "updateBodyBeat" || command.type === "updateChildDialogue") {
           const child = model.scenes[0]!.beats.find(b=>b.id===command.beatId)!;
-          if (JSON.stringify(command.expectedOwner)!==JSON.stringify(child.owner)) throw Object.assign(Error("owner"),{code:"SCENE_INVARIANT"});
+          if (command.type === "updateBodyBeat") {
+            if (JSON.stringify(command.expectedBody)!==JSON.stringify({type:"branch",...child.owner})) throw Object.assign(Error("owner"),{code:"SCENE_INVARIANT"});
+          } else if (JSON.stringify(command.expectedOwner)!==JSON.stringify(child.owner)) throw Object.assign(Error("owner"),{code:"SCENE_INVARIANT"});
           if(draft!==undefined)throw Object.assign(Error("dirty source"),{code:"DIRTY_SOURCE"});
-          text = original.replace("True café 雪",command.text as string); accepted=text;
-          model={...model,canUndo:true,canRedo:false,sourceMapRevision:"5".repeat(64),scenes:[{...model.scenes[0]!,sourceRevision:"6".repeat(64),beats:model.scenes[0]!.beats.map(b=>b.id===child.id?{...b,payload:{type:"dialogue",characterId:"alice",text:command.text as string}}:b)}]};
+          const changedText = command.type === "updateBodyBeat" ? (command.beat as {text:string}).text : command.text as string;
+          text = original.replace("True café 雪",changedText); accepted=text;
+          model={...model,canUndo:true,canRedo:false,sourceMapRevision:"5".repeat(64),scenes:[{...model.scenes[0]!,sourceRevision:"6".repeat(64),beats:model.scenes[0]!.beats.map(b=>b.id===child.id?{...b,payload:{type:"dialogue",characterId:"alice",text:changedText}}:b)}]};
           saved=model;
         } else if(command.type==="undo") { text=original;model={...foundationModel(),canRedo:true}; }
         else if(command.type==="redo") { text=accepted;model=saved; }

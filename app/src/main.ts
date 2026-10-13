@@ -602,6 +602,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     }
     disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
+      current: () => generation === viewGeneration && currentProject?.sessionId === project.sessionId,
       assist: (sceneId,beatId,action="rewriteDialogue") => {
         if (rewriteController?.busy()) { setStatus("Finish or cancel the current Assist operation first.","error"); return; }
         if (rewriteController?.hasWork() && !window.confirm("Discard the unfinished Assist task/proposal and select this Beat?")) return;

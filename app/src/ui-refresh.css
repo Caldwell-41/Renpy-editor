@@ -717,3 +717,14 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .context-preview table { width:100%; text-align:left; }
 .context-preview th { font-weight:normal; }
 .prompt-restore { border:1px solid var(--border-normal); padding:.8rem; }
+
+.story-condition-group { border-inline-start: 2px solid var(--border-strong); margin-block: 8px; padding-inline-start: min(1rem, 2vw); }
+.story-branch-body { min-width: 0; padding-block: 6px; }
+.story-branch-body > .nested-dialogue { margin-inline-start: 0; }
+.story-breadcrumb, .story-insertion { color: var(--text-secondary); overflow-wrap: anywhere; }
+.choice-option { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: start; }
+.choice-availability { grid-column: 1 / -1; }
+.condition-fields { display: flex; flex-wrap: wrap; gap: 12px; }
+.condition-fields > .field, .condition-fields > div { flex: 1 1 160px; min-width: 0; }
+.field-error { display: block; color: var(--error); font-size: .9em; }
+@media (max-width: 760px) { .choice-option { display: flex; flex-direction: column; } .choice-option > * { width: 100%; } }
