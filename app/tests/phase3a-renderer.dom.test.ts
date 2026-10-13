@@ -75,7 +75,7 @@ test("Branches presents body, guards and Call continuations with exact source lo
   const dispose = renderBranches(host, { load: async () => flow, source: target => sources.push(target), scene: (...args) => scenes.push(args), status: () => {} }); await tick();
   const choose = (label: string, value: string): void => { const select = host.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)!; select.value = value; select.dispatchEvent(new window.Event("change")); };
   choose("Selected Scene", "one"); choose("Selected route", "call");
-  assert.match(host.textContent!, /Call Scene returns to its continuation/); assert.match(host.textContent!, /Conditions are not evaluated/); assert.match(host.textContent!, /Availability unknown/);
+  assert.match(host.textContent!, /Call Scene returns to its continuation/); assert.match(host.textContent!, /Conditions are not evaluated/); assert.doesNotMatch(host.textContent!, /Availability unknown/);
   assert.ok(![...host.querySelectorAll("button")].some(button => button.textContent === "Edit Choice / Jump"));
   for (const label of ["View origin in Source", "View destination body in Source", "View continuation in Source"]) [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === label)!.click();
   assert.deepEqual(sources, [location, body.location, body.location]); assert.deepEqual(scenes, []);
@@ -110,5 +110,22 @@ test("ordinary neighbors cannot move through read-only Call and guarded Choice r
   const dispose = renderSceneAuthoring(host, tree, model([first, call, choice, after]), { apply: async () => { writes++; throw Error("Unexpected move"); }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 } });
   const down = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 1 down")!; const up = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 4 up")!;
   assert.equal(down.disabled, true); assert.equal(up.disabled, true); down.click(); up.click(); assert.equal(writes, 0);
+  dispose(); await browser.happyDOM.close();
+});
+
+test("core guard conditions remain distinct from Choice availability and missing Call targets are diagnosed", async () => {
+  const { browser, host } = setup(); const location = { path: "game/arrival.rpy", revision: "saved", byteStart: 40, byteEnd: 95 };
+  const base = { sceneId: "one", beatId: "guard", optionOrdinal: null, editable: false, location };
+  const flow: FlowWorkspace = { revision: "flow", entrySceneId: "one", partial: true, stale: false, overLimit: false, notice: "Possible flow", nodes: [{ sceneId: "one", name: "Arrival", label: "arrival", location, partial: true, stale: false }], edges: [
+    { ...base, id: "guard", text: "If", kind: "guard", condition: unknown, guardPath: [{ branchId: "guard", branch: { groupId: "group", otherwise: false, ordinal: 0, condition: unknown } }], destination: { kind: "body", sceneId: "one", beatId: null, owner: null, location: null } },
+    { ...base, id: "choice", text: "Guarded option", kind: "choice", condition: unknown, guardPath: [], destination: { kind: "resolved", sceneId: "one" } },
+    { ...base, id: "call-missing", text: "Call target unavailable", kind: "call", guardPath: [], returnLabel: "_loomlight_return", destination: { kind: "missing", label: "absent_scene" }, continuation: { sceneId: "one", beatId: null, owner: null, location: null } },
+  ] };
+  const dispose = renderBranches(host, { load: async () => flow, source: () => {}, scene: () => {}, status: () => {} }); await tick();
+  const choose = (label: string, value: string): void => { const select = host.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)!; select.value = value; select.dispatchEvent(new window.Event("change")); };
+  choose("Selected Scene", "one"); choose("Selected route", "guard");
+  assert.match(host.textContent!, /If Unknown condition: custom_check\(\)/); assert.doesNotMatch(host.textContent!, /Available when|Availability unknown/);
+  choose("Selected route", "choice"); assert.match(host.textContent!, /Available when Unknown condition: custom_check\(\).*Availability unknown/);
+  choose("Selected route", "call-missing"); assert.match(host.textContent!, /Missing label: absent_scene/); assert.doesNotMatch(host.textContent!, /Call Scene returns to its continuation/);
   dispose(); await browser.happyDOM.close();
 });
