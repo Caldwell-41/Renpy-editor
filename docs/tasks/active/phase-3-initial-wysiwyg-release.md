@@ -1,41 +1,59 @@
 # Phase 3 — Initial WYSIWYG release
 
-**Planning date:** 2026-10-02. **State:** researched implementation-plan draft;
-full milestone implementation `not_started`. Bounded section 21 source foundations
-are implemented locally with qualification incomplete; [Phase 2 section 23](../archive/2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07) owns evidence. No 3A acceptance is claimed.
-**Latest user direction:** accept only native Ren'Py video/animation formats at this
-stage, with no conversion; 3C explicitly covers character drag/resize, pre-rendered
-playback and dialogue-time idle loops. Earlier direction removed 3E/Git and requested
-implementation research. Plan the
-implementation of the remaining Phase 3 parts using Ren'Py documentation and relevant
-projects as references. Earlier outcome-level planning was not a complete implementation
-plan. The steps below supply a proposed technical approach and proof checkpoints;
-research is not SDK qualification or approval to start coding.
-**Sequence:** selected staged overlap brings bounded 3A source foundations forward
-and completes 3A alongside remaining Phase 2 work after the first safe rewrite.
-Story logic precedes Screens; Screens and Timeline may use two lanes, with zero to two
-helpers according to independent work.
-[The Phase 2 delivery section](phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
-owns the shared sequence/team. Its [bounded deliverable queue and completion loop](phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
-selects one outcome, which may group related deliverables, then docs/handover and a
-next-outcome prompt.
-Exact feature subsets remain reviewable.
-Cross-platform work uses [CI-first routing](../../WORKFLOW.md#test-host-routing-and-ownership):
-keep development in the current session and use focused CI for required platform
-proof. Group qualification for selected related work; request local handoff only
-for a named required case CI cannot establish. Direct other-machine access is not
-implied. Preserve selected scope, cumulative allowances and evidence requirements.
-**Owner:** this brief owns Phase 3 capability boundaries and acceptance planning;
-[ROADMAP](../../ROADMAP.md) owns the overall sequence, and
-[PRODUCT](../../PRODUCT.md) retains the initial-release commitment.
-**Entry:** accepted/integrated Phase 1 including 1H, fresh refs/implementation
-inspection and selection of a bounded outcome. Minimum 3A source foundations may be
-selected before Phase 2 completion; remaining 3A follows the first safe Phase 2 rewrite.
-3B/3C require accepted Phase 2 and 3A. 3D follows its qualified semantics/effects, and
-3F retains all milestone acceptance dependencies. These are scoped entry conditions,
-not approval to implement every checkpoint.
-Planning can continue now. No implementation, integration, release or new CI dispatch
-is selected by this document.
+**Current selection — 2026-10-13:** Phase 3A Story logic implementation is
+`in_progress`, authorized by the user's explicit orchestration request. Phase 2 is
+**PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
+This selection supersedes the earlier planning-only/complexity-assessment directions.
+No 3A acceptance is claimed. 3B/3C/3D/3F remain unselected; default 3B/3C entry still
+requires accepted Phase 2/3A.
+
+**Baseline and dependencies:** entry branch is `codex/provider-qualification`,
+HEAD `591b04a`; implementation now uses dedicated `codex/phase3a-story-logic`, preserving
+the Phase 2 branch, with four pre-existing local
+pause/assessment documentation edits preserved. Phase 1 and bounded nested-source
+foundations are accepted; the latter is both-target qualified through PR19. The first
+safe rewrite is qualified. Section 19's overlap therefore permits remaining 3A without
+Phase 2 final acceptance. 3A reuses source-map v3, exact-range preparation, transactions,
+history, variables and observed flow. Shared changes must preserve the existing AI
+allowlist or visibly refuse unsupported targets; no provider request is needed.
+
+**Execution:** the lead orchestrates Sol 6.1 High implementation and validation agents,
+reviews each coherent slice and continues routine slices autonomously. Core/model and
+renderer writers remain serial at shared interfaces and use isolated implementation
+worktrees. Delegated Sol 6.1 High agents may monitor/poll selected CI under the user's
+explicit exception to WORKFLOW's default wait policy; the lead must not poll CI.
+No recursive delegation, merge, release, Phase 2 live send or security-policy change.
+
+**Reviewable slices:**
+
+1. 3A.1: typed condition grammar, exact values, diagnostics and nested source ownership;
+   reuse accepted foundation and prove a nested transaction before broad UI work.
+2. 3A.2: conditional choices, calls/stable return labels, block-aware continuation,
+   observed graph and history; early actual pinned-SDK dispatch/runtime proof.
+3. 3A.3: nested Story condition/choice/call controls, explicit keyboard moves,
+   Branches navigation, shared diagnostics and retained drafts.
+4. 3A.4: coherent-candidate Windows/macOS qualification of both routes, nested calls,
+   save/return, source round trips, history, ordinary conflicts and reopen.
+
+Section 3 owns the grammar, interaction contract and completion criteria. Each slice
+requires owner review and any selected independent review before advancement. Missing
+proof never becomes acceptance. Hard dependencies, exhausted cumulative allowances
+and material scope decisions require a concrete escalation; routine checkpoints do not.
+Initial 3A.1 allowance: six focused local check invocations, with reassessment after two
+unsuccessful corrections of one hypothesis. Validation allowance: four focused local rounds and three paired CI batches cumulative
+across 3A, zero package builds/owner native starts/live model calls. Per batch/target:
+one verified SDK install, one GUI generation, compile and lint, at most six runtime
+cases (failures count). Early batch follows reviewed core condition/call work before
+broad UI. No Phase 2 allowance is reused; extra required native capability or exhausted
+limits remain a decision, never a waived gate.
+
+**Owner:** this brief owns Phase 3 capability boundaries, acceptance and this execution
+ledger. [ROADMAP](../../ROADMAP.md) owns overall sequence; [PRODUCT](../../PRODUCT.md)
+retains the initial-release commitment. [WORKFLOW](../../WORKFLOW.md) governs delivery
+and [Phase 2 section 19](phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
+owns the shared team/sequence. The current user selection authorizes all 3A slices,
+not other Phase 3 capabilities. Native video/animation without conversion remains the
+future 3C direction; 3E/Git remains removed.
 
 Implementation agents follow the accepted [UI/UX guidelines](../../UI.md#accepted-uiux-guidelines-for-implementation-agents),
 including plain interface language, optional technical help, completion/submission
@@ -870,3 +888,40 @@ Exact preservation checks retained both complete UI sections and the pre-merge l
 Phase 1 CURRENT/HANDOVER content. App/test/script/workflow/AGENTS trees are unchanged.
 No app/SDK/native/build/CI execution was required or performed. Commit the merge
 locally; no push or branch/worktree deletion. Resolve its exact two-parent SHA from Git.
+
+## 3A execution ledger — 2026-10-13
+
+**Entry/dependency assessment:** branch/remote both `591b04a` (tree `d1dcded`), no
+open PR or pending branch CI at delegated entry inspection. Existing documentation
+edits retained. Shared foundation PR19 and first safe rewrite satisfy overlap entry;
+Phase 2 final feedback/acceptance is independent and remains **PAUSED — INCOMPLETE**.
+No provider access, Phase 2 UI session or unfinished AI feature is needed for 3A.
+
+**Branch preservation:** root created `codex/phase3a-story-logic` from entry HEAD
+with the existing documentation edits retained. `codex/provider-qualification` and
+all existing branches/commits remain intact. Dedicated branch pushes do not trigger
+the existing main-only quality or historical runtime push workflows. No PR is open;
+focused dispatch will follow reviewed publication.
+
+**Assignments:** Sol 6.1 High core agent owns Rust in isolated `phase3a-core` worktree
+at entry HEAD. Sol 6.1 High validation agent owns dedicated workflow/scripts/harness
+in an isolated validation worktree, consumes the reviewed core test contract, and
+alone may poll CI. A separate Sol 6.1 High reviewer checks design and exact changes
+read-only; root owns integration/status. No recursive agent tree or concurrent shared
+file writers. First pairing's output so far is core seam/dependency design and CI/SDK
+capability assessment; no speedup, timing or cost claim. Integration rework and duplicate
+checks will be recorded if incurred.
+
+**Capability:** portable pinned toolchain is available through the repository's ignored
+Mac environment script. Delegated unsandboxed read-only GitHub access works; initial
+sandbox network/login failure was an environment boundary, not a product issue. The
+local official 8.5.3 SDK archive has recorded SHA256
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+Recent Windows/macOS runner evidence establishes available native service paths but
+does not qualify new 3A inputs. Early proof will use normal SDK entry and actual
+route/return assertions, plus a rejecting wrong-result fixture and precise cleanup.
+
+**Current counts:** core focused checks 0/6; validation local rounds 0/4; paired CI
+0/3; packages/native-owner starts/live model calls 0. No 3A CI dispatched, no product
+commit published, no 3A acceptance claimed. Next: first core expression/nested-source
+implementation, independent review, then call/flow integration and early paired proof.

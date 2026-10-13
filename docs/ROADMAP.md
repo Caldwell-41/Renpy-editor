@@ -84,6 +84,11 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 ## Phase 2 — Initial LLM assistance
 
+**Status — 2026-10-13: PAUSED — INCOMPLETE.** The user selected Phase 3A implementation
+without resuming or closing Phase 2. Final human acceptance remains pending; scoped
+technical qualification is preserved. The [pause record](tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13)
+owns outstanding work and supersedes historical execution directions below.
+
 **Outcome:** Unsloth Studio alone supports user-initiated structured scene, Character
 and proposed-lore actions, with reviewable semantic/file changes. Persistent Character
 cards and a lorebook support manual and LLM-generated content for selected context;

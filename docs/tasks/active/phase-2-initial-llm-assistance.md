@@ -1,5 +1,38 @@
 # Phase 2 — Initial LLM assistance
 
+## User pause — 2026-10-13
+
+**Phase status: PAUSED — INCOMPLETE.** The user explicitly selected autonomous
+Phase 3A implementation and prohibited resuming, completing, accepting or closing
+Phase 2 without a later explicit instruction. This supersedes the prior complexity
+assessment selection and all historical Phase 2 continuation prompts below.
+
+Preserve branch `codex/provider-qualification`, its commits, existing local documentation
+changes, qualified source foundation and every technical evidence/failure record.
+Studio-only technical closeout and UI refinement retain their scoped `review_ready`
+status; that is not Phase 2 acceptance. No pending Phase 2 operation needs cancellation.
+
+Outstanding on resume:
+
+- Guided feedback is prepared but `not_started`; preferences and defects must remain
+  distinct from explicit acceptance. No feedback session or follow-up fixes are selected.
+- Required final human acceptance remains unclaimed. The refined renderer has both-target
+  controlled CI proof, but no new matching packaged WebView physical interaction or
+  screen-reader proof. The installed frozen929 package predates the refinement; a
+  matching-build native session requires its own selected scope and allowance.
+- Literal IPv6 HTTPS remains unsupported and owner live TLS was not newly measured;
+  retain these limits, failed live send7 and historical CI failures without reclassifying
+  them as passes. No supported remaining scoped technical blocker was found in the
+  final CI9/UI CI1 audits; unfinished acceptance remains unfinished.
+- Generic providers, selected-route context and AI ending/connection changes remain
+  deferred; thinking/streaming and new AI mutation families are not authorized.
+
+Existing Phase 2 allowances are preserved and never transferred to Phase 3A.
+The section 19 overlap permits 3A after the qualified first rewrite; no incomplete
+Phase 2 acceptance item blocks that entry. Shared-model compatibility regressions
+belong to 3A safety, not renewed Phase 2 acceptance. Default 3B/3C entry still requires
+accepted Phase 2/3A. Resume Phase 2 only on explicit user direction.
+
 ## Active scope amendment — Unsloth Studio only — 2026-10-12
 
 The user revised Phase 2 to **Unsloth Studio only**. This amendment supersedes the

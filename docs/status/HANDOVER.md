@@ -1,6 +1,40 @@
 # Current outcome handover
 
-## Studio UI refinement — review_ready; guided feedback prepared, not started
+## Selected focus — Phase 3A implementation; Phase 2 PAUSED — INCOMPLETE
+
+The user's 2026-10-13 orchestration request authorizes autonomous Phase 3A slices with
+Sol 6.1 High implementation/validation agents and review before advancement. It forbids
+resuming or closing Phase 2. Its outstanding work and limitations are preserved in the
+[Phase 2 pause record](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13).
+Existing scoped `review_ready` records below remain evidence, not phase acceptance.
+
+Current branch `codex/phase3a-story-logic`, created from preserved Phase 2 branch
+`codex/provider-qualification`, entry HEAD `591b04a`; four local pause/assessment
+document edits predated this request and are preserved in the updated records. Root owns
+status/task documentation and integration; the core agent owns an isolated 3A Rust
+worktree, while validation initially inspects CI/runtime capability read-only. No other
+branch, commit, unfinished work or Phase 2 allowance is discarded or transferred.
+
+The [Phase 3 brief](../tasks/active/phase-3-initial-wysiwyg-release.md) owns ordered
+3A.1 expressions/nesting, 3A.2 calls/flow, 3A.3 Story/Branches controls and 3A.4 qualified
+runtime/source/history behavior. Accepted source foundations and qualified first rewrite
+permit 3A entry independently of unfinished Phase 2 acceptance. Keep the AI allowlist
+unchanged. Default 3B/3C entry still requires accepted Phase 2/3A.
+
+**Next:** review current core seams and the delegated dependency/CI capability reports,
+then implement and review the first coherent condition/source slice. Initial allowance
+is six focused local check invocations; record usage in the task. Validation allowance: four local rounds, three paired CI batches cumulative across
+3A; per batch/target one verified SDK install, one GUI generation, compile/lint and at
+most six runtime cases. Zero packages/owner native starts/live model calls. No CI is
+pending for 3A. The lead must not poll CI;
+delegated Sol 6.1 High agents may poll selected runs by explicit user authorization,
+superseding default manual wait only for this work. Continue reviewable routine slices
+without intermediate user approval; escalate only concrete hard dependencies, exhausted
+allowance or material decisions. Development stays on macOS; required affected Windows/
+macOS proof uses focused CI. Work is local-only until publication is confirmed. No merge,
+release, live model send, Phase 2 acceptance session or unrelated feature is authorized.
+
+## Preserved Studio UI refinement — review_ready; guided feedback paused
 
 The bounded refinement is delivered on `codex/provider-qualification`, source
 462cf0897eb84d34390d68634f0b8cb2345d7a48/tree
@@ -56,8 +90,9 @@ remain historical; settled exact CI inputs establish current renderer evidence. 
 allowances are not reasons to execute or transfer automatically to another outcome.
 No further refinement CI is needed; repository/diff validation covers docs closeout.
 
-**Next:** the separate [guided-feedback prompt](../tasks/active/phase-2-initial-llm-assistance.md#prepared-guided-feedback-session--not-started)
-is prepared with status `not_started`. Wait for the user's selection; do not create/start
+**Phase 2 resume:** the separate [guided-feedback prompt](../tasks/active/phase-2-initial-llm-assistance.md#prepared-guided-feedback-session--not-started)
+is prepared with status `not_started` and paused by the latest user direction. Wait for
+the user's explicit Phase 2 resume/selection; do not create/start
 a chat/session, launch an app or request acceptance automatically. Default feedback can
 use current public-fixture screenshots. The installed frozen929 app is older UI and must
 not be presented as refined. A matching-build native feedback/test route needs its own
