@@ -1,9 +1,11 @@
 import { layoutFor, saveLayout } from "./preferences.ts";
 import { branchBounds, branchCaption, routeBranches, type GraphBounds } from "./branches-routing.ts";
+import { conditionCaption, type BeatOwner, type Condition, type ConditionalBranch } from "./scene-ui.ts";
 export interface FlowLocation { readonly path: string; readonly revision: string; readonly byteStart: number; readonly byteEnd: number }
 export interface FlowNode { readonly sceneId: string; readonly name: string; readonly label: string; readonly location: FlowLocation | null; readonly partial: boolean; readonly stale: boolean }
-export type FlowDestination = { readonly kind: "resolved"; readonly sceneId: string } | { readonly kind: "missing"; readonly label: string } | { readonly kind: "unknown"; readonly label: string | null; readonly location: FlowLocation | null } | { readonly kind: "terminal" };
-export interface FlowEdge { readonly id: string; readonly sceneId: string; readonly beatId: string | null; readonly optionOrdinal: number | null; readonly text: string; readonly kind: string; readonly location: FlowLocation; readonly destination: FlowDestination; readonly editable: boolean }
+export interface FlowBody { readonly sceneId: string; readonly beatId: string | null; readonly owner?: BeatOwner | null; readonly location?: FlowLocation | null }
+export type FlowDestination = { readonly kind: "resolved"; readonly sceneId: string } | ({ readonly kind: "body" } & FlowBody) | { readonly kind: "missing"; readonly label: string } | { readonly kind: "unknown"; readonly label: string | null; readonly location: FlowLocation | null } | { readonly kind: "terminal" };
+export interface FlowEdge { readonly id: string; readonly sceneId: string; readonly beatId: string | null; readonly optionOrdinal: number | null; readonly text: string; readonly kind: string; readonly location: FlowLocation; readonly destination: FlowDestination; readonly editable: boolean; readonly guardPath?: readonly { readonly branchId: string; readonly branch: ConditionalBranch }[]; readonly condition?: Condition; readonly continuation?: FlowBody | null; readonly returnLabel?: string }
 export interface FlowWorkspace { readonly observation?: { readonly status: string; readonly fromCache?: boolean; readonly checkedAt: number | null }; readonly entryLocation?: FlowLocation | null; readonly entryNotice?: string; readonly revision: string; readonly entrySceneId: string; readonly nodes: readonly FlowNode[]; readonly edges: readonly FlowEdge[]; readonly partial: boolean; readonly stale: boolean; readonly overLimit: boolean; readonly notice: string }
 export interface BranchesActions {
   readonly layoutKey?: string;
@@ -88,11 +90,33 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
     if (!node) return;
     const description = document.createElement("p"); description.textContent = `${node.name} · ${node.label}${node.sceneId === model?.entrySceneId ? " · Entry" : ""}${node.partial ? " · Partial" : ""}${node.stale ? " · Stale" : ""}`; details.append(description);
     const edge = routes.find((item) => item.id === selectedEdge);
-    const openScene = button(edge?.editable ? "Edit Choice / Jump" : "Open Scene", () => { void navigate(() => actions.scene(node, edge?.editable ? edge : undefined)); }); openScene.disabled = Boolean(model?.stale || node.stale || !node.location); details.append(openScene);
-    if (edge || node.location) { const source = button("View origin in Source", () => { void navigate(() => actions.source(edge?.location ?? node.location ?? undefined)); }); source.disabled = Boolean(model?.stale); details.append(source); }
-    if (edge?.destination.kind === "resolved") { const id = edge.destination.sceneId; const destination = model?.nodes.find((item) => item.sceneId === id); if (destination) details.append(button("Open destination", () => { void navigate(() => actions.scene(destination)); })); }
-    if (edge?.destination.kind === "unknown" && edge.destination.location) { const location = edge.destination.location; details.append(button("View unmapped destination", () => { void navigate(() => actions.source(location)); })); }
-    if (edge) { const text = document.createElement("p"); text.textContent = edge.destination.kind === "missing" ? `Missing label: ${edge.destination.label}` : edge.destination.kind === "terminal" ? "Return / End has no destination edge." : edge.destination.kind === "unknown" ? "Unresolved / custom flow. This graph does not prove every route." : "Use the existing Scene controls to change or create a destination."; details.append(text); }
+    const editable = edge?.editable && ["choice", "jump"].includes(edge.kind) && !edge.condition && !edge.guardPath?.length && !edge.continuation && edge.destination.kind !== "body";
+    const stale = Boolean(model?.stale || node.stale);
+    const openScene = button(editable ? "Edit Choice / Jump" : "Open Scene", () => { void navigate(() => actions.scene(node, editable ? edge : undefined)); }); openScene.disabled = stale || !node.location; details.append(openScene);
+    const sourceLink = (label: string, location: FlowLocation | null | undefined): void => {
+      const source = button(label, () => { if (location) navigate(() => actions.source(location)); }); source.disabled = stale || !location; details.append(source);
+    };
+    if (edge || node.location) sourceLink("View origin in Source", edge?.location ?? node.location);
+    if (edge?.destination.kind === "resolved") { const id = edge.destination.sceneId; const destination = model?.nodes.find((item) => item.sceneId === id); if (destination) { const open = button("Open destination", () => { void navigate(() => actions.scene(destination)); }); open.disabled = stale || destination.stale || !destination.location; details.append(open); } }
+    if (edge?.destination.kind === "unknown" && edge.destination.location) sourceLink("View unmapped destination", edge.destination.location);
+    if (edge?.destination.kind === "body") sourceLink("View destination body in Source", edge.destination.location);
+    if (edge?.continuation) sourceLink("View continuation in Source", edge.continuation.location);
+    if (edge) {
+      const text = document.createElement("p"); text.textContent = edge.kind === "call" ? "Call Scene returns to its continuation. This graph does not execute the called Scene."
+        : edge.destination.kind === "missing" ? `Missing label: ${edge.destination.label}` : edge.destination.kind === "terminal" ? "Return / End has no destination edge." : edge.destination.kind === "unknown" ? "Unresolved / custom flow. This graph does not prove every route." : edge.destination.kind === "body" ? "Possible flow within this Scene. Open its exact source body to inspect." : editable ? "Use the existing Scene controls to change or create a destination." : "Read-only observed flow. Open Source to inspect.";
+      details.append(text);
+      if (edge.guardPath?.length || edge.condition) {
+        const guards = document.createElement("p"); guards.textContent = "Possible guarded route · Conditions are not evaluated here."; details.append(guards);
+        const list = document.createElement("ul");
+        for (const guard of edge.guardPath ?? []) {
+          const item = document.createElement("li");
+          item.textContent = guard.branch.otherwise ? "Otherwise · prior branches did not match" : `${guard.branch.ordinal ? "Else If" : "If"} ${guard.branch.condition ? conditionCaption(guard.branch.condition) : "Unknown condition"}${guard.branch.ordinal ? " · prior branches did not match" : ""}`;
+          list.append(item);
+        }
+        if (edge.condition) { const item = document.createElement("li"); item.textContent = `Available when ${conditionCaption(edge.condition)} · Availability unknown`; list.append(item); }
+        details.append(list);
+      }
+    }
   };
   select.addEventListener("change", () => { selectedScene = select.value || undefined; selectedEdge = undefined; showDetails(); });
   edgeSelect.addEventListener("change", () => { selectedEdge = edgeSelect.value || undefined; showDetails(); edgeSelect.focus(); });

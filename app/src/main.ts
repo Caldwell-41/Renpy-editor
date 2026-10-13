@@ -635,7 +635,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       status: setStatus,
       resolution: project.resolution,
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
-      viewSource: (path, byteStart, byteEnd) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd }); },
+      viewSource: (path, byteStart, byteEnd, expectedRevision) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd, expectedRevision }); },
       layoutKey: `${project.projectId}:story`,
       apply: async (command: SceneCommand, expected) => {
         const operationToken = beginAuthoringCompletion(project, command);

@@ -2,9 +2,21 @@ import { layoutFor, saveLayout } from "./preferences.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
+export type ConditionExpression =
+  | { readonly type: "bool"; readonly value: boolean }
+  | { readonly type: "int" | "string"; readonly value: string }
+  | { readonly type: "variable"; readonly variableId: string; readonly variableType: "bool" | "int" | "string" }
+  | { readonly type: "compare"; readonly operator: "equal" | "notEqual" | "less" | "lessEqual" | "greater" | "greaterEqual"; readonly left: ConditionExpression; readonly right: ConditionExpression }
+  | { readonly type: "not"; readonly operand: ConditionExpression }
+  | { readonly type: "and" | "or"; readonly left: ConditionExpression; readonly right: ConditionExpression };
+export type Condition =
+  | { readonly status: "supported"; readonly expression: ConditionExpression }
+  | { readonly status: "unknown"; readonly source: string; readonly diagnostic: "unsupportedSyntax" | "limitExceeded" | "missingVariable" | "typeMismatch" | "invalidValue" };
+
 export interface ChoiceOption {
   readonly text: string;
   readonly destinationSceneId: string;
+  readonly condition?: Condition;
 }
 
 export type BeatPayload =
@@ -22,11 +34,12 @@ export type BeatPayload =
   | { readonly type: "setVariable"; readonly variableId: string; readonly value: boolean | string }
   | { readonly type: "choice"; readonly options: readonly ChoiceOption[] }
   | { readonly type: "jump"; readonly sceneId: string }
+  | { readonly type: "call"; readonly sceneId: string; readonly returnLabel: string | null }
   | { readonly type: "return" }
   | { readonly type: "customCode"; readonly source: string; readonly reason: string };
 
 export interface BeatOwner { readonly groupId: string; readonly branchId: string }
-export interface ConditionalBranch { readonly groupId: string; readonly variableId: string; readonly otherwise: boolean }
+export interface ConditionalBranch { readonly groupId: string; readonly variableId?: string; readonly otherwise: boolean; readonly ordinal?: number; readonly condition?: Condition }
 export interface SceneBeat {
   readonly owner?: BeatOwner;
   readonly conditionalBranch?: ConditionalBranch;
@@ -84,6 +97,42 @@ export interface SceneWorkspace {
   readonly canRedo: boolean;
 }
 
+/** Read the core's typed expression without evaluating project state. */
+export function conditionCaption(condition: Condition, variables?: SceneWorkspace["authoring"]["variables"]): string {
+  if (condition.status === "unknown") {
+    const reason = { unsupportedSyntax: "unsupported expression", limitExceeded: "expression limit exceeded", missingVariable: "missing Variable", typeMismatch: "Variable type mismatch", invalidValue: "invalid value" }[condition.diagnostic];
+    return `Unknown condition: ${condition.source} (${reason})`;
+  }
+  let remaining = 128;
+  const caption = (expression: ConditionExpression, depth = 0): string => {
+    if (--remaining < 0 || depth > 16) return "Unknown expression";
+    switch (expression.type) {
+      case "bool": return expression.value ? "True" : "False";
+      case "int": return expression.value;
+      case "string": return JSON.stringify(expression.value);
+      case "variable": return variables ? variables.find(variable => variable.id === expression.variableId)?.technicalName ?? "Missing Variable" : `Variable (${expression.variableId})`;
+      case "compare": {
+        const operator = { equal: "is", notEqual: "is not", less: "is less than", lessEqual: "is at most", greater: "is greater than", greaterEqual: "is at least" }[expression.operator];
+        return `(${caption(expression.left, depth + 1)} ${operator} ${caption(expression.right, depth + 1)})`;
+      }
+      case "not": return `Not (${caption(expression.operand, depth + 1)})`;
+      case "and": case "or": return `(${caption(expression.left, depth + 1)} ${expression.type} ${caption(expression.right, depth + 1)})`;
+    }
+  };
+  return caption(condition.expression);
+}
+
+function branchCaption(branch: ConditionalBranch, model: SceneWorkspace): string {
+  if (branch.otherwise) return "Otherwise";
+  const condition = branch.condition ? conditionCaption(branch.condition, model.authoring.variables)
+    : model.authoring.variables.find(variable => variable.id === branch.variableId)?.technicalName ?? "Unknown condition";
+  return `${branch.ordinal ? "Else If" : "If"} ${condition}`;
+}
+
+function readOnlyLogic(beat: SceneBeat): boolean {
+  return beat.payload.type === "call" || (beat.payload.type === "choice" && beat.payload.options.some(option => option.condition !== undefined));
+}
+
 export interface MediaPresentation {
   readonly assetId: string;
   readonly purpose: "thumbnail" | "imagePreview" | "audioAudition";
@@ -117,7 +166,7 @@ export interface ScenePreviewState {
   readonly musicUnknown: boolean;
   readonly variables: Readonly<Record<string, { readonly value: boolean | string; readonly beatId: string }>>;
   readonly variablesUnknown: boolean;
-  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "return"; readonly text: string; readonly beatId: string };
+  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return"; readonly text: string; readonly beatId: string };
 }
 
 export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string): ScenePreviewState {
@@ -136,10 +185,11 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string)
   for (const beat of scene.beats.slice(0, limit + 1)) {
     const payload = beat.payload;
     if (beat.owner && beat.id !== throughBeatId) continue;
-    if (payload.type === "customCode") {
+    if (payload.type === "customCode" || readOnlyLogic(beat)) {
       unknownBeatIds.push(beat.id); background = undefined; backgroundUnknown = true;
       characters = []; charactersUnknown = true; music = undefined; musicUnknown = true;
-      variables = {}; variablesUnknown = true; overlay = undefined; continue;
+      variables = {}; variablesUnknown = true; overlay = undefined;
+      if (payload.type === "customCode") continue;
     }
     switch (payload.type) {
       case "background": background = { assetId: payload.assetId, beatId: beat.id }; backgroundUnknown = false; characters = []; charactersUnknown = false; break;
@@ -156,8 +206,9 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string)
       case "setVariable": variables[payload.variableId] = { value: payload.value, beatId: beat.id }; break;
       case "dialogue": overlay = { kind: "dialogue", text: payload.text, beatId: beat.id }; break;
       case "narration": overlay = { kind: "narration", text: payload.text, beatId: beat.id }; break;
-      case "choice": overlay = { kind: "choice", text: payload.options.map((option) => option.text).join(" · "), beatId: beat.id }; break;
+      case "choice": overlay = { kind: "choice", text: payload.options.map((option) => `${option.text}${option.condition ? " (availability unknown)" : ""}`).join(" · "), beatId: beat.id }; break;
       case "jump": overlay = { kind: "jump", text: "Jump", beatId: beat.id }; break;
+      case "call": overlay = { kind: "call", text: "Call Scene · preview state unknown", beatId: beat.id }; break;
       case "return": overlay = { kind: "return", text: "Return / End", beatId: beat.id }; break;
       case "playSfx": case "transition": break;
     }
@@ -185,7 +236,7 @@ export interface SceneActions {
   readonly status: (message: string, kind?: "normal" | "error") => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
   readonly resolution: { readonly width: number; readonly height: number };
-  readonly viewSource?: (path: string, byteStart?: number, byteEnd?: number) => void;
+  readonly viewSource?: (path: string, byteStart?: number, byteEnd?: number, expectedRevision?: string) => void;
 }
 
 export interface RecoveryActions {
@@ -209,6 +260,7 @@ const beatLabels: Record<BeatPayload["type"], string> = {
   setVariable: "Set Variable",
   choice: "Choice",
   jump: "Jump",
+  call: "Call Scene",
   return: "Return / End",
   customCode: "Custom Code",
 };
@@ -481,7 +533,7 @@ export function renderSceneAuthoring(
       const image = document.createElement("img"); image.className = "preview-background"; image.alt = model.authoring.assets.find((asset) => asset.id === state.background?.assetId)?.displayName ?? "Scene background";
       canvas.append(image); void loadImage(state.background.assetId, "imagePreview", image, canvas);
     } else {
-      const empty = document.createElement("p"); empty.className = "preview-empty"; empty.textContent = state.backgroundUnknown ? "Background unknown after Custom Code" : "No background at this point"; canvas.append(empty);
+      const empty = document.createElement("p"); empty.className = "preview-empty"; empty.textContent = state.backgroundUnknown ? "Background unknown after code or unevaluated flow" : "No background at this point"; canvas.append(empty);
     }
     for (const visible of state.characters) {
       const figure = document.createElement("figure"); figure.className = `preview-character ${visible.placement}`;
@@ -509,7 +561,7 @@ export function renderSceneAuthoring(
     state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance"));
     contribution(state.musicUnknown ? "Music · unknown" : "Music", state.music?.beatId, "playMusic");
     const knownVariables = Object.entries(state.variables); knownVariables.forEach(([id, value]) => contribution(`Variable ${model.authoring.variables.find((item) => item.id === id)?.technicalName ?? id} = ${String(value.value)}`, value.beatId, "setVariable"));
-    if (state.variablesUnknown && !knownVariables.length) { const unknown = document.createElement("p"); unknown.className = "muted"; unknown.textContent = "Variable state is unknown after Custom Code."; provenance.append(unknown); }
+    if (state.variablesUnknown && !knownVariables.length) { const unknown = document.createElement("p"); unknown.className = "muted"; unknown.textContent = "Variable state is unknown after code or unevaluated flow."; provenance.append(unknown); }
     details.append(provenance);
     const media = document.createElement("div"); media.className = "preview-media"; const mediaHeading = document.createElement("h3"); mediaHeading.textContent = "Scene media"; media.append(mediaHeading);
     const referenced = new Set<string>(); if (state.background) referenced.add(state.background.assetId); state.characters.forEach((character) => { const assetId = model.authoring.appearances.find((item) => item.id === character.appearanceId)?.assetId; if (assetId) referenced.add(assetId); });
@@ -529,7 +581,7 @@ export function renderSceneAuthoring(
     titleBlock.append(eyebrow, title, technical);
     const history = document.createElement("div"); history.className = "scene-history";
     const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
-    const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd));
+    const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd, scene.sourceRevision));
     const undo = button("Undo"); undo.disabled = !model.canUndo; undo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "undo" }); });
     const redo = button("Redo"); redo.disabled = !model.canRedo; redo.addEventListener("click", () => { if (draftGuard()) void mutate({ type: "redo" }); });
     const focus = button(writingFocus ? "Exit Writing focus" : "Writing focus");focus.ariaPressed=String(writingFocus);focus.addEventListener("click",()=>{writingFocus=!writingFocus;host.dataset.writingFocus=String(writingFocus);host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus",String(writingFocus));focus.textContent=writingFocus?"Exit Writing focus":"Writing focus";focus.ariaPressed=String(writingFocus);});
@@ -565,7 +617,7 @@ export function renderSceneAuthoring(
       const continuation=button("Assist · Continue Scene");
       const anchorIndex=scene.beats.findIndex(b=>b.id===selected?.id),terminalKinds=["return","jump","choice"];
       const adjacent=scene.beats.slice(Math.max(0,anchorIndex-1),anchorIndex+1);
-      continuation.disabled=!selected||scene.sourceConflict||!terminalKinds.includes(scene.beats.at(-1)?.payload.type??"")||scene.beats.slice(0,-1).some(b=>terminalKinds.includes(b.payload.type))||adjacent.some(b=>b.protected||!!b.owner||!!b.conditionalBranch)||!!scene.beats.at(-1)?.protected||!!scene.beats.at(-1)?.owner||!!scene.beats.at(-1)?.conditionalBranch;
+      continuation.disabled=!selected||scene.sourceConflict||scene.beats.some(readOnlyLogic)||!terminalKinds.includes(scene.beats.at(-1)?.payload.type??"")||scene.beats.slice(0,-1).some(b=>terminalKinds.includes(b.payload.type))||adjacent.some(b=>b.protected||!!b.owner||!!b.conditionalBranch)||!!scene.beats.at(-1)?.protected||!!scene.beats.at(-1)?.owner||!!scene.beats.at(-1)?.conditionalBranch;
       continuation.addEventListener("click",()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"continueScene");});
       const card=button("Assist · Draft Character card");card.disabled=assist.disabled||scene.sourceConflict;
       card.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateCard");};
@@ -595,7 +647,7 @@ export function renderSceneAuthoring(
       const target=scene.beats.findIndex(b=>b.id===card.dataset.beatId);
       if(target<0||target===drag.from)return;
       const interval=scene.beats.slice(Math.min(target,drag.from),Math.max(target,drag.from)+1);
-      if(interval.some(b=>b.owner||b.protected||["choice","jump","return"].includes(b.payload.type))||interval.some((b,i)=>i>0&&interval[i-1]!.byteEnd!==b.byteStart))return;
+      if(interval.some(b=>b.owner||b.protected||readOnlyLogic(b)||["choice","jump","return"].includes(b.payload.type))||interval.some((b,i)=>i>0&&interval[i-1]!.byteEnd!==b.byteStart))return;
       drag.target=target;card.classList.add(target>drag.from?"drop-after":"drop-before");
     };
     const scrollDrag=():void=>{
@@ -628,17 +680,17 @@ export function renderSceneAuthoring(
       if (beat.owner) { card.classList.add("nested-dialogue"); card.dataset.groupId=beat.owner.groupId; card.dataset.branchId=beat.owner.branchId; }
       if (beat.conditionalBranch) card.classList.add("conditional-branch");
       const compact = document.createElement("div"); compact.className = "beat-compact";
-      const select = button(`${index + 1}. ${beat.conditionalBranch ? (beat.conditionalBranch.otherwise ? "Otherwise" : "If " + (model.authoring.variables.find(v=>v.id===beat.conditionalBranch?.variableId)?.technicalName ?? "missing bool variable")) : beatLabels[beat.payload.type]}`, "beat-select"); select.ariaExpanded = String(selectedBeatId === beat.id);
+      const select = button(`${index + 1}. ${beat.conditionalBranch ? branchCaption(beat.conditionalBranch, model) : beatLabels[beat.payload.type]}`, "beat-select"); select.ariaExpanded = String(selectedBeatId === beat.id);
       const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beat.conditionalBranch ? "Read-only condition branch" : beatSummary(beat.payload, model);
       select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();};if(!hasSceneDraft(host)&&!settling){selectBeat();return;}void settle().then(ok=>{if(ok)selectBeat();else actions.status("Complete or cancel the current edit before changing Beats.","error");});});
       const controls = document.createElement("div"); controls.className = "beat-controls";
-      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || !!beat.owner || beat.protected || !!scene.beats[index - 1]?.owner || scene.beats[index - 1]?.protected === true || scene.sourceConflict;
+      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = index === 0 || !!beat.owner || beat.protected || readOnlyLogic(beat) || !!scene.beats[index - 1]?.owner || scene.beats[index - 1]?.protected === true || (index > 0 && readOnlyLogic(scene.beats[index - 1]!)) || scene.sourceConflict;
       up.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "up" }));
-      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || !!beat.owner || beat.protected || !!scene.beats[index + 1]?.owner || scene.beats[index + 1]?.protected === true || scene.sourceConflict;
+      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = index === scene.beats.length - 1 || !!beat.owner || beat.protected || readOnlyLogic(beat) || !!scene.beats[index + 1]?.owner || scene.beats[index + 1]?.protected === true || (index < scene.beats.length - 1 && readOnlyLogic(scene.beats[index + 1]!)) || scene.sourceConflict;
       down.addEventListener("click", () => void mutate({ type: "moveBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, direction: "down" }));
-      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !!beat.owner || beat.protected || beat.payload.type === "return" || scene.sourceConflict;
+      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !!beat.owner || beat.protected || readOnlyLogic(beat) || beat.payload.type === "return" || scene.sourceConflict;
       remove.addEventListener("click", () => confirmAction(card, `Delete Beat ${index + 1}?`, () => mutate({ type: "removeBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id })));
-      const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=!!beat.owner||beat.protected||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
+      const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=!!beat.owner||beat.protected||readOnlyLogic(beat)||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
       grip.addEventListener("lostpointercapture",e=>{if(drag?.pointerId===e.pointerId)cancelDrag();});
       grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasSceneDraft(host)||settling){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
       controls.append(up, down, remove); compact.append(grip,select, controls); card.append(compact);
@@ -648,6 +700,23 @@ export function renderSceneAuthoring(
   };
 
   const renderExistingBeat = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat, index: number): void => {
+    if (readOnlyLogic(beat)) {
+      const panel = document.createElement("div"); panel.className = "expanded-beat protected-code";
+      const explanation = document.createElement("p");
+      explanation.textContent = beat.payload.type === "call" ? `${beatSummary(beat.payload, model)}. Call editing is available in Source. The editor preview does not execute the called Scene.` : "Choice conditions are read-only here. Availability is unknown in the editor preview. Edit this Choice in Source.";
+      panel.append(explanation);
+      if (beat.payload.type === "choice") {
+        const options = document.createElement("ul");
+        for (const option of beat.payload.options) {
+          const item = document.createElement("li"); const destination = model.scenes.find(scene => scene.id === option.destinationSceneId)?.displayName ?? "Missing Scene";
+          item.textContent = `${option.text} → ${destination} · ${option.condition ? `Available when ${conditionCaption(option.condition, model.authoring.variables)} · Availability unknown` : "Always available"}`;
+          options.append(item);
+        }
+        panel.append(options);
+      }
+      const source = button("View in Source", "button secondary"); source.disabled = !actions.viewSource;
+      source.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision)); panel.append(source); card.append(panel); return;
+    }
     if (beat.protected) {
       const protectedPanel = document.createElement("div"); protectedPanel.className = "protected-code";
       const explanation = document.createElement("p"); explanation.textContent = beat.payload.type === "customCode" ? beat.payload.reason : "Protected source";
@@ -722,7 +791,7 @@ export function renderSceneAuthoring(
     if (list.querySelector(".new-beat")) return;
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft"; panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
-    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode");
+    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode" && type !== "call");
     const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType);
     const editorHost = document.createElement("div");
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model));
@@ -797,8 +866,9 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
     case "stopMusic": return "Stop current music";
     case "transition": return payload.transition;
     case "setVariable": return `${model.authoring.variables.find((item) => item.id === payload.variableId)?.technicalName ?? "variable"} = ${String(payload.value)}`;
-    case "choice": return `${payload.options.length} option${payload.options.length === 1 ? "" : "s"}`;
+    case "choice": return `${payload.options.length} option${payload.options.length === 1 ? "" : "s"}${payload.options.some(option => option.condition) ? " · Conditional availability unknown" : ""}`;
     case "jump": return scene(payload.sceneId);
+    case "call": return `${scene(payload.sceneId)} · Returns to next Beat`;
     case "return": return "Scene terminal";
     case "customCode": return payload.reason;
   }
@@ -842,6 +912,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload): BeatEdito
       read = () => { if (!rows.length) throw new Error("A Choice needs at least one option."); return { type: "choice", options: rows.map((row) => ({ text: requiredText(row.text, "Choice text"), destinationSceneId: required(row.destination) })) }; }; break;
     }
     case "jump": { const destination = scenes(payload.sceneId); add("Destination Scene", destination); read = () => ({ type: "jump", sceneId: required(destination) }); break; }
+    case "call": read = () => payload; break;
     case "return": read = () => ({ type: "return" }); break;
     case "customCode": read = () => payload; break;
   }
@@ -866,6 +937,7 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace): BeatP
     case "setVariable": { const variable = model.authoring.variables[0]; return { type, variableId: variable?.id ?? "", value: variable?.defaultValue ?? "" }; }
     case "choice": return { type, options: [{ text: "", destinationSceneId: model.scenes[0]?.id ?? "" }] };
     case "jump": return { type, sceneId: model.scenes[0]?.id ?? "" };
+    case "call": return { type, sceneId: model.scenes[0]?.id ?? "", returnLabel: null };
     case "return": return { type };
     case "customCode": return { type, source: "", reason: "Protected source" };
   }
