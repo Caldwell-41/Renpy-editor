@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Phase 3A resumed — early SDK gate passed; structural slice active
+## Phase 3A — full controls implemented; final proof and budget decisions
 
 Phase 3A is **ACTIVE — INCOMPLETE**, explicitly resumed on 2026-10-13. Phase 2 stays
 **PAUSED — INCOMPLETE** and requires its own separate resume. The user authorized
@@ -8,11 +8,14 @@ GPT-6.1 Sol High delegated implementation, validation and independent review, ro
 slices and reviewed pushes to `codex/phase3a-story-logic`; no merge or release. The
 orchestrator must not poll CI. Delegated monitoring of selected runs is authorized.
 
-Root was clean at `1bdc532`, matching the remote branch. Its successor changes after
-reviewed candidate `81ee770` are pause documentation only. Preserved detached worktrees
-`phase3a-core` at `e97be13`, `phase3a-renderer` at `52c238c`, and `phase3a-validation`
-at `3a3dabd` reconcile with integrated product work. Keep the Phase 2 branch and
-unrelated planning worktree (two unpublished commits). Never reset these to old prompts.
+Initial resumed root `1bdc532` matched remote and added only pause documentation to
+early `81ee770`. The working branch now includes core `ec0c43c`, full renderer
+`71e3d2a`, final harness `e31f27a` and compile/input correction `50e1ee3`. Original
+detached core `e97be13`, renderer `52c238c` and validation `3a3dabd` remain preserved
+through additive refs/history, alongside every later checkpoint. Renderer `421a241`
+holds the prepared CSS diff; validation `50e1ee3` holds pending harness corrections.
+Keep the Phase 2 branch and unrelated planning worktree (two unpublished commits).
+Never reset these to old prompts.
 Root owns canonical status/task documentation and integration; shared-interface writers
 remain serial. The repository-local noreply identity is intact.
 
@@ -73,9 +76,10 @@ is not a blind retry allowance.
 
 
 Cumulative usage does not reset: core **16/18** (first foundation eight, calls/flow
-four, narrow/full structural four); renderer **9/10** (four compatibility plus four
-completed narrow authoring rounds, fourth passed; full-control round 9 failed); validation
-**5/7**; paired CI **2/3**; packages/owner native starts/live model calls **zero**.
+four, narrow/full structural four); renderer **10/10** (four compatibility plus four
+completed narrow authoring rounds, fourth passed; full-control round 9 failed and
+final round 10 passed); validation
+**7/7** (rounds 6/7 failed); paired CI **2/3**; packages/owner native starts/live model calls **zero**.
 The user explicitly approved the driver-repair fifth local round, then four additional
 core invocations, six authoring renderer rounds and two final validation rounds.
 Original failures and the earlier unexplained descendant-cleanup limitation remain
@@ -96,15 +100,45 @@ subtree move/remove, selected unwrap and canonical pass are implemented under
 Narrow reviewed renderer `d481179` is integrated as `9630c66`; repaired round 8 passed
 34 DOM cases/typecheck/compilation/production build. Prior three failed authoring rounds
 and non-started model-capacity interruption remain in the ledger. Full controls now
-use the final two rounds 9/10 after reviewed broad-core integration. Round 9 is now
-terminal after independent correction review: typecheck/test compilation passed,
+used the final two rounds 9/10 after reviewed broad-core integration. Round 9 failed:
+typecheck/test compilation passed,
 51 DOM cases had 45 passes/six failures/zero skipped or cancelled. Build/nine captures
-were skipped. Reassess the precise causes and independently review corrections before
-round 10, which remains unused. Do not erase earlier failures or rerun blindly.
+were skipped. The independently clear focused correction passed round 10 once:
+all 51 DOM cases/zero failed/skipped/cancelled/todo, typecheck/test
+compilation, production build and nine portable captures with zero runtime errors or
+horizontal page/authoring overflow. Exact seal/capture review and checkpoint integration
+are complete mechanically, with all 105 input hashes and 51 names matched. Full controls
+`421a241` are integrated as `71e3d2a`; final reviewed harness `b675a50` is integrated as
+`e31f27a`. Exact delegated/root file equivalence passed. Independent visual inspection
+found default-size **vertical preview clipping**, especially the laptop canvas/message,
+despite horizontal metrics passing. Prepare a minimal shrinkable/scrollable manual-panel
+correction. Its scoped minimum selector/canvas viewport and writing-focus override are
+now clear by independent static review; the focused extra-round request (cap11) is
+pending user approval. 10/10 remains exhausted; no new visual check may start meanwhile.
+Sol capacity errors occurred before new work/checks, without a model switch.
+Local validation round 6 failed on exact `e31f27a`: locked helper build passed, but
+SDK-test `--no-run` failed E0282 receipt-type inference. Preflight/full ten DOM/Host
+cases did not run; helper starts zero. The explicit receipt type correction is clear;
+the corrected embedded dependency manifest and receipt type are integrated as `50e1ee3`.
+Final local round 7 failed on that exact candidate: checker11, SDK-test compilation
+and zero-SDK preflight passed, but the helper fixture seed received `INVALID_SOURCE`
+and panicked before any DOM case. One helper started/abnormally exited; normal cleanup
+and reaping report did not pass. Static owner/reviewer diagnosis is double-BOM Source
+editor transport, also present in the SDK caller-save helper. Actual exit101 was
+observed/awaited; the old report conflates normal exit with reaping. Failed fixture
+bytes were removed before capture, so retain logs/static diagnosis without claiming
+captured originals. Prepare/review exactly-one declared-BOM handling, future failure
+capture and accurate exit/normal-cleanup fields without bypassing production refusal, then
+request a concrete extra validation allowance; 7/7 is exhausted. No eighth round or
+final CI3 execution may start. The full ten-case/two-process proof remains missing.
+Reuse the matching sealed compiled adapter and unchanged
+passed build where valid. Do not retry automatically or dispatch final CI3.
+final CI3 waits for the visual correction and remaining validation. Retain all failures.
 
 Validator prepares the real frontend/host and saved-callee proof, with corrected cleanup,
 read-only scenario helpers, session-history-reset oracle and fail-closed SDK receipts.
-Round 6 waits for the full reviewed UI/scenario module. SDK source must include an actual
+Round 6 used the full reviewed UI/scenario module and exact candidate/input seals.
+SDK source must include an actual
 new structural condition command before the one compile/lint and six cases. Capture
 UI eligibility before controls lock; preserve current owner/session checks. Original
 core/renderer/validation commits have permanent `refs/codex-preserved/` references.

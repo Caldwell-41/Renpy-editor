@@ -1138,8 +1138,15 @@ Phase 3A's reviewed narrow renderer now adds explicit root/branch Beat insertion
 editing, Call pickers and supported Choice availability editors through captured
 body/revision envelopes. Unknown-guard Choices stay wholly read-only. Pending commits,
 navigation refusals and field validation retain draft values; caption whitespace is
-preserved. Condition/subtree core commands are implemented, while full controls and
-actual frontend/save-return qualification remain in progress in the
+preserved. Full typed condition/branch, subtree move/delete/selected unwrap and
+hierarchy/collapse/focus controls are implemented and passed portable DOM/build checks.
+Their forms capture owner/revision envelopes, and tree/Story drafts protect each other.
+Illustrative preview keeps route selection separate from editing selection, stops at
+unresolved forks/Choices and terminal Return/Jump, and reports the actual visited Beat;
+view state never edits source. Branches opens the exact body/source and Call continuation.
+Independent capture review found default-height vertical preview clipping from the
+manual route panel; that layout correction and actual frontend/save-return qualification
+remain in progress in the
 [Phase 3 task](tasks/active/phase-3-initial-wysiwyg-release.md).
 
 An existing declared-bool If/Otherwise group with direct dialogue children is displayed

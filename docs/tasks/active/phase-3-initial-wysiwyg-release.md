@@ -2,8 +2,10 @@
 
 **Current selection — 2026-10-13:** Phase 3A Story logic implementation is
 **ACTIVE — INCOMPLETE**, resumed explicitly after the documented safe stop. Existing CI1 failed its SDK gate; the reviewed minimal harness repair passed corrected
-both-target CI2 audit. The early gate is established and explicit-body structural
-implementation is active; full Story controls and 3A acceptance remain pending. Preserve the reviewed commits,
+both-target CI2 audit. The early gate, structural core30 and full renderer51/build
+are established. Final captures exposed vertical clipping; local frontend/Host proof
+failed during fixture setup before any case. Reviewed corrections and additional
+budget decisions are pending; no final CI3 or 3A acceptance. Preserve the reviewed commits,
 worktrees, failed run and cumulative allowances. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
@@ -1693,3 +1695,181 @@ behavior still unexecuted. Round 9's 105-input seal is unchanged; retained log S
 is `7511b899870e80c4bbf60363dc0df73ba8af978eca6ccad9371dd8b7307f0d5e`.
 No round 10 has run yet. The validator's exact refusal-code/snapshot corrections are
 now independently clear by inspection; round 6 still waits for the reviewed UI pass.
+
+**Final renderer round 10 started once:** independent review cleared both select
+initializations, explicit unavailable-value handling and all four accurate expectation
+updates. Exact AST/depth/refusal/draft/pending-lock assertions remain intact; the
+guard-only regression additionally requires preserved `greaterEqual`. Owner session
+32224 retains `loomlight-story-renderer-round10-inputs.json` and its separate log
+outside Git. Renderer **10/10** is now consumed; core16/18, validation5/7 and CI2/3
+are unchanged. No duplicate start or additional check is authorized. Build/captures
+remain conditional on earlier passes; no terminal result is yet claimed.
+
+Reviewed failure/status documentation was published and remote Git-verified through
+`84921adf858894182e1b15dd1d5afd4102c1c05f`; repository validation passed 552 files.
+This is evidence preservation, not full UI/Phase 3A acceptance, merge or release.
+
+**Round 10 terminal pass:** existing session 32224 exited zero. Typecheck/test
+compilation, exactly **51 DOM cases/zero failed/skipped/cancelled/todo** in
+1429.873958 ms, production frontend build and diff check passed. All **nine portable
+browser captures** report zero runtime errors and zero horizontal page/authoring overflow. Owner
+seal/visual inspection, independent terminal/capture review and exact checkpoint
+integration are pending; no additional checks are selected. Renderer **10/10**, core
+16/18, validation5/7, CI2/3. Actual frontend/native-service and saved-callee/both-host
+proof remain required; portable captures are not packaged WebView or human proof.
+
+**Round 10 terminal audit and material visual finding:** independent review matched
+all 105 input hashes and 51 distinct passed titles, build completion and log SHA256
+`61eb64e5a95ecf13ad888da47afcda20e13ad75d0e47b4152834aab4efc2cd25`.
+Input seal SHA256 is `30797fe0340f46d8c59ac0f39873b5d7623bac398343ba87008527aab4c6dcf8`.
+Selection is compatibility7 + narrow authoring7 + structural17 + scene authoring19 +
+Save command1, five files once with no name pattern. All nine images are inspected:
+authoring fields/themes/deep forms are readable, but the new nonshrinking manual route
+panel consumes default preview height. The canvas and unknown-state message are
+vertically clipped (laptop canvas approximately 14px), despite passing horizontal
+overflow metrics. Existing resize is a workaround, not clearance of this material
+default-layout defect. Root independently inspected the representative laptop image.
+Do not claim an unclipped/useful preview or full acceptance. Prepare and independently
+review a minimal panel-shrink/internal-scroll correction before requesting an extra
+focused renderer round; existing 10/10 is exhausted and no extra check is authorized.
+
+Full reviewed renderer `421a241414574f4ea1af9a5992fd8e50ab244103` is integrated as
+`71e3d2ab49ce788f19e40978b3586ebfab8563e6`. Reviewed unexecuted final harness
+`b675a50d4891746ebf03bedd0200886eea923f96`, preserved under its additive final-harness
+ref, is integrated as `e31f27a1f009a526cce393fd3da497ceed3ce688`. All 51 exact titles
+are required once; eight final recipe checks replace the redundant narrow run while
+retaining every case. Callback/refusal/SDK/input/privacy/cleanup contracts are clear
+by inspection. Root verified exact 12-file renderer and seven-file harness equivalence
+and diff checks. These integrated commits remain local-only pending updated publication.
+
+User requested a done/outstanding list before continuing; the lead reported completed
+audit/early both-host SDK/core30/renderer51 and remaining integration, local validation,
+final CI3/save-return/acceptance. Phase 2 stays paused. Local **round 6 is authorized
+once on exact e31f27a**, not yet confirmed started: safely reuse the retained clean
+validation worktree, fresh candidate/input seals, needed adapter test compilation only,
+locked core helper build, SDK test compile `--no-run`, exact zero-SDK BOM preflight and
+all ten production DOM/Host cases with exactly two reaped helper processes. This is
+separate from the visual correction and does not authorize CI3 or additional renderer
+checks. Two Sol renderer correction turns failed pre-start for model capacity; no
+model switch, code edit or new check was confirmed. Counts remain16/18,10/10,5/7,2/3
+until validation's first executed command. Preserve all evidence and original work.
+
+**Local round 6 started once:** candidate `e31f27a`, tree
+`dfd0f40a27157ebb9c6dc57c6e904e31ab91bddc`; dynamic 194-file manifest SHA256
+`e2e0042cbbf37bc37edfdde2c5cebf4d1b51a4cd5e5a6d6ac3abfd39505a248d`.
+All 94 renderer compilation input records and 60 generated adapter files match the
+reviewed round 10 seals; compiled adapter reuse SHA256
+`3d7fae8da7d4af928ec0e0d978a494cb3556a4c9c3ab8a53d794a1f59a79ad50`.
+No npm install, repeated typecheck/DOM/build or test compilation was needed. The sole
+sequential runner began locked core helper compilation, charging validation **6/7**.
+Ignored `local-round6/` retains logs/partials; any failure stops before round 7. Local
+SDK/packages/native editor/credentials/live calls remain zero, helpers not yet started
+at the compilation receipt. Renderer10/10, core16/18 and CI2/3 are unchanged. A third
+same-model preparation-only renderer turn was requested after capacity failures; no
+additional visual round is authorized, and final CI3 remains withheld.
+
+**Local round 6 terminal failure:** locked `story-controller-driver` build passed
+exit0/12.18s; changed SDK-gate `--no-run` compile failed exit101/3.64s with Rust E0282
+at `phase3a.rs:822`, unable to infer the saved-receipt Option/JSON index type. Owner
+prepares explicit `Option<Value>` at the declaration for independent inspection before
+any final round 7. Exact zero-SDK preflight and all ten DOM/Host cases were **not run**;
+helpers started0, local SDK/native editor/packages/credentials/live calls0. Candidate
+194-file seal is unchanged. Recorder session67474 exited zero but its retained
+`result.passed=false`; recorder completion is not a qualification pass. Logs/partials
+remain in ignored `local-round6/`. Adapter reuse matched **105** input records/60
+outputs, correcting the earlier mistaken 94-input report; preserve that earlier receipt
+as history rather than using it as the final count. Validation6/7, renderer10/10,
+core16/18, CI2/3; no round 7/CI3 or extra renderer check initiated.
+
+**Prepared corrections and required decision:** the explicit saved receipt
+`Option<Value>` is independently clear with source/SDK/case/receipt assertions unchanged.
+Driver dependency inspection identified six embedded `prompts/v1/*.txt` and the root
+Source-foundation `scene.rpy` omitted from the per-file manifest; original round 6
+194-file receipt remains preserved. A mistakenly proposed root reference-library
+fixture path was caught before execution: the actual `app/tests/.../manual-save.json`
+is already recursively covered. Correct the manifest and existing coverage assertion;
+the normalized 57-dependency driver seal already used the actual path and remains
+valid. Reuse additionally binds binary SHA256
+`d05646495569612801c8a6d0af09d8958e5973bad16ad2d84b21012dbf856673`.
+No final round 7 has run or been authorized yet.
+
+The CSS-only clipping correction now statically clears independent review: manual
+selectors retain a 5rem scroll viewport, the canvas reserves 8rem, condition-preview
+grid minimum is `calc(13rem + 52px)`, header cannot shrink and outer scroll is a
+fallback. Ordinary scenes/writing focus and shared percentage keyboard bounds remain
+unchanged; the pixel floor can limit actual small percentage allocations as existing
+grid minima do. New default/scaled canvas/message, selector focus/scroll and divider
+20/default/70/Writing-focus proof is still required. The lead requested **one focused
+extra renderer round, cap10→11**, under task/WORKFLOW §5, reusing unchanged 51 DOM
+and typecheck evidence, no package/native editor/local SDK/live calls or other cap
+increase. This is **pending user approval**, not an allowance or executed round.
+All Sol capacity errors were pre-start; no model switch or hidden check is charged.
+Repository validation of integrated code/documentation passed **558 files**; Phase 3A
+remains incomplete, Phase 2 paused, no merge/release/final CI3.
+
+**Reviewed final local preparation integrated:** exact three-file correction
+`c2002ebc788e6fccc477bf317f71d3bd9399d2f7`, retained under additive compile-input-fix
+ref, is integrated as `50e1ee3925d1d276bf8f5bc1efd1d7740f7dfc02`. Independent final
+inspection clears the real dependency paths, exact coverage/hash assertions and sole
+receipt type annotation. Root full app source/test/core/scripts equivalence and diff
+checks passed. Original failed result/seals/path-correction records remain untouched.
+Driver reuse 57-input seal SHA256 is
+`d6352c1e48a6de80c61d230140af9f6ad2633599a5228aeb5a69594f89e3bcf9`;
+adapter seal remains `3d7fae8d...9ad50`, requiring exact matching dependency/output bytes.
+**Final existing round 7 is authorized once**, not yet confirmed started: changed
+Python evidence negative fixtures, locked SDK-gate `--no-run`, exact zero-SDK preflight
+and full ten production DOM/Host cases/two separately reaped helpers. Reuse unchanged
+passed driver/adapter; no repeated frontend suite/build or driver compilation. Stop
+and retain any failure; no eighth round or final CI3 is authorized by this instruction.
+Pending visual cap11 decision is separate. Current16/18,10/10,6/7,2/3 until execution.
+
+**Final local round 7 started once:** exact candidate `50e1ee3`, tree
+`364af53d63f5ad75521ad7425201e1ea02085811`; fresh **201-file** manifest SHA256
+`7b7f86b5bfbdf3edc5b6ad3b99da8c42e704f02782ae8061d880d912a1f7c08a` includes the
+seven genuine embedded-input omissions. All 57 driver dependencies/binary and 105
+renderer compilation inputs/60 generated outputs match reuse seals; receipt SHA256
+`97d2501f30cfa56562595a0038c68a5ccd56c44065a46471b9159956c22a060c`.
+Changed Python negative fixtures passed exit0; locked SDK-test `--no-run` compilation
+is underway. Validation **7/7** is consumed, no driver/renderer rebuild repeated.
+Ignored `local-round7/` retains evidence and any failure stops without retry. Full ten
+DOM/Host cases have not yet passed; zero SDK/native editor/packages/credentials/live
+operations. Core16/18, renderer10/10, CI2/3, pending extra visual decision unchanged.
+
+**Final local round 7 terminal failure:** changed Python evidence fixtures passed
+**11 tests/zero failed** in0.14s; SDK-gate `--no-run` compilation passed19.86s and
+exact zero-SDK BOM/source preflight passed **one/zero failed** in3.10s. The actual
+controller exited1/3.33s before its first DOM case: Rust fixture-seeding Host Source
+dispatch returned `INVALID_SOURCE` (incomplete/unreconcilable draft), helper assert at
+line14 panicked and child exited101. **cases=[]**, actual helper starts1; normal
+cleanup and report `reaped=false` did not pass. Reconcile actual OS termination and
+owned temporary fixture separately; do not equate abnormal exit with passed cleanup.
+This is currently a harness fixture/setup failure, not evidence of failed authoring
+UI. Full ten-case/two-process proof remains missing. Recorder session87062 completed,
+but qualification failed; ignored `local-round7/` keeps logs/result and unchanged
+201-input seal `7b7f86b5...7c08a`. All local SDK/package/native editor/credentials/live
+operations remain zero. Validation **7/7** is exhausted, renderer10/10, core16/18,
+CI2/3. No retry/eighth round or final CI3 initiated. Owner prepares a safe production-
+Source fixture/cleanup correction by inspection with independent review before any
+new local-budget request; no direct bypass or relaxed refusal is selected.
+
+**Round 7 independent static diagnosis/reconciliation:** foundation source accepts
+one UTF-8 BOM; driver seed passed a BOM in Source editor `text`. The production API
+strips BOM for editor representation and `with_original_bom` restores the accepted
+BOM, yielding two on that proposal and correct label-reconciliation refusal. The
+SDK safe-caller helper's `read_to_string` input has the same future risk. Prepare
+exactly-one declared-BOM transport conversion in the harness helpers, retaining
+accepted bytes/one BOM, production validators and stable labels; never trim-all.
+Extend the existing zero-SDK preflight to perform the actual BOM-bearing safe-caller
+save and assert minimal bytes/labels. The changed driver must be compiled in any
+future approved round; prior binary reuse no longer applies to the correction.
+
+Actual failed source/proposal bytes were not captured before Node's finally removed
+the owned synthetic root. Do not fabricate snapshots or treat source reconstruction
+as captured evidence; original candidate, logs and failed receipts remain preserved.
+Future failure capture must precede root removal. Existing Node exit handler observed
+and awaited child101, so the old `reaped=false` conflates abnormal exit with absence
+of reaping. Keep the original failed receipt/normal-cleanupfalse; future reporting
+must separately attest observed exit/reaping and required normal cleanup. This is
+static inspection of existing evidence, not a new helper start or qualification pass.
+No extra local round is authorized; reviewed correction and a concrete cumulative
+validation-budget decision are still required. Extra visual cap11 request is pending.

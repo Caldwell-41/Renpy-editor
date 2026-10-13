@@ -8,10 +8,28 @@ attempt 1/exact `cba3c0e`, passed both-host terminal artifact audit. The early S
 is established; delegated structural implementation continues within the extended
 allowance. Reviewed full structural `ec0c43c` passes 30 focused tests; core 16/18
 is consumed, with failures retained. Narrow renderer `9630c66` passes 34 DOM cases;
-renderer 9/10: full-control round 9 passed typecheck/test compilation but failed six
-of 51 DOM cases; build/nine captures were skipped. Corrections are under review before
-the final authorized renderer round. Full Story controls and the actual frontend/save-return harness remain
-in implementation (validation 5/7). Approved cumulative caps
+renderer 10/10. Final round 10 passed all 51 DOM cases, typecheck/test compilation,
+production build and nine portable captures with zero runtime errors or page/authoring
+horizontal overflow. Exact seal/capture review passed mechanically; independent visual
+inspection found vertical preview clipping at default sizes, which remains a blocker.
+Full controls `71e3d2a` and reviewed final harness `e31f27a` are integrated on the working branch;
+no Phase 3A acceptance is claimed. Round 9's six failures/skipped build and captures
+are retained. Local round 6 failed on exact `e31f27a` (validation6/7): core driver
+compiled, but SDK-test `--no-run` compilation hit receipt-type inference error E0282.
+Preflight/frontend-Host cases were not run. The minimal receipt type correction is
+independently clear, and corrected helper input coverage is integrated as `50e1ee3`.
+Final round 7 failed (validation7/7): checker11, SDK-test compilation and zero-SDK
+preflight passed; actual helper fixture seeding was refused before any DOM case,
+followed by abnormal exit and failed normal-cleanup evidence. Static diagnosis is
+double-BOM input to the Source editor API; the SDK caller-edit helper shares the risk.
+The ten-case proof is missing. Prepare/review exactly-one declared-BOM transport and
+failure-retention/exit-report corrections before another local-budget
+decision; no eighth round or final CI3 is authorized. The matching sealed
+renderer adapter was reused. A CSS-only visual
+correction is prepared and independently reviewed; a request for one focused extra
+renderer round (cap11) is pending user approval. Pre-start Sol capacity errors consumed
+no check round, and the requested models were retained.
+Approved cumulative caps
 are core 18, renderer 10 and validation 7; prior usage is
 retained. Paired CI is 2/3 consumed.
 The user authorized delegated Sol 6.1 High implementation and validation of 3A Story

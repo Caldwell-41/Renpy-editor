@@ -417,7 +417,11 @@ branch insertion/edit/removal, whole-subtree moves/deletion and selected-branch 
 It preserves anchored IDs/extras and safely owned trivia, uses a verified pass for empty
 branches, and refuses unqualified reindentation or ownership promotion.
 [ADR 0016](adr/0016-explicit-body-story-authoring.md) owns those qualified boundaries;
-full frontend/runtime qualification remains pending.
+Full renderer controls use these commands through captured transactional envelopes,
+retain competing Story/tree drafts and keep illustrative route/view state source-free.
+Preview stops at unresolved forks or terminal transfers; it does not infer execution
+state. Portable DOM/build/source seals passed, but the default preview panel has a
+documented vertical-clipping defect. Actual frontend/runtime qualification remains pending.
 
 The Scene recognizer follows the same rule: supported canonical Beats retain stable
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become
