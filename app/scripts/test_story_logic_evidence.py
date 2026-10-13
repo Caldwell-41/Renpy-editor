@@ -97,7 +97,8 @@ class Evidence(unittest.TestCase):
                      'app/vite.config.ts', 'app/tsconfig.json', 'app/src/nested/view.ts',
                      'app/scripts/scan-artifacts.mjs', 'app/scripts/story-controller.mjs',
                      'app/scripts/story-controller-cases.mjs', 'app/src-core/examples/story-controller-driver.rs',
-                     'spikes/renpy-sdk/archive_safety.py')
+                     'app/src-core/prompts/v1/rewrite-dialogue.txt', 'tests/fixtures/source-foundation/scene.rpy',
+                     'app/tests/fixtures/reference-library/manual-save.json', 'spikes/renpy-sdk/archive_safety.py')
             for path in paths:
                 file = root / path
                 file.parent.mkdir(parents=True, exist_ok=True)

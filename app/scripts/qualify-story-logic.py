@@ -41,6 +41,8 @@ def input_manifest(repo):
         'tsconfig.json', 'tsconfig.tests.json', 'vite.config.ts', 'index.html', 'scripts/scan-artifacts.mjs'))
     files.update(repo / p for p in ('.github/workflows/quality.yml', '.github/workflows/story-logic.yml'))
     files.update((app / 'scripts').glob('*story*'))
+    files.update((app / 'src-core/prompts/v1').glob('*.txt'))
+    files.add(repo / 'tests/fixtures/source-foundation/scene.rpy')
     files.update((repo / 'spikes/renpy-sdk').glob('*.py'))
     return {p.relative_to(repo).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in sorted(files) if p.is_file()}

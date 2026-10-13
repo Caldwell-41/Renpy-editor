@@ -757,7 +757,7 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
     assert!(!without_metadata.join(".renpy-editor").exists());
     counts.metadata_absent = true;
     let mut reports = Vec::new();
-    let mut saved_receipt = None;
+    let mut saved_receipt: Option<Value> = None;
     for (name, flag, trust, mood, expected, ending, reject) in [
         (
             "conditions-low",
