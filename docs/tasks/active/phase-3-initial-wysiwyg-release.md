@@ -1,9 +1,9 @@
 # Phase 3 — Initial WYSIWYG release
 
 **Current selection — 2026-10-13:** Phase 3A Story logic implementation is
-**ACTIVE — INCOMPLETE**, resumed explicitly after the documented safe stop. Existing
-CI1 has been audited and failed its SDK gate; structural and Story-control implementation
-remain gated on corrected early both-target proof. Preserve the reviewed commits,
+**ACTIVE — INCOMPLETE**, resumed explicitly after the documented safe stop. Existing CI1 failed its SDK gate; the reviewed minimal harness repair passed corrected
+both-target CI2 audit. The early gate is established and explicit-body structural
+implementation is active; full Story controls and 3A acceptance remain pending. Preserve the reviewed commits,
 worktrees, failed run and cumulative allowances. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
@@ -1283,3 +1283,65 @@ unknown/raw conditions cannot be authored. Candidate recursion checks must cover
 transfer commands as well as new body commands. Literal root-end insertion after a
 terminator refuses; ordinary append must use an explicit before-terminator anchor.
 These are planned implementation conditions, not completed behavior or extra allowance.
+
+
+**Reviewed publication and corrected CI2 dispatch:** root published and Git-verified
+`cba3c0ef707cf149cba5313b3d017102d2f09f66`, tree
+`ad1c996130f5c657ffe5a2d9aa66a61dda3b0a45`, containing reviewed correction `b5fa01a`
+and resumed evidence/contract records. Repository validation passed all 546 files and
+combined diff checks passed. Live records retain extra words to preserve simultaneous
+Phase 3A recovery and Phase 2's distinct paused evidence/publication boundaries.
+Delegated validator reconciled exact remote and found no existing corrected-candidate
+run, then dispatched [CI2 run 38351419387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387)
+once, attempt 1, `workflow_dispatch`, at 2026-10-13T05:26:50Z. Exact candidate/tree
+match; only `story_logic_early=true`, ordinal 2, older selectors false. Required
+Windows `115144462084` and Mac `115144462200` were in progress at confirmed dispatch;
+excluded jobs are not passes. Cumulative local validation **5/5**, paired CI **2/3**.
+Validator owns monitoring and terminal artifact audit; the lead does not poll CI.
+No early SDK pass or structural implementation is claimed while these results are pending.
+
+
+### Corrected early SDK gate established — 2026-10-13
+
+Delegated terminal audit passes [CI2 run 38351419387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
+attempt 1, exact `cba3c0ef707cf149cba5313b3d017102d2f09f66`, tree
+`ad1c996130f5c657ffe5a2d9aa66a61dda3b0a45`, completed success at 05:33:09Z.
+Required Windows `115144462084` completed success 05:33:08Z and Mac `115144462200`
+05:32:10Z; all primary selected steps succeeded. Excluded jobs are not passes.
+Both hosts pass all 17 named core/preflight checks, seven renderer cases and all six
+SDK outcomes. Four former menu failures now pass 16/16 assertions, exact route markers
+and endings; no-option passes 15/15; deliberate wrong-outcome rejection fails its
+intended first assertion. SDK report, logs and case receipts agree. Each target has
+12 spawns, one verified SDK install, one GUI generation/two commands, two version
+checks, one compile/lint and six runtime cases. Source preservation, metadata absence,
+owned cleanup and controller reaping are true. All 179 input hashes match candidate
+blobs; ZIP CRCs/40 files/39 hashes and privacy scans/independent pattern audit pass.
+
+| Target | Artifact | ZIP SHA256 | Expiry UTC |
+| --- | --- | --- | --- |
+| Windows x64 | 11791540530 | `e528c0065bc5609bf4922d92440ae0cdc2646d9e746b3783c3f0ab406236d233` | 2026-10-20T05:32:16Z |
+| macOS ARM64 | 11791211433 | `8d0883ed25f41c36ebbc3a1e30857f48d590a9659c3e2960ab5578ac32f43c9c` | 2026-10-20T05:31:31Z |
+
+Ignored `.toolchains/phase3a-validation/ci2-audit/` retains audit code/results, full
+metadata/logs and exact ZIPs/extracted artifacts alongside CI1. No active watcher,
+local SDK/native/package/live operation or further CI dispatch remains. Cumulative
+local validation **5/5**, paired CI **2/3**; CI1 failure is retained. Scoped early
+conditions/calls proof is established, not full Phase 3A acceptance; saved-callee safe
+edit/return and full frontend authoring remain unproven.
+
+**Next authorised internal slice:** sole core agent reuses preserved clean worktree
+at the audited coherent candidate without reset/rebase. Implement only explicit
+`insertBodyBeat`/`updateBodyBeat`, body/node/position qualification and candidate transfer
+checks covering new and legacy authoring. The existing two remaining core invocations
+(12/14 before execution) cover decisive nested transaction/minimal bytes/ownership/
+history/reopen, then recursion/baselines and reviewed corrections. Other structural
+variants are planned, not exposed as stubs. Renderer preparation is read-only until
+this interface is reviewed. Additional structural/renderer/validation rounds remain
+proposals requiring finite allocation without transferring or resetting old counts.
+
+
+Independent Sol High retained-evidence audit is clear: it separately matched all ZIP/
+manifest/extracted bytes, all 179 Git input blobs per host, exact ordinal/run/attempt/
+candidate/tree, required job steps and six case logs. Exact route markers, negative
+oracle without a route marker, SDK terminal/report fields and cleanup/source guarantees
+agree. No CI polling, tests or SDK execution occurred during independent review.

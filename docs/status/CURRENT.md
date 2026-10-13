@@ -1,11 +1,12 @@
 # Current status
 
 **Updated:** 2026-10-13. **Phase 2: PAUSED — INCOMPLETE. Phase 3A: ACTIVE — INCOMPLETE.**
-The user explicitly resumed Phase 3A. Delegated audit of existing CI1 found both
-required jobs failed four SDK menu cases because the test driver stalled before its
-click; the early SDK gate remains unproven. The independently reviewed driver repair is
-integrated as `b5fa01a`; its approved extra local round passed compilation and zero-SDK
-preflight (5/5 consumed). Corrected both-target CI2 proof is next; no redispatch yet.
+The user explicitly resumed Phase 3A. Existing CI1's failed menu cases were audited,
+its driver corrected and independently reviewed, and one approved extra local round
+passed (5/5 consumed). Corrected [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
+attempt 1/exact `cba3c0e`, passed both-host terminal artifact audit. The early SDK gate
+is established; delegated explicit-body structural implementation now uses the two
+remaining core invocations (12/14 before execution). Paired CI is 2/3 consumed.
 The user authorized delegated Sol 6.1 High implementation and validation of 3A Story
 logic, with review between slices. The qualified shared foundation and first rewrite
 satisfy 3A entry; Phase 2 feedback and final acceptance remain paused and unclaimed.
@@ -16,7 +17,7 @@ See the [3A selection](../tasks/active/phase-3-initial-wysiwyg-release.md) and
 
 | Capability | Evidence | Disposition |
 | --- | --- | --- |
-| 3A Story logic | Reviewed core/renderer/harness published through `81ee770`. [Early CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499) exact attempt 1 audited: 17 core and seven renderer cases pass per host; four SDK menu cases fail per host. | ACTIVE — INCOMPLETE; structural/Story controls gated on repaired early proof. No 3A acceptance. |
+| 3A Story logic | Reviewed early candidate `cba3c0e`: CI2 passes 17 core/preflight, seven renderer and six SDK outcomes per host, with exact inputs/artifacts/counts/privacy/cleanup audited. CI1 failure retained. | ACTIVE — INCOMPLETE; early SDK gate established, explicit-body structural slice underway. No 3A acceptance. |
 | Studio actions, generated references, prompts, selectable subset | Frozen929 owner live/native chain and controlled CI; new UI CI1 actual controller/native service all-five/selectable/exact-send/separate approval/invalid-zero-write/valid-subset/history/reopen/cleanup. | Scoped technical proof preserved; failed live send7 retained. |
 | Sampling/setup/HTTPS | Frozen929 combined worker/TLS/SDK and saved-key owner/CI9 Windows native setup/invalidation/cancel/reopen. New UI Settings draft/validation/readiness/cancel DOM regressions pass both targets. | Ordinary profile/key unchanged. LiteralIPv6HTTPS unsupported; liveTLS not newly measured. |
 | Game, SDK and packages | Owner native Validate/Run/Stop and metadata-free SDK05; signed Mac package1/exact Windows executable reused for unchanged paths. | No new editor package or physical native UI proof for the renderer refinement. |

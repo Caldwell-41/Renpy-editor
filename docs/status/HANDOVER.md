@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Phase 3A resumed — early SDK gate failed; bounded correction authorized
+## Phase 3A resumed — early SDK gate passed; structural slice active
 
 Phase 3A is **ACTIVE — INCOMPLETE**, explicitly resumed on 2026-10-13. Phase 2 stays
 **PAUSED — INCOMPLETE** and requires its own separate resume. The user authorized
@@ -37,7 +37,8 @@ at driver line 29's bare `advance` while the game was at its menu. Each passed a
 passed; the wrong-result fixture rejected the intended assertion. Terminal SDK records
 retain `passed=false`, six cases, 12 adapter spawns and all selected operation limits;
 owned cleanup, metadata absence and accepted source preservation passed. A complete
-SDK report is absent. The early gate therefore remains **failed**, with no 3A acceptance.
+SDK report is absent. CI1 remains **failed**; corrected CI2 below establishes the early gate without
+claiming 3A acceptance.
 
 Independent Sol High review identified the pinned SDK driver mechanism: bare advance
 waits for a new dialogue callback, which a choice screen does not produce. The minimal
@@ -48,14 +49,31 @@ the preserved validation worktree; independent diff review is clear. The sole ch
 file is `app/src-core/src/renpy/tests/phase3a.rs`, committed in the
 validation worktree as `671036a` and integrated as `b5fa01a`. Approved local round 5
 passed locked gate compilation and exact zero-SDK preflight (one pass). No local SDK
-operation, native start or redispatch has run; corrected paired CI2 is next.
+operation or native start ran. Corrected paired CI2 was dispatched once after
+confirming no duplicate candidate run.
 
 <a id="ready-to-paste-restart-prompt"></a>
 
 ### Continuation, budgets and remaining acceptance
 
+**Completed operation:** delegated validator audited
+[CI2 run 38351419387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
+attempt 1, dispatched 2026-10-13T05:26:50Z on exact published
+`cba3c0ef707cf149cba5313b3d017102d2f09f66`, tree
+`ad1c996130f5c657ffe5a2d9aa66a61dda3b0a45`. Required Windows `115144462084` and
+Mac `115144462200` passed; run ended success at 2026-10-13T05:33:09Z. Both hosts pass
+17 core/preflight names, seven renderer cases and all six SDK outcomes. All four prior
+menu failures now pass 16 assertions; no-option passes and wrong-result rejection
+matches its oracle. ZIP CRCs/40 files/39 hashes, 179 exact candidate inputs, SDK logs/
+reports/case receipts, counts, privacy, source/metadata/cleanup and controller reaping
+all match. Older excluded jobs are not passes. The lead did not poll. Ignored
+`ci2-audit/` retains the terminal audit and exact artifacts; hashes/expiry belong in the
+owning task. The early conditions/calls gate is **established**. CI3 remains unused and
+is not a blind retry allowance.
+
+
 Counts do not reset: first core slice 8/8, calls/flow 4/6 (**12/14 cumulative**),
-renderer compatibility **4/4**, local validation **5/5**, paired CI **1/3**,
+renderer compatibility **4/4**, local validation **5/5**, paired CI **2/3**,
 packages/owner native starts/live model calls **zero**. The earlier broad 318-pass/two-
 failure run, obsolete-contract correction and unexplained descendant-cleanup failure
 with exact serial passes remain in the task ledger. No previous failure is erased.
@@ -67,13 +85,14 @@ round; preserve any failure and escalate a further exhausted-budget decision. CI
 the existing paired allowance after reviewed publication; retain six runtime cases,
 12 spawns and exact candidate/artifact audit. No blind rerun or ordinal reset.
 
-Only after corrected early SDK proof implement structural commands and then full
-Story controls. Read-only core preparation agreed explicit `BodyRef` (root/branch),
+With corrected early SDK proof established, the sole core agent is implementing
+explicit nested insertion/update and legacy/new candidate transfer checks in the
+retained core worktree, checked out to audited `cba3c0e` without reset/rebase. Read-only core preparation agreed explicit `BodyRef` (root/branch),
 `NodeRef` (Beat/whole condition), immediate-sibling `Position`, expected ownership and
 revision envelopes. Preserve whole-subtree identities, safely qualified indentation,
 canonical empty-body pass, delete versus selected-branch unwrap and transaction/history.
 Close later Jump/Choice recursive-Call authoring while allowing pure Jump loops. The
-remaining two core invocations can cover the first decisive structural checks;
+remaining two core invocations are selected for this first decisive structural slice;
 four more were proposed for review corrections/full coverage and remain unallocated.
 Renderer controls need their own finite slice selection; compatibility rounds are spent.
 
