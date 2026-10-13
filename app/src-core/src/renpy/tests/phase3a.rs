@@ -362,6 +362,24 @@ fn edit_nested_dialogue(
     (accepted_before, produced)
 }
 
+fn runtime_driver(
+    name: &str,
+    flag: bool,
+    trust: i64,
+    mood: &str,
+    expected: &str,
+    ending: &str,
+) -> String {
+    let progression = if ending == "High ending" {
+        "        advance until screen \"choice\"\n        assert screen \"choice\" timeout 10\n        click \"Ready route\"\n"
+    } else if ending == "Low ending" {
+        "        advance until screen \"choice\"\n        assert screen \"choice\" timeout 10\n        click \"Low route\"\n"
+    } else {
+        "        advance\n"
+    };
+    format!("init -999 python:\n    import os\n    os.environ[\"SDL_AUDIODRIVER\"] = \"dummy\"\n\ntestsuite phase3a:\n    after testcase:\n        exit\n\n    testcase route:\n        assert screen \"main_menu\" timeout 10\n        click \"Start\"\n        assert {expected:?} timeout 10\n        assert eval (renpy.get_screen(\"say\").scope[\"what\"] == {expected:?}) timeout 10\n        assert eval (flag is {flag}) timeout 10\n        assert eval (trust == {trust} and precision == 9007199254740993 and mood == {mood:?}) timeout 10\n        $ phase3a_base_depth = renpy.call_stack_depth()\n        advance until \"B entry\"\n        assert \"B entry\" timeout 10\n        assert eval (renpy.call_stack_depth() == phase3a_base_depth + 1) timeout 10\n        advance until \"C entry\"\n        assert \"C entry\" timeout 10\n        assert eval (renpy.call_stack_depth() == phase3a_base_depth + 2) timeout 10\n        advance until \"B resumed\"\n        assert \"B resumed\" timeout 10\n        assert eval (renpy.call_stack_depth() == phase3a_base_depth + 1) timeout 10\n        advance until \"Caller resumed\"\n        assert \"Caller resumed\" timeout 10\n        assert eval (renpy.call_stack_depth() == phase3a_base_depth and opaque_neighbor == \"kept\") timeout 10\n{progression}        assert {ending:?} timeout 10\n        assert eval (renpy.get_screen(\"say\").scope[\"what\"] == {ending:?}) timeout 10\n        $ print(\"PHASE3A_ROUTE {name}\", flush=True)\n        advance until screen \"main_menu\"\n        exit\n", flag = if flag { "True" } else { "False" })
+}
+
 #[test]
 fn phase3a_sdk_fixture_source_save_preserves_bom() {
     let temporary = tempfile::tempdir().unwrap();
@@ -389,6 +407,27 @@ fn phase3a_sdk_fixture_source_save_preserves_bom() {
     let (before, after) = edit_nested_dialogue(&mut service, &root, &entry_id, &source);
     assert!(before.starts_with(&[0xef, 0xbb, 0xbf]));
     assert!(after.starts_with(&[0xef, 0xbb, 0xbf]));
+    for (ending, expected_click) in [("High ending", "Ready route"), ("Low ending", "Low route")] {
+        let driver = runtime_driver("preflight", true, 5, "ready", "Edited deep café 雪", ending);
+        let progression = format!(
+            "        advance until screen \"choice\"\n        assert screen \"choice\" timeout 10\n        click \"{expected_click}\"\n"
+        );
+        assert!(driver.contains(&progression));
+        assert!(!driver.contains("\n        advance\n"));
+        assert!(driver.contains("renpy.call_stack_depth() == phase3a_base_depth"));
+        assert!(driver.contains("PHASE3A_ROUTE preflight"));
+        assert!(driver.ends_with("        advance until screen \"main_menu\"\n        exit\n"));
+    }
+    let driver = runtime_driver(
+        "preflight",
+        true,
+        -1,
+        "blocked",
+        "Other nested branch",
+        "Nothing available",
+    );
+    assert!(driver.contains("\n        advance\n        assert \"Nothing available\" timeout 10\n"));
+    assert!(!driver.contains("screen \"choice\""));
     assert_eq!(
         process_spawn_count_for_test(),
         before_spawns,
@@ -614,14 +653,7 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
         for (relative, bytes) in &accepted_sources {
             fs::write(without_metadata.join(relative), bytes).unwrap();
         }
-        let choice = if ending == "High ending" {
-            "        click \"Ready route\"\n"
-        } else if ending == "Low ending" {
-            "        click \"Low route\"\n"
-        } else {
-            ""
-        };
-        let driver = format!("init -999 python:\n    import os\n    os.environ[\"SDL_AUDIODRIVER\"] = \"dummy\"\n\ntestsuite phase3a:\n    after testcase:\n        exit\n\n    testcase route:\n        assert screen \"main_menu\" timeout 10\n        click \"Start\"\n        assert {expected:?} timeout 10\n        assert eval (renpy.get_screen(\"say\").scope[\"what\"] == {expected:?}) timeout 10\n        assert eval (flag is {flag}) timeout 10\n        assert eval (trust == {trust} and precision == 9007199254740993 and mood == {mood:?}) timeout 10\n        $ phase3a_base_depth = renpy.call_stack_depth()\n        advance until \"B entry\"\n        assert \"B entry\" timeout 10\n        assert eval (renpy.call_stack_depth() == phase3a_base_depth + 1) timeout 10\n        advance until \"C entry\"\n        assert \"C entry\" timeout 10\n        assert eval (renpy.call_stack_depth() == phase3a_base_depth + 2) timeout 10\n        advance until \"B resumed\"\n        assert \"B resumed\" timeout 10\n        assert eval (renpy.call_stack_depth() == phase3a_base_depth + 1) timeout 10\n        advance until \"Caller resumed\"\n        assert \"Caller resumed\" timeout 10\n        assert eval (renpy.call_stack_depth() == phase3a_base_depth and opaque_neighbor == \"kept\") timeout 10\n        advance\n{choice}        assert {ending:?} timeout 10\n        assert eval (renpy.get_screen(\"say\").scope[\"what\"] == {ending:?}) timeout 10\n        $ print(\"PHASE3A_ROUTE {name}\", flush=True)\n        advance until screen \"main_menu\"\n        exit\n", flag = if flag { "True" } else { "False" });
+        let driver = runtime_driver(name, flag, trust, mood, expected, ending);
         fs::write(without_metadata.join("game/zz_phase3a_test.rpy"), &driver).unwrap();
         if let Some(path) = &evidence {
             fs::write(path.join(format!("{name}-driver.rpy")), &driver).unwrap();
