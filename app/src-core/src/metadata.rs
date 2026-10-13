@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 3;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 4;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
 
@@ -137,8 +137,13 @@ pub struct BeatOwner {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ConditionalBranch {
     pub group_id: String,
-    pub variable_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variable_id: Option<String>,
     pub otherwise: bool,
+    #[serde(default)]
+    pub ordinal: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<crate::conditions::Condition>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -312,7 +317,7 @@ impl SourceMapMetadata {
     pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
         if !matches!(
             self.schema_version,
-            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | SOURCE_MAP_SCHEMA_VERSION
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id
             || self.sources.len() > 4096
@@ -342,6 +347,8 @@ impl SourceMapMetadata {
             let mut last_end = scene.label_start;
             let mut groups = HashSet::new();
             let mut active_branch: Option<(&str, &str)> = None;
+            let mut active = Vec::<(&str, &str)>::new();
+            let mut rich_groups = std::collections::HashMap::<&str, (Option<BeatOwner>, u32, bool)>::new();
             for beat in &scene.beats {
                 if !valid_id(&beat.id)
                     || !beat_ids.insert(beat.id.clone())
@@ -360,11 +367,12 @@ impl SourceMapMetadata {
                 {
                     return Err(MetadataError::InvalidStructure);
                 }
+                if self.schema_version < 4 {
                 if let Some(branch) = &beat.conditional_branch {
                     if beat.owner.is_some()
                         || beat.kind != "customCode"
                         || !valid_id(&branch.group_id)
-                        || !valid_id(&branch.variable_id)
+                        || branch.variable_id.as_deref().is_none_or(|id| !valid_id(id))
                         || beat_ids.contains(&branch.group_id)
                         || if branch.otherwise {
                             active_branch.is_none_or(|(group, _)| group != branch.group_id)
@@ -382,6 +390,33 @@ impl SourceMapMetadata {
                             != Some((owner.group_id.as_str(), owner.branch_id.as_str()))
                     {
                         return Err(MetadataError::InvalidStructure);
+                    }
+                }
+                } else {
+                    if let Some(owner) = &beat.owner {
+                        let position = active.iter().position(|pair| *pair == (owner.group_id.as_str(), owner.branch_id.as_str())).ok_or(MetadataError::InvalidStructure)?;
+                        active.truncate(position + 1);
+                    } else if beat.kind != "customCode" || beat.conditional_branch.is_some() { active.clear(); }
+                    if let Some(branch) = &beat.conditional_branch {
+                        if beat.kind != "customCode" || !valid_id(&branch.group_id) || beat_ids.contains(&branch.group_id)
+                            || branch.variable_id.as_deref().is_some_and(|id| !valid_id(id))
+                            || branch.otherwise && branch.condition.is_some()
+                            || !branch.otherwise && branch.condition.is_none() && branch.variable_id.is_none()
+                        { return Err(MetadataError::InvalidStructure); }
+                        if let Some(crate::conditions::Condition::Supported { expression }) = &branch.condition {
+                            crate::conditions::validate_expression(expression).map_err(|_| MetadataError::InvalidStructure)?;
+                        }
+                        match rich_groups.get_mut(branch.group_id.as_str()) {
+                            Some((parent, ordinal, closed)) => {
+                                if *closed || parent != &beat.owner || branch.ordinal != *ordinal + 1 { return Err(MetadataError::InvalidStructure); }
+                                *ordinal = branch.ordinal; *closed = branch.otherwise;
+                            }
+                            None => {
+                                if branch.ordinal != 0 || branch.otherwise { return Err(MetadataError::InvalidStructure); }
+                                rich_groups.insert(&branch.group_id, (beat.owner.clone(), 0, false));
+                            }
+                        }
+                        active.push((&branch.group_id, &beat.id));
                     }
                 }
             }

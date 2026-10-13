@@ -792,7 +792,7 @@ mod branches_tests {
             ("flag", "if flag:\n            bec \"nested\""),
         ] {
             let temporary = tempfile::tempdir().unwrap();
-            let (mut service, _) = foundation(&temporary);
+            let (mut service, root) = foundation(&temporary);
             let model = ipc(&mut service, "scene.list", json!({}));
             let scene = &model["scenes"][0];
             let source = format!("label {}:\n    if {condition}:\n        {body}\n    else:\n        bec \"False\"\n    return\n", scene["technicalLabel"].as_str().unwrap());
@@ -812,10 +812,24 @@ mod branches_tests {
                 json!({"path":scene["sourcePath"],"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
             );
             let result = service.scene_workspace().unwrap();
-            assert!(result.scenes[0]
-                .beats
-                .iter()
-                .all(|b| b.owner.is_none() && b.conditional_branch.is_none()));
+            // Phase 3A refines supported boolean combinations and nested groups;
+            // opaque expressions/statements remain protected exact source ranges.
+            let first = result.scenes[0].beats.iter().find_map(|b| b.conditional_branch.as_ref()).unwrap();
+            if condition == "missing" {
+                assert!(matches!(first.condition, Some(crate::conditions::Condition::Unknown { .. })));
+            } else {
+                assert!(matches!(first.condition, Some(crate::conditions::Condition::Supported { .. })));
+            }
+            if body.starts_with("$ unknown") {
+                assert!(result.scenes[0].beats.iter().any(|b| b.protected && matches!(&b.payload, crate::scene::BeatPayload::CustomCode { source, .. } if source.trim() == body)));
+            }
+            assert!(result.scenes[0].beats.iter().filter(|b| matches!(b.payload, crate::scene::BeatPayload::CustomCode { .. })).all(|b| b.protected));
+            assert_eq!(result.scenes[0].beats.iter().filter(|b| b.conditional_branch.is_some()).count(), if body.starts_with("if flag:") { 3 } else { 2 });
+            let dialogue_children = result.scenes[0].beats.iter().filter(|b| matches!(b.payload, crate::scene::BeatPayload::Dialogue { .. })).collect::<Vec<_>>();
+            assert_eq!(dialogue_children.len(), if body.starts_with("$ unknown") { 1 } else { 2 });
+            assert!(dialogue_children.iter().all(|b| b.owner.is_some()));
+            let prefix: &[u8] = if opened["hasBom"] == true { b"\xef\xbb\xbf" } else { b"" };
+            assert_eq!(fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap(), [prefix, source.as_bytes()].concat());
             assert!(result.scenes[0].partial);
             service.close().unwrap();
         }

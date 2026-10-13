@@ -353,6 +353,9 @@ enum ParsedNesting {
         group_start: usize,
         variable_id: String,
         otherwise: bool,
+        ordinal: u32,
+        condition: Option<crate::conditions::Condition>,
+        parent: Option<(usize, usize)>,
     },
     Child {
         group_start: usize,
@@ -406,6 +409,7 @@ impl AuthoringService {
         metadata
             .validate(None)
             .map_err(|_| SceneError::InvalidMetadata)?;
+        let previous_schema = source_map.schema_version;
         source_map.schema_version = SOURCE_MAP_SCHEMA_VERSION;
         let previous_mappings = std::mem::take(&mut source_map.scene_mappings);
         let authoring = self
@@ -426,7 +430,7 @@ impl AuthoringService {
             if let Some(old) = legacy.as_mut() {
                 // Migration may refine an old opaque child, never rewrite source.
                 // Reuse IDs only for exactly matching source ranges and bytes.
-                let (_, _, parsed) = parse_scene(scene, &bytes, Some((&metadata, &authoring)))?;
+                let (_, _, parsed) = parse_scene_mode(scene, &bytes, Some((&metadata, &authoring)), previous_schema < 4)?;
                 if old.source_revision != revision.sha256 {
                     return Err(SceneError::SourceConflict);
                 }
@@ -443,6 +447,7 @@ impl AuthoringService {
                 {
                     return Err(SceneError::InvalidMetadata);
                 }
+                let (_, _, parsed) = parse_scene(scene, &bytes, Some((&metadata, &authoring)))?;
                 for parsed in parsed {
                     let hash = sha256(&bytes[parsed.start..parsed.end]);
                     if let Some(mapped) = old.beats.iter().find(|m| {
@@ -1893,7 +1898,7 @@ fn apply_beat_edit(
     if beats
         .iter()
         .take(beats.len().saturating_sub(1))
-        .any(|beat| is_terminal_payload(&beat.payload))
+        .any(|beat| is_terminal_payload(&beat.payload) && beat.owner.is_none() && beat.conditional_branch.is_none())
     {
         return Err(SceneError::InvariantBlocked);
     }
@@ -2589,6 +2594,9 @@ fn parse_bool_group(
                 group_start,
                 variable_id: variable.id.clone(),
                 otherwise,
+                ordinal: u32::from(otherwise),
+                condition: None,
+                parent: None,
             });
             result.push(parsed);
         } else if body.trim().is_empty() || body.trim_start().starts_with('#') {
@@ -2614,10 +2622,104 @@ fn parse_bool_group(
     (otherwise && dialogues.iter().all(|n| *n > 0)).then_some((next, result))
 }
 
+const MAX_CONDITION_NESTING: usize = 16;
+fn condition_header(body: &str, indent: usize, keyword: &str) -> Option<String> {
+    let prefix = format!("{}{}", " ".repeat(indent), keyword);
+    let rest = body.strip_prefix(&prefix)?;
+    // Locate comments outside quotes. Never interpret Python or custom syntax.
+    let mut quoted = None;
+    let mut escaped = false;
+    let mut end = rest.len();
+    for (offset, ch) in rest.char_indices() {
+        if escaped { escaped = false; continue; }
+        if ch == '\\' && quoted.is_some() { escaped = true; continue; }
+        if quoted == Some(ch) { quoted = None; }
+        else if quoted.is_none() && (ch == '\'' || ch == '"') { quoted = Some(ch); }
+        else if quoted.is_none() && ch == '#' { end = offset; break; }
+    }
+    let expression = rest[..end].trim_end().strip_suffix(':')?.trim();
+    (!expression.is_empty() || keyword == "else").then(|| expression.into())
+}
+fn indentation(body: &str) -> usize { body.bytes().take_while(|b| *b == b' ').count() }
+fn parse_condition_group(
+    lines: &[(usize, usize, &str)], index: usize,
+    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>, indent: usize,
+    parent: Option<(usize, usize)>, depth: usize, lexical: &HashSet<usize>,
+) -> Option<(usize, Vec<ParsedBeat>)> {
+    if depth >= MAX_CONDITION_NESTING || !lexical.contains(&lines[index].0) { return None; }
+    let first = condition_header(lines[index].2, indent, "if ")?;
+    let authoring = loaded?.1;
+    let group_start = lines[index].0;
+    let legacy_variable = authoring.variables.iter().find(|v| v.technical_name == first && v.variable_type == VariableType::Bool).map(|v| v.id.clone()).unwrap_or_default();
+    let mut next = index;
+    let mut result = Vec::new();
+    let mut ordinal = 0;
+    loop {
+        let (start, end, body) = lines[next];
+        let (otherwise, expression) = if next == index { (false, first.clone()) }
+            else if let Some(expression) = condition_header(body, indent, "elif ") { (false, expression) }
+            else if condition_header(body, indent, "else").as_deref() == Some("") { (true, String::new()) }
+            else { break; };
+        let branch_start = start;
+        let mut header = custom(start, end, body);
+        header.nesting = Some(ParsedNesting::Branch {
+            group_start, variable_id: legacy_variable.clone(), otherwise, ordinal,
+            condition: (!otherwise).then(|| crate::conditions::parse(&expression, authoring)), parent,
+        });
+        result.push(header);
+        next += 1;
+        let mut statements = 0;
+        while next < lines.len() {
+            let (start, end, body) = lines[next];
+            if body.trim().is_empty() || body.trim_start().starts_with('#') {
+                let trivia = custom(start, end, body);
+                result.push(trivia); next += 1; continue;
+            }
+            if indentation(body) <= indent { break; }
+            if indentation(body) != indent + 4 || body.starts_with('\t') { return None; }
+            if let Some((after, nested)) = parse_condition_group(lines, next, loaded, indent + 4, Some((group_start, branch_start)), depth + 1, lexical) {
+                result.extend(nested); next = after; statements += 1; continue;
+            }
+            let normalized = format!("    {}", &body[indent + 4..]);
+            let payload = if !lexical.contains(&start) { None } else if let Some((_, quote_end)) = dialogue_quotes(&normalized) {
+                let suffix = normalized[quote_end + 1..].trim();
+                if suffix.is_empty() || suffix.starts_with('#') { parse_line(&normalized[..quote_end + 1], loaded) } else { None }
+            } else { parse_line(&normalized, loaded) };
+            let payload = payload.unwrap_or_else(|| BeatPayload::CustomCode { source: body.into(), reason: "Unsupported or runtime-dependent Ren'Py source".into() });
+            // Unsupported indented blocks are opaque as a unit. In particular, Python
+            // internals must never become editable dialogue or conditional children.
+            let mut after = next + 1;
+            if matches!(payload, BeatPayload::CustomCode { .. }) {
+                while after < lines.len() && (!lexical.contains(&lines[after].0) || indentation(lines[after].2) > indent + 4) { after += 1; }
+            }
+            result.push(ParsedBeat { start, end, payload, nesting: Some(ParsedNesting::Child { group_start, branch_start }) });
+            for (start, end, body) in &lines[next + 1..after] {
+                let mut opaque = custom(*start, *end, body);
+                opaque.nesting = Some(ParsedNesting::Child { group_start, branch_start });
+                result.push(opaque);
+            }
+            next = after; statements += 1;
+        }
+        if statements == 0 { return None; }
+        ordinal += 1;
+        if otherwise || next >= lines.len() { break; }
+    }
+    Some((next, result))
+}
+
 fn parse_scene(
     scene: &SceneMetadata,
     bytes: &[u8],
     loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
+    parse_scene_mode(scene, bytes, loaded, false)
+}
+
+fn parse_scene_mode(
+    scene: &SceneMetadata,
+    bytes: &[u8],
+    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    legacy: bool,
 ) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
     let bom = usize::from(bytes.starts_with(&[0xef, 0xbb, 0xbf])) * 3;
     let source = std::str::from_utf8(&bytes[bom..]).map_err(|_| SceneError::UnsupportedSource)?;
@@ -2625,6 +2727,9 @@ fn parse_scene(
         .into_iter()
         .map(|(start, end, body)| (start + bom, end + bom, body))
         .collect::<Vec<_>>();
+    let lexical: HashSet<usize> = if legacy { HashSet::new() } else {
+        crate::authoring::lexical_lines(&bytes[bom..], false).map_err(|_| SceneError::UnsupportedSource)?.into_iter().map(|(start, _)| start + bom).collect()
+    };
     let wanted = format!("label {}:", scene.technical_label);
     let labels: Vec<_> = lines
         .iter()
@@ -2652,12 +2757,12 @@ fn parse_scene(
         if body.starts_with("label ") && body.ends_with(':') {
             return Err(SceneError::UnsupportedSource);
         }
-        if let Some((next, nested)) = parse_bool_group(&lines, index, loaded) {
+        if let Some((next, nested)) = if legacy { parse_bool_group(&lines, index, loaded) } else { parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical) } {
             beats.extend(nested);
             index = next;
             continue;
         }
-        if body == "    menu:" {
+        if body == "    menu:" && (legacy || lexical.contains(&start)) {
             let menu_start = start;
             index += 1;
             let mut options = Vec::new();
@@ -2665,6 +2770,7 @@ fn parse_scene(
             while index + 1 < lines.len() {
                 let (_, option_end, option_line) = lines[index];
                 let (_, jump_end, jump_line) = lines[index + 1];
+                if !legacy && (!lexical.contains(&lines[index].0) || !lexical.contains(&lines[index + 1].0)) { break; }
                 let Some(option_text) = choice_option_text(option_line) else {
                     break;
                 };
@@ -2701,7 +2807,7 @@ fn parse_scene(
             beats.push(custom(start, end, body));
             continue;
         }
-        let payload = parse_line(body, loaded).unwrap_or_else(|| BeatPayload::CustomCode {
+        let payload = (if legacy || lexical.contains(&start) { parse_line(body, loaded) } else { None }).unwrap_or_else(|| BeatPayload::CustomCode {
             source: body.into(),
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         });
@@ -2988,10 +3094,10 @@ pub(crate) fn build_mapping(
     for (start, nested) in &nesting {
         if let Some(ParsedNesting::Branch {
             group_start,
-            otherwise: false,
             ..
         }) = nested
         {
+            if group_start != start { continue; }
             let header_id = &ids_by_start[start];
             let group_id = previous
                 .and_then(|p| p.beats.iter().find(|m| &m.id == header_id))
@@ -3010,11 +3116,21 @@ pub(crate) fn build_mapping(
                 group_start,
                 variable_id,
                 otherwise,
+                ordinal,
+                condition,
+                parent,
             }) => {
+                if let Some((group, branch)) = parent {
+                    let owner = crate::metadata::BeatOwner { group_id: groups[&group].clone(), branch_id: ids_by_start[&branch].clone() };
+                    mapped.owner = Some(owner.clone());
+                    beat.owner = Some(owner);
+                }
                 let branch = crate::metadata::ConditionalBranch {
                     group_id: groups[&group_start].clone(),
-                    variable_id,
+                    variable_id: (!variable_id.is_empty()).then_some(variable_id),
                     otherwise,
+                    ordinal,
+                    condition,
                 };
                 mapped.conditional_branch = Some(branch.clone());
                 beat.conditional_branch = Some(branch);
@@ -3490,23 +3606,29 @@ pub(crate) fn continue_anchor(beats: &[SceneBeat], before: &str) -> Result<usize
 }
 
 fn root_insertion_is_nested(beats: &[SceneBeat], insertion: usize) -> bool {
-    let mut group_start = None;
+    let by_id: HashMap<_, _> = beats.iter().map(|beat| (beat.id.as_str(), beat)).collect();
+    let mut groups: HashMap<&str, (usize, usize)> = HashMap::new();
     for beat in beats {
-        if beat
-            .conditional_branch
-            .as_ref()
-            .is_some_and(|b| !b.otherwise)
-        {
-            group_start = Some(beat.byte_start as usize);
-        }
-        if beat.owner.is_some()
-            && group_start.is_some_and(|start| start < insertion)
-            && insertion < beat.byte_end as usize
-        {
-            return true;
+        if let Some(branch) = &beat.conditional_branch {
+            if branch.ordinal == 0 {
+                groups.insert(&branch.group_id, (beat.byte_start as usize, beat.byte_end as usize));
+            }
         }
     }
-    false
+    for beat in beats {
+        if let Some(branch) = &beat.conditional_branch {
+            if let Some((_, end)) = groups.get_mut(branch.group_id.as_str()) { *end = (*end).max(beat.byte_end as usize); }
+        }
+        // A nested group's descendants also belong to every ancestor's source
+        // interval, even when its last child belongs to a deeper immediate owner.
+        let mut owner = beat.owner.as_ref();
+        for _ in 0..MAX_CONDITION_NESTING {
+            let Some(parent) = owner else { break; };
+            if let Some((_, end)) = groups.get_mut(parent.group_id.as_str()) { *end = (*end).max(beat.byte_end as usize); }
+            owner = by_id.get(parent.branch_id.as_str()).and_then(|header| header.owner.as_ref());
+        }
+    }
+    groups.values().any(|(start, end)| *start < insertion && insertion < *end)
 }
 
 fn boundary_is_opaque(beats: &[SceneBeat], insertion: usize) -> bool {

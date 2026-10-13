@@ -1409,3 +1409,23 @@ fn compatibility_untested_profile_refuses_preparation_without_writes() {
     let store=f.service.read().unwrap();
     let result=f.call("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":60,"context":{"expectedPromptRevision":o["prompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"expectedSourceRevision":scene["sourceRevision"],"sceneId":scene["id"],"beatId":beat["id"],"references":[],"task":"Synthetic rewrite","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}));assert_eq!(result["ok"],false);assert_snapshots(&before,&f.snapshots());
 }
+
+#[test]
+fn phase3a_new_nested_targets_do_not_expand_ai_allowlist() {
+    let mut f = Fixture::new();
+    let w = f.ok("scene.list", json!({}));
+    let scene = &w["scenes"][0];
+    let source = format!("label {}:\n    if flag:\n        if flag == True:\n            bec \"Nested scope remains excluded\"\n        else:\n            bec \"Alternative\"\n    return\n", scene["technicalLabel"].as_str().unwrap());
+    let opened = f.ok("source.open", json!({"path":f.path}));
+    let draft = f.ok("source.updateDraft", json!({"path":f.path,"expectedBaseRevision":opened["baseRevision"],"text":source,"selectionStart":0,"selectionEnd":0}));
+    f.ok("source.save", json!({"path":f.path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}));
+    let options = f.ok("context.options", json!({}));
+    let w = f.ok("scene.list", json!({}));
+    let scene = &w["scenes"][0];
+    let beat = scene["beats"].as_array().unwrap().iter().find(|b| b["payload"]["text"] == "Nested scope remains excluded").unwrap();
+    assert!(beat["owner"].is_object());
+    let before = f.snapshots();
+    let store = f.service.read().unwrap();
+    assert_eq!(f.call("rewrite.prepare", json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"action":prompts::ACTION,"expectedPromptRevision":options["prompt"]["revision"],"expectedStructureRevision":options["structureRevision"],"expectedSourceRevision":scene["sourceRevision"],"sceneId":scene["id"],"beatId":beat["id"],"references":[],"task":"Rejected nested target","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}))["ok"], false);
+    assert_snapshots(&before, &f.snapshots());
+}

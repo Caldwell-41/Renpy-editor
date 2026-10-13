@@ -4,6 +4,7 @@ pub mod ai_discovery;
 pub mod ai_file_secrets;
 pub mod ai_profiles;
 pub mod authoring;
+pub mod conditions;
 pub mod dispatch;
 pub mod lifecycle;
 pub mod media;
