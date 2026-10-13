@@ -6,6 +6,14 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      story_logic_early:
+        description: Only focused Phase 3A conditions and calls; no package or older gates
+        type: boolean
+        default: false
+      story_logic_ordinal:
+        description: Cumulative Phase 3A paired attempt, 1 through 3
+        type: string
+        default: '1'
       assistance_ui:
         description: Only focused Studio UI refinement; no package or SDK matrix
         required: false
@@ -42,7 +50,7 @@ permissions:
 
 jobs:
   validate:
-    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.assistance_ui && !inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos) }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.story_logic_early && !inputs.assistance_ui && !inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos) }}
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -60,7 +68,7 @@ jobs:
 
 
   phase1g-flow-profile:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.assistance_ui && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
     name: Phase 1G flow profile — ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -204,7 +212,7 @@ jobs:
           retention-days: 7
 
   phase1g-macos-browser-diagnostic:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.assistance_ui && inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
     name: R2-P1 macOS browser diagnostic
     runs-on: macos-26
     timeout-minutes: 10
@@ -324,7 +332,7 @@ jobs:
 
 
   source-foundation-macos:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.assistance_ui && inputs.source_foundation_macos }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.story_logic_early && !inputs.assistance_ui && inputs.source_foundation_macos }}
     name: Bounded source foundation — macOS ARM64
     runs-on: macos-26
     timeout-minutes: 70
@@ -415,7 +423,14 @@ jobs:
           retention-days: 7
 
   assistance-ui:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.assistance_ui }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.story_logic_early && inputs.assistance_ui }}
     uses: ./.github/workflows/assistance-ui.yml
     with:
       ordinal: ${{ inputs.assistance_ui_ordinal }}
+
+  story-logic:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.story_logic_early }}
+    uses: ./.github/workflows/story-logic.yml
+    with:
+      ordinal: ${{ inputs.story_logic_ordinal }}
+      excluded_selectors: ${{ inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
