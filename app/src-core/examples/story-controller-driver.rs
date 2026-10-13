@@ -1,6 +1,7 @@
 //! Disposable Story controller qualification. No renderer fixture IPC, SDK or credentials.
 use loomlight_core::{dispatch::ApplicationHost, lifecycle::LifecycleService, CoreResponse};
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 
@@ -8,25 +9,60 @@ fn emit(value: Value) {
     println!("{value}");
     io::stdout().flush().unwrap();
 }
+fn dispatch(host: &ApplicationHost, operation: &str, payload: Value) -> Value {
+    serde_json::to_value(host.dispatch(json!({"protocolVersion": 1,
+        "requestId": uuid::Uuid::new_v4().to_string(), "operation": operation, "payload": payload}), false)).unwrap()
+}
 fn value(host: &ApplicationHost, operation: &str, payload: Value) -> Value {
-    let response = serde_json::to_value(host.dispatch(json!({"protocolVersion":1,
-        "requestId":uuid::Uuid::new_v4().to_string(),"operation":operation,"payload":payload}), false)).unwrap();
-    assert_eq!(response["ok"], true, "fixture dispatch: {response}");
+    let response = dispatch(host, operation, payload);
+    assert_eq!(response["ok"], true, "fixture {operation} dispatch: {response}");
     response["value"].clone()
 }
-fn source_save(host: &ApplicationHost, session: &str, path: &str, text: &str) {
-    let opened=value(host,"source.open",json!({"sessionId":session,"path":path}));
-    let draft=value(host,"source.updateDraft",json!({"sessionId":session,"path":path,
-        "expectedBaseRevision":opened["baseRevision"],"text":text,"selectionStart":0,"selectionEnd":0}));
-    value(host,"source.save",json!({"sessionId":session,"path":path,
-        "expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}));
+fn source_editor_text(text: &str, has_bom: bool) -> &str {
+    if let Some(editor) = text.strip_prefix('\u{feff}') {
+        assert!(has_bom, "transport BOM must match declared accepted BOM");
+        assert!(!editor.starts_with('\u{feff}'), "multiple transport BOMs must refuse");
+        editor
+    } else {
+        text
+    }
 }
+fn source_save(host: &ApplicationHost, session: &str, root: &Path, evidence: &Path, stage: &str, path: &str, text: &str) {
+    let opened = value(host, "source.open", json!({"sessionId": session, "path": path}));
+    let has_bom = opened["hasBom"].as_bool().expect("declared Source BOM required");
+    let before = std::fs::read(root.join(path)).unwrap();
+    assert_eq!(before.starts_with(&[0xef, 0xbb, 0xbf]), has_bom, "declared BOM matches accepted bytes");
+    std::fs::create_dir_all(evidence).unwrap();
+    std::fs::write(evidence.join(format!("{stage}-before.rpy")), &before).unwrap();
+    std::fs::write(evidence.join(format!("{stage}-requested.rpy")), text).unwrap();
+    let editor = source_editor_text(text, has_bom);
+    let mut proposed = Vec::new();
+    if has_bom { proposed.extend_from_slice(&[0xef, 0xbb, 0xbf]); }
+    proposed.extend_from_slice(editor.as_bytes());
+    assert!(!proposed.starts_with(&[0xef, 0xbb, 0xbf, 0xef, 0xbb, 0xbf]));
+    std::fs::write(evidence.join(format!("{stage}-proposed.rpy")), &proposed).unwrap();
+    let draft = value(host, "source.updateDraft", json!({"sessionId": session, "path": path,
+        "expectedBaseRevision": opened["baseRevision"], "text": editor, "selectionStart": 0, "selectionEnd": 0}));
+    let payload = json!({"sessionId": session, "path": path, "expectedBaseRevision": draft["baseRevision"], "expectedDraftVersion": draft["draftVersion"]});
+    let response = dispatch(host, "source.save", payload.clone());
+    let receipt = json!({"stage": stage, "operation": "source.save", "path": path, "hasBom": has_bom,
+        "requestPayload": payload, "response": response, "editorText": editor,
+        "beforeSHA256": format!("{:x}", Sha256::digest(&before)), "proposedSHA256": format!("{:x}", Sha256::digest(&proposed))});
+    std::fs::write(evidence.join(format!("{stage}-source-save.json")), serde_json::to_vec_pretty(&receipt).unwrap()).unwrap();
+    assert_eq!(response["ok"], true, "fixture Source save {stage}: {response}");
+    let after = std::fs::read(root.join(path)).unwrap();
+    std::fs::write(evidence.join(format!("{stage}-accepted.rpy")), &after).unwrap();
+    assert_eq!(after, proposed, "typed Source Save must preserve declared BOM and every editor body byte");
+    assert_eq!(response["value"]["hasBom"], has_bom);
+    assert_eq!(response["value"]["text"], editor);
+}
+
 fn apply(host: &ApplicationHost, session: &str, command: Value) -> Value {
     let ws=value(host,"scene.list",json!({"sessionId":session}));
     value(host,"scene.apply",json!({"sessionId":session,"expectedProjectRevision":ws["projectRevision"],
         "expectedSourceMapRevision":ws["sourceMapRevision"],"command":command}))
 }
-fn seed(host: &ApplicationHost, session: &str) {
+fn seed(host: &ApplicationHost, session: &str, root: &Path, evidence: &Path) {
     for (name,kind,default) in [("trust","int",json!("5")),("mood","string",json!("ready")),
         ("precision","int",json!("9007199254740993"))] {
         value(host,"variable.create",json!({"sessionId":session,"technicalName":name,"variableType":kind,"defaultValue":default}));
@@ -38,11 +74,12 @@ fn seed(host: &ApplicationHost, session: &str) {
         let ws=apply(host,session,json!({"type":"createScene","chapterId":entry["chapterId"],"displayName":name}));
         let scene=ws["scenes"].as_array().unwrap().iter().find(|s|s["displayName"]==name).unwrap().clone();
         let line=if name=="Called scene" {"Called entry"} else {name};
-        source_save(host,session,scene["sourcePath"].as_str().unwrap(),
+        let stage = match name { "Called scene" => "called-scene", "High ending" => "high-ending", _ => "low-ending" };
+        source_save(host,session,root,evidence,stage,scene["sourcePath"].as_str().unwrap(),
             &format!("label {}:\n    \"{line}\"\n    return\n",scene["technicalLabel"].as_str().unwrap()));
         created.push(scene);
     }
-    source_save(host,session,entry["sourcePath"].as_str().unwrap(),&format!(
+    source_save(host,session,root,evidence,"entry-source",entry["sourcePath"].as_str().unwrap(),&format!(
         "\u{feff}label {}:\n    # exact Story fixture café 雪\n    python:\n        opaque_neighbor = \"kept\"\n    if flag:\n        # nested neighbour retained\n        \"Nested retained\"\n    elif trust == 4:\n        \"Boundary preserved\"\n    else:\n        pass\n    \"Caller resumed\"\n    menu:\n        \"Ready route\" if trust >= 5:\n            jump {}\n        \"Low route\" if trust >= 0 and trust < 5:\n            jump {}\n    \"Nothing available\"\n    return\n",
         entry["technicalLabel"].as_str().unwrap(),created[1]["technicalLabel"].as_str().unwrap(),created[2]["technicalLabel"].as_str().unwrap()));
     let ws=value(host,"scene.list",json!({"sessionId":session}));
@@ -69,6 +106,8 @@ fn main() {
     let root=PathBuf::from(args.get(index+1).unwrap());
     assert_eq!(root.parent(),Some(std::env::temp_dir().as_path()));
     assert!(root.file_name().unwrap().to_str().unwrap().starts_with("loomlight-phase3a-controller-"));
+    let evidence_index = args.iter().position(|arg| arg == "--seed-evidence").expect("explicit synthetic seed evidence path required");
+    let evidence = PathBuf::from(args.get(evidence_index + 1).unwrap());
     let reopen=args.iter().any(|a|a=="--reopen");
     let retain=args.iter().any(|a|a=="--retain");
     let service=if reopen {assert!(root.is_dir());LifecycleService::new(root.clone()).unwrap()}
@@ -76,7 +115,16 @@ fn main() {
     let host=ApplicationHost::new(service);
     if !reopen {
         let p=host.with_service(|s|s.open_path(&root.join("synthetic-project")).unwrap()).unwrap();
-        seed(&host,&p.session_id);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(||
+            seed(&host, &p.session_id, &root.join("synthetic-project"), &evidence)));
+        if let Err(failure) = result {
+            std::fs::create_dir_all(&evidence).unwrap();
+            let mut snapshot = serde_json::Map::new();
+            files(&root.join("synthetic-project"), &root.join("synthetic-project"), &mut snapshot);
+            std::fs::write(evidence.join("failed-seed-project-snapshot.json"), serde_json::to_vec_pretty(&snapshot).unwrap()).unwrap();
+            emit(json!({"ready": false, "fixtureId": root.file_name().unwrap().to_str().unwrap(), "reopen": false, "seedFailed": true, "failureSnapshotRetained": true}));
+            std::panic::resume_unwind(failure);
+        }
         value(&host,"project.close",json!({"sessionId":p.session_id}));
     }
     emit(json!({"ready":true,"fixtureId":root.file_name().unwrap().to_str().unwrap(),"reopen":reopen}));

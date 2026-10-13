@@ -42,5 +42,9 @@ export function driverProcess(executable,args,{timeout=15000}={}){
   if(failure&&failure!==exitError)throw failure;
   if(result.error||result.code!==0)throw result.error??Error(`Driver cleanup exit ${result.code} (${result.signal??'no signal'})`);
  };
- return {next,request,stop};
+ // Observation only: abnormal exit and an unobserved/unreaped child are different facts.
+ const exitStatus=()=>finished?.error
+  ? {exitObserved:false,exitCode:null,signal:null,startError:String(finished.error)}
+  : {exitObserved:finished!==undefined,exitCode:finished?.code??null,signal:finished?.signal??null};
+ return {next,request,stop,exitStatus};
 }

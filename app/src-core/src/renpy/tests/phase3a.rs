@@ -54,18 +54,32 @@ fn phase3a_conditions_calls_sdk_gate() {
     assert!(cleanup, "owned game/profile/SDK/save cleanup failed");
 }
 
+fn source_editor_text(text: &str, has_bom: bool) -> &str {
+    if let Some(editor) = text.strip_prefix('\u{feff}') {
+        assert!(has_bom, "transport BOM must match the declared accepted BOM");
+        assert!(!editor.starts_with('\u{feff}'), "multiple transport BOMs must refuse");
+        editor
+    } else {
+        text
+    }
+}
+
 fn save(service: &mut LifecycleService, path: &str, text: &str) {
     let opened = ipc(service, "source.open", json!({"path": path}));
+    let has_bom = opened["hasBom"].as_bool().expect("declared Source BOM required");
+    let editor = source_editor_text(text, has_bom);
     let draft = ipc(
         service,
         "source.updateDraft",
-        json!({"path": path, "expectedBaseRevision": opened["baseRevision"], "text": text, "selectionStart": 0, "selectionEnd": 0}),
+        json!({"path": path, "expectedBaseRevision": opened["baseRevision"], "text": editor, "selectionStart": 0, "selectionEnd": 0}),
     );
-    ipc(
+    let saved = ipc(
         service,
         "source.save",
         json!({"path": path, "expectedBaseRevision": draft["baseRevision"], "expectedDraftVersion": draft["draftVersion"]}),
     );
+    assert_eq!(saved["hasBom"], has_bom);
+    assert_eq!(saved["text"], editor, "Source Save preserves every editor body byte");
 }
 
 fn scene(service: &mut LifecycleService, name: &str) -> Value {
@@ -556,6 +570,48 @@ fn phase3a_sdk_fixture_source_save_preserves_bom() {
     let (_, condition_bytes, receipt) = author_root_condition(&mut service,&root,&entry_id);
     assert_eq!(receipt["operation"],"updateConditionBranch");
     assert!(std::str::from_utf8(&condition_bytes).unwrap().contains("    if (flag == True):\n"));
+    // Exercise the same BOM-bearing caller-save path as the final SDK load proof, with no SDK.
+    let b = scene(&mut service, "Preflight callee");
+    let c = scene(&mut service, "Preflight deepest callee");
+    save(&mut service, b["sourcePath"].as_str().unwrap(), &format!(
+        "label {}:\n    \"Preflight B entry\"\n    \"Preflight B resumed\"\n    return\n", b["technicalLabel"].as_str().unwrap()));
+    save(&mut service, c["sourcePath"].as_str().unwrap(), &format!(
+        "label {}:\n    \"Preflight C entry\"\n    return\n", c["technicalLabel"].as_str().unwrap()));
+    let entry_id_value = json!(entry_id);
+    let b_call = insert_call(&mut service, &root, &b["id"], &c, "Preflight B resumed");
+    let entry_call = insert_call(&mut service, &root, &entry_id_value, &b, "Caller resumed");
+    let model = ipc(&mut service, "scene.list", json!({}));
+    let entry = model["scenes"].as_array().unwrap().iter().find(|item| item["id"] == entry_id_value).unwrap();
+    let path = entry["sourcePath"].as_str().unwrap();
+    let all_before = sources(&root);
+    let before_caller = fs::read(root.join(path)).unwrap();
+    assert!(before_caller.starts_with(&[0xef, 0xbb, 0xbf]));
+    assert!(!before_caller[3..].starts_with(&[0xef, 0xbb, 0xbf]));
+    let before_text = std::str::from_utf8(&before_caller).unwrap();
+    assert_eq!(before_text.matches("\"Caller resumed\"").count(), 1);
+    let expected = before_text.replacen("\"Caller resumed\"", "\"Caller safely edited\"", 1);
+    save(&mut service, path, &expected);
+    let after_caller = fs::read(root.join(path)).unwrap();
+    assert_eq!(after_caller, expected.as_bytes(), "caller save changes only the qualified narration");
+    assert!(after_caller.starts_with(&[0xef, 0xbb, 0xbf]));
+    assert!(!after_caller[3..].starts_with(&[0xef, 0xbb, 0xbf]));
+    let labels = [&entry_call["payload"]["returnLabel"], &b_call["payload"]["returnLabel"]];
+    assert_ne!(labels[0], labels[1]);
+    for (call, source_path) in [(&entry_call, path), (&b_call, b["sourcePath"].as_str().unwrap())] {
+        let label = call["payload"]["returnLabel"].as_str().unwrap();
+        let bytes = fs::read(root.join(source_path)).unwrap();
+        assert_eq!(std::str::from_utf8(&bytes).unwrap().matches(&format!(" from {label}")).count(), 1);
+    }
+    let after_model = ipc(&mut service, "scene.list", json!({}));
+    for call in [&entry_call, &b_call] {
+        let current = after_model["scenes"].as_array().unwrap().iter().flat_map(|scene| scene["beats"].as_array().unwrap()).find(|beat| beat["id"] == call["id"]).unwrap();
+        assert_eq!(current["payload"]["returnLabel"], call["payload"]["returnLabel"]);
+    }
+    let all_after = sources(&root);
+    let mut expected_sources = all_before;
+    assert_eq!(expected_sources.insert(PathBuf::from(path), after_caller.clone()), Some(before_caller.clone()));
+    assert_eq!(all_after, expected_sources, "caller save preserves the exact source file set and every other byte");
+    println!("phase-3a-zero-sdk-bom-caller: {}", json!({"beforeSHA256":format!("{:x}",Sha256::digest(&before_caller)),"afterSHA256":format!("{:x}",Sha256::digest(&after_caller)),"entryReturnLabel":labels[0],"calleeReturnLabel":labels[1],"singleBomPreserved":true,"allOtherSourceBytesPreserved":true}));
     for (ending, expected_click) in [("High ending", "Ready route"), ("Low ending", "Low route")] {
         let driver = runtime_driver("preflight", true, 5, "ready", "Edited deep café 雪", ending);
         let progression = format!(

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {randomUUID,createHash} from 'node:crypto';
 import {tmpdir} from 'node:os';
 import {join,resolve,basename,dirname} from 'node:path';
-import {existsSync,rmSync,mkdirSync,writeFileSync} from 'node:fs';
+import {existsSync,rmSync,mkdirSync,writeFileSync,readdirSync,lstatSync,readFileSync} from 'node:fs';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {Window} from 'happy-dom';
 import {driverProcess} from '../tests/phase2-driver-process.mjs';
@@ -26,6 +26,11 @@ const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains ma
 const hash=bytes=>createHash('sha256').update(Buffer.from(bytes)).digest('hex');
 const rpy=snapshot=>Object.fromEntries(Object.entries(snapshot).filter(([p])=>p.endsWith('.rpy')));
 const hashes=snapshot=>Object.fromEntries(Object.entries(snapshot).map(([p,b])=>[p,hash(b)]));
+const ownedProjectSnapshot=fixture=>{
+ const base=join(fixture,'synthetic-project'),snapshot={};
+ const visit=(dir,prefix='')=>{for(const entry of readdirSync(dir)){const file=join(dir,entry),relative=prefix+entry,state=lstatSync(file);assert(!state.isSymbolicLink(),'Owned failure snapshot refuses links');if(state.isDirectory())visit(file,relative+'/');else if(state.isFile()){assert(!relative.includes('savetoken')&&!relative.endsWith('.key'));snapshot[relative]=Array.from(readFileSync(file));}}};
+ if(existsSync(base))visit(base);return snapshot;
+};
 
 export async function qualifyStoryController(executable,{output,caseModule,selection='full'}={}) {
  assert(executable&&output&&caseModule,'Explicit driver, evidence output and reviewed DOM case module required');
@@ -36,7 +41,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  const fixture=join(tmpdir(),`loomlight-phase3a-controller-${randomUUID()}`);
  assert(!existsSync(fixture));
  const evidence={selection,passed:false,cases:[],driverStarts:0,driverExits:[],cleanupComplete:false,
-  sdkCommands:0,credentialOperations:0,aiOperations:0,packagedUi:'not exercised',humanAcceptance:'not claimed'};
+  sdkCommands:0,credentialOperations:0,aiOperations:0,packagedUi:'not exercised',humanAcceptance:'not claimed',fixtureId:basename(fixture),ownedFixtureRemoved:false,failureSnapshotRetained:false};
  let child,session,latestWorkspace,lastMutation,saveBefore,saveAfter;
  let domSequence=0,lastEvent,caseActive=false,caseEventStart=0;
  const panelEvents=new Map();let sourceInputEvent;
@@ -138,19 +143,21 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  };
  const start=async reopen=>{
   evidence.driverStarts++;
-  child=driverProcess(executable,['--root',fixture,...(reopen?['--reopen']:['--retain'])]);
-  const ready=await child.next();assert.equal(ready.ready,true);assert.equal(ready.fixtureId,basename(fixture));assert.equal(ready.reopen,reopen);
+  child=driverProcess(executable,['--root',fixture,'--seed-evidence',join(output,'seed'),...(reopen?['--reopen']:['--retain'])]);
+  const ready=await child.next();evidence.lastDriverReady=ready;assert.equal(ready.fixtureId,basename(fixture));assert.equal(ready.ready,true);assert.equal(ready.reopen,reopen);
  };
  const stop=async()=>{
   assert(child,'No owned driver to stop');const owner=child;
   try{
-   await owner.stop();
-   evidence.driverExits.push({normal:true,reaped:true});
+   await owner.stop();const outcome=owner.exitStatus();assert(outcome.exitObserved&&outcome.exitCode===0&&!outcome.signal);
+   evidence.driverExits.push({normal:true,reaped:true,...outcome});
    if(child===owner)child=undefined;
   }catch(error){
    stopFailure??=error;evidence.passed=false;evidence.cleanupComplete=false;
-   if(!evidence.driverExits.some(exit=>exit.normal===false))evidence.driverExits.push({normal:false,reaped:false,error:String(error)});
-   // Retain ownership: outer cleanup must not confuse failed shutdown with no child.
+   const outcome=owner.exitStatus();
+   if(!evidence.driverExits.some(exit=>exit.normal===false))evidence.driverExits.push({normal:false,reaped:outcome.exitObserved,...outcome,error:String(error)});
+   // Release a child only after its OS exit is observed. Abnormal termination still fails the gate.
+   if(outcome.exitObserved&&child===owner)child=undefined;
    throw error;
   }
  };
@@ -208,13 +215,21 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  } finally {
   let cleanupError=stopFailure;
   if(child){try{await stop();}catch(error){cleanupError=error;}}
-  await w.happyDOM.close();
+  try{await w.happyDOM.close();}catch(error){cleanupError??=error;evidence.domDisposalError=String(error);}
   // Rust EOF cleanup cannot run after a crash/forced kill; harness owns this exact UUID root.
   if(existsSync(fixture)){
    assert.equal(dirname(fixture),tmpdir());assert(basename(fixture).startsWith('loomlight-phase3a-controller-'));
-   rmSync(fixture,{recursive:true,force:true});
+   let retained=true;
+   if(!evidence.passed){
+    try{mkdirSync(output,{recursive:true});const saved=ownedProjectSnapshot(fixture),serialized=JSON.stringify(saved,null,2)+'\n';writeFileSync(join(output,'failed-owned-project-snapshot.json'),serialized);evidence.failureSnapshotRetained=true;evidence.failureSnapshotSHA256=hash(Buffer.from(serialized));}
+    catch(error){retained=false;cleanupError??=error;evidence.failureSnapshotError=String(error);}
+   }
+   // Preserve failed evidence, or a still-unobserved child, instead of deleting underneath it.
+   if(retained&&!child)rmSync(fixture,{recursive:true,force:true});
+   else evidence.ownedFixtureRetained=true;
   }
-  evidence.cleanupComplete=!existsSync(fixture)&&!cleanupError&&!stopFailure&&!child;
+  evidence.ownedFixtureRemoved=!existsSync(fixture);
+  evidence.cleanupComplete=evidence.ownedFixtureRemoved&&!cleanupError&&!stopFailure&&!child;
   if(cleanupError)evidence.passed=false;
   mkdirSync(output,{recursive:true});
   writeFileSync(join(output,'controller-report.json'),JSON.stringify(evidence,null,2)+'\n');
