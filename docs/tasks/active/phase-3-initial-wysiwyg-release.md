@@ -1101,3 +1101,52 @@ The final focused selections passed 16 Phase 3A tests (16.13 seconds), 16 Source
 The core worktree is clean and preserved. [ADR 0015](../../adr/0015-guarded-choices-and-stable-call-continuations.md)
 records the reviewed decision and limits. Validation now integrates this exact code for
 its next local harness round; no SDK/CI run or 3A acceptance has occurred.
+
+**Validation round 3/4:** the integrated core/renderer candidate passed all 16 frozen
+named core tests, seven exact renderer compatibility cases, frontend typecheck/test
+compilation/production build, six rejecting evidence fixtures and workflow/diff checks.
+The SDK gate compiled but was excluded from execution. The harness now authors both
+Call insertion and a guarded Choice condition through `scene.apply`, asserting exact
+source changes, unchanged neighboring options, flow targets/continuations and reopen.
+Final independent harness review precedes its commit/publication and the first paired
+CI dispatch. Counts: core 12/14, renderer compatibility 4/4, validation local 3/4,
+paired CI 0/3, SDK/package/owner-native/live-model execution zero.
+
+**Final harness review corrections selected:** require the privacy scan to pass before
+upload, while retaining failed-test partial artifacts when the scan passes; include
+the scanner, all used nested fixtures and renderer entry/public/config inputs in the
+per-file manifest. Review also caught a fixture-only BOM mismatch before any CI: Source
+preserves the initial BOM, but the expected nested edit used a BOM-free string.
+Derive expectations/artifacts from actual accepted bytes and add a zero-SDK preflight
+through the same fixture helper. This is within the remaining fourth local validation
+round, including changed Rust compilation and focused harness/workflow checks; the
+six actual SDK cases and 12 subprocess cap remain unchanged.
+
+**Read-only structural planning:** core and renderer agreed on additive `BodyRef`
+(explicit root or group/branch), `NodeRef` (Beat or whole condition) and body-relative
+`Position` with an immediate sibling anchor. Existing-node changes capture explicit
+expected ownership and existing revision envelopes. Same-Scene subtree moves, stable
+IDs, qualified reindentation, canonical empty-body `pass` and delete versus selected-
+branch unwrap use the existing transaction/history path. First frontend proof can
+edit a guarded Choice through real dispatch before broader hierarchy controls. These
+are implementation inputs, not executed changes or extra qualification authority;
+broad authoring remains gated on the early SDK result.
+
+**Validation round 4/4:** eight rejecting checker fixtures, both workflow checks,
+Python/diff checks, changed SDK-gate compilation and the shared-helper zero-SDK BOM
+preflight all passed (one preflight test, 2.06 seconds). The 179-file input manifest
+includes nested fixtures, renderer entry/public/config inputs, privacy and archive
+helpers; its privacy scan passed. Unchanged core/frontend suites were not repeated.
+The temporary dependency symlink was removed without touching its target. Final delta
+review precedes a seven-file harness commit. Local validation 4/4 is exhausted;
+paired CI remains 0/3, with no SDK execution yet.
+Independent final harness review is clear: 17 exact core/preflight names, recursive
+input sealing, BOM-preserving shared fixture, privacy-gated uploads, six normal-entry
+runtime cases and the 12-spawn budget match the selected contract. Publication awaits
+the exact local harness commit; SDK execution and phase acceptance remain pending.
+
+**Harness integration:** delegated `3a3dabdbbccd24cbdd005b9f664f164d076b12af` is integrated
+as `ce10f24` (seven authorized harness files). Its worktree is clean and preserved.
+Repository validation passed for 546 files and the combined diff check passed. The
+coherent candidate is ready for authorized publication and delegated batch 1; current
+CI consumption remains 0/3 until dispatch. The lead does not poll CI.

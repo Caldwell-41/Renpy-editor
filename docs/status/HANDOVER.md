@@ -31,27 +31,30 @@ an exact serial rerun; the original cleanup cause remains unproven. See the
 [3A ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
 and [ADR 0014](../adr/0014-typed-conditions-and-recursive-source-ownership.md).
 
-**Next:** integrate the frozen reviewed calls/guarded-choice/map-v5 core (`1029bd8`,
-delegated `e97be13`) into the validation harness, then review and publish the coherent
-early CI candidate. Renderer
+**Next:** publish the coherent early CI candidate and delegate batch 1 dispatch,
+monitoring and exact-artifact terminal audit. Reviewed core is `1029bd8` (delegated
+`e97be13`); the reviewed harness is integrated as `ce10f24` (delegated `3a3dabd`). Renderer
 compatibility has passed 61 focused tests, serialized-flow agreement and independent
-review; it is integrated locally as `461441c`/`a9c3406`. Validation compiles the integrated authored-Call
-harness after that freeze.
+review; it is integrated as `461441c`/`a9c3406`. The integrated authored-Call/Choice
+harness passed its local preparation checks and final independent review.
 First core allowance consumed 8/8 after explicit bounded reassessments; next
 slice 4/6 (12/14 cumulative; latest 34 passed across focused selections). Core
 freeze/review is clear. Early recursion refusal applies to Call commands; later
 Jump/Choice authoring gap is retained for the structural slice before 3A acceptance.
 Renderer compatibility is 4/4 local rounds; validation
-is local 2/4, paired CI 0/3; per batch/
+is local 4/4 (integrated checks and final BOM/manifest/privacy preflight passed), paired CI 0/3; per batch/
 target one verified SDK install, GUI generation (two commands), compile/lint and six
 runtime cases. Zero packages/owner native starts/live model calls. No 3A CI is pending.
 The lead must not poll CI; delegated Sol 6.1 High agents may poll selected runs by
 explicit user authorization. Continue routine reviewable slices without approval;
 escalate concrete hard dependencies or material decisions, retain cumulative budgets.
-Development stays on macOS; affected Windows/macOS proof uses focused CI. First reviewed slice/docs are published through `e5bfa25` on the dedicated branch;
-remote head was verified after explicit user authorization resolved the initial
-auto-review publication rejection. Later work remains local until separately verified
-published. No merge, release, Phase 2 session or acceptance is authorized.
+Development stays on macOS; affected Windows/macOS proof uses focused CI. Explicit
+user authorization resolved the initial auto-review publication rejection; reviewed
+Phase 3A branch pushes remain authorized. Reviewed core/renderer and decision records are published through
+`a08b3c8c85c2b06d0471c2f00c8684ae840b8b7e`; Git remote head was verified. The reviewed
+harness at `ce10f24` awaits the next publication and delegated CI dispatch. No CI was
+triggered by the earlier branch push. No merge, release,
+Phase 2 session or acceptance is authorized.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 

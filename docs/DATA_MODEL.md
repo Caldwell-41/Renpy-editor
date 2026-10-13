@@ -507,7 +507,7 @@ retain their proven Beat identity. Unknown ranges never select a nearby Beat.
 Destinations distinguish a uniquely resolved mapped Scene, proven absent static label,
 unresolved/custom destination (with Source navigation only when proven), and terminal
 Return. A bounded project-wide lexical inventory must be complete before absence or
-uniqueness is claimed. Conditional/dynamic source remains opaque; proven canonical
+uniqueness is claimed. Unsupported conditional/dynamic source remains opaque; proven canonical
 options after an unknown destination are retained with an explicit incomplete boundary.
 Additional labels remain unmapped, not invented Scenes. The unique accepted `start`
 label's canonical unconditional jump establishes the entry badge; custom/missing/

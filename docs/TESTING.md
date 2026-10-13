@@ -1190,7 +1190,36 @@ unsupported custom statements to remain protected. That contract update does not
 reclassify earlier failures. The [3A execution ledger](tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
 retains the broad local run's descendant-cleanup failure and its isolated passing rerun.
 Neither these local checks nor unchanged Phase 2 proof establish new SDK/target or full
-3A acceptance. The delegated focused CI harness is being prepared separately.
+3A acceptance. The separately reviewed focused CI harness now provides an explicitly
+selected early SDK gate; its results remain pending.
+
+The reviewed calls/guarded-choice slice extends the focused `phase3a_` selection to
+stable generated return labels, minimal Call target and menu-field edits, v3/v4-to-v5
+record preservation and refusal, exact guarded continuations, recursive-route and
+ambiguous-label diagnostics, missing mapped continuations and unchanged AI permissions.
+Its final local selection passed 16 Phase 3A tests, 16 Source tests and two exact
+migration/mapping baselines. Call-command recursion refusal does not yet cover later
+Jump/Choice edits; preserve that early boundary until structural authoring closes it.
+
+Renderer compatibility has seven dedicated cases in `phase3a-renderer.dom.test.ts`;
+the final local bundle passed 61 cases including related existing draft/navigation
+regressions. Calls and guarded Choices are read-only at this checkpoint. Typecheck,
+test compilation and DOM outcomes are not actual SDK, packaged WebView or full Story
+authoring proof. The early both-target gate must bind named tests, reject missing or
+skipped outcomes, assert real normal-entry SDK routes/returns, preserve partial failure
+artifacts and audit exact candidate inputs. Later save-inside-callee and safe-edit
+return qualification remains required before Phase 3A acceptance.
+
+The focused workflow selects 17 named core/preflight tests (the 16 product regressions
+plus a shared SDK-fixture BOM preflight) and the seven renderer cases. The actual SDK
+gate is `renpy::tests::phase3a::phase3a_conditions_calls_sdk_gate`; it is ignored by
+routine runs and must be explicitly selected with the official pinned archive.
+Its six normal-entry cases cover low/high/boundary values, all-false menu continuation,
+nested Call returns and a deliberately wrong-outcome rejection. `qualify-story-logic.py`
+and `check-story-logic-evidence.py` enforce named successes, operation counts, input
+identity and terminal cleanup. Artifact upload requires a successful privacy scan even
+when preserving partial evidence from a failed run. This gate is early proof, not the
+later saved-callee or full Story-control acceptance.
 
 ## Bounded nested-dialogue foundation
 
