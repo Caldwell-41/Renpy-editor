@@ -428,7 +428,7 @@ not yet supply condition-authoring controls or complete Phase 3A qualification.
 
 The subsequent 3A.2 candidate advances source maps to v5 for supported Call statements
 and guarded menus; [ADR 0015](adr/0015-guarded-choices-and-stable-call-continuations.md)
-owns its pending qualification. Older maps use their version's recognizer before
+owns its reviewed contract and early both-target qualification. Older maps use their version's recognizer before
 refinement. Exact tiled menu merges retain the header identity and preserve removed
 records in non-authoritative `refinedChildMappings` extras. Every old record must be
 accounted for; split ranges, reserved-key collisions and output exceeding the unchanged
@@ -438,8 +438,17 @@ accounted for; split ranges, reserved-key collisions and output exceeding the un
 label, and target edits preserve it. Choice options may carry the shared `Condition`.
 An all-guarded menu can continue when no option is available, so authoring cannot
 assume every Choice is terminal. Early renderer support presents Calls and guarded
-Choices read-only with revision-bound Source navigation; full Story controls and
+Choices read-only with revision-bound Source navigation. The narrow reviewed renderer
+now provides Call and supported guarded Choice editors; full Story controls and
 runtime/save qualification remain pending.
+
+Structural commands use explicit root/branch bodies, immediate sibling Beat/condition
+anchors and captured ownership/revisions under [ADR 0016](adr/0016-explicit-body-story-authoring.md).
+SceneBeat may derive `structuralPlaceholder: true` for a sole exact branch pass. This
+flag is not stored in source-map metadata, does not authorize a patch, and does not make
+Custom Code generally editable. Empty-body replacement and all structural mutations
+re-prove source ownership. Schema remains v5; IDs/extras are retained through qualified
+moves and reindentation, with ambiguous or unsupported promotion refused.
 
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing

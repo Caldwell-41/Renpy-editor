@@ -1133,6 +1133,15 @@ other token-bound controls stay independent; ambiguous writes are never replayed
 
 ## Bounded source-foundation Story outline
 
+The accepted Phase 2 foundation below remains its historical qualified boundary.
+Phase 3A's reviewed narrow renderer now adds explicit root/branch Beat insertion and
+editing, Call pickers and supported Choice availability editors through captured
+body/revision envelopes. Unknown-guard Choices stay wholly read-only. Pending commits,
+navigation refusals and field validation retain draft values; caption whitespace is
+preserved. Condition/subtree core commands are implemented, while full controls and
+actual frontend/save-return qualification remain in progress in the
+[Phase 3 task](tasks/active/phase-3-initial-wysiwyg-release.md).
+
 An existing declared-bool If/Otherwise group with direct dialogue children is displayed
 with read-only branch rows and indented selectable dialogue. Commit edits only the
 existing child text; Speaker, move, delete and continuation are disabled for that

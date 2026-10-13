@@ -65,6 +65,9 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
 | Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |
+| Typed conditions and recursive source ownership | [ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md) |
+| Guarded Choices and stable Call continuations | [ADR 0015](adr/0015-guarded-choices-and-stable-call-continuations.md) |
+| Explicit-body structural authoring, source qualification and empty branches | [ADR 0016](adr/0016-explicit-body-story-authoring.md) |
 | AI settings, remembered keys, project prompts and references | [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) |
 | Selected temporary Mac file credentials, recovery workflow and implementation prompt; code/native proof not started | [Development credential plan](tasks/active/2026-10-08-macos-development-credential-storage.md) |
 | Studio-scoped provider/credential contract and qualification history | [ADR 0013](adr/0013-provider-request-and-transport-contract.md), [provider ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#25-provider-qualification-ledger--2026-10-07) |

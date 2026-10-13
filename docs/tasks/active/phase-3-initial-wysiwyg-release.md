@@ -1447,3 +1447,154 @@ old `52c238c` retained under `refs/codex-preserved/phase3a-renderer`; the origin
 or worktree removal. Renderer now owns first Call/Choice/body controls; validator owns
 the disposable actual frontend/host and saved-callee harness. No new check round beyond
 core 14 has run yet. Root owns canonical documentation/integration/publication.
+
+
+**Renderer authoring round 1:** consumed first of six new rounds, cumulative **5/10**.
+Typecheck failed at a leftover `rootInsertionIsNested` reference in preview provenance
+actions after replacing the former insertion helper. Test compilation/tests did not
+run. The owner restores source-derived read-only range qualification before round 2;
+no source write, actual IPC proof or gate pass is claimed. Existing complex supported
+guards remain intact/read-only until deliberate replacement; unknown-guard Choices
+remain wholly read-only. All form revisions/parents are captured at opening, and
+failed writes preserve earlier disabled states and input. Core stays 14/18, validation
+5/7, paired CI 2/3 until reported execution; no budget reset.
+
+
+**Renderer authoring round 2 and reassessment:** second of six new rounds consumed,
+cumulative **6/10**. Typecheck repeated the same missing-helper failure because the
+attempted correction used `app/src` relative to the `app` working directory and did
+not edit the file before rerunning. Neither round ran DOM tests or native IPC proof.
+After two unsuccessful checks, reassessment identified the working-directory failure;
+the helper is now restored at the correct worktree-root path, untested. Concrete narrow
+Call/Choice/body controls, condition editor and draft/revision changes are ready for
+independent read-only review before the last first-slice round. One narrow and three
+broad authoring rounds remain within the approved six; no cap reset or extra allowance.
+
+The validator's first concrete harness draft is also ready for independent inspection:
+core `ApplicationHost` example driver, production frontend runner, high-save/fresh-load
+SDK fixture, 24 exact required core names, stricter saved-state/source receipts and ten
+final DOM case gates. The actual scenario module awaits reviewed renderer selectors;
+missing callbacks block qualification. No round 6/7, commit/push, local SDK/native/
+package/live operation or CI3 dispatch has occurred. Original validation commits now
+have permanent non-overwriting preservation refs, including `3a3dabd` and `671036a`.
+
+
+**Pre-execution review findings:** narrow renderer draft must preserve raw Choice
+caption whitespace when validating nonempty text, mark pending unchanged-form commits
+and guard settlement against opening replacement drafts, and ignore late failures after
+disposal/session navigation. Guarded option-count actions remain constrained until core
+supports them. These are in-scope fixes before the last narrow check. Harness review
+corrected its proposed process-reopen oracle: canonical transaction history is session-
+local, so exact accepted source/maps persist but Undo/Redo cursor resets on process
+reopen. First-session Undo/Redo still requires exact bytes. No new product history
+persistence is selected. Owned driver handles must remain tracked until stop/reaping
+succeeds; a stop error cannot yield a true cleanup receipt. Neither new harness round
+nor third renderer round has run yet; counts stay core 14/18, renderer 6/10,
+validation 5/7 and paired CI 2/3.
+
+
+**Renderer capacity reconciliation:** the requested Sol agent hit a model-capacity
+error after announcing narrow round 3. Same-model continuation reconciled local processes
+and artifacts: no check was running and new compiled/build output was absent, so the
+round had not started. Capacity failure is retained separately, without a duplicate
+check or model substitution. The one authorized round then started; renderer usage is
+**7/10** while terminal results are pending.
+
+**Core structural invocation 15 started:** full draft exposes the seven agreed remaining
+condition/branch/subtree operations, with five new actual-dispatch scenarios for branch
+ordering/refusals, canonical pass replacement, subtree/leaf moves, selected unwrap/trivia,
+minimal headers and history/reopen. Usage is **15/18**; SDK gate remains ignored.
+Broad independent review is pending, with remaining correction/check rounds 16–18;
+no broad integration or acceptance is claimed from a draft.
+
+
+**Renderer authoring round 3 terminal and bounded reassessment:** typecheck and test
+compilation passed. DOM bundle finished **27 passed/7 failed/0 cancelled or skipped**
+out of 34; production build did not run after failure. Five new test selectors could
+not see ARIA label properties because pinned Happy DOM lacks property reflection;
+explicit attributes are the portable correction. Two fixtures still asserted legacy
+`beforeBeatId` or refused the unchanged `updateChildDialogue` wrong-owner path. Correct
+explicit Position expectations and retain the legacy refusal alongside new commands.
+These failed cases remain unqualified, not passes. Current renderer **7/10**.
+
+Within the same approved full Story outcome and cumulative cap, root reallocates one
+of three remaining authoring rounds to reviewed narrow corrections, leaving two for
+broader controls. No amount increase, reset or approval loop. Corrected diff review
+precedes the next check; inability to finish broader proof within the remaining cap
+will be a concrete budget decision. The transient model-capacity failure did not start
+or duplicate this actual round. Core full check remains in progress at 15/18.
+
+**Harness repair draft:** all four independent findings are corrected, unexecuted:
+reopen exact source/maps with reset session cursor; retained child ownership and sticky
+cleanup failure until confirmed reaping; read-only scenario helpers with fresh UI-event
+write attribution before Host dispatch; and SDK validated state only after log/artifact/
+report gates pass. A missing/mismatched source-artifact rejecting fixture is added.
+Independent corrected-delta review remains required; validation still 5/7, CI still 2/3.
+
+
+**Core invocation 15 terminal and conservative scope decision:** compilation passed
+(20.06 seconds); focused result **28 passed/1 failed/1 intentionally ignored SDK** in
+46.44 seconds. The unwrap fixture expected inline-comment narration to become a root
+Beat, but v5 recognizes that line as protected Custom Code at root. The identity guard
+correctly returned `OPAQUE_BOUNDARY` without writes rather than losing source/identity.
+Root retains v5 and its qualified-destination rule, requiring an exact byte/ID/map
+refusal regression and successful unwrap of qualified narration/whole-line trivia.
+No v6 recognizer/migration or comment normalization is selected; this is a routine
+conservative scope choice within the frozen contract, not a new permission request.
+
+Independent broad review separately found a real trivia-preservation defect: unwrap
+of a selected nonlast branch used the last significant node as its body end and could
+discard trailing selected comments/blank lines when replacing the whole group. Fix
+full safely owned branch extent separately from insertion end, or refuse ambiguous
+ownership; cover CRLF/source/IDs/history. Core remains **15/18**, with reviewed
+corrections/checks 16–18 available. No broad integration or acceptance yet.
+
+Renderer's reassessed correction diff is inspection-ready, unexecuted: explicit ARIA
+attributes and Position expectations, with independently validated legacy and new body
+refusal fixture paths. Round 8 remains pending corrected-diff review; no native IPC
+proof or production build pass is claimed. Renderer7/10, validation5/7, pairedCI2/3.
+
+
+### Reviewed full structural core and narrow renderer — 2026-10-13
+
+Invocation **16 passed** locked compilation (20.35 seconds), all **30 focused Phase3A
+checks/0 failed/one intentionally ignored SDK** in 49.12 seconds. Independent final
+broad review cleared all seven new command paths and selected-trivia correction.
+Six-file input SHA256 seal is retained in ignored `phase3a-core/round16/`; failed
+invocation 15 remains recorded. Broad checkpoint `e160464c7c9e4ba74dca4805235a61767069b6f7`
+is integrated as `ec0c43c301a6802a42f5e05786f646faefaf9e60`, on narrow core `de5d17f`.
+Condition/branch edits, whole-node move/remove and selected unwrap are concrete;
+no stubs, recognition change or schema migration. Preserve qualified whole-line/selected
+trivia and anchored IDs/extras; unsupported inline-comment root promotion, custom/
+multiline/tab reindentation and ambiguous outdent trivia refuse without writes.
+`structuralPlaceholder` is a derived sole-pass hint, not map authority. [ADR0016](../../adr/0016-explicit-body-story-authoring.md)
+and canonical architecture/data contracts own this boundary. Core **16/18**, two unused.
+No final both-target qualification of new code is claimed before CI3.
+
+Reassessed renderer round **8 passed** typecheck, test compilation, all **34 named DOM
+cases/0 failed/cancelled/skipped**, production renderer build and diff checks. Corrected
+ARIA/Position/legacy-fixture delta is independently clear. Reviewed seven-file
+`d48117996a971cdadd4cf97718426baecf527f8b` is integrated as
+`9630c66f480cde6b0565fa075f0667bb11e62c9e`. Narrow Call/Choice/body controls capture
+applicable revisions/parents, preserve raw captions and pending drafts/disabled states,
+and ignore late navigation callbacks. Previous two compile failures, seven failed
+DOM cases/skipped build and non-started capacity interruption are retained. Renderer
+**8/10**, two rounds for full condition/hierarchy/move/unwrap/manual-preview/navigation
+controls. Actual native service IPC proof remains the validator's unexecuted round 6.
+
+Validator may integrate these reviewed code checkpoints without disturbing its own
+harness edits. Corrected harness receipt/cleanup/read-only context/SDK-result findings
+are clear by inspection; eligibility is captured before production handlers disable
+controls. Actual ten-case DOM scenario module still needs full controls and independent
+review. Final SDK fixture must author a condition through a new structural command,
+assert the minimal accepted header/source and compile those bytes, retaining the six
+cases/12 spawns. Validation **5/7**, CI **2/3**, packages/owner starts/live calls zero.
+No further checks merely to consume spare allowance, and no Phase 3A acceptance yet.
+
+
+**Branch-order contract clarification:** the selected written interaction contract
+requires visible first-match order and explicit placement when adding Else If/Otherwise.
+The journey moves Beats between bodies; no separate existing-branch reorder command is
+selected. Preserve branch identities rather than remove/recreate to simulate reorder.
+Ordinary Beat/whole-condition Up/Down and Move-to remain required. This clarification
+adds no command, migration or allowance; full controls continue within renderer9/10.

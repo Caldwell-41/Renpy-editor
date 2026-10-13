@@ -6,9 +6,10 @@ its driver corrected and independently reviewed, and one approved extra local ro
 passed (5/5 consumed). Corrected [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
 attempt 1/exact `cba3c0e`, passed both-host terminal artifact audit. The early SDK gate
 is established; delegated structural implementation continues within the extended
-allowance. Reviewed `de5d17f` passes 24 focused tests; core 14/18
-is consumed, with the first failed expectation retained. Renderer controls and the
-actual frontend/save-return harness are in implementation. Approved cumulative caps
+allowance. Reviewed full structural `ec0c43c` passes 30 focused tests; core 16/18
+is consumed, with failures retained. Narrow renderer `9630c66` passes 34 DOM cases;
+renderer 8/10. Full Story controls and the actual frontend/save-return harness remain
+in implementation (validation 5/7). Approved cumulative caps
 are core 18, renderer 10 and validation 7; prior usage is
 retained. Paired CI is 2/3 consumed.
 The user authorized delegated Sol 6.1 High implementation and validation of 3A Story

@@ -412,8 +412,12 @@ cannot authorize an apparent Story child. Branch headers are not ordinary Beat t
 Whole condition nodes can anchor insertion without exposing header replacement.
 Protected boundaries and terminal-ending violations refuse without writes; supported
 nested updates retain token-level source, stable IDs, mapping extras and one transaction/
-history operation. Recognition and source-map v5 are unchanged. Remaining condition/
-subtree commands are still in implementation; no unimplemented command is exposed.
+history operation. Recognition and source-map v5 are unchanged. The reviewed continuation adds condition/
+branch insertion/edit/removal, whole-subtree moves/deletion and selected-branch unwrap.
+It preserves anchored IDs/extras and safely owned trivia, uses a verified pass for empty
+branches, and refuses unqualified reindentation or ownership promotion.
+[ADR 0016](adr/0016-explicit-body-story-authoring.md) owns those qualified boundaries;
+full frontend/runtime qualification remains pending.
 
 The Scene recognizer follows the same rule: supported canonical Beats retain stable
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become

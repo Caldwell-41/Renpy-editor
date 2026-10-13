@@ -72,8 +72,8 @@ owning task. The early conditions/calls gate is **established**. CI3 remains unu
 is not a blind retry allowance.
 
 
-Cumulative usage does not reset: core **14/18** (first foundation eight, calls/flow
-four, explicit-body two); renderer **4/10** (four compatibility consumed); validation
+Cumulative usage does not reset: core **16/18** (first foundation eight, calls/flow
+four, explicit-body two); renderer **8/10** (four compatibility plus four authoring rounds, fourth passed); validation
 **5/7**; paired CI **2/3**; packages/owner native starts/live model calls **zero**.
 The user explicitly approved the driver-repair fifth local round, then four additional
 core invocations, six authoring renderer rounds and two final validation rounds.
@@ -87,13 +87,23 @@ source-map v5/AI permissions. Review closed new-fallthrough and selected-Scene l
 boundary gaps. Invocation 13 remains failed (21 pass/one wrong expected wire error/
 one ignored SDK); invocation 14 passed 24/0/one ignored SDK. No local SDK ran.
 
-The sole core writer continues condition/subtree commands from `e8c6c7c` using four
-remaining invocations. The renderer reused its clean worktree at `de5d17f` and now
-implements Call/Choice/body controls in the first three of six authoring rounds.
-The validator prepares the actual production frontend/host and saved-callee proof;
-round 6 waits for reviewed integrated controls. Preserve original core `e97be13` and
-renderer `52c238c` refs under `refs/codex-preserved/`; no reset/rebase or worktree removal.
-Shared interfaces stay serial, with root owning canonical documentation/integration.
+The full reviewed structural core `e160464` is integrated as `ec0c43c` after
+invocation 16 passed 30 focused cases/zero failed/one ignored SDK gate. Invocation 15's
+unsupported root-promotion fixture failure is retained. Condition/branch commands,
+subtree move/remove, selected unwrap and canonical pass are implemented under
+[ADR 0016](../adr/0016-explicit-body-story-authoring.md); two core checks remain unused.
+Narrow reviewed renderer `d481179` is integrated as `9630c66`; repaired round 8 passed
+34 DOM cases/typecheck/compilation/production build. Prior three failed authoring rounds
+and non-started model-capacity interruption remain in the ledger. Full controls now
+use its two remaining rounds 9/10 after reviewed broad-core integration.
+
+Validator prepares the real frontend/host and saved-callee proof, with corrected cleanup,
+read-only scenario helpers, session-history-reset oracle and fail-closed SDK receipts.
+Round 6 waits for the full reviewed UI/scenario module. SDK source must include an actual
+new structural condition command before the one compile/lint and six cases. Capture
+UI eligibility before controls lock; preserve current owner/session checks. Original
+core/renderer/validation commits have permanent `refs/codex-preserved/` references.
+No reset/rebase/worktree removal. Root owns canonical documentation/integration.
 
 Remaining structural commands use explicit whole-condition nodes, selected branch
 unwrap and safe reindentation; unknown/raw conditions and unqualified opaque crossings
