@@ -3,9 +3,9 @@
 **Current selection — 2026-10-13:** Phase 3A Story logic implementation is
 **ACTIVE — INCOMPLETE**, resumed explicitly after the documented safe stop. Existing CI1 failed its SDK gate; the reviewed minimal harness repair passed corrected
 both-target CI2 audit. The early gate, structural core30 and full renderer51/build
-are established. Final captures exposed vertical clipping. Local round9 passed the first five
-frontend/Host cases, then stopped at a stale case6 count oracle before deletion.
-Prepared corrections, review capability and additional budget decisions are pending; no final CI3 or 3A acceptance. Preserve the reviewed commits,
+are established. Local validation10 passes all ten actual frontend/core cases/two processes. Focused
+renderer11 passes20 captures and image self-review, closing portable vertical clipping.
+The user approved cumulative local/renderer caps14 and clearly labelled self-review; no final CI3 or 3A acceptance. Preserve the reviewed commits,
 worktrees, failed run and cumulative allowances. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
@@ -48,11 +48,9 @@ proof never becomes acceptance. Hard dependencies, exhausted cumulative allowanc
 and material scope decisions require a concrete escalation; routine checkpoints do not.
 Initial 3A.1 allowance: six focused local check invocations, subsequently amended and
 retained in the ledger; current core cumulative cap is 18 after the explicit resume
-extension. Reassess after two unsuccessful corrections of one hypothesis. Renderer cap
-is ten rounds (four compatibility plus six authoring), with one focused visual extension
-pending user decision. Validation allowance: nine
-focused local rounds (original four, one approved driver repair, two approved final
-qualification rounds, then two approved BOM/setup/final proof rounds) and three paired CI batches cumulative
+extension. Reassess after two unsuccessful corrections of one hypothesis. Renderer cumulative cap is14 and local validation cumulative cap is14, as explicitly
+approved on2026-10-14. Usage is renderer11/local10; all original consumed rounds/failures
+remain accounted for. Paired CI cap stays three cumulative
 across 3A, zero package builds/owner native starts/live model calls. Per batch/target:
 one verified SDK install, one GUI generation, compile and lint, at most six runtime
 cases (failures count). Early batch follows reviewed core condition/call work before
@@ -2140,3 +2138,34 @@ checks pass. The browser script is an already-covered runtime test input, not a 
 TypeScript compilation dependency; prior DOM51/typecheck proof is reused. This changed
 harness does not invalidate the production controller's actual input/binary equivalence.
 Next execute one CSS-focused renderer round11; no CI3 until actual visual inspection.
+
+
+**Renderer11 terminal pass and self-audit — 2026-10-14:** exact
+`6ef631481715da0fb012a495e6ab5e52502963a4`, tree
+`9e8cdb86e8d4c97e5d2d1e807d3788909e28d9fb`,7.52s. All20 focused captures pass
+vertical canvas/message visibility, no page/authoring horizontal overflow, seven
+selectors' actual focus/internal-scroll access, divider20/default/70/clamping and
+Writing focus. Zero runtime errors. Canvas heights128px at default/20 and160px with
+scaled text; expanded70 allocations grow to232.9/295.9px. Exact PNG CRC/decompression/
+hashes and both themes' full image set inspected; four representative originals also
+viewed at full resolution. The prior clipping blocker is closed in this portable
+scope. The actual manual viewport scrolls; all selector controls are reachable, rather
+than claiming every row remains simultaneously visible. This is self-review under
+user approval, not independent review, packaged native interaction or human acceptance.
+No new typecheck/DOM/compiler/production build repeated; renderer51 evidence reused
+for unchanged TypeScript. Input seal remains unchanged through the round. Ignored
+`renderer-round11/` retains actual captures, hashes, identity/input/result/log and
+self-review. Usage **local10/14, renderer11/14, core16/18, pairedCI2/3**; all zero
+local SDK/native editor/package/credential/live counts retained.
+
+**Final candidate review:** no new production core/source/history or IPC change after
+the existing independent core review. Exact CSS retains its independent static review
+plus actual portable self-review; oracle/manifest/harness corrections have accepted
+self-review. The final SDK driver retains six cases/twelve adapter processes per host,
+one compile/lint, actual structural condition, high saved-callee receipt, literal
+loaded values/depth and caller-only narration edit with stable labels. Missing receipts/
+load cannot fall back to Start. Complete input coverage includes all213 recipe inputs.
+Local controller proof is reused for unchanged actual frontend/core inputs and binary
+seals; browser-only harness and docs successors do not change that journey. CI3 is the
+single remaining affected Windows/macOS batch, not a blind retry. Prepare reviewed
+publication and dispatch once, then record exact identity and pause without polling.

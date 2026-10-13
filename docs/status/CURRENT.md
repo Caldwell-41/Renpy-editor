@@ -1,40 +1,38 @@
 # Current status
 
 **Updated:** 2026-10-14. **Phase 2: PAUSED — INCOMPLETE. Phase 3A: ACTIVE — INCOMPLETE.**
-One agent now owns Phase3A; no subagents or CI polling. Reviewed pushes to
-`codex/phase3a-story-logic` remain authorized; no merge or release. Root/validation
-HEAD is `74a0361`; the one-time takeover remote/CI inventory confirms published
-`edec5a8` and no active run. Later BOM/retention and Source-readiness corrections
-remain local-only. Unrelated planning/Phase2 work and preservation refs remain intact.
+One agent owns Phase3A; no subagents or CI polling. Reviewed pushes to
+`codex/phase3a-story-logic` are authorized; no merge/release. Existing independent
+reviews are reused for unchanged inputs; the user accepted clearly labelled self-review
+and cumulative local/renderer caps14. All earlier failures/usage remain retained.
 
-Completed evidence: corrected [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
-attempt1/exact `cba3c0e`, passes both-host terminal artifact audit and establishes the
-early conditions/calls gate. CI1 remains a retained failure. Structural core30 and
-renderer51 DOM/typecheck/test compilation/build pass. Nine captures pass mechanical
-checks; independent visual review found vertical preview clipping. Local round9 on
-`74a0361` completed five production frontend/core cases, then stopped before deletion
-at a stale three-member oracle. Source-map v5 correctly exposes four members.
-Local round10 now passes all ten cases and two-process reopen; the actual failed snapshot,
-85 accepted requests and one normally exited/reaped helper are preserved.
+Corrected [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
+attempt1/exact `cba3c0e`, established the early both-host conditions/calls gate.
+Structural core30 and renderer51 DOM/typecheck/test compilation/build pass. Local
+validation10 on `be06333` passed checker11 and all ten actual frontend/core cases,
+243 typed requests, two normally exited/observed/reaped helpers and owned cleanup.
+Exact source/ownership, deletion/unwrap/pass, draft and external-edit refusals,
+Undo/Redo and second-process reopen/maps/session-history-reset pass. Round9's stale
+three-member oracle failure and actual fixture snapshot remain preserved.
 
-Root now holds four uncommitted proposal files: the exact preserved four-member oracle,
-exact independently reviewed CSS correction, and final manifest/coverage-oracle additions
-for twelve separately verified SDK compile inputs. Static manifest inventory is213;
-the old201 receipt is unchanged. All remaining cases were traced together in a separate
-self-review. New oracle/manifest changes have **self-review only**, with no confirmed
-independent review. The user approved clearly labelled self-review and both runs with cumulative
-local/renderer caps14 on2026-10-14. Local round10 passed checker11 and all ten production cases; visual11 is next. Reused binaries/dependencies/frontend outputs
-match; changed coverage checker evidence must be obtained in an approved round.
+Focused renderer11 on `6ef6314` passed20 captures and actual image self-review:
+readable default/scaled canvas/message, seven selector focus/scroll access,
+divider20/default/70/clamping and Writing focus. The prior portable vertical-clipping
+blocker is closed; no packaged native physical or human proof is claimed. Final
+input recipe/coverage includes213 files, adding twelve verified SDK dependencies;
+old201 receipts are unchanged. Rust/preflight/frontend evidence was reused only with
+exact dependency/binary/output hashes. Detailed receipts belong in the
+[latest task continuation](../tasks/active/phase-3-initial-wysiwyg-release.md#approved-cumulative-cap14-and-self-review--2026-10-14).
 
-Cumulative usage remains **core16/18, renderer10/14, local validation10/14, pairedCI2/3**.
-Both prepared rounds are approved; previous usage remains consumed. CI3 is withheld
-until complete local/visual proof and review; it retains six SDK cases/twelve adapter
-processes per host, including saved-callee/safe-caller-edit return. Local SDK, owner
-native starts, packages, credentials and live model operations remain zero. CI waiting
-uses manual same-thread resume; no watchers. Phase3A remains incomplete.
-See [combined review and bounded plan](../tasks/active/phase-3-initial-wysiwyg-release.md#single-agent-preparation-and-combined-self-review--2026-10-13),
-[HANDOVER](HANDOVER.md) and the separate
-[Phase2 pause backlog](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13).
+Cumulative usage: **core16/18, local10/14, renderer11/14, pairedCI2/3**. Local SDK,
+owner native starts, packages, credentials and live model calls stay zero. Prepare
+reviewed publication and one final paired CI3 batch, retaining six SDK cases/twelve
+adapter processes per host and saved-callee/safe-caller-edit/later-load return proof.
+CI3 is not yet dispatched. After dispatch, record its exact identity and pause for
+manual same-thread resume/terminal audit. No polling/watchers or blind retry.
+[HANDOVER](HANDOVER.md) owns recovery; the separate
+[Phase2 pause backlog](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13)
+remains untouched. Phase3A completion still awaits required CI3 evidence.
 
 | Capability | Evidence | Disposition |
 | --- | --- | --- |

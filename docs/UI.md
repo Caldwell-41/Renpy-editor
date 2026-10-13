@@ -1144,9 +1144,16 @@ Their forms capture owner/revision envelopes, and tree/Story drafts protect each
 Illustrative preview keeps route selection separate from editing selection, stops at
 unresolved forks/Choices and terminal Return/Jump, and reports the actual visited Beat;
 view state never edits source. Branches opens the exact body/source and Call continuation.
-Independent capture review found default-height vertical preview clipping from the
-manual route panel; that layout correction and actual frontend/save-return qualification
-remain in progress in the
+The condition preview reserves a scrollable manual-selector viewport of at least 5rem
+and a canvas region of at least 8rem; the header cannot shrink. The condition grid's
+minimum is `calc(13rem + 52px)`, with outer scrolling available at small sizes. The
+shared divider still advertises 20–70 percent; the pixel minimum can increase the actual
+preview allocation on small windows. Writing focus hides preview/divider and restores
+the single writing row. Portable round 11 verified 20 captures across both themes,
+default/scaled layouts and divider bounds, including readable unknown-state messages
+and selector focus/scroll. This closes the prior clipping finding by self-review under
+user approval. The local ten-case frontend/core and two-process proof also passes;
+both-host saved-callee qualification remains pending in the
 [Phase 3 task](tasks/active/phase-3-initial-wysiwyg-release.md).
 
 An existing declared-bool If/Otherwise group with direct dialogue children is displayed

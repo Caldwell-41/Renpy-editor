@@ -1234,8 +1234,17 @@ compilation and the production renderer build. Call/known guarded Choice and exp
 root/branch Beat controls now author through captured revisions and parents. Unknown
 Choice remains wholly read-only. This supersedes the compatibility checkpoint's
 read-only limitation for supported controls, while preserving its historical proof.
-Full structural controls, actual frontend-to-core dispatch and saved-callee qualification
-remain pending; passing portable DOM cases alone does not establish those outcomes.
+The full renderer continuation passed 51 DOM cases/typecheck/test compilation/build.
+Local validation 10 on `be06333` additionally passed all ten actual production frontend/
+ApplicationHost cases and two normally exited, observed/reaped helper processes:
+exact source/ownership, deletion/unwrap/pass, drafts/refusals, external edits, Undo/Redo,
+second-process reopen/map persistence and session-history reset. Portable visual 11 on
+`6ef6314` passed 20 captures with vertical canvas/message, seven-selector focus/scroll,
+divider 20/default/70 and Writing-focus proof. These were self-audited under explicit
+user approval; neither packaged WebView physical input nor human acceptance is claimed.
+Final both-host saved-callee qualification remains pending. The 213-input recipe includes
+the twelve previously omitted embedded SDK-test dependencies; original 201 receipts
+remain preserved. The exact path/hash oracle covers these binary/text inputs.
 
 The early focused workflow selected 17 named core/preflight tests (the 16 product regressions
 plus a shared SDK-fixture BOM preflight) and the seven renderer cases. The final planned
