@@ -1,10 +1,10 @@
 # Phase 3 — Initial WYSIWYG release
 
 **Current selection — 2026-10-13:** Phase 3A Story logic implementation is
-**PAUSED — INCOMPLETE** at the user's subsequent safe-stop/handover request. Preserve
-the reviewed commits, worktrees and already-dispatched CI1; no further implementation,
-checks, dispatch or monitoring until explicit Phase 3A resume. The earlier autonomous
-orchestration authorization remains the continuation contract when resumed. Phase 2 is
+**ACTIVE — INCOMPLETE**, resumed explicitly after the documented safe stop. Existing
+CI1 has been audited and failed its SDK gate; structural and Story-control implementation
+remain gated on corrected early both-target proof. Preserve the reviewed commits,
+worktrees, failed run and cumulative allowances. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
 No 3A acceptance is claimed. 3B/3C/3D/3F remain unselected; default 3B/3C entry still
@@ -26,7 +26,7 @@ renderer writers remain serial at shared interfaces and use isolated implementat
 worktrees. Delegated Sol 6.1 High agents may monitor/poll selected CI under the user's
 explicit exception to WORKFLOW's default wait policy; the lead must not poll CI.
 No recursive delegation, merge, release, Phase 2 live send or security-policy change.
-This execution contract applies on resume; the current user-directed pause takes precedence.
+The explicit resume reinstates this execution contract; it does not renew allowances.
 
 **Reviewable slices:**
 
@@ -44,7 +44,8 @@ requires owner review and any selected independent review before advancement. Mi
 proof never becomes acceptance. Hard dependencies, exhausted cumulative allowances
 and material scope decisions require a concrete escalation; routine checkpoints do not.
 Initial 3A.1 allowance: six focused local check invocations, with reassessment after two
-unsuccessful corrections of one hypothesis. Validation allowance: four focused local rounds and three paired CI batches cumulative
+unsuccessful corrections of one hypothesis. Validation allowance: five focused local rounds
+(original four plus one explicitly approved on resume) and three paired CI batches cumulative
 across 3A, zero package builds/owner native starts/live model calls. Per batch/target:
 one verified SDK install, one GUI generation, compile and lint, at most six runtime
 cases (failures count). Early batch follows reviewed core condition/call work before
@@ -1180,3 +1181,105 @@ failure history and all later exact results remain in this ledger. The single li
 prompt, implemented/todo summary, exact candidate/jobs and next audit obligations.
 Stop-documentation changes are docs-only successors to tested CI candidate `81ee770`;
 they do not replace its immutable input identity or establish any acceptance.
+
+
+### Resume and exact CI1 failure audit — 2026-10-13
+
+The user explicitly resumed Phase 3A with delegated GPT-6.1 Sol High implementation,
+validation and independent review; the lead must not poll CI. Phase 2 remains
+**PAUSED — INCOMPLETE**. Root `1bdc532` and the three preserved worktrees were clean;
+remote branch head matched `1bdc532`. Its changes after `81ee770` are pause documents
+only. The unrelated planning worktree retains its two unpublished commits; no worktree
+or branch was reset, removed or repurposed. Repository-local noreply identity is intact.
+
+Delegated validator audited existing [CI1 run 38346032499](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499),
+attempt 1, exact candidate `81ee770dac70181832b0020984545621ee403d9d` and tree
+`1046286ce44b6f4c46892ed86dbe4a24e6744e51`. The run ended **failure** at
+2026-10-13T04:27:07Z; required Windows `115127555940` and Mac `115127555751` both failed
+SDK execution. Excluded jobs remain excluded. No redispatch or new execution occurred.
+Each host passed all 17 exact core/preflight names, seven renderer cases, typecheck,
+test compilation and renderer production build. Each artifact has 39 files and 38
+manifest hashes; ZIP CRCs, all 179 candidate input blobs, target architecture,
+privacy scan and retained identities match. Full metadata/logs/ZIPs and executable
+artifact audit reside in ignored `.toolchains/phase3a-validation/ci1-audit/`.
+
+| Target | Artifact | ZIP SHA256 | Expiry UTC |
+| --- | --- | --- | --- |
+| Windows x64 | 11789520653 | `8c6fc0bee2bad57ac02095d4de424e7844405372d4e85f1802b8631b798131f3` | 2026-10-20T04:27:02Z |
+| macOS ARM64 | 11789675027 | `e851b0c4f7575bc9af1149fe37f03b0d8687bdb10a2aaf21352b1afec6f69343` | 2026-10-20T04:25:22Z |
+
+Four runtime cases per host (`conditions-low`, `conditions-high`, `conditions-boundary`,
+`nested-call-return`) failed with `RenpyTestTimeoutError` after five seconds at generated
+driver line 29, bare `advance`, while the game was at `menu:`. All 13 preceding
+assertions passed, including exact dialogue, variable values, nested Call depths and
+return to caller. `no-option-fallthrough` passed 15 assertions; `reject-wrong-outcome`
+failed the intended first wrong-dialogue assertion, satisfying its rejection oracle.
+The failed terminal records preserve `passed=false`, six runtime cases, 12 adapter
+spawns, one SDK install, one GUI generation/two commands, compile/lint and two version
+checks; cleanup, metadata absence and accepted source preservation are true. No complete
+`sdk-report.json` exists. Nine other runtime-source bytes are represented by hashes
+rather than retained raw bytes; entry/callee bytes were independently hash verified.
+
+Independent Sol High review corroborated a harness failure using the pinned SDK's
+`Advance` implementation: it stops at a new dialogue callback, which the menu never
+produces. `advance until screen "choice"` is the documented menu transition and is
+already used in the existing Phase 1H fixture. A minimal correction will await and
+assert the choice screen before the existing high/low route click; the no-option case
+keeps ordinary advance. No production behavior or timeout threshold changes are needed.
+This diagnosis does not pass the failed menu outcomes or waive the early SDK gate.
+
+Read-only structural preparation produced the agreed explicit body/node/position and
+expected-owner contracts. It remains gated. Cumulative counts stay core 12/14,
+renderer compatibility 4/4, local validation 4/4, paired CI 1/3, packages/owner native
+starts/live calls zero. Before further local validation, request one additional focused
+round (cumulative 5/5) for generated-driver zero-SDK preflight, changed Rust compilation
+and affected evidence gates. The remaining paired CI allowance can cover reviewed
+corrected CI2; there is no blind rerun. Structural implementation can use the two
+remaining core invocations after early proof, with reassessment for further coverage;
+its suggested additional four rounds are a proposal, not a renewed allowance.
+
+
+**Prepared correction and budget escalation:** validator changed only
+`app/src-core/src/renpy/tests/phase3a.rs` in the preserved validation worktree at
+`3a3dabd`. Shared `runtime_driver` emits explicit choice-screen wait/assert/click for
+High/Low endings and keeps bare advance for no-option continuation. The existing BOM
+preflight now checks both generated choice routes and no-option driver output without
+SDK execution. Independent Sol High concrete diff review is clear: previous exact
+state/depth/outcome assertions, required 17-name set, six cases, 12 spawns, rejection
+oracle, teardown and thresholds remain intact. The patch is uncommitted and untested;
+no production file changed. Root requested explicit approval for one extra local
+validation round (4/4 to 5/5), followed by already-authorized paired CI2/3. Until the
+answer, no checks or redispatch occur; all counts remain unchanged. Structural plan is
+prepared, implementation not started, with two existing core invocations available
+only after early proof. No Phase 2 activity or acceptance occurred.
+
+
+**Budget decision received:** user approved exactly one additional local validation
+round, raising the cumulative cap from four to five without resetting four consumed
+rounds. The validator is delegated changed locked Rust compilation and existing exact
+zero-SDK preflight, with no frontend repeats or SDK/native/package/live operations.
+A pass permits reviewed integration/publication and existing paired CI2/3; a failure
+consumes round 5 and must be retained before any further budget decision. Structural
+implementation still waits for the corrected early both-target SDK gate.
+
+
+**Approved round 5 completed:** one round at 2026-10-13T05:23:30–05:23:51Z passed
+format/diff checks, locked release lib SDK-gate `--no-run` compilation (18.87 seconds)
+and exact `phase3a_sdk_fixture_source_save_preserves_bom` preflight (one passed, zero
+failed/ignored, 2.04 seconds). Generated-driver assertions passed and the process
+counter remained zero. No renderer/rejecting-gate repeats or local SDK/install/GUI/
+compile/lint/runtime/package/native/live operations. Ignored
+`.toolchains/phase3a-validation/local-round5/` retains result and logs. Reviewed sole
+file committed by validator as `671036ae63f80a01f1f2da831801ba3d2b4c62fb`, integrated
+by root as `b5fa01a`. Validation worktree is clean; local validation now **5/5** exhausted,
+paired CI still **1/3** until confirmed dispatch. Corrected both-target CI2 is next;
+CI1 remains failed and early runtime proof is still pending.
+
+Independent structural interface review adds these mandatory constraints before
+implementation: ordinary Beat nodes must reject condition-header records; branch
+commands validate containing group parent ownership and scene/group/branch membership;
+initial If cannot be removed or replaced by Otherwise, which is unique and last;
+unknown/raw conditions cannot be authored. Candidate recursion checks must cover legacy
+transfer commands as well as new body commands. Literal root-end insertion after a
+terminator refuses; ordinary append must use an explicit before-terminator anchor.
+These are planned implementation conditions, not completed behavior or extra allowance.

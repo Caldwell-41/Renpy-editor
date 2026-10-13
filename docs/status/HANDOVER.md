@@ -1,119 +1,96 @@
 # Current outcome handover
 
-## User-requested stop — Phase 3A PAUSED — INCOMPLETE; Phase 2 PAUSED — INCOMPLETE
+## Phase 3A resumed — early SDK gate failed; bounded correction authorized
 
-The user explicitly requested a safe stop, documentation and restart prompt on
-2026-10-13. All delegated agents are stopped. The validator recorded its final
-snapshot at **2026-10-13 04:23:33 UTC** and closed only its owned local CI watcher.
-Preserve the already-dispatched CI1 rather than cancel useful authorized work. No
-new checks, fixes, retries or dispatches are authorized while paused. Resume Phase 3A
-only on explicit user direction; Phase 2 requires its own separate explicit resume.
+Phase 3A is **ACTIVE — INCOMPLETE**, explicitly resumed on 2026-10-13. Phase 2 stays
+**PAUSED — INCOMPLETE** and requires its own separate resume. The user authorized
+GPT-6.1 Sol High delegated implementation, validation and independent review, routine
+slices and reviewed pushes to `codex/phase3a-story-logic`; no merge or release. The
+orchestrator must not poll CI. Delegated monitoring of selected runs is authorized.
 
-The user's 2026-10-13 orchestration request authorizes autonomous Phase 3A slices with
-Sol 6.1 High implementation/validation agents and review before advancement. It forbids
-resuming or closing Phase 2. Its outstanding work and limitations are preserved in the
-[Phase 2 pause record](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13).
-Existing scoped `review_ready` records below remain evidence, not phase acceptance.
+Root was clean at `1bdc532`, matching the remote branch. Its successor changes after
+reviewed candidate `81ee770` are pause documentation only. Preserved detached worktrees
+`phase3a-core` at `e97be13`, `phase3a-renderer` at `52c238c`, and `phase3a-validation`
+at `3a3dabd` reconcile with integrated product work. Keep the Phase 2 branch and
+unrelated planning worktree (two unpublished commits). Never reset these to old prompts.
+Root owns canonical status/task documentation and integration; shared-interface writers
+remain serial. The repository-local noreply identity is intact.
 
-Current branch `codex/phase3a-story-logic`, created from preserved Phase 2 branch
-`codex/provider-qualification`, entry HEAD `591b04a`; four local pause/assessment
-document edits predated this request and are preserved in the updated records. Root owns
-status/task documentation and integration; the core agent owns an isolated 3A Rust
-worktree, while validation initially inspects CI/runtime capability read-only. No other
-branch, commit, unfinished work or Phase 2 allowance is discarded or transferred.
+### Exact existing CI1 audit
 
-The [Phase 3 brief](../tasks/active/phase-3-initial-wysiwyg-release.md) owns ordered
-3A.1 expressions/nesting, 3A.2 calls/flow, 3A.3 Story/Branches controls and 3A.4 qualified
-runtime/source/history behavior. Accepted source foundations and qualified first rewrite
-permit 3A entry independently of unfinished Phase 2 acceptance. Keep the AI allowlist
-unchanged. Default 3B/3C entry still requires accepted Phase 2/3A.
-
-**Checkpoint:** the first source slice is integrated locally as `e235d3d` from delegated
-`d97ca99`: typed conditions, recursive exact-source ownership, source-map v4 migration,
-minimal child edits and unchanged AI permissions. Independent review closed lexical
-opacity/trivia and group-insertion findings. Six new regressions passed; a broad run
-retains 318 passes/two failures (obsolete foundation contract and an unchanged runtime
-descendant-cleanup assertion). Corrected foundation and unchanged runtime each passed
-an exact serial rerun; the original cleanup cause remains unproven. See the
-[3A ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
-and [ADR 0014](../adr/0014-typed-conditions-and-recursive-source-ownership.md).
-
-**On resume:** reconcile delegated batch 1 terminal results/artifacts, classify any failures, and proceed
-to structural/Story controls only after early SDK proof. Reviewed core is `1029bd8` (delegated
-`e97be13`); the reviewed harness is integrated as `ce10f24` (delegated `3a3dabd`). Renderer
-compatibility has passed 61 focused tests, serialized-flow agreement and independent
-review; it is integrated as `461441c`/`a9c3406`. The integrated authored-Call/Choice
-harness passed its local preparation checks and final independent review.
-First core allowance consumed 8/8 after explicit bounded reassessments; next
-slice 4/6 (12/14 cumulative; latest 34 passed across focused selections). Core
-freeze/review is clear. Early recursion refusal applies to Call commands; later
-Jump/Choice authoring gap is retained for the structural slice before 3A acceptance.
-Renderer compatibility is 4/4 local rounds; validation
-is local 4/4 (integrated checks and final BOM/manifest/privacy preflight passed), paired CI 1/3; per batch/
-target one verified SDK install, GUI generation (two commands), compile/lint and six
-runtime cases. Zero packages/owner native starts/live model calls. Selected CI1 is
-[run 38346032499](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499),
+Delegated validator audited [run 38346032499](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499),
 attempt 1, exact `81ee770dac70181832b0020984545621ee403d9d`, tree
-`1046286ce44b6f4c46892ed86dbe4a24e6744e51`. Windows job `115127555940` and Mac
-`115127555751` are required; both were in progress at the real dispatch/SDK step in
-the final snapshot. No terminal outcome or artifact audit was available. Older jobs are intentionally
-excluded, not claimed passes. Delegated validation owns monitoring and audit on resume.
-The lead must not poll CI; delegated Sol 6.1 High agents may poll selected runs by
-explicit user authorization. On resume, continue routine reviewable slices without approval;
-escalate concrete hard dependencies or material decisions, retain cumulative budgets.
-Development stays on macOS; affected Windows/macOS proof uses focused CI. Explicit
-user authorization resolved the initial auto-review publication rejection; reviewed
-Phase 3A branch pushes remain authorized. Reviewed core/renderer and decision records are published through
-`81ee770dac70181832b0020984545621ee403d9d`; Git remote head was verified. CI1 was
-explicitly dispatched once after confirming no duplicate selected run. No merge, release,
-Phase 2 session or acceptance is authorized.
+`1046286ce44b6f4c46892ed86dbe4a24e6744e51`. It ended **failure** at
+2026-10-13T04:27:07Z. Required Windows `115127555940` and Mac `115127555751` both
+failed SDK execution; excluded jobs are not passes. No redispatch occurred.
+Both targets passed 17 named core/preflight checks, seven renderer cases, typecheck,
+test compilation and renderer build. ZIP CRCs/39 files/38 manifest hashes, all 179
+candidate input blobs, architecture, operation counts and privacy scans were audited.
+Ignored `.toolchains/phase3a-validation/ci1-audit/` retains full metadata, logs, exact
+ZIPs/extracted artifacts and audit code/results. Artifacts expire 2026-10-20;
+exact IDs/hashes/expiry and failure receipts belong in the
+[resume ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#resume-and-exact-ci1-failure-audit--2026-10-13).
 
-### Phase 3A completed work and remaining work
+Four cases per target (`conditions-low/high/boundary`, `nested-call-return`) timed out
+at driver line 29's bare `advance` while the game was at its menu. Each passed all
+13 preceding route/value/Call-depth/return assertions. The all-false continuation
+passed; the wrong-result fixture rejected the intended assertion. Terminal SDK records
+retain `passed=false`, six cases, 12 adapter spawns and all selected operation limits;
+owned cleanup, metadata absence and accepted source preservation passed. A complete
+SDK report is absent. The early gate therefore remains **failed**, with no 3A acceptance.
 
-**Implemented and independently reviewed:** bounded typed conditions with exact i64
-values and unknown diagnostics; recursive source ownership and map v4/v5 migration;
-guarded Choice/returning Call core operations, stable labels, minimal patches,
-history/reopen and observed guard/continuation diagnostics. Renderer compatibility
-preserves Source revisions/drafts and safely displays the richer model. Calls and
-guarded Choices are still read-only in Story. The focused both-target CI harness is
-reviewed and published; its first actual SDK run is not yet audited.
+Independent Sol High review identified the pinned SDK driver mechanism: bare advance
+waits for a new dialogue callback, which a choice screen does not produce. The minimal
+repair awaits and asserts the choice screen before the existing route click and keeps
+ordinary advance for no available options. No production fix or threshold relaxation
+is selected. The validator prepared this repair plus shared zero-SDK driver preflight in
+the preserved validation worktree; independent diff review is clear. The sole changed
+file is `app/src-core/src/renpy/tests/phase3a.rs`, committed in the
+validation worktree as `671036a` and integrated as `b5fa01a`. Approved local round 5
+passed locked gate compilation and exact zero-SDK preflight (one pass). No local SDK
+operation, native start or redispatch has run; corrected paired CI2 is next.
 
-**Remaining:** audit CI1's exact candidate, both required jobs, logs/ZIP manifests,
-17 core/preflight names, seven renderer cases, six SDK outcomes, operation counts,
-privacy and cleanup. Diagnose failures without treating skips or missing evidence as
-passes. Only after early SDK proof implement explicit-body structural commands and
-full Story controls: condition builder, nested insert/edit/move, Else If/Otherwise,
-delete versus unwrap, empty-body handling, Call/choice editors and manual preview.
-Close the later Jump/Choice recursive-Call authoring gap while allowing pure Jump loops.
-Prove the actual frontend-to-core path, drafts and ordinary external-edit conflicts;
-qualify save-inside-callee/return-after-safe-edit and both targets before 3A acceptance.
-The task ledger preserves the read-only structural API proposal and staged plan.
+<a id="ready-to-paste-restart-prompt"></a>
 
-**Preserved worktrees:** `phase3a-core` at `e97be13`, `phase3a-renderer` at `52c238c`,
-and `phase3a-validation` at `3a3dabd` are clean, detached and retained; their work is
-integrated on the dedicated branch. Keep the original `codex/provider-qualification`
-and unrelated `milestone-planning` worktree. Local CI watch evidence is retained in
-ignored `.toolchains/phase3a-validation/ci1/watch.log`; preparation logs remain in
-the validation worktree's ignored evidence directory. CI artifacts have seven-day
-retention; retrieve/audit available artifacts promptly on resume, without rerunning
-merely because this chat stopped.
+### Continuation, budgets and remaining acceptance
 
-### Ready-to-paste restart prompt
+Counts do not reset: first core slice 8/8, calls/flow 4/6 (**12/14 cumulative**),
+renderer compatibility **4/4**, local validation **5/5**, paired CI **1/3**,
+packages/owner native starts/live model calls **zero**. The earlier broad 318-pass/two-
+failure run, obsolete-contract correction and unexplained descendant-cleanup failure
+with exact serial passes remain in the task ledger. No previous failure is erased.
 
-> Resume Phase 3A of Loomlight from the documented pause. Read AGENTS.md,
-> docs/status/CURRENT.md, docs/status/HANDOVER.md and the relevant sections of
-> docs/tasks/active/phase-3-initial-wysiwyg-release.md. Reconcile the current branch,
-> worktrees and recorded CI state before changing anything; preserve all work.
-> Phase 2 must remain PAUSED — INCOMPLETE and must not be resumed, completed,
-> accepted or closed. Use delegated GPT-6.1 Sol High agents for implementation,
-> validation and independent review. The orchestrator must not poll CI; a delegated
-> validator may inspect/audit existing run 38346032499, attempt 1, candidate 81ee770.
-> Do not redispatch it blindly. Resume with that exact-result/artifact audit, then
-> continue the documented structural and Story-control slices after early SDK proof.
-> Respect cumulative allowances and preserve failures; do not reset them. Reviewed
-> pushes to codex/phase3a-story-logic remain authorized, without merge or release.
-> Continue routine slices autonomously, escalating real blockers or required budget
-> decisions. Mark Phase 3A complete only when its own acceptance criteria are met.
+The user explicitly approved **one additional focused local validation round**
+(cumulative 5/5; passed) for generated-driver zero-SDK preflight and changed Rust gate
+compilation. The concrete correction is independently reviewed. Do not exceed this added
+round; preserve any failure and escalate a further exhausted-budget decision. CI2 fits
+the existing paired allowance after reviewed publication; retain six runtime cases,
+12 spawns and exact candidate/artifact audit. No blind rerun or ordinal reset.
+
+Only after corrected early SDK proof implement structural commands and then full
+Story controls. Read-only core preparation agreed explicit `BodyRef` (root/branch),
+`NodeRef` (Beat/whole condition), immediate-sibling `Position`, expected ownership and
+revision envelopes. Preserve whole-subtree identities, safely qualified indentation,
+canonical empty-body pass, delete versus selected-branch unwrap and transaction/history.
+Close later Jump/Choice recursive-Call authoring while allowing pure Jump loops. The
+remaining two core invocations can cover the first decisive structural checks;
+four more were proposed for review corrections/full coverage and remain unallocated.
+Renderer controls need their own finite slice selection; compatibility rounds are spent.
+
+Remaining acceptance includes typed builder, nested insert/edit/move, Else If/Otherwise,
+Call and guarded Choice editors, explicit parent destinations, collapse/draft protection,
+manual illustrative preview and coherent Branches navigation. Prove the actual frontend-
+to-core path, retained drafts and ordinary external-edit refusal, source/history/reopen,
+save inside a callee and return after a safe surrounding edit on both targets. No package
+or physical native UI proof is claimed by Chrome/DOM/native-service evidence. Phase 3A
+must not be completed until its own acceptance is satisfied. 3B/3C remain unselected
+and retain accepted Phase 2/3A entry requirements.
+
+Development stays on macOS; affected Windows/macOS automated proof uses focused CI.
+Escalate named capability gaps or exhausted budgets; continue routine authorized work
+without checkpoint approval. Root documentation records the resumed state and passing local correction. Preserve
+exact corrected CI2 candidate/run identity after delegated dispatch; docs-only successors
+do not replace its tested inputs.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 

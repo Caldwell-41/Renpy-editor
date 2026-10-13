@@ -1215,7 +1215,12 @@ plus a shared SDK-fixture BOM preflight) and the seven renderer cases. The actua
 gate is `renpy::tests::phase3a::phase3a_conditions_calls_sdk_gate`; it is ignored by
 routine runs and must be explicitly selected with the official pinned archive.
 Its six normal-entry cases cover low/high/boundary values, all-false menu continuation,
-nested Call returns and a deliberately wrong-outcome rejection. `qualify-story-logic.py`
+nested Call returns and a deliberately wrong-outcome rejection. CI1 failed four menu
+cases per host because bare test-driver `advance` waited for another dialogue callback.
+The reviewed correction explicitly waits for and asserts the choice screen before its
+route click; the no-option case retains ordinary advance. The shared zero-SDK preflight
+checks generated driver progression. Corrected both-target SDK proof remains required.
+`qualify-story-logic.py`
 and `check-story-logic-evidence.py` enforce named successes, operation counts, input
 identity and terminal cleanup. Artifact upload requires a successful privacy scan even
 when preserving partial evidence from a failed run. This gate is early proof, not the
