@@ -423,8 +423,8 @@ The condition model supports bool/int/string values, same-type equality/inequali
 integer ordering and bounded boolean combinations. Integers remain canonical signed
 64-bit decimal strings across JSON. Unknown/missing/type-invalid expressions remain
 unknown, never false or evidence of unreachable branches. The core projection does
-not execute Python or infer a route from default values. This first local slice does
-not yet supply condition-authoring controls or complete Phase 3A qualification.
+not execute Python or infer a route from default values. The first local slice supplied
+the model; later Story controls use the same authority and pass scoped CI4 qualification.
 
 The subsequent 3A.2 candidate advances source maps to v5 for supported Call statements
 and guarded menus; [ADR 0015](adr/0015-guarded-choices-and-stable-call-continuations.md)
@@ -439,8 +439,9 @@ label, and target edits preserve it. Choice options may carry the shared `Condit
 An all-guarded menu can continue when no option is available, so authoring cannot
 assume every Choice is terminal. Early renderer support presents Calls and guarded
 Choices read-only with revision-bound Source navigation. The narrow reviewed renderer
-now provides Call and supported guarded Choice editors; full Story controls and
-runtime/save qualification remain pending.
+now provides Call and supported guarded Choice editors alongside full typed condition,
+branch and subtree controls. CI4 qualifies the selected full frontend/core and SDK
+save/edit/load-return behavior; Phase3A acceptance remains pending.
 
 Structural commands use explicit root/branch bodies, immediate sibling Beat/condition
 anchors and captured ownership/revisions under [ADR 0016](adr/0016-explicit-body-story-authoring.md).

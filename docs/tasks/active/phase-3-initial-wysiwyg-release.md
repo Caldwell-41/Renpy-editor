@@ -1,16 +1,17 @@
 # Phase 3 — Initial WYSIWYG release
 
-**Current selection — 2026-10-14:** Phase 3A Story logic implementation is
-**ACTIVE — INCOMPLETE**, resumed explicitly after the documented safe stop. Existing CI1 failed its SDK gate; the reviewed minimal harness repair passed corrected
-both-target CI2 audit. The early gate, structural core30 and full renderer51/build
-are established. Local validation10 passes all ten actual frontend/core cases/two processes. Focused
-renderer11 passes20 captures and image self-review, closing portable vertical clipping.
-The user approved cumulative local/renderer caps14 and clearly labelled self-review. CI3 is audited failed; two additional paired runs raise the cap to5. One review-only independent agent completed review of the whole-workflow corrections. Local12 passes; CI4 is dispatched and awaiting terminal audit. No 3A acceptance. Preserve the reviewed commits,
-worktrees, failed run and cumulative allowances. Phase 2 is
-**PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
-This selection supersedes the earlier planning-only/complexity-assessment directions.
-No 3A acceptance is claimed. 3B/3C/3D/3F remain unselected; default 3B/3C entry still
-requires accepted Phase 2/3A.
+**Current selection — 2026-10-14:** Phase3A Story logic is **ACTIVE — INCOMPLETE**.
+The selected implementation/technical qualification is now **review_ready**: CI4
+exact49dba1f passes both-host terminal artifact audit, all30 core/51 DOM/full ten-case
+controller and six actual pinned-SDK outcomes including saved-callee/safe caller-edit/
+later-load return. Portable renderer11 closes clipping with20 inspected captures.
+Phase3A acceptance is not claimed; Phase2 stays **PAUSED — INCOMPLETE**, with no
+resume, completion, acceptance or closure. No merge/release or new 3B/3C/3D/3F scope.
+The user approved local/renderer caps14, two extra paired runs (cap5), clearly labelled
+self-review and one independent review-only agent. Prior failures, worktrees and
+allowances remain preserved; no further run is needed for the scoped passing outcome.
+Default 3B/3C entry still requires accepted Phase2/3A. See the
+[CI4 terminal audit](#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
 
 **Baseline and dependencies:** entry branch is `codex/provider-qualification`,
 HEAD `591b04a`; implementation now uses dedicated `codex/phase3a-story-logic`, preserving
@@ -49,9 +50,11 @@ and material scope decisions require a concrete escalation; routine checkpoints 
 Initial 3A.1 allowance: six focused local check invocations, subsequently amended and
 retained in the ledger; current core cumulative cap is 18 after the explicit resume
 extension. Reassess after two unsuccessful corrections of one hypothesis. Renderer cumulative cap is14 and local validation cumulative cap is14, as explicitly
-approved on2026-10-14. Usage is renderer11/local10; all original consumed rounds/failures
-remain accounted for. Paired CI cap stays three cumulative
-across 3A, zero package builds/owner native starts/live model calls. Per batch/target:
+approved on2026-10-14. Usage is renderer11/14, local12/14, core16/18; all original
+consumed rounds/failures remain accounted for. The user authorized two additional
+paired runs, raising cumulative CI cap to5; usage4/5. Zero local SDK execution, package
+builds/owner native starts/credentials/live calls. Independent review-only exception
+is limited to the one authorized reviewer. No implementation delegation. Per batch/target:
 one verified SDK install, one GUI generation, compile and lint, at most six runtime
 cases (failures count). Early batch follows reviewed core condition/call work before
 broad UI. No Phase 2 allowance is reused; extra required native capability or exhausted
@@ -2387,3 +2390,83 @@ wait successor, then end active work without polling/watchers. On manual same-th
 artifacts/source identities/process counts/save/load/storage/raw logs/cleanup/privacy;
 retain any failure and reassess before further execution. Phase3A is awaiting_ci but
 **ACTIVE — INCOMPLETE**; Phase2 **PAUSED — INCOMPLETE**. No merge/release.
+
+### CI4 terminal audit and scoped qualification — 2026-10-14
+
+On user manual resume, audited [CI4 run38437801470](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38437801470),
+attempt1/ordinal4/exact `49dba1fc79ab4f1eba1490591209dc453b40dbf9`, tree
+`8d3f370be3468ca8bf18e799df782a325521c384`. Terminal **success**, updated
+2026-10-13T17:27:15Z. Required Windows115436273320 and Mac115436273716 and every
+selected step pass. Unrelated skipped jobs are excluded, not acceptance passes.
+
+Each host passes checker13, typecheck/test compilation/production renderer build,
+30 exact core/preflight and51 exact DOM tests, all ten actual frontend/ApplicationHost
+cases and two normally exited0/observed/reaped helper processes with owned cleanup.
+Windows250/Mac246 typed requests include only expected DIRTY_SOURCE/SOURCE_CONFLICT
+refusals. Exact seed/import/source bytes and second-process reopen/map/history reset
+proof are retained. No native packaged UI or human acceptance is claimed.
+
+All six pinned8.5.3 SDK cases pass: low/high/boundary, no-option fallthrough, later-
+process nested saved return and expected wrong-outcome assertion rejection. Each
+host spends exactly one SDK install, two version checks, GUI generation/image command,
+one compile, one lint and six runtime processes: **twelve adapter spawns**. High
+route actually saves in callee at depth2/base0 with true flag,trust5,precision
+9007199254740993,moodready. The one caller narration edit preserves BOM, both stable
+return labels and every other source byte. A later raw-slot FileLoad restores those
+literal values, returns depth0 to “Caller safely edited” and reaches High ending.
+No fallback Start or loaded-state assignment substitutes for this behavior.
+
+All eleven accepted source-file digests, exact metadata-free source membership,
+structural header/nested minimal deltas, three retained actual SDK scaffold imports,
+raw output/process/save/edit/load receipts and six actual owned save/token directory
+witnesses pass. All three actual scaffold imports carry a BOM and become exact body
+bytes in their initially empty non-BOM destinations. This proves the corrected import
+path; it does not reconstruct CI3's lost exact failed input. No product defect was
+established from that old setup assertion. CI1/CI3 and local failures remain failures.
+
+| Host | Artifact / ZIP SHA256 | Expiry UTC |
+| --- | --- | --- |
+| Windows x64 | 11834341134 / `208144f1abc120924e0381967d2d3ebd3d1fd3fd92c16b982123c060a5648c4b` | 2026-10-20T17:27:08Z |
+| macOS ARM64 | 11832919965 / `ee70b22187bfe485b6835f5cba6f51b72db13b1ff7a3f82be746bca8442ec164` | 2026-10-20T17:25:35Z |
+
+Root self-audit verifies each ZIP CRC/safe entries,89 files/88 manifest hashes,213 exact
+Git-object input hashes/candidate/tree/run/attempt/ordinal/architecture, successful
+blocking recipe and raw SDK outcomes. CI privacy scans89 files per host; local audit
+scan178 extracted files passes. Ignored `ci4-audit/` retains original ZIPs/metadata/log,
+extracted evidence and audit.py/audit.json. No application/test/SDK/dispatch was run
+during this audit; no polling/watcher/retry occurred.
+
+**Scoped completion coverage:**
+
+| Selected criterion | Established evidence |
+| --- | --- |
+| 3A.1 grammar, exact values, type/unknown diagnostics, recursive ownership/migration/lossless source | Exact30 core gate, lexical/no-op/minimal-byte/AI-refusal regressions and SDK low/high/boundary outcomes; source-map v5 retains IDs/extras/source. |
+| 3A.2 guarded choice, returning Calls, continuation and persistence | Both-host observed-flow/labels/migration/history regressions and six actual SDK cases; no-option fallthrough and saved nested return after qualified caller edit. |
+| 3A.3 coherent Story/Source/Branches, conditions/branches/keyboard/moves/delete/unwrap, drafts/refusals | Exact51 DOM and ten production controller cases per host; explicit ownership, protected ranges/pass, navigation, zero-write conflicts, Undo/Redo and two-process reopen. |
+| 3A.4 runtime and portable UX proof | Exact CI4 outcomes/source receipts/process/storage/cleanup; unchanged renderer production/fixture inputs reuse20 inspected renderer11 captures across themes/layouts/dividers/focus. |
+
+Independent workflow review applies to the unchanged frozen six-file patch. The same
+sole authorized independent read-only reviewer separately audits terminal artifacts;
+its final report confirms **no supported blocker**, all exact hashes/receipts/cleanup
+and unchanged renderer inputs. It is retained distinctly from root self-audit. Technical scoped checks
+are satisfied; Phase3A is **review_ready** but **ACTIVE — INCOMPLETE** pending explicit
+acceptance. WORKFLOW separates implementation, evidence and user acceptance. This
+does not select packaged physical input/human testing, broaden save compatibility,
+resume Phase2 or authorize integration/release. Remaining automated evidence gaps
+for this selected scope: none identified after audit/review. No CI5 or new local/
+renderer round is needed. All cumulative usage remains core16/18, local12/14,
+renderer11/14, pairedCI4/5; all local SDK/native/package/credentials/live counts zero.
+Next is explicit Phase3A acceptance/next-outcome selection, keeping Phase2 paused and
+no merge/release. Update canonical contracts/status and publish docs-only closeout
+without changing the213 qualified inputs.
+
+Final independent terminal verdict is bound to run38437801470/attempt1/exact49dba1f,
+with no tests/SDK/CI/network/edits/delegation in review. Ignored independent-review.txt
+and the audit seal retain that report. Canonical ARCHITECTURE/DATA_MODEL/UI/TESTING
+and ADR0014/0015/0016 now record the scoped implemented/qualified outcome and its
+acceptance limits. Root separately reviewed the documentation-only closeout; no code
+or qualified213 input changed. Repository structural/privacy/link validation passes
+558 files; diff check passes. CURRENT exceeds its review target to preserve separate
+Phase2 frozen baseline/limits; HANDOVER fits its target. No pending operation
+or additional automated proof is identified. Publication is a docs-only successor,
+not a new tested candidate or acceptance of either phase.

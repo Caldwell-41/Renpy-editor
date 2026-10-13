@@ -1,6 +1,6 @@
 # ADR 0014: Typed conditions and recursive source ownership
 
-- Status: Independently reviewed; focused local and early both-target SDK proof passed; full 3A qualification pending
+- Status: Independently reviewed; scoped both-target frontend/core/SDK qualification passed; Phase3A acceptance pending
 - Date: 2026-10-13
 - Scope: Phase 3A.1; extends ADR 0012 without changing its historical acceptance
 
@@ -61,3 +61,6 @@ This decision alone does not deliver editable conditions, calls, Story controls 
 3A acceptance. Those slices retain their own review and runtime requirements. The
 [Phase 3 task](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
 owns exact check outcomes, failures, source identities and qualification status.
+
+Scoped final CI4 evidence and limits are recorded in the [terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
+Prior failures, portable visual self-review and user acceptance remain distinct.

@@ -1152,9 +1152,11 @@ preview allocation on small windows. Writing focus hides preview/divider and res
 the single writing row. Portable round 11 verified 20 captures across both themes,
 default/scaled layouts and divider bounds, including readable unknown-state messages
 and selector focus/scroll. This closes the prior clipping finding by self-review under
-user approval. The local ten-case frontend/core and two-process proof also passes;
-both-host saved-callee qualification remains pending in the
-[Phase 3 task](tasks/active/phase-3-initial-wysiwyg-release.md).
+user approval. CI4 passes the full ten-case frontend/core journey and two separately
+reaped helpers on both hosts, plus actual pinned-SDK saved-callee/caller-edit/load-return
+qualification. Portable visual/controller proof does not claim packaged physical input
+or human acceptance. Phase3A remains incomplete; the [terminal audit](tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14)
+owns exact evidence and limits.
 
 An existing declared-bool If/Otherwise group with direct dialogue children is displayed
 with read-only branch rows and indented selectable dialogue. Commit edits only the

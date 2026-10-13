@@ -1,6 +1,6 @@
 # ADR 0015: Guarded choices and stable Call continuations
 
-- Status: Independently reviewed; focused local and early both-target SDK proof passed; full 3A qualification pending
+- Status: Independently reviewed; scoped both-target frontend/core/SDK qualification passed; Phase3A acceptance pending
 - Date: 2026-10-13
 - Scope: Phase 3A.2; extends ADR 0014 without changing its historical evidence
 
@@ -66,7 +66,10 @@ of callees and a separate mutation layer are unnecessary.
 Local checks cover generated labels, minimal edits, history/reopen, guarded-menu ending
 refusal, older-map refinement, flow diagnostics and unchanged AI permissions. Final
 independent review is clear. Early actual pinned-SDK proof passed both targets in CI2;
-full Story authoring and saved-callee safe-edit return proof remain pending. The
+full Story authoring and saved-callee safe-edit/later-load return proof passed CI4. The
 [3A execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
 owns exact commits, cumulative checks, failures and qualification status. This decision
 does not mark either Phase 2 or Phase 3A complete.
+
+Scoped final CI4 evidence and limits are recorded in the [terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
+Prior failures, portable visual self-review and user acceptance remain distinct.

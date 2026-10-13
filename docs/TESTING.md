@@ -1192,8 +1192,8 @@ retains the broad local run's descendant-cleanup failure and its isolated passin
 Neither these local checks nor unchanged Phase 2 proof establish new SDK/target or full
 3A acceptance. The separately reviewed focused CI harness now provides an explicitly
 selected early SDK gate; corrected CI2 passed its exact both-target artifact audit.
-CI1's failed driver outcomes remain recorded. Full authoring and saved-callee proof
-remain pending.
+CI1's failed driver outcomes remain recorded. The later final gate described below
+qualifies full authoring and saved-callee behavior without reclassifying failures.
 
 The reviewed calls/guarded-choice slice extends the focused `phase3a_` selection to
 stable generated return labels, minimal Call target and menu-field edits, v3/v4-to-v5
@@ -1242,12 +1242,12 @@ second-process reopen/map persistence and session-history reset. Portable visual
 `6ef6314` passed 20 captures with vertical canvas/message, seven-selector focus/scroll,
 divider 20/default/70 and Writing-focus proof. These were self-audited under explicit
 user approval; neither packaged WebView physical input nor human acceptance is claimed.
-Final both-host saved-callee qualification remains pending. The 213-input recipe includes
+Final both-host saved-callee qualification passed CI4 on exact `49dba1f`. The 213-input recipe includes
 the twelve previously omitted embedded SDK-test dependencies; original 201 receipts
 remain preserved. The exact path/hash oracle covers these binary/text inputs.
 
 The early focused workflow selected 17 named core/preflight tests (the 16 product regressions
-plus a shared SDK-fixture BOM preflight) and the seven renderer cases. The final planned
+plus a shared SDK-fixture BOM preflight) and the seven renderer cases. The final
 gate requires all 30 exact core/preflight names, retaining every earlier required name.
 The actual SDK
 gate is `renpy::tests::phase3a::phase3a_conditions_calls_sdk_gate`; it is ignored by
@@ -1258,12 +1258,31 @@ cases per host because bare test-driver `advance` waited for another dialogue ca
 The reviewed correction explicitly waits for and asserts the choice screen before its
 route click; the no-option case retains ordinary advance. The shared zero-SDK preflight
 checks generated driver progression. Corrected CI2 established the early both-target
-SDK gate on its exact reviewed candidate; full authoring/saved-callee proof remains required.
+SDK gate on its exact reviewed candidate; CI4 supplies the later full authoring/saved-callee proof.
 `qualify-story-logic.py`
 and `check-story-logic-evidence.py` enforce named successes, operation counts, input
 identity and terminal cleanup. Artifact upload requires a successful privacy scan even
-when preserving partial evidence from a failed run. This gate is early proof, not the
-later saved-callee or full Story-control acceptance.
+when preserving partial evidence from a failed run. CI2 is early proof; final ordinals
+3–5 select the full51 DOM and ten-case controller recipe in addition to core/SDK checks.
+
+Final [CI4 terminal audit](tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14)
+passed Windows x64/macOS ARM64 on exact `49dba1f`: checker13,30 named core/preflight,
+51 named DOM, production build and ten real frontend/core cases with two normal
+observed/reaped helpers per host. The six pinned8.5.3 SDK cases pass with exactly twelve
+adapter processes per host. High-route save inside the nested callee, exact caller
+narration edit preserving BOM/labels/other source, later-process raw-slot FileLoad,
+literal saved values and return to the edited continuation are established. The wrong-
+outcome case is an expected SDK assertion rejection. Metadata-free source sets and
+owned save/token storage pass. CI1/CI3 and all local failures remain retained.
+
+Artifact checks bind213 exact inputs, every accepted source-file digest, imported
+scaffold bytes/encoding receipts, raw runtime output/process receipts, save/edit/load
+receipts and six storage witnesses. Each host's89-file ZIP/88-entry manifest, identity,
+privacy and cleanup passed terminal audit. Independent static workflow and terminal
+evidence reviews are distinct from root self-audit and approved visual self-review.
+The selected technical outcome is review_ready; Phase3A remains incomplete pending
+explicit acceptance. No packaged physical input or human acceptance, arbitrary script-
+change save compatibility, Phase2 advancement, package, merge or release is claimed.
 
 ## Bounded nested-dialogue foundation
 

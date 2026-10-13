@@ -387,8 +387,8 @@ It validates legacy maps before refining locations, retains opaque lexical regio
 and refuses root insertion anywhere inside a complete group. Existing nested dialogue
 edits remain minimal and transactional. Phase 2 proposal permissions do not expand.
 [ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md) owns this extension;
-Full Story controls and final qualification remain in progress; the early conditions/
-calls SDK gate has passed on Windows x64 and macOS ARM64.
+Full Story controls and scoped final qualification now pass Windows x64/macOS ARM64
+in CI4; Phase3A remains incomplete pending acceptance.
 
 The reviewed 3A.2 candidate extends this through source-map v5, stable returning
 Calls, guarded Choices and observed body continuations under
@@ -400,8 +400,9 @@ Call, Jump and Choice authoring through both legacy and explicit-body commands; 
 Jump loops remain allowed. This is bounded conservative refusal, not general
 reachability analysis or a change to deliberate source execution.
 Renderer compatibility preserves the AI allowlist, draft handling and revision-bound
-Source navigation. Exact early SDK proof is recorded in the Phase 3 task; full authoring
-and saved-callee qualification remain pending.
+Source navigation. Exact early and final SDK proof is recorded in the Phase 3 task.
+CI4 establishes full authoring and saved-callee return after the qualified caller
+narration edit; it does not promise arbitrary script-change save compatibility.
 
 The first structural commands are `insertBodyBeat` and `updateBodyBeat`. Their explicit
 body identifies the root or a known group/branch; insertion names an immediate sibling

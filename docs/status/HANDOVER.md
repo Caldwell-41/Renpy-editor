@@ -1,68 +1,60 @@
 # Current outcome handover
 
-## Phase 3A — CI4 awaiting terminal audit
+## Phase3A — scoped qualification review_ready; acceptance pending
 
-Phase3A is **ACTIVE — INCOMPLETE**; Phase2 remains **PAUSED — INCOMPLETE**. One
-implementation agent owns work. The user explicitly authorized one independent
-review-only agent, cumulative local/renderer caps14, self-review and two additional
-paired CI runs (cap5). Reviewed pushes to `codex/phase3a-story-logic` are authorized;
-no merge/release. No CI polling/watchers: record dispatch, publish wait record, end
-turn and audit on manual same-thread user resume.
+Phase3A is **ACTIVE — INCOMPLETE**; selected implementation/technical qualification
+is **review_ready**. Phase2 stays **PAUSED — INCOMPLETE**. No Phase3A/user acceptance,
+Phase2 resume/closure, next capability, merge or release is implied. One implementation
+agent owns work; the sole authorized independent review-only agent reviews evidence.
+Self-review is separately labelled. Reviewed branch pushes are authorized. No polling/
+watchers; no pending CI or helper process. No further automated round is needed.
 
-Root is `codex/phase3a-story-logic`; reviewed candidate49dba1f is published and
-remote Git-verified, following scaffold fixde26fcb and whole-workflow patchb26597a.
-A docs-only wait successor records CI4 without changing tested inputs. Live Git owns the exact latest HEAD/dirty state. Never reset to an
-old prompt SHA. Validation74a0361 retains its original dirty oracle, renderer421a241
-its original dirty CSS. Coree160464, planning2c5a164/two unpublished commits, Phase2
-work, original/additive preservation refs and all failures remain intact. Root reused
-60 exact frontend outputs against69 input hashes;14 older outputs remain ignored in
-`root-adapter-prior/`. Do not overwrite preserved worktrees or relabel old201 receipts.
+Root branch `codex/phase3a-story-logic` contains published candidate
+`49dba1fc79ab4f1eba1490591209dc453b40dbf9`, tree
+`8d3f370be3468ca8bf18e799df782a325521c384`; docs-only wait successor81ea757 follows.
+Closeout updates docs only; live Git owns latest HEAD/publication. Preserve validation
+74a0361's dirty oracle, renderer421a241's dirty CSS, coree160464, planning2c5a164/two
+unpublished commits, Phase2 work and original/additive preservation refs. No reset or
+cleanup of those worktrees. Root's60 exact reused frontend outputs and14 preserved
+older outputs remain ignored; original201 receipts are not complete coverage receipts.
 
-CI2 exactcba3c0e established the early both-host SDK gate. Local10 exactbe06333 passes
-all ten actual frontend/core cases,243 requests, two normal observed/reaped helpers,
-source/refusals/history/reopen and cleanup. Renderer11 exact6ef6314 passes20 captures
-and actual image self-review, closing portable clipping; no packaged physical/human
-acceptance claimed. Local11 exactde26fcb passes the narrow scaffold preflight; local12 exactb26597a
-passes checker13, SDK-test no-run and expanded exact zero-SDK preflight. Original round9 failure/snapshot, all receipts and
-213-input seals remain ignored under `.toolchains/phase3a-validation/`.
+[CI4 run38437801470](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38437801470),
+attempt1/ordinal4/exact49dba1f, is terminal success updated2026-10-13T17:27:15Z.
+Both-host terminal audit passes89-file ZIPs/88 manifest hashes/213 exact Git inputs,
+identity/architecture/limits/privacy/cleanup. Each host: checker13/core30/DOM51/build,
+all ten actual frontend/ApplicationHost cases/two normal observed/reaped helpers.
+Windows250/Mac246 requests include only expected dirty Source/external conflict
+refusals. Six actual pinned8.5.3 SDK cases/twelve adapter processes pass, including
+callee save depth2, qualified caller narration edit, later raw-slot load returning
+depth0 to edited continuation with exact saved values. Metadata-free source-set and
+owned save/token witnesses pass. Exact artifacts/expiry/coverage/reviews belong in
+[the terminal ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
+Ignored `ci4-audit/` retains originals/extracted files/audit.py/audit.json.
 
-[CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
-attempt1/ordinal3/exact9a6dbcd/tree d5ace1a4, is terminal failed. Both hosts pass
-checker11/core30/renderer51/build/full ten-case controller/two reaped processes.
-SDK setup stopped at strict transport-BOM assertion importing separately encoded GUI
-scaffolding: four adapter processes; no compile/lint/runtime cases. Cleanup passed.
-This is a proven harness setup defect; actual failed input/path was not retained.
-Final saved-callee/safe caller edit/load-return/source proof remains unestablished.
-Exact jobs/artifact IDs/ZIP hashes/expiry and original audit reside in the
-[CI3 ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14)
-and ignored `ci3-audit/`. Existing audit must not be blindly rerun with a changed checker.
+Local10's ten-case proof, local11/12's no-SDK harness checks and renderer11's20 actual
+images/self-review remain valid; final CI inputs differ from renderer11 only in the
+six reviewed harness/workflow files. No renderer production/fixture input changed.
+No packaged WebView physical input or human acceptance is claimed. Saved-game proof
+only covers the qualified safe caller edit, not arbitrary source changes. Independent workflow and terminal evidence reviews found no supported blocker; they
+are distinct from root self-audit and approved
+portable visual self-review. Source authority, unsupported bytes, transactional layer
+and AI allowlist remain unchanged. Canonical docs record implemented behavior/proof.
 
-The complete remaining SDK journey, platform API assumptions, failure diagnostics,
-cleanup and artifact gate were jointly audited against production and pinned8.5.3
-archive source without local SDK execution. Corrections are confined to tests,
-recipe/checker and CI ordinal selection: imported BOM conversion, exact source-set
-and scaffold bindings, retained output before assertions, storage witnesses, strict
-receipts, setup failure breadcrumbs and final full checks at ordinals4/5. Production
-Source behavior/timeouts remain unchanged. Independent read-only review found no
-remaining supported static blocker; root self-review is separately labelled. Source-
-supported assumptions do not establish actual runtime outcomes. See
-[whole-workflow ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-dispatched-manual-waiting--2026-10-14)
-and ignored `whole-workflow-audit/` for patch hashes/review/source evidence and limits.
+CI1/CI3 and every local failure remain failed and retained. CI3's lost exact generated
+input is not reconstructed; CI4 retains all three actual BOM imports/body receipts.
+Their successful import conversion closes the proven harness setup defect; no product
+defect was established from that old assertion. Round9's actual failed fixture and
+seals remain intact; five completed cases were never relabelled as ten. Historical
+CI2 early proof is preserved. Audit operations executed no SDK/application/test.
 
-Whole-workflow patchb26597a passes local12 and independent hashes match. Published
-CI candidate49dba1f/tree8d3f370be3468ca8bf18e799df782a325521c384 has identical213
-inputs. [CI4 run38437801470](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38437801470)
-is confirmed attempt1/ordinal4, created2026-10-13T17:20:05Z, last observed queued at
-2026-10-13T17:20:10Z. No later status/result claimed. Ignored `ci4-dispatch/` retains
-identity/inventory/input hashes. On manual same-thread “Audit CI4 and continue”,
-inspect this run and audit terminal both-host artifacts/outcomes/cleanup/privacy.
-Reuse unchanged passed local frontend/core/renderer/controller proof. Required pairedCI4:
-exact six SDK cases/twelve adapter processes per host,
-required full30 core/51 DOM/controller gates. Preserve failure and reassess; no blind
-retry. Usage **core16/18, local12/14, renderer11/14, pairedCI4/5**. CI5 is unused,
-not automatic authorization to retry. No local SDK/helper/native/package/credential/
-live action selected. CI4 is the sole pending operation; no local process or active
-agent work. Independent review completed. End turn without polling/watchers.
+Usage **core16/18, local12/14, renderer11/14, pairedCI4/5**. Caps14/14 and two additional
+CI runs were explicitly approved; counts never reset/transferred. Local SDK, owner
+native editor, packages, credentials and live calls remain zero. CI5 is unused and
+not a reason to rerun. Next: explicit Phase3A acceptance/next-outcome selection under
+WORKFLOW's separate implementation/evidence/acceptance states. Phase2 stays paused;
+3B/3C default entry still requires accepted Phase2/3A. No unselected native/human
+session, merge/release or background operation. Reuse this thread for any selected
+continuation and read live Git/status rather than old prompt SHAs.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 
