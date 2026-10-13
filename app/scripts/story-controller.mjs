@@ -9,6 +9,7 @@ import {pathToFileURL,fileURLToPath} from 'node:url';
 import {Window} from 'happy-dom';
 import {driverProcess} from '../tests/phase2-driver-process.mjs';
 import {createRequest,isCoreResponse} from '../dist-tests/src/protocol.js';
+import {sourceTextareaSnapshot} from '../dist-tests/src/source-textarea.js';
 
 export const STORY_CASES=[
  'Guarded Choice actual Story dispatch preserves exact neighbours',
@@ -44,7 +45,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   sdkCommands:0,credentialOperations:0,aiOperations:0,packagedUi:'not exercised',humanAcceptance:'not claimed',fixtureId:basename(fixture),ownedFixtureRemoved:false,failureSnapshotRetained:false};
  let child,session,latestWorkspace,lastMutation,saveBefore,saveAfter;
  let domSequence=0,lastEvent,caseActive=false,caseEventStart=0;
- const panelEvents=new Map();let sourceInputEvent;
+ const panelEvents=new Map(),sourceDocuments=new Map();let sourceInputEvent,sourceNavigationEvent;
  let stopFailure;let inFlight=0;let responseBarrier;
  const transcript=[];
  const w=new Window({url:'http://tauri.localhost'});
@@ -55,12 +56,23 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  for(const type of ['click','keydown','input','change'])document.addEventListener(type,event=>{
   const target=event.target?.closest?.('button,input,select,textarea,[role="button"]')??event.target;
   const panel=target?.closest?.('.scene-workspace')?'story':target?.closest?.('.source-workspace')?'source':target?.closest?.('.app-header')?'header':null;
+  // prepareTransition retains the editor being left, never the destination row's path.
+  const navigationTarget=target?.matches?.('.source-file-tree .source-file-open, .story-sidebar > .tree-item');
+  const navigationActivation=type==='click'||(type==='keydown'&&['Enter',' '].includes(event.key));
+  const surface=document.querySelector('.source-workspace'),editor=surface?.querySelector('textarea.source-editor');
+  const currentPath=surface?.querySelector('.source-header h1')?.textContent;
+  const current=sourceDocuments.get(currentPath);
+  const sourceSnapshot=navigationTarget&&navigationActivation&&target?.isConnected&&target.ownerDocument===document&&!target.disabled&&!target.closest('[hidden]')&&surface?.isConnected&&!surface.closest('[hidden]')&&surface.dataset.sourceBusy==='false'
+   &&surface.querySelector('.source-tab-group[data-active="true"]')?.title===currentPath
+   &&editor?.isConnected&&!editor.disabled&&!editor.readOnly&&current?.sessionId===session
+   ?{path:currentPath,expectedBaseRevision:current.document.baseRevision,...sourceTextareaSnapshot(current.document,editor)}:undefined;
   domSequence++;lastEvent={sequence:domSequence,type,tag:target?.tagName,panel,
    connected:target?.isConnected===true,enabled:target?.disabled!==true,
    currentDocument:target?.ownerDocument===document,ownerSession:session,
-   label:target?.getAttribute?.('aria-label')??target?.textContent?.slice(0,120)};
+   label:target?.getAttribute?.('aria-label')??target?.textContent?.slice(0,120),sourceSnapshot};
   if(panel)panelEvents.set(panel,lastEvent);
   if(panel==='source'&&['input','change','keydown'].includes(type))sourceInputEvent=lastEvent;
+  if(sourceSnapshot)sourceNavigationEvent={...lastEvent,panel:'source-navigation'};
  },true);
  const wait=async predicate=>{const start=Date.now();while(!await predicate()){
   assert(Date.now()-start<15000,'Actual Story controller deadline exceeded');await new Promise(r=>setTimeout(r,10));
@@ -72,7 +84,10 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   const request=createRequest(operation,payload);
   let attributed=lastEvent;
   if(operation==='scene.apply')attributed=panelEvents.get('story');
-  if(operation==='source.updateDraft')attributed=sourceInputEvent??panelEvents.get('source');
+  if(operation==='source.updateDraft'){
+   attributed=sourceInputEvent??panelEvents.get('source');
+   if(sourceNavigationEvent&&(!attributed||sourceNavigationEvent.sequence>attributed.sequence))attributed=sourceNavigationEvent;
+  }
   else if(operation.startsWith('source.')&&!reads.has(operation)){
    const source=panelEvents.get('source'),header=panelEvents.get('header');
    attributed=header&&(!source||header.sequence>source.sequence)?header:source;
@@ -83,8 +98,15 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
    assert(caseActive&&eligible&&event.sequence>caseEventStart&&event.panel==='story',
     'A fresh event in the current actual Story panel must initiate authoring');
   }
+  if(operation==='source.updateDraft'&&event?.panel==='source-navigation'){
+   const captured=event.sourceSnapshot,surface=document.querySelector('.source-workspace');
+   assert(captured&&surface?.isConnected&&surface.querySelector('.source-header h1')?.textContent===captured.path
+    &&surface.querySelector('.source-tab-group[data-active="true"]')?.title===captured.path,
+    'Source transition retention must still own the captured current document');
+   for(const key of ['path','expectedBaseRevision','text','selectionStart','selectionEnd'])assert.equal(payload[key],captured[key],`Source transition must retain the exact visible ${key}`);
+  }
   if(['source.updateDraft','source.save','source.applyBoth','source.saveAll','source.discard','source.discardAll'].includes(operation)){
-   assert(caseActive&&eligible&&event.sequence>caseEventStart&&['source','header'].includes(event.panel),
+   assert(caseActive&&eligible&&event.sequence>caseEventStart&&(['source','header'].includes(event.panel)||(operation==='source.updateDraft'&&event.panel==='source-navigation')),
     'Source writes must originate in the current actual Source UI');
   }
   inFlight++;let response;
@@ -100,7 +122,10 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   assert(isCoreResponse(response,request.requestId),'Actual Host response must match the exact typed request ID');
   transcript.push({request,responseOk:response.ok,errorCode:response.ok?undefined:response.error.code,
    responseSHA256:hash(Buffer.from(JSON.stringify(response))),domEvent:event});
-  if(operation==='project.openRecent'&&response.ok)session=response.value.sessionId;
+  if(operation==='project.openRecent'&&response.ok){session=response.value.sessionId;sourceDocuments.clear();}
+  if(response.ok&&['source.open','source.updateDraft','source.save','source.discard','source.applyBoth'].includes(operation)){
+   const document=response.value;if(document?.path&&document.baseRevision)sourceDocuments.set(document.path,{sessionId:payload.sessionId,document});
+  }
   if(operation==='scene.list'&&response.ok)latestWorkspace=response.value;
   if(operation==='scene.apply'){
    assert.equal(payload.sessionId,session);assert(payload.expectedProjectRevision&&payload.expectedSourceMapRevision);
@@ -125,7 +150,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   const button=[...scope.querySelectorAll('button')].find(b=>(b.textContent===label||b.getAttribute('aria-label')===label)&&!b.disabled);
   button.click();return button;
  };
- const enter=(control,value,event='input')=>{assert(control?.isConnected&&control.ownerDocument===document&&!control.disabled,'Input must be a connected enabled current control');control.focus();control.value=value;control.dispatchEvent(new w.Event(event,{bubbles:true}));};
+ const enter=(control,value,event='input')=>{assert(control?.isConnected&&control.ownerDocument===document&&!control.disabled&&!control.readOnly,'Input must be a connected enabled current control');control.focus();control.value=value;control.dispatchEvent(new w.Event(event,{bubbles:true}));};
  const key=(control,key,options={})=>{assert(control?.isConnected&&control.ownerDocument===document&&!control.disabled);control.focus();assert.equal(document.activeElement,control);control.dispatchEvent(new w.KeyboardEvent('keydown',{key,bubbles:true,...options}));};
  const labelled=(text,scope=document)=>{
   const label=[...scope.querySelectorAll('label')].find(l=>l.firstElementChild?.textContent===text);
@@ -174,7 +199,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
    sourceText:(snapshot,path)=>Buffer.from(snapshot[path]).toString('utf8')};
   for(const name of required){
    const before=await snapshot();const from=transcript.length;const beforeEvent=domSequence;
-   lastMutation=undefined;lastEvent=undefined;sourceInputEvent=undefined;panelEvents.clear();caseEventStart=domSequence;caseActive=true;
+   lastMutation=undefined;lastEvent=undefined;sourceInputEvent=undefined;sourceNavigationEvent=undefined;panelEvents.clear();caseEventStart=domSequence;caseActive=true;
    // Case code owns exact expected byte/model/history assertions and actual selectors.
    try{await cases.storyCases[name](context);await context.settle();}finally{caseActive=false;}
    const after=await snapshot();const requests=transcript.slice(from);
@@ -215,6 +240,13 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  } finally {
   let cleanupError=stopFailure;
   if(child){try{await stop();}catch(error){cleanupError=error;}}
+  if(!evidence.passed){
+   const source=document.querySelector('.source-workspace'),editor=source?.querySelector('textarea.source-editor');
+   evidence.failureDomState={sessionId:session,sourceMounted:source?.isConnected===true,sourceBusy:source?.dataset.sourceBusy,
+    sourcePath:source?.querySelector('.source-header h1')?.textContent,activeSourceTab:source?.querySelector('.source-tab-group[data-active="true"]')?.title,
+    sourceRows:[...document.querySelectorAll('.source-file-tree .source-file-open')].map(row=>({path:row.title,connected:row.isConnected,disabled:row.disabled})),
+    editorMounted:editor?.isConnected===true,editorDisabled:editor?.disabled,editorReadOnly:editor?.readOnly,pendingRequests:inFlight};
+  }
   try{await w.happyDOM.close();}catch(error){cleanupError??=error;evidence.domDisposalError=String(error);}
   // Rust EOF cleanup cannot run after a crash/forced kill; harness owns this exact UUID root.
   if(existsSync(fixture)){

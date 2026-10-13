@@ -12,7 +12,8 @@ const names=[
  'Ordinary external edits and stale revisions refuse with zero source writes',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
-const row=(c,id)=>{const node=c.document.querySelector(`.scene-workspace [data-beat-id="${id}"]`);c.assert(node);return node;};
+const findRow=(c,id)=>c.document.querySelector(`.scene-workspace [data-beat-id="${id}"]`);
+const row=(c,id)=>{const node=findRow(c,id);c.assert(node);return node;};
 const text=c=>async()=>c.sourceText(await c.snapshot(),scene(c).sourcePath);
 const source=c=>async()=>c.call('source.open',{path:scene(c).sourcePath});
 const select=async(c,id)=>{row(c,id).querySelector('.beat-select').click();await c.wait(()=>row(c,id).querySelector('.expanded-beat'));};
@@ -60,17 +61,42 @@ const addNarration=async(c,header,value)=>{
 };
 const newHeaders=c=>scene(c).beats.filter(b=>b.conditionalBranch?.groupId===authored.groupId);
 const previewBoundary=(c,beat)=>{c.assert(beat);const ordinal=scene(c).beats.findIndex(item=>item.id===beat.id)+1;c.assert.equal(c.document.querySelector('.preview-header > span').textContent,`Through Beat ${ordinal}`);};
+// Wait real mounted controls and typed completion, never the shell alone.
+const mountedSourceEditor=(c,path)=>{
+ const surface=c.document.querySelector('.source-workspace'),editor=surface?.querySelector('textarea.source-editor');
+ const active=surface?.querySelector('.source-tab-group[data-active="true"]');
+ return surface?.isConnected&&surface.dataset.sourceBusy==='false'&&surface.querySelector('.source-header h1')?.textContent===path&&active?.title===path&&editor?.isConnected&&!editor.disabled&&!editor.readOnly?editor:undefined;
+};
+const successfulOpen=(c,from,path,owner)=>c.requests().slice(from).some(r=>r.request.operation==='source.open'&&r.request.payload.path===path&&r.request.payload.sessionId===owner&&r.responseOk);
+const openSourceEditor=async(c,path)=>{
+ const owner=c.session();await c.click('Source');
+ const find=()=>[...c.document.querySelectorAll('.source-file-tree .source-file-open')].find(b=>b.title===path&&b.isConnected&&!b.disabled);
+ await c.wait(()=>c.session()===owner&&find());
+ const from=c.requests().length;find().click();
+ await c.wait(()=>c.session()===owner&&successfulOpen(c,from,path,owner)&&mountedSourceEditor(c,path));await c.settle();
+ c.assert.equal(c.session(),owner);const ready=mountedSourceEditor(c,path);c.assert(ready,'Exact current Source editor must remain ready after typed opening settles');return ready;
+};
+const goStory=async(c,sceneId=scene(c).id)=>{
+ const from=c.requests().length,owner=c.session();await c.click('Story');
+ await c.wait(()=>c.session()===owner&&c.workspace().lastOpen.sceneId===sceneId&&c.document.querySelector('.scene-workspace .beat-card')&&c.requests().slice(from).some(r=>r.request.operation==='scene.list'&&r.request.payload.sessionId===owner&&r.responseOk));await c.settle();
+};
+const openBranches=async(c,sceneId,routeId)=>{
+ const from=c.requests().length,owner=c.session();await c.click('Branches');
+ const selected=()=>c.document.querySelector('[aria-label="Selected Scene"]');
+ await c.wait(()=>c.session()===owner&&selected()?.isConnected&&!selected().disabled&&[...selected().options].some(o=>o.value===sceneId)&&c.requests().slice(from).some(r=>r.request.operation==='flow.list'&&r.request.payload.sessionId===owner&&r.responseOk));
+ c.enter(selected(),sceneId,'change');
+ if(routeId!==undefined){const routes=()=>c.document.querySelector('[aria-label="Selected route"]');await c.wait(()=>routes()?.isConnected&&!routes().disabled&&[...routes().options].some(o=>o.value===routeId));c.enter(routes(),routeId,'change');}
+ await c.settle();c.assert.equal(c.session(),owner);
+};
 // Exact fixture changes still travel through production Source DOM and its typed requester.
 const editSource=async(c,expected)=>{
- const path=scene(c).sourcePath,before=await c.snapshot(),at=c.requests().length;
- await c.click('Source');await c.wait(()=>c.document.querySelector('.source-workspace'));
- const open=[...c.document.querySelectorAll('.source-file-open')].find(b=>b.title===path);c.assert(open);open.click();
- await c.wait(()=>c.document.querySelector('textarea.source-editor'));const editor=c.document.querySelector('textarea.source-editor');
+ const path=scene(c).sourcePath,before=await c.snapshot(),at=c.requests().length,owner=c.session();
+ const editor=await openSourceEditor(c,path);
  const editorText=expected.startsWith('\ufeff')?expected.slice(1):expected;c.enter(editor,editorText);
  await c.wait(async()=>(await c.call('source.open',{path})).text===editorText);await c.settle();
  await c.click('Save Source',c.document.querySelector('.app-header'));
- await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='source.save'&&r.responseOk));await c.settle();
- await c.click('Story');await c.wait(()=>c.document.querySelector('.scene-workspace .beat-card'));await c.settle();
+ await c.wait(()=>c.session()===owner&&c.requests().slice(at).some(r=>r.request.operation==='source.save'&&r.request.payload.path===path&&r.request.payload.sessionId===owner&&r.responseOk)&&mountedSourceEditor(c,path)?.value===editorText);await c.settle();
+ await goStory(c);
  const after=await c.snapshot();c.assert.equal(c.sourceText(after,path),expected);unchangedOtherSources(c,before,after,path);
  c.assert.equal((await c.call('source.list')).dirtyCount,0);
 };
@@ -124,7 +150,7 @@ export const storyCases={
   const flow=await c.call('flow.list',{refresh:true}),edge=flow.edges.find(e=>e.kind==='call'&&e.beatId===call.id);c.assert(edge?.continuation?.location);
   await select(c,call.id);await c.click('Open called Scene',row(c,call.id));await c.wait(()=>c.workspace().lastOpen.sceneId===destination.id&&c.document.querySelector('.scene-workspace .beat-card'));await c.settle();
   c.assert([...c.document.querySelectorAll('.scene-workspace button')].some(b=>b.textContent==='Back to caller'));
-  await c.click('Back to caller');await c.wait(()=>c.workspace().lastOpen.sceneId===s.id&&row(c,call.id).classList.contains('selected'));await c.settle();
+  await c.click('Back to caller');await c.wait(()=>c.workspace().lastOpen.sceneId===s.id&&findRow(c,call.id)?.classList.contains('selected'));await c.settle();
   await c.click('View Call continuation',row(c,call.id));await c.wait(()=>c.document.querySelector(`.beat-card.selected[data-beat-id="${edge.continuation.beatId}"]`));await c.settle();
   const continuation=scene(c).beats.find(b=>b.id===edge.continuation.beatId);c.assert.equal(continuation.payload.text,'Caller resumed');c.assert(!continuation.owner);
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(after));
@@ -273,23 +299,23 @@ export const storyCases={
   c.enter(c.document.querySelector(`select[data-preview-group-id="${rootNow.conditionalBranch.groupId}"]`),otherwise.id,'change');
   c.assert.equal(c.document.querySelector('.preview-overlay').textContent,'Return / End');previewBoundary(c,scene(c).beats.find(b=>b.payload.type==='return'&&!b.owner));
   c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('After root terminal'));c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('Ready route'));
-  c.assert.equal(c.sourceText(await c.snapshot(),path),rootTerminalFixture);await editSource(c,accepted);await c.click('Branches');await c.wait(()=>c.document.querySelector('[aria-label="Selected Scene"]'));
-  c.enter(c.document.querySelector('[aria-label="Selected Scene"]'),s.id,'change');const flow=await c.call('flow.list',{refresh:true});const call=flow.edges.find(e=>e.sceneId===s.id&&e.kind==='call');c.assert(call?.location);
-  c.enter(c.document.querySelector('[aria-label="Selected route"]'),call.id,'change');c.assert.match(c.document.querySelector('.branches-workspace').textContent,/Call Scene returns to its continuation/);
+  c.assert.equal(c.sourceText(await c.snapshot(),path),rootTerminalFixture);await editSource(c,accepted);await openBranches(c,s.id);
+  const flow=await c.call('flow.list',{refresh:true});const call=flow.edges.find(e=>e.sceneId===s.id&&e.kind==='call');c.assert(call?.location);
+  await c.wait(()=>[...c.document.querySelector('[aria-label="Selected route"]').options].some(o=>o.value===call.id));c.enter(c.document.querySelector('[aria-label="Selected route"]'),call.id,'change');c.assert.match(c.document.querySelector('.branches-workspace').textContent,/Call Scene returns to its continuation/);
   await c.click('Open Scene');await c.wait(()=>c.document.querySelector(`.beat-card.selected[data-beat-id="${call.beatId}"]`));await c.settle();
   c.assert.equal(c.workspace().lastOpen.sceneId,s.id);c.assert.equal(scene(c).beats.find(b=>b.id===call.beatId).payload.type,'call');
-  await c.click('Branches');await c.wait(()=>c.document.querySelector('[aria-label="Selected Scene"]'));c.enter(c.document.querySelector('[aria-label="Selected Scene"]'),s.id,'change');c.enter(c.document.querySelector('[aria-label="Selected route"]'),call.id,'change');
+  await openBranches(c,s.id,call.id);
   await c.click('Open continuation in Story');await c.wait(()=>c.document.querySelector(`.beat-card.selected[data-beat-id="${call.continuation.beatId}"]`));await c.settle();c.assert.equal(scene(c).beats.find(b=>b.id===call.continuation.beatId).payload.text,'Caller resumed');
-  await c.click('Branches');await c.wait(()=>c.document.querySelector('[aria-label="Selected Scene"]'));c.enter(c.document.querySelector('[aria-label="Selected Scene"]'),s.id,'change');
+  await openBranches(c,s.id);
   const bodyEdge=flow.edges.find(e=>e.sceneId===s.id&&e.destination.kind==='body'&&e.destination.owner);c.assert(bodyEdge?.destination.location);
   c.enter(c.document.querySelector('[aria-label="Selected route"]'),bodyEdge.id,'change');await c.click('Open destination body in Story');
   const body=bodyEdge.destination,targetId=body.beatId??body.owner.branchId;await c.wait(()=>c.document.querySelector(`.beat-card.selected[data-beat-id="${targetId}"]`));await c.settle();
   const target=scene(c).beats.find(b=>b.id===targetId);c.assert(target);c.assert(target.owner?.branchId===body.owner.branchId||target.id===body.owner.branchId);c.assert.equal(scene(c).sourceRevision,body.location.revision);
-  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(bytes));await c.click('Branches');await c.wait(()=>c.document.querySelector('[aria-label="Selected Scene"]'));c.enter(c.document.querySelector('[aria-label="Selected Scene"]'),s.id,'change');c.enter(c.document.querySelector('[aria-label="Selected route"]'),call.id,'change');
-  const at=c.requests().length;await c.click('View origin in Source');await c.wait(()=>c.document.querySelector('textarea.source-editor'));
+  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(bytes));await openBranches(c,s.id,call.id);
+  const at=c.requests().length,sourceOwner=c.session();await c.click('View origin in Source');await c.wait(()=>c.session()===sourceOwner&&successfulOpen(c,at,call.location.path,sourceOwner)&&mountedSourceEditor(c,call.location.path));await c.settle();
   const request=c.requests().slice(at).find(r=>r.request.operation==='source.open'&&r.request.payload.expectedRevision);c.assert(request);
   c.assert.equal(request.request.payload.path,call.location.path);c.assert.equal(request.request.payload.expectedRevision,call.location.revision);c.assert.equal(request.request.payload.byteStart,call.location.byteStart);c.assert.equal(request.request.payload.byteEnd,call.location.byteEnd);
-  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(bytes));await c.click('Story');await c.wait(()=>c.document.querySelector('.scene-workspace .beat-card'));
+  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(bytes));await goStory(c);
  },
  [names[7]]:async c=>{
   const s=scene(c),choice=s.beats.find(b=>b.payload.type==='choice');const accepted=await c.snapshot();const from=c.requests().length;
@@ -309,23 +335,20 @@ export const storyCases={
   c.assert.equal(c.requests().slice(at).filter(r=>r.request.operation==='scene.apply').length,1);
   c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),replaceOnce(c,c.sourceText(accepted,s.sourcePath),'"Ready route" if (trust >= 6):','"Pending tree guard intent" if (trust >= 6):'));
   await c.click('Undo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='undo'&&c.lastMutation().response.ok);await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(accepted));
-  await c.click('Source');await c.wait(()=>c.document.querySelector('.source-workspace'));
-  const open=[...c.document.querySelectorAll('.source-file-open')].find(b=>b.title===s.sourcePath);c.assert(open);open.click();
-  await c.wait(()=>c.document.querySelector('textarea.source-editor'));const editor=c.document.querySelector('textarea.source-editor');
+  const editor=await openSourceEditor(c,s.sourcePath);
   const retained=editor.value+'# retained unaccepted Source draft\n';c.enter(editor,retained);
   await c.wait(async()=> (await source(c)()).text===retained);const draft=await source(c)();c.assert(draft.draftVersion>0);c.assert.equal(draft.baseRevision,s.sourceRevision);
-  await c.click('Story');await c.wait(()=>c.document.querySelector('.scene-workspace .beat-card'));
+  await goStory(c);
   await select(c,choice.id);card=row(c,choice.id);const pending=card.querySelector('[aria-label="Choice option text"]');c.enter(pending,'Retained intent after Source refusal');
   const beforeDirtyRefusal=await c.snapshot();await c.click('Commit Beat',card);await c.wait(()=>c.lastMutation()&&!c.lastMutation().response.ok&&!pending.disabled);
   c.assert.equal(c.lastMutation().response.error.code,'DIRTY_SOURCE');c.assert.deepEqual(await c.snapshot(),beforeDirtyRefusal,'Dirty Source refusal must preserve all source, maps and project metadata');
   c.assert.equal(pending.value,'Retained intent after Source refusal');c.assert(pending.isConnected);
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(accepted));c.assert.equal((await source(c)()).text,retained);
-  await c.click('Cancel',card);await c.click('Source');await c.wait(()=>c.document.querySelector('.source-workspace'));
-  const reopen=[...c.document.querySelectorAll('.source-file-open')].find(b=>b.title===s.sourcePath);c.assert(reopen);reopen.click();await c.wait(()=>c.document.querySelector('textarea.source-editor'));
+  await c.click('Cancel',card);await openSourceEditor(c,s.sourcePath);
   await c.click('Discard Draft',c.document.querySelector('.source-workspace'));
   const modal=c.document.querySelector('.source-discard-confirmation');c.assert(modal);
-  await c.click('Discard Draft',modal);await c.wait(async()=>!(await c.call('source.list')).dirtyCount);
-  await c.click('Story');await c.wait(()=>c.document.querySelector('.scene-workspace .beat-card'));
+  const discardAt=c.requests().length;await c.click('Discard Draft',modal);await c.wait(()=>!c.document.querySelector('.source-discard-confirmation')&&mountedSourceEditor(c,s.sourcePath)&&c.requests().slice(discardAt).some(r=>r.request.operation==='source.discard'&&r.request.payload.path===s.sourcePath&&r.responseOk));await c.settle();c.assert.equal((await c.call('source.list')).dirtyCount,0);
+  await goStory(c);
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(accepted));
  },
  [names[8]]:async c=>{
@@ -339,11 +362,9 @@ export const storyCases={
   c.assert.equal(refused.request.payload.command.expectedSourceRevision,s.sourceRevision);
   c.assert.equal(refused.response.error.code,'SOURCE_CONFLICT');c.assert.equal(input.value,'External refusal keeps this intent');c.assert(input.isConnected);
   c.assert.deepEqual(await c.snapshot(),externalSnapshot,'Refusal must preserve exact external bytes and all project metadata');
-  await c.click('Cancel',card);await c.click('Source');await c.wait(()=>c.document.querySelector('.source-workspace'));
-  const open=[...c.document.querySelectorAll('.source-file-open')].find(b=>b.title===s.sourcePath);c.assert(open);open.click();await c.wait(()=>c.document.querySelector('textarea.source-editor'));
-  const editor=c.document.querySelector('textarea.source-editor');c.assert(editor.value.includes('# ordinary external Story writer'));
-  await c.click('Save Source',c.document.querySelector('.app-header'));await c.settle();
-  await c.click('Story');await c.wait(()=>c.document.querySelector('.scene-workspace .beat-card'));
+  await c.click('Cancel',card);const editor=await openSourceEditor(c,s.sourcePath);c.assert(editor.value.includes('# ordinary external Story writer'));
+  const saveAt=c.requests().length;await c.click('Save Source',c.document.querySelector('.app-header'));await c.wait(()=>mountedSourceEditor(c,s.sourcePath)&&c.requests().slice(saveAt).some(r=>r.request.operation==='project.flush'&&r.request.payload.sessionId===c.session()&&r.responseOk));await c.settle();
+  await goStory(c);
   const refreshed=scene(c).beats.find(b=>b.id===choice.id);c.assert(refreshed);await select(c,refreshed.id);
   const freshCard=row(c,refreshed.id);c.enter(freshCard.querySelector('[aria-label="Choice option text"]'),'Fresh ordinary external revision');
   await c.click('Commit Beat',freshCard);await c.wait(()=>c.lastMutation()?.response.ok&&!row(c,refreshed.id).querySelector('.expanded-beat'));
