@@ -7,6 +7,7 @@
 
 pub mod flow;
 mod logic;
+mod structure;
 
 use crate::{
     authoring::{AssetKind, AuthoringMetadata, AuthoringService, VariableType},
@@ -213,6 +214,38 @@ pub enum MoveDirection {
     Down,
 }
 
+/// Explicit source-derived body; a root assertion is never inferred from selection.
+#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    tag = "type",
+    deny_unknown_fields
+)]
+pub enum BodyRef {
+    Root,
+    Branch { group_id: String, branch_id: String },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    tag = "type",
+    deny_unknown_fields
+)]
+pub enum NodeRef {
+    Beat { beat_id: String },
+    Condition { group_id: String },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase", tag = "type", deny_unknown_fields)]
+pub enum Position {
+    Before { anchor: NodeRef },
+    End,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SceneCommandRequest {
@@ -288,6 +321,20 @@ pub enum SceneCommand {
         scene_id: String,
         expected_source_revision: String,
         beat_id: String,
+        beat: BeatPayload,
+    },
+    InsertBodyBeat {
+        scene_id: String,
+        expected_source_revision: String,
+        body: BodyRef,
+        position: Position,
+        beat: BeatPayload,
+    },
+    UpdateBodyBeat {
+        scene_id: String,
+        expected_source_revision: String,
+        beat_id: String,
+        expected_body: BodyRef,
         beat: BeatPayload,
     },
     UpdateChildDialogue {
@@ -985,6 +1032,18 @@ impl AuthoringService {
                     payload: beat,
                 },
             ),
+            SceneCommand::InsertBodyBeat {
+                scene_id, expected_source_revision, body, position, beat,
+            } => self.body_beat_proposal(
+                project, loaded, &scene_id, &expected_source_revision,
+                structure::BodyEdit::Insert { body, position, payload: beat },
+            ),
+            SceneCommand::UpdateBodyBeat {
+                scene_id, expected_source_revision, beat_id, expected_body, beat,
+            } => self.body_beat_proposal(
+                project, loaded, &scene_id, &expected_source_revision,
+                structure::BodyEdit::Update { id: beat_id, body: expected_body, payload: beat },
+            ),
             SceneCommand::UpdateChildDialogue {
                 scene_id,
                 expected_source_revision,
@@ -1236,6 +1295,11 @@ impl AuthoringService {
                 payload: BeatPayload::Choice { options },
             },
             &loaded,
+        )?;
+        self.validate_candidate_transfers(
+            project, &loaded,
+            &[(source_scene_id, proposed_source.as_slice()),
+              (destination.id.as_str(), destination_bytes.as_slice())],
         )?;
         let proposed_source_revision = sha256(&proposed_source);
         let (source_mapping, _) = build_mapping(
@@ -1535,9 +1599,15 @@ impl AuthoringService {
         {
             return Err(SceneError::InvariantBlocked);
         }
+        let transfer_edit = structure::edit_changes_transfers(&edit);
         let edit = self.prepare_call_labels(project, &loaded, scene_id, &beats, edit)?;
         let (proposed_source, forced) = apply_beat_edit(&source_bytes, &beats, edit, &loaded)?;
         logic::validate_conditional_completion(&proposed_source, &scene, &loaded)?;
+        if transfer_edit {
+            self.validate_candidate_transfers(
+                project, &loaded, &[(scene_id, proposed_source.as_slice())],
+            )?;
+        }
         let proposed_revision = sha256(&proposed_source);
         let (new_mapping, _) = build_mapping(
             &scene,
@@ -3365,6 +3435,8 @@ fn command_source_paths(
         | SceneCommand::DeleteScene { scene_id, .. }
         | SceneCommand::InsertBeat { scene_id, .. }
         | SceneCommand::UpdateBeat { scene_id, .. }
+        | SceneCommand::InsertBodyBeat { scene_id, .. }
+        | SceneCommand::UpdateBodyBeat { scene_id, .. }
         | SceneCommand::UpdateChildDialogue { scene_id, .. }
         | SceneCommand::ContinueDialogue { scene_id, .. }
         | SceneCommand::RemoveBeat { scene_id, .. }

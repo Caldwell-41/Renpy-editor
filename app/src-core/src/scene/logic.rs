@@ -58,57 +58,11 @@ impl AuthoringService {
     pub(super) fn prepare_call_labels(
         &self,
         project: &ProjectId,
-        loaded: &Loaded,
-        source_id: &str,
+        _loaded: &Loaded,
+        _source_id: &str,
         beats: &[SceneBeat],
         mut edit: BeatEdit,
     ) -> Result<BeatEdit, SceneError> {
-        let proposed_target = match &edit {
-            BeatEdit::Insert {
-                payload: BeatPayload::Call { scene_id, .. },
-                ..
-            }
-            | BeatEdit::Update {
-                payload: BeatPayload::Call { scene_id, .. },
-                ..
-            } => Some(scene_id.as_str()),
-            _ => None,
-        };
-        if let Some(target) = proposed_target {
-            let mut adjacency = HashMap::new();
-            let mut bytes_seen = 0;
-            for scene in &loaded.project.scenes {
-                let (bytes, _) = self.scene_snapshot(project, &scene.source_path)?;
-                bytes_seen += bytes.len();
-                if bytes_seen > 32 * 1024 * 1024 {
-                    return Err(SceneError::UnsupportedCallRoute);
-                }
-                let (_, _, parsed) =
-                    parse_scene(scene, &bytes, Some((&loaded.project, &loaded.authoring)))?;
-                adjacency.insert(
-                    scene.id.clone(),
-                    parsed
-                        .iter()
-                        .flat_map(|b| match &b.payload {
-                            BeatPayload::Call { scene_id, .. } => vec![(scene_id.clone(), true)],
-                            BeatPayload::Jump { scene_id } => vec![(scene_id.clone(), false)],
-                            BeatPayload::Choice { options } => options
-                                .iter()
-                                .map(|o| (o.destination_scene_id.clone(), false))
-                                .collect(),
-                            _ => vec![],
-                        })
-                        .collect::<Vec<_>>(),
-                );
-            }
-            adjacency
-                .entry(source_id.into())
-                .or_default()
-                .push((target.into(), true));
-            if call_route_is_unsupported(&adjacency, source_id, target) {
-                return Err(SceneError::UnsupportedCallRoute);
-            }
-        }
         match &mut edit {
             BeatEdit::Insert {
                 payload: BeatPayload::Call { return_label, .. },
@@ -212,6 +166,15 @@ pub(super) fn call_route_is_unsupported(
     source: &str,
     target: &str,
 ) -> bool {
+    call_route_with_budget(adjacency, source, target, &mut 8192)
+}
+
+pub(super) fn call_route_with_budget(
+    adjacency: &HashMap<String, Vec<(String, bool)>>,
+    source: &str,
+    target: &str,
+    remaining: &mut usize,
+) -> bool {
     if source == target {
         return true;
     }
@@ -224,9 +187,10 @@ pub(super) fn call_route_is_unsupported(
         if !visited.insert((node.clone(), stack.clone())) {
             continue;
         }
-        if visited.len() > 8192 {
+        if *remaining == 0 {
             return true;
         }
+        *remaining -= 1;
         for (destination, calling) in adjacency.get(&node).into_iter().flatten() {
             let mut next_stack = stack.clone();
             if *calling {
@@ -628,11 +592,11 @@ mod tests {
         }
         pub(super) fn reject(&mut self, command: Value) -> Value {
             let w = self.model();
-            let paths = [
-                self.root
-                    .join(w["scenes"][0]["sourcePath"].as_str().unwrap()),
-                self.root.join(".renpy-editor/source-map.json"),
-            ];
+            let mut paths = w["scenes"].as_array().unwrap().iter()
+                .map(|scene| self.root.join(scene["sourcePath"].as_str().unwrap()))
+                .collect::<Vec<_>>();
+            paths.push(self.root.join(".renpy-editor/source-map.json"));
+            paths.push(self.root.join(".renpy-editor/project.json"));
             let before: Vec<_> = paths.iter().map(|p| fs::read(p).unwrap()).collect();
             let response = crate::handle_application_request(
                 json!({"protocolVersion":1,"requestId":"phase3a-reject","operation":"scene.apply","payload":{"sessionId":self.service.current().unwrap().session_id,"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":command}}),
@@ -1180,5 +1144,487 @@ mod boundary_tests {
             assert_eq!(fs::read(&path).unwrap(), source);
             assert_eq!(fs::read(&map_path).unwrap(), old_map);
         }
+    }
+}
+
+#[cfg(test)]
+mod body_tests {
+    use super::tests::Fixture;
+    use super::*;
+    use serde_json::json;
+    use std::fs;
+    fn root(f: &mut Fixture) -> Value {
+        f.model()["scenes"][0].clone()
+    }
+    fn beat(scene: &Value, text: &str) -> Value {
+        scene["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["text"] == text)
+            .unwrap()
+            .clone()
+    }
+    fn body(beat: &Value) -> Value {
+        json!({"type":"branch","groupId":beat["owner"]["groupId"],"branchId":beat["owner"]["branchId"]})
+    }
+    fn command(scene: &Value, fields: Value) -> Value {
+        let mut fields = fields.as_object().unwrap().clone();
+        fields.insert("sceneId".into(), scene["id"].clone());
+        fields.insert(
+            "expectedSourceRevision".into(),
+            scene["sourceRevision"].clone(),
+        );
+        Value::Object(fields)
+    }
+    #[test]
+    fn phase3a_body_nested_minimal_bytes_ids_extras_history_reopen() {
+        let mut f = Fixture::new();
+        let a = root(&mut f);
+        let source = format!("label {}:\r\n    if flag:\r\n        if flag:\r\n            \"Deep café 雪\" # retain\r\n        else:\r\n            \"Other\"\r\n    elif not flag:\r\n        \"Else If\" # keep\r\n    else:\r\n        \"Otherwise\"\r\n    # parent trivia\r\n    return\r\n", a["technicalLabel"].as_str().unwrap());
+        f.save(&a, &source);
+        let a = root(&mut f);
+        let deep = beat(&a, "Deep café 雪");
+        let map_path = f.root.join(".renpy-editor/source-map.json");
+        let mut map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+        map["sceneMappings"][0]["beats"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .find(|b| b["id"] == deep["id"])
+            .unwrap()["retainedExtra"] = json!({"note":"owned"});
+        fs::write(&map_path, serde_json::to_vec_pretty(&map).unwrap()).unwrap();
+        let a = root(&mut f);
+        let original = fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap();
+        f.command(command(&a, json!({"type":"updateBodyBeat","beatId":deep["id"],"expectedBody":body(&deep),"beat":{"type":"narration","text":"Changed 雪"}})));
+        let a = root(&mut f);
+        let expected = [
+            b"\xef\xbb\xbf".as_slice(),
+            source.replace("Deep café 雪", "Changed 雪").as_bytes(),
+        ]
+        .concat();
+        assert_eq!(
+            fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
+            expected
+        );
+        assert_eq!(beat(&a, "Changed 雪")["id"], deep["id"]);
+        let deep = beat(&a, "Changed 雪");
+        f.command(command(&a, json!({"type":"insertBodyBeat","body":body(&deep),"position":{"type":"before","anchor":{"type":"beat","beatId":deep["id"]}},"beat":{"type":"narration","text":"Inserted"}})));
+        let after = root(&mut f);
+        assert_eq!(beat(&after, "Inserted")["owner"], deep["owner"]);
+        let map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+        assert_eq!(
+            map["sceneMappings"][0]["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|b| b["id"] == deep["id"])
+                .unwrap()["retainedExtra"],
+            json!({"note":"owned"})
+        );
+        let else_if = beat(&after, "Else If");
+        f.command(command(&after, json!({"type":"insertBodyBeat","body":body(&else_if),"position":{"type":"end"},"beat":{"type":"narration","text":"Else continuation"}})));
+        let final_scene = root(&mut f);
+        assert_eq!(
+            beat(&final_scene, "Else continuation")["owner"],
+            else_if["owner"]
+        );
+        let final_bytes = fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap();
+        assert_eq!(
+            final_bytes,
+            [
+                b"\xef\xbb\xbf".as_slice(),
+                source
+                    .replace("Deep café 雪", "Changed 雪")
+                    .replace(
+                        "            \"Changed",
+                        "            \"Inserted\"\r\n            \"Changed"
+                    )
+                    .replace(
+                        "        \"Else If\" # keep\r\n",
+                        "        \"Else If\" # keep\r\n        \"Else continuation\"\r\n"
+                    )
+                    .as_bytes()
+            ]
+            .concat()
+        );
+        for _ in 0..3 {
+            f.command(json!({"type":"undo"}));
+        }
+        assert_eq!(
+            fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
+            original
+        );
+        for _ in 0..3 {
+            f.command(json!({"type":"redo"}));
+        }
+        assert_eq!(
+            fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
+            final_bytes
+        );
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        assert_eq!(root(&mut f)["beats"], final_scene["beats"]);
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn phase3a_body_owner_header_anchor_and_terminal_refusals_write_nothing() {
+        let mut f = Fixture::new();
+        let a = root(&mut f);
+        f.save(&a, &format!("label {}:\n    if flag:\n        \"If child\"\n    else:\n        \"Else child\"\n    return\n", a["technicalLabel"].as_str().unwrap()));
+        let a = root(&mut f);
+        let child = beat(&a, "If child");
+        let other = beat(&a, "Else child");
+        let header = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| !b["conditionalBranch"].is_null())
+            .unwrap();
+        for fields in [
+            json!({"type":"updateBodyBeat","beatId":child["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"lost"}}),
+            json!({"type":"updateBodyBeat","beatId":child["id"],"expectedBody":body(&other),"beat":{"type":"narration","text":"lost"}}),
+            json!({"type":"updateBodyBeat","beatId":header["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"lost"}}),
+            json!({"type":"insertBodyBeat","body":body(&child),"position":{"type":"before","anchor":{"type":"beat","beatId":other["id"]}},"beat":{"type":"narration","text":"lost"}}),
+            json!({"type":"insertBodyBeat","body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":header["id"]}},"beat":{"type":"narration","text":"lost"}}),
+            json!({"type":"insertBodyBeat","body":{"type":"root"},"position":{"type":"end"},"beat":{"type":"narration","text":"lost"}}),
+        ] {
+            assert_eq!(
+                f.reject(command(&a, fields))["error"]["code"],
+                "SCENE_INVARIANT"
+            );
+        }
+        // Whole group is an explicit root sibling anchor.
+        f.command(command(&a, json!({"type":"insertBodyBeat","body":{"type":"root"},"position":{"type":"before","anchor":{"type":"condition","groupId":header["conditionalBranch"]["groupId"]}},"beat":{"type":"narration","text":"Before group"}})));
+        let updated = root(&mut f);
+        let mut stale = command(
+            &updated,
+            json!({"type":"updateBodyBeat","beatId":child["id"],"expectedBody":body(&child),"beat":{"type":"narration","text":"lost"}}),
+        );
+        stale["expectedSourceRevision"] = a["sourceRevision"].clone();
+        assert_eq!(f.reject(stale)["error"]["code"], "SOURCE_CONFLICT");
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn phase3a_body_eof_separator_preserves_previous_child_identity() {
+        let mut f = Fixture::new();
+        let a = root(&mut f);
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    if flag:\n        \"EOF\"",
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = root(&mut f);
+        let old = beat(&a, "EOF");
+        f.command(command(&a, json!({"type":"insertBodyBeat","body":body(&old),"position":{"type":"end"},"beat":{"type":"narration","text":"Next"}})));
+        let after = root(&mut f);
+        assert_eq!(beat(&after, "EOF")["id"], old["id"]);
+        assert_eq!(beat(&after, "Next")["owner"], old["owner"]);
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn phase3a_body_calls_and_guarded_choices_preserve_labels_and_neighbors() {
+        let mut f = Fixture::new();
+        let b = f.scene("B");
+        let c = f.scene("C");
+        let a = root(&mut f);
+        f.save(&a, &format!("label {}:\n    if flag:\n        call  {}  from retained_nested # keep\n        menu:\n            \"A\" if flag:\n                jump {}\n            \"B\" if not flag:\n                jump {}\n    return\n", a["technicalLabel"].as_str().unwrap(), b["technicalLabel"].as_str().unwrap(), b["technicalLabel"].as_str().unwrap(), c["technicalLabel"].as_str().unwrap()));
+        let a = root(&mut f);
+        let call = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "call")
+            .unwrap()
+            .clone();
+        f.command(command(&a, json!({"type":"updateBodyBeat","beatId":call["id"],"expectedBody":body(&call),"beat":{"type":"call","sceneId":c["id"]}})));
+        let a = root(&mut f);
+        let choice = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "choice")
+            .unwrap()
+            .clone();
+        let before = fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap();
+        let mut options = choice["payload"]["options"].clone();
+        options[0]["text"] = json!("Renamed");
+        f.command(command(&a, json!({"type":"updateBodyBeat","beatId":choice["id"],"expectedBody":body(&choice),"beat":{"type":"choice","options":options}})));
+        let after = root(&mut f);
+        assert_eq!(
+            fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
+            String::from_utf8(before)
+                .unwrap()
+                .replace("\"A\"", "\"Renamed\"")
+                .as_bytes()
+        );
+        assert_eq!(
+            after["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|b| b["id"] == call["id"])
+                .unwrap()["payload"]["returnLabel"],
+            "retained_nested"
+        );
+        let mut unknown = options.clone();
+        unknown[0]["condition"] =
+            json!({"status":"unknown","source":"python()","diagnostic":"unsupportedSyntax"});
+        assert_eq!(f.reject(command(&after, json!({"type":"updateBodyBeat","beatId":choice["id"],"expectedBody":body(&choice),"beat":{"type":"choice","options":unknown}})))["error"]["code"], "OPAQUE_BOUNDARY");
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn phase3a_body_candidate_transfers_close_jump_choice_gaps_allow_pure_jump_loops() {
+        let mut f = Fixture::new();
+        let b = f.scene("B");
+        let c = f.scene("C");
+        let a = root(&mut f);
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    call {} from a_b\n    return\n",
+                a["technicalLabel"].as_str().unwrap(),
+                b["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let w = f.model();
+        let bs = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == b["id"])
+            .unwrap()
+            .clone();
+        let last = bs["beats"].as_array().unwrap().last().unwrap();
+        for fields in [
+            json!({"type":"updateBeat","beatId":last["id"],"beat":{"type":"jump","sceneId":a["id"]}}),
+            json!({"type":"insertBeat","beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"Recurse","destinationSceneId":a["id"]}]}}),
+            json!({"type":"updateBodyBeat","beatId":last["id"],"expectedBody":{"type":"root"},"beat":{"type":"jump","sceneId":a["id"]}}),
+        ] {
+            assert_eq!(
+                f.reject(command(&bs, fields))["error"]["code"],
+                "UNSUPPORTED_CALL_ROUTE"
+            );
+        }
+        f.save(
+            &b,
+            &format!(
+                "label {}:\n    if flag:\n        \"Child\"\n    return\n",
+                b["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let w = f.model();
+        let bs = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == b["id"])
+            .unwrap()
+            .clone();
+        let child = beat(&bs, "Child");
+        assert_eq!(f.reject(command(&bs, json!({"type":"insertBodyBeat","body":body(&child),"position":{"type":"end"},"beat":{"type":"jump","sceneId":a["id"]}})))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
+        // Replace an unsafe old edge with the safe candidate; stale adjacency must not reject.
+        f.save(
+            &b,
+            &format!(
+                "label {}:\n    jump {}\n",
+                b["technicalLabel"].as_str().unwrap(),
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let w = f.model();
+        let bs = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == b["id"])
+            .unwrap()
+            .clone();
+        f.command(command(&bs, json!({"type":"updateBeat","beatId":bs["beats"][0]["id"],"beat":{"type":"jump","sceneId":c["id"]}})));
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    jump {}\n",
+                a["technicalLabel"].as_str().unwrap(),
+                b["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let w = f.model();
+        let bs = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == b["id"])
+            .unwrap()
+            .clone();
+        f.command(command(&bs, json!({"type":"updateBeat","beatId":bs["beats"][0]["id"],"beat":{"type":"jump","sceneId":a["id"]}})));
+        let flow = crate::lifecycle::acceptance::ipc(&mut f.service, "flow.list", json!({}));
+        assert!(!flow["edges"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["text"].as_str().is_some_and(|s| s.contains("recursion"))));
+        f.service.close().unwrap();
+    }
+}
+
+#[cfg(test)]
+mod structural_review_tests {
+    use super::tests::Fixture;
+    use serde_json::{json, Value};
+    fn root(f: &mut Fixture) -> Value {
+        f.model()["scenes"][0].clone()
+    }
+    #[test]
+    fn phase3a_body_new_fallthrough_and_opaque_root_end_refuse() {
+        let mut f = Fixture::new();
+        let a = root(&mut f);
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    return\n",
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = root(&mut f);
+        assert_eq!(f.reject(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":a["beats"][0]["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Fallthrough"}}))["error"]["code"], "SCENE_INVARIANT");
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    if flag:\n        return\n    else:\n        return\n",
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = root(&mut f);
+        let child = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "return")
+            .unwrap();
+        assert_eq!(f.reject(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":child["id"],"expectedBody":{"type":"branch","groupId":child["owner"]["groupId"],"branchId":child["owner"]["branchId"]},"beat":{"type":"narration","text":"Fallthrough"}}))["error"]["code"], "SCENE_INVARIANT");
+        for suffix in [
+            "python:\n    x = 1\n",
+            "screen custom():\n    text \"Opaque\"\n",
+        ] {
+            f.save(
+                &a,
+                &format!(
+                    "label {}:\n    \"Known\"\n{suffix}",
+                    a["technicalLabel"].as_str().unwrap()
+                ),
+            );
+            let a = root(&mut f);
+            assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"root"},"position":{"type":"end"},"beat":{"type":"narration","text":"Must not enter opaque block"}}))["error"]["code"], "OPAQUE_BOUNDARY");
+        }
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    \"Known\"\n    return\ninit python:\n    \"Opaque Python\"\n",
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = root(&mut f);
+        let opaque = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["text"] == "Opaque Python")
+            .unwrap();
+        assert_eq!(f.reject(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":opaque["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "SCENE_INVARIANT");
+        f.save(&a, &format!("label {}:\n    \"Known\"\n    return\nscreen custom():\n    if flag:\n        text \"Opaque\"\n", a["technicalLabel"].as_str().unwrap()));
+        let a = root(&mut f);
+        let header = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| !b["conditionalBranch"].is_null())
+            .unwrap();
+        assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"branch","groupId":header["conditionalBranch"]["groupId"],"branchId":header["id"]},"position":{"type":"end"},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "OPAQUE_BOUNDARY");
+        assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"condition","groupId":header["conditionalBranch"]["groupId"]}},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "SCENE_INVARIANT");
+        // A qualified earlier Scene edit still preserves the later screen bytes.
+        let known = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["text"] == "Known")
+            .unwrap();
+        let before = std::fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap();
+        f.command(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":known["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Changed"}}));
+        assert_eq!(
+            std::fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
+            String::from_utf8(before)
+                .unwrap()
+                .replace("Known", "Changed")
+                .as_bytes()
+        );
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn phase3a_body_create_scene_from_choice_checks_candidate_routes() {
+        let mut f = Fixture::new();
+        let b = f.scene("B");
+        let a = root(&mut f);
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    call {} from a_b\n    return\n",
+                a["technicalLabel"].as_str().unwrap(),
+                b["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        f.save(
+            &b,
+            &format!(
+                "label {}:\n    menu:\n        \"Again\":\n            jump {}\n",
+                b["technicalLabel"].as_str().unwrap(),
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let w = f.model();
+        let bs = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == b["id"])
+            .unwrap()
+            .clone();
+        assert_eq!(f.reject(json!({"type":"createSceneFromChoice","sceneId":b["id"],"expectedSourceRevision":bs["sourceRevision"],"choiceBeatId":bs["beats"][0]["id"],"optionText":"New path","chapterId":w["chapters"][0]["id"],"displayName":"New destination"}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
+        // Repair only the old recursive route through Source; adding a returning target then succeeds.
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    return\n",
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let w = f.model();
+        let bs = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == b["id"])
+            .unwrap();
+        let result = f.command(json!({"type":"createSceneFromChoice","sceneId":b["id"],"expectedSourceRevision":bs["sourceRevision"],"choiceBeatId":bs["beats"][0]["id"],"optionText":"New path","chapterId":w["chapters"][0]["id"],"displayName":"New destination"}));
+        assert_eq!(
+            result["scenes"].as_array().unwrap().len(),
+            w["scenes"].as_array().unwrap().len() + 1
+        );
+        let bs = result["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == b["id"])
+            .unwrap();
+        assert_eq!(
+            bs["beats"][0]["payload"]["options"]
+                .as_array()
+                .unwrap()
+                .len(),
+            2
+        );
+        f.service.close().unwrap();
     }
 }
