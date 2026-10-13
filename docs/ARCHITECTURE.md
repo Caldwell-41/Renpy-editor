@@ -387,18 +387,33 @@ It validates legacy maps before refining locations, retains opaque lexical regio
 and refuses root insertion anywhere inside a complete group. Existing nested dialogue
 edits remain minimal and transactional. Phase 2 proposal permissions do not expand.
 [ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md) owns this extension;
-Story condition controls, call/flow work and SDK/target qualification remain in progress.
+Full Story controls and final qualification remain in progress; the early conditions/
+calls SDK gate has passed on Windows x64 and macOS ARM64.
 
-The locally checked 3A.2 candidate extends this through source-map v5, stable returning
+The reviewed 3A.2 candidate extends this through source-map v5, stable returning
 Calls, guarded Choices and observed body continuations under
 [ADR 0015](adr/0015-guarded-choices-and-stable-call-continuations.md). Metadata refinement
 accounts for every old record or refuses without writes; minimal Call/Choice field
-patches preserve unchanged source formatting. Call insertion/target edits inspect a
-bounded possible-route graph, while source-defined or later transfer-created recursion
-is visibly unknown. This early command boundary is not general reachability analysis;
-the structural slice must close the later transfer-edit gap before 3A acceptance.
+patches preserve unchanged source formatting. Source-defined recursion remains visibly
+unknown. The reviewed structural extension checks the actual candidate graph after
+Call, Jump and Choice authoring through both legacy and explicit-body commands; pure
+Jump loops remain allowed. This is bounded conservative refusal, not general
+reachability analysis or a change to deliberate source execution.
 Renderer compatibility preserves the AI allowlist, draft handling and revision-bound
-Source navigation. Real SDK and supported-target qualification remain pending.
+Source navigation. Exact early SDK proof is recorded in the Phase 3 task; full authoring
+and saved-callee qualification remain pending.
+
+The first structural commands are `insertBodyBeat` and `updateBodyBeat`. Their explicit
+body identifies the root or a known group/branch; insertion names an immediate sibling
+node or literal body end. Mutation captures expected ownership and source/project/map
+revisions through the existing session envelope. Core re-verifies membership against
+source, including the selected label's lexical extent, so later Python/screen declarations
+cannot authorize an apparent Story child. Branch headers are not ordinary Beat targets.
+Whole condition nodes can anchor insertion without exposing header replacement.
+Protected boundaries and terminal-ending violations refuse without writes; supported
+nested updates retain token-level source, stable IDs, mapping extras and one transaction/
+history operation. Recognition and source-map v5 are unchanged. Remaining condition/
+subtree commands are still in implementation; no unimplemented command is exposed.
 
 The Scene recognizer follows the same rule: supported canonical Beats retain stable
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become

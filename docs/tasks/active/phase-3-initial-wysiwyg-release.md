@@ -43,9 +43,12 @@ Section 3 owns the grammar, interaction contract and completion criteria. Each s
 requires owner review and any selected independent review before advancement. Missing
 proof never becomes acceptance. Hard dependencies, exhausted cumulative allowances
 and material scope decisions require a concrete escalation; routine checkpoints do not.
-Initial 3A.1 allowance: six focused local check invocations, with reassessment after two
-unsuccessful corrections of one hypothesis. Validation allowance: five focused local rounds
-(original four plus one explicitly approved on resume) and three paired CI batches cumulative
+Initial 3A.1 allowance: six focused local check invocations, subsequently amended and
+retained in the ledger; current core cumulative cap is 18 after the explicit resume
+extension. Reassess after two unsuccessful corrections of one hypothesis. Renderer cap
+is ten rounds (four compatibility plus six authoring). Validation allowance: seven
+focused local rounds (original four, one approved driver repair, two approved final
+qualification rounds) and three paired CI batches cumulative
 across 3A, zero package builds/owner native starts/live model calls. Per batch/target:
 one verified SDK install, one GUI generation, compile and lint, at most six runtime
 cases (failures count). Early batch follows reviewed core condition/call work before
@@ -1345,3 +1348,102 @@ manifest/extracted bytes, all 179 Git input blobs per host, exact ordinal/run/at
 candidate/tree, required job steps and six case logs. Exact route markers, negative
 oracle without a route marker, SDK terminal/report fields and cleanup/source guarantees
 agree. No CI polling, tests or SDK execution occurred during independent review.
+
+
+**Remaining qualification plan and allowance proposal:** read-only validator/renderer
+plans and independent review select the real production `startApplication(requester)`
+path, normal typed `createRequest`/response validation and bounded JSON-line forwarding
+to `ApplicationHost::dispatch`. Actual DOM actions must prove guarded Choice editing,
+explicit insertion in an existing branch, captured applicable revisions/ownership,
+Source/Story/Branches agreement, cancellation/drafts, ordinary external-edit and dirty
+Source refusal, Undo/Redo, real second-process reopen and owned cleanup. Driver-only
+snapshot/external-edit/reopen controls reuse existing probe helpers; no production IPC,
+AI, credentials, SDK or package path is added. Helper launches/reaping are counted
+separately from the SDK and owner editor starts.
+
+Final SDK proof can preserve six case names/12 adapter spawns: save at C entry in the
+high case, deliberately change only caller narration through captured Source save,
+then load that save in the later nested-call-return process and assert C/B/edited
+caller/choice/ending with unchanged stable return labels. Use explicit owned savedir
+and portable Ren'Py token-root isolation, fixed raw slot `phase3a-callee` with `slot=True`
+for FileSave/FileLoad and matching loadability checks. Validate the high saved state/
+depth receipt before editing; the loader asserts literal expectations from that receipt,
+never assigns loaded state to make the test pass. Seal exact before/after accepted source
+hashes/BOM/comments/return labels; per-case preservation compares its current accepted
+snapshot, recognizing the deliberate edit. Existing low/boundary/no-option/rejection
+oracles remain. Static feasibility is reviewed; cross-process load/return remains new
+CI3 proof. No additional SDK process is planned, and failed CI3 consumes the final batch.
+
+Root requested a bundled bounded budget decision: four additional core invocations
+(cumulative cap 18, retaining current 12/14), six renderer rounds (four compatibility
+consumed plus six authoring, cap 10; first three for the concrete Call/Choice/body path),
+and two validation rounds (five consumed plus two, cap 7). Final paired CI cap stays
+three, with two consumed. Round 6 would compile the changed disposable driver/SDK
+fixture without SDK execution and run actual frontend-to-host proof; round 7 would
+verify reviewed integrated changes, selectors, rejecting gates, sealed inputs/privacy/
+cleanup, reusing unchanged passes. Full remaining structural/UI work and in-scope review
+corrections fit these proposals; no allowance is allocated until the user's answer.
+Current narrow core work proceeds only within its two remaining existing invocations.
+
+
+**Core invocation 13:** compilation succeeded; focused selection finished 21 passed,
+one failed, one ignored in 32.74 seconds. The ignored SDK gate did not execute. New
+refusal coverage asserted the obsolete expected wire string `INVARIANT_BLOCKED` rather
+than existing `SCENE_INVARIANT`; its first refusal correctly left bytes unchanged.
+This remains a failed run, classified as a test expectation defect. Independent review
+also found a real new-command completion gap: replacing a root Return or a terminal
+child in an all-terminating root group could introduce fallthrough. The owner is adding
+a source-derived before/after no-new-fallthrough guard, preserving preexisting partial
+Source cases, and exact refusal regressions before the final existing invocation 14.
+Usage now **13/14**; no structural acceptance, integration or rerun yet. The new budget
+question remains pending and does not authorize execution beyond the old cap.
+
+
+**Bundled extension approved:** user answered “Yes I approve your request in its
+ totality.” Four additional core invocations raise its cumulative cap to **18**;
+current use is **13/18**, including failed invocation 13. Renderer keeps four consumed
+compatibility rounds and gains six authoring rounds, **4/10** total (first three narrow
+Call/Choice/body controls, remaining three full controls). Validation keeps five consumed
+rounds and gains two, **5/7**. Paired CI remains **2/3**, final batch unchanged at six
+SDK cases/12 adapter spawns per target. Zero package builds, owner native starts and
+live model calls remain. No consumption is reset or transferred from Phase 2.
+Core completes the reviewed explicit-body checkpoint before broad structural commands;
+renderer follows the stable integrated DTO; validator implements the disposable
+frontend and saved-callee harness but waits for reviewed integration before round 6.
+Routine implementation/review/in-scope fixes continue within these finite limits.
+
+
+### Reviewed explicit-body checkpoint — 2026-10-13
+
+Independent review closed the new terminal-to-fallthrough and opaque-parent ownership
+findings. All new body targets/anchors are bounded to the selected label's lexical
+extent, so later top-level Python/screen declarations cannot authorize apparent Story
+children. Existing partial Source cases are preserved. The candidate transfer guard
+covers old/new Call, Jump and Choice authoring, including `createSceneFromChoice`,
+with 16 active Call frames/8,192 possible states; pure Jump loops remain allowed.
+
+Invocation **14 passed** 24 tests, zero failed and one intentionally ignored SDK gate
+(19.78-second compilation, 36.45-second test execution). No SDK operation occurred.
+Seven new exact `phase3a_body_` regressions cover actual nested minimal-byte dispatch,
+IDs/extras/history/reopen, ownership/header/anchor/terminal zero-write refusal, EOF
+separator identity, Call/Choice labels/neighbors, candidate transfer gaps/pure loops,
+new-fallthrough/opaque-root refusal and legacy choice-created Scene routes. Final
+both-target qualification must explicitly require these names plus later additions;
+a prefix run alone is not named evidence. Failed invocation 13 is retained.
+
+Reviewed sole three-file checkpoint `e8c6c7cc7e234e8fc2b2a90f092adbf65da7392a` is
+integrated by root as `de5d17f24b9e186fae06232f606d184945db9a04`. Only
+`insertBodyBeat` and `updateBodyBeat` are exposed, with explicit source-derived body,
+immediate sibling position, expected owner and existing revision/session envelopes.
+Root/branch headers and protected boundaries cannot masquerade as ordinary Beats.
+Source-map v5 and AI permissions remain unchanged. No both-target qualification of
+these new inputs is claimed before CI3, and no full structural or Story acceptance.
+Cumulative core **14/18**, renderer **4/10**, validation **5/7**, paired CI **2/3**.
+
+Core continues the remaining condition/subtree commands in its four authorized
+invocations. Renderer reused the clean preserved worktree at reviewed `de5d17f`, with
+old `52c238c` retained under `refs/codex-preserved/phase3a-renderer`; the original core
+`e97be13` similarly survives under `refs/codex-preserved/phase3a-core`. No reset/rebase
+or worktree removal. Renderer now owns first Call/Choice/body controls; validator owns
+the disposable actual frontend/host and saved-callee harness. No new check round beyond
+core 14 has run yet. Root owns canonical documentation/integration/publication.

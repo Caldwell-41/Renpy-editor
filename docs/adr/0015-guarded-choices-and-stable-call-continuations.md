@@ -1,6 +1,6 @@
 # ADR 0015: Guarded choices and stable Call continuations
 
-- Status: Independently reviewed; focused local proof passed, SDK/target qualification pending
+- Status: Independently reviewed; focused local and early both-target SDK proof passed; full 3A qualification pending
 - Date: 2026-10-13
 - Scope: Phase 3A.2; extends ADR 0014 without changing its historical evidence
 
@@ -30,11 +30,12 @@ existing label, spacing and comments through a minimal token patch. Call is dist
 from Jump and Return. Incoming Call references prevent deleting the referenced Scene.
 Parameterized/dynamic calls and unbounded recursion remain outside the supported
 Call subset. Call insertion and target-edit commands conservatively inspect possible
-Call, Jump and Choice routes and refuse unsupported call routes. This early guard
-does not run on later Jump/Choice edits, which can introduce a possible recursive
-route; observed flow then remains partial/unknown. Closing that authoring gap belongs
-to the structural slice before 3A acceptance, while ordinary pure Jump loops remain
-allowed. This is not a general boundedness or complete reachability claim and does
+Call, Jump and Choice routes and refuse unsupported call routes. The initial guard
+left later Jump/Choice authoring unchecked. The independently reviewed structural
+continuation closes that gap by validating the actual patched candidate for legacy
+and explicit-body transfer commands, replacing old target edges rather than checking
+the previous graph. Ordinary pure Jump loops remain allowed; source-defined recursion
+stays explicit unknown. This is not a general boundedness or complete reachability claim and does
 not change deliberate execution of ordinary source.
 The current bound is 16 active Call frames and 8,192 inspected possible states.
 Existing duplicate return labels are diagnosed, and target edits refuse ambiguous
@@ -64,7 +65,8 @@ of callees and a separate mutation layer are unnecessary.
 
 Local checks cover generated labels, minimal edits, history/reopen, guarded-menu ending
 refusal, older-map refinement, flow diagnostics and unchanged AI permissions. Final
-independent review is clear against the explicit early command boundary. Actual
-pinned-SDK proof remains pending. The [3A execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
+independent review is clear. Early actual pinned-SDK proof passed both targets in CI2;
+full Story authoring and saved-callee safe-edit return proof remain pending. The
+[3A execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
 owns exact commits, cumulative checks, failures and qualification status. This decision
 does not mark either Phase 2 or Phase 3A complete.

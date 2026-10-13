@@ -5,8 +5,12 @@ The user explicitly resumed Phase 3A. Existing CI1's failed menu cases were audi
 its driver corrected and independently reviewed, and one approved extra local round
 passed (5/5 consumed). Corrected [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
 attempt 1/exact `cba3c0e`, passed both-host terminal artifact audit. The early SDK gate
-is established; delegated explicit-body structural implementation now uses the two
-remaining core invocations (12/14 before execution). Paired CI is 2/3 consumed.
+is established; delegated structural implementation continues within the extended
+allowance. Reviewed `de5d17f` passes 24 focused tests; core 14/18
+is consumed, with the first failed expectation retained. Renderer controls and the
+actual frontend/save-return harness are in implementation. Approved cumulative caps
+are core 18, renderer 10 and validation 7; prior usage is
+retained. Paired CI is 2/3 consumed.
 The user authorized delegated Sol 6.1 High implementation and validation of 3A Story
 logic, with review between slices. The qualified shared foundation and first rewrite
 satisfy 3A entry; Phase 2 feedback and final acceptance remain paused and unclaimed.

@@ -72,29 +72,38 @@ owning task. The early conditions/calls gate is **established**. CI3 remains unu
 is not a blind retry allowance.
 
 
-Counts do not reset: first core slice 8/8, calls/flow 4/6 (**12/14 cumulative**),
-renderer compatibility **4/4**, local validation **5/5**, paired CI **2/3**,
-packages/owner native starts/live model calls **zero**. The earlier broad 318-pass/two-
-failure run, obsolete-contract correction and unexplained descendant-cleanup failure
-with exact serial passes remain in the task ledger. No previous failure is erased.
+Cumulative usage does not reset: core **14/18** (first foundation eight, calls/flow
+four, explicit-body two); renderer **4/10** (four compatibility consumed); validation
+**5/7**; paired CI **2/3**; packages/owner native starts/live model calls **zero**.
+The user explicitly approved the driver-repair fifth local round, then four additional
+core invocations, six authoring renderer rounds and two final validation rounds.
+Original failures and the earlier unexplained descendant-cleanup limitation remain
+in the task ledger. No Phase 2 allowance is transferred.
 
-The user explicitly approved **one additional focused local validation round**
-(cumulative 5/5; passed) for generated-driver zero-SDK preflight and changed Rust gate
-compilation. The concrete correction is independently reviewed. Do not exceed this added
-round; preserve any failure and escalate a further exhausted-budget decision. CI2 fits
-the existing paired allowance after reviewed publication; retain six runtime cases,
-12 spawns and exact candidate/artifact audit. No blind rerun or ordinal reset.
+Reviewed explicit-body checkpoint `e8c6c7c` is integrated as `de5d17f`: only
+`insertBodyBeat`/`updateBodyBeat` are exposed, with source-derived root/branch ownership,
+immediate-sibling positions, captured revisions, candidate transfer checks and unchanged
+source-map v5/AI permissions. Review closed new-fallthrough and selected-Scene lexical
+boundary gaps. Invocation 13 remains failed (21 pass/one wrong expected wire error/
+one ignored SDK); invocation 14 passed 24/0/one ignored SDK. No local SDK ran.
 
-With corrected early SDK proof established, the sole core agent is implementing
-explicit nested insertion/update and legacy/new candidate transfer checks in the
-retained core worktree, checked out to audited `cba3c0e` without reset/rebase. Read-only core preparation agreed explicit `BodyRef` (root/branch),
-`NodeRef` (Beat/whole condition), immediate-sibling `Position`, expected ownership and
-revision envelopes. Preserve whole-subtree identities, safely qualified indentation,
-canonical empty-body pass, delete versus selected-branch unwrap and transaction/history.
-Close later Jump/Choice recursive-Call authoring while allowing pure Jump loops. The
-remaining two core invocations are selected for this first decisive structural slice;
-four more were proposed for review corrections/full coverage and remain unallocated.
-Renderer controls need their own finite slice selection; compatibility rounds are spent.
+The sole core writer continues condition/subtree commands from `e8c6c7c` using four
+remaining invocations. The renderer reused its clean worktree at `de5d17f` and now
+implements Call/Choice/body controls in the first three of six authoring rounds.
+The validator prepares the actual production frontend/host and saved-callee proof;
+round 6 waits for reviewed integrated controls. Preserve original core `e97be13` and
+renderer `52c238c` refs under `refs/codex-preserved/`; no reset/rebase or worktree removal.
+Shared interfaces stay serial, with root owning canonical documentation/integration.
+
+Remaining structural commands use explicit whole-condition nodes, selected branch
+unwrap and safe reindentation; unknown/raw conditions and unqualified opaque crossings
+refuse. Emptied branches use a verified canonical pass. Final frontend proof must use
+real DOM handlers and the normal request/response adapter, captured applicable revisions,
+ordinary external edits/retained input and real second-process reopen. Final SDK cases
+use one fixed raw save slot, isolated saves/tokens, validated saved C state/depth, exact
+safe caller narration edit and loaded return assertions. Missing receipts/load cannot
+fall back to a normal Start. Never upload saves or token keys. Final CI3 remains one
+batch with six cases/12 SDK adapter spawns; no blind retry or ordinal reset.
 
 Remaining acceptance includes typed builder, nested insert/edit/move, Else If/Otherwise,
 Call and guarded Choice editors, explicit parent destinations, collapse/draft protection,

@@ -1,6 +1,6 @@
 # ADR 0014: Typed conditions and recursive source ownership
 
-- Status: Independently reviewed; focused local proof passed, SDK/target qualification pending
+- Status: Independently reviewed; focused local and early both-target SDK proof passed; full 3A qualification pending
 - Date: 2026-10-13
 - Scope: Phase 3A.1; extends ADR 0012 without changing its historical acceptance
 

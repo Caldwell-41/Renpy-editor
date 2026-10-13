@@ -1191,15 +1191,25 @@ reclassify earlier failures. The [3A execution ledger](tasks/active/phase-3-init
 retains the broad local run's descendant-cleanup failure and its isolated passing rerun.
 Neither these local checks nor unchanged Phase 2 proof establish new SDK/target or full
 3A acceptance. The separately reviewed focused CI harness now provides an explicitly
-selected early SDK gate; its results remain pending.
+selected early SDK gate; corrected CI2 passed its exact both-target artifact audit.
+CI1's failed driver outcomes remain recorded. Full authoring and saved-callee proof
+remain pending.
 
 The reviewed calls/guarded-choice slice extends the focused `phase3a_` selection to
 stable generated return labels, minimal Call target and menu-field edits, v3/v4-to-v5
 record preservation and refusal, exact guarded continuations, recursive-route and
 ambiguous-label diagnostics, missing mapped continuations and unchanged AI permissions.
 Its final local selection passed 16 Phase 3A tests, 16 Source tests and two exact
-migration/mapping baselines. Call-command recursion refusal does not yet cover later
-Jump/Choice edits; preserve that early boundary until structural authoring closes it.
+migration/mapping baselines. The reviewed first structural continuation now covers
+later Jump/Choice authoring through actual candidate-graph checks, preserving pure
+Jump loops. Its final narrow selection passed 24 tests, zero failed and one deliberately
+ignored SDK gate. Seven new `scene::logic::tests::phase3a_body_` names require explicit
+presence in the final both-target gate. They cover nested minimal bytes/IDs/extras/
+history/reopen; exact ownership, header, anchor and terminal refusals; EOF separator
+identity; Call labels and guarded Choice neighbors; candidate transfer cycles and pure
+Jump loops; no-new-fallthrough and opaque trailing declarations; and legacy
+`createSceneFromChoice` candidate routes. The first run's wrong expected wire error
+remains a failed run, not a pass. New commands retain source-map v5 and AI permissions.
 
 Renderer compatibility has seven dedicated cases in `phase3a-renderer.dom.test.ts`;
 the final local bundle passed 61 cases including related existing draft/navigation
