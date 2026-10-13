@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Phase 3A — whole-workflow corrections reviewed; local12 then CI4
+## Phase 3A — whole-workflow corrections locally passed; CI4 next
 
 Phase3A is **ACTIVE — INCOMPLETE**; Phase2 remains **PAUSED — INCOMPLETE**. One
 implementation agent owns work. The user explicitly authorized one independent
@@ -22,8 +22,8 @@ CI2 exactcba3c0e established the early both-host SDK gate. Local10 exactbe06333 
 all ten actual frontend/core cases,243 requests, two normal observed/reaped helpers,
 source/refusals/history/reopen and cleanup. Renderer11 exact6ef6314 passes20 captures
 and actual image self-review, closing portable clipping; no packaged physical/human
-acceptance claimed. Local11 exactde26fcb passes SDK-test no-run and extended exact
-zero-SDK scaffold/caller preflight. Original round9 failure/snapshot, all receipts and
+acceptance claimed. Local11 exactde26fcb passes the narrow scaffold preflight; local12 exactb26597a
+passes checker13, SDK-test no-run and expanded exact zero-SDK preflight. Original round9 failure/snapshot, all receipts and
 213-input seals remain ignored under `.toolchains/phase3a-validation/`.
 
 [CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
@@ -49,12 +49,11 @@ supported assumptions do not establish actual runtime outcomes. See
 [whole-workflow ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#whole-workflow-audit-independent-review-and-ci-cap5--2026-10-14)
 and ignored `whole-workflow-audit/` for patch hashes/review/source evidence and limits.
 
-Next commit coherent reviewed patch and perform one local12 round: changed checker,
-locked/offline SDK-test no-run, exact zero-SDK preflight. Reuse unchanged passed local
-frontend/core/renderer/controller proof. On pass/hash match publish candidate and
-dispatch pairedCI4 once: exact six SDK cases/twelve adapter processes per host,
+Whole-workflow patch is committed as local-onlyb26597a and independent hashes match.
+Next publish reviewed candidate and dispatch CI4 once. Reuse unchanged passed local
+frontend/core/renderer/controller proof. Required pairedCI4: exact six SDK cases/twelve adapter processes per host,
 required full30 core/51 DOM/controller gates. Preserve failure and reassess; no blind
-retry. Usage **core16/18, local11/14, renderer11/14, pairedCI3/5**. CI5 is unused,
+retry. Usage **core16/18, local12/14, renderer11/14, pairedCI3/5**. CI5 is unused,
 not automatic authorization to retry. No local SDK/helper/native/package/credential/
 live action selected. No active CI or local test process; independent review completed.
 

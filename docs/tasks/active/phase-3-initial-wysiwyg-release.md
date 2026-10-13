@@ -2328,3 +2328,29 @@ automatic retry. Current local11/14, renderer11/14, core16/18, pairedCI3/5. Pres
 all failure evidence and stop to reassess any failed round. No polling/watchers;
 publish wait record and audit only on manual user resume. Phase3A remains incomplete,
 Phase2 paused, no merge/release.
+
+### Local12 whole-workflow preflight passed — 2026-10-14
+
+Exact reviewed `b26597ad0588418d6a9752fdb87148805fb7ed0d`, tree
+`fb363b0241cfd1c7da5f06aa58ef0e062d515d00`: checker13 passes0.19s; locked/offline
+SDK-test no-run compilation21.74s; exact expanded zero-SDK preflight passes5.08s.
+Expected synthetic refusal panics are caught by the preflight; terminal result is
+one passed/zero failed. No actual SDK process was executed. All213 inputs unchanged;
+compiled SDK-test binary/output hashes and complete logs/seals retained in ignored
+`local-round12/`. Privacy scan39 local12/audit files passes.
+
+Independent reviewer confirmed all six file hashes and full patchSHA256 match the
+frozen reviewed receipt, with no supported blocker. Root self-review remains separate.
+No code correction followed that verdict. Repository structural/privacy/link check
+passes558 files; diff check passes. CURRENT599 words exceeds the review target to
+preserve distinct Phase2 baseline/acceptance limits; HANDOVER1122 fits its target.
+
+Publish the coherent candidate and start exactly one pairedCI4 (ordinal4, attempt1,
+exclusive story selector). Required complete final recipe remains30 focused core,
+51 DOM, full ten controller cases/two processes, six SDK cases/twelve adapter spawns
+per host. Passing prior product/controller/visual evidence is retained; no broad
+local rerun. Source-supported runtime assumptions still await CI execution/artifact
+audit; CI3 remains failed. Cumulative **local12/14, renderer11/14, core16/18, CI3/5**.
+Local SDK/native editor/package/credentials/live actions remain zero. CI5 is unused
+and is not a blind retry allowance. Preserve every failure; manual wait/resume only.
+Phase3A incomplete; Phase2 paused; no merge/release.

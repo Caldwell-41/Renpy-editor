@@ -25,14 +25,13 @@ old201 receipts are unchanged. Rust/preflight/frontend evidence was reused only 
 exact dependency/binary/output hashes. Detailed receipts belong in the
 [latest task continuation](../tasks/active/phase-3-initial-wysiwyg-release.md#approved-cumulative-cap14-and-self-review--2026-10-14).
 
-Cumulative usage: **core16/18, local11/14, renderer11/14, pairedCI3/5**. Local SDK,
+Cumulative usage: **core16/18, local12/14, renderer11/14, pairedCI3/5**. Local SDK,
 owner native starts, packages, credentials and live calls stay zero. CI3 on published
 `9a6dbcd` is audited failed: both hosts pass core30/renderer51/ten controller cases,
 but SDK setup stopped on a harness import-BOM assertion before compile/lint/runtime.
-Local11 passes the narrow fix/preflight. The user authorized two additional paired
+Local12 passes checker13/SDK-test compilation/expanded zero-SDK preflight. The user authorized two additional paired
 runs and one review-only independent agent. Complete workflow corrections have no
-remaining supported static-review blocker; local12 checks and actual both-host saved-
-callee/caller-edit/load-return proof remain outstanding. Reviewed fixes are local-only.
+remaining supported static-review blocker; actual both-host saved-callee/caller-edit/load-return proof remains outstanding. Reviewed fixes and local proof are ready for publication/CI4.
 See [whole-workflow audit](../tasks/active/phase-3-initial-wysiwyg-release.md#whole-workflow-audit-independent-review-and-ci-cap5--2026-10-14).
 [HANDOVER](HANDOVER.md) owns recovery. No polling/watchers or automatic retries.
 Phase3A remains incomplete; the separate Phase2 pause remains untouched.
