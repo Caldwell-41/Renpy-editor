@@ -1,7 +1,10 @@
 # Phase 3 — Initial WYSIWYG release
 
 **Current selection — 2026-10-13:** Phase 3A Story logic implementation is
-`in_progress`, authorized by the user's explicit orchestration request. Phase 2 is
+**PAUSED — INCOMPLETE** at the user's subsequent safe-stop/handover request. Preserve
+the reviewed commits, worktrees and already-dispatched CI1; no further implementation,
+checks, dispatch or monitoring until explicit Phase 3A resume. The earlier autonomous
+orchestration authorization remains the continuation contract when resumed. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
 No 3A acceptance is claimed. 3B/3C/3D/3F remain unselected; default 3B/3C entry still
@@ -23,6 +26,7 @@ renderer writers remain serial at shared interfaces and use isolated implementat
 worktrees. Delegated Sol 6.1 High agents may monitor/poll selected CI under the user's
 explicit exception to WORKFLOW's default wait policy; the lead must not poll CI.
 No recursive delegation, merge, release, Phase 2 live send or security-policy change.
+This execution contract applies on resume; the current user-directed pause takes precedence.
 
 **Reviewable slices:**
 
@@ -1150,3 +1154,29 @@ as `ce10f24` (seven authorized harness files). Its worktree is clean and preserv
 Repository validation passed for 546 files and the combined diff check passed. The
 coherent candidate is ready for authorized publication and delegated batch 1; current
 CI consumption remains 0/3 until dispatch. The lead does not poll CI.
+
+**Early paired CI1 dispatched:** delegated validator confirmed no existing branch run,
+then dispatched [run 38346032499](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499),
+attempt 1, `workflow_dispatch`, exact published candidate
+`81ee770dac70181832b0020984545621ee403d9d`, tree
+`1046286ce44b6f4c46892ed86dbe4a24e6744e51`. Only `story_logic_early`/ordinal 1 is selected;
+older selectors are false. Required jobs are Windows `115127555940` and Mac
+`115127555751`; other excluded jobs are not passes. Usage is paired CI 1/3, local
+validation 4/4. Delegated monitoring and exact terminal artifact audit are active;
+the lead has not polled CI. Results remain pending, with no Phase 3A acceptance.
+
+**User-requested safe stop — 2026-10-13:** Phase 3A is now **PAUSED — INCOMPLETE**;
+Phase 2 remains **PAUSED — INCOMPLETE**. No implementation, monitoring, checks, fixes,
+dispatch or retries continue until explicit resume. Final delegated snapshot at
+04:23:33 UTC: CI1 and both required jobs remained in progress at the actual dispatch/
+SDK step, with no terminal conclusion or artifact audit available. The validator
+terminated only its owned local GitHub watcher, confirmed its wrapper/session exit,
+and left the authorized remote run running. No remote cancellation occurred.
+All agents are idle; the three implementation/validation worktrees are clean and
+preserved. Core 12/14 (latest slice 4/6), renderer compatibility 4/4, local validation
+4/4 and paired CI 1/3 remain consumed; no allowances reset. The original broad-run
+failure history and all later exact results remain in this ledger. The single live
+[handover](../../status/HANDOVER.md#ready-to-paste-restart-prompt) contains the restart
+prompt, implemented/todo summary, exact candidate/jobs and next audit obligations.
+Stop-documentation changes are docs-only successors to tested CI candidate `81ee770`;
+they do not replace its immutable input identity or establish any acceptance.

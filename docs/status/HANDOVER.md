@@ -1,6 +1,13 @@
 # Current outcome handover
 
-## Selected focus — Phase 3A implementation; Phase 2 PAUSED — INCOMPLETE
+## User-requested stop — Phase 3A PAUSED — INCOMPLETE; Phase 2 PAUSED — INCOMPLETE
+
+The user explicitly requested a safe stop, documentation and restart prompt on
+2026-10-13. All delegated agents are stopped. The validator recorded its final
+snapshot at **2026-10-13 04:23:33 UTC** and closed only its owned local CI watcher.
+Preserve the already-dispatched CI1 rather than cancel useful authorized work. No
+new checks, fixes, retries or dispatches are authorized while paused. Resume Phase 3A
+only on explicit user direction; Phase 2 requires its own separate explicit resume.
 
 The user's 2026-10-13 orchestration request authorizes autonomous Phase 3A slices with
 Sol 6.1 High implementation/validation agents and review before advancement. It forbids
@@ -31,8 +38,8 @@ an exact serial rerun; the original cleanup cause remains unproven. See the
 [3A ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
 and [ADR 0014](../adr/0014-typed-conditions-and-recursive-source-ownership.md).
 
-**Next:** publish the coherent early CI candidate and delegate batch 1 dispatch,
-monitoring and exact-artifact terminal audit. Reviewed core is `1029bd8` (delegated
+**On resume:** reconcile delegated batch 1 terminal results/artifacts, classify any failures, and proceed
+to structural/Story controls only after early SDK proof. Reviewed core is `1029bd8` (delegated
 `e97be13`); the reviewed harness is integrated as `ce10f24` (delegated `3a3dabd`). Renderer
 compatibility has passed 61 focused tests, serialized-flow agreement and independent
 review; it is integrated as `461441c`/`a9c3406`. The integrated authored-Call/Choice
@@ -42,19 +49,71 @@ slice 4/6 (12/14 cumulative; latest 34 passed across focused selections). Core
 freeze/review is clear. Early recursion refusal applies to Call commands; later
 Jump/Choice authoring gap is retained for the structural slice before 3A acceptance.
 Renderer compatibility is 4/4 local rounds; validation
-is local 4/4 (integrated checks and final BOM/manifest/privacy preflight passed), paired CI 0/3; per batch/
+is local 4/4 (integrated checks and final BOM/manifest/privacy preflight passed), paired CI 1/3; per batch/
 target one verified SDK install, GUI generation (two commands), compile/lint and six
-runtime cases. Zero packages/owner native starts/live model calls. No 3A CI is pending.
+runtime cases. Zero packages/owner native starts/live model calls. Selected CI1 is
+[run 38346032499](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499),
+attempt 1, exact `81ee770dac70181832b0020984545621ee403d9d`, tree
+`1046286ce44b6f4c46892ed86dbe4a24e6744e51`. Windows job `115127555940` and Mac
+`115127555751` are required; both were in progress at the real dispatch/SDK step in
+the final snapshot. No terminal outcome or artifact audit was available. Older jobs are intentionally
+excluded, not claimed passes. Delegated validation owns monitoring and audit on resume.
 The lead must not poll CI; delegated Sol 6.1 High agents may poll selected runs by
-explicit user authorization. Continue routine reviewable slices without approval;
+explicit user authorization. On resume, continue routine reviewable slices without approval;
 escalate concrete hard dependencies or material decisions, retain cumulative budgets.
 Development stays on macOS; affected Windows/macOS proof uses focused CI. Explicit
 user authorization resolved the initial auto-review publication rejection; reviewed
 Phase 3A branch pushes remain authorized. Reviewed core/renderer and decision records are published through
-`a08b3c8c85c2b06d0471c2f00c8684ae840b8b7e`; Git remote head was verified. The reviewed
-harness at `ce10f24` awaits the next publication and delegated CI dispatch. No CI was
-triggered by the earlier branch push. No merge, release,
+`81ee770dac70181832b0020984545621ee403d9d`; Git remote head was verified. CI1 was
+explicitly dispatched once after confirming no duplicate selected run. No merge, release,
 Phase 2 session or acceptance is authorized.
+
+### Phase 3A completed work and remaining work
+
+**Implemented and independently reviewed:** bounded typed conditions with exact i64
+values and unknown diagnostics; recursive source ownership and map v4/v5 migration;
+guarded Choice/returning Call core operations, stable labels, minimal patches,
+history/reopen and observed guard/continuation diagnostics. Renderer compatibility
+preserves Source revisions/drafts and safely displays the richer model. Calls and
+guarded Choices are still read-only in Story. The focused both-target CI harness is
+reviewed and published; its first actual SDK run is not yet audited.
+
+**Remaining:** audit CI1's exact candidate, both required jobs, logs/ZIP manifests,
+17 core/preflight names, seven renderer cases, six SDK outcomes, operation counts,
+privacy and cleanup. Diagnose failures without treating skips or missing evidence as
+passes. Only after early SDK proof implement explicit-body structural commands and
+full Story controls: condition builder, nested insert/edit/move, Else If/Otherwise,
+delete versus unwrap, empty-body handling, Call/choice editors and manual preview.
+Close the later Jump/Choice recursive-Call authoring gap while allowing pure Jump loops.
+Prove the actual frontend-to-core path, drafts and ordinary external-edit conflicts;
+qualify save-inside-callee/return-after-safe-edit and both targets before 3A acceptance.
+The task ledger preserves the read-only structural API proposal and staged plan.
+
+**Preserved worktrees:** `phase3a-core` at `e97be13`, `phase3a-renderer` at `52c238c`,
+and `phase3a-validation` at `3a3dabd` are clean, detached and retained; their work is
+integrated on the dedicated branch. Keep the original `codex/provider-qualification`
+and unrelated `milestone-planning` worktree. Local CI watch evidence is retained in
+ignored `.toolchains/phase3a-validation/ci1/watch.log`; preparation logs remain in
+the validation worktree's ignored evidence directory. CI artifacts have seven-day
+retention; retrieve/audit available artifacts promptly on resume, without rerunning
+merely because this chat stopped.
+
+### Ready-to-paste restart prompt
+
+> Resume Phase 3A of Loomlight from the documented pause. Read AGENTS.md,
+> docs/status/CURRENT.md, docs/status/HANDOVER.md and the relevant sections of
+> docs/tasks/active/phase-3-initial-wysiwyg-release.md. Reconcile the current branch,
+> worktrees and recorded CI state before changing anything; preserve all work.
+> Phase 2 must remain PAUSED — INCOMPLETE and must not be resumed, completed,
+> accepted or closed. Use delegated GPT-6.1 Sol High agents for implementation,
+> validation and independent review. The orchestrator must not poll CI; a delegated
+> validator may inspect/audit existing run 38346032499, attempt 1, candidate 81ee770.
+> Do not redispatch it blindly. Resume with that exact-result/artifact audit, then
+> continue the documented structural and Story-control slices after early SDK proof.
+> Respect cumulative allowances and preserve failures; do not reset them. Reviewed
+> pushes to codex/phase3a-story-logic remain authorized, without merge or release.
+> Continue routine slices autonomously, escalating real blockers or required budget
+> decisions. Mark Phase 3A complete only when its own acceptance criteria are met.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 
