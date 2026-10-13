@@ -34,13 +34,13 @@ def command(argv):
 def input_manifest(repo):
     app = repo / 'app'
     files = set()
-    for directory in ('src-core/src', 'src', 'tests', 'public'):
+    for directory in ('src-core/src', 'src-core/examples', 'src', 'tests', 'public'):
         files.update((app / directory).rglob('*'))
     files.update(app / p for p in ('Cargo.toml', 'Cargo.lock', 'src-core/Cargo.toml',
         'src-tauri/Cargo.toml', 'rust-toolchain.toml', 'package.json', 'package-lock.json',
         'tsconfig.json', 'tsconfig.tests.json', 'vite.config.ts', 'index.html', 'scripts/scan-artifacts.mjs'))
     files.update(repo / p for p in ('.github/workflows/quality.yml', '.github/workflows/story-logic.yml'))
-    files.update((app / 'scripts').glob('*story*logic*'))
+    files.update((app / 'scripts').glob('*story*'))
     files.update((repo / 'spikes/renpy-sdk').glob('*.py'))
     return {p.relative_to(repo).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in sorted(files) if p.is_file()}
@@ -84,7 +84,7 @@ def main():
                           outputLimited=result.output_limited, processReaped=True)
             if result.timed_out or result.output_limited or result.exit_code != 0:
                 raise RuntimeError(name + ' failed, exceeded deadline or output budget')
-            if argv[0] == 'cargo':
+            if argv[0] == 'cargo' and argv[1] == 'test':
                 record['passedTests'] = gate.cargo_ok(text, required)
             record['passed'] = True
             return text
@@ -103,17 +103,31 @@ def main():
         identity['sdkArchiveSHA256'] = expected
         run('renderer-typecheck', ['npm', 'run', 'typecheck'])
         run('renderer-test-compile', ['npm', 'run', 'build:tests'])
-        text = run('renderer-dom', ['node', '--test', '--test-concurrency=1', 'dist-tests/tests/phase3a-renderer.dom.test.js'])
-        gate.dom_ok(text)
+        dom_files = gate.FINAL_DOM_FILES if args.ordinal == 3 else ('dist-tests/tests/phase3a-renderer.dom.test.js',)
+        dom_names = gate.FINAL_DOM_TESTS if args.ordinal == 3 else gate.DOM_TESTS
+        text = run('renderer-dom', ['node', '--test', '--test-concurrency=1', *dom_files])
+        checks[-1]['passed'] = False
+        checks[-1]['passedTests'] = gate.dom_ok(text, dom_names)
+        checks[-1]['passed'] = True
         run('renderer-build', ['npm', 'run', 'build'])
         run('focused-core', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', '--lib', 'phase3a_', '--', '--skip', gate.SDK_TEST, '--nocapture'], required=gate.CORE_TESTS)
+        if args.ordinal == 3:
+            run('controller-driver-build', ['cargo', 'build', '-p', 'loomlight-core', '--example', 'story-controller-driver', '--release', '--locked'])
+            executable = APP / 'target/release/examples' / ('story-controller-driver.exe' if platform.system() == 'Windows' else 'story-controller-driver')
+            text = run('controller-dispatch', ['node', 'scripts/story-controller.mjs', '--driver', str(executable),
+                '--output', str(args.output / 'controller'), '--cases', 'scripts/story-controller-cases.mjs'])
+            checks[-1]['passed'] = False
+            gate.controller_ok(text)
+            checks[-1]['passed'] = True
         env = dict(os.environ, LOOMLIGHT_RUNTIME_SDK_ARCHIVE=str(args.archive.resolve()), LOOMLIGHT_PHASE3A_EVIDENCE_DIR=str((args.output / 'sdk').resolve()))
         text = run('sdk', ['cargo', 'test', '-p', 'loomlight-core', '--release', '--locked', '--lib', gate.SDK_TEST, '--', '--ignored', '--exact', '--nocapture'], timeout=900, env=env, required=(gate.SDK_TEST,))
-        sdk = gate.sdk_ok(text)
-        (args.output / 'sdk-report.json').write_text(json.dumps(sdk, indent=2) + '\n', encoding='utf-8')
+        candidate_sdk = gate.sdk_ok(text)
+        gate.sdk_artifacts_ok(args.output / 'sdk', candidate_sdk)
+        (args.output / 'sdk-report.json').write_text(json.dumps(candidate_sdk, indent=2) + '\n', encoding='utf-8')
+        sdk = candidate_sdk  # Publish only after blocking gates and report retention succeed.
     finally:
         (args.output / 'identity.json').write_text(json.dumps(identity, indent=2) + '\n', encoding='utf-8')
-        (args.output / 'result.json').write_text(json.dumps({'passed': len(checks) == 6 and all(c['passed'] for c in checks) and sdk is not None,
+        (args.output / 'result.json').write_text(json.dumps({'passed': len(checks) == (8 if args.ordinal == 3 else 6) and all(c['passed'] for c in checks) and sdk is not None,
                                                            'checks': checks, 'sdkEvidenceValidated': sdk is not None}, indent=2) + '\n', encoding='utf-8')
         gate.seal(args.output)
 
