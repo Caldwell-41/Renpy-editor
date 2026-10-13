@@ -1211,6 +1211,15 @@ Jump loops; no-new-fallthrough and opaque trailing declarations; and legacy
 `createSceneFromChoice` candidate routes. The first run's wrong expected wire error
 remains a failed run, not a pass. New commands retain source-map v5 and AI permissions.
 
+The full structural continuation passed **30 focused tests**, zero failed and one
+deliberately ignored SDK gate. Six exact `scene::logic::structural_tests::phase3a_structure_`
+names extend the final gate: condition/branch edits with canonical empty pass and
+history/reopen; branch kind/owner/unknown/initial-If refusals; leaf and whole-subtree
+moves with stable IDs; selected unwrap preserving only its body's trivia; minimal
+condition headers and opaque reindent refusals; and nonlast selected trivia with
+unqualified root-promotion refusal. The earlier unsupported inline-comment promotion
+expectation remains a failed fixture run; source-map v5 recognition is retained.
+
 Renderer compatibility has seven dedicated cases in `phase3a-renderer.dom.test.ts`;
 the final local bundle passed 61 cases including related existing draft/navigation
 regressions. Calls and guarded Choices are read-only at this checkpoint. Typecheck,
@@ -1220,8 +1229,18 @@ skipped outcomes, assert real normal-entry SDK routes/returns, preserve partial 
 artifacts and audit exact candidate inputs. Later save-inside-callee and safe-edit
 return qualification remains required before Phase 3A acceptance.
 
-The focused workflow selects 17 named core/preflight tests (the 16 product regressions
-plus a shared SDK-fixture BOM preflight) and the seven renderer cases. The actual SDK
+The reviewed narrow authoring continuation passed **34 DOM cases**, typecheck, test
+compilation and the production renderer build. Call/known guarded Choice and explicit
+root/branch Beat controls now author through captured revisions and parents. Unknown
+Choice remains wholly read-only. This supersedes the compatibility checkpoint's
+read-only limitation for supported controls, while preserving its historical proof.
+Full structural controls, actual frontend-to-core dispatch and saved-callee qualification
+remain pending; passing portable DOM cases alone does not establish those outcomes.
+
+The early focused workflow selected 17 named core/preflight tests (the 16 product regressions
+plus a shared SDK-fixture BOM preflight) and the seven renderer cases. The final planned
+gate requires all 30 exact core/preflight names, retaining every earlier required name.
+The actual SDK
 gate is `renpy::tests::phase3a::phase3a_conditions_calls_sdk_gate`; it is ignored by
 routine runs and must be explicitly selected with the official pinned archive.
 Its six normal-entry cases cover low/high/boundary values, all-false menu continuation,
@@ -1229,7 +1248,8 @@ nested Call returns and a deliberately wrong-outcome rejection. CI1 failed four 
 cases per host because bare test-driver `advance` waited for another dialogue callback.
 The reviewed correction explicitly waits for and asserts the choice screen before its
 route click; the no-option case retains ordinary advance. The shared zero-SDK preflight
-checks generated driver progression. Corrected both-target SDK proof remains required.
+checks generated driver progression. Corrected CI2 established the early both-target
+SDK gate on its exact reviewed candidate; full authoring/saved-callee proof remains required.
 `qualify-story-logic.py`
 and `check-story-logic-evidence.py` enforce named successes, operation counts, input
 identity and terminal cleanup. Artifact upload requires a successful privacy scan even

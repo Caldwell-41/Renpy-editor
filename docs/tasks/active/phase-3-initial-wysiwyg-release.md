@@ -1598,3 +1598,98 @@ The journey moves Beats between bodies; no separate existing-branch reorder comm
 selected. Preserve branch identities rather than remove/recreate to simulate reorder.
 Ordinary Beat/whole-condition Up/Down and Move-to remain required. This clarification
 adds no command, migration or allowance; full controls continue within renderer9/10.
+
+
+**Final preparation review checkpoint:** independent review cleared ADR0016/canonical
+contract wording and the new structural SDK helper's exact header/BOM/group identity/
+all-other-byte seals. Accepted header and safe caller hashes are linked to runtime
+source artifacts; save/token artifacts are rejected. Frontend eligibility is captured
+before handler locking, read-only helpers and missing-case gates remain blocking.
+Two partial scenario selectors need correction: production discard modal
+`.source-discard-confirmation`, and visible shell `.app-header` Save Source rather than
+the production-hidden Source toolbar button. These are pre-execution harness findings,
+not passed UI evidence. Full ten-case scenario and broader UI still await completion/
+review. No round6/7 or CI3; usage16/18,8/10,5/7,2/3 unchanged.
+
+Reviewed full structural core/narrow renderer and canonical evidence were published
+through `b5206beea987edcb861e2a0f6ffc33a41a16901f`; remote head was Git-verified.
+Repository validation passed 552 files and combined diff/content equivalence checks
+passed against both exact delegated source checkpoints. No merge or release.
+
+
+**Full renderer pre-execution draft:** all seven structural command controls, recursive
+typed comparison/All/Any/Not/bool editor, explicit ordered branch placement, whole-node/
+leaf keyboard moves/Move-to/delete/selected unwrap, inert sole-pass, hierarchy/collapse/
+focus/breadcrumb/draft guards, manual route preview independent of editing selection,
+and exact Branches/Call continuation/caller navigation are ready for independent
+review before round 9. Twelve new DOM cases plus the existing 34 plan **46** named
+outcomes; **nine** portable Chrome captures cover both themes, wide/laptop/compact,
+scaled and deep nesting, with runtime/page/authoring overflow metrics. Existing local
+Chrome/Vite/dependencies are reused; no package/owner editor start is added. The old
+source-foundation native-probe static structural-control contract is updated to enabled
+explicit Move-to and disabled drag; unchanged legacy wrong-owner refusal remains.
+No new check or native probe run. Renderer8/10, validation5/7, core16/18, pairedCI2/3.
+Full source/frontend and saved-callee acceptance are not claimed from draft controls.
+
+**Full renderer independent review before round 9:** inspection found four product
+issues: Unknown Choice controls had become editable, destructive group counts omitted
+protected descendants, illustrative preview continued after terminal control flow,
+and Story/tree forms could bypass each other's draft and pending guards. The owner
+corrected these and added explicit regression oracles; subsequent independent
+inspection closed all four. The expanded plan is now **50 DOM cases** and nine
+portable browser captures, replacing the earlier 46-case plan without executing a
+round. One additional blocker remains: an unresolved condition or Choice fork must
+stop illustrative preview rather than silently apply later root effects, and its
+reported Beat must be the actual stopped boundary. The guarded-only menu oracle
+incorrectly expected continuation and is being corrected before round 9. These are
+unexecuted review findings, not passed evidence. Usage remains core16/18,
+renderer8/10, validation5/7, pairedCI2/3; Phase 3A remains incomplete and Phase 2 paused.
+
+The focused preview correction is inspection-ready in `scene-ui.ts` and
+`story-structure.dom.test.ts`: every Choice stops as partial, unselected/stale condition
+routes stop at their header, and only an explicit valid branch/no-match selection
+permits a condition's continuation. The reported Beat is the actual visited boundary.
+Regressions require unvisited root variable/background/narration effects to remain
+unapplied and distinguish explicit matched/no-match routes. The plan is now **51 DOM
+cases** plus nine browser captures; this is still pre-execution, not an extra round.
+
+**Round 9 started once after independent clearance:** the focused preview correction
+and all four earlier product fixes are clear by inspection. Owner execution session
+66806 retains its exact input seal and log outside Git; conditional sequence is
+typecheck/test compilation, 51 exact DOM cases, then production build and nine Chrome
+captures if earlier checks pass. No round 10 retry is authorized automatically on
+failure; first reconcile the concrete result. Renderer **9/10** is now consumed,
+core16/18, validation5/7 and CI2/3 unchanged. No terminal result is yet claimed.
+
+**Round 9 terminal failure:** typecheck and test compilation passed; **51 DOM cases
+yielded 45 passed/six failed/zero cancelled or skipped** in 1457.39 ms. Production
+build and all nine browser captures were not run after the DOM failure. Exact log and
+input seal are retained outside Git. Four failures concern changed error copy,
+full-ancestor breadcrumb text and typed FlowBody destination expectations; two concern
+hydrated bool-comparison recursion and an unchanged pending condition's tree lock.
+These are hypotheses awaiting owner/reviewer diagnosis, not accepted fixture fixes or
+product passes. Owner and independent reviewer are reassessing all six before the last
+authorized round 10; no automatic retry, commit, local validation or CI3 occurred.
+Renderer9/10, core16/18, validation5/7, CI2/3. Phase 3A remains incomplete.
+
+The complete ten-case frontend/Host scenario is independently reviewed by inspection.
+Two negative-oracle corrections are still required before its first execution: exact
+`DIRTY_SOURCE` with before/after whole-project snapshots, and exact `SOURCE_CONFLICT`
+for the ordinary external/stale refusal with existing snapshot/draft checks. All 51
+renderer names must be synchronized into the final gate. SDK save/isolation/receipts
+remain clear by inspection; none of this substitutes for actual runtime proof.
+
+**Round 9 reassessment by owner and independent reviewer:** four stale assertions
+must match the stronger current error explanations, full ancestor breadcrumb and
+typed destination's `kind: "body"`. The two remaining failures share a select
+hydration cause: marking options selected before appending triggers the pinned Happy
+DOM's incorrect multiple-selected index, turning bool/variable shapes into All and
+recursing to the existing depth bound. Condition reading then throws before dispatch,
+so the failed tree-lock assertion does not establish a pending-write bypass. Populate
+options first and set `select.value` once to the exact requested value, preserving
+unavailable values/refusal and the AST; no shim, depth increase or weakened lock is
+selected. This is a portable hydration/harness-host incompatibility, with real browser
+behavior still unexecuted. Round 9's 105-input seal is unchanged; retained log SHA256
+is `7511b899870e80c4bbf60363dc0df73ba8af978eca6ccad9371dd8b7307f0d5e`.
+No round 10 has run yet. The validator's exact refusal-code/snapshot corrections are
+now independently clear by inspection; round 6 still waits for the reviewed UI pass.

@@ -73,7 +73,8 @@ is not a blind retry allowance.
 
 
 Cumulative usage does not reset: core **16/18** (first foundation eight, calls/flow
-four, explicit-body two); renderer **8/10** (four compatibility plus four authoring rounds, fourth passed); validation
+four, narrow/full structural four); renderer **9/10** (four compatibility plus four
+completed narrow authoring rounds, fourth passed; full-control round 9 failed); validation
 **5/7**; paired CI **2/3**; packages/owner native starts/live model calls **zero**.
 The user explicitly approved the driver-repair fifth local round, then four additional
 core invocations, six authoring renderer rounds and two final validation rounds.
@@ -95,7 +96,11 @@ subtree move/remove, selected unwrap and canonical pass are implemented under
 Narrow reviewed renderer `d481179` is integrated as `9630c66`; repaired round 8 passed
 34 DOM cases/typecheck/compilation/production build. Prior three failed authoring rounds
 and non-started model-capacity interruption remain in the ledger. Full controls now
-use its two remaining rounds 9/10 after reviewed broad-core integration.
+use the final two rounds 9/10 after reviewed broad-core integration. Round 9 is now
+terminal after independent correction review: typecheck/test compilation passed,
+51 DOM cases had 45 passes/six failures/zero skipped or cancelled. Build/nine captures
+were skipped. Reassess the precise causes and independently review corrections before
+round 10, which remains unused. Do not erase earlier failures or rerun blindly.
 
 Validator prepares the real frontend/host and saved-callee proof, with corrected cleanup,
 read-only scenario helpers, session-history-reset oracle and fail-closed SDK receipts.

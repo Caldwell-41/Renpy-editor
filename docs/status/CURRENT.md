@@ -8,7 +8,9 @@ attempt 1/exact `cba3c0e`, passed both-host terminal artifact audit. The early S
 is established; delegated structural implementation continues within the extended
 allowance. Reviewed full structural `ec0c43c` passes 30 focused tests; core 16/18
 is consumed, with failures retained. Narrow renderer `9630c66` passes 34 DOM cases;
-renderer 8/10. Full Story controls and the actual frontend/save-return harness remain
+renderer 9/10: full-control round 9 passed typecheck/test compilation but failed six
+of 51 DOM cases; build/nine captures were skipped. Corrections are under review before
+the final authorized renderer round. Full Story controls and the actual frontend/save-return harness remain
 in implementation (validation 5/7). Approved cumulative caps
 are core 18, renderer 10 and validation 7; prior usage is
 retained. Paired CI is 2/3 consumed.
