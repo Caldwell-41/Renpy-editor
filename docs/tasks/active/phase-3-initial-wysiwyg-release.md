@@ -1,11 +1,11 @@
 # Phase 3 — Initial WYSIWYG release
 
-**Current selection — 2026-10-13:** Phase 3A Story logic implementation is
+**Current selection — 2026-10-14:** Phase 3A Story logic implementation is
 **ACTIVE — INCOMPLETE**, resumed explicitly after the documented safe stop. Existing CI1 failed its SDK gate; the reviewed minimal harness repair passed corrected
 both-target CI2 audit. The early gate, structural core30 and full renderer51/build
 are established. Local validation10 passes all ten actual frontend/core cases/two processes. Focused
 renderer11 passes20 captures and image self-review, closing portable vertical clipping.
-The user approved cumulative local/renderer caps14 and clearly labelled self-review. CI3 is audited failed; two additional paired runs raise the cap to5. One review-only independent agent is explicitly authorized for the whole-workflow corrections; no 3A acceptance. Preserve the reviewed commits,
+The user approved cumulative local/renderer caps14 and clearly labelled self-review. CI3 is audited failed; two additional paired runs raise the cap to5. One review-only independent agent completed review of the whole-workflow corrections. Local12 passes; CI4 is dispatched and awaiting terminal audit. No 3A acceptance. Preserve the reviewed commits,
 worktrees, failed run and cumulative allowances. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
@@ -2354,3 +2354,36 @@ audit; CI3 remains failed. Cumulative **local12/14, renderer11/14, core16/18, CI
 Local SDK/native editor/package/credentials/live actions remain zero. CI5 is unused
 and is not a blind retry allowance. Preserve every failure; manual wait/resume only.
 Phase3A incomplete; Phase2 paused; no merge/release.
+
+### CI4 dispatched; manual waiting — 2026-10-14
+
+Reviewed/locally checked candidate `49dba1fc79ab4f1eba1490591209dc453b40dbf9`, tree
+`8d3f370be3468ca8bf18e799df782a325521c384`, is published and remote Git-verified.
+Its213 recipe inputs exactly match local12; docs successor adds proof/status only.
+Inputs fileSHA256 `4f7162dfd5362c018e99131a640815563bdc8e4e75700385055712ad7c479633`.
+Independent reviewed patch/file hashes remain exact; no further code edits. Original
+dirty worktrees and failure/preservation evidence remain intact.
+
+One predispatch quality-workflow inventory found no active run or duplicate CI4.
+Exactly one dispatch confirmed [CI4 run38437801470](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38437801470),
+attempt1/ordinal4/exact49dba1f, eventworkflow_dispatch on the authorized branch.
+Created/updated2026-10-13T17:20:05Z; last observed **queued**, conclusionnull at
+2026-10-13T17:20:10.631893Z (2026-10-14 03:20 AEST). All unrelated selectorsfalse.
+Ignored `ci4-dispatch/` retains identity, single inventory and exact213 input seal.
+No later status observation or terminal result is claimed.
+
+Required each host: complete final recipe,30 exact focused core/51 exact DOM/full ten
+production controller cases/two reaped helper processes, six actual SDK cases/twelve
+adapter spawns with compile/lint/metadata-free preservation and saved-callee/safe
+caller-edit/later-load literal-return proof, six owned storage witnesses, strict
+receipt/artifact/privacy/cleanup gate. Planned counts are not completed counts.
+CI3 remains failed; neither static review nor local preflight replaces these outcomes.
+
+Cumulative **pairedCI4/5, local12/14, renderer11/14, core16/18**. Fifth CI run remains
+unused and requires a meaningful audited/reviewed reason; no automatic retry. Local
+SDK/native editor/package/credential/live calls remain zero. Publish this docs-only
+wait successor, then end active work without polling/watchers. On manual same-thread
+“Audit CI4 and continue”, inspect recorded run/attempt and audit exact both-host
+artifacts/source identities/process counts/save/load/storage/raw logs/cleanup/privacy;
+retain any failure and reassess before further execution. Phase3A is awaiting_ci but
+**ACTIVE — INCOMPLETE**; Phase2 **PAUSED — INCOMPLETE**. No merge/release.

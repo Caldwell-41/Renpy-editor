@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Phase 3A — whole-workflow corrections locally passed; CI4 next
+## Phase 3A — CI4 awaiting terminal audit
 
 Phase3A is **ACTIVE — INCOMPLETE**; Phase2 remains **PAUSED — INCOMPLETE**. One
 implementation agent owns work. The user explicitly authorized one independent
@@ -9,9 +9,9 @@ paired CI runs (cap5). Reviewed pushes to `codex/phase3a-story-logic` are author
 no merge/release. No CI polling/watchers: record dispatch, publish wait record, end
 turn and audit on manual same-thread user resume.
 
-Root is `codex/phase3a-story-logic`, published docs successor `b13ea6e` following CI3
-candidate `9a6dbcd`; local-only scaffold fix `de26fcb` and six-file whole-workflow
-corrections follow. Live Git owns the exact latest HEAD/dirty state. Never reset to an
+Root is `codex/phase3a-story-logic`; reviewed candidate49dba1f is published and
+remote Git-verified, following scaffold fixde26fcb and whole-workflow patchb26597a.
+A docs-only wait successor records CI4 without changing tested inputs. Live Git owns the exact latest HEAD/dirty state. Never reset to an
 old prompt SHA. Validation74a0361 retains its original dirty oracle, renderer421a241
 its original dirty CSS. Coree160464, planning2c5a164/two unpublished commits, Phase2
 work, original/additive preservation refs and all failures remain intact. Root reused
@@ -46,16 +46,23 @@ receipts, setup failure breadcrumbs and final full checks at ordinals4/5. Produc
 Source behavior/timeouts remain unchanged. Independent read-only review found no
 remaining supported static blocker; root self-review is separately labelled. Source-
 supported assumptions do not establish actual runtime outcomes. See
-[whole-workflow ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#whole-workflow-audit-independent-review-and-ci-cap5--2026-10-14)
+[whole-workflow ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-dispatched-manual-waiting--2026-10-14)
 and ignored `whole-workflow-audit/` for patch hashes/review/source evidence and limits.
 
-Whole-workflow patch is committed as local-onlyb26597a and independent hashes match.
-Next publish reviewed candidate and dispatch CI4 once. Reuse unchanged passed local
-frontend/core/renderer/controller proof. Required pairedCI4: exact six SDK cases/twelve adapter processes per host,
+Whole-workflow patchb26597a passes local12 and independent hashes match. Published
+CI candidate49dba1f/tree8d3f370be3468ca8bf18e799df782a325521c384 has identical213
+inputs. [CI4 run38437801470](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38437801470)
+is confirmed attempt1/ordinal4, created2026-10-13T17:20:05Z, last observed queued at
+2026-10-13T17:20:10Z. No later status/result claimed. Ignored `ci4-dispatch/` retains
+identity/inventory/input hashes. On manual same-thread “Audit CI4 and continue”,
+inspect this run and audit terminal both-host artifacts/outcomes/cleanup/privacy.
+Reuse unchanged passed local frontend/core/renderer/controller proof. Required pairedCI4:
+exact six SDK cases/twelve adapter processes per host,
 required full30 core/51 DOM/controller gates. Preserve failure and reassess; no blind
-retry. Usage **core16/18, local12/14, renderer11/14, pairedCI3/5**. CI5 is unused,
+retry. Usage **core16/18, local12/14, renderer11/14, pairedCI4/5**. CI5 is unused,
 not automatic authorization to retry. No local SDK/helper/native/package/credential/
-live action selected. No active CI or local test process; independent review completed.
+live action selected. CI4 is the sole pending operation; no local process or active
+agent work. Independent review completed. End turn without polling/watchers.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 

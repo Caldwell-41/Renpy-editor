@@ -25,20 +25,23 @@ old201 receipts are unchanged. Rust/preflight/frontend evidence was reused only 
 exact dependency/binary/output hashes. Detailed receipts belong in the
 [latest task continuation](../tasks/active/phase-3-initial-wysiwyg-release.md#approved-cumulative-cap14-and-self-review--2026-10-14).
 
-Cumulative usage: **core16/18, local12/14, renderer11/14, pairedCI3/5**. Local SDK,
+Cumulative usage: **core16/18, local12/14, renderer11/14, pairedCI4/5**. Local SDK,
 owner native starts, packages, credentials and live calls stay zero. CI3 on published
 `9a6dbcd` is audited failed: both hosts pass core30/renderer51/ten controller cases,
 but SDK setup stopped on a harness import-BOM assertion before compile/lint/runtime.
-Local12 passes checker13/SDK-test compilation/expanded zero-SDK preflight. The user authorized two additional paired
-runs and one review-only independent agent. Complete workflow corrections have no
-remaining supported static-review blocker; actual both-host saved-callee/caller-edit/load-return proof remains outstanding. Reviewed fixes and local proof are ready for publication/CI4.
-See [whole-workflow audit](../tasks/active/phase-3-initial-wysiwyg-release.md#whole-workflow-audit-independent-review-and-ci-cap5--2026-10-14).
+Local12 passes checker13/SDK-test compilation/expanded zero-SDK preflight. The user
+authorized two additional paired runs and one review-only independent agent. Complete workflow corrections have no
+remaining supported static-review blocker; actual both-host saved-callee/caller-edit/
+load-return proof remains outstanding. Reviewed candidate49dba1f is published; [CI4 run38437801470](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38437801470)
+is confirmed attempt1/ordinal4, last observed queued2026-10-13T17:20:10Z.
+Terminal both-host audit awaits manual same-thread resume.
+See [CI4 wait and review record](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-dispatched-manual-waiting--2026-10-14).
 [HANDOVER](HANDOVER.md) owns recovery. No polling/watchers or automatic retries.
 Phase3A remains incomplete; the separate Phase2 pause remains untouched.
 
 | Capability | Evidence | Disposition |
 | --- | --- | --- |
-| 3A Story logic | Reviewed early candidate `cba3c0e`: CI2 passes 17 core/preflight, seven renderer and six SDK outcomes per host, with exact inputs/artifacts/counts/privacy/cleanup audited. CI1 failure retained. | ACTIVE — INCOMPLETE; early SDK gate established, explicit-body structural slice underway. No 3A acceptance. |
+| 3A Story logic | CI2 establishes early SDK behavior; CI3 passes full30 core/51 DOM/ten controller cases per host but fails SDK setup. Local12 reviewed harness checks pass; CI4 terminal runtime audit pending. All failures retained. | ACTIVE — INCOMPLETE; local structural/control/portable visual proof passes; final saved-callee/load-return proof missing. No 3A acceptance. |
 | Studio actions, generated references, prompts, selectable subset | Frozen929 owner live/native chain and controlled CI; new UI CI1 actual controller/native service all-five/selectable/exact-send/separate approval/invalid-zero-write/valid-subset/history/reopen/cleanup. | Scoped technical proof preserved; failed live send7 retained. |
 | Sampling/setup/HTTPS | Frozen929 combined worker/TLS/SDK and saved-key owner/CI9 Windows native setup/invalidation/cancel/reopen. New UI Settings draft/validation/readiness/cancel DOM regressions pass both targets. | Ordinary profile/key unchanged. LiteralIPv6HTTPS unsupported; liveTLS not newly measured. |
 | Game, SDK and packages | Owner native Validate/Run/Stop and metadata-free SDK05; signed Mac package1/exact Windows executable reused for unchanged paths. | No new editor package or physical native UI proof for the renderer refinement. |
