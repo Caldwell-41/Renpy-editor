@@ -82,6 +82,42 @@ fn save(service: &mut LifecycleService, path: &str, text: &str) {
     assert_eq!(saved["text"], editor, "Source Save preserves every editor body byte");
 }
 
+fn scaffold_editor_text(text: &str) -> &str {
+    // Imported SDK file encoding is independent of the destination editor's BOM.
+    let editor = text.strip_prefix('\u{feff}').unwrap_or(text);
+    assert!(!editor.starts_with('\u{feff}'), "multiple SDK scaffold BOMs must refuse");
+    editor
+}
+
+fn import_scaffold(
+    service: &mut LifecycleService, root: &Path, evidence: Option<&Path>, path: &str, text: &str,
+) {
+    assert!(matches!(path, "game/gui.rpy" | "game/screens.rpy" | "game/options.rpy"));
+    let name = Path::new(path).file_name().unwrap();
+    // Retain the actual imported bytes before any encoding assertion or Source write.
+    if let Some(evidence) = evidence {
+        let inputs = evidence.join("scaffold-inputs");
+        fs::create_dir_all(&inputs).unwrap();
+        fs::write(inputs.join(name), text.as_bytes()).unwrap();
+    }
+    let editor = scaffold_editor_text(text);
+    let before = fs::read(root.join(path)).unwrap();
+    let has_bom = before.starts_with(&[0xef, 0xbb, 0xbf]);
+    save(service, path, editor);
+    let after = fs::read(root.join(path)).unwrap();
+    let mut expected = if has_bom { vec![0xef, 0xbb, 0xbf] } else { Vec::new() };
+    expected.extend_from_slice(editor.as_bytes());
+    assert_eq!(after, expected, "SDK import preserves destination BOM and every imported body byte");
+    if let Some(evidence) = evidence {
+        let receipt = json!({"path":path,"operation":"source.save","destinationHasBom":has_bom,
+            "importHasBom":text.starts_with('\u{feff}'),"importSHA256":format!("{:x}",Sha256::digest(text.as_bytes())),
+            "beforeSHA256":format!("{:x}",Sha256::digest(&before)),"afterSHA256":format!("{:x}",Sha256::digest(&after)),
+            "bodyBytesPreserved":true,"passed":true});
+        fs::write(evidence.join("scaffold-inputs").join(name).with_extension("json"),
+            serde_json::to_vec_pretty(&receipt).unwrap()).unwrap();
+    }
+}
+
 fn scene(service: &mut LifecycleService, name: &str) -> Value {
     let model = ipc(service, "scene.list", json!({}));
     let model = ipc(
@@ -549,6 +585,42 @@ fn phase3a_sdk_fixture_source_save_preserves_bom() {
     let root = profile.join("synthetic-project");
     service.open_path(&root).unwrap();
     let entry_id = service.current().unwrap().scene_id.clone();
+    // Generated SDK files can carry a BOM while the destination starts empty without one.
+    let before_imports = sources(&root);
+    let mut expected_imports = before_imports.clone();
+    let scaffold_evidence = temporary.path().join("scaffold-evidence");
+    for (path, text) in [
+        ("game/gui.rpy", "\u{feff}# synthetic SDK GUI café 雪\r\ndefine gui.text_size = 22\r\n"),
+        ("game/screens.rpy", "\u{feff}# synthetic SDK screens\n"),
+        ("game/options.rpy", "# synthetic SDK options\ndefine config.name = \"fixture\"\n"),
+    ] {
+        assert!(before_imports[Path::new(path)].is_empty());
+        import_scaffold(&mut service, &root, Some(&scaffold_evidence), path, text);
+        expected_imports.insert(PathBuf::from(path), scaffold_editor_text(text).as_bytes().to_vec());
+        let opened = ipc(&mut service, "source.open", json!({"path":path}));
+        assert_eq!(opened["hasBom"], false);
+        assert_eq!(opened["text"], scaffold_editor_text(text));
+        let name = Path::new(path).file_name().unwrap();
+        let input = scaffold_evidence.join("scaffold-inputs").join(name);
+        assert_eq!(fs::read(&input).unwrap(), text.as_bytes());
+        let receipt: Value = serde_json::from_slice(&fs::read(input.with_extension("json")).unwrap()).unwrap();
+        assert_eq!(receipt["path"], path);
+        assert_eq!(receipt["destinationHasBom"], false);
+        assert_eq!(receipt["importHasBom"], text.starts_with('\u{feff}'));
+        assert_eq!(receipt["importSHA256"], format!("{:x}", Sha256::digest(text.as_bytes())));
+        assert_eq!(receipt["afterSHA256"], format!("{:x}", Sha256::digest(&expected_imports[Path::new(path)])));
+        assert_eq!(receipt["passed"], true);
+    }
+    assert_eq!(sources(&root), expected_imports, "scaffold import changes only the three exact bodies");
+    let invalid_evidence = temporary.path().join("invalid-scaffold-evidence");
+    let invalid = "\u{feff}\u{feff}# invalid\n";
+    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(||
+        import_scaffold(&mut service, &root, Some(&invalid_evidence), "game/gui.rpy", invalid)
+    )).is_err());
+    assert_eq!(fs::read(invalid_evidence.join("scaffold-inputs/gui.rpy")).unwrap(), invalid.as_bytes());
+    assert_eq!(sources(&root), expected_imports, "rejected multiple BOMs write nothing");
+    assert!(std::panic::catch_unwind(|| source_editor_text("\u{feff}# transport\n", false)).is_err());
+    assert!(std::panic::catch_unwind(|| source_editor_text("\u{feff}\u{feff}# transport\n", true)).is_err());
     create_story_variables(&mut service);
     let high = scene(&mut service, "High ending");
     let low = scene(&mut service, "Low ending");
@@ -682,11 +754,8 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
     counts.gui_image_commands = (process_spawn_count_for_test() - gui_start).saturating_sub(1);
     generated.unwrap();
     for path in ["game/gui.rpy", "game/screens.rpy", "game/options.rpy"] {
-        save(
-            &mut service,
-            path,
-            &fs::read_to_string(scaffold.join(path)).unwrap(),
-        );
+        import_scaffold(&mut service, &root, evidence.as_deref(), path,
+            &fs::read_to_string(scaffold.join(path)).unwrap());
     }
     copy_game(&scaffold.join("game/gui"), &root.join("game/gui"));
     create_story_variables(&mut service);

@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Phase 3A — local/visual proof passed; awaiting final CI3 terminal audit
+## Phase 3A — local/visual proof passed; CI3 audited failed; scaffold correction next
 
 Phase3A is **ACTIVE — INCOMPLETE**; Phase2 stays **PAUSED — INCOMPLETE** and needs its
 own explicit resume. One agent only: no spawning/delegation/messaging/resuming
@@ -63,32 +63,36 @@ outputs. Canonical UI/TESTING now record the implemented preview sizing and proo
 [the task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#approved-cumulative-cap14-and-self-review--2026-10-14)
 owns detailed attempts/receipts. No pending local process or agent work.
 
-### Pending CI3 and exact resume route
+### Audited CI3 failure and correction route
 
 [CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
-attempt1/ordinal3, `workflow_dispatch`, exact
-`9a6dbcdd7ae982f09cb4e65b6af78bf7f92acbbf`, created2026-10-13T16:14:19Z
-(2026-10-14 02:14 AEST). Last observed queued while capturing confirmed identity.
-Only focused Story selector is enabled; unrelated selectors are false. Ignored
-`ci3-dispatch/identity.json` retains metadata. No polling or watcher has been installed.
-PairedCI3/3 is consumed; there is no retry allowance. This run is not yet audited.
+attempt1/ordinal3/exact9a6dbcd, ended failure2026-10-13T16:21:01Z. Full terminal
+self-audit matched both jobs/ZIPs/36 files/35 hashes/213 exact inputs/identity/privacy.
+Windows115405351728 and Mac115405351521 pass checker11/core30/renderer51/build and
+all ten actual controller cases/two normal separately reaped processes/owned cleanup.
+SDK setup panicked at transport-BOM assertion during GUI import: four adapter spawns,
+zero compile/lint/runtime cases. Cleanup passed; final structural/saved-callee/safe-
+edit/loaded-return/source/metadata proof remains unestablished. The exact failed GUI
+input/path was not retained; no reconstructed snapshot is claimed. Artifact IDs,
+ZIP hashes/expiry and detailed diagnosis belong in the
+[CI3 terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14).
+Ignored `ci3-audit/` retains originals, extracted artifacts and audit code/results.
 
-The required Windows/macOS proof retains six SDK cases/twelve adapter processes per
-host: actual structural condition, high-case saved-callee receipt/state/depth,
-safe caller-only narration edit with unchanged stable return labels, later-process
-FileLoad and correct C/B/caller/choice/ending return. Missing receipt/load cannot fall
-back to Start. One compile/lint; no extra SDK process or blind retry. Required core30,
-renderer51 and actual ten-case/two-process controller also run on both hosts. These
-are obligations, not passing results. Uploads require privacy scanning; retention is
-configured7days, with artifact IDs/actual expiry still unknown until terminal audit.
+This is a harness import/setup defect; no production defect is established. Prepared
+one-file SDK-test correction separates incoming scaffold encoding from destination
+BOM, rejecting multiple BOMs and preserving normal Source save/body bytes. Existing
+caller transport checks stay strict. Raw scaffold bytes are captured before assertions,
+with acceptance receipts; the shared zero-SDK preflight covers all three imports,
+CRLF/Unicode/plain/BOM, exact source-set/retention/refusal, then original caller labels.
+New review is self-review under user approval. No retry, polling or watcher occurred.
 
-The wait record is a docs-only successor, not a replacement CI candidate. End this
-turn and resume only on user command in the same thread. On resume inspect the recorded
-run/attempt, audit terminal required jobs/artifacts,213 exact Git inputs/manifest hashes,
-source/save/edit/load receipts, operation limits/privacy/cleanup and current Git state.
-If still pending, preserve identity and pause. Do not redispatch or install a monitor.
-No Phase3A completion until every acceptance criterion passes. Phase2 remains paused;
-no merge/release. Local SDK/native editor/package/credential/live counts remain zero.
+Next: commit the reviewed correction and run one local11 round consisting of locked
+SDK-test `--no-run` and the extended exact zero-SDK preflight only. Local cap14 permits
+this; current usage10/14, renderer11/14, core16/18, pairedCI3/3. Unchanged passed product/
+renderer/controller evidence remains reusable. No local SDK/native editor/package/
+credential/live call. After local proof, request a concrete extra paired CI allowance;
+no CI4 dispatch is authorized. Phase3A remains ACTIVE — INCOMPLETE, Phase2 PAUSED —
+INCOMPLETE, no merge/release. No active CI or helper process to resume.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 

@@ -27,10 +27,14 @@ exact dependency/binary/output hashes. Detailed receipts belong in the
 Cumulative usage: **core16/18, local10/14, renderer11/14, pairedCI3/3**. Local SDK,
 owner native starts, packages, credentials and live model calls stay zero. Reviewed candidate `9a6dbcd` is published and Git-verified.
 [CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
-attempt1/ordinal3/exact9a6dbcd, was dispatched once; last observed queued while recording
-identity. Its both-host six SDK cases/twelve adapter processes and saved-callee/safe-
-caller-edit/later-load return proof are pending terminal audit. Paired allowance3/3
-is consumed. Pause for manual same-thread resume; no polling/watchers or blind retry.
+attempt1/ordinal3/exact9a6dbcd, is audited **failed** on both hosts. Both passed core30,
+renderer51 and all ten production controller cases/two processes. SDK setup stopped
+on a harness BOM assertion while importing generated scaffolding, before compile/lint
+or any runtime case; final saved-callee proof is missing. A narrow import conversion
+and extended zero-SDK preflight are self-reviewed and ready for authorized local11.
+Paired allowance3/3 is exhausted; no retry/CI4 dispatch without a budget decision.
+No polling/watchers. See the
+[terminal audit and correction](../tasks/active/phase-3-initial-wysiwyg-release.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14).
 [HANDOVER](HANDOVER.md) owns recovery; the separate
 [Phase2 pause backlog](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13)
 remains untouched. Phase3A completion still awaits required CI3 evidence.

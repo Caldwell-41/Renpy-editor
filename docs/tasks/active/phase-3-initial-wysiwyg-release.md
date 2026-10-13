@@ -2205,3 +2205,69 @@ missing/failed/cancelled/skipped checks are not passes. No redispatch, blind ret
 automatic wake-up. The configured CI artifact retention is7days; no uploaded artifact
 ID/actual expiry is claimed before terminal audit. Phase3A remains **ACTIVE — INCOMPLETE**
 and Phase2 **PAUSED — INCOMPLETE**.
+
+
+### CI3 terminal audit and scaffold-import diagnosis — 2026-10-14
+
+Audited recorded [CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
+attempt1/ordinal3/exact `9a6dbcdd7ae982f09cb4e65b6af78bf7f92acbbf`, tree
+`d5ace1a4d91a1c755a73b56817040a54ad74d5ab`. Terminal **failure**, updated
+2026-10-13T16:21:01Z. Required Windows115405351728 and Mac115405351521 both fail
+only the SDK portion of the focused recipe. Both pass checker11, typecheck/test
+compilation/build, all30 exact core names, all51 exact renderer names and the complete
+actual ten-case/two-process controller. Windows249 and Mac244 typed requests include
+only expected DIRTY_SOURCE/SOURCE_CONFLICT refusals; both helpers per host exited0,
+observed/reaped and owned cleanup passed. The failed CI run is not an acceptance pass.
+Unrelated intentionally skipped jobs are not passes.
+
+Self-audit under user approval verified ZIP CRC/safe entries/36 files/35 manifest hashes,
+213 exact Git input hashes per host, exact run/attempt/candidate/tree/architecture,
+controller report/log/seed-byte receipts, checks/limits and successful privacy scans.
+Windows artifact11829613884 ZIPsha256
+`3b4f95786269619cb1581852f18b6ff74fc44577f34fad4dc37894741abca6c2`, expires
+2026-10-20T16:20:55Z; Mac11828959974 ZIPsha256
+`6fbaaed002665f089ef2729195d3d4d2e8c36983f877d606c5c076b126f5a300`, expires
+2026-10-20T16:18:35Z. Ignored `ci3-audit/` retains exact metadata/log/ZIPs/extracted
+artifacts and audit.py/audit.json; nothing was redispatched or executed by the audit.
+
+Both SDK tests panic at `phase3a.rs:59`: transport BOM must match the declared accepted
+BOM. They completed SDK install/two version checks/GUI generation+image command,
+**four adapter spawns**, then stopped before compile/lint/structural authoring or any
+runtime case. Terminal cleanupComplete=true, but metadata/source/saved-callee/edit/
+load/structural proof fields remain false, not established failures of those user
+behaviors. All six runtime cases, caller edit and saved return are missing. Exact
+failed GUI import path/source was not captured before owned cleanup; no recreated
+bytes are claimed as evidence. Program order proves one of the three generated SDK
+scaffolding imports supplied BOM-prefixed text to an empty non-BOM Source destination.
+
+**Classification and reassessment:** SDK harness import/setup defect, not a production
+Source/BOM defect. The prior declared-BOM helper correctly handles edits to accepted
+BOM-bearing caller/Scene bytes, but was wrongly reused for importing separately encoded
+SDK GUI files. A source file's import encoding need not match its destination's existing
+encoding. Audit all remaining save paths: three GUI imports require explicit external
+file-to-editor conversion; condition/Scene/caller saves retain the strict existing
+helper, captured revisions and exact byte/label checks. Remaining compile/lint/six SDK
+runtime/save-load behavior stays uncertain. Do not relax production validation or
+assertions, broaden timeouts or run local SDK to bypass the exhausted paired allowance.
+
+**Prepared narrow correction and separate self-review:** only
+`app/src-core/src/renpy/tests/phase3a.rs` changes. Explicit scaffold import strips at
+most one incoming UTF-8 BOM, rejects a second before Source writes, uses normal Source
+save and verifies exact imported body bytes plus destination BOM policy. Existing
+transport/caller helper stays unchanged and strict. Actual SDK inputs are retained
+before assertions, with per-import hashes/encoding receipts after acceptance. The
+existing zero-SDK preflight now exercises all three imports, BOM/plain/CRLF/Unicode,
+full source-set equality, raw-input/receipt retention, multiple-BOM zero writes and
+unchanged strict transport refusals, then the original full caller/label preflight.
+The synthetic import fixture is not represented as the failed CI's lost original.
+Separate self-review traced all SDK save call sites and the remaining driver/receipt
+journey. No independent review claimed. Diff check passes; execution pending.
+
+**Next authorized bounded local11:** locked SDK-test `--no-run` compilation and only
+the extended exact zero-SDK preflight, once, under local cap14. Reuse successful both-
+host renderer/core-product/controller proof; no helper/frontend rebuild, SDK operation,
+native editor/package/credential/live call. Preserve failure before reassessment.
+PairedCI remains3/3 exhausted; a concrete extra paired-batch decision is required
+only after this correction is reviewable/locally checked. No CI4 dispatch permitted.
+Current usage core16/18, renderer11/14, local10/14. Phase3A remains incomplete;
+Phase2 paused; no merge/release.
