@@ -5,7 +5,7 @@
 both-target CI2 audit. The early gate, structural core30 and full renderer51/build
 are established. Local validation10 passes all ten actual frontend/core cases/two processes. Focused
 renderer11 passes20 captures and image self-review, closing portable vertical clipping.
-The user approved cumulative local/renderer caps14 and clearly labelled self-review; no final CI3 or 3A acceptance. Preserve the reviewed commits,
+The user approved cumulative local/renderer caps14 and clearly labelled self-review; final CI3 dispatched with terminal audit pending; no 3A acceptance. Preserve the reviewed commits,
 worktrees, failed run and cumulative allowances. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
@@ -2169,3 +2169,39 @@ Local controller proof is reused for unchanged actual frontend/core inputs and b
 seals; browser-only harness and docs successors do not change that journey. CI3 is the
 single remaining affected Windows/macOS batch, not a blind retry. Prepare reviewed
 publication and dispatch once, then record exact identity and pause without polling.
+
+
+### Final CI3 dispatched; manual resume for audit — 2026-10-14
+
+Reviewed coherent candidate `9a6dbcdd7ae982f09cb4e65b6af78bf7f92acbbf` was published
+and remote Git-verified. Its213 recipe inputs exactly match passing renderer11; only
+the browser-only harness differs from controller10's inventory, with all actual
+controller/frontend/core/runtime inputs and sealed binaries unchanged. Canonical
+UI/TESTING and repository validation558/diff/privacy checks pass. Local10 and visual11
+are self-audited under the explicit user approval; earlier independent reviews remain
+reused for unchanged inputs. Both original dirty drafts/worktrees and all failures
+remain preserved. Local result privacy scan30 files and renderer scan29 files passed;
+no private fixture/save/token/key material was committed.
+
+Confirmed one dispatch: [CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
+attempt1, ordinal3, `workflow_dispatch`, created2026-10-13T16:14:19Z
+(2026-10-14 02:14 AEST), exact9a6dbcd. Only focused Story selector is true; all unrelated
+selectors are explicitly false. Last observed **queued** while capturing run identity;
+no progress polling or watcher. Required Windows x64/macOS ARM64 jobs will run the
+final core30, renderer51 and actual controller/two-process proof plus six SDK cases/
+twelve adapter processes each, including actual structural condition, saved-callee,
+safe caller edit and later loaded return. These are planned obligations, not results.
+Inputs/result/receipts/artifacts/privacy/cleanup must be audited on the exact run.
+Ignored `ci3-dispatch/identity.json` retains confirmed metadata. The final paired
+allowance is now **3/3 consumed**; local10/14, renderer11/14, core16/18 are unchanged.
+No local SDK/native editor/package/credential/live operation, Phase2 advancement,
+merge/release or Phase3A acceptance.
+
+Publish this docs-only wait successor and end the active turn. Resume only on the
+user's same-thread command, then read the recorded run/attempt's terminal state and
+audit exact both-host jobs/artifacts,213 candidate inputs, source/operation counts,
+save/edit/load receipts and cleanup. If still pending, preserve identity and pause;
+missing/failed/cancelled/skipped checks are not passes. No redispatch, blind retry or
+automatic wake-up. The configured CI artifact retention is7days; no uploaded artifact
+ID/actual expiry is claimed before terminal audit. Phase3A remains **ACTIVE — INCOMPLETE**
+and Phase2 **PAUSED — INCOMPLETE**.

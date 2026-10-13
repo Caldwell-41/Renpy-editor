@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Phase 3A — local/visual proof passed; final paired CI3 next
+## Phase 3A — local/visual proof passed; awaiting final CI3 terminal audit
 
 Phase3A is **ACTIVE — INCOMPLETE**; Phase2 stays **PAUSED — INCOMPLETE** and needs its
 own explicit resume. One agent only: no spawning/delegation/messaging/resuming
@@ -13,8 +13,7 @@ no merge/release. CI uses manual same-thread waiting/resume, with no polling/wat
 
 Root branch is `codex/phase3a-story-logic`. Corrections were committed as `be06333`,
 followed by the focused visual harness/local proof record `6ef6314`; later documentation
-successors do not change their tested production inputs. Last takeover verified
-published commit was `edec5a8`; reviewed publication of these local successors is next.
+successors do not change their tested production inputs. Published candidate `9a6dbcd` is remote Git-verified; a docs-only wait successor follows.
 Never reset to an old prompt SHA. Validation worktree remains at74a0361 with its
 preserved dirty oracle; renderer421a241 retains the exact dirty CSS draft. Coree160464
 and planning worktree/two unpublished commits are preserved. All original/additive
@@ -57,24 +56,39 @@ and self-review records. Earlier independent CSS static review remains applicabl
 
 ### Final candidate, budget and waiting route
 
-Cumulative usage: **core16/18, local10/14, renderer11/14, pairedCI2/3**. Unused allowance
+Cumulative usage: **core16/18, local10/14, renderer11/14, pairedCI3/3**. Unused allowance
 is not a reason to rerun passed checks. Review of the complete final candidate reuses
 unchanged Rust/preflight and actual frontend/core proof, binding exact inputs/binaries/
 outputs. Canonical UI/TESTING now record the implemented preview sizing and proof limits;
 [the task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#approved-cumulative-cap14-and-self-review--2026-10-14)
 owns detailed attempts/receipts. No pending local process or agent work.
 
-Next publish the reviewed coherent candidate and verify the branch, then dispatch
-CI3 once with only the focused Story selector/ordinal3. Its six SDK cases/twelve
-adapter processes per host remain exact: actual structural condition command,
-high-case saved-callee receipt/state/depth, safe caller-only narration edit with
-unchanged stable return labels, later-process FileLoad and correct C/B/caller/choice/
-ending return. Missing receipt/load cannot fall back to Start. One compile/lint;
-no extra SDK process or blind retry. Both Windows/macOS evidence is mandatory.
-After dispatch, record exact run/attempt/candidate and remaining artifact audit,
-publish the wait record and end this turn. Resume only on user command, then audit
-that terminal run's jobs/artifacts/inputs/counts/privacy/cleanup. No polling loop,
-watcher or automatic wake-up. CI3 is not yet dispatched and Phase3A is incomplete.
+### Pending CI3 and exact resume route
+
+[CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
+attempt1/ordinal3, `workflow_dispatch`, exact
+`9a6dbcdd7ae982f09cb4e65b6af78bf7f92acbbf`, created2026-10-13T16:14:19Z
+(2026-10-14 02:14 AEST). Last observed queued while capturing confirmed identity.
+Only focused Story selector is enabled; unrelated selectors are false. Ignored
+`ci3-dispatch/identity.json` retains metadata. No polling or watcher has been installed.
+PairedCI3/3 is consumed; there is no retry allowance. This run is not yet audited.
+
+The required Windows/macOS proof retains six SDK cases/twelve adapter processes per
+host: actual structural condition, high-case saved-callee receipt/state/depth,
+safe caller-only narration edit with unchanged stable return labels, later-process
+FileLoad and correct C/B/caller/choice/ending return. Missing receipt/load cannot fall
+back to Start. One compile/lint; no extra SDK process or blind retry. Required core30,
+renderer51 and actual ten-case/two-process controller also run on both hosts. These
+are obligations, not passing results. Uploads require privacy scanning; retention is
+configured7days, with artifact IDs/actual expiry still unknown until terminal audit.
+
+The wait record is a docs-only successor, not a replacement CI candidate. End this
+turn and resume only on user command in the same thread. On resume inspect the recorded
+run/attempt, audit terminal required jobs/artifacts,213 exact Git inputs/manifest hashes,
+source/save/edit/load receipts, operation limits/privacy/cleanup and current Git state.
+If still pending, preserve identity and pause. Do not redispatch or install a monitor.
+No Phase3A completion until every acceptance criterion passes. Phase2 remains paused;
+no merge/release. Local SDK/native editor/package/credential/live counts remain zero.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 

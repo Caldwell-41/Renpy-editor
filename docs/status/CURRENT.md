@@ -24,12 +24,13 @@ old201 receipts are unchanged. Rust/preflight/frontend evidence was reused only 
 exact dependency/binary/output hashes. Detailed receipts belong in the
 [latest task continuation](../tasks/active/phase-3-initial-wysiwyg-release.md#approved-cumulative-cap14-and-self-review--2026-10-14).
 
-Cumulative usage: **core16/18, local10/14, renderer11/14, pairedCI2/3**. Local SDK,
-owner native starts, packages, credentials and live model calls stay zero. Prepare
-reviewed publication and one final paired CI3 batch, retaining six SDK cases/twelve
-adapter processes per host and saved-callee/safe-caller-edit/later-load return proof.
-CI3 is not yet dispatched. After dispatch, record its exact identity and pause for
-manual same-thread resume/terminal audit. No polling/watchers or blind retry.
+Cumulative usage: **core16/18, local10/14, renderer11/14, pairedCI3/3**. Local SDK,
+owner native starts, packages, credentials and live model calls stay zero. Reviewed candidate `9a6dbcd` is published and Git-verified.
+[CI3 run38428839556](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556),
+attempt1/ordinal3/exact9a6dbcd, was dispatched once; last observed queued while recording
+identity. Its both-host six SDK cases/twelve adapter processes and saved-callee/safe-
+caller-edit/later-load return proof are pending terminal audit. Paired allowance3/3
+is consumed. Pause for manual same-thread resume; no polling/watchers or blind retry.
 [HANDOVER](HANDOVER.md) owns recovery; the separate
 [Phase2 pause backlog](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13)
 remains untouched. Phase3A completion still awaits required CI3 evidence.
