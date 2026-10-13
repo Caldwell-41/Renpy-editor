@@ -3,9 +3,9 @@
 **Current selection — 2026-10-13:** Phase 3A Story logic implementation is
 **ACTIVE — INCOMPLETE**, resumed explicitly after the documented safe stop. Existing CI1 failed its SDK gate; the reviewed minimal harness repair passed corrected
 both-target CI2 audit. The early gate, structural core30 and full renderer51/build
-are established. Final captures exposed vertical clipping; local frontend/Host proof
-failed during fixture setup before any case. Reviewed corrections and additional
-budget decisions are pending; no final CI3 or 3A acceptance. Preserve the reviewed commits,
+are established. Final captures exposed vertical clipping. Local round9 passed the first five
+frontend/Host cases, then stopped at a stale case6 count oracle before deletion.
+Prepared corrections, review capability and additional budget decisions are pending; no final CI3 or 3A acceptance. Preserve the reviewed commits,
 worktrees, failed run and cumulative allowances. Phase 2 is
 **PAUSED — INCOMPLETE** and must not be resumed, completed, accepted or closed.
 This selection supersedes the earlier planning-only/complexity-assessment directions.
@@ -22,13 +22,14 @@ Phase 2 final acceptance. 3A reuses source-map v3, exact-range preparation, tran
 history, variables and observed flow. Shared changes must preserve the existing AI
 allowlist or visibly refuse unsupported targets; no provider request is needed.
 
-**Execution:** the lead orchestrates Sol 6.1 High implementation and validation agents,
-reviews each coherent slice and continues routine slices autonomously. Core/model and
-renderer writers remain serial at shared interfaces and use isolated implementation
-worktrees. Delegated Sol 6.1 High agents may monitor/poll selected CI under the user's
-explicit exception to WORKFLOW's default wait policy; the lead must not poll CI.
-No recursive delegation, merge, release, Phase 2 live send or security-policy change.
-The explicit resume reinstates this execution contract; it does not renew allowances.
+**Execution:** one agent, with no spawning, delegation, messaging or resuming
+subagents, as explicitly selected by the user on takeover. Reuse existing independent
+reviews; label new self-review honestly. Earlier delegated execution and CI-polling
+exceptions are superseded. CI follows WORKFLOW's manual same-thread waiting policy:
+record dispatch, pause, audit on user resume. No polling loops or background watchers.
+Reviewed pushes to `codex/phase3a-story-logic` remain authorized. No merge, release,
+Phase 2 advancement, local SDK/native editor/package/credential/live operation.
+The takeover does not renew allowances.
 
 **Reviewable slices:**
 
@@ -48,9 +49,10 @@ and material scope decisions require a concrete escalation; routine checkpoints 
 Initial 3A.1 allowance: six focused local check invocations, subsequently amended and
 retained in the ledger; current core cumulative cap is 18 after the explicit resume
 extension. Reassess after two unsuccessful corrections of one hypothesis. Renderer cap
-is ten rounds (four compatibility plus six authoring). Validation allowance: seven
+is ten rounds (four compatibility plus six authoring), with one focused visual extension
+pending user decision. Validation allowance: nine
 focused local rounds (original four, one approved driver repair, two approved final
-qualification rounds) and three paired CI batches cumulative
+qualification rounds, then two approved BOM/setup/final proof rounds) and three paired CI batches cumulative
 across 3A, zero package builds/owner native starts/live model calls. Per batch/target:
 one verified SDK install, one GUI generation, compile and lint, at most six runtime
 cases (failures count). Early batch follows reviewed core condition/call work before
@@ -1873,3 +1875,235 @@ must separately attest observed exit/reaping and required normal cleanup. This i
 static inspection of existing evidence, not a new helper start or qualification pass.
 No extra local round is authorized; reviewed correction and a concrete cumulative
 validation-budget decision are still required. Extra visual cap11 request is pending.
+
+**Explicit validation extension approved:** the user answered **“Approve two local
+rounds (cap 9)”** to the bounded correction/full-ten-case/final changed-gate request.
+All seven prior rounds/failures stay consumed; round8 is the first corrected attempt,
+round9 only for meaningful independently reviewed corrections or changed final
+evidence/privacy checks. Exactly two core-only helpers per full attempt, no local
+SDK/native editor/package/credentials/live calls, no CI allowance increase. The
+separate visual cap11 request remains pending; this approval does not grant it.
+
+Independent complete four-file correction review clears declared one-BOM conversion,
+second-BOM refusal and returned body/hasBom; existing zero-SDK preflight performs
+actual safe-caller save with exact caller-only bytes, full source-file-map equality,
+two stable Call labels/IDs and zero SDK spawns. Future diagnostic/proposal/typed
+response and failed-seed snapshots precede cleanup; deletion requires retained
+capture/observed exit, and abnormal exit stays qualification/normal-cleanupfalse.
+The shared `phase2-driver-process.mjs` accessor is observation only, with unchanged
+existing request/start/stop behavior and no Phase 2 execution/schema/product change.
+Original lost round7 bytes remain unavailable and its failure is not relabeled.
+
+Reviewed checkpoint `15022a5b3db350433b41de4236b5001326538f77`, retained by an
+additive BOM-retention-fix ref, is integrated as
+`9d0eaa9457cc2ad06f16a25c5fbcc5be46e44a47`. Root full app equivalence/diff checks
+passed. Changed helper and SDK test require rebuild; unchanged frontend/checker proof
+may be reused only with exact hashes. **Round8 is authorized once on exact9d0eaa9**,
+not yet confirmed started: locked helper build, SDK `--no-run`, extended exact zero-SDK
+preflight, full ten production DOM/Host cases/two normal separately reaped helpers.
+No automatic round9 retry or final CI3. Current core16/18, renderer10/10,
+validation7/9, CI2/3. Reviewed preceding source/status was published and remote-verified
+through `edec5a8dacad2b675682490632a09d601644bf90`; new9d0 correction is local-only
+pending updated publication. No merge/release/acceptance; Phase 2 remains paused.
+
+**Round8 once-started and terminal failure:** exact9d0eaa9, tree
+`6bd06ce02fda1c7cb544e404af5b1e4f665b3949`; fresh201-input SHA256
+`3ef4299999880df801094144ba266fcb80d39faced95b8ffb8086c2d4a701ae1`.
+Actual TypeScript/config/package compilation inputs are69 conservative records from
+the original105 inventory; all60 generated outputs match. Changed shared `.mjs` is
+a direct Node runtime input, not a compiler input (`allowJs` absent). Eleven Python
+passes reused only after unchanged checker/recipe/test/workflow/spike hashes; reuse
+receipt SHA256 `a6f3da0eb3c90a50d60b04e268a6ba61148da9a6ffb4940d583ef3d98ed1de3b`.
+Changed driver build passed1.54s, SDK `--no-run` passed18.67s, extended exact zero-SDK
+BOM/caller/two-label/full-source-set preflight passed **one/zero failed** in4.58s.
+
+Full controller exited1/3.33s after a real first guarded-Choice mutation succeeded,
+then `editSource` asserted missing Open control (`cases.mjs:67`) during Source
+navigation. **cases=[]**: no full case completed. Diagnose async inventory/editor
+readiness versus actual row/path selectors by existing source/transcript; audit all
+shared navigation helpers before last round9, without sleeps/timeouts/bypasses or
+weaker assertions. Currently a harness navigation failure; no product regression is
+established. One helper exited normally0, observed/reapedtrue; normal cleanup and
+owned-root removal passed. Actual failed project snapshot retained SHA256
+`343651445f559147872bb377d5ccd91e73de04cdc97d6ccc94dfa2423bc9eb84` before removal.
+Recorder session54085 completed; ignored `local-round8/` preserves logs/failure and
+unchanged input seal. Validation **8/9** consumed, no automatic round9/CI3; all local
+SDK/native editor/packages/credentials/live0. Core16/18, renderer10/10, CI2/3 and
+pending separate visual allowance unchanged. New BOM/retention helpers are proven
+within this scope; full ten-case/two-process frontend qualification remains missing.
+
+**Reviewed script-only correction/final round9 authorization:** Source mounts its
+shell before awaited inventory rows; retained transcript has first real guard
+mutation and `source.list` success, with no `source.open`. Exact row title/path
+selector is correct, so central helpers now wait enabled matching row, actual typed
+open, current path/active tab/session and idle editable field. Shared edit/dirty/
+external/mapped Source and discard/Story/Branches/caller navigation transitions are
+audited against actual production completion; clean Save follows `project.flush`.
+Observed Source tree/sidebar activation can retain only the OLD visible current
+Source document, with exact captured path/session/base revision/text/selection before
+locks using the production newline snapshot helper. Destination paths cannot authorize
+a write. Direct context writes remain forbidden; no generic navigation authority,
+new operation, arbitrary sleep, timeout expansion, product change or weaker oracle.
+Privacy-safe failure readiness metadata is captured before disposal.
+
+Independent two-script review is clear. Checkpoint
+`107180480d4a4301ed9383fcd9a2cc3a594f8c5b`, retained under additive source-readiness-fix
+ref, is integrated as `74a0361dec95d75b3aaff31f999090e884588363`. Root full app
+equivalence/diff checks pass. **Last existing local round9 is authorized once on
+exact74a0361**, not yet confirmed started: refresh full input seals and reuse
+unchanged Round8 driver/SDK build/preflight, compiled frontend and checker11 evidence
+only after exact dependency/binary/output hashes. Execute only changed full ten-case
+production controller/two separately reaped helpers. Stop on failure without another
+local round or final CI3. Validation8/9, core16/18, renderer10/10, CI2/3; separate
+visual cap11 request remains pending. All prior failures/snapshots remain preserved.
+
+**Round9 terminal failure and single-agent transfer — 2026-10-13:** exact
+`74a0361dec95d75b3aaff31f999090e884588363`, tree
+`3540e9a47635ff48ba38059b5f6c6a0efcb1e97a`. Controller exited1/8.51s.
+The first five actual production frontend/core cases passed: guarded Choice,
+Call/navigation/stable label, explicit-body insertion, full condition controls,
+keyboard/cross-body whole-subtree moves. Case6 stopped before deletion dispatch on
+expected3/actual4 member count: two narrations plus separately protected Python header
+and assignment ranges. Cases6–10 and second-process reopen remain unproven. This
+establishes a stale harness oracle, not a production count defect. All85 typed requests
+were accepted;18 scene.apply operations. One helper exited normally0, observed/reaped,
+normal cleanup and owned-root removal passed. Actual snapshot SHA256
+`ce5b127b00d42db2715245d3e530b2eeb3f0ab5f546857631cbcee5b3fa34b49`;
+terminal-audit result SHA256
+`2442474049c41aa26e55ce3225536550141356d2940b3af74a72dd10a45e6ffc`;
+transcript SHA256
+`81ed23385253d3741cdabd24c3eb094f06571c3d4c276aa978835876d3774099`.
+Ignored `local-round9/` retains these and201-input seal SHA256
+`0b3629c01823cd22556f4742616bf2a417773867a3d1d86c0146f85be5ef5d8a`.
+Unchanged Rust/SDK-test binaries, zero-SDK preflight and frontend evidence were reused
+only after exact dependency/output hash checks. Twelve SDK compile dependencies were
+separately Git-verified but are absent from the201-input recipe manifest: add coverage
+before final CI3, without relabeling the old receipt. Local SDK/editor/package/
+credential/live operations remain zero. Core16/18, renderer10/10, validation**9/9**,
+CI2/3. No active CI or final CI3 dispatch.
+
+An uncommitted one-file oracle draft in the validation worktree asserts exactly four
+ordered members, two narration texts, two protected opaque byte ranges, two headers
+and readable2branches/4Beats confirmation. Deletion/Undo/leaf-pass/selected-unwrap byte
+oracles are unchanged. Static inspection of remaining cases found no further concrete
+model mismatch; it is not execution evidence. Reconcile independent review status.
+The ignored controller-only round10 plan is a proposal, **not an approved allowance**.
+The separate renderer cap11 request also remains unanswered. Neither may run without
+an explicit budget decision.
+
+The user requested a new **single agent with no subagents**. Work/checks stopped for
+handoff; this supersedes earlier delegated-agent directions. Preserve the no-CI-polling
+constraint and explicitly resolve unavailable review/monitoring capability. Root HEAD
+and validation HEAD are74a0361; renderer421a241 holds the separate reviewed CSS draft.
+Root's three live records are uncommitted. Verified remote is still
+`edec5a8dacad2b675682490632a09d601644bf90`; later9d0eaa9/74a0361 are local-only.
+Phase 2 stays **PAUSED — INCOMPLETE**. Phase 3A is incomplete; no merge/release.
+
+
+### Single-agent preparation and combined self-review — 2026-10-13
+
+**Reconciled entry:** root and validation HEAD `74a0361`; renderer `421a241`.
+Root initially held only the three uncommitted live records. Validation's one-file
+oracle and renderer's one-file CSS drafts were preserved exactly and copied into
+root for a concrete reviewable proposal; original worktrees remain untouched. Core
+and planning worktrees are clean; planning retains its two unpublished commits.
+All original/additive preservation refs and Phase 2 work remain intact. One entry
+remote/CI inventory confirms published `edec5a8`, terminal CI1/CI2 only and no active
+run. No redispatch, repeated historical audit or polling occurred. Repository-local
+noreply identity is intact.
+
+**Prepared four-file correction:** `story-controller-cases.mjs` now requires four
+ordered members, two exact narration texts, two protected Python ranges sharing the
+If owner's identity, two headers and readable four-Beat deletion confirmation. The
+whole-condition deletion, Undo, canonical empty pass, selected unwrap, retained Beat
+IDs, minimal source bytes and neighboring-source assertions remain unchanged.
+`ui-refresh.css` is the exact previously independently reviewed draft (5rem manual
+viewport, 8rem canvas floor, `calc(13rem + 52px)` conditional grid minimum and writing
+focus override). Actual visual proof is still missing. `qualify-story-logic.py` adds
+four embedded Tauri-text inputs and the eight Phase1H expected/asset inputs;
+`test_story_logic_evidence.py` extends the existing exact path/hash coverage oracle
+and exercises binary bytes. Static manifest inspection yields **213 inputs**, exactly
+twelve added, with the original201 receipt unchanged. The twelve bytes match their
+supplementary hashes and successful round8 Git inputs. No SDK behavior changed.
+
+**Separate combined self-review, not independent review:** reviewed all four diffs
+after preparation against the retained round9 fixture and production handlers/core.
+No additional concrete harness mismatch was found. The case6 draft has no confirmed
+completed independent review; the new manifest/oracle changes have self-review only.
+Existing independent CSS and earlier code/recovery reviews are reused for unchanged
+inputs. Under the one-agent restriction, a fresh independent agent review is unavailable;
+user review or an explicit decision accepting self-review for these changes is needed
+before the selected independent-review prerequisite can be satisfied or superseded.
+
+| Remaining case | Production trace and retained assertions | Current classification |
+| --- | --- | --- |
+| 6 — deletion/unwrap | `scene-ui.ts` counts separate non-header members; structural Remove deletes the lexical group; leaf removal emits pass; Unwrap keeps/reindents the chosen body with its IDs. Draft matches captured v5 ranges, including BOM/Unicode offsets. Undo/Source restoration must recover IDs before leaf/unwrap actions. | Stale harness count corrected; journey execution missing. |
+| 7 — preview/navigation | Preview stops at unselected condition, selected Return and Choice; selecting preview redraws only preview and preserves pending Choice input. Branches handlers use exact origin/continuation/body revision and range. Source helper waits typed open/current path/tab/session/idle editor; route controls rebuild synchronously after their accepted model. | No further concrete static mismatch; DOM/Host journey and clipping proof missing. |
+| 8 — drafts/refusal | Tree guards preserve drafts and lock pending writes; one validated response is held after real dispatch. Dirty Source uses normal retention/discard; unchanged source hashes after Undo support captured base revision. Exact whole snapshot and pending-input checks remain. | Missing actual pending/dirty refusal proof. |
+| 9 — external edit | Owned append is the only external-write helper; stale captured revisions must refuse with SOURCE_CONFLICT and full snapshot equality. Source open reconciles ordinary external bytes, clean toolbar Save uses project.flush, fresh Story mutation retains the external comment. | Missing actual refusal and refresh proof. |
+| 10 — history/reopen | Last accepted case9 mutation is Undo/Redo target. Close clears the session history cursor; first helper retains root, second uses --reopen and removes it at EOF. Requester refreshes session/document inventory. Exact scenes/map revision/source, reset history and old-session zero-write refusal are mandatory. Failure capture precedes owned removal; observed exit/reaping and normal cleanup remain separate. | Second helper and complete reopen/history proof missing. |
+
+Remaining uncertainties are runtime DOM/readiness timing, map/ID reconciliation over
+the complete restored fixture, two normal separately reaped processes, actual clipping/
+selector reachability at small allocations, and cross-process saved-callee return in
+CI3. Static review does not resolve those uncertainties or establish acceptance.
+No production change was made to accommodate a mistaken harness oracle; the sole
+production draft addresses the already established visual defect.
+
+**Inspection/reuse evidence:** round9 result, transcript, captured failure snapshot and
+201-input hashes match retained receipts. Driver binary plus57 dependencies and SDK-test
+binary plus92 dependencies still match; all69 frontend compilation inputs and60 outputs
+match. Python recipe/coverage inputs changed, so checker11's prior receipt cannot cover
+them. Python source parses and `git diff --check` passes; no suite, build, controller,
+browser, helper or SDK invocation ran. Cumulative usage remains **16/18 core, 10/10
+renderer, 9/9 local validation, 2/3 paired CI**; zero other operations.
+
+**One bounded proposal — NOT APPROVED:**
+
+1. Local cap9→10: once run changed evidence checker11 and the complete production
+   controller with exactly two core-only helpers. Reuse unchanged Rust builds,
+   zero-SDK preflight and compiled frontend only after fresh exact input/binary/output
+   seals. Replay cases1–5 only as the dependent fixture/history prefix for cases6–10.
+   The former controller-only plan must now account for the changed coverage checker.
+   No compiler, frontend suite, install or local SDK/native editor/package/live run.
+2. Renderer cap10→11: one CSS-focused portable browser round using the existing
+   six-level Story fixture and themes/layouts. Inspect default/scaled canvas and
+   unknown-state message, manual selector scrolling/focus, divider20/default/70 and
+   Writing focus; retain vertical geometry and actual screenshots, not only horizontal
+   overflow. Reuse unchanged DOM51/typecheck evidence; no native editor/package/SDK.
+3. Stop at the first failure in either round, retain actual fixture/DOM/typed requests,
+   source/map/input seals and process diagnostics, then reassess the whole remaining
+   journey. No automatic patch/retry or allowance transfer.
+4. After both proofs and the review decision, prepare/review/publish the coherent
+   candidate, then dispatch the one remaining paired CI3 batch once. Keep its exact
+   six SDK cases/twelve adapter processes per host, structural condition command and
+   high-save/safe-caller-edit/later-load-return assertions. Record run identity and
+   pause for manual same-thread resume; no polling or watcher.
+
+Root's proposal remains uncommitted/local-only pending the review/budget decisions;
+HEAD remains74a0361 and published remote remainsedec5a8. No Phase3A acceptance,
+Phase2 advancement, merge, release or CI3 dispatch is claimed.
+
+
+Ignored `single-agent-preparation/inspection.json` binds the four exact proposal hashes
+and static reuse findings; it is not a run/pass receipt. CURRENT620/HANDOVER1341 words
+exceed their review targets because the preserved Phase2 evidence and paused resume
+route remain intact; detailed Phase3 history was removed from the live handover in
+favor of its owning ledger. No unrelated Phase2 work or unique failure evidence was
+removed. Budget/review questions are pending; unanswered questions grant no execution.
+
+
+### Approved cumulative cap14 and self-review — 2026-10-14
+
+The user approved both proposed runs and explicitly set **local validation cap14**
+and **renderer cap14**, accepting clearly labelled self-review under the continuing
+one-agent restriction. No fresh independent review is claimed. Earlier independent
+reviews remain reusable for unchanged inputs. This supersedes the pending cap10/cap11
+and fresh independent-agent review prerequisites. Previous usage stays9 local/10
+renderer; core16/18 and pairedCI2/3 are unchanged. No budget reset/transfer, extra CI
+batch, local SDK/native editor/package/credentials/live operation, merge/release or
+Phase2 advancement is authorized. Execute the bounded prepared runs, retaining and
+reassessing failures before any corrected attempt within the cumulative caps.
+Root's older generated frontend outputs were preserved under ignored
+`root-adapter-prior/`; reuse copies the exact60 sealed validation outputs after verifying
+all69 compilation inputs. No new compilation or test occurred during this preparation.

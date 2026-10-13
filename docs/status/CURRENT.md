@@ -1,44 +1,40 @@
 # Current status
 
-**Updated:** 2026-10-13. **Phase 2: PAUSED — INCOMPLETE. Phase 3A: ACTIVE — INCOMPLETE.**
-The user explicitly resumed Phase 3A. Existing CI1's failed menu cases were audited,
-its driver corrected and independently reviewed, and one approved extra local round
-passed (5/5 consumed). Corrected [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
-attempt 1/exact `cba3c0e`, passed both-host terminal artifact audit. The early SDK gate
-is established; delegated structural implementation continues within the extended
-allowance. Reviewed full structural `ec0c43c` passes 30 focused tests; core 16/18
-is consumed, with failures retained. Narrow renderer `9630c66` passes 34 DOM cases;
-renderer 10/10. Final round 10 passed all 51 DOM cases, typecheck/test compilation,
-production build and nine portable captures with zero runtime errors or page/authoring
-horizontal overflow. Exact seal/capture review passed mechanically; independent visual
-inspection found vertical preview clipping at default sizes, which remains a blocker.
-Full controls `71e3d2a` and reviewed final harness `e31f27a` are integrated on the working branch;
-no Phase 3A acceptance is claimed. Round 9's six failures/skipped build and captures
-are retained. Local round 6 failed on exact `e31f27a` (validation6/7): core driver
-compiled, but SDK-test `--no-run` compilation hit receipt-type inference error E0282.
-Preflight/frontend-Host cases were not run. The minimal receipt type correction is
-independently clear, and corrected helper input coverage is integrated as `50e1ee3`.
-Final round 7 failed (validation7/7): checker11, SDK-test compilation and zero-SDK
-preflight passed; actual helper fixture seeding was refused before any DOM case,
-followed by abnormal exit and failed normal-cleanup evidence. Static diagnosis is
-double-BOM input to the Source editor API; the SDK caller-edit helper shares the risk.
-The ten-case proof is missing. Prepare/review exactly-one declared-BOM transport and
-failure-retention/exit-report corrections before another local-budget
-decision; no eighth round or final CI3 is authorized. The matching sealed
-renderer adapter was reused. A CSS-only visual
-correction is prepared and independently reviewed; a request for one focused extra
-renderer round (cap11) is pending user approval. Pre-start Sol capacity errors consumed
-no check round, and the requested models were retained.
-Approved cumulative caps
-are core 18, renderer 10 and validation 7; prior usage is
-retained. Paired CI is 2/3 consumed.
-The user authorized delegated Sol 6.1 High implementation and validation of 3A Story
-logic, with review between slices. The qualified shared foundation and first rewrite
-satisfy 3A entry; Phase 2 feedback and final acceptance remain paused and unclaimed.
-Default 3B/3C entry still requires accepted Phase 2/3A. The lead does not poll CI;
-selected CI monitoring belongs to delegated agents under explicit user authority.
-See the [3A selection](../tasks/active/phase-3-initial-wysiwyg-release.md) and
-[Phase 2 resume backlog](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13).
+**Updated:** 2026-10-14. **Phase 2: PAUSED — INCOMPLETE. Phase 3A: ACTIVE — INCOMPLETE.**
+One agent now owns Phase3A; no subagents or CI polling. Reviewed pushes to
+`codex/phase3a-story-logic` remain authorized; no merge or release. Root/validation
+HEAD is `74a0361`; the one-time takeover remote/CI inventory confirms published
+`edec5a8` and no active run. Later BOM/retention and Source-readiness corrections
+remain local-only. Unrelated planning/Phase2 work and preservation refs remain intact.
+
+Completed evidence: corrected [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
+attempt1/exact `cba3c0e`, passes both-host terminal artifact audit and establishes the
+early conditions/calls gate. CI1 remains a retained failure. Structural core30 and
+renderer51 DOM/typecheck/test compilation/build pass. Nine captures pass mechanical
+checks; independent visual review found vertical preview clipping. Local round9 on
+`74a0361` completed five production frontend/core cases, then stopped before deletion
+at a stale three-member oracle. Source-map v5 correctly exposes four members.
+Cases6–10 and the second-process reopen remain unproven; the actual failed snapshot,
+85 accepted requests and one normally exited/reaped helper are preserved.
+
+Root now holds four uncommitted proposal files: the exact preserved four-member oracle,
+exact independently reviewed CSS correction, and final manifest/coverage-oracle additions
+for twelve separately verified SDK compile inputs. Static manifest inventory is213;
+the old201 receipt is unchanged. All remaining cases were traced together in a separate
+self-review. New oracle/manifest changes have **self-review only**, with no confirmed
+independent review. The user approved clearly labelled self-review and both runs with cumulative
+local/renderer caps14 on2026-10-14. No qualification check started. Reused binaries/dependencies/frontend outputs
+match; changed coverage checker evidence must be obtained in an approved round.
+
+Cumulative usage remains **core16/18, renderer10/14, local validation9/14, pairedCI2/3**.
+Both prepared rounds are approved; previous usage remains consumed. CI3 is withheld
+until complete local/visual proof and review; it retains six SDK cases/twelve adapter
+processes per host, including saved-callee/safe-caller-edit return. Local SDK, owner
+native starts, packages, credentials and live model operations remain zero. CI waiting
+uses manual same-thread resume; no watchers. Phase3A remains incomplete.
+See [combined review and bounded plan](../tasks/active/phase-3-initial-wysiwyg-release.md#single-agent-preparation-and-combined-self-review--2026-10-13),
+[HANDOVER](HANDOVER.md) and the separate
+[Phase2 pause backlog](../tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13).
 
 | Capability | Evidence | Disposition |
 | --- | --- | --- |

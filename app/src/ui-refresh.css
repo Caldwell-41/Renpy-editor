@@ -741,7 +741,13 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .condition-combination, .condition-operands { display: flex; flex-wrap: wrap; gap: 12px; }
 .condition-combination > .condition-expression, .condition-operands > .condition-expression { flex: 1 1 220px; min-width: 0; }
 .condition-operands > .field { width: 100%; }
-.illustrative-preview { padding: 8px 12px; max-height: 160px; overflow: auto; flex: none; }
+/* Reserve readable fork controls and canvas without changing the shared divider's percentage bounds. */
+.scene-stack:has(> .preview-region > .illustrative-preview) { grid-template-rows: minmax(calc(13rem + 52px), var(--preview-share)) 8px minmax(100px, var(--beats-share)); }
+.scene-workspace[data-writing-focus="true"] .scene-stack:has(> .preview-region > .illustrative-preview) { grid-template-rows: minmax(0, 1fr); }
+.preview-region:has(> .illustrative-preview) { padding-block: 8px; overflow: auto; }
+.preview-region:has(> .illustrative-preview) > .preview-header { flex: none; }
+.preview-region:has(> .illustrative-preview) > .preview-surround { flex: 1 0 8rem; min-height: 8rem; }
+.illustrative-preview { padding: 4px 12px; box-sizing: border-box; min-height: 5rem; max-height: 160px; overflow: auto; flex: 0 1 160px; }
 .illustrative-preview h3, .illustrative-preview p { margin: 0 0 8px; }
 .illustrative-preview .field { display: inline-flex; flex-direction: column; max-width: 100%; margin: 0 8px 8px 0; }
 .beat-controls { flex-wrap: wrap; }

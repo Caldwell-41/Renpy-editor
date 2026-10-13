@@ -1,173 +1,92 @@
 # Current outcome handover
 
-## Phase 3A — full controls implemented; final proof and budget decisions
+## Phase 3A — one-agent preparation; approved cap14 checks next
 
-Phase 3A is **ACTIVE — INCOMPLETE**, explicitly resumed on 2026-10-13. Phase 2 stays
-**PAUSED — INCOMPLETE** and requires its own separate resume. The user authorized
-GPT-6.1 Sol High delegated implementation, validation and independent review, routine
-slices and reviewed pushes to `codex/phase3a-story-logic`; no merge or release. The
-orchestrator must not poll CI. Delegated monitoring of selected runs is authorized.
+Phase3A is **ACTIVE — INCOMPLETE**. Phase2 stays **PAUSED — INCOMPLETE** and requires
+its own explicit resume. Work as one agent: no spawning, delegation, messaging or
+resuming subagents. Existing independent reviews remain usable for unchanged inputs;
+new self-review must be distinguished. Reviewed branch pushes remain authorized;
+no merge/release. CI follows WORKFLOW's manual same-thread waiting policy, with no
+polling loops, background watchers or automatic wake-up.
 
-Initial resumed root `1bdc532` matched remote and added only pause documentation to
-early `81ee770`. The working branch now includes core `ec0c43c`, full renderer
-`71e3d2a`, final harness `e31f27a` and compile/input correction `50e1ee3`. Original
-detached core `e97be13`, renderer `52c238c` and validation `3a3dabd` remain preserved
-through additive refs/history, alongside every later checkpoint. Renderer `421a241`
-holds the prepared CSS diff; validation `50e1ee3` holds pending harness corrections.
-Keep the Phase 2 branch and unrelated planning worktree (two unpublished commits).
-Never reset these to old prompts.
-Root owns canonical status/task documentation and integration; shared-interface writers
-remain serial. The repository-local noreply identity is intact.
+### Reconciled checkout and publication
 
-### Exact existing CI1 audit
+Root branch `codex/phase3a-story-logic`, HEAD
+`74a0361dec95d75b3aaff31f999090e884588363`, tree
+`3540e9a47635ff48ba38059b5f6c6a0efcb1e97a`. Validation worktree is detached at the
+same HEAD; renderer remains detached at `421a241`; core at `e160464`. The planning
+worktree is clean and retains two unpublished commits. Root initially had three
+uncommitted live records. Original and additive `refs/codex-preserved/` refs, unrelated
+planning and Phase2 branch remain intact. No reset, removal or discarded work.
 
-Delegated validator audited [run 38346032499](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499),
-attempt 1, exact `81ee770dac70181832b0020984545621ee403d9d`, tree
-`1046286ce44b6f4c46892ed86dbe4a24e6744e51`. It ended **failure** at
-2026-10-13T04:27:07Z. Required Windows `115127555940` and Mac `115127555751` both
-failed SDK execution; excluded jobs are not passes. No redispatch occurred.
-Both targets passed 17 named core/preflight checks, seven renderer cases, typecheck,
-test compilation and renderer build. ZIP CRCs/39 files/38 manifest hashes, all 179
-candidate input blobs, architecture, operation counts and privacy scans were audited.
-Ignored `.toolchains/phase3a-validation/ci1-audit/` retains full metadata, logs, exact
-ZIPs/extracted artifacts and audit code/results. Artifacts expire 2026-10-20;
-exact IDs/hashes/expiry and failure receipts belong in the
-[resume ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#resume-and-exact-ci1-failure-audit--2026-10-13).
+One takeover remote/CI inventory confirms published
+`edec5a8dacad2b675682490632a09d601644bf90`; local `9d0eaa9` BOM/retention and
+`74a0361` Source-readiness fixes are unpublished. No active CI. Root now additionally
+holds four uncommitted proposal files: `app/scripts/story-controller-cases.mjs`,
+`app/src/ui-refresh.css`, `app/scripts/qualify-story-logic.py` and
+`app/scripts/test_story_logic_evidence.py`. Oracle/CSS were copied exactly from the
+preserved validation/renderer dirty drafts; those originals are untouched. Repository
+noreply identity is intact. Do not treat local proposals as published/tested inputs.
 
-Four cases per target (`conditions-low/high/boundary`, `nested-call-return`) timed out
-at driver line 29's bare `advance` while the game was at its menu. Each passed all
-13 preceding route/value/Call-depth/return assertions. The all-false continuation
-passed; the wrong-result fixture rejected the intended assertion. Terminal SDK records
-retain `passed=false`, six cases, 12 adapter spawns and all selected operation limits;
-owned cleanup, metadata absence and accepted source preservation passed. A complete
-SDK report is absent. CI1 remains **failed**; corrected CI2 below establishes the early gate without
-claiming 3A acceptance.
+### Completed proof and retained failures
 
-Independent Sol High review identified the pinned SDK driver mechanism: bare advance
-waits for a new dialogue callback, which a choice screen does not produce. The minimal
-repair awaits and asserts the choice screen before the existing route click and keeps
-ordinary advance for no available options. No production fix or threshold relaxation
-is selected. The validator prepared this repair plus shared zero-SDK driver preflight in
-the preserved validation worktree; independent diff review is clear. The sole changed
-file is `app/src-core/src/renpy/tests/phase3a.rs`, committed in the
-validation worktree as `671036a` and integrated as `b5fa01a`. Approved local round 5
-passed locked gate compilation and exact zero-SDK preflight (one pass). No local SDK
-operation or native start ran. Corrected paired CI2 was dispatched once after
-confirming no duplicate candidate run.
+[CI2 run38351419387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
+attempt1/exact `cba3c0e`, passed both-host terminal artifact audits; early SDK gate
+established. [CI1 run38346032499](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499),
+attempt1/exact `81ee770`, remains failed. Existing audits/ZIPs/hashes/expiry belong in
+the [task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#corrected-early-sdk-gate-established--2026-10-13)
+and ignored `ci1-audit/`/`ci2-audit/`; no repeat audit or dispatch without changed state.
+Structural core30 and renderer51 DOM/typecheck/test compilation/production build pass.
+Nine captures pass horizontal/mechanical gates, but independent visual inspection
+found vertical clipping; visual acceptance remains incomplete.
 
-<a id="ready-to-paste-restart-prompt"></a>
+Local rounds6–9 remain failures, with earlier missing round7 original bytes not
+reconstructed. Round9 completed five actual frontend/core cases, then case6 stopped
+before deletion on expected3/actual4 members. Two narrations and separate protected
+Python header/assignment ranges are correct source-map v5 behavior. Cases6–10 and
+second-process reopen remain missing. All85 recorded requests were accepted; one
+helper exited0/observed/reaped and owned cleanup passed. Actual snapshot SHA256
+`ce5b127b00d42db2715245d3e530b2eeb3f0ab5f546857631cbcee5b3fa34b49`, result,
+transcript and201-input hashes were verified unchanged. Preserve all ignored
+`.toolchains/phase3a-validation/local-round9/` evidence and earlier failures.
 
-### Continuation, budgets and remaining acceptance
+### Review and next decision
 
-**Completed operation:** delegated validator audited
-[CI2 run 38351419387](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38351419387),
-attempt 1, dispatched 2026-10-13T05:26:50Z on exact published
-`cba3c0ef707cf149cba5313b3d017102d2f09f66`, tree
-`ad1c996130f5c657ffe5a2d9aa66a61dda3b0a45`. Required Windows `115144462084` and
-Mac `115144462200` passed; run ended success at 2026-10-13T05:33:09Z. Both hosts pass
-17 core/preflight names, seven renderer cases and all six SDK outcomes. All four prior
-menu failures now pass 16 assertions; no-option passes and wrong-result rejection
-matches its oracle. ZIP CRCs/40 files/39 hashes, 179 exact candidate inputs, SDK logs/
-reports/case receipts, counts, privacy, source/metadata/cleanup and controller reaping
-all match. Older excluded jobs are not passes. The lead did not poll. Ignored
-`ci2-audit/` retains the terminal audit and exact artifacts; hashes/expiry belong in the
-owning task. The early conditions/calls gate is **established**. CI3 remains unused and
-is not a blind retry allowance.
+The [combined self-review and bounded plan](../tasks/active/phase-3-initial-wysiwyg-release.md#single-agent-preparation-and-combined-self-review--2026-10-13)
+traces cases6–10 together against production selectors/readiness, ownership, revisions,
+BOM, cleanup and reopen. No further concrete static mismatch was found. Case6 draft
+requires exact four ordered member kinds/texts/protected byte ranges/owner, two headers
+and readable4-Beat confirmation. Existing deletion/Undo/pass/selected-unwrap byte and
+ID assertions remain. This review is **self-review, not independent**. No completed
+independent review of the new oracle/manifest changes is confirmed. A fresh independent
+agent review is unavailable under the one-agent direction: the user explicitly accepted clearly labelled self-review on2026-10-14. Existing CSS independent static
+review is reused for its exact draft; actual visual evidence is still missing.
 
+The final recipe/coverage oracle now includes the twelve missing SDK compile inputs;
+static manifest inventory is213. Original201 receipt remains unchanged. Twelve added
+bytes match supplementary seals and successful round8 Git inputs. Driver plus57 and
+SDK-test plus92 dependency/binary seals, frontend69 compile inputs/60 outputs match.
+Changed Python checker inputs invalidate reuse of checker11 for those changes; no
+suite/build/helper/browser/SDK ran during preparation. Static Python parse/diff checks
+passed. Root proposal remains local-only approved checks next, with no new round started yet.
 
-Cumulative usage does not reset: core **16/18** (first foundation eight, calls/flow
-four, narrow/full structural four); renderer **10/10** (four compatibility plus four
-completed narrow authoring rounds, fourth passed; full-control round 9 failed and
-final round 10 passed); validation
-**7/7** (rounds 6/7 failed); paired CI **2/3**; packages/owner native starts/live model calls **zero**.
-The user explicitly approved the driver-repair fifth local round, then four additional
-core invocations, six authoring renderer rounds and two final validation rounds.
-Original failures and the earlier unexplained descendant-cleanup limitation remain
-in the task ledger. No Phase 2 allowance is transferred.
+Cumulative usage is **core16/18, renderer10/14, validation9/14, pairedCI2/3**. The user approved both prepared runs and cumulative local/renderer caps14. Local proposal covers
+changed checker11 plus full ten-case journey/two normal separately reaped helpers,
+reusing unchanged builds/preflight/frontend after fresh exact seals. Cases1–5 replay
+only as dependent fixture/history prefix. Visual proposal covers CSS clipping at
+existing themes/layouts, default/scaled canvas/message, selector focus/scroll,
+divider20/default/70 and Writing focus with vertical metrics/screenshots. Both stop
+on first failure, preserve actual evidence and reassess before any further request.
+The old ignored controller-only round10 plan needs the changed checker accounted for.
 
-Reviewed explicit-body checkpoint `e8c6c7c` is integrated as `de5d17f`: only
-`insertBodyBeat`/`updateBodyBeat` are exposed, with source-derived root/branch ownership,
-immediate-sibling positions, captured revisions, candidate transfer checks and unchanged
-source-map v5/AI permissions. Review closed new-fallthrough and selected-Scene lexical
-boundary gaps. Invocation 13 remains failed (21 pass/one wrong expected wire error/
-one ignored SDK); invocation 14 passed 24/0/one ignored SDK. No local SDK ran.
-
-The full reviewed structural core `e160464` is integrated as `ec0c43c` after
-invocation 16 passed 30 focused cases/zero failed/one ignored SDK gate. Invocation 15's
-unsupported root-promotion fixture failure is retained. Condition/branch commands,
-subtree move/remove, selected unwrap and canonical pass are implemented under
-[ADR 0016](../adr/0016-explicit-body-story-authoring.md); two core checks remain unused.
-Narrow reviewed renderer `d481179` is integrated as `9630c66`; repaired round 8 passed
-34 DOM cases/typecheck/compilation/production build. Prior three failed authoring rounds
-and non-started model-capacity interruption remain in the ledger. Full controls now
-used the final two rounds 9/10 after reviewed broad-core integration. Round 9 failed:
-typecheck/test compilation passed,
-51 DOM cases had 45 passes/six failures/zero skipped or cancelled. Build/nine captures
-were skipped. The independently clear focused correction passed round 10 once:
-all 51 DOM cases/zero failed/skipped/cancelled/todo, typecheck/test
-compilation, production build and nine portable captures with zero runtime errors or
-horizontal page/authoring overflow. Exact seal/capture review and checkpoint integration
-are complete mechanically, with all 105 input hashes and 51 names matched. Full controls
-`421a241` are integrated as `71e3d2a`; final reviewed harness `b675a50` is integrated as
-`e31f27a`. Exact delegated/root file equivalence passed. Independent visual inspection
-found default-size **vertical preview clipping**, especially the laptop canvas/message,
-despite horizontal metrics passing. Prepare a minimal shrinkable/scrollable manual-panel
-correction. Its scoped minimum selector/canvas viewport and writing-focus override are
-now clear by independent static review; the focused extra-round request (cap11) is
-pending user approval. 10/10 remains exhausted; no new visual check may start meanwhile.
-Sol capacity errors occurred before new work/checks, without a model switch.
-Local validation round 6 failed on exact `e31f27a`: locked helper build passed, but
-SDK-test `--no-run` failed E0282 receipt-type inference. Preflight/full ten DOM/Host
-cases did not run; helper starts zero. The explicit receipt type correction is clear;
-the corrected embedded dependency manifest and receipt type are integrated as `50e1ee3`.
-Final local round 7 failed on that exact candidate: checker11, SDK-test compilation
-and zero-SDK preflight passed, but the helper fixture seed received `INVALID_SOURCE`
-and panicked before any DOM case. One helper started/abnormally exited; normal cleanup
-and reaping report did not pass. Static owner/reviewer diagnosis is double-BOM Source
-editor transport, also present in the SDK caller-save helper. Actual exit101 was
-observed/awaited; the old report conflates normal exit with reaping. Failed fixture
-bytes were removed before capture, so retain logs/static diagnosis without claiming
-captured originals. Prepare/review exactly-one declared-BOM handling, future failure
-capture and accurate exit/normal-cleanup fields without bypassing production refusal, then
-request a concrete extra validation allowance; 7/7 is exhausted. No eighth round or
-final CI3 execution may start. The full ten-case/two-process proof remains missing.
-Reuse the matching sealed compiled adapter and unchanged
-passed build where valid. Do not retry automatically or dispatch final CI3.
-final CI3 waits for the visual correction and remaining validation. Retain all failures.
-
-Validator prepares the real frontend/host and saved-callee proof, with corrected cleanup,
-read-only scenario helpers, session-history-reset oracle and fail-closed SDK receipts.
-Round 6 used the full reviewed UI/scenario module and exact candidate/input seals.
-SDK source must include an actual
-new structural condition command before the one compile/lint and six cases. Capture
-UI eligibility before controls lock; preserve current owner/session checks. Original
-core/renderer/validation commits have permanent `refs/codex-preserved/` references.
-No reset/rebase/worktree removal. Root owns canonical documentation/integration.
-
-Remaining structural commands use explicit whole-condition nodes, selected branch
-unwrap and safe reindentation; unknown/raw conditions and unqualified opaque crossings
-refuse. Emptied branches use a verified canonical pass. Final frontend proof must use
-real DOM handlers and the normal request/response adapter, captured applicable revisions,
-ordinary external edits/retained input and real second-process reopen. Final SDK cases
-use one fixed raw save slot, isolated saves/tokens, validated saved C state/depth, exact
-safe caller narration edit and loaded return assertions. Missing receipts/load cannot
-fall back to a normal Start. Never upload saves or token keys. Final CI3 remains one
-batch with six cases/12 SDK adapter spawns; no blind retry or ordinal reset.
-
-Remaining acceptance includes typed builder, nested insert/edit/move, Else If/Otherwise,
-Call and guarded Choice editors, explicit parent destinations, collapse/draft protection,
-manual illustrative preview and coherent Branches navigation. Prove the actual frontend-
-to-core path, retained drafts and ordinary external-edit refusal, source/history/reopen,
-save inside a callee and return after a safe surrounding edit on both targets. No package
-or physical native UI proof is claimed by Chrome/DOM/native-service evidence. Phase 3A
-must not be completed until its own acceptance is satisfied. 3B/3C remain unselected
-and retain accepted Phase 2/3A entry requirements.
-
-Development stays on macOS; affected Windows/macOS automated proof uses focused CI.
-Escalate named capability gaps or exhausted budgets; continue routine authorized work
-without checkpoint approval. Root documentation records the resumed state and passing local correction. Preserve
-exact corrected CI2 candidate/run identity after delegated dispatch; docs-only successors
-do not replace its tested inputs.
+After local/visual proof and review, prepare/review/publish the coherent candidate,
+then obtain CI3's exact six SDK cases/twelve adapter processes per host: actual structural
+condition, high saved-callee receipt, safe minimal caller edit with stable labels,
+later-process load and correct return. No fallback Start or extra SDK process. CI3 is
+not dispatched; after authorized dispatch record exact run/attempt/candidate and pause
+for user resume/terminal audit. No blind retry. Development remains on Mac; final
+affected Windows/macOS evidence uses CI. Local SDK/native editor/package/credential/
+live-model counts stay zero. No Phase3A completion until every criterion is satisfied.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 

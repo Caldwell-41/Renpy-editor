@@ -43,6 +43,11 @@ def input_manifest(repo):
     files.update((app / 'scripts').glob('*story*'))
     files.update((app / 'src-core/prompts/v1').glob('*.txt'))
     files.add(repo / 'tests/fixtures/source-foundation/scene.rpy')
+    # Embedded by core tests even when only the focused SDK gate is selected.
+    files.update(app / p for p in ('src-tauri/build.rs', 'src-tauri/tauri.conf.json',
+        'src-tauri/capabilities/main.json', 'src-tauri/permissions/core-request.toml'))
+    files.add(repo / 'tests/fixtures/phase-1h/expected.json')
+    files.update((repo / 'tests/fixtures/phase-1h/assets').glob('*'))
     files.update((repo / 'spikes/renpy-sdk').glob('*.py'))
     return {p.relative_to(repo).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in sorted(files) if p.is_file()}

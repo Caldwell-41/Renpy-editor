@@ -98,11 +98,17 @@ class Evidence(unittest.TestCase):
                      'app/scripts/scan-artifacts.mjs', 'app/scripts/story-controller.mjs',
                      'app/scripts/story-controller-cases.mjs', 'app/src-core/examples/story-controller-driver.rs',
                      'app/src-core/prompts/v1/rewrite-dialogue.txt', 'tests/fixtures/source-foundation/scene.rpy',
-                     'app/tests/fixtures/reference-library/manual-save.json', 'spikes/renpy-sdk/archive_safety.py')
+                     'app/tests/fixtures/reference-library/manual-save.json', 'spikes/renpy-sdk/archive_safety.py',
+                     'app/src-tauri/build.rs', 'app/src-tauri/tauri.conf.json',
+                     'app/src-tauri/capabilities/main.json', 'app/src-tauri/permissions/core-request.toml',
+                     'tests/fixtures/phase-1h/expected.json', 'tests/fixtures/phase-1h/assets/alex.png',
+                     'tests/fixtures/phase-1h/assets/bell.wav', 'tests/fixtures/phase-1h/assets/booth.png',
+                     'tests/fixtures/phase-1h/assets/morgan.png', 'tests/fixtures/phase-1h/assets/riverside.png',
+                     'tests/fixtures/phase-1h/assets/rooftop.png', 'tests/fixtures/phase-1h/assets/theme.wav')
             for path in paths:
                 file = root / path
                 file.parent.mkdir(parents=True, exist_ok=True)
-                file.write_text('public fixture ' + path, encoding='utf-8')
+                file.write_bytes(b'\x00\xff' + path.encode('utf-8'))
             manifest = recipe.input_manifest(root)
             self.assertEqual(set(manifest), set(paths))
             for path in paths:
