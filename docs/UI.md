@@ -1242,7 +1242,7 @@ staleness, cancellation and refusals retain the author’s input and ordinary gu
 Native/platform proof is tracked in the selected task; UI availability alone does not
 establish full Phase2 or human acceptance.
 
-## Studio assistance refinement — 2026-10-13 implementation, qualification pending
+## Studio assistance refinement — 2026-10-13, scoped portable proof passed
 
 The user approved the [refinement direction](design/phase-2-llm/studio-refinement-2026-10-13/README.md).
 Settings groups Connection, Saved key and Response defaults, with advanced and
@@ -1273,6 +1273,7 @@ widths. Prompt/scope tabs have arrow/Home/End traversal and associated panels;
 prompt save/restore/Undo and draft protection retain their existing contract.
 
 The [owning task](tasks/active/phase-2-initial-llm-assistance.md#studio-ui-refinement-selection-and-finite-allowance--2026-10-13)
-owns changed-input evidence and limits. These are implemented UI contracts, not
-native qualification or final human acceptance claims. Frozen929 technical proof
-remains valid for unchanged core/source/storage/SDK behavior.
+owns changed-input evidence and limits. [CI1run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511)
+passes both-target renderer/controller-service proof at462cf08 with independent audit.
+These contracts do not claim new packaged native interaction or human acceptance.
+Frozen929 technical proof remains valid for unchanged core/source/storage/SDK behavior.

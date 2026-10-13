@@ -8451,7 +8451,121 @@ No more local test/browser rounds, duplicate CI, automatic polling/wake or feedb
 session. Actual manual same-thread pause follows WORKFLOW; resume on user command.
 Human acceptance remains unclaimed; ordinary profile/key and frozen evidence intact.
 
+#### UI refinement CI1 terminal audit and delivery — 2026-10-13
+
+User resumed **“Audit CI and continue”**. Exact run38324391511/attempt1/exact
+462cf0897eb84d34390d68634f0b8cb2345d7a48/tree
+d3dfeace9ad1493bb42395305ab0f6d210ce13c4 completed success2026-10-12T23:57:35Z.
+Windows115059587083 and Mac115059587332 passed every required step. Unrelated jobs
+were intentionally excluded, not required passes. No candidate/product changes since
+dispatch: current branch successors changed only status/task docs.
+
+ArtifactW11780670629 ZIPsha256
+34b64d18a8f30741ca5c0c9a57c8fe9c2a8ebeb61ba0f368b2675325938849f1;
+M11779794670 ZIPsha256
+7cfe0647dfadfcf8c0993b7cd2eac7efe40337f0c2c8a0ea343a3f422f943b2d.
+Both exact ZIP/extracted contents,43-file manifests,candidate/tree,36PNG dimensions/
+CRCs/decoded image data and eight exported fixture-source hashes independently
+verified. Artifacts expire2026-10-19T23:56:53Z/23:56:05Z. Ignored
+`.toolchains/phase2-ui-refinement/ci1-audit/` retains ZIPs, metadata, logs and repeatable
+read-only audit.py/audit.json. Both artifact privacy scans passed41files before
+candidate/tree/manifest metadata was sealed.
+
+Each target: typecheck/test compilation/production renderer build pass;32DOM cases
+passed,0failed/cancelled/skipped.36renderer captures span all six affected surfaces,
+both themes,wide/compact/large-interface;0runtime errors or page-wide overflow.
+Recorded Assist primary actions remain visible in all layouts. Final nonmodal and
+unfinished-poll focus regressions pass on both targets. Controlled actual controller
+→native service proof passes all five actions plus Edit Scene selection, exact sends,
+passive reviews,separate saved-reference approval, generated-reference staleness,
+dependency-invalid zero writes,valid partial subset saved once,protected/custom source,
+mixed project Undo/Redo,project/process reopen,zero reopen HTTP and owned root/listener
+cleanup. No ordinary user profile/key was accessed by the fixtures.
+
+Primary owner inspected12representative actual images; the same requested Sol6.1/high
+agent independently audited exact ZIPs/manifests/results and six representative images
+across both hosts/themes/layouts/all affected surfaces. **Independent terminal audit
+passes; no supported remaining blocker.** Rapid-resize framing from local browser5
+does not occur in inspected CI captures; improved settling/closed-detail metrics are
+in the tested harness. Fixture navigation is schematic. Reference approval controls
+are below the initial compact viewport but remain in the scrollable comparison flow;
+no claim that every reference action is permanently pinned.
+
+Concrete same-owner renderer comparison:1440×900 proposed card view height2540→684px,
+lore2071→684px; JSON/form-first review becomes prose-first. Settings Save was below
+the initial viewport and is now visible at wide/compact/scaled sizes. Assist previously
+had seven simultaneous toolbar actions/two primary styles; it now shows one primary
+per actionable stage with complete-send/apply always reachable in the recorded layouts.
+These measure public renderer fixtures, not packaged native or human acceptance.
+
+Outcome **review_ready**: bounded refinement delivered at462cf08; no further CI needed
+or pending. Counts remain pairedCI1/2,local3/3,browser5/5,images2/3,signed builds0/2,
+editor native starts0/4. Unused allowances are not reasons to execute. Preserve the
+three earlier local/browser harness failures and frozen929/CI9 evidence. No new signed
+package/Tauri WebView physical input/screen-reader/native UI proof claimed. Core/native
+credential/storage/SDK/transaction paths are unchanged and reuse qualified evidence.
+No paid/live sends,model discovery/installations,expanded product scope,merge/release.
+Final human acceptance remains unclaimed. The separate feedback prompt below is
+prepared only; no new chat/session/operation has started.
+
+#### Prepared guided feedback session — not started
+
+This is a separate, plain-language feedback outcome with status `not_started`.
+It does not reuse unspent refinement allowances automatically or request Phase2 sign-off.
+The installed frozen929 package must not be presented as containing this refinement.
+Start with recorded current-candidate screenshots unless a matching refined build is
+already available; native packaging/testing needs its own selected scope and allowance.
+
+Paste-ready prompt for the user's later session:
+
+```text
+Guide me through feedback on the completed Studio-only Phase2 UI refinement in
+Caldwell-41/Renpy-editor, continuing codex/provider-qualification. Read AGENTS.md,
+CURRENT/HANDOVER, the UI-refinement delivery and this prepared feedback section,
+and the accepted UI guidelines. The tested refinement source is462cf08; its audit
+is run38324391511, attempt1. Frozen929 is older packaged UI, not the refined build.
+
+This is a feedback session, not new implementation or automatic acceptance. Use
+plain language, one short question at a time, and keep a compact record of what
+feels clear, crowded or uncertain. Explain the visible screen before asking.
+
+First establish which view we are discussing: the recorded public-fixture screenshots,
+or an already available matching refined app. If a matching build is unavailable,
+use the screenshots and be explicit about that limit. Do not build/install/launch
+or run new technical checks merely to start feedback; select any necessary native
+work separately. Never present the older installed app as the new refinement.
+
+Walk through these five journeys in order, allowing me to stop or skip:
+1. Settings: finding the connection, saved-key status, response defaults and setup
+   readiness; whether Save and advanced controls are easy to find.
+2. Assist preparation: recognizing the target, writing a task, choosing references
+   and understanding request limits. Ask what I expect the next action to do.
+3. Inspect send and review: understanding where content goes, inspecting the exact
+   request, comparing Saved/Proposed text and distinguishing Generate from applying
+   and saving. Keep generated text passive; no live send.
+4. Character cards and Lorebook: distinguishing direct manual edits from saved
+   generated proposals, separate approval and inclusion in a request. Ask whether
+   selection, changed supporting material and the comparison feel clear.
+5. Compact/dark/larger text and recovery: whether actions remain reachable and
+   failure, cancellation, dirty input and source changes explain what to do next.
+   Keep unfinished work and ordinary history intact.
+
+Use harmless public fixture content. Preserve the ordinary saved Studio profile/key;
+never ask for it again while configured or read/export/remove it. No paid/live sends,
+model discovery/installations, storage/signing changes, source rewriting, generic
+providers, Phase3, route context, AI endings/connections, thinking/streaming expansion,
+merge or release. Do not trigger setup tests/discovery as part of observing layout.
+
+Separate preferences from demonstrated defects. Record supported problems and
+proposed follow-up scope; do not silently begin repairs. End with a short account
+of feedback and unresolved points. Do not infer final human acceptance from my
+observations or from an automated pass; acceptance remains an explicit decision.
+```
+
 #### Requested next UI-refinement prompt — prepared, not executed
+
+Historical prepared prompt: subsequently selected and implemented in the refinement
+records above; the prepared feedback session now owns the next user-selected outcome.
 
 ```text
 Refine the existing Studio-only Phase 2 assistance UI in Caldwell-41/Renpy-editor,

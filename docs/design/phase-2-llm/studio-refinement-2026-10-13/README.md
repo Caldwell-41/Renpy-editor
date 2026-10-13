@@ -83,11 +83,30 @@ The same Sol/high agent independently inspected both boards and accepted the des
 direction for presentation **with the written corrections above**. No visual scope
 blocker remains under those corrections; this review is not implementation proof.
 
-The user approved both boards and written corrections on2026-10-13. Renderer
-refinement and independent-review fixes are implemented; changed-input qualification
-is pending. Complete local baseline and after captures now exist (36each); three
-earlier incomplete attempts remain failures. Saved-key storage and core transaction
-code are unchanged. Current candidate CI will capture the later prose/key hierarchy
-corrections and check32DOM cases plus real controlled controller/service integration.
-No new editor package/native UI proof, model discovery, paid/live send, merge, release
-or human acceptance is claimed. Guided feedback follows delivery and is not started.
+The user approved both boards and written corrections on2026-10-13. The refinement
+is **review_ready** at462cf08. [CI1run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511),
+attempt1, passed on Windowsx64/macOSARM64 and was independently audited:32DOM cases
+and36renderer captures per host, no failures/skips/runtime errors/page overflow,
+controlled controller/native-service five-action/selectable/history/reopen/cleanup
+proof. Both ZIP digests and43-file manifests match; final focus regressions pass.
+Core/source/history/key storage and frozen929 technical evidence remain intact.
+
+| Public renderer comparison | Before | Delivered candidate |
+| --- | --- | --- |
+| Proposed card review at1440×900, same owner browser | 2540px view; long frozen form and JSON precede the decision | 684px view; readable saved/proposed prose leads the decision |
+| Proposed lore review at1440×900 | 2071px view | 684px view |
+| Settings Save at initial wide/compact view | Below initial viewport | Visible, with draft state |
+| Assist toolbar | Seven actions; two primary styles | One primary per actionable stage, reachable in wide/compact/scaled captures |
+| Horizontal viewport overflow | None measured | None on both CI hosts |
+
+Complete baseline/after and exact CI screenshots/metrics remain in ignored
+`.toolchains/phase2-ui-refinement/`; the owning task records exact digests and audit
+limits. Local rapid-resize image limitations remain historical; settled CI screenshots
+establish the delivered inputs.12owner and six independent representative actual
+captures were inspected across hosts/themes/layouts/surfaces. Fixture navigation is
+schematic; compact reference approval is reached by scrolling its comparison.
+
+No new editor package/Tauri WebView physical interaction/screen-reader/native UI proof,
+model discovery, paid/live send, merge, release or human acceptance is claimed.
+The [guided feedback prompt](../../../tasks/active/phase-2-initial-llm-assistance.md#prepared-guided-feedback-session--not-started)
+is prepared as a separate session and has not started.

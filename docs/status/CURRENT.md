@@ -1,33 +1,29 @@
 # Current status
 
-**Updated:** 2026-10-13. **Studio-only Phase 2 technical closeout is review_ready.**
-CI9 and its independent artifact/native audit pass. Final human acceptance remains
-unclaimed. The approved UI refinement is implemented with independent-review fixes;
-focused changed-input CI1 is running on Windows/macOS. Guided feedback has not started.
+**Updated:** 2026-10-13. **Studio-only Phase2 technical closeout and UI refinement are
+review_ready.** Final human acceptance remains unclaimed. The separate guided-feedback
+prompt is prepared; no session, external operation or further CI is pending.
 
-| Capability | Exact evidence | Disposition |
+| Capability | Evidence | Disposition |
 | --- | --- | --- |
-| Five actions, generated references, prompts, selectable subset | Frozen929 owner live/native chain; separately approved exact revisions, zero-write invalid subset, one valid save, Undo/Redo and project/process reopen. CI1 controlled Windows integration reused. | Scoped technical proof passed; failed live send7 retained. |
-| Sampling/setup/HTTPS | Both-target CI1 core/renderer/worker/TLS proof; owner saved-key setup; CI9 actual Windows defaults/sampling/native credential/setup/invalidation/cancel/readiness/reopen. | Scoped technical gap closed. Literal IPv6 HTTPS remains unsupported; live TLS not newly measured. |
-| Game and SDK | Owner native Validate/Run/Stop and exact metadata-free SDK05 named12+init12 assertions independently audited. | Passed on final authored source; earlier failures retained. |
-| Packages and cleanup | Signed Mac package1 and exact CI1 Windows executable reused. CI9 two normal exits0, owned profile/reference/root/listener cleanup, source/profile preservation and privacy pass. | Ordinary saved Studio profile/key preserved; no new product build. |
-| UI refinement | Approved boards, Sol6.1/high research/review fixes, complete local before/after renderer captures. | [CI1run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511) pending at462cf08; final32DOM/build/renderer/service proof awaits audit. Local3/3 and browser5/5 spent; no new package/native UI proof claimed. |
-| Human/following work | Technical reviews pass; refinement implementation follows design approval. | Human acceptance unclaimed; guided feedback unstarted. |
+| Studio actions, generated references, prompts, selectable subset | Frozen929 owner live/native chain and controlled CI; new UI CI1 actual controller/native service all-five/selectable/exact-send/separate approval/invalid-zero-write/valid-subset/history/reopen/cleanup. | Scoped technical proof preserved; failed live send7 retained. |
+| Sampling/setup/HTTPS | Frozen929 combined worker/TLS/SDK and saved-key owner/CI9 Windows native setup/invalidation/cancel/reopen. New UI Settings draft/validation/readiness/cancel DOM regressions pass both targets. | Ordinary profile/key unchanged. LiteralIPv6HTTPS unsupported; liveTLS not newly measured. |
+| Game, SDK and packages | Owner native Validate/Run/Stop and metadata-free SDK05; signed Mac package1/exact Windows executable reused for unchanged paths. | No new editor package or physical native UI proof for the renderer refinement. |
+| UI refinement | [UI CI1run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511), attempt1/exact462cf08/tree d3dfeace;32DOM and36renderer captures per host, builds/controlled service/privacy/cleanup pass. Exact ZIPs/43-file manifests and representative screenshots independently audited. | Implemented and review_ready. Both themes/wide/compact/scaled; no runtime errors/page overflow; final focus findings closed. |
+| Human/following work | [Prepared guided-feedback prompt](../tasks/active/phase-2-initial-llm-assistance.md#prepared-guided-feedback-session--not-started). | Not started. Observations will not imply human acceptance. |
 
-Behavioral baseline5f593225fad2ebdb2970663d56ee83631b27ecef; frozen product
-929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree9f034ca6cae69ef11e87d6a95a332152a9998eaa/
-269input digest3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd.
-External native-driver repair30b18f2 is separate from that packaged product.
+Refinement source462cf0897eb84d34390d68634f0b8cb2345d7a48; docs-only successors do not
+change tested inputs. Counts: pairedUI CI1/2,local3/3,browser5/5,images2/3,signed
+builds0/2,editor native starts0/4. Earlier harness failures retained; unused allowance
+is not a reason to rerun. Chrome/DOM/native-service proof is distinct from packaged
+WebView physical interaction, screen-reader or human acceptance.
 
-[CI9run38317425509](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38317425509),
-attempt1/harness30b18f2/tree7cef4bf, completedsuccess2026-10-12T22:36:00Z.
-Both jobs/ZIPs/manifests/product269/harness7/PSCRLF/CI1exe audited. Win18+11,
-Mac18+7 no skips; all nine required Windows stages and actual screenshots pass.
-Starts8/PID9272 and9/PID8824 exit0; exactly3 synthetic POSTs/cancelled socket,
-zero save/reopenHTTP and complete owned cleanup. CI2–8 remain historical failures.
-
-Counts: pairedCI9 per target; Windowspackage1/3/starts9; ownerMacpackage1/3/starts5/6;
-hostedMacstarts0; live8/10/Rewrite3/4/discovery0. No further CI needed or pending.
-No merge/release, provider expansion/Phase3, route context or AI ending/connection
-changes. [Final audit and next prompt](../tasks/active/phase-2-initial-llm-assistance.md#ci9-terminal-audit-and-scoped-technical-closeout--2026-10-13)
-own exact proof/failures/limits; [HANDOVER](HANDOVER.md) owns continuation.
+Frozen product929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree9f034ca6/
+269input digest3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd;
+behavioral baseline5f593225fad2ebdb2970663d56ee83631b27ecef. External driver30b18f2 is
+separate. [Frozen CI9](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38317425509)
+terminal audit/Windows native screenshots/owned cleanup passed; historical CI2–8
+remain failures. Detailed exact evidence/limits reside in the [owning task](../tasks/active/phase-2-initial-llm-assistance.md#ui-refinement-ci1-terminal-audit-and-delivery--2026-10-13);
+[HANDOVER](HANDOVER.md) owns continuation. No merge/release, generic providers/Phase3,
+route context, AI ending/connection, thinking/streaming, signing/storage-policy change,
+model discovery/installations or paid/live sends.
