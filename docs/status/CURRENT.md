@@ -14,7 +14,7 @@ renderer51 DOM/typecheck/test compilation/build pass. Nine captures pass mechani
 checks; independent visual review found vertical preview clipping. Local round9 on
 `74a0361` completed five production frontend/core cases, then stopped before deletion
 at a stale three-member oracle. Source-map v5 correctly exposes four members.
-Cases6–10 and the second-process reopen remain unproven; the actual failed snapshot,
+Local round10 now passes all ten cases and two-process reopen; the actual failed snapshot,
 85 accepted requests and one normally exited/reaped helper are preserved.
 
 Root now holds four uncommitted proposal files: the exact preserved four-member oracle,
@@ -23,10 +23,10 @@ for twelve separately verified SDK compile inputs. Static manifest inventory is2
 the old201 receipt is unchanged. All remaining cases were traced together in a separate
 self-review. New oracle/manifest changes have **self-review only**, with no confirmed
 independent review. The user approved clearly labelled self-review and both runs with cumulative
-local/renderer caps14 on2026-10-14. No qualification check started. Reused binaries/dependencies/frontend outputs
+local/renderer caps14 on2026-10-14. Local round10 passed checker11 and all ten production cases; visual11 is next. Reused binaries/dependencies/frontend outputs
 match; changed coverage checker evidence must be obtained in an approved round.
 
-Cumulative usage remains **core16/18, renderer10/14, local validation9/14, pairedCI2/3**.
+Cumulative usage remains **core16/18, renderer10/14, local validation10/14, pairedCI2/3**.
 Both prepared rounds are approved; previous usage remains consumed. CI3 is withheld
 until complete local/visual proof and review; it retains six SDK cases/twelve adapter
 processes per host, including saved-callee/safe-caller-edit return. Local SDK, owner

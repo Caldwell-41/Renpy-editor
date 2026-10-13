@@ -43,8 +43,7 @@ found vertical clipping; visual acceptance remains incomplete.
 Local rounds6–9 remain failures, with earlier missing round7 original bytes not
 reconstructed. Round9 completed five actual frontend/core cases, then case6 stopped
 before deletion on expected3/actual4 members. Two narrations and separate protected
-Python header/assignment ranges are correct source-map v5 behavior. Cases6–10 and
-second-process reopen remain missing. All85 recorded requests were accepted; one
+Python header/assignment ranges are correct source-map v5 behavior. Local round10 on `be06333` passes all ten cases and two separately reaped helpers. All85 recorded requests were accepted; one
 helper exited0/observed/reaped and owned cleanup passed. Actual snapshot SHA256
 `ce5b127b00d42db2715245d3e530b2eeb3f0ab5f546857631cbcee5b3fa34b49`, result,
 transcript and201-input hashes were verified unchanged. Preserve all ignored
@@ -68,9 +67,9 @@ bytes match supplementary seals and successful round8 Git inputs. Driver plus57 
 SDK-test plus92 dependency/binary seals, frontend69 compile inputs/60 outputs match.
 Changed Python checker inputs invalidate reuse of checker11 for those changes; no
 suite/build/helper/browser/SDK ran during preparation. Static Python parse/diff checks
-passed. Root proposal remains local-only approved checks next, with no new round started yet.
+passed. Root proposal remains local-only local10 passed; focused visual11 is next.
 
-Cumulative usage is **core16/18, renderer10/14, validation9/14, pairedCI2/3**. The user approved both prepared runs and cumulative local/renderer caps14. Local proposal covers
+Cumulative usage is **core16/18, renderer10/14, validation10/14, pairedCI2/3**. The user approved both prepared runs and cumulative local/renderer caps14. Local proposal covers
 changed checker11 plus full ten-case journey/two normal separately reaped helpers,
 reusing unchanged builds/preflight/frontend after fresh exact seals. Cases1–5 replay
 only as dependent fixture/history prefix. Visual proposal covers CSS clipping at

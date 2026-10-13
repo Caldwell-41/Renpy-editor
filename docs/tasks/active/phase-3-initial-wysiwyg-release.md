@@ -2107,3 +2107,36 @@ reassessing failures before any corrected attempt within the cumulative caps.
 Root's older generated frontend outputs were preserved under ignored
 `root-adapter-prior/`; reuse copies the exact60 sealed validation outputs after verifying
 all69 compilation inputs. No new compilation or test occurred during this preparation.
+
+
+**Local validation10 terminal pass:** exact `be0633352c1e36931b99cc86799e891663c4fcef`,
+tree `2836ed584e0afa20aaeb18d49118bfd479c9748c`, full213-input manifest SHA256
+`598d8beb00af7bd8e9f7cd8faef325404920a7e802f6005106b475d94887d544` unchanged
+through execution. Changed checker11 passed0.16s; full production controller passed
+15.28s, all ten exact cases,243 typed requests. Both core-only helpers exited0,
+observed/reaped and owned cleanup passed. Deletion/Undo/pass/selected unwrap, manual
+preview/mapped navigation, cancellation/pending controls, DIRTY_SOURCE and ordinary
+SOURCE_CONFLICT zero-write snapshots, fresh external revision, Undo/Redo and second
+OS-process reopen/map persistence/history reset/stale-session refusal pass. The
+previous five cases replayed only as required fixture state. Unchanged sealed binaries,
+zero-SDK preflight and frontend outputs were reused; no Rust/renderer compilation,
+local SDK/native editor/package/credential/live operation. Original failures remain.
+Ignored `local-round10/` retains identity, input/reuse seals, checker/controller logs,
+full reports/transcript. This is self-audited under user approval, not independent
+review. Usage **local10/14, renderer10/14, core16/18, pairedCI2/3**.
+
+**Prepared visual11 harness and separate self-review:** the existing browser capture
+script gains explicit `--preview-proof` mode, preserving its original authoring mode.
+It uses the same seven fork selectors/six-level fixture and actual divider keyboard/
+Writing-focus handlers. Twenty screenshots cover both themes/four default layouts,
+laptop/scaled20/70 allocations and Writing focus. Named readiness waits for actual
+ResizeObserver geometry, never arbitrary delays or added timeouts; vertical canvas/
+message visibility and selector internal scroll/focus are asserted. Partial result,
+failure screenshot/DOM and errors are retained before browser/server cleanup. Core
+writes remain refused by the renderer fixture. Separate self-review traced the mode
+against production ResizeObserver, divider2-point clamping and Writing-focus rules.
+No bypass of production actions or independent review is claimed. Node syntax/diff
+checks pass. The browser script is an already-covered runtime test input, not a changed
+TypeScript compilation dependency; prior DOM51/typecheck proof is reused. This changed
+harness does not invalidate the production controller's actual input/binary equivalence.
+Next execute one CSS-focused renderer round11; no CI3 until actual visual inspection.
