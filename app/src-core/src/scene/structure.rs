@@ -1,7 +1,50 @@
 //! Explicit-body Beat edits over verified disjoint source ranges.
 use super::*;
+mod operations;
+
+pub(super) enum StructuralEdit {
+    InsertCondition {
+        body: BodyRef,
+        position: Position,
+        condition: crate::conditions::Condition,
+        otherwise: bool,
+    },
+    UpdateBranch {
+        group_id: String,
+        branch_id: String,
+        expected_body: BodyRef,
+        condition: crate::conditions::Condition,
+    },
+    AddBranch {
+        group_id: String,
+        expected_body: BodyRef,
+        before_branch_id: Option<String>,
+        condition: Option<crate::conditions::Condition>,
+    },
+    RemoveBranch {
+        group_id: String,
+        branch_id: String,
+        expected_body: BodyRef,
+    },
+    Move {
+        node: NodeRef,
+        expected_body: BodyRef,
+        body: BodyRef,
+        position: Position,
+    },
+    Remove {
+        node: NodeRef,
+        expected_body: BodyRef,
+    },
+    Unwrap {
+        group_id: String,
+        branch_id: String,
+        expected_body: BodyRef,
+    },
+}
 
 pub(super) enum BodyEdit {
+    Structural(StructuralEdit),
     Insert {
         body: BodyRef,
         position: Position,
@@ -124,6 +167,7 @@ impl AuthoringService {
             Some((&loaded.project, &loaded.authoring)),
         )?;
         let edit = match edit {
+            edit @ BodyEdit::Structural(_) => edit,
             BodyEdit::Insert {
                 body,
                 position,
@@ -169,11 +213,12 @@ impl AuthoringService {
             }
         };
         let transfer_edit = match &edit {
+            BodyEdit::Structural(_) => true,
             BodyEdit::Insert { payload, .. } | BodyEdit::Update { payload, .. } => {
                 transfer(payload)
             }
         };
-        let (proposed, forced) = apply(&source, &beats, edit, &loaded)?;
+        let (proposed, forced) = apply(&source, &beats, edit, &loaded, &scene)?;
         logic::validate_conditional_completion(&proposed, &scene, &loaded)?;
         if transfer_edit {
             self.validate_candidate_transfers(
@@ -398,6 +443,7 @@ fn apply(
     beats: &[SceneBeat],
     edit: BodyEdit,
     loaded: &Loaded,
+    scene: &SceneMetadata,
 ) -> Result<(Vec<u8>, Vec<ForcedBeatId>), SceneError> {
     let newline = if source.windows(2).any(|w| w == b"\r\n") {
         "\r\n"
@@ -405,6 +451,7 @@ fn apply(
         "\n"
     };
     match edit {
+        BodyEdit::Structural(edit) => operations::apply(source, beats, edit, loaded, scene),
         BodyEdit::Insert {
             body,
             position,
@@ -446,6 +493,19 @@ fn apply(
             if boundary_is_opaque(beats, insertion) {
                 return Err(SceneError::OpaqueBoundary);
             }
+            let replacing_placeholder = body.owner.is_some()
+                && body.siblings.len() == 1
+                && body.siblings[0].structural_placeholder;
+            let replacement_end = if replacing_placeholder {
+                body.siblings[0].byte_end as usize
+            } else {
+                insertion
+            };
+            let insertion = if replacing_placeholder {
+                body.siblings[0].byte_start as usize
+            } else {
+                insertion
+            };
             let mut rendered = generated_at_indent(&payload, loaded, newline, body.indent)?;
             let mut forced = Vec::new();
             let mut offset = insertion;
@@ -471,7 +531,7 @@ fn apply(
                 Some(offset),
             ));
             let mut output = source.to_vec();
-            output.splice(insertion..insertion, rendered.bytes());
+            output.splice(insertion..replacement_end, rendered.bytes());
             Ok((output, forced))
         }
         BodyEdit::Update { id, body, payload } => {
@@ -564,4 +624,23 @@ fn patch_text(original: &[u8], text: &str) -> Result<String, SceneError> {
     let (start, end) = dialogue_quotes(&original).ok_or(SceneError::OpaqueBoundary)?;
     original.replace_range(start + 1..end, &escape_string(text)?);
     Ok(original)
+}
+
+pub(super) fn mark_placeholders(beats: &mut [SceneBeat]) {
+    let mut counts = HashMap::<(String, String), usize>::new();
+    for beat in beats
+        .iter()
+        .filter(|b| !trivia(b) && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0))
+    {
+        if let Some(owner) = &beat.owner {
+            *counts
+                .entry((owner.group_id.clone(), owner.branch_id.clone()))
+                .or_default() += 1;
+        }
+    }
+    for beat in beats {
+        beat.structural_placeholder = beat.owner.as_ref().is_some_and(|owner| {
+            counts.get(&(owner.group_id.clone(), owner.branch_id.clone())) == Some(&1)
+        }) && matches!(&beat.payload, BeatPayload::CustomCode { source, .. } if source.trim() == "pass");
+    }
 }

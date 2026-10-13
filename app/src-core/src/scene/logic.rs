@@ -821,6 +821,7 @@ pub(super) fn group_may_continue(group_id: &str, beats: &[SceneBeat], depth: usi
                 if branch.ordinal==0 && !group_may_continue(&branch.group_id,beats,depth+1) { return false; }
                 continue;
             }
+            if matches!(&beat.payload,BeatPayload::CustomCode { source,.. } if source.trim() == "pass") { continue; }
             if matches!(&beat.payload,BeatPayload::CustomCode { source,.. } if !source.trim().is_empty() && !source.trim_start().starts_with('#')) { return true; }
             if is_terminal_payload(&beat.payload) { return false; }
         }
@@ -1628,3 +1629,7 @@ mod structural_review_tests {
         f.service.close().unwrap();
     }
 }
+
+#[cfg(test)]
+#[path = "structure/tests.rs"]
+mod structural_tests;

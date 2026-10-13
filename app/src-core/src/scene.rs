@@ -176,6 +176,8 @@ pub struct SceneBeat {
     pub byte_start: u64,
     pub byte_end: u64,
     pub protected: bool,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub structural_placeholder: bool,
     pub payload: BeatPayload,
 }
 
@@ -336,6 +338,37 @@ pub enum SceneCommand {
         beat_id: String,
         expected_body: BodyRef,
         beat: BeatPayload,
+    },
+    InsertCondition {
+        scene_id: String, expected_source_revision: String,
+        body: BodyRef, position: Position,
+        condition: crate::conditions::Condition, otherwise: bool,
+    },
+    UpdateConditionBranch {
+        scene_id: String, expected_source_revision: String,
+        group_id: String, branch_id: String, expected_body: BodyRef,
+        condition: crate::conditions::Condition,
+    },
+    AddConditionBranch {
+        scene_id: String, expected_source_revision: String,
+        group_id: String, expected_body: BodyRef,
+        before_branch_id: Option<String>, condition: Option<crate::conditions::Condition>,
+    },
+    RemoveConditionBranch {
+        scene_id: String, expected_source_revision: String,
+        group_id: String, branch_id: String, expected_body: BodyRef,
+    },
+    MoveStoryNode {
+        scene_id: String, expected_source_revision: String,
+        node: NodeRef, expected_body: BodyRef, body: BodyRef, position: Position,
+    },
+    RemoveStoryNode {
+        scene_id: String, expected_source_revision: String,
+        node: NodeRef, expected_body: BodyRef,
+    },
+    UnwrapCondition {
+        scene_id: String, expected_source_revision: String,
+        group_id: String, branch_id: String, expected_body: BodyRef,
     },
     UpdateChildDialogue {
         scene_id: String,
@@ -1044,6 +1077,27 @@ impl AuthoringService {
                 project, loaded, &scene_id, &expected_source_revision,
                 structure::BodyEdit::Update { id: beat_id, body: expected_body, payload: beat },
             ),
+            SceneCommand::InsertCondition { scene_id, expected_source_revision, body, position, condition, otherwise } =>
+                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
+                    structure::BodyEdit::Structural(structure::StructuralEdit::InsertCondition { body, position, condition, otherwise })),
+            SceneCommand::UpdateConditionBranch { scene_id, expected_source_revision, group_id, branch_id, expected_body, condition } =>
+                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
+                    structure::BodyEdit::Structural(structure::StructuralEdit::UpdateBranch { group_id, branch_id, expected_body, condition })),
+            SceneCommand::AddConditionBranch { scene_id, expected_source_revision, group_id, expected_body, before_branch_id, condition } =>
+                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
+                    structure::BodyEdit::Structural(structure::StructuralEdit::AddBranch { group_id, expected_body, before_branch_id, condition })),
+            SceneCommand::RemoveConditionBranch { scene_id, expected_source_revision, group_id, branch_id, expected_body } =>
+                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
+                    structure::BodyEdit::Structural(structure::StructuralEdit::RemoveBranch { group_id, branch_id, expected_body })),
+            SceneCommand::MoveStoryNode { scene_id, expected_source_revision, node, expected_body, body, position } =>
+                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
+                    structure::BodyEdit::Structural(structure::StructuralEdit::Move { node, expected_body, body, position })),
+            SceneCommand::RemoveStoryNode { scene_id, expected_source_revision, node, expected_body } =>
+                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
+                    structure::BodyEdit::Structural(structure::StructuralEdit::Remove { node, expected_body })),
+            SceneCommand::UnwrapCondition { scene_id, expected_source_revision, group_id, branch_id, expected_body } =>
+                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
+                    structure::BodyEdit::Structural(structure::StructuralEdit::Unwrap { group_id, branch_id, expected_body })),
             SceneCommand::UpdateChildDialogue {
                 scene_id,
                 expected_source_revision,
@@ -3267,6 +3321,7 @@ pub(crate) fn build_mapping(
             byte_start: parsed.start as u64,
             byte_end: parsed.end as u64,
             protected: matches!(parsed.payload, BeatPayload::CustomCode { .. }),
+            structural_placeholder: false,
             payload: parsed.payload,
         });
     }
@@ -3333,6 +3388,7 @@ pub(crate) fn build_mapping(
             None => {}
         }
     }
+    structure::mark_placeholders(&mut beats);
     if let Some(old) = previous.filter(|m| m.source_revision == revision) {
         if old.beats.iter().zip(&mappings).any(|(old, new)| {
             old.owner != new.owner || old.conditional_branch != new.conditional_branch
@@ -3437,6 +3493,13 @@ fn command_source_paths(
         | SceneCommand::UpdateBeat { scene_id, .. }
         | SceneCommand::InsertBodyBeat { scene_id, .. }
         | SceneCommand::UpdateBodyBeat { scene_id, .. }
+        | SceneCommand::InsertCondition { scene_id, .. }
+        | SceneCommand::UpdateConditionBranch { scene_id, .. }
+        | SceneCommand::AddConditionBranch { scene_id, .. }
+        | SceneCommand::RemoveConditionBranch { scene_id, .. }
+        | SceneCommand::MoveStoryNode { scene_id, .. }
+        | SceneCommand::RemoveStoryNode { scene_id, .. }
+        | SceneCommand::UnwrapCondition { scene_id, .. }
         | SceneCommand::UpdateChildDialogue { scene_id, .. }
         | SceneCommand::ContinueDialogue { scene_id, .. }
         | SceneCommand::RemoveBeat { scene_id, .. }
