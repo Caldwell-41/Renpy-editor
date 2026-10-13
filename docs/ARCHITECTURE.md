@@ -381,7 +381,13 @@ transaction/history service. Root mutations refuse nested child targets, movemen
 ranges containing children and insertion inside a group's headers/body trivia. Structural
 rows stay read-only, unsupported bodies stay opaque, and preview does not infer a
 branch route. [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) owns the migration
-and minimal preparation contract; full condition/call semantics remain planned.
+and minimal preparation contract. The reviewed 3A.1 extension uses source-map v4
+for recursive If/Else If/Otherwise ownership and a bounded typed core expression tree.
+It validates legacy maps before refining locations, retains opaque lexical regions,
+and refuses root insertion anywhere inside a complete group. Existing nested dialogue
+edits remain minimal and transactional. Phase 2 proposal permissions do not expand.
+[ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md) owns this extension;
+Story condition controls, call/flow work and SDK/target qualification remain in progress.
 
 The Scene recognizer follows the same rule: supported canonical Beats retain stable
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become

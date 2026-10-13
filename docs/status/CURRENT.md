@@ -11,7 +11,7 @@ See the [3A selection](../tasks/active/phase-3-initial-wysiwyg-release.md) and
 
 | Capability | Evidence | Disposition |
 | --- | --- | --- |
-| 3A Story logic | Core/dependency and focused CI capability inspection started; expressions/source → flow/calls → controls → qualification. | In progress; no 3A acceptance. |
+| 3A Story logic | Typed expressions/recursive source ownership reviewed and locally verified at `e235d3d`; calls/flow underway; SDK/target proof pending. | In progress; no 3A acceptance. |
 | Studio actions, generated references, prompts, selectable subset | Frozen929 owner live/native chain and controlled CI; new UI CI1 actual controller/native service all-five/selectable/exact-send/separate approval/invalid-zero-write/valid-subset/history/reopen/cleanup. | Scoped technical proof preserved; failed live send7 retained. |
 | Sampling/setup/HTTPS | Frozen929 combined worker/TLS/SDK and saved-key owner/CI9 Windows native setup/invalidation/cancel/reopen. New UI Settings draft/validation/readiness/cancel DOM regressions pass both targets. | Ordinary profile/key unchanged. LiteralIPv6HTTPS unsupported; liveTLS not newly measured. |
 | Game, SDK and packages | Owner native Validate/Run/Stop and metadata-free SDK05; signed Mac package1/exact Windows executable reused for unchanged paths. | No new editor package or physical native UI proof for the renderer refinement. |

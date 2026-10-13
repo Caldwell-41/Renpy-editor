@@ -1174,6 +1174,24 @@ long caption. Routing checks use measured widths for label/channel separation an
 bounds. Packaged route-a/route-b reports assert actual native SVG text width plus
 padding and fitted pill bounds; synthetic selection remains distinct from native input.
 
+## Phase 3A conditions and recursive source ownership
+
+The first local slice uses six named `phase3a_` regressions in `conditions::tests`,
+`conditions::source_tests` and `rewrite::tests`: exact values/types/precedence,
+bounds/unknown state, lexical opacity/trivia, v3 migration with IDs/extras/source,
+actual nested dispatch/minimal patch/history/reopen and AI allowlist refusal.
+The nested test also rejects root insertions before Else If and interbranch trivia
+without changing source or map bytes. Run the focused lib selector for those checks;
+the separate archive-backed SDK gate must remain excluded until explicitly selected.
+
+The existing foundation test now expects supported combinations/nesting and guarded
+unknown diagnostics, with exact source-byte and ownership assertions. It still requires
+unsupported custom statements to remain protected. That contract update does not
+reclassify earlier failures. The [3A execution ledger](tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
+retains the broad local run's descendant-cleanup failure and its isolated passing rerun.
+Neither these local checks nor unchanged Phase 2 proof establish new SDK/target or full
+3A acceptance. The delegated focused CI harness is being prepared separately.
+
 ## Bounded nested-dialogue foundation
 
 Use `cargo test -p loomlight-core --locked source_foundation` for focused production

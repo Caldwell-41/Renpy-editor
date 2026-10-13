@@ -21,18 +21,27 @@ runtime/source/history behavior. Accepted source foundations and qualified first
 permit 3A entry independently of unfinished Phase 2 acceptance. Keep the AI allowlist
 unchanged. Default 3B/3C entry still requires accepted Phase 2/3A.
 
-**Next:** review current core seams and the delegated dependency/CI capability reports,
-then implement and review the first coherent condition/source slice. Initial allowance
-is six focused local check invocations; record usage in the task. Validation allowance: four local rounds, three paired CI batches cumulative across
-3A; per batch/target one verified SDK install, one GUI generation, compile/lint and at
-most six runtime cases. Zero packages/owner native starts/live model calls. No CI is
-pending for 3A. The lead must not poll CI;
-delegated Sol 6.1 High agents may poll selected runs by explicit user authorization,
-superseding default manual wait only for this work. Continue reviewable routine slices
-without intermediate user approval; escalate only concrete hard dependencies, exhausted
-allowance or material decisions. Development stays on macOS; required affected Windows/
-macOS proof uses focused CI. Work is local-only until publication is confirmed. No merge,
-release, live model send, Phase 2 acceptance session or unrelated feature is authorized.
+**Checkpoint:** the first source slice is integrated locally as `e235d3d` from delegated
+`d97ca99`: typed conditions, recursive exact-source ownership, source-map v4 migration,
+minimal child edits and unchanged AI permissions. Independent review closed lexical
+opacity/trivia and group-insertion findings. Six new regressions passed; a broad run
+retains 318 passes/two failures (obsolete foundation contract and an unchanged runtime
+descendant-cleanup assertion). Corrected foundation and unchanged runtime each passed
+an exact serial rerun; the original cleanup cause remains unproven. See the
+[3A ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
+and [ADR 0014](../adr/0014-typed-conditions-and-recursive-source-ownership.md).
+
+**Next:** core implements calls/stable return labels, conditional choices and observed
+flow; validation compiles its isolated integrated harness before adding authored Call
+proof. First core allowance consumed 8/8 after explicit bounded reassessments; next
+slice 0/6 (cumulative cap 14). Validation remains local 1/4, paired CI 0/3; per batch/
+target one verified SDK install, GUI generation (two commands), compile/lint and six
+runtime cases. Zero packages/owner native starts/live model calls. No 3A CI is pending.
+The lead must not poll CI; delegated Sol 6.1 High agents may poll selected runs by
+explicit user authorization. Continue routine reviewable slices without approval;
+escalate concrete hard dependencies or material decisions, retain cumulative budgets.
+Development stays on macOS; affected Windows/macOS proof uses focused CI. Branch/code
+are local-only; no merge, release, Phase 2 session or acceptance is authorized.
 
 ## Preserved Studio UI refinement — review_ready; guided feedback paused
 

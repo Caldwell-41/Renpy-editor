@@ -921,7 +921,68 @@ Recent Windows/macOS runner evidence establishes available native service paths 
 does not qualify new 3A inputs. Early proof will use normal SDK entry and actual
 route/return assertions, plus a rejecting wrong-result fixture and precise cleanup.
 
-**Current counts:** core focused checks 0/6; validation local rounds 0/4; paired CI
-0/3; packages/native-owner starts/live model calls 0. No 3A CI dispatched, no product
-commit published, no 3A acceptance claimed. Next: first core expression/nested-source
-implementation, independent review, then call/flow integration and early paired proof.
+**3A.1 local checks and review:** initial checks 1–6 are consumed. First invocation
+had a harness working-directory/setup and stale test-import compile failure. Invocation
+2 passed two expression tests but exposed a legacy-trivia owner-stack issue. Invocation
+3 corrected that issue, then hit Source Save `InvalidSource`; invocation 4 established
+valid parser/map output and isolated the remaining failure to a fixture supplying a BOM
+that Source already preserves. Invocation 5 passed all three selected expression/nested
+transaction tests. Invocation 6 failed compilation of a new AI-refusal regression using
+an incorrect existing action-constant name; no suite pass is claimed for that invocation.
+The exact constant typo is fixed. The orchestrator amended its initial local cap from
+6 to 7 for one final cheap focused bundle after independent review, retaining all six
+attempts. This is a bounded reassessment within the user's routine implementation
+selection, not renewed Phase 2/user-imposed allowance or added SDK/CI/package authority.
+
+Independent review identified and corrected trailing-trivia absorption and multiline
+Python-string fake condition/menu recognition; exact regressions remain in the candidate.
+Schema-v3 migration uses the legacy recognizer before refinement, preserving source,
+IDs and extras. Candidate acceptance is pending final review and the last focused bundle.
+
+**Validation:** local round 1/4 passed four rejecting-oracle tests, workflow actionlint
+and diff checks. Review corrected integer IPC values to canonical decimal strings and
+testcase click indentation before execution. The SDK fixture reuses non-executing source
+foundation setup; generated GUI avoids implicit starter compile/lint that would exceed
+the cap. Actual process accounting distinguishes two SDK version checks, `generate_gui`,
+`gui_images`, authored compile/lint and six runtime cases (12 total subprocesses).
+Named required core checks and real authored Call dispatch remain prerequisites.
+
+**3A.1 final proof:** independent review closed the root-insertion defect: root edits
+now reject interiors of complete groups, including nested/Else If headers and intervening
+trivia, with byte-identical source/map refusal assertions. All six named new 3A
+regressions passed in invocation 7. The full routine bundle ended with 318 passed,
+2 failed, 42 ignored and 3 filtered in 297.14 seconds. It is a failed run, not an overall
+pass. One failure was the old foundation assertion that now-supported combinations
+and nested groups must have no ownership; the replacement checks exact bytes, actual
+branch/child counts, unknown diagnostics and protected custom statements. The other
+was the unchanged runtime descendant-cleanup assertion (`kill(pid, 0)` still found
+the descendant), with no captured action/PID state explaining the cause.
+
+The orchestrator selected one final bounded local invocation 8 for the corrected
+foundation test and unchanged runtime test, each exact and serial. Both passed:
+1/0/0 in 4.05 seconds and 1/0/0 in 5.65 seconds. No runtime protection was changed and
+no broad suite repeated. The cleanup failure is non-reproduced in isolation, not
+proven an environment/harness issue. No task-unique executable remained after invocation
+8; the failed run did not capture enough identity to prove every historical descendant's
+cleanup. Preserve that limitation rather than reclassifying the old failure.
+
+First-slice code and exact changed-scope regressions are reviewed and ready for local
+integration. [ADR 0014](../../adr/0014-typed-conditions-and-recursive-source-ownership.md)
+records the reviewed ownership/condition decision. SDK/target and full 3A acceptance
+remain pending. The initial local allowance was explicitly amended 6→7→8 for test
+compilation, superseded-contract correction and one failed-layer discrimination;
+consumption never reset and no Phase 2 allowance was touched.
+
+**Next slice selected:** calls with stable core-owned return labels, conditional
+choices, block-aware completion and observed guarded/call/return/continuation flow.
+Six additional focused local invocations are allocated (first slice 8 retained,
+cumulative core cap 14), with two-correction reassessment unchanged. No local SDK,
+package or owner native start is added. Structural authoring commands follow as a
+separate internal slice needed by Story controls. AI field-level operation permissions
+must not expand through newly shared payload fields.
+
+**Current counts:** first core slice local 8/8; next core slice 0/6; validation local
+rounds 1/4; paired CI 0/3; packages/native-owner starts/live model calls 0. No SDK proof
+or 3A CI has run. Documentation selection is locally committed as `f0c0ce3`; core
+checkpoint `d97ca99` is integrated locally as `e235d3d` (six exact code/test files). No product publication or 3A acceptance claimed. Next:
+integrate reviewed core checkpoint, then implement calls/flow and early paired proof.

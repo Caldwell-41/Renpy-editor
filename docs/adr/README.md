@@ -20,6 +20,8 @@ supersede them with a later ADR rather than editing history.
 
 | [0012](0012-bounded-nested-dialogue-ownership.md) | Implemented locally; target qualification pending | Source-map v3, explicit group/branch ownership and minimal existing-child dialogue edits |
 
+| [0014](0014-typed-conditions-and-recursive-source-ownership.md) | Reviewed; local proof passed, target qualification pending | Source-map v4, bounded typed conditions and recursive exact-source ownership |
+
 Future changes to an accepted decision require a superseding ADR. An accepted design
 is not a claim that its implementation or supported-target acceptance is complete;
 CURRENT, HANDOVER and the linked active task own that delivery state.

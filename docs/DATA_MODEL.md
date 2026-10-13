@@ -410,7 +410,21 @@ addresses its group/branch UUIDs; the enclosing Scene revision and exact range/h
 remain write authority. Migration from v2 reuses every exact-byte Beat UUID, including
 previously opaque children, and preserves unknown fields without writing `.rpy`.
 Project remains v2; authoring remains v1. [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md)
-defines the implemented local boundary and pending native qualification.
+records the qualified bounded foundation. Phase 3A extends that historical boundary
+with source-map v4 under [ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md).
+Branch headers now carry an ordinal and a typed supported condition or explicit unknown
+diagnostic; the legacy simple-bool Variable UUID is optional. Headers and ordinary
+children can identify an immediate containing branch, enabling recursive ownership
+without overlapping source ranges. Old-map validation precedes richer recognition;
+unchanged range/hash UUIDs and extras survive metadata-only migration. Exact source
+verification remains mandatory, and newer schemas are refused.
+
+The condition model supports bool/int/string values, same-type equality/inequality,
+integer ordering and bounded boolean combinations. Integers remain canonical signed
+64-bit decimal strings across JSON. Unknown/missing/type-invalid expressions remain
+unknown, never false or evidence of unreachable branches. The core projection does
+not execute Python or infer a route from default values. This first local slice does
+not yet supply condition-authoring controls or complete Phase 3A qualification.
 
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing
