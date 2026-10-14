@@ -1,6 +1,15 @@
 # Phase 2 — Initial LLM assistance
 
-## User pause — 2026-10-13
+## Combined approval walkthrough selected — 2026-10-14
+
+The user resumed Phase 2 for a combined, step-by-step Phase 2/3A approval walkthrough
+on `codex/phase3a-story-logic`: one signed Mac build and up to three editor launches.
+The [combined walkthrough ledger](phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
+owns shared preparation/counts/results. This supersedes the earlier feedback pause
+for this session only; implementation remains review_ready, acceptance pending.
+No live sends, automatic repairs or deferred features selected.
+
+## User pause — 2026-10-13 (superseded for the selected walkthrough)
 
 **Phase status: PAUSED — INCOMPLETE.** The user explicitly selected autonomous
 Phase 3A implementation and prohibited resuming, completing, accepting or closing

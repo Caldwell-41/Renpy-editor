@@ -1,6 +1,53 @@
 # Phase 3 — Initial WYSIWYG release
 
-**Current selection — 2026-10-14:** Phase3A Story logic is **ACTIVE — INCOMPLETE**.
+## Combined Phase 2 / 3A Mac approval walkthrough — 2026-10-14
+
+User selected: “Yes, prepare the signed Mac build and up to three launches, then guide
+me through Phase 2 and 3a one step at a time for my approval.” This supersedes the
+prior feedback pause only for this combined walkthrough. State: `in_progress`;
+Phase 2 and Phase 3A acceptance remain pending and require separate explicit decisions.
+Candidate is branch `codex/phase3a-story-logic`, source60ec1da (docs-only successor of
+qualified49dba1f); it includes the entire Phase 2 branch591b04a.
+
+Fresh allowance: **one signed Mac package build, up to three native editor launches**.
+No transfer/reset of implementation qualification counts. Preserve the approved
+certificate, names, storage and ordinary saved profile/key. Use a disposable public
+example and isolated application state; no live/paid sends, model discovery, credential
+setup, merge/release, Windows build or automatic follow-up fixes selected. Reuse valid
+both-host automated/SDK evidence. Mac human feedback does not claim Windows human proof.
+
+Preparation: pinned local Node24.19.0/npm11.9.0/Rust1.90.0; approved signing identity
+is visible outside the filesystem sandbox. No certificate import/trust/ACL change.
+Build output and machine-specific evidence remain ignored. Sequence: verify package
+identity/installer/source candidate; launch1; guide Settings, references, Assist/review,
+then conditions/choices/calls/Source/Branches/history; reserve remaining launches for
+reopening. Explain each visible screen, ask one short question at a time, and record
+preferences, demonstrated defects and explicit acceptance separately.
+
+**Preparation result:** one signed Mac ARM64 build passed; installer contents and
+copied bundle passed strict signature, approved certificate and certificate-bound
+identifier verification. Product files are unchanged from source60ec1da. Executable
+SHA256 `6c30b9797427db07552c961c0c5410590494168ed1b7bd86a7d29fcc8c47e698`;
+installerSHA256 `d7eaa3ccf10a98054edfffd6021024f60b682c7106030c6a639df505f4fdc7bf`.
+Existing local self-signed identity reused without trust/ACL changes; no notarization
+claimed. Pinned renderer build and native compilation completed. Earlier CI proof is
+reused; no qualification suite/SDK was rerun. Ignored approval-walkthrough evidence
+retains identity receipt, build/launch logs, candidate, public fixture hashes and PID.
+
+Launch1 was observed at the exact verified output executable. Existing `phase2-studio`
+isolated ordinary-UI mode created the public source-foundation/references example;
+no profile/key/network request was created. It remains open in Settings → AI providers.
+The new-profile/credential-not-configured state belongs to the isolated walkthrough,
+not the user's ordinary saved profile. The older installed app was not replaced.
+
+**Usage:** build1/1 passed, editor launches1/3. **Human results:** none yet; Step1
+Settings feedback pending in this chat. Explain connection, saved-key status and
+response defaults, then obtain one short response before navigating further.
+Preferences/defects/phase acceptance remain separate. Do not infer approval from
+successful preparation or open screens. Keep this process/project for continuation;
+reserve launches2–3 for deliberate reopen checks.
+
+**Previous technical qualification selection — 2026-10-14 (preserved):** Phase3A Story logic is **ACTIVE — INCOMPLETE**.
 The selected implementation/technical qualification is now **review_ready**: CI4
 exact49dba1f passes both-host terminal artifact audit, all30 core/51 DOM/full ten-case
 controller and six actual pinned-SDK outcomes including saved-callee/safe caller-edit/

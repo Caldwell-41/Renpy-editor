@@ -1,10 +1,26 @@
 # Current outcome handover
 
+## Selected combined Mac approval walkthrough — 2026-10-14
+
+The user selected one signed Mac build and up to three native editor launches from
+`codex/phase3a-story-logic` (candidate60ec1da), followed by one-step-at-a-time Phase 2
+and 3A review. Signed package/installer verification passed; launch1 is open at Settings → AI providers.
+Walkthrough is `in_progress`; both acceptance decisions remain pending.
+This supersedes the prior Phase 2 feedback pause for this walkthrough. Build1/1 passed,
+launches1/3; existing implementation budgets/evidence remain unchanged. Disposable
+public project/isolated state; preserve ordinary profile/key and signing identity.
+No live sends, automatic fixes, merge or release. The [combined walkthrough ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
+owns candidate, counts, results and continuation. Next: same chat, receive Step1
+Settings feedback, then continue one step at a time; keep the current app open.
+
+Earlier qualification and unique recovery evidence below remain valid. The separate
+walkthrough selection above owns current human-session scope and counts.
+
 ## Phase3A — scoped qualification review_ready; acceptance pending
 
 Phase3A is **ACTIVE — INCOMPLETE**; selected implementation/technical qualification
-is **review_ready**. Phase2 stays **PAUSED — INCOMPLETE**. No Phase3A/user acceptance,
-Phase2 resume/closure, next capability, merge or release is implied. One implementation
+is **review_ready**. Phase2/3A acceptance remains incomplete; the selected combined
+walkthrough above resumes human review only. No next capability, merge or release is implied. One implementation
 agent owns work; the sole authorized independent review-only agent reviews evidence.
 Self-review is separately labelled. Reviewed branch pushes are authorized. No polling/
 watchers; no pending CI or helper process. No further automated round is needed.
@@ -50,13 +66,13 @@ CI2 early proof is preserved. Audit operations executed no SDK/application/test.
 Usage **core16/18, local12/14, renderer11/14, pairedCI4/5**. Caps14/14 and two additional
 CI runs were explicitly approved; counts never reset/transferred. Local SDK, owner
 native editor, packages, credentials and live calls remain zero. CI5 is unused and
-not a reason to rerun. Next: explicit Phase3A acceptance/next-outcome selection under
-WORKFLOW's separate implementation/evidence/acceptance states. Phase2 stays paused;
+not a reason to rerun. Next: continue the selected combined walkthrough above under
+WORKFLOW's separate implementation/evidence/acceptance states;
 3B/3C default entry still requires accepted Phase2/3A. No unselected native/human
 session, merge/release or background operation. Reuse this thread for any selected
 continuation and read live Git/status rather than old prompt SHAs.
 
-## Preserved Studio UI refinement — review_ready; guided feedback paused
+## Preserved Studio UI refinement — review_ready; walkthrough selected
 
 The bounded refinement is delivered on `codex/provider-qualification`, source
 462cf0897eb84d34390d68634f0b8cb2345d7a48/tree
@@ -112,16 +128,12 @@ remain historical; settled exact CI inputs establish current renderer evidence. 
 allowances are not reasons to execute or transfer automatically to another outcome.
 No further refinement CI is needed; repository/diff validation covers docs closeout.
 
-**Phase 2 resume:** the separate [guided-feedback prompt](../tasks/active/phase-2-initial-llm-assistance.md#prepared-guided-feedback-session--not-started)
-is prepared with status `not_started` and paused by the latest user direction. Wait for
-the user's explicit Phase 2 resume/selection; do not create/start
-a chat/session, launch an app or request acceptance automatically. Default feedback can
-use current public-fixture screenshots. The installed frozen929 app is older UI and must
-not be presented as refined. A matching-build native feedback/test route needs its own
-selected scope/allowance; unused refinement package/launch counts do not authorize it.
-One plain-language question at a time; record preferences separately from defects and
-explicit acceptance. Do not silently begin fixes or live sends. This next-session prompt
-is preparation, not execution or proof of final human acceptance.
+**Phase 2 walkthrough:** the user selected the combined matching-build Mac session
+above. The earlier [prepared guided-feedback prompt](../tasks/active/phase-2-initial-llm-assistance.md#prepared-guided-feedback-session--not-started)
+remains reference guidance, superseded only where the new selection authorizes the
+combined native/Phase3A session. Use the verified new bundle, not installed frozen929.
+One plain-language question at a time; record preferences, demonstrated defects and
+explicit acceptance separately. Do not silently begin repairs or live sends.
 
 ## Preserved Studio-only technical closeout — review_ready
 
