@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-15",
+  "researchAgent": "character_ui_research",
+  "scope": "Official public documentation; no logged-in editors; concepts are our design inferences, not product copies.",
+  "sources": [
+    {
+      "title": "Novelcrafter: Anatomy of a Codex Entry",
+      "url": "https://www.novelcrafter.com/help/docs/codex/anatomy-codex-entry",
+      "pattern": "Constant header; changing contents tabs; freeform description and optional details."
+    },
+    {
+      "title": "Scrivener: Advanced Character Sketch Templates",
+      "url": "https://www.literatureandlatte.com/blog/using-advanced-character-sketch-templates-in-scrivener",
+      "pattern": "Prose character sketches and nested writing documents."
+    },
+    {
+      "title": "World Anvil: Character Template",
+      "url": "https://www.worldanvil.com/learn/article-templates/character",
+      "pattern": "Free writing first; optional prompts and topic grouping."
+    },
+    {
+      "title": "Campfire: Characters Tutorial",
+      "url": "https://www.campfirewriting.com/learn/characters-tutorial",
+      "pattern": "Discrete modular character panels."
+    },
+    {
+      "title": "Milanote: Character Profile",
+      "url": "https://milanote.com/templates/creative-writing/character-profile",
+      "pattern": "Visual arrangement of notes and reference images."
+    }
+  ]
+}

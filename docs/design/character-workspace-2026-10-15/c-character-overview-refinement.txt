@@ -1,0 +1,7 @@
+Edit this Loomlight visual-character-overview mockup. Preserve the dark charcoal/copper theme, all existing fictional Mara prose, same left app navigation and cast list, stable save bar, readable text and the fixed-grid overview concept. Make ONLY these refinements:
+1. Add a clear “Writing” (selected) / “Game setup” tab switch immediately below the Mara identity heading. Both sections belong to Mara.
+2. Remove ALL three “Edit text” actions from Who Mara is, Motivations, and Voice. These text sections are directly editable by clicking the prose; show a subtle insertion caret at the end of the personality sentence instead of edit/unlock buttons.
+3. Anchor “+ New character” at the top-right of the main workspace heading, independent of the game status box. Keep it at that stable header anchor.
+4. Reduce the game-status box's visual priority. Under Planning only show small secondary “Create game character” and “Link existing character” actions, not two large primary buttons. Keep the one primary Save changes in the bottom bar.
+5. Add “Where to use these notes” as a fourth small row in More about Mara under Linked lore.
+Keep the overview substantially different from a long form or notebook. Relationships remains one simple summary line and Add relationship, not an expanded form. No extra controls or text. Output one full landscape desktop UI mockup, same framing, no annotations.

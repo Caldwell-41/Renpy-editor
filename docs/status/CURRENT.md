@@ -4,14 +4,14 @@
 
 The user selected one signed Mac build and up to three native editor launches from
 `codex/phase3a-story-logic` (candidate60ec1da), followed by one-step-at-a-time Phase 2
-and 3A review. Signed package/installer verification passed; launch1 is open at Settings → AI providers.
+and 3A review. Signed package/installer verification passed; launch1 is open at Characters → Character cards.
 Walkthrough is `in_progress`; both acceptance decisions remain pending.
 This supersedes the prior Phase 2 feedback pause for this walkthrough. Build1/1 passed,
 launches1/3; existing implementation budgets/evidence remain unchanged. Disposable
 public project/isolated state; preserve ordinary profile/key and signing identity.
 No live sends, automatic fixes, merge or release. The [combined walkthrough ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
-owns candidate, counts, results and continuation. Next: same chat, receive Step1
-Settings feedback, then continue one step at a time; keep the current app open.
+owns candidate, counts, results and continuation. Next: same chat, choose among three delivered
+ImageGen character-layout concepts (design comparison linked in task); preserve unsaved Mara draft; keep the current app open.
 
 **Updated:** 2026-10-14. **Phase2 and Phase3A: approval walkthrough ACTIVE — INCOMPLETE.**
 The selected Phase3A implementation/technical qualification is **review_ready**,

@@ -9,6 +9,98 @@ owns shared preparation/counts/results. This supersedes the earlier feedback pau
 for this session only; implementation remains review_ready, acceptance pending.
 No live sends, automatic repairs or deferred features selected.
 
+## Walkthrough follow-up — Studio model loading and one context setting — 2026-10-14
+
+**State:** recorded follow-up, `not_started`; no implementation/execution allowance
+selected. User explicitly requests Loomlight loading the chosen model in Unsloth Studio
+and setting context length, with one context setting. This extends the future product
+requirement beyond the existing inference-only connection; it does not change the
+currently qualified build or authorize a live model operation during this walkthrough.
+
+**Requested journey:**
+1. Connect to Studio and refresh the model IDs it exposes.
+2. Select a model ID and initiate generation.
+3. If that model is not loaded, load it with the chosen context length, wait for
+   successful readiness, then send the generation request.
+4. If it is already loaded with sufficient context, send the generation request
+   without an unnecessary reload.
+
+**Settings:** one editable **Context length**, default32768 tokens, for the total
+input/output budget and the requested model-load context. Separate **Maximum response
+length**, default8192 tokens, stays within that total. Replace the second editable
+“Configured capacity — unverified” limit with read-only detected status where available.
+Actual server capacity must be checked after load; requested size is not proof of
+applied size. Retain source/profile protections and reject requests that do not fit.
+
+**Implementation preparation still needed:** verify supported loading/status interfaces,
+authentication and the installed Studio version. Current inference model-list discovery
+is not proof of a full unloaded-model inventory; determine how an unloaded available
+model can be selected. Define clear load progress, failure/cancellation and behavior for
+an already-loaded model with insufficient/different context or another user's active
+model. Generate is the user-initiated operation; opening Settings, saving or refreshing
+must not silently load/reload. No implicit download, Studio installation/process
+management, security-policy change or automatic unloading of shared models is selected.
+
+Acceptance for the later implementation must prove both already-loaded and load-needed
+paths, the requested versus actual context, failure/cancellation without project writes,
+and reuse across supported Windows/macOS clients. Existing inference evidence does not
+qualify this new management flow. The combined walkthrough ledger owns copy feedback;
+this section owns the new Phase2 functional follow-up. Current session continues its
+one-step review rather than implementing the follow-up.
+
+## Walkthrough follow-up — linked character workspace — 2026-10-15
+
+**State:** user accepted the design direction on2026-10-15; implementation `not_started`
+and not selected by this walkthrough. The user
+expects Game characters and Character cards to describe the same character, questions
+Bec lacking a card and Mara lacking a Ren'Py definition, and requests refining a path
+to create a runnable character from a card and link them. Current code already has
+optional linkedCharacterId, exposed as “Game character (optional)” inside the collapsed
+“Story links & knowledge notes”; it does not create the runnable definition. The
+walkthrough fixture deliberately contains runnable Bec and a separate Mara card.
+
+**Agreed direction:** one Characters list and one character workspace with two clear
+sections: **Game setup** (Ren'Py identifier/display/dialogue settings/Appearances) and
+**Character card** (description/personality/background/voice/knowledge). Selecting Bec
+should reveal Bec's own card section, initially empty if no writing notes exist; creating
+or importing a game character makes this section available without a separate search
+or creation ritual. Do not invent personality or approve generated material.
+
+Allow card-first planning: a card-only character is labelled **Planning only**, with
+**Create game character** and **Link existing character** actions. Creation reviews
+identifier/display settings, creates the source definition through the transaction
+layer and links the existing card; linking explicitly selects an existing game
+character and does not duplicate it. A connected character is labelled **In game**.
+The normal linked path presents one canonical card for that character; existing
+unlinked/multiple records must be preserved rather than automatically merged by name.
+
+The source definition and writing reference remain separately owned data behind one
+workspace. Card prose does not silently become source or Appearance assets. A rename,
+relink, deletion or proposed AI change must keep the relationship understandable,
+preserve source authority and normal Undo/recovery, and avoid changing/removing the
+other record implicitly. Creation and rename behavior require explicit source review;
+no code/source/card changes are selected by this design conversation.
+
+**Follow-up acceptance checks:** create from either starting point, link
+existing without duplicates, fill an initially empty card, clearly identify planning
+versus in-game state, retain stable links through rename/history/reopen and preserve
+existing unlinked references/custom source. Design agreement is not implementation
+selection or whole-phase acceptance.
+
+**Additional layout feedback:** user reports layout shift when moving between cards
+and inconsistent New character / New character card button placement across screens.
+Record the shift as a user-observed issue; the current fixture has only one card, so
+cross-card reproduction is not independently claimed. Existing views put creation in
+different layout containers. Follow-up must use a consistent page header/creation
+position (top right of the Characters workspace), stable list/editor alignment and
+stable primary-action positions when changing views or selection. Card-specific field
+content/expansion may vary without shifting the shared workspace frame. Preserve drafts
+and deliberate focus/scroll behavior. The unified creation workflow should use the
+same anchored entry point for game-first and card-first creation. Later visual checks
+must cover tab/view switches and multiple short/long/expanded cards at matching viewport.
+No UI/source/reference mutation or new native launch performed for this feedback.
+Next: continue card-field/layout review with the accepted direction recorded.
+
 ## User pause — 2026-10-13 (superseded for the selected walkthrough)
 
 **Phase status: PAUSED — INCOMPLETE.** The user explicitly selected autonomous

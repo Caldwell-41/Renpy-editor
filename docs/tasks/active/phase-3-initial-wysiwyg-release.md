@@ -40,9 +40,142 @@ no profile/key/network request was created. It remains open in Settings → AI p
 The new-profile/credential-not-configured state belongs to the isolated walkthrough,
 not the user's ordinary saved profile. The older installed app was not replaced.
 
-**Usage:** build1/1 passed, editor launches1/3. **Human results:** none yet; Step1
-Settings feedback pending in this chat. Explain connection, saved-key status and
-response defaults, then obtain one short response before navigating further.
+**Usage:** build1/1 passed, editor launches1/3. **Human results:** Step1 Connection feedback recorded; no acceptance yet.
+- User prefers local-profile wording for “Saved on this computer. Saving does not
+  connect.” Proposed follow-up: “Profiles are saved only on this computer.”
+- User did not understand “Not checked for this saved configuration.” Inspection
+  confirms this is the setup-test/structured-proposal compatibility state, shown
+  even for the unsaved new-profile screen. Wording/placement issue: it does not name
+  the test and refers to a saved configuration that does not exist. Proposed follow-up:
+  hide it for a new profile; show “Setup not tested yet” beside Test setup under
+  Setup readiness for a saved untested profile. User explicitly approved this wording
+  and placement; record as an agreed follow-up, not implemented behavior.
+- User supplies Model ID help: “Enter an exact model ID, or choose one after you
+  Refresh models.” Record as a copy preference, retaining the Refresh models label.
+No product code changes, rebuild, launch, setup test or network operation performed
+for this feedback. Step1 wording/placement decision is recorded; user requested moving on.
+Step2 remains open at Settings → AI providers, scrolled to key/response controls.
+- User requests renaming “Saved key” to “API Key”; recorded as an agreed follow-up.
+- User requests clearer budget/response text and larger default lengths. Refined copy:
+  “Total context budget” / “Total token budget for the request and response, including
+  a safety margin.” “Maximum response length” / “Maximum number of tokens to generate.
+  Reaching this limit may cut the response short.” Truncated proposals remain refused.
+- User accepted the refined response copy and new-profile defaults: context32768
+  and response8192. Recorded for implementation follow-up; current build unchanged.
+  These values were used in the prior successful owner live recheck; this is evidence
+  of that configured model, not universal capacity or cause of the earlier failed send.
+  Current new-profile values are context4096/response1024/ceiling8192. Follow-up must
+  resolve the capacity setting consistently and preserve smaller-capacity admission,
+  setup invalidation and existing saved profiles; no automatic capacity verification
+  or discovery is implied. No product or profile change during walkthrough.
+- User requests removing the generic key-reuse/native-entry/nonrevocation paragraph
+  and replacing it with a concise macOS storage notice. Refined copy: “macOS: API keys
+  are encrypted and stored on this computer. Software running under your user account
+  may be able to decrypt them.” Present once in API Key instead of duplicating the
+  long Mac notice. This is wording only; actual storage/security policy and native
+  confirmation disclosure remain unchanged. No credential operation performed.
+Step3 Advanced settings remains visible. User questions the relevance of configured
+capacity, asks whether context can be set while loading Studio's model, and finds
+multiple total-context limits confusing. Local inspection: capacity is a manually
+reported server ceiling; budget is Loomlight's per-request total including reserved
+output/margin. Budget must not exceed ceiling. Loomlight currently lists models and
+sends requests; no explicit model-loading integration exists.
+Read-only current official-source research confirms Studio supports choosing context
+at model load (official API guide and current LoadRequest/inference route). This does
+not establish compatibility with the user's installed Studio version or authorize a
+model load/reload. Sources: https://unsloth.ai/docs/basics/api and
+https://github.com/unslothai/unsloth/blob/main/studio/backend/models/inference.py .
+User explicitly selects a recorded follow-up: one Context length setting plus
+separate Maximum response length; connect/refresh/select a model, and on generation
+load that model with the chosen context if it is not loaded, wait ready, then generate.
+Detected actual capacity replaces the second editable limit. Defaults remain32768/8192.
+The [Phase2 functional follow-up](phase-2-initial-llm-assistance.md#walkthrough-follow-up--studio-model-loading-and-one-context-setting--2026-10-14)
+owns the requested flow, unverified inventory/loading/version seams and later acceptance.
+This is `not_started` follow-up, not an implementation selection or live-load permission.
+No code, profile, provider or model operation performed. User confirms Temperature
+and Top-p explanations are clear; record no requested change to these controls.
+User requests moving Allow private-network HTTP beside the Endpoint textbox and
+showing it when a non-HTTPS address is entered. Record the repeated message once as
+an agreed UI follow-up: conditionally show beside Endpoint for nonempty non-HTTPS
+input, hide for HTTPS. Loopback HTTP still does not require opt-in; keep that clear.
+Visibility does not enable the option, send a request or weaken existing address
+validation. No source/profile change.
+User finds “Setup readiness” odd and requests a refined explanation. Record the
+requested follow-up with refined heading “Connection test”, button “Test connection”
+and help: “Send a small test request to check whether Unsloth Studio can return the
+response format Loomlight needs. No project content is sent.” This changes wording,
+not the test's payload, readiness checks or explicit-send requirement. User explicitly
+approves this heading, button and explanation as a recorded follow-up.
+The user cannot inspect “Synthetic setup test request” because no profile is saved.
+Record that preview as **unreviewed / unavailable in this unsaved-profile state**;
+do not infer clarity or approval. No profile was saved and no test was run merely
+to obtain feedback. User requests moving on. Model list and profile maintenance is
+expanded and visible; explain Refresh models (Studio model-list request), Retry
+(retry saved-profile read after failure), Reload saved profiles (reread local profiles)
+and Remove profile (remove saved connection). No button activated.
+User requests moving Refresh models directly below Model ID, expresses confusion
+about Retry versus Reload saved profiles, and requests a separate red Danger Zone
+with a confirmation dialog for Remove profile (inspired by GitHub, not copied).
+Record placement/destructive-action treatment as agreed follow-up. Confirmation must
+name the selected profile and local saved-key impact, provide Cancel and an explicit
+red Remove profile action; cancellation performs no mutation. Static inspection finds
+current removal dispatches directly without a deletion confirmation. No actual removal
+was attempted during this unsaved-profile walkthrough.
+Static inspection of Retry/Reload confirms both read local profiles; Retry preserves
+selected profile when it still exists, whereas Reload currently selects the first
+saved profile. User explicitly accepts one Reload profiles control preserving
+selection, with Retry loading profiles shown only after a read failure; record as
+agreed follow-up, preserving the unsaved-input guard and busy-state protection.
+Settings wording/layout review is complete for currently inspectable controls; the
+synthetic request preview remains unreviewed and all requested changes remain unimplemented.
+User requests moving on. Closed Settings without discarding a dirty draft and opened
+Characters → Character cards. Existing public Mara card is selected, Saved, and marked
+Approved by the fixture. No card text or approval was changed. On2026-10-15 the user
+questions their separation and asks for a refined associated-character/card workflow,
+including creating a Ren'Py character from a card. Code inspection confirms existing
+optional linking is hidden under Story links & knowledge notes; no create-from-card
+flow is established. Recorded the [linked workspace direction](phase-2-initial-llm-assistance.md#walkthrough-follow-up--linked-character-workspace--2026-10-15)
+in the Phase2 task: one list, Game setup and Character card sections, an empty card
+section for each game character, Planning only cards with Create game character or
+Link existing character, and clear In game state. User explicitly accepts this design
+direction, then reports layout shift between cards and inconsistent placement of New
+character / New character card. Recorded stable workspace geometry and one consistent
+creation-action position in the owning follow-up. Cross-card shift remains user-reported,
+not independently reproduced with the one-card fixture. No product/source/reference
+changes, native relaunch or network operation performed. User requests continuation.
+Current Mara card has **unsaved reference changes**, observed on2026-10-15. Preserve
+that live draft; no automatic Save, Discard, Reload, navigation away or app close.
+The user has expanded writing/link sections while exploring. Next: review Appearance
+notes, Background and Motivations labels/grouping one step at a time, then Voice &
+relationships. Fields remain unmodified by the agent; no new launch or send.
+**Character design exploration selected — 2026-10-15:** the user is generally unhappy
+with the card view and requests2–3 different layout/style mockups, one online research
+subagent and ImageGen. The user adds that importance is unclear, relationships are
+cluttered and Story links & knowledge notes is unclear. This selects design exploration
+only, replacing the current field-by-field feedback step until a direction is chosen.
+One explicitly authorized research-only agent reviewed five official product/help
+sources (Novelcrafter, Scrivener, World Anvil, Campfire, Milanote); no login, repository
+mutation or further delegation. Owner uses the imagegen skill and built-in tool for
+three distinct new concept screenshots: writing notebook, focused section editor,
+visual overview. Three initial generations selected; no app build, launch, technical
+qualification or live Studio operation. Existing build1/1 and launches1/3 unchanged.
+Prompts and source research are saved under docs/design/character-workspace-2026-10-15/.
+All concepts preserve the accepted linked-character model, fixed New character/save
+positions and current draft. Essentials lead; relationship editing is disclosed on
+request; unclear link/knowledge grouping is split into plain authoring topics.
+**Delivered:** three1586×992 concepts saved in the [design comparison](../../design/character-workspace-2026-10-15/README.md),
+with final images, exact prompts, research links and hashed manifest. Built-in ImageGen
+used three initial generations plus one targeted C refinement (restore Writing/Game
+setup, remove Edit-unlock actions, reduce game-status emphasis and fix creation anchor).
+Owner visually reviewed the three outputs; this is self-review, not independent UI
+qualification. A favors prose hierarchy; B favors one topic at a time; C favors a
+visual overview. Portraits/type choices are illustrative, not new accepted features.
+User selection is pending. These static proposals do not prove responsive switching,
+keyboard use or draft preservation and do not establish implementation/human acceptance.
+The existing unsaved Mara draft remains in the running app untouched. Next: compare
+A/B/C or a combination in this chat; no implementation or new native launch selected.
+
+No whole-phase acceptance is implied.
 Preferences/defects/phase acceptance remain separate. Do not infer approval from
 successful preparation or open screens. Keep this process/project for continuation;
 reserve launches2–3 for deliberate reopen checks.
