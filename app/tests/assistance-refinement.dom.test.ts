@@ -5,11 +5,63 @@ import {mountStudioSettings} from "../src/ai-settings-ui.ts";
 import {openSettings} from "../src/settings-ui.ts";
 import {mountRewrite} from "../src/rewrite-ui.ts";
 import {emptyReference,renderReferenceLibrary} from "../src/reference-ui.ts";
+import type {CoreOperation,CoreResponse} from "../src/protocol.ts";
 function waitFor(predicate:()=>boolean):Promise<void>{if(predicate())return Promise.resolve();return new Promise((resolve,reject)=>{const observer=new window.MutationObserver(()=>{if(predicate()){clearTimeout(deadline);observer.disconnect();resolve();}});const deadline=setTimeout(()=>{observer.disconnect();reject(Error("Expected assistance state was not reached"));},2000);observer.observe(document.body,{subtree:true,attributes:true,childList:true,characterData:true});});}
 const settingsReady=()=>waitFor(()=>document.querySelector<HTMLElement>(".studio-settings")?.dataset.busy==="false");
 function setup(){const w=new Window();Object.assign(globalThis,{window:w,document:w.document,HTMLElement:w.HTMLElement,HTMLInputElement:w.HTMLInputElement,HTMLTextAreaElement:w.HTMLTextAreaElement,HTMLSelectElement:w.HTMLSelectElement,Event:w.Event});document.body.innerHTML='<button id="entry">Open assistance</button><div class="app-shell"><header></header><main></main></div><footer></footer>';return w;}
 function button(name:string){return [...document.querySelectorAll<HTMLButtonElement>('button')].find(b=>b.textContent===name)!;}
 function enter(id:string,value:string){const n=document.getElementById(id) as HTMLInputElement;n.value=value;n.dispatchEvent(new window.Event('input',{bubbles:true}));return n;}
+
+test('native Game setup saves refresh only their host and retain all cached writing drafts',async()=>{
+ const w=setup();document.body.innerHTML='<div id="app"></div>';
+ Object.assign(globalThis,{KeyboardEvent:w.KeyboardEvent,MutationObserver:w.MutationObserver});
+ const project={sessionId:'game-draft-session',projectId:'game-draft-project',title:'Synthetic game drafts',folderName:'synthetic',chapterId:'chapter',chapterName:'Chapter',sceneId:'scene',sceneName:'Scene',sdkVersion:'8.5.3',resolution:{width:1280,height:720}};
+ const source={path:'game/characters.rpy',statement:'define mara = Character("Mara")',sourceRevision:'source-1'};
+ const game={schemaVersion:1,projectId:project.projectId,characters:[{id:'mara',technicalName:'mara',displayName:'Mara',dialogueColor:'#abcdef',defaultAppearanceId:'one',source}],appearances:[{id:'one',characterId:'mara',label:'calm',attributes:{outfit:'default',pose:'default'},renderMode:'staticImportedAsset',assetId:'asset-one'},{id:'two',characterId:'mara',label:'alert',attributes:{outfit:'default',pose:'default'},renderMode:'staticImportedAsset',assetId:'asset-two'}],assets:[{id:'asset-one',kind:'characterAppearance',displayName:'Calm',relativePath:'game/images/calm.png',sha256:'1'.repeat(64)},{id:'asset-two',kind:'characterAppearance',displayName:'Alert',relativePath:'game/images/alert.png',sha256:'2'.repeat(64)}],variables:[]};
+ const card=(id:string,title:string,linkedCharacterId:string|null)=>({id,revisionCounter:1,currentRevisionId:id+'-v1',approvedRevisionId:id+'-v1',revisions:[{id:id+'-v1',number:1,status:'approved',createdAt:'',reviewedAt:'',content:{...emptyReference('card'),title,linkedCharacterId}}]});
+ const references={revision:'library-1',document:{schemaVersion:1 as const,projectId:project.projectId,cards:[card('mara-card','Mara','mara'),card('ivo-card','Ivo',null)],loreEntries:[]},diagnostic:null,entities:[{kind:'character' as const,id:'mara',title:'Mara',revision:'source-1'}],issues:[],canUndo:true,canRedo:false};
+ const calls:CoreOperation[]=[];let refuseCharacter=true,refuseRefresh=false,revision=1;
+ const request=async<T>(op:CoreOperation,p:Readonly<Record<string,unknown>>={}):Promise<CoreResponse<T>>=>{
+  calls.push(op);let value:unknown;
+  if(op==='project.listRecent')value=[];
+  else if(op==='project.openPicker')value=project;
+  else if(op==='project.status')value='saved';
+  else if(op==='scene.list')value={scenes:[],chapters:[],lastOpen:{}};
+  else if(op==='references.list')value=structuredClone(references);
+  else if(op==='authoring.list'&&refuseRefresh){refuseRefresh=false;return{protocolVersion:1,requestId:'fixture',ok:false,error:{code:'READ_FAILED',message:'Synthetic refresh refusal'}};}
+  else if(op==='authoring.list')value=structuredClone(game);
+  else if(op==='media.present')value={mimeType:'image/png',dataBase64:'AA=='};
+  else if(op==='asset.chooseImport')value={authorityId:'synthetic-image',displayName:'new.png',byteCount:1,extension:'png'};
+  else if(op==='character.update'&&refuseCharacter){refuseCharacter=false;return{protocolVersion:1,requestId:'fixture',ok:false,error:{code:'INVALID_PAYLOAD',message:'Synthetic character refusal'}};}
+  else if(['character.update','appearance.setDefault','appearance.update','asset.import'].includes(op)){
+   references.revision=`library-${++revision}`;
+   if(op==='character.update'){game.characters[0]!.displayName=String(p.displayName);game.characters[0]!.source.sourceRevision=`source-${revision}`;references.entities[0]!.revision=`source-${revision}`;}
+   if(op==='appearance.setDefault')game.characters[0]!.defaultAppearanceId=String(p.appearanceId);
+   if(op==='appearance.update')game.appearances.find(a=>a.id===p.id)!.label=String(p.expression);
+   if(op==='asset.import')refuseRefresh=true;
+   value=structuredClone(game);
+  }else throw Error(`Unexpected main wiring operation ${op}`);
+  return{protocolVersion:1,requestId:'fixture',ok:true,value:value as T};
+ };
+ bridge(w,()=>({schemaVersion:1,theme:'light',density:'default',sourceFontSize:14,rememberLayout:false,layouts:{}}));
+ const click=(text:string,host:ParentNode=document)=>{const b=[...host.querySelectorAll<HTMLButtonElement>('button')].find(n=>n.textContent===text);assert(b,`Missing ${text}`);b.click();};
+ const input=(name:string,value:string,host:ParentNode=document)=>{const n=host.querySelector<HTMLInputElement|HTMLTextAreaElement>(`[name="${name}"]`);assert(n,`Missing ${name}`);n.value=value;n.dispatchEvent(new Event('input',{bubbles:true}));return n;};
+ const select=async(id:string)=>{document.querySelector<HTMLButtonElement>(`[data-entry-key="card:${id}"]`)!.click();await waitFor(()=>document.querySelector<HTMLElement>('.character-workspace')?.dataset.selectedKey===`card:${id}`);};
+ const {startApplication}=await import('../src/main.js');startApplication(request);
+ try{
+  await waitFor(()=>!!document.querySelector('.recent-section'));click('Open Loomlight Project');await waitFor(()=>!!document.querySelector('.project-shell'));click('Characters');await waitFor(()=>!!document.querySelector('.character-workspace'));
+  const workspace=document.querySelector('.character-workspace');
+  input('description','Mara retained writing');await select('ivo-card');input('description','Ivo retained writing');await select('mara-card');click('Game setup');await waitFor(()=>!!document.querySelector('.catalog-details-only'));
+  click('Edit',document.querySelector('.catalog-inspector')!);let dialog=document.querySelector<HTMLElement>('.catalog-dialog')!;const display=dialog.querySelector<HTMLInputElement>('input')!;display.value='Mara changed';display.dispatchEvent(new Event('input',{bubbles:true}));click('Save Character',dialog);
+  await waitFor(()=>document.querySelector('#app-status')?.textContent==='Synthetic character refusal');assert.equal(display.value,'Mara changed');assert.equal(dialog.isConnected,true);
+  click('Save Character',dialog);await waitFor(()=>!document.querySelector('.catalog-dialog'));assert.equal(document.querySelector('.character-workspace'),workspace);
+  const beforeDefaultReads=calls.filter(op=>op==='references.list').length;click('Set default');await waitFor(()=>calls.filter(op=>op==='authoring.list').length===3);await waitFor(()=>!!document.querySelector('.appearance-select[data-appearance-id="two"][data-default="true"]')&&calls.filter(op=>op==='references.list').length>beforeDefaultReads&&document.querySelector<HTMLElement>('.character-workspace')?.dataset.busy==='false');
+  const editAppearance=[...document.querySelectorAll<HTMLButtonElement>('.appearance-row button')].find(b=>b.ariaLabel==='Edit appearance alert');assert(editAppearance);editAppearance.click();dialog=document.querySelector<HTMLElement>('.catalog-dialog')!;const expression=dialog.querySelector<HTMLInputElement>('input')!;expression.value='happy';expression.dispatchEvent(new Event('input',{bubbles:true}));click('Save Appearance',dialog);await waitFor(()=>!document.querySelector('.catalog-dialog'));assert.equal(document.querySelector('.character-workspace'),workspace);
+  click('Add Appearance');dialog=document.querySelector<HTMLElement>('.catalog-dialog')!;const imported=dialog.querySelector<HTMLInputElement>('input')!;imported.value='new';imported.dispatchEvent(new Event('input',{bubbles:true}));click('Choose image…',dialog);await waitFor(()=>!document.querySelector('.catalog-dialog'));assert.match(document.querySelector('.character-game-setup')!.textContent!,/Saved\. Game setup could not be refreshed/);assert.equal(document.querySelector('.character-workspace'),workspace);assert.equal(calls.filter(op=>op==='asset.import').length,1);const beforeRetryReads=calls.filter(op=>op==='references.list').length;click('Reload game setup');await waitFor(()=>!!document.querySelector('.catalog-details-only')&&calls.filter(op=>op==='references.list').length>beforeRetryReads&&document.querySelector<HTMLElement>('.character-workspace')?.dataset.busy==='false');assert.equal(calls.filter(op=>op==='asset.import').length,1,'read-only refresh never replays the saved import');
+  click('Writing');await waitFor(()=>document.querySelector<HTMLButtonElement>('#character-view-writing')?.ariaSelected==='true');assert.equal((document.querySelector('[name="description"]') as HTMLTextAreaElement).value,'Mara retained writing');await select('ivo-card');assert.equal((document.querySelector('[name="description"]') as HTMLTextAreaElement).value,'Ivo retained writing');
+  assert.equal(document.querySelector('.character-workspace'),workspace);assert.equal(calls.filter(op=>op==='references.apply').length,0);assert.equal(calls.filter(op=>op==='asset.import').length,1);assert.equal(calls.filter(op=>op==='character.update').length,2);assert.equal(calls.filter(op=>op==='appearance.update').length,1);assert.equal(calls.filter(op=>op==='appearance.setDefault').length,1);
+ }finally{await w.happyDOM.close();}
+});
 const settings={label:'Saved',endpoint:'http://127.0.0.1:8888/v1',model:'fixture',contextCeiling:8192,contextBudget:4096,maximumResponse:1024};
 const profile={profileId:'p',revision:1,disabled:false,credentialStatus:'configured',compatibilityState:'ready',settings,discovery:null};
 function bridge(w:Window,fn:(op:string,p:Record<string,unknown>)=>unknown){Object.assign(w,{__TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}})=>({protocolVersion:1,requestId:request.requestId,ok:true,value:await fn(request.operation,request.payload)})}});}

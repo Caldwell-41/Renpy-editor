@@ -1288,7 +1288,11 @@ Hidden legacy fields remain stored. Version history is a compact readable dialog
 Restore creates a new revision and refuses pending writing/game input. The project
 Lorebook has two growing world/tone areas, page-body scrolling and reachable fixed
 Save/Discard, plus read-only history. All surfaces use existing Paper/Teal and
-Charcoal/Copper tokens. [Reference contracts](REFERENCE_LIBRARY.md#walkthrough-redesign-contract--2026-10-15)
+Charcoal/Copper tokens. Compact actions share a stable bottom row, with status above.
+Existing proposed lore remains reachable through an explicit review dialog that keeps
+global drafts. Native Game setup completion retains the Characters controller/drafts;
+its final main-wiring regression remains pending in the owning task.
+[Reference contracts](REFERENCE_LIBRARY.md#walkthrough-redesign-contract--2026-10-15)
 own lifecycle/preservation; [context contracts](PROMPTS_CONTEXT.md#shared-project-world-and-tone--2026-10-15)
 own visible per-request inclusion/omission and exact preview. Static fixtures do not
 establish packaged WebView physical input, screen-reader behavior or phase acceptance.

@@ -72,7 +72,8 @@ async function mount(page,surface,theme,size){
   document.documentElement.dataset.theme=theme;
   document.querySelector('.project-shell').dataset.navigationCollapsed=String(size==='compact');
   const navigation=surface==='lorebook'?'Lorebook':surface==='assist'?'Story':surface==='settings'?null:'Characters';
-  for(const item of document.querySelectorAll('.story-sidebar>.tree-item')){const selected=item.textContent.trim()===navigation;item.classList.toggle('selected',selected);if(selected)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');}
+  const {icon}=await import('/src/icons.ts');
+  for(const item of document.querySelectorAll('.story-sidebar>.tree-item')){const title=item.textContent.trim(),selected=title===navigation;item.prepend(icon(title.toLowerCase()));item.title=title;item.setAttribute('aria-label',title);item.classList.toggle('selected',selected);if(selected)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');}
   window.fixtureExpectedNavigation=navigation;
   const host=document.querySelector('#surface'),creation=document.querySelector('#creation');
   creation.querySelector('h1').textContent=surface==='assist'?'Story':surface==='settings'?'Settings':surface==='lorebook'?'Lorebook':'Characters';

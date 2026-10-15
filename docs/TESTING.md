@@ -777,7 +777,7 @@ authorize a production dispatch during Q1-PREP.
 
 The [approved walkthrough redesign](tasks/active/walkthrough-redesign-implementation.md)
 has an explicit thin-check/no-local-package contract and cumulative allowances. Its
-task ledger owns pending cap extensions; the command references here do not authorise
+task ledger owns current cap decisions; the command references here do not authorise
 another attempt. Focused source/test compilation, typed reference/context dispatch,
 actual request transport/host fixtures and source-module browser rendering cover the
 changed paths. No specialist crash/hostile-filesystem or unrelated SDK matrix is selected.

@@ -816,5 +816,8 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
   .reference-version-history {white-space:normal;max-width:110px;}
   .reference-topics button {font-size:.9em;padding:8px;}
   .reference-form-footer>.button {font-size:.9em;padding:9px 12px;}
+  .character-workspace .reference-form-footer,.project-lorebook .reference-form-footer {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;}
+  .character-workspace .reference-form-footer>span,.project-lorebook .reference-form-footer>span {grid-column:1/-1;margin:0;}
+  .character-workspace .reference-form-footer>.button,.project-lorebook .reference-form-footer>.button {min-width:0;white-space:nowrap;}
   .reference-writing-body {padding-right:0;}
 }

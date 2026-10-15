@@ -1,6 +1,6 @@
 # Walkthrough redesign implementation
 
-**State: blocked on bounded verification extensions; implementation local; approved for execution on 2026-10-15.** The user approved the
+**State: local implementation; two new bounded verification decisions after approved extensions.** The user approved the
 complete proposed scope/budgets and explicitly requested starting the new chat. The
 Sol6.1/xhigh coordinator owns implementation, Sol6.1/high delegation, review, tests,
 publication of the reviewed candidate and gated CI under this contract. This supersedes
@@ -302,3 +302,81 @@ single-case round, and one browser28-case round with at most one diagnosed corre
 No answer is treated as approval. All unaffected work above is complete; resume here
 with the decisions, retain existing counts and complete the held focused proof before
 any gated publication/CI. Final human Phase2/3A acceptance remains pending.
+
+### Approved verification continuation
+
+On 2026-10-15 the user replied **Request Approved** to all three pending extension
+questions. This authorises one extra C round for exactly the three named cases above,
+one extra B round for the named status-consistency failure-path case, and one fresh
+full28 browser matrix plus at most one diagnosed correction. It does not reset prior
+usage or expand live/token/management/CI budgets. The coordinator resumed those checks;
+live dispatch remains gated by the focused B result, and publication/CI by all required
+slice/integration proof and final technical review. The original walkthrough remains
+untouched. Historical pending/blocked entries above record the earlier checkpoint.
+
+### Approved extension results and new reassessment
+
+All three extensions approved by **Request Approved** were executed without resetting
+earlier counts:
+
+| Approved extension / further in-scope work | Actual result and retained evidence |
+| --- | --- |
+| C one exact3-case round | **3/3 passed**, zero ignored. Separate fully qualified `--exact` invocations; raw logs, source/test-executable hashes and manifest under `/private/tmp/loomlight-c-approved-round1/`. Core inputs were committed c6dfc00950cd6963d1e3a77fe7fb3a156fc80e2c/treefe1ef3e0ccae9939812d8295fb5b726484ab292b; only status docs changed during the batch. No C correction remained or ran. |
+| B one exact failure-path case | **1/1 passed**, zero ignored: `ai_request::model_readiness_tests::capacity_conflict_loading_and_unknown_status_refuse_without_generation_or_mutation`. Pinned `cargo test --manifest-path app/src-core/Cargo.toml --locked` with the full name and `-- --exact --nocapture`; raw `/private/tmp/loomlight-b-focused-20261015-XXXXXX.log`. Independent B review found no remaining controlled-path blocker. |
+| Browser extra initial | Failed14/28 at compact Characters. Actual Discard top590→638 on list collapse while Save stayed638 proved a product wrap defect; failure image, stable input hashes and closed cleanup retained at `/private/tmp/loomlight-redesign-browser-approved-round1/`. This is distinct from the earlier container-only observation. |
+| Browser extra correction1 | **28/28 passed**, checker passed, zero errors/prohibited operations/viewport overflow, all actions visible, browser/server closed. Compact Save and Discard both top638/bottom674; wide810/846, stable across card switches and list collapse/restore in both themes. CSS reserves a compact two-column action row and full-width status. Harness-only inert global nav now uses production icons. Raw log,28 PNGs, source hashes and manifests at `/private/tmp/loomlight-redesign-browser-approved-correction1/`; summary `/private/tmp/loomlight-approved-verification-summary.json`. All37 before/after inputs matched. The dirty working-tree hashes own this proof, not barec6dfc00. Root inspected compact Characters/Lorebook; worker inspected five representative compact images. No browser allowance remains. |
+| E correction2 | Independent review found existing Assist-generated proposed lore had lost its review entry point. Explicit retained-lore comparison/approve/reject dialog restored without legacy editing/migration or merging global notes. Exact revision/support checks, safe text rendering, global draft retention and visible refusals preserved. Typecheck/test compilation and named regression **1/1 passed**; raw ignored `.toolchains/walkthrough-redesign/e2-proposed-lore.log`. Earlier same-case pass before requested reload glue was rerun for changed inputs, disclosed. **E2/2 used.** Coordinator reviewed/accepted. F restore copy now accurately describes writing restoration and retained current game link. |
+| Integration correction2 | Independent review found native character/appearance/import success callbacks called full `showProject`, destroying all cached writing/source drafts. Captured-host refresh and controller reload replace that teardown; owned catalogue disposal and late-result guards retained. Typecheck/test compilation passed. New main regression reached successful character/default saves with controller retained, then failed on happy-dom's nonreflected ariaLabel attribute selector. Raw `/private/tmp/loomlight-integration2-game-drafts.log`; **integration2/2 used**. The property-selector repair is prepared, UNRUN. Further static review found confirmed-save/read-failure could re-enable a consumed mutation; concrete saved/read-only-reload guard plus same-case import/no-replay/readiness assertions are prepared, UNRUN, and independently statically reviewed. Final behavior is not yet qualified. These later main-only edits were not loaded by the browser fixture; its rendering-module evidence remains distinct. |
+
+**Owner live attempt1:** rebuilt the test-only production driver (no package/editor).
+Printed/reviewed its fixed synthetic compatibility body before dispatch; reserved one
+slot and2048 response tokens in the ignored common ledger before literal dispatch.
+The native credential adapter read the existing bound credential internally once;
+no secret export/logging, ordinary profile write or fallback occurred. Production
+readiness returned `model_interface` during checking_model; no loading_model/sending
+stage, model-load POST or generation POST was reached. Saved profile token unchanged.
+Raw `/private/tmp/loomlight-redesign-live-01.log`. The failed slot remains charged.
+Two explicit unauthenticated read-only diagnostics (status/version) each returned401;
+they do not identify the authenticated schema/version or prove a bad saved key.
+Exact endpoint/profile/root and input hashes stay ignored, never in repository docs.
+
+Reassessment: loaded-path reuse is verified in controlled production transport, but
+the installed authenticated interface rejection remains undiagnosed. The public core
+transport exposes no credential-safe status/version observation to this driver;
+duplicating transport, exporting the credential or guessing a capacity/fallback would
+violate the selected contract. No automatic generation retry is justified. B's original
+two cycles and extra single-case round remain charged; runtime diagnosis needs a
+separately bounded extension. A concrete debug/test-only, fixed-two-GET proposal is
+being prepared as an unapplied local patch, not silently executed.
+
+**Two current requested decisions (not yet approved):**
+
+1. One extra integration round: pinned typecheck/test compilation and only
+   `native Game setup saves refresh only their host and retain all cached writing drafts`.
+   This verifies the prepared property-selector repair, cached drafts through all four
+   native operations, confirmed import followed by failed read, and read-only recovery
+   with exactly one import. No broad DOM rerun or browser reset.
+2. One B diagnostic round: apply/review a debug/test-only helper and owner-driver mode
+   that reuse production credential/destination/cancellation/transport for fixed GET
+   `/api/inference/status` and `/version`, at most15 seconds total, returning only
+   allowlisted shape/capacity/version/failure facts. One exact controlled diagnostic
+   case must prove only two GETs, no POST/raw body/secret leakage, and refusal/cleanup.
+   Then one authenticated read-only owner probe, with no generation/load. If it diagnoses
+   an in-scope adapter defect, permit at most one diagnosed correction/affected focused
+   verification round. No guessed fallback, new provider/version scope or policy weakening.
+   Existing live/token/refresh/load limits remain unchanged; otherwise report the actual
+   unsupported setup and preserve it. Resume bounded generation checks only after proof.
+
+Common usage now **live1/12, reserved2048/32768, refresh0/4, loads0/2, pairedCI0/3,
+local production builds0/0 and new native starts0/0**. No CI/push/merge/release/phase
+acceptance. Complete unaffected review/docs and preserve these concrete patches; do
+not spend either requested extension before the user answers. Final publication/CI
+remains gated by integration/B evidence and coordinator technical approval.
+
+The user then explicitly requested a **new independent subagent** to research the
+Unsloth Studio API and obtain a clear sourced answer without assumptions. Sol6.1/high
+`studio_api_research` is selected for read-only official-source research: complete route
+registration/authentication, exact pinned status/version/inventory/load schema versus
+the adapter, and separation of public contract facts from unknown installed responses.
+This research authorises no test rerun, authenticated probe, credential/model operation
+or budget reset. Reassess the proposed diagnostic only after that evidence returns.

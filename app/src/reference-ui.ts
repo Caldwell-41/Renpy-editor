@@ -43,7 +43,7 @@ export interface ReferenceActions {
   workspaceKey?:string;
   renderGameSetup?(host:HTMLElement,characterId:string):Promise<void|(()=>void)>;
 }
-export interface ReferenceController { save(): Promise<void>; isBusy(): boolean; dispose(): void }
+export interface ReferenceController { save(): Promise<void>; reload(): Promise<void>; isBusy(): boolean; dispose(): void }
 
 const common=["title","tags","scope","knowledgeNotes","provenance","citations","links"] as const;
 const cardFields=["linkedCharacterId","aliases","description","appearanceNotes","personality","motivations","background","relationships","speakingStyle","exampleDialogue","linkedLoreIds"] as const;
@@ -82,7 +82,7 @@ function renderProjectLore(host:HTMLElement,initial:ReferenceWorkspace,actions:R
   const undo=button("Undo",()=>{void mutate({type:"undo"});}),redo=button("Redo",()=>{void mutate({type:"redo"});}),reload=button("Reload Lorebook",()=>{void refresh();});toolbar.append(undo,redo,reload);
   const editor=el("div","","reference-editor lorebook-editor"),body=el("div","","reference-writing-body");
   const footer=el("div","","reference-form-footer"),state=el("span"),discard=button("Discard changes",()=>{void discardDraft();}),saveButton=button("Save changes",()=>{void save();},"button primary");footer.append(state,discard,saveButton);
-  const header=el("div","","reference-identity-header"),versions=button("Version history",()=>openHistory());header.append(el("h2","Project Lorebook","reference-identity"),versions);root.append(toolbar,notice,editor);editor.append(header,el("p","Shared context for AI writing in this project. You can omit these notes for each request. Review these notes in the AI request before sending. Saving sends nothing.","muted"),body,footer);host.append(root);
+  const header=el("div","","reference-identity-header"),versions=button("Version history",()=>openHistory()),proposedLore=button("Review proposed lore",()=>openProposedLore());header.append(el("h2","Project Lorebook","reference-identity"),proposedLore,versions);root.append(toolbar,notice,editor);editor.append(header,el("p","Shared context for AI writing in this project. You can omit these notes for each request. Review these notes in the AI request before sending. Saving sends nothing.","muted"),body,footer);host.append(root);
   const controls=new Map<keyof ProjectContextContent,HTMLTextAreaElement>();const errors=new Map<keyof ProjectContextContent,HTMLElement>();
   for(const [key,title,description] of [["world","World & starting situation","Describe the setting, world rules and situation when the story begins."],["tone","Tone & writing style","Describe the mood, pacing, dialogue and prose style. Character cards guide each person's voice."]] as const){
     const input=el("textarea");input.name=key;input.rows=6;input.value=draft[key];const helper=el("p",description,"reference-field-help muted"),error=el("span","","field-error");helper.id=`lorebook-${key}-help`;error.id=`lorebook-${key}-error`;input.setAttribute("aria-describedby",`${helper.id} ${error.id}`);const wrapper=label(title,input);wrapper.append(helper,error);body.append(wrapper);controls.set(key,input);errors.set(key,error);
@@ -91,12 +91,47 @@ function renderProjectLore(host:HTMLElement,initial:ReferenceWorkspace,actions:R
   const active=():boolean=>!disposed&&actions.current();const dirty=():boolean=>JSON.stringify(draft)!==baseline;
   function feedback(text:string,error=false):void{notice.textContent=text;notice.dataset.kind=error?"error":"normal";actions.status(text,error?"error":"normal");}
   function validate(key:keyof ProjectContextContent):boolean{const message=new TextEncoder().encode(draft[key]).length>10000?"Use at most 10,000 UTF-8 bytes for this field.":"";errors.get(key)!.textContent=message;controls.get(key)!.setAttribute("aria-invalid",String(!!message));return !message;}
-  function synchronize():void{const blocked=busy||!!history;root.dataset.busy=String(busy);if(dirty())root.dataset.unsubmitted="true";else delete root.dataset.unsubmitted;state.textContent=busy?"Saving…":dirty()?"Unsaved changes":"Saved";saveButton.disabled=blocked||!dirty()||!model.document;discard.disabled=blocked||!dirty();undo.disabled=blocked||dirty()||!model.canUndo;redo.disabled=blocked||dirty()||!model.canRedo;reload.disabled=blocked;versions.disabled=busy||!model.document?.projectContext;controls.forEach(n=>n.disabled=blocked||!model.document);}
+  function synchronize():void{const blocked=busy||!!history;root.dataset.busy=String(busy);if(dirty())root.dataset.unsubmitted="true";else delete root.dataset.unsubmitted;state.textContent=busy?"Saving…":dirty()?"Unsaved changes":"Saved";saveButton.disabled=blocked||!dirty()||!model.document;discard.disabled=blocked||!dirty();undo.disabled=blocked||dirty()||!model.canUndo;redo.disabled=blocked||dirty()||!model.canRedo;reload.disabled=blocked;versions.disabled=busy||!model.document?.projectContext;proposedLore.hidden=!pendingLore().length;proposedLore.disabled=busy;controls.forEach(n=>n.disabled=blocked||!model.document);if(history)history.querySelectorAll<HTMLButtonElement>("button").forEach(n=>n.disabled=busy||n.dataset.refused==="true");}
   function draw():void{for(const [key,input]of controls){input.value=draft[key];errors.get(key)!.textContent="";input.removeAttribute("aria-invalid");grow(input);}synchronize();}
   async function discardDraft():Promise<void>{if(busy||history||!active()||!await actions.guard()||!active())return;draft=saved();baseline=JSON.stringify(draft);expectedRevision=model.revision;draw();feedback("Returned to saved text.");}
   async function save():Promise<void>{if(busy||history||!active()||!dirty())return;let first:HTMLTextAreaElement|undefined;for(const key of controls.keys())if(!validate(key))first??=controls.get(key);if(first){feedback("Correct the marked fields before saving. Your draft is retained.",true);first.focus();return;}await mutate({type:"saveProjectContext",...draft});}
   async function mutate(command:ReferenceCommand):Promise<void>{if(busy||history||!active()||!model.document||(command.type!=="saveProjectContext"&&dirty()))return;busy=true;root.dataset.mutationCommand=command.type;root.dataset.mutationOutcome="pending";synchronize();try{const next=await actions.apply(command,command.type==="saveProjectContext"?expectedRevision:model.revision);if(!active())return;model=next;draft=saved();baseline=JSON.stringify(draft);expectedRevision=model.revision;root.dataset.mutationOutcome="committed";draw();feedback(next.diagnostic??"Saved");}catch(error){if(active()){root.dataset.mutationOutcome="refused";feedback(errorMessage(error),true);}}finally{busy=false;root.dataset.mutationSequence=String(++sequence);if(active())synchronize();}}
   async function refresh():Promise<void>{if(busy||history||!active())return;busy=true;synchronize();try{const next=await actions.load();if(!active())return;model=next;if(!dirty()){draft=saved();baseline=JSON.stringify(draft);expectedRevision=model.revision;draw();}feedback(next.diagnostic??(dirty()?"Lorebook reloaded. Your draft is retained; changed saved data may require a fresh edit.":"Lorebook reloaded."));}catch(error){if(active())feedback(errorMessage(error),true);}finally{busy=false;if(active())synchronize();}}
+  function pendingLore():ReferenceRecord[]{return (model.document?.loreEntries??[]).filter(record=>currentRevision(record).status==="proposed");}
+  function openProposedLore():void{
+    if(busy||history||!pendingLore().length)return;
+    const invoker=document.activeElement as HTMLElement,overlay=el("div","","leave-source-dialog reference-version-dialog reference-proposed-lore-dialog");overlay.role="dialog";overlay.setAttribute("aria-modal","true");overlay.ariaLabel="Review proposed lore";
+    const panel=el("section","","catalog-dialog-panel"),notice=el("p","","reference-proposal-notice"),items=el("div");notice.role="status";
+    panel.append(el("h2","Review proposed lore"),el("p","These retained lore entries are separate from the project's world and tone notes. Review each saved proposal explicitly. Approving or rejecting it keeps your unsaved Lorebook draft.","muted"),notice,items);
+    const close=button("Close proposed lore review",()=>finish());panel.append(close);overlay.append(panel);root.append(overlay);history=overlay;
+    function finish():void{if(busy)return;overlay.remove();history=undefined;synchronize();if(invoker?.isConnected&&!invoker.hidden)invoker.focus();else{const heading=header.querySelector<HTMLElement>("h2");if(heading){heading.tabIndex=-1;heading.focus();}}}
+    function drawReviews():void{
+      items.replaceChildren();const records=pendingLore();if(!records.length)items.append(el("p","No proposed lore needs review."));
+      for(const record of records){
+        const next=currentRevision(record),approved=record.revisions.find(r=>r.id===record.approvedRevisionId),section=el("section","","reference-proposed-lore");section.dataset.recordId=record.id;section.append(el("h3",next.content.title),el("p",`Saved version ${next.number} · Proposed · needs approval`),el("p","Approving replaces the approved text for this entry; rejection retains the previous approved text. Undo is available."));
+        for(const [key,value]of Object.entries(next.content)){const previous=(approved?.content as unknown as Record<string,unknown>|undefined)?.[key];if(JSON.stringify(previous)!==JSON.stringify(value))section.append(referenceComparison(referenceFieldName(key),previous,value));}
+        const retained=el("details");retained.append(el("summary","Saved proposed lore and exact metadata"),el("h4","Current approved text"),el("pre",JSON.stringify(approved?.content??null,null,2)),el("h4","Proposed text"),el("pre",JSON.stringify(next.content,null,2)));section.append(retained);
+        const approve=button("Approve this lore revision",()=>{void review(record.id,next.id,true);},"button primary"),reject=button("Reject proposed lore entry",()=>{void review(record.id,next.id,false);});approve.dataset.reviewLore=reject.dataset.reviewLore="true";
+        if(model.issues.some(issue=>issue.recordId===record.id&&issue.revisionId===next.id&&(issue.field==="citations"||issue.field==="supportingReadSet"))){approve.dataset.refused="true";section.append(el("p","Approval unavailable: supporting material is missing or changed. Review fresh material before approving this revision.","error-message"));}
+        section.append(approve,reject);items.append(section);
+      }
+    }
+    async function review(recordId:string,revisionId:string,approve:boolean):Promise<void>{
+      if(busy||!active())return;const record=pendingLore().find(r=>r.id===recordId);if(!record||currentRevision(record).id!==revisionId)return;
+      if(approve&&model.issues.some(issue=>issue.recordId===recordId&&issue.revisionId===revisionId&&(issue.field==="citations"||issue.field==="supportingReadSet")))return;
+      const previousContext=model.document?.projectContext?.currentRevisionId;
+      busy=true;root.dataset.mutationCommand="reviewLore";root.dataset.mutationOutcome="pending";delete root.dataset.mutationErrorCode;notice.textContent="Saving review…";notice.classList.remove("error-message");synchronize();
+      try{
+        const next=await actions.apply({type:"reviewLore",recordId,revisionId,approve},model.revision);if(!active())return;model=next;
+        // This explicit review changes a separate record. Preserve global drafts and
+        // advance their token only when the world/tone revision stayed unchanged.
+        if(!dirty()){draft=saved();baseline=JSON.stringify(draft);expectedRevision=model.revision;draw();}else if(previousContext===model.document?.projectContext?.currentRevisionId)expectedRevision=model.revision;
+        root.dataset.mutationOutcome="committed";drawReviews();notice.textContent=approve?"Lore revision approved. Your Lorebook draft is retained.":"Proposed lore rejected. Your Lorebook draft is retained.";feedback(notice.textContent);close.focus();
+      }catch(error){if(active()){root.dataset.mutationOutcome="refused";const code=(error as {code?:unknown})?.code;root.dataset.mutationErrorCode=typeof code==="string"&&/^[A-Z_]+$/.test(code)?code:"REFERENCE_ACTION_FAILED";notice.textContent=errorMessage(error);notice.classList.add("error-message");feedback(notice.textContent,true);}}
+      finally{busy=false;root.dataset.mutationSequence=String(++sequence);if(active()){synchronize();if(root.dataset.mutationOutcome==="committed"&&history===overlay)close.focus();}}
+    }
+    overlay.addEventListener("keydown",event=>{if(event.key==="Escape"&&!busy){event.preventDefault();finish();}if(event.key==="Tab"){const controls=[...overlay.querySelectorAll<HTMLElement>('button:not(:disabled),summary')],first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}});drawReviews();synchronize();close.focus();
+  }
   function openHistory():void{
     const record=model.document?.projectContext;if(busy||history||!record)return;
     const invoker=document.activeElement as HTMLElement,overlay=el("div","","leave-source-dialog reference-version-dialog lorebook-version-dialog");overlay.role="dialog";overlay.setAttribute("aria-modal","true");overlay.ariaLabel="Lorebook version history";
@@ -110,7 +145,7 @@ function renderProjectLore(host:HTMLElement,initial:ReferenceWorkspace,actions:R
     overlay.addEventListener("keydown",event=>{if(event.key==="Escape"){event.preventDefault();finish();}if(event.key==="Tab"){const focusable=[...overlay.querySelectorAll<HTMLElement>("summary,button")],first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}});synchronize();close.focus();
   }
   synchronize();if(model.diagnostic)feedback(model.diagnostic,true);
-  return {save,isBusy:()=>busy,dispose:()=>{disposed=true;history?.remove();root.remove();}};
+  return {save,reload:refresh,isBusy:()=>busy,dispose:()=>{disposed=true;history?.remove();root.remove();}};
 }
 
 interface CharacterEntry { key:string;record:ReferenceRecord|null;game:ReferenceEntity|null;title:string }
@@ -236,7 +271,7 @@ function renderCharacters(host:HTMLElement,initial:ReferenceWorkspace,actions:Re
   function openHistory():void{
     if(busy||history||!entry().record)return;const record=entry().record!,invoker=document.activeElement as HTMLElement;
     const overlay=el("div","","leave-source-dialog reference-version-dialog");overlay.role="dialog";overlay.setAttribute("aria-modal","true");overlay.ariaLabel="Character version history";
-    const panel=el("section","","catalog-dialog-panel"),heading=el("h2","Version history"),copy=el("p","Restores the whole card as a new saved version. Your current version stays in recent history. You can undo the restore."),versions=el("div","","reference-version-previews");panel.append(heading,copy);if(restoreBlocked())panel.append(el("p","Save or discard your current changes before restoring a version.","error-message"));
+    const panel=el("section","","catalog-dialog-panel"),heading=el("h2","Version history"),copy=el("p","Restores this card’s writing as a new saved version. The current game-character link is kept. You can undo the restore."),versions=el("div","","reference-version-previews");panel.append(heading,copy);if(restoreBlocked())panel.append(el("p","Save or discard your current changes before restoring a version.","error-message"));
     const close=button("Close version history",()=>closeHistory(invoker));
     for(const revision of [...record.revisions].reverse()){
       const item=el("details","","reference-version-preview");item.open=revision.id!==record.currentRevisionId;item.append(el("summary",`Saved version ${revision.number} · ${revision.status}${revision.id===record.currentRevisionId?" · Current":""}`));
@@ -266,5 +301,5 @@ function renderCharacters(host:HTMLElement,initial:ReferenceWorkspace,actions:Re
   if(!entries().some(e=>e.key===selected)&&selected!=="new")selected=entries()[0]?.key??"new";
   drawList();drawEditor();setCollapsed(remembered.treeCollapsed||window.innerWidth<900);if(model.diagnostic)feedback(model.diagnostic,true);
   const reset=():void=>setCollapsed(window.innerWidth<900,true);root.closest(".project-shell")?.addEventListener("reset-panes",reset);
-  return {save,isBusy:()=>busy,dispose:()=>{disposed=true;clearGame();history?.remove();root.closest(".project-shell")?.removeEventListener("reset-panes",reset);create.remove();root.remove();}};
+  return {save,reload:refresh,isBusy:()=>busy,dispose:()=>{disposed=true;clearGame();history?.remove();root.closest(".project-shell")?.removeEventListener("reset-panes",reset);create.remove();root.remove();}};
 }

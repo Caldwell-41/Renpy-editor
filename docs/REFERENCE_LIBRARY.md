@@ -40,10 +40,18 @@ starting perspective only. The UI omits linked lore, applicability, source notes
 generic story-link controls while retaining those stored values and approval checks.
 Card history previews are readable and Restore is explicit; Lorebook history is
 read-only. Save/Discard and Undo/Redo retain ordinary transaction/reopen behavior.
+Native Game setup saves refresh their captured host while retaining the reference
+controller and all cached writing drafts. A confirmed save followed by a failed read
+offers read-only reload; it must not re-enable the consumed mutation form. The task
+ledger records the pending final integration regression for this guard.
 
 The simplified Lorebook edits World & starting situation and Tone & writing style.
 Its shared AI inclusion/omission and preserved legacy-style exclusion are defined in
 [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#shared-project-world-and-tone--2026-10-15).
+When retained lore has proposed revisions, **Review proposed lore** opens passive
+comparison/metadata and explicit approve/reject actions on the exact saved revision.
+This preserves dirty world/tone notes, current support checks and separate lore IDs;
+it neither edits legacy lore nor merges it into the global notes. Failures stay visible.
 
 **State:** selected manual-library outcome accepted on packaged Mac and Windows x64.
 Native authoring, consecutive Undo/Redo, byte-exact process reopen, keyboard/focus,
