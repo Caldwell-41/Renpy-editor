@@ -175,3 +175,12 @@ Lorebook to set world state and tone. The [new Lorebook mockup and scope notes](
 propose one document per project, starting-world facts and tone/style, consistent with
 approved B. The Lorebook proposal awaits approval and does not reopen the approved card
 design or authorise migration/deletion of existing lore or automatic context injection.
+
+## Palette consistency correction
+
+User requires the Lorebook and redesigned surfaces to match the rest of the app. Use
+existing app/src/ui-refresh.css Paper/Teal and Charcoal/Copper theme tokens; approved B
+images govern layout, not a separate blue/purple colour scheme. This correction preserves
+character design approval and applies to implementation across redesigned surfaces.
+[Corrected Lorebook preview](../lorebook-workspace-2026-10-15/global-world-tone-v2.png)
+awaits feedback. No application code or theme preference changed.

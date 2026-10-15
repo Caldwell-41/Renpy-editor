@@ -1,5 +1,18 @@
 # Phase 2 — Initial LLM assistance
 
+## Lorebook palette correction — 2026-10-15
+
+User rejects the blue/purple mockup colour scheme and requires the existing app palette.
+Verified actual theme overrides in app/src/ui-refresh.css and approved Paper/Teal image;
+delivered [corrected preview](../../design/lorebook-workspace-2026-10-15/global-world-tone-v2.png)
+using1targeted built-in ImageGen edit. Dark neutral text, grey helpers/borders, warm
+surfaces and muted teal match the existing light-theme direction. Actual shared tokens
+also govern earlier B layouts; generated blue colouring is superseded. Original PNG/
+prompts retained. Owner visual review and PNG/hash checks pass; bitmap rendering is not
+pixel-exact CSS proof. Lorebook calls2, total design16; no additional agent. No code,
+native navigation, source/reference edit, build/launch, provider or credential operation.
+Current card draft preserved. Lorebook layout/workflow approval remains pending.
+
 ## Lorebook redesign proposal — 2026-10-15
 
 User dislikes the Lorebook layout and asks for a global world-state/tone page using

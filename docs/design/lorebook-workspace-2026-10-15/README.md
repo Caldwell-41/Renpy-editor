@@ -11,7 +11,9 @@ These are design assumptions for review, not confirmed new product behavior.
 
 ## Proposed page
 
-[Full mockup](global-world-tone-v1.png) · [exact prompt](global-world-tone-v1.txt)
+[Current mockup — corrected palette](global-world-tone-v2.png) · [palette-correction prompt](global-world-tone-palette-fix.txt)
+
+[Initial layout prompt](global-world-tone-v1.txt); original image preserved, blue palette rejected.
 
 - One broad page, without an entry list or extra sidebar.
 - **World at the start**: setting, initial situation and shared facts when the story begins.
@@ -64,3 +66,21 @@ Static mockups do not verify resizing, keyboard behavior, history restoration or
 context assembly. PNG CRC/hash and exact prompt hash are in [manifest.json](manifest.json).
 No additional researcher/subagent was requested or used. Lorebook calls1; prior character
 design calls14; cumulative walkthrough design calls15. User visual/workflow approval pending.
+
+## Palette correction — current preview
+
+User rejects the blue/purple colour treatment and requires consistency with the existing
+application. The initial mockup had visibly blue text/icons/borders despite the intended
+style. Corrected [v2](global-world-tone-v2.png) uses the actual Paper/Teal token system in
+[ui-refresh.css](../../../app/src/ui-refresh.css) and the approved
+[light palette reference](../ui-refresh/palette-light-paper-teal.png). Keep dark neutral
+headings/prose, muted grey helpers, warm paper/stone surfaces, neutral borders and muted
+teal actions/selections. The actual theme overrides the earlier base stylesheet palette;
+do not introduce a second page-specific palette. Preserve the existing Charcoal/Copper
+dark theme in implementation; this preview illustrates light mode only.
+
+One targeted built-in ImageGen colour edit; Lorebook calls2, walkthrough design calls16.
+Owner inspected retained layout/text and corrected colour hierarchy. PNG integrity/hash
+checks passed. Existing app and unsaved card remain untouched. User has not yet approved
+the Lorebook layout/workflow; corrected preview awaits feedback. Earlier B images are
+layout references only wherever their rendered colours disagree with the actual theme.

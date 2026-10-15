@@ -1,0 +1,17 @@
+Use case: ui-mockup, colour correction.
+Image 1 is the EDIT TARGET: the proposed Loomlight Lorebook page. Image 2 is ONLY the approved app palette reference; do not copy its scene preview, characters or layout.
+Correct image 1 to the app's existing PAPER AND TEAL theme. The blue/purple text, blue icons, blue borders and cool-white canvas are wrong. Remove all those blue/purple treatments. This is a colour-only correction: keep image 1's exact Lorebook layout, all wording, fields, spacing, relative sizes, icon shapes, collapsed navigation, active Lorebook selection, Version history button, Project-wide badge and Save/Discard footer.
+
+Use the actual current app light-theme colours:
+- Main canvas warm paper #F5F3ED.
+- Top app header, icon navigation rail and footer warm stone #EBE8E0.
+- Text input and textarea interiors warm white #FFFDF8.
+- Headings, labels, entered prose, main app title and project name dark neutral ink #252A28. These are not navy or teal.
+- Intro/subtitle secondary neutral green-grey #505B54; helper text, search placeholder, inactive navigation icons and Unsaved changes text muted neutral grey #626B65.
+- Unfocused field/button borders and separators neutral warm grey #D5D1C7, stronger outlines #969F96 where needed. No blue focus outlines; no field is focused.
+- The only saturated accent is muted deep teal #286B65, with soft pale sage/teal selected background #DFEBE6. Use teal for the active Lorebook icon, the panel restore icon as appropriate, tiny badge dot, and the primary Save changes button.
+- Project-wide badge: pale sage #DFEBE6 with restrained deep teal text/dot.
+- Version history and Discard are neutral secondary buttons: warm-white fill, grey border, dark neutral text and history icon.
+- Save changes is a flat deep teal #286B65 fill with warm-white #FFFDF8 label. No gradient, glow or vivid turquoise.
+Keep the soft paper background and subdued neutral body text of image 2. Do not apply the old saturated-blue mockup palette anywhere. Avoid pure brilliant white backgrounds, navy headings, blue search text, purple status text or blue icon strokes.
+Do not add theme swatches, colour codes, captions, legends or new controls to the output. All text remains exactly as in image 1 and fully legible, including the helper sentences and saving note. Output one landscape full app screenshot, same dimensions as image 1.
