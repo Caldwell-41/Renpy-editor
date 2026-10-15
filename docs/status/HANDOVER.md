@@ -7,6 +7,9 @@ this coordinator chat and the [approved implementation task](../tasks/active/wal
 whose execution contracts/ledger own scope, ownership, allowances and detailed evidence.
 Branch `codex/phase3a-story-logic` began clean at3744a17; live Git owns the current
 checkpoint and uncommitted work. Do not reset to an old prompt SHA or remote baseline.
+Local implementation checkpoint34cbb4421c418cfcd05a1a3e8e28ada60918f8df,
+tree789e2f141b460b2ea9cc0d9be80ec1253247fdff, records the complete local patch and
+verification holds. A docs-only successor records this identity; no publication/CI.
 The approved coordinator is Sol6.1/xhigh with explicitly configured Sol6.1/high workers.
 
 The original walkthrough app still owns an **unsaved synthetic Mara draft**. Its

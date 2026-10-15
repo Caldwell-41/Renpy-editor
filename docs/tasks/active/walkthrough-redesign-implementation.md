@@ -263,6 +263,12 @@ and final human acceptance remain separate.
 
 ### Coordinator review and local checkpoint
 
+Local implementation checkpoint34cbb4421c418cfcd05a1a3e8e28ada60918f8df,
+tree789e2f141b460b2ea9cc0d9be80ec1253247fdff, contains the45-file implementation,
+tests, canonical contracts and explicit verification holds. The branch is unpublished;
+this is not a reviewed CI candidate or phase acceptance. A documentation successor
+records the checkpoint without changing its source inputs.
+
 Coordinator independently reviewed A form/state/credential paths, C/F/E reference
 commands and transaction composition, D cached drafts/hidden data/callback cleanup,
 E exact assembly and request forwarding, B pinned public vendor source/transport/
