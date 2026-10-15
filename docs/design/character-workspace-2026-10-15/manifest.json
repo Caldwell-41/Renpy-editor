@@ -56,7 +56,9 @@
       "height": 992,
       "sha256": "6d7185f96af68327a6b1f7748e7f42b48a27639b847ff5fafd68766082786d7c",
       "prompt": "knowledge-b-guided-prompts-v1.txt",
-      "promptSha256": "1e0b68504344fd76dc4433711c7232b2e605c1ce26f1abb0f2bce24ac1a943d7"
+      "promptSha256": "4a158f90b7c63d18d947d852937c02eadb277b2deeee7885db62b0c3d4dedeb9",
+      "generationPromptSha256": "1e0b68504344fd76dc4433711c7232b2e605c1ce26f1abb0f2bce24ac1a943d7",
+      "promptFileNote": "A final LF was added on 2026-10-15 for the repository text convention. Generation used the same text without that final LF; generationPromptSha256 preserves its exact input hash."
     },
     {
       "file": "knowledge-c-separate-views-v1.png",

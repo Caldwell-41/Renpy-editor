@@ -44,6 +44,8 @@ struct Pending {
     estimated_input: u32,
     margin: u32,
     maximum_response: u32,
+    model_readiness: Option<loomlight_core::studio_models::Readiness>,
+    requested_context: u32,
     rewrite_token: Option<String>,
     proposal: Option<Value>,
     compatibility_profile: Option<String>,
@@ -66,7 +68,7 @@ pub fn service() -> &'static Arc<Service> {
     SERVICE.get_or_init(|| Arc::new(Service::default()))
 }
 fn view(p: &Pending) -> Value {
-    json!({"requestId":p.id,"state":p.state,"done":p.done,"httpStatus":p.http,"elapsedMs":if p.done{p.elapsed_ms}else{p.started.elapsed().as_millis()},"category":p.failure.map(Failure::code),"message":p.failure.map(Failure::message),"completion":p.result,"proposal":p.proposal,"estimatedInput":p.estimated_input,"margin":p.margin,"maximumResponse":p.maximum_response})
+    json!({"requestId":p.id,"state":p.state,"done":p.done,"httpStatus":p.http,"elapsedMs":if p.done{p.elapsed_ms}else{p.started.elapsed().as_millis()},"category":p.failure.map(Failure::code),"message":p.failure.map(Failure::message),"completion":p.result,"proposal":p.proposal,"estimatedInput":p.estimated_input,"margin":p.margin,"maximumResponse":p.maximum_response,"requestedContext":p.requested_context,"modelReadiness":p.model_readiness})
 }
 fn current(host: &ApplicationHost, token: &str, session: &Option<String>) -> Option<bool> {
     host.with_service(|s| {
@@ -192,7 +194,7 @@ impl Service {
             session: input.session_id,
             cancel: cancel.clone(),
             started: Instant::now(),
-            state: "sending",
+            state: "checking_model",
             http: None,
             result: None,
             failure: None,
@@ -202,7 +204,9 @@ impl Service {
             estimated_input: prepared.estimated_input,
             margin: prepared.margin,
             maximum_response: prepared.profile.settings.maximum_response,
-            rewrite_token: rewrite_input.map(|r|r.token),
+            model_readiness: None,
+            requested_context: prepared.profile.settings.context_budget,
+            rewrite_token: rewrite_input.map(|r| r.token),
             proposal: None,
             compatibility_profile,
         });
@@ -215,7 +219,7 @@ impl Service {
             .spawn(move || {
                 let mut http = None;
                 let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    ai_request::execute(
+                    ai_request::execute_ready(
                         prepared,
                         &cancel,
                         |stage| {
@@ -225,15 +229,28 @@ impl Service {
                                     .as_mut()
                                     .filter(|p| p.id == worker_id && !p.cancel.cancelled())
                                 {
-                                    p.state = if stage == "receiving" {
-                                        "receiving"
-                                    } else {
-                                        "validating"
+                                    p.state = match stage {
+                                        "checking_model" => "checking_model",
+                                        "loading_model" => "loading_model",
+                                        "sending" => "sending",
+                                        "receiving" => "receiving",
+                                        _ => "validating",
                                     };
                                 }
                             }
                         },
                         &mut http,
+                        |ready| {
+                            if let Ok(mut s) = service.state.lock() {
+                                if let Some(p) = s
+                                    .pending
+                                    .as_mut()
+                                    .filter(|p| p.id == worker_id && !p.cancel.cancelled())
+                                {
+                                    p.model_readiness = Some(ready.clone());
+                                }
+                            }
+                        },
                     )
                 }))
                 .unwrap_or(Err(Failure::Connection));
@@ -497,6 +514,25 @@ mod tests {
         let input = json!({"token":credentials::token(&saved),"profileId":saved.profiles[0].profile_id,"sessionId":null,"timeoutSeconds":600});
         (root, ApplicationHost::new(s), input)
     }
+    fn generation_socket(listener: &TcpListener) -> std::net::TcpStream {
+        let (mut status, _) = listener.accept().unwrap();
+        status
+            .set_read_timeout(Some(Duration::from_secs(2)))
+            .unwrap();
+        let mut bytes = Vec::new();
+        let mut b = [0; 4096];
+        while !bytes.windows(4).any(|w| w == b"\r\n\r\n") {
+            let n = status.read(&mut b).unwrap();
+            assert!(n > 0);
+            bytes.extend_from_slice(&b[..n]);
+        }
+        assert!(String::from_utf8_lossy(&bytes).starts_with("GET /api/inference/status "));
+        let body = br#"{"active_model":"synthetic-model","model_identifier":"synthetic-model","loaded":["synthetic-model"],"loading":[],"context_length":8192}"#;
+        write!(status,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).unwrap();
+        status.write_all(body).unwrap();
+        drop(status);
+        listener.accept().unwrap().0
+    }
     fn stalled() -> (TcpListener, u16) {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let port = listener.local_addr().unwrap().port();
@@ -545,7 +581,7 @@ mod tests {
         for valid in [true,false] {
             let(listener,port)=stalled();let(root,host,input)=setup(port);let service=Arc::new(Service::default());
             let server=thread::spawn(move||{
-                let(mut socket,_)=listener.accept().unwrap();let mut bytes=Vec::new();let mut b=[0;4096];
+                let mut socket=generation_socket(&listener);let mut bytes=Vec::new();let mut b=[0;4096];
                 let body=loop {
                     let n=socket.read(&mut b).unwrap();assert!(n>0);bytes.extend_from_slice(&b[..n]);
                     if let Some(pos)=bytes.windows(4).position(|b|b==b"\r\n\r\n") {
@@ -732,7 +768,7 @@ mod tests {
             let (_root, host, input) = setup(port);
             let service = Arc::new(Service::default());
             let server = thread::spawn(move || {
-                let (mut socket, _) = listener.accept().unwrap();
+                let mut socket = generation_socket(&listener);
                 socket
                     .set_read_timeout(Some(Duration::from_secs(2)))
                     .unwrap();
@@ -823,7 +859,7 @@ mod tests {
             *service.publication_attempted.lock().unwrap() = Some(attempted);
             let (respond, response_rx) = std::sync::mpsc::channel();
             let server = thread::spawn(move || {
-                let (mut socket, _) = listener.accept().unwrap();
+                let mut socket = generation_socket(&listener);
                 socket
                     .set_read_timeout(Some(Duration::from_secs(2)))
                     .unwrap();
@@ -887,4 +923,33 @@ mod tests {
             assert!(service.shutdown());
         }
     }
+    #[test]
+    fn model_readiness_refusal_publishes_diagnosis_without_generation_or_provider_details() {
+        let (listener, port) = stalled();
+        let (_root, host, input) = setup(port);
+        let service = Arc::new(Service::default());
+        let (finished, finished_rx) = std::sync::mpsc::channel();
+        let server = thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            socket.set_read_timeout(Some(Duration::from_secs(2))).unwrap();
+            let mut bytes = Vec::new(); let mut b = [0;4096];
+            while !bytes.windows(4).any(|w| w == b"\r\n\r\n") {
+                let n = socket.read(&mut b).unwrap(); assert!(n > 0); bytes.extend_from_slice(&b[..n]);
+            }
+            assert!(String::from_utf8_lossy(&bytes).starts_with("GET /api/inference/status "));
+            let body = br#"{"active_model":"synthetic-model","model_identifier":"synthetic-model","loaded":["synthetic-model"],"loading":[],"context_length":2048,"private_error":"untrusted-provider-private-path"}"#;
+            write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).unwrap(); socket.write_all(body).unwrap(); drop(socket);
+            finished_rx.recv_timeout(Duration::from_secs(2)).unwrap();
+            listener.set_nonblocking(true).unwrap();
+            assert!(matches!(listener.accept(), Err(e) if e.kind() == std::io::ErrorKind::WouldBlock));
+        });
+        let started = service.send_fixture(&host,input).unwrap();
+        let done = finish(&service,&host,&started["requestId"]);
+        assert_eq!(done["state"],"failed"); assert_eq!(done["category"],"model_context_insufficient");
+        assert_eq!(done["requestedContext"],4096); assert_eq!(done["modelReadiness"],Value::Null);
+        assert_eq!(done["completion"],Value::Null); assert_eq!(done["httpStatus"],Value::Null);
+        assert!(!done.to_string().contains("untrusted-provider-private-path"));
+        finished.send(()).unwrap(); server.join().unwrap(); assert!(service.shutdown());
+    }
+
 }

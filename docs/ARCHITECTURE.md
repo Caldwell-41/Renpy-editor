@@ -704,6 +704,15 @@ Each staged import still uses the existing typed transaction operation.
 
 ## Studio synthetic request worker
 
+The [2026-10-15 readiness amendment](adr/0013-provider-request-and-transport-contract.md#generation-time-studio-readiness--2026-10-15)
+adds the version-scoped `studio_models` adapter before native worker generation.
+It reuses the transport's captured destination/credential/cancellation/deadline rather
+than adding renderer HTTP or a second credential path. Reference lifecycle/source
+creation, project world/tone and card restore extend `references.apply` and the same
+`AuthoringService::commit_history`; see [reference ownership](REFERENCE_LIBRARY.md#walkthrough-redesign-contract--2026-10-15).
+No read-time migration, alternate history stack or game execution is introduced.
+These locally implemented inputs are not covered by earlier frozen-product proof.
+
 The current bounded non-streaming slice uses `ai.sendSynthetic`, `ai.requestStatus`
 and `ai.cancelRequest` through the existing main-window typed IPC. Core captures a
 fixed synthetic body and saved Studio profile/credential, validates the supported

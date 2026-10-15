@@ -91,7 +91,8 @@ impl Fixture {
         assert_eq!(r["ok"], true, "{r}");
         r["value"].clone()
     }
-    fn prepare(&mut self) -> Value {
+    fn prepare(&mut self) -> Value { self.prepare_with_project_context(None) }
+    fn prepare_with_project_context(&mut self, include: Option<bool>) -> Value {
         let o = self.ok("context.options", json!({}));
         let w = self.ok("scene.list", json!({}));
         let scene = &w["scenes"][0];
@@ -111,7 +112,9 @@ impl Fixture {
             )
             .collect::<Vec<_>>();
         let store = self.service.read().unwrap();
-        self.ok("rewrite.prepare",json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"expectedPromptRevision":o["prompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"expectedSourceRevision":scene["sourceRevision"],"sceneId":scene["id"],"beatId":b["id"],"references":refs,"task":"Rewrite café 雪","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}}))
+        let mut request=json!({"profileId":store.profiles[0].profile_id,"expectedProfileToken":ai_credentials::token(&store),"timeoutSeconds":600,"context":{"expectedPromptRevision":o["prompt"]["revision"],"expectedStructureRevision":o["structureRevision"],"expectedSourceRevision":scene["sourceRevision"],"sceneId":scene["id"],"beatId":b["id"],"references":refs,"task":"Rewrite café 雪","contextBudget":32768,"contextCeiling":32768,"maximumResponse":1024}});
+        if let Some(include)=include { request["context"]["includeProjectContext"]=json!(include); }
+        self.ok("rewrite.prepare",request)
     }
     fn take(&self, p: &Value, c: Cancel) -> Result<SendCapture, crate::lifecycle::LifecycleError> {
         self.service.rewrite_take_send(
@@ -1470,4 +1473,25 @@ fn phase3a_logic_context_and_generated_fields_keep_ai_allowlist_closed() {
         assert!(f.complete(&prepared, response.to_string()).is_err());
         assert_snapshots(&before, &f.snapshots());
     }
+}
+
+#[test]
+fn shared_project_context_exact_send_include_omit_and_changed_notes_refuse_without_writes() {
+    let mut f=Fixture::new();
+    let baseline=f.ok("references.list",json!({}));
+    let saved=f.ok("references.apply",json!({"expectedRevision":baseline["revision"],"command":{"type":"saveProjectContext","world":"World café 雪\r\n  exact  ","tone":"Patient and intimate."}}));
+    assert_eq!(saved["document"]["cards"],baseline["document"]["cards"]);assert_eq!(saved["document"]["loreEntries"],baseline["document"]["loreEntries"]);
+    let before=f.snapshots();
+    let included=f.prepare();
+    assert_eq!(included["context"]["projectContext"]["included"],true);
+    let body:Value=serde_json::from_str(included["serializedPayload"].as_str().unwrap()).unwrap();let user:Value=serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+    assert_eq!(user["projectContext"],json!({"recordId":saved["document"]["projectContext"]["id"],"revisionId":saved["document"]["projectContext"]["currentRevisionId"],"world":"World café 雪\r\n  exact  ","tone":"Patient and intimate."}));
+    let cancel=Cancel::default();let capture=f.take(&included,cancel.clone()).unwrap();assert_eq!(capture.body,included["serializedPayload"].as_str().unwrap().as_bytes());cancel.cancel();f.ok("rewrite.discard",json!({}));assert_snapshots(&before,&f.snapshots());
+    let omitted=f.prepare_with_project_context(Some(false));assert_eq!(omitted["context"]["projectContext"]["included"],false);
+    let body:Value=serde_json::from_str(omitted["serializedPayload"].as_str().unwrap()).unwrap();let user:Value=serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();assert!(user.get("projectContext").is_none());assert!(!omitted["serializedPayload"].as_str().unwrap().contains("Patient and intimate."));
+    let cancel=Cancel::default();let capture=f.take(&omitted,cancel.clone()).unwrap();assert_eq!(capture.body,omitted["serializedPayload"].as_str().unwrap().as_bytes());cancel.cancel();f.ok("rewrite.discard",json!({}));assert_snapshots(&before,&f.snapshots());
+    let pending=f.prepare();
+    let latest=f.ok("references.list",json!({}));f.ok("references.apply",json!({"expectedRevision":latest["revision"],"command":{"type":"saveProjectContext","world":"Changed world","tone":"Patient and intimate."}}));
+    let after_save=f.snapshots();assert!(f.take(&pending,Cancel::default()).is_err());assert_snapshots(&after_save,&f.snapshots());
+    assert_eq!(after_save[&f.path],before[&f.path]);
 }

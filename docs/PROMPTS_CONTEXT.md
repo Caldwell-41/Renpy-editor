@@ -1,5 +1,35 @@
 # Project prompts and context preparation
 
+## Shared project world and tone — 2026-10-15
+
+The [redesign implementation](tasks/active/walkthrough-redesign-implementation.md)
+adds shared project context to the existing writing actions. This amendment describes
+local code; required qualification and human phase acceptance remain pending.
+`context.options` exposes the optional reference document's `projectContext` record.
+`context.preview` accepts `includeProjectContext` (default true). After the user starts
+a writing operation, the current saved notes enter the user-role object as
+`projectContext:{recordId,revisionId,world,tone}`. Only those known fields are sent;
+unknown record/revision/content extensions remain on disk. A per-request unchecked
+control omits the entire outbound member. The exact preview discloses inclusion or
+omission and includes the complete body/digest before explicit Send. Saving/opening
+Lorebook sends nothing; synthetic connection tests include no project context.
+
+World notes describe shared setting/rules/starting circumstances; they do not establish
+every character's knowledge. Tone guides overall style, while explicitly selected card
+voice guides that person. Existing `ai.json.styleNotes` remains byte-preserved/readable
+as legacy data but is excluded from requests, so it cannot silently compete with the
+Lorebook tone. Existing action prompt overrides remain visible and editable separately.
+Legacy approved lore/card selection and support/approval refusals are unchanged.
+
+World/tone bytes participate in the same complete serialized-body estimate, response
+reserve and safety margin. Exceeding Context length refuses; no content truncation or
+automatic omission. Both legacy budget/capacity fields derive from the one visible
+Context length on explicit request preparation. The reference snapshot remains in the
+read set, so changing shared notes invalidates a prepared send. Generation separately
+checks actual loaded-model context through the Studio readiness adapter; that capacity
+is reported read-only. Prior sections' separate editable capacity/style descriptions
+below are superseded where this amendment says so.
+
 The selected outcome implements one action, **Dialogue rewrite**, for a saved dialogue
 or narration Beat. Settings → Current project has System prompts and Context preparation
 tabs. Settings context preview remains read-only. Story → Assist now adds the

@@ -2,7 +2,7 @@ import { requestCore } from "./bridge.ts";
 import type { CoreOperation } from "./protocol.ts";
 interface Profile {profileId:string;credentialStatus:string;disabled:boolean;settings:{label:string;endpoint:string;model:string;contextBudget:number;maximumResponse:number}}
 interface Snapshot {token:string;profiles:Profile[]}
-interface Status {requestId:string;state:string;done:boolean;httpStatus:number|null;elapsedMs:number;message:string|null;estimatedInput:number;margin:number;maximumResponse:number;completion:null|{text:string;model:string;finishReason:string;responseBytes:number;usage:{promptTokens:number|null;completionTokens:number|null;totalTokens:number|null;reasoningTokens:number|null}}}
+interface Status {requestedContext?:number;modelReadiness?:{requestedContext:number;actualContext:number;loadedForRequest:boolean}|null;requestId:string;state:string;done:boolean;httpStatus:number|null;elapsedMs:number;message:string|null;estimatedInput:number;margin:number;maximumResponse:number;completion:null|{text:string;model:string;finishReason:string;responseBytes:number;usage:{promptTokens:number|null;completionTokens:number|null;totalTokens:number|null;reasoningTokens:number|null}}}
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,text=""):HTMLElementTagNameMap[K]{const n=document.createElement(tag);n.textContent=text;return n;}
 /** Nonmodal synthetic request panel. Local status observation never sends HTTP. */
 export function openStudioRequest(sessionId:string|null):void {
@@ -21,10 +21,12 @@ export function openStudioRequest(sessionId:string|null):void {
   const state=():void=>{const p=snapshot?.profiles.find(p=>p.profileId===profile.value);send.disabled=busy||active||!p||p.disabled||p.credentialStatus!=='configured';cancel.disabled=busy||!active;reload.disabled=busy||active;profile.disabled=busy||active;timeout.disabled=busy||active;};
   const draw=():void=>{const p=snapshot?.profiles.find(p=>p.profileId===profile.value);preview.textContent=p?`${p.settings.endpoint} · Model: ${p.settings.model} · Context budget ${p.settings.contextBudget} (capacity unverified) · Response reserve ${p.settings.maximumResponse}`:'Configure a saved Studio profile and credential in Settings.';state();};
   const call=async<T>(operation:CoreOperation,payload:Record<string,unknown>={}):Promise<T>=>{const r=await requestCore<T>(operation,payload);if(!r.ok)throw Error(r.error.message);return r.value;};
+  const stageName=(state:string):string=>({checking_model:'Checking model readiness',loading_model:'Loading the selected model',sending:'Sending request',receiving:'Receiving response',validating:'Checking response'} as Record<string,string>)[state]??state;
   const display=(value:Status):void=>{
     const ending=value.done&&value.state==='expired'&&!value.message?'Configuration or project changed; response discarded.':value.message;
-    status.textContent=ending??`${value.state==='completed'?'Completed':value.state} · ${value.httpStatus===null?'HTTP status unknown':`HTTP ${value.httpStatus}`} · ${Math.round(value.elapsedMs)} ms · input estimate ${value.estimatedInput} + margin ${value.margin} + response reserve ${value.maximumResponse}`;
+    status.textContent=ending??`${value.state==='completed'?'Completed':stageName(value.state)} · ${value.httpStatus===null?'HTTP status unknown':`HTTP ${value.httpStatus}`} · ${Math.round(value.elapsedMs)} ms · input estimate ${value.estimatedInput} + margin ${value.margin} + response reserve ${value.maximumResponse}`;
     if(ending)status.textContent+=` · ${value.httpStatus===null?'HTTP status unknown':`HTTP ${value.httpStatus}`} · ${Math.round(value.elapsedMs)} ms`;
+    if(value.modelReadiness)status.textContent+=` · Context requested ${value.modelReadiness.requestedContext.toLocaleString()} / loaded ${value.modelReadiness.actualContext.toLocaleString()} tokens${value.modelReadiness.loadedForRequest?' · Loaded for this request':' · Reused loaded model'}`;
     status.dataset.state=value.state;output.textContent='';
     if(value.completion){const c=value.completion,u=c.usage;status.textContent+=` · finish: ${c.finishReason} · usage input ${u.promptTokens??'unknown'}, output ${u.completionTokens??'unknown'}, total ${u.totalTokens??'unknown'}, reasoning ${u.reasoningTokens??'unknown'}`;output.textContent=c.text;}
     active=!value.done;state();

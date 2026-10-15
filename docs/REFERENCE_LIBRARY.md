@@ -1,5 +1,50 @@
 # Manual reference library v1
 
+## Walkthrough redesign contract — 2026-10-15
+
+The [approved redesign task](tasks/active/walkthrough-redesign-implementation.md)
+owns the locally implemented successor below; its technical qualification and human
+acceptance remain pending. Earlier acceptance paragraphs describe their frozen inputs.
+
+Characters uses one list of stable card IDs and game-character IDs, with Writing and
+Game setup. A game-only row shows an empty writing section without a read-time write.
+Explicit writing Save materializes its linked card; a planning card can explicitly link
+an unassociated game ID or review/create a game character. No association is inferred
+from a name. `references.apply` retains its expected library revision and adds:
+
+- `linkCharacter` with record ID (or null), character ID and expected source revision.
+- `previewGameCharacter` with record ID (or null), technical/display name and colour;
+  it prepares real source/metadata patches without writing and returns a digest.
+- `createGameCharacter` with those fields and `expectedPreviewDigest`; source,
+  authoring metadata and the linked empty/existing card commit as one history entry.
+- `restoreCard` with record/revision IDs; approved/superseded retained writing content
+  becomes a fresh approved revision, preserving the current game association, snapshot
+  extensions and support. Proposed/rejected/current versions and stale support refuse.
+  Existing proposals never gain approval through linking, creation or restoration.
+
+The existing schema1 document optionally contains `projectContext`:
+`{id, revisionCounter, currentRevisionId, revisions:[{id, number, createdAt,
+content:{world, tone}}]}`. `saveProjectContext` accepts only the known world/tone fields,
+each at most10,000 UTF-8 bytes, through shared transactions/history. IDs share the
+document's uniqueness space; recent snapshots remain bounded to three. Reads of an
+absent context return empty fields without creating a file. Known-field saves preserve
+unknown members. Existing lore entries, their IDs, approval/citations/applicability and
+links remain intact and available for explicit AI selection; no prose is migrated or
+silently merged into this document.
+
+Writing fields retain per-character drafts across topics/list collapse/switches.
+Source-create inputs are independent drafts and survive writing saves. Navigation and
+restore guard pending writing/game input; source creation requires reviewed changes.
+Relationships are compact rows with one open editor; knowledge means the character's
+starting perspective only. The UI omits linked lore, applicability, source notes and
+generic story-link controls while retaining those stored values and approval checks.
+Card history previews are readable and Restore is explicit; Lorebook history is
+read-only. Save/Discard and Undo/Redo retain ordinary transaction/reopen behavior.
+
+The simplified Lorebook edits World & starting situation and Tone & writing style.
+Its shared AI inclusion/omission and preserved legacy-style exclusion are defined in
+[PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#shared-project-world-and-tone--2026-10-15).
+
 **State:** selected manual-library outcome accepted on packaged Mac and Windows x64.
 Native authoring, consecutive Undo/Redo, byte-exact process reopen, keyboard/focus,
 both themes and compact layout pass on both targets. Shared-history regressions

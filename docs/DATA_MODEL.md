@@ -575,6 +575,14 @@ No diagnostic is independent document truth or authority to mutate/open arbitrar
 
 ## Project assistance prose and prepared context
 
+The 2026-10-15 [reference redesign amendment](REFERENCE_LIBRARY.md#walkthrough-redesign-contract--2026-10-15)
+defines schema1's optional projectContext world/tone snapshots, stable game/card
+association commands and non-destructive card restore. Legacy lore and unknown values
+remain stored. [Shared context assembly](PROMPTS_CONTEXT.md#shared-project-world-and-tone--2026-10-15)
+defines default known-field inclusion, explicit omission, budgeting and preserved legacy
+style notes excluded from the wire. These locally implemented changes remain under the
+redesign task's qualification gates; earlier native acceptance is not transferred.
+
 [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md) owns `.renpy-editor/ai.json` v1 project prompt
 overrides, separate style notes, baseline version/digest, bounds and shared history.
 The selected one-Beat preview records exact approved reference revisions and bounded

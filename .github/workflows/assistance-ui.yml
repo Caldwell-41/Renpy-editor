@@ -2,6 +2,15 @@ name: Studio assistance UI refinement
 on:
   workflow_call:
     inputs:
+      outcome:
+        type: string
+        default: assistance-ui
+      expected_candidate:
+        type: string
+        default: ''
+      excluded_selectors:
+        type: boolean
+        default: false
       ordinal:
         type: string
         default: '1'
@@ -32,10 +41,19 @@ jobs:
         shell: bash
         env:
           ORDINAL: ${{ inputs.ordinal }}
+          OUTCOME: ${{ inputs.outcome }}
+          EXPECTED_CANDIDATE: ${{ inputs.expected_candidate }}
+          EXCLUDED_SELECTORS: ${{ inputs.excluded_selectors }}
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/provider-qualification
-          test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ORDINAL" = 1 -o "$ORDINAL" = 2
+          set -euo pipefail
+          if test "$OUTCOME" = walkthrough-redesign; then
+            python app/scripts/check-redesign-evidence.py gate
+          else
+            test "$OUTCOME" = assistance-ui
+            test "$GITHUB_REF" = refs/heads/codex/provider-qualification
+            test "$GITHUB_RUN_ATTEMPT" = 1
+            test "$ORDINAL" = 1 -o "$ORDINAL" = 2
+          fi
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24.19.0
@@ -46,7 +64,8 @@ jobs:
           key: assistance-ui-${{ matrix.runner }}
           workspaces: app -> target
           cache-bin: 'false'
-      - name: Pinned dependencies and focused UI/service proof
+      - name: Pinned dependencies and historical focused UI/service proof
+        if: inputs.outcome == 'assistance-ui'
         shell: bash
         working-directory: app
         run: |
@@ -75,6 +94,53 @@ jobs:
           cat "$RUNNER_TEMP/assistance-ui/controller.log"
           python -c "import os,pathlib; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/controller.log').read_text(encoding='utf-8'); assert 'PASS: same-project integrated selectable multi-operation/dependency-invalid zero writes/valid partial subset accepted once/custom preservation/Undo-Redo/export/project-process reopen' in s"
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/assistance-ui"
+      - name: Current redesign focused tests and build checks
+        if: inputs.outcome == 'walkthrough-redesign'
+        shell: bash
+        working-directory: app
+        env:
+          RUSTUP_TOOLCHAIN: 1.90.0
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/assistance-ui"
+          npm install --global npm@11.9.0
+          npm_cli="$(npm root --global)/npm/bin/npm-cli.js"
+          test "$(node "$npm_cli" --version)" = 11.9.0
+          node "$npm_cli" ci --ignore-scripts
+          python -m unittest discover -s scripts -p 'test_redesign_evidence.py' -v > "$RUNNER_TEMP/assistance-ui/gate-tests.log" 2>&1
+          python -c "import os,pathlib,re; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/gate-tests.log').read_text(); n=re.findall(r'Ran (\d+) tests?',s); assert len(n)==1 and int(n[0])==25 and re.search(r'^OK\s*$',s,re.M) and 'skipped' not in s.lower()"
+          node "$npm_cli" run typecheck > "$RUNNER_TEMP/assistance-ui/typecheck.log" 2>&1
+          node "$npm_cli" run build:tests > "$RUNNER_TEMP/assistance-ui/test-compile.log" 2>&1
+          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/reference-ui.dom.test.js dist-tests/tests/assistance-refinement.dom.test.js dist-tests/tests/rewrite-ui.dom.test.js dist-tests/tests/prompt-ui.dom.test.js dist-tests/tests/studio-request.dom.test.js > "$RUNNER_TEMP/assistance-ui/dom.log" 2>&1
+          python scripts/check-redesign-evidence.py dom "$RUNNER_TEMP/assistance-ui/dom.log"
+          node "$npm_cli" run build > "$RUNNER_TEMP/assistance-ui/renderer-build.log" 2>&1
+          export LOOMLIGHT_UI_OUTPUT="$RUNNER_TEMP/assistance-ui/browser"
+          node node_modules/playwright/cli.js install chromium
+          node tests/walkthrough-redesign.browser.mjs > "$RUNNER_TEMP/assistance-ui/browser.log" 2>&1
+          python scripts/check-redesign-evidence.py browser "$LOOMLIGHT_UI_OUTPUT"
+          rustup toolchain install 1.90.0 --profile minimal
+          for scope in references::tests:: prompts::tests:: ai_request::model_readiness_tests::; do
+            name="${scope//::/-}"
+            cargo test -p loomlight-core --locked --lib "$scope" -- --list > "$RUNNER_TEMP/assistance-ui/$name-list.log" 2>&1
+            cargo test -p loomlight-core --locked --lib "$scope" -- --nocapture > "$RUNNER_TEMP/assistance-ui/$name.log" 2>&1
+            python scripts/check-redesign-evidence.py cargo "$RUNNER_TEMP/assistance-ui/$name.log" "$scope" "$RUNNER_TEMP/assistance-ui/$name-list.log"
+          done
+          cargo test -p loomlight-core --locked --lib shared_project_context -- --list > "$RUNNER_TEMP/assistance-ui/rewrite-list.log" 2>&1
+          cargo test -p loomlight-core --locked --lib shared_project_context -- --nocapture > "$RUNNER_TEMP/assistance-ui/rewrite.log" 2>&1
+          python scripts/check-redesign-evidence.py cargo "$RUNNER_TEMP/assistance-ui/rewrite.log" shared_project_context "$RUNNER_TEMP/assistance-ui/rewrite-list.log"
+          cargo test -p loomlight-desktop --locked --bin loomlight ai_requests::tests:: -- --list > "$RUNNER_TEMP/assistance-ui/request-host-list.log" 2>&1
+          cargo test -p loomlight-desktop --locked --bin loomlight ai_requests::tests:: -- --nocapture > "$RUNNER_TEMP/assistance-ui/request-host.log" 2>&1
+          python scripts/check-redesign-evidence.py cargo "$RUNNER_TEMP/assistance-ui/request-host.log" ai_requests::tests:: "$RUNNER_TEMP/assistance-ui/request-host-list.log"
+          git diff --exit-code HEAD -- . ../.github/workflows ../scripts/validate.py
+      - name: Scan partial or complete current redesign evidence
+        id: redesign-privacy
+        if: ${{ always() && inputs.outcome == 'walkthrough-redesign' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/assistance-ui"
+          python app/scripts/check-redesign-evidence.py seal "$RUNNER_TEMP/assistance-ui"
+          node app/scripts/scan-artifacts.mjs "$RUNNER_TEMP/assistance-ui"
       - name: Retain actual candidate and partial or complete evidence
         if: always()
         shell: bash
@@ -84,7 +150,7 @@ jobs:
           git rev-parse HEAD^{tree} > "$RUNNER_TEMP/assistance-ui/tree.txt"
           python -c "import hashlib,json,pathlib,os; p=pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui'; (p/'manifest.json').write_text(json.dumps({str(f.relative_to(p)).replace(chr(92),'/'):hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file() and f.name!='manifest.json'},indent=2))"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+        if: ${{ always() && (inputs.outcome == 'assistance-ui' || steps.redesign-privacy.outcome == 'success') }}
         with:
           name: assistance-ui-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/assistance-ui/

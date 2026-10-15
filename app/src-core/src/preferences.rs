@@ -34,6 +34,10 @@ pub struct Layout {
     pub inspector_open: bool,
     pub preview_percent: Option<u16>,
     pub tree_width: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reference_selection: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reference_topic: Option<String>,
     pub graph: Option<GraphView>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -67,6 +71,8 @@ impl Preferences {
                         .chars()
                         .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | ':' | '_'))
                     && layout.tree_width.is_none_or(|v| (160..=400).contains(&v))
+                    && layout.reference_selection.as_ref().is_none_or(|v| v.len() <= 160 && !v.chars().any(char::is_control))
+                    && layout.reference_topic.as_ref().is_none_or(|v| v.len() <= 64 && !v.chars().any(char::is_control))
                     && layout.graph.as_ref().is_none_or(|g| {
                         g.zoom.is_finite()
                             && (0.05..=2.0).contains(&g.zoom)

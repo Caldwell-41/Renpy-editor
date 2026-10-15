@@ -1269,6 +1269,30 @@ establish full Phase2 or human acceptance.
 
 ## Studio assistance refinement — 2026-10-13, scoped portable proof passed
 
+The [2026-10-15 redesign contract](tasks/active/walkthrough-redesign-implementation.md)
+supersedes the earlier settings/reference presentation in this section for local code;
+its technical proof and human acceptance remain separate. Settings uses Connection,
+API Key, Response defaults, sampling disclosure, Connection test and a named-profile
+Danger Zone confirmation. One Context length (new-profile32768) and Maximum response
+length (8192) do not overwrite old values on read. Refresh models sits below Model ID;
+HTTP opt-in is beside Endpoint and hidden for empty/HTTPS input. Reload preserves
+selection; Retry loading profiles appears only after a read failure. Saving connects
+nothing. Actual model context is read-only status, with explicit checking/loading states
+and Cancel in request panels.
+
+Characters has one list, Writing/Game setup and horizontal writing topics; the shared
+Story panel icons collapse/restore the list and global navigation. Drafts, selection,
+topic and deliberate focus/scroll survive switching. Persistent helpers, compact
+relationship rows and starting-only knowledge replace the cluttered card controls.
+Hidden legacy fields remain stored. Version history is a compact readable dialog;
+Restore creates a new revision and refuses pending writing/game input. The project
+Lorebook has two growing world/tone areas, page-body scrolling and reachable fixed
+Save/Discard, plus read-only history. All surfaces use existing Paper/Teal and
+Charcoal/Copper tokens. [Reference contracts](REFERENCE_LIBRARY.md#walkthrough-redesign-contract--2026-10-15)
+own lifecycle/preservation; [context contracts](PROMPTS_CONTEXT.md#shared-project-world-and-tone--2026-10-15)
+own visible per-request inclusion/omission and exact preview. Static fixtures do not
+establish packaged WebView physical input, screen-reader behavior or phase acceptance.
+
 The user approved the [refinement direction](design/phase-2-llm/studio-refinement-2026-10-13/README.md).
 Settings groups Connection, Saved key and Response defaults, with advanced and
 maintenance controls disclosed on demand. Save stays reachable. Profile changes,

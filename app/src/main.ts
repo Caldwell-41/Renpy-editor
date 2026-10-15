@@ -78,7 +78,6 @@ let rewriteController: RewriteController | undefined;
 let disposeBranchesView: (() => void) | undefined;
 let disposeSourceView: (() => void) | undefined;
 let activeReferenceController: ReferenceController | undefined;
-let characterTab: "game" | "cards" = "game";
 let sourceRegistrationSequence = 0;
 let activeSourceController: { readonly token: number; readonly project: OpenProject; readonly controller: SourceWorkspaceController } | undefined;
 let statusRequestSequence = 0;
@@ -128,7 +127,6 @@ interface CompletionToken { view: number; operation: number; scope: object; sess
 
 function beginView(project?: OpenProject): number {
   activeReferenceController?.dispose(); activeReferenceController=undefined;
-  if(currentProject?.sessionId!==project?.sessionId)characterTab="game";
   disposeCatalogue?.();disposeCatalogue=undefined;
   if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; }
   disposeBranchesView?.();
@@ -786,6 +784,8 @@ async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProje
     const model=await projectValue<ReferenceWorkspace>(project,"references.list");if(!current())return;
     const owner={};activeReferenceController=renderReferenceLibrary(host,kind,model,{
       creationHost:header,current,guard:allowSceneNavigation,status:setStatus,
+      workspaceKey:`${project.projectId}:characters`,
+      renderGameSetup:async(host,characterId)=>{const game=await projectValue<AuthoringMetadata>(project,"authoring.list");if(!current()||!host.isConnected)return;return renderCharacters(host,project,{...game,characters:game.characters.filter(c=>c.id===characterId)},true);},
       load:()=>projectValue<ReferenceWorkspace>(project,"references.list"),
       apply:async(command,expectedRevision)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<ReferenceWorkspace>(project,"references.apply",{command,expectedRevision}));if(!result)throw new Error("Another change is still being saved. Try again after it finishes.");return result;}
     });
@@ -793,13 +793,7 @@ async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProje
   try {
     if(surface==="lorebook")await renderReferences("lore",workspace);
     else if(surface==="characters"){
-      const tabs=document.createElement("div");tabs.className="reference-tabs";tabs.role="tablist";tabs.ariaLabel="Characters";
-      for(const [id,label]of [["game","Game characters"],["cards","Character cards"]]as const){const tab=button(label,"button");tab.role="tab";tab.ariaSelected=String(characterTab===id);tab.tabIndex=characterTab===id?0:-1;
-        const switchTo=async():Promise<void>=>{if(!await allowSceneNavigation())return;characterTab=id;showProject(project,"characters");};tab.onclick=()=>{void switchTo();};tab.onkeydown=e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();characterTab===id&&void(async()=>{if(!await allowSceneNavigation())return;characterTab=id==="game"?"cards":"game";showProject(project,"characters");})();}};tabs.append(tab);}
-      workspace.append(tabs);const pane=document.createElement("section");pane.role="tabpanel";pane.ariaLabel=characterTab==="cards"?"Character cards":"Game characters";workspace.append(pane);
-      if(characterTab==="cards")await renderReferences("card",pane);
-      else {const model=await projectValue<AuthoringMetadata>(project,"authoring.list");if(!current())return;renderCharacters(pane,project,model);}
-      tabs.querySelector<HTMLElement>('[aria-selected="true"]')?.focus();
+      await renderReferences("card",workspace);
     }else{
       const model=await projectValue<AuthoringMetadata>(project,"authoring.list");if(!current())return;
       if(surface==="assets")renderAssets(workspace,project,model);if(surface==="variables")renderVariables(workspace,project,model);
@@ -819,7 +813,7 @@ function inlineEditor(host: HTMLElement, label: string, controls: HTMLElement[],
   actions.append(submit); editor.append(...controls, actions); host.append(editor); dismiss=catalogDialog(editor, label);
 }
 
-function renderCharacters(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
+function renderCharacters(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata, selectedOnly=false): (()=>void)|void {
   const list = supportingSection(); list.append(formHeading("Characters"));
   if (!model.characters.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "No Characters yet."; list.append(empty); }
   model.characters.forEach((character) => {
@@ -842,6 +836,14 @@ function renderCharacters(workspace: HTMLElement, project: OpenProject, model: A
       };
       item.append(selectAppearance, mode, makeDefault,editAppearance); list.append(item); });
   });
+  if(selectedOnly){
+    workspace.append(list);
+    const rows=[...list.querySelectorAll<HTMLElement>(":scope > .entity-row")];
+    const infos=model.characters.map((character,i)=>{const extra:HTMLElement[]=[];let cursor=rows[i]?.nextElementSibling;while(cursor&&!cursor.classList.contains("entity-row")){const next=cursor.nextElementSibling;extra.push(cursor as HTMLElement);cursor=next;}
+      const declaration=document.createElement("details"),summary=document.createElement("summary"),code=document.createElement("pre");summary.textContent="Game source definition";code.textContent=character.source.statement;declaration.append(summary,code);extra.push(declaration);
+      return {id:character.id,label:character.displayName,assetId:model.appearances.find(a=>a.id===character.defaultAppearanceId)?.assetId,extra};});
+    return catalogue(workspace,list,undefined,"Characters",infos,id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}),undefined,true);
+  }
   const create = supportingSection(); create.append(formHeading("Create Character"));
   const technical = input(); technical.name = "technicalName"; technicalNameInput(technical);
   const display = input(); display.name = "displayName";
@@ -1022,7 +1024,7 @@ function installListeners(): void {
 export function startApplication(requester: typeof desktopRequestCore = desktopRequestCore): void {
   runtimeWorkspace?.dispose(); runtimeWorkspace = undefined;
   coreRequester = requester;
-  activeReferenceController?.dispose();activeReferenceController=undefined;characterTab="game";
+  activeReferenceController?.dispose();activeReferenceController=undefined;
   saveCommandTrace.length = 0;
   viewGeneration = 0;
   operationGeneration = 0;

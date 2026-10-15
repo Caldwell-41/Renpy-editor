@@ -74,6 +74,7 @@ impl Resolver for CheckedResolver {
 #[derive(Clone)]
 pub struct Discovery {
     pub models: Vec<String>,
+    pub inventory: Vec<crate::studio_models::Model>,
     pub selected_available: bool,
     pub addresses: Vec<SocketAddr>,
 }
@@ -125,6 +126,8 @@ pub fn discover(
         .read_to_vec()
         .map_err(|_| "Discovery response unavailable or oversized.")?;
     let models = parse_models(&bytes)?;
+    let inventory = crate::studio_models::parse_inventory(&bytes)
+        .map_err(|_| "Studio inventory fields are unsupported; no model operation requested.")?;
     let addresses = observed
         .lock()
         .map_err(|_| "Discovery state unavailable.")?
@@ -132,6 +135,7 @@ pub fn discover(
     Ok(Discovery {
         selected_available: models.contains(&profile.settings.model),
         models,
+        inventory,
         addresses,
     })
 }

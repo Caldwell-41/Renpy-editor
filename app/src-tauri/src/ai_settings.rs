@@ -887,7 +887,7 @@ mod readiness_tests {
     use super::*;
     #[test]
     fn compatibility_discovery_unavailable_changed_and_ordered_availability_disposition() {
-        let value=|models:Vec<&str>,available|loomlight_core::ai_discovery::Discovery{models:models.into_iter().map(str::to_owned).collect(),selected_available:available,addresses:vec![]};
+        let value=|models:Vec<&str>,available|loomlight_core::ai_discovery::Discovery{models:models.into_iter().map(str::to_owned).collect(),selected_available:available,inventory:vec![],addresses:vec![]};
         let old=value(vec!["a","b"],true);
         assert!(!discovery_invalidates(None,&old));
         assert!(!discovery_invalidates(Some(&old),&value(vec!["b","a"],true)));
@@ -911,7 +911,7 @@ fn view_store(host: &ApplicationHost, store: ProfileStore) -> credentials::Resul
     let profiles=store.profiles.iter().map(|p| {
         let (status, access_error) = credential_view(p, &secrets);
         let discovery=evidence.get(&p.profile_id).filter(|(t,_)|t==&token);
-        json!({"profileId":p.profile_id,"revision":p.revision,"settings":p.settings,"credentialStatus":status,"credentialError":access_error,"disabled":p.disabled,"compatibilityPayload":String::from_utf8(loomlight_core::ai_compatibility::body(p)).unwrap(),"compatibilityState":if p.compatibility_ready(){"ready"}else{"untested"},"compatibilityCheckedAt":p.compatibility.as_ref().filter(|_|p.compatibility_ready()).map(|c|c.checked_at_unix_seconds),"discovery":discovery.map(|(_,d)|json!({"models":d.models,"selectedAvailable":d.selected_available,"status":discovery_status(d,status)}))})
+        json!({"profileId":p.profile_id,"revision":p.revision,"settings":p.settings,"credentialStatus":status,"credentialError":access_error,"disabled":p.disabled,"compatibilityPayload":String::from_utf8(loomlight_core::ai_compatibility::body(p)).unwrap(),"compatibilityState":if p.compatibility_ready(){"ready"}else{"untested"},"compatibilityCheckedAt":p.compatibility.as_ref().filter(|_|p.compatibility_ready()).map(|c|c.checked_at_unix_seconds),"discovery":discovery.map(|(_,d)|json!({"models":d.models,"inventory":d.inventory,"selectedAvailable":d.selected_available,"status":discovery_status(d,status)}))})
     }).collect::<Vec<_>>();
     Ok(
         json!({"token":token,"profiles":profiles,"storageNotice":if cfg!(target_os = "macos") { "Temporary Mac development storage: encrypted local files plus a saved unencrypted unlock key. Software under the same login may decrypt your keys. Healthy storage is intended to survive app quit/reopen and replacement." } else { "Native credential storage" },"cleanup":store.cleanup.iter().map(|c|json!({"profileId":c.profile_id,"deferred":c.credential.storage.is_native() && cfg!(target_os = "macos")})).collect::<Vec<_>>()}),

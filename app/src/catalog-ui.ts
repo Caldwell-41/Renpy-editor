@@ -4,7 +4,7 @@ interface CardInfo { id: string; label: string; kind?: string; assetId?: string;
 interface CatalogState { search:string; kind:string; asList:boolean; selectedId?:string; inspectorOpen:boolean; appearances:Record<string,string> }
 const retainedCatalogues=new Map<string,CatalogState>();
 /** Presentation layer over existing transactional forms; handlers retain their owner. */
-export function catalogue(host: HTMLElement, list: HTMLElement, create: HTMLElement | undefined, title: string, infos: CardInfo[], load: (id: string)=>Promise<MediaPresentation>, stateKey?:string): ()=>void {
+export function catalogue(host: HTMLElement, list: HTMLElement, create: HTMLElement | undefined, title: string, infos: CardInfo[], load: (id: string)=>Promise<MediaPresentation>, stateKey?:string, detailsOnly=false): ()=>void {
   const retained=stateKey?retainedCatalogues.get(stateKey):undefined;
   const selectedAppearances={...retained?.appearances};
   const rows=[...list.querySelectorAll<HTMLElement>(":scope > .entity-row")];
@@ -96,6 +96,7 @@ export function catalogue(host: HTMLElement, list: HTMLElement, create: HTMLElem
   host.classList.add("catalog-workspace");
   const selectedIndex=infos.findIndex(info=>info.id===retained?.selectedId);
   rows[selectedIndex>=0?selectedIndex:0]?.querySelector<HTMLButtonElement>(".card-open")?.click();
-  if(retained?.inspectorOpen===false){inspector.hidden=true;body.classList.remove("inspecting");}
+  if(detailsOnly){toolbar.hidden=true;grid.hidden=true;close.hidden=true;host.classList.add("catalog-details-only");}
+  if(!detailsOnly&&retained?.inspectorOpen===false){inspector.hidden=true;body.classList.remove("inspecting");}
   return ()=>{if(stateKey){retainedCatalogues.set(stateKey,{search:search.value,kind:filters.value,asList:grid.classList.contains("catalog-list"),selectedId,inspectorOpen:!inspector.hidden,appearances:selectedAppearances});if(retainedCatalogues.size>24)retainedCatalogues.delete(retainedCatalogues.keys().next().value!);}disposed=true;createObservers.forEach(o=>o.disconnect());closeDialog?.();observer?.disconnect();pending.length=0;urls.forEach(c=>URL.revokeObjectURL(c.url));urls.clear();};
 }

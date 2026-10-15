@@ -1,183 +1,102 @@
 # Current outcome handover
 
-## Approved redesign implementation handoff — 2026-10-15
+## Selected outcome and continuation
 
-The user approved the [implementation task](../tasks/active/walkthrough-redesign-implementation.md)
-and requested a new local Sol6.1/xhigh chat with Sol6.1/high implementation/testing
-subagents. This task now owns the selected implementation outcome and finite allowances;
-prior walkthrough-only restrictions are superseded only where this contract says so.
-The coordinator owns slice contracts, integration, review, a thin production-action
-harness, a CI-logic audit before dispatch, and final Windows/macOS evidence review.
-At most3concurrent subagents. Live budget12attempts/32768reserved response tokens,
-4model refreshes/2loads; CI at most3paired attempts. Initial usage0. No local app
-package builds or native launches; focused test compilation permitted. Preserve the
-old walkthrough app's unsaved Mara draft and all existing data/credentials. No merge/release.
-Next: dispatch the approved coordinator chat; it must inspect latest local Git and keep
-unpublished design commits. Do not reset to old remote source. This preparing chat has
-performed documentation only; no code/live/CI work yet.
+Updated 2026-10-15. **Redesign implementation: blocked on finite verification extensions; local-only.** Continue
+this coordinator chat and the [approved implementation task](../tasks/active/walkthrough-redesign-implementation.md),
+whose execution contracts/ledger own scope, ownership, allowances and detailed evidence.
+Branch `codex/phase3a-story-logic` began clean at3744a17; live Git owns the current
+checkpoint and uncommitted work. Do not reset to an old prompt SHA or remote baseline.
+The approved coordinator is Sol6.1/xhigh with explicitly configured Sol6.1/high workers.
 
-## Selected combined Mac approval walkthrough — 2026-10-15
+The original walkthrough app still owns an **unsaved synthetic Mara draft**. Its
+ignored `.toolchains/approval-walkthrough-2026-10-14/session.json` is recovery metadata,
+not permission to interact. No Save/Discard/Reload/navigation/close or reuse of that
+session. No new local native editor launches or production/package/installer builds.
+Focused test compilation and test-only production drivers are authorised.
 
-Phase 2 / 3A approval walkthrough remains **in_progress; acceptance pending** on
-`codex/phase3a-story-logic`, candidate60ec1da. Signed build1/1 passed; launches1/3.
-The current package remains unchanged. Preserve the open isolated public walkthrough
-project and its **unsaved Mara reference draft**; no Save/Discard/Reload or closing.
-No live Studio sends/model operations, automatic fixes, merge or release are selected.
+## Implemented increments and evidence limits
 
-The user requested all feedback consolidated and consistent with approved B. The
-[decision record](../design/character-workspace-2026-10-15/walkthrough-decisions.md)
-owns current settings, linked-character/B layout, relationship copy, starting-only
-knowledge, linked-lore/applicability deferrals, Source notes UI removal and surfaced
-previous-version restore. Existing data and approval/freshness protections remain.
-Two [updated mockups](../design/character-workspace-2026-10-15/walkthrough-decisions.md#updated-approval-previews)
-were approved on2026-10-15; restore/model loading/unified creation remain functional
-follow-ups, not implemented behavior. The
-[combined ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
-owns qualification and cumulative counts. Character-card design review is complete.
-The [project-wide Lorebook direction/refinements](../design/lorebook-workspace-2026-10-15/README.md#agreed-refinements--2026-10-15)
-are agreed: World & starting situation, tone distinct from character voice, shared AI
-writing context with preview/omission, and growing fields/fixed footer. Actual app theme
-tokens govern both designs. Entries/draft remain intact; implementation pending.
-The implementation handoff above is approved; the retained walkthrough facts below
-remain evidence and recovery context, not a second implementation owner.
-All recording/design work is local-only; no application or provider changes.
+- A Settings: approved words/layout, new-profile defaults32768/8192, one visible context
+  value (legacy fields preserved until explicit save), conditional HTTP, model refresh
+  placement, single Mac notice, connection test, selection-preserving reload/retry and
+  named Danger Zone confirmation.13 focused DOM cases passed; coordinator reviewed code.
+- C/F/E data: reference commands for stable-ID link, actual source preview/digest and
+  atomic source/metadata/card creation, guarded game-only card save, retained-card
+  restore as a new revision and optional project world/tone history. No read-time writes,
+  name merges, legacy lore deletion or extension migration. F/E tests passed; C proof
+  is held as described below. Source authority/approval/freshness remain mandatory.
+- D/E/F UI: unified Characters Writing/Game setup, Story-style list controls,
+  per-entry retained writing/source-form drafts, helpers, compact relationships,
+  starting-only knowledge, hidden-control data preservation and readable history/restore.
+  Global Lorebook has two growing fields, fixed footer and read-only recent history.
+  Initial19 UI cases passed; affected correction cases passed, current suite20cases.
+  A later F guard case covers pending source-form/native game drafts before restore.
+- E context: actual context-preview and prepared send capture include exact known
+  world/tone fields by default; omission removes them. Unknown fields and legacy
+  `ai.json.styleNotes` stay on disk and are excluded from requests. Two focused core
+  tests passed budgeting, exact bytes and stale-send refusal. Root integrated visible
+  inclusion controls and one request-context input; focused integration UI batch20 passed. One successful-proposal readiness-display correction was then reverified in the affected case1/1; integration1/2 corrections used.
+- B: pinned official Studio v0.1.902-beta API source was inspected. Production request
+  worker checks actual loaded context, reuses sufficient residents and can load a verified
+  cached local GGUF with requested context. No observed resident replacement, download,
+  forced reload/cancel or credential change.7 controlled transport and9 native service
+  cases passed, plus one post-load diagnosis case. Vendor load API lacks an atomic
+  expected-empty precondition; immediate status recheck is explicit. Root's subsequent
+  loaded-list identity consistency fix has not yet been verified.
+- G: historical provider-qualification/frozen-product gates retained. A new exclusive
+  quality selector routes current redesign to exact SHA/branch/attempt/architecture
+  gates, focused tests/builds and partial evidence retention.25 checker fixtures passed after cleanup/provenance/image checks; focused actionlint passed. Browser14 wide captures are partial observations; compact/footer geometry remains unverified at the exhausted browser allowance. No complete visual/CI pass.
 
-Earlier qualification and unique recovery evidence below remain valid. The separate
-walkthrough selection above owns current human-session scope and counts.
+## Pending decisions, budgets and next action
 
-## Phase3A — scoped qualification review_ready; acceptance pending
+Three concise user-input questions are pending in this chat. **Do not silently spend the
+requested extensions or relabel them as integration.**
 
-Phase3A is **ACTIVE — INCOMPLETE**; selected implementation/technical qualification
-is **review_ready**. Phase2/3A acceptance remains incomplete; the selected combined
-walkthrough above resumes human review only. No next capability, merge or release is implied. One implementation
-agent owns work; the sole authorized independent review-only agent reviews evidence.
-Self-review is separately labelled. Reviewed branch pushes are authorized. No polling/
-watchers; no pending CI or helper process. No further automated round is needed.
+1. C used initial verification plus two full corrections. Three fixture-assumption
+   failures remain unverified; reviewed minimal fixes are applied. Requested one extra
+   focused round for exactly the three named tests in the task ledger. Raw failures
+   remain in worker transcript; `/private/tmp/loomlight-reference-verification-ledger.txt`
+   is a summary, not raw evidence. No proven product failure was inferred from setup errors.
+2. B consumed its two correction/verification cycles. Coordinator review prepared a
+   consistency refusal for contradictory active/loaded identities and added a rejecting
+   fixture in the existing failure-path test. Requested one extra focused rerun only;
+   do not run until the user answers.
 
-Root branch `codex/phase3a-story-logic` contains published candidate
-`49dba1fc79ab4f1eba1490591209dc453b40dbf9`, tree
-`8d3f370be3468ca8bf18e799df782a325521c384`; docs-only wait successor81ea757 follows.
-Closeout updates docs only; live Git owns latest HEAD/publication. Preserve validation
-74a0361's dirty oracle, renderer421a241's dirty CSS, coree160464, planning2c5a164/two
-unpublished commits, Phase2 work and original/additive preservation refs. No reset or
-cleanup of those worktrees. Root's60 exact reused frontend outputs and14 preserved
-older outputs remain ignored; original201 receipts are not complete coverage receipts.
+3. Browser setup+selector+geometry consumed its original initial/two correction batches.
+   Fourteen wide captures exist; a footer-container assertion is not yet proof of actual
+   Save/Discard movement. Prepared actual-button/provenance/failure-image measurement
+   fixes remain unrun. Requested one new full28 batch plus at most one diagnosed correction.
 
-[CI4 run38437801470](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38437801470),
-attempt1/ordinal4/exact49dba1f, is terminal success updated2026-10-13T17:27:15Z.
-Both-host terminal audit passes89-file ZIPs/88 manifest hashes/213 exact Git inputs,
-identity/architecture/limits/privacy/cleanup. Each host: checker13/core30/DOM51/build,
-all ten actual frontend/ApplicationHost cases/two normal observed/reaped helpers.
-Windows250/Mac246 requests include only expected dirty Source/external conflict
-refusals. Six actual pinned8.5.3 SDK cases/twelve adapter processes pass, including
-callee save depth2, qualified caller narration edit, later raw-slot load returning
-depth0 to edited continuation with exact saved values. Metadata-free source-set and
-owned save/token witnesses pass. Exact artifacts/expiry/coverage/reviews belong in
-[the terminal ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
-Ignored `ci4-audit/` retains originals/extracted files/audit.py/audit.json.
+Unaffected implementation/review/documentation is complete. The safe test-only owner
+live driver compiled and preparation-only14 combinations passed. Metadata-only production
+inspection found zero profiles in the untouched walkthrough root and one bound profile
+in the ordinary standard app root; no secret read or HTTP. Exact local setup is kept
+ignored, not in repository docs. Hold live dispatch until B's pending proof is resolved.
+Repository validator initially failed on a preexisting saved prompt's missing newline;
+only the LF/manifest file hash were repaired, preserving original generation hash and
+explicit provenance. Validator now passes601files; diff-check/actionlint pass. Every slice and integrated
+candidate must pass coordinator review/focused verification before publication/CI.
+Shared main/styles/preferences/protocol wiring belongs to the coordinator. Workers
+have exclusive file ownership and return patches without staging others' changes.
 
-Local10's ten-case proof, local11/12's no-SDK harness checks and renderer11's20 actual
-images/self-review remain valid; final CI inputs differ from renderer11 only in the
-six reviewed harness/workflow files. No renderer production/fixture input changed.
-No packaged WebView physical input or human acceptance is claimed. Saved-game proof
-only covers the qualified safe caller edit, not arbitrary source changes. Independent workflow and terminal evidence reviews found no supported blocker; they
-are distinct from root self-audit and approved
-portable visual self-review. Source authority, unsupported bytes, transactional layer
-and AI allowlist remain unchanged. Canonical docs record implemented behavior/proof.
+Common usage remains **live0/12, reserved response tokens0/32768, refresh0/4, loads0/2,
+pairedCI0/3, local production builds0/0, native starts0/0**. No live attempts, secrets,
+owner model operations or CI dispatch occurred. Detailed facet failures/corrections
+belong to the task ledger; allowances never reset with agents or hosts.
+No pending external workflow/run. CI may run only after final review; record exact
+candidate SHA/tree, selector inputs and run identity, then follow WORKFLOW's manual
+same-chat resume policy—no automatic polling/watcher/automation.
 
-CI1/CI3 and every local failure remain failed and retained. CI3's lost exact generated
-input is not reconstructed; CI4 retains all three actual BOM imports/body receipts.
-Their successful import conversion closes the proven harness setup defect; no product
-defect was established from that old assertion. Round9's actual failed fixture and
-seals remain intact; five completed cases were never relabelled as ten. Historical
-CI2 early proof is preserved. Audit operations executed no SDK/application/test.
+## Preserved earlier state
 
-Usage **core16/18, local12/14, renderer11/14, pairedCI4/5**. Caps14/14 and two additional
-CI runs were explicitly approved; counts never reset/transferred. Local SDK, owner
-native editor, packages, credentials and live calls remain zero. CI5 is unused and
-not a reason to rerun. Next: continue the selected combined walkthrough above under
-WORKFLOW's separate implementation/evidence/acceptance states;
-3B/3C default entry still requires accepted Phase2/3A. No unselected native/human
-session, merge/release or background operation. Reuse this thread for any selected
-continuation and read live Git/status rather than old prompt SHAs.
-
-## Preserved Studio UI refinement — review_ready; walkthrough selected
-
-The bounded refinement is delivered on `codex/provider-qualification`, source
-462cf0897eb84d34390d68634f0b8cb2345d7a48/tree
-d3dfeace9ad1493bb42395305ab0f6d210ce13c4. The user approved the imagegen direction
-and two extra browser attempts, then requested **“Audit CI and continue”**. State
-`review_ready`; no pending workflow, test, app or following session. Docs-only closeout
-successors record the verified source and do not become new product inputs. macOSARM64
-remains the implementation owner. No open PR was found; no merge/release occurred.
-
-**Implemented:** grouped Settings Connection/Saved key/Response defaults, advanced and
-maintenance disclosure, reachable Save and profile draft/busy guards. Field completion/
-submission validation preserves input and focuses errors. Assist has captured target/
-stage/header, scrolling body/reachable stage-specific actions, full-width Task, disclosed
-additional limits, visible send decision context and complete exact body. Proposal prose
-leads Source/metadata review. Proposed card/lore comparisons precede frozen fields and
-retain exact revision approval, status and stale-support refusal. Selection highlights,
-tab associations/arrows/Home/End and deliberate focus entry/return are explicit. Async
-completion moves focus only inside Assist; unfinished polls preserve it. Core source/
-transaction/history/native credential/storage/signing code is unchanged. Existing probe
-selectors were updated for exact-change details and **Apply and save 1 change**; frozen
-packages/evidence remain intact. [Canonical UI contract](../UI.md#studio-assistance-refinement--2026-10-13-scoped-portable-proof-passed)
-and [approved concepts](../design/phase-2-llm/studio-refinement-2026-10-13/README.md) explain behavior.
-
-**Exact CI1 audit:** [run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511),
-attempt1/workflow_dispatch/exact462cf08, completed success2026-10-12T23:57:35Z.
-Required Windows115059587083 and Mac115059587332 passed every selected step. Unrelated
-jobs intentionally excluded, not required passes. Each target: typecheck/test compile/
-production renderer build,32DOM passed0failed/cancelled/skipped,36renderer captures,
-0runtime errors/page-wide overflow and every recorded Assist primary visible. Actual
-controller/native service five-action/selectable/exact-send/approval/staleness/zero-write
-refusal/valid partial subset/protected-custom source/Undo-Redo/project-process reopen/
-zero reopenHTTP/owned cleanup pass. Both privacy scans passed41files.
-
-ArtifactW11780670629 ZIPsha25634b64d18a8f30741ca5c0c9a57c8fe9c2a8ebeb61ba0f368b2675325938849f1;
-M11779794670 ZIPsha2567cfe0647dfadfcf8c0993b7cd2eac7efe40337f0c2c8a0ea343a3f422f943b2d.
-Exact ZIP/extracted contents/43-file manifests/candidate/tree/allPNG dimensions-CRCs-
-decoded data/eight fixture-source hashes verified. Artifacts expire2026-10-19T23:56:53Z/
-23:56:05Z. Ignored `.toolchains/phase2-ui-refinement/ci1-audit/` retains ZIPs, metadata,
-logs, audit.py/audit.json. Owner viewed12representative actual images; the same requested
-Sol6.1/high agent independently audited evidence and six representative images across
-both hosts/themes/layouts/surfaces. **No supported remaining blocker**. Final nonmodal/
-unfinished-poll focus regressions pass both hosts. Details in the [delivery ledger](../tasks/active/phase-2-initial-llm-assistance.md#ui-refinement-ci1-terminal-audit-and-delivery--2026-10-13).
-
-**Evidence limits/counts:** Chrome renderer fixtures, programmatic DOM focus and native
-service integration do not establish new packaged Tauri/WebView physical input,
-screen-reader behavior or human acceptance. Fixture navigation is schematic; compact
-reference approval is reached by scrolling the comparison. No new editor package/native
-UI proof selected; unchanged core/credential/SDK guarantees reuse frozen qualification.
-Counts remain pairedCI1/2,local3/3,browser5/5,images2/3,signed builds0/2,editor starts0/4.
-Three earlier browser preparation failures, first DOM assertion failure and later test
-compile failures retain their actual outcomes. Local rapid-resize image/metric limits
-remain historical; settled exact CI inputs establish current renderer evidence. Unused
-allowances are not reasons to execute or transfer automatically to another outcome.
-No further refinement CI is needed; repository/diff validation covers docs closeout.
-
-**Phase 2 walkthrough:** the user selected the combined matching-build Mac session
-above. The earlier [prepared guided-feedback prompt](../tasks/active/phase-2-initial-llm-assistance.md#prepared-guided-feedback-session--not-started)
-remains reference guidance, superseded only where the new selection authorizes the
-combined native/Phase3A session. Use the verified new bundle, not installed frozen929.
-One plain-language question at a time; record preferences, demonstrated defects and
-explicit acceptance separately. Do not silently begin repairs or live sends.
-
-## Preserved Studio-only technical closeout — review_ready
-
-Frozen product929af6f23f1fe79af2665a4cc71c276a64ffd80d/tree
-9f034ca6cae69ef11e87d6a95a332152a9998eaa/269input digest
-3c244dc28f7a4fd201ffd00b92d0df462aa2429c4d2139cf10adf6e91f97a1bd;
-behavioral baseline5f593225fad2ebdb2970663d56ee83631b27ecef. External driver30b18f2
-is distinct from packaged product. [Frozen CI9run38317425509](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38317425509)
-passed exact manifests/nine Windows stages/native screenshots/normal exits/synthetic
-POSTs/cancelled socket/zero save-reopenHTTP/source-profile preservation/owned cleanup.
-Its artifacts expire2026-10-19; ignored closeout evidence retained. CI1 and signed owner
-Mac all-five/live/reference/source/history/reopen/nativeSDK05 remain valid for unchanged
-inputs. Exact hashes/receipts/historical CI2–8/send7 failures remain in the [technical
-closeout](../tasks/active/phase-2-initial-llm-assistance.md#ci9-terminal-audit-and-scoped-technical-closeout--2026-10-13).
-LiteralIPv6HTTPS unsupported; owner liveTLS unmeasured. Ordinary saved Studio profile/key
-is untouched: never ask again while configured or read/export/erase it. No paid/live
-sends, discovery/model installations, generic providers/Phase3, route context, AI ending/
-connection, thinking/streaming expansion, signing/storage changes, merge or release.
+Phase2/3A technical qualification remains review_ready and **human acceptance pending**;
+redesign implementation does not accept the phases. Earlier walkthrough build1/1 and
+launch1/3 remain unchanged. Exact earlier failures/recovery/receipts remain in the
+[Phase2 ledger](../tasks/active/phase-2-initial-llm-assistance.md) and
+[Phase3A CI4/combined walkthrough ledger](../tasks/active/phase-3-initial-wysiwyg-release.md).
+Their source packages/artifacts prove only their frozen inputs; never qualify new code
+with the old running package. Retain ignored old evidence and the separate planning,
+core, renderer and validation worktrees (2c5a164/e160464/421a241/74a0361) with unrelated
+local changes; no reset, cleanup or historical source reconstruction is authorised.
+No merge/release or signing/Keychain/credential namespace-policy change.

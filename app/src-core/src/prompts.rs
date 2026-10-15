@@ -113,11 +113,14 @@ pub struct PreviewRequest {
     pub display_name: String,
     pub expected_structure_revision: String,
     pub references: Vec<ReferenceSelection>,
+    #[serde(default = "include_project_context")]
+    pub include_project_context: bool,
     pub task: String,
     pub context_budget: usize,
     pub maximum_response: usize,
     pub context_ceiling: usize,
 }
+fn include_project_context() -> bool { true }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PromptWorkspace {
@@ -385,7 +388,7 @@ impl AuthoringService {
             }
         }
         Ok(
-            json!({"characters":ws.authoring.characters,"editPrompt":self.prompts_for(project,project_id,crate::rewrite::batch::ACTION)?,"prompt":self.prompts(project,project_id)?,"targets":targets,"anchors":anchors,"continuePrompt":self.prompts_for(project,project_id,CONTINUE)?,"draftPrompt":self.prompts_for(project,project_id,DRAFT)?,"cardPrompt":self.prompts_for(project,project_id,CARD)?,"lorePrompt":self.prompts_for(project,project_id,LORE)?,"loreEntries":references.document.as_ref().map(|d| d["loreEntries"].clone()),"cards":references.document.as_ref().map(|d| d["cards"].clone()),"chapters":ws.chapters,"structureRevision":digest(format!("{}:{}",ws.project_revision,ws.source_map_revision).as_bytes()),"references":choices,"referenceDiagnostic":references.diagnostic}),
+            json!({"characters":ws.authoring.characters,"editPrompt":self.prompts_for(project,project_id,crate::rewrite::batch::ACTION)?,"prompt":self.prompts(project,project_id)?,"targets":targets,"anchors":anchors,"continuePrompt":self.prompts_for(project,project_id,CONTINUE)?,"draftPrompt":self.prompts_for(project,project_id,DRAFT)?,"cardPrompt":self.prompts_for(project,project_id,CARD)?,"lorePrompt":self.prompts_for(project,project_id,LORE)?,"projectContext":references.document.as_ref().and_then(|d| d.get("projectContext")).cloned(),"loreEntries":references.document.as_ref().map(|d| d["loreEntries"].clone()),"cards":references.document.as_ref().map(|d| d["cards"].clone()),"chapters":ws.chapters,"structureRevision":digest(format!("{}:{}",ws.project_revision,ws.source_map_revision).as_bytes()),"references":choices,"referenceDiagnostic":references.diagnostic}),
         )
     }
     pub fn context_preview(
@@ -774,13 +777,31 @@ impl AuthoringService {
             references::validate_generated_scope(scope).map_err(|_|PromptError::Invalid)?;
             story["loreTarget"] = json!({"recordId":if r.lore_id.is_empty(){Value::Null}else{json!(r.lore_id)},"title":r.display_name,"scope":scope,"currentRevisionId":record.map(|r| &r["currentRevisionId"]),"approvedRevisionId":record.map(|r| &r["approvedRevisionId"]),"content":current.map(|v| known_content(&v["content"],"lore"))});
         }
-        let user = json!({"task":r.task,"styleNotes":prompt.style_notes,"story":story,"definitions":definitions,"references":included,"responseContract":contract});
+        // Only the project's two authored fields enter shared writing context.
+        // Legacy styleNotes remain stored/readable, but never compete as hidden tone.
+        let project_context = doc.get("projectContext").and_then(|record| {
+            record["revisions"].as_array()?.iter()
+                .find(|revision| revision["id"] == record["currentRevisionId"])
+                .map(|revision| json!({"recordId":record["id"],"revisionId":revision["id"],
+                    "world":revision["content"]["world"],"tone":revision["content"]["tone"]}))
+        });
+        let mut user = json!({"task":r.task,"story":story,"definitions":definitions,"references":included,"responseContract":contract});
+        if r.include_project_context {
+            if let Some(context) = project_context.as_ref() {
+                user["projectContext"] = context.clone();
+            }
+        }
+        let context_disclosure = json!({"included":r.include_project_context && project_context.is_some(),
+            "reason":if !r.include_project_context {"Omitted for this request"} else if project_context.is_none() {"No saved world or tone notes"} else {"Shared project writing context"},
+            "recordId":project_context.as_ref().map(|c| &c["recordId"]),
+            "revisionId":project_context.as_ref().map(|c| &c["revisionId"]),
+            "legacyStyleNotes":"Preserved on disk; excluded from requests. Use Lorebook tone and writing style."});
         let body = json!({"messages":[{"role":"system","content":prompt.effective_text},{"role":"user","content":serde_json::to_string(&user).map_err(|_|PromptError::Invalid)?}],"maximumResponse":r.maximum_response});
         let serialized = serde_json::to_string(&body).map_err(|_| PromptError::Invalid)?;
         let component_bytes: BTreeMap<&str, usize> = [
             ("instructions", prompt.effective_text.len()),
             ("task", r.task.len()),
-            ("styleNotes", prompt.style_notes.len()),
+            ("projectContext", user.get("projectContext").map(|v| serde_json::to_vec(v).unwrap().len()).unwrap_or(0)),
             ("story", serde_json::to_vec(&story).unwrap().len()),
             (
                 "definitions",
@@ -851,7 +872,7 @@ impl AuthoringService {
             read_set.insert(path.clone(), token(revision));
         }
         Ok(
-            json!({"action":r.action,"projectId":project_id,"sessionId":session,"supportingReadSet":read_set.iter().filter(|(path,_)|supporting_paths.contains(*path)).map(|(k,v)|(k.clone(),v.clone())).collect::<BTreeMap<_,_>>(),"payload":body,"serializedPayload":serialized,"payloadDigest":digest(serialized.as_bytes()),"promptDigest":digest(prompt.effective_text.as_bytes()),"baselineVersion":prompt.baseline_version,"baselineDigest":prompt.baseline_digest,"savedBaselineVersion":prompt.saved_baseline_version,"savedBaselineDigest":prompt.saved_baseline_digest,"readSet":read_set,"included":selected,"excluded":exclusions,"dependencies":dependencies,"unrelatedDraftsExcluded":unrelated_drafts,"exclusionPolicy":[if continuing {"Other Scenes"} else if batch {"Unselected Beats and other Scenes"} else {"Other Beats and Scenes"},"Custom code (marker only; never executed)","Asset binaries","Unknown metadata extensions","Hidden/unapproved files, credentials, Git history, external files"],"characterNames":ws.authoring.characters.iter().filter(|c|definitions.iter().any(|d|d["kind"]=="character"&&d["id"]==c.id)).map(|c|json!({"id":c.id,"displayName":c.display_name})).collect::<Vec<_>>(),"customCodeMarker":if scene.is_some_and(|s|s.partial){"Custom/unsupported source excluded"}else{"No custom text selected"},"uncertainty":"Runtime state, conditions and non-simple interpolation dependencies are unknown; no evaluation or automatic retrieval","size":{"estimator":"UTF-8 byte upper estimate; not measured model tokens","componentBytes":component_bytes,"serializedBytes":input,"estimatedInputTokens":input,"maximumResponse":r.maximum_response,"margin":margin,"total":total,"contextBudget":r.context_budget,"contextCeiling":r.context_ceiling},"sendAvailable":false}),
+            json!({"action":r.action,"projectId":project_id,"sessionId":session,"supportingReadSet":read_set.iter().filter(|(path,_)|supporting_paths.contains(*path)).map(|(k,v)|(k.clone(),v.clone())).collect::<BTreeMap<_,_>>(),"payload":body,"serializedPayload":serialized,"payloadDigest":digest(serialized.as_bytes()),"promptDigest":digest(prompt.effective_text.as_bytes()),"baselineVersion":prompt.baseline_version,"baselineDigest":prompt.baseline_digest,"savedBaselineVersion":prompt.saved_baseline_version,"savedBaselineDigest":prompt.saved_baseline_digest,"readSet":read_set,"included":selected,"projectContext":context_disclosure,"excluded":exclusions,"dependencies":dependencies,"unrelatedDraftsExcluded":unrelated_drafts,"exclusionPolicy":[if continuing {"Other Scenes"} else if batch {"Unselected Beats and other Scenes"} else {"Other Beats and Scenes"},"Custom code (marker only; never executed)","Asset binaries","Unknown metadata extensions","Hidden/unapproved files, credentials, Git history, external files"],"characterNames":ws.authoring.characters.iter().filter(|c|definitions.iter().any(|d|d["kind"]=="character"&&d["id"]==c.id)).map(|c|json!({"id":c.id,"displayName":c.display_name})).collect::<Vec<_>>(),"customCodeMarker":if scene.is_some_and(|s|s.partial){"Custom/unsupported source excluded"}else{"No custom text selected"},"uncertainty":"Runtime state, conditions and non-simple interpolation dependencies are unknown; no evaluation or automatic retrieval","size":{"estimator":"UTF-8 byte upper estimate; not measured model tokens","componentBytes":component_bytes,"serializedBytes":input,"estimatedInputTokens":input,"maximumResponse":r.maximum_response,"margin":margin,"total":total,"contextBudget":r.context_budget,"contextCeiling":r.context_ceiling},"sendAvailable":false}),
         )
     }
 }

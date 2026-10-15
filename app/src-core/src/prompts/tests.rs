@@ -319,3 +319,35 @@ fn installed_baseline_update_keeps_override_until_explicit_restore() {
     f.apply(json!({"type":"restore"}));
     assert_eq!(f.prompt()["effectiveText"], BASELINE);
 }
+
+#[test]
+fn shared_project_context_exact_preview_omission_budget_and_unknown_data_preservation() {
+    let mut f=Fixture::new();f.library();
+    let source=fs::read(f.root.join("game/script.rpy")).unwrap();
+    let mut legacy_prompt=empty(&f.project);legacy_prompt["styleNotes"]=json!("HIDDEN_LEGACY_TONE_DO_NOT_SEND");legacy_prompt["futurePrompt"]=json!({"keep":true});
+    fs::write(f.root.join(PATH),serde_json::to_vec(&legacy_prompt).unwrap()).unwrap();
+    let prompt_bytes=fs::read(f.root.join(PATH)).unwrap();
+    let library=f.ok("references.list",json!({}));
+    let saved=f.ok("references.apply",json!({"expectedRevision":library["revision"],"command":{"type":"saveProjectContext","world":"World café 雪\r\n  before dawn  ","tone":"Slow prose; sharp dialogue."}}));
+    let mut doc=saved["document"].clone();
+    let context=&mut doc["projectContext"];context["privateExtension"]=json!("RECORD_EXTENSION_DO_NOT_SEND");context["revisions"][0]["privateExtension"]=json!("REVISION_EXTENSION_DO_NOT_SEND");context["revisions"][0]["content"]["privateExtension"]=json!("CONTENT_EXTENSION_DO_NOT_SEND");
+    fs::write(f.root.join(references::PATH),serde_json::to_vec(&doc).unwrap()).unwrap();
+    let reference_bytes=fs::read(f.root.join(references::PATH)).unwrap();
+    let options=f.ok("context.options",json!({}));assert_eq!(options["projectContext"],doc["projectContext"]);
+    let selection=f.selection();
+    let preview=f.ok("context.preview",selection.clone());
+    assert_eq!(preview["projectContext"]["included"],true);
+    let body:Value=serde_json::from_str(preview["serializedPayload"].as_str().unwrap()).unwrap();let user:Value=serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+    assert_eq!(user["projectContext"],json!({"recordId":doc["projectContext"]["id"],"revisionId":doc["projectContext"]["currentRevisionId"],"world":"World café 雪\r\n  before dawn  ","tone":"Slow prose; sharp dialogue."}));
+    assert!(user.get("styleNotes").is_none());
+    for excluded in ["HIDDEN_LEGACY_TONE_DO_NOT_SEND","RECORD_EXTENSION_DO_NOT_SEND","REVISION_EXTENSION_DO_NOT_SEND","CONTENT_EXTENSION_DO_NOT_SEND"] { assert!(!preview["serializedPayload"].as_str().unwrap().contains(excluded)); }
+    assert_eq!(preview["payloadDigest"],digest(preview["serializedPayload"].as_str().unwrap().as_bytes()));
+    let mut omitted_selection=selection.clone();omitted_selection["includeProjectContext"]=json!(false);
+    let omitted=f.ok("context.preview",omitted_selection.clone());assert_eq!(omitted["projectContext"]["included"],false);
+    let omitted_body:Value=serde_json::from_str(omitted["serializedPayload"].as_str().unwrap()).unwrap();let omitted_user:Value=serde_json::from_str(omitted_body["messages"][1]["content"].as_str().unwrap()).unwrap();assert!(omitted_user.get("projectContext").is_none());assert!(!omitted["serializedPayload"].as_str().unwrap().contains("Slow prose; sharp dialogue."));
+    assert!(preview["size"]["total"].as_u64().unwrap()>omitted["size"]["total"].as_u64().unwrap());
+    let admitted_budget=omitted["size"]["total"].clone();
+    let mut limited=selection;limited["contextBudget"]=admitted_budget.clone();limited["contextCeiling"]=admitted_budget.clone();assert_eq!(f.call("context.preview",limited.clone())["error"]["code"],"CONTEXT_BUDGET");
+    limited["includeProjectContext"]=json!(false);let admitted=f.ok("context.preview",limited);assert_eq!(admitted["size"]["total"],admitted_budget);
+    assert_eq!(fs::read(f.root.join("game/script.rpy")).unwrap(),source);assert_eq!(fs::read(f.root.join(PATH)).unwrap(),prompt_bytes);assert_eq!(fs::read(f.root.join(references::PATH)).unwrap(),reference_bytes);
+}

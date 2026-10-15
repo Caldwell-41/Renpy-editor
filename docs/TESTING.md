@@ -775,6 +775,31 @@ authorize a production dispatch during Q1-PREP.
 
 ## Required quality gate by change type
 
+The [approved walkthrough redesign](tasks/active/walkthrough-redesign-implementation.md)
+has an explicit thin-check/no-local-package contract and cumulative allowances. Its
+task ledger owns pending cap extensions; the command references here do not authorise
+another attempt. Focused source/test compilation, typed reference/context dispatch,
+actual request transport/host fixtures and source-module browser rendering cover the
+changed paths. No specialist crash/hostile-filesystem or unrelated SDK matrix is selected.
+
+The current-candidate CI selection is Repository quality → `walkthrough_redesign`,
+with exact reviewed commit SHA and ordinal1–3; every other selector must be false.
+It calls the existing assistance workflow's distinct redesign branch, retaining the
+older provider-qualification branch and frozen native Settings meaning. The gate
+checks actual checkout/SHA/branch/run-attempt/architecture, exact DOM test discovery,
+Cargo listed-versus-executed cases (no zero/ignored/failed cases), all28 browser
+surface/theme/size receipts, visible/stable actions, errors and owned cleanup.
+Pinned dependencies, renderer build and native test compilation occur on Windows x64
+and macOS ARM64 only after coordinator review/focused checks. Partial logs/images,
+produced renderer/test executables, source input hashes and run identity are retained
+behind the artifact privacy scan; a green job summary alone does not qualify them.
+
+Controlled fixtures never receive owner Studio credentials. Bounded owner live checks,
+when safely available through the production native adapter, are separate and charge
+the task's request/token/model ledger before dispatch. No old running package proves
+new code; portable browser/DOM/native-service checks do not establish physical packaged
+WebView input, screen-reader support or final human Phase2/3A acceptance.
+
 | Change | Minimum gate |
 | --- | --- |
 | Documentation/governance | Validator, link/privacy scan, `git diff --check` |

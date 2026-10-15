@@ -753,3 +753,68 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .beat-controls { flex-wrap: wrap; }
 .story-empty-marker { color: var(--text-secondary); }
 @media (max-width: 900px) { .beat-compact { flex-wrap: wrap; } .beat-controls { opacity: 1; } .condition-combination, .condition-operands { display: block; } }
+
+/* Approved walkthrough writing workspaces share the application palette and panels. */
+.supporting-workspace:has(>.reference-library) {display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:24px 28px;}
+.supporting-workspace:has(>.reference-library)>.reference-page-header {flex:none;min-height:42px;margin-bottom:14px;}
+.supporting-workspace>.character-workspace,.supporting-workspace>.project-lorebook {flex:1;min-height:0;max-width:none;display:flex;flex-direction:column;}
+.character-workspace>.reference-history,.project-lorebook>.reference-history {flex:none;}
+.character-workspace>.reference-notice,.project-lorebook>.reference-notice {flex:none;margin:4px 0 10px;}
+.character-workspace>.reference-layout {flex:1;min-height:0;display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;align-items:stretch;}
+.character-workspace .reference-list {display:block;overflow:auto;padding:14px;min-height:0;}
+.character-workspace .reference-list>h2 {font-size:1em;margin:12px 0 18px;}
+.character-workspace .reference-list>.project-tree-toggle {position:static;margin-left:auto;display:flex;}
+.character-workspace .reference-layout>.tree-restore {position:static;align-self:start;justify-self:start;margin:0;}
+.character-workspace[data-tree-collapsed="true"]>.reference-layout {grid-template-columns:36px minmax(0,1fr);gap:14px;}
+.character-workspace .reference-editor,.project-lorebook .lorebook-editor {max-width:none;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+.reference-identity-header {display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:60px;flex:none;padding-bottom:14px;border-bottom:1px solid var(--border-normal);}
+.reference-identity-header .reference-identity {margin:0 0 5px;font-size:1.5em;}
+.reference-character-state {font-size:.85em;color:var(--text-secondary);}
+.reference-version-history {font-size:.85em;white-space:nowrap;}
+.reference-view-tabs,.reference-topics {display:flex;flex-wrap:wrap;gap:5px;flex:none;}
+.reference-view-tabs {padding:14px 0;border-bottom:1px solid var(--border-normal);}
+.reference-view-tabs button,.reference-topics button {padding:9px 12px;border:1px solid transparent;border-radius:5px;background:transparent;color:var(--text-secondary);}
+.reference-view-tabs [aria-selected="true"],.reference-topics [aria-selected="true"] {background:var(--accent-subtle);border-color:var(--accent-primary);color:var(--text-primary);}
+.reference-writing-body {flex:1;min-height:0;overflow:auto;scrollbar-gutter:stable;padding:0 8px 20px 0;}
+.reference-topics {position:sticky;top:0;z-index:1;padding:14px 0;background:var(--surface-app);border-bottom:1px solid var(--border-normal);}
+.reference-topic-panel {padding-top:16px;min-width:0;}
+.reference-topic-panel>h3 {margin:0 0 18px;font-size:1.15em;}
+.reference-topic-panel>.field,.lorebook-editor .reference-writing-body>.field {margin:0 0 24px;}
+.reference-field-help {margin:6px 0 0;font-size:.88em;line-height:1.5;font-weight:400;}
+.character-workspace textarea,.project-lorebook textarea {resize:none;overflow:hidden;min-height:112px;line-height:1.65;background:var(--surface-raised);}
+.character-workspace input,.character-workspace select,.project-lorebook input {background:var(--surface-raised);}
+.reference-inclusion-note {font-size:.88em;line-height:1.5;padding-top:12px;}
+.reference-knowledge-guides {line-height:1.8;color:var(--text-secondary);padding:14px 18px;border-left:3px solid var(--accent-primary);background:var(--surface-panel);}
+.reference-relationship {margin:10px 0;border:1px solid var(--border-normal);border-radius:6px;padding:14px 18px;background:var(--surface-raised);}
+.reference-relationship>summary {cursor:pointer;font-weight:600;overflow-wrap:anywhere;}
+.reference-relationship[open]>summary {margin-bottom:20px;}
+.reference-relationship .field {margin-bottom:18px;}
+.character-workspace .reference-form-footer,.project-lorebook .reference-form-footer {position:static;flex:none;margin:0;bottom:auto;padding:14px 0 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.character-workspace .reference-form-footer>span,.project-lorebook .reference-form-footer>span {margin-right:auto;}
+.project-lorebook .lorebook-editor {flex:1;}
+.lorebook-editor>.reference-identity {margin:0 0 8px;flex:none;}
+.lorebook-editor>p {flex:none;max-width:850px;line-height:1.6;margin-bottom:22px;}
+.project-lorebook .reference-writing-body {padding-right:12px;}
+.reference-game-linking {padding:18px 0;}
+.reference-game-linking .field {margin-bottom:18px;}
+.character-game-setup {padding:16px 0;}
+.catalog-details-only .catalog-body.inspecting {grid-template-columns:minmax(0,1fr);}
+.catalog-details-only .catalog-inspector {position:static;width:auto;max-width:none;max-height:none;overflow:visible;box-shadow:none;}
+.reference-version-dialog .catalog-dialog-panel {width:min(760px,calc(100vw - 40px));max-height:calc(100dvh - 70px);display:flex;flex-direction:column;overflow:auto;}
+.reference-version-previews {min-height:0;overflow:auto;margin:14px 0;}
+.reference-version-preview {border:1px solid var(--border-normal);border-radius:6px;padding:14px 18px;margin:10px 0;background:var(--surface-panel);}
+.reference-version-preview>summary {font-weight:600;cursor:pointer;}
+.reference-version-preview .review-prose {white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;}
+.studio-danger-zone {border-top:1px solid var(--status-error);padding-top:18px;}
+.studio-danger-zone h4,.studio-danger-zone .danger {color:var(--status-error);}
+.studio-danger-zone .danger {border-color:var(--status-error);}
+@media(max-width:900px) {
+  .supporting-workspace:has(>.reference-library) {padding:16px;}
+  .character-workspace>.reference-layout {grid-template-columns:170px minmax(0,1fr);gap:14px;}
+  .reference-identity-header {gap:10px;align-items:flex-start;}
+  .reference-identity-header .reference-identity {font-size:1.25em;}
+  .reference-version-history {white-space:normal;max-width:110px;}
+  .reference-topics button {font-size:.9em;padding:8px;}
+  .reference-form-footer>.button {font-size:.9em;padding:9px 12px;}
+  .reference-writing-body {padding-right:0;}
+}

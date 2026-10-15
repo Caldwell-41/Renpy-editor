@@ -1,6 +1,7 @@
 pub mod ai_compatibility;
 pub mod ai_credentials;
 pub mod ai_discovery;
+pub mod studio_models;
 pub mod ai_file_secrets;
 pub mod ai_profiles;
 pub mod authoring;

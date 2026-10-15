@@ -1,7 +1,7 @@
 //! Editor-only manual references, sharing the existing project transaction/history owner.
 //! Values retain extensions; renderer commands edit known content fields only.
 use crate::{
-    authoring::AuthoringService,
+    authoring::{AuthoringError, AuthoringService, CreateCharacterRequest},
     metadata::ProjectMetadata,
     scene::SceneError,
     transaction::{
@@ -101,6 +101,11 @@ pub enum Command {
     },
     ReviewLore { record_id: String, revision_id: String, approve: bool },
     ReviewCard { record_id: String, revision_id: String, approve: bool },
+    LinkCharacter { record_id: Option<String>, character_id: String, expected_source_revision: String },
+    PreviewGameCharacter { record_id: Option<String>, technical_name: String, display_name: String, dialogue_color: String },
+    CreateGameCharacter { record_id: Option<String>, technical_name: String, display_name: String, dialogue_color: String, expected_preview_digest: String },
+    RestoreCard { record_id: String, revision_id: String },
+    SaveProjectContext { world: String, tone: String },
     Undo,
     Redo,
 }
@@ -120,6 +125,21 @@ pub struct Workspace {
     pub issues: Vec<Issue>,
     pub can_undo: bool,
     pub can_redo: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub character_preview: Option<CharacterPreview>,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CharacterPreview {
+    pub digest: String,
+    pub patches: Vec<CharacterPatch>,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CharacterPatch {
+    pub path: String,
+    pub before: String,
+    pub after: String,
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -383,6 +403,9 @@ pub fn validate(v: &Value, project_id: &str) -> Result<(), ReferenceError> {
         return invalid();
     }
     let mut ids = HashSet::new();
+    if let Some(context) = v.get("projectContext") {
+        validate_project_context(context, &mut ids)?;
+    }
     for (kind, records) in [(Kind::Card, cards), (Kind::Lore, lore)] {
         for r in records {
             if [
@@ -500,6 +523,87 @@ fn merge(before: &Value, patch: &Value) -> Value {
         (_, v) => v.clone(),
     }
 }
+fn empty_card(title: &str, character_id: &str) -> Value {
+    json!({"title":title,"tags":[],"scope":{"type":"project"},"knowledgeNotes":"","provenance":{"kind":"userAuthored","notes":""},"citations":[],"links":[],"linkedCharacterId":character_id,"aliases":[],"description":"","appearanceNotes":"","personality":"","motivations":"","background":"","relationships":[],"speakingStyle":"","exampleDialogue":"","linkedLoreIds":[]})
+}
+fn new_record() -> Value {
+    json!({"id":uuid::Uuid::new_v4().to_string(),"revisionCounter":0,"currentRevisionId":null,"approvedRevisionId":null,"revisions":[]})
+}
+fn current_revision(record: &Value) -> Result<&Value, ReferenceError> {
+    array(&record["revisions"] )?.iter().find(|r| r["id"] == record["currentRevisionId"]).ok_or(ReferenceError::Invalid)
+}
+// Used by explicit lifecycle/restore actions; they cannot approve an outstanding proposal.
+fn editable_card<'a>(doc: &'a Value, record_id: &str) -> Result<&'a Value, ReferenceError> {
+    let record = array(&doc["cards"] )?.iter().find(|r| r["id"] == record_id).ok_or(ReferenceError::Invalid)?;
+    if current_revision(record)?["status"] == "proposed" { return invalid(); }
+    Ok(record)
+}
+fn association_available(doc: &Value, record_id: Option<&str>, character_id: &str) -> Result<(), ReferenceError> {
+    for record in array(&doc["cards"] )? {
+        if record["id"].as_str() == record_id { continue; }
+        // A retained approval remains usable even while the current revision is proposed.
+        for revision in array(&record["revisions"] )?.iter().filter(|r| r["id"] == record["currentRevisionId"] || r["id"] == record["approvedRevisionId"]) {
+            if revision["content"]["linkedCharacterId"] == character_id { return invalid(); }
+        }
+    }
+    Ok(())
+}
+fn append_approved(record: &mut Value, template: &Value, content: Value, retain_support: bool) -> Result<(), ReferenceError> {
+    let number = record["revisionCounter"].as_u64().unwrap_or(0).checked_add(1).filter(|n| *n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
+    let revision_id = uuid::Uuid::new_v4().to_string();
+    let record_id = record["id"].clone();
+    let prior = record["approvedRevisionId"].clone();
+    let current = record["currentRevisionId"].clone();
+    let mut next = template.clone();
+    if !retain_support { next.as_object_mut().ok_or(ReferenceError::Invalid)?.remove("supportingReadSet"); }
+    for (k,v) in json!({"id":revision_id,"number":number,"status":"approved","createdAt":now(),"reviewedAt":now(),"reviewNote":"","supersedes":if prior.is_null(){Value::Null}else{json!({"recordId":record_id,"revisionId":prior})},"supersededBy":null,"content":content}).as_object().unwrap() { next[k] = v.clone(); }
+    let revisions = record["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+    for r in revisions.iter_mut().filter(|r| r["id"] == prior) {
+        r["status"] = json!("superseded");
+        r["supersededBy"] = json!({"recordId":record_id,"revisionId":revision_id});
+    }
+    revisions.retain(|r| r["id"] == prior || r["id"] == current);
+    revisions.push(next);
+    record["revisionCounter"] = json!(number);
+    record["currentRevisionId"] = json!(revision_id);
+    record["approvedRevisionId"] = json!(revision_id);
+    Ok(())
+}
+fn validate_project_context(context: &Value, ids: &mut HashSet<String>) -> Result<(), ReferenceError> {
+    object(context)?;
+    if !ids.insert(id(&context["id"] )?.into()) { return invalid(); }
+    let counter = context["revisionCounter"].as_u64().filter(|n| *n > 0 && *n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
+    let current = id(&context["currentRevisionId"] )?;
+    let revisions = array(&context["revisions"] )?;
+    if revisions.is_empty() || revisions.len() > 3 { return invalid(); }
+    let mut numbers = HashSet::new();
+    let mut has_current = false;
+    for revision in revisions {
+        object(revision)?;
+        let revision_id = id(&revision["id"] )?;
+        if !ids.insert(revision_id.into()) { return invalid(); }
+        has_current |= revision_id == current;
+        let number = revision["number"].as_u64().filter(|n| *n > 0 && *n <= counter).ok_or(ReferenceError::Invalid)?;
+        if !numbers.insert(number) { return invalid(); }
+        timestamp(&revision["createdAt"], false)?;
+        object(&revision["content"] )?;
+        text(&revision["content"]["world"], 10_000, false)?;
+        text(&revision["content"]["tone"], 10_000, false)?;
+    }
+    if !has_current { return invalid(); }
+    Ok(())
+}
+fn authoring_error(error: AuthoringError) -> ReferenceError {
+    ReferenceError::History(match error {
+        AuthoringError::DirtySource => SceneError::DirtySource,
+        AuthoringError::SourceConflict => SceneError::SourceConflict,
+        AuthoringError::RecoveryRequired => SceneError::RecoveryRequired,
+        AuthoringError::RuntimeBusy => SceneError::RuntimeBusy,
+        AuthoringError::UnsupportedSource => SceneError::UnsupportedSource,
+        AuthoringError::Io => SceneError::Io,
+        _ => return ReferenceError::Invalid,
+    })
+}
 fn now() -> String {
     // Gregorian civil date from UTC Unix days; no locale, device input or dependency.
     let seconds = std::time::SystemTime::now()
@@ -544,7 +648,7 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<Workspace, ReferenceError> {
-        let(bytes,revision)=match self.reference_snapshot(project){Ok(snapshot)=>snapshot,Err(_)=>return Ok(Workspace{document:None,revision:String::new(),diagnostic:Some("This reference library could not be read within its bounds. Its file has been retained."),entities:vec![],issues:vec![],can_undo:false,can_redo:false})};
+        let(bytes,revision)=match self.reference_snapshot(project){Ok(snapshot)=>snapshot,Err(_)=>return Ok(Workspace{document:None,revision:String::new(),diagnostic:Some("This reference library could not be read within its bounds. Its file has been retained."),entities:vec![],issues:vec![],can_undo:false,can_redo:false,character_preview:None})};
         let parsed = if bytes.is_empty() && revision == Revision::expected_absence() {
             Ok(empty(project_id))
         } else {
@@ -615,6 +719,7 @@ impl AuthoringService {
             issues,
             can_undo: history.is_some_and(|h| h.can_undo()),
             can_redo: history.is_some_and(|h| h.can_redo()),
+            character_preview: None,
         })
     }
     fn reference_entities(
@@ -733,6 +838,31 @@ impl AuthoringService {
             base:revision, expected_bytes:bytes, proposed,
         }],intent:TransactionIntent::Edit }, json!({"recordId":rid,"revisionId":id,"before":before,"after":content,"approvedRevisionId":approved,"status":"proposed"})))
     }
+    fn check_reference_support(&self, project: &ProjectId, project_id: &str, record_id: &str, revision_id: &str) -> Result<(), ReferenceError> {
+        let workspace = self.references(project, project_id)?;
+        if workspace.diagnostic.is_some() || workspace.issues.iter().any(|i|i.record_id == record_id && i.revision_id == revision_id && matches!(i.field,"citations" | "supportingReadSet")) { return Err(ReferenceError::Conflict); }
+        Ok(())
+    }
+    fn prepare_reference_character(&self, project: &ProjectId, project_id: &str, doc: &Value, expected_revision: &str, record_id: Option<&str>, request: CreateCharacterRequest) -> Result<(TransactionProposal, CharacterPreview), ReferenceError> {
+        if let Some(record_id) = record_id {
+            let record = editable_card(doc, record_id)?;
+            let old = current_revision(record)?;
+            if !old["content"]["linkedCharacterId"].is_null() { return invalid(); }
+            self.check_reference_support(project, project_id, record_id, string(&old["id"] )?)?;
+        }
+        let mut digest = Sha256::new();
+        digest.update(serde_json::to_vec(&json!({"expectedRevision":expected_revision,"recordId":record_id,"technicalName":request.technical_name,"displayName":request.display_name,"dialogueColor":request.dialogue_color})).map_err(|_|ReferenceError::Invalid)?);
+        let (proposal, _) = self.prepare_create_character(project, project_id, request, uuid::Uuid::new_v4().to_string(), false).map_err(authoring_error)?;
+        let mut patches = vec![];
+        for mutation in &proposal.mutations {
+            // Bind every real source/metadata precondition. Generated UUIDs in new metadata
+            // are deliberately not digest input; the complete reviewed source bytes are.
+            digest.update(serde_json::to_vec(&json!({"path":mutation.path.as_str(),"base":mutation.base,"before":mutation.expected_bytes})).map_err(|_|ReferenceError::Invalid)?);
+            if mutation.path.as_str().ends_with(".rpy") { digest.update(&mutation.proposed); }
+            patches.push(CharacterPatch {path:mutation.path.as_str().into(),before:String::from_utf8(mutation.expected_bytes.clone()).map_err(|_|ReferenceError::Invalid)?,after:String::from_utf8(mutation.proposed.clone()).map_err(|_|ReferenceError::Invalid)?});
+        }
+        Ok((proposal, CharacterPreview {digest:hex::encode(digest.finalize()),patches}))
+    }
     pub fn references_apply(
         &self,
         project: &ProjectId,
@@ -749,6 +879,7 @@ impl AuthoringService {
             crate::ai_discovery::strict_json(&bytes).map_err(|_| ReferenceError::Invalid)?
         };
         validate(&doc, project_id)?;
+        let mut extra_mutations = vec![];
         let review_kind = if matches!(&request.command, Command::ReviewLore { .. }) { Kind::Lore } else { Kind::Card };
         match request.command {
             Command::ReviewCard { record_id, revision_id, approve } | Command::ReviewLore { record_id, revision_id, approve } => {
@@ -783,6 +914,87 @@ impl AuthoringService {
                     }
                     record["approvedRevisionId"] = json!(revision_id);
                 }
+            }
+            Command::LinkCharacter { record_id, character_id, expected_source_revision } => {
+                id(&json!(character_id))?;
+                let workspace = self.references(project, project_id)?;
+                let entity = workspace.entities.iter().find(|e| e.kind == "character" && e.id == character_id).ok_or(ReferenceError::Invalid)?;
+                if entity.revision.as_deref() != Some(expected_source_revision.as_str()) { return Err(ReferenceError::Conflict); }
+                self.ensure_source_paths_clean(project, self.list(project, project_id).map_err(authoring_error)?.characters.iter().filter(|c| c.id == character_id).map(|c| c.source.path.as_str())).map_err(|_|ReferenceError::History(SceneError::DirtySource))?;
+                association_available(&doc, record_id.as_deref(), &character_id)?;
+                let (template, content) = if let Some(record_id) = &record_id {
+                    let record = editable_card(&doc, record_id)?;
+                    let old = current_revision(record)?;
+                    if !old["content"]["linkedCharacterId"].is_null() { return invalid(); }
+                    self.check_reference_support(project, project_id, record_id, string(&old["id"] )?)?;
+                    let mut content = old["content"].clone();
+                    content["linkedCharacterId"] = json!(character_id);
+                    (old.clone(), content)
+                } else { (json!({}), empty_card(&entity.title, &character_id)) };
+                let records = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+                let index = if let Some(record_id) = &record_id { records.iter().position(|r|r["id"] == *record_id).ok_or(ReferenceError::Invalid)? }
+                    else { records.push(new_record()); records.len()-1 };
+                append_approved(&mut records[index], &template, content, true)?;
+            }
+            Command::PreviewGameCharacter { record_id, technical_name, display_name, dialogue_color } => {
+                let (_, preview) = self.prepare_reference_character(project, project_id, &doc, &request.expected_revision, record_id.as_deref(), CreateCharacterRequest {technical_name, display_name, dialogue_color})?;
+                let mut workspace = self.references(project, project_id)?;
+                workspace.character_preview = Some(preview);
+                return Ok(workspace);
+            }
+            Command::CreateGameCharacter { record_id, technical_name, display_name, dialogue_color, expected_preview_digest } => {
+                let (mut proposal, preview) = self.prepare_reference_character(project, project_id, &doc, &request.expected_revision, record_id.as_deref(), CreateCharacterRequest {technical_name, display_name, dialogue_color})?;
+                if preview.digest != expected_preview_digest { return Err(ReferenceError::Conflict); }
+                // The prepared source metadata assigns this exact new stable character ID.
+                let metadata = proposal.mutations.iter().find(|m|m.path.as_str() == ".renpy-editor/authoring.json").ok_or(ReferenceError::Invalid)?;
+                let metadata: Value = serde_json::from_slice(&metadata.proposed).map_err(|_|ReferenceError::Invalid)?;
+                let character = metadata["characters"].as_array().and_then(|a|a.last()).ok_or(ReferenceError::Invalid)?;
+                let character_id = string(&character["id"] )?;
+                let (template, mut content) = if let Some(record_id) = &record_id {
+                    let old = current_revision(editable_card(&doc, record_id)?)?;
+                    (old.clone(), old["content"].clone())
+                } else { (json!({}), empty_card(string(&character["displayName"] )?, character_id)) };
+                content["linkedCharacterId"] = json!(character_id);
+                let records = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+                let index = if let Some(record_id) = &record_id { records.iter().position(|r|r["id"] == *record_id).ok_or(ReferenceError::Invalid)? }
+                    else { records.push(new_record()); records.len()-1 };
+                append_approved(&mut records[index], &template, content, true)?;
+                extra_mutations.append(&mut proposal.mutations);
+            }
+            Command::RestoreCard { record_id, revision_id } => {
+                let record = editable_card(&doc, &record_id)?;
+                let current = current_revision(record)?;
+                if current["id"] == revision_id { return invalid(); }
+                let snapshot = array(&record["revisions"] )?.iter().find(|r| r["id"] == revision_id && matches!(r["status"].as_str(),Some("approved" | "superseded"))).ok_or(ReferenceError::Invalid)?.clone();
+                self.check_reference_support(project, project_id, &record_id, &revision_id)?;
+                if let Some(character_id) = current["content"]["linkedCharacterId"].as_str() {
+                    association_available(&doc, Some(&record_id), character_id)?;
+                    if !self.references(project, project_id)?.entities.iter().any(|e|e.kind == "character" && e.id == character_id && e.revision.is_some()) { return Err(ReferenceError::Conflict); }
+                }
+                let mut content = snapshot["content"].clone();
+                content["linkedCharacterId"] = current["content"]["linkedCharacterId"].clone();
+                validate_content(&content, Kind::Card)?;
+                let record = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?.iter_mut().find(|r|r["id"] == record_id).ok_or(ReferenceError::Invalid)?;
+                append_approved(record, &snapshot, content, true)?;
+            }
+            Command::SaveProjectContext { world, tone } => {
+                text(&json!(world), 10_000, false)?;
+                text(&json!(tone), 10_000, false)?;
+                if doc.get("projectContext").is_none() {
+                    doc["projectContext"] = json!({"id":uuid::Uuid::new_v4().to_string(),"revisionCounter":0,"currentRevisionId":null,"revisions":[]});
+                }
+                let context = &mut doc["projectContext"];
+                let mut next = context["revisions"].as_array().ok_or(ReferenceError::Invalid)?.iter().find(|r|r["id"] == context["currentRevisionId"]).cloned().unwrap_or_else(||json!({}));
+                let content = merge(&next["content"], &json!({"world":world,"tone":tone}));
+                if next["content"] == content { return invalid(); }
+                let number = context["revisionCounter"].as_u64().unwrap_or(0).checked_add(1).filter(|n|*n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
+                let revision_id = uuid::Uuid::new_v4().to_string();
+                for (k,v) in json!({"id":revision_id,"number":number,"createdAt":now(),"content":content}).as_object().unwrap() { next[k] = v.clone(); }
+                let revisions = context["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+                if revisions.len() >= 3 { revisions.remove(0); }
+                revisions.push(next);
+                context["currentRevisionId"] = json!(revision_id);
+                context["revisionCounter"] = json!(number);
             }
             Command::Undo => {
                 self.undo_scene(project).map_err(ReferenceError::History)?;
@@ -821,6 +1033,17 @@ impl AuthoringService {
                         && !(if kind == Kind::Card { CARD } else { LORE }).contains(&k.as_str())
                 }) {
                     return invalid();
+                }
+                if kind == Kind::Card {
+                    let old = record_id.as_ref().and_then(|record_id| doc["cards"].as_array()?.iter().find(|r|r["id"] == *record_id)).and_then(|r|current_revision(r).ok());
+                    if let Some(linked) = fields.get("linkedCharacterId") {
+                        if old.is_some_and(|r|r["content"]["linkedCharacterId"] != *linked) { return invalid(); }
+                        if old.is_none() && !linked.is_null() {
+                            let character_id = id(linked)?;
+                            association_available(&doc, None, character_id)?;
+                            if !self.references(project, project_id)?.entities.iter().any(|e|e.kind == "character" && e.id == character_id && e.revision.is_some()) { return invalid(); }
+                        }
+                    }
                 }
                 let a = doc[kind.collection()]
                     .as_array_mut()
@@ -891,7 +1114,7 @@ impl AuthoringService {
             .commit_history(
                 project,
                 TransactionProposal {
-                    mutations: vec![FileMutation {
+                    mutations: { let mut mutations = vec![FileMutation {
                         path: RelativePath::new(PATH).map_err(|_| ReferenceError::Io)?,
                         kind: if revision == Revision::expected_absence() {
                             MutationKind::CreateNew
@@ -901,13 +1124,13 @@ impl AuthoringService {
                         base: revision,
                         expected_bytes: bytes,
                         proposed,
-                    }],
+                    }]; mutations.extend(extra_mutations); mutations },
                     intent: TransactionIntent::Edit,
                 },
             )
             .map_err(ReferenceError::History)?;
         // Commit success remains explicit even if subsequent supporting-data reads fail.
-        self.references(project,project_id).or_else(|_|Ok(Workspace{document:Some(doc),revision:token(&committed[0]),diagnostic:Some("Saved. Supporting links could not be checked; reload the library to check them."),entities:vec![],issues:vec![],can_undo:true,can_redo:false}))
+        self.references(project,project_id).or_else(|_|Ok(Workspace{document:Some(doc),revision:token(&committed[0]),diagnostic:Some("Saved. Supporting links could not be checked; reload the library to check them."),entities:vec![],issues:vec![],can_undo:true,can_redo:false,character_preview:None}))
     }
 }
 

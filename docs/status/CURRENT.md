@@ -1,67 +1,28 @@
 # Current status
 
-## Approved redesign implementation handoff — 2026-10-15
+## Walkthrough redesign — local implementation; verification held
 
-The user approved the [implementation task](../tasks/active/walkthrough-redesign-implementation.md)
-and requested a new local Sol6.1/xhigh chat with Sol6.1/high implementation/testing
-subagents. This task now owns the selected implementation outcome and finite allowances;
-prior walkthrough-only restrictions are superseded only where this contract says so.
-The coordinator owns slice contracts, integration, review, a thin production-action
-harness, a CI-logic audit before dispatch, and final Windows/macOS evidence review.
-At most3concurrent subagents. Live budget12attempts/32768reserved response tokens,
-4model refreshes/2loads; CI at most3paired attempts. Initial usage0. No local app
-package builds or native launches; focused test compilation permitted. Preserve the
-old walkthrough app's unsaved Mara draft and all existing data/credentials. No merge/release.
-Next: dispatch the approved coordinator chat; it must inspect latest local Git and keep
-unpublished design commits. Do not reset to old remote source. This preparing chat has
-performed documentation only; no code/live/CI work yet.
+Updated 2026-10-15. The user approved the complete
+[redesign implementation outcome](../tasks/active/walkthrough-redesign-implementation.md).
+The local coordinator works on `codex/phase3a-story-logic` from approved3744a17,
+retaining all unpublished design/approval commits. Changes are currently **local-only**;
+no reviewed candidate has been published and no redesign CI has been dispatched.
 
-## Selected combined Mac approval walkthrough — 2026-10-15
-
-Phase 2 / 3A approval walkthrough remains **in_progress; acceptance pending** on
-`codex/phase3a-story-logic`, candidate60ec1da. Signed build1/1 passed; launches1/3.
-The current package remains unchanged. Preserve the open isolated public walkthrough
-project and its **unsaved Mara reference draft**; no Save/Discard/Reload or closing.
-No live Studio sends/model operations, automatic fixes, merge or release are selected.
-
-The user requested all feedback consolidated and consistent with approved B. The
-[decision record](../design/character-workspace-2026-10-15/walkthrough-decisions.md)
-owns current settings, linked-character/B layout, relationship copy, starting-only
-knowledge, linked-lore/applicability deferrals, Source notes UI removal and surfaced
-previous-version restore. Existing data and approval/freshness protections remain.
-Two [updated mockups](../design/character-workspace-2026-10-15/walkthrough-decisions.md#updated-approval-previews)
-were approved on2026-10-15; restore/model loading/unified creation remain functional
-follow-ups, not implemented behavior. The
-[combined ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
-owns qualification and cumulative counts. Character-card design review is complete.
-The [project-wide Lorebook direction/refinements](../design/lorebook-workspace-2026-10-15/README.md#agreed-refinements--2026-10-15)
-are agreed: World & starting situation, tone distinct from character voice, shared AI
-writing context with preview/omission, and growing fields/fixed footer. Actual app theme
-tokens govern both designs. Entries/draft remain intact; implementation pending.
-The implementation handoff above is approved; the retained walkthrough facts below
-remain evidence and recovery context, not a second implementation owner.
-All recording/design work is local-only; no application or provider changes.
-
-## Qualification and remaining acceptance
-
-**Updated:** 2026-10-15. **Phase 2 / 3A: ACTIVE — INCOMPLETE.** Phase3A implementation
-and scoped technical qualification are **review_ready**, pending explicit human
-acceptance. The walkthrough resumes Phase2 human review only; no following Phase3
-capability is selected. Earlier failed evidence and recovery state remain preserved
-in the owning tasks and [HANDOVER](HANDOVER.md).
-
-| Capability | Current evidence / limit |
+| Capability | Implementation and evidence |
 | --- | --- |
-| 3A Story logic | [CI4 terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14) passed both hosts, actual controller paths and six pinned-SDK cases including qualified safe-edit/save/load return. Arbitrary source-change compatibility is not claimed. |
-| Studio assistance and UI | [UI delivery ledger](../tasks/active/phase-2-initial-llm-assistance.md#ui-refinement-ci1-terminal-audit-and-delivery--2026-10-13) preserves exact both-host controller/native-service/privacy/render evidence and frozen owner live/native qualification. Failed sends remain failures. |
-| SDK, packages and credentials | Unchanged paths reuse earlier qualification. Matching signed walkthrough package verified; ordinary profile/key and signing policy unchanged. Literal IPv6 HTTPS remains unsupported; live TLS not newly measured. |
-| Human review | Settings feedback recorded; character-card design approved. Synthetic connection-test preview, remaining reference/AI flow and Phase3A walkthrough remain unreviewed. Design decisions do not imply phase acceptance. |
+| Settings | Approved copy, one context setting/new-profile32768+8192 defaults, conditional HTTP, reload/retry and named removal confirmation implemented. Focused13-case DOM proof passed; coordinator code review passed. Ordinary profile/key untouched. |
+| Characters and history | Unified workspace, stable-ID lifecycle/source review, retained drafts, compact relationships, starting knowledge and guarded new-revision restore implemented. Focused UI proof passed; three corrected core fixture tests await a user-requested allowance extension after the original C verification limit. |
+| Project Lorebook/context | Two-field world/tone document preserves legacy lore/extensions; default shared inclusion and explicit omission. Two exact production-context tests passed, including budgeting and freshness; UI save/history proof passed. |
+| Studio readiness | Version-scoped cached-GGUF loading and loaded-context reuse implemented. Controlled7-core/9-host cases passed. A coordinator consistency fix awaits one additional focused check beyond B's used slice limit. Live driver is prepared and metadata-only inspection found the existing bound profile; no credential read/live call. Its dispatch awaits the B proof hold. |
+| Integrated candidate/CI | Shared wiring/context tests passed; CI logic/checker audit passed.14 wide visual captures are partial; compact proof awaits a bounded extension. No local production/package builds or native editor launches. Browser fixtures remain distinct from packaged physical input. |
 
-Implementation qualification usage remains **core16/18, local12/14, renderer11/14,
-pairedCI4/5**; separate walkthrough usage is build1/1, launch1/3. No additional
-automated qualification round is needed for unchanged application inputs. Existing
-portable renderer/DOM/native-service evidence is distinct from packaged physical
-interaction, screen-reader proof and human acceptance. No merge/release, generic
-providers, route-context inference, automatic thinking/streaming or storage-policy
-change is selected. Exact candidates, manifests, review distinctions, historical
-allowances and unique failure/recovery evidence remain in the linked task ledgers.
+The [task ledger](../tasks/active/walkthrough-redesign-implementation.md#execution-ledger--2026-10-15)
+owns exact checks, failures, three pending allowance questions and cumulative budgets.
+Live0/12; reserved tokens0/32768; refresh0/4; loads0/2; pairedCI0/3.
+
+Phase2/3A remain **incomplete; human acceptance pending**. Earlier technical proof
+remains review_ready in the [Phase2](../tasks/active/phase-2-initial-llm-assistance.md)
+and [Phase3A](../tasks/active/phase-3-initial-wysiwyg-release.md) ledgers. The original
+walkthrough app and its unsaved synthetic Mara draft are preserved; never save,
+discard, reload, repurpose or close that session for this implementation. No merge,
+release, signing/credential-policy change or destructive migration is authorised.
