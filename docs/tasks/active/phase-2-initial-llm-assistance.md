@@ -99,7 +99,12 @@ and deliberate focus/scroll behavior. The unified creation workflow should use t
 same anchored entry point for game-first and card-first creation. Later visual checks
 must cover tab/view switches and multiple short/long/expanded cards at matching viewport.
 No UI/source/reference mutation or new native launch performed for this feedback.
-Next: continue card-field/layout review with the accepted direction recorded.
+User chooses concept B and requests refinement: collapse the character list, reduce
+sidebar overhead and show helpful AI-writing guidance below card text boxes. The
+[refined B comparison](../../design/character-workspace-2026-10-15/README.md#refined-b--more-room-for-writing)
+shows expanded and focused states with horizontal topics, no permanent right inspector,
+explicit show/hide/exit-focus controls and draft helper copy. B is the chosen base;
+refined geometry/helper copy awaits user review. Implementation remains unselected.
 
 ## User pause — 2026-10-13 (superseded for the selected walkthrough)
 

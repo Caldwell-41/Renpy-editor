@@ -1,6 +1,7 @@
 # Character workspace concepts — 2026-10-15
 
-Status: **awaiting user design choice**. Three built-in ImageGen mockups, informed by
+Status: **B selected; refined expanded/focus states awaiting review**. The original
+three built-in ImageGen mockups were informed by
 one user-requested research-only subagent and owner source/visual review. No application
 implementation, source/reference mutation, new app launch or Studio request. The live
 Mara draft remains unsaved and untouched. These concepts extend the agreed unified
@@ -26,6 +27,44 @@ one refinement were used. Preserve the implementation's ordinary direct editing 
 source/refusal/approval behavior; generated UI details are not authoritative contracts.
 Static mockups cannot prove stable switching, keyboard use, draft retention or native
 responsive behavior. Both accepted themes remain required if implementation is selected.
+
+## Refined B — more room for writing
+
+The user prefers B and requests helpers under every card text field, a collapsible
+character list, and more editor space. These refinements are proposed, not implemented.
+
+| State | Image | Intended behavior |
+| --- | --- | --- |
+| Expanded character list | [B refined — expanded](b-refined-expanded-v2.png) | Slim cast list has Hide characters. Topics move above the editor, the right inspector is removed, and game-link settings remain under Game setup. |
+| Focused writing | [B refined — focus](b-refined-focus-v2.png) | Character list is hidden and app navigation becomes icons. Show characters and Exit focus provide visible restore paths. The selected name, topic, text/help and save controls remain reachable. |
+
+Ordinary cast-list collapse should preserve the user's selection/draft and remember
+the layout choice. Focus is an explicit extra action; switching topics/characters must
+not unexpectedly toggle it. At compact widths, topic navigation can become one labelled
+selector instead of reintroducing a sidebar. This is a behavioral design requirement,
+not something the generated screenshots prove.
+
+Persistent helper text sits immediately below each card writing field, separate from
+placeholder text and errors. [Draft helper copy](b-field-help.json) covers other fields.
+For the visible fields:
+
+- Personality: describe traits, habits and reactions; concrete examples help the AI
+  keep behavior consistent.
+- Motivations: state what they want and why it matters; this helps give their choices
+  a clear reason.
+
+One note explains that the AI uses a card only when included in a request. Help must
+not suggest automatic sends, guaranteed model compliance or automatic tracking of what
+a character knows. No AI/provider operation was initiated for these examples.
+
+Built-in ImageGen used three B-refinement calls: expanded draft, one targeted creation-
+button correction, and focus state. Cumulative design calls7 (original3, C correction1,
+B refinement3); researcher count remains1. Owner visually reviewed both final1586×992
+outputs; no native app, fixture draft or source change. Earlier A/B/C images remain
+preserved. Static examples do not prove compact wrapping, keyboard use or no layout shift.
+
+Exact prompts: [expanded](b-refined-expanded.txt), [header correction](b-refined-expanded-header-fix.txt),
+[focus](b-refined-focus.txt). Next: user review of width, collapse controls and helper text.
 
 ## Research and design interpretation
 
@@ -53,6 +92,6 @@ inferences. No other product's exact interface or branding is copied.
 - [C initial prompt](c-character-overview.txt) and [targeted refinement](c-character-overview-refinement.txt)
 - [Research records](research.json) and [image hashes/review manifest](manifest.json)
 
-Next: ask which direction or combination feels clearest. Record the user's choice
+Next: review the refined B expanded/focus states. Record the user's decision
 before selecting any implementation scope, budget or replacement app build. All earlier
 walkthrough feedback and the unreviewed unsaved-profile request preview remain open.

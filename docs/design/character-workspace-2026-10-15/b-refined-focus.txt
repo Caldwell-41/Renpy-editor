@@ -1,0 +1,10 @@
+Edit the supplied refined Loomlight concept B into its FOCUSED WRITING state. Keep the exact same paper/teal styling, Mara identity, Planning only status, Writing/Game setup tabs, selected Personality & goals topic, BOTH text contents and helper texts, and bottom Unsaved changes / Discard / Save changes bar.
+Collapse the whole character list completely (no cast thumbnails, no permanent character icon rail). At the left of the Mara workspace header provide a clear “Show characters” button with a panel icon, which can reopen the cast list. Keep the selected character name Mara visible even while its list is hidden.
+Collapse the app-wide navigation to one narrow50px icon strip at the far left. This is a deliberate Focus writing mode, not accidental layout movement. Do not add a right panel or any vertical topic list.
+The main editor now occupies almost the full application width. Keep a readable maximum prose width about1100px, centered within the generous workspace. Use the extra horizontal room for comfortably wide text boxes, not huge text or large decorative spacing. Show both Personality and Motivations text boxes with their helper sentences BELOW them.
+At the top-right workspace header show the primary “+ New character” button and immediately to its left a secondary “Exit focus” button. New character stays in the same header corner as expanded mode, never moves to footer. The Show characters control must be visible and readable.
+The topic strip stays horizontal, Overview / Personality & goals selected / Voice / Relationships / What they know / More details. A muted note still reads “The AI uses this card only when you include it in a request.”
+Keep short helper text readable:
+Personality: “Describe traits, habits and reactions. Concrete examples help the AI keep behaviour consistent.”
+Motivations: “Write what they want and why it matters. This helps the AI give their choices a clear reason.”
+No simulated new AI send, no unrelated controls, no annotations/device frame, no hidden restore button. Output one landscape full-screen mockup at the same size as input.

@@ -10,8 +10,8 @@ This supersedes the prior Phase 2 feedback pause for this walkthrough. Build1/1 
 launches1/3; existing implementation budgets/evidence remain unchanged. Disposable
 public project/isolated state; preserve ordinary profile/key and signing identity.
 No live sends, automatic fixes, merge or release. The [combined walkthrough ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
-owns candidate, counts, results and continuation. Next: same chat, choose among three delivered
-ImageGen character-layout concepts (design comparison linked in task); preserve unsaved Mara draft; keep the current app open.
+owns candidate, counts, results and continuation. Next: same chat, review refined B
+with collapsible cast list, fewer sidebars and field help; preserve unsaved Mara draft; keep the current app open.
 
 Earlier qualification and unique recovery evidence below remain valid. The separate
 walkthrough selection above owns current human-session scope and counts.

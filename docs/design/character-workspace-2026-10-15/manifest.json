@@ -3,8 +3,8 @@
   "tool": "built-in image_gen.imagegen",
   "researchAgents": 1,
   "initialGenerations": 3,
-  "targetedRefinements": 1,
-  "selection": "awaiting user design choice; no implementation",
+  "targetedRefinements": 4,
+  "selection": "B selected for refinement; expanded/focus v2 awaiting user feedback; no implementation",
   "assets": [
     {
       "file": "a-character-notebook.png",
@@ -23,6 +23,18 @@
       "width": 1586,
       "height": 992,
       "sha256": "1aece908ae08eb43e461040dc31b422a4ef16848d83b51fc95b4b91fb893b086"
+    },
+    {
+      "file": "b-refined-expanded-v2.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "103aae10f2e481df03fd37577690b63fd0595800912b24c2c829ed849a94541b"
+    },
+    {
+      "file": "b-refined-focus-v2.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "2fdcab6dd5a3297146316ba4df0ec082eb801ef14f26ae3125f85c1806291575"
     }
   ],
   "review": {
@@ -31,5 +43,12 @@
     "b": "One-topic editor; fixed identity/section navigation; more side panels than A. Avatars illustrative.",
     "c": "Fixed overview; direct editing; Writing/Game setup restored and game actions made secondary in one refinement. Portrait illustrative.",
     "limits": "Static generated images do not prove keyboard interaction, resizing or freedom from layout shift. Existing unsaved app draft untouched."
+  },
+  "totalImageCalls": 7,
+  "bRefinement": {
+    "calls": 3,
+    "deliveredStates": 2,
+    "correction": "First expanded mockup omitted New character; one targeted header fix retained Focus writing and restored fixed creation action.",
+    "review": "Owner inspected both final outputs: right inspector removed, topics horizontal, helpers below both textboxes, character collapse/restore and focus exit visible, creation/save anchors present. Static designs, no interaction proof."
   }
 }

@@ -170,10 +170,24 @@ setup, remove Edit-unlock actions, reduce game-status emphasis and fix creation 
 Owner visually reviewed the three outputs; this is self-review, not independent UI
 qualification. A favors prose hierarchy; B favors one topic at a time; C favors a
 visual overview. Portraits/type choices are illustrative, not new accepted features.
-User selection is pending. These static proposals do not prove responsive switching,
-keyboard use or draft preservation and do not establish implementation/human acceptance.
-The existing unsaved Mara draft remains in the running app untouched. Next: compare
-A/B/C or a combination in this chat; no implementation or new native launch selected.
+User selects **B** as preferred on2026-10-15 and requests refinement: help beneath
+card text boxes explaining what to write for AI use; collapsible character sidebar;
+more room for the actual card. Design refinement only, no implementation/new build.
+Owner prepares expanded-list and collapsed/focused B states: remove permanent right
+inspector, replace inner topic sidebar with a horizontal topic strip/dropdown, keep
+one compact collapsible character list, preserve identity/save/creation anchors and
+make the editor dominant. Add concise persistent per-field help and one accurate
+explicit-inclusion note; do not promise automatic AI use or tracked runtime knowledge.
+**Delivered refined B:** two1586×992 expanded/focused screenshots in the existing
+design comparison, exact prompts/helper-copy and updated hashes. Built-in ImageGen
+used3calls for2final states (one targeted correction restored missing New character
+in the expanded draft); cumulative design7calls, researcher1. Owner visually reviewed
+both: width returned to editor, horizontal topics, no right inspector, visible below-
+field help, explicit collapse/restore/focus controls and creation/save anchors. Earlier
+images/prompts preserved. No new researcher. These static proposals do not prove
+responsive switching, keyboard use or draft preservation and do not establish
+implementation/human acceptance. Unsaved Mara draft untouched. Next: user review of
+refined B width, collapse controls and help; no native relaunch or provider send.
 
 No whole-phase acceptance is implied.
 Preferences/defects/phase acceptance remain separate. Do not infer approval from
