@@ -1,5 +1,21 @@
 # Phase 2 — Initial LLM assistance
 
+## Lorebook refinements agreed — 2026-10-15
+
+User agrees all four suggested refinements to the simple project-wide two-field design:
+**World & starting situation** includes lasting rules/opening circumstances; global
+Lorebook notes are shared context for project AI writing, disclosed in request preview
+with per-request omission; overall tone remains distinct from character-card voice;
+text areas grow with content while the page body scrolls and Save/Discard stays fixed.
+No categories/tags/extra panels. Existing theme tokens remain authoritative. The
+[agreed Lorebook design](../../design/lorebook-workspace-2026-10-15/README.md#agreed-refinements--2026-10-15)
+supersedes screenshot v2's former World at the start label; no new image is necessary.
+Saving sends nothing; preview/context and explicit Send remain separate. This new
+shared-context behavior requires future implementation/budgeting and preserves existing
+approved references, source freshness, entries and private state. No application/source/
+reference save, migration, build/launch or Studio operation. Character design remains
+approved. Next: remaining AI/Phase3A walkthrough; no whole-phase acceptance inferred.
+
 ## Lorebook palette correction — 2026-10-15
 
 User rejects the blue/purple mockup colour scheme and requires the existing app palette.

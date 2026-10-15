@@ -7,7 +7,7 @@
   "previousCharacterDesignCalls": 14,
   "cumulativeWalkthroughDesignCalls": 16,
   "additionalAgents": 0,
-  "status": "Palette corrected to existing app; layout/workflow approval pending",
+  "status": "Project-wide two-field direction and four refinements agreed on 2026-10-15; implementation pending",
   "applicationChanged": false,
   "assets": [
     {
@@ -29,10 +29,10 @@
   ],
   "review": "Owner inspected: one project-wide page with starting world state and tone, below-field helpers, B visual style, global rail only, active Lorebook icon, fixed save/discard, quiet history. Generated icons/colours illustrative; exact shared controls/tokens required. Static design is not native or context-assembly proof.",
   "scopeAssumptions": [
-    "Global means within each project",
-    "World state means authored start-of-story facts",
-    "Existing entries/data preserved; migration unselected",
-    "Shared AI context inclusion and tone precedence require later explicit design/implementation"
+    "One shared Lorebook within each project",
+    "Starting situation plus lasting world facts; later discoveries/runtime tracking deferred",
+    "Preserve existing entries/data; migration unselected",
+    "Shared writing context and per-request omission agreed as future behavior; exact assembly/budgeting still requires implementation"
   ],
   "currentAsset": "global-world-tone-v2.png",
   "paletteCorrection": {
@@ -42,5 +42,17 @@
     "calls": 1,
     "review": "Owner visually inspected corrected final: neutral dark text, warm paper/stone surfaces, grey field borders, teal active Lorebook and primary action; layout and visible helper/prose retained. Bitmap colours approximate; actual shared theme tokens remain authoritative.",
     "supersedes": "global-world-tone-v1.png palette only; original preserved"
+  },
+  "agreedRefinements": {
+    "date": "2026-10-15",
+    "userResponse": "Agreed",
+    "worldLabel": "World & starting situation",
+    "worldMeaning": "Setting, lasting rules and opening situation",
+    "sharedAIContext": "Default for project AI-writing requests; visible inclusion and per-request omission in preview; explicit Send",
+    "toneAndVoice": "Overall tone in Lorebook; individual dialogue voice in character cards",
+    "layout": "Growing writing areas, page scrolling, fixed Save/Discard footer",
+    "noAdditionalControls": "No categories, tags or panels",
+    "imageUnchanged": true,
+    "implementationSelected": false
   }
 }

@@ -173,8 +173,9 @@ superseded by this decision record. No extra image correction or new build is se
 Character-card design review remains complete. User now requests a simpler global
 Lorebook to set world state and tone. The [new Lorebook mockup and scope notes](../lorebook-workspace-2026-10-15/README.md)
 propose one document per project, starting-world facts and tone/style, consistent with
-approved B. The Lorebook proposal awaits approval and does not reopen the approved card
-design or authorise migration/deletion of existing lore or automatic context injection.
+approved B. The user subsequently agreed the Lorebook refinements, including visible shared context
+for AI writing with per-request omission. This does not reopen the approved card design
+or authorise migration/deletion or silently change current context assembly.
 
 ## Palette consistency correction
 
@@ -184,3 +185,12 @@ images govern layout, not a separate blue/purple colour scheme. This correction 
 character design approval and applies to implementation across redesigned surfaces.
 [Corrected Lorebook preview](../lorebook-workspace-2026-10-15/global-world-tone-v2.png)
 awaits feedback. No application code or theme preference changed.
+
+## Lorebook refinements agreed
+
+The user agrees the [four refinements](../lorebook-workspace-2026-10-15/README.md#agreed-refinements--2026-10-15):
+World & starting situation, visible shared context with per-request omission, distinct
+story tone/character voice, and growing fields with page scrolling/fixed Save/Discard.
+No categories/tags/panels. Preserve the corrected mockup and approved application theme;
+this wording/behavior amendment needs no new image. Implementation and testing remain
+follow-up work, with no product or provider change during review.

@@ -18,10 +18,11 @@ were approved on2026-10-15; restore/model loading/unified creation remain functi
 follow-ups, not implemented behavior. The
 [combined ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
 owns qualification and cumulative counts. Character-card design review is complete.
-User requests a simpler project-wide Lorebook; [world/tone mockup](../design/lorebook-workspace-2026-10-15/README.md)
-has been colour-corrected after rejection of its blue palette; approval pending. Shared
-app theme tokens govern all designs. Entries/draft stay intact; no migration or AI change.
-Next: Lorebook feedback, then remaining AI/Phase3A walkthrough.
+The [project-wide Lorebook direction/refinements](../design/lorebook-workspace-2026-10-15/README.md#agreed-refinements--2026-10-15)
+are agreed: World & starting situation, tone distinct from character voice, shared AI
+writing context with preview/omission, and growing fields/fixed footer. Actual app theme
+tokens govern both designs. Entries/draft remain intact; implementation pending.
+Next: remaining AI/Phase3A walkthrough; no additional design permission needed for these refinements.
 All recording/design work is local-only; no application or provider changes.
 
 ## Qualification and remaining acceptance
