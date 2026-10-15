@@ -2,80 +2,87 @@
 
 ## Selected continuation
 
-Updated 2026-10-15. **Local implementation; two bounded verification decisions remain.**
+Updated 2026-10-15. **Local implementation; six final live checks held at the model-load ceiling.**
 Continue this chat and the [approved task](../tasks/active/walkthrough-redesign-implementation.md).
-Its [latest reassessment](../tasks/active/walkthrough-redesign-implementation.md#approved-extension-results-and-new-reassessment)
-owns exact results, raw logs and remaining actions. Live Git owns the latest local
-checkpoint on `codex/phase3a-story-logic`; never reset to an old SHA or remote baseline.
-All unpublished design/approval/implementation commits remain. Earlier implementation
-checkpoint34cbb4421c418cfcd05a1a3e8e28ada60918f8df and docs checkpointc6dfc00 are historical.
-Coordinator Sol6.1/xhigh and three explicitly scoped Sol6.1/high workers remain selected.
+Its [latest result](../tasks/active/walkthrough-redesign-implementation.md#latest-live-result-and-remaining-decision)
+owns exact evidence, cumulative allowances and the remaining decision. Live Git owns
+this checkout on `codex/phase3a-story-logic`; never reset to an old candidate or remote
+baseline. All implementation/design/approval commits remain unpublished. Checkpoint
+`dbe79c4` precedes the capability adapter and final integration proof; it is not the
+final source candidate. Coordinator owns commits, final review and common budgets.
+Workers have no live-call allowance and no outstanding mutation task.
 
-The original walkthrough app owns an **unsaved synthetic Mara draft**. Ignored
+Preserve the original walkthrough app's **unsaved synthetic Mara draft**. Ignored
 `.toolchains/approval-walkthrough-2026-10-14/session.json` is recovery metadata only.
 No Save/Discard/Reload/navigation/close/reuse of that session. **No local production,
-package or installer builds; no new native editor launches.** Focused test compilation
-and test-only production drivers are authorised. No worker stages/commits others' work.
+package or installer builds; no new native editor launches.** Test compilation and
+test-only production drivers are authorised. Keep all other worktrees and unrelated
+changes, including the planning/core/renderer/validation historical worktrees.
 
-## Results since the approved extensions
+## Accepted local findings and evidence limits
 
-The user replied **Request Approved** to all three previous questions. Those exact
-extensions are now consumed: C named3/3 pass; B named1/1 pass; browser extra initial
-failed on a real compact Discard wrap, then its one diagnosed correction passed28/28
-with evidence checker, unchanged before/after37 input hashes and owned cleanup.
-Raw logs/images/manifests remain in the local paths recorded in the task. Browser
-working-tree hashes identify its inputs; barec6dfc00 does not. Subsequent main-only
-read-recovery edits are separate from that fixture's loaded rendering modules.
+The three earlier bounded extensions passed: character3 named cases; readiness1
+consistency case; browser28/28 plus actual evidence checker after one diagnosed
+compact Discard-wrap correction. Earlier failed attempts remain failures. Settings13
+focused cases, reference/lifecycle/history/context contracts and proposed-lore review
+proof remain valid for unchanged inputs. Main Game setup now refreshes only its
+captured host, retains all cached writing drafts, consumes successful mutation forms
+before read failure and offers read-only reload. Its exact regression passed after
+fixture readiness was corrected to wait for the existing coordinator owner release.
+The observation attribute reflects that owner map and adds no second lock or bypass.
 
-A Settings13-case proof, C/F/E core contracts, exact shared-context2-case production
-preview/send proof and earlier focused UI results remain valid for unchanged inputs.
-E correction2 restored explicit proposed-lore approve/reject review without legacy
-editing/migration, preserving dirty global notes and refusal state; named1/1 passed.
-E2/2 used. G checker25 fixtures/actionlint/audit passed; no further checker/browser
-round remains. Native WebView/physical-input/human acceptance is not claimed.
+The browser fixture's37 before/after source hashes match. Later main-only edits have
+separate production-main DOM evidence; the fixture does not import main. Its exact
+working-tree hashes, images and cleanup receipts identify its inputs, not an earlier
+bare commit. Packaged WebView physical input and whole-phase human acceptance are
+not claimed. Old frozen packages cannot qualify changed source.
 
-Independent review found successful native Game setup callbacks disposed all cached
-writing/source drafts by rebuilding the project. Main now refreshes only the captured
-host and reconciles reference revisions. The new main regression reached successful
-character/default saves, then failed on happy-dom's nonreflected ariaLabel selector.
-Integration2/2 used; selector repair is prepared, UNRUN. Further review found a
-post-commit authoring-read error could re-enable a consumed form; concrete guard and
-same-case import/read-retry assertions are also prepared, UNRUN. Static review owns
-no passing behavior claim. One extra focused integration round is requested.
+At the user's direction, Unsloth Studio accepts compatible observed contracts without
+an exact-version/installation-marker gate. Independent research checked exact official
+902 and907 sources, route/authentication/cache/load/status semantics, safe local-file
+failure and limits on parallel/hidden model observations. The10 affected readiness
+cases and1 sanitised diagnostic case passed. The request-only22528 context option
+passed one preparation case covering28 combinations and rebuilt the debug driver;
+it leaves saved settings unchanged. Source supports lower effective context at load
+time but does not explain the observed32768-to22528 change. Do not infer GPU fitting
+or a first-generation adjustment.
 
-The rebuilt test-only owner driver used the approved native credential adapter once
-internally; no secret export/logging or ordinary profile write. Attempt1 refused with
-model_interface during checking_model, before any load/generation POST; profile token
-unchanged. Unauthenticated status/version diagnostics each returned401 and reveal no
-authenticated schema. No retry/fallback is allowed from that evidence. Public production
-transport does not expose authenticated management observations to the test driver;
-a separately bounded debug-only diagnostic helper/fixture is proposed for review.
-Exact ordinary root/profile and request/source hashes stay ignored under
-`.toolchains/walkthrough-redesign/`; never copy private setup into repository docs.
+Live3 setup passed after one cached load, observed32768 and strict compatibility
+validation. Later status reported22528; live4 correctly refused the larger request
+before generation. Live5 rewrite/include at temporary22528 passed HTTP200 and strict
+validation, profile unchanged. It needed the second cached load after empty-state
+checks. The runner stopped before Continue; six remaining original checks are Continue,
+Draft, Card/world-include, Lore, Edit and rewrite/world-omit. Never replay the successful
+rewrite/include merely by restarting the old complete plan. Exact ordinary profile,
+endpoint/root and native binding remain only in ignored `.toolchains/walkthrough-redesign/`.
+The native adapter reads the key internally; no secret export/logging or profile write.
 
-## Budgets and next action
+## Budget, proposal and next action
 
-Common usage: **live1/12, reserved response tokens2048/32768, model refresh0/4,
-model loads0/2, pairedCI0/3, local production builds0/0, new native starts0/0**.
-The refused live slot remains charged. Prior slice failures/corrections remain charged.
-No pending CI, push, merge, release or phase acceptance.
+Common usage: **live5/12, reserved response tokens10240/32768, inventory observations3/4,
+model loads2/2, pairedCI0/3; additional shared reruns10/10**. All failed slots and full
+response reservations remain charged. No pending process/CI, production build/native
+start, push, merge, release or phase acceptance. Preserve the currently loaded model;
+no third load, download, deliberate unload/reload or service installation is authorised.
 
-Finish unaffected documentation/review, then obtain the two explicit decisions in the
-task reassessment. Do not silently rerun the main case or change exhausted B production
-logic. The proposed Studio diagnostic is fixed read-only routes, production internal
-credential/destination/deadline, sanitised facts only; no extra live/token/load budget.
-Only after all slice/integration proof and final coordinator review may the exact
-reviewed candidate be published and paired CI dispatched (ordinal1–3). Record exact
-SHA/tree/inputs/run identity, then follow WORKFLOW manual same-chat resume: no polling,
-watcher or automation. Terminal resume must audit actual cases, identity, privacy,
-cleanup and matching artifacts; green summaries alone are insufficient.
+A concrete test-driver-only reuse guard is prepared **unapplied/unrun** and root-reviewed
+at `/private/tmp/loomlight-owner-reuse-only.patch` (hash in the task): a run-only
+policy disclosed before dispatch cancels synchronously on the production loading stage,
+so the shared transport refuses before its load POST. It uses actual production
+readiness/generation and no second parser or credential path. One extra focused guard
+verification plus driver build needs user approval because the shared rerun pool is
+exhausted. Only after that passes and root review may the six original live checks use
+the remaining original request/token slots, with no extra model-load allowance. Stop
+on any refusal, unexpected state, changed setup or uncertain outcome. Do not use the
+old wrapper unmodified: it intentionally refuses once loads2/2 and still begins at
+rewrite/include. No further product verification is authorised by this handover alone.
 
-## Preserved earlier evidence
-
-Phase2/3A technical qualification remains review_ready; human acceptance is pending.
-Earlier walkthrough build1/1 and launch1/3 remain unchanged. Frozen old packages do
-not qualify changed code. Retain unique failure/recovery receipts in the
-[Phase2 ledger](../tasks/active/phase-2-initial-llm-assistance.md) and
-[Phase3A ledger](../tasks/active/phase-3-initial-wysiwyg-release.md), ignored old evidence
-and planning/core/renderer/validation worktrees2c5a164/e160464/421a241/74a0361 with unrelated
-changes. No reset, cleanup, signing/Keychain/credential namespace change is authorised.
+Final independent read-only CI audit accepted current gates/discovery/retention; it
+ran no new checks. Only after missing live proof and final root approval may the exact
+reviewed candidate be published and paired Windows x64/macOS ARM64 CI dispatched.
+Record exact SHA/tree, inputs, run/attempt and remaining budget, confirm run identity,
+then end the turn under WORKFLOW manual same-chat resume; no polling/watchers/automation.
+Terminal resume must inspect jobs/cases, matching manifests/source flags, retained
+executed binaries, privacy and cleanup. Partial-evidence sealing or green summaries
+alone do not qualify a candidate. Phase2/3A technical baselines remain review_ready;
+final integrated technical and human acceptance remain pending.

@@ -42,26 +42,30 @@ const TONE: &str = "Synthetic tone marker: calm, concise, observant prose.";
 
 struct Args {
     inspect: bool,
+    diagnose: bool,
     root: PathBuf,
     profile: Option<String>,
     fixture: String,
     purpose: String,
     output: u32,
+    context_length: Option<u32>,
     include: bool,
 }
 fn args() -> Result<Args, &'static str> {
     let mut values = std::env::args().skip(1);
-    let mode = values.next().ok_or("Expected inspect or run mode.")?;
-    if !matches!(mode.as_str(), "inspect" | "run") {
-        return Err("Expected inspect or run mode.");
+    let mode = values.next().ok_or("Expected inspect, diagnose or run mode.")?;
+    if !matches!(mode.as_str(), "inspect" | "diagnose" | "run") {
+        return Err("Expected inspect, diagnose or run mode.");
     }
     let mut result = Args {
         inspect: mode == "inspect",
+        diagnose: mode == "diagnose",
         root: PathBuf::new(),
         profile: None,
         fixture: String::new(),
         purpose: String::new(),
         output: 0,
+        context_length: None,
         include: true,
     };
     let mut seen = std::collections::HashSet::new();
@@ -77,6 +81,13 @@ fn args() -> Result<Args, &'static str> {
             "--purpose" => result.purpose = value,
             "--output-limit" => {
                 result.output = value.parse().map_err(|_| "Output limit invalid.")?
+            }
+            "--context-length" => {
+                let length = value.parse().map_err(|_| "Context length invalid.")?;
+                if !(256..=2_000_000).contains(&length) {
+                    return Err("Context length must be from 256 to 2000000.");
+                }
+                result.context_length = Some(length);
             }
             "--project-context" => {
                 result.include = match value.as_str() {
@@ -100,9 +111,19 @@ fn args() -> Result<Args, &'static str> {
             || !result.fixture.is_empty()
             || !result.purpose.is_empty()
             || result.output != 0
+            || result.context_length.is_some()
             || seen.contains("--project-context")
         {
             return Err("Inspect accepts only --root.");
+        }
+    } else if result.diagnose {
+        if !cfg!(debug_assertions) {
+            return Err("Diagnostics require the debug qualification driver.");
+        }
+        if result.profile.as_deref().is_none_or(str::is_empty)
+            || seen.iter().any(|s| !matches!(s.as_str(), "--root" | "--profile"))
+        {
+            return Err("Diagnose accepts only --root and an explicit --profile.");
         }
     } else {
         if result.profile.as_deref().is_none_or(str::is_empty)
@@ -206,8 +227,12 @@ fn prepare_case(
     if input.fixture == "connection" {
         let mut captured = profile.clone();
         captured.settings.maximum_response = input.output;
+        if let Some(length) = input.context_length {
+            captured.settings.context_budget = length;
+            captured.settings.context_ceiling = length;
+        }
         let body = ai_compatibility::body(&captured);
-        let view = json!({"serializedPayload":std::str::from_utf8(&body).map_err(|_|"Synthetic payload encoding failed.")?,"serializedBytes":body.len(),"maximumResponse":input.output,"projectContextIncluded":false});
+        let view = json!({"serializedPayload":std::str::from_utf8(&body).map_err(|_|"Synthetic payload encoding failed.")?,"serializedBytes":body.len(),"maximumResponse":input.output,"requestedContext":captured.settings.context_budget,"projectContextIncluded":false});
         return Ok((
             Case::Connection(SendCapture {
                 profile: captured,
@@ -267,7 +292,7 @@ fn prepare_case(
         "lore" => "lorePrompt",
         _ => "editPrompt",
     };
-    let mut context = json!({"action":action,"expectedPromptRevision":options[prompt_key]["revision"],"expectedStructureRevision":options["structureRevision"],"references":[],"includeProjectContext":input.include,"task":"Write one short synthetic qualification result. Follow the exact supplied response contract. No tools.","contextBudget":profile.settings.context_budget,"contextCeiling":profile.settings.context_ceiling,"maximumResponse":input.output});
+    let mut context = json!({"action":action,"expectedPromptRevision":options[prompt_key]["revision"],"expectedStructureRevision":options["structureRevision"],"references":[],"includeProjectContext":input.include,"task":"Write one short synthetic qualification result. Follow the exact supplied response contract. No tools.","contextBudget":input.context_length.unwrap_or(profile.settings.context_budget),"contextCeiling":input.context_length.unwrap_or(profile.settings.context_ceiling),"maximumResponse":input.output});
     if !matches!(input.fixture.as_str(), "draft" | "continue") {
         let target = options["targets"]
             .as_array()
@@ -324,7 +349,7 @@ fn prepare_case(
     if payload.contains(WORLD) != input.include || payload.contains(TONE) != input.include {
         return Err("Production context inclusion differs from requested fixture.");
     }
-    let receipt = json!({"serializedPayload":payload,"payloadDigest":preview["payloadDigest"],"serializedBytes":payload.len(),"maximumResponse":input.output,"projectContextIncluded":input.include});
+    let receipt = json!({"serializedPayload":payload,"payloadDigest":preview["payloadDigest"],"serializedBytes":payload.len(),"maximumResponse":input.output,"requestedContext":preview["size"]["contextBudget"],"projectContextIncluded":input.include});
     let proposal = Proposal {
         _temporary: temporary,
         owner,
@@ -361,9 +386,14 @@ fn run() -> Result<(), &'static str> {
     let token = ai_credentials::token(&store);
     let destination = ai_request::resolve_destination(&profile.settings)
         .map_err(|_| "Selected destination unavailable or unsupported.")?;
-    let (case, preview) = prepare_case(&input, &store, profile, destination)?;
+    let (case, preview) = if input.diagnose {
+        (None, json!({"readOnly":true,"routes":["GET /api/inference/status","GET /version"],"totalDeadlineSeconds":15}))
+    } else {
+        let (case, preview) = prepare_case(&input, &store, profile, destination.clone())?;
+        (Some(case), preview)
+    };
     emit(
-        json!({"driver":"redesign-owner-driver","state":"awaiting_dispatch","purpose":input.purpose,"fixture":input.fixture,"preview":preview,"credentialRead":false,"generationDispatched":false}),
+        json!({"driver":"redesign-owner-driver","state":"awaiting_dispatch","mode":if input.diagnose {"diagnose"} else {"run"},"purpose":input.purpose,"fixture":input.fixture,"preview":preview,"credentialRead":false,"generationDispatched":false}),
     )?;
     let mut confirmation = String::new();
     if io::stdin()
@@ -383,7 +413,11 @@ fn run() -> Result<(), &'static str> {
         return Err("Saved profiles changed; no dispatch.");
     }
     let cancel = Cancel::default();
-    let capture = case.take(cancel.clone())?;
+    let capture = match &case {
+        Some(case) => case.take(cancel.clone())?,
+        // Diagnostic helper ignores the body; profile/secret/destination validation stays native.
+        None => SendCapture { profile:profile.clone(), body:Vec::new(), timeout_seconds:30, destination },
+    };
     // Exactly one production adapter read. No status probe, key copy, export, print or fallback.
     let secret = ai_native::secrets(records.ai_data_root())
         .map_err(|_| "Native credential adapter unavailable.")?
@@ -412,6 +446,14 @@ fn run() -> Result<(), &'static str> {
         capture.destination,
     )
     .map_err(|_| "Production request preparation refused; no dispatch.")?;
+    #[cfg(debug_assertions)]
+    if input.diagnose {
+        emit(json!({"driver":"redesign-owner-driver","state":"dispatching","readOnly":true}))?;
+        let diagnostic = ai_request::diagnose_model_interface(prepared, &cancel);
+        let unchanged = records.read_ai_profiles().is_ok_and(|s|ai_credentials::token(&s)==token);
+        emit(json!({"state":"diagnosed","diagnostic":diagnostic,"profileUnchanged":unchanged,"generationDispatched":false,"loadDispatched":false}))?;
+        return if unchanged { Ok(()) } else { Err("Saved profiles changed during diagnosis; no automatic retry.") };
+    }
     emit(
         json!({"driver":"redesign-owner-driver","state":"dispatching","maximumResponse":input.output,"fixture":input.fixture}),
     )?;
@@ -432,7 +474,7 @@ fn run() -> Result<(), &'static str> {
         .is_ok_and(|s| ai_credentials::token(&s) == token);
     let receipt = match result {
         Ok(completion) => {
-            json!({"state":"finished","transportCompleted":true,"responseValidated":unchanged&&case.validate(&completion),"profileUnchanged":unchanged,"httpStatus":http,"usage":completion.usage,"responseBytes":completion.response_bytes})
+            json!({"state":"finished","transportCompleted":true,"responseValidated":unchanged&&case.as_ref().is_some_and(|case|case.validate(&completion)),"profileUnchanged":unchanged,"httpStatus":http,"usage":completion.usage,"responseBytes":completion.response_bytes})
         }
         Err(failure) => {
             json!({"state":"finished","transportCompleted":false,"responseValidated":false,"profileUnchanged":unchanged,"httpStatus":http,"category":failure.code()})
@@ -459,7 +501,7 @@ mod preparation_tests {
     use super::*;
     #[test]
     fn all_fixed_payloads_use_production_preparation_without_credentials_or_network() {
-        let mut profile: StudioProfile=serde_json::from_value(json!({"profileId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","revision":1,"disabled":false,"settings":{"label":"Public driver fixture","endpoint":"http://127.0.0.1:8765/v1","model":"synthetic-model","privateHttp":false,"contextBudget":65536,"contextCeiling":65536,"maximumResponse":8192},"credential":{"credentialId":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","revision":1,"origin":"http://127.0.0.1:8765"}})).unwrap();
+        let mut profile: StudioProfile=serde_json::from_value(json!({"profileId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","revision":1,"disabled":false,"settings":{"label":"Public driver fixture","endpoint":"http://127.0.0.1:8765/v1","model":"synthetic-model","privateHttp":false,"contextBudget":32768,"contextCeiling":262144,"maximumResponse":8192},"credential":{"credentialId":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","revision":1,"origin":"http://127.0.0.1:8765"}})).unwrap();
         profile.compatibility = Some(loomlight_core::ai_profiles::CompatibilityEvidence {
             schema_version: 1,
             configuration_digest: profile.compatibility_digest(),
@@ -480,35 +522,42 @@ mod preparation_tests {
             "edit",
         ] {
             for include in [true, false] {
-                let input = Args {
-                    inspect: false,
-                    root: PathBuf::new(),
-                    profile: Some(profile.profile_id.clone()),
-                    fixture: fixture.into(),
-                    purpose: "generation-action".into(),
-                    output: 2048,
-                    include,
-                };
-                let destination = Destination {
-                    addresses: vec!["127.0.0.1:8765".parse().unwrap()],
-                };
-                let (case, preview) = prepare_case(&input, &store, &profile, destination)
-                    .unwrap_or_else(|message| panic!("{fixture}/{include}: {message}"));
-                let body = string(&preview["serializedPayload"]).unwrap();
-                let captured = case.take(Cancel::default()).unwrap();
-                assert_eq!(body.as_bytes(), captured.body);
-                assert_eq!(captured.profile.settings.maximum_response, 2048);
-                let parsed: Value = serde_json::from_slice(&captured.body).unwrap();
-                assert_eq!(parsed["max_tokens"], 2048);
-                assert_eq!(parsed["enable_tools"], false);
-                assert_eq!(parsed["enable_thinking"], false);
-                assert_eq!(body.contains(WORLD), fixture != "connection" && include);
-                assert_eq!(body.contains(TONE), fixture != "connection" && include);
-                assert_eq!(
-                    serde_json::to_vec(&store).unwrap(),
-                    before,
-                    "original metadata must remain unchanged"
-                );
+                for context_length in [None, Some(22528)] {
+                    let input = Args {
+                        inspect: false,
+                        diagnose: false,
+                        root: PathBuf::new(),
+                        profile: Some(profile.profile_id.clone()),
+                        fixture: fixture.into(),
+                        purpose: "generation-action".into(),
+                        output: 2048,
+                        context_length,
+                        include,
+                    };
+                    let destination = Destination {
+                        addresses: vec!["127.0.0.1:8765".parse().unwrap()],
+                    };
+                    let (case, preview) = prepare_case(&input, &store, &profile, destination)
+                        .unwrap_or_else(|message| panic!("{fixture}/{include}: {message}"));
+                    let body = string(&preview["serializedPayload"]).unwrap();
+                    let captured = case.take(Cancel::default()).unwrap();
+                    assert_eq!(body.as_bytes(), captured.body);
+                    assert_eq!(captured.profile.settings.maximum_response, 2048);
+                    assert_eq!(captured.profile.settings.context_budget, context_length.unwrap_or(profile.settings.context_budget));
+                    assert_eq!(captured.profile.settings.context_ceiling, context_length.unwrap_or(profile.settings.context_ceiling));
+                    assert_eq!(preview["requestedContext"], captured.profile.settings.context_budget);
+                    let parsed: Value = serde_json::from_slice(&captured.body).unwrap();
+                    assert_eq!(parsed["max_tokens"], 2048);
+                    assert_eq!(parsed["enable_tools"], false);
+                    assert_eq!(parsed["enable_thinking"], false);
+                    assert_eq!(body.contains(WORLD), fixture != "connection" && include);
+                    assert_eq!(body.contains(TONE), fixture != "connection" && include);
+                    assert_eq!(
+                        serde_json::to_vec(&store).unwrap(),
+                        before,
+                        "original metadata must remain unchanged"
+                    );
+                }
             }
         }
     }

@@ -119,7 +119,7 @@ jobs:
           node tests/walkthrough-redesign.browser.mjs > "$RUNNER_TEMP/assistance-ui/browser.log" 2>&1
           python scripts/check-redesign-evidence.py browser "$LOOMLIGHT_UI_OUTPUT"
           rustup toolchain install 1.90.0 --profile minimal
-          for scope in references::tests:: prompts::tests:: ai_request::model_readiness_tests::; do
+          for scope in references::tests:: prompts::tests:: ai_request::model_readiness_tests:: ai_request::model_diagnostic_tests::; do
             name="${scope//::/-}"
             cargo test -p loomlight-core --locked --lib "$scope" -- --list > "$RUNNER_TEMP/assistance-ui/$name-list.log" 2>&1
             cargo test -p loomlight-core --locked --lib "$scope" -- --nocapture > "$RUNNER_TEMP/assistance-ui/$name.log" 2>&1

@@ -35,6 +35,12 @@ CARGO_REQUIRED = {
         'ai_request::model_readiness_tests::sufficient_loaded_model_reused_without_version_inventory_load_or_reload',
         'ai_request::model_readiness_tests::capacity_conflict_loading_and_unknown_status_refuse_without_generation_or_mutation',
         'ai_request::model_readiness_tests::cancellation_during_local_load_closes_only_owned_socket_and_never_generates',
+        'ai_request::model_readiness_tests::optional_serving_contract_allows_idle_load_and_single_primary_reuse_without_version_or_tag',
+        'ai_request::model_readiness_tests::hidden_or_ambiguous_serving_and_reported_eviction_never_generate',
+        'ai_request::model_readiness_tests::cache_capability_metadata_accepts_chat_and_legacy_rows_but_refuses_media_unknown_or_malformed',
+    ),
+    'ai_request::model_diagnostic_tests::': (
+        'ai_request::model_diagnostic_tests::fixed_status_and_version_gets_are_sanitized_without_post_or_secret',
     ),
     'ai_requests::tests::': (
         'ai_requests::tests::model_readiness_refusal_publishes_diagnosis_without_generation_or_provider_details',

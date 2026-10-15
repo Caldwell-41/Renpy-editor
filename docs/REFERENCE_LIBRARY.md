@@ -43,7 +43,7 @@ read-only. Save/Discard and Undo/Redo retain ordinary transaction/reopen behavio
 Native Game setup saves refresh their captured host while retaining the reference
 controller and all cached writing drafts. A confirmed save followed by a failed read
 offers read-only reload; it must not re-enable the consumed mutation form. The task
-ledger records the pending final integration regression for this guard.
+ledger records the passing focused main integration regression for this guard.
 
 The simplified Lorebook edits World & starting situation and Tone & writing style.
 Its shared AI inclusion/omission and preserved legacy-style exclusion are defined in

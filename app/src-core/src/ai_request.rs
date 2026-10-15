@@ -860,6 +860,21 @@ fn model_exchange(
     body: Option<&Value>,
     tls: ureq::tls::TlsConfig,
 ) -> Result<Value> {
+    model_exchange_observed(
+        prepared, cancel, deadline, path, body, tls,
+        #[cfg(any(test, debug_assertions))]
+        None,
+    )
+}
+fn model_exchange_observed(
+    prepared: &Prepared,
+    cancel: &Cancel,
+    deadline: Instant,
+    path: &str,
+    body: Option<&Value>,
+    tls: ureq::tls::TlsConfig,
+    #[cfg(any(test, debug_assertions))] observed_http: Option<&mut Option<u16>>,
+) -> Result<Value> {
     if cancel.cancelled() {
         return Err(Failure::Cancelled);
     }
@@ -911,6 +926,10 @@ fn model_exchange(
             .call()
     }
     .map_err(map_error)?;
+    #[cfg(any(test, debug_assertions))]
+    if let Some(observed) = observed_http {
+        *observed = Some(response.status().as_u16());
+    }
     match response.status().as_u16() {
         200 => (),
         401 | 403 => return Err(Failure::Authentication),
@@ -945,6 +964,148 @@ fn model_exchange(
     }
     remaining(deadline)?;
     crate::ai_discovery::strict_json(&bytes).map_err(|_| Failure::Malformed)
+}
+
+
+/// Debug/test-only, read-only qualification. Fixed routes, one shared 15-second deadline,
+/// no retries, inventory calls, load or generation. No raw provider strings leave here.
+#[cfg(any(test, debug_assertions))]
+pub fn diagnose_model_interface(prepared: Prepared, cancel: &Cancel) -> Value {
+    fn kind(value: Option<&Value>) -> &'static str {
+        match value {
+            None => "missing",
+            Some(Value::Null) => "null",
+            Some(Value::String(_)) => "string",
+            Some(Value::Array(_)) => "array",
+            Some(Value::Number(_)) => "number",
+            Some(Value::Bool(_)) => "boolean",
+            Some(Value::Object(_)) => "object",
+        }
+    }
+    fn text_fact(value: Option<&Value>, selected: &str) -> Value {
+        json!({"kind":kind(value),"wellFormed":value.and_then(Value::as_str).is_some_and(|s| !s.is_empty() && s.len() <= 4096 && !s.chars().any(char::is_control)),"matchesSelected":value.and_then(Value::as_str)==Some(selected)})
+    }
+    fn array_fact(value: Option<&Value>, selected: &str) -> Value {
+        let array = value.and_then(Value::as_array);
+        json!({"kind":kind(value),"count":array.map(Vec::len),"allStrings":array.map(|a|a.iter().all(Value::is_string)),"allWellFormed":array.map(|a|a.iter().all(|v|v.as_str().is_some_and(|s|!s.is_empty() && s.len()<=4096 && !s.chars().any(char::is_control)))),"selectedCount":array.map(|a|a.iter().filter(|v|v.as_str()==Some(selected)).count())})
+    }
+    fn public_version(value: &Value, key: &str) -> Option<String> {
+        let value = value.get("version")?.as_str()?;
+        if value.len() > 64 || value.contains(key) { return None; }
+        if value == "dev" { return Some(value.into()); }
+        let version = value.strip_prefix('v').unwrap_or(value);
+        let (numbers, suffix) = version.split_once('-').unwrap_or((version, ""));
+        let parts: Vec<_> = numbers.split('.').collect();
+        if parts.len() != 3 || parts.iter().any(|s|s.is_empty() || !s.bytes().all(|b|b.is_ascii_digit()))
+            || !suffix.bytes().all(|b|b.is_ascii_alphanumeric() || matches!(b,b'.'|b'-'))
+        { return None; }
+        Some(value.into())
+    }
+    let deadline = Instant::now() + prepared.timeout.min(Duration::from_secs(15));
+    let mut routes = Vec::with_capacity(2);
+    for (route, path) in [("status", "/api/inference/status"), ("version", "/version")] {
+        let mut http = None;
+        let result = model_exchange_observed(&prepared, cancel, deadline, path, None,
+            ureq::tls::TlsConfig::default(), Some(&mut http));
+        // Also close the owned socket on HTTP/shape errors; never touch Studio model state.
+        cancel.close_socket();
+        let receipt = match result {
+            Err(failure) => json!({"route":route,"httpStatus":http,"failure":failure.code()}),
+            Ok(value) if route == "status" => {
+                let selected = &prepared.profile.settings.model;
+                json!({"route":route,"httpStatus":http,"facts":{
+                    "object":value.is_object(),"yours":value.get("yours").and_then(Value::as_bool),
+                    "activeModel":text_fact(value.get("active_model"),selected),
+                    "modelIdentifier":text_fact(value.get("model_identifier"),selected),
+                    "loaded":array_fact(value.get("loaded"),selected),
+                    "loading":array_fact(value.get("loading"),selected),
+                    "activeInLoaded":value.get("active_model").and_then(Value::as_str).map(|id|value.get("loaded").and_then(Value::as_array).is_some_and(|a|a.iter().any(|v|v.as_str()==Some(id)))),
+                    "identifierInLoaded":value.get("model_identifier").and_then(Value::as_str).map(|id|value.get("loaded").and_then(Value::as_array).is_some_and(|a|a.iter().any(|v|v.as_str()==Some(id)))),
+                    "contextLength":{"kind":kind(value.get("context_length")),"capacity":value.get("context_length").and_then(Value::as_u64)},
+                    "llamaCppInstalledTag":text_fact(value.get("llama_cpp_installed_tag"),selected)
+                }})
+            }
+            Ok(value) => json!({"route":route,"httpStatus":http,"facts":{
+                "object":value.is_object(),"versionKind":kind(value.get("version")),
+                "version":public_version(&value,&prepared.key)
+            }}),
+        };
+        routes.push(receipt);
+    }
+    json!({"readOnly":true,"routes":routes})
+}
+
+#[cfg(test)]
+mod model_diagnostic_tests {
+    use super::*;
+    use std::{io::{Read, Write}, net::TcpListener, thread};
+
+    #[test]
+    fn fixed_status_and_version_gets_are_sanitized_without_post_or_secret() {
+        const KEY: &str = "diagnostic-private-fixture";
+        const PRIVATE: &str = "/private/synthetic-cache/model.gguf";
+        for status_code in [200, 404] {
+            let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+            listener.set_nonblocking(true).unwrap();
+            let port = listener.local_addr().unwrap().port();
+            let (finished_tx, finished_rx) = std::sync::mpsc::channel();
+            let server = thread::spawn(move || {
+                let deadline = Instant::now() + Duration::from_secs(5);
+                for (route, code, value) in [
+                    ("GET /api/inference/status ", status_code, json!({"yours":false,"active_model":PRIVATE,"model_identifier":KEY,"loaded":["synthetic-model",PRIVATE],"loading":[],"context_length":32768,"llama_cpp_installed_tag":KEY,"untrusted":KEY})),
+                    ("GET /version ", 200, json!({"version":if status_code==200 {"v1.2.3-diagnostic-private-fixture"} else {"v0.1.902-beta"},"untrusted":PRIVATE})),
+                ] {
+                    let mut socket = loop {
+                        match listener.accept() {
+                            Ok((socket, _)) => break socket,
+                            Err(e) if e.kind()==std::io::ErrorKind::WouldBlock => {
+                                assert!(Instant::now()<deadline,"Expected fixed diagnostic GET missing");
+                                thread::yield_now();
+                            }
+                            Err(_) => panic!("Fixture accept failed"),
+                        }
+                    };
+                    socket.set_nonblocking(false).unwrap();
+                    socket.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+                    let mut bytes = Vec::new();
+                    while !bytes.ends_with(b"\r\n\r\n") {
+                        let mut byte = [0];
+                        assert_eq!(socket.read(&mut byte).unwrap(),1);
+                        bytes.push(byte[0]);
+                        assert!(bytes.len()<8192);
+                    }
+                    let headers = String::from_utf8(bytes).unwrap();
+                    assert!(headers.starts_with(route),"Unexpected request method or route");
+                    assert!(headers.to_ascii_lowercase().contains(&format!("authorization: bearer {KEY}")),"Native-bound credential missing");
+                    let body = serde_json::to_vec(&value).unwrap();
+                    let mut response = format!("HTTP/1.1 {code} Fixture\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).into_bytes();
+                    response.extend(body);
+                    socket.write_all(&response).unwrap();
+                }
+                finished_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+                assert!(matches!(listener.accept(),Err(e) if e.kind()==std::io::ErrorKind::WouldBlock),"Unexpected extra request");
+            });
+            let prepared = prepare(super::tests::profile(port),Secret::new(KEY.into()),30).unwrap();
+            let diagnostic = diagnose_model_interface(prepared,&Cancel::default());
+            finished_tx.send(()).unwrap();
+            server.join().unwrap();
+            assert_eq!(diagnostic["routes"].as_array().unwrap().len(),2);
+            assert_eq!(diagnostic["routes"][0]["httpStatus"],status_code);
+            assert_eq!(diagnostic["routes"][1]["httpStatus"],200);
+            if status_code==200 {
+                assert_eq!(diagnostic["routes"][0]["facts"]["contextLength"]["capacity"],32768); assert_eq!(diagnostic["routes"][0]["facts"]["yours"],false);
+                assert_eq!(diagnostic["routes"][0]["facts"]["loaded"]["selectedCount"],1);
+                assert!(diagnostic["routes"][1]["facts"]["version"].is_null());
+            } else {
+                assert_eq!(diagnostic["routes"][0]["failure"],Failure::ModelUnsupported.code());
+                assert_eq!(diagnostic["routes"][1]["facts"]["version"],"v0.1.902-beta");
+            }
+            let serialized = serde_json::to_string(&diagnostic).unwrap();
+            for forbidden in [KEY,PRIVATE,"untrusted","synthetic-model"] {
+                assert!(!serialized.contains(forbidden),"Diagnostic leaked an unallowlisted value");
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -1451,7 +1612,7 @@ mod model_readiness_tests {
         thread,
     };
     fn empty() -> Value {
-        json!({"active_model":null,"model_identifier":null,"loaded":[],"loading":[],"llama_cpp_installed_tag":"fixture-installed"})
+        json!({"active_model":null,"model_identifier":null,"loaded":[],"loading":[]})
     }
     fn loaded(context: Value, id: &str) -> Value {
         json!({"active_model":id,"model_identifier":id,"loaded":[id],"loading":[],"context_length":context})
@@ -1462,14 +1623,13 @@ mod model_readiness_tests {
     fn plan() -> Vec<(&'static str, Value)> {
         vec![
             ("GET /api/inference/status ", empty()),
-            ("GET /version ", json!({"version":"v0.1.902-beta"})),
             (
                 "GET /v1/models ",
                 json!({"data":[{"id":"fixture/model-GGUF","loaded":false,"quant":"Q4_K_M"}]}),
             ),
             (
                 "GET /api/models/cached-gguf ",
-                json!({"cached":[{"repo_id":"fixture/model-GGUF","partial":false}]}),
+                json!({"cached":[{"repo_id":"fixture/model-GGUF","partial":false,"task":"text-generation"}]}),
             ),
             (
                 "GET /api/models/cached-model-path?repo_id=fixture%2Fmodel-GGUF&variant=Q4_K_M ",
@@ -1547,9 +1707,10 @@ mod model_readiness_tests {
                         body["model_path"],
                         "C:\\synthetic-cache\\fixture.Q4_K_M.gguf"
                     );
-                    for field in ["force_reload", "force_cancel_active", "trust_remote_code"] {
+                    for field in ["force_reload", "force_cancel_active", "trust_remote_code", "alongside", "force_alongside"] {
                         assert_eq!(body[field], false);
                     }
+                    assert_eq!(body["engine"], "auto");
                     assert_eq!(body["disable_vision"], true);
                     assert_eq!(body["speculative_type"], "off");
                     assert_eq!(body["llama_extra_args"], json!([]));
@@ -1653,42 +1814,137 @@ mod model_readiness_tests {
         }
     }
     #[test]
-    fn unsupported_version_missing_variant_partial_cache_and_observed_race_refuse() {
-        let mut version = plan();
-        version[1].1 = json!({"version":"v0.1.903-beta"});
-        version.truncate(2);
-        assert_eq!(run(version).0, Err(Failure::ModelUnsupported));
+    fn missing_variant_partial_cache_and_observed_race_refuse() {
         let mut missing = plan();
-        missing[2].1 = json!({"data":[]});
-        missing.truncate(3);
+        missing[1].1 = json!({"data":[]});
+        missing.truncate(2);
         assert_eq!(run(missing).0, Err(Failure::ModelUnavailable));
         let mut partial = plan();
-        partial[3].1["cached"][0]["partial"] = json!(true);
-        partial.truncate(4);
+        partial[2].1["cached"][0]["partial"] = json!(true);
+        partial.truncate(3);
         assert_eq!(run(partial).0, Err(Failure::ModelUnavailable));
         let mut race = plan();
-        race[5].1 = loaded(json!(8192), "another-model");
-        race.truncate(6);
+        race[4].1 = loaded(json!(8192), "another-model");
+        race.truncate(5);
         assert_eq!(run(race).0, Err(Failure::ModelConflict));
     }
     #[test]
     fn late_load_error_and_unconfirmed_or_insufficient_final_status_never_generate() {
         let mut late = plan();
-        late[6].1 =
+        late[5].1 =
             json!({"_deferred_error":{"status_code":500,"detail":"untrusted private path"}});
-        late.truncate(7);
+        late.truncate(6);
         assert_eq!(run(late).0, Err(Failure::ModelLoad));
         let mut not_ready = plan();
-        not_ready[7].1 = empty();
-        not_ready.truncate(8);
+        not_ready[6].1 = empty();
+        not_ready.truncate(7);
         assert_eq!(run(not_ready).0, Err(Failure::ModelNotReady));
         let mut narrow = plan();
-        narrow[7].1 = loaded(json!(2048), "C:\\synthetic-cache\\fixture.Q4_K_M.gguf");
-        narrow.truncate(8);
+        narrow[6].1 = loaded(json!(2048), "C:\\synthetic-cache\\fixture.Q4_K_M.gguf");
+        narrow.truncate(7);
         assert_eq!(run(narrow).0, Err(Failure::ModelLoadContext));
         assert!(Failure::ModelLoadContext.message().contains("completed a local model load"));
         assert!(Failure::ModelLoadContext.message().contains("no generation was sent"));
     }
+
+    #[test]
+    fn optional_serving_contract_allows_idle_load_and_single_primary_reuse_without_version_or_tag() {
+        let mut extended = plan();
+        for index in [0, 4] {
+            extended[index].1["serving"] = json!([]);
+            extended[index].1["serving_checkpoints"] = json!([]);
+            extended[index].1["yours"] = json!(true);
+            extended[index].1["llama_cpp_installed_tag"] = Value::Null;
+        }
+        // Additional quant-pinned rows are distinct; bare repo selection stays exact.
+        extended[1].1["data"].as_array_mut().unwrap().push(json!({"id":"fixture/model-GGUF:Q8_0","loaded":false,"quant":"Q8_0","status":{"value":"cached"}}));
+        extended[5].1["evicted"] = json!([]);
+        extended[6].1["serving"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf"]);
+        extended[6].1["serving_checkpoints"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf"]);
+        let (result, _, ready) = run(extended);
+        assert!(result.is_ok());
+        assert!(ready.unwrap().loaded_for_request);
+
+        // The serving name may differ from the selected identifier, but must be
+        // exactly the observed primary name/checkpoint pair, with no other slot.
+        let status = json!({"active_model":"Synthetic primary name","model_identifier":"fixture/model-GGUF","loaded":["Synthetic primary name"],"loading":[],"context_length":8192,"serving":["Synthetic primary name"],"serving_checkpoints":["fixture/model-GGUF"],"yours":true});
+        let (result, _, ready) = run(vec![("GET /api/inference/status ",status),("POST /v1/chat/completions ",completion())]);
+        assert!(result.is_ok());
+        assert!(!ready.unwrap().loaded_for_request);
+    }
+    #[test]
+    fn hidden_or_ambiguous_serving_and_reported_eviction_never_generate() {
+        let mut statuses = Vec::new();
+        statuses.push((json!({"loaded":[],"loading":[],"yours":false}),Failure::ModelConflict));
+        statuses.push((json!({"loaded":[],"loading":[],"yours":"unknown"}),Failure::ModelUnsupported));
+        statuses.push((json!({"loaded":[],"loading":[],"serving":["other"],"serving_checkpoints":["other"]}),Failure::ModelConflict));
+        statuses.push((json!({"loaded":[],"loading":[],"serving":[]}),Failure::ModelUnsupported));
+        statuses.push((json!({"loaded":[],"loading":[],"serving":null,"serving_checkpoints":[]}),Failure::ModelUnsupported));
+        statuses.push((json!({"loaded":[],"loading":[],"serving":["other"],"serving_checkpoints":[]}),Failure::ModelUnsupported));
+        for (names, checkpoints) in [
+            (json!([]),json!([])),
+            (json!(["fixture/model-GGUF","other"]),json!(["fixture/model-GGUF","other"])),
+            (json!(["other"]),json!(["fixture/model-GGUF"])),
+            (json!(["fixture/model-GGUF"]),json!(["other"])),
+        ] {
+            let mut status = loaded(json!(8192),"fixture/model-GGUF");
+            status["serving"] = names;
+            status["serving_checkpoints"] = checkpoints;
+            statuses.push((status,Failure::ModelConflict));
+        }
+        for (status, failure) in statuses {
+            assert_eq!(run(vec![("GET /api/inference/status ",status)]).0,Err(failure));
+        }
+        // Rechecking immediately before load must apply the same ownership/slot guard.
+        for status in [
+            json!({"loaded":[],"loading":[],"yours":false}),
+            json!({"loaded":[],"loading":[],"serving":["other"],"serving_checkpoints":["other"]}),
+        ] {
+            let mut race = plan();
+            race[4].1 = status;
+            race.truncate(5);
+            assert_eq!(run(race).0,Err(Failure::ModelConflict));
+        }
+        for evicted in [json!(["other"]),Value::Null,json!(false)] {
+            let mut changed = plan();
+            changed[5].1["evicted"] = evicted;
+            changed.truncate(6);
+            assert_eq!(run(changed).0,Err(Failure::ModelLoad));
+        }
+        let mut changed = plan();
+        changed[6].1["serving"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf","other"]);
+        changed[6].1["serving_checkpoints"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf","other"]);
+        changed.truncate(7);
+        assert_eq!(run(changed).0,Err(Failure::ModelConflict));
+    }
+
+
+    #[test]
+    fn cache_capability_metadata_accepts_chat_and_legacy_rows_but_refuses_media_unknown_or_malformed() {
+        // The normal positive load fixture advertises text-generation, matching
+        // the public cache schema. Missing/null fields retain older compatibility.
+        for null in [false, true] {
+            let mut legacy = plan();
+            let row = legacy[2].1["cached"][0].as_object_mut().unwrap();
+            for key in ["task", "partial"] {
+                if null { row.insert(key.into(), Value::Null); } else { row.remove(key); }
+            }
+            assert!(run(legacy).0.is_ok());
+        }
+        for task in [json!("text-to-image"), json!("text-to-speech"), json!("unknown"), json!(""), json!(false), json!({"status":"complete"}), json!([])] {
+            let mut rejected = plan();
+            rejected[2].1["cached"][0]["task"] = task;
+            rejected.truncate(3);
+            assert_eq!(run(rejected).0, Err(Failure::ModelUnavailable));
+        }
+        for partial in [json!(true), json!("false"), json!(0), json!({}), json!([])] {
+            let mut rejected = plan();
+            rejected[2].1["cached"][0]["partial"] = partial;
+            rejected.truncate(3);
+            assert_eq!(run(rejected).0, Err(Failure::ModelUnavailable));
+        }
+    }
+
     #[test]
     fn cancellation_owns_and_closes_status_socket_before_any_generation() {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
@@ -1725,7 +1981,7 @@ mod model_readiness_tests {
     fn cancellation_during_local_load_closes_only_owned_socket_and_never_generates() {
         let listener=TcpListener::bind("127.0.0.1:0").unwrap();let port=listener.local_addr().unwrap().port();let cancel=Cancel::default();let c=cancel.clone();
         let server=thread::spawn(move||{
-            for (route,response) in plan().into_iter().take(7) {
+            for (route,response) in plan().into_iter().take(6) {
                 let(mut socket,_)=listener.accept().unwrap();let(header,_)=read_request(&mut socket);assert!(header.starts_with(route));
                 if route=="POST /api/inference/load " {c.cancel();let mut b=[0;1];assert_eq!(socket.read(&mut b).unwrap(),0);break;}
                 let bytes=serde_json::to_vec(&response).unwrap();write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",bytes.len()).unwrap();socket.write_all(&bytes).unwrap();

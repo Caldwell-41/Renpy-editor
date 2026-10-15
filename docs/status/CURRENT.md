@@ -1,28 +1,35 @@
 # Current status
 
-## Walkthrough redesign — local implementation; two verification decisions
+## Walkthrough redesign — local implementation; final live checks held
 
 Updated 2026-10-15. The user approved the complete
-[redesign implementation outcome](../tasks/active/walkthrough-redesign-implementation.md)
-and all three earlier bounded verification extensions. Work remains **local-only** on
-`codex/phase3a-story-logic`; no reviewed candidate has been pushed or sent to redesign CI.
+[redesign implementation outcome](../tasks/active/walkthrough-redesign-implementation.md),
+three earlier bounded extensions and10 additional shared reruns. Those extensions
+are consumed. Work remains **local-only** on `codex/phase3a-story-logic`; no redesign
+candidate has been pushed or sent to CI.
 
-| Capability | Implementation and evidence |
-| --- | --- |
-| Settings | Approved copy/defaults/context/HTTP/reload/removal flow implemented; focused13-case DOM proof and coordinator review passed. Ordinary profile/key unchanged. |
-| Characters/history | Unified workspace, stable-ID transactional lifecycle and guarded history implemented. The approved extra C round passed all3 named cases. Earlier focused UI proof remains valid. |
-| Lorebook/context | Two world/tone fields, exact default inclusion/omission and legacy preservation implemented. E correction2 restored reachable proposed-lore review; its focused regression passed. |
-| Studio readiness | Controlled7-core/9-host proof plus approved extra consistency case passed. First owner attempt refused at model-interface observation before loading/generation; authenticated runtime schema remains unknown. No automatic retry. |
-| Integration/visual/CI | Full28 browser matrix/checker passed after compact action-row correction. Independent review found main Game setup draft-loss and post-save read-failure gaps; concrete fixes are prepared, but their final focused main regression needs one extra bounded round. CI logic audit passed; dispatch remains gated. |
+Settings, unified Characters/Game setup, project-wide Lorebook/context and previous-card
+restore are implemented. Focused Settings13 cases, approved character3 cases, shared-context
+production preview/send checks, proposed-lore review and the final main draft-preservation
+regression passed. The full28-state browser matrix/checker passed after the compact
+Save/Discard layout correction; subsequent main-only changes have separate DOM proof.
+These results do not establish native WebView physical-input or human acceptance.
 
-The [task ledger](../tasks/active/walkthrough-redesign-implementation.md#approved-extension-results-and-new-reassessment)
-owns raw evidence, exact failed/passing inputs, two requested continuation decisions and
-cumulative allowances. **Live1/12; reserved2048/32768; refresh0/4; loads0/2; pairedCI0/3.**
-The live slot is charged despite no generation POST. No local production/package builds
-or native editor launches occurred.
+Unsloth Studio compatibility now uses observed response contracts and capabilities;
+exact application version and installation-marker gates were removed following the
+user's direction and independent official-source research. The affected readiness10
+cases, sanitised diagnostic1 case and request-only context preparation case passed.
+Live setup and rewrite/include passed. Six original action/context checks remain.
+The runner stopped after the second permitted cached load; a reuse-only test-driver
+guard is prepared for review before any further request.
+
+The [latest task record](../tasks/active/walkthrough-redesign-implementation.md#latest-live-result-and-remaining-decision)
+owns exact evidence and the remaining verification decision. Usage: **live5/12;
+reserved tokens10240/32768; inventory3/4; loads2/2; pairedCI0/3; extra reruns10/10**.
+No local production/package builds or new native editor launches occurred. Preserve
+the original app's unsaved synthetic Mara draft without interaction.
 
 Phase2/3A remain **incomplete; human acceptance pending**. Earlier technical proof
 remains review_ready in the [Phase2](../tasks/active/phase-2-initial-llm-assistance.md)
-and [Phase3A](../tasks/active/phase-3-initial-wysiwyg-release.md) ledgers. Preserve the
-original walkthrough app and its unsaved synthetic Mara draft: no save, discard,
-reload, navigation, reuse or close. No merge/release or credential/signing-policy change.
+and [Phase3A](../tasks/active/phase-3-initial-wysiwyg-release.md) ledgers. No merge,
+release or credential/signing-policy change is authorised.

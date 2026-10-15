@@ -1,6 +1,6 @@
 # Walkthrough redesign implementation
 
-**State: local implementation; two new bounded verification decisions after approved extensions.** The user approved the
+**State: local implementation; final live checks stopped at the model-load ceiling.** The user approved the
 complete proposed scope/budgets and explicitly requested starting the new chat. The
 Sol6.1/xhigh coordinator owns implementation, Sol6.1/high delegation, review, tests,
 publication of the reviewed candidate and gated CI under this contract. This supersedes
@@ -380,3 +380,258 @@ registration/authentication, exact pinned status/version/inventory/load schema v
 the adapter, and separation of public contract facts from unknown installed responses.
 This research authorises no test rerun, authenticated probe, credential/model operation
 or budget reset. Reassess the proposed diagnostic only after that evidence returns.
+
+The user subsequently granted **“approval 10 reruns in all budget areas (this one,
+studio, visual etc)”**. Coordinator uses a conservative **shared pool of10 additional
+verification/correction reruns across areas**, preserving all earlier charged usage.
+This covers the concrete integration continuation and necessary diagnosed Studio/
+visual/CI repeats without another per-step approval loop. Original live-request/token/
+model-operation ceilings, no local package/native-launch rule and credential/source
+invariants still apply; these have ample unused capacity and are not silently reset.
+Shared extra pool starts0/10; reserve each newly executed batch before it runs. Studio
+changes still require the independently researched contract and focused proof.
+
+Additional pool batch1/10: integration typecheck/test compilation passed; the one
+named main regression timed out without a labelled observation (raw
+`/private/tmp/loomlight-integration-approved-extra1.log`). It is a failure, not proof.
+Batch2/10 is reserved for the same exact case with fixture-only failing-state
+diagnostics, to locate the unmet explicit readiness condition before any product change.
+
+Batch2/10 failed with decisive fixture diagnostics: it submitted Save Appearance before
+the preceding Set default coordinator released ownership. The app refused before
+appearance.update IPC and retained the form. Component reload busy=false is not final
+operation completion. Independent review accepted a read-only root authoring-busy
+observation derived directly from the existing owner map (including stale/new-view
+handling), so the fixture waits for actual release rather than a timer. No lock or
+mutation policy changes. Batch3/10 reserved for this correction: typecheck/test compile
+and only the same named integration case; raw extra1/extra2 failures remain retained.
+
+Batch3/10 **passed** pinned typecheck, test compilation and the exact integration case
+**1/1, zero failed/cancelled/skipped**. Raw
+`/private/tmp/loomlight-integration-approved-extra3.log` (plus sibling compile/typecheck
+logs). It covers current/other-card draft preservation through actual main character
+edit, default selection, appearance edit and import handlers; source-write refusal
+retains the form, confirmed import plus failed read consumes it, and read-only retry
+keeps import count1. The read-only authoring-busy attribute reflects the existing
+owner map on acquisition/release/view/reset; no separate lock or bypass. Coordinator
+review and independent static review accepted this correction. Shared extra pool
+**3/10 used**, remaining7. No live/model/CI usage changed.
+
+The concrete Studio diagnostic proposal is prepared **unapplied/unrun** at
+`/private/tmp/loomlight-b-readonly-diagnostic-extension.patch`,311 lines,
+SHA2560126fb5e2fcc9568dacb5e4c19ca78d5295b99af6a0a623a0134ba47164a5355.
+Coordinator reviewed fixed-route/shared-transport/15-second/secret-safe observation
+and driver handshake/token checks. It includes one exact controlled regression and
+direct CI scope/required-case data wiring, without checker algorithm/count changes.
+Independent API research precedes any decision to apply or execute it.
+
+Independent API research completed from exact official commit1b588389…: route prefixes
+and shared API-key/JWT Bearer authentication match; ordinary status uses nullable
+identities/context/tag and string arrays. No specific owner failure cause is established.
+The prebuilt installed-tag can be null despite an available binary; it is a conservative
+adapter restriction, not evidence of this owner state. A managed-account hidden status
+can omit fields and set yours:false; API-key paths may be opaque. No guessed parser
+relaxation/fallback follows. The source-linked report remains in the research transcript.
+
+Batch4/10 reserved: apply the reviewed debug/test-only diagnostic, compile its driver,
+run only `ai_request::model_diagnostic_tests::fixed_status_and_version_gets_are_sanitized_without_post_or_secret`,
+then (only after pass) one internally authenticated read-only status/version owner probe.
+The updated proposal includes sanitised yours bool and its assertion; selected patch
+SHA256bc761e832fd63f6edabbba9a5f384f7b272c0a3d7711d9d9b08358274bf170d8 supersedes
+the earlier prepared hash, with no execution before this reservation. No generation,
+inventory refresh, load or extra token reserve is used by this diagnostic round.
+
+Batch4/10 compiled the helper but its one fixture failed on macOS WouldBlock while
+reading an accepted socket inherited from a nonblocking listener; raw
+`/private/tmp/loomlight-b-diagnostic-approved-extra4-test.log`. The sequential driver
+build/probe did not run after the failure. Batch5/10 reserved for the diagnosed
+fixture-only blocking-socket correction, same exact case, test-only driver build and
+then the gated read-only owner probe. No adapter readiness behavior changed.
+
+Batch5/10 **passed** the exact diagnostic case1/1 (zero ignored), test-only driver
+build and independent API-researcher static review. Internally authenticated fixed
+status/version GETs each returned200, profile token unchanged, no generation/load.
+Raw `/private/tmp/loomlight-redesign-authenticated-diagnostic-01.log`: current status
+is idle, loaded/loading empty, identities/context null, installed-tag well formed;
+actual version is **v0.1.907-beta**. Therefore the current idle path would stop at the
+adapter's902-only version gate. This is a present-state diagnosis, not a reconstruction
+of every historical response during attempt1. Shared extra pool **5/10 used**.
+
+The same independent researcher is now verifying the exact official907 tag/commit,
+complete status/inventory/cache/load routes and no-download/no-resident-replacement
+conditions before any support update. Existing installed Studio is the original
+authorised endpoint; supporting its verified API is the selected B outcome, not a new
+provider/install. Do not simply whitelist an unverified version. Original B worker
+is preparing a minimal adapter design, with no source edit/test/model operation yet.
+
+The user explicitly rejected exact Unsloth Studio version acceptance: ordinary app
+updates must not break a compatible endpoint. This supersedes the earlier version-gate
+design/proposed907 allowlist. Compatibility now depends on actual required response
+contracts and observed capabilities; version/prebuilt marker are diagnostic information.
+The user also requests the endpoint be called **Unsloth Studio** in conversation.
+
+Exact907 official source commit133a8076d10aa109f812f85a953636b3488926f6 was independently
+verified alongside902. Common status loaded/loading arrays and cached-local-GGUF/load
+fields remain;907 adds optional parallel serving/serving_checkpoints string arrays,
+ownership hiding and optional evicted results. Both preserve the bare repo catalog row
+(907 adds distinct quant-pinned IDs). Missing ordinary llama-server binary raises a
+typed400 install-instruction error and does not download/install runtime. Therefore
+neither exact Studio version nor installed-tag presence is a valid mandatory load gate.
+No new installation/model download/provider or ambiguous retry is authorised.
+
+Batch6/10 reserved for the necessary capability-based adapter correction, full affected
+`ai_request::model_readiness_tests::` controlled group (including new ownership/serving/
+eviction/forward-compatible cases) and test-only owner-driver rebuild. B worker owns
+`studio_models.rs` and only the readiness-test section of `ai_request.rs`; root diagnostic
+changes remain intact. Required guards: hidden/extra/loading states refuse before
+mutation; optional extensions validate by presence, not version; exact cached bare-repo
+GGUF selection/path; explicit non-forced/non-alongside flags; optional evicted absent-or-
+empty; final sole-primary identity+positive serving context. No guessed pin parsing or
+model-targeted/multi-model flow is added; current bare-ID selection remains supported.
+
+Batch6/10 **passed9/9 affected readiness cases**, zero ignored/failures, plus test-only
+owner-driver rebuild. Raw `/private/tmp/loomlight-b-capability-readiness-batch6-20261015.log`
+and `/private/tmp/loomlight-b-capability-driver-build-batch6-20261015.log`. New cases
+prove no version/marker query prerequisite, earlier/extended status compatibility,
+explicit non-alongside flags, hidden/extra/malformed serving refusal, primary context
+association and reported-eviction refusal. CI required-case data now names both new
+anchors; its algorithm/count rules are unchanged. Coordinator reviewed actual adapter
+and test diff; independent source-review continuation checks final public identity.
+Shared additional pool **6/10 used**, remaining4. No additional owner request yet.
+
+Independent API researcher accepted actual capability-adapter diff and ordinary HF
+cache/public repo plus redacted checkpoint relationships. Batch7/10 reserved for the
+diagnosed synthetic setup retry through rebuilt production driver. Live attempt2 and
+2048 response tokens must be charged before dispatch; authorise at most one inventory
+observation and one cached-model load within the existing management ceilings. Actual
+load/refresh stages and result determine the retained receipt; no unload/download or
+ordinary profile write. This is a diagnosed retry after the first no-generation refusal.
+
+Batch7/10/live2 refused `model_unavailable` during checking_model before load/chat;
+profile unchanged, no loading/sending stage. Raw `/private/tmp/loomlight-redesign-live-02.log`.
+The code path proves one inventory GET occurred; conservatively charged as refresh1/4.
+Its selected-row/quant/cache/resolver refusal point remains unknown. No fallback or
+automatic retry. Researcher is tracing exact cached-GGUF row task/partial semantics;
+source conclusions must be separated from the unobserved owner payload. Shared pool
+**7/10 used**, live2/12, tokens4096/32768, refresh1/4, loads0/2, CI0/3.
+
+Independent exact-source research found a definite adapter defect: cached-GGUF `task`
+is model capability classification; ordinary GGUF architectures report
+`text-generation`, not an active download job. The existing non-null refusal rejects
+normal text models in both researched contracts; fixture task:null masked it. This
+does not identify the unobserved owner row. Batch8/10 reserved for the minimal sourced
+correction: allow missing/null/text-generation, refuse media/unknown/malformed tasks,
+keep partial/exact-variant/local-path checks, use realistic positive cache fixtures,
+run the affected readiness group once and rebuild the test-only driver. No owner retry
+or actual model state change is included until result/coordinator review.
+
+Batch8/10 **passed10/10** affected readiness cases, zero ignored/failures, plus rebuilt
+test-only driver. Raw `/private/tmp/loomlight-b-cache-task-readiness-batch8-20261015.log`
+and `/private/tmp/loomlight-b-cache-task-driver-build-batch8-20261015.log`. Actual diff
+allows known chat capability plus legacy null/missing, strictly refuses malformed
+partial/task metadata, preserves all reviewed load guards. Root reviewed/accepted;
+new exact cache-metadata regression added to CI required-case data. Shared pool8/10.
+
+Batch9/10 reserved for the diagnosed synthetic setup retry, live attempt3 with2048
+tokens charged before dispatch and at most one inventory observation/one cached load
+inside remaining management budget. No claim that the unobserved prior owner cache row
+has been reconstructed; this corrects a source-proven defect and verifies actual result.
+
+Live3 reached loading_model, completed one cached local load and reported actual
+context32768=requested32768, loadedForRequest:true; then sending. Management totals
+refresh2/4, loads1/2. No model download/unload or ordinary profile write. Generation
+completion/strict compatibility validation remains pending at this observation.
+
+Live3/batch9 **passed** HTTP200, strict compatibility validation true, profile unchanged.
+Actual usage35 prompt+15 completion tokens; reserved2048 remains charged. One actual
+cached local load and actual serving32768 are now owner evidence. Root continues the
+seven original planned action/context checks (initial coverage, not another rerun),
+reserving each live/token slot before its literal dispatch handshake. Stop on failure,
+profile/endpoint/model change, ambiguous outcome or exhausted common allowance; no
+automatic retry. Existing loaded model should be reused; observed load count is capped2.
+
+Initial action live4 (rewrite/include) refused `model_context_insufficient` before
+generation; raw `/private/tmp/loomlight-redesign-live-04.log`. Read-only profile inspection
+confirmed original32768/262144 values. Authenticated fixed status/version diagnostic2
+confirmed the same sole selected model now reports serving context22528, after the
+earlier post-load32768 report. Profile unchanged; no reload or new generation. The
+client correctly refuses a larger requested window; mechanism research is separate.
+Common live4/12, reserved8192/32768, refresh2/4, loads1/2; pool9/10 unchanged by these
+original checks/read-only observations. All failed reservations remain charged.
+
+Batch10/10 reserved for a thin test-driver correction: explicit optional context-length
+argument, included in exact preview and mapped through production preparation to both
+request context values; range validation and inspect/diagnose refusal preserved. This
+allows remaining synthetic requests to use observed22528 without ordinary-profile
+write, model reload or changing32768 new-profile default. Extend the existing single
+preparation-only case to verify captured context/exact bytes/default compatibility,
+run it once and rebuild driver. Then resume the diagnosed rewrite retry and remaining
+six original action/context checks with22528, reserving each live/token slot before
+dispatch. Original request/token/load/refresh ceilings still bind; stop on any failure.
+
+Batch10/10 **passed** the single preparation case1/1, covering28 synthetic combinations
+(seven fixtures, include/omit, saved/default versus explicit22528), and rebuilt the
+debug test-only driver. Raw `/private/tmp/loomlight-owner-context-preparation-batch10-20261015.log`
+and `/private/tmp/loomlight-owner-context-driver-build-batch10-20261015.log`. Root reviewed
+actual production preparation, exact captured bytes/context and original-store immutability.
+All10 additional shared reruns are now consumed; earlier failures remain charged.
+
+Independent official-source research confirms the load response includes context length
+and load-time reconciliation can lower reported capacity to actual slot allocation.
+No first-generation/post-generation reconciliation call was found in this path; the
+specific32768-to22528 change remains unexplained. Do not attribute it to GPU fitting or
+first-generation adjustment. Latest authenticated status22528 governs the temporary
+synthetic request; no ordinary-profile edit or model reload is implied. Exact source:
+commit133a8076d10aa109f812f85a953636b3488926f6, `studio/backend/core/inference/llama_cpp.py`
+lines34072–34082 and37506–37574, schema/runtime response builder in
+`studio/backend/models/inference.py`1540–1542 and `routes/inference.py`8555–8584.
+
+### Latest live result and remaining decision
+
+Live5 rewrite/include **passed** HTTP200 and strict production response validation,
+profile unchanged. Raw `/private/tmp/loomlight-redesign-live-05.log`, SHA256
+49cd213ffded1e012785b53ac9f26f46f3a91578273173454436b204b267ba55;
+driver SHA25610a96efb8c3a60276a7389c816f0c032aceefc38f400f53458123d74b955828c.
+Requested and actual context22528, loadedForRequest:true, usage1261 prompt+405 completion.
+Despite the preceding resident-status observation, this request reached another cached
+load after empty-state checks; no cause for the intervening state change is established.
+The runner then stopped before the next dispatch because the model-load ceiling was reached.
+
+Current common usage: **live5/12, reserved response tokens10240/32768, inventory
+observations3/4, model loads2/2, pairedCI0/3; shared additional reruns10/10**. No local
+production/package builds, new native editor launches, ordinary profile/key writes,
+model downloads, deliberate unloads, push, merge or release. All failed attempts and
+full token reservations remain charged. Setup and rewrite/include now have live proof;
+six original checks remain: Continue, Draft, Card/world-include, Lore, Edit, rewrite/world-omit.
+None is recorded as passing or dispatched. Repeating the whole plan would duplicate
+the successful rewrite and is prohibited.
+
+Independent final read-only CI audit accepted the actual readiness10-case/diagnostic
+1-case discovery wiring, exact candidate/branch/attempt/ordinal/architecture guards,
+failure/skip rejection, privacy and partial-evidence retention. It performed no new
+test/checker round. Terminal audit must still inspect sourceMatchesCandidate,
+missing inputs, retained executed binaries and artifact manifests; sealing incomplete
+evidence is not qualification. CI remains gated on the six missing live checks and
+final root approval.
+
+A test-driver-only reuse guard is prepared as an **unapplied, unrun proposal** at
+`/private/tmp/loomlight-owner-reuse-only.patch`,215 lines, SHA256
+5233c2c854eaff58bfc41c73b1ff0d00d7b988758ccf3c2b65a59ce06378b6bf.
+It cancels synchronously at the production loading stage before the production
+transport can send a load POST, while preserving actual loaded-model readiness and
+generation. This needs one additional focused verification/build decision beyond the
+exhausted shared pool before use. It does not request another model load or reset any
+live/token/management/CI allowance. Preserve the currently loaded model and untouched
+Mara walkthrough. Root reviewed the concrete patch and production cancellation order;
+the proposed single regression exercises actual production transport with an idle
+five-GET cache-valid fixture and a resident GET/chat success fixture, bounded sockets
+and explicit completion. No patch application, compilation or execution occurred.
+Root continues unaffected review/status maintenance only.
+
+Final unaffected local review found no further actionable defect in the capability
+adapter, shared diagnostic transport, request-only context preparation, main owner
+observation or CI discovery additions. Repository validation passed601 files and
+`git diff --check` passed after current status/contract updates. CURRENT245 words and
+HANDOVER773 words meet the live-record review targets. These static/document checks
+do not supply the six missing owner results or a further product verification round.
+The reviewed implementation is a local checkpoint, not a published/qualified CI candidate.

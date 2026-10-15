@@ -1,8 +1,9 @@
-//! Version-scoped Studio inventory and generation-time readiness.
+//! Capability-checked Unsloth Studio inventory and generation-time readiness.
 //! Only an explicitly initiated generation may reach the local GGUF load path.
-//! Interface pinned to Unsloth v0.1.902-beta, source commit
-//! 1b588389b488eb9f8a9cb8ad5ca3073c7661f073: routes/models.py cache resolver,
-//! routes/inference.py load/status, and models/inference.py request/response schema.
+//! Contract verified against official v0.1.902-beta commit
+//! 1b588389b488eb9f8a9cb8ad5ca3073c7661f073 and v0.1.907-beta commit
+//! 133a8076d10aa109f812f85a953636b3488926f6: cache resolver, load/status,
+//! and request/response schema. Runtime version is diagnostic, never admission.
 use crate::{
     ai_discovery::strict_json,
     ai_request::{Cancel, Failure, Result},
@@ -11,7 +12,6 @@ use serde::Serialize;
 use serde_json::{json, Value};
 
 pub const MAX_MODEL_RESPONSE: usize = 128 * 1024;
-pub const SUPPORTED_LOAD_VERSION: &str = "v0.1.902-beta";
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -98,7 +98,8 @@ struct Status {
     loaded: Vec<String>,
     loading: bool,
     context: Option<u32>,
-    installed: bool,
+    yours: Option<bool>,
+    serving: Option<(Vec<String>, Vec<String>)>,
 }
 impl Status {
     fn parse(value: &Value) -> Result<Self> {
@@ -107,6 +108,22 @@ impl Status {
                 None | Some(Value::Null) => Ok(None),
                 Some(v) => Ok(Some(text(v).ok_or(Failure::ModelUnsupported)?.into())),
             }
+        };
+        let yours = match value.get("yours") {
+            None | Some(Value::Null) => None,
+            Some(v) => Some(v.as_bool().ok_or(Failure::ModelUnsupported)?),
+        };
+        let serving = match (value.get("serving"), value.get("serving_checkpoints")) {
+            (None, None) => None,
+            (Some(names), Some(checkpoints)) => {
+                let names = strings(names)?.into_iter().map(str::to_owned).collect::<Vec<_>>();
+                let checkpoints = strings(checkpoints)?.into_iter().map(str::to_owned).collect::<Vec<_>>();
+                if names.len() != checkpoints.len() {
+                    return Err(Failure::ModelUnsupported);
+                }
+                Some((names, checkpoints))
+            }
+            _ => return Err(Failure::ModelUnsupported),
         };
         Ok(Self {
             active: optional("active_model")?,
@@ -117,7 +134,8 @@ impl Status {
                 .collect(),
             loading: !strings(&value["loading"])?.is_empty(),
             context: capacity(&value["context_length"])?,
-            installed: optional("llama_cpp_installed_tag")?.is_some(),
+            yours,
+            serving,
         })
     }
     fn ready(
@@ -127,6 +145,9 @@ impl Status {
         requested: u32,
         loaded_for_request: bool,
     ) -> Result<Option<Readiness>> {
+        if self.yours == Some(false) {
+            return Err(Failure::ModelConflict);
+        }
         if self.loading {
             return Err(Failure::ModelNotReady);
         }
@@ -134,6 +155,17 @@ impl Status {
         let active = self.active.as_deref().is_some_and(matches)
             || self.identifier.as_deref().is_some_and(matches);
         if active {
+            // The optional serving extension must describe this primary alone.
+            // Additional or extra-only slots need model-targeted status support.
+            if let Some((names, checkpoints)) = &self.serving {
+                if names.len() != 1
+                    || names.first().map(String::as_str) != self.active.as_deref()
+                    || checkpoints.first().map(String::as_str)
+                        != self.identifier.as_deref().or(self.active.as_deref())
+                {
+                    return Err(Failure::ModelConflict);
+                }
+            }
             if !self.loaded.iter().any(|id| matches(id)
                 || self.active.as_deref() == Some(id)
                 || self.identifier.as_deref() == Some(id)) {
@@ -149,7 +181,9 @@ impl Status {
                 loaded_for_request,
             }));
         }
-        if self.active.is_some() || self.identifier.is_some() || !self.loaded.is_empty() {
+        if self.active.is_some() || self.identifier.is_some() || !self.loaded.is_empty()
+            || self.serving.as_ref().is_some_and(|(names, _)| !names.is_empty())
+        {
             return Err(Failure::ModelConflict);
         }
         Ok(None)
@@ -216,11 +250,7 @@ pub fn ensure_ready(
     if let Some(ready) = status.ready(model, None, requested, false)? {
         return Ok(ready);
     }
-    if !status.installed || !repo_id(model) {
-        return Err(Failure::ModelUnsupported);
-    }
-    let version = checked(exchange("/version", None)?)?;
-    if version["version"] != SUPPORTED_LOAD_VERSION {
+    if !repo_id(model) {
         return Err(Failure::ModelUnsupported);
     }
     let catalog = checked(exchange("/v1/models", None)?)?;
@@ -239,9 +269,11 @@ pub fn ensure_ready(
         .filter(|r| r.len() <= 256)
         .ok_or(Failure::ModelUnsupported)?;
     let matching: Vec<_> = rows.iter().filter(|r| r["repo_id"] == model).collect();
+    // `task` describes model capability, not an in-progress download. Ordinary
+    // chat GGUFs advertise text-generation; older cache rows may omit it.
     if matching.len() != 1
-        || matching[0]["partial"].as_bool().unwrap_or(false)
-        || !matching[0]["task"].is_null()
+        || !matches!(&matching[0]["partial"], Value::Null | Value::Bool(false))
+        || (!matching[0]["task"].is_null() && matching[0]["task"] != "text-generation")
     {
         return Err(Failure::ModelUnavailable);
     }
@@ -254,7 +286,7 @@ pub fn ensure_ready(
         None,
     )?)?;
     let path = local_gguf(&location)?;
-    // Recheck immediately before mutation. Studio v0.1.902 has no expected-empty CAS;
+    // Recheck immediately before mutation. Unsloth Studio has no expected-empty CAS;
     // an idle external load racing this final observation cannot be made atomic here.
     let current = Status::parse(&checked(exchange("/api/inference/status", None)?)?)?;
     if let Some(ready) = current.ready(model, None, requested, false)? {
@@ -267,10 +299,11 @@ pub fn ensure_ready(
     let loaded = checked(exchange(
         "/api/inference/load",
         Some(
-            &json!({"model_path":path,"max_seq_length":requested,"disable_vision":true,"speculative_type":"off","llama_extra_args":[],"force_reload":false,"force_cancel_active":false,"trust_remote_code":false}),
+            &json!({"model_path":path,"max_seq_length":requested,"disable_vision":true,"speculative_type":"off","llama_extra_args":[],"force_reload":false,"force_cancel_active":false,"trust_remote_code":false,"engine":"auto","alongside":false,"force_alongside":false}),
         ),
     )?)?;
     if loaded.get("_deferred_error").is_some()
+        || loaded.get("evicted").is_some_and(|v| v.as_array().is_none_or(|a| !a.is_empty()))
         || !matches!(loaded["status"].as_str(), Some("loaded" | "already_loaded"))
         || loaded["is_gguf"] != true
         || loaded["is_local_model"] != true

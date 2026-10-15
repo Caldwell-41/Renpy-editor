@@ -705,7 +705,7 @@ Each staged import still uses the existing typed transaction operation.
 ## Studio synthetic request worker
 
 The [2026-10-15 readiness amendment](adr/0013-provider-request-and-transport-contract.md#generation-time-studio-readiness--2026-10-15)
-adds the version-scoped `studio_models` adapter before native worker generation.
+adds the capability/response-contract `studio_models` adapter before native worker generation.
 It reuses the transport's captured destination/credential/cancellation/deadline rather
 than adding renderer HTTP or a second credential path. Reference lifecycle/source
 creation, project world/tone and card restore extend `references.apply` and the same

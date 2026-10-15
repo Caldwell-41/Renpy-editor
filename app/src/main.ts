@@ -137,6 +137,7 @@ function beginView(project?: OpenProject): number {
   disposeSourceView = undefined;
   viewGeneration += 1;
   currentProject = project;
+  reflectAuthoringState();
   return viewGeneration;
 }
 
@@ -163,12 +164,18 @@ function beginAuthoringCompletion(project: OpenProject, scope: object): Completi
   }
   const token = beginCompletion(project, scope);
   activeAuthoringOperations.set(project.sessionId, token.operation);
+  reflectAuthoringState();
   return token;
+}
+
+function reflectAuthoringState(): void {
+  root.dataset.authoringBusy=String(!!currentProject&&activeAuthoringOperations.has(currentProject.sessionId));
 }
 
 function finishAuthoringCompletion(token: CompletionToken): void {
   if (token.sessionId && activeAuthoringOperations.get(token.sessionId) === token.operation) {
     activeAuthoringOperations.delete(token.sessionId);
+    reflectAuthoringState();
     refreshPersistenceAfterStaleCompletion(token);
   }
 }
@@ -1059,6 +1066,7 @@ export function startApplication(requester: typeof desktopRequestCore = desktopR
   activeFlushOperations.clear();
   statusRequestSequence += 1;
   currentProject = undefined;
+  reflectAuthoringState();
   disposeSceneView?.();
   disposeSceneView = undefined;
   disposeSourceView?.();

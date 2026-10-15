@@ -6,8 +6,10 @@
 ## Generation-time Studio readiness — 2026-10-15
 
 The [approved redesign task](../tasks/active/walkthrough-redesign-implementation.md)
-selects a version-scoped model-management adapter. Implementation is local; owner live
-and final both-host evidence are pending. It changes no provider/credential/signing
+selects a capability/response-contract model-management adapter for Unsloth Studio.
+The user explicitly rejected exact-version acceptance gates. Implementation is local;
+owner setup and rewrite/include passed, while remaining action and final both-host
+evidence are pending. It changes no provider/credential/signing
 policy. Saving, Settings open and explicit inventory refresh never load a model.
 
 Production native generation calls `execute_ready`. Authenticated management calls
@@ -18,17 +20,40 @@ observed actual context is read-only. An already-loaded matching model with suff
 reported actual context is reused without a load or reload. Unknown/insufficient
 capacity, another resident/loading model or contradictory status refuse before chat.
 
-Automatic loading is restricted to the verified interface of Studio
-`v0.1.902-beta`, official source commit
-[`1b588389`](https://github.com/unslothai/unsloth/tree/1b588389b488eb9f8a9cb8ad5ca3073c7661f073/studio/backend).
-An empty supported status plus exact `/version` permits authenticated inventory and
-cache lookup. A completely available GGUF variant must resolve through
+Automatic loading validates the common published response contract, independently
+researched in official source commits
+[`1b588389`](https://github.com/unslothai/unsloth/tree/1b588389b488eb9f8a9cb8ad5ca3073c7661f073/studio/backend)
+and [`133a8076`](https://github.com/unslothai/unsloth/tree/133a8076d10aa109f812f85a953636b3488926f6/studio/backend).
+These source versions establish evidence, not an acceptance allowlist. `/version` and
+the prebuilt installation marker are diagnostic information, not load prerequisites.
+The owner diagnostic observed a compatible idle status and v0.1.907-beta; the old
+902-only gate would refuse that current state. The task ledger owns qualification.
+
+Required loaded/loading arrays, identity/context fields and authenticated inventory
+must establish no observed resident or loading model before cache lookup. Explicit
+hidden ownership refuses. If serving/serving_checkpoints are supplied, both must be
+valid parallel arrays: empty for loading, one matching primary for reuse/final context.
+The primary's context must never be attributed to an aggregate extra slot. Unknown
+or malformed relevant contract fields refuse; unrelated extensions remain ignorable.
+A completely available GGUF variant must resolve through
 `/api/models/cached-model-path` to an absolute local `.gguf` file, not a repository or
 directory. After another empty-status check, `/api/inference/load` receives that file,
-the requested context, vision/speculation disabled, empty extra arguments and false
-force-reload/force-cancel/trust-remote-code flags. The reviewed local-file backend
+the requested context, engine auto, alongside/force-alongside false, vision/speculation
+disabled, empty extra arguments and false force-reload/force-cancel/trust-remote-code
+flags. Optional reported evictions must be an empty array; this detects a report after
+the operation and cannot undo it. The reviewed local-file backend
 refuses an absent file rather than switching to its separate HF download branch.
-No model download, Studio process management or intentional resident replacement.
+No model download, Unsloth Studio process management or intentional resident replacement.
+An absent ordinary llama-server binary raises a typed load failure with installation
+instructions; these reviewed paths do not install it. A missing prebuilt marker alone
+does not prove binary absence. The bare repository-ID cached-GGUF flow is supported;
+automatic pinned-variant/model-targeted/multi-model loading remains unsupported.
+The cache row's `task` is capability classification, not download activity: explicit
+`text-generation` and legacy absent/null rows are eligible; media/unknown/malformed
+tasks refuse. Separate `partial` evidence must be absent/null/false, never malformed.
+The official [classifier](https://github.com/unslothai/unsloth/blob/133a8076d10aa109f812f85a953636b3488926f6/studio/backend/hub/services/models/catalog_classification.py#L282-L341)
+and [cache row](https://github.com/unslothai/unsloth/blob/133a8076d10aa109f812f85a953636b3488926f6/studio/backend/routes/models.py#L5295-L5306)
+own this distinction; fixture null alone was insufficient evidence.
 
 An HTTP200 alone is insufficient: late-error envelopes/refused load results and a
 fresh insufficient/unconfirmed status cannot advance to chat. Cancellation closes
@@ -36,9 +61,13 @@ only Loomlight's owned socket; server-side loading may continue. The vendor API 
 no atomic expected-empty precondition: the immediate status recheck diagnoses observed
 conflicts but cannot guarantee an idle other-client load will not race that observation.
 Active-generation refusal is enforced by the vendor lifecycle gate before teardown.
-Unsupported versions/unknown interfaces give a safe diagnosis rather than a guessed
-load operation. Existing discovery IDs remain available; loaded/context metadata is
+Incompatible observed interfaces give a diagnosis before chat; compatible Unsloth Studio
+updates do not require an application release merely to pass a version check.
+Existing discovery IDs remain available; loaded/context metadata is
 optional read-only evidence, not a second editable capacity setting.
+Visible-slot observations are bounded by the single-user support model; managed foreign
+slots or teardown remnants can be hidden by the server. No global empty-state guarantee
+or atomic expected-empty promise is inferred from these observations.
 
 **Current closeout disposition, 2026-10-12:** Phase 2 is Studio-only. The selected
 literal-HTTP/nonstreaming/off-only client slices are qualified; full-phase scope and
