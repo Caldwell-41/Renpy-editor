@@ -1,6 +1,6 @@
 # Walkthrough redesign implementation
 
-**State: paired CI audited; correcting source-evidence checkout comparison before final attempt.** The user approved the
+**State: evidence correction published; awaiting_ci on the final paired attempt.** The user approved the
 complete proposed scope/budgets and explicitly requested starting the new chat. The
 Sol6.1/xhigh coordinator owns implementation, Sol6.1/high delegation, review, tests,
 publication of the reviewed candidate and gated CI under this contract. This supersedes
@@ -842,3 +842,24 @@ validation passed602 files. Log
 `/private/tmp/loomlight-model-config-ci-identity-placeholder-correction.log`.
 Whitespace checks passed; live records reviewed at CURRENT364/HANDOVER942 words.
 This is an in-scope fixture-policy correction, not a product or privacy defect.
+
+Final reviewed evidence candidate `7551a9c91cb5e4bba7617f8c10843584be3ef2a1`, tree
+`8e4153feaefbfce71637a65be59852e55854ea39`, committed and normally published with remote
+SHA verified. Preflight showed no pending existing dispatch. One final dispatch is
+confirmed: Repository quality workflow354880113,
+[run38736854507](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38736854507),
+run attempt1, cumulative ordinal3, event workflow_dispatch, exact candidate and branch
+codex/phase3a-story-logic. Created2026-10-15T12:43:39Z, last observed queued/conclusion
+null at2026-10-15T12:43:48Z. Inputs: walkthrough_redesign=true,
+walkthrough_redesign_ordinal=3, walkthrough_redesign_candidate=the exact SHA above;
+all six other boolean selectors false (story_logic_early, assistance_ui,
+source_foundation_macos, phase1g_flow_profile, phase1g_macos_browser_diagnostic,
+phase1g_candidate_proof). String-valued launcher JSON is retained outside Git.
+
+Paired usage3/3; no further paired run authorised. No live request/token/model/settings
+operation was added. The reset10 LLM allowance remains unused. Current source requires
+27 checker fixtures and a complete-source identity step in addition to unchanged
+product/UI/service/browser selection. Artifacts retain7 days after upload. No terminal
+result is claimed. Publish this docs-only wait successor and stop active work under
+manual same-chat resume; terminal audit must verify exact cases, input/binary/artifact
+hashes, true source match, empty missing/mismatched lists, privacy and cleanup.

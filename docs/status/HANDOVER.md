@@ -2,7 +2,7 @@
 
 ## Selected continuation
 
-Updated 2026-10-15. **Terminal CI audited; evidence correction reviewed for final paired attempt.**
+Updated 2026-10-15. **Evidence correction published; awaiting_ci with manual same-chat resume.**
 Continue this chat and the [owning task](../tasks/active/walkthrough-redesign-implementation.md),
 especially its [model-load settings amendment](../tasks/active/walkthrough-redesign-implementation.md#user-selected-model-load-configuration-amendment--2026-10-15).
 The user selected configurable Unsloth Studio defaults and warning-only deviations
@@ -10,10 +10,11 @@ when a request fits actual verified capacity. The supplied brief selects mocked
 acceptance at this stage. No physical endpoint test is required for this amendment.
 
 The checkout is `codex/phase3a-story-logic`. Live Git owns current state; never reset
-to an old checkpoint or remote baseline. The previous product candidate is published:
-`e127688bcc1d8f64fea4974b64647720a0adef47`, tree
-`a57161a3e41257ce9d2a63fd5f536c4e54bc9c4d`. Normal push and remote SHA were verified.
-A later docs-only wait successor records this candidate and does not replace it. Root owns commits, integration, review and common
+to an old checkpoint or remote baseline. The active code candidate is published:
+`7551a9c91cb5e4bba7617f8c10843584be3ef2a1`, tree
+`8e4153feaefbfce71637a65be59852e55854ea39`. Normal push and remote SHA were verified.
+It contains only an evidence-check correction beyond product candidate e127688.
+A later docs-only wait successor records this candidate without replacing it. Root owns commits, integration, review and common
 budgets; all existing workers are finished. The existing API researcher independently
 double-checked official source and the final implementation, closing all findings.
 
@@ -69,13 +70,14 @@ no credential export, owner API/settings call, download, deliberate unload/reloa
 service installation is planned. The model-load allowance is exhausted.
 
 Historical common usage: live5/12, reserved response tokens10240/32768, inventory3/4,
-loads2/2, pairedCI3/3 reserved and prior shared additional reruns10/10. Failures/reservations
+loads2/2, pairedCI3/3 charged and prior shared additional reruns10/10. Failures/reservations
 remain charged. The user's separate reset10 LLM allowance is unused; its optional
 scope clarification is pending and does not block mocked work. No allowance was
 silently reset by the amendment. Local production builds and new native launches0.
 
-No operation is pending. Previous run38729094527/attempt1/ordinal2 completed success
-at2026-10-15T11:49:40Z on exact candidate e127688 above. Both jobs passed69 DOM/protocol
+Previous run38729094527/attempt1/ordinal2 completed success
+at2026-10-15T11:49:40Z on product candidate
+`e127688bcc1d8f64fea4974b64647720a0adef47`. Both jobs passed69 DOM/protocol
 cases,68 Rust cases,28 browser states,25 checker fixtures and build checks. Terminal
 audit verified both artifact ZIP digests, complete63-entry manifests,37 browser input
 hashes, retained executed binaries/architectures, privacy and closed browser/server
@@ -93,17 +95,28 @@ gate after always-run sealing/privacy, preserving partial evidence retention.
 Two real-Git/rejecting fixtures bring the suite to27; all passed, actionlint passed,
 and independent review closed without findings. No product source changed.
 
-Next: publish the reviewed correction and dispatch the reserved final paired ordinal3
-against its exact new candidate; all other selectors false. Ordinal1's local parse
-failure remains charged and ordinal2 was the completed run. After ordinal3 reservation,
-no paired allowance remains. No automatic redispatch, new live call or model/settings
-operation is authorised. Record one confirmed run identity, candidate/tree, inputs and
-status/time, then publish the docs-only wait successor and end the turn for manual
-same-chat resume. Required hosts remain Windows2025 x64/macOS26 ARM64, with no local
-production build/native launch or broad package/SDK matrix.
+One operation is pending: Repository quality workflow354880113,
+[run38736854507](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38736854507),
+run attempt1, cumulative ordinal3, event workflow_dispatch, exact active candidate
+7551a9c above on codex/phase3a-story-logic. Created2026-10-15T12:43:39Z, last observed
+queued at2026-10-15T12:43:48Z, conclusion null. Material inputs: walkthrough_redesign=true,
+walkthrough_redesign_ordinal=3, walkthrough_redesign_candidate=the exact active SHA;
+story_logic_early, assistance_ui, source_foundation_macos, phase1g_flow_profile,
+phase1g_macos_browser_diagnostic and phase1g_candidate_proof all false. Launcher JSON
+uses string values. No duplicate dispatch occurred. Artifacts retain7 days after upload;
+check actual availability/expiry during terminal audit.
 
-On user resume, audit that exact terminal run/attempt, actual jobs/cases, manifests,
-sourceMatchesCandidate, missing/mismatched inputs, retained executables, privacy,
-cleanup and artifact availability before qualification. The docs-only successor does
-not replace the code candidate. No polling, watchers, automation, merge or release.
+All3 paired allowances are charged: local parse refusal1, completed evidence-defect
+run2, current run3. No further paired run is authorised. Live reset10 remains unused.
+A fixture-only placeholder-domain validation failure was corrected, both affected
+identity cases passed again, and repository validation passed602 files; actionlint
+and whitespace checks passed. No product behavior, model setting or owner call changed.
+Required hosts remain Windows2025 x64/macOS26 ARM64; no local production build/native
+launch or broad package/SDK matrix.
+
+Next: on manual user resume in this same chat, audit the exact current terminal run/
+attempt, actual jobs/cases, manifests, sourceMatchesCandidate:true, empty missing/
+mismatched inputs, retained executables, privacy, cleanup and artifact availability.
+If still pending, preserve identity and pause again. The docs-only successor does not
+replace the code candidate. No polling, watchers, automation, merge or release.
 Phase2/3A human acceptance remains pending.
