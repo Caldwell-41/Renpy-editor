@@ -1,5 +1,21 @@
 # Current status
 
+## Approved redesign implementation handoff — 2026-10-15
+
+The user approved the [implementation task](../tasks/active/walkthrough-redesign-implementation.md)
+and requested a new local Sol6.1/xhigh chat with Sol6.1/high implementation/testing
+subagents. This task now owns the selected implementation outcome and finite allowances;
+prior walkthrough-only restrictions are superseded only where this contract says so.
+The coordinator owns slice contracts, integration, review, a thin production-action
+harness, a CI-logic audit before dispatch, and final Windows/macOS evidence review.
+At most3concurrent subagents. Live budget12attempts/32768reserved response tokens,
+4model refreshes/2loads; CI at most3paired attempts. Initial usage0. No local app
+package builds or native launches; focused test compilation permitted. Preserve the
+old walkthrough app's unsaved Mara draft and all existing data/credentials. No merge/release.
+Next: dispatch the approved coordinator chat; it must inspect latest local Git and keep
+unpublished design commits. Do not reset to old remote source. This preparing chat has
+performed documentation only; no code/live/CI work yet.
+
 ## Selected combined Mac approval walkthrough — 2026-10-15
 
 Phase 2 / 3A approval walkthrough remains **in_progress; acceptance pending** on
@@ -22,9 +38,8 @@ The [project-wide Lorebook direction/refinements](../design/lorebook-workspace-2
 are agreed: World & starting situation, tone distinct from character voice, shared AI
 writing context with preview/omission, and growing fields/fixed footer. Actual app theme
 tokens govern both designs. Entries/draft remain intact; implementation pending.
-Next decision: approve the [new Sol6.1 implementation-chat plan](../tasks/active/walkthrough-redesign-implementation.md),
-including scoped delegation, pre-dispatch CI audit and the common Unsloth budget.
-Proposal only: no new chat, implementation, live generation or CI has started.
+The implementation handoff above is approved; the retained walkthrough facts below
+remain evidence and recovery context, not a second implementation owner.
 All recording/design work is local-only; no application or provider changes.
 
 ## Qualification and remaining acceptance

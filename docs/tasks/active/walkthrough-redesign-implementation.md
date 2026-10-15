@@ -1,9 +1,17 @@
-# Walkthrough redesign implementation — proposed handoff
+# Walkthrough redesign implementation
 
-**State: not_started; awaiting user approval.** No implementation, subagent dispatch,
-new chat, CI run or live generation is authorised by drafting this plan. Approval of
-this plan selects the outcome and finite allowances below; prior closed budgets do
-not roll over or reset. The original Phase 2 / 3A walkthrough remains incomplete.
+**State: not_started; approved for execution on 2026-10-15.** The user approved the
+complete proposed scope/budgets and explicitly requested starting the new chat. The
+Sol6.1/xhigh coordinator owns implementation, Sol6.1/high delegation, review, tests,
+publication of the reviewed candidate and gated CI under this contract. This supersedes
+the earlier review-only/no-live-sends selection only within this new approved outcome.
+Prior closed budgets do not roll over or reset. Whole-phase human acceptance remains pending.
+
+**Initial usage:** live generations0/12, reserved response tokens0/32768, model-list
+refreshes0/4, model-load attempts0/2, paired CI attempts0/3. Per-slice and integration
+verification/correction cycles are unconsumed. Local app packages/native starts0/0.
+Coordinator chat creation is the next authorised dispatch; no implementation or live
+operation has occurred in the preparing chat.
 
 ## Outcome and execution model
 
@@ -183,7 +191,7 @@ are satisfied; final human phase acceptance remains the user's decision. If a li
 capability or material requirement blocks completion, report the concrete missing
 decision and continue unaffected authorised work. Do not mark missing proof complete.
 
-Before creating the new chat, obtain approval of this proposed plan. Then create only
-the one requested coordinator chat with its specified model/effort, current local
-project and this task as the implementation contract. The coordinator creates subagents
+User approval has been obtained. Create only the one requested coordinator chat with
+its specified model/effort, current local project and this task as the implementation
+contract. The coordinator creates subagents
 as scoped workers; do not create a separate user chat for every slice.
