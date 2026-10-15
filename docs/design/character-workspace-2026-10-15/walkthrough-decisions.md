@@ -194,3 +194,11 @@ story tone/character voice, and growing fields with page scrolling/fixed Save/Di
 No categories/tags/panels. Preserve the corrected mockup and approved application theme;
 this wording/behavior amendment needs no new image. Implementation and testing remain
 follow-up work, with no product or provider change during review.
+
+## Proposed implementation outcome
+
+The user requests a refined plan for a new Sol6.1/xhigh chat to coordinate Sol6.1/high
+implementation/testing subagents, review and audited CI, with an Unsloth generation
+budget. The [implementation proposal](../../tasks/active/walkthrough-redesign-implementation.md)
+is the single owning plan and awaits approval. It does not start implementation or
+create the chat; prior no-build restrictions remain pending the explicitly scoped plan.

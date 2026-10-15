@@ -1,5 +1,17 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Proposed implementation handoff — awaiting approval
+
+User requests a new Sol6.1/xhigh coordinator chat, Sol6.1/high implementation/testing
+subagents, independently scoped/auditable slices, coordinator review and CI only after
+review approval. User also requires a thin production-action harness, explicit readiness,
+no sleeps/timeout inflation/bypasses/weakened assertions, a CI logic audit before running,
+and a bounded Unsloth generation allowance. The
+[proposed implementation task](walkthrough-redesign-implementation.md) owns the refined
+plan, dependencies, deliverables and budgets; it awaits user approval. No coordinator
+chat or subagent was created and no implementation/live/CI operation was performed.
+Existing package/draft and walkthrough allowances remain untouched.
+
 ## Lorebook refinements agreed — 2026-10-15
 
 User agrees all four suggested refinements to the simple project-wide two-field design:

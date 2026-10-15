@@ -22,7 +22,9 @@ The [project-wide Lorebook direction/refinements](../design/lorebook-workspace-2
 are agreed: World & starting situation, tone distinct from character voice, shared AI
 writing context with preview/omission, and growing fields/fixed footer. Actual app theme
 tokens govern both designs. Entries/draft remain intact; implementation pending.
-Next: remaining AI/Phase3A walkthrough; no additional design permission needed for these refinements.
+Next decision: approve the [new Sol6.1 implementation-chat plan](../tasks/active/walkthrough-redesign-implementation.md),
+including scoped delegation, pre-dispatch CI audit and the common Unsloth budget.
+Proposal only: no new chat, implementation, live generation or CI has started.
 All recording/design work is local-only; no application or provider changes.
 
 ## Qualification and remaining acceptance
