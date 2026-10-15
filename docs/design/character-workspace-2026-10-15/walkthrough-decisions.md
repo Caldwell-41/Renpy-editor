@@ -7,6 +7,10 @@ retains the sequence, qualifications and unique evidence. The Phase 2 task owns 
 [model-loading follow-up](../../tasks/active/phase-2-initial-llm-assistance.md#walkthrough-follow-up--studio-model-loading-and-one-context-setting--2026-10-14)
 and [linked-character follow-up](../../tasks/active/phase-2-initial-llm-assistance.md#walkthrough-follow-up--linked-character-workspace--2026-10-15).
 
+**Character-card design review: COMPLETE — approved on 2026-10-15.** The user also
+agrees to omit generic Related story items controls while preserving stored links.
+Implementation/testing and whole-phase acceptance remain separate and pending.
+
 **Scope:** record all user feedback, consolidate the agreed design and prepare updated
 mockups for approval. Application implementation, live Studio requests/model operations,
 new builds and whole-phase sign-off are not selected by this request. Existing build1/1
@@ -100,7 +104,7 @@ The temporal scope, B layout and final updated copy/screenshot are approved. No 
 | Character-linked lore | Leave out of the simplified card UI for now. Preserve existing links, the independent Lorebook and explicit lore selection for AI requests. Linking does not automatically send content or establish character knowledge. |
 | Applies to | Leave out of the character-card design; defer route-specific character changes. Preserve existing saved scope, without silently flattening it. This supersedes the earlier suggestion to tuck it under More details. |
 | Source notes | Remove this section from the simplified card UI. Preserve stored provenance/citations and underlying approval/freshness protections. This does not authorise bypassing missing/changed-support checks. |
-| Generic Related story items | No final decision has been made on this separate legacy control. Do not reintroduce it into starting knowledge or silently delete its data. Resolve its future presentation explicitly during implementation preparation. |
+| Generic Related story items | User agrees to omit this control from the simplified character-card UI. Preserve existing saved links; no data deletion or reference migration is authorised. This closes the final character-card design-review item. |
 
 ## Version history and restore
 
@@ -124,7 +128,7 @@ Any existing AI proposal remains subject to its own review, not automatic approv
 - User approved both final starting-knowledge and Version history mockups on 2026-10-15.
 - The synthetic connection-test request preview was unavailable for the unsaved
   profile and remains unreviewed. No profile save/test was performed to reveal it.
-- Generic related-story-link placement remains unresolved as described above.
+- Generic related-story-link UI removal is approved; existing links must remain preserved.
 - Studio loading, unified character/source creation and version restoration are
   separate functional follow-ups requiring implementation scope and verification.
 - The Phase 2 / 3A walkthrough is incomplete. Remaining reference/AI-request review

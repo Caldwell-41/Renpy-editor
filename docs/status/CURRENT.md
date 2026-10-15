@@ -17,8 +17,9 @@ Two [updated mockups](../design/character-workspace-2026-10-15/walkthrough-decis
 were approved on2026-10-15; restore/model loading/unified creation remain functional
 follow-ups, not implemented behavior. The
 [combined ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
-owns qualification and cumulative counts. Next: resume the remaining reference/AI
-and Phase 3A walkthrough; no additional design approval is needed for these two views.
+owns qualification and cumulative counts. Character-card design review is complete: user
+also approves omitting Related story items controls while preserving links. Next: Lorebook,
+then remaining AI/Phase3A walkthrough; implementation and phase acceptance remain pending.
 All recording/design work is local-only; no application or provider changes.
 
 ## Qualification and remaining acceptance
@@ -34,7 +35,7 @@ in the owning tasks and [HANDOVER](HANDOVER.md).
 | 3A Story logic | [CI4 terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14) passed both hosts, actual controller paths and six pinned-SDK cases including qualified safe-edit/save/load return. Arbitrary source-change compatibility is not claimed. |
 | Studio assistance and UI | [UI delivery ledger](../tasks/active/phase-2-initial-llm-assistance.md#ui-refinement-ci1-terminal-audit-and-delivery--2026-10-13) preserves exact both-host controller/native-service/privacy/render evidence and frozen owner live/native qualification. Failed sends remain failures. |
 | SDK, packages and credentials | Unchanged paths reuse earlier qualification. Matching signed walkthrough package verified; ordinary profile/key and signing policy unchanged. Literal IPv6 HTTPS remains unsupported; live TLS not newly measured. |
-| Human review | Settings feedback recorded; character design review ongoing. Synthetic connection-test preview, remaining reference/AI flow and Phase3A walkthrough remain unreviewed. Design decisions do not imply phase acceptance. |
+| Human review | Settings feedback recorded; character-card design approved. Synthetic connection-test preview, remaining reference/AI flow and Phase3A walkthrough remain unreviewed. Design decisions do not imply phase acceptance. |
 
 Implementation qualification usage remains **core16/18, local12/14, renderer11/14,
 pairedCI4/5**; separate walkthrough usage is build1/1, launch1/3. No additional

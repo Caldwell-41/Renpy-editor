@@ -4,7 +4,7 @@
   "researchAgents": 2,
   "initialGenerations": 3,
   "targetedRefinements": 6,
-  "selection": "Consolidated B starting-only knowledge and surfaced history/restore presentation approved by user on 2026-10-15; implementation remains unselected",
+  "selection": "Character-card design review complete and approved on 2026-10-15; generic Related story items controls omitted; existing data preserved; implementation/testing pending",
   "assets": [
     {
       "file": "a-character-notebook.png",
@@ -131,9 +131,10 @@
     "temporalMeaning": "Character knowledge when story begins; later discoveries and current-point knowledge resolution deferred to an unassigned future phase",
     "imageUnchanged": true,
     "linkedLoreDecision": "Defer visible character-linked-lore controls from lean card; preserve stored links and independent Lorebook/request selection",
-    "nextReview": "History direction recorded; continue character/AI walkthrough",
+    "nextReview": "Character-card design closed; next walkthrough section Lorebook",
     "applicabilityDecision": "Omit from character-card UI; route variants deferred",
-    "sourceNotesDecision": "Remove Source notes UI; retain existing data and approval/freshness protections"
+    "sourceNotesDecision": "Remove Source notes UI; retain existing data and approval/freshness protections",
+    "genericLinksDecision": "Omit generic Related story items controls from simplified card; preserve saved links"
   },
   "cardHistoryDecision": {
     "userDirection": "Surface history with rollback to previous saved card",
@@ -156,5 +157,13 @@
       "b-starting-knowledge-v3.png",
       "b-version-history-v1.png"
     ]
+  },
+  "designReview": {
+    "status": "complete",
+    "userApproved": true,
+    "date": "2026-10-15",
+    "finalItem": "omit Related story items control, preserve stored links",
+    "implementationComplete": false,
+    "phaseAcceptance": false
   }
 }

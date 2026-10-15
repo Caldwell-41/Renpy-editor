@@ -36,7 +36,8 @@
   "hiddenCardControls": {
     "linkedLore": "Deferred from simplified card; stored links retained",
     "scope": "Deferred; existing stored scope retained",
-    "sourceNotes": "Removed from simplified card UI; stored data/approval safeguards retained"
+    "sourceNotes": "Removed from simplified card UI; stored data/approval safeguards retained",
+    "relatedStoryItems": "Omit from simplified card UI; preserve existing saved links"
   },
   "versionHistory": {
     "entryLabel": "Version history",

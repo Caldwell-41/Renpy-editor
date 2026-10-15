@@ -1,6 +1,6 @@
 # Character workspace concepts — 2026-10-15
 
-Status: **All walkthrough feedback consolidated; updated knowledge/history views approved on 2026-10-15**.
+Status: **Character-card design review complete and approved on 2026-10-15; implementation/testing pending**.
 
 The [consolidated walkthrough decision record](walkthrough-decisions.md) owns the current
 settings, unified-character, B-layout, relationship, starting-knowledge, removal/deferral

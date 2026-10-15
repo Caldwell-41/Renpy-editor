@@ -17,8 +17,9 @@ Two [updated mockups](../design/character-workspace-2026-10-15/walkthrough-decis
 were approved on2026-10-15; restore/model loading/unified creation remain functional
 follow-ups, not implemented behavior. The
 [combined ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
-owns qualification and cumulative counts. Next: resume the remaining reference/AI
-and Phase 3A walkthrough; no additional design approval is needed for these two views.
+owns qualification and cumulative counts. Character-card design review is complete: user
+also approves omitting Related story items controls while preserving links. Next: Lorebook,
+then remaining AI/Phase3A walkthrough; implementation and phase acceptance remain pending.
 All recording/design work is local-only; no application or provider changes.
 
 Earlier qualification and unique recovery evidence below remain valid. The separate

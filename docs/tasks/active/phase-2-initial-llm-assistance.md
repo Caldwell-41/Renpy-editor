@@ -15,8 +15,12 @@ cumulative14calls, agents2. Owner visual review and PNG integrity/hash checks pa
 static views are not native interaction/restore qualification. User explicitly approved
 both final knowledge/history views and their updated copy on2026-10-15. No source edits, build, launch,
 Studio call, credential operation, phase sign-off or remote publication. Preserve
-build1/1 and launches1/3; Mara last observed with unsaved reference changes. Next:
-resume remaining reference/AI and Phase3A walkthrough. Full chronology and
+build1/1 and launches1/3; Mara last observed with unsaved reference changes. User
+agrees to omit generic Related story items controls, preserving saved links. This
+closes the **character-card design review — COMPLETE, approved on2026-10-15**.
+Implementation/testing and whole-phase acceptance remain pending. No new mockup is
+needed: approved final views already omit that control. Next: Lorebook, followed by
+remaining AI and Phase3A walkthrough. Full chronology and
 unique technical/recovery evidence below remain preserved.
 
 ## Combined approval walkthrough selected — 2026-10-14
