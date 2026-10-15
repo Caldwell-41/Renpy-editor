@@ -1,0 +1,31 @@
+Use case: ui-mockup. High-fidelity Loomlight desktop application screenshot.
+Image 1 is the edit target: the approved B character workspace. Turn it into a clean, project-wide LOREBOOK page while keeping the same warm off-white/teal style, crisp typography, restrained borders, generous writing width and anchored Save/Discard footer.
+
+KEEP the top app bar with “Loomlight”, project “The Last Tram” and Search project. KEEP the narrow far-left global icon navigation and its outlined split-panel restore icon at the top. Highlight the BOOK/Lorebook icon in teal instead of Characters. There is only this one global icon rail: NO second list, no entry sidebar and no right inspector.
+REMOVE Mara’s portrait/name/Planning only badge, Writing/Game setup tabs, character-topic tabs, the inner character-list restore button, New character and all character controls. Do not replace them with new entry lists or category selectors.
+Main page header reads “Lorebook” with a small quiet “Project-wide” badge. Subtitle: “A shared guide to your world and how the story should feel.”
+At the far top-right workspace header place the quiet secondary “Version history” button, using the same style and fixed header placement as the approved character view. No New lore entry button: this design is one shared document per project. No project picker or cross-project library.
+
+The main body has two clearly separated full-width prose sections stacked vertically. No extra topic navigation. Both sections must be visible with their helper text and footer, without clipping. Use the reclaimed vertical space from the old character header/tabs to fit comfortably.
+FIRST SECTION:
+Bold section heading “World at the start”.
+Directly editable wide multiline textarea, about 150px tall. Exact text:
+“The story begins in a small coastal town in late autumn.
+The old station is still operating, but the last tram has arrived empty for three nights.
+The townspeople treat the disappearances as an ordinary disruption.”
+Helper immediately BELOW the textarea: “Describe the setting, the current situation and facts that are true when the story begins.”
+
+SECOND SECTION:
+Bold section heading “Tone & writing style”.
+Another directly editable wide multiline textarea, about 140px tall. Exact text:
+“Quiet mystery with warm, understated dialogue.
+Build tension through small details and pauses.
+Keep descriptions grounded and concise; reveal the uncanny gradually.”
+Helper immediately BELOW the textarea: “Describe the mood, pacing, dialogue and prose style you want the AI to follow.”
+
+Below the two sections show one small muted sentence: “Review these notes in the AI request before sending. Saving sends nothing.”
+This is a proposal for the AI-writing workflow, not a completed network operation. No Send/Generate button on this page.
+
+Fixed footer at the same bottom position as the reference: “Unsaved changes” at left; Discard and primary teal “Save changes” at right.
+Keep the actual writing boxes dominant and broad, about 85–90 percent of available workspace width. Show a calm, coherent app page, not a dashboard or a giant title poster. Plain-language helpful text must be readable and precise. No lore entry metadata, tags, per-character links, source notes, “Applies to”, route selectors, character knowledge, discovery timeline, world simulation/state meters, automatic updates or extra settings. No new image decoration or illustration.
+Output ONE landscape full application screenshot at the same size as the edit target.

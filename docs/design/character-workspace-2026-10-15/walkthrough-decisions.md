@@ -167,3 +167,11 @@ visual presentations on 2026-10-15; no new implementation or phase sign-off is i
 Historical images/prompts are preserved. The old optional-lore/applicability rows,
 ambiguous temporal wording, bespoke focus controls and Other character label are
 superseded by this decision record. No extra image correction or new build is selected.
+
+## Following walkthrough section — Lorebook proposal
+
+Character-card design review remains complete. User now requests a simpler global
+Lorebook to set world state and tone. The [new Lorebook mockup and scope notes](../lorebook-workspace-2026-10-15/README.md)
+propose one document per project, starting-world facts and tone/style, consistent with
+approved B. The Lorebook proposal awaits approval and does not reopen the approved card
+design or authorise migration/deletion of existing lore or automatic context injection.

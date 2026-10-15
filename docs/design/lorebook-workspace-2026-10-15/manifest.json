@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-15",
+  "tool": "built-in image_gen.imagegen",
+  "intent": "edit approved B character frame into proposed project-wide Lorebook",
+  "reference": "../character-workspace-2026-10-15/b-starting-knowledge-v3.png",
+  "imageCalls": 1,
+  "previousCharacterDesignCalls": 14,
+  "cumulativeWalkthroughDesignCalls": 15,
+  "additionalAgents": 0,
+  "status": "awaiting user approval",
+  "applicationChanged": false,
+  "assets": [
+    {
+      "file": "global-world-tone-v1.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "b4997a2f05d0b353e2b22c36dd262f6f4f56a9cf738584d7c9c91ac8dc0ec5a3",
+      "prompt": "global-world-tone-v1.txt",
+      "promptSha256": "18359bd2aed3abcf703d3465fb0870d370f7b9b8abdf3e230238faa781dcae64"
+    }
+  ],
+  "review": "Owner inspected: one project-wide page with starting world state and tone, below-field helpers, B visual style, global rail only, active Lorebook icon, fixed save/discard, quiet history. Generated icons/colours illustrative; exact shared controls/tokens required. Static design is not native or context-assembly proof.",
+  "scopeAssumptions": [
+    "Global means within each project",
+    "World state means authored start-of-story facts",
+    "Existing entries/data preserved; migration unselected",
+    "Shared AI context inclusion and tone precedence require later explicit design/implementation"
+  ]
+}

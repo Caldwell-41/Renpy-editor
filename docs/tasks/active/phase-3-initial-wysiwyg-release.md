@@ -1,5 +1,21 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Lorebook redesign proposal — 2026-10-15
+
+User dislikes the Lorebook layout and asks for a global world-state/tone page using
+ImageGen. Delivered [project-wide Lorebook proposal](../../design/lorebook-workspace-2026-10-15/README.md):
+one shared document per project with World at the start and Tone & writing style,
+below-field helpers, approved B frame, no entry-list/sidebar clutter and fixed Save/
+Discard/history presentation. These scope assumptions and the mockup await approval.
+Existing multi-entry data, explicit AI selection and prompt style settings remain;
+no migration, default context injection, restore implementation or data deletion is
+selected. Global-context preview/budgeting and tone precedence require later design.
+One built-in edit, owner visual review and PNG integrity/hash checks complete; prior
+character calls14, Lorebook1, cumulative15; no extra agent. Preserve character design
+approval, unsaved Mara draft, build1/1 and launches1/3. No native navigation, app/source/
+reference/profile/credential change, Studio request or phase sign-off. Next: user
+approval/refinement of the Lorebook page.
+
 ## Current walkthrough design record — 2026-10-15
 
 User requests all feedback recorded and UI consistent with agreed B, with new mockups
