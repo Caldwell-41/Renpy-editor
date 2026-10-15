@@ -464,6 +464,7 @@ mod tests {
                     maximum_response: 1024,
                     temperature: None,
                     top_p: None,
+                model_load: None,
                 },
             )
             .unwrap();
@@ -697,6 +698,7 @@ mod tests {
                 maximum_response: 1024,
                 temperature: None,
                 top_p: None,
+                model_load: None,
             },
         )
         .unwrap();

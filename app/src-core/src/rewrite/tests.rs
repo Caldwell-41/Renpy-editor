@@ -35,6 +35,7 @@ impl Fixture {
                 context_budget: 32768,
                 context_ceiling: 32768,
                 maximum_response: 1024,
+                model_load: None,
                 temperature: None,
                 top_p: None,
             },

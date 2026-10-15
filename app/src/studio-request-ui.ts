@@ -2,7 +2,7 @@ import { requestCore } from "./bridge.ts";
 import type { CoreOperation } from "./protocol.ts";
 interface Profile {profileId:string;credentialStatus:string;disabled:boolean;settings:{label:string;endpoint:string;model:string;contextBudget:number;maximumResponse:number}}
 interface Snapshot {token:string;profiles:Profile[]}
-interface Status {requestedContext?:number;modelReadiness?:{requestedContext:number;actualContext:number;loadedForRequest:boolean}|null;requestId:string;state:string;done:boolean;httpStatus:number|null;elapsedMs:number;message:string|null;estimatedInput:number;margin:number;maximumResponse:number;completion:null|{text:string;model:string;finishReason:string;responseBytes:number;usage:{promptTokens:number|null;completionTokens:number|null;totalTokens:number|null;reasoningTokens:number|null}}}
+interface Status {requestedContext?:number;modelReadiness?:{requestedContext:number;actualContext:number;loadedForRequest:boolean;warnings?:string[]}|null;requestId:string;state:string;done:boolean;httpStatus:number|null;elapsedMs:number;message:string|null;estimatedInput:number;margin:number;maximumResponse:number;completion:null|{text:string;model:string;finishReason:string;responseBytes:number;usage:{promptTokens:number|null;completionTokens:number|null;totalTokens:number|null;reasoningTokens:number|null}}}
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,text=""):HTMLElementTagNameMap[K]{const n=document.createElement(tag);n.textContent=text;return n;}
 /** Nonmodal synthetic request panel. Local status observation never sends HTTP. */
 export function openStudioRequest(sessionId:string|null):void {
@@ -29,6 +29,7 @@ export function openStudioRequest(sessionId:string|null):void {
     if(value.modelReadiness)status.textContent+=` · Context requested ${value.modelReadiness.requestedContext.toLocaleString()} / loaded ${value.modelReadiness.actualContext.toLocaleString()} tokens${value.modelReadiness.loadedForRequest?' · Loaded for this request':' · Reused loaded model'}`;
     status.dataset.state=value.state;output.textContent='';
     if(value.completion){const c=value.completion,u=c.usage;status.textContent+=` · finish: ${c.finishReason} · usage input ${u.promptTokens??'unknown'}, output ${u.completionTokens??'unknown'}, total ${u.totalTokens??'unknown'}, reasoning ${u.reasoningTokens??'unknown'}`;output.textContent=c.text;}
+    for(const warning of value.modelReadiness?.warnings??[]){const note=node('span',` Warning: ${warning}`);note.className='studio-load-warning';status.append(note);}
     active=!value.done;state();
   };
   const poll=async(id:string,version:number):Promise<void>=>{

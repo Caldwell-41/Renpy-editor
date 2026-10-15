@@ -446,7 +446,7 @@ fn core_request(
             .ok_or("Desktop lifecycle state is unavailable.")?;
         if matches!(
             operation.as_str(),
-            "ai.sendSynthetic" | "ai.testCompatibility" | "ai.requestStatus" | "ai.cancelRequest" | "rewrite.send" | "rewrite.prepare"
+            "ai.sendSynthetic" | "ai.testCompatibility" | "ai.requestStatus" | "ai.cancelRequest" | "ai.readModelLoadSettings" | "ai.applyModelLoadSettings" | "rewrite.send" | "rewrite.prepare"
         ) {
             return Ok(ai_requests::service().dispatch(
                 &host,

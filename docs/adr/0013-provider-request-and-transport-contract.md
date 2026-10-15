@@ -17,8 +17,11 @@ and chat share the captured credential/destination, cancellation socket owner an
 absolute request deadline, with no proxy/redirect/retry. Fixed stages expose checking
 model, loading model, sending, receiving and validating; requested versus successfully
 observed actual context is read-only. An already-loaded matching model with sufficient
-reported actual context is reused without a load or reload. Unknown/insufficient
-capacity, another resident/loading model or contradictory status refuse before chat.
+actual capacity for the prepared input estimate, margin and response reserve is reused
+without a load or reload. A different requested context or load preference produces
+a visible warning; it does not fail a request that fits. Unknown capacity, an actual
+request that exceeds capacity, another resident/loading model or contradictory identity
+still refuse before chat.
 
 Automatic loading validates the common published response contract, independently
 researched in official source commits
@@ -38,9 +41,11 @@ or malformed relevant contract fields refuse; unrelated extensions remain ignora
 A completely available GGUF variant must resolve through
 `/api/models/cached-model-path` to an absolute local `.gguf` file, not a repository or
 directory. After another empty-status check, `/api/inference/load` receives that file,
-the requested context, engine auto, alongside/force-alongside false, vision/speculation
-disabled, empty extra arguments and false force-reload/force-cancel/trust-remote-code
-flags. Optional reported evictions must be an empty array; this detects a report after
+the requested context, engine auto, alongside/force-alongside false and false
+force-reload/force-cancel/trust-remote-code flags. Explicit saved model-load preferences
+and recognized server overrides are projected as described below; legacy absent local
+preferences preserve the earlier load path. Optional reported evictions must be an
+empty array; this detects a report after
 the operation and cannot undo it. The reviewed local-file backend
 refuses an absent file rather than switching to its separate HF download branch.
 No model download, Unsloth Studio process management or intentional resident replacement.
@@ -68,6 +73,47 @@ optional read-only evidence, not a second editable capacity setting.
 Visible-slot observations are bounded by the single-user support model; managed foreign
 slots or teardown remnants can be hidden by the server. No global empty-state guarantee
 or atomic expected-empty promise is inferred from these observations.
+
+### Configurable model-load preferences — 2026-10-15
+
+AI Settings exposes parallel slots, GPU memory mode and automatic fitting, using the
+existing single Context length. Suggested defaults are32768 tokens,1 slot,manual GPU
+mode and fitting off. These remain editable preferences, not strict achieved-state
+requirements. Optional `modelLoad` profile data is materialized only by an explicit
+local Save; absent legacy records remain readable without a read-time write. No CPU
+thread counts or fixed GPU-layer counts are introduced. Sampling and exact ordinary
+chat-completion bodies retain their existing contract.
+
+Separate `ai.readModelLoadSettings` and `ai.applyModelLoadSettings` accept only a saved
+profile ID and profile-store token. They use its existing native credential and
+captured approved destination through the bounded shared transport; no renderer URL,
+credential, arbitrary method or raw provider response crosses IPC. Apply requires
+saved preferences, verifies the real selected model/quantization, reads and reconciles
+the current override, writes only the selected quant's entry via
+`PUT /api/settings/openai-auto-switch/overrides`, then separately reads loader-resolved
+state. It preserves recognized unrelated fields/custom flags and leaves bare fallbacks
+and other quantizations intact. Unknown fields or unsafe flags refuse preservation
+instead of silently dropping them. The server lacks revision/CAS; immediate recheck
+and read-back detect observed changes without promising an atomic external-editor fence.
+
+Management runs only on explicit Read/Apply. Local profile Save and ordinary chat
+completions never write overrides. Apply persists future-load settings and never
+reloads/unloads the current model. Loomlight refuses management during its active
+generation without cancelling that generation, blocks new requests while managing,
+and cancels its owned management socket on profile/project change or shutdown. Loss
+of a write response is an uncertain outcome: read again before applying, with no
+automatic retry. The global automatic-switching flag is read-only; unavailable owner
+permission is unknown rather than disabled. A disabled/unknown flag produces an
+explanation, and Loomlight never silently enables it.
+
+Requested, saved and actually loaded values are shown separately. Omitted runtime
+values remain unverified. Source-verified manual-load paths can strip `--fit` even
+when the override stores it, so saved fit off never proves an effective strict fitting
+policy. Both researched [manual flag handling](https://github.com/unslothai/unsloth/blob/133a8076d10aa109f812f85a953636b3488926f6/studio/backend/routes/inference.py#L18499-L18553)
+and the [runtime fields](https://github.com/unslothai/unsloth/blob/133a8076d10aa109f812f85a953636b3488926f6/studio/backend/models/inference.py#L1799-L1956)
+own that limitation. Warnings retain generation/proposal review when the prepared
+request fits actual capacity; a genuine admission/load/authentication failure remains
+an error. No specific Unsloth Studio version is an acceptance gate.
 
 **Current closeout disposition, 2026-10-12:** Phase 2 is Studio-only. The selected
 literal-HTTP/nonstreaming/off-only client slices are qualified; full-phase scope and

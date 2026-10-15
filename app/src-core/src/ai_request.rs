@@ -52,6 +52,9 @@ pub enum Failure {
     ModelLoadContext,
     ModelNotReady,
     ModelLoad,
+    ModelSettingsUnsupported,
+    ModelSettingsUnsafe,
+    ModelSettingsChanged,
 }
 impl Failure {
     pub fn code(self) -> &'static str {
@@ -81,6 +84,9 @@ impl Failure {
             Self::ModelLoadContext => "model_context_insufficient",
             Self::ModelNotReady => "model_not_ready",
             Self::ModelLoad => "model_load",
+            Self::ModelSettingsUnsupported => "model_settings_interface",
+            Self::ModelSettingsUnsafe => "model_settings_preservation",
+            Self::ModelSettingsChanged => "model_settings_changed",
         }
     }
     pub fn message(self) -> &'static str {
@@ -102,12 +108,15 @@ impl Failure {
         Self::Oversized=>"Studio response exceeds the application size limit. Response discarded.",
         Self::UnsupportedResponse=>"Studio response is unsupported or incomplete. Response discarded.",
         Self::Cancelled=>"Client request cancelled; server computation or model loading may continue.",
+        Self::ModelSettingsUnsupported=>"Unsloth Studio cannot verify its model-load settings interface. No settings fallback or automatic retry was used.",
+        Self::ModelSettingsUnsafe=>"Existing Unsloth Studio model options cannot be safely preserved. Review the selected model configuration in Studio before applying changes.",
+        Self::ModelSettingsChanged=>"Saved profiles changed before the settings write; no settings were applied.",
         Self::ModelUnsupported=>"Studio cannot verify this model loading interface. Load the selected model in Studio and retry; no generation was sent.",
         Self::ModelUnavailable=>"The selected model or exact GGUF variant is not verified as completely downloaded in Studio. No model download or generation was requested.",
         Self::ModelConflict=>"Studio has another loaded or loading model. Keep it intact and select that model, or manage models in Studio before retrying. No generation was sent.",
         Self::ModelCapacity=>"Studio did not report the loaded model’s actual context length. Check Studio before retrying; no generation was sent.",
-        Self::ModelContext=>"The loaded model’s actual context is below the requested Context length. Adjust Context length or manage the model in Studio; no reload or generation was requested.",
-        Self::ModelLoadContext=>"Studio completed a local model load but reported less context than requested. Check Context length and the loaded model in Studio before retrying; no generation was sent.",
+        Self::ModelContext=>"The loaded Unsloth Studio context cannot fit this request plus its response allowance; no generation was sent.",
+        Self::ModelLoadContext=>"Unsloth Studio completed a local model load but its actual context cannot fit this request plus its response allowance; no generation was sent.",
         Self::ModelNotReady=>"Studio has not confirmed the selected model is ready. Check Studio before retrying; no generation was sent.",
         Self::ModelLoad=>"Studio did not confirm a successful local model load. Check Studio before retrying; no generation was sent.",
     }
@@ -735,14 +744,20 @@ fn execute_inner(
         if cancel.cancelled() {
             return Err(Failure::Cancelled);
         }
+        let mut context_limit = prepared.profile.settings.context_budget;
         if check_model {
             let observation = crate::studio_models::ensure_ready(
-                &prepared.profile.settings.model,
-                prepared.profile.settings.context_budget,
+                &prepared.profile.settings,
                 cancel,
                 &stage,
                 |path, body| model_exchange(&prepared, cancel, deadline, path, body, tls.clone()),
             )?;
+            let required = u64::from(prepared.estimated_input) + u64::from(prepared.margin)
+                + u64::from(prepared.profile.settings.maximum_response);
+            if required > u64::from(observation.actual_context) {
+                return Err(if observation.loaded_for_request {Failure::ModelLoadContext} else {Failure::ModelContext});
+            }
+            context_limit = context_limit.min(observation.actual_context);
             ready(&observation);
             stage("sending");
         }
@@ -832,11 +847,11 @@ fn execute_inner(
             || completion
                 .usage
                 .prompt_tokens
-                .is_some_and(|n| n > u64::from(prepared.profile.settings.context_budget))
+                .is_some_and(|n| n > u64::from(context_limit))
             || completion
                 .usage
                 .total_tokens
-                .is_some_and(|n| n > u64::from(prepared.profile.settings.context_budget))
+                .is_some_and(|n| n > u64::from(context_limit))
         {
             return Err(Failure::Oversized);
         }
@@ -875,6 +890,18 @@ fn model_exchange_observed(
     tls: ureq::tls::TlsConfig,
     #[cfg(any(test, debug_assertions))] observed_http: Option<&mut Option<u16>>,
 ) -> Result<Value> {
+    model_exchange_method(prepared, cancel, deadline, path, body, tls, false,
+        #[cfg(any(test, debug_assertions))]
+        observed_http,
+        #[cfg(not(any(test, debug_assertions)))]
+        None,
+    )
+}
+fn model_exchange_method(
+    prepared: &Prepared, cancel: &Cancel, deadline: Instant, path: &str,
+    body: Option<&Value>, tls: ureq::tls::TlsConfig, put: bool,
+    observed_http: Option<&mut Option<u16>>,
+) -> Result<Value> {
     if cancel.cancelled() {
         return Err(Failure::Cancelled);
     }
@@ -912,8 +939,7 @@ fn model_exchange_observed(
     let url = format!("{base}{path}");
     let mut response = if let Some(body) = body {
         let bytes = serde_json::to_vec(body).map_err(|_| Failure::Configuration)?;
-        agent
-            .post(url)
+        (if put { agent.put(url) } else { agent.post(url) })
             .header("Authorization", format!("Bearer {}", &*prepared.key))
             .header("Content-Type", "application/json")
             .header("Connection", "close")
@@ -926,7 +952,6 @@ fn model_exchange_observed(
             .call()
     }
     .map_err(map_error)?;
-    #[cfg(any(test, debug_assertions))]
     if let Some(observed) = observed_http {
         *observed = Some(response.status().as_u16());
     }
@@ -966,6 +991,95 @@ fn model_exchange_observed(
     crate::ai_discovery::strict_json(&bytes).map_err(|_| Failure::Malformed)
 }
 
+
+
+/// Explicit per-model management through the same captured native credential,
+/// destination, TLS, cancellation and absolute deadline as normal Studio requests.
+/// This never changes global auto-switch, unloads/reloads a model, or sends chat.
+pub fn model_load_settings(
+    prepared: Prepared, apply: bool, cancel: &Cancel, before_write: impl Fn() -> bool,
+) -> Result<crate::studio_config::Report> {
+    use crate::studio_config::{self as config, Report, Requested};
+    if apply && prepared.profile.settings.model_load.is_none() {return Err(Failure::Configuration);}
+    let deadline=Instant::now()+prepared.timeout;
+    let exchange=|path:&str,body:Option<&Value>,put:bool,http:Option<&mut Option<u16>>| {
+        let result=model_exchange_method(&prepared,cancel,deadline,path,body,ureq::tls::TlsConfig::default(),put,http);
+        cancel.close_socket();
+        result.map_err(|e|if e==Failure::ModelUnsupported {Failure::ModelSettingsUnsupported}else{e})
+    };
+    let result=(|| {
+        let requested=Requested::from_settings(&prepared.profile.settings);
+        let status=exchange("/api/inference/status",None,false,None)?;
+        let (loading,effective)=crate::studio_models::configuration_status(&status,&prepared.profile.settings.model)?;
+        if apply && loading {return Err(Failure::Busy);}
+        let catalog=exchange("/v1/models",None,false,None)?;
+        let target=config::target(&prepared.profile.settings.model,&catalog)?;
+        let path=crate::studio_models::cached_path(&target.repo,&target.quant,|path,body|exchange(path,body,false,None))?;
+        let query=config::query(&target,&path);
+        let mut resolved=config::resolved_in_scope(&exchange(&query,None,false,None)?,&target,&path)?;
+        let mut warnings=vec![config::FIT_WARNING.into()];
+        if prepared.profile.settings.model_load.is_none() {warnings.push("Load options shown are suggested defaults; the legacy profile has not saved them.".into());}
+        let mut http=None;
+        let auto_switch_enabled=match exchange("/api/settings/openai-auto-switch",None,false,Some(&mut http)) {
+            Ok(value)=>value["enabled"].as_bool(),
+            Err(Failure::Authentication) if http==Some(403)=>None,
+            Err(Failure::ModelSettingsUnsupported)=>None,
+            Err(error)=>return Err(error),
+        };
+        match auto_switch_enabled {
+            Some(false)=>warnings.push("Automatic model switching is disabled. Saved settings alone do not enable API auto-loading; Loomlight can explicitly load an available cached model.".into()),
+            None=>warnings.push("Automatic model switching could not be verified; no global setting was changed.".into()),
+            _=>(),
+        }
+        let mut applied=false;
+        if apply {
+            // Refresh the merge base and loading observation immediately before PUT.
+            // Studio offers no compare-and-swap: external edits can still race this write.
+            resolved=config::resolved_in_scope(&exchange(&query,None,false,None)?,&target,&path)?;
+            let merged=config::merge(resolved.row.as_ref(),&requested)?;
+            let current=exchange("/api/inference/status",None,false,None)?;
+            if crate::studio_models::configuration_status(&current,&prepared.profile.settings.model)?.0 {return Err(Failure::Busy);}
+            let mut body=Value::Object(merged.clone());
+            body["model_id"]=json!(target.key);
+            if cancel.cancelled() {return Err(Failure::Cancelled);}
+            if !before_write() {return Err(Failure::ModelSettingsChanged);}
+            exchange(config::ROUTE,Some(&body),true,None)?;
+            let readback=exchange(&query,None,false,None)?;
+            resolved=match config::resolved_in_scope(&readback,&target,&path) {
+                Ok(resolved)=>resolved,
+                Err(Failure::ModelSettingsUnsafe)=>{
+                    warnings.push("The write completed, but read-back resolved outside the selected model. The outcome is unverified; unrelated saved values were discarded and no retry occurred.".into());
+                    config::Resolved {key:None,row:None}
+                }
+                Err(error)=>return Err(error),
+            };
+            let verified=resolved.row.as_ref().map(config::known_saved);
+            applied=resolved.key.as_deref().is_some_and(|key|key.eq_ignore_ascii_case(&target.key))
+                && resolved.row.as_ref().is_some_and(|row|row.get("max_seq_length").and_then(Value::as_u64)==Some(requested.context_length.into()) && row.get("custom_context_length").and_then(Value::as_u64)==Some(requested.context_length.into()))
+                && verified.as_ref().is_some_and(|saved|
+                saved.context_length==Some(requested.context_length) && saved.parallel==Some(requested.parallel)
+                && (saved.gpu_memory_mode==Some(requested.gpu_memory_mode)
+                    || (requested.gpu_memory_mode==crate::ai_profiles::GpuMemoryMode::Auto && resolved.row.as_ref().is_some_and(|r|!r.contains_key("gpu_memory_mode"))))
+                && saved.fit==Some(requested.fit));
+            if !applied {warnings.push("The write completed, but the loader-resolved target or requested values differ on read-back. Saved configuration is not confirmed; no retry or reload occurred.".into());}
+            if let Some(row)=&resolved.row {
+                let mut unrelated=merged.iter().filter(|(key,_)|!matches!(key.as_str(),"max_seq_length"|"custom_context_length"|"n_parallel"|"gpu_memory_mode"|"llama_extra_args"));
+                if unrelated.any(|(key,value)|row.get(key)!=Some(value)) || row.get("llama_extra_args")!=merged.get("llama_extra_args") {
+                    applied=false;warnings.push("Some existing model options differ on read-back; preservation is not confirmed.".into());
+                }
+            }
+        } else if resolved.row.as_ref().is_some_and(|row|config::validate(row).is_err()) {
+            warnings.push("Existing options include unverified fields or flags. Applying settings will require a safe, supported merge.".into());
+        }
+        let saved=resolved.row.as_ref().map(config::known_saved);
+        if let Some(saved)=&saved {warnings.extend(config::warnings(&requested,saved,"Saved"));}
+        if let Some(effective)=&effective {warnings.extend(config::warnings(&requested,effective,"Effective"));} else {warnings.push("Loaded values could not be verified for the selected model; no effective configuration is claimed.".into());}
+        warnings.sort();warnings.dedup();
+        Ok(Report {model_id:prepared.profile.settings.model.clone(),resolved_model_id:resolved.key.filter(|key|key.eq_ignore_ascii_case(&target.key)),requested,saved,effective,auto_switch_enabled,applied,warnings,message:if apply {"Settings were written for the next model load. The current model was not reloaded; inspect read-back and warnings for confirmation."} else {"Observed saved settings and known loaded values. No settings were changed."}.into()})
+    })();
+    cancel.close_socket();
+    if cancel.cancelled() {Err(Failure::Cancelled)}else{result}
+}
 
 /// Debug/test-only, read-only qualification. Fixed routes, one shared 15-second deadline,
 /// no retries, inventory calls, load or generation. No raw provider strings leave here.
@@ -1635,6 +1749,7 @@ mod model_readiness_tests {
                 "GET /api/models/cached-model-path?repo_id=fixture%2Fmodel-GGUF&variant=Q4_K_M ",
                 json!({"path":"C:\\synthetic-cache\\fixture.Q4_K_M.gguf","is_dir":false}),
             ),
+            ("GET /api/settings/openai-auto-switch/overrides?model_id=C%3A%5Csynthetic-cache%5Cfixture.Q4_K_M.gguf&alias_id=fixture%2Fmodel-GGUF&gguf_variant=Q4_K_M ",json!({"overrides":{},"resolved":{},"resolved_key":null})),
             ("GET /api/inference/status ", empty()),
             (
                 "POST /api/inference/load ",
@@ -1690,9 +1805,19 @@ mod model_readiness_tests {
         Vec<String>,
         Option<crate::studio_models::Readiness>,
     ) {
+        run_options(plan, None)
+    }
+    fn run_options(plan: Vec<(&'static str, Value)>, model_load: Option<crate::ai_profiles::ModelLoadSettings>) -> (Result<Completion>,Vec<String>,Option<crate::studio_models::Readiness>) {
+        run_case(plan,model_load,false)
+    }
+    fn run_response_failure(plan: Vec<(&'static str, Value)>) -> (Result<Completion>,Vec<String>,Option<crate::studio_models::Readiness>) {
+        run_case(plan,None,true)
+    }
+    fn run_case(plan: Vec<(&'static str, Value)>, model_load: Option<crate::ai_profiles::ModelLoadSettings>, response_failure:bool) -> (Result<Completion>,Vec<String>,Option<crate::studio_models::Readiness>) {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let port = listener.local_addr().unwrap().port();
         let (finished, finish) = mpsc::channel();
+        let expected_options=model_load.clone();
         let server = thread::spawn(move || {
             let mut observed = Vec::new();
             for (route, response) in plan {
@@ -1713,10 +1838,19 @@ mod model_readiness_tests {
                     assert_eq!(body["engine"], "auto");
                     assert_eq!(body["disable_vision"], true);
                     assert_eq!(body["speculative_type"], "off");
-                    assert_eq!(body["llama_extra_args"], json!([]));
+                    if let Some(options)=&expected_options {
+                        assert_eq!(body["n_parallel"],options.parallel);
+                        assert_eq!(body["gpu_memory_mode"],json!(options.gpu_memory_mode));
+                        assert_eq!(body["llama_extra_args"],json!(["--fit",match options.fit {crate::ai_profiles::Fit::On=>"on",crate::ai_profiles::Fit::Off=>"off"}]));
+                    } else {
+                        assert_eq!(body["llama_extra_args"], json!([]));
+                        assert!(body.get("n_parallel").is_none());
+                        assert!(body.get("gpu_memory_mode").is_none());
+                    }
                 }
                 let bytes = serde_json::to_vec(&response).unwrap();
-                write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",bytes.len()).unwrap();
+                let code=response.get("_fixture_http_status").and_then(Value::as_u64).unwrap_or(200);
+                write!(socket,"HTTP/1.1 {code} Fixture\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",bytes.len()).unwrap();
                 socket.write_all(&bytes).unwrap();
             }
             finish.recv_timeout(Duration::from_secs(2)).unwrap();
@@ -1729,6 +1863,7 @@ mod model_readiness_tests {
         });
         let mut profile = super::tests::profile(port);
         profile.settings.model = "fixture/model-GGUF".into();
+        profile.settings.model_load=model_load;
         let p = prepare(profile, Secret::new("public-fixture".into()), 30).unwrap();
         let stages = Mutex::new(Vec::new());
         let readiness = Mutex::new(None);
@@ -1743,9 +1878,15 @@ mod model_readiness_tests {
         finished.send(()).unwrap();
         let routes = server.join().unwrap();
         if result.is_err() {
-            assert!(!routes.iter().any(|r| r.contains("chat/completions")));
-            assert!(readiness.lock().unwrap().is_none());
-            assert_eq!(http, None);
+            if response_failure {
+                assert!(routes.iter().any(|r|r.contains("chat/completions")));
+                assert!(readiness.lock().unwrap().is_some());
+                assert_eq!(http,Some(200));
+            } else {
+                assert!(!routes.iter().any(|r| r.contains("chat/completions")));
+                assert!(readiness.lock().unwrap().is_none());
+                assert_eq!(http, None);
+            }
         }
         (
             result,
@@ -1774,6 +1915,20 @@ mod model_readiness_tests {
         );
     }
     #[test]
+    fn lower_effective_context_warns_and_generates_when_actual_request_fits() {
+        let (result, _, ready) = run(vec![("GET /api/inference/status ",loaded(json!(2048),"fixture/model-GGUF")),("POST /v1/chat/completions ",completion())]);
+        assert!(result.is_ok());
+        let ready=ready.unwrap();
+        assert_eq!(ready.actual_context,2048);
+        assert!(!ready.warnings.is_empty());
+    }
+    #[test]
+    fn reported_usage_above_observed_context_is_rejected_after_generation() {
+        let mut completion=completion();completion["usage"]=json!({"prompt_tokens":3000,"completion_tokens":1,"total_tokens":3001});
+        let (result,_,ready)=run_response_failure(vec![("GET /api/inference/status ",loaded(json!(2048),"fixture/model-GGUF")),("POST /v1/chat/completions ",completion)]);
+        assert_eq!(result,Err(Failure::Oversized));assert_eq!(ready.unwrap().actual_context,2048);
+    }
+    #[test]
     fn sufficient_loaded_model_reused_without_version_inventory_load_or_reload() {
         let (result, _, ready) = run(vec![
             (
@@ -1789,7 +1944,7 @@ mod model_readiness_tests {
     fn capacity_conflict_loading_and_unknown_status_refuse_without_generation_or_mutation() {
         for (status, failure) in [
             (
-                loaded(json!(2048), "fixture/model-GGUF"),
+                loaded(json!(512), "fixture/model-GGUF"),
                 Failure::ModelContext,
             ),
             (
@@ -1824,24 +1979,24 @@ mod model_readiness_tests {
         partial.truncate(3);
         assert_eq!(run(partial).0, Err(Failure::ModelUnavailable));
         let mut race = plan();
-        race[4].1 = loaded(json!(8192), "another-model");
-        race.truncate(5);
+        race[5].1 = loaded(json!(8192), "another-model");
+        race.truncate(6);
         assert_eq!(run(race).0, Err(Failure::ModelConflict));
     }
     #[test]
     fn late_load_error_and_unconfirmed_or_insufficient_final_status_never_generate() {
         let mut late = plan();
-        late[5].1 =
+        late[6].1 =
             json!({"_deferred_error":{"status_code":500,"detail":"untrusted private path"}});
-        late.truncate(6);
+        late.truncate(7);
         assert_eq!(run(late).0, Err(Failure::ModelLoad));
         let mut not_ready = plan();
-        not_ready[6].1 = empty();
-        not_ready.truncate(7);
+        not_ready[7].1 = empty();
+        not_ready.truncate(8);
         assert_eq!(run(not_ready).0, Err(Failure::ModelNotReady));
         let mut narrow = plan();
-        narrow[6].1 = loaded(json!(2048), "C:\\synthetic-cache\\fixture.Q4_K_M.gguf");
-        narrow.truncate(7);
+        narrow[7].1 = loaded(json!(512), "C:\\synthetic-cache\\fixture.Q4_K_M.gguf");
+        narrow.truncate(8);
         assert_eq!(run(narrow).0, Err(Failure::ModelLoadContext));
         assert!(Failure::ModelLoadContext.message().contains("completed a local model load"));
         assert!(Failure::ModelLoadContext.message().contains("no generation was sent"));
@@ -1850,7 +2005,7 @@ mod model_readiness_tests {
     #[test]
     fn optional_serving_contract_allows_idle_load_and_single_primary_reuse_without_version_or_tag() {
         let mut extended = plan();
-        for index in [0, 4] {
+        for index in [0, 5] {
             extended[index].1["serving"] = json!([]);
             extended[index].1["serving_checkpoints"] = json!([]);
             extended[index].1["yours"] = json!(true);
@@ -1858,9 +2013,9 @@ mod model_readiness_tests {
         }
         // Additional quant-pinned rows are distinct; bare repo selection stays exact.
         extended[1].1["data"].as_array_mut().unwrap().push(json!({"id":"fixture/model-GGUF:Q8_0","loaded":false,"quant":"Q8_0","status":{"value":"cached"}}));
-        extended[5].1["evicted"] = json!([]);
-        extended[6].1["serving"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf"]);
-        extended[6].1["serving_checkpoints"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf"]);
+        extended[6].1["evicted"] = json!([]);
+        extended[7].1["serving"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf"]);
+        extended[7].1["serving_checkpoints"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf"]);
         let (result, _, ready) = run(extended);
         assert!(result.is_ok());
         assert!(ready.unwrap().loaded_for_request);
@@ -1901,20 +2056,20 @@ mod model_readiness_tests {
             json!({"loaded":[],"loading":[],"serving":["other"],"serving_checkpoints":["other"]}),
         ] {
             let mut race = plan();
-            race[4].1 = status;
-            race.truncate(5);
+            race[5].1 = status;
+            race.truncate(6);
             assert_eq!(run(race).0,Err(Failure::ModelConflict));
         }
         for evicted in [json!(["other"]),Value::Null,json!(false)] {
             let mut changed = plan();
-            changed[5].1["evicted"] = evicted;
-            changed.truncate(6);
+            changed[6].1["evicted"] = evicted;
+            changed.truncate(7);
             assert_eq!(run(changed).0,Err(Failure::ModelLoad));
         }
         let mut changed = plan();
-        changed[6].1["serving"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf","other"]);
-        changed[6].1["serving_checkpoints"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf","other"]);
-        changed.truncate(7);
+        changed[7].1["serving"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf","other"]);
+        changed[7].1["serving_checkpoints"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf","other"]);
+        changed.truncate(8);
         assert_eq!(run(changed).0,Err(Failure::ModelConflict));
     }
 
@@ -1945,6 +2100,22 @@ mod model_readiness_tests {
         }
     }
 
+    #[test]
+    fn explicit_load_knobs_reach_manual_loader_and_effective_mismatch_only_warns() {
+        let mut p=plan();p[7].1=loaded(json!(2048),"C:\\synthetic-cache\\fixture.Q4_K_M.gguf");p[7].1["parallel_slots"]=json!(1);p[7].1["gpu_memory_mode"]=json!("manual");
+        let options=crate::ai_profiles::ModelLoadSettings {parallel:2,gpu_memory_mode:crate::ai_profiles::GpuMemoryMode::Auto,fit:crate::ai_profiles::Fit::On};
+        let (result,_,ready)=run_options(p,Some(options));assert!(result.is_ok());let ready=ready.unwrap();assert!(ready.loaded_for_request);assert!(ready.warnings.len()>=3);assert_eq!(ready.effective.parallel,Some(1));assert_eq!(ready.effective.fit,None);
+        let (result,_,ready)=run_options(vec![("GET /api/inference/status ",loaded(json!(2048),"fixture/model-GGUF")),("POST /v1/chat/completions ",completion())],Some(crate::ai_profiles::ModelLoadSettings::default()));assert!(result.is_ok());assert!(!ready.unwrap().loaded_for_request);
+    }
+    #[test]
+    fn legacy_settings_api_absence_preserves_cached_load_but_explicit_config_refuses_precisely() {
+        let mut p=plan();p[4].1=json!({"_fixture_http_status":404,"detail":"untrusted path"});assert!(run(p.clone()).0.is_ok());p.truncate(5);assert_eq!(run_options(p,Some(crate::ai_profiles::ModelLoadSettings::default())).0,Err(Failure::ModelSettingsUnsupported));
+    }
+    #[test]
+    fn resolved_override_for_unrelated_model_refuses_before_local_load_or_generation() {
+        let mut p=plan();p[4].1=json!({"overrides":{"unrelated/model":{"n_parallel":1}},"resolved_key":"unrelated/model","resolved":{"n_parallel":1}});p.truncate(5);
+        assert_eq!(run(p).0,Err(Failure::ModelSettingsUnsafe));
+    }
     #[test]
     fn cancellation_owns_and_closes_status_socket_before_any_generation() {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
@@ -1981,7 +2152,7 @@ mod model_readiness_tests {
     fn cancellation_during_local_load_closes_only_owned_socket_and_never_generates() {
         let listener=TcpListener::bind("127.0.0.1:0").unwrap();let port=listener.local_addr().unwrap().port();let cancel=Cancel::default();let c=cancel.clone();
         let server=thread::spawn(move||{
-            for (route,response) in plan().into_iter().take(6) {
+            for (route,response) in plan().into_iter().take(7) {
                 let(mut socket,_)=listener.accept().unwrap();let(header,_)=read_request(&mut socket);assert!(header.starts_with(route));
                 if route=="POST /api/inference/load " {c.cancel();let mut b=[0;1];assert_eq!(socket.read(&mut b).unwrap(),0);break;}
                 let bytes=serde_json::to_vec(&response).unwrap();write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",bytes.len()).unwrap();socket.write_all(&bytes).unwrap();
@@ -1993,4 +2164,111 @@ mod model_readiness_tests {
         assert_eq!(execute_ready(p,&cancel,|_|{},&mut None,|_|panic!("cancel cannot publish readiness")),Err(Failure::Cancelled));server.join().unwrap();
     }
 
+}
+
+#[cfg(test)]
+mod model_settings_tests {
+    use super::*;
+    use crate::{ai_profiles::ModelLoadSettings, studio_config};
+    use std::{io::{Read,Write},net::TcpListener,thread};
+    const QUERY: &str="GET /api/settings/openai-auto-switch/overrides?model_id=C%3A%5Csynthetic-cache%5Cfixture.Q4_K_M.gguf&alias_id=fixture%2Fmodel-GGUF&gguf_variant=Q4_K_M ";
+    fn response(key:&str,row:Value)->Value {
+        let mut rows=serde_json::Map::new();rows.insert(key.into(),row.clone());
+        json!({"overrides":rows,"resolved":row,"resolved_key":key})
+    }
+    fn initial()->Value {response("fixture/model-GGUF",json!({"kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--flash-attn","on","--no-warmup"]}))}
+    fn saved()->Value {response("fixture/model-GGUF:Q4_K_M",json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--flash-attn","on","--no-warmup","--fit","off"]}))}
+    fn status()->Value {json!({"active_model":"fixture/model-GGUF","model_identifier":"fixture/model-GGUF","loaded":["fixture/model-GGUF"],"loading":[],"context_length":2048,"parallel_slots":2,"gpu_memory_mode":"auto"})}
+    fn plan(apply:bool)->Vec<(&'static str,u16,Value)> {
+        let mut plan=vec![
+            ("GET /api/inference/status ",200,status()),
+            ("GET /v1/models ",200,json!({"data":[{"id":"fixture/model-GGUF","loaded":true,"quant":"Q4_K_M"}]})),
+            ("GET /api/models/cached-gguf ",200,json!({"cached":[{"repo_id":"fixture/model-GGUF","task":"text-generation","partial":false}]})),
+            ("GET /api/models/cached-model-path?repo_id=fixture%2Fmodel-GGUF&variant=Q4_K_M ",200,json!({"path":"C:\\synthetic-cache\\fixture.Q4_K_M.gguf","is_dir":false})),
+            (QUERY,200,initial()),
+            ("GET /api/settings/openai-auto-switch ",200,json!({"enabled":false})),
+        ];
+        if apply {plan.extend([(QUERY,200,initial()),("GET /api/inference/status ",200,status()),("PUT /api/settings/openai-auto-switch/overrides ",200,json!({"overrides":{},"resolved":null,"resolved_key":null})),(QUERY,200,saved())]);}
+        plan
+    }
+    fn run(plan:Vec<(&'static str,u16,Value)>,apply:bool,legacy:bool,before:impl Fn(&Cancel)->bool)->Result<studio_config::Report> {
+        let listener=TcpListener::bind("127.0.0.1:0").unwrap();listener.set_nonblocking(true).unwrap();let port=listener.local_addr().unwrap().port();
+        let (done_tx,done_rx)=mpsc::channel();
+        let server=thread::spawn(move||{
+            let deadline=Instant::now()+Duration::from_secs(8);
+            for (route,code,value) in plan {
+                let mut socket=loop {match listener.accept(){Ok((socket,_))=>break socket,Err(e)if e.kind()==std::io::ErrorKind::WouldBlock=>{assert!(Instant::now()<deadline,"Expected settings request missing");thread::yield_now();},Err(_)=>panic!("Fixture accept failed")}};
+                socket.set_nonblocking(false).unwrap();socket.set_read_timeout(Some(Duration::from_secs(3))).unwrap();socket.set_write_timeout(Some(Duration::from_secs(3))).unwrap();
+                let mut header=Vec::new();while !header.ends_with(b"\r\n\r\n") {let mut b=[0];assert_eq!(socket.read(&mut b).unwrap(),1);header.push(b[0]);assert!(header.len()<8192);}
+                let header=String::from_utf8(header).unwrap();assert!(header.starts_with(route),"Unexpected method or route");assert!(header.to_ascii_lowercase().contains("authorization: bearer public-fixture"),"Expected bound fixture credential");
+                let length=header.lines().find_map(|line|line.to_ascii_lowercase().strip_prefix("content-length:").map(|n|n.trim().parse::<usize>().unwrap())).unwrap_or(0);assert!(length<16384);let mut bytes=vec![0;length];socket.read_exact(&mut bytes).unwrap();
+                if route.starts_with("PUT ") {
+                    let body:Value=serde_json::from_slice(&bytes).unwrap();
+                    assert_eq!(body["model_id"],"fixture/model-GGUF:Q4_K_M");assert_eq!(body["max_seq_length"],4096);assert_eq!(body["custom_context_length"],4096);assert_eq!(body["n_parallel"],1);assert_eq!(body["gpu_memory_mode"],"manual");
+                    if value["_fixture_empty_merge"]==true {
+                        assert!(body.get("kv_cache_dtype").is_none());assert_eq!(body["llama_extra_args"],json!(["--fit","off"]));
+                    } else {
+                        assert_eq!(body["kv_cache_dtype"],"q8_0");assert_eq!(body["speculative_type"],"ngram");assert_eq!(body["ctx_checkpoints"],4);assert_eq!(body["n_batch"],512);assert_eq!(body["llama_extra_args"],json!(["--flash-attn","on","--no-warmup","--fit","off"]));
+                    }
+                }
+                let body=serde_json::to_vec(&value).unwrap();let mut reply=format!("HTTP/1.1 {code} Fixture\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).into_bytes();reply.extend(body);socket.write_all(&reply).unwrap();
+            }
+            done_rx.recv_timeout(Duration::from_secs(9)).unwrap();assert!(matches!(listener.accept(),Err(e)if e.kind()==std::io::ErrorKind::WouldBlock),"Unexpected settings, load or generation request");
+        });
+        let mut profile=super::tests::profile(port);profile.settings.model="fixture/model-GGUF".into();profile.settings.model_load=(!legacy).then(ModelLoadSettings::default);
+        let prepared=prepare(profile,Secret::new("public-fixture".into()),30).unwrap();let cancel=Cancel::default();
+        let result=model_load_settings(prepared,apply,&cancel,||before(&cancel));done_tx.send(()).unwrap();server.join().unwrap();result
+    }
+    #[test]
+    fn explicit_apply_preserves_quant_options_verifies_resolved_readback_and_never_reloads() {
+        let report=run(plan(true),true,false,|_|true).unwrap();assert!(report.applied);assert_eq!(report.model_id,"fixture/model-GGUF");assert_eq!(report.resolved_model_id.as_deref(),Some("fixture/model-GGUF:Q4_K_M"));assert_eq!(report.saved.unwrap().context_length,Some(4096));assert_eq!(report.effective.unwrap().context_length,Some(2048));assert_eq!(report.auto_switch_enabled,Some(false));assert!(!report.warnings.is_empty());
+    }
+    #[test]
+    fn first_apply_accepts_source_empty_object_resolution_and_confirms_quant_entry() {
+        let mut p=plan(true);let empty=json!({"overrides":{},"resolved_key":null,"resolved":{}});p[4].2=empty.clone();p[6].2=empty;p[8].2=json!({"overrides":{},"resolved_key":null,"resolved":null,"_fixture_empty_merge":true});p[9].2=response("fixture/model-GGUF:Q4_K_M",json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","llama_extra_args":["--fit","off"]}));assert!(run(p,true,false,|_|true).unwrap().applied);
+    }
+    #[test]
+    fn legacy_read_and_owner_only_auto_switch_forbidden_remain_read_only_and_sanitized() {
+        let mut p=plan(false);p[5].1=403;p[5].2=json!({"detail":"public-fixture C:\\private\\profile"});
+        let report=run(p,false,true,|_|panic!("Read cannot request a write")).unwrap();assert!(!report.applied);assert_eq!(report.auto_switch_enabled,None);let text=serde_json::to_string(&report).unwrap();assert!(!text.contains("public-fixture"));assert!(!text.contains("synthetic-cache"));assert!(!text.contains("private"));
+        let mut contradictory=plan(false);contradictory[0].2=json!({"active_model":"fixture/model-GGUF","loaded":[],"loading":[],"context_length":2048});let report=run(contradictory,false,true,|_|true).unwrap();assert!(report.effective.is_none());assert!(report.warnings.iter().any(|w|w.contains("no effective configuration")));
+    }
+    #[test]
+    fn unsafe_fields_busy_changed_profile_and_cancellation_refuse_before_put() {
+        for bad in [json!({"unknown_private_field":1}),json!({"llama_extra_args":["--parallel","1"]})] {
+            let mut p=plan(true);p[6].2=response("fixture/model-GGUF",bad);p.truncate(7);assert!(matches!(run(p,true,false,|_|true),Err(Failure::ModelSettingsUnsafe)));
+        }
+        let mut busy=plan(true);busy[0].2=json!({"loaded":[],"loading":["fixture/model-GGUF"]});busy.truncate(1);assert!(matches!(run(busy,true,false,|_|true),Err(Failure::Busy)));
+        let mut changed=plan(true);changed.truncate(8);assert!(matches!(run(changed.clone(),true,false,|_|false),Err(Failure::ModelSettingsChanged)));assert!(matches!(run(changed,true,false,|cancel|{cancel.cancel();true}),Err(Failure::Cancelled)));
+    }
+    #[test]
+    fn resolved_readback_mismatch_warns_without_claiming_success() {
+        let mut p=plan(true);p[9].2=initial();let report=run(p,true,false,|_|true).unwrap();assert!(!report.applied);assert!(report.warnings.iter().any(|w|w.contains("not confirmed")));
+        let mut lost=plan(true);let row=json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--fit","off"]});lost[9].2=response("fixture/model-GGUF:Q4_K_M",row);let report=run(lost,true,false,|_|true).unwrap();assert!(!report.applied);assert!(report.warnings.iter().any(|w|w.contains("preservation is not confirmed")));
+    }
+    #[test]
+    fn resolved_rows_outside_selected_target_refuse_before_write_and_readback_is_unverified() {
+        let unrelated=response("unrelated/model",json!({"n_parallel":1}));
+        for apply in [false,true] {
+            let mut p=plan(apply);p[4].2=unrelated.clone();p.truncate(5);
+            assert!(matches!(run(p,apply,false,|_|panic!("Unrelated read must not reach write guard")),Err(Failure::ModelSettingsUnsafe)));
+        }
+        let mut p=plan(true);p[6].2=unrelated.clone();p.truncate(7);
+        assert!(matches!(run(p,true,false,|_|panic!("Unrelated merge must not reach write guard")),Err(Failure::ModelSettingsUnsafe)));
+        let mut p=plan(true);p[9].2=unrelated;
+        let report=run(p,true,false,|_|true).unwrap();assert!(!report.applied);assert!(report.saved.is_none());assert!(report.resolved_model_id.is_none());assert!(report.warnings.iter().any(|w|w.contains("outside the selected model")));
+        // A proved ASCII spelling normalization is still the server's winner.
+        let mut p=plan(true);let row=p[9].2["resolved"].clone();p[9].2=response("FIXTURE/MODEL-GGUF:q4_k_m",row);
+        assert!(run(p,true,false,|_|true).unwrap().applied);
+        // Value normalization/deviation is reported, rather than a transport refusal.
+        let mut p=plan(true);let mut row=p[9].2["resolved"].clone();row["n_parallel"]=json!(2);p[9].2=response("fixture/model-GGUF:Q4_K_M",row);
+        let report=run(p,true,false,|_|true).unwrap();assert!(!report.applied);assert_eq!(report.saved.unwrap().parallel,Some(2));
+    }
+    #[test]
+    fn missing_management_interface_and_provider_errors_never_expose_raw_responses() {
+        let mut after_write=plan(true);after_write[9].1=500;after_write[9].2=json!({"detail":"public-fixture /private/secret"});assert!(matches!(run(after_write,true,false,|_|true),Err(Failure::Provider)));
+        for (code,failure) in [(404,Failure::ModelSettingsUnsupported),(401,Failure::Authentication),(500,Failure::Provider)] {
+            let mut p=plan(false);p[0].1=code;p[0].2=json!({"detail":"public-fixture /private/secret"});p.truncate(1);let result=run(p,false,false,|_|true);assert!(matches!(result,Err(e)if e==failure));assert!(!failure.message().contains("public-fixture"));assert!(!failure.message().contains("/private"));
+        }
+    }
 }

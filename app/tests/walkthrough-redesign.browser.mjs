@@ -65,7 +65,7 @@ async function mount(page,surface,theme,size){
   const refuse=operation=>{window.fixtureProhibited.push(operation);throw Error('Fixture blocks persistence/network: '+operation);};
   window.__TAURI_INTERNALS__={invoke:async(_,{request})=>{
    window.fixtureCalls.push(request.operation);
-   const value=request.operation==='ai.profiles'?profiles:request.operation==='preferences.read'?preferences:refuse(request.operation);
+   const value=request.operation==='ai.profiles'?profiles:request.operation==='preferences.read'?preferences:request.operation==='ai.readModelLoadSettings'?{modelId:'synthetic-model',resolvedModelId:'synthetic-model:Q4_K_M',requested:{contextLength:32768,parallel:1,gpuMemoryMode:'manual',fit:'off'},saved:{contextLength:32768,parallel:1,gpuMemoryMode:'manual',fit:'off'},effective:{contextLength:22528,parallel:2,gpuMemoryMode:'auto',fit:null},autoSwitchEnabled:false,applied:false,warnings:['Fitting is unverified. Unsloth Studio may filter the requested fit argument during loading.'],message:'Synthetic read-only model-load report.'}:refuse(request.operation);
    return {ok:true,value,protocolVersion:1,requestId:request.requestId};
   }};
   const {loadPreferences}=await import('/src/preferences.ts');await loadPreferences();
@@ -144,8 +144,12 @@ async function exerciseSurface(page,surface,size){
  if(surface==='settings'){
   await page.locator('.studio-settings[data-busy="false"]').waitFor();
   assert.equal(await page.getByLabel('Context length',{exact:true}).inputValue(),'32768');assert.equal(await page.getByLabel('Maximum response length',{exact:true}).inputValue(),'8192');
-  await page.getByLabel('Model ID',{exact:true}).fill('synthetic-model-draft');
-  return {actions:['.studio-save-actions button'],behavior:{settingsDraft:true,oneContextField:await page.getByLabel('Context length',{exact:true}).count()===1}};
+  assert.equal(await page.getByLabel('Parallel slots',{exact:true}).inputValue(),'1');assert.equal(await page.getByLabel('GPU memory mode',{exact:true}).inputValue(),'manual');assert.equal(await page.getByLabel('Automatic memory fitting',{exact:true}).inputValue(),'off');
+  await page.getByRole('button',{name:'Read model-load settings',exact:true}).click();
+  await page.locator('.studio-model-load-report[data-outcome="read"]').waitFor();
+  assert.match(await page.locator('.studio-model-load-report').textContent(),/Actually loaded.*22,528/s);assert.match(await page.locator('.studio-model-load-warnings').textContent(),/Fitting is unverified/);
+  await page.getByLabel('Parallel slots',{exact:true}).evaluate(element=>element.closest('.studio-model-loading').scrollIntoView({block:'start'}));
+  return {actions:['.studio-save-actions button'],behavior:{configurableLoadDefaults:true,requestedSavedLoadedDistinct:true,readOnlyReport:true,mismatchWarning:true,oneContextField:await page.getByLabel('Context length',{exact:true}).count()===1}};
  }
  if(surface==='assist'){
   await page.locator('.rewrite-panel[data-busy="false"]').waitFor();

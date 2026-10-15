@@ -25,6 +25,15 @@ but had no renderer or native entry dialog. It is not production credential UX e
 
 ## Decision
 
+The [2026-10-15 model-load amendment](0013-provider-request-and-transport-contract.md#configurable-model-load-preferences--2026-10-15)
+adds optional `settings.modelLoad` with parallel slots, GPU memory mode and fitting.
+Missing legacy data stays absent until explicit local Save; suggested defaults do not
+rewrite existing records on read. Selected-model override persistence is a separate
+explicit Unsloth Studio action using the existing credential reference, not secret
+metadata or project content. Neither opening Settings nor saving the local profile
+writes to the server. Requested/saved/effective states and configuration warnings remain
+separate; no new provider, CPU-thread setting or credential namespace is introduced.
+
 - Keep versioned provider/model settings and project-to-profile bindings in device-local
   `ai-profiles.json` under the existing application-data root. Store no key values.
 - Baseline design uses macOS Keychain / Windows Credential Manager for **Remember on this computer**; the selected temporary Mac development exception below replaces Mac API-key calls while preserving native ownership.

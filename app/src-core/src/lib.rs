@@ -2,6 +2,7 @@ pub mod ai_compatibility;
 pub mod ai_credentials;
 pub mod ai_discovery;
 pub mod studio_models;
+pub mod studio_config;
 pub mod ai_file_secrets;
 pub mod ai_profiles;
 pub mod authoring;
@@ -53,6 +54,8 @@ pub const OPERATIONS: &[&str] = &[
     "ai.discover",
     "ai.sendSynthetic",
     "ai.testCompatibility",
+    "ai.readModelLoadSettings",
+    "ai.applyModelLoadSettings",
     "ai.requestStatus",
     "ai.cancelRequest",
     "probe.denied",

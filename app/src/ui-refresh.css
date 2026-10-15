@@ -648,6 +648,9 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 .studio-settings .studio-group { min-width: 0; }
 .studio-settings .setting-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(140px,280px); gap:8px 24px; padding:10px 0; }
 .studio-settings .setting-row input:not([type="checkbox"]) { width:100%; }
+.studio-settings .setting-row select { width:100%; min-width:0; }
+.studio-model-load-report table { width:100%; table-layout:fixed; border-collapse:collapse; font-size:.875em; }
+.studio-model-load-report th,.studio-model-load-report td { padding:6px; text-align:left; vertical-align:top; overflow-wrap:anywhere; border-bottom:1px solid var(--border-normal); }
 .studio-settings .setting-row .field-error { grid-column:1/-1; }
 .studio-advanced,.studio-maintenance { border-top:1px solid var(--border-normal); padding:14px 0; }
 .studio-settings summary { cursor:pointer; font-weight:600; overflow-wrap:anywhere; }

@@ -64,6 +64,8 @@ pub struct StudioSettings {
     pub context_ceiling: u32,
     pub context_budget: u32,
     pub maximum_response: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model_load: Option<ModelLoadSettings>,
     // Absent fields retain old serialized profiles until an explicit Settings save.
     #[serde(
         default,
@@ -77,6 +79,25 @@ pub struct StudioSettings {
         skip_serializing_if = "Option::is_none"
     )]
     pub top_p: Option<f64>,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum GpuMemoryMode { Auto, Manual }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Fit { On, Off }
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ModelLoadSettings {
+    pub parallel: u32,
+    pub gpu_memory_mode: GpuMemoryMode,
+    pub fit: Fit,
+}
+impl Default for ModelLoadSettings {
+    fn default() -> Self { Self { parallel: 1, gpu_memory_mode: GpuMemoryMode::Manual, fit: Fit::Off } }
+}
+impl ModelLoadSettings {
+    pub fn valid(&self) -> bool { (1..=64).contains(&self.parallel) }
 }
 fn sampling_value<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
@@ -289,6 +310,7 @@ impl StudioSettings {
             && (256..=2_000_000).contains(&self.context_ceiling)
             && (256..=self.context_ceiling).contains(&self.context_budget)
             && self.maximum_response > 0
+            && self.model_load.as_ref().is_none_or(ModelLoadSettings::valid)
             && self
                 .maximum_response
                 .checked_add(128)
@@ -413,6 +435,7 @@ mod tests {
                     context_ceiling: 8192,
                     context_budget: 4096,
                     maximum_response: 1024,
+                    model_load: None,
                     temperature: None,
                     top_p: None,
                 },
@@ -465,6 +488,22 @@ mod tests {
         }
     }
 
+    #[test]
+    fn model_load_legacy_roundtrip_explicit_settings_and_bounds() {
+        let legacy=fixture();
+        let bytes=serde_json::to_vec(&legacy).unwrap();
+        assert_eq!(serde_json::to_vec(&decode(&bytes).unwrap()).unwrap(),bytes);
+        assert!(!String::from_utf8(bytes).unwrap().contains("modelLoad"));
+        let mut saved=legacy.clone();
+        saved.profiles[0].settings.model_load=Some(ModelLoadSettings::default());
+        assert_eq!(decode(&serde_json::to_vec(&saved).unwrap()).unwrap(),saved);
+        for parallel in [1,64] {saved.profiles[0].settings.model_load.as_mut().unwrap().parallel=parallel;assert!(saved.valid());}
+        for parallel in [0,65] {saved.profiles[0].settings.model_load.as_mut().unwrap().parallel=parallel;assert!(!saved.valid());}
+        for value in [serde_json::json!({"parallel":1,"gpuMemoryMode":"manual","fit":"unknown"}),serde_json::json!({"parallel":true,"gpuMemoryMode":"manual","fit":"off"}),serde_json::json!({"parallel":1,"gpuMemoryMode":"manual","fit":"off","threads":4})] {
+            let mut data=serde_json::to_value(&legacy).unwrap();data["profiles"][0]["settings"]["modelLoad"]=value;
+            assert!(decode(&serde_json::to_vec(&data).unwrap()).is_err());
+        }
+    }
     #[test]
     fn endpoint_policy_refuses_ordinary_misrouting() {
         for endpoint in [

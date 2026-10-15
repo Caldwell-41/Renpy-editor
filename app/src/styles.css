@@ -318,6 +318,7 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .studio-request select { width:100%; margin:8px 0; }
 .studio-request input { width:90px; margin-left:8px; }
 .studio-request-output { white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; }
+.studio-load-warning { display:block; color:var(--status-warning); overflow-wrap:anywhere; }
 
 .rewrite-panel { position:fixed; right:16px; top:76px; z-index:24; width:min(580px,calc(100vw - 32px)); max-height:calc(100vh - 120px); overflow:auto; padding:18px; border:1px solid var(--border-normal); border-radius:var(--radius-small); background:var(--surface-panel); box-shadow:var(--shadow-preview); }
 .rewrite-panel h3 { margin:0 0 12px; }

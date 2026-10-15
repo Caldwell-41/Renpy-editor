@@ -713,6 +713,14 @@ creation, project world/tone and card restore extend `references.apply` and the 
 No read-time migration, alternate history stack or game execution is introduced.
 These locally implemented inputs are not covered by earlier frozen-product proof.
 
+The [model-load preference amendment](adr/0013-provider-request-and-transport-contract.md#configurable-model-load-preferences--2026-10-15)
+adds optional local profile preferences and fixed per-model read/apply/read-back through
+`studio_config`. Native request ownership blocks concurrent generation/management,
+keeps network outside the project lock and cancels owned management on configuration
+change or shutdown. Server overrides are persistent future-load configuration; effective
+runtime evidence remains separate. Generation never writes settings and admits the
+prepared payload against verified actual capacity, warning on preference deviations.
+
 The current bounded non-streaming slice uses `ai.sendSynthetic`, `ai.requestStatus`
 and `ai.cancelRequest` through the existing main-window typed IPC. Core captures a
 fixed synthetic body and saved Studio profile/credential, validates the supported

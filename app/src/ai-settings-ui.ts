@@ -1,6 +1,9 @@
 import { requestCore } from "./bridge.ts";
 import type { CoreOperation } from "./protocol.ts";
-interface StudioSettings { label:string; endpoint:string; model:string; privateHttp:boolean; contextCeiling:number; contextBudget:number; maximumResponse:number; temperature?:number; topP?:number }
+interface ModelLoadSettings { parallel:number; gpuMemoryMode:"auto"|"manual"; fit:"on"|"off" }
+interface ModelLoadValues { contextLength:number; parallel:number; gpuMemoryMode:"auto"|"manual"; fit:"on"|"off" }
+interface ModelLoadReport { modelId:string; resolvedModelId?:string; requested:ModelLoadValues; saved:Partial<ModelLoadValues>|null; effective:Partial<ModelLoadValues>|null; autoSwitchEnabled:boolean|null; applied:boolean; warnings:string[]; message:string }
+interface StudioSettings { modelLoad?:ModelLoadSettings; label:string; endpoint:string; model:string; privateHttp:boolean; contextCeiling:number; contextBudget:number; maximumResponse:number; temperature?:number; topP?:number }
 interface Profile { profileId:string; revision:number; settings:StudioSettings; credentialStatus:string; credentialError?:string|null; disabled:boolean; compatibilityState?:string; compatibilityPayload?:string; discovery:null|{models:string[]; selectedAvailable:boolean; status:string;inventory?:{id:string;loaded:boolean|null;actualContext:number|null}[]} }
 interface Snapshot { token:string; profiles:Profile[]; cleanup:{profileId:string;deferred?:boolean}[]; storageNotice?:string; saveStatus?:string }
 function el<K extends keyof HTMLElementTagNameMap>(tag:K,text="",cls=""):HTMLElementTagNameMap[K] {const n=document.createElement(tag);n.textContent=text;n.className=cls;return n;}
@@ -16,6 +19,10 @@ export function mountStudioSettings(content:HTMLElement,footer:HTMLElement):Stud
     n.type=type;n.id=`studio-${label.toLowerCase().replace(/[^a-z]+/g,"-")}`;name.htmlFor=n.id;n.ariaLabel=label;
     copy.append(name,el("p",description,"muted"));line.append(copy,n);fields.append(line);return n;
   };
+  const choice=(label:string,description:string,options:readonly (readonly [string,string])[]):HTMLSelectElement=>{
+    const row=el("div","","setting-row"),copy=el("div"),name=el("label",label),select=el("select");select.id=`studio-${label.toLowerCase().replace(/[^a-z]+/g,"-")}`;select.ariaLabel=label;name.htmlFor=select.id;
+    for(const [value,text]of options){const option=el("option",text);option.value=value;select.append(option);}copy.append(name,el("p",description,"muted"));row.append(copy,select);fields.append(row);return select;
+  };
   const draftState=el("p","","studio-draft-state");
   root.append(el("h3","Unsloth Studio"),el("p","Profiles are saved only on this computer. Saving a profile does not connect.","muted"),chooser,status,fields);
   const label=input("Profile name","A local name for this connection."),endpoint=input("Endpoint","Base endpoint; loopback HTTP or verified HTTPS."),model=input("Model ID","Enter an exact model ID, or choose one after you Refresh models.");
@@ -23,20 +30,27 @@ export function mountStudioSettings(content:HTMLElement,footer:HTMLElement):Stud
   const privateHttp=input("Allow private-network HTTP","HTTP is unencrypted. Private LAN/VPN addresses need explicit opt-in. Loopback HTTP needs no private-network opt-in.","checkbox");
   const budget=input("Context length","Total tokens for the request and response. The response reserve and safety margin must fit within this total. Also used when requesting model-load context.","number"),response=input("Maximum response length","Maximum number of tokens to generate. Reaching this limit may cut the response short.","number");
   [budget,response].forEach(n=>{n.min="1";n.step="1";});
+  const parallel=input("Parallel slots","How many decoding slots Studio should allow for this model. Choose a whole number from 1 to 64.","number");parallel.min="1";parallel.max="64";parallel.step="1";
+  const gpuMemoryMode=choice("GPU memory mode","Automatic lets Studio choose memory placement. Manual requests Studio's manual mode; it does not guarantee a GPU-layer count.",[["auto","Automatic"],["manual","Manual"]]);
+  const memoryFit=choice("Automatic memory fitting","Off requests no automatic fitting. Actual loaded settings are checked separately and may differ.",[["on","On"],["off","Off"]]);
   const temperature=input("Temperature","How varied the writing is. Start at 1; lower it for more restrained output.","number"),topP=input("Top-p","How broad the word choices are. Start at 0.95.","number");
   temperature.min="0";temperature.max="2";temperature.step="0.01";topP.min="0";topP.max="1";topP.step="0.01";
   const credential=el("p","Credential: not configured","muted"),actions=el("div","","studio-actions");
   const button=(text:string):HTMLButtonElement=>{const b=el("button",text,"button");b.type="button";actions.append(b);return b;};
-  const save=button("Save profile"),entry=button("Enter credential…"),removeKey=button("Remove credential"),discover=button("Refresh models"),remove=button("Remove profile"),retryRead=button("Retry loading profiles"),reload=button("Reload profiles");save.classList.add("primary");
+  const save=button("Save profile"),entry=button("Enter credential…"),removeKey=button("Remove credential"),discover=button("Refresh models"),remove=button("Remove profile"),retryRead=button("Retry loading profiles"),reload=button("Reload profiles"),readModelLoad=button("Read model-load settings"),applyModelLoad=button("Apply model-load settings");save.classList.add("primary");
   const testSetup=button("Test connection"),cancelTest=button("Cancel connection test"),testPreview=el("details");testPreview.append(el("summary","Synthetic connection test request"));const testBody=el("pre");testPreview.append(testBody);root.append(testPreview);
   const cleanup=el("div"),storageNotice=el("p","","muted"),testStatus=el("p","","muted");
-  const connection=el("section","","studio-group"),defaultsGroup=el("section","","studio-group"),keyGroup=el("section","","studio-group"),advanced=el("details","","studio-advanced"),maintenance=el("details","","studio-maintenance"),setup=el("section","","studio-group"),danger=el("section","","studio-group studio-danger-zone");
+  const connection=el("section","","studio-group"),defaultsGroup=el("section","","studio-group"),keyGroup=el("section","","studio-group"),advanced=el("details","","studio-advanced"),maintenance=el("details","","studio-maintenance"),setup=el("section","","studio-group"),danger=el("section","","studio-group studio-danger-zone"),loadGroup=el("section","","studio-group studio-model-loading"),loadReport=el("div","","studio-model-load-report");loadReport.hidden=true;
   connection.append(el("h4","Connection"));for(const n of [label,endpoint,privateHttp,model])connection.append(n.closest(".setting-row")!);
   const modelActions=el("div","","studio-actions");modelActions.append(discover);connection.append(modelActions);
   const privateRow=privateHttp.closest<HTMLElement>(".setting-row")!;
   const transportVisibility=():void=>{privateRow.hidden=!endpoint.value.trim()||/^https:/i.test(endpoint.value.trim());};
   endpoint.addEventListener("input",transportVisibility);
   defaultsGroup.append(el("h4","Response defaults"),el("p","Tokens measure request and response length. The context length includes input, response reserve and a margin.","muted"));for(const n of [budget,response])defaultsGroup.append(n.closest(".setting-row")!);
+  const loadActions=el("div","","studio-actions");loadActions.append(readModelLoad,applyModelLoad);
+  loadGroup.append(el("h4","Model loading"),el("p","Suggested starting values are 1 slot, Manual memory mode and fitting Off. You can change them. The Context length above is also the requested model-load context.","muted"));
+  for(const n of [parallel,gpuMemoryMode,memoryFit])loadGroup.append(n.closest(".setting-row")!);
+  loadGroup.append(el("p","Save profile stores these preferences only on this computer and sends nothing. Read contacts Studio to inspect this saved model. Save profile first to store model-loading preferences before applying them to Studio. Apply explicitly updates that model's saved Studio settings; it does not reload an active model or enable automatic model switching.","muted"),loadActions,loadReport);
   advanced.append(el("summary","Advanced settings · sampling"));for(const n of [temperature,topP])advanced.append(n.closest(".setting-row")!);
   const keyActions=el("div","","studio-actions"),setupActions=el("div","","studio-actions"),maintenanceActions=el("div","","studio-actions"),saveActions=el("div","","studio-actions studio-save-actions");
   keyActions.append(entry,removeKey);keyGroup.append(el("h4","API Key"),credential,keyActions,storageNotice,cleanup);
@@ -45,24 +59,28 @@ export function mountStudioSettings(content:HTMLElement,footer:HTMLElement):Stud
   const removalConfirmation=el("div"),removalNotice=el("p"),removalActions=el("div","","studio-actions"),cancelRemoval=el("button","Cancel","button"),confirmRemoval=el("button","Remove profile","button danger");
   cancelRemoval.type=confirmRemoval.type="button";removalConfirmation.hidden=true;remove.classList.add("danger");
   removalActions.append(cancelRemoval,confirmRemoval);removalConfirmation.append(removalNotice,removalActions);danger.append(el("h4","Danger Zone"),remove,removalConfirmation);
-  fields.append(connection,keyGroup,defaultsGroup,advanced);saveActions.append(draftState,save);root.append(setup,maintenance,danger,saveActions);actions.remove();
+  fields.append(connection,keyGroup,defaultsGroup,loadGroup,advanced);saveActions.append(draftState,save);root.append(setup,maintenance,danger,saveActions);actions.remove();
   const active=():boolean=>!disposed&&root.isConnected;
+  const resetLoadReport=():void=>{loadReport.replaceChildren();loadReport.hidden=true;delete loadReport.dataset.outcome;delete loadReport.dataset.modelId;};
   const state=():void=>{
     root.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>("input,select,button").forEach(n=>n.disabled=busy||(!snapshot&&n!==retryRead&&n!==reload));
     retryRead.hidden=!readFailed;
     const testing=testId!==null;testSetup.disabled=busy||testing||!snapshot||!selected||dirty||snapshot.profiles.find(p=>p.profileId===selected)?.credentialStatus!=="configured";cancelTest.disabled=!testing;
     save.disabled=busy||testing||!snapshot;entry.disabled=busy||!snapshot||!selected||dirty;removeKey.disabled=busy||!snapshot||!selected||dirty;remove.disabled=busy||!snapshot||!selected||dirty;confirmRemoval.disabled=remove.disabled;cancelRemoval.disabled=busy;entry.disabled ||= snapshot?.profiles.find(p=>p.profileId===selected)?.credentialStatus==="unsupported";discover.disabled=busy||!snapshot||!selected||dirty||snapshot?.profiles.find(p=>p.profileId===selected)?.credentialStatus!=="configured";
+    const managementProfile=snapshot?.profiles.find(p=>p.profileId===selected);
+    readModelLoad.disabled=busy||testing||!snapshot||!selected||dirty||managementProfile?.disabled===true||managementProfile?.credentialStatus!=="configured";
+    applyModelLoad.disabled=readModelLoad.disabled||!managementProfile?.settings.modelLoad;
     if(testing){root.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>("input,select,button").forEach(n=>n.disabled=n!==cancelTest);}
     draftState.textContent=busy?"Working…":dirty?"Unsaved profile changes":!snapshot?"Saved profiles unavailable":selected?"Saved profile settings":"New profile · unsaved";
     root.dataset.dirty=String(dirty);root.dataset.busy=String(busy||testing);cancelTest.hidden=!testing;
-    footer.textContent="Profile changes need explicit Save. Refresh models and Test connection connect only when selected.";
+    footer.textContent="Save profile is local only. Refresh models, Test connection, Read and Apply model-load settings contact Studio only when selected.";
   };
   const draw=():void=>{
     if(!snapshot||!active())return;
     chooser.replaceChildren();snapshot.profiles.forEach(p=>{const o=el("option",p.settings.label);o.value=p.profileId;chooser.append(o);});const fresh=el("option","New Studio profile");fresh.value="";chooser.append(fresh);chooser.value=selected??"";
-    const p=snapshot.profiles.find(p=>p.profileId===selected);const s=p?.settings;
+    const p=snapshot.profiles.find(p=>p.profileId===selected);const s=p?.settings;resetLoadReport();
     for(const [input,error] of errors){error.textContent="";input.removeAttribute("aria-invalid");}
-    label.value=s?.label??"Studio";endpoint.value=s?.endpoint??"http://127.0.0.1:8888/v1";model.value=s?.model??"";privateHttp.checked=s?.privateHttp??false;budget.value=String(s?.contextBudget??32768);response.value=String(s?.maximumResponse??8192);transportVisibility();removalConfirmation.hidden=true;remove.hidden=false;temperature.value=String(s?.temperature??1);topP.value=String(s?.topP??0.95);
+    label.value=s?.label??"Studio";endpoint.value=s?.endpoint??"http://127.0.0.1:8888/v1";model.value=s?.model??"";privateHttp.checked=s?.privateHttp??false;budget.value=String(s?.contextBudget??32768);response.value=String(s?.maximumResponse??8192);transportVisibility();removalConfirmation.hidden=true;remove.hidden=false;temperature.value=String(s?.temperature??1);topP.value=String(s?.topP??0.95);parallel.value=String(s?.modelLoad?.parallel??1);gpuMemoryMode.value=s?.modelLoad?.gpuMemoryMode??"manual";memoryFit.value=s?.modelLoad?.fit??"off";
     credential.textContent=`Credential: ${p?.credentialStatus??"not configured"}${p?.disabled?" · profile disabled":""}`;entry.textContent=p?.credentialStatus==="configured"?"Replace credential…":["unavailable","deferred","missing"].includes(p?.credentialStatus??"")&&p?.credentialError?"Re-enter API key":"Enter credential…";
     storageNotice.textContent=/Mac/i.test(window.navigator.platform)||snapshot.storageNotice?.startsWith("Temporary Mac development storage")?"macOS: API keys are encrypted and stored on this computer. Software running under your user account may be able to decrypt them.":snapshot.storageNotice??"";
     status.textContent=p?.credentialError??p?.discovery?.status??(p?"Saved configuration":"New profile · unsaved");
@@ -86,7 +104,7 @@ export function mountStudioSettings(content:HTMLElement,footer:HTMLElement):Stud
     }catch{if(op==="ai.profiles")readFailed=true;if(active())status.textContent="AI settings service unavailable. Saved data is retained.";}finally{busy=false;if(active())state();}
   };
   const canLeave=():boolean=>{if(busy||testId){status.textContent="Finish the current action or cancel the connection test before leaving.";return false;}return !dirty||window.confirm("Discard unsaved Studio profile changes?");};
-  const validators=new Map<HTMLInputElement,()=>string>();
+  const validators=new Map<HTMLInputElement|HTMLSelectElement,()=>string>();
   const bytes=(text:string):number=>new TextEncoder().encode(text).length;
   const nameRule=(n:HTMLInputElement,max:number,name:string):string=>!n.value.trim()?`Enter ${name}.`:bytes(n.value)>max||/[\u0000-\u001f\u007f-\u009f]/u.test(n.value)?`Use at most ${max} UTF-8 bytes and no control characters.`:"";
   validators.set(label,()=>nameRule(label,80,"a profile name"));validators.set(model,()=>nameRule(model,256,"the exact model ID"));
@@ -96,19 +114,23 @@ export function mountStudioSettings(content:HTMLElement,footer:HTMLElement):Stud
   const whole=(n:HTMLInputElement,min:number,max:number):boolean=>!!n.value.trim()&&Number.isInteger(Number(n.value))&&Number(n.value)>=min&&Number(n.value)<=max;
   validators.set(budget,()=>whole(budget,256,2000000)?"":"Enter a whole number from 256 to 2,000,000 tokens.");
   validators.set(response,()=>whole(response,1,2000000)&&Number(response.value)+128<Number(budget.value)?"":"Enter a whole number greater than 0, leaving more than 128 tokens in the context length.");
+  validators.set(parallel,()=>whole(parallel,1,64)?"":"Enter a whole number from 1 to 64 parallel slots.");
+  validators.set(gpuMemoryMode,()=>["auto","manual"].includes(gpuMemoryMode.value)?"":"Choose Automatic or Manual GPU memory mode.");
+  validators.set(memoryFit,()=>["on","off"].includes(memoryFit.value)?"":"Choose On or Off for automatic memory fitting.");
   validators.set(temperature,()=>temperature.value.trim()&&Number.isFinite(Number(temperature.value))&&Number(temperature.value)>=0&&Number(temperature.value)<=2?"":"Enter a number from 0 to 2.");
   validators.set(topP,()=>topP.value.trim()&&Number.isFinite(Number(topP.value))&&Number(topP.value)>=0&&Number(topP.value)<=1?"":"Enter a number from 0 to 1.");
-  const errors=new Map<HTMLInputElement,HTMLElement>();
-  const validate=(n:HTMLInputElement):boolean=>{const text=validators.get(n)!();errors.get(n)!.textContent=text;n.setAttribute("aria-invalid",String(!!text));return !text;};
+  const errors=new Map<HTMLInputElement|HTMLSelectElement,HTMLElement>();
+  const validate=(n:HTMLInputElement|HTMLSelectElement):boolean=>{const text=validators.get(n)!();errors.get(n)!.textContent=text;n.setAttribute("aria-invalid",String(!!text));return !text;};
   for(const n of validators.keys()){const error=el("span","","field-error");error.id=`${n.id}-error`;errors.set(n,error);n.setAttribute("aria-describedby",error.id);n.closest(".setting-row")!.append(error);let composing=false;n.addEventListener("compositionstart",()=>{composing=true;});n.addEventListener("compositionend",()=>{composing=false;});n.addEventListener("blur",()=>{if(!composing)validate(n);});n.addEventListener("input",()=>{if(!composing&&error.textContent)validate(n);});}
-  fields.addEventListener("input",()=>{removalConfirmation.hidden=true;remove.hidden=false;const first=!dirty;dirty=true;if(first)status.textContent="Unsaved changes. Save before testing this connection or managing its key. Readiness applies only to the saved configuration.";state();});
+  const changed=():void=>{resetLoadReport();removalConfirmation.hidden=true;remove.hidden=false;const first=!dirty;dirty=true;if(first)status.textContent="Unsaved changes. Save before connecting or managing this model or its key. Readiness applies only to the saved configuration.";state();};
+  fields.addEventListener("input",changed);fields.addEventListener("change",changed);
   chooser.addEventListener("change",()=>{if(!canLeave()){chooser.value=selected??"";return;}selected=chooser.value||null;draw();});
   save.addEventListener("click",()=>{
-    let first:HTMLInputElement|undefined;for(const n of validators.keys())if(!validate(n))first??=n;
+    let first:HTMLInputElement|HTMLSelectElement|undefined;for(const n of validators.keys())if(!validate(n))first??=n;
     if(first){const details=first.closest("details");if(details)details.open=true;status.textContent="Correct the marked fields before saving. Your profile changes are retained.";first.focus();return;}
     const t=Number(temperature.value),p=Number(topP.value);
     if(!temperature.value.trim()||!topP.value.trim()||!Number.isFinite(t)||t<0||t>2||!Number.isFinite(p)||p<0||p>1){status.textContent="Temperature must be 0–2 and Top-p must be 0–1. Saved settings are unchanged.";return;}
-    void run("ai.saveProfile",{token:snapshot!.token,profileId:selected,settings:{label:label.value,endpoint:endpoint.value,model:model.value,privateHttp:privateHttp.checked,contextCeiling:Number(budget.value),contextBudget:Number(budget.value),maximumResponse:Number(response.value),temperature:t,topP:p}});
+    void run("ai.saveProfile",{token:snapshot!.token,profileId:selected,settings:{label:label.value,endpoint:endpoint.value,model:model.value,privateHttp:privateHttp.checked,contextCeiling:Number(budget.value),contextBudget:Number(budget.value),maximumResponse:Number(response.value),temperature:t,topP:p,modelLoad:{parallel:Number(parallel.value),gpuMemoryMode:gpuMemoryMode.value,fit:memoryFit.value}}});
   });
   for(const [b,op] of [[entry,"ai.enterCredential"],[removeKey,"ai.removeCredential"],[discover,"ai.discover"]] as const)b.addEventListener("click",()=>void run(op,{token:snapshot!.token,profileId:selected}));
   remove.addEventListener("click",()=>{
@@ -122,6 +144,41 @@ export function mountStudioSettings(content:HTMLElement,footer:HTMLElement):Stud
     if(confirmRemoval.disabled||removalConfirmation.hidden||!snapshot||!selected)return;
     void run("ai.removeProfile",{token:snapshot.token,profileId:selected});
   });
+  const loadFields:[keyof ModelLoadValues,string][]=[["contextLength","Context length"],["parallel","Parallel slots"],["gpuMemoryMode","GPU memory mode"],["fit","Automatic memory fitting"]];
+  const loadValue=(key:keyof ModelLoadValues,value:unknown):string=>{
+    if(key==="contextLength"||key==="parallel")return typeof value==="number"&&Number.isInteger(value)&&value>0?`${value.toLocaleString()}${key==="contextLength"?" tokens":""}`:"Unverified";
+    if(key==="gpuMemoryMode")return value==="auto"?"Automatic":value==="manual"?"Manual":"Unverified";
+    return value==="on"?"On":value==="off"?"Off":"Unverified";
+  };
+  const renderLoadReport=(report:ModelLoadReport,applying:boolean):void=>{
+    resetLoadReport();loadReport.hidden=false;loadReport.dataset.outcome=applying?(report.applied?"applied":"unverified"):"read";loadReport.dataset.modelId=report.modelId;
+    loadReport.append(el("h5",`Model-load settings · ${report.modelId}`));if(report.resolvedModelId)loadReport.append(el("p",`Studio override target: ${report.resolvedModelId}`,"muted"));
+    loadReport.append(el("p",report.message),el("p",applying?(report.applied?"Studio accepted the update. Check the saved and loaded values below. An active model has not been reloaded.":"The update was sent, but its saved configuration is unverified. Read the values and warnings below. An active model has not been reloaded."):"No model-load settings were applied by this action."));
+    const table=el("table"),head=el("thead"),titles=el("tr");for(const title of ["Setting","Requested","Saved in Studio","Actually loaded"]){const th=el("th",title);th.scope="col";titles.append(th);}head.append(titles);const body=el("tbody");
+    const warnings=[...report.warnings];
+    for(const [key,title]of loadFields){const row=el("tr"),name=el("th",title);name.scope="row";row.append(name);for(const value of [report.requested[key],report.saved?.[key],report.effective?.[key]])row.append(el("td",loadValue(key,value)));body.append(row);
+      for(const [source,values]of [["Saved in Studio",report.saved],["Actually loaded",report.effective]] as const){const actual=values?.[key];if(loadValue(key,actual)!=="Unverified"&&actual!==report.requested[key])warnings.push(`${source}: ${title} is ${loadValue(key,actual)}; requested ${loadValue(key,report.requested[key])}.`);}
+    }
+    table.append(head,body);loadReport.append(table,el("p","Unverified means Studio did not report a confirmed value. Differences are warnings; writing requests are checked against the actual loaded capacity.","muted"));
+    loadReport.append(el("p",`Automatic model switching: ${report.autoSwitchEnabled===true?"On":report.autoSwitchEnabled===false?"Off":"Unverified"}. Loomlight has not changed this server-wide setting.`));
+    if(report.autoSwitchEnabled!==true)warnings.push(report.autoSwitchEnabled===false?"Automatic model switching is off. Saved overrides will not cause API-driven loading on their own.":"Automatic model switching is unverified. Saved overrides may not cause API-driven loading.");
+    if(warnings.length){const box=el("div","","studio-model-load-warnings");box.role="status";box.style.color="var(--status-warning)";box.append(el("strong","Configuration warnings"));const list=el("ul");for(const warning of new Set(warnings))list.append(el("li",warning));box.append(list);loadReport.append(box);}
+  };
+  const manageModelLoad=async(operation:"ai.readModelLoadSettings"|"ai.applyModelLoadSettings"):Promise<void>=>{
+    const action=operation==="ai.applyModelLoadSettings"?applyModelLoad:readModelLoad;
+    if(action.disabled||!snapshot||!selected||!active())return;
+    const origin={token:snapshot.token,profileId:selected,modelId:snapshot.profiles.find(p=>p.profileId===selected)!.settings.model};
+    busy=true;resetLoadReport();state();status.textContent=operation==="ai.applyModelLoadSettings"?"Applying saved model-load settings…":"Reading model-load settings…";
+    try{
+      const result=await requestCore<ModelLoadReport>(operation,{token:origin.token,profileId:origin.profileId});if(!active())return;
+      if(!result.ok)throw new Error(result.error.message);
+      if(dirty||selected!==origin.profileId||snapshot?.token!==origin.token){status.textContent="Model-load action completed, but this form changed. Read again for the saved configuration.";return;}
+      if(result.value.modelId!==origin.modelId)throw new Error("Studio returned a report for a different model. Read again before applying settings.");
+      renderLoadReport(result.value,operation==="ai.applyModelLoadSettings");status.textContent=result.value.message;
+    }catch(error){if(!active())return;const detail=error instanceof Error?error.message:"The Studio management service is unavailable.";const message=operation==="ai.applyModelLoadSettings"?`Studio did not confirm the apply outcome. The server may already have saved settings. Read model-load settings before applying again. ${detail}`:`Model-load settings could not be read. ${detail}`;resetLoadReport();loadReport.hidden=false;loadReport.dataset.outcome="error";loadReport.append(el("p",message,"error-message"));status.textContent=message;}
+    finally{busy=false;if(active())state();}
+  };
+  readModelLoad.addEventListener("click",()=>{void manageModelLoad("ai.readModelLoadSettings");});applyModelLoad.addEventListener("click",()=>{void manageModelLoad("ai.applyModelLoadSettings");});
   testSetup.addEventListener("click",()=>void(async()=>{
     if(testSetup.disabled||!snapshot||!selected)return;
     const version=++testGeneration;busy=true;state();

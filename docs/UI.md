@@ -1280,6 +1280,19 @@ selection; Retry loading profiles appears only after a read failure. Saving conn
 nothing. Actual model context is read-only status, with explicit checking/loading states
 and Cancel in request panels.
 
+Model loading adds editable Parallel slots, GPU memory mode and Automatic memory
+fitting, with suggested1/manual/off defaults. The existing Context length remains the
+single requested context control. Save profile stays local; explicit Read/Apply use
+the clean saved profile and its existing key. Legacy profiles require Save before
+Apply. A read-only comparison distinguishes requested, saved-in-Studio and actually
+loaded values; missing evidence is Unverified, and mismatches are visible warnings.
+Applying future-load preferences does not reload the active model or enable global
+auto-switch. An unconfirmed write says the update was sent and asks for read-back;
+it never claims no settings changed. Request/Assist warnings survive proposal review
+while a request that fits the actual context remains usable. The
+[configuration contract](adr/0013-provider-request-and-transport-contract.md#configurable-model-load-preferences--2026-10-15)
+owns exact scope, preservation and the unverified fitting limitation.
+
 Characters has one list, Writing/Game setup and horizontal writing topics; the shared
 Story panel icons collapse/restore the list and global navigation. Drafts, selection,
 topic and deliberate focus/scroll survive switching. Persistent helpers, compact

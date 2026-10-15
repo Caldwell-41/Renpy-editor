@@ -794,6 +794,17 @@ and macOS ARM64 only after coordinator review/focused checks. Partial logs/image
 produced renderer/test executables, source input hashes and run identity are retained
 behind the artifact privacy scan; a green job summary alone does not qualify them.
 
+The model-load configuration amendment adds optional-profile round-trip/bounds,
+override merge/projection, actual GET/PUT/read-back transport and native management
+ownership fixtures to this exact-candidate selection. Protocol discovery includes
+the two typed Read/Apply operations. Core fixtures cover normalized/mismatched read-back,
+unrelated option preservation, unsupported APIs, authentication/errors, no forced
+reload/global write, and warning-only lower context when the actual request fits.
+The existing browser Settings cases observe configurable controls and a synthetic
+requested/saved/loaded warning report in both themes and widths. These are mocked
+contracts; no owner server configuration, live credential or physical test is required
+for this amendment, and no actual strict fitting policy is inferred from saved flags.
+
 Controlled fixtures never receive owner Studio credentials. Bounded owner live checks,
 when safely available through the production native adapter, are separate and charge
 the task's request/token/model ledger before dispatch. No old running package proves

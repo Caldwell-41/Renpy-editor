@@ -111,7 +111,7 @@ jobs:
           python -c "import os,pathlib,re; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/gate-tests.log').read_text(); n=re.findall(r'Ran (\d+) tests?',s); assert len(n)==1 and int(n[0])==25 and re.search(r'^OK\s*$',s,re.M) and 'skipped' not in s.lower()"
           node "$npm_cli" run typecheck > "$RUNNER_TEMP/assistance-ui/typecheck.log" 2>&1
           node "$npm_cli" run build:tests > "$RUNNER_TEMP/assistance-ui/test-compile.log" 2>&1
-          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/reference-ui.dom.test.js dist-tests/tests/assistance-refinement.dom.test.js dist-tests/tests/rewrite-ui.dom.test.js dist-tests/tests/prompt-ui.dom.test.js dist-tests/tests/studio-request.dom.test.js > "$RUNNER_TEMP/assistance-ui/dom.log" 2>&1
+          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/reference-ui.dom.test.js dist-tests/tests/assistance-refinement.dom.test.js dist-tests/tests/rewrite-ui.dom.test.js dist-tests/tests/prompt-ui.dom.test.js dist-tests/tests/studio-request.dom.test.js dist-tests/tests/protocol.test.js > "$RUNNER_TEMP/assistance-ui/dom.log" 2>&1
           python scripts/check-redesign-evidence.py dom "$RUNNER_TEMP/assistance-ui/dom.log"
           node "$npm_cli" run build > "$RUNNER_TEMP/assistance-ui/renderer-build.log" 2>&1
           export LOOMLIGHT_UI_OUTPUT="$RUNNER_TEMP/assistance-ui/browser"
@@ -119,7 +119,7 @@ jobs:
           node tests/walkthrough-redesign.browser.mjs > "$RUNNER_TEMP/assistance-ui/browser.log" 2>&1
           python scripts/check-redesign-evidence.py browser "$LOOMLIGHT_UI_OUTPUT"
           rustup toolchain install 1.90.0 --profile minimal
-          for scope in references::tests:: prompts::tests:: ai_request::model_readiness_tests:: ai_request::model_diagnostic_tests::; do
+          for scope in references::tests:: prompts::tests:: ai_profiles::tests::model_load_ studio_config::tests:: ai_request::model_settings_tests:: ai_request::model_readiness_tests:: ai_request::model_diagnostic_tests::; do
             name="${scope//::/-}"
             cargo test -p loomlight-core --locked --lib "$scope" -- --list > "$RUNNER_TEMP/assistance-ui/$name-list.log" 2>&1
             cargo test -p loomlight-core --locked --lib "$scope" -- --nocapture > "$RUNNER_TEMP/assistance-ui/$name.log" 2>&1

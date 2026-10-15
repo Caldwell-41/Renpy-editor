@@ -18,7 +18,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[2]
 DOM_FILES = (
     'ai-settings.dom.test.ts', 'reference-ui.dom.test.ts',
-    'assistance-refinement.dom.test.ts', 'rewrite-ui.dom.test.ts', 'prompt-ui.dom.test.ts', 'studio-request.dom.test.ts',
+    'assistance-refinement.dom.test.ts', 'rewrite-ui.dom.test.ts', 'prompt-ui.dom.test.ts', 'studio-request.dom.test.ts', 'protocol.test.ts',
 )
 CARGO_REQUIRED = {
     'references::tests::': (
@@ -30,6 +30,22 @@ CARGO_REQUIRED = {
     ),
     'prompts::tests::': ('prompts::tests::shared_project_context_exact_preview_omission_budget_and_unknown_data_preservation',),
     'shared_project_context': ('rewrite::tests::shared_project_context_exact_send_include_omit_and_changed_notes_refuse_without_writes',),
+    'ai_profiles::tests::model_load_': (
+        'ai_profiles::tests::model_load_legacy_roundtrip_explicit_settings_and_bounds',
+    ),
+    'studio_config::tests::': (
+        'studio_config::tests::merge_preserves_known_options_replaces_only_owned_knobs_and_rejects_unsafe_state',
+        'studio_config::tests::exact_catalog_quant_and_resolved_loader_row_are_required',
+        'studio_config::tests::legacy_projection_omits_new_defaults_and_optional_effective_fields_warn',
+        'studio_config::tests::resolved_scope_checks_query_members_without_guessing_an_alternate_winner',
+    ),
+    'ai_request::model_settings_tests::': (
+        'ai_request::model_settings_tests::explicit_apply_preserves_quant_options_verifies_resolved_readback_and_never_reloads',
+        'ai_request::model_settings_tests::unsafe_fields_busy_changed_profile_and_cancellation_refuse_before_put',
+        'ai_request::model_settings_tests::resolved_readback_mismatch_warns_without_claiming_success',
+        'ai_request::model_settings_tests::first_apply_accepts_source_empty_object_resolution_and_confirms_quant_entry',
+        'ai_request::model_settings_tests::resolved_rows_outside_selected_target_refuse_before_write_and_readback_is_unverified',
+    ),
     'ai_request::model_readiness_tests::': (
         'ai_request::model_readiness_tests::supported_local_load_verifies_exact_context_and_fresh_status_before_generation',
         'ai_request::model_readiness_tests::sufficient_loaded_model_reused_without_version_inventory_load_or_reload',
@@ -38,6 +54,10 @@ CARGO_REQUIRED = {
         'ai_request::model_readiness_tests::optional_serving_contract_allows_idle_load_and_single_primary_reuse_without_version_or_tag',
         'ai_request::model_readiness_tests::hidden_or_ambiguous_serving_and_reported_eviction_never_generate',
         'ai_request::model_readiness_tests::cache_capability_metadata_accepts_chat_and_legacy_rows_but_refuses_media_unknown_or_malformed',
+        'ai_request::model_readiness_tests::lower_effective_context_warns_and_generates_when_actual_request_fits',
+        'ai_request::model_readiness_tests::explicit_load_knobs_reach_manual_loader_and_effective_mismatch_only_warns',
+        'ai_request::model_readiness_tests::reported_usage_above_observed_context_is_rejected_after_generation',
+        'ai_request::model_readiness_tests::resolved_override_for_unrelated_model_refuses_before_local_load_or_generation',
     ),
     'ai_request::model_diagnostic_tests::': (
         'ai_request::model_diagnostic_tests::fixed_status_and_version_gets_are_sanitized_without_post_or_secret',
@@ -45,6 +65,9 @@ CARGO_REQUIRED = {
     'ai_requests::tests::': (
         'ai_requests::tests::model_readiness_refusal_publishes_diagnosis_without_generation_or_provider_details',
         'ai_requests::tests::compatibility_native_worker_exact_probe_and_strict_publication_no_project_writes',
+        'ai_requests::tests::model_settings_refuse_active_generation_before_credentials_without_cancelling_it',
+        'ai_requests::tests::model_settings_owner_blocks_generation_and_cancels_on_profile_change_or_shutdown',
+        'ai_requests::tests::model_settings_stale_or_untyped_targets_never_read_credentials_or_write_profiles',
     ),
 }
 spec = importlib.util.spec_from_file_location('q1_gate', Path(__file__).with_name('check-q1-prep-gates.py'))

@@ -105,6 +105,7 @@ pub fn prepare(
         maximum_response: 1024,
         temperature: None,
         top_p: None,
+                model_load: None,
     };
     if !settings.valid() || !endpoint.starts_with("http://127.0.0.1:") || !endpoint.ends_with("/v1")
     {

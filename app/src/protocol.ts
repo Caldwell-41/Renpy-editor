@@ -12,6 +12,8 @@ export const CORE_OPERATIONS = [
   "ai.removeProfile",
   "ai.cleanup",
   "ai.discover",
+  "ai.readModelLoadSettings",
+  "ai.applyModelLoadSettings",
   "ai.sendSynthetic",
   "ai.testCompatibility",
   "ai.requestStatus",

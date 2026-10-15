@@ -28,6 +28,12 @@ struct RewriteSend { token: String, payload_digest: String, session_id: String }
 struct Target {
     request_id: String,
 }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ModelSettingsTarget {
+    token: String,
+    profile_id: String,
+}
 struct Pending {
     id: String,
     token: String,
@@ -53,6 +59,7 @@ struct Pending {
 #[derive(Default)]
 struct State {
     pending: Option<Pending>,
+    model_settings: Option<Cancel>,
     changing: usize,
     closing: bool,
 }
@@ -86,6 +93,16 @@ fn expire(p: &mut Pending) {
     p.failure = None;
 }
 pub struct Change(Arc<Service>);
+struct ModelSettingsChange(Arc<Service>);
+impl Drop for ModelSettingsChange {
+    fn drop(&mut self) {
+        if let Ok(mut state) = self.0.state.lock() {
+            state.model_settings = None;
+            state.changing -= 1;
+            self.0.returned.notify_all();
+        }
+    }
+}
 impl Drop for Change {
     fn drop(&mut self) {
         if let Ok(mut s) = self.0.state.lock() {
@@ -98,22 +115,73 @@ impl Drop for Change {
 }
 impl Service {
     pub fn active_workers(&self) -> usize {
-        usize::from(
-            self.state
-                .lock()
-                .unwrap()
-                .pending
-                .as_ref()
-                .is_some_and(|p| !p.done),
-        )
+        let state = self.state.lock().unwrap();
+        usize::from(state.pending.as_ref().is_some_and(|p| !p.done))
+            + usize::from(state.model_settings.is_some())
     }
     pub fn change(self: &Arc<Self>) -> Change {
         let mut s = self.state.lock().unwrap();
         s.changing += 1;
+        if let Some(cancel) = &s.model_settings {
+            cancel.cancel();
+        }
         if let Some(p) = s.pending.as_mut() {
             expire(p);
         }
         Change(self.clone())
+    }
+    fn begin_model_settings(self: &Arc<Self>, cancel: &Cancel) -> Result<ModelSettingsChange, &'static str> {
+        let mut state = self.state.lock().map_err(|_| "Request service unavailable.")?;
+        if state.closing || state.changing != 0 || state.model_settings.is_some()
+            || state.pending.as_ref().is_some_and(|pending| !pending.done)
+        {
+            return Err("Finish the active request or configuration change before managing model-load settings. No request was cancelled.");
+        }
+        state.model_settings = Some(cancel.clone());
+        state.changing += 1;
+        Ok(ModelSettingsChange(self.clone()))
+    }
+    fn model_settings_with_reader(
+        self: &Arc<Self>, host: &ApplicationHost, payload: Value, apply: bool,
+        read: impl FnOnce(&loomlight_core::lifecycle::LifecycleService, &loomlight_core::ai_profiles::StudioProfile)
+            -> credentials::Result<credentials::Secret>,
+    ) -> Result<Value, &'static str> {
+        let target: ModelSettingsTarget = serde_json::from_value(payload)
+            .map_err(|_| "Invalid model-load settings payload.")?;
+        let cancel = Cancel::default();
+        let _change = self.begin_model_settings(&cancel)?;
+        let (profile, key) = host.with_service(|records| {
+            let store = credentials::checked(records, &target.token)?;
+            let profile = store.profiles.iter().find(|profile| profile.profile_id == target.profile_id)
+                .ok_or("Saved profile missing.")?.clone();
+            if !profile.credential_bound() { return Err(Failure::Credential.message()); }
+            let key = read(records, &profile)?;
+            Ok((profile, key))
+        }).map_err(|_| "Project service is busy; no model-load settings changed.")??;
+        // Management uses the same captured origin, credential and bounded transport.
+        // Network and DNS never run while the project service is checked out.
+        let prepared = ai_request::prepare(profile, key, 30).map_err(Failure::message)?;
+        let still_current = || !cancel.cancelled() && host.with_service(|records|
+            records.read().is_ok_and(|store| credentials::token(&store) == target.token)
+        ).unwrap_or(false);
+        if !still_current() { return Err("Saved profile changed; read model-load settings again before applying."); }
+        let report = ai_request::model_load_settings(prepared, apply, &cancel, still_current)
+            .map_err(|failure| if apply {
+                match failure {
+                    Failure::Authentication => "Unsloth Studio authentication failed. Model-load settings remain unverified; read settings before applying again.",
+                    Failure::ModelUnsupported => "Unsloth Studio's settings interface or existing options cannot be safely preserved. Model-load settings remain unverified; read settings before applying again.",
+                    Failure::ModelUnavailable => "The selected model and quantization could not be resolved. Model-load settings remain unverified; read settings before applying again.",
+                    Failure::ModelConflict | Failure::ModelNotReady => "The model is loading or its identity changed. Model-load settings remain unverified; read settings before applying again.",
+                    Failure::ModelSettingsUnsupported | Failure::ModelSettingsUnsafe | Failure::ModelSettingsChanged => failure.message(),
+                    Failure::Configuration => "Save valid model-load settings for this profile before applying. Read Unsloth Studio settings before retrying.",
+                    // A socket failure/cancellation after PUT cannot establish whether it saved.
+                    _ => "Model-load settings could not be verified. Unsloth Studio may have saved them; read settings before applying again. No automatic retry or model reload.",
+                }
+            } else { failure.message() })?;
+        if !still_current() {
+            return Err("Saved profile changed during model-load settings. Read settings again; the server may have saved the previous model's override. No automatic retry or reload.");
+        }
+        serde_json::to_value(report).map_err(|_| "Model-load settings report unavailable; read settings again before applying.")
     }
     fn send(
         self: &Arc<Self>,
@@ -391,18 +459,21 @@ impl Service {
     pub fn shutdown(&self) -> bool {
         let mut state = self.state.lock().unwrap();
         state.closing = true;
+        if let Some(cancel) = &state.model_settings {
+            cancel.cancel();
+        }
         if let Some(p) = state.pending.as_mut() {
             expire(p);
         }
         let Ok((mut state, _)) =
             self.returned
                 .wait_timeout_while(state, Duration::from_secs(2), |s| {
-                    s.pending.as_ref().is_some_and(|p| !p.done)
+                    s.pending.as_ref().is_some_and(|p| !p.done) || s.model_settings.is_some()
                 })
         else {
             return false;
         };
-        if state.pending.as_ref().is_some_and(|p| !p.done) {
+        if state.pending.as_ref().is_some_and(|p| !p.done) || state.model_settings.is_some() {
             return false;
         }
         if let Some(mut p) = state.pending.take() {
@@ -434,6 +505,11 @@ impl Service {
         payload: Value,
     ) -> CoreResponse {
         let result = match op {
+            "ai.readModelLoadSettings" | "ai.applyModelLoadSettings" => self.model_settings_with_reader(host, payload, op == "ai.applyModelLoadSettings", |records, profile| {
+                crate::ai_native::secrets(records.ai_data_root())?
+                    .read(&profile.profile_id, profile.credential.as_ref().unwrap())?
+                    .ok_or(Failure::Credential.message())
+            }),
             "ai.sendSynthetic" => self.send(host, payload),
             "ai.testCompatibility" => self.send_kind(host,payload,false,true,|s,profile|{
                 crate::ai_native::secrets(s.ai_data_root())?.read(&profile.profile_id,profile.credential.as_ref().unwrap())?.ok_or(Failure::Credential.message())
@@ -493,6 +569,7 @@ mod tests {
                 maximum_response: 1024,
                 temperature: None,
                 top_p: None,
+                model_load: None,
             },
         )
         .unwrap();
@@ -937,7 +1014,7 @@ mod tests {
                 let n = socket.read(&mut b).unwrap(); assert!(n > 0); bytes.extend_from_slice(&b[..n]);
             }
             assert!(String::from_utf8_lossy(&bytes).starts_with("GET /api/inference/status "));
-            let body = br#"{"active_model":"synthetic-model","model_identifier":"synthetic-model","loaded":["synthetic-model"],"loading":[],"context_length":2048,"private_error":"untrusted-provider-private-path"}"#;
+            let body = br#"{"active_model":"synthetic-model","model_identifier":"synthetic-model","loaded":["synthetic-model"],"loading":[],"context_length":512,"private_error":"untrusted-provider-private-path"}"#;
             write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).unwrap(); socket.write_all(body).unwrap(); drop(socket);
             finished_rx.recv_timeout(Duration::from_secs(2)).unwrap();
             listener.set_nonblocking(true).unwrap();
@@ -950,6 +1027,83 @@ mod tests {
         assert_eq!(done["completion"],Value::Null); assert_eq!(done["httpStatus"],Value::Null);
         assert!(!done.to_string().contains("untrusted-provider-private-path"));
         finished.send(()).unwrap(); server.join().unwrap(); assert!(service.shutdown());
+    }
+
+    #[test]
+    fn model_settings_refuse_active_generation_before_credentials_without_cancelling_it() {
+        let (listener, port) = stalled();
+        let (_root, host, input) = setup(port);
+        let service = Arc::new(Service::default());
+        let started = service.send_fixture(&host, input.clone()).unwrap();
+        let target = json!({"token":input["token"],"profileId":input["profileId"]});
+        for apply in [false, true] {
+            let result = service.model_settings_with_reader(&host, target.clone(), apply, |_, _| {
+                panic!("Busy refusal must precede credential access")
+            });
+            assert!(result.unwrap_err().contains("No request was cancelled"));
+            let state = service.state.lock().unwrap();
+            assert!(!state.pending.as_ref().unwrap().cancel.cancelled());
+            assert!(state.model_settings.is_none());
+        }
+        service.cancel(json!({"requestId":started["requestId"]})).unwrap();
+        drop(listener);
+        assert!(service.shutdown());
+    }
+
+    #[test]
+    fn model_settings_owner_blocks_generation_and_cancels_on_profile_change_or_shutdown() {
+        for shutdown in [false, true] {
+            let service = Arc::new(Service::default());
+            let cancel = Cancel::default();
+            let guard = service.begin_model_settings(&cancel).unwrap();
+            assert_eq!(service.active_workers(), 1);
+            assert!(service.begin_model_settings(&Cancel::default()).is_err());
+            let (_root, host, input) = setup(45678);
+            let refused = service.send_with_reader(&host, input, false, |_, _| {
+                panic!("Management owner must block sends before credential access")
+            });
+            assert!(refused.unwrap_err().contains("Configuration or project is changing"));
+            if shutdown {
+                let owner = service.clone();
+                let thread = thread::spawn(move || owner.shutdown());
+                // Cancellation is an explicit signal, not an assumed elapsed interval.
+                let deadline = Instant::now() + Duration::from_secs(1);
+                while !cancel.cancelled() {
+                    assert!(Instant::now() < deadline);
+                    thread::yield_now();
+                }
+                drop(guard);
+                assert!(thread.join().unwrap());
+            } else {
+                let change = service.change();
+                assert!(cancel.cancelled());
+                drop(change);
+                assert_eq!(service.state.lock().unwrap().changing, 1);
+                drop(guard);
+                assert_eq!(service.state.lock().unwrap().changing, 0);
+                assert!(service.shutdown());
+            }
+            assert_eq!(service.active_workers(), 0);
+        }
+    }
+
+    #[test]
+    fn model_settings_stale_or_untyped_targets_never_read_credentials_or_write_profiles() {
+        let (_root, host, input) = setup(45678);
+        let service = Arc::new(Service::default());
+        let before = host.with_service(|records| records.read().unwrap()).unwrap();
+        for payload in [
+            json!({"token":"stale","profileId":input["profileId"]}),
+            json!({"token":input["token"],"profileId":input["profileId"],"url":"http://untrusted.invalid"}),
+        ] {
+            assert!(service.model_settings_with_reader(&host, payload, true, |_, _| {
+                panic!("Invalid target must refuse before credential access")
+            }).is_err());
+            assert_eq!(service.active_workers(), 0);
+            assert_eq!(service.state.lock().unwrap().changing, 0);
+            assert_eq!(host.with_service(|records| records.read().unwrap()).unwrap(), before);
+        }
+        assert!(service.shutdown());
     }
 
 }

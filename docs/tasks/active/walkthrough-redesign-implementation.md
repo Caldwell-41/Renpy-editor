@@ -1,6 +1,6 @@
 # Walkthrough redesign implementation
 
-**State: local implementation; final live checks stopped at the model-load ceiling.** The user approved the
+**State: reviewed local implementation; preparing paired CI for the Unsloth Studio load-configuration amendment.** The user approved the
 complete proposed scope/budgets and explicitly requested starting the new chat. The
 Sol6.1/xhigh coordinator owns implementation, Sol6.1/high delegation, review, tests,
 publication of the reviewed candidate and gated CI under this contract. This supersedes
@@ -635,3 +635,123 @@ observation or CI discovery additions. Repository validation passed601 files and
 HANDOVER773 words meet the live-record review targets. These static/document checks
 do not supply the six missing owner results or a further product verification round.
 The reviewed implementation is a local checkpoint, not a published/qualified CI candidate.
+
+### User-selected model-load configuration amendment — 2026-10-15
+
+The user supplied `Loomlight_Unsloth_Studio_Model_Load_Config.md` and selected adapting
+its per-model override workflow to Loomlight. The newer explicit direction supersedes
+the brief's strictness:32768 context,1 parallel slot,manual GPU memory and fit off are
+configurable suggested defaults; a different effective configuration warns rather
+than failing a request that fits actual verified capacity. Genuine oversized requests,
+authentication/load failures and unsafe/ambiguous configuration writes still refuse.
+Expose parallel, GPU memory mode and fitting in AI Settings, preserve the single context
+field, automatic CPU threads, unrelated provider/model options and exact inference bodies.
+
+Save profile remains local. Separate explicit Read/Apply use the existing native key
+and fixed per-model management GET/PUT/read-back. Resolve the selected quant from real
+inventory/cache evidence, merge valid existing options, preserve bare fallbacks/other
+quants, never silently enable global auto-switch, reload or write on every completion.
+Reports distinguish requested/saved/effective state, including unknown fields and
+auto-switch availability. Persisted overrides do not alter the currently loaded model.
+Loomlight's active-request owner refuses concurrent management without cancelling it.
+External settings edits have no server CAS; immediate recheck/read-back do not promise
+atomicity. Manual mode strips fit arguments in researched Unsloth Studio paths, so
+read-back fit off is not proof of effective fitting policy; warn explicitly.
+
+Existing workers own core management/readiness and AI Settings UI; root owns native
+guard/IPC/request warnings/integration/docs. The existing API researcher independently
+verified official907/current contracts and will double-check the final implementation,
+as requested. This amendment uses controlled mocks; no owner API/configuration/model
+operation or physical end-to-end test is planned. Old live5/12, tokens10240/32768,
+inventory3/4,loads2/2 and all historical verification failures remain recorded.
+The user's LLM budget reset to10 is recorded separately; clarification of whether it
+also renews verification rounds is pending. No live request has consumed that reset.
+For this newly selected feature, plan one initial focused core/UI/native batch and at
+most two diagnosed correction rounds; no old completed proof or closed allowance is
+silently relabelled. Old reuse-only patch remains unapplied and is not part of this change.
+
+Amendment initial renderer verification passed typecheck, test compilation and41 cases
+across changed AI Settings, synthetic request, Assist and protocol tests (zero
+failures/skips/cancellations). AI Settings includes18 cases,5 new for configurable
+defaults, explicit clean/saved-target Read/Apply, partial/mismatch warnings, busy/error/
+draft/selection retention and wrong-model refusal. Exact logs are
+`/private/tmp/loomlight-model-config-round1-{typecheck,test-compile,renderer}.log`.
+Root reviewed UI and native diffs; independent native ownership audit found no actionable
+issue. Initial browser verification is reserved for the28-state matrix with added
+model-load controls/read-only warning-report observations and scoped responsive table
+styles. It remains synthetic with all persistence and external networking blocked.
+
+Amendment initial browser matrix/checker **passed28/28**, unchanged before/after renderer
+hashes and closed browser/server; raw `/private/tmp/loomlight-model-config-round1-browser.log`
+and matching folder. Root inspected compact light and wide dark Settings captures.
+Subsequent Apply-only report copy correction is separate: a completed PUT with
+unconfirmed read-back must say unverified update, not falsely claim no write occurred.
+Renderer correction1 is reserved for typecheck/test compilation plus the one existing
+Read/Apply regression extended with that exact outcome. The browser Read branch/layout
+is unchanged by this conditional; exact-candidate CI will still use current source.
+Initial core verification is reserved for profile model-load persistence, configuration
+merge/projection, production management transport and readiness groups after static
+review fixes. Source review found last-fit-flag and effective-context-precedence
+reporting details; root also requires response usage within verified actual capacity.
+No live/API-key/server-configuration/model operation occurs in these controlled tests.
+
+Renderer correction1 **passed1/1**, zero skipped, after typecheck/test compilation:
+`/private/tmp/loomlight-model-config-ui-correction1{,-typecheck,-compile}.log`.
+Before the first core execution, independent/root static review corrected normal
+empty override `{resolved_key:null,resolved:{}}`, last-fit-flag semantics, source
+context precedence, recognized flag values/current engine fields, exact quant propagation,
+unrelated flag read-back, consistent effective identity and response usage bounded by
+actual capacity. Core is now frozen for the reserved initial four-group batch, expected
+24 cases (actual output owns counts). Native initial verification is reserved for the
+12-case request-host group, including three new ownership/stale-target regressions,
+after the core batch completes. No production app package or launch is part of either.
+
+Amendment initial core **24/24 passed**: profiles1, configuration3, real management
+transport6 and readiness14, zero failed/ignored. Raw
+`/private/tmp/loomlight-model-config-round1-core-{profiles,config,management,readiness}.log`.
+Native request-host **12/12 passed**, including the three new ownership/stale-target
+cases; raw `/private/tmp/loomlight-model-config-round1-native.log`. No core/native
+correction execution has occurred. The user-configured preparation budget remains an
+intentional request limit; warnings about server deviations do not bypass that budget.
+Initial CI-logic verification is reserved for updated dynamic profile/config/management/
+readiness/host/protocol discovery data: the existing25 rejecting/positive checker
+fixtures and actionlint on quality/assistance workflows. No CI dispatch is yet approved.
+
+Core correction1 is complete: the server-returned resolved row must be one of the
+four actual queried path/repo candidates before read/merge/load reuse. Proven ASCII
+repo/quant and Windows/UNC/WSL path normalization is accepted, POSIX path case remains
+exact, and unproved Unicode-equivalent aliases refuse. The server's winner remains
+authoritative; no client-side alternate selection. Unexpected post-PUT identity clears
+saved values and returns an unverified warning. Independent source review accepted
+the concrete helper and every consumer. **26/26 passed** (configuration4, management7,
+readiness15), `/private/tmp/loomlight-model-config-core-correction1-{config,management,readiness}.log`.
+The unchanged profile case1 makes27 current core cases; native12 and renderer41 remain
+valid, with the one Apply-copy regression separately reverified. One core correction
+and one renderer correction were used; second correction allowance remains unused.
+
+Updated checker25 fixtures and actionlint passed at the initial CI-data update; later
+data-only semantic-floor additions name actual passing scope regressions without
+changing gate algorithms. Final root review accepts the amendment's implemented and
+controlled behavior. Source/API reviewer independently closed all findings. Existing
+user-set prompt budgets still apply; unknown actual capacity or a request that cannot
+fit actual capacity still refuses. Saved fit off remains unverified as an effective
+runtime policy. No actual endpoint settings/readiness/reload or new live generation
+is claimed for this amendment; the user brief selects mocked acceptance at this stage.
+
+The amendment is ready for its required automated Windows x64/macOS ARM64 proof on the
+reviewed exact candidate using the existing redesign selection, within pairedCI0/3.
+This is a source/service/mock qualification, not whole-phase or physical acceptance.
+The six older planned live actions remain unrun and are not relabelled passed; they
+are not prerequisites for this newer amendment's mock-based acceptance. No owner calls
+are scheduled and the reset10 LLM allowance is unused. Historical request/token/load
+counts remain intact. After commit/publication, one paired dispatch may run, then
+record confirmed identity and pause for manual same-chat terminal audit per WORKFLOW.
+
+Final root repository validation passed602 files and whitespace checks passed. Live
+record review is compact (CURRENT303 words, HANDOVER783 before the dispatch record).
+Existing workers are finished and independent review has no remaining blocker. Root
+reserves **paired CI ordinal1 of3** for one exact-candidate dispatch after normal
+publication; this reservation is charged even if dispatch fails or is cancelled.
+No operation is pending yet. The run identity/inputs and tested commit will be recorded
+after dispatch in a docs-only successor. No duplicate dispatch, live call or owner
+model/settings operation is authorised by this reservation.
