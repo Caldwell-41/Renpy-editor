@@ -14,11 +14,11 @@ owns current settings, linked-character/B layout, relationship copy, starting-on
 knowledge, linked-lore/applicability deferrals, Source notes UI removal and surfaced
 previous-version restore. Existing data and approval/freshness protections remain.
 Two [updated mockups](../design/character-workspace-2026-10-15/walkthrough-decisions.md#updated-approval-previews)
-await visual approval; restore/model loading/unified creation remain functional
+were approved on2026-10-15; restore/model loading/unified creation remain functional
 follow-ups, not implemented behavior. The
 [combined ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
-owns qualification and cumulative counts. Next: approve updated knowledge/history
-presentation, then resume remaining character/reference/AI and Phase 3A walkthrough.
+owns qualification and cumulative counts. Next: resume the remaining reference/AI
+and Phase 3A walkthrough; no additional design approval is needed for these two views.
 All recording/design work is local-only; no application or provider changes.
 
 ## Qualification and remaining acceptance

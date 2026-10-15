@@ -12,11 +12,11 @@ historical; existing data, approval/freshness safeguards and unsaved draft remai
 Two [updated approval previews](../../design/character-workspace-2026-10-15/walkthrough-decisions.md#updated-approval-previews)
 were delivered using3built-in ImageGen edits (one targeted panel-icon correction),
 cumulative14calls, agents2. Owner visual review and PNG integrity/hash checks pass;
-static views are not native interaction/restore qualification. Exact updated copy and
-knowledge/history presentation await visual approval. No source edits, build, launch,
+static views are not native interaction/restore qualification. User explicitly approved
+both final knowledge/history views and their updated copy on2026-10-15. No source edits, build, launch,
 Studio call, credential operation, phase sign-off or remote publication. Preserve
 build1/1 and launches1/3; Mara last observed with unsaved reference changes. Next:
-approval of the updated pair, then resume remaining walkthrough. Full chronology and
+resume remaining reference/AI and Phase3A walkthrough. Full chronology and
 unique technical/recovery evidence below remain preserved.
 
 ## Combined approval walkthrough selected — 2026-10-14

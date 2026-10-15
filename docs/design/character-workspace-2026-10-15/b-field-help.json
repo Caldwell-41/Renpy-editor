@@ -28,7 +28,7 @@
       "What secrets do they keep?"
     ],
     "laterDiscoveries": "Deferred to a future phase, unassigned",
-    "copyStatus": "Draft wording reflecting agreed starting-only scope; not implemented"
+    "copyStatus": "Final starting-only mockup copy approved on 2026-10-15; not implemented"
   },
   "legacyHiddenCopy": {
     "sourceNotes": "Explain where these notes came from and flag anything you are uncertain about."
@@ -44,7 +44,7 @@
     "preview": "Previous saved card",
     "help": "Restores the whole card as a new saved version. Your current version stays in recent history.",
     "undoHelp": "You can undo the restore.",
-    "copyStatus": "Proposed screenshot wording, visual approval pending",
+    "copyStatus": "Final history/restore mockup wording approved on 2026-10-15; not implemented",
     "functionalStatus": "Follow-up; not implemented"
   }
 }

@@ -1,6 +1,6 @@
 # Character workspace concepts — 2026-10-15
 
-Status: **All walkthrough feedback consolidated; updated knowledge/history mockups awaiting visual approval**.
+Status: **All walkthrough feedback consolidated; updated knowledge/history views approved on 2026-10-15**.
 
 The [consolidated walkthrough decision record](walkthrough-decisions.md) owns the current
 settings, unified-character, B-layout, relationship, starting-knowledge, removal/deferral

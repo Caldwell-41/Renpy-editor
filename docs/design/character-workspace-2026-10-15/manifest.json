@@ -4,7 +4,7 @@
   "researchAgents": 2,
   "initialGenerations": 3,
   "targetedRefinements": 6,
-  "selection": "Consolidated walkthrough decisions own current design; B starting-only knowledge and surfaced restore agreed; updated knowledge/history presentation awaiting approval",
+  "selection": "Consolidated B starting-only knowledge and surfaced history/restore presentation approved by user on 2026-10-15; implementation remains unselected",
   "assets": [
     {
       "file": "a-character-notebook.png",
@@ -140,7 +140,8 @@
     "presentationProposal": "Version history; readable preview; Restore this version",
     "currentCapability": "read-only revision display; restore follow-up required",
     "retention": "existing bounded snapshots preserved",
-    "implementationSelected": false
+    "implementationSelected": false,
+    "presentationApproval": "approved on 2026-10-15"
   },
   "consolidation": {
     "decisionRecord": "walkthrough-decisions.md",
@@ -148,8 +149,12 @@
     "finalScreens": 2,
     "correction": "One targeted correction replaced bare back arrows with split-panel restore icons in starting-knowledge final. First draft not selected; original retained at tool output location.",
     "review": "Owner visually inspected both final outputs: B frame and creation/save anchors retained, knowledge only at story start, below-field helper, removed lore/applicability/source controls, compact readable version preview and explicit restore. Final knowledge panel icons corrected; scrim background icons in history image remain illustrative. No responsive/keyboard/native restore proof.",
-    "approval": "pending visual approval",
+    "approval": "user approved both final views on 2026-10-15",
     "localOnly": true,
-    "applicationChanged": false
+    "applicationChanged": false,
+    "approvedAssets": [
+      "b-starting-knowledge-v3.png",
+      "b-version-history-v1.png"
+    ]
   }
 }

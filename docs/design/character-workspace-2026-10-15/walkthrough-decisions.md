@@ -83,7 +83,7 @@ The prior Relationships image remains evidence of the accepted arrangement. Its
 what the character knows when the story begins, what they have not learned and secrets
 they keep. The questions are guidance, not three new saved fields or required steps.
 
-Updated presentation proposed for visual approval:
+Updated presentation approved by the user on 2026-10-15:
 
 - Heading/field: **Starting knowledge & secrets**.
 - Intro: **Describe Mara's perspective when the story begins.**
@@ -92,8 +92,7 @@ Updated presentation proposed for visual approval:
 - Helper: **Write what Mara knows, doesn't know and keeps secret at the start of the story.**
 - Inclusion note: **Used only when you include Mara's card in an AI request.**
 
-The temporal scope and B layout are agreed; exact updated copy and screenshot remain
-for review. No automatic reclassification or overwrite of existing knowledge prose.
+The temporal scope, B layout and final updated copy/screenshot are approved. No automatic reclassification or overwrite of existing knowledge prose.
 
 | Feature | Decision |
 | --- | --- |
@@ -108,7 +107,7 @@ for review. No automatic reclassification or overwrite of existing knowledge pro
 **Agreed:** keep history visible and let the user roll back to the previous saved
 card. This supersedes the suggestion to hide history behind the scenes.
 
-Proposed UI for approval: a quiet **Version history** entry in the character header,
+Approved UI: a quiet **Version history** entry in the character header,
 opening a compact dialog with readable recent-version previews and an explicit
 **Restore this version** action. No permanent history sidebar or raw metadata dump.
 
@@ -122,7 +121,7 @@ Any existing AI proposal remains subject to its own review, not automatic approv
 
 ## Open review and implementation boundaries
 
-- Updated starting-knowledge and Version history mockups require visual approval.
+- User approved both final starting-knowledge and Version history mockups on 2026-10-15.
 - The synthetic connection-test request preview was unavailable for the unsaved
   profile and remains unreviewed. No profile save/test was performed to reveal it.
 - Generic related-story-link placement remains unresolved as described above.
@@ -158,7 +157,8 @@ correction; cumulative14calls, two earlier user-requested research/workflow agen
 No additional subagent was used for consolidation. The history dialog's dimmed underlying
 icons are illustrative; implementation must reuse the actual shared Story panel controls
 shown in the corrected knowledge image. Static screens do not qualify interaction,
-responsive wrapping or the new restore behavior. Both visual presentations await approval.
+responsive wrapping or the new restore behavior. The user explicitly approved both
+visual presentations on 2026-10-15; no new implementation or phase sign-off is inferred.
 
 Historical images/prompts are preserved. The old optional-lore/applicability rows,
 ambiguous temporal wording, bespoke focus controls and Other character label are
