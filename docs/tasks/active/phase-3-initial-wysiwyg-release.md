@@ -1,5 +1,26 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Current walkthrough design record — 2026-10-15
+
+User requests all feedback recorded and UI consistent with agreed B, with new mockups
+for approval where needed. The [consolidated decision index](../../design/character-workspace-2026-10-15/walkthrough-decisions.md)
+owns the current settings copy/placement/defaults, Studio loading follow-up, unified
+Characters model, stable/collapsible B frame, approved relationship wording, starting-
+only guided knowledge, linked-lore/applicability deferrals, Source notes UI removal
+and surfaced prior-version restore. Earlier conflicting recommendations/images are
+historical; existing data, approval/freshness safeguards and unsaved draft remain intact.
+Two [updated approval previews](../../design/character-workspace-2026-10-15/walkthrough-decisions.md#updated-approval-previews)
+were delivered using3built-in ImageGen edits (one targeted panel-icon correction),
+cumulative14calls, agents2. Owner visual review and PNG integrity/hash checks pass;
+static views are not native interaction/restore qualification. Exact updated copy and
+knowledge/history presentation await visual approval. No source edits, build, launch,
+Studio call, credential operation, phase sign-off or remote publication. Preserve
+build1/1 and launches1/3; Mara last observed with unsaved reference changes. Next:
+approval of the updated pair, then resume remaining walkthrough. Full chronology and
+unique technical/recovery evidence below remain preserved. CURRENT was compacted to its overview role; HANDOVER retains slightly
+more than the suggested length to preserve exact qualification/recovery and publication
+limits. No historical failure evidence was removed.
+
 ## Combined Phase 2 / 3A Mac approval walkthrough — 2026-10-14
 
 User selected: “Yes, prepare the signed Mac build and up to three launches, then guide
@@ -187,7 +208,137 @@ field help, explicit collapse/restore/focus controls and creation/save anchors. 
 images/prompts preserved. No new researcher. These static proposals do not prove
 responsive switching, keyboard use or draft preservation and do not establish
 implementation/human acceptance. Unsaved Mara draft untouched. Next: user review of
-refined B width, collapse controls and help; no native relaunch or provider send.
+refined B width/help. User finds B better and directs Story's collapse/expand pattern.
+Recorded shared panel-icon controls/placement, visible restore affordance, focus transfer
+and remembered state; generated Hide/Show/Focus button styling is superseded for collapse.
+No product edit, extra image generation, native relaunch or provider send. B interaction
+refinement agreed; implementation and whole-phase acceptance remain unselected.
+User asks what is next; resumed relationship review. Latest native observation shows
+Mara **Saved**, superseding the earlier live dirty-state note; no agent Save/Discard/
+Reload was performed and no cause of that state change is inferred. Opened Voice &
+relationships and scrolled only. Current relationship is Not linked with existing
+public fixture prose; no selector/text was changed. Explain relationship notes as
+writing context when the card is included in a request. For B, propose compact named
+rows, one entry opened at a time, character selection plus how Mara feels/acts toward
+them; Add relationship remains explicit. User agrees that entry direction and requests
+an ImageGen mockup. Delivered [Relationships concept](../../design/character-workspace-2026-10-15/README.md#relationships--refined-b)
+using one built-in edit of the B focus image (cumulative8calls, researcher1). Owner
+inspected readable summaries, one open editor, helper and creation/save anchors;
+generated panel icons must still match Story in implementation. Exact prompt and PNG
+hash retained. User finds the layout clear and approves **Relationship with** plus helper
+**Choose who these notes are about.** Original image/prompt retained; approved copy recorded
+in design/helper records. Moved to What they know: expanded current Story links & knowledge
+notes and scrolled to Knowledge & spoiler notes; existing fixture text “Proposed:
+recognises the passenger, but keeps this quiet.” observed, with Saved state. No field
+edit, new image, native launch, Studio send or phase sign-off. Next: feedback on the
+purpose, label and helper for What they know, then Linked lore separately.
+
+
+**Knowledge-section design exploration — 2026-10-15:** user finds the entire section
+messy and unclear, explicitly requests one subagent to rethink goals/AI workflow and
+2–3 mockups fitting approved B. One read-only source/workflow reviewer separates manual
+character knowledge, optional lore organisation, applicability, game setup and generic
+links. Links do not automatically include target prose; scope is author guidance, not
+runtime knowledge or an automatic spoiler gate. Delivered three built-in ImageGen edits:
+A one note with optional disclosures, B guided questions with one saved note, C separate
+notes/world-reference views. [Comparison and workflow review](../../design/character-workspace-2026-10-15/README.md#knowledge-workflow-alternatives)
+retain exact prompts, PNG/hash checks and visual self-review limitations. Owner inspected
+all3; no extra sidebar, broad editor/help and creation/save anchors retained. A's duplicate
+chevrons are illustrative; shared Story controls remain required. Three calls, cumulative11;
+research/workflow agents cumulative2. User selection pending; no implementation selected,
+new image correction, native launch, project edit or Studio send. Existing approved B
+frame/Relationship with wording remains valid.
+
+User prefers knowledge option **B — Guided questions**, but asks whether the notes
+describe the beginning world state. Temporal meaning is unresolved; the mockup does
+not specify a story point. Current implementation stores manual prose and applicability,
+not initial/runtime knowledge or automatic learning. Proposed for discussion: make
+starting character knowledge explicit, with later scene-specific changes separately
+identified; no such temporal capability or copy is approved/implemented yet.
+
+Next: clarify temporal meaning before further design or walkthrough progression.
+
+
+**Open temporal-workflow gap:** user asks how to record later discoveries and how AI
+knows a character's knowledge at the current writing point. Source review confirms
+current prompt assembly includes selected approved reference content and action-specific
+story context, without a resolved per-character knowledge timeline. Today the author
+must supply the relevant state in the request and review included reference text.
+Starting knowledge alone is insufficient. Proposed for discussion only: author-reviewed
+discoveries anchored before/after a Scene/Beat and conditional route/choice, assembled
+into a current-point summary for request preview; ambiguity requires route selection
+or clarification, with later/other-route discoveries excluded. No automatic execution,
+source inference, new capability or implementation scope is approved by this proposal.
+
+
+## Agreed scope — starting knowledge only
+
+The user chooses knowledge option **B — Guided questions** and explicitly limits this
+section to the character's knowledge when the story begins. Later discoveries, scene/
+route-dependent knowledge and a resolved “what they know here” preview are deferred to
+a future phase; no specific phase is assigned and they are not current acceptance gates.
+Keep one prose field with guided questions about starting facts, unknowns and secrets.
+Draft title: **Starting knowledge & secrets**. Draft helper: **Describe what this
+character knows, doesn't know and keeps secret when the story begins.**
+The draft copy reflects the agreed scope; no additional approval or implementation is
+inferred. Existing notes must not be automatically reclassified or overwritten. Current
+AI inclusion remains explicit; there is no new automatic timeline or runtime inference.
+Original PNGs/prompts remain preserved; no image regeneration or product edit is selected.
+
+Next: Related world notes / linked lore; no new build, launch, image or Studio send.
+
+
+**Linked lore review:** user requests continuation. Reconnected to the already running
+walkthrough app (no launch) and scrolled to Linked lore. Existing “The last tram” link
+is checked; Mara remains Saved. No checkbox/text/selection changed. Current links
+organise references and disclose dependencies; target prose is excluded unless selected
+separately for an AI request. They do not establish character knowledge. Proposed B
+label **Related world notes**, helper **Link Lorebook entries relevant to this character.
+Choose them separately when preparing an AI request to include their text.** Copy and
+purpose feedback pending; no user approval, provider operation or implementation inferred.
+
+**Voice walkthrough decision — simplified linked lore:** user questions the relevance
+of character-to-lore linking and agrees to leave it out of the lean character-card
+setup for now. Defer its visible controls/workflow; revisit later if useful. This does
+not remove the Lorebook, prohibit explicit lore selection for AI requests, or authorise
+deleting existing saved links. B's related-world-note block and pending helper proposal
+are superseded for the lean card design. Starting knowledge remains selected. No native
+field changed, image regenerated, source edited or Studio request sent.
+Next review: applicability (current Applies to), which is manual whole-project/Scene/
+route guidance, not runtime knowledge. Owner proposes Whole project by default with
+optional applicability tucked under More details; this proposal awaits feedback.
+
+
+**Voice simplification decisions:** user agrees to omit Applies to from the character-
+card design and defer route-specific variants. User explicitly requests removal of the
+Source notes section from this simplified UI. Preserve existing stored scope/provenance/
+citations and underlying approval/freshness protections; no destructive migration or
+bypass is selected. Generic links remain an unreviewed separate concern.
+
+**Version-history review:** user asks whether all previous card versions are needed
+and questions the visible Earlier saved text section. Source inspection confirms the
+reference document already retains at most3 revision snapshots per record, pruning to
+prior approved/current plus the new revision on save; it is not unlimited history.
+Recommendation: omit the visible version dump from the main editor while retaining
+bounded revision storage, AI approval and ordinary transactional Undo/Redo. Retention-
+policy changes and removal of recovery are not user-authorised. Display decision pending.
+Latest native observation: Earlier saved text opened by user; card has Unsaved changes,
+Applies to shows Whole project. The agent did not change/save/discard any field; preserve
+this draft. No app launch or provider request. Previous Saved observation is superseded.
+
+
+**Agreed history direction:** user prefers a surfaced history feature with an option
+to roll back to the previous card version. This supersedes the owner's suggestion to
+hide history. Proposed presentation: compact **Version history**, readable preview of
+previous saved content and explicit **Restore this version** action. Current Earlier
+saved text only displays revisions; restoration is a functional follow-up, not existing
+behavior or an authorised live rollback. Restore should use the shared transactional
+change layer, preserve the card's identity, respect current unsaved-draft guards and
+approval/freshness checks, and create a new current revision rather than rewind IDs or
+silently delete newer data. Ordinary Undo/Redo should apply. Keep existing bounded
+snapshot retention; no unlimited archive or destructive pruning change is selected.
+No app/source edit, native restore, save/discard, extra image or provider send performed.
+
 
 No whole-phase acceptance is implied.
 Preferences/defects/phase acceptance remain separate. Do not infer approval from

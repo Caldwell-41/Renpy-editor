@@ -1,0 +1,17 @@
+Use case: ui-mockup.
+Input image 1 is the approved Loomlight B workspace, used as the edit target. Replace only the Relationships topic content to show a new What they know design alternative. Keep its warm off-white/teal style, readable type, narrow app icon navigation, collapsed character list with panel restore icon, Mara identity with small Planning only badge and existing thumbnail, Writing selected / Game setup tabs, horizontal topics Overview / Personality & goals / Voice / Relationships / What they know / More details. Select What they know. Keep + New character top-right and fixed bottom Unsaved changes / Discard / Save changes footer. No right inspector, extra sidebar, charts, workflow meters, AI generate buttons, automatic sends or edit-to-unlock actions. One landscape screenshot, same size as source, crisp readable text. Keep the main editor broad. Use modest spacing so all requested controls are visible above the footer. Do not show concept labels A/B/C in the app itself. Every editable prose field has visible helper text directly BELOW it, not placeholder-only. Existing panel icons are reference styling; do not add custom Focus or Show characters buttons. No game-character linking or generic story-link clutter inside this topic. The single note about AI inclusion must be visible: “Used only when you include Mara’s card in an AI request.” Do not imply runtime knowledge is tracked.
+
+CONTENT — Simple notebook approach, all on one page.
+Heading “What Mara knows”, intro “Give the AI the facts and secrets that shape Mara’s dialogue.”
+Show ONE broad prose textarea labelled “Knowledge & secrets”, with about 5 lines of writing space. Exact text:
+“Mara recognises the passenger from the last tram.
+She does not know why Bec returned.
+She keeps their earlier meeting secret and changes the subject if asked.”
+Helper directly below: “Write what Mara knows, what she doesn’t know, and what she won’t reveal. Specific examples help the AI.”
+Below it, use two compact collapsed disclosure rows, visually secondary:
+“Related world notes” with muted “2 linked” and a right chevron.
+Helper under that row: “Link shared facts from the Lorebook. Select them separately when preparing an AI request.”
+“Where these notes apply” with muted “Whole project” and a right chevron.
+Helper under it: “Optional guidance about scenes or routes. This does not track what happens in the game.”
+Then the muted AI inclusion note from the common specification.
+No additional text boxes, no repeated card containers or lower-level topic tabs. This option should feel like writing a simple brief, with optional settings out of the way.

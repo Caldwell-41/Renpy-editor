@@ -1,17 +1,25 @@
 # Current outcome handover
 
-## Selected combined Mac approval walkthrough — 2026-10-14
+## Selected combined Mac approval walkthrough — 2026-10-15
 
-The user selected one signed Mac build and up to three native editor launches from
-`codex/phase3a-story-logic` (candidate60ec1da), followed by one-step-at-a-time Phase 2
-and 3A review. Signed package/installer verification passed; launch1 is open at Characters → Character cards.
-Walkthrough is `in_progress`; both acceptance decisions remain pending.
-This supersedes the prior Phase 2 feedback pause for this walkthrough. Build1/1 passed,
-launches1/3; existing implementation budgets/evidence remain unchanged. Disposable
-public project/isolated state; preserve ordinary profile/key and signing identity.
-No live sends, automatic fixes, merge or release. The [combined walkthrough ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
-owns candidate, counts, results and continuation. Next: same chat, review refined B
-with collapsible cast list, fewer sidebars and field help; preserve unsaved Mara draft; keep the current app open.
+Phase 2 / 3A approval walkthrough remains **in_progress; acceptance pending** on
+`codex/phase3a-story-logic`, candidate60ec1da. Signed build1/1 passed; launches1/3.
+The current package remains unchanged. Preserve the open isolated public walkthrough
+project and its **unsaved Mara reference draft**; no Save/Discard/Reload or closing.
+No live Studio sends/model operations, automatic fixes, merge or release are selected.
+
+The user requested all feedback consolidated and consistent with approved B. The
+[decision record](../design/character-workspace-2026-10-15/walkthrough-decisions.md)
+owns current settings, linked-character/B layout, relationship copy, starting-only
+knowledge, linked-lore/applicability deferrals, Source notes UI removal and surfaced
+previous-version restore. Existing data and approval/freshness protections remain.
+Two [updated mockups](../design/character-workspace-2026-10-15/walkthrough-decisions.md#updated-approval-previews)
+await visual approval; restore/model loading/unified creation remain functional
+follow-ups, not implemented behavior. The
+[combined ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
+owns qualification and cumulative counts. Next: approve updated knowledge/history
+presentation, then resume remaining character/reference/AI and Phase 3A walkthrough.
+All recording/design work is local-only; no application or provider changes.
 
 Earlier qualification and unique recovery evidence below remain valid. The separate
 walkthrough selection above owns current human-session scope and counts.

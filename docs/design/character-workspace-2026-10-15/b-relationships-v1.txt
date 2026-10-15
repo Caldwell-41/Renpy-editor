@@ -1,0 +1,19 @@
+Edit the supplied Loomlight concept B screenshot into a polished RELATIONSHIPS topic view. Preserve the same warm off-white and muted teal desktop-app visual style, typography scale and broad writing area. This is a realistic app screenshot, landscape, same size as input. No device frame or callouts.
+
+Keep the global navigation collapsed into its narrow icon strip. Keep the character list collapsed, with no extra character icon rail. Replace the previous bespoke “Show characters” and “Exit focus” text buttons with the familiar Story-page panel-toggle pattern: a small outlined split-panel icon button at the top of the app navigation rail, and a small outlined panel-open icon button at the left edge of the character workspace header to restore the character list. No Focus or Show/Hide text buttons. Do not add a right inspector or vertical topic navigation.
+
+Retain the stable top workspace header: “Mara”, small “Planning only” badge, Writing selected / Game setup. Keep “+ New character” at the far top-right. The horizontal topic strip reads Overview / Personality & goals / Voice / Relationships / What they know / More details, with Relationships clearly selected.
+
+Content heading “Relationships”. Beneath it: “Write how Mara sees other people and how she behaves around them.” Place a modest “+ Add relationship” secondary action on the same heading row.
+Show two stacked, generously wide relationship entries, NOT a two-column layout or another sidebar:
+1. Bec — expanded and selected. Its summary line says “Trusts her, but keeps a secret.” A subtle down chevron indicates it is open.
+Inside this one expanded entry show a compact labelled dropdown “Other character” with value “Bec”, then a broad multiline text box labelled “How Mara feels and behaves”. The text in the box reads:
+“Mara trusts Bec’s judgement and seeks her advice. She jokes with her when things get tense, but avoids questions about the night the signal stopped.”
+Immediately BELOW the text box, readable muted helper text:
+“Describe how Mara feels about Bec and how she acts around her. Specific examples help the AI write their interactions.”
+A subtle “Remove relationship” text action sits quietly at the lower right of this expanded entry, away from Add relationship.
+2. Station manager — collapsed compact row, right-pointing chevron and one-line summary “Wary; avoids direct questions.” Do not show its form fields.
+Use understated borders and restrained spacing. The single expanded relationship is easy to scan, the text field has ample writing space and neither entry looks like a huge dashboard card.
+
+One muted general note below the entries says “The AI uses these notes only when you include this card in a request.”
+Preserve the fixed footer “Unsaved changes” at left, Discard and teal Save changes at right. Do not add per-relationship Save buttons, an Edit-to-unlock button, scores, relationship meters, AI-generation controls, portraits or more panels. Keep all text crisp and readable, the header/creation action visible and the canvas wide.

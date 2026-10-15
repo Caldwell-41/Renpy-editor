@@ -1,0 +1,34 @@
+Use case: ui-mockup. High-fidelity desktop application screenshot, not a wireframe or poster.
+Image 1 is the edit target: the approved Loomlight B guided-knowledge workspace. Preserve its exact warm off-white/teal styling, readable type and wide main editor, portrait thumbnail, Mara identity, Planning only badge, Writing / Game setup tabs, horizontal topics, narrow app navigation and collapsed character-list state. Make the existing panel controls look like simple outlined split-panel rectangles with a small inward/outward chevron, matching Story's collapse/restore pattern: one at the top of the global icon rail and one at the workspace left edge. No Focus/Hide/Show characters text buttons.
+Retain New character fixed at top right. Immediately to its left add a quieter secondary “Version history” button with a small history icon; keep both header actions in the same place in every view. Keep horizontal topics Overview / Personality & goals / Voice / Relationships / What they know / More details; What they know selected. No new sidebar or right inspector.
+This is a revised starting-only design. Remove ALL Related world notes, linked lore, applicability, scene/route guidance and Source notes controls and explanatory lines. Do not add links to those removed settings under More details. No later discoveries, knowledge timeline, AI generation buttons, scores, raw keys or metadata. No replacement optional configuration section in the freed space.
+Content heading “Starting knowledge & secrets”. Intro “Describe Mara’s perspective when the story begins.”
+Keep B’s three small horizontal guide blocks:
+“What does Mara already know?” example “She recognises the passenger.”
+“What hasn’t she learned yet?” example “She doesn’t know why Bec returned.”
+“What secrets does she keep?” example “She hides their earlier meeting.”
+Below the guides show ONE wide, comfortably tall editable textarea labelled “Starting knowledge & secrets”:
+“Mara recognises the passenger from the last tram.
+She does not know why Bec returned.
+She keeps their earlier meeting secret and changes the subject if asked.”
+Persistent helper directly below the textarea: “Write what Mara knows, doesn’t know and keeps secret at the start of the story.”
+One muted note: “Used only when you include Mara’s card in an AI request.”
+Keep stable workspace bottom footer with status at left and Discard / Save changes at right. Exact language and legibility matter. Landscape, same size as input.
+State: Version history is open over the saved character workspace. Underlying footer shows “Saved”, and Save changes is disabled. This is a synthetic clean-card state, not an actual operation on the user’s draft.
+Overlay the workspace with a subtle scrim and ONE centered, roomy dialog, about 1000px wide and 700px high. Keep the header New character / Version history actions visible behind the scrim. Do not use a side drawer or history sidebar.
+Dialog title “Version history” with close X at upper right. Subtitle “Mara · Recent saved cards”.
+Below, use two compact horizontal selection buttons: “Current card” and “Previous saved card”; Previous saved card is selected. No timestamps, arbitrary version numbers, status codes or technical IDs.
+In a single full-width scrollable preview area, render ordinary human-readable field labels and prose, NOT an editable form, raw JSON or key:value dump. Preview heading “Previous saved card”.
+Show:
+“Description”
+“A station attendant who stays late.”
+“Personality”
+“Reserved and observant.”
+“Starting knowledge & secrets”
+“Mara knows the timetable, but not the cause of the delays.”
+“Voice”
+“Short sentences, gentle humour.”
+Use subtle separators and a small scroll cue indicating more card content is available to inspect. No three-column comparison or extra side panes.
+Below the preview, concise help: “Restores the whole card as a new saved version. Your current version stays in recent history.”
+A second short line: “You can undo the restore.”
+Fixed dialog footer: secondary “Cancel” and primary teal “Restore this version”. Restoration is an explicit choice after preview; do not show a completed restore, success toast, AI approval or deleted current card. No destructive red treatment needed for this reversible action. Keep all dialog help/actions crisp, fully visible and visually consistent with B.

@@ -12,8 +12,39 @@
     "speakingStyle": "Describe vocabulary, tone and sentence style the AI should follow in dialogue.",
     "exampleDialogue": "Write a few sample lines in their voice to show the AI the style you want.",
     "relationship": "Describe how this character feels about the selected person and how they act around them.",
-    "knowledgeNotes": "Describe what they know and any secrets they should keep. These notes do not track game state automatically.",
+    "knowledgeNotes": "Describe what this character knows, doesn't know and keeps secret when the story begins.",
+    "relationshipTarget": "Choose who these notes are about."
+  },
+  "constraints": "Persistent help below card text fields, not placeholder-only; optional inclusion note once per editor; no claim of automatic provider sends or runtime knowledge tracking.",
+  "labels": {
+    "relationshipTarget": "Relationship with",
+    "knowledgeNotes": "Starting knowledge & secrets"
+  },
+  "knowledgeScope": {
+    "decision": "Starting knowledge only; B guided layout",
+    "guidedQuestions": [
+      "What do they already know when the story begins?",
+      "What have they not learned yet?",
+      "What secrets do they keep?"
+    ],
+    "laterDiscoveries": "Deferred to a future phase, unassigned",
+    "copyStatus": "Draft wording reflecting agreed starting-only scope; not implemented"
+  },
+  "legacyHiddenCopy": {
     "sourceNotes": "Explain where these notes came from and flag anything you are uncertain about."
   },
-  "constraints": "Persistent help below card text fields, not placeholder-only; optional inclusion note once per editor; no claim of automatic provider sends or runtime knowledge tracking."
+  "hiddenCardControls": {
+    "linkedLore": "Deferred from simplified card; stored links retained",
+    "scope": "Deferred; existing stored scope retained",
+    "sourceNotes": "Removed from simplified card UI; stored data/approval safeguards retained"
+  },
+  "versionHistory": {
+    "entryLabel": "Version history",
+    "restoreAction": "Restore this version",
+    "preview": "Previous saved card",
+    "help": "Restores the whole card as a new saved version. Your current version stays in recent history.",
+    "undoHelp": "You can undo the restore.",
+    "copyStatus": "Proposed screenshot wording, visual approval pending",
+    "functionalStatus": "Follow-up; not implemented"
+  }
 }

@@ -1,0 +1,20 @@
+Use case: ui-mockup.
+Input image 1 is the approved Loomlight B workspace, used as the edit target. Replace only the Relationships topic content to show a new What they know design alternative. Keep its warm off-white/teal style, readable type, narrow app icon navigation, collapsed character list with panel restore icon, Mara identity with small Planning only badge and existing thumbnail, Writing selected / Game setup tabs, horizontal topics Overview / Personality & goals / Voice / Relationships / What they know / More details. Select What they know. Keep + New character top-right and fixed bottom Unsaved changes / Discard / Save changes footer. No right inspector, extra sidebar, charts, workflow meters, AI generate buttons, automatic sends or edit-to-unlock actions. One landscape screenshot, same size as source, crisp readable text. Keep the main editor broad. Use modest spacing so all requested controls are visible above the footer. Do not show concept labels A/B/C in the app itself. Every editable prose field has visible helper text directly BELOW it, not placeholder-only. Existing panel icons are reference styling; do not add custom Focus or Show characters buttons. No game-character linking or generic story-link clutter inside this topic. The single note about AI inclusion must be visible: “Used only when you include Mara’s card in an AI request.” Do not imply runtime knowledge is tracked.
+
+CONTENT — Guided writing with three questions and ONE saved note.
+Heading “What Mara knows”, intro “Use these questions to get started. Write your answers together in the note below.”
+Across the broad content area show three small, light, borderless guidance blocks in ONE horizontal row (not cards with metrics, not three editable fields):
+“What has Mara learned?” / example “She recognises the passenger.”
+“What hasn’t she learned?” / example “She doesn’t know why Bec returned.”
+“What does she hide?” / example “She keeps their earlier meeting secret.”
+Then show ONE generously wide prose textarea labelled “Mara’s knowledge notes”, with about 5 lines of writing room.
+Exact text:
+“Mara recognises the passenger from the last tram.
+She does not know why Bec returned.
+She keeps their earlier meeting secret and changes the subject if asked.”
+Helper immediately BELOW: “Write in plain sentences. Specific details help the AI keep Mara’s dialogue consistent.”
+Below this, a compact collapsed row “Related world notes · 2 linked” with a right-pointing chevron.
+Help below that row: “Select linked world notes separately when preparing an AI request.”
+A quiet small line “Scene and route guidance is in More details.”
+Then the common AI inclusion note.
+The three questions are optional writing guidance, NOT separate saved fields, mandatory steps or extra settings. There is just one textarea. Give the note the most space, and do not create side panels or additional save buttons.

@@ -1,0 +1,17 @@
+Use case: ui-mockup. High-fidelity desktop application screenshot, not a wireframe or poster.
+Image 1 is the edit target: the approved Loomlight B guided-knowledge workspace. Preserve its exact warm off-white/teal styling, readable type and wide main editor, portrait thumbnail, Mara identity, Planning only badge, Writing / Game setup tabs, horizontal topics, narrow app navigation and collapsed character-list state. Make the existing panel controls look like simple outlined split-panel rectangles with a small inward/outward chevron, matching Story's collapse/restore pattern: one at the top of the global icon rail and one at the workspace left edge. No Focus/Hide/Show characters text buttons.
+Retain New character fixed at top right. Immediately to its left add a quieter secondary “Version history” button with a small history icon; keep both header actions in the same place in every view. Keep horizontal topics Overview / Personality & goals / Voice / Relationships / What they know / More details; What they know selected. No new sidebar or right inspector.
+This is a revised starting-only design. Remove ALL Related world notes, linked lore, applicability, scene/route guidance and Source notes controls and explanatory lines. Do not add links to those removed settings under More details. No later discoveries, knowledge timeline, AI generation buttons, scores, raw keys or metadata. No replacement optional configuration section in the freed space.
+Content heading “Starting knowledge & secrets”. Intro “Describe Mara’s perspective when the story begins.”
+Keep B’s three small horizontal guide blocks:
+“What does Mara already know?” example “She recognises the passenger.”
+“What hasn’t she learned yet?” example “She doesn’t know why Bec returned.”
+“What secrets does she keep?” example “She hides their earlier meeting.”
+Below the guides show ONE wide, comfortably tall editable textarea labelled “Starting knowledge & secrets”:
+“Mara recognises the passenger from the last tram.
+She does not know why Bec returned.
+She keeps their earlier meeting secret and changes the subject if asked.”
+Persistent helper directly below the textarea: “Write what Mara knows, doesn’t know and keeps secret at the start of the story.”
+One muted note: “Used only when you include Mara’s card in an AI request.”
+Keep stable workspace bottom footer with status at left and Discard / Save changes at right. Exact language and legibility matter. Landscape, same size as input.
+State: normal editing, no overlay. Footer shows “Unsaved changes” at left. Discard and teal Save changes are visible at right. Use the vertical space reclaimed from removed optional sections for a taller writing box and breathing room, with the guide blocks still above it. The Version history button is visible and secondary to New character. No other controls added.

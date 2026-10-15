@@ -1,10 +1,10 @@
 {
   "date": "2026-10-15",
   "tool": "built-in image_gen.imagegen",
-  "researchAgents": 1,
+  "researchAgents": 2,
   "initialGenerations": 3,
-  "targetedRefinements": 4,
-  "selection": "B selected for refinement; expanded/focus v2 awaiting user feedback; no implementation",
+  "targetedRefinements": 6,
+  "selection": "Consolidated walkthrough decisions own current design; B starting-only knowledge and surfaced restore agreed; updated knowledge/history presentation awaiting approval",
   "assets": [
     {
       "file": "a-character-notebook.png",
@@ -35,6 +35,64 @@
       "width": 1586,
       "height": 992,
       "sha256": "2fdcab6dd5a3297146316ba4df0ec082eb801ef14f26ae3125f85c1806291575"
+    },
+    {
+      "file": "b-relationships-v1.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "7a38d7b75c503a311a773b81afa1205156450503118d418fa402485b1b96acbc"
+    },
+    {
+      "file": "knowledge-a-single-note-v1.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "df503d662d90a34df403d1c7bfbc76a5e16aba65e955063297fb53c680138289",
+      "prompt": "knowledge-a-single-note-v1.txt",
+      "promptSha256": "bac09ef0d81c06e9cfa4c37a862e938b13cde7ec7a8ed6e905316813c8b46e94"
+    },
+    {
+      "file": "knowledge-b-guided-prompts-v1.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "6d7185f96af68327a6b1f7748e7f42b48a27639b847ff5fafd68766082786d7c",
+      "prompt": "knowledge-b-guided-prompts-v1.txt",
+      "promptSha256": "1e0b68504344fd76dc4433711c7232b2e605c1ce26f1abb0f2bce24ac1a943d7"
+    },
+    {
+      "file": "knowledge-c-separate-views-v1.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "7a69586d6ef8beb3cf781be4ad517b8b9ebc4575460d0c78638777f3338378b7",
+      "prompt": "knowledge-c-separate-views-v1.txt",
+      "promptSha256": "d0b8fb2c9a7347770234ff61544eda1ff765e54575853743f6272e6a760ce052"
+    },
+    {
+      "file": "b-starting-knowledge-v3.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "128878f739c561634cb63b9f915e0261b1e9910973c6fad3acd7f1b6fe7819c3",
+      "prompts": [
+        {
+          "file": "b-starting-knowledge-v2.txt",
+          "sha256": "2a662db5459343f4a3b2595f8cb4fc96c8dfce5df1a51a39704355eaa2d95d2c"
+        },
+        {
+          "file": "b-starting-knowledge-panel-fix.txt",
+          "sha256": "f79225cb33ed0b9207f4cf27e1682b919b8f38016f506efbf4d3cf4ce3d165c1"
+        }
+      ]
+    },
+    {
+      "file": "b-version-history-v1.png",
+      "width": 1586,
+      "height": 992,
+      "sha256": "38dd032db11e40acea52531713d67bff3733a8a554973d03fb6710d97a88d5ac",
+      "prompts": [
+        {
+          "file": "b-version-history-v1.txt",
+          "sha256": "38abdec5bc6e345eb6789e70369801cb01613fdf2b4fdd342705d03526312d21"
+        }
+      ]
     }
   ],
   "review": {
@@ -44,11 +102,54 @@
     "c": "Fixed overview; direct editing; Writing/Game setup restored and game actions made secondary in one refinement. Portrait illustrative.",
     "limits": "Static generated images do not prove keyboard interaction, resizing or freedom from layout shift. Existing unsaved app draft untouched."
   },
-  "totalImageCalls": 7,
+  "totalImageCalls": 14,
   "bRefinement": {
     "calls": 3,
     "deliveredStates": 2,
     "correction": "First expanded mockup omitted New character; one targeted header fix retained Focus writing and restored fixed creation action.",
-    "review": "Owner inspected both final outputs: right inspector removed, topics horizontal, helpers below both textboxes, character collapse/restore and focus exit visible, creation/save anchors present. Static designs, no interaction proof."
+    "review": "Owner inspected both final outputs: right inspector removed, topics horizontal, helpers below both textboxes, character collapse/restore and focus exit visible, creation/save anchors present. Static designs, no interaction proof.",
+    "interactionAmendment": "Use existing Story panel-icon collapse/restore controls, placement, focus transfer and remembered state. Mockup Hide/Show/Focus controls superseded for ordinary collapse; no further image call."
+  },
+  "relationships": {
+    "calls": 1,
+    "prompt": "b-relationships-v1.txt",
+    "review": "Owner visually reviewed: compact summaries, one expanded editor, below-field helper, explicit Add and stable creation/save actions. Wide main area; no extra sidebar. Generated panel icons remain illustrative and must match Story controls in implementation. Retained illustrative portrait is not a new product requirement.",
+    "status": "layout and label/helper refinement agreed; move to What they know",
+    "copyAmendment": {
+      "label": "Relationship with",
+      "helper": "Choose who these notes are about.",
+      "imageUnchanged": true
+    }
+  },
+  "knowledgeExploration": {
+    "calls": 3,
+    "type": "three alternative edits of approved B Relationships frame",
+    "agent": "one user-requested read-only workflow/source reviewer",
+    "status": "B selected; starting knowledge only agreed",
+    "review": "Owner inspected all three: readable content/helpers, single prose field, fixed creation/save controls and no extra sidebar. A duplicates disclosure chevrons; use shared single Story control in implementation. C world-reference view is proposed, not shown/verified. No native interaction proof.",
+    "noImplementation": true,
+    "temporalMeaning": "Character knowledge when story begins; later discoveries and current-point knowledge resolution deferred to an unassigned future phase",
+    "imageUnchanged": true,
+    "linkedLoreDecision": "Defer visible character-linked-lore controls from lean card; preserve stored links and independent Lorebook/request selection",
+    "nextReview": "History direction recorded; continue character/AI walkthrough",
+    "applicabilityDecision": "Omit from character-card UI; route variants deferred",
+    "sourceNotesDecision": "Remove Source notes UI; retain existing data and approval/freshness protections"
+  },
+  "cardHistoryDecision": {
+    "userDirection": "Surface history with rollback to previous saved card",
+    "presentationProposal": "Version history; readable preview; Restore this version",
+    "currentCapability": "read-only revision display; restore follow-up required",
+    "retention": "existing bounded snapshots preserved",
+    "implementationSelected": false
+  },
+  "consolidation": {
+    "decisionRecord": "walkthrough-decisions.md",
+    "calls": 3,
+    "finalScreens": 2,
+    "correction": "One targeted correction replaced bare back arrows with split-panel restore icons in starting-knowledge final. First draft not selected; original retained at tool output location.",
+    "review": "Owner visually inspected both final outputs: B frame and creation/save anchors retained, knowledge only at story start, below-field helper, removed lore/applicability/source controls, compact readable version preview and explicit restore. Final knowledge panel icons corrected; scrim background icons in history image remain illustrative. No responsive/keyboard/native restore proof.",
+    "approval": "pending visual approval",
+    "localOnly": true,
+    "applicationChanged": false
   }
 }
