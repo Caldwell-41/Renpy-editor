@@ -1,6 +1,6 @@
 # Walkthrough redesign implementation
 
-**State: reviewed local implementation; preparing paired CI for the Unsloth Studio load-configuration amendment.** The user approved the
+**State: published implementation; awaiting_ci for the Unsloth Studio load-configuration amendment.** The user approved the
 complete proposed scope/budgets and explicitly requested starting the new chat. The
 Sol6.1/xhigh coordinator owns implementation, Sol6.1/high delegation, review, tests,
 publication of the reviewed candidate and gated CI under this contract. This supersedes
@@ -755,3 +755,33 @@ publication; this reservation is charged even if dispatch fails or is cancelled.
 No operation is pending yet. The run identity/inputs and tested commit will be recorded
 after dispatch in a docs-only successor. No duplicate dispatch, live call or owner
 model/settings operation is authorised by this reservation.
+
+The reviewed candidate is `e127688bcc1d8f64fea4974b64647720a0adef47`, tree
+`a57161a3e41257ce9d2a63fd5f536c4e54bc9c4d`, normally published and remote SHA verified.
+CI reservation1 failed locally at2026-10-15T11:40:43Z: the installed launcher requires
+JSON input values to be strings and rejected boolean JSON before sending a dispatch.
+No workflow run was created by that command. This remains charged as attempt1/3.
+The diagnosed correction changes only launcher input encoding to string `true`/`false`;
+candidate/source/selectors are unchanged. Reserve ordinal2/3 for that single corrected
+dispatch, with one remaining paired allowance. Do not retry an ambiguous server result.
+
+Corrected dispatch is confirmed: Repository quality workflow354880113,
+[run38729094527](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38729094527),
+run attempt1, cumulative ordinal2, created2026-10-15T11:41:13Z. Exact head is candidate
+`e127688bcc1d8f64fea4974b64647720a0adef47` on `codex/phase3a-story-logic`, event
+workflow_dispatch. Last observed queued, conclusion null, at2026-10-15T11:41:20Z.
+Material inputs: walkthrough_redesign=true, walkthrough_redesign_ordinal=2,
+walkthrough_redesign_candidate=that exact SHA; all six other boolean selectors false
+(story_logic_early, assistance_ui, source_foundation_macos, phase1g_flow_profile,
+phase1g_macos_browser_diagnostic, phase1g_candidate_proof). Corrected launcher inputs
+are string-valued JSON; no source change or duplicate server dispatch occurred.
+
+Current paired usage2/3 includes the local parse failure; one remaining allowance.
+New live LLM use0 of reset10; historical live/token/inventory/load counters unchanged.
+Expected selected jobs are only the current-redesign Windows2025 x64/macOS26 ARM64
+proof, with retained artifacts7 days. No terminal evidence is claimed. On manual
+same-chat resume inspect exact jobs, actual cases, source/binary/manifests, privacy,
+cleanup and artifact availability before qualification. Docs-only wait successor
+records this tested candidate; it is not a replacement code candidate. No polling,
+watcher or automation. CURRENT/HANDOVER replace superseded live holds; unique old
+failures, missing live actions and the unused reuse-only patch remain in this ledger.
