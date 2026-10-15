@@ -1,122 +1,88 @@
 # Current outcome handover
 
-## Selected continuation
+## Completed amendment and continuation
 
-Updated 2026-10-15. **Evidence correction published; awaiting_ci with manual same-chat resume.**
-Continue this chat and the [owning task](../tasks/active/walkthrough-redesign-implementation.md),
-especially its [model-load settings amendment](../tasks/active/walkthrough-redesign-implementation.md#user-selected-model-load-configuration-amendment--2026-10-15).
-The user selected configurable Unsloth Studio defaults and warning-only deviations
-when a request fits actual verified capacity. The supplied brief selects mocked
-acceptance at this stage. No physical endpoint test is required for this amendment.
+Updated 2026-10-16. **Unsloth Studio model-load amendment: review_ready; automated
+qualification and terminal CI audit complete.** Continue this chat if further work is
+selected. The [owning task](../tasks/active/walkthrough-redesign-implementation.md)
+retains the broader walkthrough outcome, historical failures and missing acceptance.
+Its [final audit](../tasks/active/walkthrough-redesign-implementation.md#final-automated-qualification-audit--2026-10-16)
+owns exact evidence. No workflow, amendment implementation or audit remains pending.
 
-The checkout is `codex/phase3a-story-logic`. Live Git owns current state; never reset
-to an old checkpoint or remote baseline. The active code candidate is published:
-`7551a9c91cb5e4bba7617f8c10843584be3ef2a1`, tree
-`8e4153feaefbfce71637a65be59852e55854ea39`. Normal push and remote SHA were verified.
-It contains only an evidence-check correction beyond product candidate e127688.
-A later docs-only wait successor records this candidate without replacing it. Root owns commits, integration, review and common
-budgets; all existing workers are finished. The existing API researcher independently
-double-checked official source and the final implementation, closing all findings.
+The qualified candidate is `7551a9c91cb5e4bba7617f8c10843584be3ef2a1`, tree
+`8e4153feaefbfce71637a65be59852e55854ea39`, published on
+`codex/phase3a-story-logic`. Documentation-only successors record this candidate;
+they do not become the tested code candidate. Live Git owns the current checkout;
+never reset to an old checkpoint or remote baseline. Root owns integration,
+publication and common budgets. Existing workers are finished; independent official
+source/API and concrete implementation reviews closed without findings.
 
-## Implemented behavior and evidence
+## Behavior and qualification
 
-AI Settings exposes parallel slots, GPU memory mode and automatic memory fitting.
-Defaults1/manual/off and the existing32768 context are suggestions, materialized by
-explicit Save; old profiles remain readable without silently adding preferences.
-Save remains local. Separate explicit Read/Apply use the saved selected model and
-existing native credential, resolve the actual quantization, preserve known unrelated
-server options, write only the selected override and read it back. No global setting
-is silently enabled, no per-completion write occurs, and Apply does not reload a model.
-Reports distinguish requested, saved and actually loaded values. A completed write
-with uncertain read-back says unverified update rather than claiming no write occurred.
+AI Settings exposes parallel slots, GPU memory mode and automatic memory fitting,
+with suggested defaults 1/manual/off and the existing 32768 context. Explicit Save
+stores local preferences; old profiles do not silently acquire settings. Separate
+Read/Apply use the saved selected model, exact quantization and existing native
+credential. Apply preserves known unrelated options, changes only the selected
+override and reads it back. It does not enable global auto-switch, reload a model
+or add a per-completion settings write. Reports distinguish requested, saved and
+actually loaded values, including uncertain writes and unverified fitting.
 
-Loomlight refuses settings management during its active generation without cancelling
-that generation. Profile/project changes and shutdown cancel only owned management
-work. Unknown/unsafe fields or a resolved row outside the selected model refuse before
-write or load reuse. Different effective values warn if the actual request fits;
-unknown capacity, real overflow and authentication/load errors still refuse. Existing
-user-configured prompt budgets remain limits. No exact Unsloth Studio version gate
-is present. Manual loading may strip fit arguments, so saved fitting off is explicitly
-not proof of effective runtime fitting. External edits have no server compare-and-swap;
-recheck/read-back does not promise atomicity.
+Different effective settings warn when the request fits actual verified capacity.
+Unknown capacity, actual overflow, authentication/load errors, unsafe fields and
+unrelated resolved rows still refuse. Existing user prompt budgets remain limits.
+Loomlight's active generation blocks management without cancellation. Profile/project
+changes and shutdown cancel only owned management work. No exact Unsloth Studio
+version gate exists. Manual loading can strip fit arguments, so saved fit off is not
+proof of runtime fitting. External edits have no server compare-and-swap; read-back
+does not imply atomicity.
 
-Current local amendment proof:27 distinct core cases (profile1, configuration4,
-management7, readiness15),12 native ownership/request-host cases,41 renderer/protocol
-cases, one focused Apply-copy regression,28 browser states with the actual evidence
-checker,25 CI-checker fixtures and actionlint. Typecheck/test compilation passed.
-Core correction1 and renderer correction1 were used; second corrections are unused.
-Raw paths and all earlier failures remain in the task. Browser source hashes matched
-before/after that run; the later Apply-only copy correction has separate DOM proof
-and must not be described as identical browser inputs. Exact-candidate CI repeats
-current source. Browser fixtures do not prove native WebView physical input.
+[Run 38736854507](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38736854507),
+Repository quality workflow 354880113, run attempt 1, cumulative ordinal 3, completed
+successfully at 2026-10-15T12:50:18Z. Required jobs Windows 116428234933 and macOS
+116428234868 passed on the exact candidate. Each executed 69 UI/protocol cases,
+68 Rust cases, 28 browser states and 27 checker fixtures with no failed, ignored or
+skipped selected tests. Typecheck, compilation and renderer build passed. Only
+unselected historical/other workflow steps were skipped.
 
-Earlier Characters/Game setup/Lorebook/history/context proofs remain valid for
-unchanged inputs. Two older live successes cover setup and rewrite/include. Six
-original live actions remain unrun: Continue, Draft, Card/world-include, Lore, Edit
-and rewrite/world-omit. They are not passes and are not prerequisites for this newer
-mock-based amendment. Do not replay the successful rewrite/include or restart the
-old wrapper. The old reuse-only driver patch remains unapplied/unrun; its exact hash
-and proposal live in the task's [earlier result](../tasks/active/walkthrough-redesign-implementation.md#latest-live-result-and-remaining-decision).
+Terminal audit independently verified all 300 tracked input hashes and 37 browser
+inputs against candidate checkout bytes, true sourceMatchesCandidate and empty
+missing/mismatched lists. Both 64-file artifact ZIPs match GitHub digests; their
+63-entry manifests cover every retained file. Actual executed native/core binaries
+are retained with matching hashes and ARM64/x64 headers. All 28 PNG receipts per
+host, browser/server closure and privacy scans passed. Root inspected final compact
+light macOS and wide dark Windows Settings images. No actionable finding remains.
+This establishes the supplied brief's mocked automated acceptance, not actual server
+configuration, runtime fitting or native physical-input/human acceptance.
 
-## Recovery, budget and next action
+Artifacts macOS 11974057652 and Windows 11974432918 expire respectively at
+2026-10-22T12:46:42Z and 2026-10-22T12:49:31Z. Exact ZIP/binary hashes and audit
+receipts are in the task; downloaded evidence is outside Git in
+`/private/tmp/loomlight-model-config-ci3-audit/`. The earlier run 38729094527 passed
+tests but had false source-match receipts due to CRLF comparison. Those receipts
+remain unchanged; the final run qualifies the reviewed correction.
+
+## Recovery, limits and remaining scope
 
 Preserve the original walkthrough app's **unsaved synthetic Mara draft**. Ignored
 `.toolchains/approval-walkthrough-2026-10-14/session.json` is recovery metadata only.
-No Save/Discard/Reload/navigation/close/reuse of that session. **No local production,
-package or installer builds; no new native editor launches.** Test compilation and
-test-only drivers are allowed. Preserve all other worktrees and unrelated work.
-Ordinary profiles/keys, private endpoint details and recovery receipts stay private;
-no credential export, owner API/settings call, download, deliberate unload/reload or
-service installation is planned. The model-load allowance is exhausted.
+No Save/Discard/Reload/navigation/close/reuse of that session. No local production,
+package or installer builds and no new native editor launches occurred. Preserve
+other worktrees and unrelated work. Owner credentials/profiles, private endpoint
+details and recovery receipts stay private. No owner settings write, live request,
+download, deliberate unload/reload or service installation was used for this amendment.
 
-Historical common usage: live5/12, reserved response tokens10240/32768, inventory3/4,
-loads2/2, pairedCI3/3 charged and prior shared additional reruns10/10. Failures/reservations
-remain charged. The user's separate reset10 LLM allowance is unused; its optional
-scope clarification is pending and does not block mocked work. No allowance was
-silently reset by the amendment. Local production builds and new native launches0.
+Historical usage remains live 5/12, reserved response tokens 10240/32768, inventory
+3/4, loads 2/2, paired CI 3/3 and prior extra reruns 10/10. All failures/reservations
+remain charged, including ordinal 1's local launcher parse refusal. The separate reset
+10 LLM allowance is unused. No further paired attempt is authorised or needed for the
+completed amendment. No polling, watcher or automation exists.
 
-Previous run38729094527/attempt1/ordinal2 completed success
-at2026-10-15T11:49:40Z on product candidate
-`e127688bcc1d8f64fea4974b64647720a0adef47`. Both jobs passed69 DOM/protocol
-cases,68 Rust cases,28 browser states,25 checker fixtures and build checks. Terminal
-audit verified both artifact ZIP digests, complete63-entry manifests,37 browser input
-hashes, retained executed binaries/architectures, privacy and closed browser/server
-cleanup. Artifacts11968818508 (macOS) and11968704191 (Windows) expire2026-10-22 at
-11:46:14Z/11:48:43Z respectively. Exact hashes/results are in the task's
-[terminal audit](../tasks/active/walkthrough-redesign-implementation.md#terminal-ci-audit-and-evidence-correction--2026-10-15).
-
-Both identity receipts have sourceMatchesCandidate:false. Exactly two PowerShell
-files use required CRLF checkout bytes whereas the old checker expected normalized
-Git blobs; root proved all299 hashes match Git's candidate checkout representation.
-This is a checker defect, with no product-test failure. Preserve original receipts;
-this run does not satisfy the final identity gate. Correction uses `git cat-file
---filters`, records mismatches, tracks `.gitattributes` and adds a success-only identity
-gate after always-run sealing/privacy, preserving partial evidence retention.
-Two real-Git/rejecting fixtures bring the suite to27; all passed, actionlint passed,
-and independent review closed without findings. No product source changed.
-
-One operation is pending: Repository quality workflow354880113,
-[run38736854507](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38736854507),
-run attempt1, cumulative ordinal3, event workflow_dispatch, exact active candidate
-7551a9c above on codex/phase3a-story-logic. Created2026-10-15T12:43:39Z, last observed
-queued at2026-10-15T12:43:48Z, conclusion null. Material inputs: walkthrough_redesign=true,
-walkthrough_redesign_ordinal=3, walkthrough_redesign_candidate=the exact active SHA;
-story_logic_early, assistance_ui, source_foundation_macos, phase1g_flow_profile,
-phase1g_macos_browser_diagnostic and phase1g_candidate_proof all false. Launcher JSON
-uses string values. No duplicate dispatch occurred. Artifacts retain7 days after upload;
-check actual availability/expiry during terminal audit.
-
-All3 paired allowances are charged: local parse refusal1, completed evidence-defect
-run2, current run3. No further paired run is authorised. Live reset10 remains unused.
-A fixture-only placeholder-domain validation failure was corrected, both affected
-identity cases passed again, and repository validation passed602 files; actionlint
-and whitespace checks passed. No product behavior, model setting or owner call changed.
-Required hosts remain Windows2025 x64/macOS26 ARM64; no local production build/native
-launch or broad package/SDK matrix.
-
-Next: on manual user resume in this same chat, audit the exact current terminal run/
-attempt, actual jobs/cases, manifests, sourceMatchesCandidate:true, empty missing/
-mismatched inputs, retained executables, privacy, cleanup and artifact availability.
-If still pending, preserve identity and pause again. The docs-only successor does not
-replace the code candidate. No polling, watchers, automation, merge or release.
-Phase2/3A human acceptance remains pending.
+Six older live actions remain unrun: Continue, Draft, Card/world-include, Lore, Edit
+and rewrite/world-omit. They are not amendment prerequisites or passing results. Do
+not restart the old wrapper or replay the successful rewrite/include. The old
+reuse-only driver patch remains unapplied/unrun; its proposal and exact hash remain
+in the task's earlier result. No continuation of that older live plan is selected.
+Phase2/3A whole-phase/native/human acceptance remains pending; earlier technical
+baselines stay review_ready. No merge, release or signing/credential-policy change is
+authorised. Any newly selected outcome must preserve these recovery and budget facts.

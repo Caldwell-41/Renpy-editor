@@ -1,6 +1,6 @@
 # Walkthrough redesign implementation
 
-**State: evidence correction published; awaiting_ci on the final paired attempt.** The user approved the
+**State: Unsloth Studio amendment review_ready after final automated qualification; broader walkthrough/phase acceptance remains incomplete.** The user approved the
 complete proposed scope/budgets and explicitly requested starting the new chat. The
 Sol6.1/xhigh coordinator owns implementation, Sol6.1/high delegation, review, tests,
 publication of the reviewed candidate and gated CI under this contract. This supersedes
@@ -863,3 +863,68 @@ product/UI/service/browser selection. Artifacts retain7 days after upload. No te
 result is claimed. Publish this docs-only wait successor and stop active work under
 manual same-chat resume; terminal audit must verify exact cases, input/binary/artifact
 hashes, true source match, empty missing/mismatched lists, privacy and cleanup.
+
+### Final automated qualification audit — 2026-10-16
+
+User resumed with “Audit ci.” Recorded run38736854507/attempt1/ordinal3 is
+completed/success, updated2026-10-15T12:50:18Z. Exact candidate
+`7551a9c91cb5e4bba7617f8c10843584be3ef2a1`, tree
+`8e4153feaefbfce71637a65be59852e55854ea39`, branch codex/phase3a-story-logic match
+the recorded selection. Windows job116428234933 and macOS job116428234868 both
+passed all required steps, including the new complete-source identity gate. Ordinal3,
+exact candidate and all excluded selectors:false were independently checked in logs.
+
+Each host executed69 DOM/protocol cases,68 listed/executed Rust cases (references19,
+prompts7, shared-context2, profile1, configuration4, management7, readiness15,
+diagnostic1, native host12),28 browser states and27 checker fixtures. All selected
+cases passed with zero failed/ignored/skipped/cancelled; typecheck, test compilation
+and renderer build passed. Unselected historical/other workflow jobs were correctly
+skipped. The existing Vite bundle-size advisory remains nonblocking.
+
+Both receipts have sourceMatchesCandidate:true, missingTrackedInputs:[] and
+mismatchedTrackedInputs:[]. Root independently recomputed all300 tracked checkout
+hashes, including `.gitattributes`, against Git's exact candidate checkout bytes;
+the retained input sets are complete. All37 browser inputs match that candidate,
+before/after identities are stable and all28 named PNG hashes/dimensions/receipts per
+host passed. Browser and server cleanup are closed. Root inspected final compact
+light macOS and wide dark Windows Settings captures without finding a defect.
+
+Downloaded unexpired artifacts match GitHub ZIP digests and complete manifests:
+
+- macOS11974057652: SHA256b6712ce954f38309716c85ea2321045db92a041d627b365ad338dedc3c9fb2ff,
+  expires2026-10-22T12:46:42Z.
+- Windows11974432918: SHA256aa99188a0cd40bf000fa1de6c9d581954187f5390361ce15ce888fb3ea879095,
+  expires2026-10-22T12:49:31Z.
+
+Each ZIP contains64 files and a complete matching63-entry manifest covering renderer,
+logs, identity, images and actual executed test binaries. Binary hashes and headers:
+
+- macOS core `loomlight_core-8045009050921e82`,
+  SHA256e33bdfbe51669a588e3c2014df46e72346cae1ef9777c297f9a64cb51f97146d, Mach-O ARM64.
+- macOS host `loomlight-a1412eb32c9bde92`,
+  SHA2564722de5349dad08a0517618a0715d53c153c152ac53d38455fffacb79c4921cd, Mach-O ARM64.
+- Windows core `loomlight_core-6dbf3a47de1bfee3.exe`,
+  SHA25635a4aa860b2f60e1e9bc43f97287115016dd292d3549413479b831c36f27f2e0, PE x64.
+- Windows host `loomlight-ce45c365f4728222.exe`,
+  SHA2568961d2d9e7c8a067bd234086f0918d20fd815cf000e81c21cd7e76c56001d640, PE x64.
+
+Runner privacy scans and the independent downloaded-artifact scan passed. Full audit
+inputs/results remain outside Git at `/private/tmp/loomlight-model-config-ci3-audit/`:
+two artifact ZIPs, combined job/system logs, `audit.py`, `audit-summary.json`, receipts,
+images and binaries. Combined run-log ZIP SHA256
+2eaf00d4111cc878eeaa06b7f26f7c1a15b9c6f07127d809fb5caedd868d386b; audit observation
+2026-10-15T15:54:15Z (2026-10-16 local). Earlier false receipts/failures remain unchanged.
+
+**Result: the user-selected model-load configuration amendment is review_ready and
+its mocked automated acceptance is complete.** No actionable qualification finding,
+pending CI operation or amendment work remains. No actual server configuration or
+strict fitting, native physical input or whole-phase acceptance is inferred. Six
+older live actions remain unrun and outside this amendment's acceptance. Paired3/3,
+old live/token/inventory/load counts and reset10 LLM allowance unused remain unchanged.
+No new run, owner call, local app build/launch, merge or release was performed or
+selected. Publish the docs-only closure without changing the qualified code candidate.
+
+Closure repository validation passed602 files and whitespace checks passed. Live
+records reviewed at CURRENT330/HANDOVER724 words; no excess or recovery omission.
+Only this ledger and the two live status records changed during closure. No additional
+test/product build or CI dispatch is required for the documentation-only successor.
