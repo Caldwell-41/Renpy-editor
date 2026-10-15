@@ -10,6 +10,7 @@ import importlib.util
 import json
 from pathlib import Path
 import struct
+import subprocess
 import tempfile
 import unittest
 from unittest import mock
@@ -71,6 +72,52 @@ def tiny_png(width=1440, height=900):
             + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
             + chunk(b"IDAT", zlib.compress((b"\x00" + b"\x10\x20\x30" * width) * height))
             + chunk(b"IEND", b""))
+
+
+class IdentityTests(unittest.TestCase):
+    def test_git_checkout_attributes_pass_but_changed_file_bytes_refuse(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / '.gitattributes').write_bytes(b'* text eol=lf\n*.ps1 text eol=crlf\n*.png binary\n')
+            (root / 'fixture.ps1').write_bytes(b'Write-Output "synthetic"\r\n')
+            (root / 'fixture.txt').write_bytes(b'synthetic\n')
+            (root / 'fixture.png').write_bytes(b'\x00\xff\r\n\n')
+            git = lambda *args: subprocess.check_output(['git', '-c', 'core.autocrlf=false', *args], cwd=root, stderr=subprocess.STDOUT)
+            git('init', '--quiet')
+            git('add', '--all')
+            git('-c', 'user.name=Synthetic fixture', '-c', 'user.email=fixture@example.com',
+                '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=disabled-fixture-hooks',
+                'commit', '--quiet', '-m', 'Synthetic identity fixture')
+            inputs = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                      for path in root.iterdir() if path.is_file()}
+            self.assertNotEqual(hashlib.sha256(git('show', 'HEAD:fixture.ps1')).hexdigest(), inputs['fixture.ps1'])
+            with mock.patch.object(checker, 'ROOT', root):
+                self.assertEqual(checker.candidate_mismatches(inputs), [])
+                (root / 'fixture.ps1').write_bytes(b'Write-Output "changed"\r\n')
+                inputs['fixture.ps1'] = hashlib.sha256((root / 'fixture.ps1').read_bytes()).hexdigest()
+                self.assertEqual(checker.candidate_mismatches(inputs), ['fixture.ps1'])
+                (root / '.gitattributes').write_bytes(b'* text eol=lf\n')
+                inputs['.gitattributes'] = hashlib.sha256((root / '.gitattributes').read_bytes()).hexdigest()
+                self.assertIn('.gitattributes', checker.candidate_mismatches(inputs))
+
+    def test_complete_identity_required_without_waiving_partial_evidence_retention(self):
+        report = {'candidate': SHA, 'tree': 'f' * 40, 'sourceMatchesCandidate': True,
+                  'missingTrackedInputs': [], 'mismatchedTrackedInputs': []}
+        self.assertTrue(checker.identity_ok(report, SHA, 'f' * 40))
+        for field, values in {
+            'candidate': ['', 'e' * 40], 'tree': ['', 'e' * 40],
+            'sourceMatchesCandidate': [False, 'true', 1, None],
+            'missingTrackedInputs': [['fixture.txt'], None],
+            'mismatchedTrackedInputs': [['fixture.ps1'], None],
+        }.items():
+            for value in values:
+                with self.subTest(field=field, value=value):
+                    changed = copy.deepcopy(report)
+                    changed[field] = value
+                    self.assertFalse(checker.identity_ok(changed, SHA, 'f' * 40))
+            changed = copy.deepcopy(report)
+            del changed[field]
+            self.assertFalse(checker.identity_ok(changed, SHA, 'f' * 40))
 
 
 class SelectionTests(unittest.TestCase):

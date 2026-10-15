@@ -163,10 +163,26 @@ def browser_ok(folder):
             and all(r.get('image') == f"{r['surface']}-{r['theme']}-{r['size']}.png" and (folder / r['image']).is_file() for r in receipts))
 
 
+def candidate_mismatches(inputs):
+    # Checkout bytes include the repository's declared transformations (e.g. CRLF
+    # PowerShell files). Compare with Git's checkout representation, retaining raw
+    # file hashes in the receipt; never normalize or ignore an edited input here.
+    return [name for name, checksum in inputs.items()
+            if hashlib.sha256(subprocess.check_output(
+                ['git', 'cat-file', '--filters', 'HEAD:' + name], cwd=ROOT)).hexdigest() != checksum]
+
+
+def identity_ok(report, head, tree):
+    return (report.get('candidate') == head and report.get('tree') == tree
+            and report.get('sourceMatchesCandidate') is True
+            and report.get('missingTrackedInputs') == []
+            and report.get('mismatchedTrackedInputs') == [])
+
+
 def seal(folder):
     folder.mkdir(parents=True, exist_ok=True)
     git = lambda *args: subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()
-    names = git('ls-files', 'app', '.github/workflows', 'scripts/validate.py').splitlines()
+    names = git('ls-files', '.gitattributes', 'app', '.github/workflows', 'scripts/validate.py').splitlines()
     missing = [name for name in names if not (ROOT / name).is_file()]
     inputs = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in names if (ROOT / name).is_file()}
     identity = {'candidate': git('rev-parse', 'HEAD'), 'tree': git('rev-parse', 'HEAD^{tree}'),
@@ -189,7 +205,8 @@ def seal(folder):
                     shutil.copy2(source, destination)
                     retained.append({'name': source.name, 'sha256': hashlib.sha256(destination.read_bytes()).hexdigest()})
     identity['missingTrackedInputs'] = missing
-    identity['sourceMatchesCandidate'] = not missing and all(hashlib.sha256(subprocess.check_output(['git','show','HEAD:' + name],cwd=ROOT)).hexdigest() == checksum for name, checksum in inputs.items())
+    identity['mismatchedTrackedInputs'] = candidate_mismatches(inputs)
+    identity['sourceMatchesCandidate'] = not missing and not identity['mismatchedTrackedInputs']
     identity['retainedTestExecutables'] = retained
     identity['selectedDomTests'] = dom_names()
     (folder / 'identity.json').write_text(json.dumps(identity, indent=2) + '\n', encoding='utf-8')
@@ -197,7 +214,7 @@ def seal(folder):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', choices=('gate', 'dom', 'cargo', 'browser', 'seal'))
+    parser.add_argument('mode', choices=('gate', 'dom', 'cargo', 'browser', 'seal', 'identity'))
     parser.add_argument('path', nargs='?')
     parser.add_argument('scope', nargs='?')
     parser.add_argument('listing', nargs='?')
@@ -211,6 +228,10 @@ def main():
         good = cargo_ok(Path(args.path).read_text(encoding='utf-8'), Path(args.listing).read_text(encoding='utf-8'), args.scope)
     elif args.mode == 'browser':
         good = browser_ok(Path(args.path))
+    elif args.mode == 'identity':
+        head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+        tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=ROOT, text=True).strip()
+        good = identity_ok(json.loads(Path(args.path).read_text(encoding='utf-8')), head, tree)
     else:
         seal(Path(args.path)); good = True
     if not good:

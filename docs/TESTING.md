@@ -793,6 +793,11 @@ Pinned dependencies, renderer build and native test compilation occur on Windows
 and macOS ARM64 only after coordinator review/focused checks. Partial logs/images,
 produced renderer/test executables, source input hashes and run identity are retained
 behind the artifact privacy scan; a green job summary alone does not qualify them.
+Source identity compares retained raw checkout hashes with Git's candidate checkout
+representation (`git cat-file --filters`), including declared CRLF PowerShell files.
+The receipt includes `.gitattributes`, missing/mismatched input lists and an explicit
+complete-source identity gate. Failed checks still retain privacy-approved partial
+evidence; a retained seal alone is not a successful completion gate.
 
 The model-load configuration amendment adds optional-profile round-trip/bounds,
 override merge/projection, actual GET/PUT/read-back transport and native management

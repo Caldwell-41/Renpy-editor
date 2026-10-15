@@ -1,6 +1,6 @@
 # Walkthrough redesign implementation
 
-**State: published implementation; awaiting_ci for the Unsloth Studio load-configuration amendment.** The user approved the
+**State: paired CI audited; correcting source-evidence checkout comparison before final attempt.** The user approved the
 complete proposed scope/budgets and explicitly requested starting the new chat. The
 Sol6.1/xhigh coordinator owns implementation, Sol6.1/high delegation, review, tests,
 publication of the reviewed candidate and gated CI under this contract. This supersedes
@@ -785,3 +785,60 @@ cleanup and artifact availability before qualification. Docs-only wait successor
 records this tested candidate; it is not a replacement code candidate. No polling,
 watcher or automation. CURRENT/HANDOVER replace superseded live holds; unique old
 failures, missing live actions and the unused reuse-only patch remain in this ledger.
+
+### Terminal CI audit and evidence correction — 2026-10-15
+
+User resumed with “Audit ci.” Run38729094527/attempt1 is completed/success, updated
+2026-10-15T11:49:40Z, with the exact recorded candidate/head and both required jobs:
+Windows116402144300 and macOS116402145085. Each executed69 DOM/protocol cases,
+68 listed/executed Rust cases (references19, prompts7, shared-context2, profile1,
+configuration4, management7, readiness15, diagnostic1, native host12),28 browser states
+and25 checker fixtures, with no failed/ignored/skipped selected test. Typecheck,
+test compilation and renderer build passed. Only unrelated selectors/historical steps
+were skipped. All37 browser input hashes match candidate checkout bytes; browser and
+server cleanup are closed. Retained native/core binaries match their recorded hashes
+and actual execution logs; Mach-O ARM64 and PE x64 architectures are correct. Root
+inspected compact dark macOS and wide light Windows Settings captures; no finding.
+
+Both downloaded artifacts are unexpired and match GitHub's ZIP digests:
+macOS11968818508, SHA256a0a6cb9f9f562728ddfb6ace97b8ff6bb5b2e880bc82f9be76675b817ec887fc,
+expires2026-10-22T11:46:14Z; Windows11968704191,
+SHA2569242f1743ca43ecc00641f3d2f77c01022be61de9e04512dc2030e302268fdb5,
+expires2026-10-22T11:48:43Z. Each ZIP contains64 files and a complete matching63-entry
+manifest. Both privacy scans passed on runners and the downloaded artifacts passed
+again. Exact audit inputs/results remain outside Git at
+`/private/tmp/loomlight-model-config-ci2-audit/`, including both ZIPs,30 run-log files,
+`audit-initial.json` and retained receipts/binaries/images.
+
+**Evidence defect, not a product-test failure:** both identity receipts truthfully
+report sourceMatchesCandidate:false, with no missing inputs. Exactly two of299 input
+hashes differ from raw Git blobs: `app/scripts/rewrite-windows-native.ps1` and
+`app/scripts/studio-setup-windows.ps1`. The repository declares `*.ps1 text eol=crlf`;
+both hosts correctly checked out CRLF while Git stores normalized LF. Root independently
+confirmed all299 retained hashes equal `git cat-file --filters candidate:path` bytes.
+Do not rewrite the old receipts or promote this run as satisfying the required identity
+gate. Product results remain valid observations on their exact recorded inputs.
+
+The in-scope correction compares raw file hashes with Git's declared checkout
+representation, includes `.gitattributes` in tracked identity/final diff, lists actual
+mismatches and adds a success-only complete-source identity gate after always-run
+sealing/privacy. Partial-failure evidence retention is preserved. Two new fixtures use
+a real synthetic Git repository to prove CRLF/binary/LF matching and actual edit/
+attribute-change rejection, plus missing/mismatched/false/changed-candidate refusal.
+Focused correction1 passed27/27 fixtures and actionlint; log
+`/private/tmp/loomlight-model-config-ci-identity-correction1-tests.log`. Existing API
+researcher independently reviewed the concrete correction, finding no blocker. No
+product code, live request, model operation or local app build/launch changed.
+
+Root approves the reviewed evidence correction and reserves **paired ordinal3/3**
+for its single new exact-candidate proof. No allowance remains after this reservation;
+old failures stay charged. Commit/publish the coherent correction, dispatch once,
+confirm identity, then publish the wait record and pause for manual same-chat audit.
+
+Final repository validation initially rejected the synthetic fixture's example.invalid
+email domain under its existing placeholder allowlist. Changed only that test identity
+to the allowed example.com domain; both IdentityTests passed again and repository
+validation passed602 files. Log
+`/private/tmp/loomlight-model-config-ci-identity-placeholder-correction.log`.
+Whitespace checks passed; live records reviewed at CURRENT364/HANDOVER942 words.
+This is an in-scope fixture-policy correction, not a product or privacy defect.
