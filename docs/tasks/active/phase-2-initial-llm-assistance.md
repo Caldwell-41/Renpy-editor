@@ -1,5 +1,105 @@
 # Phase 2 — Initial LLM assistance
 
+## Thinking settings and full workflow — selected 2026-10-16
+
+User requests a thinking toggle in AI Settings, on by default, a16384-token maximum
+response default, full-app workflow verification and relevant updated tests. This
+supersedes the off-only boundary for this selected outcome. Existing saved response
+limits remain authored values; missing thinking defaults on without rewriting files.
+Old off-only compatibility evidence must expire. Reasoning remains separate from
+applicable final content; shared transaction/review/approval guards stay authoritative.
+
+Status **in_progress**, owner on existing `codex/phase3a-story-logic`; preserve all
+pre-existing walkthrough/design/status edits. Scope includes profile/UI/transport
+mapping, regression tests, canonical docs, focused Windows/macOS CI, and isolated
+Mac native Settings→test→generate→review→save→approve/reopen verification. Keep new
+allowances separate from both closed synthetic pairs and older phase budgets.
+Selected finite allowance: initial focused checks plus at most two diagnosed
+correction rounds per affected gate; two focused paired CI attempts; two signed Mac
+package attempts; two native launches/reopens; up to four live generations including
+connection tests, reserving at most65536 output tokens, and one cached model load.
+All reservations/failures remain charged. No automatic live retry or settings apply,
+download, credential-policy change, merge or release is selected.
+
+Preparation found the current isolated walkthrough app still has unsaved New Studio
+profile fields and no selected model/key. Preserve that live draft; native testing
+must not silently close/discard it. Ordinary read-only UI observation only so far.
+Implementation uses optional typed `thinking`, effective default true, explicit bool
+validation, profile-bound readiness invalidation and response defaults16384 across
+Settings/context/Assist. Focused tests are being updated; no new live send, package,
+native launch or CI dispatch yet. Cumulative qualification remains open.
+
+**Authorised combined scope:** the user asked the paused walkthrough owner to send
+its agreed setup brief here for implementation. The message and the actual user turn
+in `Resume phase 2/3a walkthrough` were read and verified. The authoritative
+[connection amendment](../../design/character-workspace-2026-10-15/walkthrough-decisions.md#connection-setup-sequence-and-layout-amendment--2026-10-16)
+requires Name→Endpoint/private HTTP→native API key→Connect→model choice→Save, including
+draft authentication/discovery without a saved profile or model. Connect is GET only,
+with no model operation or implicit response-format generation. This is additional
+user-selected functional scope, not a reset of any counters. Existing open draft and
+single-instance protections remain binding. The implementation owner now owns live
+status documents; the walkthrough owner has paused without closing its app.
+
+Implementation now includes native memory-only draft/key ownership, cancellable
+discovery on the existing guarded transport, origin/revision/profile checks, atomic
+completed-profile/key publication with durable cleanup ownership, and shared native
+entry callbacks with draft-specific copy on both platforms. No raw key in renderer
+state, IPC responses or logs; Cancel/leave drops the draft rather than saved keys.
+Updated UI follows the agreed sequence and keeps model-specific response-format
+testing separate. Original saved-profile maintenance remains available.
+
+Focused proof so far: 51 UI/protocol cases passed; four thinking regressions, nine
+profile cases, two compatibility cases, eleven credential cases, three connection
+core cases and three native draft-connection cases passed. Eight transport cases
+passed after correcting the peer-closure test to accept explicit connection reset
+as well as EOF while still requiring owned shutdown, cancellation and deadline.
+The earlier failure was a peer reset observation, not an open socket. A connection
+publication defect (busy checkout mistaken for changed state) was reproduced and
+fixed with bounded service-availability waiting. Earlier DOM failures were obsolete
+save-first expectations, an incorrect expected preserved custom token value, and a
+test waiting for a call-array change via a DOM observer; the latter now uses an
+explicit request-start signal. No sleeps, inflated timeouts or unobserved success
+replace the required events. Settings unit tests exposed shared-static test
+contention; per-module test serialization is being verified. All failure logs remain
+ignored under `.toolchains/thinking-toggle-2026-10-16/`.
+
+New focused Windows/macOS workflow and a six-case rejecting result-checker are
+prepared. Live generations0/4, cached loads0/1, native launches0/2, packages0/2,
+paired CI0/2. No publication or external dispatch yet. Remaining: final regression/
+responsive proof, review, signed candidate, authorised native session transition,
+live full workflow and exact-candidate both-host CI/audit.
+
+**Reviewed local candidate:** implementation commit
+`77dbefc76d554ab18edfd6d0ab2175a58af9ed08` contains only in-scope product/test/contracts.
+The pre-existing walkthrough/design/status/task edits remained unstaged. Final local
+UI/protocol51, thinking4, profiles9, compatibility2, credentials11, connection-core3,
+native connection3, native Settings5 and native worker12 cases passed. Transport8
+passed after the diagnosed reset observation correction. The Settings shared-static
+tests now serialize their fixture operations; production guards were not relaxed.
+Six result-checker cases, repository validation606 files, renderer build, actionlint
+and diff checks passed. Final Settings browser captures4/4 passed both themes and
+wide/compact layouts with unchanged source hashes and closed browser/server; earlier
+captures predate the final response-format labels and are retained as superseded.
+
+Signed Mac package1/2 passed strict signature, ARM64 identity and read-only installer
+contents under the existing approved certificate, with application inputs unchanged.
+Executable SHA256 `77e818cce4a0cbbdfcd0e3547714a46ab95b5d223a757a1b1bfff152b3867d19`;
+installer SHA256 `6701c193eb1f53587b7f73b276a41bec6fba673f6a468f975b05f92ac9d212ee`.
+Ignored package/evidence: `.toolchains/thinking-toggle-2026-10-16/`. The disposable
+native fixture has manual Beck/Henry cards, an isolated owned profile/key created
+through production services, thinking on/response16384 and untested compatibility.
+Original profiles remained unchanged. Initial private fixture preparation hit the
+expected refusal for a noncanonical temporary path; it resumed the same owned fixture
+with the canonical project root. No generation or editor launch occurred.
+
+Native UI access now reports the Mac locked. The user was asked to unlock it and
+either close the protected walkthrough window themselves, authorise recording its
+non-secret draft details and closing it, or keep native proof pending. That required
+decision remains pending; no close/discard/launch is authorised by elapsed time.
+The focused CI route is being wired through the existing quality workflow entry point;
+no CI run yet. Qualification totals: packages1/2, native launches0/2, generations0/4,
+reserved output0/65536, cached loads0/1, paired CI0/2. No merge or release.
+
 ## Approved implementation handoff — 2026-10-15
 
 User requests a new Sol6.1/xhigh coordinator chat, Sol6.1/high implementation/testing

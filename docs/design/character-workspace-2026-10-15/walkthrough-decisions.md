@@ -35,6 +35,32 @@ preserve it without Save, Discard, Reload, navigation away or closing the app.
 | Reloading profiles | One **Reload profiles** button preserving selection. Show **Retry loading profiles** only after a read failure; preserve unsaved-input guards. |
 | Removing a profile | Separate red **Danger Zone**. Confirm the named profile and local saved-key impact, with Cancel and explicit Remove profile actions. Do not imply remote key revocation. No actual removal was performed. |
 
+### Connection setup sequence and layout amendment — 2026-10-16
+
+During the restarted walkthrough, the user rejects save-before-key/discovery and
+explicitly approves recording a rearranged UI:
+
+**Profile name → IP/address (Endpoint) → API Key → Connect → Choose model → Save profile.**
+
+Arrange the controls in that order: API Key before model selection, Connect after
+the address/key inputs, then model selection after successful connection. Keep any
+applicable private-network HTTP option beside Endpoint. Connect checks access and
+retrieves available models using the draft connection without requiring a saved
+profile or a selected model. Show connection progress/errors beside that action and
+retain entered details on failure/cancellation. Save stores the completed profile
+locally after model selection. Existing native-only key entry/storage and saved-profile
+protection must be preserved; this requires supporting the draft setup workflow.
+
+Connect does not load a model, generate text or apply model-load overrides. It remains
+distinct from the model-specific response-format test. This newer direction supersedes
+conflicting earlier Model ID/Refresh placement and save-first interaction assumptions;
+local-only Save semantics remain. The user confirms the UI needs rearranging. This is
+an agreed functional/layout follow-up, not an implemented change or phase acceptance.
+The [restart ledger](../../tasks/active/phase-3-initial-wysiwyg-release.md#restarted-combined-phase-2--3a-guided-walkthrough--2026-10-16)
+owns current build/session state; the earlier scope/budget paragraph above is historical
+to the 2026-10-15 design review. No implementation, live connection or credential
+operation is performed to record this amendment.
+
 ### Studio loading follow-up
 
 User initiates generation after connecting, refreshing exposed model IDs and selecting
