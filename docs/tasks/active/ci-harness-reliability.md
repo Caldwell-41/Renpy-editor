@@ -461,3 +461,46 @@ Reserve current native CI1/2 only after publication and no-existing-run reconcil
 one Windows package, at most two launches/seven GETs; Mac portable fixtures only.
 This reservation does not reset any old task allowance. Follow manual same-thread
 waiting after exact run identity/status is recorded. No native pass is claimed yet.
+
+## Deliverable3 native CI1 reservation — 2026-10-16
+
+Reviewed implementation published as `370f4b793f87ce0fbefb78626f128c2b2e070347`,
+tree `e2dec83d328628499111687403b9d504c5d4820b`, on the existing branch. Only24owned
+paths were committed; the three unrelated user files remain unchanged/uncommitted.
+The pre-dispatch Repository quality listing contains no run for this candidate and
+no unresolved recent operation. Reserve nativeCI1/2 with only
+`studio_connection_native=true`, exact candidate and ordinal1. This selects current
+Windows native proof and Mac portable gates, not the old Thinking/Studio selections.
+Reserve at most one Windows package/two app launches/seven loopback GETs for this
+attempt; actual execution counts require terminal receipts. Local3/3 stays consumed.
+Do not duplicate an ambiguous request; confirm the returned run identity first.
+
+## Deliverable3 confirmed native CI1 and manual wait — 2026-10-16
+
+[Run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330),
+workflow354880113/attempt1, workflow_dispatch, created2026-10-16T11:43:24Z,
+exact head `370f4b793f87ce0fbefb78626f128c2b2e070347`, branch
+`codex/phase3a-story-logic`. Inputs were only `studio_connection_native=true`, that
+exact candidate and ordinal1. NativeCI1/2 is charged; one dispatch remains, with no
+automatic retry. Local3/3 remains used. One Windows package/two launches/seven GETs
+are reserved, not claimed executed; actual counts need the terminal attempt receipts.
+
+At11:43:44Z the run was **in_progress**. Mac job116955388339 and Windows116955388760
+had passed exact-candidate/allowance gates and were setting up Node. Nine other jobs
+were intentionally excluded, including the standalone harness route; this job runs
+the shared harness itself. Mac package/native steps are unselected by design and
+must not be counted as native passes. Ignored `d3/native-ci1` retains initial metadata.
+
+State `awaiting_ci`. Publish this docs-only continuation and pause under manual
+same-thread waiting; no model polling, watcher, automatic wake-up or second writer.
+On user resume, read this exact run/attempt once. If terminal, audit both-host raw
+Python/renderer/Cargo selected names/counts/exclusions, source/outcome gates and
+Windows build/process/package inputs, two exact native reports, early/failure/retry/
+Cancel observations, current one-shot reload, request order/deadlines and independent
+normal-exit/PID/modal/fault/listener/owned-credential cleanup. Verify both published
+artifact ZIP digests, safe entries/CRC, manifest files, complete checkout-aware source
+inputs and exact candidate/tree/run/attempt/architecture. Keep failures/missing proof
+distinct from product defects. Do not chase a newer docs-only head as the tested
+candidate. If still pending, retain this identity and pause again. No native pass or
+deliverable3 completion is claimed. Additional local repair rounds are not selected;
+classify any failure and reassess the remaining allowance before another correction.

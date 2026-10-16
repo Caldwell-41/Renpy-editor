@@ -1,6 +1,6 @@
 # Current status
 
-## Current native connection harness — implementation ready; CI1 reserved
+## Current native connection harness — published; native CI1 audit pending
 
 Updated2026-10-16. The user approved [deliverable3](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
 on `codex/phase3a-story-logic`. One Mac implementation owner; Windows native CI and
@@ -14,8 +14,11 @@ both-host portable checks supply evidence without routine machine switching.
 
 Local3/3 used: clean-export197Python (195pass/two exact exclusions), Q1/10retention,
 33renderer/probe cases, real connection/fixture tests, build, lint and docs validation.
-Current nativeCI0/2; reserve CI1 after publication with at most one matching Windows
-package/two launches/seven loopback GETs. The native sequence has its own fresh
+[Native CI1run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330)
+was in progress at11:43:44Z on exact370f4b7/attempt1, both required jobs in setup.
+NativeCI1/2 is charged; one Windows package/two launches/seven loopback GETs are
+reserved, with actual usage pending receipts. Next is manual same-thread terminal
+artifact/source/native-sequence audit; no native pass is claimed. The native sequence has its own fresh
 namespace; legacy guards/ordinals and frozen929route are retained. No Mac package,
 real provider/model request, SDK, dependency update, merge or release is selected.
 Unrelated user edits and the native/human recovery below remain untouched. The task

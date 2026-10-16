@@ -2,7 +2,7 @@
 
 ## Deliverable3 — current native connection harness selected, 2026-10-16
 
-State `review_ready` for the first focused native dispatch on
+State `awaiting_ci` for the first focused native dispatch on
 `codex/phase3a-story-logic`. User explicitly approved the
 [plan/selection](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16).
 One Mac implementation owner; Windows native CI and both-host portable fixture gates.
@@ -23,19 +23,33 @@ fixture1/reload3 Rust cases, renderer build, all-workflow lint and621-file valid
 The first producer-conformance failure and local loopback-capability refusal remain
 recorded; corrections passed. Raw proof is ignored under the maintenance `d3` root.
 
-Cumulative current usage: local3/3, nativeCI0/2, Windows packages0/2, launches0/4,
-loopback GETs0/14 before dispatch. Reserve CI1 only after publishing the exact reviewed
-candidate and checking for an existing run: one package/at most two launches/seven
-GETs, Mac portable gates only. Old maintenance/Thinking/Studio/walkthrough counts
-stay consumed. No native pass is claimed yet.
+Implementation published as `370f4b793f87ce0fbefb78626f128c2b2e070347`, tree
+`e2dec83d328628499111687403b9d504c5d4820b`. Only24owned paths were committed;
+all three existing user files are unchanged/uncommitted. Later commits are docs-only.
+Pre-dispatch reconciliation found no existing run for this candidate or unresolved
+recent manual operation.
 
-**Next:** publish only owned paths, then use Repository quality with only
-`studio_connection_native=true`, exact candidate and ordinal1. Record actual run,
-attempt, candidate, inputs and initial status, then apply manual same-thread waiting.
-On resume audit both-host selected groups and the Windows package, exact phase reports,
-all native controls/observations, ordered GETs, normal exit/PID, independent cleanup,
-archive digest/source/manifest and privacy. Failed/missing/skipped proof stays failed
-or pending. No automatic polling, duplicate dispatch or extra local round is selected.
+[Native CI1run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330),
+workflow354880113/attempt1, created11:43:24Z, exact370f4b7 on the existing branch,
+selected only `studio_connection_native=true`, exact candidate and ordinal1.
+At11:43:44Z it was **in_progress**: Windows116955388760/Mac116955388339 passed
+candidate/allowance gates and were setting up Node. Nine other jobs were excluded.
+Mac supplies portable evidence only. Initial metadata stays ignored under `d3/native-ci1`.
+
+Current usage: local3/3 and nativeCI1/2 charged; one dispatch remains. Reserve one
+Windows package/at most two launches/seven GETs for CI1; actual package/launch/GET
+counts require terminal receipts. Maximum cumulative packages2/launches4/GETs14.
+No automatic retry or extra local repair round is selected. Old maintenance,
+Thinking/Studio/walkthrough counts stay consumed. No native pass is claimed.
+
+**Next on manual same-thread resume:** read the exact recorded run/attempt once;
+if terminal, follow the [task's audit](../tasks/active/ci-harness-reliability.md#deliverable3-confirmed-native-ci1-and-manual-wait--2026-10-16)
+for both-host named fixture/probe/Cargo results and source gates, Windows package/
+process identities, both native phases, risky-control/retry/Cancel/reload observations,
+ordered requests/deadlines, independent cleanup and archive/source/manifest/privacy.
+Do not substitute a newer docs-only candidate or skipped Mac native steps. If still
+pending, preserve identity and pause again. No polling/watcher/wake-up/second writer.
+Any failure needs classification and allowance reassessment before a correction.
 
 ## Retained app baseline and unrelated pending work
 
