@@ -158,6 +158,29 @@ resume/audit. Preserve existing native fixture and protected user window; the us
 close/unlock it themselves. Packages1/2 (first stale), launches0/2, live0/4,
 output0/65536 and model loads0/1 remain unchanged.
 
+### Independent-step CI3 confirmed — 2026-10-16
+
+Published corrective candidate `36feff12ff9acfc1cd6eb0832da3abba243b9463` on the existing branch. Reserved cumulative
+paired CI3/3 before exactly one dispatch, quality workflow354880113, thinking_settings
+only, ordinal3 and all other routes false. Confirmed [run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609),
+created2026-10-16T04:59:20Z, attempt1, exact candidate. Initial observed state: in_progress.
+Selected jobs116819482592/116819482862 are recorded from the live initial receipt;
+use ci-03-initial.json/qualification-ledger.json as the exact identity source.
+
+Both host jobs expose the independent Python, six core scopes, desktop and outcome
+summary steps. This is awaiting_ci, not a pass. Terminal tests, exact source/binary
+identity, artifact digests/manifests and safe failure retention still require audit.
+Manual same-thread resume remains the wait route; no watcher or automatic polling.
+No fourth attempt is authorised. Earlier failed CI1/CI2 and all other budgets remain
+charged. No package/native launch/model send occurred during this correction.
+
+Local preparation passed Python184/2 explicit Windows-only skips (186 total), Mac
+desktop36, checker15, retention10, Q1/source gates, actionlint and repository validation608.
+A fresh checkout passed all351 material source comparisons. Only in-scope changes and
+this task/status record are published; unrelated walkthrough/comparison notes remain
+local. The documentation successor records this implementation candidate; it is not
+an additional CI dispatch or a replacement tested SHA.
+
 ## Approved implementation handoff — 2026-10-15
 
 User requests a new Sol6.1/xhigh coordinator chat, Sol6.1/high implementation/testing
