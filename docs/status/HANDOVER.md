@@ -8,31 +8,36 @@ Windows/macOS evidence host. Implement current runbooks and a searchable inciden
 index, make host-neutral routing explicit, reuse cheap rejecting harness checks and
 include production-probe consumers with independent current UI outcomes.
 
-State `awaiting_ci`: local verification4/4 passed; paired harnessCI1/2 dispatched.
+State `repair_verified`: local round5/6 passed; CI1/2 failed and CI2/2 is reserved.
 Implementation published at `c33d77cf4cf5826050d1ae367d6219822dc30bc1` on the existing
 branch. Only21 maintenance paths committed; pre-existing walkthrough-design and
 Phase2/3 task edits stay unstaged and unchanged. Later status commits are docs-only.
 
 [Run38878570023](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38878570023),
-workflow354880113/attempt1, created2026-10-16T09:09:55Z, exactc33d77c, was **in_progress**
-at09:10:26Z. Required Windows116899482492 and Mac116899482822 are running; eight
-other jobs intentionally excluded. Only `harness_regressions=true` was selected.
+workflow354880113/attempt1, exactc33d77c, completed **failure** at09:11:17Z. Both hosts
+failed three credential inventory fixtures that depended on ignored generated Tauri
+permissions. Both archives/digests, manifests and353source inputs per host verified;
+other harness groups passed. The [task audit](../tasks/active/ci-harness-reliability.md#ci1-terminal-audit-and-selected-repair--2026-10-16)
+retains failures, artifact identities/expiry and the bounded repair selection.
 No SDK/package/app launch, provider/model operation, dependency update, frozen native
 migration, merge or release. Prior Thinking/Story/native allowances stay separate.
 
-Local checks passed190 Python cases (188pass/two named host exclusions),10retention,
-93renderer/probe cases, rejecting/outcome checks, all-workflow actionlint and617-file
-validation. Raw local logs are ignored under `.toolchains/ci-harness-reliability/`.
+The repair uses a temporary controlled inventory and retains real missing-permission
+refusal; production native gates are unchanged. Clean-export shared checks passed
+191Python cases (189pass/two named host exclusions), Q1 checks and10retention, without
+generated permissions, dependencies or build output before or after the run.
+All-workflow actionlint,617-file validation and whitespace pass. Prior unchanged
+93renderer/probe proof remains valid. Raw local logs are ignored under
+`.toolchains/ci-harness-reliability/`.
 Full former testing text was preserved exactly apart from relative-link relocation;
 all38 old section anchors resolve to current runbooks or historical evidence.
 
-**Next:** pause under manual same-thread waiting. On user resume, audit this exact
-run/attempt's terminal required steps, downloaded archive/source/manifest identities,
-raw named test results and host exclusions, four group outcomes and privacy/upload.
-No platform pass is claimed yet. If still nonterminal, retain this identity and pause
-again; do not poll, duplicate dispatch or start a second writer. Do not chase the
-newer docs-only head as though it were the tested candidate. The task owns remaining
-allowance and failure classification; no extra app/native qualification is selected.
+**Next:** publish only the owned repair, reconcile existing runs, then dispatch the
+remaining CI2/2 with only `harness_regressions=true` and record its exact candidate.
+Audit terminal required steps, archives/source/manifests, named results/exclusions,
+all four groups and privacy/upload. Apply manual same-thread waiting if nonterminal;
+do not poll or duplicate dispatch. Prepare deliverable3's concrete plan only; no
+native migration or package/launch is authorised by this maintenance continuation.
 
 ## Retained app baseline and unrelated pending work
 

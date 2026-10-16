@@ -58,6 +58,7 @@ WINDOWS_NATIVE_TESTS = frozenset('test_rewrite_windows_reuse.RetainedEvidenceGat
 PYTHON_REQUIRED = MAC_SNAPSHOT_TESTS | WINDOWS_NATIVE_TESTS | {
     'test_macos_studio_request.SyntheticRequestTests.test_known_unused_blocked_fixture_cleanup_requires_exact_seed_and_no_process',
     'test_windows_studio_credentials.WindowsFixtureGate.test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch',
+    'test_windows_studio_credentials.WindowsFixtureGate.test_source_inventory_requires_generated_permissions_without_prior_builds',
     'test_harness_checks.HarnessChecks.test_failure_timeout_and_spawn_failure_keep_logs_and_do_not_hide_later_results',
     'test_harness_checks.HarnessChecks.test_zero_exit_cannot_override_rejected_evidence',
     'test_harness_checks.HarnessChecks.test_retention_gate_rejects_missing_duplicate_and_unexpected_skipped_cases',

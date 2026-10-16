@@ -160,6 +160,20 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   the shared runner's actual retention execution remains required on both hosts.
 - **Evidence:** [maintenance verification](../tasks/active/ci-harness-reliability.md#implementation-and-verification).
 
+## H17 — Inventory unit fixtures depend on an earlier Tauri build
+
+- **Class/search:** harness fixture; clean checkout, generated permissions,
+  `core_request.toml` KeyError, complete input maps unexpectedly refuse on both hosts.
+- **Cause/correction:** tests used the real checkout's ignored generated permissions;
+  earlier local builds masked their absence. Create an explicit temporary inventory
+  and exercise the real inventory/admission functions. Remove actual fixture files
+  to test refusal; keep production permission and package gates unchanged.
+- **Regression:** named `test_source_inventory_requires_generated_permissions_without_prior_builds`
+  is required by the Python evidence gate. Run the shared harness from a clean export
+  without generated permissions, dependencies or build output before affected CI.
+- **Evidence:** [CI1 audit and repair](../tasks/active/ci-harness-reliability.md#ci1-terminal-audit-and-selected-repair--2026-10-16),
+  [clean-checkout verification](../tasks/active/ci-harness-reliability.md#clean-checkout-repair-verification--2026-10-16).
+
 ## P01 — Redo refuses an app-owned clean deletion
 
 - **Class/search:** product; Draft Scene Undo/Redo, cached unavailable Source buffer, DIRTY_SOURCE.

@@ -17,6 +17,9 @@ The output directory must be new. Four independent groups run: Python `test_*.py
 fixtures, Q1 rejecting self-tests, Q1 source audit and package-retention fixtures.
 They do not build or launch Loomlight, install an SDK or contact a provider. A few
 fixtures invoke Node or the host's PowerShell against public controlled inputs.
+Inventory fixtures must create their own controlled source and permission files;
+they must also pass from a clean checkout without ignored Tauri-generated files,
+installed dependencies or a prior build. Keep missing-permission refusal checks.
 Every group's assertion output is printed and retained; failure or timeout remains
 blocking while later independent groups run. `checks.json`, `result.json` and
 `summary.md` distinguish successful checks from failures. Timeouts retain partial
