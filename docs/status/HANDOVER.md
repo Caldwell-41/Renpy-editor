@@ -1,58 +1,40 @@
 # Current outcome handover
 
-## CI harness reliability — selected 2026-10-16
+## CI harness reliability — deliverables1/2 complete, 2026-10-16
 
-The user approved the [reviewed maintenance plan](../tasks/active/ci-harness-reliability.md)
-on current branch `codex/phase3a-story-logic`. One Mac implementation owner; CI is the
-Windows/macOS evidence host. Implement current runbooks and a searchable incident
-index, make host-neutral routing explicit, reuse cheap rejecting harness checks and
-include production-probe consumers with independent current UI outcomes.
+State `complete` for the [selected maintenance](../tasks/active/ci-harness-reliability.md)
+on `codex/phase3a-story-logic`: concise current testing runbooks, searchable incidents,
+symmetric development-host/CI rules, independent cheap harness checks and current
+production-probe consumers. Deliverable3 is a proposal awaiting explicit selection.
 
-State `awaiting_ci`: local round5/6 passed; CI1/2 failed and CI2/2 is dispatched.
-Implementation published at `c33d77cf4cf5826050d1ae367d6219822dc30bc1` on the existing
-branch. Only21 maintenance paths committed; pre-existing walkthrough-design and
-Phase2/3 task edits stay unstaged and unchanged. Later status commits are docs-only.
+The qualified harness repair is `0cc56e702e514b30a01378954916a862c618a349`, tree
+`c50c3d46ba8b3c7154eb586ea4f17235d1047cdd`. [CI2run38886792055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38886792055),
+workflow354880113/attempt1, completed **success** at10:23:48Z. Both required Windows
+and Mac jobs passed all four groups and source/privacy/upload gates. Eight unrelated
+jobs were excluded. Windows passed191Python/four exact exclusions and9retention/one
+exact exclusion; Mac189Python/two exact exclusions and10retention. The formerly
+failing cases and new cold-inventory regression passed on both hosts.
 
-[Run38878570023](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38878570023),
-workflow354880113/attempt1, exactc33d77c, completed **failure** at09:11:17Z. Both hosts
-failed three credential inventory fixtures that depended on ignored generated Tauri
-permissions. Both archives/digests, manifests and353source inputs per host verified;
-other harness groups passed. The [task audit](../tasks/active/ci-harness-reliability.md#ci1-terminal-audit-and-selected-repair--2026-10-16)
-retains failures, artifact identities/expiry and the bounded repair selection.
-No SDK/package/app launch, provider/model operation, dependency update, frozen native
-migration, merge or release. Prior Thinking/Story/native allowances stay separate.
+The [terminal audit](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16)
+verifies exact candidate/tree/run/attempt/host, both ZIP digests, manifests/named results,
+353checkout-aware source inputs per host and privacy scans22files. Mac source proof
+was reused against its unchanged terminal artifact. Artifacts expire2026-10-23;
+identities/digests/results remain in the task. Raw evidence stays ignored under
+`.toolchains/ci-harness-reliability/ci2-audit/`. Later commits are docs-only.
 
-The repair uses a temporary controlled inventory and retains real missing-permission
-refusal; production native gates are unchanged. Clean-export shared checks passed
-191Python cases (189pass/two named host exclusions), Q1 checks and10retention, without
-generated permissions, dependencies or build output before or after the run.
-All-workflow actionlint,617-file validation and whitespace pass. Prior unchanged
-93renderer/probe proof remains valid. Raw local logs are ignored under
-`.toolchains/ci-harness-reliability/`.
-Full former testing text was preserved exactly apart from relative-link relocation;
-all38 old section anchors resolve to current runbooks or historical evidence.
+CI1 remains failed: its three unit fixtures depended on ignored permissions generated
+by a prior Tauri build. The repair uses public temporary inventory files and retains
+real missing-permission refusal. Clean-export proof passed without build state;
+production native gates are unchanged. Local5/6 and pairedCI2/2 are final cumulative
+usage. Unchanged prior93renderer/probe proof, workflow lint and docs checks remain
+recorded. The three pre-existing user edits remain untouched and uncommitted.
 
-Repair published at `0cc56e702e514b30a01378954916a862c618a349`, tree
-`c50c3d46ba8b3c7154eb586ea4f17235d1047cdd`. No prior manual run existed for that SHA.
-Only `harness_regressions=true` dispatched [CI2run38886792055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38886792055),
-workflow354880113/attempt1, created10:22:26Z. First snapshot at10:23Z showed Mac
-job116926380222 success and Windows116926380554 running; eight other jobs excluded.
-CI2/2 is charged; no dispatch remains. Mac artifact12039768955 expires2026-10-23T10:22:57Z.
-Its digest, safe ZIP/CRC,10manifest entries/11files,353source inputs and exact
-candidate/tree/run/attempt/ARM64/named results passed audit and privacy re-scan.
-Mac passed191Python cases (189pass/two exact exclusions), Q1 and10retention, including
-the new cold-inventory case. Raw proof is ignored under `ci2-audit`.
-
-**Next on manual same-thread resume:** audit this exact run's terminal Windows job,
-required steps, archive digest/source/manifest and raw named Python/retention results.
-Reuse the unchanged completed Mac audit. If still nonterminal, retain identity and
-pause; no polling, duplicate dispatch or second writer. Deliverable2 remains awaiting
-both-host qualification. Later docs-only heads are not the tested candidate.
-
-The [deliverable3 plan](../tasks/active/ci-harness-reliability.md#deliverable3-proposed-plan--current-native-connection-harness)
-is prepared only. It scopes current Windows contract2/fixture/input proof and Mac
-report admission; proposed local3/nativeCI2 limits require selection and do not renew
-old counts. No native migration, package or launch is authorised by this continuation.
+**Next:** the [deliverable3 plan](../tasks/active/ci-harness-reliability.md#deliverable3-proposed-plan--current-native-connection-harness)
+awaits explicit approval. It scopes current Windows contract2/fixture/input proof and
+Mac report admission; proposed local3/nativeCI2 limits do not renew old counts.
+No new CI, package/native launch, provider/model operation, dependency update, frozen
+native migration, merge or release is selected. Prior native/human recovery below
+remains pending and untouched.
 
 ## Retained app baseline and unrelated pending work
 

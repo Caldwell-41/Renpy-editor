@@ -1,6 +1,6 @@
 # Current status
 
-## CI harness reliability — CI2 Mac audited; Windows audit pending
+## CI harness reliability — deliverables1/2 complete; native plan awaiting selection
 
 Updated2026-10-16. The [selected maintenance](../tasks/active/ci-harness-reliability.md)
 is published on `codex/phase3a-story-logic` at `c33d77cf4cf5826050d1ae367d6219822dc30bc1`:
@@ -14,11 +14,14 @@ remain recorded; artifact/source identities were verified.
 failed on exactc33d77c. The self-contained fixture repair is published at
 `0cc56e702e514b30a01378954916a862c618a349`. Clean-export checks pass without generated
 permissions/dependencies/build output. [CI2run38886792055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38886792055)
-tests exact0cc56e7/attempt1: Mac passed and its digest/source/manifest/named results
-are audited; Windows was still running at the10:23Z snapshot. Mac passed191Python
-cases (189pass/two named exclusions), Q1 checks and10retention. Local5/6 and paired
-CI2/2 are used. Deliverable2 qualification awaits the Windows terminal audit on
-manual same-thread resume; no additional dispatch remains. Native gates are unchanged.
+completed success at2026-10-16T10:23:48Z on exact0cc56e7/attempt1. Both required hosts
+passed all four harness groups and source/privacy/upload gates. Windows passed191
+Python cases with four exact exclusions; Mac189 with two exact exclusions. Retention
+passed Windows9/one exact exclusion and Mac10. Both archives/digests/manifests, source
+identities and named results are audited; the new regression passes on both hosts.
+The [terminal audit](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16)
+closes deliverable2. Local5/6 and pairedCI2/2 are final usage; CI1 remains failed.
+Native gates are unchanged; no additional dispatch remains.
 The [deliverable3 plan](../tasks/active/ci-harness-reliability.md#deliverable3-proposed-plan--current-native-connection-harness)
 is prepared only; its native migration/allowance needs selection. No package, SDK execution, editor launch,
 provider request, dependency update, merge or release is selected. Unrelated local

@@ -172,7 +172,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   is required by the Python evidence gate. Run the shared harness from a clean export
   without generated permissions, dependencies or build output before affected CI.
 - **Evidence:** [CI1 audit and repair](../tasks/active/ci-harness-reliability.md#ci1-terminal-audit-and-selected-repair--2026-10-16),
-  [clean-checkout verification](../tasks/active/ci-harness-reliability.md#clean-checkout-repair-verification--2026-10-16).
+  [clean-checkout verification](../tasks/active/ci-harness-reliability.md#clean-checkout-repair-verification--2026-10-16),
+  [both-host CI2 completion](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
 
 ## P01 — Redo refuses an app-owned clean deletion
 
