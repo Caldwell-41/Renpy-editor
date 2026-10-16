@@ -189,10 +189,29 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   outcomes. Strict visibility/ownership gates and frozen helpers remain intact.
 - **Regression:** portable viewport/retention/original-error/owned-reference cases;
   actual current PowerShell functions on1024×768, scaling, refused placement and close
-  after observation refusal run on Windows before packaging. Both native phases still
-  require CI2 proof. No app defect is established by CI1.
+  after observation refusal run on Windows before packaging. CI2 proves geometry,
+  state retention and phase1; phase2 reaches the distinct H19 recovery/close gap.
+  No app defect is established by CI1.
 - **Evidence:** [native CI1 terminal audit and proposal](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16).
   [Approved repair and local results](../tasks/active/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16).
+
+## H19 — Retry inside closed disclosure; Settings modal blocks app-close cleanup
+
+- **Class/search:** harness visibility/cleanup gap; `Current confirmed-save read-only
+  reload`, Retry loading profiles, Profile maintenance, closed details, Alt-F4.
+- **Evidence/cause:** current phase1 passed; phase2 reached confirmed-save reload
+  recovery, then the combined native status/Retry wait failed. Retry is inside a
+  closed maintenance disclosure, while DOM checks inspect only `[hidden]` flags and
+  can directly click hidden descendants. Driver never opens that disclosure. Failed
+  wait diagnostics do not identify which UIA subcondition failed; this remains the
+  leading source-supported diagnosis. No backend Save/reload defect established.
+- **Second omission:** cleanup sends owned Alt-F4 without closing Settings first;
+  the ordinary app close guard rejects its `aria-modal=true` overlay. Key-send receipt
+  passed but process exit failed and forced termination followed.
+- **Correction needed, not selected:** model effective disclosure visibility and
+  ordinary modal-close lifecycle in the driver/consumer regressions; retain separate
+  status/control/close observations. Keep app close protections and deadlines.
+- **Evidence:** [final native CI2 audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17).
 
 ## P01 — Redo refuses an app-owned clean deletion
 

@@ -44,10 +44,10 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-Deliverables1/2 remain complete. Active state: `awaiting_ci` for the approved scoped
-deliverable3 repair after native CI1; its audit and continuation are below. Original maintenance
-local5/6 and pairedCI2/2 were used, including failed CI1. CI2's Windows/Mac steps, artifacts, source identities and
-named results pass audit. Deliverable3 was plan-only at that completion; the later
+Deliverables1/2 remain complete. Active state: `blocked` after the final native CI2
+failure; its terminal audit and implementation omissions are below. Original maintenance
+local5/6 and pairedCI2/2 were used, including failed CI1. That earlier CI2's Windows/Mac
+steps, artifacts, source identities and named results pass audit. Deliverable3 was plan-only at that completion; the later
 user approval selects its implementation.
 
 The latest100-run review found36 failed outcomes;35 of62 manual dispatches failed.
@@ -742,3 +742,98 @@ removal transitions. Partial/not-reached snapshots and forced exit remain failur
 The older370f4b7 failure stays historical; a docs-only successor is not the tested
 repair candidate. Close deliverable3 only on full acceptance; any new failure needs
 diagnosis/reassessment because both repair and native attempt limits are exhausted.
+
+## Deliverable3 final CI2 audit and missed Settings interactions — 2026-10-17
+
+The user asked why the final run failed and whether the implementation missed it.
+**Yes: the harness omitted recovery-control disclosure and Settings-modal close
+handling.** The added regression verified current placement/ownership and delivery
+of an Alt-F4 primitive with controlled native calls; it did not establish the full
+application recovery/close interaction. No further implementation edit, test round,
+native launch or CI dispatch is selected or performed by this evidence audit.
+
+[Run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
+completed **failure** at2026-10-16T13:49:03Z, exact
+`e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`, tree
+`040ba28a462f4fb2fbc10b2ea36dbacacd2193bb`, workflow354880113/attempt1.
+Windows117000574210 failed only “Complete both current Windows native phases”;
+Mac117000573825 passed its selected portable checks. Nine other jobs and Mac native
+steps were unselected. The Windows success-only final gate was skipped after failure.
+
+Independent audit verifies both ZIP digests/safe unique names/CRC, all121Windows/
+17Mac manifest hashes, all357 checkout-aware source input names/bytes and exact
+candidate/tree/run/attempt identities. Local privacy scan passes all140 files.
+Windows206Python (202pass/four exact Mac exclusions), Mac202Python (199pass/three
+exact Windows exclusions), both Q1 gates, exact retention host cases, all33DOM cases
+and matching Cargo listings/results pass. Cargo counts remain4connection/1Windows
+fixture/4reload on Windows and4/1/3 on Mac. The actual new PowerShell regression passed
+on Windows before packaging. The AMD64 package/hash/launch receipts match executable
+SHA256 `6870666cef6fd711e33fd527e7da3e2578daf4cb58a73768435cccb691580c00`.
+
+Windows artifact12050720337 ZIP SHA256
+`b4ae2e1968ee3519abc0ec455a5be7955f2c7be6d78aa42e122d7a1e74d4d4b4`,122files,
+expires2026-10-23T13:48:56Z. Mac artifact12049273140 ZIP SHA256
+`0024c4c1b58b8c8e06d45e9f18a6504d8e759dddc67d7091f54c8f4377f8d5e9`,18files,
+expires2026-10-23T13:39:18Z. Metadata/log/ZIPs/extracted evidence, reconstructed state
+and `audit.json` stay ignored under `d3/native-ci2`.
+
+### What worked, what failed and what remains uncertain
+
+Phase1 PID4104 passed in29.531seconds with all11native stages, exact4accepted GETs
+alpha/gamma/alpha/alpha, report/whole-store validation, normal exit0, PID absence,
+listener stop and two remembered native keys proved present. Actual fitted outer
+bounds1008×704/client992×665 fit work area1024×720 at96DPI. All25selected state files
+were retained and hash-verified. The previous geometry and snapshot-loss errors did
+not recur. This is real phase1 proof, not full deliverable3 acceptance.
+
+Phase2 PID6128 passed reopen, first alpha discovery and beta native entry. The retained
+reload-required marker can only be emitted after the production probe has checked
+confirmed Save, the exact reload-error DOM message, enabled/non-hidden Retry and
+disabled mutation controls. Persisted revision5→8/A2→3/B2 is independently valid;
+the replacement reference changed, B stayed unchanged, and the retained store equals
+the reload-required snapshot. Both phase2 GETs alpha/beta were accepted.
+
+The native `observe-reload/beta-reload-required` driver then timed out after20seconds
+at `Current confirmed-save read-only reload`. Its combined predicate is status text
+**and** `Has-ButtonState 'Retry loading profiles' true`. Geometry/ownership passed.
+It did not retain separate status/control lookup results or a failure screenshot;
+therefore the exact failing UI Automation subcondition is **not proved**.
+
+Source inspection identifies a concrete navigation/visibility omission explaining
+the Retry mismatch: `ai-settings-ui.ts` puts Retry inside the initially closed
+`details.studio-maintenance` (“Profile maintenance”) and does not open it on read
+failure. The producer/test button helper checks only the button's own `hidden` and
+`[hidden]` ancestors, not closed `details`; direct DOM clicks can activate that hidden
+descendant. The native driver waits for the Retry button without first expanding the
+disclosure. The DOM checks can thus pass without a user-visible/native-exposed recovery
+control. This is the leading source-supported diagnosis, not a captured UIA-node trace.
+
+Cleanup's owned foreground/Alt-F4 **input receipt passed**, but the app did not exit
+within five seconds and forced termination followed. The current driver cancels a
+native credential dialog only; it never closes the renderer Settings modal. Settings
+sets `aria-modal=true`; `main.ts` deliberately rejects application close while any
+such modal remains. This omitted step is a second implementation gap. Key delivery
+does not prove CloseRequested was observed or the normal app-close lifecycle completed.
+PID absence/listener stop passed afterward; credential removal remains unproved.
+
+Phase2 lasted38.969seconds. Its15retained state files and explicit not-reached rows
+are hash-verified. Read-only Retry, third GET, removal, final normal exit/credential
+cleanup and a complete phase2 report were not reached. No saved-data corruption or
+backend Save/reload defect was established. The ordinary Settings close guard must
+remain; this audit does not justify changing product behavior to accept the test.
+
+### Reassessment before any further correction
+
+The implementation review and regressions should have covered the actual Settings
+disclosure/modal states, rather than treating DOM hidden flags and an OS key-send
+receipt as full visible-recovery/normal-close proof. Needed changes are explicit
+owned disclosure/visibility handling for Retry, effective-visibility producer/consumer
+regressions, ordinary Settings-modal close before app exit, and separate bounded
+native status/control/close diagnostics. Keep preserved-data protections and existing
+deadlines; increasing waits or weakening the observer would not address these gaps.
+
+State `blocked`, deliverable3 incomplete. Actual cumulative use is local5/5,
+nativeCI2/2, Windows packages2/2, launches3/4 and GETs6/14. The unused launch/request
+capacity is not another CI/package allowance. No additional correction or dispatch
+is authorised; any further implementation needs a newly selected bounded continuation.
+Deliverables1/2 remain complete. Only audit/index/live-status documentation is updated.

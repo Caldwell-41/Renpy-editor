@@ -1,35 +1,32 @@
 # Current status
 
-## Current native connection harness — final CI2 queued; audit pending
+## Current native connection harness — final CI2 failed; reassessment required
 
-Updated2026-10-16, branch `codex/phase3a-story-logic`. Deliverables1/2 remain complete;
-[CI2 audited their both-host harness proof](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
-Deliverable3's first native attempt failed in harness window geometry/cleanup; no
-application defect was established. [The audit](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16)
-retains that failure and the missing archived-snapshot evidence.
+Updated2026-10-17, branch `codex/phase3a-story-logic`. Deliverables1/2 remain complete;
+[their both-host harness proof is audited](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
+Deliverable3 remains incomplete after its final native attempt.
 
-The user approved the scoped repair and two extra local rounds on the same Mac
-host/current branch. [Preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16)
-is complete: current-only measured window fitting, independent owned ordinary
-failure close and allowlisted synthetic state retention. Exact saved native references
-are checked for presence/removal without blob reads. Product defaults, frozen helpers,
-legacy guards/ordinals and the929route stay unchanged.
+[Final CI2run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
+failed on exact `e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`/attempt1. Both-host
+portable/source/archive/manifest/privacy and the Windows package passed audit.
+The geometry/retention repair worked: phase1 completed its full native sequence,
+normal exit and four GETs. Phase2 reopened and saved beta, then timed out observing
+read-only recovery; forced exit followed. No backend Save/reload defect established.
 
-Final clean-export checks pass202Python (199pass/three named Windows exclusions),
-both Q1 gates,10retention, all-workflow lint and621-file validation. The actual current
-PowerShell regression runs on Windows before packaging; prior unchanged33DOM and
-Rust integration proof remains valid and selected in CI. No Mac native pass is claimed.
+[The terminal audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17)
+records two missed harness interactions: Retry sits inside a closed maintenance
+section that DOM hidden-flag checks do not model; failure cleanup sends Alt-F4
+without closing the Settings modal, which the app close guard deliberately blocks.
+The combined native wait did not log which status/control predicate failed, so the
+exact UIA symptom remains unproved. [H19](../testing/INCIDENTS.md#h19--retry-inside-closed-disclosure-settings-modal-blocks-app-close-cleanup)
+indexes this gap; H18 retains the earlier geometry failure.
 
-Repair published as `e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`.
-[Final native CI2run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
-was **queued** at its single confirmation: exact candidate/ordinal2/attempt1,
-created13:37:07Z. State `awaiting_ci`; nativeCI2/2 and local5/5 are consumed. CI2
-reserves one Windows package/two launches/seven GETs; actual counts need receipts.
-The [confirmed-run handover](../tasks/active/ci-harness-reliability.md#deliverable3-confirmed-final-native-ci2-and-manual-wait--2026-10-16)
-owns terminal audit and remaining acceptance. Pause under manual same-thread waiting;
-no polling, extra local round or third dispatch. Deliverable3 stays open. Unrelated
-edits and native/human recovery remain intact. No Mac package, real provider, SDK,
-dependency update, merge or release is selected.
+State `blocked` for exhausted selected limits: local5/5, nativeCI2/2, Windows
+packages2/2, launches3/4, GETs6/14. No operation is pending and no further correction
+or dispatch is selected. Next work needs a bounded reassessment of disclosure,
+modal-close and diagnostic coverage. Only audit/status documentation changed in
+this audit. Product defaults, close protections, frozen routes, unrelated user edits
+and native/human recovery remain intact. No Mac native acceptance is claimed.
 
 ## Retained app baseline and pending acceptance
 
