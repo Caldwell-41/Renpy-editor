@@ -1,33 +1,32 @@
 # Current status
 
-## Current native connection harness — CI1 audited; repair proposal pending
+## Current native connection harness — scoped repair ready for final CI
 
-Updated2026-10-16. The user approved [deliverable3](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
-on `codex/phase3a-story-logic`. One Mac implementation owner; Windows native CI and
-both-host portable checks supply evidence without routine machine switching.
+Updated2026-10-16, branch `codex/phase3a-story-logic`. Deliverables1/2 remain complete;
+[CI2 audited their both-host harness proof](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
+Deliverable3's first native attempt failed in harness window geometry/cleanup; no
+application defect was established. [The audit](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16)
+retains that failure and the missing archived-snapshot evidence.
 
-| Work | Current evidence |
-| --- | --- |
-| Deliverables1/2: testing docs and cheap harness prevention | Complete; [both-host CI2 audited](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16) on0cc56e7 |
-| Current Windows connection native harness | CI1 failed in harness window geometry and cleanup; deliverable3 remains open |
-| Mac report admission | Stricter current-contract/assertion checks pass actual-producer/negative fixtures; fresh Mac native acceptance remains separate |
+The user approved the scoped repair and two extra local rounds on the same Mac
+host/current branch. [Preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16)
+is `review_ready`: current-only measured window fitting, independent owned ordinary
+failure close and allowlisted synthetic state retention. Exact saved native references
+are checked for presence/removal without blob reads. Product defaults, frozen helpers,
+legacy guards/ordinals and the929route stay unchanged.
 
-Local3/3 used: clean-export197Python (195pass/two exact exclusions), Q1/10retention,
-33renderer/probe cases, real connection/fixture tests, build, lint and docs validation.
-[Native CI1run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330)
-failed on exact370f4b7/attempt1. Both-host portable checks, source/artifact audits and
-the Windows package passed. Early native Cancel passed; the1044-pixel-wide main
-window exceeded the1024-pixel desktop. Cleanup repeated that gate and forced exit.
-This establishes a harness failure; later native behavior remains unproved. Fixture
-snapshots were also absent from the uploaded archive. No app defect is established.
+Final clean-export checks pass202Python (199pass/three named Windows exclusions),
+both Q1 gates,10retention, all-workflow lint and621-file validation. The actual current
+PowerShell regression runs on Windows before packaging; prior unchanged33DOM and
+Rust integration proof remains valid and selected in CI. No Mac native pass is claimed.
 
-The [terminal audit and scoped repair proposal](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16)
-own exact evidence and limits; [H18](../testing/INCIDENTS.md#h18--current-native-window-exceeds-the-runner-desktop-cleanup-repeats-the-gate)
-indexes the cause. State `blocked` for allowance reassessment: local3/3 used,
-nativeCI1/2, actual Windows packages1/2, launches1/4, GETs0/14. One dispatch remains;
-two additional local rounds are proposed, not approved. No correction or rerun was
-made. Legacy/frozen929routes, unrelated edits and native/human recovery remain intact.
-No Mac native package, real provider, SDK, dependency update, merge or release selected.
+Local5/5 is used; nativeCI1/2, Windows packages1/2, launches1/4, GETs0/14. Next is
+publication/reconciliation and the final ordinal2 CI dispatch, capped at one matching
+package/two launches/seven GETs. No operation is pending before dispatch. Deliverable3
+stays open until both Windows phases and their terminal evidence audit pass. Manual
+same-thread waiting applies; no retry beyond the selected cap. Unrelated edits and
+native/human recovery remain intact. No Mac package, real provider, SDK, dependency
+update, merge or release is selected.
 
 ## Retained app baseline and pending acceptance
 

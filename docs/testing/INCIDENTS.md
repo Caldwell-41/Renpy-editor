@@ -183,13 +183,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   it supplied no fitting viewport. Early native Cancel passed, but main-window
   observation refused. Failure close reused that gate and forced exit followed.
   Temporary fixture snapshots also remained outside the uploaded artifact directory.
-- **Proposed correction, pending approval:** fit and verify only the current test
-  window against measured desktop/frame/DPI; separate owned ordinary close from
-  observation geometry; retain allowlisted synthetic snapshots with partial outcomes.
-  Keep strict visibility/ownership gates and frozen helpers. No app defect established.
-- **Regression needed:** actual current driver on1024×768 and invalid placement,
-  close after observation refusal, partial state retention, then both native phases.
+- **Correction implemented; native proof pending:** fit and verify only the current
+  test window against measured work-area/frame/DPI; separate owned ordinary close
+  from observation geometry; retain allowlisted synthetic snapshots and partial
+  outcomes. Strict visibility/ownership gates and frozen helpers remain intact.
+- **Regression:** portable viewport/retention/original-error/owned-reference cases;
+  actual current PowerShell functions on1024×768, scaling, refused placement and close
+  after observation refusal run on Windows before packaging. Both native phases still
+  require CI2 proof. No app defect is established by CI1.
 - **Evidence:** [native CI1 terminal audit and proposal](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16).
+  [Approved repair and local results](../tasks/active/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16).
 
 ## P01 — Redo refuses an app-owned clean deletion
 

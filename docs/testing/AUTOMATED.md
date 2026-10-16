@@ -27,7 +27,7 @@ stdout/stderr. No retry or deadline inflation is built in.
 
 The shared Python result gate requires nonzero discovery, matching result counts,
 unique rows, named required cases and only exact host exclusions. Four POSIX Mac
-snapshot/permission cases are excluded on Windows; two PowerShell helper cases
+snapshot/permission cases are excluded on Windows; three PowerShell helper cases
 are excluded on Mac. Retention permits only its named POSIX tar-symlink case on
 Windows. Shared path/policy/process/receipt tests remain selected on both hosts.
 Portable cleanup fixtures inject process absence and reject live/unknown state;

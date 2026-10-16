@@ -379,6 +379,12 @@ the next profiles read once; Retry reads without saving or making another reques
 Existing historical commands, completed ordinals, store/reload fixtures and frozen
 external Settings qualification remain historical. A matching package is built once
 per selected current attempt; no installer or automatic retry is involved.
+Only the current driver fits its owned window to measured work-area/frame/DPI bounds;
+failure close does not depend on accepted screenshot geometry. Per-phase evidence
+retains allowlisted synthetic JSON snapshots and explicit partial states. Exact saved
+native references are checked for presence/reopen and final removal without reading
+credential blobs. See [H18](../docs/testing/INCIDENTS.md#h18--current-native-window-exceeds-the-runner-desktop-cleanup-repeats-the-gate)
+for the first native attempt and its scoped repair.
 Use an accessible workspace TEMP on restricted Windows hosts. Native entry/capture
 uses supported Computer Use with actual returned windows and fresh state. No native
 credential enumeration, diagnostic secret-value reads or automatic ownership recovery.

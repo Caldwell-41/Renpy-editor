@@ -1,69 +1,58 @@
 # Current outcome handover
 
-## Deliverable3 — native CI1 failed; scoped repair pending, 2026-10-16
+## Deliverable3 — scoped repair ready for final CI, 2026-10-16
 
-State `blocked` for exhausted local allowance after the first native failure on
-`codex/phase3a-story-logic`. User explicitly approved the
-[plan/selection](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16).
-One Mac implementation owner; Windows native CI and both-host portable fixture gates.
-No second writer or routine host switch. The three existing user edits stay untouched.
+State `review_ready`, same Mac implementation owner/current branch
+`codex/phase3a-story-logic`. The user approved the scoped repairs, two additional
+local repair/check rounds and the remaining CI attempt. No routine host switch or
+second writer. Deliverables1/2 retain [audited completion](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
 
-Current mode adds a fresh two-phase Windows connection harness, real current-Save
-reload fault, early verified-child/focus/Cancel checks, retained-input Retry/Cancel,
-whole-store/request/report/cleanup gates and partial evidence retention. Historical
-Windows guard/ordinals and frozen929Settings route stay unchanged. Mac changes only
-report admission, preserving the existing four-phase/signing contract; no Mac native
-package or launch is selected. Real provider/generation and old human acceptance remain
-separate. Deliverables1/2 retain [audited CI2 completion](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
+[Native CI1run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330)
+failed on exact370f4b7/attempt1. Early owned native Cancel passed;1044×759 main-window
+bounds exceeded the1024×768 desktop. Failure close repeated that size gate and forced
+exit followed. Phase2 never launched; zero requests. Both-host portable/source/ZIP/
+manifest/privacy and Windows package identity passed independent audit. Store/step
+snapshots stayed outside the upload. No app defect or complete native pass was proved.
+The [terminal audit](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16)
+retains hashes/receipts/limits; raw evidence is ignored under `d3/native-ci1`, artifacts
+expire2026-10-23. [H18](../testing/INCIDENTS.md#h18--current-native-window-exceeds-the-runner-desktop-cleanup-repeats-the-gate)
+indexes the cause and repair.
 
-[Local preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-local-preparation-and-review--2026-10-16)
-passed final cold-export197Python cases (195pass/two exact exclusions), Q1/10retention,
-33actual renderer/probe cases including cross-language admission, connection4/Windows
-fixture1/reload3 Rust cases, renderer build, all-workflow lint and621-file validation.
-The first producer-conformance failure and local loopback-capability refusal remain
-recorded; corrections passed. Raw proof is ignored under the maintenance `d3` root.
+[Scoped repair preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16)
+adds current-only measured work-area/DPI/frame/client fitting and strict resulting
+viewport admission. Failure close verifies owned modal/PID/HWND/foreground without
+observation geometry. Selected synthetic JSON is retained with hashes, visible
+artifact paths and explicit partial states; original failure remains authoritative.
+After validated store transitions, exact owned native references are checked for
+initial presence/final removal without credential blob reads or foreign enumeration.
+Frozen helpers, legacy guard/ordinals,929route, production defaults and deadlines stay
+unchanged. Mac work remains portable admission/retention only; no native Mac launch.
 
-Implementation published as `370f4b793f87ce0fbefb78626f128c2b2e070347`, tree
-`e2dec83d328628499111687403b9d504c5d4820b`. Only24owned paths were committed;
-all three existing user files are unchanged/uncommitted. Later commits are docs-only.
-Pre-dispatch reconciliation found no existing run for this candidate or unresolved
-recent manual operation.
+Local rounds4/5 pass shared202Python (199pass/three named Windows exclusions), Q1
+source/rejection and10retention. Final round used a fresh616-file source export with
+no ignored generated permissions/schemas, dependencies or build output. All workflows
+pass actionlint;621-file validation/whitespace pass. The third Windows-only exclusion
+executes actual current PowerShell fit/close functions with controlled primitives,
+including1024×768, DPI/refusals and close despite rejected layout; Windows runs it
+before packaging. Prior unchanged33DOM/Rust evidence is reused, and CI still runs
+those selections on both hosts. Raw local proof stays ignored under `d3/repair`.
 
-[Native CI1run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330),
-workflow354880113/attempt1, exact370f4b7/ordinal1, completed **failure** at11:52:04Z.
-Windows116955388760 failed in native phase1; Mac116955388339 passed portable checks.
-Both-host archives/manifests/all357 source inputs, named Python/33DOM/Cargo results
-and privacy passed independent audit. Windows package AMD64/hash/PID identity passed.
-Mac native steps and nine unrelated jobs were unselected. Raw proof, metadata and
-audit JSON remain ignored under `d3/native-ci1`; artifacts expire2026-10-23.
+Usage: local5/5, nativeCI1/2, actual Windows packages1/2, launches1/4, GETs0/14.
+The final dispatch permits one matching package/two launches/seven GETs. No local
+round or further CI retry remains after those selections. Old maintenance/Thinking/
+Studio/walkthrough counts stay consumed. All three unrelated user edits and the
+retained recovery tail remain byte-identical.
 
-Early owned native Cancel passed, including children100/1/2 and masked focus/input.
-Main observation then refused1044×759 outer bounds on a1024×768 desktop. Failure
-close called the same size gate before Alt-F4, so forced exit followed. PID absence
-and listener stop passed; normal close/full native sequence/credential cleanup did
-not. Phase2 never launched; zero requests. No application defect is established.
-The fixture root was retained only on the runner: store/step snapshots are absent
-from the uploaded ZIP, so their equality cannot be independently audited.
-
-The [terminal audit and concrete proposal](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16)
-own full receipts and [H18](../testing/INCIDENTS.md#h18--current-native-window-exceeds-the-runner-desktop-cleanup-repeats-the-gate)
-indexes the cause. Proposed repair: fit/verify only the current test window using
-measured desktop/frame/DPI, separate ordinary owned close from geometry acceptance,
-and retain allowlisted synthetic snapshots with focused regressions. Frozen helpers,
-product defaults and existing deadlines/gates stay intact. No correction was made.
-
-Actual usage: local3/3, nativeCI1/2, Windows packages1/2, launches1/4, GETs0/14.
-One dispatch remains, at most one package/two launches/seven GETs. Two additional
-local repair/check rounds (cap5) are proposed, **not approved**; the existing CI cap2
-is unchanged. Old maintenance/Thinking/Studio/walkthrough counts stay consumed.
-
-**Next on same-thread resume:** obtain explicit selection of that scoped repair
-and local allowance extension before edits/check rounds or CI2. Then implement and
-review current-driver geometry/cleanup/retention regressions on the chosen Mac host,
-use Windows CI for actual native proof, and audit both full phases before completion.
-No operation is pending, no native pass is claimed, and no automatic retry, polling,
-watcher, host switch or second writer is selected. This audit publication changes
-only the owning task, incident index and live status documents.
+**Next:** publish the exact reviewed repair candidate, reconcile existing operations,
+then reserve/dispatch current native ordinal2 once. Confirm workflow/run/attempt,
+head SHA/branch/material inputs and actual status. Publish a docs-only continuation
+and pause under manual same-thread waiting; no watcher/polling/wake-up. On user
+resume, audit that exact run's both-host named gates, source/archive identities,
+Windows package/process/two native reports, viewport/retained-input/reload/GET order,
+normal exits and independent modal/fault/listener/credential cleanup, plus retained
+snapshot bytes/manifest/privacy. Only a full pass closes deliverable3. No operation
+is pending before dispatch; no Mac package/real provider/SDK/dependency/merge/release
+is selected. Preserve the unrelated native/human recovery below.
 
 ## Retained app baseline and unrelated pending work
 

@@ -74,11 +74,78 @@ function Restore-Fault {
   [IO.File]::WriteAllBytes($script:profilePath,$script:original);$script:faultActive=$false;$receipt.cleanup.faultRestored=$true
  }
 }
+function Select-CurrentForeground {
+ Select-MainWindow -ObserveOnly
+ [void][RewriteNative]::SetForegroundWindow($script:handle)
+ Wait-Native {[RewriteNative]::GetForegroundWindow() -eq $script:handle}
+}
+function Current-ClientSize {
+ $client=New-Object CurrentStudioWindow+RECT
+ Assert-Native ([CurrentStudioWindow]::GetClientRect($script:handle,[ref]$client)) 'Current client bounds unavailable'
+ return @([int]($client.Right-$client.Left),[int]($client.Bottom-$client.Top))
+}
+function Current-WorkArea {return ([System.Windows.Forms.Screen]::FromHandle($script:handle)).WorkingArea}
+function Current-Placement($Rect,$WorkArea,$Client,[int]$Dpi) {
+ Assert-Native ($Dpi -ge 72 -and $Dpi -le 480 -and $Client.Count -eq 2 -and $Client[0] -gt 0 -and $Client[1] -gt 0) 'Current DPI/client bounds refused'
+ $frameWidth=$Rect.Width-$Client[0];$frameHeight=$Rect.Height-$Client[1]
+ Assert-Native ($frameWidth -ge 0 -and $frameWidth -le 256 -and $frameHeight -ge 0 -and $frameHeight -le 256) 'Current window frame refused'
+ $margin=[int][Math]::Ceiling(8*$Dpi/96.0)
+ $minimum=@([int][Math]::Ceiling(560*$Dpi/96.0),[int][Math]::Ceiling(480*$Dpi/96.0))
+ $width=[int][Math]::Min($Rect.Width,$WorkArea.Width-2*$margin)
+ $height=[int][Math]::Min($Rect.Height,$WorkArea.Height-2*$margin)
+ Assert-Native ($width-$frameWidth -ge $minimum[0] -and $height-$frameHeight -ge $minimum[1]) 'Current desktop cannot fit the minimum test viewport'
+ $left=[int][Math]::Max($WorkArea.Left+$margin,[Math]::Min($Rect.Left,$WorkArea.Right-$margin-$width))
+ $top=[int][Math]::Max($WorkArea.Top+$margin,[Math]::Min($Rect.Top,$WorkArea.Bottom-$margin-$height))
+ return [ordered]@{target=@($left,$top,$width,$height);minimumClient=$minimum;frame=@($frameWidth,$frameHeight);margin=$margin}
+}
+function Fit-CurrentWindow {
+ # This adapter alone may resize the disposable current scenario. Frozen layout
+ # helpers still require the complete observed window to fit and never resize it.
+ Select-CurrentForeground
+ Assert-Native ((Entry-Handle) -eq [IntPtr]::Zero) 'Current viewport requires no owned modal'
+ $rect=Window-Rect $script:handle
+ $area=Current-WorkArea
+ $dpi=[int][RewriteNative]::GetDpiForWindow($script:handle);$client=Current-ClientSize
+ $receipt.currentWindow=[ordered]@{before=@($rect.Left,$rect.Top,$rect.Width,$rect.Height);clientBefore=$client;workArea=@($area.Left,$area.Top,$area.Width,$area.Height);dpi=$dpi;verified=$false}
+ $plan=Current-Placement $rect $area $client $dpi
+ $receipt.currentWindow.target=$plan.target;$receipt.currentWindow.minimumClient=$plan.minimumClient;$receipt.currentWindow.frame=$plan.frame;$receipt.currentWindow.margin=$plan.margin
+ $target=$plan.target
+ if((@($rect.Left,$rect.Top,$rect.Width,$rect.Height) -join ',') -ne ($target -join ',')) {
+  # SWP_NOZORDER | SWP_NOACTIVATE. Resize only the verified owned main window.
+  Assert-Native ([RewriteNative]::SetWindowPos($script:handle,[IntPtr]::Zero,$target[0],$target[1],$target[2],$target[3],0x14)) 'Current owned viewport placement failed'
+ }
+ Wait-Native {
+  $actual=Window-Rect $script:handle
+  return (@($actual.Left,$actual.Top,$actual.Width,$actual.Height) -join ',') -eq ($target -join ',')
+ }
+ $after=Window-Rect $script:handle;$actualClient=Current-ClientSize
+ $receipt.currentWindow.after=@($after.Left,$after.Top,$after.Width,$after.Height);$receipt.currentWindow.clientAfter=$actualClient
+ Assert-Native ($area.Contains($after) -and $actualClient[0] -ge $plan.minimumClient[0] -and $actualClient[1] -ge $plan.minimumClient[1]) 'Current observed viewport does not fit'
+ Ensure-ObservableWindow
+ $receipt.currentWindow.verified=$true;$receipt.checks.currentViewport=$true
+}
+function Close-CurrentOwned {
+ # Ordinary close needs verified ownership/foreground, not an accepted screenshot.
+ Cancel-OwnedEntry
+ Select-CurrentForeground
+ Assert-Native ((Entry-Handle) -eq [IntPtr]::Zero) 'Failure close still has an owned modal'
+ Assert-Native ([RewriteNative]::GetForegroundWindow() -eq $script:handle) 'Failure close lost foreground'
+ $receipt.checks.closeForeground=$true
+ [System.Windows.Forms.SendKeys]::SendWait('%{F4}');$receipt.checks.closeInput=$true
+}
 $script:faultActive=$false
 try{
  $names=@('Frozen-Definitions','Wait-Step','Entry-Handle','Assert-EntryOwner','Entry-Exists','Entry-Foreground','Entry-Control','Masked-FocusReady','Click-EntryControl','Click-MaskedField','Select-Entry','Cancel-OwnedEntry','Select-MainWindow','Control','Value','Field-TypeAllowed')
  foreach($definition in (Definitions (Join-Path $ProductRepo 'app/scripts/studio-setup-windows.ps1') $names -NativeType)){. ([scriptblock]::Create($definition))}
  foreach($definition in (Frozen-Definitions)){. ([scriptblock]::Create($definition))}
+ Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class CurrentStudioWindow {
+ [StructLayout(LayoutKind.Sequential)] public struct RECT {public int Left,Top,Right,Bottom;}
+ [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr handle,out RECT rect);
+}
+'@
  [void][RewriteNative]::SetProcessDPIAware();$receipt.inputDesktop=Input-Desktop
  Assert-Native ($receipt.inputDesktop -eq 'Default' -and [Environment]::UserInteractive -and [Environment]::Is64BitProcess) 'Interactive Windows x64 required'
  $receipt.checks.interactiveDesktop=$true
@@ -89,11 +156,9 @@ try{
   Select-MainWindow -ObserveOnly
   if($Stage.StartsWith('entry-')){Public-Entry}
   elseif($Stage -eq 'cleanup-after-failure'){
-   Cancel-OwnedEntry;Select-MainWindow
-   Assert-Native ([RewriteNative]::GetForegroundWindow() -eq $script:handle) 'Failure close lost foreground'
-   [System.Windows.Forms.SendKeys]::SendWait('%{F4}');$receipt.checks.closeInput=$true
+   Close-CurrentOwned
   }else{
-   Select-MainWindow
+   Fit-CurrentWindow
    Assert-Native ((Entry-Handle) -eq [IntPtr]::Zero) 'Unexpected owned credential modal'
    if($Stage -eq 'observe-reload'){
     Wait-Step 'Current confirmed-save read-only reload' {(Has-Text 'Profile saved; saved profiles could not be reloaded.') -and (Has-ButtonState 'Retry loading profiles' $true)}
@@ -107,6 +172,7 @@ try{
     Wait-Step 'Current configured credential observed' {Has-Text 'Credential: configured'}
     $receipt.checks.configuredStatus=$true
     $model=Control 'Model ID';Assert-Native (Field-TypeAllowed 'Model ID' $model.Current.ControlType) 'Model control type changed'
+    Focus-Control $model
     Assert-Native ((Value 'Model ID') -eq 'loomlight-synthetic-model') 'Nonsecret model readback changed'
     $receipt.checks.modelReadback=$true
    }elseif($Step -eq 'removed'){

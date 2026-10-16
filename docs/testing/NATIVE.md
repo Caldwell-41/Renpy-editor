@@ -62,6 +62,14 @@ fresh namespace, exact candidate/ordinal, two processes and seven loopback GETs
 (alpha/gamma/alpha/alpha, then alpha/beta/beta). The ordinary legacy entry and frozen
 929 workflow remain unchanged. Current native qualification is pending its own CI
 and terminal artifact audit; the selector is not permission to replay old attempts.
+The current driver alone fits its owned main window inside the measured monitor
+work area, including frame/DPI and the product's minimum client size. Frozen layout
+helpers still reject clipping. Failure close verifies owned PID/HWND/foreground
+independently of screenshot geometry. Forced termination remains failure. Selected
+synthetic store/step/timing/observation JSON is retained under visible phase-state
+artifact paths, with hashes and explicit not-reached records; no whole-root upload.
+The complete flow also checks exact saved native references for initial presence
+and final removal without inspecting credential blobs or foreign cleanup identities.
 
 The Mac identity probe's existing four phases retain their 2/2/4/0 GET schedule,
 including draft Connect. Its report validator requires contract2, the exact case,

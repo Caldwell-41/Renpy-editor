@@ -7,6 +7,7 @@ import hmac
 import http.server
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -26,6 +27,8 @@ OBSERVATIONS = {1: ['preflight-cancelled', 'alpha-saved', 'gamma-saved', 'cancel
                 2: ['reopened', 'get-1-complete', 'beta-reloaded', 'get-2-complete', 'removed', 'complete']}
 ENTRIES = {1: {'preflight-cancel':'entry-preflight', 'alpha-entry':'entry-alpha', 'gamma-entry':'entry-gamma', 'cancel-entry':'entry-cancel'},
            2: {'beta-entry':'entry-beta'}}
+SNAPSHOTS = {1: ['preflight-cancelled','alpha-saved','gamma-saved','cancelled','complete'],
+             2: ['reopened','beta-saved','beta-reload-required','beta-reloaded','removed','complete']}
 RELOAD_RESPONSE = dict(saved=True, profileId=legacy.A, cleanupPending=True)
 CHECKS = {1: ['Fixed Windows phase selected', 'Shared v2 profiles and foreign cleanup retained', 'Initial fixture has no native keys',
               'Early native Cancel preserves complete initial snapshot', 'Retained-field Retry saved A while foreign cleanup remained pending',
@@ -117,6 +120,89 @@ def validate_snapshots(root, phase):
         if snap('complete') != read(root/'ai-profiles.json'): raise ValueError('Final snapshot changed')
 
 
+def retain_state(output, root, phase, complete):
+    """Retain only selected synthetic JSON; never copy the temporary root wholesale."""
+    directory = output / f'phase-{phase}-state'
+    directory.mkdir(exist_ok=False)
+    records = {}
+    selected = {'profile-store.json': 'ai-profiles.json', 'marker.json': '.studio-windows-step.json'}
+    for p in range(1, phase + 1):
+        for step in SNAPSHOTS[p]:
+            selected[f'snapshot-{p}-{step}.json'] = f'.studio-windows-{p}-{step}.json'
+    steps = set(OBSERVATIONS[phase]) | set(ENTRIES[phase]) | set(SNAPSHOTS[phase])
+    for step in sorted(steps):
+        selected[f'timing-{step}.json'] = f'.studio-windows-timing-{phase}-{step}.json'
+    for step in OBSERVATIONS[phase]:
+        selected[f'observed-{step}.json'] = f'.studio-windows-observed-{phase}-{step}.json'
+    if phase == 2:
+        selected['current-reload-observed.json'] = '.studio-windows-current-reload-observed.json'
+    required = {'profile-store.json'} | {name for name in selected if name.startswith('snapshot-')}
+    if root.is_symlink() or root.parent.resolve() != Path(tempfile.gettempdir()).resolve() or not root.name.startswith('loomlight-studio-windows-connection-'):
+        raise ValueError('Current state retention root refused')
+    for name, source in selected.items():
+        path = root/source
+        record = dict(source=source, state='not-reached')
+        records[name] = record
+        if path.is_symlink():
+            record['state'] = 'refused-link'
+        elif path.exists():
+            try:
+                if not path.is_file() or path.stat().st_size > 131072:
+                    raise ValueError('Bounded JSON file required')
+                data = path.read_bytes()
+                if not isinstance(json.loads(data.decode('utf-8-sig')), dict):
+                    raise ValueError('JSON object required')
+                with (directory/name).open('xb') as stream: stream.write(data)
+                record.update(state='retained', sha256=hashlib.sha256(data).hexdigest(), bytes=len(data))
+            except (OSError, ValueError, UnicodeError) as error:
+                record.update(state='refused', failure=type(error).__name__)
+    passed = (all(r['state'] in ('retained','not-reached') for r in records.values())
+              and (not complete or all(records[name]['state']=='retained' for name in required)))
+    receipt = dict(passed=passed, phase=phase, complete=complete, files=records)
+    write(directory/'retention.json', receipt)
+    if not passed: raise ValueError('Current state retention incomplete or refused')
+    return dict(passed=True, directory=directory.name, files=sum(r['state']=='retained' for r in records.values()))
+
+
+def audit_owned_credentials(root, phase):
+    # Only call after complete snapshot validation. Read exact synthetic identities,
+    # never enumerate the credential store or inspect a credential blob.
+    identities = {}
+    for p, step in [(1,'alpha-saved'),(1,'gamma-saved')] + ([(2,'beta-saved')] if phase==2 else []):
+        for profile in read(root/f'.studio-windows-{p}-{step}.json')['profiles']:
+            credential = profile.get('credential')
+            if credential:
+                identities[(profile['profileId'],credential['credentialId'])] = profile
+    records = []
+    for (profile_id, credential_id), profile in identities.items():
+        present = legacy.native_present(profile)
+        records.append(dict(profileId=profile_id,credentialId=credential_id,present=present))
+    if len(records) != (2 if phase==1 else 3) or any(r['present'] != (phase==1) for r in records):
+        raise ValueError('Expected owned native credential presence/removal unproved')
+    return dict(state='retained-for-reopen' if phase==1 else 'removed', checked=records)
+
+
+def validate_viewport(value):
+    def integers(items, count):
+        return isinstance(items,list) and len(items)==count and all(type(n) is int for n in items)
+    if not isinstance(value,dict) or value.get('verified') is not True:
+        raise ValueError('Current verified viewport missing')
+    for key, count in [('before',4),('after',4),('workArea',4),('target',4),('clientBefore',2),('clientAfter',2),('minimumClient',2),('frame',2)]:
+        if not integers(value.get(key),count): raise ValueError('Typed current viewport bounds missing')
+    dpi=value.get('dpi');before=value['before'];area=value['workArea'];client=value['clientBefore']
+    if type(dpi) is not int or not 72 <= dpi <= 480 or min(client)<=0:
+        raise ValueError('Current viewport DPI/client refused')
+    frame=[before[2]-client[0],before[3]-client[1]]
+    minimum=[math.ceil(560*dpi/96),math.ceil(480*dpi/96)];margin=math.ceil(8*dpi/96)
+    width=min(before[2],area[2]-2*margin);height=min(before[3],area[3]-2*margin)
+    target=[max(area[0]+margin,min(before[0],area[0]+area[2]-margin-width)),
+            max(area[1]+margin,min(before[1],area[1]+area[3]-margin-height)),width,height]
+    if (any(not 0 <= n <= 256 for n in frame) or value['frame']!=frame or value['minimumClient']!=minimum
+            or value.get('margin')!=margin or value['target']!=target or value['after']!=target
+            or any(target[2+n]-frame[n]<minimum[n] or not minimum[n]<=value['clientAfter'][n]<=target[2+n] for n in range(2))):
+        raise ValueError('Current viewport placement or minimum client refused')
+
+
 def validate_native(receipt, stage, step, phase, pid, executable_hash, directory):
     checks = receipt.get('checks', {})
     if (receipt.get('contract') != 2 or receipt.get('passed') is not True or receipt.get('stage') != stage
@@ -157,6 +243,8 @@ def validate_native(receipt, stage, step, phase, pid, executable_hash, directory
         if not all(checks.get(k) is True for k in ['osMouseInput', *required]):
             raise ValueError('Current physical entry/retry/Cancel evidence missing')
     elif stage in ('observe','observe-reload'):
+        validate_viewport(receipt.get('currentWindow'))
+        if checks.get('currentViewport') is not True: raise ValueError('Current viewport observation missing')
         if stage == 'observe-reload' and not all(checks.get(k) is True for k in ('mutationsDisabled','retryEnabled')):
             raise ValueError('Native read-only reload controls missing')
         required = ('cancelStatus' if step in ('preflight-cancelled','cancelled') else 'connectedStatus' if step.startswith('get-')
@@ -169,6 +257,9 @@ def validate_native(receipt, stage, step, phase, pid, executable_hash, directory
         spec=importlib.util.spec_from_file_location('native_capture', APP/'scripts/studio-setup-native.py')
         module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
         module.validate_capture(directory/'observed.png',capture)
+    elif stage == 'cleanup-after-failure':
+        if not all(checks.get(k) is True for k in ('closeForeground','closeInput')):
+            raise ValueError('Owned ordinary close input unproved')
 
 
 def native(output, executable, stage, phase=0, pid=0, root=None, step=''):
@@ -296,12 +387,13 @@ def launch(output, phase, root, package):
         validate_report(reports,phase,events,process.returncode)
         if observed!=OBSERVATIONS[phase] or not set(ENTRIES[phase]).issubset(handled): raise ValueError('Complete ordered native sequence missing')
         validate_snapshots(root,phase)
+        result['cleanup']['ownedCredentials']=audit_owned_credentials(root,phase)
         result['passed']=True
     except Exception as error:
         result['failure']=type(error).__name__+': '+str(error)
     finally:
         if process is not None and process.poll() is None:
-            try: native(output,executable,'cleanup-after-failure',phase,process.pid,root,'failure')
+            try: result['cleanup']['normalClose']=native(output,executable,'cleanup-after-failure',phase,process.pid,root,'failure')
             except Exception as error: result['cleanup']['normalCloseError']=type(error).__name__
             try: process.wait(timeout=5)
             except subprocess.TimeoutExpired:
@@ -324,7 +416,12 @@ def launch(output, phase, root, package):
             except Exception as error: result['cleanup']['listenerJoinError']=type(error).__name__
         result['cleanup']['listenerStopped']=worker is not None and not worker.is_alive() and not any(k.startswith('listener') and k.endswith('Error') for k in result['cleanup'])
         result['cleanup']['rootPreserved']=root.is_dir()
-        result['cleanup']['ownedCredentials']=('removed' if phase==2 else 'retained-for-reopen') if result['passed'] else 'unproved-retained'
+        result['cleanup'].setdefault('ownedCredentials',dict(state='unproved-retained'))
+        try: result['stateRetention']=retain_state(output,root,phase,result['passed'])
+        except Exception as error:
+            result['stateRetention']=dict(passed=False,failure=type(error).__name__+': '+str(error))
+            result['passed']=False
+            result.setdefault('failure','Current state retention failed')
         result['native']=native_records;result['elapsedSeconds']=round(time.monotonic()-started,3)
         result['passed']=result['passed'] and result['cleanup']['processStopped'] and result['cleanup']['listenerStopped'] and result['cleanup']['pidAbsent'] and not result['cleanup'].get('forcedExit',False) and result['elapsedSeconds']<=300
         write(output/f'phase-{phase}.json',result)

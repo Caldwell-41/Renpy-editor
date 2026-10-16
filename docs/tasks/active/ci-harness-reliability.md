@@ -44,8 +44,8 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-Deliverables1/2 remain complete. Active state: `blocked` after deliverable3 native
-CI1 failed; its terminal audit and proposed repair are below. Original maintenance
+Deliverables1/2 remain complete. Active state: `review_ready` for the approved scoped
+deliverable3 repair after native CI1; its audit and continuation are below. Original maintenance
 local5/6 and pairedCI2/2 were used, including failed CI1. CI2's Windows/Mac steps, artifacts, source identities and
 named results pass audit. Deliverable3 was plan-only at that completion; the later
 user approval selects its implementation.
@@ -628,3 +628,75 @@ Audit documentation passes621-file repository validation and whitespace checks.
 CURRENT384words/HANDOVER805words remain within the maintenance guidance. All three
 pre-existing user edits and the retained unrelated HANDOVER tail are byte-identical;
 only the task, incident index, CURRENT and HANDOVER belong to this publication.
+
+## Deliverable3 scoped repair selected — 2026-10-16
+
+The user explicitly approved the scoped repairs on the current branch, two additional
+local repair/check rounds and the remaining CI attempt. State `in_progress`, same
+Mac owner/branch `codex/phase3a-story-logic`, starting at3360073. Limit is now local5
+cumulatively (3used/2remaining); nativeCI1/2, Windows packages1/2, launches1/4,
+GETs0/14. Final CI allows one package/two launches/seven loopback GETs. No automatic
+retry, product-default/frozen-helper change, Mac native launch, real provider, SDK,
+dependency upgrade, merge or release. Preserve unrelated edits and recovery tail.
+
+Implement current-only measured window fitting, geometry-independent owned failure
+close and allowlisted synthetic state retention. Verify portable rejection/retention
+locally; retain real PowerShell driver regressions in the cold Windows harness before
+its expensive build. Review, publish the exact candidate, reconcile existing runs,
+then dispatch ordinal2 once. Record the confirmed identity and pause under the existing
+manual same-thread wait policy; a later terminal audit owns completion.
+
+## Deliverable3 scoped repair preparation and review — 2026-10-16
+
+State `review_ready`; local5/5 now used. NativeCI1/2, actual Windows packages1/2,
+launches1/4, GETs0/14 remain unchanged before dispatch. No local app, native store,
+SDK or provider operation was performed. No additional local repair round remains.
+
+Current-only driver fitting records physical work area, DPI, outer/client bounds,
+frame/margin/minimum client and exact requested/observed placement. It shrinks/moves
+only the verified owned main window, then runs the unchanged strict frozen placement
+and capture gates. The minimum viewport remains560×480 logical units. Unsupported
+geometry, failed placement, clipped/client-small or unverified receipts still refuse.
+Configured-model observation also brings its typed nonsecret control into view.
+Ordinary failure close now verifies owned modal/PID/HWND/foreground without requiring
+an accepted layout. Its full close receipt is kept independently of the original
+failure; forced exit remains failure. Frozen scripts and production defaults are unchanged.
+
+Controller retention uses explicit per-phase store/snapshot/marker/timing/observation
+JSON names, visible archive paths, exclusive output, bounded valid objects, hashes
+and not-reached states. Required complete-flow snapshots must exist; refusal remains
+failure and cannot replace an earlier error. No entire temporary-root upload or
+credential blob is selected. After whole-store validation, the existing exact-native-
+reference reader checks the two saved credentials for reopen, then all three saved/
+replacement identities for final absence; it never enumerates foreign credentials.
+
+Added four portable regression cases plus one Windows-only case extracting and
+executing the actual current PowerShell fit/close functions with controlled native
+primitives. It covers1024×768, frame/DPI scaling, repeat placement stability, small
+desktop/failed move/foreground/frame refusal and close after layout rejection; the
+only physical close delivery is intercepted in the regression. Actual native input
+still needs the packaged sequence. The named evidence gate requires these cases and
+adds exactly that third Windows exclusion on Mac. Windows executes it in the shared
+cold harness before dependencies/build/native launches; no workflow change was needed.
+
+- Local round4: shared harness passes202Python (199pass/three exact Windows exclusions),
+  both Q1 source/rejection gates and all10retention cases on Mac ARM64/Python3.12.14.
+  System Python initially refused the required3.11 minimum before test execution;
+  the existing bundled3.12 runtime supplied the compatible run without installation.
+- Local round5: fresh616-tracked-file export of final repair inputs passes the same
+  shared gates/counts, including independent listener-failure assertions added during
+  review. No ignored permissions/schemas, dependencies or build output exist before
+  or after. All workflows pass actionlint; repository621-file validation and whitespace
+  checks pass. Raw logs, export/input map and receipts stay ignored under `d3/repair`.
+- Review: ownership/foreground/masked-field gates, original deadlines and GET schedule
+  remain; retention cannot turn a failure into a pass; failed close/listener/retention
+  remain independent. Existing valid33DOM/connection/reload evidence is reused because
+  its producers/backend are unchanged; the CI route still executes those selections
+  on both hosts. Three pre-existing user files and the unrelated handover tail remain
+  byte-identical. Only harness/runbook/task/index/live-status changes are selected.
+
+Next: publish the reviewed candidate, reconcile existing operations and reserve the
+last current native CI attempt (ordinal2). Allow one matching Windows package/two
+launches/seven GETs. Confirm exact run/attempt/candidate/inputs, publish a compact
+wait record and stop active polling. Complete deliverable3 only after both actual
+Windows phases and the source/archive/retained-state/native-cleanup audit pass.
