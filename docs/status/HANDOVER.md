@@ -1,8 +1,8 @@
 # Current outcome handover
 
-## Deliverable3 — scoped repair ready for final CI, 2026-10-16
+## Deliverable3 — final CI2 queued; terminal audit pending, 2026-10-16
 
-State `review_ready`, same Mac implementation owner/current branch
+State `awaiting_ci`, same Mac implementation owner/current branch
 `codex/phase3a-story-logic`. The user approved the scoped repairs, two additional
 local repair/check rounds and the remaining CI attempt. No routine host switch or
 second writer. Deliverables1/2 retain [audited completion](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
@@ -37,22 +37,35 @@ including1024×768, DPI/refusals and close despite rejected layout; Windows runs
 before packaging. Prior unchanged33DOM/Rust evidence is reused, and CI still runs
 those selections on both hosts. Raw local proof stays ignored under `d3/repair`.
 
-Usage: local5/5, nativeCI1/2, actual Windows packages1/2, launches1/4, GETs0/14.
-The final dispatch permits one matching package/two launches/seven GETs. No local
-round or further CI retry remains after those selections. Old maintenance/Thinking/
-Studio/walkthrough counts stay consumed. All three unrelated user edits and the
-retained recovery tail remain byte-identical.
+Repair published as `e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`, tree
+`040ba28a462f4fb2fbc10b2ea36dbacacd2193bb`, only11owned paths; all three unrelated
+user files remain unchanged/uncommitted. Later commits record the wait only.
+Pre-dispatch reconciliation found no candidate dispatch or unresolved recent manual run.
 
-**Next:** publish the exact reviewed repair candidate, reconcile existing operations,
-then reserve/dispatch current native ordinal2 once. Confirm workflow/run/attempt,
-head SHA/branch/material inputs and actual status. Publish a docs-only continuation
-and pause under manual same-thread waiting; no watcher/polling/wake-up. On user
-resume, audit that exact run's both-host named gates, source/archive identities,
-Windows package/process/two native reports, viewport/retained-input/reload/GET order,
-normal exits and independent modal/fault/listener/credential cleanup, plus retained
-snapshot bytes/manifest/privacy. Only a full pass closes deliverable3. No operation
-is pending before dispatch; no Mac package/real provider/SDK/dependency/merge/release
-is selected. Preserve the unrelated native/human recovery below.
+[Final native CI2run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
+is confirmed: workflow354880113/workflow_dispatch/attempt1, exact repair SHA on the
+same branch, created13:37:07Z. Only current native selector/exact candidate/ordinal2
+were sent. At the single confirmation it was **queued**, conclusion null; no job/native
+pass claimed. Initial metadata/dispatch stays ignored under `d3/native-ci2`.
+
+Usage: local5/5 and nativeCI2/2 charged. Last audited pre-CI2 actuals were Windows
+packages1/2, launches1/4, GETs0/14; CI2 reserves one package/two launches/seven GETs.
+Terminal receipts own actual consumption. No local repair round or third dispatch
+remains. Old maintenance/Thinking/Studio/walkthrough allowances stay consumed.
+
+**Next on manual same-thread resume:** read/audit the exact recorded run/attempt;
+follow the [confirmed CI2 audit checklist](../tasks/active/ci-harness-reliability.md#deliverable3-confirmed-final-native-ci2-and-manual-wait--2026-10-16).
+Audit both-host named Python/exclusions/Q1/retention/33DOM/Cargo and source/toolchain
+identities; Windows matching package/process and both native phases, measured viewport,
+retained input/reload/4+3 GET order/deadlines, normal exits and independent modal/fault/
+PID/listener/owned-credential cleanup. Verify both published archives, manifests,
+checkout-aware source inputs/privacy, and the newly retained state/snapshot/timing/
+observation bytes against whole-store transitions. Missing/not-reached proof and
+forced exit remain failures; Mac native steps are unselected. Only full acceptance
+closes deliverable3. If pending, preserve identity and pause again. Any failure needs
+diagnosis/reassessment under exhausted limits; no retry or new repair round is selected.
+No polling/watcher/wake-up, second writer or Mac package/real provider/SDK/dependency/
+merge/release is selected. Preserve all unrelated user edits and recovery below.
 
 ## Retained app baseline and unrelated pending work
 

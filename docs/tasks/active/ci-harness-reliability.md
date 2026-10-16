@@ -44,7 +44,7 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-Deliverables1/2 remain complete. Active state: `review_ready` for the approved scoped
+Deliverables1/2 remain complete. Active state: `awaiting_ci` for the approved scoped
 deliverable3 repair after native CI1; its audit and continuation are below. Original maintenance
 local5/6 and pairedCI2/2 were used, including failed CI1. CI2's Windows/Mac steps, artifacts, source identities and
 named results pass audit. Deliverable3 was plan-only at that completion; the later
@@ -700,3 +700,45 @@ last current native CI attempt (ordinal2). Allow one matching Windows package/tw
 launches/seven GETs. Confirm exact run/attempt/candidate/inputs, publish a compact
 wait record and stop active polling. Complete deliverable3 only after both actual
 Windows phases and the source/archive/retained-state/native-cleanup audit pass.
+
+## Deliverable3 final native CI2 reservation — 2026-10-16
+
+Repair published as `e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`, tree
+`040ba28a462f4fb2fbc10b2ea36dbacacd2193bb`, only11owned paths. Pre-dispatch
+reconciliation of the latest10 manual quality runs finds no candidate dispatch or
+unresolved recent operation. Reserve the final nativeCI2/2 for workflow354880113,
+current selector only, exact candidate and ordinal2/attempt1. At most one matching
+Windows package/two launches/seven GETs; Mac supplies portable gates only. Local5/5
+is consumed. Actual cumulative packages1/2, launches1/4, GETs0/14 before dispatch;
+the reservation is not executed-count evidence. No further retry is selected.
+
+## Deliverable3 confirmed final native CI2 and manual wait — 2026-10-16
+
+[Run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
+is confirmed: workflow354880113, workflow_dispatch, attempt1, created13:37:07Z,
+exact candidate `e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`, branch
+`codex/phase3a-story-logic`. Only `studio_connection_native=true`, that exact SHA
+and ordinal2 were sent. At the single confirmation it was **queued**, conclusion
+null. Dispatch input/response, initial run metadata and reconciliation stay ignored
+under `d3/native-ci2`/`d3/repair`. No duplicate or status polling was performed.
+
+State `awaiting_ci`. NativeCI2/2 is charged; local5/5 remains consumed. The last
+audited actual use before CI2 was packages1/2, launches1/4, GETs0/14. CI2 reserves
+one package/at most two launches/seven GETs; actual execution needs terminal receipts.
+No additional local round or third dispatch is selected. Mac native steps are
+unselected; neither a queued run nor portable fixtures prove native completion.
+
+Publish this docs-only successor and pause under manual same-thread waiting. On user
+resume, read this exact run/attempt once and audit both-host named Python/exclusions,
+Q1/retention/33DOM/Cargo outcomes and exact source/run/tree/architecture/toolchain
+seals. Verify published ZIP digests/safe unique entries/CRC, all manifest/input
+hashes/privacy, matching Windows PE/build/launch identity, both actual native phases,
+measured viewport receipts, risky native controls/retained-field Retry/Cancel/current
+one-shot reload, ordered4/3 GETs/deadlines and independent normal-exit/PID/modal/fault/
+listener/owned-credential outcomes. Reconcile actual cumulative use from receipts.
+Audit per-phase retained store/snapshot/step/timing/observation bytes and retention
+manifests, including early Cancel equality and complete publication/reopen/retry/
+removal transitions. Partial/not-reached snapshots and forced exit remain failures.
+The older370f4b7 failure stays historical; a docs-only successor is not the tested
+repair candidate. Close deliverable3 only on full acceptance; any new failure needs
+diagnosis/reassessment because both repair and native attempt limits are exhausted.

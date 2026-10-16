@@ -1,6 +1,6 @@
 # Current status
 
-## Current native connection harness — scoped repair ready for final CI
+## Current native connection harness — final CI2 queued; audit pending
 
 Updated2026-10-16, branch `codex/phase3a-story-logic`. Deliverables1/2 remain complete;
 [CI2 audited their both-host harness proof](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
@@ -10,7 +10,7 @@ retains that failure and the missing archived-snapshot evidence.
 
 The user approved the scoped repair and two extra local rounds on the same Mac
 host/current branch. [Preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16)
-is `review_ready`: current-only measured window fitting, independent owned ordinary
+is complete: current-only measured window fitting, independent owned ordinary
 failure close and allowlisted synthetic state retention. Exact saved native references
 are checked for presence/removal without blob reads. Product defaults, frozen helpers,
 legacy guards/ordinals and the929route stay unchanged.
@@ -20,13 +20,16 @@ both Q1 gates,10retention, all-workflow lint and621-file validation. The actual 
 PowerShell regression runs on Windows before packaging; prior unchanged33DOM and
 Rust integration proof remains valid and selected in CI. No Mac native pass is claimed.
 
-Local5/5 is used; nativeCI1/2, Windows packages1/2, launches1/4, GETs0/14. Next is
-publication/reconciliation and the final ordinal2 CI dispatch, capped at one matching
-package/two launches/seven GETs. No operation is pending before dispatch. Deliverable3
-stays open until both Windows phases and their terminal evidence audit pass. Manual
-same-thread waiting applies; no retry beyond the selected cap. Unrelated edits and
-native/human recovery remain intact. No Mac package, real provider, SDK, dependency
-update, merge or release is selected.
+Repair published as `e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`.
+[Final native CI2run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
+was **queued** at its single confirmation: exact candidate/ordinal2/attempt1,
+created13:37:07Z. State `awaiting_ci`; nativeCI2/2 and local5/5 are consumed. CI2
+reserves one Windows package/two launches/seven GETs; actual counts need receipts.
+The [confirmed-run handover](../tasks/active/ci-harness-reliability.md#deliverable3-confirmed-final-native-ci2-and-manual-wait--2026-10-16)
+owns terminal audit and remaining acceptance. Pause under manual same-thread waiting;
+no polling, extra local round or third dispatch. Deliverable3 stays open. Unrelated
+edits and native/human recovery remain intact. No Mac package, real provider, SDK,
+dependency update, merge or release is selected.
 
 ## Retained app baseline and pending acceptance
 
