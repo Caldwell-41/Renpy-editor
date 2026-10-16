@@ -45,6 +45,42 @@ def verify_dom(output):
     return counts['tests']
 
 
+MAC_SNAPSHOT_TESTS = frozenset('test_macos_development_credentials.DevelopmentFixtureTests.' + name for name in (
+    'test_reload_selector_preparation_is_read_only_and_rejects_changed_fixture',
+    'test_isolation_private_snapshot_and_no_credential_creation',
+    'test_steps_refuse_out_of_order_and_unconfirmed_save',
+    'test_cancel_rejects_file_change_even_when_profiles_are_identical',
+))
+WINDOWS_NATIVE_TESTS = frozenset('test_rewrite_windows_reuse.RetainedEvidenceGate.' + name for name in (
+    'test_native_polling_handles_transient_nodes_without_accepting_missing_proof',
+    'test_native_window_placement_preserves_layout_and_rejects_unobservable_states',
+))
+PYTHON_REQUIRED = MAC_SNAPSHOT_TESTS | WINDOWS_NATIVE_TESTS | {
+    'test_macos_studio_request.SyntheticRequestTests.test_known_unused_blocked_fixture_cleanup_requires_exact_seed_and_no_process',
+    'test_windows_studio_credentials.WindowsFixtureGate.test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch',
+}
+
+
+def verify_python(output, runner):
+    """Allow only named host exclusions, never an unexpected skip or zero discovery."""
+    if runner not in ('Windows', 'macOS'):
+        raise ValueError('Explicit supported Python test host required')
+    expected_skips = MAC_SNAPSHOT_TESTS if runner == 'Windows' else WINDOWS_NATIVE_TESTS
+    runs = re.findall(r'^Ran (\d+) tests? in [^\n]+$', output, re.M)
+    summaries = re.findall(r'^OK(?: \(skipped=(\d+)\))?\s*$', output, re.M)
+    rows = re.findall(r'^test_\w+ \(([\w.]+)\) \.\.\. (ok|skipped [^\n]+)\s*$', output, re.M)
+    skipped = [name for name, status in rows if status.startswith('skipped ')]
+    completed = {name for name, status in rows if status == 'ok'}
+    if (len(runs) != 1 or int(runs[0]) < len(PYTHON_REQUIRED)
+            or summaries != [str(len(expected_skips))]
+            or len(rows) != len({name for name, _ in rows})
+            or len(skipped) != len(expected_skips) or set(skipped) != expected_skips
+            or not PYTHON_REQUIRED.difference(expected_skips).issubset(completed)
+            or re.search(r'^(?:FAILED|ERROR:|FAIL:|UNEXPECTED SUCCESS:)', output, re.M)):
+        raise ValueError('Python harness failed, omitted required cases or skipped outside its host contract')
+    return {'tests': int(runs[0]), 'passed': int(runs[0]) - len(skipped), 'hostExcluded': sorted(skipped)}
+
+
 def redesign_checker():
     spec = importlib.util.spec_from_file_location('redesign_evidence', Path(__file__).with_name('check-redesign-evidence.py'))
     module = importlib.util.module_from_spec(spec)
@@ -121,14 +157,17 @@ def verify_binaries(folder, receipt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('cargo', 'dom', 'browser', 'retain', 'seal', 'identity'))
+    parser.add_argument('action', choices=('cargo', 'dom', 'python', 'browser', 'retain', 'seal', 'identity'))
     parser.add_argument('path', type=Path)
     parser.add_argument('other', nargs='?', type=Path)
+    parser.add_argument('--runner', choices=('Windows', 'macOS'))
     args = parser.parse_args()
     if args.action == 'cargo':
         print(verify_cargo(args.path.read_text(encoding='utf-8'), args.other.read_text(encoding='utf-8')))
     elif args.action == 'dom':
         print(verify_dom(args.path.read_text(encoding='utf-8')))
+    elif args.action == 'python':
+        print(json.dumps(verify_python(args.path.read_text(encoding='utf-8'), args.runner)))
     elif args.action == 'browser':
         if not redesign_checker().browser_ok(args.path, ('settings',)):
             raise SystemExit('Required Thinking/connection browser evidence refused')

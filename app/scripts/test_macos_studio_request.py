@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import unittest
 import tempfile
+from unittest.mock import patch
 spec=importlib.util.spec_from_file_location('walkthrough',Path(__file__).with_name('macos-studio-request.py'))
 walkthrough=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(walkthrough)
@@ -48,7 +49,20 @@ class SyntheticRequestTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'Unused fixture changed'):walkthrough.cleanup(output)
                 self.assertTrue(root.exists())
                 seed['revision']=1;(root/'ai-profiles.json').write_text(json.dumps(seed))
-                walkthrough.cleanup(output)
+                with patch.object(walkthrough.os, 'kill', return_value=None) as process_check:
+                    with self.assertRaisesRegex(ValueError, 'Owned app still exists'):
+                        walkthrough.cleanup(output)
+                process_check.assert_called_once_with(99999999, 0)
+                self.assertTrue(root.exists())
+                with patch.object(walkthrough.os, 'kill', side_effect=PermissionError):
+                    with self.assertRaises(PermissionError):
+                        walkthrough.cleanup(output)
+                self.assertTrue(root.exists())
+                # This unit fixture controls process absence; actual Unix PID
+                # semantics belong to native Mac qualification.
+                with patch.object(walkthrough.os, 'kill', side_effect=ProcessLookupError) as process_check:
+                    walkthrough.cleanup(output)
+                process_check.assert_called_once_with(99999999, 0)
                 self.assertFalse(root.exists())
                 receipt=json.loads((output/'cleanup.json').read_text())
                 self.assertEqual(receipt['credentialsCreated'],0)

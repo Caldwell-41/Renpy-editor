@@ -100,6 +100,64 @@ The focused CI route is being wired through the existing quality workflow entry 
 no CI run yet. Qualification totals: packages1/2, native launches0/2, generations0/4,
 reserved output0/65536, cached loads0/1, paired CI0/2. No merge or release.
 
+### Authorised portability correction and one independent-step CI run — 2026-10-16
+
+User clarified that CI itself supplies Windows evidence, then explicitly selected:
+“Go ahead, fix those harness issues, review the changes properly, then run CI once
+with the independent test steps.” This grants one further paired dispatch, cumulative
+CI3/3, preserving the two consumed failed attempts. No separate Windows preflight,
+local-host transfer, extra verification run or remote access installation is required.
+No automatic retry, package/native/model operation, merge or release is selected.
+The preceding [CI2 run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38850950449)
+failed on e6e5082: Mac passed the full job (208 renderer,182 Python passes/2 host skips,
+73 Rust); Windows passed208 renderer and compilation, then its Python suite had five
+platform errors and one clock assertion failure. Windows Rust execution was not reached.
+Both artifacts,351 source inputs per host and retained compiled binaries were audited.
+
+Corrections: only the four Mac POSIX ownership/permission snapshot cases are host
+restricted; their real ownership/mode checks remain unchanged. Shared policy fixtures
+stay selected on both hosts. The portable cleanup test controls process absence and
+also checks that live/permission-denied process states refuse deletion. The mocked
+failed-build test uses an explicit monotonic sequence and exact elapsed receipt values;
+failed publication, PID proof and no-redispatch assertions remain intact.
+
+Python evidence now checks exact named host exclusions (four on Windows, two on Mac),
+requires the platform-relevant and corrected tests, and rejects missing/extra skips,
+missing/duplicate required results, zero discovery and failed/expected-failure reports.
+Rejecting fixtures cover both host contracts and CRLF output. Fifteen checker tests
+pass; full Mac Python186 cases:184 passed,2 explicit Windows-only skips. These are local
+preparation results; the selected CI remains the Windows execution surface.
+
+Workflow review: independent named renderer/typecheck, Python, Q1/source/retention,
+six core scopes and full desktop steps depend only on their real setup/compilation
+prerequisites and cancellation. No continue-on-error or blanket success conversion.
+A Python or core-scope failure does not suppress unrelated compiled scopes or desktop
+results. Logs are printed and retained, with a filtered outcome/conclusion JSON receipt
+and job summary; skipped prerequisites remain explicit. Executing the actual embedded
+summary with failed/successful/skipped inputs preserved each outcome. All-workflow
+actionlint, Q1 rejecting/source gates and10 package-retention fixtures passed. An initial
+local review script lacked optional PyYAML; it was replaced with a stdlib-only check
+of the actionlint-validated workflow and actual embedded summary, without installation.
+Review also found the second Windows-only Settings dispatch fixture omitted TEST_SERIAL.
+It now holds the same existing guard as every other Settings-dispatch test, preventing
+concurrent ACTIVE.try_lock refusals without weakening production locking. The prior
+Windows cancellation test and confirmed-entry test are both covered by the upcoming
+full desktop run. Production behavior and renderer/core inputs are unchanged; reuse
+prior208 renderer/browser proof locally and run the affected desktop suite. CI tests
+the exact new candidate on both hosts without a separate Windows preflight.
+
+Final local full Python186 cases passed184 with2 explicit Windows-only skips; the
+new host-result gate accepted that exact report. Mac desktop36 passed with zero ignored
+cases and the normal parallel runner. Source review confirmed that all four Settings
+dispatch fixtures now hold TEST_SERIAL. Canonical testing documentation is updated.
+
+Repository validation608 files and final diff checks passed. Next publish only this
+increment, reserve3/3
+before one dispatch, confirm its exact run/candidate and pause for manual same-thread
+resume/audit. Preserve existing native fixture and protected user window; the user will
+close/unlock it themselves. Packages1/2 (first stale), launches0/2, live0/4,
+output0/65536 and model loads0/1 remain unchanged.
+
 ## Approved implementation handoff — 2026-10-15
 
 User requests a new Sol6.1/xhigh coordinator chat, Sol6.1/high implementation/testing

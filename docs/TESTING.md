@@ -52,8 +52,20 @@ or fixed 1,006/503/504 source-pass count is required.
 The selected `thinking-settings.yml` workflow runs the complete renderer test command,
 Python harness fixtures, Q1 rejecting/retention gates, affected core scopes and the full
 desktop unit binary on Windows x64 and macOS ARM64. Python helpers require 3.11 or later.
-The two PowerShell helper fixtures are explicitly Windows-only; their Mac skips are
-not Windows proof. Historical SDK, package and credential qualification allowances
+Four POSIX ownership/permission snapshot cases execute only on Mac; two PowerShell
+helper fixtures execute only on Windows. Shared policy, request, cleanup and receipt
+tests stay selected on both hosts. The Python result gate requires these exact named
+host exclusions and the platform-relevant cases, rejecting extra/missing skips, missing
+required results, duplicate rows and zero/failed discovery. Unit cleanup fixtures inject
+process absence and refuse live/unknown process state; receipt fixtures use a controlled
+clock. These fixtures do not replace native process/permission proof.
+
+Independent renderer, Python, Q1, core and desktop groups have named steps gated by
+their actual setup/compilation prerequisites and cancellation. Failures remain blocking;
+they do not skip unrelated groups. Per-group logs show assertions in the job output,
+and a retained check-results receipt/job summary records failure and skipped prerequisites.
+CI itself supplies Windows evidence; no separate Windows preflight or user handoff is
+required for this correction. Historical SDK, package and credential qualification allowances
 are not reopened by this selection. The current Mac identity probe preserves its
 2/2/4/0 GET schedule by counting draft Connect within each phase. The completed
 Windows credential runner explicitly refuses current probe contract2 before building

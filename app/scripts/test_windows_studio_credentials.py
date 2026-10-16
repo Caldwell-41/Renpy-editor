@@ -183,13 +183,24 @@ class WindowsFixtureGate(unittest.TestCase):
     def test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch(self):
         with tempfile.TemporaryDirectory() as directory:
             out=Path(directory);process=Mock(pid=123);process.wait.return_value=1;process.poll.return_value=1
-            with patch.object(probe,"OUTPUT",out),patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"configure_npm_hook"),patch.object(probe,"source_inputs",return_value={}),patch.object(probe,"qualification_inputs",return_value={}),patch.object(probe,"pid_absent",return_value=True),patch.object(probe.subprocess,"Popen",return_value=process) as dispatch:
+            with (
+                patch.object(probe, "OUTPUT", out),
+                patch.object(probe, "ACCEPTANCE", True),
+                patch.object(probe, "configure_npm_hook"),
+                patch.object(probe, "source_inputs", return_value={}),
+                patch.object(probe, "qualification_inputs", return_value={}),
+                patch.object(probe, "pid_absent", return_value=True),
+                patch.object(probe.time, "monotonic", side_effect=[100.0, 100.0, 100.25, 100.25]),
+                patch.object(probe.subprocess, "Popen", return_value=process) as dispatch,
+            ):
                 with self.assertRaises(ValueError):probe.build(3)
                 terminal=probe.read(out/"build-3-terminal.json");attempt=probe.read(out/"build-3-attempt.json")
                 self.assertFalse(terminal["passed"]);self.assertEqual(terminal["exitCode"],1)
                 self.assertTrue(terminal["stopped"] and terminal["pidAbsent"])
                 self.assertEqual(terminal["startedMonotonic"],attempt["startedMonotonic"])
-                self.assertGreater(terminal["endedMonotonic"],terminal["startedMonotonic"])
+                self.assertEqual(terminal["startedMonotonic"],100.0)
+                self.assertEqual(terminal["endedMonotonic"],100.25)
+                self.assertEqual(terminal["elapsedSeconds"],0.25)
                 self.assertFalse((out/"build-3.json").exists())
                 before=(out/"build-3-terminal.json").read_bytes()
                 with self.assertRaises(ValueError):probe.build(3)

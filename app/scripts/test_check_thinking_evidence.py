@@ -15,6 +15,40 @@ class GateTests(unittest.TestCase):
     listing = 'scope::first: test\nscope::second: test\n'
     output = 'test scope::first ... ok\ntest scope::second ... ok\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.01s\n'
 
+    @staticmethod
+    def python_log(runner):
+        skipped = module.MAC_SNAPSHOT_TESTS if runner == 'Windows' else module.WINDOWS_NATIVE_TESTS
+        rows = [f"{name.rsplit('.', 1)[1]} ({name}) ... " + ("skipped 'Requires other host'" if name in skipped else 'ok')
+                for name in sorted(module.PYTHON_REQUIRED)]
+        return '\n'.join(rows) + f'\n\nRan {len(rows)} tests in 0.01s\n\nOK (skipped={len(skipped)})\n'
+
+    def test_python_gate_accepts_only_explicit_host_exclusions(self):
+        for runner in ('Windows', 'macOS'):
+            output = self.python_log(runner)
+            result = module.verify_python(output, runner)
+            expected = module.MAC_SNAPSHOT_TESTS if runner == 'Windows' else module.WINDOWS_NATIVE_TESTS
+            self.assertEqual(result['hostExcluded'], sorted(expected))
+            self.assertEqual(result['passed'], len(module.PYTHON_REQUIRED) - len(expected))
+            self.assertEqual(module.verify_python(output.replace('\n', '\r\n'), runner), result)
+            with self.assertRaises(ValueError):
+                module.verify_python(output, 'unsupported')
+            with self.assertRaises(ValueError):
+                module.verify_python(output, 'Windows' if runner == 'macOS' else 'macOS')
+
+    def test_python_gate_rejects_missing_extra_skipped_zero_and_failed_cases(self):
+        for runner in ('Windows', 'macOS'):
+            output = self.python_log(runner)
+            for wrong in (output.replace(' ... ok', " ... skipped 'Blanket exclusion'", 1),
+                          output.replace(' ... ok', ' ... FAIL', 1),
+                          output.replace(' ... ok', ' ... expected failure', 1),
+                          '\n'.join(output.splitlines()[1:]),
+                          output.splitlines()[0] + '\n' + output,
+                          output + '\nRan 9 tests in 0.01s\n\nOK\n',
+                          output + '\nFAILED (failures=1)\n',
+                          'Ran 0 tests in 0.01s\n\nOK\n'):
+                with self.subTest(runner=runner, wrong=wrong), self.assertRaises(ValueError):
+                    module.verify_python(wrong, runner)
+
     def test_complete(self):
         self.assertEqual(module.verify_cargo(self.listing, self.output), 2)
 

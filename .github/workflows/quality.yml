@@ -15,7 +15,7 @@ on:
         type: string
         default: ''
       thinking_settings_ordinal:
-        description: Cumulative thinking/connection paired attempt, 1 or 2
+        description: Cumulative thinking/connection paired attempt, 1 through 3
         type: string
         default: '1'
       walkthrough_redesign:

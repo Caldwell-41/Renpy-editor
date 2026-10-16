@@ -552,6 +552,7 @@ mod tests {
     #[test]
     fn windows_confirmed_entry_controller_and_snapshot_seam_use_no_os_store_and_retry_is_read_only()
     {
+        let _serial = TEST_SERIAL.lock().unwrap();
         use crate::ai_reload_fixture::{WINDOWS_PROFILE, WINDOWS_SELECTOR};
         use loomlight_core::ai_profiles::OwnedCredential;
         struct Memory(std::cell::RefCell<std::collections::HashMap<String, String>>);

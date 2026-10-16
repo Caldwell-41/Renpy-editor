@@ -15,10 +15,10 @@ on:
         required: true
         type: string
       ordinal:
-        description: Cumulative paired attempt (1 or 2)
+        description: Cumulative paired attempt (1 through 3)
         default: '1'
         type: choice
-        options: ['1', '2']
+        options: ['1', '2', '3']
 permissions:
   contents: read
 concurrency:
@@ -39,74 +39,243 @@ jobs:
       ATTEMPT_ORDINAL: ${{ inputs.ordinal }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        id: checkout
       - name: Verify exact candidate and attempt
+        id: candidate
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/thinking-settings"
           python -c "import sys; assert sys.version_info >= (3,11)"
           test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ATTEMPT_ORDINAL" = 1 -o "$ATTEMPT_ORDINAL" = 2
+          case "$ATTEMPT_ORDINAL" in 1|2|3) ;; *) exit 1 ;; esac
           test "$(git rev-parse HEAD)" = "$EXPECTED_CANDIDATE"
           python -c "import os,platform; expected='arm64' if os.environ['RUNNER_OS']=='macOS' else 'amd64'; assert platform.machine().lower()==expected, platform.machine()"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        id: node
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
         with:
           node-version: 24.19.0
           cache: npm
           cache-dependency-path: app/package-lock.json
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
         with:
           workspaces: app -> target
           key: thinking-settings-${{ matrix.runner }}
           cache-bin: 'false'
-      - name: Focused renderer and service regressions
+      - name: Install locked renderer dependencies
+        id: node_dependencies
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' && steps.node.outcome == 'success' }}
         shell: bash
         working-directory: app
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/thinking-settings"
           npm install --global npm@11.9.0
           npm_cli="$(npm root --global)/npm/bin/npm-cli.js"
           test "$(node "$npm_cli" --version)" = 11.9.0
+          echo "LOOMLIGHT_QUALIFICATION_NPM_CLI=$npm_cli" >> "$GITHUB_ENV"
           node "$npm_cli" ci --ignore-scripts
-          node "$npm_cli" run typecheck > "$RUNNER_TEMP/thinking-settings/typecheck.log" 2>&1
-          node "$npm_cli" run build:tests > "$RUNNER_TEMP/thinking-settings/test-compile.log" 2>&1
-          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/*.test.js tests/branches-timing-policy.test.mjs > "$RUNNER_TEMP/thinking-settings/dom.log" 2>&1
+      - name: Select pinned Rust toolchain
+        id: rust_toolchain
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        shell: bash
+        run: rustup toolchain install 1.90.0 --profile minimal
+      - name: Typecheck renderer
+        id: typecheck
+        if: ${{ !cancelled() && steps.node_dependencies.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node "$LOOMLIGHT_QUALIFICATION_NPM_CLI" run typecheck 2>&1 | tee "$RUNNER_TEMP/thinking-settings/typecheck.log"
+      - name: Compile renderer tests
+        id: renderer_compile
+        if: ${{ !cancelled() && steps.node_dependencies.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node "$LOOMLIGHT_QUALIFICATION_NPM_CLI" run build:tests 2>&1 | tee "$RUNNER_TEMP/thinking-settings/test-compile.log"
+      - name: Full renderer regressions
+        id: renderer_tests
+        if: ${{ !cancelled() && steps.renderer_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/*.test.js tests/branches-timing-policy.test.mjs 2>&1 | tee "$RUNNER_TEMP/thinking-settings/dom.log"
           python scripts/check-thinking-evidence.py dom "$RUNNER_TEMP/thinking-settings/dom.log"
-          node "$npm_cli" run build > "$RUNNER_TEMP/thinking-settings/renderer-build.log" 2>&1
+      - name: Build renderer
+        id: renderer_build
+        if: ${{ !cancelled() && steps.node_dependencies.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node "$LOOMLIGHT_QUALIFICATION_NPM_CLI" run build 2>&1 | tee "$RUNNER_TEMP/thinking-settings/renderer-build.log"
+      - name: Settings browser captures and visible-control gate
+        id: browser
+        if: ${{ !cancelled() && steps.renderer_build.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
           node node_modules/playwright/cli.js install chromium
           export LOOMLIGHT_UI_OUTPUT="$RUNNER_TEMP/thinking-settings/browser"
           export LOOMLIGHT_UI_SURFACES=settings
-          node tests/walkthrough-redesign.browser.mjs > "$RUNNER_TEMP/thinking-settings/browser.log" 2>&1
+          node tests/walkthrough-redesign.browser.mjs 2>&1 | tee "$RUNNER_TEMP/thinking-settings/browser.log"
           python scripts/check-thinking-evidence.py browser "$LOOMLIGHT_UI_OUTPUT"
-          rustup toolchain install 1.90.0 --profile minimal
-          cargo test -p loomlight-core --locked --lib --no-run --message-format=json > "$RUNNER_TEMP/thinking-settings/core-artifacts.jsonl" 2> "$RUNNER_TEMP/thinking-settings/core-compile.log"
-          cargo test -p loomlight-desktop --locked --bin loomlight --no-run --message-format=json > "$RUNNER_TEMP/thinking-settings/desktop-artifacts.jsonl" 2> "$RUNNER_TEMP/thinking-settings/desktop-compile.log"
-          python -m unittest discover -s scripts -p 'test_*.py' -v > "$RUNNER_TEMP/thinking-settings/gate-tests.log" 2>&1
-          python scripts/check-q1-prep-gates.py self-test > "$RUNNER_TEMP/thinking-settings/q1-gate-tests.log" 2>&1
-          python scripts/check-q1-prep-gates.py source-audit .. > "$RUNNER_TEMP/thinking-settings/q1-source-audit.log" 2>&1
-          python scripts/test-q1-package-retention.py > "$RUNNER_TEMP/thinking-settings/retention-tests.log" 2>&1
-          for scope in ai_profiles::tests:: ai_credentials::tests:: ai_compatibility::tests:: thinking_ connection_; do
-            name="${scope//::/-}"
-            cargo test -p loomlight-core --locked --lib "$scope" -- --list > "$RUNNER_TEMP/thinking-settings/$name-list.log" 2>&1
-            cargo test -p loomlight-core --locked --lib "$scope" -- --nocapture > "$RUNNER_TEMP/thinking-settings/$name.log" 2>&1
-            python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/$name-list.log" "$RUNNER_TEMP/thinking-settings/$name.log"
-          done
+      - name: Compile core test binary
+        id: core_compile
+        if: ${{ !cancelled() && steps.rust_toolchain.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          cargo test -p loomlight-core --locked --lib --no-run --message-format=json > "$RUNNER_TEMP/thinking-settings/core-artifacts.jsonl" 2> "$RUNNER_TEMP/thinking-settings/core-compile.log" || { cat "$RUNNER_TEMP/thinking-settings/core-compile.log"; exit 1; }
+      - name: Compile desktop test binary
+        id: desktop_compile
+        if: ${{ !cancelled() && steps.rust_toolchain.outcome == 'success' && steps.renderer_build.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          cargo test -p loomlight-desktop --locked --bin loomlight --no-run --message-format=json > "$RUNNER_TEMP/thinking-settings/desktop-artifacts.jsonl" 2> "$RUNNER_TEMP/thinking-settings/desktop-compile.log" || { cat "$RUNNER_TEMP/thinking-settings/desktop-compile.log"; exit 1; }
+      - name: Python harness regressions and exact host exclusions
+        id: python_tests
+        if: ${{ !cancelled() && steps.node_dependencies.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s scripts -p 'test_*.py' -v 2>&1 | tee "$RUNNER_TEMP/thinking-settings/gate-tests.log"
+          python scripts/check-thinking-evidence.py python "$RUNNER_TEMP/thinking-settings/gate-tests.log" --runner "$RUNNER_OS"
+      - name: Q1 rejecting gate fixtures
+        id: q1_tests
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python app/scripts/check-q1-prep-gates.py self-test 2>&1 | tee "$RUNNER_TEMP/thinking-settings/q1-gate-tests.log"
+      - name: Q1 source audit
+        id: q1_source
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python app/scripts/check-q1-prep-gates.py source-audit . 2>&1 | tee "$RUNNER_TEMP/thinking-settings/q1-source-audit.log"
+      - name: Package-retention rejecting fixtures
+        id: retention_tests
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python app/scripts/test-q1-package-retention.py 2>&1 | tee "$RUNNER_TEMP/thinking-settings/retention-tests.log"
+      - name: Core profiles regressions
+        id: core_profiles
+        if: ${{ !cancelled() && steps.core_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          cargo test -p loomlight-core --locked --lib ai_profiles::tests:: -- --list > "$RUNNER_TEMP/thinking-settings/ai_profiles-tests--list.log" 2>&1
+          cargo test -p loomlight-core --locked --lib ai_profiles::tests:: -- --nocapture 2>&1 | tee "$RUNNER_TEMP/thinking-settings/ai_profiles-tests-.log"
+          python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/ai_profiles-tests--list.log" "$RUNNER_TEMP/thinking-settings/ai_profiles-tests-.log"
+      - name: Core credentials regressions
+        id: core_credentials
+        if: ${{ !cancelled() && steps.core_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          cargo test -p loomlight-core --locked --lib ai_credentials::tests:: -- --list > "$RUNNER_TEMP/thinking-settings/ai_credentials-tests--list.log" 2>&1
+          cargo test -p loomlight-core --locked --lib ai_credentials::tests:: -- --nocapture 2>&1 | tee "$RUNNER_TEMP/thinking-settings/ai_credentials-tests-.log"
+          python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/ai_credentials-tests--list.log" "$RUNNER_TEMP/thinking-settings/ai_credentials-tests-.log"
+      - name: Core compatibility regressions
+        id: core_compatibility
+        if: ${{ !cancelled() && steps.core_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          cargo test -p loomlight-core --locked --lib ai_compatibility::tests:: -- --list > "$RUNNER_TEMP/thinking-settings/ai_compatibility-tests--list.log" 2>&1
+          cargo test -p loomlight-core --locked --lib ai_compatibility::tests:: -- --nocapture 2>&1 | tee "$RUNNER_TEMP/thinking-settings/ai_compatibility-tests-.log"
+          python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/ai_compatibility-tests--list.log" "$RUNNER_TEMP/thinking-settings/ai_compatibility-tests-.log"
+      - name: Core thinking regressions
+        id: core_thinking
+        if: ${{ !cancelled() && steps.core_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          cargo test -p loomlight-core --locked --lib thinking_ -- --list > "$RUNNER_TEMP/thinking-settings/thinking_-list.log" 2>&1
+          cargo test -p loomlight-core --locked --lib thinking_ -- --nocapture 2>&1 | tee "$RUNNER_TEMP/thinking-settings/thinking_.log"
+          python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/thinking_-list.log" "$RUNNER_TEMP/thinking-settings/thinking_.log"
+      - name: Core connection regressions
+        id: core_connection
+        if: ${{ !cancelled() && steps.core_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          cargo test -p loomlight-core --locked --lib connection_ -- --list > "$RUNNER_TEMP/thinking-settings/connection_-list.log" 2>&1
+          cargo test -p loomlight-core --locked --lib connection_ -- --nocapture 2>&1 | tee "$RUNNER_TEMP/thinking-settings/connection_.log"
+          python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/connection_-list.log" "$RUNNER_TEMP/thinking-settings/connection_.log"
+      - name: Core request regressions
+        id: core_request
+        if: ${{ !cancelled() && steps.core_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
           cargo test -p loomlight-core --locked --lib ai_request::tests:: -- --list > "$RUNNER_TEMP/thinking-settings/request-list.log" 2>&1
-          cargo test -p loomlight-core --locked --lib ai_request::tests:: -- --nocapture > "$RUNNER_TEMP/thinking-settings/request.log" 2>&1
+          cargo test -p loomlight-core --locked --lib ai_request::tests:: -- --nocapture 2>&1 | tee "$RUNNER_TEMP/thinking-settings/request.log"
           python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/request-list.log" "$RUNNER_TEMP/thinking-settings/request.log"
+      - name: Full desktop regressions
+        id: desktop_tests
+        if: ${{ !cancelled() && steps.desktop_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
           cargo test -p loomlight-desktop --locked --bin loomlight -- --list > "$RUNNER_TEMP/thinking-settings/desktop-list.log" 2>&1
-          cargo test -p loomlight-desktop --locked --bin loomlight -- --nocapture > "$RUNNER_TEMP/thinking-settings/desktop.log" 2>&1
+          cargo test -p loomlight-desktop --locked --bin loomlight -- --nocapture 2>&1 | tee "$RUNNER_TEMP/thinking-settings/desktop.log"
           python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/desktop-list.log" "$RUNNER_TEMP/thinking-settings/desktop.log"
-          git diff --exit-code HEAD -- . ../.github/workflows
+      - name: Require unchanged material checkout
+        id: unchanged
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        shell: bash
+        run: git diff --exit-code HEAD -- app .github/workflows
       - name: Retain available compiled tests including failed attempts
-        if: always()
+        id: binaries
+        if: ${{ always() && steps.checkout.outcome == 'success' }}
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/thinking-settings"
-          python app/scripts/check-thinking-evidence.py retain "$RUNNER_TEMP/thinking-settings" app/target > "$RUNNER_TEMP/thinking-settings/binary-retention.log" 2>&1
+          python app/scripts/check-thinking-evidence.py retain "$RUNNER_TEMP/thinking-settings" app/target > "$RUNNER_TEMP/thinking-settings/binary-retention.log" 2>&1 || { cat "$RUNNER_TEMP/thinking-settings/binary-retention.log"; exit 1; }
+      - name: Summarise independent check outcomes
+        if: ${{ always() && steps.checkout.outcome == 'success' }}
+        shell: bash
+        env:
+          CHECK_STEP_RESULTS: ${{ toJSON(steps) }}
+        run: |
+          python - <<'PYRESULTS'
+          import json, os
+          from pathlib import Path
+          rows = {name: {'outcome': value['outcome'], 'conclusion': value['conclusion']}
+                  for name, value in json.loads(os.environ['CHECK_STEP_RESULTS']).items()}
+          folder = Path(os.environ['RUNNER_TEMP']) / 'thinking-settings'
+          folder.mkdir(parents=True, exist_ok=True)
+          (folder / 'check-results.json').write_text(json.dumps(rows, indent=2) + '\n', encoding='utf-8')
+          table = '| Check | Outcome |\n| --- | --- |\n' + ''.join(f"| {name} | {row['outcome']} |\n" for name, row in rows.items())
+          with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a', encoding='utf-8') as summary:
+              summary.write(table)
+          print(table)
+          PYRESULTS
       - name: Seal exact-candidate evidence
         id: seal
-        if: always()
+        if: ${{ always() && steps.checkout.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail

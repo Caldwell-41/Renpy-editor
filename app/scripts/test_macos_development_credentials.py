@@ -1,5 +1,6 @@
 import importlib.util
 import copy
+import sys
 from pathlib import Path
 import tempfile
 import time
@@ -11,6 +12,7 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class DevelopmentFixtureTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == 'darwin', 'macOS POSIX credential snapshot requires macOS')
     def test_reload_selector_preparation_is_read_only_and_rejects_changed_fixture(self):
         with tempfile.TemporaryDirectory(prefix='loomlight-studio-dev-credentials-') as directory:
             root = Path(directory)
@@ -65,6 +67,7 @@ class DevelopmentFixtureTests(unittest.TestCase):
             with self.assertRaises(ValueError): probe.check_transition(3, candidate, receipt)
         probe.check_transition(4, new, dict(passed=True, phase=3, bundle=new))
 
+    @unittest.skipUnless(sys.platform == 'darwin', 'macOS POSIX credential snapshot requires macOS')
     def test_isolation_private_snapshot_and_no_credential_creation(self):
         with tempfile.TemporaryDirectory(prefix='loomlight-studio-dev-credentials-') as directory:
             root = Path(directory)
@@ -77,6 +80,7 @@ class DevelopmentFixtureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaises(ValueError): probe.isolated_root({'root':directory})
 
+    @unittest.skipUnless(sys.platform == 'darwin', 'macOS POSIX credential snapshot requires macOS')
     def test_steps_refuse_out_of_order_and_unconfirmed_save(self):
         with tempfile.TemporaryDirectory(prefix='loomlight-studio-dev-credentials-') as directory, tempfile.TemporaryDirectory() as report:
             root, output = Path(directory), Path(report)
@@ -129,6 +133,7 @@ class DevelopmentFixtureTests(unittest.TestCase):
                     with self.assertRaises(ValueError): probe.confirmed_save(root, current, previous, label)
                     path.write_bytes(original); path.chmod(0o600)
 
+    @unittest.skipUnless(sys.platform == 'darwin', 'macOS POSIX credential snapshot requires macOS')
     def test_cancel_rejects_file_change_even_when_profiles_are_identical(self):
         with tempfile.TemporaryDirectory(prefix='loomlight-studio-dev-credentials-') as directory, tempfile.TemporaryDirectory() as report:
             root, output = Path(directory), Path(report)
