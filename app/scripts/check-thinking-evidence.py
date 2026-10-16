@@ -58,7 +58,33 @@ WINDOWS_NATIVE_TESTS = frozenset('test_rewrite_windows_reuse.RetainedEvidenceGat
 PYTHON_REQUIRED = MAC_SNAPSHOT_TESTS | WINDOWS_NATIVE_TESTS | {
     'test_macos_studio_request.SyntheticRequestTests.test_known_unused_blocked_fixture_cleanup_requires_exact_seed_and_no_process',
     'test_windows_studio_credentials.WindowsFixtureGate.test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch',
+    'test_harness_checks.HarnessChecks.test_failure_timeout_and_spawn_failure_keep_logs_and_do_not_hide_later_results',
+    'test_harness_checks.HarnessChecks.test_zero_exit_cannot_override_rejected_evidence',
+    'test_harness_checks.HarnessChecks.test_retention_gate_rejects_missing_duplicate_and_unexpected_skipped_cases',
+    'test_redesign_evidence.DomTests.test_nested_probe_checks_are_counted_and_cannot_hide_failure_or_missing_results',
 }
+
+
+def python_results(output):
+    """Verbose unittest warnings can interrupt a result line before its final ok."""
+    rows = []
+    pending = None
+    for line in output.splitlines():
+        header = re.fullmatch(r'test_\w+ \(([\w.]+)\) \.\.\. (.*)', line)
+        if header:
+            if pending is not None:
+                raise ValueError('Previous Python test has no completed result')
+            pending, status = header.groups()
+        elif pending is not None:
+            status = line.strip()
+        else:
+            continue
+        if status == 'ok' or status.startswith('skipped '):
+            rows.append((pending, status))
+            pending = None
+    if pending is not None:
+        raise ValueError('Python test has no completed result')
+    return rows
 
 
 def verify_python(output, runner):
@@ -68,11 +94,12 @@ def verify_python(output, runner):
     expected_skips = MAC_SNAPSHOT_TESTS if runner == 'Windows' else WINDOWS_NATIVE_TESTS
     runs = re.findall(r'^Ran (\d+) tests? in [^\n]+$', output, re.M)
     summaries = re.findall(r'^OK(?: \(skipped=(\d+)\))?\s*$', output, re.M)
-    rows = re.findall(r'^test_\w+ \(([\w.]+)\) \.\.\. (ok|skipped [^\n]+)\s*$', output, re.M)
+    rows = python_results(output)
     skipped = [name for name, status in rows if status.startswith('skipped ')]
     completed = {name for name, status in rows if status == 'ok'}
     if (len(runs) != 1 or int(runs[0]) < len(PYTHON_REQUIRED)
             or summaries != [str(len(expected_skips))]
+            or len(rows) != int(runs[0])
             or len(rows) != len({name for name, _ in rows})
             or len(skipped) != len(expected_skips) or set(skipped) != expected_skips
             or not PYTHON_REQUIRED.difference(expected_skips).issubset(completed)
@@ -123,7 +150,7 @@ def retain_binaries(folder, build_root):
     return receipt
 
 
-def seal(folder, repo):
+def seal(folder, repo, outcome='thinking-and-harness-repair'):
     folder=folder.resolve();repo=repo.resolve();folder.mkdir(parents=True,exist_ok=True)
     checker = redesign_checker()
     checker.ROOT = repo
@@ -133,7 +160,7 @@ def seal(folder, repo):
     inputs = {name:hashlib.sha256((repo / name).read_bytes()).hexdigest() for name in names if name not in missing}
     mismatches = checker.candidate_mismatches(inputs)
     identity = {'candidate':git('rev-parse', 'HEAD'), 'tree':git('rev-parse', 'HEAD^{tree}'),
-                'outcome':'thinking-and-harness-repair', 'runId':os.getenv('GITHUB_RUN_ID'), 'attempt':os.getenv('GITHUB_RUN_ATTEMPT'),
+                'outcome':outcome, 'runId':os.getenv('GITHUB_RUN_ID'), 'attempt':os.getenv('GITHUB_RUN_ATTEMPT'),
                 'machine':platform.machine(), 'runner':os.getenv('RUNNER_OS'), 'inputs':inputs,
                 'missingTrackedInputs':missing, 'mismatchedTrackedInputs':mismatches,
                 'sourceMatchesCandidate':bool(inputs) and not missing and not mismatches}
@@ -161,6 +188,7 @@ if __name__ == '__main__':
     parser.add_argument('path', type=Path)
     parser.add_argument('other', nargs='?', type=Path)
     parser.add_argument('--runner', choices=('Windows', 'macOS'))
+    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions'), default='thinking-and-harness-repair')
     args = parser.parse_args()
     if args.action == 'cargo':
         print(verify_cargo(args.path.read_text(encoding='utf-8'), args.other.read_text(encoding='utf-8')))
@@ -174,7 +202,7 @@ if __name__ == '__main__':
     elif args.action == 'retain':
         retain_binaries(args.path, args.other)
     elif args.action == 'seal':
-        seal(args.path, args.other)
+        seal(args.path, args.other, args.outcome)
     else:
         report = json.loads(args.path.read_text(encoding='utf-8'))
         head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()

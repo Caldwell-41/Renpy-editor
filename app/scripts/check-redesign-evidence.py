@@ -19,6 +19,9 @@ ROOT = Path(__file__).resolve().parents[2]
 DOM_FILES = (
     'ai-settings.dom.test.ts', 'reference-ui.dom.test.ts',
     'assistance-refinement.dom.test.ts', 'rewrite-ui.dom.test.ts', 'prompt-ui.dom.test.ts', 'studio-request.dom.test.ts', 'protocol.test.ts',
+    'identity-probe.dom.test.ts', 'windows-studio-probe.dom.test.ts',
+    'selectable-native-sequence.dom.test.ts', 'native-probe-driver.test.ts',
+    'save-command.dom.test.ts', 'supporting-authoring.dom.test.ts', 'smoke-report.dom.test.ts',
 )
 CARGO_REQUIRED = {
     'references::tests::': (
@@ -108,10 +111,11 @@ def dom_ok(text, expected):
             return False
         summaries[key] = int(values[0])
     actual = re.findall(r'^ok \d+ - (.+?)\s*$', text, re.M)
+    completed = re.findall(r'^\s*ok \d+ - (.+?)\s*$', text, re.M)
     return (bool(expected) and sorted(actual) == sorted(expected)
-            and summaries == {'tests': len(expected), 'pass': len(expected), 'fail': 0,
+            and summaries == {'tests': len(completed), 'pass': len(completed), 'fail': 0,
                               'cancelled': 0, 'skipped': 0, 'todo': 0}
-            and not re.search(r'^not ok |# (?:SKIP|TODO)\b', text, re.M))
+            and not re.search(r'^\s*not ok |# (?:SKIP|TODO)\b', text, re.M))
 
 
 def cargo_ok(text, listing, scope):

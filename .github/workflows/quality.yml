@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      harness_regressions:
+        description: Only inexpensive Windows/macOS harness checks; no SDK, package or editor launch
+        type: boolean
+        default: false
       thinking_settings:
         description: Only selected thinking and draft-connection qualification on Windows and Mac
         type: boolean
@@ -73,8 +77,67 @@ permissions:
   contents: read
 
 jobs:
+  harness-regressions:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.harness_regressions }}
+    name: Harness regressions — ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [windows-2025, macos-26]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: '1'
+      HARNESS_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require isolated harness selection and actual target identity
+        shell: bash
+        env:
+          EXCLUDED_SELECTORS: ${{ inputs.thinking_settings || inputs.walkthrough_redesign || inputs.story_logic_early || inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
+        run: |
+          set -euo pipefail
+          test "$EXCLUDED_SELECTORS" = false
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          "$HARNESS_PYTHON" -c "import os,platform,sys; assert sys.version_info >= (3,11); assert platform.machine().lower() == ('arm64' if os.environ['RUNNER_OS']=='macOS' else 'amd64')"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+      - name: Run all independent harness groups and print failed assertions
+        shell: bash
+        run: '"$HARNESS_PYTHON" app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/harness-regressions"'
+      - name: Retain identity, summary and privacy-approved partial results
+        id: harness_privacy
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/harness-regressions"
+          git rev-parse HEAD > "$RUNNER_TEMP/harness-regressions/candidate.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/harness-regressions/tree.txt"
+          if test -f "$RUNNER_TEMP/harness-regressions/summary.md"; then
+            cat "$RUNNER_TEMP/harness-regressions/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Harness result unavailable; qualification incomplete.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          "$HARNESS_PYTHON" app/scripts/check-thinking-evidence.py seal "$RUNNER_TEMP/harness-regressions" . --outcome harness-regressions
+          node app/scripts/scan-artifacts.mjs "$RUNNER_TEMP/harness-regressions"
+      - name: Require complete unchanged harness source identity
+        if: success()
+        shell: bash
+        run: |
+          "$HARNESS_PYTHON" -c "import json,os,pathlib; r=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'harness-regressions/identity.json').read_text()); assert r['sourceMatchesCandidate'] and r['candidate']==os.environ['GITHUB_SHA'] and r['runId']==os.environ['GITHUB_RUN_ID'] and r['attempt']==os.environ['GITHUB_RUN_ATTEMPT'] and r['outcome']=='harness-regressions'"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ always() && steps.harness_privacy.outcome == 'success' }}
+        with:
+          name: harness-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/harness-regressions/
+          if-no-files-found: error
+          retention-days: 7
+
   validate:
-    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && !inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos) }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && !inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos) }}
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -92,7 +155,7 @@ jobs:
 
 
   phase1g-flow-profile:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
     name: Phase 1G flow profile — ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -236,7 +299,7 @@ jobs:
           retention-days: 7
 
   phase1g-macos-browser-diagnostic:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos }}
     name: R2-P1 macOS browser diagnostic
     runs-on: macos-26
     timeout-minutes: 10
@@ -356,7 +419,7 @@ jobs:
 
 
   source-foundation-macos:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.source_foundation_macos }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.source_foundation_macos }}
     name: Bounded source foundation — macOS ARM64
     runs-on: macos-26
     timeout-minutes: 70
@@ -447,20 +510,20 @@ jobs:
           retention-days: 7
 
   assistance-ui:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && inputs.assistance_ui }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && inputs.assistance_ui }}
     uses: ./.github/workflows/assistance-ui.yml
     with:
       ordinal: ${{ inputs.assistance_ui_ordinal }}
 
   story-logic:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.thinking_settings && !inputs.walkthrough_redesign && inputs.story_logic_early }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && inputs.story_logic_early }}
     uses: ./.github/workflows/story-logic.yml
     with:
       ordinal: ${{ inputs.story_logic_ordinal }}
       excluded_selectors: ${{ inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
 
   walkthrough-redesign:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.thinking_settings && inputs.walkthrough_redesign }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && inputs.walkthrough_redesign }}
     uses: ./.github/workflows/assistance-ui.yml
     with:
       outcome: walkthrough-redesign
@@ -469,7 +532,7 @@ jobs:
       excluded_selectors: ${{ inputs.story_logic_early || inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
 
   thinking-settings:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.thinking_settings }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && inputs.thinking_settings }}
     uses: ./.github/workflows/thinking-settings.yml
     with:
       candidate: ${{ inputs.thinking_settings_candidate }}

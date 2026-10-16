@@ -53,8 +53,10 @@ a real decision or unavailable capability.
 
 Verify the changed user behavior on the required test host. Reuse valid evidence;
 repeat or broaden checks only for changed inputs, failures or unresolved concerns.
-Use CI by default for automated Windows/macOS proof while development stays on the
-preferred machine; WORKFLOW owns capability checks and any necessary local handoff.
+Iterate on the user's chosen development host; use CI for affected Windows/macOS
+proof in either direction. Record the chosen host once in the task; do not assume
+Mac-first development or require routine machine switches. WORKFLOW owns cadence,
+capability exceptions and any necessary local handoff.
 Keep product defects, harness failures and missing evidence distinct. Failed,
 cancelled or skipped required checks are not passes. No package matrix for docs alone.
 
@@ -63,6 +65,8 @@ cancelled or skipped required checks are not passes. No package matrix for docs 
 - Build/check commands: [app/README](app/README.md#local-checks); test selection,
   specialist exclusions and native evidence: [TESTING](docs/TESTING.md).
   Commands are references, not a requirement to run every suite.
+  For a matching failure or harness change, search the [incident index](docs/testing/INCIDENTS.md)
+  and follow relevant evidence links; do not read the full historical ledger by default.
 - Multi-step delivery, test-host routing or integration:
   [WORKFLOW](docs/WORKFLOW.md). Read the sections needed by the task.
 - CI or external waits: [waiting policy](docs/WORKFLOW.md#waiting-without-model-polling).

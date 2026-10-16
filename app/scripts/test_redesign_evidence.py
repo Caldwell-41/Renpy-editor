@@ -168,6 +168,16 @@ class SelectionTests(unittest.TestCase):
 
 
 class DomTests(unittest.TestCase):
+    def test_nested_probe_checks_are_counted_and_cannot_hide_failure_or_missing_results(self):
+        text = dom_log(['probe']).replace('ok 1 - probe', '    ok 1 - success\n    ok 2 - failure-report\nok 1 - probe')
+        text = text.replace('# tests 1', '# tests 3').replace('# pass 1', '# pass 3')
+        self.assertTrue(checker.dom_ok(text, ['probe']))
+        for bad in (text.replace('    ok 1', '    not ok 1'),
+                    text.replace('    ok 2 - failure-report\n', ''),
+                    text.replace('failure-report', 'failure-report # SKIP'),
+                    text.replace('ok 1 - probe', 'ok 1 - wrong-probe')):
+            self.assertFalse(checker.dom_ok(bad, ['probe']))
+
     names = ["saved setup preserves author input", "world café 雪 is explicitly omitted"]
 
     def test_exact_selected_names_and_truthful_summary_pass(self):

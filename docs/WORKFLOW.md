@@ -2,6 +2,7 @@
 
 **Policy established:** 2026-09-19. **Delivery rules updated:** 2026-09-28.
 **CI routing and qualification cadence amended:** 2026-10-10, user approved.
+**Host-neutral clarification and harness prevention:** 2026-10-16, user approved.
 Applies to future project and maintenance tasks.
 
 ## Authority and document ownership
@@ -17,6 +18,7 @@ instructions take precedence and must be recorded before conflicting work contin
 | [HANDOVER.md](status/HANDOVER.md) | One live continuation record: branch, checkpoint, evidence and next action. |
 | `docs/tasks/active/` | Detailed scope, implementation plan, checkpoint gates and execution ledger. |
 | [WORKFLOW.md](WORKFLOW.md) / [TESTING.md](TESTING.md) | Workflow owns test selection, investigation budgets and host routing; TESTING owns technical gates and evidence details. |
+| `docs/testing/` | Focused current technical runbooks; INCIDENTS is a compact lookup index linking to original task evidence. |
 | Canonical technical docs / `docs/adr/` | Durable behavior, decisions, lessons and operational contracts. |
 | `docs/tasks/archive/` | Completed task evidence and historical decisions, not current instructions. |
 
@@ -151,6 +153,10 @@ including SDK heap-buffer and receipt-cancellation fixes, when reorganising test
 Record the observed failure as product defect, harness defect, environment limitation,
 missing evidence or requirement mismatch; multiple/provisional classifications are
 allowed. State evidence, uncertainty and the smallest discriminating experiment.
+Search the [incident index](testing/INCIDENTS.md) for the matching symptom/host/test
+or changed harness, then read the relevant original evidence. Keep detailed attempts
+in the owning task; index only a new cause, changed diagnosis or durable prevention
+lesson. An expired artifact remains unavailable, not freshly verified evidence.
 A red job alone is not a diagnosis. Do not change production code to satisfy an
 unvalidated harness or relax a threshold to turn a run green. Reproduce at the failed
 layer; use a native target when that is needed to assess actual desktop behavior.
@@ -222,6 +228,29 @@ rather than rewriting results or turning past exclusions into passes.
 Keep one implementation owner on the user's preferred development machine. Use GitHub
 Actions by default for required automated Windows x64 and macOS ARM64 checks. Running
 checks on another operating system does not require transferring the development session.
+
+This applies symmetrically: Mac development uses Windows CI for affected Windows
+evidence; Windows development uses macOS CI for affected Mac evidence. Record the
+chosen development host and required evidence targets once in the selected task;
+do not infer preference from old task history. Select platforms from changed behavior,
+native boundaries and dependencies, not from which machine is convenient.
+
+During iteration run cheap affected local checks, including actual production-probe
+consumers for changed UI/request contracts. For a new platform-sensitive assumption,
+select an early representative real-path CI check on affected targets. Reuse unchanged
+qualified slices. Put inexpensive harness checks before expensive work in an existing
+selected qualification run; do not require a separate harness dispatch for every feature
+or commit. The optional harness-only selector is for the smallest necessary focused
+platform proof. Qualify a coherent candidate at the selected milestone, then repeat
+only affected or unresolved checks after a diagnosed correction. Ordinary implementation
+steps do not require repeated user test-selection approval within the existing allowance.
+
+The rule is the same in both directions; capabilities need not be identical. A Mac
+runner without the approved signing identity, or a runner without the required native
+input/observation surface, leaves that named case pending. Mocked contracts and passing
+local tests do not establish the other platform's behavior. This clarification does
+not alter [manual same-thread waiting](#waiting-without-model-polling), create a
+background polling loop or authorize another writer while CI is pending.
 
 Within the selected outcome, the agent may prepare, dispatch, monitor and review focused
 CI checks, including necessary workflow adjustments. Verify runner capabilities and retain

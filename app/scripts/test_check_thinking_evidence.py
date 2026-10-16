@@ -30,6 +30,8 @@ class GateTests(unittest.TestCase):
             self.assertEqual(result['hostExcluded'], sorted(expected))
             self.assertEqual(result['passed'], len(module.PYTHON_REQUIRED) - len(expected))
             self.assertEqual(module.verify_python(output.replace('\n', '\r\n'), runner), result)
+            warned = output.replace(' ... ok', ' ... public fixture warning\n  warning context\nok', 1)
+            self.assertEqual(module.verify_python(warned, runner), result)
             with self.assertRaises(ValueError):
                 module.verify_python(output, 'unsupported')
             with self.assertRaises(ValueError):
@@ -45,6 +47,8 @@ class GateTests(unittest.TestCase):
                           output.splitlines()[0] + '\n' + output,
                           output + '\nRan 9 tests in 0.01s\n\nOK\n',
                           output + '\nFAILED (failures=1)\n',
+                          output.replace(f'Ran {len(module.PYTHON_REQUIRED)} tests', 'Ran 999 tests'),
+                          output.replace(' ... ok', ' ... warning without a completed result', 1),
                           'Ran 0 tests in 0.01s\n\nOK\n'):
                 with self.subTest(runner=runner, wrong=wrong), self.assertRaises(ValueError):
                     module.verify_python(wrong, runner)
@@ -118,6 +122,8 @@ class GateTests(unittest.TestCase):
             folder=root/'evidence';module.seal(folder,repo)
             identity=json.loads((folder/'identity.json').read_text());self.assertTrue(identity['sourceMatchesCandidate'])
             self.assertEqual(list(identity['inputs']),['app/input.txt'])
+            module.seal(folder,repo,'harness-regressions')
+            self.assertEqual(json.loads((folder/'identity.json').read_text())['outcome'],'harness-regressions')
             source.write_text('changed bytes');module.seal(folder,repo)
             identity=json.loads((folder/'identity.json').read_text());self.assertFalse(identity['sourceMatchesCandidate']);self.assertEqual(identity['mismatchedTrackedInputs'],['app/input.txt'])
 

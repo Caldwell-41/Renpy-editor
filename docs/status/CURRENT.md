@@ -1,5 +1,14 @@
 # Current status
 
+## CI harness reliability — implementation in progress
+
+Updated2026-10-16. The [selected maintenance](../tasks/active/ci-harness-reliability.md)
+implements the approved documentation/incident index, symmetric development-host/CI
+routing and focused harness safeguards on `codex/phase3a-story-logic`. Local checks/review pass;
+focused both-host harness proof is pending. This selects no app package, native
+launch, provider request, dependency update, merge or release. Prior Thinking/native
+allowances and the protected walkthrough remain separate; recovery is in HANDOVER.
+
 ## Thinking and connection setup — CI verified; dependency finding open
 
 Updated2026-10-16. The [selected outcome](../tasks/active/phase-2-initial-llm-assistance.md#thinking-settings-and-full-workflow--selected-2026-10-16)

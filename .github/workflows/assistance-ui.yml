@@ -38,6 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Require selected branch and finite fresh attempt
+        id: selection
         shell: bash
         env:
           ORDINAL: ${{ inputs.ordinal }}
@@ -55,6 +56,7 @@ jobs:
             test "$ORDINAL" = 1 -o "$ORDINAL" = 2
           fi
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        id: node
         with:
           node-version: 24.19.0
           cache: npm
@@ -94,12 +96,16 @@ jobs:
           cat "$RUNNER_TEMP/assistance-ui/controller.log"
           python -c "import os,pathlib; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/controller.log').read_text(encoding='utf-8'); assert 'PASS: same-project integrated selectable multi-operation/dependency-invalid zero writes/valid partial subset accepted once/custom preservation/Undo-Redo/export/project-process reopen' in s"
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/assistance-ui"
-      - name: Current redesign focused tests and build checks
-        if: inputs.outcome == 'walkthrough-redesign'
+      - name: Current harness regressions before expensive qualification
+        id: redesign_harness
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.selection.outcome == 'success' && steps.node.outcome == 'success' }}
+        shell: bash
+        run: python app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/assistance-ui/harness"
+      - name: Current redesign locked dependencies
+        id: redesign_dependencies
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.selection.outcome == 'success' && steps.node.outcome == 'success' }}
         shell: bash
         working-directory: app
-        env:
-          RUSTUP_TOOLCHAIN: 1.90.0
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/assistance-ui"
@@ -107,31 +113,120 @@ jobs:
           npm_cli="$(npm root --global)/npm/bin/npm-cli.js"
           test "$(node "$npm_cli" --version)" = 11.9.0
           node "$npm_cli" ci --ignore-scripts
-          python -m unittest discover -s scripts -p 'test_redesign_evidence.py' -v > "$RUNNER_TEMP/assistance-ui/gate-tests.log" 2>&1
-          python -c "import os,pathlib,re; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/gate-tests.log').read_text(); n=re.findall(r'Ran (\d+) tests?',s); assert len(n)==1 and int(n[0])==28 and re.search(r'^OK\s*$',s,re.M) and 'skipped' not in s.lower()"
-          node "$npm_cli" run typecheck > "$RUNNER_TEMP/assistance-ui/typecheck.log" 2>&1
-          node "$npm_cli" run build:tests > "$RUNNER_TEMP/assistance-ui/test-compile.log" 2>&1
-          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/reference-ui.dom.test.js dist-tests/tests/assistance-refinement.dom.test.js dist-tests/tests/rewrite-ui.dom.test.js dist-tests/tests/prompt-ui.dom.test.js dist-tests/tests/studio-request.dom.test.js dist-tests/tests/protocol.test.js > "$RUNNER_TEMP/assistance-ui/dom.log" 2>&1
+          echo "REDESIGN_NPM_CLI=$npm_cli" >> "$GITHUB_ENV"
+      - name: Current redesign typecheck
+        id: redesign_typecheck
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.redesign_dependencies.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node "$REDESIGN_NPM_CLI" run typecheck 2>&1 | tee "$RUNNER_TEMP/assistance-ui/typecheck.log"
+      - name: Current redesign test compilation
+        id: redesign_test_compile
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.redesign_dependencies.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node "$REDESIGN_NPM_CLI" run build:tests 2>&1 | tee "$RUNNER_TEMP/assistance-ui/test-compile.log"
+      - name: Current redesign renderer and production probe consumers
+        id: redesign_dom
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.redesign_test_compile.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/reference-ui.dom.test.js dist-tests/tests/assistance-refinement.dom.test.js dist-tests/tests/rewrite-ui.dom.test.js dist-tests/tests/prompt-ui.dom.test.js dist-tests/tests/studio-request.dom.test.js dist-tests/tests/protocol.test.js dist-tests/tests/identity-probe.dom.test.js dist-tests/tests/windows-studio-probe.dom.test.js dist-tests/tests/selectable-native-sequence.dom.test.js dist-tests/tests/native-probe-driver.test.js dist-tests/tests/save-command.dom.test.js dist-tests/tests/supporting-authoring.dom.test.js dist-tests/tests/smoke-report.dom.test.js 2>&1 | tee "$RUNNER_TEMP/assistance-ui/dom.log"
           python scripts/check-redesign-evidence.py dom "$RUNNER_TEMP/assistance-ui/dom.log"
-          node "$npm_cli" run build > "$RUNNER_TEMP/assistance-ui/renderer-build.log" 2>&1
+      - name: Current redesign renderer build
+        id: redesign_build
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.redesign_dependencies.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node "$REDESIGN_NPM_CLI" run build 2>&1 | tee "$RUNNER_TEMP/assistance-ui/renderer-build.log"
+      - name: Current redesign browser evidence
+        id: redesign_browser
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.redesign_build.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
           export LOOMLIGHT_UI_OUTPUT="$RUNNER_TEMP/assistance-ui/browser"
           node node_modules/playwright/cli.js install chromium
-          node tests/walkthrough-redesign.browser.mjs > "$RUNNER_TEMP/assistance-ui/browser.log" 2>&1
+          node tests/walkthrough-redesign.browser.mjs 2>&1 | tee "$RUNNER_TEMP/assistance-ui/browser.log"
           python scripts/check-redesign-evidence.py browser "$LOOMLIGHT_UI_OUTPUT"
-          rustup toolchain install 1.90.0 --profile minimal
+      - name: Current redesign Rust toolchain
+        id: redesign_rust
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.selection.outcome == 'success' }}
+        run: rustup toolchain install 1.90.0 --profile minimal
+      - name: Current redesign independent core service scopes
+        id: redesign_core
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.redesign_rust.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        env:
+          RUSTUP_TOOLCHAIN: 1.90.0
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/assistance-ui"
+          failed=0
           for scope in references::tests:: prompts::tests:: ai_profiles::tests::model_load_ studio_config::tests:: ai_request::model_settings_tests:: ai_request::model_readiness_tests:: ai_request::model_diagnostic_tests::; do
             name="${scope//::/-}"
-            cargo test -p loomlight-core --locked --lib "$scope" -- --list > "$RUNNER_TEMP/assistance-ui/$name-list.log" 2>&1
-            cargo test -p loomlight-core --locked --lib "$scope" -- --nocapture > "$RUNNER_TEMP/assistance-ui/$name.log" 2>&1
-            python scripts/check-redesign-evidence.py cargo "$RUNNER_TEMP/assistance-ui/$name.log" "$scope" "$RUNNER_TEMP/assistance-ui/$name-list.log"
+            if cargo test -p loomlight-core --locked --lib "$scope" -- --list > "$RUNNER_TEMP/assistance-ui/$name-list.log" 2>&1 &&
+               cargo test -p loomlight-core --locked --lib "$scope" -- --nocapture 2>&1 | tee "$RUNNER_TEMP/assistance-ui/$name.log" &&
+               python scripts/check-redesign-evidence.py cargo "$RUNNER_TEMP/assistance-ui/$name.log" "$scope" "$RUNNER_TEMP/assistance-ui/$name-list.log"; then
+              echo "$scope PASS"
+            else
+              cat "$RUNNER_TEMP/assistance-ui/$name-list.log"
+              failed=1
+            fi
           done
+          test "$failed" = 0
+      - name: Current redesign shared project context
+        id: redesign_context
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.redesign_rust.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        env:
+          RUSTUP_TOOLCHAIN: 1.90.0
+        run: |
+          set -euo pipefail
           cargo test -p loomlight-core --locked --lib shared_project_context -- --list > "$RUNNER_TEMP/assistance-ui/rewrite-list.log" 2>&1
-          cargo test -p loomlight-core --locked --lib shared_project_context -- --nocapture > "$RUNNER_TEMP/assistance-ui/rewrite.log" 2>&1
+          cargo test -p loomlight-core --locked --lib shared_project_context -- --nocapture 2>&1 | tee "$RUNNER_TEMP/assistance-ui/rewrite.log"
           python scripts/check-redesign-evidence.py cargo "$RUNNER_TEMP/assistance-ui/rewrite.log" shared_project_context "$RUNNER_TEMP/assistance-ui/rewrite-list.log"
+      - name: Current redesign native worker regressions
+        id: redesign_worker
+        if: ${{ !cancelled() && inputs.outcome == 'walkthrough-redesign' && steps.redesign_rust.outcome == 'success' && steps.redesign_build.outcome == 'success' }}
+        shell: bash
+        working-directory: app
+        env:
+          RUSTUP_TOOLCHAIN: 1.90.0
+        run: |
+          set -euo pipefail
           cargo test -p loomlight-desktop --locked --bin loomlight ai_requests::tests:: -- --list > "$RUNNER_TEMP/assistance-ui/request-host-list.log" 2>&1
-          cargo test -p loomlight-desktop --locked --bin loomlight ai_requests::tests:: -- --nocapture > "$RUNNER_TEMP/assistance-ui/request-host.log" 2>&1
+          cargo test -p loomlight-desktop --locked --bin loomlight ai_requests::tests:: -- --nocapture 2>&1 | tee "$RUNNER_TEMP/assistance-ui/request-host.log"
           python scripts/check-redesign-evidence.py cargo "$RUNNER_TEMP/assistance-ui/request-host.log" ai_requests::tests:: "$RUNNER_TEMP/assistance-ui/request-host-list.log"
           git diff --exit-code HEAD -- . ../.github/workflows ../scripts/validate.py ../.gitattributes
+      - name: Summarize independent current redesign outcomes
+        if: ${{ always() && inputs.outcome == 'walkthrough-redesign' }}
+        shell: bash
+        env:
+          CHECK_STEPS: ${{ toJSON(steps) }}
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / 'assistance-ui'
+          output.mkdir(parents=True, exist_ok=True)
+          steps = json.loads(os.environ['CHECK_STEPS'])
+          names = ('selection', 'node', 'redesign_harness', 'redesign_dependencies', 'redesign_typecheck', 'redesign_test_compile', 'redesign_dom', 'redesign_build', 'redesign_browser', 'redesign_rust', 'redesign_core', 'redesign_context', 'redesign_worker')
+          results = {name: {key: steps.get(name, {}).get(key, 'not-run') for key in ('outcome', 'conclusion')} for name in names}
+          (output / 'check-results.json').write_text(json.dumps(results, indent=2) + '\n', encoding='utf-8')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as stream:
+              stream.write('\n'.join('- ' + name + ': ' + value['outcome'] for name, value in results.items()) + '\n')
+          PY
       - name: Scan partial or complete current redesign evidence
         id: redesign-privacy
         if: ${{ always() && inputs.outcome == 'walkthrough-redesign' }}

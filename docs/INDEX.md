@@ -82,6 +82,12 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |
 | Contribution and inbound licensing | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
+| Current automated commands, host exclusions and production-probe consumers | [Automated checks](testing/AUTOMATED.md) |
+| Pinned SDK, source/runtime and performance gates | [SDK/runtime](testing/SDK-RUNTIME.md) |
+| Native/package/human evidence and result retention | [Native evidence](testing/NATIVE.md), [results](testing/EVIDENCE.md) |
+| Searchable CI causes, corrections and preventing regressions | [Incident index](testing/INCIDENTS.md) |
+| Selected testing-documentation and harness maintenance | [CI harness reliability](tasks/active/ci-harness-reliability.md) |
+| Former mixed testing reference; historical selections and receipts only | [Migrated reference](tasks/archive/2026-10-16-testing-reference.md) |
 | Transaction, durability and recovery contract | [TRANSACTIONS.md](TRANSACTIONS.md) |
 | Product phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
 | Completed Phase 1 sequence and prerequisites | [tasks/archive/2026-10-07-phase-1-vertical-slice.md](tasks/archive/2026-10-07-phase-1-vertical-slice.md) |

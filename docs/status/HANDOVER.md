@@ -1,83 +1,38 @@
 # Current outcome handover
 
-## Selected outcome and publication
+## CI harness reliability — selected 2026-10-16
 
-Updated2026-10-16. This chat owns Thinking on by default, response16384 and the paused
-walkthrough’s approved draft connection setup. The [owning task](../tasks/active/phase-2-initial-llm-assistance.md#thinking-settings-and-full-workflow--selected-2026-10-16)
-records scope/allowances. Branch `codex/phase3a-story-logic`; qualified implementation
-`36feff12ff9acfc1cd6eb0832da3abba243b9463`, tree
-`be21b78e493c9b2156b66993c985f20246b18643`. Later commits are status/task documentation
-only; there is no material app/workflow delta. Preserve unrelated design/phase3 and
-older local comparison/task notes. No reset, force push, merge or release.
+The user approved the [reviewed maintenance plan](../tasks/active/ci-harness-reliability.md)
+on current branch `codex/phase3a-story-logic`. One Mac implementation owner; CI is the
+Windows/macOS evidence host. Implement current runbooks and a searchable incident
+index, make host-neutral routing explicit, reuse cheap rejecting harness checks and
+include production-probe consumers with independent current UI outcomes.
 
-Settings follows Name → Endpoint/private HTTP → native key → Connect → model → Save.
-An opaque native draft binds zeroizing key/origin/revision/profile. Discovery is
-cancellable GET without generation/model management. Save uses existing durable
-credential publication. Raw keys never enter renderer IPC. Missing Thinking resolves
-on; explicit off and existing limits persist. New response defaults are16384. Digest2
-expires old off-only readiness; reasoning is never saved writing. Mac signing identity,
-credential namespaces, data-loss prevention and single instance remain unchanged.
+State `review_ready`: local verification4/4 passed, paired harness CI0/2. No package/native
+launch, SDK execution, provider/model operation, dependency update, frozen runner
+migration, merge or release. Do not renew exhausted prior Thinking/Story allowances.
+The existing manual same-thread CI wait/resume policy remains unchanged.
 
-## CI3 terminal audit complete
+Local checks/review pass:190 Python cases (188pass/two host exclusions),10 retention,
+93 renderer/probe cases, rejecting/outcome fixtures, all-workflow actionlint and617-file
+validation. Next: publish only the maintenance paths and select harness-only platform
+proof, then retain the exact run for manual same-thread terminal audit.
+Keep unrelated walkthrough-design and Phase2/3 task edits byte-identical and unstaged.
+No second writer or development-machine switch is needed.
 
-[Run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609),
-workflow354880113, attempt1/cumulative paired3/3, completed success2026-10-16T05:06:23Z
-on the exact candidate. Windows job116819482592 and Mac job116819482862 passed every
-required step. Seven unselected jobs were intentionally skipped. No required case is
-claimed from a skipped/cancelled step, and no further CI run is selected.
+## Retained app baseline and unrelated pending work
 
-Windows:208 renderer,37 core and38 desktop cases passed (75 Rust total); Python190
-selected/186 passed/four named Mac-only exclusions. Mac:208 renderer,37 core and36
-desktop (73 Rust); Python186 selected/184 passed/two named Windows-only exclusions.
-Both repaired Windows Settings fixtures ran once and passed under the ordinary
-parallel test runner. All selected Cargo names matched results, zero ignored/measured.
-The Python gate accepted only exact host exclusions and required relevant cases.
-Checker15 passed per host; retention9 passed plus one existing POSIX tar-symlink
-exclusion on Windows and10 passed on Mac. Q1/source, typecheck/build and every one of
-the25 retained independent-step outcomes passed. The previous two failures remain
-charged and preserved; they are not rewritten as passes.
+Thinking/default response and draft connection behavior remain qualified at
+`36feff12ff9acfc1cd6eb0832da3abba243b9463` by [CI3run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609).
+The [terminal audit](../tasks/active/phase-2-initial-llm-assistance.md#ci3-terminal-results-and-retained-evidence-audit--2026-10-16)
+retains exact archive/source/test-binary/browser inventories and both earlier failures.
+Its paired3/3 allowance is closed; current maintenance proof concerns changed harness
+inputs, not renewed app/native qualification. Mac-signed/native/real Studio and
+Phase2/3A human acceptance remain pending. The walkthrough is paused at Step3.
 
-Downloaded artifact12026416298 Windows digest
-660fb20e90dce37b4e0fce74ba19cf5b48c77a9f7d558cd1f79f6e700afe6487;
-artifact12025949746 Mac digest
-6ffc72c098235ad9b8f298133a582f0bfb67fbbb833615d082ed2b7813c15223.
-They expire2026-10-23T05:05:43Z/05:03:29Z respectively. Both digests matched GitHub,
-all52 manifest entries/53 retained files per host matched, and all351 source inputs
-matched Git checkout bytes including CRLF/preserved mixed-newline fixtures. Run,
-attempt, candidate/tree and machine identities matched. All four retained test binaries
-matched bytes/hash/header and compiler streams; Windows is PE x64, Mac ARM64 Mach-O.
-
-All16 Settings images per host passed filenames/dimensions/digests, theme/size matrix,
-visible actions, source identity and browser/server cleanup. Four representative
-connection/response captures were visually inspected; Thinking on and32768/16384 are
-readable. They are passive browser fixtures, not native credential/full Studio proof.
-Privacy re-scan passed53 files per host. Ignored
-`.toolchains/thinking-toggle-2026-10-16/ci-03-audit.json` and its script/logs/archives
-retain audit evidence. The ledger records success/audit complete/both-host qualification.
-
-The first CI failed Windows fixture isolation; the second exposed Mac POSIX tests on
-Windows, Unix PID assumptions and an instant mocked-clock assertion. The third fixes
-host routing, controlled process/clock data and both missing Settings test guards, then
-uses independent steps without continue-on-error. Historical Windows credential native
-contract2 migration remains separate; its legacy runner refuses incompatible probes.
-CI itself supplied Windows evidence; no additional preflight or host transfer occurred.
-
-## Separate dependency finding and next action
-
-Both npm-ci logs report one high advisory. Read-only npm audit confirmed source-map-js
-1.2.1 through development-only Vite8.3.0 → PostCSS8.5.28. Published
-[GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) concerns event-loop
-denial of service from indexed source-map offsets; the published patch is1.2.2.
-The selected workflow is not a zero-npm-advisory gate: functional qualification passed,
-but this finding remains open. Packaged-runtime exploitability was not established.
-No install/update/lockfile change occurred. Ignored npm audit/explanation receipts
-record the result. Other warnings concern existing Vite bundle size, action runtime/
-Node deprecations, unused Windows test code and an intentional duplicate-ZIP fixture.
-
-This user turn requested results/evidence audit only; it is complete. Report the open
-advisory and pending native acceptance. A dependency correction/new CI requires its
-own selected increment; do not silently update the lock or renew exhausted CI3/3.
-Original native/full Studio work retains its existing allowance and recovery below.
+The separate source-map-js development-dependency advisory remains open. No lockfile
+update or zero-advisory qualification is selected. Prior ordinary profile credentials,
+protected user window, signing policy and native recovery below are unchanged.
 
 ## Native recovery and remaining acceptance
 
