@@ -368,7 +368,9 @@ Focused controller checks: `python -m unittest discover -s scripts -p test_windo
 The selected [current native harness migration](../docs/tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
 uses `scripts/windows-studio-credentials.py current build|run --output <fresh-output>
 --candidate <exact-reviewed-sha> --ordinal 1|2|3` through the focused Repository quality
-selector `studio_connection_native`. The current native proof remains pending CI/audit.
+selector `studio_connection_native`. The current Windows sequence and both-host
+portable/rendered gates passed the [CI3 terminal audit](../docs/tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+This exact-candidate proof does not qualify signed Mac native or human acceptance.
 It retains the approved Windows credential namespace, uses the current native draft
 dialog, observes Cancel before committing keys, proves failed-entry retained-field
 Retry/Cancel, then completes save/reopen/replacement/read-only reload/removal in two

@@ -60,8 +60,9 @@ adds explicit `windows-studio-credentials.py current` build/run selection and th
 `Repository quality` → `studio_connection_native` route. This current mode uses a
 fresh namespace, exact candidate/ordinal, two processes and seven loopback GETs
 (alpha/gamma/alpha/alpha, then alpha/beta/beta). The ordinary legacy entry and frozen
-929 workflow remain unchanged. Current native qualification is pending its own CI
-and terminal artifact audit; the selector is not permission to replay old attempts.
+929 workflow remain unchanged. The current Windows sequence and both-host portable/
+rendered gates are qualified by the [CI3 terminal audit](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+This is exact-candidate evidence; the selector is not permission to replay old attempts.
 The current driver alone fits its owned main window inside the measured monitor
 work area, including frame/DPI and the product's minimum client size. Frozen layout
 helpers still reject clipping. Failure close verifies owned PID/HWND/foreground

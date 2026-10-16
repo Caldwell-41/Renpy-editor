@@ -1,35 +1,28 @@
 # Current status
 
-## Current native harness — CI3 in progress; audit pending
+## CI harness reliability — all three deliverables complete
 
-Updated2026-10-17, current branch `codex/phase3a-story-logic`. Deliverables1/2 remain
-complete; deliverable3 remains open. [CI2 audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17)
-retains its full phase1 pass and phase2 recovery/close failure. The user authorised
-checking the requirements/build/CI and one further CI attempt on this branch.
+Updated2026-10-17, state `accepted`, current branch `codex/phase3a-story-logic`.
+[CI3 terminal audit](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17)
+closes deliverable3 at `e00160b962ac09d70cb95000a6c10e4c205895c7`.
+[Run38969448685](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38969448685)
+passed both selected hosts. Source/archive/named-result audit admits both-host portable
+and rendered gates plus the complete Windows native save/reopen/replacement/recovery/
+removal sequence, seven authenticated loopback GETs and two normal process exits.
 
-[H19 preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17)
-is complete: current probe opens maintenance and rejects effectively hidden
-controls; native recovery records status/control facts separately; failure close
-handles the owned Settings modal before application close. Confirmed owner exit is
-handled without swallowing errors on a live process. Product close guards, backend
-save/reload, frozen routes, dependencies and signing remain unchanged.
+Deliverables1/2 retain concise current testing runbooks, searchable incident history,
+symmetric chosen-host iteration/target-CI rules and independent cheap harness gates.
+Current native instrumentation opens maintenance before Retry and verifies effective
+visibility; failure close dismisses owned Settings. Rendered rejecting cases cover the
+previous blind spots. Both earlier native failures remain in the ledger; no product
+Settings/backend/close-guard change was needed. Mac portable proof does not qualify
+fresh signed Mac native or human acceptance.
 
-A real rendered production probe/controller/app-close test reproduces the old hidden
-Retry failure. Corrected flow passes at992×665 and1440×900; collapsed/disabled Retry
-are rejected. The actual app guard blocks close with Settings open and reaches close
-after dismissal. Browser/server cleanup is recorded independently. These checks run
-in both CI jobs before packaging; browser/synthetic IPC proof is not native acceptance.
-
-Local checks pass34DOM cases, renderer typecheck/build, clean-export203Python
-(200pass/three exact Windows exclusions), Q1/10retention, all-workflow lint and622-file
-validation. Repair published as `e00160b962ac09d70cb95000a6c10e4c205895c7`.
-[CI3run38969448685](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38969448685)
-was **in_progress** at its single confirmation, exact candidate/ordinal3/attempt1,
-created2026-10-16T21:27:01Z. State `awaiting_ci`; nativeCI3/3 charged, local7/7 used.
-One Windows package/two launches/seven native fixture GETs are reserved; actual use
-needs terminal receipts. The [confirmed CI3 audit checklist](../tasks/active/ci-harness-reliability.md#deliverable3-confirmed-ci3-and-manual-wait--2026-10-17)
-owns continuation. Pause under manual same-thread waiting; no polling, fourth dispatch
-or extra local round. Deliverable3 remains open. Unrelated edits/recovery remain intact.
+Final deliverable3 use: local7/7, nativeCI3/3, Windows packages3/3, launches5/6,
+fixture GETs13/21. No CI or repair is pending; no further attempt is selected.
+Canonical native guidance/incident entries now link accepted proof. Closure documentation
+records the tested implementation separately; it does not become a new package candidate.
+The three unrelated user edits and existing recovery remain intact.
 
 ## Retained app baseline and pending acceptance
 

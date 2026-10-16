@@ -6,8 +6,9 @@ The user approved implementation on the current `codex/phase3a-story-logic` bran
 after an evidence review and plan. Reduce avoidable harness failures, keep current
 testing guidance separate from historical receipts, and make development/test-host
 routing explicitly symmetric for Mac-first or Windows-first development.
-This original selection owns completed deliverables1/2; the explicitly approved
-deliverable3 continuation at the end of this task owns the active native migration.
+All three deliverables are complete. This original selection owns deliverables1/2;
+the explicitly approved deliverable3 continuation and terminal audit at the end of
+this task own the accepted native migration.
 
 Scope: current guidance/runbooks and searchable incident index; inexpensive shared
 harness checks; relevant production-probe consumers and independent current UI
@@ -44,9 +45,10 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-Deliverables1/2 remain complete. Active state: `awaiting_ci` for the user-authorised
-H19 continuation and one additional CI3. Both failed native audits and the current
-build/rejecting-gate review are below. Original maintenance
+State `accepted`,2026-10-17. Deliverables1/2/3 are complete; the
+[CI3 terminal audit](#deliverable3-ci3-terminal-audit-and-completion--2026-10-17)
+qualifies the current Windows native migration and both-host portable/rendered gates.
+Both failed native audits and their corrections remain below. Original maintenance
 local5/6 and pairedCI2/2 were used, including failed CI1. That earlier CI2's Windows/Mac
 steps, artifacts, source identities and named results pass audit. Deliverable3 was plan-only at that completion; the later
 user approval selects its implementation.
@@ -965,3 +967,114 @@ per-phase state/retention/whole-store transitions and native credential presence
 removal, normal exits/PID/modal/fault/listener cleanup. Reconcile actual totals;
 forced exit or missing/not-reached evidence is failure. Keep both earlier failures
 and any new diagnosis distinct. Complete deliverable3 only after full acceptance.
+
+## Deliverable3 CI3 terminal audit and completion — 2026-10-17
+
+State `accepted`; all three deliverables are complete. On the user's manual resume,
+[run38969448685](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38969448685)
+is terminal **success**, updated2026-10-16T21:40:46Z. Exact implementation candidate
+`e00160b962ac09d70cb95000a6c10e4c205895c7`, tree
+`42c061927bec9f0bbb0070e1e91f2368b6c93a9d`, branch `codex/phase3a-story-logic`,
+workflow354880113/workflow_dispatch/attempt1/ordinal3 match the reservation. Windows
+job117203939861 and Mac job117203939807 passed every selected step, including rendered
+recovery, source sealing/privacy and final positive admission. Nine other jobs were
+intentionally unselected. The Mac job's Windows-only input/package/native steps are
+unselected, not Mac native passes. No new dispatch, package or repair round was run.
+
+### Archive, source and named-result audit
+
+| Evidence | Windows | macOS |
+| --- | --- | --- |
+| Artifact ID |12077031125|12076710136|
+| ZIP SHA256 |`7b3250526c7d7f1ed08c31529d3fe1178fd152f84332f2cefceb02ada460996d`|`5de313722cd802ffededa437718787709d096718c2285acd7af6ccceeb7c5343`|
+| Manifest entries, excluding manifest itself |149|19|
+| Python named results |207:203pass/four exact Mac exclusions|203:200pass/three exact Windows exclusions|
+| Retention results |10:nine pass/one exact Mac-tar exclusion|10pass|
+| Actual selected DOM cases |34pass; zero skipped/cancelled/todo|34pass; zero skipped/cancelled/todo|
+| Rust connection/window-fixture/reload cases |4/1/4pass|4/1/3pass|
+
+Both published ZIP digests match; unique safe raw names, CRC, no links/traversal and
+every manifest path/hash match the extracted archives. Each host's complete358-input
+source map equals independently filtered Git bytes at the exact candidate/tree;
+run/attempt/architecture identity matches. Q1 rejection and source gates pass.
+Toolchains are Node24.19.0/npm11.9.0/Rust-Cargo1.90.0; Python3.12.10 on Windows and
+3.15.0 on Mac. The artifact privacy scan passes170files including both manifests.
+Artifacts expire2026-10-23. Raw ZIPs/metadata/logs, independent audit and reconstructed
+synthetic state remain ignored under `d3/native-ci3`; this ledger retains the result
+after hosted artifact expiry. Logs, package and private paths are not published.
+
+Both hosts' actual rendered Chromium155.0.8059.40 integration passes normal992×665
+and1440×900 with three simulated Connect calls each. Injected collapsed/disabled
+Retry are rejected after two calls. Every case proves the production close guard
+rejects open Settings, then reaches application close after ordinary Settings dismissal.
+Browser and server close independently. These counters use synthetic IPC and are
+distinct from the seven authenticated native loopback HTTP requests below.
+
+### Windows package and complete native acceptance
+
+The matching PE AMD64 executable SHA256 is
+`b5c0f7410ab1c8758461efaf12a1d2ef045e1808d0c014a455604e3704bfaff6`.
+Both launch/attempt/native-stage identities match it. The build exits0 with stopped
+process/PID absence and no forced termination. The234-source package inventory agrees
+with tracked inputs, both required generated permissions and optional-directory absence;
+three dist/four Tauri-generated/236Cargo-output hashes are inventoried. The runner
+checks exact input equality before both launches. Generated output bytes are not
+independently rebuilt or replayed from the archive.
+
+- Phase1 passes in29.344seconds, PID2140,11native stages,17exact report assertions,
+  25retained synthetic JSON files and authenticated GETs alpha/gamma/alpha/alpha.
+  Early Cancel leaves the complete initial store unchanged. Native failed entry
+  retains input for Retry; the later failed-entry Cancel preserves the complete store.
+- Phase2 passes in21.5seconds, PID7740, eight native stages,20exact report assertions,
+  29retained files and GETs alpha/beta/beta. Reopen reuses both keys; confirmed beta
+  replacement reaches the one-shot post-publication snapshot fault. Maintenance is
+  open and Retry is visible/enabled; native diagnostics independently match status,
+  typed Retry and all four disabled mutators. The retained1008×704capture shows Retry
+  inside the expanded disclosure. Read-only Retry adds no Save or GET; complete saved,
+  reload-required and reloaded stores match. Removal preserves unrelated state and
+  the final store contains the original foreign cleanup record only.
+
+Pure validators independently admit both complete reports, exact named assertions,
+two post-save timing observations per phase, ordered native observations and all
+retained state hashes/whole-store transitions. Native receipts establish owned
+executable/PID/Default desktop, unique typed children100/1/2, masked-field metadata,
+foreground/focus/physical actions, retained Retry/Cancel and independently restored
+modal/fault state. Two exact saved native references are present after phase1; all
+three current/retired owned references are absent after phase2. No credential blob
+or foreign store was inspected. Both processes exit0 within300seconds; PID absence
+and listener stop pass independently with no forced exit. Successful native flow
+does not execute failure cleanup; that repair is covered by the real rendered close
+guard and extracted actual PowerShell helper/rejection fixtures on Windows.
+
+### Why CI2 failed with the product unchanged
+
+CI1 stopped at window geometry before reaching reload recovery. Repairing that
+harness gate let CI2 complete phase1 and reach a later existing UI state. Its probe
+could programmatically click Retry under a closed disclosure while its native
+observer required an actual enabled control; cleanup also ignored the existing
+Settings modal that blocks app close. Thus an unchanged product can fail a changed
+harness that reaches more of the journey. These were missed harness assumptions;
+the earlier local simulations did not test rendered visibility or the actual close
+guard. CI2's combined wait did not log which UIA subcondition failed, so the exact
+subcondition remains uncertain; source and rendered reproduction support H19.
+
+Across CI1→CI3 the only changed packaged source is current test instrumentation
+`windows_studio_probe.js`. Product Settings, application close guards and backend
+remain unchanged; rebuilding that embedded probe does change the executable.
+The new rendered rejecting cases plus complete native CI3 qualify the correction;
+they do not turn either earlier failure into a pass.
+
+Final deliverable3 consumption: local7/7, nativeCI3/3, Windows packages3/3,
+launches5/6 and native fixture GETs13/21, including both failed attempts. CI3 used
+one package/two launches/seven GETs. No further iteration is selected. Original
+deliverables1/2 consumption remains local5/6 and pairedCI2/2. Current canonical
+native guidance and incident entries link this accepted proof; TESTING remains the
+short current entry point with searchable history. Signed-Mac/real Studio and
+Phase2/3A human acceptance remain separate and pending. The three unrelated user
+edits and retained native/human handover are preserved.
+
+Closure verification passes622-file repository validation and whitespace/privacy
+checks. CURRENT is321words; HANDOVER is589words, including the unchanged recovery
+tail. This publication contains only the six owned audit/closure documentation paths;
+the three unrelated user edits remain uncommitted. No package matrix is selected for
+this documentation-only successor.
