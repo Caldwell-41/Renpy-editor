@@ -365,6 +365,20 @@ observations cannot be replaced by probe markers. The opt-in
 the fixed beta post-save reload failure and requires one read-only Retry.
 
 Focused controller checks: `python -m unittest discover -s scripts -p test_windows_studio_credentials.py -v`.
+The selected [current native harness migration](../docs/tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
+uses `scripts/windows-studio-credentials.py current build|run --output <fresh-output>
+--candidate <exact-reviewed-sha> --ordinal 1|2` through the focused Repository quality
+selector `studio_connection_native`. The current native proof remains pending CI/audit.
+It retains the approved Windows credential namespace, uses the current native draft
+dialog, observes Cancel before committing keys, proves failed-entry retained-field
+Retry/Cancel, then completes save/reopen/replacement/read-only reload/removal in two
+processes. Connect-before-Save adds GETs: phase1 alpha/gamma/alpha/alpha; phase2
+alpha/beta/beta. Only public synthetic keys and fixed loopback `/v1/models` are used.
+The current reload fault confirms a real `ai.saveConnection` publication and refuses
+the next profiles read once; Retry reads without saving or making another request.
+Existing historical commands, completed ordinals, store/reload fixtures and frozen
+external Settings qualification remain historical. A matching package is built once
+per selected current attempt; no installer or automatic retry is involved.
 Use an accessible workspace TEMP on restricted Windows hosts. Native entry/capture
 uses supported Computer Use with actual returned windows and fresh state. No native
 credential enumeration, diagnostic secret-value reads or automatic ownership recovery.

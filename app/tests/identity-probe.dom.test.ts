@@ -1,3 +1,4 @@
+import {spawnSync} from 'node:child_process';
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -83,4 +84,12 @@ test("prepared identity probe rejects a failed second discovery despite stale su
 test("identity probe cancellation reports failure and releases its Settings view",async()=>{
  const abort=new AbortController();abort.abort();const result=await scenario(1,false,abort.signal);
  assert.equal(result.report.passed,false);assert.match(String(result.report.error),/Probe cancelled/);
+});
+
+test('Mac report validator accepts every actual current probe phase',{timeout:10000},async t=>{
+ for(const phase of [1,2,3,4]){
+  const {report}=await scenario(phase,false,t.signal);
+  const result=spawnSync(process.env.HARNESS_PYTHON??(process.platform==='win32'?'python':'python3'),['-c',"import importlib.util,json,sys; s=importlib.util.spec_from_file_location('probe','scripts/macos-identity-probe.py'); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); d=json.load(sys.stdin); p=d['phase']; m.validate_report([dict(evidence='runtime-ui-packaged',case='studio-settings',passed=True,cleanupComplete=True,details=d)],p,42,d['executablePath'],[dict(sequence=n+1,accepted=True) for n in range(len(m.SCHEDULE[p]))],0,False)"],{input:JSON.stringify(report),encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
+ }
 });

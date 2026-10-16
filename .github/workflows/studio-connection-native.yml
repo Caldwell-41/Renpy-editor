@@ -1,0 +1,171 @@
+name: Current Studio connection native qualification
+on:
+  workflow_call:
+    inputs:
+      candidate:
+        required: true
+        type: string
+      ordinal:
+        required: true
+        type: string
+      selector_conflict:
+        required: true
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: studio-connection-native-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  focused:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [windows-2025, macos-26]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      HARNESS_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
+      RUSTUP_TOOLCHAIN: 1.90.0
+      CARGO_TARGET_DIR: ${{ github.workspace }}/app/target
+      NATIVE_CANDIDATE: ${{ inputs.candidate }}
+      NATIVE_ORDINAL: ${{ inputs.ordinal }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require exact selected current candidate and allowance
+        id: candidate
+        shell: bash
+        env:
+          SELECTOR_CONFLICT: ${{ inputs.selector_conflict }}
+        run: |
+          set -euo pipefail
+          test "$SELECTOR_CONFLICT" = false
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          case "$NATIVE_ORDINAL" in 1|2) ;; *) exit 1 ;; esac
+          test "$(git rev-parse HEAD)" = "$NATIVE_CANDIDATE"
+          echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
+          echo "TEMP=$RUNNER_TEMP" >> "$GITHUB_ENV"
+          echo "TMP=$RUNNER_TEMP" >> "$GITHUB_ENV"
+          "$HARNESS_PYTHON" -c "import os,platform,sys; assert sys.version_info >= (3,11); assert platform.machine().lower()==('arm64' if os.environ['RUNNER_OS']=='macOS' else 'amd64')"
+          mkdir -p "$RUNNER_TEMP/studio-connection"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Cold-checkout harness regressions
+        id: harness
+        shell: bash
+        run: '"$HARNESS_PYTHON" app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/studio-connection/harness"'
+      - name: Parse current native input script before expensive preparation
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $tokens=$null;$errors=$null
+          [void][System.Management.Automation.Language.Parser]::ParseFile((Join-Path $env:GITHUB_WORKSPACE 'app/scripts/studio-connection-windows.ps1'),[ref]$tokens,[ref]$errors)
+          if($errors.Count){$errors | ForEach-Object {$_.Message};exit 1}
+      - name: Install locked renderer tooling
+        id: dependencies
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          npm install --global npm@11.9.0
+          npm_cli="$(npm root --global)/npm/bin/npm-cli.js"
+          test "$(node "$npm_cli" --version)" = 11.9.0
+          echo "LOOMLIGHT_WINDOWS_NPM_CLI=$npm_cli" >> "$GITHUB_ENV"
+          node "$npm_cli" ci --ignore-scripts
+      - name: Production probe consumers and renderer build
+        id: renderer
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node "$LOOMLIGHT_WINDOWS_NPM_CLI" run build:tests
+          node --test --test-reporter=tap --test-concurrency=1 dist-tests/tests/identity-probe.dom.test.js dist-tests/tests/windows-studio-probe.dom.test.js dist-tests/tests/ai-settings.dom.test.js 2>&1 | tee "$RUNNER_TEMP/studio-connection/renderer.log"
+          node "$LOOMLIGHT_WINDOWS_NPM_CLI" run build
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          workspaces: app -> target
+          key: current-studio-connection-${{ matrix.runner }}
+          cache-bin: 'false'
+      - name: Select pinned Rust toolchain
+        shell: bash
+        run: rustup toolchain install 1.90.0 --profile minimal
+      - name: Retain actual selected toolchain versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version > "$RUNNER_TEMP/studio-connection/toolchains.log"
+          node "$LOOMLIGHT_WINDOWS_NPM_CLI" --version >> "$RUNNER_TEMP/studio-connection/toolchains.log"
+          rustc -Vv >> "$RUNNER_TEMP/studio-connection/toolchains.log"
+          cargo -V >> "$RUNNER_TEMP/studio-connection/toolchains.log"
+          "$HARNESS_PYTHON" --version >> "$RUNNER_TEMP/studio-connection/toolchains.log"
+      - name: Real connection and fixture integration
+        id: integration
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          failed=0
+          for scope in ai_connection::tests windows_studio_probe::tests ai_reload_fixture::tests; do
+            logname="${scope//:/-}"
+            if ! cargo test -p loomlight-desktop --locked --bin loomlight "$scope" -- --list > "$RUNNER_TEMP/studio-connection/$logname.list" 2>&1; then failed=1; fi
+            if ! cargo test -p loomlight-desktop --locked --bin loomlight "$scope" -- --nocapture 2>&1 | tee "$RUNNER_TEMP/studio-connection/$logname.log"; then failed=1; fi
+            if ! "$HARNESS_PYTHON" scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/studio-connection/$logname.list" "$RUNNER_TEMP/studio-connection/$logname.log"; then failed=1; fi
+          done
+          test "$failed" = 0
+      - name: Build one matching Windows native package
+        id: package
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python app/scripts/windows-studio-credentials.py current build --output "$RUNNER_TEMP/studio-connection/native" --candidate "$NATIVE_CANDIDATE" --ordinal "$NATIVE_ORDINAL"
+      - name: Complete both current Windows native phases
+        id: native
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python app/scripts/windows-studio-credentials.py current run --output "$RUNNER_TEMP/studio-connection/native" --candidate "$NATIVE_CANDIDATE" --ordinal "$NATIVE_ORDINAL"
+      - name: Record selected outcomes without normalizing failures
+        if: always()
+        shell: bash
+        env:
+          STEP_RESULTS: ${{ toJSON(steps) }}
+        run: |
+          "$HARNESS_PYTHON" - <<'PYRESULT'
+          import json,os,pathlib
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'studio-connection'
+          root.mkdir(parents=True,exist_ok=True)
+          steps=json.loads(os.environ['STEP_RESULTS'])
+          selected=['candidate','harness','dependencies','renderer','integration']+(['package','native'] if os.environ['RUNNER_OS']=='Windows' else [])
+          checks=[dict(name=name,outcome=steps.get(name,{}).get('outcome','not-run')) for name in selected]
+          value=dict(passed=all(c['outcome']=='success' for c in checks),checks=checks,nativeSelected=os.environ['RUNNER_OS']=='Windows')
+          (root/'result.json').write_text(json.dumps(value,indent=2)+'\n')
+          PYRESULT
+      - name: Seal exact source, scan and retain partial evidence
+        id: seal
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/studio-connection"
+          "$HARNESS_PYTHON" app/scripts/check-thinking-evidence.py seal "$RUNNER_TEMP/studio-connection" . --outcome current-studio-connection
+          node app/scripts/scan-artifacts.mjs "$RUNNER_TEMP/studio-connection"
+      - name: Require complete successful current candidate evidence
+        if: success()
+        shell: bash
+        run: |
+          "$HARNESS_PYTHON" - <<'PYGATE'
+          import json,os,pathlib
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'studio-connection'
+          identity=json.loads((root/'identity.json').read_text())
+          assert identity['sourceMatchesCandidate'] and identity['candidate']==os.environ['NATIVE_CANDIDATE'] and identity['runId']==os.environ['GITHUB_RUN_ID'] and identity['attempt']=='1'
+          assert json.loads((root/'result.json').read_text())['passed'] is True
+          PYGATE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ always() && steps.seal.outcome == 'success' }}
+        with:
+          name: studio-connection-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/studio-connection/
+          if-no-files-found: error
+          retention-days: 7

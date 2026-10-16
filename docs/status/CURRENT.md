@@ -1,31 +1,25 @@
 # Current status
 
-## CI harness reliability — deliverables1/2 complete; native plan awaiting selection
+## Current native connection harness — implementation ready; CI1 reserved
 
-Updated2026-10-16. The [selected maintenance](../tasks/active/ci-harness-reliability.md)
-is published on `codex/phase3a-story-logic` at `c33d77cf4cf5826050d1ae367d6219822dc30bc1`:
-concise testing guidance/runbooks, searchable incidents, symmetric development-host/CI
-routing, independent harness checks and current production-probe consumers.
-Application behavior was not changed. The CI1 audit found a test fixture dependency
-on ignored generated permissions, masked by a prior local build. Both-host failures
-remain recorded; artifact/source identities were verified.
+Updated2026-10-16. The user approved [deliverable3](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
+on `codex/phase3a-story-logic`. One Mac implementation owner; Windows native CI and
+both-host portable checks supply evidence without routine machine switching.
 
-[Harness CI1run38878570023](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38878570023)
-failed on exactc33d77c. The self-contained fixture repair is published at
-`0cc56e702e514b30a01378954916a862c618a349`. Clean-export checks pass without generated
-permissions/dependencies/build output. [CI2run38886792055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38886792055)
-completed success at2026-10-16T10:23:48Z on exact0cc56e7/attempt1. Both required hosts
-passed all four harness groups and source/privacy/upload gates. Windows passed191
-Python cases with four exact exclusions; Mac189 with two exact exclusions. Retention
-passed Windows9/one exact exclusion and Mac10. Both archives/digests/manifests, source
-identities and named results are audited; the new regression passes on both hosts.
-The [terminal audit](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16)
-closes deliverable2. Local5/6 and pairedCI2/2 are final usage; CI1 remains failed.
-Native gates are unchanged; no additional dispatch remains.
-The [deliverable3 plan](../tasks/active/ci-harness-reliability.md#deliverable3-proposed-plan--current-native-connection-harness)
-is prepared only; its native migration/allowance needs selection. No package, SDK execution, editor launch,
-provider request, dependency update, merge or release is selected. Unrelated local
-walkthrough-design and Phase2/3 task edits remain untouched and unpublished.
+| Work | Current evidence |
+| --- | --- |
+| Deliverables1/2: testing docs and cheap harness prevention | Complete; [both-host CI2 audited](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16) on0cc56e7 |
+| Current Windows connection native harness | Implemented/reviewed; local checks pass; real Windows native proof pending |
+| Mac report admission | Stricter current-contract/assertion checks pass actual-producer/negative fixtures; fresh Mac native acceptance remains separate |
+
+Local3/3 used: clean-export197Python (195pass/two exact exclusions), Q1/10retention,
+33renderer/probe cases, real connection/fixture tests, build, lint and docs validation.
+Current nativeCI0/2; reserve CI1 after publication with at most one matching Windows
+package/two launches/seven loopback GETs. The native sequence has its own fresh
+namespace; legacy guards/ordinals and frozen929route are retained. No Mac package,
+real provider/model request, SDK, dependency update, merge or release is selected.
+Unrelated user edits and the native/human recovery below remain untouched. The task
+owns exact attempts, remaining allowance and terminal evidence audit.
 
 ## Retained app baseline and pending acceptance
 

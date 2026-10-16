@@ -127,7 +127,18 @@ pub fn dispatch(app:&tauri::AppHandle,host:&ApplicationHost,id:String,operation:
     let result=(||->credentials::Result<Value>{
         let owner=service();
         if operation=="ai.beginConnection" {return owner.begin(host,serde_json::from_value(payload).map_err(|_|"Invalid connection draft payload.")?,&crate::ai_settings::secrets(host)?);}
-        if operation=="ai.saveConnection" {return owner.save(host,serde_json::from_value(payload).map_err(|_|"Invalid connected profile payload.")?,&crate::ai_settings::secrets(host)?);}
+        if operation=="ai.saveConnection" {
+            let saved=owner.save(host,serde_json::from_value(payload).map_err(|_|"Invalid connected profile payload.")?,&crate::ai_settings::secrets(host)?)?;
+            #[cfg(target_os="windows")]
+            { use tauri::Manager;
+              if let Some(state)=app.try_state::<crate::ai_reload_fixture::ConnectionState>() {
+                // The real confirmed response stays true; fixture mismatch is not
+                // reported as a failed Save or as the selected snapshot failure.
+                if let Ok(mut fixture)=state.0.lock() {let _=host.with_service(|s|fixture.confirm(s,saved["profileId"].as_str().unwrap_or_default(),saved["cleanupPending"]==true));}
+              }
+            }
+            return Ok(saved);
+        }
         let target:Target=serde_json::from_value(payload).map_err(|_|"Invalid connection target.")?;
         match operation {
             "ai.connectionStatus"=>owner.status(host,&target),
@@ -170,11 +181,72 @@ mod tests {
     fn target(owner:&Service)->Target {let state=owner.draft.lock().unwrap();let d=state.as_ref().unwrap();Target{draft_id:d.id.clone(),revision:d.revision}}
     fn wait(owner:&Service,host:&ApplicationHost,target:&Target)->Value {let deadline=Instant::now()+Duration::from_secs(3);loop {let v=owner.status(host,target).unwrap();if v["state"]!="connecting" {return v;}assert!(Instant::now()<deadline);std::thread::yield_now();}}
     fn start_server(code:u16,wait:Option<std::sync::mpsc::Receiver<()>>)->(String,std::thread::JoinHandle<()>,std::sync::mpsc::Receiver<()>) {
-        let listener=TcpListener::bind("127.0.0.1:0").unwrap();let endpoint=format!("http://{}/v1",listener.local_addr().unwrap());let(tx,rx)=std::sync::mpsc::channel();
+        serve(TcpListener::bind("127.0.0.1:0").unwrap(),code,wait,"fixture")
+    }
+    fn serve(listener:TcpListener,code:u16,wait:Option<std::sync::mpsc::Receiver<()>>,model:&'static str)->(String,std::thread::JoinHandle<()>,std::sync::mpsc::Receiver<()>) {
+        let endpoint=format!("http://{}/v1",listener.local_addr().unwrap());let(tx,rx)=std::sync::mpsc::channel();
         let thread=std::thread::spawn(move||{let(mut socket,_)=listener.accept().unwrap();socket.set_read_timeout(Some(Duration::from_secs(3))).unwrap();let mut bytes=Vec::new();while !bytes.ends_with(b"\r\n\r\n"){let mut b=[0];assert_eq!(socket.read(&mut b).unwrap(),1);bytes.push(b[0]);assert!(bytes.len()<8192);}
             let request=String::from_utf8(bytes).unwrap();assert!(request.starts_with("GET /v1/models HTTP/1.1"));assert!(request.to_ascii_lowercase().contains("authorization: bearer public-draft-key"));let _=tx.send(());if let Some(wait)=wait{let _=wait.recv_timeout(Duration::from_secs(3));}
-            let body=r#"{"data":[{"id":"fixture","loaded":false,"quant":"Q4_K_M"}]}"#;let _=write!(socket,"HTTP/1.1 {code} Result\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",body.len());
+            let body=json!({"data":[{"id":model,"loaded":false,"quant":"Q4_K_M"}]}).to_string();let _=write!(socket,"HTTP/1.1 {code} Result\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",body.len());
         });(endpoint,thread,rx)
+    }
+    #[test]
+    fn current_windows_fixture_fails_one_read_only_after_real_connected_save_without_rewriting_bytes() {
+        let _serial=SERIAL.lock().unwrap();
+        struct WindowsKeys(Keys);
+        impl Secrets for WindowsKeys {
+            fn read(&self,p:&str,c:&OwnedCredential)->credentials::Result<Option<Secret>> {self.0.read(p,c)}
+            fn add(&self,p:&str,c:&OwnedCredential,k:&str)->credentials::Result<()> {self.0.add(p,c,k)}
+            fn delete(&self,p:&str,c:&OwnedCredential)->credentials::Result<()> {
+                if !c.storage.is_native(){return Err("Foreign fixture cleanup preserved");} self.0.delete(p,c)
+            }
+        }
+        let dir=tempfile::Builder::new().prefix("loomlight-studio-windows-connection-").tempdir().unwrap();
+        let records=LifecycleService::new(dir.path().to_owned()).unwrap();
+        let fixture:ProfileStore=serde_json::from_str(crate::windows_studio_probe::FIXTURE).unwrap();
+        std::fs::write(dir.path().join("ai-profiles.json"),serde_json::to_vec(&fixture).unwrap()).unwrap();
+        let keys=WindowsKeys(Keys::default());
+        assert!(crate::ai_reload_fixture::ConnectionReload::arm(&records).is_err());
+        for profile in &fixture.profiles {
+            let mut settings=profile.settings.clone(); settings.context_ceiling=settings.context_budget;
+            settings.thinking=Some(true);settings.temperature=Some(1.0);settings.top_p=Some(0.95);settings.model_load=Some(Default::default());
+            credentials::save_connection(&records,&keys,&credentials::token(&records.read().unwrap()),Some(&profile.profile_id),settings,"public-draft-key").unwrap();
+        }
+        let before=records.read().unwrap();crate::windows_studio_probe::validate_current(&before,2).unwrap();
+        for change in 0..5 {
+            let mut wrong=before.clone();
+            match change {
+                0=>wrong.revision+=1,
+                1=>wrong.profiles[0].credential.as_mut().unwrap().service=loomlight_core::ai_profiles::CredentialService::Loomlight,
+                2=>wrong.profiles[0].settings.thinking=Some(false),
+                3=>wrong.cleanup.clear(),
+                _=>{wrong.profiles.pop();},
+            }
+            assert!(crate::windows_studio_probe::validate_current(&wrong,2).is_err());
+        }
+        let mut fault=crate::ai_reload_fixture::ConnectionReload::arm(&records).unwrap();
+        assert!(fault.confirm(&records,crate::ai_reload_fixture::WINDOWS_PROFILE,true).is_err());
+        assert_eq!(fault.read(&records).unwrap(),before);
+        let host=ApplicationHost::new(records);let owner=Arc::new(Service::default());
+        let(endpoint,server,_)=serve(TcpListener::bind("127.0.0.1:46082").unwrap(),200,None,"loomlight-synthetic-model");
+        let view=owner.begin(&host,Begin{token:credentials::token(&before),profile_id:Some(before.profiles[0].profile_id.clone()),endpoint,private_http:false},&keys).unwrap();
+        let initial:Target=serde_json::from_value(json!({"draftId":view["draftId"],"revision":view["revision"]})).unwrap();
+        owner.key(&host,&initial,"public-draft-key").unwrap();let input=target(&owner);
+        owner.connect(&host,Target{draft_id:input.draft_id.clone(),revision:input.revision}).unwrap();
+        assert_eq!(wait(&owner,&host,&input)["state"],"connected");server.join().unwrap();
+        let path=dir.path().join("ai-profiles.json");let original=std::fs::read(&path).unwrap();
+        assert!(host.with_service(|s|fault.confirm(s,crate::ai_reload_fixture::WINDOWS_PROFILE,true)).unwrap().is_err());
+        assert_eq!(original,std::fs::read(&path).unwrap());
+        let settings=before.profiles[0].settings.clone();
+        let saved=owner.save(&host,Save{draft_id:input.draft_id,revision:input.revision,settings},&keys).unwrap();
+        assert_eq!(saved["cleanupPending"],true);
+        let published=std::fs::read(&path).unwrap();assert_ne!(original,published);
+        host.with_service(|s|fault.confirm(s,crate::ai_reload_fixture::WINDOWS_PROFILE,true)).unwrap().unwrap();
+        assert!(host.with_service(|s|fault.read(s)).unwrap().is_err());
+        assert_eq!(published,std::fs::read(&path).unwrap());
+        for _ in 0..2 {assert!(host.with_service(|s|fault.read(s)).unwrap().is_ok());assert_eq!(published,std::fs::read(&path).unwrap());}
+        assert!(host.with_service(|s|fault.confirm(s,crate::ai_reload_fixture::WINDOWS_PROFILE,true)).unwrap().is_err());
+        owner.shutdown();
     }
     #[test]
     fn draft_connect_without_profile_or_model_save_reopen_and_no_secret_ipc() {

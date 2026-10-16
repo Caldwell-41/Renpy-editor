@@ -915,6 +915,10 @@ def fault(action, name):
     print(json.dumps({"action": action, "step": name, "completed": True}))
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "current":
+        from studio_connection_native import main
+        main(sys.argv[2:])
+        raise SystemExit(0)
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=["prepare", "build", "launch", "corrupt", "restore", "confirm-reload", "native-clock"])
     parser.add_argument("--phase", type=int, choices=[1, 2])

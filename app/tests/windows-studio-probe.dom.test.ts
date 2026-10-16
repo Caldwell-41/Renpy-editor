@@ -1,3 +1,4 @@
+import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
@@ -34,7 +35,7 @@ async function scenario(phase:number,failedGet=false,reloadProof=false,defect=''
      const saved=profiles.find((p:{profileId:string})=>p.profileId===payload.profileId);assert(saved);
      draft={draftId:'windows-draft-'+(++draftNumber),revision:1,profileId:saved.profileId,credentialReady:saved.credentialStatus==='configured',state:'ready',models:[],message:'Enter key, then Connect.'};return ok(structuredClone(draft));
     }
-    case 'ai.enterConnectionKey':assert(draft);entries++;if(phase===1&&entries===3)return ok({...draft,cancelled:true});draft.revision++;draft.credentialReady=true;return ok(structuredClone(draft));
+    case 'ai.enterConnectionKey':assert(draft);entries++;if(phase===1&&(entries===1||entries===4))return ok({...draft,cancelled:true});draft.revision++;draft.credentialReady=true;return ok(structuredClone(draft));
     case 'ai.connect':assert(draft);gets++;if(failedGet&&gets===2)return refused('Refused synthetic discovery');draft.state='connected';draft.models=['loomlight-synthetic-model'];draft.message='Connected. Choose a model, then Save profile.';return ok(structuredClone(draft));
     case 'ai.saveConnection':
      assert(p&&draft?.state==='connected');p.revision++;p.credentialStatus='configured';p.settings=structuredClone(payload.settings);p.discovery=null;
@@ -58,7 +59,7 @@ async function scenario(phase:number,failedGet=false,reloadProof=false,defect=''
  }finally{controller?.dispose();await browser.happyDOM.close();}
 }
 test('prepared Windows probe drives both actual Settings phases with exact secret-free operations',{timeout:10000},async t=>{
- for(const phase of [1,2]){const r=await scenario(phase,false,false,'',false,t.signal);assert.equal(r.report.passed,true,JSON.stringify(r.report));assert.equal(r.entries,phase===1?3:1);assert.equal(r.gets,phase===1?4:3);assert.equal(r.removals,phase===1?0:2);}
+ for(const phase of [1,2]){const r=await scenario(phase,false,false,'',false,t.signal);assert.equal(r.report.passed,true,JSON.stringify(r.report));assert.equal(r.entries,phase===1?4:1);assert.equal(r.gets,phase===1?4:3);assert.equal(r.removals,phase===1?0:2);}
 });
 test('Windows probe rejects failed discovery despite earlier availability',{timeout:5000},async t=>{
  const r=await scenario(2,true,false,'',false,t.signal);assert.equal(r.report.passed,false);assert.equal(r.gets,2);
@@ -76,8 +77,16 @@ test('Windows beta reload gate rejects a Retry that enables controls without rea
 test('opt-in evidence holds each confirmation and records actual client discovery intervals',{timeout:10000},async t=>{
  for(const phase of [1,2]){
   const r=await scenario(phase,false,phase===2,'',true,t.signal);assert.equal(r.report.passed,true,JSON.stringify(r.report));
-  assert.deepEqual(r.holds,phase===1?['alpha-saved-observed','gamma-saved-observed','cancelled-observed','get-1-complete-observed','get-2-complete-observed','complete-observed']:['reopened-observed','get-1-complete-observed','beta-reload-observed','beta-reloaded-observed','get-2-complete-observed','removed-observed','complete-observed']);
+  assert.deepEqual(r.holds,phase===1?['preflight-cancelled-observed','alpha-saved-observed','gamma-saved-observed','cancelled-observed','get-1-complete-observed','get-2-complete-observed','complete-observed']:['reopened-observed','get-1-complete-observed','beta-reload-observed','beta-reloaded-observed','get-2-complete-observed','removed-observed','complete-observed']);
   const timings=r.report.clientTimings as {actionStarted:number;requestStarted:number;requestEnded:number;completed:number}[];assert.equal(timings.length,2);for(const v of timings)assert(v.actionStarted<=v.requestStarted&&v.requestStarted<=v.requestEnded&&v.requestEnded<=v.completed);
  }
  const ordinary=await scenario(1,false,false,'',false,t.signal);assert.deepEqual(ordinary.holds,[]);assert.equal(ordinary.report.clientTimings,undefined);
+});
+
+test('Windows current validator accepts the real producer including early Cancel and reload',{timeout:10000},async t=>{
+ for(const phase of [1,2]){
+  const {report}=await scenario(phase,false,phase===2,'',true,t.signal);
+  const result=spawnSync(process.env.HARNESS_PYTHON??(process.platform==='win32'?'python':'python3'),['-c',"import importlib.util,json,sys; s=importlib.util.spec_from_file_location('probe','scripts/studio_connection_native.py'); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); d=json.load(sys.stdin); p=d['phase']; m.validate_report([dict(evidence='runtime-ui-packaged',case='studio-settings',passed=True,cleanupComplete=True,details=d)],p,[dict(sequence=n+1,label=label,accepted=True) for n,label in enumerate(m.SCHEDULE[p])],0)"],{input:JSON.stringify(report),encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
+ }
 });

@@ -6,6 +6,8 @@ The user approved implementation on the current `codex/phase3a-story-logic` bran
 after an evidence review and plan. Reduce avoidable harness failures, keep current
 testing guidance separate from historical receipts, and make development/test-host
 routing explicitly symmetric for Mac-first or Windows-first development.
+This original selection owns completed deliverables1/2; the explicitly approved
+deliverable3 continuation at the end of this task owns the active native migration.
 
 Scope: current guidance/runbooks and searchable incident index; inexpensive shared
 harness checks; relevant production-probe consumers and independent current UI
@@ -42,10 +44,11 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-State: `complete` for the selected maintenance (deliverables1/2). Local5/6 and paired
-CI2/2 were used, including the retained failed CI1. CI2's Windows/Mac terminal steps,
-artifacts, source identities and named results pass audit. Deliverable3 is plan-only
-and awaits explicit selection; it is not implemented or included in this completion.
+Deliverables1/2 remain complete. Active state: `in_progress` for the selected
+deliverable3 continuation below. Original maintenance local5/6 and pairedCI2/2 were
+used, including failed CI1. CI2's Windows/Mac steps, artifacts, source identities and
+named results pass audit. Deliverable3 was plan-only at that completion; the later
+user approval selects its implementation.
 
 The latest100-run review found36 failed outcomes;35 of62 manual dispatches failed.
 This mixed sample is not an app-defect rate. The incident index retains specific
@@ -275,7 +278,8 @@ publication is documentation-only; the qualified executable harness candidate is
 
 ## Deliverable3 proposed plan — current native connection harness
 
-**Plan only; implementation and native execution are not selected by this resume.**
+The proposal below was explicitly selected by the user's “Proceed” on2026-10-16;
+the active continuation and cumulative usage are recorded at the end of this task.
 The proposed outcome is a usable, bounded Windows native harness for the current
 draft connection flow, with stricter Mac report admission. Keep routine iteration
 on whichever host the user chooses; use target CI for portable/Windows proof and
@@ -373,3 +377,87 @@ remains separately pending under its owning task and approved identity/capabilit
 Do not repeat the four-phase cross-binary Keychain qualification solely for this
 parser change. If implementation needs a Mac producer/backend/signing change,
 reassess that boundary before any additional Mac package or native launch.
+
+## Deliverable3 selected implementation — 2026-10-16
+
+The user explicitly approved the proposal above. State `in_progress`, same branch
+`codex/phase3a-story-logic`, starting at b6ed3e4. One implementation owner, chosen
+development host Mac; Windows native CI and both-host portable fixture proof as
+planned. No Mac package/launch, real provider request, dependency upgrade, merge,
+release or frozen929runner migration is selected. Preserve the three existing user
+edits and the unrelated native/human recovery tail byte-for-byte.
+
+Initial allowance: local0/3 meaningful rounds; current native CI0/2; Windows packages0/2,
+launches0/4, loopback GETs0/14. Each CI attempt permits one matching package and at
+most two launches/seven GETs including failures/ambiguity. Risky input checks are
+inside those launches. These are the approved new deliverable3 limits; prior
+maintenance local5/6/CI2/2 and old Thinking/Studio/walkthrough counts remain consumed.
+Continue preparation, implementation, focused rejecting/integration checks, review
+and in-scope repairs before reserving a reviewed exact-candidate native dispatch.
+Manual same-thread waiting remains in force after dispatch. Mac native acceptance
+remains separately pending; Mac work here is report-validator admission only.
+
+## Deliverable3 local preparation and review — 2026-10-16
+
+State `review_ready` for the first native dispatch. Local3/3 meaningful rounds used;
+nativeCI0/2, packages0/2, launches0/4 and GETs0/14 before dispatch. No app/native
+process, Mac package, SDK or real provider was launched locally. The native sequence
+still needs actual Windows evidence; portable tests do not substitute for it.
+
+Implemented an explicit `current` mode in the existing Windows harness with a fresh
+attempt namespace and opt-in focused workflow, routed through Repository quality.
+The legacy guard/ordinals and frozen929workflow/driver remain unchanged. Current
+admission follows the real connection Save settings/revisions and preserves the
+existing Windows Legacy credential namespace. The current native dialog title is
+different from the old Remember dialog; the new input driver imports only qualified
+definitions, with that exact current title, rather than executing frozen stages.
+
+The native sequence observes verified children100/1/2 and masked focus, proves Cancel
+before creating keys, and uses the existing non-crashing invalid-record fault to
+prove failed-entry retained-field Retry/Cancel. It retains pre-fault bytes for recovery,
+restores only exact owned fault bytes, and never reads a password control. Both phases
+use fresh exact report/ack identities, fixed stage/capture evidence and seven ordered
+authenticated loopback GETs. Request, modal/fault, process/PID, listener and root/owned
+credential outcomes are retained separately; forced exit remains failure.
+
+The current one-shot reload fixture confirms actual `ai.saveConnection` publication,
+requires the complete real replacement snapshot, then refuses the next profiles read
+once without modifying saved bytes. The Mac admission validator requires contract2,
+exact case and ordered complete assertions while retaining its four-phase/signing
+rules. Actual JavaScript probe reports pass through their Python validators in DOM
+tests, so an outdated positive fixture cannot silently validate itself.
+
+Round1 shared Python/Q1/retention passed, but actual producer conformance rejected
+the stale legacy reload response/check set in the new validator. Corrected the
+current Save confirmation separately from its later failed profiles read; the legacy
+receipt is unchanged. Actionlint also caught job-level runner.temp context use, moved
+to the environment of following steps. Initial Rust compilation passed but the sandbox
+refused a loopback bind; that failure poisoned its suite guard. The same four real
+connection tests passed with the required local-listener capability; no test was skipped.
+
+Round2 passed all33selected renderer/probe cases and the production renderer build;
+the two cross-language producer/validator consumers pass. Rust connection4, Windows
+fixture1 and Mac reload3 selected tests passed. Review strengthened native child/style/
+focus/action refusal, exclusive failed-build receipts, timeout log/fault recovery,
+independent cleanup and source/outcome gates. The actual quality selector expressions
+were exercised: current mode excludes all other selections, conflicts fail its early
+gate, and every prior manual/push/PR route is preserved.
+
+Final round3 used a disposable Git export containing every changed harness input
+and none of the unrelated user edits. No generated permissions, node_modules or
+target existed. All four groups passed:197Python cases (195pass/two exact host
+exclusions), Q1 rejecting/source checks and10retention. The final real connection
+suite passed4cases including wrong service/settings/cleanup/revision/partial-state
+refusals and exactly one read failure after a real connected Save. Actionlint,
+621-file repository validation and whitespace pass. Reused unchanged round2 DOM/build
+and fixture results. Raw logs/export remain ignored under the maintenance `d3` root.
+
+Review confirmed the CLI seal accepts the new outcome, Rust test listings/results
+must match exactly, failed independent Rust scopes continue without becoming success,
+and artifact source/privacy/outcome gates retain failed or partial evidence. Windows
+syntax and interactive-desktop preflights run before the package. All three existing
+user files match their entry hashes; the protected native/human recovery is untouched.
+Reserve current native CI1/2 only after publication and no-existing-run reconciliation:
+one Windows package, at most two launches/seven GETs; Mac portable fixtures only.
+This reservation does not reset any old task allowance. Follow manual same-thread
+waiting after exact run identity/status is recorded. No native pass is claimed yet.

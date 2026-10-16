@@ -124,6 +124,8 @@ class GateTests(unittest.TestCase):
             self.assertEqual(list(identity['inputs']),['app/input.txt'])
             module.seal(folder,repo,'harness-regressions')
             self.assertEqual(json.loads((folder/'identity.json').read_text())['outcome'],'harness-regressions')
+            module.seal(folder,repo,'current-studio-connection')
+            self.assertEqual(json.loads((folder/'identity.json').read_text())['outcome'],'current-studio-connection')
             source.write_text('changed bytes');module.seal(folder,repo)
             identity=json.loads((folder/'identity.json').read_text());self.assertFalse(identity['sourceMatchesCandidate']);self.assertEqual(identity['mismatchedTrackedInputs'],['app/input.txt'])
 

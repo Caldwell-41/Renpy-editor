@@ -1,40 +1,41 @@
 # Current outcome handover
 
-## CI harness reliability — deliverables1/2 complete, 2026-10-16
+## Deliverable3 — current native connection harness selected, 2026-10-16
 
-State `complete` for the [selected maintenance](../tasks/active/ci-harness-reliability.md)
-on `codex/phase3a-story-logic`: concise current testing runbooks, searchable incidents,
-symmetric development-host/CI rules, independent cheap harness checks and current
-production-probe consumers. Deliverable3 is a proposal awaiting explicit selection.
+State `review_ready` for the first focused native dispatch on
+`codex/phase3a-story-logic`. User explicitly approved the
+[plan/selection](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16).
+One Mac implementation owner; Windows native CI and both-host portable fixture gates.
+No second writer or routine host switch. The three existing user edits stay untouched.
 
-The qualified harness repair is `0cc56e702e514b30a01378954916a862c618a349`, tree
-`c50c3d46ba8b3c7154eb586ea4f17235d1047cdd`. [CI2run38886792055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38886792055),
-workflow354880113/attempt1, completed **success** at10:23:48Z. Both required Windows
-and Mac jobs passed all four groups and source/privacy/upload gates. Eight unrelated
-jobs were excluded. Windows passed191Python/four exact exclusions and9retention/one
-exact exclusion; Mac189Python/two exact exclusions and10retention. The formerly
-failing cases and new cold-inventory regression passed on both hosts.
+Current mode adds a fresh two-phase Windows connection harness, real current-Save
+reload fault, early verified-child/focus/Cancel checks, retained-input Retry/Cancel,
+whole-store/request/report/cleanup gates and partial evidence retention. Historical
+Windows guard/ordinals and frozen929Settings route stay unchanged. Mac changes only
+report admission, preserving the existing four-phase/signing contract; no Mac native
+package or launch is selected. Real provider/generation and old human acceptance remain
+separate. Deliverables1/2 retain [audited CI2 completion](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
 
-The [terminal audit](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16)
-verifies exact candidate/tree/run/attempt/host, both ZIP digests, manifests/named results,
-353checkout-aware source inputs per host and privacy scans22files. Mac source proof
-was reused against its unchanged terminal artifact. Artifacts expire2026-10-23;
-identities/digests/results remain in the task. Raw evidence stays ignored under
-`.toolchains/ci-harness-reliability/ci2-audit/`. Later commits are docs-only.
+[Local preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-local-preparation-and-review--2026-10-16)
+passed final cold-export197Python cases (195pass/two exact exclusions), Q1/10retention,
+33actual renderer/probe cases including cross-language admission, connection4/Windows
+fixture1/reload3 Rust cases, renderer build, all-workflow lint and621-file validation.
+The first producer-conformance failure and local loopback-capability refusal remain
+recorded; corrections passed. Raw proof is ignored under the maintenance `d3` root.
 
-CI1 remains failed: its three unit fixtures depended on ignored permissions generated
-by a prior Tauri build. The repair uses public temporary inventory files and retains
-real missing-permission refusal. Clean-export proof passed without build state;
-production native gates are unchanged. Local5/6 and pairedCI2/2 are final cumulative
-usage. Unchanged prior93renderer/probe proof, workflow lint and docs checks remain
-recorded. The three pre-existing user edits remain untouched and uncommitted.
+Cumulative current usage: local3/3, nativeCI0/2, Windows packages0/2, launches0/4,
+loopback GETs0/14 before dispatch. Reserve CI1 only after publishing the exact reviewed
+candidate and checking for an existing run: one package/at most two launches/seven
+GETs, Mac portable gates only. Old maintenance/Thinking/Studio/walkthrough counts
+stay consumed. No native pass is claimed yet.
 
-**Next:** the [deliverable3 plan](../tasks/active/ci-harness-reliability.md#deliverable3-proposed-plan--current-native-connection-harness)
-awaits explicit approval. It scopes current Windows contract2/fixture/input proof and
-Mac report admission; proposed local3/nativeCI2 limits do not renew old counts.
-No new CI, package/native launch, provider/model operation, dependency update, frozen
-native migration, merge or release is selected. Prior native/human recovery below
-remains pending and untouched.
+**Next:** publish only owned paths, then use Repository quality with only
+`studio_connection_native=true`, exact candidate and ordinal1. Record actual run,
+attempt, candidate, inputs and initial status, then apply manual same-thread waiting.
+On resume audit both-host selected groups and the Windows package, exact phase reports,
+all native controls/observations, ordered GETs, normal exit/PID, independent cleanup,
+archive digest/source/manifest and privacy. Failed/missing/skipped proof stays failed
+or pending. No automatic polling, duplicate dispatch or extra local round is selected.
 
 ## Retained app baseline and unrelated pending work
 

@@ -54,10 +54,20 @@ The current draft-connection probe contract is version 2. The historical Windows
 credential runner refuses it before building/launching; its frozen store/reload-fault
 qualification is not current native connection proof. The frozen Studio Settings
 external verification route and its old ordinals remain historical. A current native
-migration needs its own selected task; this maintenance does not reopen it.
+migration needs its own selected task.
+The [selected deliverable3 continuation](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
+adds explicit `windows-studio-credentials.py current` build/run selection and the
+`Repository quality` → `studio_connection_native` route. This current mode uses a
+fresh namespace, exact candidate/ordinal, two processes and seven loopback GETs
+(alpha/gamma/alpha/alpha, then alpha/beta/beta). The ordinary legacy entry and frozen
+929 workflow remain unchanged. Current native qualification is pending its own CI
+and terminal artifact audit; the selector is not permission to replay old attempts.
 
 The Mac identity probe's existing four phases retain their 2/2/4/0 GET schedule,
-including draft Connect. Native request fixtures bind explicit Thinking modes and
+including draft Connect. Its report validator requires contract2, the exact case,
+ordered complete named assertions and one report per phase, alongside existing
+PID/path/signature/exit/request checks. Validator tests do not claim fresh Mac native
+acceptance. Native request fixtures bind explicit Thinking modes and
 actual prepared bodies. Real owner-provider sends, output budgets and model operations
 remain separately initiated/selected; never use owner credentials in controlled CI.
 Native Settings must prove retained input, refused Save/retry, cancellation/stale origin,

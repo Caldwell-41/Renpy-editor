@@ -12,7 +12,7 @@ mod identity_probe;
 mod request_probe;
 mod prompt_probe;
 mod rewrite_probe;
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", test))]
 mod windows_studio_probe;
 use loomlight_core::{
     dispatch::ApplicationHost, lifecycle::LifecycleService, validate_request, CoreResponse,
@@ -314,6 +314,10 @@ fn core_request(
             .map_err(|_| "probe state")?
             .clone()
             .ok_or("probe host")?;
+        #[cfg(target_os = "windows")]
+        if std::env::var("LOOMLIGHT_STUDIO_WINDOWS_CONTRACT").as_deref() == Ok("2")
+            && std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("studio-settings")
+        { ai_connection::service().shutdown(); }
         let owners=rewrite_probe::cleanup_owners(||ai_requests::service().shutdown(),||if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && (!passed || std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2")) {
             rewrite_probe::cleanup_when_idle(&host)
         } else {true},||host.shutdown());
@@ -805,6 +809,16 @@ fn main() {
             }
             #[cfg(target_os = "windows")]
             if let Some(selector) = std::env::var_os("LOOMLIGHT_STUDIO_WINDOWS_RELOAD_FAILURE") {
+                if std::env::var("LOOMLIGHT_STUDIO_WINDOWS_CONTRACT").as_deref() == Ok("2") {
+                    if selector.to_str() != Some(ai_reload_fixture::WINDOWS_SELECTOR)
+                        || std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() != Ok("studio-settings")
+                        || std::env::var("LOOMLIGHT_STUDIO_WINDOWS_PHASE").as_deref() != Ok("2")
+                        || std::env::var_os("LOOMLIGHT_STUDIO_DEV_CREDENTIAL_PHASE").is_some()
+                        || std::env::var_os("LOOMLIGHT_STUDIO_DEV_RELOAD_FAILURE").is_some()
+                    { return Err("Current connection reload selection refused".into()); }
+                    app.manage(ai_reload_fixture::ConnectionState(Mutex::new(
+                        ai_reload_fixture::ConnectionReload::arm(&lifecycle)?)));
+                } else {
                 let fixture = ai_reload_fixture::ReloadFixture::arm_windows(
                     selector.to_str().ok_or("Windows reload selector refused")?,
                     &std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").unwrap_or_default(),
@@ -814,6 +828,7 @@ fn main() {
                     &lifecycle,
                 )?;
                 app.manage(ai_reload_fixture::State(Mutex::new(fixture)));
+                }
             }
             *app.state::<DesktopState>()
                 .0

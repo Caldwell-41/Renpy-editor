@@ -45,6 +45,8 @@
   select(A);
   if(phase===1){
    check(initial.profiles.every(p=>p.credentialStatus==='missing'),'Initial fixture has no native keys');
+   await step('preflight-cancel');await click('Enter credential…');await wait(()=>ready()&&document.querySelector('.studio-connect [role="status"]').textContent.includes('cancelled'),120000);
+   check(JSON.stringify(await call('ai.profiles'))===JSON.stringify(initial),'Early native Cancel preserves complete initial snapshot');await checkpoint('preflight-cancelled');
    await enter('alpha-entry','API key saved; cleanup pending');await checkpoint('alpha-saved');
    let saved=await call('ai.profiles');check(saved.profiles[0].credentialStatus==='configured'&&saved.profiles[0].revision===2&&saved.cleanup.length===1,'Retained-field Retry saved A while foreign cleanup remained pending');
    select(B);await enter('gamma-entry','API key saved');await checkpoint('gamma-saved');

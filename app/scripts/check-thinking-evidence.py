@@ -56,6 +56,11 @@ WINDOWS_NATIVE_TESTS = frozenset('test_rewrite_windows_reuse.RetainedEvidenceGat
     'test_native_window_placement_preserves_layout_and_rejects_unobservable_states',
 ))
 PYTHON_REQUIRED = MAC_SNAPSHOT_TESTS | WINDOWS_NATIVE_TESTS | {
+    'test_macos_identity_probe.IdentityProbeTests.test_current_report_requires_exact_contract_case_assertions_identity_and_cleanup',
+    'test_studio_connection_native.CurrentConnectionTests.test_current_report_requires_complete_case_contract_requests_timings_and_cleanup',
+    'test_studio_connection_native.CurrentConnectionTests.test_current_publication_requires_exact_settings_revision_ownership_and_unrelated_profiles',
+    'test_studio_connection_native.CurrentConnectionTests.test_native_receipt_rejects_unowned_focus_children_failed_retry_or_cleanup',
+    'test_studio_connection_native.CurrentConnectionTests.test_failed_build_retains_exclusive_attempt_and_never_creates_positive_package',
     'test_macos_studio_request.SyntheticRequestTests.test_known_unused_blocked_fixture_cleanup_requires_exact_seed_and_no_process',
     'test_windows_studio_credentials.WindowsFixtureGate.test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch',
     'test_windows_studio_credentials.WindowsFixtureGate.test_source_inventory_requires_generated_permissions_without_prior_builds',
@@ -189,7 +194,7 @@ if __name__ == '__main__':
     parser.add_argument('path', type=Path)
     parser.add_argument('other', nargs='?', type=Path)
     parser.add_argument('--runner', choices=('Windows', 'macOS'))
-    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions'), default='thinking-and-harness-repair')
+    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions', 'current-studio-connection'), default='thinking-and-harness-repair')
     args = parser.parse_args()
     if args.action == 'cargo':
         print(verify_cargo(args.path.read_text(encoding='utf-8'), args.other.read_text(encoding='utf-8')))

@@ -32,8 +32,33 @@ pub fn phase(root: &Path) -> Result<Option<u8>, &'static str> {
             .map_err(|_| "Windows fixture records missing")?,
     )
     .map_err(|_| "Windows fixture records invalid")?;
-    validate(&store, phase)?;
+    match std::env::var("LOOMLIGHT_STUDIO_WINDOWS_CONTRACT").as_deref() {
+        Ok("2") => validate_current(&store, phase)?,
+        Err(std::env::VarError::NotPresent) => validate(&store, phase)?,
+        _ => return Err("Windows fixture contract refused"),
+    }
     Ok(Some(phase))
+}
+/// Current connection Save publishes settings and the Windows adapter's owned key.
+/// Exact fixture comparisons remain separate from historical credential entry.
+pub(crate) fn validate_current(store: &ProfileStore, phase: u8) -> Result<(), &'static str> {
+    let mut expected: ProfileStore = serde_json::from_str(FIXTURE).map_err(|_| "Windows fixture invalid")?;
+    if phase == 2 {
+        expected.revision = 5;
+        for (profile, actual) in expected.profiles.iter_mut().zip(&store.profiles) {
+            let credential = actual.credential.as_ref().ok_or("Current native credential missing")?;
+            if credential.service != loomlight_core::ai_profiles::CredentialService::Legacy
+                || !credential.storage.is_native() || credential.revision != 1
+                || credential.origin != "http://127.0.0.1:46082"
+            { return Err("Current native credential ownership refused"); }
+            profile.credential = Some(credential.clone()); profile.revision = 2;
+            profile.settings.context_ceiling = profile.settings.context_budget;
+            profile.settings.thinking = Some(true); profile.settings.temperature = Some(1.0);
+            profile.settings.top_p = Some(0.95); profile.settings.model_load = Some(Default::default());
+        }
+    } else if phase != 1 { return Err("Current Windows phase refused"); }
+    if !store.valid() || *store != expected { return Err("Current Windows complete fixture state refused"); }
+    Ok(())
 }
 pub(crate) fn validate(store: &ProfileStore, phase: u8) -> Result<(), &'static str> {
     let fixture: ProfileStore =
@@ -81,12 +106,14 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
         .ok_or("Windows fixture step missing")?;
     let evidence = std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
     let observation = step.strip_suffix("-observed").filter(|name| matches!(*name,
-        "alpha-saved" | "gamma-saved" | "cancelled" | "beta-reloaded" |
+        "preflight-cancelled" | "alpha-saved" | "gamma-saved" | "cancelled" | "beta-reloaded" |
         "get-1-complete" | "get-2-complete" | "reopened" | "removed" | "complete"));
     if observation.is_some() && !evidence { return Err("Windows capture holds disabled"); }
     if observation.is_none() && !matches!(
         step,
-        "alpha-entry"
+        "preflight-cancel"
+            | "preflight-cancelled"
+            | "alpha-entry"
             | "alpha-saved"
             | "gamma-entry"
             | "gamma-saved"
@@ -121,6 +148,11 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
         }
         if step == "beta-reload-observed" {
             if phase != "2" { return Err("Windows reload observation phase refused"); }
+            if std::env::var("LOOMLIGHT_STUDIO_WINDOWS_CONTRACT").as_deref() == Ok("2") {
+                let acknowledged = std::fs::read(root.join(".studio-windows-current-reload-observed.json"))
+                    .ok().and_then(|b| serde_json::from_slice::<Value>(&b).ok());
+                return Ok(json!({"observed":acknowledged == Some(json!({"contract":2,"phase":2,"observed":true}))}));
+            }
             let acknowledged = std::fs::read(root.join(".studio-windows-reload-observed.json"))
                 .ok().and_then(|b| serde_json::from_slice::<Value>(&b).ok());
             return Ok(json!({"observed":acknowledged == Some(json!({"run":7,"phase":2,"observed":true}))}));
@@ -137,7 +169,8 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
             .map_err(|_| "Windows fixture step unavailable")?;
         if matches!(
             step,
-            "alpha-saved"
+            "preflight-cancelled"
+                | "alpha-saved"
                 | "gamma-saved"
                 | "cancelled"
                 | "reopened"

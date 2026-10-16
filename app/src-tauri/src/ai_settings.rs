@@ -936,6 +936,23 @@ pub fn dispatch(
     operation: &str,
     payload: Value,
 ) -> CoreResponse {
+    #[cfg(target_os = "windows")]
+    if operation == "ai.profiles" {
+        use tauri::Manager;
+        if let Some(state) = app.try_state::<crate::ai_reload_fixture::ConnectionState>() {
+            let result = (|| -> credentials::Result<Value> {
+                let _active = ACTIVE.try_lock().map_err(|_| "Another AI settings operation is in progress.")?;
+                if payload != json!({}) { return Err("Invalid AI settings payload."); }
+                let mut fixture = state.0.try_lock().map_err(|_| "Current reload fixture busy")?;
+                let store = host.with_service(|s| fixture.read(s)).map_err(|_| "Current reload host busy")??;
+                view_store(host, store)
+            })();
+            return match result {
+                Ok(value) => CoreResponse::success(id, value),
+                Err(message) => CoreResponse::failure(id, "AI_SETTINGS_REFUSED", message),
+            };
+        }
+    }
     #[cfg(any(target_os = "macos", target_os = "windows"))]
     {
         use tauri::Manager;

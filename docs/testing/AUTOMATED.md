@@ -70,6 +70,10 @@ Both Thinking and the current redesign selection require production-probe consum
 cases. Redesign discovers expected names from all its selected files; Thinking
 requires its critical consumers plus complete successful renderer execution.
 Missing, duplicate, failed, cancelled or unexpectedly skipped cases cannot pass.
+The Mac identity and Windows current-connection DOM consumers also submit their
+actual production-probe reports to the Python admission validators. This checks
+producer/consumer agreement, including early native Cancel, current Save confirmation
+and read-only reload assertions; fabricated positive reports alone cannot do that.
 Nested probe subtests count toward the execution summary in addition to their
 required named parent; missing results and nested failures still refuse.
 Never update an aggregate count alone to accommodate a missing safety assertion.

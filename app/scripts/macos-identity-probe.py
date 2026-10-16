@@ -84,6 +84,53 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2) + "\n")
 
 
+def expected_checks(phase):
+    checks = ['Isolated fixture has no prior owned cleanup']
+    checks += (['Fresh isolated profile', 'New profile cannot save before connection',
+                'Native draft entry does not publish a profile'] if phase == 1 else
+               ['Full process reopen retained profile and loopback endpoint',
+                'Discovery readiness did not persist across processes'])
+    def discover(number):
+        return [f'Explicit authenticated local GET {number}', 'Connect does not persist profile changes']
+    def remembered():
+        return ['Remembered native read 1', 'Remembered native read 2']
+    def audit(active, retired):
+        return f'App-owned native audit: {active} active, {retired} retired absent, no cleanup'
+    if phase == 1:
+        checks += discover(1)
+    checks += ['WebView contains no secret field']
+    if phase <= 3:
+        checks += remembered() + [audit(1, 0)]
+        for number in ([2] if phase == 1 else [1, 2]):
+            checks += discover(number)
+        if phase == 3:
+            checks += ['Draft key replacement preserves saved revision until Save'] + discover(3)
+            checks += ['Native replacement published a new revision'] + remembered() + [audit(1, 1)]
+            checks += discover(4) + ['Credential deletion disabled profile and removed active reference',
+                                   audit(0, 2), 'Discovery disabled after deletion']
+    else:
+        checks += ['Final reopen retained deletion without another key entry',
+                   'Final reopen cannot discover without a key', audit(0, 0),
+                   'Disposable profile fully removed']
+    return checks
+
+
+def validate_report(reports, phase, pid, executable, events, exit_code, timed_out):
+    if phase not in SCHEDULE or len(reports) != 1:
+        raise ValueError('Exactly one report for a selected phase required')
+    report = reports[0]
+    details = report.get('details', {})
+    if (exit_code != 0 or timed_out or report.get('evidence') != 'runtime-ui-packaged'
+            or report.get('case') != 'studio-settings' or report.get('passed') is not True
+            or report.get('cleanupComplete') is not True or details.get('passed') is not True
+            or details.get('contract') != 2 or details.get('phase') != phase
+            or details.get('stage') != 'complete' or details.get('checks') != expected_checks(phase)
+            or details.get('localGets') != len(SCHEDULE[phase]) or details.get('processId') != pid
+            or details.get('executablePath') != str(executable)
+            or events != [{'sequence': n + 1, 'accepted': True} for n in range(len(SCHEDULE[phase]))]):
+        raise ValueError('Current identity report, complete assertions or native identity refused')
+
+
 def run(bundle, output, phase):
     if os.uname().sysname != "Darwin":
         raise ValueError("Real Mac packaged host required")
@@ -154,14 +201,9 @@ def run(bundle, output, phase):
             except ValueError:
                 pass
         result["reports"] = reports
-        details = reports[0].get("details", {}) if len(reports) == 1 else {}
-        result["passed"] = (result["exitCode"] == 0 and not result["timedOut"] and len(reports) == 1
-                            and reports[0].get("passed") is True and reports[0].get("cleanupComplete") is True
-                            and details.get("phase") == phase and details.get("stage") == "complete"
-                            and details.get("localGets") == len(SCHEDULE[phase])
-                            and details.get("processId") == process.pid
-                            and details.get("executablePath") == str(executable)
-                            and len(events) == len(SCHEDULE[phase]) and all(e["accepted"] for e in events))
+        validate_report(reports, phase, process.pid, executable, events,
+                        result['exitCode'], result['timedOut'])
+        result['passed'] = True
     finally:
         if process is not None and process.poll() is None:
             os.killpg(process.pid, signal.SIGKILL)

@@ -1,4 +1,5 @@
 import importlib.util
+import copy
 from pathlib import Path
 import unittest
 
@@ -8,6 +9,32 @@ spec.loader.exec_module(probe)
 
 
 class IdentityProbeTests(unittest.TestCase):
+    def test_current_report_requires_exact_contract_case_assertions_identity_and_cleanup(self):
+        for phase in probe.SCHEDULE:
+            details = dict(contract=2, phase=phase, passed=True, stage='complete',
+                           checks=probe.expected_checks(phase), localGets=len(probe.SCHEDULE[phase]),
+                           processId=42, executablePath='/public/Loomlight.app/Contents/MacOS/loomlight')
+            report = dict(evidence='runtime-ui-packaged', case='studio-settings', passed=True,
+                          cleanupComplete=True, details=details)
+            events = [dict(sequence=n+1, accepted=True) for n in range(len(probe.SCHEDULE[phase]))]
+            args = (phase, 42, details['executablePath'], events, 0, False)
+            probe.validate_report([report], *args)
+            for field, value in [('contract', 1), ('phase', 9), ('passed', False),
+                                 ('stage', 'open'), ('processId', 43), ('executablePath', '/other'),
+                                 ('localGets', 99), ('checks', []),
+                                 ('checks', details['checks'][:-1]), ('checks', details['checks'] * 2)]:
+                bad = copy.deepcopy(report); bad['details'][field] = value
+                with self.subTest(phase=phase, field=field), self.assertRaises(ValueError):
+                    probe.validate_report([bad], *args)
+            for field, value in [('case', 'other'), ('evidence', 'mock'), ('passed', False), ('cleanupComplete', False)]:
+                bad = copy.deepcopy(report); bad[field] = value
+                with self.assertRaises(ValueError): probe.validate_report([bad], *args)
+            for reports in ([], [report, report]):
+                with self.assertRaises(ValueError): probe.validate_report(reports, *args)
+            with self.assertRaises(ValueError): probe.validate_report([report], phase, 42, details['executablePath'], events, 1, False)
+            with self.assertRaises(ValueError): probe.validate_report([report], phase, 42, details['executablePath'], events, 0, True)
+            with self.assertRaises(ValueError): probe.validate_report([report], phase, 42, details['executablePath'], events + [dict(sequence=99, accepted=True)], 0, False)
+
     def test_request_schedule_rejects_wrong_key_route_method_and_excess(self):
         for phase, expected in probe.SCHEDULE.items():
             for index, label in enumerate(expected):
