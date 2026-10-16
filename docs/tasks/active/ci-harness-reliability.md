@@ -42,7 +42,7 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-State: `review_ready` for focused platform CI. Local rounds4/4 complete, paired harness CI0/2.
+State: `awaiting_ci`. Local rounds4/4 complete, paired harness CI1/2 dispatched.
 
 The latest100-run review found36 failed outcomes;35 of62 manual dispatches failed.
 This mixed sample is not an app-defect rate. The incident index retains specific
@@ -94,3 +94,38 @@ No production app code, package or native process was involved.
 One remaining action is focused Windows/macOS harness CI on the published maintenance
 candidate, followed by terminal log/source/manifest audit on manual same-thread resume.
 Do not dispatch the exhausted Thinking or Story selections to test this maintenance.
+
+## Focused CI1 reservation — 2026-10-16
+
+Reviewed implementation published as `c33d77cf4cf5826050d1ae367d6219822dc30bc1`
+on the existing feature branch. Only21 maintenance paths committed; the three
+pre-existing user edits remain unstaged/unchanged. Local raw logs remain ignored
+under `.toolchains/ci-harness-reliability/`.
+
+No workflow_dispatch run exists for this candidate at the pre-dispatch check.
+Reserve paired harness CI1/2 for Repository quality with only `harness_regressions`
+true. This runs only existing inexpensive Python/Q1/retention fixtures on Windows
+x64/macOS ARM64; no SDK, package, app launch or provider operation. Actual run identity
+is not confirmed until the dispatch response and exact-head lookup. An ambiguous
+response requires reconciliation, never an automatic duplicate request.
+
+## Confirmed CI1 and manual wait — 2026-10-16
+
+[Run38878570023](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38878570023),
+workflow354880113, attempt1, workflow_dispatch, exact head
+`c33d77cf4cf5826050d1ae367d6219822dc30bc1`, branch `codex/phase3a-story-logic`,
+created09:09:55Z. Initial status check at2026-10-16T09:10:26Z: **in_progress**.
+Windows job116899482492 and Mac job116899482822 are in progress. All eight other
+jobs are intentionally excluded; those skipped jobs do not supply evidence.
+Only the harness selector was sent. PairedCI1/2 is charged; no automatic duplicate,
+old-run retry or further dispatch while this identity is unresolved.
+
+Implementation/local verification is complete; both-host harness qualification is
+pending. Follow manual same-thread resume, then verify terminal status, required
+steps, exact identities, raw Python/retention named results and host exclusions,
+all four group outcomes, privacy/upload and source/hash manifest. The artifact has
+no application binary by design. Verify GitHub archive digest and retained files;
+compare checkout-aware source inputs with this exact candidate, not a newer docs
+head. Do not infer actual Windows/macOS/native or human acceptance from local proof.
+A failed required group remains failed even if later groups or source sealing pass.
+No app/package/SDK/native/provider allowance was consumed by this maintenance.
