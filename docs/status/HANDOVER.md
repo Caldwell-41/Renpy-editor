@@ -1,8 +1,8 @@
 # Current outcome handover
 
-## Deliverable3 — current native connection harness selected, 2026-10-16
+## Deliverable3 — native CI1 failed; scoped repair pending, 2026-10-16
 
-State `awaiting_ci` for the first focused native dispatch on
+State `blocked` for exhausted local allowance after the first native failure on
 `codex/phase3a-story-logic`. User explicitly approved the
 [plan/selection](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16).
 One Mac implementation owner; Windows native CI and both-host portable fixture gates.
@@ -30,26 +30,40 @@ Pre-dispatch reconciliation found no existing run for this candidate or unresolv
 recent manual operation.
 
 [Native CI1run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330),
-workflow354880113/attempt1, created11:43:24Z, exact370f4b7 on the existing branch,
-selected only `studio_connection_native=true`, exact candidate and ordinal1.
-At11:43:44Z it was **in_progress**: Windows116955388760/Mac116955388339 passed
-candidate/allowance gates and were setting up Node. Nine other jobs were excluded.
-Mac supplies portable evidence only. Initial metadata stays ignored under `d3/native-ci1`.
+workflow354880113/attempt1, exact370f4b7/ordinal1, completed **failure** at11:52:04Z.
+Windows116955388760 failed in native phase1; Mac116955388339 passed portable checks.
+Both-host archives/manifests/all357 source inputs, named Python/33DOM/Cargo results
+and privacy passed independent audit. Windows package AMD64/hash/PID identity passed.
+Mac native steps and nine unrelated jobs were unselected. Raw proof, metadata and
+audit JSON remain ignored under `d3/native-ci1`; artifacts expire2026-10-23.
 
-Current usage: local3/3 and nativeCI1/2 charged; one dispatch remains. Reserve one
-Windows package/at most two launches/seven GETs for CI1; actual package/launch/GET
-counts require terminal receipts. Maximum cumulative packages2/launches4/GETs14.
-No automatic retry or extra local repair round is selected. Old maintenance,
-Thinking/Studio/walkthrough counts stay consumed. No native pass is claimed.
+Early owned native Cancel passed, including children100/1/2 and masked focus/input.
+Main observation then refused1044×759 outer bounds on a1024×768 desktop. Failure
+close called the same size gate before Alt-F4, so forced exit followed. PID absence
+and listener stop passed; normal close/full native sequence/credential cleanup did
+not. Phase2 never launched; zero requests. No application defect is established.
+The fixture root was retained only on the runner: store/step snapshots are absent
+from the uploaded ZIP, so their equality cannot be independently audited.
 
-**Next on manual same-thread resume:** read the exact recorded run/attempt once;
-if terminal, follow the [task's audit](../tasks/active/ci-harness-reliability.md#deliverable3-confirmed-native-ci1-and-manual-wait--2026-10-16)
-for both-host named fixture/probe/Cargo results and source gates, Windows package/
-process identities, both native phases, risky-control/retry/Cancel/reload observations,
-ordered requests/deadlines, independent cleanup and archive/source/manifest/privacy.
-Do not substitute a newer docs-only candidate or skipped Mac native steps. If still
-pending, preserve identity and pause again. No polling/watcher/wake-up/second writer.
-Any failure needs classification and allowance reassessment before a correction.
+The [terminal audit and concrete proposal](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16)
+own full receipts and [H18](../testing/INCIDENTS.md#h18--current-native-window-exceeds-the-runner-desktop-cleanup-repeats-the-gate)
+indexes the cause. Proposed repair: fit/verify only the current test window using
+measured desktop/frame/DPI, separate ordinary owned close from geometry acceptance,
+and retain allowlisted synthetic snapshots with focused regressions. Frozen helpers,
+product defaults and existing deadlines/gates stay intact. No correction was made.
+
+Actual usage: local3/3, nativeCI1/2, Windows packages1/2, launches1/4, GETs0/14.
+One dispatch remains, at most one package/two launches/seven GETs. Two additional
+local repair/check rounds (cap5) are proposed, **not approved**; the existing CI cap2
+is unchanged. Old maintenance/Thinking/Studio/walkthrough counts stay consumed.
+
+**Next on same-thread resume:** obtain explicit selection of that scoped repair
+and local allowance extension before edits/check rounds or CI2. Then implement and
+review current-driver geometry/cleanup/retention regressions on the chosen Mac host,
+use Windows CI for actual native proof, and audit both full phases before completion.
+No operation is pending, no native pass is claimed, and no automatic retry, polling,
+watcher, host switch or second writer is selected. This audit publication changes
+only the owning task, incident index and live status documents.
 
 ## Retained app baseline and unrelated pending work
 

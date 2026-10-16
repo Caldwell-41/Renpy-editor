@@ -1,6 +1,6 @@
 # Current status
 
-## Current native connection harness — published; native CI1 audit pending
+## Current native connection harness — CI1 audited; repair proposal pending
 
 Updated2026-10-16. The user approved [deliverable3](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
 on `codex/phase3a-story-logic`. One Mac implementation owner; Windows native CI and
@@ -9,20 +9,25 @@ both-host portable checks supply evidence without routine machine switching.
 | Work | Current evidence |
 | --- | --- |
 | Deliverables1/2: testing docs and cheap harness prevention | Complete; [both-host CI2 audited](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16) on0cc56e7 |
-| Current Windows connection native harness | Implemented/reviewed; local checks pass; real Windows native proof pending |
+| Current Windows connection native harness | CI1 failed in harness window geometry and cleanup; deliverable3 remains open |
 | Mac report admission | Stricter current-contract/assertion checks pass actual-producer/negative fixtures; fresh Mac native acceptance remains separate |
 
 Local3/3 used: clean-export197Python (195pass/two exact exclusions), Q1/10retention,
 33renderer/probe cases, real connection/fixture tests, build, lint and docs validation.
 [Native CI1run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330)
-was in progress at11:43:44Z on exact370f4b7/attempt1, both required jobs in setup.
-NativeCI1/2 is charged; one Windows package/two launches/seven loopback GETs are
-reserved, with actual usage pending receipts. Next is manual same-thread terminal
-artifact/source/native-sequence audit; no native pass is claimed. The native sequence has its own fresh
-namespace; legacy guards/ordinals and frozen929route are retained. No Mac package,
-real provider/model request, SDK, dependency update, merge or release is selected.
-Unrelated user edits and the native/human recovery below remain untouched. The task
-owns exact attempts, remaining allowance and terminal evidence audit.
+failed on exact370f4b7/attempt1. Both-host portable checks, source/artifact audits and
+the Windows package passed. Early native Cancel passed; the1044-pixel-wide main
+window exceeded the1024-pixel desktop. Cleanup repeated that gate and forced exit.
+This establishes a harness failure; later native behavior remains unproved. Fixture
+snapshots were also absent from the uploaded archive. No app defect is established.
+
+The [terminal audit and scoped repair proposal](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16)
+own exact evidence and limits; [H18](../testing/INCIDENTS.md#h18--current-native-window-exceeds-the-runner-desktop-cleanup-repeats-the-gate)
+indexes the cause. State `blocked` for allowance reassessment: local3/3 used,
+nativeCI1/2, actual Windows packages1/2, launches1/4, GETs0/14. One dispatch remains;
+two additional local rounds are proposed, not approved. No correction or rerun was
+made. Legacy/frozen929routes, unrelated edits and native/human recovery remain intact.
+No Mac native package, real provider, SDK, dependency update, merge or release selected.
 
 ## Retained app baseline and pending acceptance
 

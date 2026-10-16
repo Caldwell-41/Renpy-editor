@@ -44,9 +44,9 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-Deliverables1/2 remain complete. Active state: `in_progress` for the selected
-deliverable3 continuation below. Original maintenance local5/6 and pairedCI2/2 were
-used, including failed CI1. CI2's Windows/Mac steps, artifacts, source identities and
+Deliverables1/2 remain complete. Active state: `blocked` after deliverable3 native
+CI1 failed; its terminal audit and proposed repair are below. Original maintenance
+local5/6 and pairedCI2/2 were used, including failed CI1. CI2's Windows/Mac steps, artifacts, source identities and
 named results pass audit. Deliverable3 was plan-only at that completion; the later
 user approval selects its implementation.
 
@@ -504,3 +504,127 @@ distinct from product defects. Do not chase a newer docs-only head as the tested
 candidate. If still pending, retain this identity and pause again. No native pass or
 deliverable3 completion is claimed. Additional local repair rounds are not selected;
 classify any failure and reassess the remaining allowance before another correction.
+
+## Deliverable3 native CI1 terminal audit and proposed repair — 2026-10-16
+
+The user requested this exact run's audit, completion only if it passed, and an
+explanation of failure and needed changes otherwise. No implementation correction
+or redispatch was selected by this audit. Deliverables1/2 remain complete;
+deliverable3 is **not complete**. State `blocked`: local3/3 repair/check rounds are
+exhausted, so the bounded repair below needs explicit allowance reassessment.
+
+[Run38895657330](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38895657330)
+completed **failure** at2026-10-16T11:52:04Z, workflow354880113/attempt1, exact
+candidate `370f4b793f87ce0fbefb78626f128c2b2e070347`, tree
+`e2dec83d328628499111687403b9d504c5d4820b`. Windows job116955388760 failed only
+at “Complete both current Windows native phases”; Mac job116955388339 passed its
+selected portable checks. Nine unrelated jobs were intentionally excluded. Mac
+package/native steps were unselected; Windows's success-only final gate was skipped
+after the native failure. None of those skips is native proof.
+
+Both archives were downloaded before expiry and independently audited: published
+ZIP SHA256, safe unique entries/CRC, every manifest file/hash, all357 exact tracked
+input names and checkout-aware candidate bytes (including CRLF PowerShell), source
+tree/run/attempt/host identity, named raw results and local artifact privacy scan.
+Windows has39 files including its38-entry manifest; Mac has18/17. Both source seals
+are complete and match the candidate; both partial-evidence/privacy uploads passed.
+
+| Evidence | Windows x64 | Mac ARM64 |
+| --- | --- | --- |
+| Shared Python | 201 discovered;197 pass/four exact Mac exclusions | 197 discovered;195 pass/two exact Windows exclusions |
+| Q1 source/rejection; retention | Both Q1 gates pass;10 retention,9 pass/one exact Mac tar exclusion | Both Q1 gates pass;10 retention pass |
+| Actual production-probe/Settings DOM | All33 named cases pass, no skips | All33 named cases pass, no skips |
+| Cargo listing/result identity | Connection4, Windows fixture1, reload4 pass | Connection4, Windows fixture1, reload3 pass |
+| Renderer/toolchains/package | Renderer and matching package pass; build exits normally | Renderer/toolchains pass; no native package selected |
+
+Windows artifact12044391259, `studio-connection-Windows-38895657330-1`, ZIP SHA256
+`13e4930f2ccd43c757dc24ce163d8f09c37b496dcce1a08aad732a8cf44ba395`, expires
+2026-10-23T11:51:58Z. Mac artifact12043378507,
+`studio-connection-macOS-38895657330-1`, ZIP SHA256
+`acc7a6678395e48cfbb1e3e50dd429e22ae2d79409cea4e7c4a81024a7f59c53`, expires
+2026-10-23T11:46:52Z. Metadata, job logs, ZIPs, extracted evidence and independent
+`audit.json` remain ignored under `.toolchains/ci-harness-reliability/d3/native-ci1`.
+
+### Decisive failure and evidence limits
+
+This is a **harness geometry/cleanup failure**, not an established application
+defect or a repeat of H17's missing generated files. The packaged executable exists,
+has an AMD64 PE header and SHA256
+`c5f487f29edb5b96131753ebb45aa532e3a9481158ed232d9255de668e553602`, matching the
+build receipt and launched PID4444. Its234 source inventory entries comprise229
+tracked source hashes matching the exact candidate, both generated command permission
+files and three optional-directory presence markers. The receipt also records three
+renderer files and generated Tauri/Cargo inventories. Those generated trees are not
+fully archived for independent byte-by-byte replay; their inventory is retained.
+
+Phase1's early native Cancel **passed**: exact owned dialog/PID, unique children
+100/1/2, masked Edit/focus and physical clicks100→2, followed by dismissal. The next
+`observe/preflight-cancelled` stage failed in the imported
+`Ensure-ObservableWindow` before inspecting the cancellation status or capturing:
+`Required owned layout does not fit observable desktop`. Its receipt records main
+window rectangle `[0,9,1044,759]` on desktop `[0,0,1024,768]`. The helper preserves
+size and can only move a window that already fits. The ordinary app configuration
+requests width1100; current mode supplied no fitting viewport. The receipt does not
+measure client/frame bounds or DPI, so the exact Windows sizing transformation is
+not inferred from those outer bounds.
+
+Failure cleanup cancelled any owned modal but then called the same size-dependent
+`Select-MainWindow`; it hit the identical geometry rejection before sending Alt-F4.
+The controller then forced exit. PID absence and listener stop are proved; normal
+exit is not. Phase1 lasted14.219seconds with **zero requests**. Phase2 was never
+launched. Save/reopen/replacement/retained-input Retry/reload/remove and full-sequence
+credential cleanup are unproved. No native pass can be inferred from the early Cancel.
+
+There is also a **retention gap**: `root.json` retains a temporary path, while the
+actual fixture/store and `.studio-windows-*` snapshots stay outside the uploaded
+artifact directory. `rootPreserved=true` only means the directory existed during
+runner cleanup; it is not an archived snapshot. Thus even the preflight Cancel store
+equality cannot be independently audited from this ZIP. No credential Save was
+reached, but native-store absence was not independently proved. No unrelated local
+app window, credential, signing identity or human-acceptance fixture was touched.
+
+### Concrete repair proposal — not selected or implemented
+
+1. **Fit only current-mode native observations to the actual desktop.** Add current
+   driver setup that records desktop/work-area, DPI and owned main-window bounds;
+   choose and verify a bounded test window within that area, including its frame,
+   before invoking strict visibility/capture checks. Verify actual post-placement
+   bounds and required controls. Keep ownership/focus/password/capture gates, product
+   defaults, deadlines and frozen legacy helpers unchanged. Record an unsupported
+   desktop explicitly rather than accepting clipping or retrying blindly.
+2. **Make failure close independent of layout qualification.** In the current
+   driver, cancel only the verified owned modal, verify the owned main PID/HWND and
+   foreground, then send ordinary Alt-F4 without the observation-size prerequisite.
+   Retain separate close/exit/PID/modal/fault/listener results. Forced exit remains
+   failure; do not let cleanup overwrite the original error.
+3. **Retain the selected synthetic state needed for audit.** Copy an explicit
+   allowlist of existing nonsecret profile/step/observation snapshots into the
+   evidence directory on success and failure, with hashes and absent/not-reached
+   states. Include them in manifest/privacy validation. Do not upload the entire
+   temporary root or credential contents. For this early Cancel, assert unchanged
+   store bytes; retain an explicit owned-credential cleanup outcome for later phases.
+4. **Add focused regressions, then spend only the remaining native attempt.** Cover
+   the actual current driver on1024×768, frame/DPI/placement refusal, normal close
+   despite observation rejection, independent cleanup failures and partial snapshot
+   retention. Keep portable policy/retention checks on Mac; run real PowerShell/native
+   behavior on Windows CI. Require both complete native phases, exact4/3 GET order,
+   normal exits, whole-store snapshots and full terminal audit before completion.
+
+Expected implementation paths: `studio-connection-windows.ps1`,
+`studio_connection_native.py` and their focused tests; touch the current workflow
+only if explicit desktop capability setup is required. No production UI/backend,
+dependency, frozen runner or Mac signing migration is justified by this failure.
+
+Actual cumulative use is local3/3, nativeCI1/2, Windows packages1/2, launches1/4,
+loopback GETs0/14. One native dispatch remains, capped at one package/two launches/
+seven GETs; an unused first-run launch is not proof and does not renew local rounds.
+Propose at most **two additional meaningful local repair/check rounds** (local cap5)
+for the three evidenced harness gaps above, retaining the existing final CI cap2.
+This proposed extension needs user approval under WORKFLOW's budget policy; no new
+round, package, app launch or CI attempt was consumed by this read-only evidence
+audit and documentation/status publication.
+
+Audit documentation passes621-file repository validation and whitespace checks.
+CURRENT384words/HANDOVER805words remain within the maintenance guidance. All three
+pre-existing user edits and the retained unrelated HANDOVER tail are byte-identical;
+only the task, incident index, CURRENT and HANDOVER belong to this publication.

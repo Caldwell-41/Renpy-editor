@@ -175,6 +175,22 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   [clean-checkout verification](../tasks/active/ci-harness-reliability.md#clean-checkout-repair-verification--2026-10-16),
   [both-host CI2 completion](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
 
+## H18 — Current native window exceeds the runner desktop; cleanup repeats the gate
+
+- **Class/search:** harness geometry/cleanup and missing retained state;
+  `Required owned layout does not fit observable desktop`,1044×759,1024×768.
+- **Cause:** current mode imports a placement helper that preserves window size;
+  it supplied no fitting viewport. Early native Cancel passed, but main-window
+  observation refused. Failure close reused that gate and forced exit followed.
+  Temporary fixture snapshots also remained outside the uploaded artifact directory.
+- **Proposed correction, pending approval:** fit and verify only the current test
+  window against measured desktop/frame/DPI; separate owned ordinary close from
+  observation geometry; retain allowlisted synthetic snapshots with partial outcomes.
+  Keep strict visibility/ownership gates and frozen helpers. No app defect established.
+- **Regression needed:** actual current driver on1024×768 and invalid placement,
+  close after observation refusal, partial state retention, then both native phases.
+- **Evidence:** [native CI1 terminal audit and proposal](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16).
+
 ## P01 — Redo refuses an app-owned clean deletion
 
 - **Class/search:** product; Draft Scene Undo/Redo, cached unavailable Source buffer, DIRTY_SOURCE.
