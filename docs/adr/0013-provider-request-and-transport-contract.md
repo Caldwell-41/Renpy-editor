@@ -3,6 +3,39 @@
 **Status:** Studio-scoped reference/design accepted for the first bounded 2A.1 slice on 2026-10-08. Generic deferred; full live/production qualification incomplete.
 **Date:** 2026-10-07.
 
+## Draft connection setup and thinking preference — 2026-10-16
+
+The user selects Name → Endpoint/private-HTTP choice → native API key → Connect →
+model choice → Save profile, plus Thinking on and maximum response16384 as new-profile
+defaults. This supersedes earlier save-first/off-only UI constraints for the selected
+Studio implementation. Existing authored response limits remain unchanged on read;
+missing optional `thinking` means true without rewriting old records. Explicit
+non-boolean values refuse. Compatibility digest generation2 invalidates prior
+off-only preflight evidence; changing the saved mode requires a new response-format
+test. Exact reviewed requests disclose `enable_thinking`; tools remain disabled,
+strict JSON and nonstreaming responses remain required. Reasoning may consume output
+allowance and is validated separately, never saved as generated prose or a proposal.
+
+One native-owned draft holds an opaque ID, revision, profile token, canonical origin
+and zeroizing in-memory key. Native entry precedes persistent Save. The renderer
+receives only key readiness, discovery status and bounded model IDs. Connect uses
+the existing guarded, cancellable15-second GET `/v1/models` transport without a model
+selection, generation, load, download or settings write. No raw key or arbitrary
+request override enters renderer IPC. Origin changes require a matching draft/key;
+key revisions and profile changes invalidate discovery. Late results cannot retarget
+another draft. Cancellation retains the non-secret form and staged key for an
+explicit retry; leaving Settings or shutdown cancels owned work and drops the key.
+
+Save validates a model from the current authenticated result and publishes completed
+settings with the verified native credential reference. Existing durable cleanup
+ownership precedes key addition; prior profiles/keys remain intact until publication.
+Failures retain owned cleanup state and the draft. A confirmed Save followed by a read
+failure disables writes until read-only reload. Existing namespace, backend, signing
+and per-model management policies remain unchanged. The separate **Test response
+format** operation is explicit and model-specific; Connect never runs it implicitly.
+Scoped tests, real Studio and native/platform evidence remain distinct in the
+[owning outcome](../tasks/active/phase-2-initial-llm-assistance.md#thinking-settings-and-full-workflow--selected-2026-10-16).
+
 ## Generation-time Studio readiness — 2026-10-15
 
 The [approved redesign task](../tasks/active/walkthrough-redesign-implementation.md)

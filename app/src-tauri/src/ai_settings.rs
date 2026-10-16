@@ -68,6 +68,7 @@ fn credential_view(
 #[cfg(test)]
 mod tests {
     use super::*;
+    static TEST_SERIAL:Mutex<()>=Mutex::new(());
     struct Refused(std::cell::Cell<usize>);
     impl Secrets for Refused {
         fn read(
@@ -96,6 +97,7 @@ mod tests {
     }
     #[test]
     fn status_preserves_access_error_with_one_read_and_no_mutation() {
+        let _serial=TEST_SERIAL.lock().unwrap();
         let profile: StudioProfile = serde_json::from_value(json!({
             "profileId":"fixture", "revision":1, "disabled":false,
             "settings":{"label":"Studio","endpoint":"http://127.0.0.1:8888/v1","model":"fixture","privateHttp":false,"contextCeiling":8192,"contextBudget":4096,"maximumResponse":1024},
@@ -111,6 +113,7 @@ mod tests {
     }
     #[test]
     fn confirmed_save_reload_failure_keeps_cleanup_pending_visible() {
+        let _serial=TEST_SERIAL.lock().unwrap();
         let regression: Value = serde_json::from_str(include_str!(
             "../../tests/fixtures/macos-development-credential-reload-failure.json"
         ))
@@ -185,6 +188,7 @@ mod tests {
     #[cfg(target_os = "macos")]
     #[test]
     fn one_shot_reload_fixture_runs_through_confirmed_entry_dispatch_and_read_only_retry() {
+        let _serial=TEST_SERIAL.lock().unwrap();
         use crate::ai_reload_fixture::{PROFILE, SELECTOR};
         let regression: Value = serde_json::from_str(include_str!(
             "../../tests/fixtures/macos-development-credential-reload-failure.json"
@@ -394,6 +398,7 @@ mod tests {
     }
     #[test]
     fn native_event_retry_and_cancel_keep_service_available_and_never_retarget() {
+        let _serial=TEST_SERIAL.lock().unwrap();
         use loomlight_core::{
             ai_credentials::Secret, ai_file_secrets::FileSecrets, lifecycle::LifecycleService,
         };
@@ -462,6 +467,7 @@ mod tests {
                     context_ceiling: 8192,
                     context_budget: 4096,
                     maximum_response: 1024,
+                    thinking: None,
                     temperature: None,
                     top_p: None,
                 model_load: None,
@@ -696,6 +702,7 @@ mod tests {
                 context_ceiling: 8192,
                 context_budget: 4096,
                 maximum_response: 1024,
+                thinking: None,
                 temperature: None,
                 top_p: None,
                 model_load: None,
@@ -737,6 +744,7 @@ mod tests {
     #[cfg(target_os = "macos")]
     #[test]
     fn settings_dispatch_routes_fixture_recovery_pending_cleanup_and_secret_free_refusals() {
+        let _serial=TEST_SERIAL.lock().unwrap();
         let fixture: Value = serde_json::from_str(include_str!(
             "../../tests/fixtures/macos-development-credentials.json"
         ))
@@ -1156,6 +1164,12 @@ fn native_save(
     secrets: &impl Secrets,
     entry: &mut credentials::CredentialEntry,
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
+    native_entry(app, false, |key| host.with_service(|s|entry.save(s,secrets,key)).map_err(|_|"Another request is in progress; input retained for retry.")?)
+}
+pub(crate) fn native_entry(
+    app: &tauri::AppHandle, draft: bool,
+    mut save_key: impl FnMut(&str)->credentials::Result<credentials::SaveOutcome>,
+) -> credentials::Result<Option<credentials::SaveOutcome>> {
     #[cfg(target_os = "windows")]
     let owner = {
         use tauri::Manager;
@@ -1175,13 +1189,25 @@ fn native_save(
             reply.recv().map_err(|_| "Secure entry unavailable.")?
         };
         #[cfg(target_os = "windows")]
-        let result = ai_native::enter_owned(owner, save);
+        let result = ai_native::enter_owned_mode(owner, draft, save);
         #[cfg(not(target_os = "windows"))]
-        let result = ai_native::enter(save);
+        let result = ai_native::enter_mode(draft, save);
         let _ = events.send(EntryEvent::Finished(result));
     })
     .map_err(|_| "Secure entry unavailable.")?;
-    drive_entry(host, secrets, entry, receive, results)
+    drive_native_entry(receive,results,&mut save_key)
+}
+fn drive_native_entry(
+    receive:std::sync::mpsc::Receiver<EntryEvent>,
+    results:std::sync::mpsc::SyncSender<credentials::Result<credentials::SaveOutcome>>,
+    mut save_key:impl FnMut(&str)->credentials::Result<credentials::SaveOutcome>,
+) -> credentials::Result<Option<credentials::SaveOutcome>> {
+    loop {
+        match receive.recv().map_err(|_|"Secure entry unavailable.")? {
+            EntryEvent::Save(key)=>{results.send(save_key(&key)).map_err(|_|"Secure entry unavailable.")?;}
+            EntryEvent::Finished(result)=>return result,
+        }
+    }
 }
 fn drive_entry(
     host: &ApplicationHost,
@@ -1190,18 +1216,5 @@ fn drive_entry(
     receive: std::sync::mpsc::Receiver<EntryEvent>,
     results: std::sync::mpsc::SyncSender<credentials::Result<credentials::SaveOutcome>>,
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
-    loop {
-        match receive.recv().map_err(|_| "Secure entry unavailable.")? {
-            EntryEvent::Save(key) => {
-                let result = host
-                    .with_service(|s| entry.save(s, secrets, &key))
-                    .map_err(|_| "Another request is in progress; input retained for retry.")
-                    .and_then(|r| r);
-                results
-                    .send(result)
-                    .map_err(|_| "Secure entry unavailable.")?;
-            }
-            EntryEvent::Finished(result) => return result,
-        }
-    }
+    drive_native_entry(receive,results,|key|host.with_service(|s|entry.save(s,secrets,key)).map_err(|_|"Another request is in progress; input retained for retry.")?)
 }

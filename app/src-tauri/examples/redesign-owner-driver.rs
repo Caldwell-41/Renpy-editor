@@ -549,7 +549,7 @@ mod preparation_tests {
                     let parsed: Value = serde_json::from_slice(&captured.body).unwrap();
                     assert_eq!(parsed["max_tokens"], 2048);
                     assert_eq!(parsed["enable_tools"], false);
-                    assert_eq!(parsed["enable_thinking"], false);
+                    assert_eq!(parsed["enable_thinking"], true);
                     assert_eq!(body.contains(WORLD), fixture != "connection" && include);
                     assert_eq!(body.contains(TONE), fixture != "connection" && include);
                     assert_eq!(

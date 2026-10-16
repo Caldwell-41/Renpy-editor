@@ -93,7 +93,7 @@ fn expire(p: &mut Pending) {
     p.failure = None;
 }
 pub struct Change(Arc<Service>);
-struct ModelSettingsChange(Arc<Service>);
+pub(crate) struct ModelSettingsChange(Arc<Service>);
 impl Drop for ModelSettingsChange {
     fn drop(&mut self) {
         if let Ok(mut state) = self.0.state.lock() {
@@ -130,12 +130,12 @@ impl Service {
         }
         Change(self.clone())
     }
-    fn begin_model_settings(self: &Arc<Self>, cancel: &Cancel) -> Result<ModelSettingsChange, &'static str> {
+    pub(crate) fn begin_model_settings(self: &Arc<Self>, cancel: &Cancel) -> Result<ModelSettingsChange, &'static str> {
         let mut state = self.state.lock().map_err(|_| "Request service unavailable.")?;
         if state.closing || state.changing != 0 || state.model_settings.is_some()
             || state.pending.as_ref().is_some_and(|pending| !pending.done)
         {
-            return Err("Finish the active request or configuration change before managing model-load settings. No request was cancelled.");
+            return Err("Finish or cancel the active AI request or settings operation before connecting or managing model-load settings. No request was cancelled.");
         }
         state.model_settings = Some(cancel.clone());
         state.changing += 1;
@@ -567,6 +567,7 @@ mod tests {
                 context_ceiling: 8192,
                 context_budget: 4096,
                 maximum_response: 1024,
+                thinking: None,
                 temperature: None,
                 top_p: None,
                 model_load: None,
@@ -667,7 +668,7 @@ mod tests {
                     }
                 };
                 assert_eq!(body["response_format"]["json_schema"]["strict"],true);assert_eq!(body["enable_tools"],false);assert_eq!(body["enabled_tools"],json!([]));
-                assert_eq!(body["enable_thinking"],false);assert_eq!(body["temperature"],1.0);assert_eq!(body["top_p"],0.95);assert!(body.get("session_id").is_none());
+                assert_eq!(body["enable_thinking"],true);assert_eq!(body["temperature"],1.0);assert_eq!(body["top_p"],0.95);assert!(body.get("session_id").is_none());
                 let response=serde_json::to_vec(&json!({"model":"synthetic-model","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":if valid{"{\"ok\":true}"}else{"{\"ok\":true,\"extra\":1}"}}}]})).unwrap();
                 write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",response.len()).unwrap();socket.write_all(&response).unwrap();
             });

@@ -1,5 +1,24 @@
 use super::*;
 use std::cell::{Cell, RefCell};
+
+#[test]
+fn connection_save_publishes_settings_with_verified_key_and_failure_preserves_saved_profiles() {
+    let f=Fixture::new();let original=f.init();f.replace(&original,"public-old-key").unwrap();
+    let before=f.read().unwrap();let mut settings=before.profiles[0].settings.clone();settings.label="Connected draft".into();
+    let(id,_)=save_connection(&f,&f,&token(&before),None,settings.clone(),"public-new-key").unwrap();
+    let saved=f.read().unwrap();assert_ne!(id,original);assert_eq!(saved.profiles.len(),2);
+    assert_eq!(saved.profiles[0],before.profiles[0]);let profile=&saved.profiles[1];
+    assert_eq!(profile.settings,settings);assert_eq!(&*Secrets::read(&f,&id,profile.credential.as_ref().unwrap()).unwrap().unwrap(),"public-new-key");
+    let mut changed=settings;changed.label="Must not publish on failure".into();
+    f.native_unavailable.set(true);
+    assert!(save_connection(&f,&f,&token(&saved),Some(&id),changed.clone(),"public-failed-key").is_err());
+    assert_eq!(f.read().unwrap().profiles,saved.profiles);f.native_unavailable.set(false);
+    let before=f.read().unwrap();f.fail_write.set(f.writes.get()+2);
+    assert!(save_connection(&f,&f,&token(&before),Some(&id),changed,"public-failed-publication").is_err());
+    assert_eq!(f.read().unwrap().profiles,saved.profiles);
+    assert_eq!(&*Secrets::read(&f,&id,profile.credential.as_ref().unwrap()).unwrap().unwrap(),"public-new-key");
+    assert!(save_connection(&f,&f,"stale",None,profile.settings.clone(),"public-key").is_err());
+}
 struct Fixture {
     records: RefCell<ProfileStore>,
     keys: RefCell<std::collections::HashMap<String, String>>,
@@ -47,6 +66,7 @@ impl Fixture {
                 context_ceiling: 8192,
                 context_budget: 4096,
                 maximum_response: 1024,
+                thinking: None,
                 model_load: None,
                 temperature: None,
                 top_p: None,

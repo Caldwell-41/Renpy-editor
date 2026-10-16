@@ -252,6 +252,16 @@ revision/service. Missing service remains legacy `app.loomlight.desktop.ai.v1`, 
 on serialization; explicit `app.loomlight` retains its owned native namespace. Unknown
 services are rejected. Service values never choose a backend or form a file path.
 
+Optional profile `thinking` is a boolean; absent means on and remains omitted until
+explicit Save. New profiles use context32768 and maximum response16384; existing
+saved response limits remain unchanged. The effective mode maps to `enable_thinking`
+for synthetic response-format tests and all assistance actions. Preflight digest
+generation2 expires earlier off-only evidence and saved-mode changes expire prepared
+requests. Native-only connection drafts are in-memory state, not project/profile
+records: opaque ID/revision, bound origin/token, zeroizing key and bounded discovered
+model IDs. Connect writes nothing. Completed Save publishes settings and the verified
+owned key reference together through the existing staged cleanup protocol.
+
 Missing credential `storage` means native and remains omitted: old schema-v1 records
 preserve their serialized form/digest, including cleanup. Explicit temporary Mac file
 storage uses `{kind:"developmentFile",generationId:<UUID-v4>}` on active and cleanup

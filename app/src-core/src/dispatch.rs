@@ -49,6 +49,23 @@ impl ApplicationHost {
             returned: Condvar::new(),
         }))
     }
+    /// Background publication may wait for an ordinary checkout to return. Busy
+    /// is distinct from changed state; no task runs after the supplied deadline.
+    pub fn with_service_until<T>(&self, deadline: std::time::Instant, task: impl FnOnce(&mut LifecycleService)->T)->Result<T,&'static str> {
+        let mut task=Some(task);
+        loop {
+            if std::time::Instant::now()>=deadline {return Err("Service publication deadline reached.");}
+            match self.with_service(|service|(task.take().unwrap())(service)) {
+                Ok(value)=>return Ok(value),
+                Err("Another request is in progress.")=>{
+                    let state=self.0.state.lock().map_err(|_|"Service unavailable.")?;
+                    if state.closing {return Err("Service shutting down.");}
+                    if state.service.is_none() {let _=self.0.returned.wait_timeout(state,deadline.saturating_duration_since(std::time::Instant::now())).map_err(|_|"Service unavailable.")?;}
+                }
+                Err(error)=>return Err(error),
+            }
+        }
+    }
     /// Checkout serializes mutations without making the control path wait for I/O.
     pub fn with_service<T>(
         &self,
@@ -382,4 +399,18 @@ fn stale(id: String) -> CoreResponse {
 }
 fn busy(id: String) -> CoreResponse {
     CoreResponse::failure(id, "RUNTIME_BUSY", "Another request is in progress.")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn connection_publication_waits_for_checkout_and_expired_deadline_never_runs_task() {
+        let dir=tempfile::tempdir().unwrap();let host=ApplicationHost::new(LifecycleService::new(dir.path().to_owned()).unwrap());
+        let(entered,ready)=std::sync::mpsc::channel();let(release,wait)=std::sync::mpsc::channel();let owner=host.clone();
+        let held=std::thread::spawn(move||owner.with_service(|_|{entered.send(()).unwrap();wait.recv().unwrap();}).unwrap());ready.recv().unwrap();
+        let owner=host.clone();let publication=std::thread::spawn(move||owner.with_service_until(std::time::Instant::now()+std::time::Duration::from_secs(2),|_|42));
+        release.send(()).unwrap();held.join().unwrap();assert_eq!(publication.join().unwrap(),Ok(42));
+        let mut called=false;assert!(host.with_service_until(std::time::Instant::now(),|_|called=true).is_err());assert!(!called);
+    }
 }

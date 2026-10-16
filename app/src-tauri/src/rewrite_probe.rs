@@ -103,6 +103,7 @@ pub fn prepare(
         context_budget: 32768,
         context_ceiling: 32768,
         maximum_response: 1024,
+        thinking: None,
         temperature: None,
         top_p: None,
                 model_load: None,

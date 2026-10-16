@@ -58,7 +58,7 @@ export function mountPromptPreparation(host:HTMLElement,actions:PromptActions):P
  const task=el("textarea");task.name="task";task.ariaLabel="Task instructions";task.rows=3;label("Task instructions (this preview)",task);
  const sharedContext=el("input");sharedContext.type="checkbox";sharedContext.name="includeProjectContext";sharedContext.checked=true;label("Include project world & tone",sharedContext);
  const limits=el("div","","context-limits");const numbers:HTMLInputElement[]=[];
- for(const [name,text,value]of [["contextBudget","Context length (tokens)",32768],["maximumResponse","Maximum response length (tokens)",8192]]as const){const n=el("input");n.type="number";n.name=name;n.min="1";n.max="2000000";n.step="1";n.value=String(value);n.ariaLabel=text;const l=el("label");l.append(el("span",text),n);limits.append(l);numbers.push(n);}
+ for(const [name,text,value]of [["contextBudget","Context length (tokens)",32768],["maximumResponse","Maximum response length (tokens)",16384]]as const){const n=el("input");n.type="number";n.name=name;n.min="1";n.max="2000000";n.step="1";n.value=String(value);n.ariaLabel=text;const l=el("label");l.append(el("span",text),n);limits.append(l);numbers.push(n);}
  const refs=el("div","","context-references");refs.role="group";refs.ariaLabel="Exact approved reference revisions";
  const build=button("Build context preview",()=>{void preview();},context);build.classList.add("primary");
  const reload=button("Reload saved choices",()=>{void load();},context);

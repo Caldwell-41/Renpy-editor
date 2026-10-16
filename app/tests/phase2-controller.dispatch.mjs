@@ -31,7 +31,7 @@ const server=createServer(async(req,res)=>{
  assert.equal(wire.stream,false);assert.equal(wire.response_format.json_schema.strict,true);
  assert.equal(wire.model,'synthetic-rewrite-model');assert.equal(wire.temperature,1);assert.equal(wire.top_p,0.95);
  assert.equal(wire.enable_tools,false);assert.deepEqual(wire.enabled_tools,[]);
- assert.equal(wire.enable_thinking,false);assert(!Object.hasOwn(wire,'tools'));assert(!Object.hasOwn(wire,'session_id'));
+ assert.equal(wire.enable_thinking,true);assert(!Object.hasOwn(wire,'tools'));assert(!Object.hasOwn(wire,'session_id'));
  assert.deepEqual(user.references.map(r=>({kind:r.kind,recordId:r.recordId,revisionId:r.revisionId})),[...expectedReferences].sort((a,b)=>a.kind.localeCompare(b.kind)||a.recordId.localeCompare(b.recordId)));
  sent.push({action,sha256:createHash('sha256').update(bytes).digest('hex')});
  let result;

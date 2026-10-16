@@ -64,6 +64,8 @@ pub struct StudioSettings {
     pub context_ceiling: u32,
     pub context_budget: u32,
     pub maximum_response: u32,
+    #[serde(default, deserialize_with = "thinking_value", skip_serializing_if = "Option::is_none")]
+    pub thinking: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub model_load: Option<ModelLoadSettings>,
     // Absent fields retain old serialized profiles until an explicit Settings save.
@@ -104,6 +106,9 @@ fn sampling_value<'de, D: serde::Deserializer<'de>>(
 ) -> Result<Option<f64>, D::Error> {
     // Missing is supported; explicit null/string/bool is not a sampling setting.
     f64::deserialize(deserializer).map(Some)
+}
+fn thinking_value<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<bool>, D::Error> {
+    bool::deserialize(deserializer).map(Some)
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -294,6 +299,7 @@ pub fn http_address_allowed(ip: IpAddr, private_http: bool) -> bool {
 }
 
 impl StudioSettings {
+    pub fn thinking(&self) -> bool { self.thinking.unwrap_or(true) }
     pub fn temperature(&self) -> f64 {
         self.temperature.unwrap_or(1.0)
     }
@@ -327,7 +333,7 @@ impl StudioSettings {
 impl StudioProfile {
     pub fn compatibility_digest(&self) -> String {
         use sha2::{Digest, Sha256};
-        let bytes=serde_json::to_vec(&("studio-json-preflight-v1", &self.profile_id, &self.settings, &self.credential, self.disabled)).unwrap();
+        let bytes=serde_json::to_vec(&("studio-json-preflight-v2", &self.profile_id, &self.settings, &self.credential, self.disabled)).unwrap();
         format!("{:x}", Sha256::digest(bytes))
     }
     pub fn compatibility_ready(&self) -> bool {
@@ -395,6 +401,7 @@ impl ProfileStore {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
     fn missing_service_keeps_legacy_profiles_cleanup_and_digest() {
@@ -435,6 +442,7 @@ mod tests {
                     context_ceiling: 8192,
                     context_budget: 4096,
                     maximum_response: 1024,
+                    thinking: None,
                     model_load: None,
                     temperature: None,
                     top_p: None,
@@ -448,6 +456,34 @@ mod tests {
                 }),
             }],
             ..ProfileStore::default()
+        }
+    }
+
+    #[test]
+    fn thinking_legacy_default_explicit_roundtrip_and_old_readiness_invalidation() {
+        use sha2::{Digest, Sha256};
+        let old = fixture();
+        let bytes = serde_json::to_vec(&old).unwrap();
+        let mut reopened: ProfileStore = serde_json::from_slice(&bytes).unwrap();
+        assert!(reopened.profiles[0].settings.thinking());
+        assert_eq!(serde_json::to_vec(&reopened).unwrap(), bytes);
+        let p = &mut reopened.profiles[0];
+        let old_digest = format!("{:x}", Sha256::digest(serde_json::to_vec(
+            &("studio-json-preflight-v1", &p.profile_id, &p.settings, &p.credential, p.disabled)
+        ).unwrap()));
+        p.compatibility = Some(CompatibilityEvidence {schema_version:1, configuration_digest:old_digest, checked_at_unix_seconds:1});
+        assert!(!p.compatibility_ready(), "off-only preflight cannot qualify the new default");
+        for enabled in [false, true] {
+            let mut value = serde_json::to_value(&old).unwrap();
+            value["profiles"][0]["settings"]["thinking"] = json!(enabled);
+            let saved: ProfileStore = serde_json::from_value(value).unwrap();
+            assert_eq!(saved.profiles[0].settings.thinking(), enabled);
+            assert_eq!(serde_json::from_slice::<ProfileStore>(&serde_json::to_vec(&saved).unwrap()).unwrap(), saved);
+        }
+        for invalid in [serde_json::Value::Null, json!("true"), json!(1), json!([])] {
+            let mut value = serde_json::to_value(&old).unwrap();
+            value["profiles"][0]["settings"]["thinking"] = invalid;
+            assert!(serde_json::from_value::<ProfileStore>(value).is_err());
         }
     }
 

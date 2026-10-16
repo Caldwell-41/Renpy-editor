@@ -1272,13 +1272,24 @@ establish full Phase2 or human acceptance.
 The [2026-10-15 redesign contract](tasks/active/walkthrough-redesign-implementation.md)
 supersedes the earlier settings/reference presentation in this section for local code;
 its technical proof and human acceptance remain separate. Settings uses Connection,
-API Key, Response defaults, sampling disclosure, Connection test and a named-profile
-Danger Zone confirmation. One Context length (new-profile32768) and Maximum response
-length (8192) do not overwrite old values on read. Refresh models sits below Model ID;
-HTTP opt-in is beside Endpoint and hidden for empty/HTTPS input. Reload preserves
-selection; Retry loading profiles appears only after a read failure. Saving connects
-nothing. Actual model context is read-only status, with explicit checking/loading states
-and Cancel in request panels.
+API Key, Response defaults, sampling disclosure and a named-profile Danger Zone.
+The selected2026-10-16 setup now follows Profile name → Endpoint/private-HTTP option →
+native API key → **Connect** → Model ID → **Save profile**. Key entry and Connect work
+before a profile or model exists. Connect authenticates and retrieves model choices;
+its progress/errors and Cancel stay beside that action. Failed/cancelled attempts
+retain entered details. Address/key changes invalidate old results and model choices;
+late responses cannot attach after a draft/profile switch. Save stores the completed
+profile/key locally. Leaving Settings discards staged native key state.
+
+Response defaults are context32768, maximum response16384 and **Thinking** checked.
+The helper explains that thinking uses response allowance and may take longer.
+Existing saved response limits and explicit thinking-off choices survive read/reload.
+**Test response format** remains a separate explicit synthetic generation for the
+saved model; Connect never loads a model or tests generation implicitly. Old off-only
+readiness requires a fresh response-format test. HTTP opt-in remains beside Endpoint
+and hidden for empty/HTTPS input. Read-only profile retry and draft protection remain.
+Actual model context is read-only status, with checking/loading stages and Cancel in
+generation panels; reasoning never becomes proposed/saved writing.
 
 Model loading adds editable Parallel slots, GPU memory mode and Automatic memory
 fitting, with suggested1/manual/off defaults. The existing Context length remains the

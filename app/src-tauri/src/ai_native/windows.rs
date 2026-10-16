@@ -244,7 +244,7 @@ unsafe extern "system" fn dialog_proc(dialog: HWND, message: u32, w: usize, l: i
 
 // Build a standard UTF-16 dialog resource. DWORD-aligned backing and each control
 // follow the documented DLGTEMPLATE layout; Segoe UI uses dialog-unit geometry.
-fn template() -> Vec<u32> {
+fn template(draft: bool) -> Vec<u32> {
     fn dword(words: &mut Vec<u16>, value: u32) {
         words.extend([value as u16, (value >> 16) as u16]);
     }
@@ -269,10 +269,10 @@ fn template() -> Vec<u32> {
     );
     dword(&mut words, 0);
     words.extend([5, 0, 0, 350, 172, 0, 0]); // count, x/y/cx/cy, menu, class
-    string(&mut words, "Remember Studio API key on this computer");
+    string(&mut words, if draft {"Use API key for this connection draft"} else {"Remember Studio API key on this computer"});
     words.push(9);
     string(&mut words, "Segoe UI");
-    control(&mut words, 101, 0x82, 0, [12, 10, 326, 42], "Windows Credential Manager saves the key for this Windows login. The web view never receives it. Local removal does not revoke it at Studio.");
+    control(&mut words, 101, 0x82, 0, [12, 10, 326, 42], if draft {"The key stays in native memory while you connect and choose a model. Save profile stores it for this login. Leaving Settings discards the draft key. The web view never receives it."}else{"Windows Credential Manager saves the key for this Windows login. The web view never receives it. Local removal does not revoke it at Studio."});
     control(
         &mut words,
         FIELD as u16,
@@ -295,7 +295,7 @@ fn template() -> Vec<u32> {
         0x80,
         WS_TABSTOP | BS_DEFPUSHBUTTON as u32,
         [194, 144, 70, 18],
-        "Remember",
+        if draft {"Use key"}else{"Remember"},
     );
     control(
         &mut words,
@@ -315,7 +315,12 @@ fn template() -> Vec<u32> {
 }
 pub fn enter_owned(
     owner: usize,
-    mut save: impl FnMut(&str) -> Result<SaveOutcome>,
+    save: impl FnMut(&str) -> Result<SaveOutcome>,
+) -> Result<Option<SaveOutcome>> {
+    enter_owned_mode(owner,false,save)
+}
+pub fn enter_owned_mode(
+    owner: usize, draft: bool, mut save: impl FnMut(&str) -> Result<SaveOutcome>,
 ) -> Result<Option<SaveOutcome>> {
     let owner = owner as HWND;
     if owner.is_null() || unsafe { IsWindow(owner) } == 0 {
@@ -331,7 +336,7 @@ pub fn enter_owned(
         save: &mut save,
         outcome: None,
     };
-    let template = template();
+    let template = template(draft);
     let result = unsafe {
         DialogBoxIndirectParamW(
             GetModuleHandleW(null()),

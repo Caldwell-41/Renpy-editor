@@ -3,6 +3,7 @@ mod ai_native;
 mod ai_reload_fixture;
 mod ai_requests;
 mod ai_settings;
+mod ai_connection;
 #[cfg(test)]
 #[path = "../identity_policy.rs"]
 mod identity_policy;
@@ -134,6 +135,7 @@ fn complete_application_close(
     if !host.with_service(|service| service.current().is_none())? {
         return Err("Close the project through its runtime and draft flow first.");
     }
+    ai_connection::service().shutdown();
     if !ai_requests::service().shutdown() || !host.shutdown() {
         return Err("Runtime cleanup is incomplete.");
     }
@@ -444,6 +446,9 @@ fn core_request(
             .as_ref()
             .cloned()
             .ok_or("Desktop lifecycle state is unavailable.")?;
+        if matches!(operation.as_str(), "ai.beginConnection"|"ai.enterConnectionKey"|"ai.connect"|"ai.connectionStatus"|"ai.cancelConnection"|"ai.discardConnection"|"ai.saveConnection") {
+            return Ok(ai_connection::dispatch(&app,&host,request_id,&operation,Value::Object(validated.payload.clone())));
+        }
         if matches!(
             operation.as_str(),
             "ai.sendSynthetic" | "ai.testCompatibility" | "ai.requestStatus" | "ai.cancelRequest" | "ai.readModelLoadSettings" | "ai.applyModelLoadSettings" | "rewrite.send" | "rewrite.prepare"
@@ -1037,7 +1042,7 @@ fn main() {
             }
             if matches!(event, tauri::RunEvent::Exit) {
                 let host = app.state::<DesktopState>().0.lock().ok().and_then(|state| state.clone());
-                if let Some(host) = host { ai_requests::service().shutdown(); host.shutdown(); }
+                if let Some(host) = host { ai_connection::service().shutdown(); ai_requests::service().shutdown(); host.shutdown(); }
             }
         });
 }

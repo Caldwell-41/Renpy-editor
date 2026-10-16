@@ -20,6 +20,13 @@ test("frontend operation list contains only bounded editor and Studio settings o
     "preferences.read",
     "preferences.write",
     "ai.profiles",
+    "ai.beginConnection",
+    "ai.enterConnectionKey",
+    "ai.connect",
+    "ai.connectionStatus",
+    "ai.cancelConnection",
+    "ai.discardConnection",
+    "ai.saveConnection",
     "ai.saveProfile",
     "ai.enterCredential",
     "ai.removeCredential",
@@ -101,7 +108,7 @@ test("frontend operation list contains only bounded editor and Studio settings o
   ]);
   assert.equal(CORE_OPERATIONS.some((operation) => /filesystem|shell|process|http|network|readSecret|exportKey|generation/i.test(operation)), false);
   assert.deepEqual(CORE_OPERATIONS.filter(operation => /credential/i.test(operation)), ["ai.enterCredential", "ai.removeCredential"]);
-  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && operation !== "runtime.status" && operation !== "runtime.requestStatus" && operation !== "ai.requestStatus" && /status|diff|commit|reset|remote/i.test(operation)), false);
+  assert.equal(CORE_OPERATIONS.some((operation) => operation !== "project.status" && operation !== "runtime.status" && operation !== "runtime.requestStatus" && operation !== "ai.requestStatus" && operation !== "ai.connectionStatus" && /status|diff|commit|reset|remote/i.test(operation)), false);
 });
 
 test("renderer source contains no secret or ambient host bridge", async () => {

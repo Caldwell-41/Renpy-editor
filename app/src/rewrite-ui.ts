@@ -42,7 +42,7 @@ export function mountRewrite(host:HTMLElement,sceneId:string,beatId:string,actio
  const contextNote=el("p","Shared Lorebook notes guide the world and overall style. Character cards guide individual voices. Review the exact notes before sending.");contextNote.className="muted";fields.append(contextNote);
  task.closest("label")!.classList.add("rewrite-task");
  const number=(name:string,text:string,min:number,max:number,defaultValue:string):HTMLInputElement=>{const i=el("input");i.type="number";i.name=name;i.min=String(min);i.max=String(max);i.step="1";i.value=defaultValue;label(text,i);return i;};
- const budget=number("rewriteBudget","Context length (tokens)",256,2000000,"32768"),reserve=number("rewriteResponse","Maximum response length (tokens)",1,2000000,"8192"),timeout=number("rewriteTimeout","Response deadline (seconds)",30,1800,"600");
+ const budget=number("rewriteBudget","Context length (tokens)",256,2000000,"32768"),reserve=number("rewriteResponse","Maximum response length (tokens)",1,2000000,"16384"),timeout=number("rewriteTimeout","Response deadline (seconds)",30,1800,"600");
  const moreLimits=el("details");moreLimits.className="rewrite-more-limits";moreLimits.append(el("summary","Response deadline"),timeout.closest("label")!);fields.append(moreLimits);
  const permissions=el("fieldset");permissions.className="rewrite-permissions";permissions.append(el("legend","Choose permitted edits before Send"));
  const replacementChoices=el("div"),speakerChoices=el("div");

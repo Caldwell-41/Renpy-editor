@@ -35,6 +35,7 @@ impl Fixture {
                 context_budget: 32768,
                 context_ceiling: 32768,
                 maximum_response: 1024,
+                thinking: None,
                 model_load: None,
                 temperature: None,
                 top_p: None,
@@ -1401,6 +1402,51 @@ fn sampling_all_actions_exact_body_persisted_defaults_and_change_invalidates_rev
         assert!(ai_credentials::save(&f.service,&ai_credentials::token(&saved),Some(&saved.profiles[0].profile_id),invalid).is_err());
         assert_eq!(f.service.read().unwrap(),saved);assert_snapshots(&before,&f.snapshots());
     }
+}
+
+#[test]
+fn thinking_all_actions_exact_mode_and_profile_changes_expire_review() {
+    for action in [prompts::ACTION,prompts::CONTINUE,prompts::DRAFT,prompts::CARD,prompts::LORE,batch::ACTION] {
+        let mut f=if action==batch::ACTION {Fixture::batch_new()}else{Fixture::new()};
+        let prepare=|f:&mut Fixture|match action {
+            prompts::ACTION=>f.prepare(),prompts::CONTINUE=>f.continue_prepare(),prompts::DRAFT=>f.draft_prepare(),
+            prompts::CARD=>f.card_prepare(Value::Null),prompts::LORE=>f.lore_prepare(Value::Null),_=>f.batch_prepare(true).0,
+        };
+        for enabled in [true,false] {
+            let old=f.service.read().unwrap();
+            let mut settings=old.profiles[0].settings.clone();settings.thinking=Some(enabled);
+            ai_credentials::save(&f.service,&ai_credentials::token(&old),Some(&old.profiles[0].profile_id),settings).unwrap();
+            let saved=f.service.read().unwrap();assert!(!saved.profiles[0].compatibility_ready());
+            ai_credentials::record_compatibility(&f.service,&ai_credentials::token(&saved),&saved.profiles[0].profile_id).unwrap();
+            let reviewed=prepare(&mut f);
+            let capture=f.take(&reviewed,Cancel::default()).unwrap();
+            let body:Value=serde_json::from_slice(&capture.body).unwrap();
+            assert_eq!(body["enable_thinking"],enabled);assert_eq!(body["enable_tools"],false);
+            assert_eq!(capture.body,reviewed["serializedPayload"].as_str().unwrap().as_bytes());
+            assert!(reviewed["responseMode"].as_str().unwrap().contains(if enabled{"thinking on"}else{"thinking off"}));
+            let before=f.snapshots();let saved=f.service.read().unwrap();
+            let mut settings=saved.profiles[0].settings.clone();settings.thinking=Some(!enabled);
+            ai_credentials::save(&f.service,&ai_credentials::token(&saved),Some(&saved.profiles[0].profile_id),settings).unwrap();
+            assert!(f.take(&reviewed,Cancel::default()).is_err());assert_snapshots(&before,&f.snapshots());
+        }
+    }
+}
+
+#[test]
+fn thinking_card_final_content_only_is_reviewed_saved_and_reopened() {
+    let mut f=Fixture::new();let p=f.card_prepare(Value::Null);
+    f.take(&p,Cancel::default()).unwrap();
+    let final_text=f.card_response(&p).to_string();
+    let wire=serde_json::to_vec(&json!({"model":"synthetic-model","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":final_text,"reasoning_content":"SYNTHETIC_PRIVATE_REASONING_MUST_NOT_BE_SAVED"}}],"usage":{"prompt_tokens":10,"completion_tokens":100,"total_tokens":110,"completion_tokens_details":{"reasoning_tokens":60}}})).unwrap();
+    let completion=crate::ai_request::parse(&wire,"synthetic-model").unwrap();
+    let review=f.service.rewrite_complete(&f.session,p["token"].as_str().unwrap(),&completion).unwrap();
+    assert!(!review.to_string().contains("SYNTHETIC_PRIVATE_REASONING"));
+    f.accept_card(&review);assert_eq!(f.review_card(&review,true)["ok"],true);
+    let before=fs::read(f.root.join(crate::references::PATH)).unwrap();
+    assert!(!String::from_utf8_lossy(&before).contains("SYNTHETIC_PRIVATE_REASONING"));
+    f.ok("project.close",json!({}));f.session=f.service.open_path(&f.root).unwrap().session_id;
+    let refs=f.ok("references.list",json!({}));assert!(!refs.to_string().contains("SYNTHETIC_PRIVATE_REASONING"));
+    assert_eq!(fs::read(f.root.join(crate::references::PATH)).unwrap(),before);
 }
 
 #[test]

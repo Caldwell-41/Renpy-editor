@@ -134,7 +134,7 @@ pub struct Prepared {
     key: Secret,
 }
 pub fn prepare(profile: StudioProfile, key: Secret, timeout_seconds: u32) -> Result<Prepared> {
-    let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[{"role":"user","content":SYNTHETIC_PROMPT}],"stream":false,"max_tokens":profile.settings.maximum_response,"temperature":profile.settings.temperature(),"top_p":profile.settings.top_p(),"enable_thinking":false,"enable_tools":false,"enabled_tools":[]})).map_err(|_|Failure::Configuration)?;
+    let body=serde_json::to_vec(&json!({"model":profile.settings.model,"messages":[{"role":"user","content":SYNTHETIC_PROMPT}],"stream":false,"max_tokens":profile.settings.maximum_response,"temperature":profile.settings.temperature(),"top_p":profile.settings.top_p(),"enable_thinking":profile.settings.thinking(),"enable_tools":false,"enabled_tools":[]})).map_err(|_|Failure::Configuration)?;
     prepare_reviewed(profile, key, timeout_seconds, body)
 }
 
@@ -307,6 +307,19 @@ static DNS_ACTIVE: AtomicBool = AtomicBool::new(false);
 /// caller waits at most one second; no queued retry or abandoned-worker accumulation.
 pub fn resolve_destination(settings: &crate::ai_profiles::StudioSettings) -> Result<Destination> {
     resolve_destination_until(settings, Instant::now() + Duration::from_secs(1))
+}
+
+/// Authenticated discovery for a native-owned connection draft. GET only, with
+/// the same destination/TLS/cancellation guards as ordinary Studio operations.
+pub fn discover_connection(profile: StudioProfile, key: Secret, cancel: &Cancel) -> Result<crate::ai_discovery::Discovery> {
+    let destination=resolve_destination(&profile.settings)?;
+    let prepared=prepare_reviewed_bound(profile,key,30,Vec::new(),destination.clone())?;
+    let value=model_exchange(&prepared,cancel,Instant::now()+Duration::from_secs(15),"/v1/models",None,ureq::tls::TlsConfig::default())?;
+    let bytes=serde_json::to_vec(&value).map_err(|_|Failure::Malformed)?;
+    if bytes.len()>128*1024 {return Err(Failure::Oversized);}
+    let models=crate::ai_discovery::parse_models(&bytes).map_err(|_|Failure::Malformed)?;
+    if models.iter().any(|model|model.contains(&*prepared.key)) {return Err(Failure::UnsupportedResponse);}
+    Ok(crate::ai_discovery::Discovery {models,inventory:crate::studio_models::parse_inventory(&bytes)?,selected_available:false,addresses:destination.addresses})
 }
 
 fn remaining(deadline: Instant) -> Result<Duration> {
@@ -980,7 +993,7 @@ fn model_exchange_method(
     let bytes = response
         .body_mut()
         .with_config()
-        .limit(crate::studio_models::MAX_MODEL_RESPONSE as u64)
+        .limit(if path=="/v1/models" {128*1024}else{crate::studio_models::MAX_MODEL_RESPONSE as u64})
         .read_to_vec()
         .map_err(map_error)?;
     cancel.close_socket();
@@ -1248,16 +1261,18 @@ mod tests {
         assert_eq!(body["max_tokens"], 1024);
         assert_eq!(body["temperature"], 1.0);
         assert_eq!(body["top_p"], 0.95);
-        assert_eq!(body["enable_thinking"], false);
+        assert_eq!(body["enable_thinking"], true);
         assert_eq!(body["enable_tools"], false);
         assert_eq!(body["enabled_tools"], json!([]));
         assert!(body.get("session_id").is_none());
         assert!(!String::from_utf8_lossy(&p.body).contains("public-fixture"));
         let mut customized = profile(8888);
+        customized.settings.thinking = Some(false);
         customized.settings.temperature = Some(0.8);
         customized.settings.top_p = Some(0.9);
         let customized = prepare(customized, Secret::new("public-fixture".into()), 600).unwrap();
         let body: Value = serde_json::from_slice(&customized.body).unwrap();
+        assert_eq!(body["enable_thinking"], false);
         assert_eq!(body["temperature"], 0.8);
         assert_eq!(body["top_p"], 0.9);
         for seconds in [0, 29, 1801] {
@@ -1641,7 +1656,10 @@ mod tests {
             assert_eq!(shutdown, Some(Ok(())), "{diagnostic}");
             assert_eq!(completion, Ok(Err(Failure::Cancelled)), "{diagnostic}");
             assert!(completion_elapsed < Duration::from_secs(2), "{diagnostic}");
-            assert_eq!(eof, Ok(0), "{diagnostic}");
+            // Closing a socket with unread response bytes can deliver EOF or a
+            // connection reset to the peer. Both prove closure; timeouts and any
+            // other error remain failures, alongside the owned-shutdown checks.
+            assert!(matches!(eof, Ok(0) | Err((std::io::ErrorKind::ConnectionReset, _))), "{diagnostic}");
             assert!(eof_elapsed < Duration::from_secs(2), "{diagnostic}");
         }
     }

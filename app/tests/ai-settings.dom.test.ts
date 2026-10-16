@@ -33,12 +33,12 @@ test("Keychain access error remains visible without retry, discovery or secret I
     await settled();
     assert.equal(document.querySelector('[role="status"]')?.textContent, message);
     const button = (label:string) => [...document.querySelectorAll("button")].find(b => b.textContent === label)!;
-    assert.equal(button("Refresh models").disabled, true);
+    assert.equal(button("Connect").disabled, true);
     assert.deepEqual(calls.map(c => c.operation), ["ai.profiles"]);
     denied = false;
     button("Reload profiles").click();
     await settled();
-    assert.equal(button("Refresh models").disabled, false);
+    assert.equal(button("Connect").disabled, false);
     assert.deepEqual(calls.map(c => c.operation), ["ai.profiles", "ai.profiles"]);
     assert.deepEqual(calls.map(c => c.payload), [{}, {}]);
     assert.equal(document.querySelectorAll('input[type="password"]').length, 0);
@@ -59,83 +59,34 @@ test("file recovery Retry is read-only, deferred cleanup retained and saved-pend
   const settle=settled;
   try {
     document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await settle();
-    assert.equal(button("Refresh models").disabled,true);assert.equal(button("Re-enter API key").disabled,false);
+    assert.equal(button("Connect").disabled,true);assert.equal(button("Re-enter API key").disabled,false);
     assert.equal(document.body.textContent!.includes("cleanup deferred"),true);assert.equal([...document.querySelectorAll("button")].some(b=>b.textContent==="Retry owned credential cleanup"),false);
     assert.equal(button("Retry loading profiles").hidden,true);button("Reload profiles").click();await settle();assert.deepEqual(calls.map(c=>c.operation),["ai.profiles","ai.profiles"]);assert.deepEqual(calls[1]!.payload,{});
-    button("Re-enter API key").click();await settle();assert.equal(document.querySelector('[role="status"]')!.textContent,"API key saved; cleanup pending");
-    assert.equal(button("Refresh models").disabled,false);assert.equal(button("Replace credential…").disabled,false);assert.deepEqual(calls[2]!.payload,{profileId:"file",token:"owned"});
+    status="configured";saveStatus="API key saved; cleanup pending";button("Reload profiles").click();await settle();assert.equal(document.querySelector('[role="status"]')!.textContent,"API key saved; cleanup pending");
+    assert.equal(button("Connect").disabled,false);assert.equal(button("Replace credential…").disabled,false);assert.deepEqual(calls[2]!.payload,{});
     assert.equal(document.querySelectorAll('input[type="password"]').length,0);assert.equal(calls.some(c=>c.operation==="ai.discover"||c.operation==="ai.cleanup"),false);
     status="unsupported";saveStatus=undefined;button("Reload profiles").click();await settle();assert.equal(button("Enter credential…").disabled,true);
   }finally{await browser.happyDOM.close();}
 });
 
-test("failed entry preserves profile fields and confirmed save with unavailable reload never becomes failed save", async () => {
-  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document});let entries=0;
-  Object.assign(browser,{__TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string}})=>{
-    if(request.operation==="ai.enterCredential"){
-      entries++;return entries===1?{protocolVersion:1,requestId:request.requestId,ok:false,error:{code:"AI_SETTINGS_REFUSED",message:"Input retained; retry inside native dialog."}}:{protocolVersion:1,requestId:request.requestId,ok:true,value:{saved:true,reloadRequired:true,cleanupPending:true,saveStatus:"API key saved; cleanup pending; saved profiles could not be reloaded. Retry reading before further changes."}};
-    }
-    return {protocolVersion:1,requestId:request.requestId,ok:true,value:{token:"saved",cleanup:[],profiles:[{profileId:"file",revision:1,disabled:false,credentialStatus:"missing",discovery:null,settings:{label:"Retained",endpoint:"http://127.0.0.1:8888/v1",model:"synthetic",privateHttp:false,contextCeiling:8192,contextBudget:4096,maximumResponse:1024}}]}};
-  }}});
-  const button=(label:string)=>[...document.querySelectorAll("button")].find(b=>b.textContent===label)!;const settle=settled;
+test("draft key entry failure and cancel preserve saved profile fields and keep raw keys out of IPC",async()=>{
+  const f=await settingsFixture([fixtureProfile("saved","Retained")]);const before=structuredClone(f.store.profiles);
   try{
-    document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await settle();
-    button("Enter credential…").click();await settle();assert.match(document.querySelector('[role="status"]')!.textContent!,/Input retained/);assert.equal((document.querySelector('#studio-profile-name') as HTMLInputElement).value,"Retained");
-    button("Enter credential…").click();await settle();assert.equal(document.querySelector('[role="status"]')!.textContent,"API key saved; cleanup pending; saved profiles could not be reloaded. Retry reading before further changes.");assert.equal(button("Save profile").disabled,true);assert.equal(button("Retry loading profiles").disabled,false);assert.equal(button("Enter credential…").disabled,true);assert.equal(button("Remove credential").disabled,true);assert.equal(button("Remove profile").disabled,true);assert.equal(button("Refresh models").disabled,true);
-  }finally{await browser.happyDOM.close();}
+    f.store.failKey=true;f.button("Replace credential…").click();await settled();assert.match(document.querySelector('.studio-connect')!.textContent!,/Native entry refused/);assert.equal(f.input("Profile name").value,"Retained");assert.deepEqual(f.store.profiles,before);
+    f.store.failKey=false;f.store.cancelEntry=true;f.button("Replace credential…").click();await settled();assert.deepEqual(f.store.profiles,before);
+    assert.equal(document.querySelectorAll('input[type="password"]').length,0);assert.equal(f.calls.some(c=>JSON.stringify(c.payload).includes("fixture-secret")),false);
+    assert.equal(f.calls.some(c=>["ai.saveProfile","ai.saveConnection","ai.discover","ai.testCompatibility"].includes(c.operation)),false);
+  }finally{f.controller.dispose();await f.browser.happyDOM.close();}
 });
 
-test("public one-shot reload fixture keeps all controls disabled until read-only Retry restores C", async () => {
-  const {readFileSync} = await import("node:fs");
-  const regression = JSON.parse(readFileSync("tests/fixtures/macos-development-credential-reload-failure.json", "utf8"));
-  const fixture = JSON.parse(readFileSync("tests/fixtures/macos-development-credentials.json", "utf8"));
-  const browser = new Window(); Object.assign(globalThis, {window:browser, document:browser.document});
-  const calls: {operation:string;payload:Record<string,unknown>}[] = [];
-  let saved = false, reads = 0;
-  const snapshot = () => ({token:saved?"confirmed":"original", cleanup:[{profileId:"legacy",deferred:true}, {profileId:regression.profileId,deferred:true}], profiles:fixture.profileStore.profiles.map((p:{profileId:string;revision:number;settings:unknown}) => ({...p, revision:saved&&p.profileId===regression.profileId?2:1, disabled:false, credentialStatus:saved&&p.profileId===regression.profileId?"configured":"deferred", discovery:null}))});
-  Object.assign(browser, {__TAURI_INTERNALS__:{invoke:async (_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}}) => {
-    calls.push(request);
-    if(request.operation === "ai.enterCredential") {
-      assert.equal(saved, false, "another save must never be sent");
-      saved = true;
-      return {protocolVersion:1,requestId:request.requestId,ok:true,value:regression.expectedResponse};
-    }
-    assert.equal(request.operation, "ai.profiles", "Retry must never mutate or discover");
-    assert.deepEqual(request.payload, {});
-    if(saved && ++reads === 1) return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:"AI_SETTINGS_REFUSED",message:"Snapshot still unavailable; retained."}};
-    return {protocolVersion:1,requestId:request.requestId,ok:true,value:snapshot()};
-  }}});
-  const button = (label:string) => [...document.querySelectorAll("button")].find(b=>b.textContent===label)!;
-  const settle = settled;
-  const disabled = () => {
-    for(const label of regression.disabledActions) assert.equal(button(label)?.disabled, true, label);
-    for(const n of document.querySelectorAll<HTMLInputElement|HTMLSelectElement>("input,select")) assert.equal(n.disabled, true);
-    assert.equal(button("Retry loading profiles").disabled, false);
-    assert.equal(button("Reload profiles").disabled, false);
-  };
-  try {
-    document.body.innerHTML="<main></main><footer></footer>";
-    mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!); await settle();
-    const chooser = document.querySelector<HTMLSelectElement>("select")!;
-    chooser.value=regression.profileId; chooser.dispatchEvent(new window.Event("change"));
-    button("Enter credential…").click(); await settle();
-    assert.equal(document.querySelector('[role="status"]')!.textContent,regression.expectedResponse.saveStatus);
-    assert.deepEqual(calls[1]!.payload,{profileId:regression.profileId,token:"original"});
-    disabled();
-    for(const label of regression.disabledActions) button(label).click();
-    assert.equal(calls.length,2,"disabled controls cannot dispatch");
-    button("Retry loading profiles").click(); await settle(); disabled();
-    assert.equal(document.querySelector('[role="status"]')!.textContent,"Snapshot still unavailable; retained.");
-    button("Retry loading profiles").click(); await settle();
-    assert.equal(chooser.value,regression.profileId);
-    assert.equal(document.querySelector('.studio-settings')!.textContent!.includes("Credential: configured"),true);
-    assert.equal(document.querySelector('.studio-settings')!.textContent!.includes("Apple Keychain cleanup deferred; owned references retained."),true);
-    assert.equal(button("Replace credential…").disabled,false);
-    assert.equal(button("Refresh models").disabled,false);
-    assert.equal(button("Save profile").disabled,false);
-    assert.deepEqual(calls.map(c=>c.operation),["ai.profiles","ai.enterCredential","ai.profiles","ai.profiles"]);
-    assert.equal(document.querySelectorAll('input[type="password"]').length,0);
-  } finally {await browser.happyDOM.close();}
+test("confirmed connected-profile save with failed reload disables writes until read-only retry",async()=>{
+  const f=await settingsFixture([]);
+  try{
+    f.button("Enter credential…").click();await settled();f.button("Connect").click();await settled();f.edit("Model ID","fixture");f.store.failReadAfterSave=true;
+    f.button("Save profile").click();await settled();assert.match(document.querySelector('[role="status"]')!.textContent!,/Profile saved.*could not be reloaded/);
+    assert.equal(f.button("Save profile").disabled,true);assert.equal(f.button("Retry loading profiles").hidden,false);assert.equal(f.button("Enter credential…").disabled,true);
+    const writes=f.calls.filter(c=>c.operation==="ai.saveConnection").length;f.store.failRead=false;f.button("Retry loading profiles").click();await settled();assert.equal(f.input("Model ID").value,"fixture");assert.equal(f.calls.filter(c=>c.operation==="ai.saveConnection").length,writes);assert.equal(f.calls.at(-1)!.operation,"ai.profiles");
+  }finally{f.controller.dispose();await f.browser.happyDOM.close();}
 });
 
 test("sampling defaults, explicit save, invalid refusal and saved reload never send inference", async () => {
@@ -154,7 +105,7 @@ test("sampling defaults, explicit save, invalid refusal and saved reload never s
     assert.equal(input("Temperature").value,"1");assert.equal(input("Top-p").value,"0.95");
     assert.deepEqual(calls.map(c=>c.operation),["ai.profiles"]);
     input("Temperature").value="0.8";input("Top-p").value="0.9";input("Temperature").dispatchEvent(new window.Event("input",{bubbles:true}));
-    assert(button("Refresh models").disabled);button("Save profile").click();await settle();
+    assert.equal(button("Connect").disabled,false);button("Save profile").click();await settle();
     assert.equal((calls[1]!.payload.settings as Record<string,unknown>).temperature,0.8);
     assert.equal((calls[1]!.payload.settings as Record<string,unknown>).topP,0.9);
     button("Reload profiles").click();await settle();assert.equal(input("Temperature").value,"0.8");assert.equal(input("Top-p").value,"0.9");
@@ -175,10 +126,10 @@ test("setup preflight is explicit, previews synthetic body and reloads configura
     document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await settled();
     const button=(label:string)=>[...document.querySelectorAll('button')].find(b=>b.textContent===label)!;
     assert.deepEqual(calls.map(c=>c.operation),["ai.profiles"]);assert(document.querySelector('details pre')!.textContent!.includes('"enable_tools":false'));
-    button("Test connection").click();await settled();
+    button("Test response format").click();await settled();
     assert.deepEqual(calls.map(c=>c.operation),["ai.profiles","ai.testCompatibility","ai.requestStatus","ai.profiles"]);
     assert.deepEqual(calls[1]!.payload,{token:"untested",profileId:"saved",sessionId:null,timeoutSeconds:60});
-    assert(document.querySelector('[role="status"]')!.textContent!.includes("Connection tested"));assert(button("Cancel connection test").disabled);
+    assert(document.querySelector('[role="status"]')!.textContent!.includes("Response format tested"));assert(button("Cancel response format test").disabled);
   }finally{await browser.happyDOM.close();}
 });
 
@@ -188,7 +139,7 @@ test("failed setup probe remains untested without discovery, automatic retry or 
     calls.push(request.operation);const value=request.operation==="ai.testCompatibility"?{requestId:"test-id"}:request.operation==="ai.requestStatus"?{done:true,state:"failed",message:"Unsupported structured response."}:{token:"untested",cleanup:[],profiles:[{profileId:"saved",revision:1,disabled:false,credentialStatus:"configured",compatibilityState:"untested",settings:{label:"Studio",endpoint:"http://127.0.0.1:8888/v1",model:"fixture",privateHttp:false,contextCeiling:8192,contextBudget:4096,maximumResponse:1024},discovery:null}]};return {protocolVersion:1,requestId:request.requestId,ok:true,value};
   }}});
   try{document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await settled();
-    [...document.querySelectorAll('button')].find(b=>b.textContent==="Test connection")!.click();await settled();
+    [...document.querySelectorAll('button')].find(b=>b.textContent==="Test response format")!.click();await settled();
     assert.equal(document.querySelector('[role="status"]')!.textContent,"Unsupported structured response.");
     assert.deepEqual(calls,["ai.profiles","ai.testCompatibility","ai.requestStatus","ai.profiles"]);
   }finally{await browser.happyDOM.close();}
@@ -205,24 +156,45 @@ test("setup cancel preserves completed publication and ignores a stale awaited s
   }}});
   try{document.body.innerHTML="<main></main><footer></footer>";mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!);await settled();
     const button=(label:string)=>[...document.querySelectorAll('button')].find(b=>b.textContent===label)!;
-    button("Test connection").click();await waitFor(()=>!!resolveStatus);assert(resolveStatus);assert.equal(button("Read model-load settings").disabled,true);assert.equal(button("Apply model-load settings").disabled,true);button("Cancel connection test").click();await waitFor(()=>document.querySelector('[role="status"]')!.textContent==="Native bridge unavailable; retry Cancel.");
-    assert.equal(document.querySelector('[role="status"]')!.textContent,"Native bridge unavailable; retry Cancel.");assert.equal(button("Cancel connection test").disabled,false);
-    button("Cancel connection test").click();await settled();
-    assert.equal(document.querySelector('[role="status"]')!.textContent,"Connection test already completed. Its result remains recorded.");
+    button("Test response format").click();await waitFor(()=>!!resolveStatus);assert(resolveStatus);assert.equal(button("Read model-load settings").disabled,true);assert.equal(button("Apply model-load settings").disabled,true);button("Cancel response format test").click();await waitFor(()=>document.querySelector('[role="status"]')!.textContent==="Native bridge unavailable; retry Cancel.");
+    assert.equal(document.querySelector('[role="status"]')!.textContent,"Native bridge unavailable; retry Cancel.");assert.equal(button("Cancel response format test").disabled,false);
+    button("Cancel response format test").click();await settled();
+    assert.equal(document.querySelector('[role="status"]')!.textContent,"Response format test already completed. Its result remains recorded.");
     resolveStatus!({protocolVersion:1,requestId:"late-status",ok:true,value:{done:true,state:"failed",message:"Late failure"}});await settled();
-    assert.equal(document.querySelector('[role="status"]')!.textContent,"Connection test already completed. Its result remains recorded.");
+    assert.equal(document.querySelector('[role="status"]')!.textContent,"Response format test already completed. Its result remains recorded.");
     assert.deepEqual(calls,["ai.profiles","ai.testCompatibility","ai.requestStatus","ai.cancelRequest","ai.cancelRequest","ai.profiles"]);
   }finally{await browser.happyDOM.close();}
 });
 
-type SettingsFixture = {label:string;endpoint:string;model:string;privateHttp:boolean;contextCeiling:number;contextBudget:number;maximumResponse:number;temperature?:number;topP?:number;modelLoad?:{parallel:number;gpuMemoryMode:"auto"|"manual";fit:"on"|"off"}};
+type SettingsFixture = {label:string;endpoint:string;model:string;privateHttp:boolean;contextCeiling:number;contextBudget:number;maximumResponse:number;thinking?:boolean;temperature?:number;topP?:number;modelLoad?:{parallel:number;gpuMemoryMode:"auto"|"manual";fit:"on"|"off"}};
 const fixtureProfile=(profileId:string,label:string)=>({profileId,revision:1,disabled:false,credentialStatus:"configured",settings:{label,endpoint:"http://127.0.0.1:8888/v1",model:"fixture",privateHttp:false,contextCeiling:8192,contextBudget:4096,maximumResponse:1024} as SettingsFixture,discovery:null});
 async function settingsFixture(profiles:ReturnType<typeof fixtureProfile>[]) {
   const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document});
   const calls:{operation:string;payload:Record<string,unknown>}[]=[];
-  const store:{profiles:ReturnType<typeof fixtureProfile>[];failRead:boolean;failSave:boolean;failRemoval:boolean;cancelEntry:boolean;management?: (operation:string,payload:Record<string,unknown>)=>unknown|Promise<unknown>}={profiles,failRead:false,failSave:false,failRemoval:false,cancelEntry:false};
+  const store:{profiles:ReturnType<typeof fixtureProfile>[];failRead:boolean;failSave:boolean;failRemoval:boolean;cancelEntry:boolean;failKey:boolean;failConnect:boolean;failReadAfterSave:boolean;pendingConnect?:Promise<unknown>;connectStarted?:()=>void;management?: (operation:string,payload:Record<string,unknown>)=>unknown|Promise<unknown>}={profiles,failRead:false,failSave:false,failRemoval:false,failKey:false,failConnect:false,failReadAfterSave:false,cancelEntry:false};
+  let draft:{draftId:string;revision:number;credentialReady:boolean;state:string;message:string;models:string[]}|null=null;
   Object.assign(browser,{__TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}})=>{
     calls.push(structuredClone(request));
+    const ok=(value:unknown)=>({protocolVersion:1,requestId:request.requestId,ok:true,value});
+    const refused=(message:string)=>({protocolVersion:1,requestId:request.requestId,ok:false,error:{code:"AI_CONNECTION_REFUSED",message}});
+    if(request.operation==="ai.beginConnection"){draft={draftId:"draft-1",revision:1,credentialReady:store.profiles.some(p=>p.profileId===request.payload.profileId),state:"ready",message:"Enter key, then Connect.",models:[]};return ok(structuredClone(draft));}
+    if(request.operation==="ai.enterConnectionKey"){
+      if(store.failKey)return refused("Native entry refused; draft retained.");
+      if(store.cancelEntry)return ok({...draft,cancelled:true});
+      draft={...draft!,revision:draft!.revision+1,credentialReady:true,state:"ready",models:[],message:"Key ready; Connect."};return ok(structuredClone(draft));
+    }
+    if(request.operation==="ai.connect"&&store.pendingConnect){store.connectStarted?.();return ok(await store.pendingConnect);}
+    if(request.operation==="ai.connect"){draft={...draft!,state:store.failConnect?"failed":"connected",message:store.failConnect?"Authentication failed; check key and Connect again.":"Connected. Choose a model.",models:store.failConnect?[]:["fixture","second-model"]};return ok(structuredClone(draft));}
+    if(request.operation==="ai.connectionStatus")return ok(structuredClone(draft));
+    if(request.operation==="ai.cancelConnection"){draft={...draft!,state:"cancelled",message:"Cancelled; draft retained.",models:[]};return ok(structuredClone(draft));}
+    if(request.operation==="ai.discardConnection"){const result=draft;draft=null;return ok(result);}
+    if(request.operation==="ai.saveConnection"){
+      if(store.failSave)return refused("Synthetic save refusal; draft retained.");
+      const profile=store.profiles.find(p=>p.profileId===document.querySelector<HTMLSelectElement>('select')!.value);
+      if(profile)profile.settings=structuredClone(request.payload.settings) as SettingsFixture;else store.profiles.push({...fixtureProfile("new-id",""),settings:structuredClone(request.payload.settings) as SettingsFixture});
+      if(store.failReadAfterSave)store.failRead=true;return ok({saved:true,profileId:profile?.profileId??"new-id",cleanupPending:false});
+    }
+
     if((request.operation==="ai.profiles"&&store.failRead)||(request.operation==="ai.saveProfile"&&store.failSave)||(request.operation==="ai.removeProfile"&&store.failRemoval))return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:"AI_SETTINGS_REFUSED",message:"Synthetic refusal; saved profiles retained."}};
     if(request.operation==="ai.readModelLoadSettings"||request.operation==="ai.applyModelLoadSettings"){
       if(!store.management)throw Error("Unexpected model-load management operation");
@@ -249,22 +221,74 @@ async function settingsFixture(profiles:ReturnType<typeof fixtureProfile>[]) {
 test("new Settings defaults and approved placement stay passive; explicit save maps the single context value",async()=>{
   const f=await settingsFixture([]);
   try {
-    assert.equal(f.input("Context length").value,"32768");assert.equal(f.input("Maximum response length").value,"8192");
+    assert.equal(f.input("Context length").value,"32768");assert.equal(f.input("Maximum response length").value,"16384");
     assert.equal([...document.querySelectorAll("label")].some(n=>n.textContent==="Configured capacity — unverified"||n.textContent==="Total context budget"),false);
     assert.match(document.body.textContent!,/Profiles are saved only on this computer/);assert.match(document.body.textContent!,/Maximum number of tokens to generate\. Reaching this limit may cut the response short\./);
     assert.equal([...document.querySelectorAll("h4")].some(h=>h.textContent==="API Key"),true);
     assert.equal(document.body.textContent!.split("macOS: API keys are encrypted and stored on this computer.").length-1,1);assert.equal(document.body.textContent!.includes("Temporary Mac development storage"),false);
-    const setup=[...document.querySelectorAll("section")].find(n=>n.querySelector("h4")?.textContent==="Connection test")!;
+    const setup=[...document.querySelectorAll("section")].find(n=>n.querySelector("h4")?.textContent==="Response format test")!;
     assert.equal([...setup.querySelectorAll("p")].find(n=>n.textContent==="")!.hidden,true,"unsaved profiles have no untested status");assert.match(setup.textContent!,/No project content is sent\./);
-    assert.equal(f.input("Model ID").closest(".setting-row")!.nextElementSibling!.querySelector("button"),f.button("Refresh models"));
+    assert.equal(f.input("Model ID").disabled,true);assert.equal(f.button("Save profile").disabled,true);assert.equal(f.button("Enter credential…").disabled,false);
+    const order=[...document.querySelectorAll(".setting-row label, .studio-connect button")].map(n=>n.textContent);assert(order.indexOf("Endpoint")<order.indexOf("Connect"));
     const privateRow=f.input("Allow private-network HTTP").closest<HTMLElement>(".setting-row")!;
     assert.equal(f.input("Endpoint").closest(".setting-row")!.nextElementSibling,privateRow);assert.equal(privateRow.hidden,false);assert.equal(f.input("Allow private-network HTTP").checked,false);
     for(const value of ["https://example.test/v1"," HTTPS://example.test/v1 ",""]){f.edit("Endpoint",value);assert.equal(privateRow.hidden,true);assert.equal(f.input("Allow private-network HTTP").checked,false);}
     f.edit("Endpoint","http://192.168.1.2:8888/v1");assert.equal(privateRow.hidden,false);assert.equal(f.input("Allow private-network HTTP").checked,false);
-    f.edit("Endpoint","http://127.0.0.1:8888/v1");f.edit("Model ID","fixture");assert.deepEqual(f.calls.map(c=>c.operation),["ai.profiles"]);
+    f.edit("Endpoint","http://127.0.0.1:8888/v1");assert.deepEqual(f.calls.map(c=>c.operation),["ai.profiles"]);
+    f.button("Enter credential…").click();await settled();assert.equal(f.input("Model ID").disabled,true);f.button("Connect").click();await settled();assert.equal(f.input("Model ID").disabled,false);f.edit("Model ID","fixture");
     f.button("Save profile").click();await settled();
-    assert.deepEqual(f.calls[1]!.payload,{token:"fixture-token",profileId:null,settings:{label:"Studio",endpoint:"http://127.0.0.1:8888/v1",model:"fixture",privateHttp:false,contextCeiling:32768,contextBudget:32768,maximumResponse:8192,temperature:1,topP:0.95,modelLoad:{parallel:1,gpuMemoryMode:"manual",fit:"off"}}});
-    assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"new-id");assert.equal(setup.textContent!.includes("Setup not tested yet"),true);assert.deepEqual(f.calls.map(c=>c.operation),["ai.profiles","ai.saveProfile"]);
+    assert.deepEqual(f.calls.find(c=>c.operation==="ai.saveConnection")!.payload,{draftId:"draft-1",revision:2,settings:{label:"Studio",endpoint:"http://127.0.0.1:8888/v1",model:"fixture",privateHttp:false,contextCeiling:32768,contextBudget:32768,maximumResponse:16384,thinking:true,temperature:1,topP:0.95,modelLoad:{parallel:1,gpuMemoryMode:"manual",fit:"off"}}});
+    assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"new-id");assert.equal(setup.textContent!.includes("Response format not tested yet"),true);assert.deepEqual(f.calls.map(c=>c.operation),["ai.profiles","ai.beginConnection","ai.enterConnectionKey","ai.connect","ai.saveConnection","ai.discardConnection","ai.profiles"]);
+  }finally{f.controller.dispose();await f.browser.happyDOM.close();}
+});
+
+test("thinking defaults on, explicit off survives save and reload, and failed saves retain the toggle draft",async()=>{
+  const profile=fixtureProfile("saved","Saved");profile.settings.thinking=false;
+  const f=await settingsFixture([profile]);
+  try {
+    assert.equal(f.input("Thinking").checked,false);assert.equal(f.input("Maximum response length").value,"1024");
+    f.select("");assert.equal(f.input("Thinking").checked,true);assert.equal(f.input("Maximum response length").value,"16384");
+    f.select("saved");f.input("Thinking").checked=true;f.input("Thinking").dispatchEvent(new window.Event("change",{bubbles:true}));
+    assert.equal(document.querySelector<HTMLElement>(".studio-settings")!.dataset.dirty,"true");
+    f.store.failSave=true;f.button("Save profile").click();await settled();assert.equal(f.input("Thinking").checked,true);assert.equal(f.store.profiles[0]!.settings.thinking,false);
+    f.store.failSave=false;f.button("Save profile").click();await settled();assert.equal(f.store.profiles[0]!.settings.thinking,true);
+    f.input("Thinking").checked=false;f.input("Thinking").dispatchEvent(new window.Event("change",{bubbles:true}));f.button("Save profile").click();await settled();
+    f.button("Reload profiles").click();await settled();assert.equal(f.input("Thinking").checked,false);assert.equal(f.input("Maximum response length").value,"1024");
+    assert.equal(f.calls.some(c=>["ai.discover","ai.testCompatibility","ai.sendSynthetic"].includes(c.operation)),false);
+  }finally{f.controller.dispose();await f.browser.happyDOM.close();}
+});
+
+test("draft authentication failure retains entered details and explicit retry discovers models without saving or inference",async()=>{
+  const f=await settingsFixture([]);
+  try{
+    f.edit("Profile name","My draft");f.edit("Endpoint","http://192.168.1.2:8888/v1");f.input("Allow private-network HTTP").checked=true;f.input("Allow private-network HTTP").dispatchEvent(new window.Event("change"));
+    f.button("Enter credential…").click();await settled();f.store.failConnect=true;f.button("Connect").click();await settled();
+    assert.match(document.querySelector('.studio-connect')!.textContent!,/Authentication failed/);assert.equal(f.input("Profile name").value,"My draft");assert.equal(f.input("Endpoint").value,"http://192.168.1.2:8888/v1");assert.equal(f.input("Model ID").disabled,true);assert.equal(f.button("Save profile").disabled,true);assert.equal(f.store.profiles.length,0);
+    f.store.failConnect=false;f.button("Connect").click();await settled();assert.equal(f.input("Model ID").disabled,false);assert.deepEqual([...document.querySelectorAll('datalist option')].map(n=>(n as HTMLOptionElement).value),["fixture","second-model"]);
+    assert.equal(f.calls.some(c=>["ai.saveProfile","ai.saveConnection","ai.testCompatibility","ai.sendSynthetic","ai.applyModelLoadSettings"].includes(c.operation)),false);
+    assert.equal(JSON.stringify(f.calls).includes("fixture-secret"),false);
+  }finally{f.controller.dispose();await f.browser.happyDOM.close();}
+});
+
+test("cancelled and late connection results cannot attach to another selected profile or changed address",async()=>{
+  const profiles=[fixtureProfile("first","First"),fixtureProfile("second","Second")],f=await settingsFixture(profiles),before=structuredClone(profiles),pending=held<unknown>();
+  try{
+    const started=held<void>();f.store.connectStarted=()=>started.resolve();f.store.pendingConnect=pending.promise;f.button("Connect").click();await started.promise;
+    assert.equal(f.button("Cancel connection").disabled,false);f.button("Cancel connection").click();await settled();f.select("second");
+    pending.resolve({draftId:"draft-1",revision:1,credentialReady:true,state:"connected",message:"OLD RESULT",models:["wrong-old-model"]});
+    await Promise.resolve();await Promise.resolve();assert.equal(document.querySelector<HTMLSelectElement>('select')!.value,"second");assert.equal(document.body.textContent!.includes("OLD RESULT"),false);assert.equal(f.input("Model ID").value,"fixture");assert.deepEqual(f.store.profiles,before);
+    f.store.pendingConnect=undefined;f.button("Connect").click();await settled();f.edit("Endpoint","http://127.0.0.1:9999/v1");assert.equal(f.input("Model ID").value,"");assert.equal(f.input("Model ID").disabled,true);assert.equal(f.button("Save profile").disabled,true);assert.match(document.querySelector('.studio-connect')!.textContent!,/Address changed/);
+    assert.equal(f.calls.some(c=>["ai.saveProfile","ai.saveConnection","ai.testCompatibility","ai.applyModelLoadSettings"].includes(c.operation)),false);
+  }finally{f.controller.dispose();await f.browser.happyDOM.close();}
+});
+
+test("connected-profile save failure retains the completed draft and explicit retry saves once",async()=>{
+  const f=await settingsFixture([]);
+  try{
+    f.button("Enter credential…").click();await settled();f.button("Connect").click();await settled();f.edit("Model ID","second-model");f.store.failSave=true;
+    f.button("Save profile").click();await settled();assert.equal(f.store.profiles.length,0);assert.equal(f.input("Model ID").value,"second-model");assert.equal(f.input("Thinking").checked,true);assert.equal(f.input("Maximum response length").value,"16384");assert.equal(f.button("Save profile").disabled,false);
+    f.store.failSave=false;f.button("Save profile").click();await settled();assert.equal(f.store.profiles.length,1);assert.equal(f.store.profiles[0]!.settings.model,"second-model");assert.equal(f.store.profiles[0]!.settings.thinking,true);assert.equal(f.calls.filter(c=>c.operation==="ai.saveConnection").length,2);
+    assert.equal(f.calls.some(c=>["ai.testCompatibility","ai.sendSynthetic","ai.applyModelLoadSettings"].includes(c.operation)),false);
   }finally{f.controller.dispose();await f.browser.happyDOM.close();}
 });
 
@@ -306,7 +330,7 @@ test("context validation rejects invalid totals and insufficient response room w
     for(const value of ["","255","2000001","256.5"]){f.edit("Context length",value);f.button("Save profile").click();assert.equal(f.calls.length,1);assert.equal(f.input("Context length").getAttribute("aria-invalid"),"true");assert.equal(f.input("Context length").value,value);}
     f.edit("Context length","1152");f.edit("Maximum response length","1024");f.button("Save profile").click();assert.equal(f.calls.length,1);assert.equal(document.activeElement,f.input("Maximum response length"));
     f.edit("Maximum response length","1023");f.button("Save profile").click();await settled();assert.equal(f.calls.length,2);assert.equal(f.store.profiles[0]!.settings.contextBudget,1152);
-    f.store.cancelEntry=true;f.button("Replace credential…").click();await settled();assert.equal(f.input("Context length").value,"1152");assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"first");assert.match(document.querySelector('[role="status"]')!.textContent!,/cancelled; saved profile unchanged/);
+    f.store.cancelEntry=true;f.button("Replace credential…").click();await settled();assert.equal(f.input("Context length").value,"1152");assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"first");assert.equal(f.store.profiles[0]!.settings.maximumResponse,1023);
   }finally{f.controller.dispose();await f.browser.happyDOM.close();}
 });
 
@@ -367,7 +391,7 @@ test("model-load partial state is unverified and mismatches or disabled auto-swi
 test("model-load busy and failed actions retain fields and selection and never automatically retry an uncertain Apply",async()=>{
   const second=fixtureProfile("second","Second");second.settings.modelLoad={parallel:1,gpuMemoryMode:"manual",fit:"off"};const f=await settingsFixture([fixtureProfile("first","First"),second]),read=held<LoadReport>();f.store.management=()=>read.promise;
   try{
-    f.select("second");f.button("Read model-load settings").click();assert.equal(f.controller.canLeave(),false);assert.equal(f.button("Read model-load settings").disabled,true);assert.equal(f.button("Apply model-load settings").disabled,true);assert.equal(f.button("Test connection").disabled,true);assert.equal(f.button("Save profile").disabled,true);f.select("first");assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"second");read.reject(Error("Synthetic management bridge unavailable"));await settled();assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"second");assert.equal(f.input("Profile name").value,"Second");assert.equal(f.input("Context length").value,"4096");assert.equal(f.input("Parallel slots").value,"1");assert.match(document.querySelector('.studio-model-load-report')!.textContent!,/could not be read/);assert.equal([...document.querySelectorAll('button')].find(b=>b.textContent==="Retry loading profiles")!.hidden,true,"management read failure is separate from profile read failure");
+    f.select("second");f.button("Read model-load settings").click();assert.equal(f.controller.canLeave(),false);assert.equal(f.button("Read model-load settings").disabled,true);assert.equal(f.button("Apply model-load settings").disabled,true);assert.equal(f.button("Test response format").disabled,true);assert.equal(f.button("Save profile").disabled,true);f.select("first");assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"second");read.reject(Error("Synthetic management bridge unavailable"));await settled();assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"second");assert.equal(f.input("Profile name").value,"Second");assert.equal(f.input("Context length").value,"4096");assert.equal(f.input("Parallel slots").value,"1");assert.match(document.querySelector('.studio-model-load-report')!.textContent!,/could not be read/);assert.equal([...document.querySelectorAll('button')].find(b=>b.textContent==="Retry loading profiles")!.hidden,true,"management read failure is separate from profile read failure");
     f.store.management=()=>{throw Error("Synthetic Apply response was lost");};f.button("Apply model-load settings").click();await settled();assert.match(document.querySelector('.studio-model-load-report')!.textContent!,/server may already have saved settings/);assert.match(document.querySelector('.studio-model-load-report')!.textContent!,/Read model-load settings before applying again/);assert.equal(f.calls.filter(c=>c.operation==="ai.applyModelLoadSettings").length,1);assert.equal(f.controller.canLeave(),true);assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"second");
     f.edit("Parallel slots","5");assert.equal(document.querySelector<HTMLElement>('.studio-model-load-report')!.hidden,true);f.button("Read model-load settings").click();f.button("Apply model-load settings").click();assert.equal(f.calls.length,3);f.store.failSave=true;f.button("Save profile").click();await settled();assert.equal(f.input("Parallel slots").value,"5");assert.equal(document.querySelector<HTMLSelectElement>("select")!.value,"second");assert.deepEqual(f.store.profiles[1]!.settings.modelLoad,{parallel:1,gpuMemoryMode:"manual",fit:"off"});assert.equal(f.button("Apply model-load settings").disabled,true);
   }finally{f.controller.dispose();await f.browser.happyDOM.close();}

@@ -26,6 +26,7 @@ async function inputSnapshot(){
  const git=(...args)=>execFileSync('git',args,{cwd:projectRoot,encoding:'utf8'}).trim();
  return {checkoutHead:git('rev-parse','HEAD'),checkoutTree:git('rev-parse','HEAD^{tree}'),dirty:!!git('status','--porcelain','--untracked-files=normal'),files};
 }
+const surfaces=process.env.LOOMLIGHT_UI_SURFACES==='settings'?['settings']:['characters','relationships','knowledge','history','lorebook','settings','assist'];
 const output=process.env.LOOMLIGHT_UI_OUTPUT??fileURLToPath(new URL('../../.toolchains/walkthrough-redesign/browser/',import.meta.url));
 await mkdir(output,{recursive:true});
 const beforeInputs=await inputSnapshot();
@@ -60,7 +61,7 @@ async function mount(page,surface,theme,size){
  await page.goto(origin+'/ui-fixture');
  await page.evaluate(async({surface,theme,size})=>{
   window.fixtureCalls=[];window.fixtureProhibited=[];
-  const profiles={token:'synthetic-profile-token',profiles:[{profileId:'synthetic-profile',revision:1,disabled:false,credentialStatus:'configured',compatibilityState:'ready',compatibilityPayload:'{"messages":[{"role":"user","content":"Synthetic connection test only"}]}',discovery:null,settings:{label:'Local Studio · public fixture',endpoint:'http://127.0.0.1:8888/v1',model:'synthetic-model',privateHttp:false,contextBudget:32768,contextCeiling:32768,maximumResponse:8192,temperature:1,topP:.95}}],cleanup:[],storageNotice:'Temporary Mac development storage · synthetic fixture'};
+  const profiles={token:'synthetic-profile-token',profiles:[{profileId:'synthetic-profile',revision:1,disabled:false,credentialStatus:'configured',compatibilityState:'ready',compatibilityPayload:'{"messages":[{"role":"user","content":"Synthetic connection test only"}]}',discovery:null,settings:{label:'Local Studio · public fixture',endpoint:'http://127.0.0.1:8888/v1',model:'synthetic-model',privateHttp:false,contextBudget:32768,contextCeiling:32768,maximumResponse:16384,thinking:true,temperature:1,topP:.95}}],cleanup:[],storageNotice:'Temporary Mac development storage · synthetic fixture'};
   const preferences={schemaVersion:1,theme,density:'default',sourceFontSize:14,rememberLayout:false,layouts:{}};
   const refuse=operation=>{window.fixtureProhibited.push(operation);throw Error('Fixture blocks persistence/network: '+operation);};
   window.__TAURI_INTERNALS__={invoke:async(_,{request})=>{
@@ -143,7 +144,8 @@ async function exerciseCharacters(page,size){
 async function exerciseSurface(page,surface,size){
  if(surface==='settings'){
   await page.locator('.studio-settings[data-busy="false"]').waitFor();
-  assert.equal(await page.getByLabel('Context length',{exact:true}).inputValue(),'32768');assert.equal(await page.getByLabel('Maximum response length',{exact:true}).inputValue(),'8192');
+  assert.equal(await page.getByLabel('Context length',{exact:true}).inputValue(),'32768');assert.equal(await page.getByLabel('Maximum response length',{exact:true}).inputValue(),'16384');assert.equal(await page.getByLabel('Thinking',{exact:true}).isChecked(),true);
+  assert.deepEqual(await page.locator('.studio-group').evaluateAll(groups=>groups.slice(0,4).map(group=>group.className.includes('studio-connect')?'connect':group.className.includes('studio-model-choice')?'model':group.querySelector('h4')?.textContent)),['Connection','API Key','connect','model']);
   assert.equal(await page.getByLabel('Parallel slots',{exact:true}).inputValue(),'1');assert.equal(await page.getByLabel('GPU memory mode',{exact:true}).inputValue(),'manual');assert.equal(await page.getByLabel('Automatic memory fitting',{exact:true}).inputValue(),'off');
   await page.getByRole('button',{name:'Read model-load settings',exact:true}).click();
   await page.locator('.studio-model-load-report[data-outcome="read"]').waitFor();
@@ -206,7 +208,7 @@ try{
   if(url.pathname==='/ui-fixture')return route.fulfill({contentType:'text/html; charset=utf-8',body:html});
   return route.continue();
  });
- for(const [size,width,height] of [['wide',1440,900],['compact',600,720]])for(const theme of ['light','dark'])for(const surface of ['characters','relationships','knowledge','history','lorebook','settings','assist']){
+ for(const [size,width,height] of [['wide',1440,900],['compact',600,720]])for(const theme of ['light','dark'])for(const surface of surfaces){
   activeCase={surface,theme,size,width,height};await page.setViewportSize({width,height});await mount(page,surface,theme,size);
   const result=await exerciseSurface(page,surface,size);await frame(page);
   const actions=await visibleBounds(page,result.actions);requireVisible(actions,`${surface} ${theme} ${size}`);
@@ -216,7 +218,7 @@ try{
   report.receipts.push({surface,theme,size,image,imageSha256:hash(await readFile(path.join(output,image))),width,height,viewportOverflow:state.viewportOverflow,actionsVisible:actions.every(action=>action.visible),actions,calls:state.calls});report.behaviors.push({surface,theme,size,...result.behavior});
   console.log(`PASS: ${surface} ${theme} ${size}`);
  }
- assert.equal(report.receipts.length,28);assert.deepEqual(report.errors,[]);assert.deepEqual(report.prohibited,[]);
+ assert.equal(report.receipts.length,surfaces.length*4);assert.deepEqual(report.errors,[]);assert.deepEqual(report.prohibited,[]);
 }catch(error){
  failure=error;report.errors.push(error instanceof Error?error.message:String(error));report.failedCase=activeCase??null;
  if(page&&!page.isClosed()){
@@ -237,4 +239,4 @@ finally{
  await writeFile(path.join(output,'metrics.json'),JSON.stringify(report,null,2)+'\n');
 }
 if(failure)throw failure;
-console.log('PASS: walkthrough redesign28 source-component captures; both themes, wide/compact, stable hashed inputs, explicit UI draft/panel/history actions; blocked persistence/network');
+console.log(`PASS: ${report.receipts.length} selected source-component captures; both themes, wide/compact, stable hashed inputs, explicit UI actions; blocked persistence/network`);
