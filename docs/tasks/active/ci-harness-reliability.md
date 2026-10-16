@@ -44,8 +44,9 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-Deliverables1/2 remain complete. Active state: `blocked` after the final native CI2
-failure; its terminal audit and implementation omissions are below. Original maintenance
+Deliverables1/2 remain complete. Active state: `review_ready` for the user-authorised
+H19 continuation and one additional CI3. Both failed native audits and the current
+build/rejecting-gate review are below. Original maintenance
 local5/6 and pairedCI2/2 were used, including failed CI1. That earlier CI2's Windows/Mac
 steps, artifacts, source identities and named results pass audit. Deliverable3 was plan-only at that completion; the later
 user approval selects its implementation.
@@ -837,3 +838,86 @@ nativeCI2/2, Windows packages2/2, launches3/4 and GETs6/14. The unused launch/re
 capacity is not another CI/package allowance. No additional correction or dispatch
 is authorised; any further implementation needs a newly selected bounded continuation.
 Deliverables1/2 remain complete. Only audit/index/live-status documentation is updated.
+
+## Deliverable3 H19 continuation and CI3 selected — 2026-10-17
+
+The user instructed: read the test requirements, check the build/CI, then run another
+CI. This authorises the necessary H19 corrections and one additional focused native
+dispatch on the current branch; it supersedes the earlier exhausted no-retry cap for
+this one attempt. Existing consumption stays recorded: local5, nativeCI2, packages2,
+launches3, GETs6. Select at most two further meaningful local repair/check rounds
+(cumulative7), one matching package (cap3), two native launches (cap6) and seven GETs
+(cap21); nativeCI cap3. No automatic retry, Mac package, provider, SDK, dependency,
+frozen-helper/route, product close-protection, merge or release change is selected.
+
+Reread WORKFLOW's real-path/user-action/rejecting-gate requirements and NATIVE's
+effective control/result/independent-cleanup requirements. Correct disclosure-aware
+current probe observations, Settings-modal close before application close, and
+separate safe native diagnostics. Exercise the real renderer/controller and app close
+guard in rendered browser checks, including known-bad collapsed/control/close states;
+these are preparation, not Windows native acceptance. Verify renderer build, focused
+shared checks and exact candidate/CI routing before spending the new attempt. Keep
+the Mac development host and three unrelated edits/recovery tail intact. Continue
+to use manual same-thread waiting after the confirmed dispatch.
+
+## Deliverable3 H19 build and pre-dispatch review — 2026-10-17
+
+State `review_ready`; cumulative local7/7 used, nativeCI2/3. The previously audited
+CI2 is still the same failed e5421a9/attempt1; its successful build/source/phase1
+evidence remains valid historical proof, not qualification of these changed inputs.
+Actual prior native consumption remains packages2/3, launches3/6, GETs6/21. Reserve
+only one new package/two launches/seven GETs for the authorised CI3 after publication.
+
+The current Windows probe now opens Profile maintenance through the actual summary
+action before exposing Retry to the observer. Its action lookup checks effective
+visibility, including closed disclosures, CSS/inert/hidden ancestry; the shared
+historical finder is unchanged. Existing exact assertions/GETs remain, plus two named
+disclosure/Retry assertions required by current report admission. Native observation
+retains status and typed Retry presence/enabled/offscreen facts separately, brings
+Retry into view and checks disabled mutations. Both lookup conditions retain the
+original shared20-second observation cap; input120/phase300/build1200 caps are unchanged.
+
+Failure close now physically closes only the owned Settings modal through its normal
+Close settings control before Alt-F4. The current receipt requires Settings dismissal
+alongside foreground/key delivery; actual process exit remains separately required.
+Review also found a normal-close race: the process may exit before the final modal
+check. Only confirmed PID absence permits that check to succeed; a live owner's
+access/ownership/cleanup error still fails. Windows executes extracted actual fit/
+recovery/close functions, safe subcondition failures and an ordinarily exited child
+process before any expensive build. It never reads password text or foreign credentials.
+
+Added a rendered Chromium integration using the production Windows probe, Settings
+controller and main.ts application close guard with passive synthetic IPC. It does
+not stub out the modal guard or claim native security/HTTP/credential proof. The old
+source reproducibly failed at the real rendered invisible Retry (report false, two
+GETs); this intentional rejecting result is retained. Corrected source passes both
+992×665 and1440×900, each completing the actual phase2 producer with three GETs.
+Injected collapsed/disabled Retry cases are rejected with two GETs/no subsequent
+mutations. Every case proves the real close guard rejects an open Settings modal
+and reaches the close command after Settings dismissal. Browser/server cleanup are
+independent and recorded. CI runs this required check on both hosts before packaging;
+failed/missing browser outcomes block success and retain partial evidence.
+
+- Round6: intended rendered red case above, then corrected four-case rendered proof;
+  all34selected actual DOM/probe cases pass. Shared202Python (199pass/three exact
+  Windows exclusions), Q1 source/rejection and10retention pass.
+- Round7: production renderer typecheck/build passes with pinned Node24.19.0 and
+  existing locked tools; only the pre-existing chunk-size warning remains. Final
+  rendered four-case proof/independent cleanup passes. Clean617-file export passes
+  shared203Python (200pass/three named Windows exclusions), both Q1 gates and10retention.
+  Added required close-receipt rejection for key delivery without Settings dismissal.
+  The export has no generated permissions/schemas, dependencies or build output before
+  or after. All-workflow actionlint,622-file validation, whitespace and evidence
+  privacy checks pass. Ignored `d3/h19-ci3` owns raw logs/results/source map.
+- Review maps changes to WORKFLOW real-action/rejecting-gate and NATIVE visibility/
+  result/independent-cleanup requirements. Production Settings/close guards, backend
+  Save/reload logic, frozen helpers/routes, dependencies and signing identities are
+  unchanged. Existing valid backend proof is reused; CI still executes the Rust
+  selections. The three unrelated user edits and unrelated recovery tail are preserved.
+
+Current-only CLI/workflow admission now permits cumulative ordinal3, preserving
+attempt1/exact-candidate/fresh-namespace guards and rejecting ordinal4 before build.
+No automatic retry was introduced. Next: publish this exact reviewed repair, reconcile
+operations and dispatch CI3 once. Actual Windows PE/input/process/whole-sequence proof
+and terminal artifact/source/rendered/native cleanup audit remain necessary for
+deliverable3 completion. Pause under manual same-thread waiting after confirmation.

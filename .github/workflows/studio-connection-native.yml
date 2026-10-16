@@ -42,7 +42,7 @@ jobs:
           set -euo pipefail
           test "$SELECTOR_CONFLICT" = false
           test "$GITHUB_RUN_ATTEMPT" = 1
-          case "$NATIVE_ORDINAL" in 1|2) ;; *) exit 1 ;; esac
+          case "$NATIVE_ORDINAL" in 1|2|3) ;; *) exit 1 ;; esac
           test "$(git rev-parse HEAD)" = "$NATIVE_CANDIDATE"
           echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
           echo "TEMP=$RUNNER_TEMP" >> "$GITHUB_ENV"
@@ -85,6 +85,15 @@ jobs:
           node "$LOOMLIGHT_WINDOWS_NPM_CLI" run build:tests
           node --test --test-reporter=tap --test-concurrency=1 dist-tests/tests/identity-probe.dom.test.js dist-tests/tests/windows-studio-probe.dom.test.js dist-tests/tests/ai-settings.dom.test.js 2>&1 | tee "$RUNNER_TEMP/studio-connection/renderer.log"
           node "$LOOMLIGHT_WINDOWS_NPM_CLI" run build
+      - name: Rendered recovery and real Settings close guard
+        id: recovery_browser
+        shell: bash
+        working-directory: app
+        run: |
+          set -euo pipefail
+          node node_modules/playwright/cli.js install chromium
+          export LOOMLIGHT_RECOVERY_OUTPUT="$RUNNER_TEMP/studio-connection/recovery-browser"
+          node tests/studio-connection-recovery.browser.mjs 2>&1 | tee "$RUNNER_TEMP/studio-connection/recovery-browser.log"
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         with:
           workspaces: app -> target
@@ -137,7 +146,7 @@ jobs:
           root=pathlib.Path(os.environ['RUNNER_TEMP'])/'studio-connection'
           root.mkdir(parents=True,exist_ok=True)
           steps=json.loads(os.environ['STEP_RESULTS'])
-          selected=['candidate','harness','dependencies','renderer','integration']+(['package','native'] if os.environ['RUNNER_OS']=='Windows' else [])
+          selected=['candidate','harness','dependencies','renderer','recovery_browser','integration']+(['package','native'] if os.environ['RUNNER_OS']=='Windows' else [])
           checks=[dict(name=name,outcome=steps.get(name,{}).get('outcome','not-run')) for name in selected]
           value=dict(passed=all(c['outcome']=='success' for c in checks),checks=checks,nativeSelected=os.environ['RUNNER_OS']=='Windows')
           (root/'result.json').write_text(json.dumps(value,indent=2)+'\n')

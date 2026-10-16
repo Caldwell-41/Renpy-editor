@@ -29,6 +29,17 @@ class CurrentConnectionTests(unittest.TestCase):
                     target=[12,12,1512,1068],after=[12,12,1512,1068],clientAfter=[1482,1010],minimumClient=[840,720],frame=[30,58],margin=12)
         probe.validate_viewport(scaled)
 
+    def test_close_receipt_rejects_key_delivery_without_settings_dismissal(self):
+        receipt=dict(contract=2,stage='cleanup-after-failure',step='failure',phase=2,passed=True,processId=42,inputDesktop='Default',executableSHA256='digest',
+                     checks=dict(interactiveDesktop=True,ownedWindow=True,settingsDismissed=True,closeForeground=True,closeInput=True),cleanup=dict(modal=True,faultRestored=True))
+        args=('cleanup-after-failure','failure',2,42,'digest',Path('.'))
+        probe.validate_native(receipt,*args)
+        for field in ['settingsDismissed','closeForeground','closeInput']:
+            bad=copy.deepcopy(receipt);bad['checks'][field]=False
+            with self.subTest(field=field),self.assertRaises(ValueError):probe.validate_native(bad,*args)
+        del receipt['checks']['settingsDismissed']
+        with self.assertRaises(ValueError):probe.validate_native(receipt,*args)
+
     def test_state_retention_keeps_exact_partial_json_and_requires_complete_snapshots(self):
         with tempfile.TemporaryDirectory(prefix='loomlight-studio-windows-connection-') as directory,tempfile.TemporaryDirectory() as evidence:
             root=Path(directory);out=Path(evidence);fixture=probe.legacy.FIXTURE.read_bytes()
@@ -128,7 +139,7 @@ public static class RewriteNative {
 '@
 $tokens=$null;$errors=$null;$ast=[System.Management.Automation.Language.Parser]::ParseFile('__DRIVER__',[ref]$tokens,[ref]$errors)
 if($errors.Count){throw ($errors|Out-String)}
-foreach($name in @('Current-Placement','Fit-CurrentWindow','Select-CurrentForeground','Close-CurrentOwned')){
+foreach($name in @('Current-Placement','Fit-CurrentWindow','Select-CurrentForeground','Close-CurrentSettings','Close-CurrentOwned','Current-OwnerAbsent','Finish-CurrentModal','Recovery-ControlFacts','Observe-CurrentReload')){
  $f=@($ast.FindAll({param($n)$n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true))
  if($f.Count -ne 1){throw 'Unique current function required'};. ([scriptblock]::Create($f[0].Extent.Text))
 }
@@ -141,9 +152,13 @@ function Window-Rect($Handle){return [System.Drawing.Rectangle]::new([RewriteNat
 function Current-ClientSize{return @(([RewriteNative]::Width-20),([RewriteNative]::Height-39))}
 function Ensure-ObservableWindow{$r=Window-Rect $script:handle;Assert-Native ((Current-WorkArea).Contains($r)) 'Still clipped'}
 function Cancel-OwnedEntry{$script:cancelled=$true}
+function Button([string]$Name){if($Name -ne 'Close settings'){throw 'Unexpected control'};if($script:settingsOpen){return @{Current=@{IsEnabled=$true}}};return $null}
+function Has-ButtonState([string]$Name,[bool]$Enabled){return $script:settingsOpen -and $Enabled}
+function Wait-Step([string]$Name,[scriptblock]$Check){Wait-Native $Check}
+function Click-Control([string]$Name){if($Name -ne 'Close settings' -or -not $script:settingsOpen){throw 'Wrong modal action'};$script:settingsOpen=$false}
 function Reset-Test{
  [RewriteNative]::X=0;[RewriteNative]::Y=9;[RewriteNative]::Width=1044;[RewriteNative]::Height=759;[RewriteNative]::Moves=0;[RewriteNative]::AllowMove=$true;[RewriteNative]::Focused=$true
- $script:receipt=@{checks=@{}};$script:cancelled=$false
+ $script:receipt=@{checks=@{}};$script:cancelled=$false;$script:settingsOpen=$true
 }
 Reset-Test;Fit-CurrentWindow
 Assert-Native (($receipt.currentWindow.after -join ',') -eq '8,8,1008,712' -and $receipt.currentWindow.verified -and [RewriteNative]::Moves -eq 1) 'Exact small-desktop fit missing'
@@ -163,13 +178,36 @@ foreach($failure in @('small','move','focus','frame')){
 # delivery so this fixture never closes a real window or uses another process.
 $close=$ast.Find({param($n)$n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Close-CurrentOwned'},$true).Extent.Text
 if(-not $close.Contains("[System.Windows.Forms.SendKeys]::SendWait('%{F4}')")){throw 'Expected physical close primitive changed'}
-$close=$close.Replace("[System.Windows.Forms.SendKeys]::SendWait('%{F4}')",'$script:sentClose=$true')
+$close=$close.Replace("[System.Windows.Forms.SendKeys]::SendWait('%{F4}')",'if($script:settingsOpen){throw "Settings still blocks app exit"};$script:sentClose=$true')
 . ([scriptblock]::Create($close))
 Reset-Test;$script:sentClose=$false;Close-CurrentOwned
-Assert-Native ($script:cancelled -and $script:sentClose -and $receipt.checks.closeForeground -and [RewriteNative]::Moves -eq 0) 'Owned close depends on accepted geometry'
+Assert-Native ($script:cancelled -and $script:sentClose -and $receipt.checks.settingsDismissed -and -not $script:settingsOpen -and $receipt.checks.closeForeground -and [RewriteNative]::Moves -eq 0) 'Owned close omitted Settings or depends on accepted geometry'
 Reset-Test;[RewriteNative]::Focused=$false;$script:sentClose=$false;$caught=$false
 try{Close-CurrentOwned}catch{$caught=$true}
 Assert-Native ($caught -and -not $script:sentClose) 'Unowned foreground received close'
+$script:Stage='cleanup-after-failure';$script:ProcessId=$PID
+$script:receipt=@{cleanup=@{}}
+Assert-Native (-not (Current-OwnerAbsent)) 'Live process accepted as absent'
+$gone=Start-Process cmd.exe -ArgumentList '/c exit 0' -NoNewWindow -Wait -PassThru
+$script:ProcessId=$gone.Id
+function Cancel-OwnedEntry{throw 'Controlled already-exited owner'}
+Finish-CurrentModal
+Assert-Native ($receipt.cleanup.modal -and $receipt.cleanup.ownerExitedDuringClose) 'Ordinary close race lost modal absence proof'
+$script:ProcessId=$PID;$caught=$false
+try{Finish-CurrentModal}catch{$caught=$true}
+Assert-Native $caught 'Live owner cleanup error was hidden'
+function Has-Text([string]$Text){return $script:statusMatched}
+function Button([string]$Name){if($Name -ne 'Retry loading profiles'){throw 'Unexpected diagnostic control'};if($script:retryFound){return @{Current=@{IsEnabled=$true;IsOffscreen=$false;ControlType=@{ProgrammaticName='ControlType.Button'}}}};return $null}
+function Control([string]$Name){return Button $Name}
+function Focus-Control($Control){$script:retryFocused=$true}
+function Has-ButtonState([string]$Name,[bool]$Enabled){return -not $Enabled}
+foreach($pair in @(@($false,$true),@($true,$false),@($true,$true))){
+ $script:statusMatched=$pair[0];$script:retryFound=$pair[1];$script:retryFocused=$false;$script:receipt=@{checks=@{}};$caught=$false
+ try{Observe-CurrentReload}catch{$caught=$true}
+ Assert-Native ($caught -eq (-not ($pair[0] -and $pair[1]))) 'Recovery accepted a missing status/control'
+ Assert-Native ($receipt.reloadObservation.statusMatched -eq $pair[0] -and $receipt.reloadObservation.retry.found -eq $pair[1]) 'Recovery subcondition diagnostics missing'
+ if(-not $caught){Assert-Native ($script:retryFocused -and $receipt.checks.retryVisible -and $receipt.checks.mutationsDisabled) 'Recovery focus/control proof missing'}
+}
 Write-Output 'PASS: actual current fit/close functions reject invalid geometry and preserve close ownership'
 '''.replace('__DRIVER__',driver.as_posix().replace("'","''"))
         result=subprocess.run(['powershell.exe','-NoProfile','-NonInteractive','-Command',script],capture_output=True,text=True,timeout=45)
@@ -226,6 +264,9 @@ Write-Output 'PASS: actual current fit/close functions reject invalid geometry a
             with patch.object(probe.platform,'system',return_value='Windows'),patch.object(probe.platform,'machine',return_value='AMD64'),patch.dict(probe.os.environ,{'GITHUB_RUN_ATTEMPT':'2'}):
                 with self.assertRaises(ValueError):probe.build(out,'candidate',1)
                 self.assertFalse(out.exists())
+            with patch.object(probe.platform,'system',return_value='Windows'),patch.object(probe.platform,'machine',return_value='AMD64'),patch.dict(probe.os.environ,{'GITHUB_RUN_ATTEMPT':'1'}),patch.object(probe.subprocess,'check_output') as identity:
+                with self.assertRaises(ValueError):probe.build(out,'candidate',4)
+                identity.assert_not_called();self.assertFalse(out.exists())
 
     def test_failed_build_retains_exclusive_attempt_and_never_creates_positive_package(self):
         with tempfile.TemporaryDirectory() as directory:

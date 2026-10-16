@@ -367,7 +367,7 @@ the fixed beta post-save reload failure and requires one read-only Retry.
 Focused controller checks: `python -m unittest discover -s scripts -p test_windows_studio_credentials.py -v`.
 The selected [current native harness migration](../docs/tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
 uses `scripts/windows-studio-credentials.py current build|run --output <fresh-output>
---candidate <exact-reviewed-sha> --ordinal 1|2` through the focused Repository quality
+--candidate <exact-reviewed-sha> --ordinal 1|2|3` through the focused Repository quality
 selector `studio_connection_native`. The current native proof remains pending CI/audit.
 It retains the approved Windows credential namespace, uses the current native draft
 dialog, observes Cancel before committing keys, proves failed-entry retained-field
@@ -385,6 +385,13 @@ retains allowlisted synthetic JSON snapshots and explicit partial states. Exact 
 native references are checked for presence/reopen and final removal without reading
 credential blobs. See [H18](../docs/testing/INCIDENTS.md#h18--current-native-window-exceeds-the-runner-desktop-cleanup-repeats-the-gate)
 for the first native attempt and its scoped repair.
+Current recovery opens the existing Profile maintenance disclosure before observing
+Retry, rejects controls behind closed disclosures, and records separate native status/
+Retry/mutation observations. Failure cleanup closes owned Settings before ordinary
+application close. The focused workflow runs `tests/studio-connection-recovery.browser.mjs`
+with an explicit `LOOMLIGHT_RECOVERY_OUTPUT` directory before native packaging. It
+exercises the production probe/renderer and app close guard, including rendered
+collapsed/disabled rejection cases; synthetic IPC/browser proof is not native acceptance.
 Use an accessible workspace TEMP on restricted Windows hosts. Native entry/capture
 uses supported Computer Use with actual returned windows and fresh state. No native
 credential enumeration, diagnostic secret-value reads or automatic ownership recovery.

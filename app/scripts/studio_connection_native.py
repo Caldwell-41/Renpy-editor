@@ -38,7 +38,8 @@ CHECKS = {1: ['Fixed Windows phase selected', 'Shared v2 profiles and foreign cl
               'Full process reopen reused both remembered keys without discovery', 'Replacement preserved B and retired only owned A',
               'Removal disabled A and preserved B', 'All Windows keys/profiles removed; foreign owned cleanup retained', 'WebView contains no secret field',
               'Native draft key leaves saved profiles unchanged',
-              'Confirmed publication exposes a read-only reload after snapshot failure'] + legacy.RELOAD_CHECKS}
+              'Confirmed publication exposes a read-only reload after snapshot failure',
+              'Recovery maintenance disclosure is available', 'Recovery Retry is rendered in an open maintenance section'] + legacy.RELOAD_CHECKS}
 for phase in CHECKS:
     CHECKS[phase] += ['Explicit authenticated discovery completed in this action', 'Discovery did not persist profile changes'] * len(SCHEDULE[phase])
 
@@ -245,7 +246,7 @@ def validate_native(receipt, stage, step, phase, pid, executable_hash, directory
     elif stage in ('observe','observe-reload'):
         validate_viewport(receipt.get('currentWindow'))
         if checks.get('currentViewport') is not True: raise ValueError('Current viewport observation missing')
-        if stage == 'observe-reload' and not all(checks.get(k) is True for k in ('mutationsDisabled','retryEnabled')):
+        if stage == 'observe-reload' and not all(checks.get(k) is True for k in ('mutationsDisabled','retryEnabled','retryVisible','reloadStatusObserved')):
             raise ValueError('Native read-only reload controls missing')
         required = ('cancelStatus' if step in ('preflight-cancelled','cancelled') else 'connectedStatus' if step.startswith('get-')
                     else 'configuredStatus' if step in ('alpha-saved','gamma-saved','beta-reloaded','reopened') else 'removedStatus' if step=='removed' else None)
@@ -258,7 +259,7 @@ def validate_native(receipt, stage, step, phase, pid, executable_hash, directory
         module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
         module.validate_capture(directory/'observed.png',capture)
     elif stage == 'cleanup-after-failure':
-        if not all(checks.get(k) is True for k in ('closeForeground','closeInput')):
+        if not all(checks.get(k) is True for k in ('settingsDismissed','closeForeground','closeInput')):
             raise ValueError('Owned ordinary close input unproved')
 
 
@@ -292,7 +293,7 @@ def package_inputs():
 def build(output, candidate, ordinal):
     if platform.system() != 'Windows' or platform.machine().lower() not in ('amd64','x86_64'):
         raise ValueError('Actual Windows x64 required')
-    if ordinal not in (1,2) or os.getenv('GITHUB_RUN_ATTEMPT') != '1' or subprocess.check_output(['git','rev-parse','HEAD'],text=True,cwd=APP).strip()!=candidate:
+    if ordinal not in (1,2,3) or os.getenv('GITHUB_RUN_ATTEMPT') != '1' or subprocess.check_output(['git','rev-parse','HEAD'],text=True,cwd=APP).strip()!=candidate:
         raise ValueError('Exact candidate and selected first-attempt CI ordinal required')
     output.mkdir(parents=True,exist_ok=False)
     legacy.OUTPUT = output
@@ -431,7 +432,7 @@ def launch(output, phase, root, package):
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action',choices=['build','run']);parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--candidate',required=True);parser.add_argument('--ordinal',type=int,choices=[1,2],required=True)
+    parser.add_argument('--candidate',required=True);parser.add_argument('--ordinal',type=int,choices=[1,2,3],required=True)
     args=parser.parse_args(argv);output=args.output.resolve()
     if args.action=='build': build(output,args.candidate,args.ordinal);return
     package=read(output/'package.json')

@@ -70,6 +70,14 @@ synthetic store/step/timing/observation JSON is retained under visible phase-sta
 artifact paths, with hashes and explicit not-reached records; no whole-root upload.
 The complete flow also checks exact saved native references for initial presence
 and final removal without inspecting credential blobs or foreign cleanup identities.
+The current probe opens Profile maintenance through its summary action and checks
+effective visibility, including closed disclosure ancestors. Its native observer
+records status and typed Retry availability separately, focuses/verifies the visible
+Retry control and checks disabled mutation controls. Failure close dismisses owned
+Settings through its ordinary close action before Alt-F4; a key-send receipt still
+requires actual process exit. A rendered Chromium regression exercises the production
+probe/controller/app close guard and rejects collapsed/disabled Retry. This remains
+preparation evidence alongside the required Windows native sequence.
 
 The Mac identity probe's existing four phases retain their 2/2/4/0 GET schedule,
 including draft Connect. Its report validator requires contract2, the exact case,

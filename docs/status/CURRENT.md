@@ -1,32 +1,33 @@
 # Current status
 
-## Current native connection harness — final CI2 failed; reassessment required
+## Current native harness — H19 repair reviewed; CI3 authorised
 
-Updated2026-10-17, branch `codex/phase3a-story-logic`. Deliverables1/2 remain complete;
-[their both-host harness proof is audited](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
-Deliverable3 remains incomplete after its final native attempt.
+Updated2026-10-17, current branch `codex/phase3a-story-logic`. Deliverables1/2 remain
+complete; deliverable3 remains open. [CI2 audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17)
+retains its full phase1 pass and phase2 recovery/close failure. The user authorised
+checking the requirements/build/CI and one further CI attempt on this branch.
 
-[Final CI2run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
-failed on exact `e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`/attempt1. Both-host
-portable/source/archive/manifest/privacy and the Windows package passed audit.
-The geometry/retention repair worked: phase1 completed its full native sequence,
-normal exit and four GETs. Phase2 reopened and saved beta, then timed out observing
-read-only recovery; forced exit followed. No backend Save/reload defect established.
+[H19 preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17)
+is `review_ready`: current probe opens maintenance and rejects effectively hidden
+controls; native recovery records status/control facts separately; failure close
+handles the owned Settings modal before application close. Confirmed owner exit is
+handled without swallowing errors on a live process. Product close guards, backend
+save/reload, frozen routes, dependencies and signing remain unchanged.
 
-[The terminal audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17)
-records two missed harness interactions: Retry sits inside a closed maintenance
-section that DOM hidden-flag checks do not model; failure cleanup sends Alt-F4
-without closing the Settings modal, which the app close guard deliberately blocks.
-The combined native wait did not log which status/control predicate failed, so the
-exact UIA symptom remains unproved. [H19](../testing/INCIDENTS.md#h19--retry-inside-closed-disclosure-settings-modal-blocks-app-close-cleanup)
-indexes this gap; H18 retains the earlier geometry failure.
+A real rendered production probe/controller/app-close test reproduces the old hidden
+Retry failure. Corrected flow passes at992×665 and1440×900; collapsed/disabled Retry
+are rejected. The actual app guard blocks close with Settings open and reaches close
+after dismissal. Browser/server cleanup is recorded independently. These checks run
+in both CI jobs before packaging; browser/synthetic IPC proof is not native acceptance.
 
-State `blocked` for exhausted selected limits: local5/5, nativeCI2/2, Windows
-packages2/2, launches3/4, GETs6/14. No operation is pending and no further correction
-or dispatch is selected. Next work needs a bounded reassessment of disclosure,
-modal-close and diagnostic coverage. Only audit/status documentation changed in
-this audit. Product defaults, close protections, frozen routes, unrelated user edits
-and native/human recovery remain intact. No Mac native acceptance is claimed.
+Local checks pass34DOM cases, renderer typecheck/build, clean-export203Python
+(200pass/three exact Windows exclusions), Q1/10retention, all-workflow lint and622-file
+validation. State `review_ready`, cumulative local7/7; nativeCI2/3. Actual prior
+Windows use is packages2/3, launches3/6, GETs6/21. One matching package/two launches/
+seven GETs are reserved for the next dispatch after publication/reconciliation.
+No operation is pending before dispatch; no automatic retry or Mac native launch.
+Unrelated edits and human/native recovery remain intact. The task owns exact
+allowances and the eventual terminal acceptance audit.
 
 ## Retained app baseline and pending acceptance
 

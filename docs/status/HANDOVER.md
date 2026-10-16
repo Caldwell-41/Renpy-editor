@@ -1,60 +1,59 @@
 # Current outcome handover
 
-## Deliverable3 — final CI2 failed; implementation gaps audited, 2026-10-17
+## Deliverable3 — H19 repair reviewed; one new CI authorised, 2026-10-17
 
-State `blocked`: local and native attempt limits are exhausted. Same Mac owner/current
-branch `codex/phase3a-story-logic`; no routine host switch or second writer. The user
-asked why the final run failed and whether the repair missed it. Two harness omissions
-are recorded below; no further implementation/check round or dispatch was authorised.
-Deliverables1/2 retain [audited completion](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
+State `review_ready`, same Mac owner/current branch `codex/phase3a-story-logic`.
+The user instructed reading the requirements, checking build/CI and running another
+CI. That selects the necessary H19 repair/checks and one further focused dispatch,
+without resetting prior consumption. Deliverables1/2 remain complete. Preserve the
+three unrelated user edits and recovery tail; no second writer or host switch.
 
-[Final CI2run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
-completed **failure** at2026-10-16T13:49:03Z, workflow354880113/attempt1, exact repair
-`e5421a9f0131b16fbcb6d0ae0daaa4b54cdecd51`, tree
-`040ba28a462f4fb2fbc10b2ea36dbacacd2193bb`. Windows117000574210 failed native
-phase2; Mac117000573825 passed portable checks. Both-host ZIP digests/safe entries/
-CRC/manifests/all357 source inputs/privacy and named Python/33DOM/Cargo evidence pass
-independent audit. Windows206Python (202pass/four exact exclusions), Mac202Python
-(199pass/three exact exclusions); actual PowerShell fit/close regression passed.
-Artifacts expire2026-10-23; raw proof/reconstructed states/audit stay ignored under
-`d3/native-ci2`. The [terminal audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17)
-owns hashes, exact results and limits; [H19](../testing/INCIDENTS.md#h19--retry-inside-closed-disclosure-settings-modal-blocks-app-close-cleanup)
-indexes the revised diagnosis.
+[CI2run38909235282](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38909235282)
+remains failed e5421a9/attempt1. Audited source/archives/portable checks/package and
+full phase1 native sequence passed; phase2 reached confirmed beta Save and reload
+error but failed native recovery observation. Settings stayed open during Alt-F4
+cleanup and forced exit followed. [The audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17)
+owns exact hashes/state/uncertainty. Both older failures remain historical. Artifacts
+expire2026-10-23; raw proof remains ignored under `d3/native-ci1`/`d3/native-ci2`.
 
-The prior geometry/retention repair worked. Phase1 PID4104 passed all11native stages,
-whole-store/native-reference/report admission, four accepted GETs and normal exit0
-in29.531seconds.25selected state files are retained/hash-verified. Window1008×704
-fit work area1024×720/client992×665 at96DPI. The older370f4b7 native CI1 failure
-remains historical; [H18](../testing/INCIDENTS.md#h18--current-native-window-exceeds-the-runner-desktop-cleanup-repeats-the-gate)
-retains it. This is phase1 proof, not completed deliverable3.
+[H19 build/review](../tasks/active/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17)
+implements current-only effective visibility/disclosure handling, separate safe
+native status/Retry/mutation diagnostics, and ordinary owned Settings dismissal before
+app close. The shared recovery observation stays20seconds; input120/phase300/build1200
+caps remain. Final modal cleanup handles confirmed PID disappearance after normal
+close but still rejects live-owner errors. Windows cold harness extracts actual
+PowerShell functions and tests fit/close/subcondition/PID-absence behavior before build.
+Exact source, phase/state/credential and normal-exit admission remain required.
 
-Phase2 PID6128 passed reopen/alpha discovery/beta entry and confirmed replacement.
-Retained reload-required state proves revision5→8, A2→3/B2, unchanged B and complete
-publication; alpha/beta GETs were accepted. Native `observe-reload` then timed out
-on combined expected status-text/enabled-Retry lookup. Source puts Retry in a closed
-Profile maintenance disclosure; producer/tests check only hidden attributes and can
-click that descendant directly. Driver never expands it. Missing native subcondition
-results/failure capture prevent claiming the exact UIA cause proved.
+New rendered Chromium integration runs the actual production probe, Settings controller
+and main.ts close guard with passive public IPC. Old source reproduces invisible Retry;
+corrected source completes phase2/three GETs at992×665 and1440×900. Injected collapsed/
+disabled Retry are rejected after two GETs. Every case proves open Settings blocks
+application close, then normal Settings dismissal permits the close command. Browser
+and server cleanup are independent/recorded. The required CI browser step precedes
+packaging and participates in the final outcome; it is not Windows native acceptance.
 
-Cleanup sent owned foreground Alt-F4 but did not close Settings first. The app's
-ordinary close guard rejects the Settings `aria-modal=true` overlay. Key delivery
-was proved, app exit was not; forced exit followed. PID absence/listener stop passed;
-owned credential removal is unproved. Phase2 retained15state files with explicit
-not-reached rows; Retry/third GET/removal/final report never ran. No backend save/
-reload defect or data corruption was established. App close protections stay intact.
+Local round6 passed rendered red→green/rejections and34actual DOM/probe cases plus
+shared harness gates. Round7 passed production renderer build, final rendered proof,
+clean617-file export203Python (200pass/three exact Windows exclusions), Q1/10retention,
+all-workflow lint and622-file validation. Only existing chunk-size warning remains.
+Source/input maps, logs and results are ignored under `d3/h19-ci3`. Product Settings/
+main close guard/backend/frozen helpers/dependencies/signing are unchanged.
 
-Actual cumulative use: local5/5, nativeCI2/2, Windows packages2/2, launches3/4,
-GETs6/14. Unused launch/request capacity does not renew CI/package limits. No operation
-is pending; no further repair or retry is selected. Old maintenance/Thinking/Studio/
-walkthrough counts remain consumed. All unrelated user files and recovery tail stay
-unchanged. Only owning task/index/live-status documentation changes in this audit.
+Usage before the new dispatch: local7/7; nativeCI2/3; actual Windows packages2/3,
+launches3/6, GETs6/21. The new attempt permits one matching package/two launches/seven
+GETs. No further automatic retry, Mac package/launch, provider/SDK/dependency/merge/
+release work is selected. Older human/native and maintenance allowances remain consumed.
 
-**Next:** explain and reassess the missed effective-visibility and Settings-modal
-lifecycle with the user before any new bounded continuation. A future correction
-needs disclosure-aware native observations, regressions that reject collapsed controls,
-Settings close before app exit and separate status/control/close diagnostics; do not
-increase waits or bypass close protections. Deliverable3 remains incomplete. No Mac
-package/real provider/SDK/dependency/merge/release or second executor is selected.
+**Next:** publish the reviewed exact repair candidate, reconcile existing operations,
+then dispatch current native ordinal3 once. Confirm run/workflow/attempt/head/inputs,
+record actual status and publish a docs-only manual-wait continuation. On user resume,
+audit that exact run's both-host named gates including rendered positive/rejecting/
+cleanup cases, source/archive/input identities, and matching Windows PE/process/
+complete two native phases. Verify visible recovery, retained-input Retry/Cancel,
+reload/4+3 GETs/deadlines, state/credential transitions and independent normal-exit/
+PID/modal/fault/listener cleanup. No operation is pending before dispatch; only full
+native/evidence acceptance closes deliverable3. No watcher/polling/wake-up or new chat.
 
 ## Retained app baseline and unrelated pending work
 

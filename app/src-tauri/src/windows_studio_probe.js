@@ -22,7 +22,18 @@
   if(evidence&&operation==='ai.connectionStatus'&&requestTiming)requestTiming.requestEnded=ended;
  };
  if(reloadProof||evidence)window.addEventListener('loomlight-windows-probe-response',observe);
- const button=name=>window.__loomlightProbeFindButton(name);
+ // A hidden attribute alone misses descendants of a closed disclosure. Preserve
+ // the shared historical finder; current connection actions require rendered state.
+ const visible=node=>{
+  if(!node?.isConnected)return false;
+  for(let p=node;p;p=p.parentElement){
+   const style=window.getComputedStyle(p);
+   if(p.hidden||p.inert||p.getAttribute('aria-hidden')==='true'||style.display==='none'||['hidden','collapse'].includes(style.visibility))return false;
+   if(p.tagName==='DETAILS'&&!p.open){const summary=p.querySelector(':scope > summary');if(!summary?.contains(node))return false;}
+  }
+  return true;
+ };
+ const button=name=>{const node=window.__loomlightProbeFindButton(name);return visible(node)?node:null;};
  const click=async name=>{await wait(()=>button(name)&&!button(name).disabled);button(name).click();};
  const call=async(operation,payload={})=>{if(reloadProof||evidence)operations.push(operation);const r=await window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}});if(!r.ok)throw Error(`${operation}: ${r.error.code}`);return r.value;};
  const step=async name=>{details.stage=name;await call('probe.windowsStudioStep',{step:name});};
@@ -60,9 +71,14 @@
     await enter('beta-entry');
     check(entryResponse?.saved===true&&entryResponse.profileId===A&&entryResponse.cleanupPending===true,
       'Windows confirmed beta save requires read-only Settings reload');
-    check(status()==='Profile saved; saved profiles could not be reloaded. Retry loading profiles before further changes.'&&!button('Retry loading profiles').disabled&&!button('Retry loading profiles').hidden,
+    const maintenance=document.querySelector('.studio-maintenance'),summary=maintenance?.querySelector(':scope > summary');
+    check(visible(summary),'Recovery maintenance disclosure is available');
+    if(!maintenance.open)summary.click();
+    await wait(()=>maintenance.open);
+    check(visible(button('Retry loading profiles')),'Recovery Retry is rendered in an open maintenance section');
+    check(status()==='Profile saved; saved profiles could not be reloaded. Retry loading profiles before further changes.'&&!button('Retry loading profiles').disabled,
       'Confirmed publication exposes a read-only reload after snapshot failure');
-    const controls=[...document.querySelectorAll('.studio-settings input,.studio-settings select,.studio-settings button')].filter(n=>!n.hidden&&!n.closest('[hidden]'));
+    const controls=[...document.querySelectorAll('.studio-settings input,.studio-settings select,.studio-settings button')].filter(visible);
     check(controls.length>10&&controls.every(n=>['Retry loading profiles','Reload profiles'].includes(n.textContent)?!n.disabled:n.disabled),
       'All Settings mutation and discovery controls disabled; read-only Retry enabled');
     details.reloadResponse=entryResponse;showStatus();await step('beta-reload-required');

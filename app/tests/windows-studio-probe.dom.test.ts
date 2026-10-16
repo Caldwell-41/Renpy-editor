@@ -18,7 +18,8 @@ async function scenario(phase:number,failedGet=false,reloadProof=false,defect=''
   __loomlightWindowsStudioPhase:phase,__loomlightWindowsEvidence:evidence,__loomlightWindowsReloadProof:reloadProof,__loomlightProbeSignal:signal,
   __loomlightProbeFindButton:(name:string)=>{
    const found=[...document.querySelectorAll('button')].find(b=>b.textContent===name&&!b.hidden&&!b.closest('[hidden]'));
-   if(defect==='retry-noop'&&confirmed&&name==='Retry loading profiles')return {disabled:false,hidden:false,click:()=>{[...document.querySelectorAll('button')].find(b=>b.textContent==='Save profile')!.disabled=false;}};
+   if(defect==='retry-noop'&&confirmed&&name==='Retry loading profiles'&&found&&!found.dataset.noop){found.dataset.noop='true';found.addEventListener('click',event=>{event.stopImmediatePropagation();[...document.querySelectorAll('button')].find(b=>b.textContent==='Save profile')!.disabled=false;},true);}
+   if(defect==='closed-maintenance'&&name==='Retry loading profiles')document.querySelector<HTMLDetailsElement>('.studio-maintenance')!.open=false;
    return found;
   },
   __TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}})=>{
@@ -73,6 +74,11 @@ test('Windows beta reload gate rejects missing response, wrong pending status an
 });
 test('Windows beta reload gate rejects a Retry that enables controls without reading profiles',{timeout:5000},async t=>{
  const r=await scenario(2,false,true,'retry-noop',false,t.signal);assert.equal(r.report.passed,false);assert.equal(r.entries,1);assert.equal(r.gets,2);assert.equal(r.removals,0);
+});
+test('Windows current probe rejects a Retry inside a closed maintenance disclosure',{timeout:5000},async t=>{
+ const r=await scenario(2,false,true,'closed-maintenance',true,t.signal);
+ assert.equal(r.report.passed,false);assert.equal(r.gets,2);assert.equal(r.removals,0);
+ assert.match(String(r.report.error),/Recovery Retry is rendered/);
 });
 test('opt-in evidence holds each confirmation and records actual client discovery intervals',{timeout:10000},async t=>{
  for(const phase of [1,2]){

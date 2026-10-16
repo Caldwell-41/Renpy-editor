@@ -208,10 +208,15 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Second omission:** cleanup sends owned Alt-F4 without closing Settings first;
   the ordinary app close guard rejects its `aria-modal=true` overlay. Key-send receipt
   passed but process exit failed and forced termination followed.
-- **Correction needed, not selected:** model effective disclosure visibility and
-  ordinary modal-close lifecycle in the driver/consumer regressions; retain separate
-  status/control/close observations. Keep app close protections and deadlines.
+- **Correction implemented; CI3 proof pending:** current probe opens maintenance
+  and checks effective visibility. Native observer retains separate status/control
+  facts; cleanup closes Settings before app close and handles confirmed owner exit.
+  A rendered production probe/controller/app-close test reproduces the old failure,
+  passes the corrected flow and rejects collapsed/disabled Retry. Actual close guard
+  rejects the open modal and permits close after dismissal. App protections/deadlines
+  remain unchanged; browser/stubbed IPC evidence does not qualify Windows native input.
 - **Evidence:** [final native CI2 audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17).
+  [H19 build/rejecting-gate review](../tasks/active/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17).
 
 ## P01 — Redo refuses an app-owned clean deletion
 

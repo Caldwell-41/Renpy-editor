@@ -124,14 +124,62 @@ function Fit-CurrentWindow {
  Ensure-ObservableWindow
  $receipt.currentWindow.verified=$true;$receipt.checks.currentViewport=$true
 }
+function Recovery-ControlFacts {
+ $retry=Button 'Retry loading profiles'
+ return [ordered]@{found=($null -ne $retry);enabled=if($null -ne $retry){$retry.Current.IsEnabled}else{$null};offscreen=if($null -ne $retry){$retry.Current.IsOffscreen}else{$null};type=if($null -ne $retry){$retry.Current.ControlType.ProgrammaticName}else{$null}}
+}
+function Observe-CurrentReload {
+ $receipt.reloadObservation=[ordered]@{statusMatched=$false;retry=$null;mutations=[ordered]@{}}
+ # Keep the original shared 20-second observation bound while retaining each
+ # subcondition independently; splitting the diagnostics must not double the wait.
+ Wait-Step 'Current confirmed-save read-only reload' {
+  $receipt.reloadObservation.statusMatched=Has-Text 'Profile saved; saved profiles could not be reloaded.'
+  $receipt.reloadObservation.retry=Recovery-ControlFacts
+  return $receipt.reloadObservation.statusMatched -and $receipt.reloadObservation.retry.found -and $receipt.reloadObservation.retry.enabled
+ }
+ $receipt.checks.reloadStatusObserved=$true
+ $retry=Control 'Retry loading profiles';Focus-Control $retry
+ $receipt.reloadObservation.retry=Recovery-ControlFacts
+ Assert-Native (-not $retry.Current.IsOffscreen) 'Current Retry remains outside viewport'
+ $receipt.checks.retryVisible=$true;$receipt.checks.retryEnabled=$true
+ foreach($name in @('Save profile','Connect',('Replace credential'+[char]0x2026),'Remove credential')){
+  $disabled=Has-ButtonState $name $false;$receipt.reloadObservation.mutations[$name]=$disabled
+  Assert-Native $disabled ('Mutation control not disabled: '+$name)
+ }
+ $receipt.checks.mutationsDisabled=$true
+}
+function Close-CurrentSettings {
+ $close=Button 'Close settings';$receipt.closeObservation=[ordered]@{settingsFound=($null -ne $close);settingsDismissed=$false}
+ if($null -ne $close){
+  Wait-Step 'Owned Settings close enabled' {Has-ButtonState 'Close settings' $true}
+  Click-Control 'Close settings'
+  Wait-Step 'Owned Settings modal dismissed' {$null -eq (Button 'Close settings')}
+ }
+ $receipt.closeObservation.settingsDismissed=$true;$receipt.checks.settingsDismissed=$true
+}
 function Close-CurrentOwned {
  # Ordinary close needs verified ownership/foreground, not an accepted screenshot.
  Cancel-OwnedEntry
  Select-CurrentForeground
  Assert-Native ((Entry-Handle) -eq [IntPtr]::Zero) 'Failure close still has an owned modal'
+ Close-CurrentSettings
  Assert-Native ([RewriteNative]::GetForegroundWindow() -eq $script:handle) 'Failure close lost foreground'
  $receipt.checks.closeForeground=$true
  [System.Windows.Forms.SendKeys]::SendWait('%{F4}');$receipt.checks.closeInput=$true
+}
+function Current-OwnerAbsent {
+ try{$owner=[System.Diagnostics.Process]::GetProcessById($ProcessId);$owner.Dispose();return $false}
+ catch [System.ArgumentException]{return $true}
+}
+function Finish-CurrentModal {
+ try{Cancel-OwnedEntry}
+ catch{
+  # Normal close may finish before this independent final check. Only actual
+  # process absence qualifies; access/ownership errors on a live PID still fail.
+  if($Stage -ne 'cleanup-after-failure' -or -not (Current-OwnerAbsent)){throw}
+  $receipt.cleanup.ownerExitedDuringClose=$true
+ }
+ $receipt.cleanup.modal=$true
 }
 $script:faultActive=$false
 try{
@@ -161,9 +209,7 @@ public static class CurrentStudioWindow {
    Fit-CurrentWindow
    Assert-Native ((Entry-Handle) -eq [IntPtr]::Zero) 'Unexpected owned credential modal'
    if($Stage -eq 'observe-reload'){
-    Wait-Step 'Current confirmed-save read-only reload' {(Has-Text 'Profile saved; saved profiles could not be reloaded.') -and (Has-ButtonState 'Retry loading profiles' $true)}
-    foreach($name in @('Save profile','Connect',('Replace credential'+[char]0x2026),'Remove credential')){Assert-Native (Has-ButtonState $name $false) ('Mutation control not disabled: '+$name)}
-    $receipt.checks.mutationsDisabled=$true;$receipt.checks.retryEnabled=$true
+    Observe-CurrentReload
    }elseif($Step -in @('preflight-cancelled','cancelled')){
     Wait-Step 'Native Cancel status observed' {Has-Text 'cancelled'};$receipt.checks.cancelStatus=$true
    }elseif($Step.StartsWith('get-')){
@@ -184,8 +230,9 @@ public static class CurrentStudioWindow {
  $receipt.passed=$true
 }catch{$receipt.error=$_.Exception.Message}
 finally{
+ if($Stage -eq 'observe-reload' -and -not $receipt.passed){try{$receipt.reloadFailureControl=Recovery-ControlFacts}catch{$receipt.reloadDiagnosticError=$_.Exception.GetType().Name}}
  try{Restore-Fault}catch{$receipt.cleanup.faultError=$_.Exception.Message;$receipt.passed=$false}
- if($ProcessId -gt 0){try{Cancel-OwnedEntry;$receipt.cleanup.modal=$true}catch{$receipt.cleanup.modalError=$_.Exception.Message;$receipt.passed=$false}}
+ if($ProcessId -gt 0){try{Finish-CurrentModal}catch{$receipt.cleanup.modalError=$_.Exception.Message;$receipt.passed=$false}}
  $receipt | ConvertTo-Json -Depth 24 | Out-File -FilePath (Join-Path $Output 'receipt.json') -Encoding utf8
 }
 if(-not $receipt.passed){exit 1}
