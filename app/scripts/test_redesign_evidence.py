@@ -302,6 +302,13 @@ class BrowserTests(unittest.TestCase):
                         "imageSha256": hashlib.sha256(data).hexdigest(),
                         "viewportOverflow": False, "actionsVisible": True,
                     })
+        for receipt in self.metrics['receipts']:
+            if receipt['surface']!='settings':continue
+            receipt['captures']=[]
+            for view in ('connection','connect','response'):
+                image=f"settings-{view}-{receipt['theme']}-{receipt['size']}.png"
+                data=(self.root/receipt['image']).read_bytes();(self.root/image).write_bytes(data)
+                receipt['captures'].append({'view':view,'image':image,'imageSha256':hashlib.sha256(data).hexdigest(),'actionsVisible':True,'actions':[{'visible':True}]})
         self.write_metrics(self.metrics)
 
     def write_metrics(self, metrics):
@@ -309,6 +316,17 @@ class BrowserTests(unittest.TestCase):
 
     def test_complete_surface_theme_size_matrix_with_visible_actions_passes(self):
         self.assertTrue(checker.browser_ok(self.root))
+
+    def test_changed_settings_controls_require_visible_complete_section_captures(self):
+        baseline=copy.deepcopy(self.metrics)
+        for failure in ('missing','hidden','duplicate'):
+            self.metrics=copy.deepcopy(baseline)
+            receipt=next(r for r in self.metrics['receipts'] if r['surface']=='settings')
+            if failure=='missing':receipt['captures'].pop()
+            elif failure=='hidden':receipt['captures'][0]['actions'][0]['visible']=False
+            else:receipt['captures'][1]=receipt['captures'][0]
+            self.write_metrics(self.metrics)
+            self.assertFalse(checker.browser_ok(self.root),failure)
 
     def test_missing_metrics_refuses(self):
         (self.root / "metrics.json").unlink()

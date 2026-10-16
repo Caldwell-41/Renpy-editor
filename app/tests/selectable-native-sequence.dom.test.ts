@@ -172,7 +172,7 @@ test('complete selectable native probe drives production shell/controller throug
       const completed = report as Record<string, any> | undefined;
       assert.equal(completed?.passed, true, JSON.stringify(completed));
       assert.equal(completed?.stage, 'complete');
-      assert.equal(completed?.checks.length, phase === 1 ? 19 : 2);
+      assert.equal(completed?.checks.length, phase === 1 ? 20 : 2);
       assert.deepEqual(JSON.parse(JSON.stringify(completed?.reviewedBodyDigests)), phase === 1 ? sentDigests : []);
       if (phase === 2) { assert.equal(sendCount, callsBefore); assert.equal(JSON.stringify(snapshot()), before, 'reopen must leave exact bytes unchanged'); }
     }

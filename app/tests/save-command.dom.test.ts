@@ -195,10 +195,10 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
   assert.equal(editor.value, model.text);
   assert.equal(editor.selectionStart, 7); assert.equal(editor.selectionEnd, 9);
 
-  click("Characters");
+  click("Variables");
   await ticks();
-  const supportingInput = document.querySelector<HTMLInputElement>('input[name="technicalName"]')!;
-  supportingInput.value = "unsubmitted_character";
+  const supportingInput = document.querySelector<HTMLInputElement>('input[data-technical-name="true"]')!;
+  supportingInput.value = "unsubmitted_variable";
   supportingInput.dispatchEvent(new window.Event("input", { bubbles: true }));
   otherSourceDirty = true;
   const flushesBeforeCombinedCase = flushes;
@@ -218,7 +218,7 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
     "character.create", "character.update", "variable.create", "variable.update", "asset.import", "asset.repairCompatibility",
   ].includes(operation)).length, supportingMutationsBefore);
   assert.equal(document.querySelector("#app-status")?.textContent, "Unsaved Source draft");
-  assert.equal(supportingInput.value, "unsubmitted_character");
+  assert.equal(supportingInput.value, "unsubmitted_variable");
   assert.equal(flushes, 2);
   assert.equal(saves, 1);
 
@@ -226,7 +226,7 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
   await ticks();
   assert.ok(document.querySelector('[aria-label="Unsubmitted changes"]'));
   click("Keep editing");
-  assert.equal(supportingInput.value, "unsubmitted_character");
+  assert.equal(supportingInput.value, "unsubmitted_variable");
   click("Source");
   await ticks();
   click("Discard and leave");

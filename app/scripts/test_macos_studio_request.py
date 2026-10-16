@@ -8,7 +8,11 @@ walkthrough=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(walkthrough)
 class SyntheticRequestTests(unittest.TestCase):
     def test_exact_public_auth_path_body_and_no_project_data(self):
-        body={'model':'synthetic-model','messages':[{'role':'user','content':walkthrough.PROMPT}],'stream':False,'max_tokens':1024,'enable_thinking':False,'enable_tools':False,'enabled_tools':[]}
+        body=walkthrough.expected_body()
+        self.assertTrue(body['enable_thinking'])
+        off=walkthrough.expected_body(False)
+        self.assertFalse(walkthrough.accepted('POST','/v1/chat/completions','Bearer '+walkthrough.PUBLIC_KEY,off))
+        self.assertTrue(walkthrough.accepted('POST','/v1/chat/completions','Bearer '+walkthrough.PUBLIC_KEY,off,False))
         self.assertTrue(walkthrough.accepted('POST','/v1/chat/completions','Bearer '+walkthrough.PUBLIC_KEY,body))
         for method,path,key,value in [('GET','/v1/models',walkthrough.PUBLIC_KEY,body),('POST','/v1/chat/completions','wrong',body),('POST','/other',walkthrough.PUBLIC_KEY,body),('POST','/v1/chat/completions',walkthrough.PUBLIC_KEY,{**body,'session_id':'unsupported'}),('POST','/v1/chat/completions',walkthrough.PUBLIC_KEY,{**body,'messages':[{'role':'user','content':'project content refused'}]})]:
             self.assertFalse(walkthrough.accepted(method,path,'Bearer '+key,value))

@@ -147,11 +147,25 @@ async function exerciseSurface(page,surface,size){
   assert.equal(await page.getByLabel('Context length',{exact:true}).inputValue(),'32768');assert.equal(await page.getByLabel('Maximum response length',{exact:true}).inputValue(),'16384');assert.equal(await page.getByLabel('Thinking',{exact:true}).isChecked(),true);
   assert.deepEqual(await page.locator('.studio-group').evaluateAll(groups=>groups.slice(0,4).map(group=>group.className.includes('studio-connect')?'connect':group.className.includes('studio-model-choice')?'model':group.querySelector('h4')?.textContent)),['Connection','API Key','connect','model']);
   assert.equal(await page.getByLabel('Parallel slots',{exact:true}).inputValue(),'1');assert.equal(await page.getByLabel('GPU memory mode',{exact:true}).inputValue(),'manual');assert.equal(await page.getByLabel('Automatic memory fitting',{exact:true}).inputValue(),'off');
+  const captures=[];
+  for(const [view,group,selectors] of [
+   ['connection','.studio-group',['#studio-profile-name','#studio-endpoint']],
+   ['connect','.studio-connect',[]],
+   ['response','#studio-thinking',['#studio-context-length','#studio-maximum-response-length','#studio-thinking']],
+  ]){
+   await page.locator(group).first().evaluate((element,view)=>(view==='connect'?element.previousElementSibling:view==='response'?element.closest('.studio-group'):element).scrollIntoView({block:'start'}),view);
+   await frame(page);
+   const required=view==='connect'?['.studio-connect button:first-child','.studio-group:has(+ .studio-connect) .studio-actions button:first-child']:selectors;
+   const actions=await visibleBounds(page,required);requireVisible(actions,`settings ${view} ${size}`);
+   const theme=await page.evaluate(()=>document.documentElement.dataset.theme);
+   const name=`settings-${view}-${theme}-${size}.png`;await page.screenshot({path:path.join(output,name)});
+   captures.push({view,image:name,imageSha256:hash(await readFile(path.join(output,name))),actionsVisible:true,actions});
+  }
   await page.getByRole('button',{name:'Read model-load settings',exact:true}).click();
   await page.locator('.studio-model-load-report[data-outcome="read"]').waitFor();
   assert.match(await page.locator('.studio-model-load-report').textContent(),/Actually loaded.*22,528/s);assert.match(await page.locator('.studio-model-load-warnings').textContent(),/Fitting is unverified/);
   await page.getByLabel('Parallel slots',{exact:true}).evaluate(element=>element.closest('.studio-model-loading').scrollIntoView({block:'start'}));
-  return {actions:['.studio-save-actions button'],behavior:{configurableLoadDefaults:true,requestedSavedLoadedDistinct:true,readOnlyReport:true,mismatchWarning:true,oneContextField:await page.getByLabel('Context length',{exact:true}).count()===1}};
+  return {actions:['.studio-save-actions button'],captures,behavior:{configurableLoadDefaults:true,requestedSavedLoadedDistinct:true,readOnlyReport:true,mismatchWarning:true,oneContextField:await page.getByLabel('Context length',{exact:true}).count()===1}};
  }
  if(surface==='assist'){
   await page.locator('.rewrite-panel[data-busy="false"]').waitFor();
@@ -215,7 +229,7 @@ try{
   const state=await page.evaluate(()=>({viewportOverflow:document.documentElement.scrollWidth>innerWidth,prohibited:window.fixtureProhibited,calls:window.fixtureCalls,fixtureUnchanged:JSON.stringify(window.fixtureModel)===window.fixtureBaseline,navigation:[...document.querySelectorAll('.story-sidebar>.tree-item.selected')].map(item=>item.textContent.trim()),expectedNavigation:window.fixtureExpectedNavigation}));
   assert.equal(state.viewportOverflow,false,`${surface} ${theme} ${size}: viewport overflow`);assert.deepEqual(state.prohibited,[]);assert.equal(state.fixtureUnchanged,true,'Rendering mutated saved fixture data');assert.deepEqual(state.navigation,state.expectedNavigation?[state.expectedNavigation]:[],'Fixture navigation does not match surface');
   const image=`${surface}-${theme}-${size}.png`;await page.screenshot({path:path.join(output,image)});
-  report.receipts.push({surface,theme,size,image,imageSha256:hash(await readFile(path.join(output,image))),width,height,viewportOverflow:state.viewportOverflow,actionsVisible:actions.every(action=>action.visible),actions,calls:state.calls});report.behaviors.push({surface,theme,size,...result.behavior});
+  report.receipts.push({surface,theme,size,image,imageSha256:hash(await readFile(path.join(output,image))),width,height,viewportOverflow:state.viewportOverflow,actionsVisible:actions.every(action=>action.visible),actions,calls:state.calls,...(result.captures?{captures:result.captures}:{})});report.behaviors.push({surface,theme,size,...result.behavior});
   console.log(`PASS: ${surface} ${theme} ${size}`);
  }
  assert.equal(report.receipts.length,surfaces.length*4);assert.deepEqual(report.errors,[]);assert.deepEqual(report.prohibited,[]);

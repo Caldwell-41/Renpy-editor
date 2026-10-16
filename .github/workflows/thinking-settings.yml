@@ -43,6 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python -c "import sys; assert sys.version_info >= (3,11)"
           test "$GITHUB_RUN_ATTEMPT" = 1
           test "$ATTEMPT_ORDINAL" = 1 -o "$ATTEMPT_ORDINAL" = 2
           test "$(git rev-parse HEAD)" = "$EXPECTED_CANDIDATE"
@@ -69,64 +70,57 @@ jobs:
           node "$npm_cli" ci --ignore-scripts
           node "$npm_cli" run typecheck > "$RUNNER_TEMP/thinking-settings/typecheck.log" 2>&1
           node "$npm_cli" run build:tests > "$RUNNER_TEMP/thinking-settings/test-compile.log" 2>&1
-          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/rewrite-ui.dom.test.js dist-tests/tests/prompt-ui.dom.test.js dist-tests/tests/studio-request.dom.test.js dist-tests/tests/protocol.test.js > "$RUNNER_TEMP/thinking-settings/dom.log" 2>&1
-          python -c "import os,pathlib,re; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'thinking-settings/dom.log').read_text(encoding='utf-8'); assert re.search(r'^# tests 51$',s,re.M) and re.search(r'^# pass 51$',s,re.M) and re.search(r'^# fail 0$',s,re.M) and re.search(r'^# skipped 0$',s,re.M)"
+          node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/*.test.js tests/branches-timing-policy.test.mjs > "$RUNNER_TEMP/thinking-settings/dom.log" 2>&1
+          python scripts/check-thinking-evidence.py dom "$RUNNER_TEMP/thinking-settings/dom.log"
           node "$npm_cli" run build > "$RUNNER_TEMP/thinking-settings/renderer-build.log" 2>&1
           node node_modules/playwright/cli.js install chromium
           export LOOMLIGHT_UI_OUTPUT="$RUNNER_TEMP/thinking-settings/browser"
           export LOOMLIGHT_UI_SURFACES=settings
           node tests/walkthrough-redesign.browser.mjs > "$RUNNER_TEMP/thinking-settings/browser.log" 2>&1
-          python -c "import os,json,pathlib; p=pathlib.Path(os.environ['LOOMLIGHT_UI_OUTPUT']); v=json.loads((p/'metrics.json').read_text(encoding='utf-8')); assert len(v['receipts'])==4 and not v['errors'] and not v['prohibited']; assert v['inputIdentity']['unchanged'] and v['cleanup']=={'browser':'closed','server':'closed'}; assert all(not r['viewportOverflow'] and r['actionsVisible'] for r in v['receipts'])"
+          python scripts/check-thinking-evidence.py browser "$LOOMLIGHT_UI_OUTPUT"
           rustup toolchain install 1.90.0 --profile minimal
           cargo test -p loomlight-core --locked --lib --no-run --message-format=json > "$RUNNER_TEMP/thinking-settings/core-artifacts.jsonl" 2> "$RUNNER_TEMP/thinking-settings/core-compile.log"
           cargo test -p loomlight-desktop --locked --bin loomlight --no-run --message-format=json > "$RUNNER_TEMP/thinking-settings/desktop-artifacts.jsonl" 2> "$RUNNER_TEMP/thinking-settings/desktop-compile.log"
-          python -m unittest discover -s scripts -p test_check_thinking_evidence.py -v > "$RUNNER_TEMP/thinking-settings/gate-tests.log" 2>&1
+          python -m unittest discover -s scripts -p 'test_*.py' -v > "$RUNNER_TEMP/thinking-settings/gate-tests.log" 2>&1
+          python scripts/check-q1-prep-gates.py self-test > "$RUNNER_TEMP/thinking-settings/q1-gate-tests.log" 2>&1
+          python scripts/check-q1-prep-gates.py source-audit .. > "$RUNNER_TEMP/thinking-settings/q1-source-audit.log" 2>&1
+          python scripts/test-q1-package-retention.py > "$RUNNER_TEMP/thinking-settings/retention-tests.log" 2>&1
           for scope in ai_profiles::tests:: ai_credentials::tests:: ai_compatibility::tests:: thinking_ connection_; do
             name="${scope//::/-}"
             cargo test -p loomlight-core --locked --lib "$scope" -- --list > "$RUNNER_TEMP/thinking-settings/$name-list.log" 2>&1
             cargo test -p loomlight-core --locked --lib "$scope" -- --nocapture > "$RUNNER_TEMP/thinking-settings/$name.log" 2>&1
-            python scripts/check-thinking-evidence.py "$RUNNER_TEMP/thinking-settings/$name-list.log" "$RUNNER_TEMP/thinking-settings/$name.log"
+            python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/$name-list.log" "$RUNNER_TEMP/thinking-settings/$name.log"
           done
           cargo test -p loomlight-core --locked --lib ai_request::tests:: -- --list > "$RUNNER_TEMP/thinking-settings/request-list.log" 2>&1
           cargo test -p loomlight-core --locked --lib ai_request::tests:: -- --nocapture > "$RUNNER_TEMP/thinking-settings/request.log" 2>&1
-          python scripts/check-thinking-evidence.py "$RUNNER_TEMP/thinking-settings/request-list.log" "$RUNNER_TEMP/thinking-settings/request.log"
-          for scope in ai_requests::tests:: ai_settings::tests:: ai_connection::tests::; do
-            name="${scope//::/-}"
-            cargo test -p loomlight-desktop --locked --bin loomlight "$scope" -- --list > "$RUNNER_TEMP/thinking-settings/$name-list.log" 2>&1
-            cargo test -p loomlight-desktop --locked --bin loomlight "$scope" -- --nocapture > "$RUNNER_TEMP/thinking-settings/$name.log" 2>&1
-            python scripts/check-thinking-evidence.py "$RUNNER_TEMP/thinking-settings/$name-list.log" "$RUNNER_TEMP/thinking-settings/$name.log"
-          done
-          python - <<'PYCODE'
-          import hashlib,json,os,pathlib,shutil
-          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'thinking-settings';binaries={}
-          for name in ['core','desktop']:
-              rows=[json.loads(line) for line in (p/(name+'-artifacts.jsonl')).read_text(encoding='utf-8').splitlines()]
-              candidates=[row['executable'] for row in rows if row.get('reason')=='compiler-artifact' and row.get('profile',{}).get('test') and row.get('executable')]
-              assert len(candidates)==1, (name,candidates)
-              source=pathlib.Path(candidates[0]);target=p/(name+'-tests.bin');shutil.copy2(source,target)
-              data=target.read_bytes();binaries[name]={'file':target.name,'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data),'header':data[:8].hex()}
-          (p/'test-binaries.json').write_text(json.dumps(binaries,indent=2)+'\n',encoding='utf-8')
-          PYCODE
+          python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/request-list.log" "$RUNNER_TEMP/thinking-settings/request.log"
+          cargo test -p loomlight-desktop --locked --bin loomlight -- --list > "$RUNNER_TEMP/thinking-settings/desktop-list.log" 2>&1
+          cargo test -p loomlight-desktop --locked --bin loomlight -- --nocapture > "$RUNNER_TEMP/thinking-settings/desktop.log" 2>&1
+          python scripts/check-thinking-evidence.py cargo "$RUNNER_TEMP/thinking-settings/desktop-list.log" "$RUNNER_TEMP/thinking-settings/desktop.log"
           git diff --exit-code HEAD -- . ../.github/workflows
+      - name: Retain available compiled tests including failed attempts
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/thinking-settings"
+          python app/scripts/check-thinking-evidence.py retain "$RUNNER_TEMP/thinking-settings" app/target > "$RUNNER_TEMP/thinking-settings/binary-retention.log" 2>&1
       - name: Seal exact-candidate evidence
         id: seal
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import hashlib,json,os,pathlib,platform,subprocess
-          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'thinking-settings';p.mkdir(exist_ok=True)
-          candidate=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
-          tracked=subprocess.check_output(['git','ls-files','app','.github/workflows/thinking-settings.yml'],text=True).splitlines()
-          inputs={name:hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest() for name in tracked}
-          (p/'identity.json').write_text(json.dumps({'candidate':candidate,'expectedCandidate':os.environ['EXPECTED_CANDIDATE'],'machine':platform.machine(),'inputs':inputs},indent=2)+'\n',encoding='utf-8')
-          (p/'manifest.json').write_text(json.dumps({f.relative_to(p).as_posix():hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file() and f!=p/'manifest.json'},indent=2)+'\n',encoding='utf-8')
-          PY
+          mkdir -p "$RUNNER_TEMP/thinking-settings"
+          python app/scripts/check-thinking-evidence.py seal "$RUNNER_TEMP/thinking-settings" .
           node app/scripts/scan-artifacts.mjs "$RUNNER_TEMP/thinking-settings"
+      - name: Require complete current source and retained compiled tests
+        if: success()
+        shell: bash
+        run: python app/scripts/check-thinking-evidence.py identity "$RUNNER_TEMP/thinking-settings/identity.json"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: ${{ always() && steps.seal.outcome == 'success' }}
         with:
           name: thinking-settings-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/thinking-settings
+          if-no-files-found: error
           retention-days: 7

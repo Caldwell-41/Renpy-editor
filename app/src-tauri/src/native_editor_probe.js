@@ -18,12 +18,17 @@ window.__loomlightProbeEditor = element => {
 
 // Recent-project buttons contain a date as well as their title. Match the title
 // node exactly; do not accidentally select a similarly prefixed project.
-window.__loomlightProbeFindButton = label => [...document.querySelectorAll('button')].find(button => {
-  const text = button.classList.contains('recent-open')
-    ? [...button.childNodes].filter(node => node.nodeType === 3).map(node => node.textContent).join('')
-    : button.textContent;
-  return text === label;
-});
+window.__loomlightProbeFindButton = label => {
+  const matches = [...document.querySelectorAll('button')].filter(button => {
+    const text = button.classList.contains('recent-open')
+      ? [...button.childNodes].filter(node => node.nodeType === 3).map(node => node.textContent).join('')
+      : button.textContent;
+    return text === label;
+  });
+  // Prefer the active confirmation among duplicate captions. A unique hidden
+  // stage action remains observable while probes wait for its disabled state.
+  return matches.find(button => !button.hidden && !button.closest('[hidden]')) ?? matches[0];
+};
 // Beat disclosure buttons toggle selection. Acceptance and history refreshes can
 // retain the fixture target, so clicking it unconditionally would deselect it.
 window.__loomlightProbeSelectBeat = beatId => {

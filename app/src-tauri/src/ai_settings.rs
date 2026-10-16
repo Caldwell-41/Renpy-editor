@@ -687,6 +687,7 @@ mod tests {
     #[cfg(target_os = "windows")]
     #[test]
     fn windows_dispatch_refuses_secret_payload_and_stale_token_before_entry() {
+        let _serial = TEST_SERIAL.lock().unwrap();
         let temp = tempfile::tempdir().unwrap();
         let service =
             loomlight_core::lifecycle::LifecycleService::new(temp.path().to_owned()).unwrap();

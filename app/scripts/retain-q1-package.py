@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import tarfile
 
-from runtime_probe_cases import RUNTIME_CASES
+from runtime_probe_cases import RUNTIME_CASES, runtime_report_ok
 
 
 def stream_digest(stream):
@@ -122,10 +122,7 @@ def main():
             and record.get("passed") is True
             and record.get("exitCode") == 0
             and record.get("timedOut") is False
-            and isinstance(report, dict)
-            and report.get("evidence") == "runtime-ui-packaged"
-            and report.get("passed") is True
-            and report.get("cleanupComplete") is True
+            and runtime_report_ok(case, report)
         )
         manifest["runtimeCases"].append({
             "case": case,

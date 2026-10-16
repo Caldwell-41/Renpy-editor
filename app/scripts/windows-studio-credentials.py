@@ -15,6 +15,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import platform
+import re
 import sys
 import tempfile
 import tarfile
@@ -573,6 +574,20 @@ def qualification_inputs():
             "commit":output(["git","rev-parse","HEAD"]), "diffDigest":digest(output(["git","diff","HEAD","--",".",":!scripts/windows-studio-credentials.py"])),
             "generatedBefore":tree_inputs(APP / "src-tauri/gen")}
 
+def require_legacy_probe(source=None):
+    # This completed qualification owns contract 1's fixed stores, faults and GETs.
+    # Contract 2 is preparation only until its native runner is separately qualified.
+    if source is None:
+        source = (APP / "src-tauri/src/windows_studio_probe.js").read_text(encoding="utf-8")
+    if re.search(r"\bcontract\s*:\s*2\b", source):
+        raise ValueError("Historical Windows runner cannot qualify draft-connection probe contract 2")
+
+
+def build_legacy(number):
+    require_legacy_probe()
+    return build(number)
+
+
 def build(number):
     # Exclusive identities preserve the first package and failed native receipt.
     # Calling this does not grant another operation beyond the selected ledger.
@@ -651,6 +666,7 @@ def build(number):
                   "elapsedSeconds":time.monotonic()-started,"failure":failure}, exclusive=True)
 
 def launch(phase, run, build_number, resume_partial=False, cancel_only=False):
+    require_legacy_probe()
     if COMPLETION_RUN is not None and phase != 2:
         raise ValueError("Completion reuses run 14; no phase-1 repetition")
     root = root_from_state()
@@ -925,7 +941,7 @@ if __name__ == "__main__":
         RUN_SECONDS = 1800
     if args.preserve_owned_prior and args.action != "prepare": parser.error("Prior preservation is preparation-only")
     if args.action == "prepare": prepare(args.preserve_owned_prior)
-    elif args.action == "build": build(args.build)
+    elif args.action == "build": build_legacy(args.build)
     elif args.action == "launch": launch(args.phase, args.run, args.build, args.resume_partial_entry, args.cancel_only)
     elif args.action == "confirm-reload": confirm_reload()
     elif args.action == "native-clock": print(json.dumps(native_input_clock(args.run,args.entry_start_seconds)))

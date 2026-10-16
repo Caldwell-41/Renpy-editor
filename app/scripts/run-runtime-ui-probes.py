@@ -10,7 +10,7 @@ import threading
 import shutil
 import hashlib
 
-from runtime_probe_cases import RUNTIME_CASES, OPTIONAL_CASES
+from runtime_probe_cases import RUNTIME_CASES, OPTIONAL_CASES, runtime_report_ok
 
 executable = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
@@ -81,7 +81,7 @@ for case in cases:
                 reports.append(report)
         except (ValueError, AttributeError):
             pass
-    passed = code == 0 and not timed_out and not external_errors and len(reports) == 1 and reports[0].get("passed") is True and reports[0].get("cleanupComplete") is True
+    passed = code == 0 and not timed_out and not external_errors and len(reports) == 1 and runtime_report_ok(case, reports[0])
     if case == "source-foundation":
         details = reports[0].get("details", {}) if len(reports) == 1 else {}
         passed = passed and details.get("extendedChecksComplete") is True and len(details.get("checks", [])) == 33 and (output / "external-write.json").is_file()

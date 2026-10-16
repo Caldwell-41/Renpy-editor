@@ -1257,6 +1257,11 @@ mod tests {
         original.settings.model = "changed".into();
         assert_eq!(p.profile.settings.model, "synthetic-model");
         let body: Value = serde_json::from_slice(&p.body).unwrap();
+        let fixture: Value = serde_json::from_str(include_str!("../../tests/fixtures/studio-request/bodies.json")).unwrap();
+        assert_eq!(body, fixture["thinkingOn"]);
+        let mut off = profile(8888); off.settings.thinking = Some(false);
+        let off = prepare(off, Secret::new("public-fixture".into()), 600).unwrap();
+        assert_eq!(serde_json::from_slice::<Value>(&off.body).unwrap(), fixture["thinkingOff"]);
         assert_eq!(body["stream"], false);
         assert_eq!(body["max_tokens"], 1024);
         assert_eq!(body["temperature"], 1.0);

@@ -6,6 +6,8 @@ It remains separate from disposable Phase 0 evidence under `spikes/`.
 
 ## Local checks
 
+Harness scripts require Python 3.11 or later (`tomllib` is used by the native qualification helpers).
+
 ```bash
 npm ci --ignore-scripts
 npm run check
@@ -52,7 +54,7 @@ Connect is one attempt with a 1-second deadline; the panel response deadline is
 response at 8 MiB, headers at 32 KiB and JSON depth at 32. Full-body byte estimation
 plus max(128, 10% input) margin plus response reserve must fit the saved context
 budget/capacity; capacity remains unverified. Studio wire uses `stream=false`,
-`max_tokens`, thinking off and tools disabled. No schema/proposal or project action
+`max_tokens`, the saved Thinking mode (on when absent), and tools disabled. No schema/proposal or project action
 is requested by this synthetic text diagnostic.
 
 Only one complete JSON response with the exact model, one index-0 assistant choice,
@@ -340,6 +342,9 @@ Full 2A.1, real providers/generation, generic/session/no-auth and clean-OS/locke
 coverage remain outside this selection. No installation or real credential was used.
 
 The fixed fixture is `tests/fixtures/windows-studio-credentials.json`.
+This completed runner is historical and refuses the current draft-connection probe
+contract2 before building or launching. Its legacy reload-fault selector below does
+not qualify the current draft Save flow; current DOM preparation remains separate.
 `scripts/windows-studio-credentials.py` owns exclusive attempts, package/source
 identity, loopback requests, whole-store snapshots and external process exit.
 `--acceptance --combined-attempts 10 --replacement --sequence 14 --completion-run 16`

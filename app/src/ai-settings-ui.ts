@@ -27,7 +27,7 @@ export function mountStudioSettings(content:HTMLElement,footer:HTMLElement):Stud
   };
   const draftState=el("p","","studio-draft-state");
   root.append(el("h3","Unsloth Studio"),el("p","Profiles are saved only on this computer. Saving a profile does not connect.","muted"),chooser,status,fields);
-  const label=input("Profile name","A local name for this connection."),endpoint=input("Endpoint","Base endpoint; loopback HTTP or verified HTTPS."),model=input("Model ID","Enter an exact model ID, or choose one after you Refresh models.");
+  const label=input("Profile name","A local name for this connection."),endpoint=input("Endpoint","Base endpoint; loopback HTTP or verified HTTPS."),model=input("Model ID","Choose the exact model ID from this connection’s current model list.");
   const choices=el("datalist");choices.id="studio-model-choices";model.setAttribute("list",choices.id);root.append(choices);
   const privateHttp=input("Allow private-network HTTP","HTTP is unencrypted. Private LAN/VPN addresses need explicit opt-in. Loopback HTTP needs no private-network opt-in.","checkbox");
   const budget=input("Context length","Total tokens for the request and response. The response reserve and safety margin must fit within this total. Also used when requesting model-load context.","number"),response=input("Maximum response length","Maximum number of tokens to generate. Reaching this limit may cut the response short.","number");
@@ -128,7 +128,7 @@ export function mountStudioSettings(content:HTMLElement,footer:HTMLElement):Stud
   const errors=new Map<HTMLInputElement|HTMLSelectElement,HTMLElement>();
   const validate=(n:HTMLInputElement|HTMLSelectElement):boolean=>{const text=validators.get(n)!();errors.get(n)!.textContent=text;n.setAttribute("aria-invalid",String(!!text));return !text;};
   for(const n of validators.keys()){const error=el("span","","field-error");error.id=`${n.id}-error`;errors.set(n,error);n.setAttribute("aria-describedby",error.id);n.closest(".setting-row")!.append(error);let composing=false;n.addEventListener("compositionstart",()=>{composing=true;});n.addEventListener("compositionend",()=>{composing=false;});n.addEventListener("blur",()=>{if(!composing)validate(n);});n.addEventListener("input",()=>{if(!composing&&error.textContent)validate(n);});}
-  const changed=():void=>{resetLoadReport();removalConfirmation.hidden=true;remove.hidden=false;const first=!dirty;dirty=true;if(first)status.textContent="Unsaved changes. Save before connecting or managing this model or its key. Readiness applies only to the saved configuration.";state();};
+  const changed=():void=>{resetLoadReport();removalConfirmation.hidden=true;remove.hidden=false;const first=!dirty;dirty=true;if(first)status.textContent="Unsaved profile changes. Connect to retrieve models, then Save profile. Response-format readiness applies to the saved configuration.";state();};
   fields.addEventListener("input",changed);fields.addEventListener("change",changed);
   for(const input of [endpoint,privateHttp]){input.addEventListener("input",()=>clearConnection(true));input.addEventListener("change",()=>clearConnection(true));}
   chooser.addEventListener("change",()=>{if(!canLeave()){chooser.value=selected??"";return;}selected=chooser.value||null;draw();});

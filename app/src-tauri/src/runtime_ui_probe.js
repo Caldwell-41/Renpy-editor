@@ -210,7 +210,7 @@
     }
     assert(document.documentElement.scrollWidth <= window.innerWidth + 2,"no page overflow at package viewport");
     checkpoint("complete");
-    await call("probe.runtimeUiReport",{passed:true,stage,stages,branchLabels,layer:"packaged WebView, synthetic DOM input, real IPC/service/SDK",nativeKeyboard:false});
+    await call("probe.runtimeUiReport",{passed:true,scenario:mode,stage,stages,branchLabels,layer:"packaged WebView, synthetic DOM input, real IPC/service/SDK",nativeKeyboard:false});
   } catch (error) {
     await call("probe.runtimeUiReport",{passed:false,stage,stages,sourceState:document.querySelector(".source-document-state")?.textContent,sourceBusy:document.querySelector(".source-workspace")?.dataset.sourceBusy,saveTrace:window.__loomlightReadSaveTrace?.(),error:String(error),runtimeStatus:document.querySelector('.runtime-panel [role="status"]')?.textContent,notice:document.querySelector('.runtime-panel [role="alert"]')?.textContent,appStatus:document.querySelector("#app-status")?.textContent,output:document.querySelector(".runtime-output")?.textContent?.slice(-8192),dialog:document.querySelector(".runtime-dialog")?.textContent?.slice(0,2000),closeState:{welcomePresent:!!document.querySelector('.welcome'),recentCount:document.querySelectorAll('.recent-open').length,closeButtonPresent:!!find("Close Project"),modal:document.querySelector('[aria-modal="true"]')?.textContent?.slice(0,1000)},elapsedMs:Math.round(performance.now()-started)});
   }

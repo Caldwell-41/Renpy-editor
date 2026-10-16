@@ -129,10 +129,10 @@ def cargo_ok(text, listing, scope):
             and all(int(summaries[0][i]) == 0 for i in (2, 3, 4)))
 
 
-def browser_ok(folder):
+def browser_ok(folder, surfaces=('characters', 'relationships', 'knowledge', 'history', 'lorebook', 'settings', 'assist')):
     metrics = json.loads((folder / 'metrics.json').read_text(encoding='utf-8'))
     receipts = metrics.get('receipts', [])
-    expected = {(surface, theme, size) for surface in ('characters', 'relationships', 'knowledge', 'history', 'lorebook', 'settings', 'assist')
+    expected = {(surface, theme, size) for surface in surfaces
                 for theme in ('light', 'dark') for size in ('wide', 'compact')}
     actual = {(r.get('surface'), r.get('theme'), r.get('size')) for r in receipts}
     identity = metrics.get('inputIdentity', {})
@@ -144,7 +144,19 @@ def browser_ok(folder):
                  and before.get('checkoutHead') == after.get('checkoutHead')
                  and all(isinstance(name, str) and re.fullmatch(r'[0-9a-f]{64}', value or '') for name, value in files.items()))
     images_ok = True
+    images=[]
     for receipt in receipts:
+        images.append((receipt, f"{receipt.get('surface')}-{receipt.get('theme')}-{receipt.get('size')}.png"))
+        if receipt.get('surface') == 'settings':
+            captures=receipt.get('captures', [])
+            if (len(captures)!=3 or {c.get('view') for c in captures}!={'connection','connect','response'}
+                    or any(c.get('actionsVisible') is not True or not c.get('actions') or any(a.get('visible') is not True for a in c['actions']) for c in captures)):
+                return False
+            for capture in captures:
+                images.append(({**capture, 'size':receipt.get('size')}, f"settings-{capture['view']}-{receipt.get('theme')}-{receipt.get('size')}.png"))
+    for receipt, expected_name in images:
+        if receipt.get('image') != expected_name:
+            return False
         image = folder / str(receipt.get('image', ''))
         if not image.is_file():
             images_ok = False; break
@@ -158,7 +170,8 @@ def browser_ok(folder):
     return (inputs_ok and images_ok and actual == expected and len(receipts) == len(expected) and metrics.get('errors') == []
             and metrics.get('cleanup') == {'browser':'closed','server':'closed'}
             and all(r.get('viewportOverflow') is False and r.get('actionsVisible') is True for r in receipts)
-            and len(list(folder.glob('*.png'))) == len(expected)
+            and metrics.get('prohibited', []) == []
+            and len(list(folder.glob('*.png'))) == len(images)
             and len({r.get('image') for r in receipts}) == len(expected)
             and all(r.get('image') == f"{r['surface']}-{r['theme']}-{r['size']}.png" and (folder / r['image']).is_file() for r in receipts))
 

@@ -72,6 +72,15 @@ class PackageRetentionTests(unittest.TestCase):
         self.assertEqual(cases["ui-refresh"]["state"], "failed-or-incomplete")
         self.assertTrue(cases["ui-refresh"]["cleanupComplete"])
 
+    def test_wrong_inner_runtime_scenario_cannot_be_labelled_as_passed(self):
+        self.binary('Windows');self.output.parent.mkdir(parents=True)
+        report={'case':'route-b','passed':True,'exitCode':0,'timedOut':False,
+                'reports':[{'evidence':'runtime-ui-packaged','case':'compile','passed':True,'cleanupComplete':True}]}
+        (self.output.parent/'runtime-ui-route-b.json').write_text(json.dumps(report))
+        result,manifest=self.retain()
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(next(c for c in manifest['runtimeCases'] if c['case']=='route-b')['state'],'failed-or-incomplete')
+
     def test_macos_tar_preserves_bundle_bytes_and_modes(self):
         binary = self.binary("macOS")
         hidden = binary.parent.parent / "Resources/.bundle-data"

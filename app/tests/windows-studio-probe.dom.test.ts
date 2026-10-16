@@ -1,108 +1,83 @@
-import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import test from "node:test";
-import { Window } from "happy-dom";
-import { mountStudioSettings } from "../src/ai-settings-ui.ts";
-const script = readFileSync("src-tauri/src/windows_studio_probe.js", "utf8");
-const fixture = JSON.parse(readFileSync("tests/fixtures/windows-studio-credentials.json", "utf8"));
-const reload = JSON.parse(readFileSync("tests/fixtures/windows-studio-credential-reload-failure.json", "utf8"));
-async function scenario(phase:number, failedGet=false, reloadProof=false, defect="", evidence=false) {
-  const browser = new Window(); Object.assign(globalThis,{window:browser,document:browser.document});
-  let profiles=fixture.profiles.map((p:{profileId:string;settings:Record<string,unknown>})=>({profileId:p.profileId,settings:structuredClone(p.settings),revision:phase===1?1:2,disabled:false,credentialStatus:phase===1?"missing":"configured",discovery:null as null|{selectedAvailable:boolean;models:string[];status:string}}));
-  let entries=0,gets=0,removals=0,reloadReads=0,confirmed=false;
-  const snapshot=()=>structuredClone({token:profiles.map((p:{revision:number})=>p.revision).join("-"),profiles,cleanup:[{profileId:fixture.profiles[0].profileId,deferred:false}]});
-  const holds:string[]=[];
-  const reports:Record<string,unknown>[]=[];
-  Object.assign(browser,{
-    __loomlightWindowsStudioPhase:phase,
-    __loomlightWindowsEvidence:evidence,
-    __loomlightWindowsReloadProof:reloadProof,
-    __loomlightProbeFindButton:(name:string)=>{
-      const found=[...document.querySelectorAll("button")].find(b=>b.textContent===name);
-      if(defect==="retry-noop"&&confirmed&&name==="Retry")return {disabled:false,click:()=>{
-        [...document.querySelectorAll("button")].find(b=>b.textContent==="Save profile")!.disabled=false;
-      }};
-      return found;
-    },
-    __TAURI_INTERNALS__:{invoke:async (_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}})=>{
-      const {operation,payload}=request;
-      assert.ok(!Object.keys(payload).some(k=>["key","password","secret"].includes(k)),"No secret IPC");
-      let value:unknown;
-      const p=profiles.find((p:{profileId:string})=>p.profileId===payload.profileId);
-      switch(operation){
-        case "ai.profiles":
-          if(confirmed){reloadReads++;if(defect==="retry-mutates"&&reloadReads===2)profiles[0]!.revision++;}
-          value=snapshot();break;
-        case "probe.windowsStudioStep":
-          if(String(payload.step).endsWith("-observed")){holds.push(String(payload.step));value={observed:true};}
-          else value={recorded:true};break;
-        case "ai.enterCredential":
-          entries++; assert.ok(p);
-          if(phase===1&&entries===3){value={cancelled:true};break;}
-          p.revision++;p.credentialStatus="configured";p.discovery=null;
-          value={...snapshot(),saveStatus:`API key saved${p.profileId===fixture.profiles[0].profileId?"; cleanup pending":""}`};break;
-        case "ai.discover":
-          gets++;assert.ok(p);
-          if(failedGet&&gets===2)return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:"FIXTURE_REFUSED",message:"Refused synthetic discovery"}};
-          p.discovery={selectedAvailable:true,models:["loomlight-synthetic-model"],status:"model available; discovery only"};value=snapshot();break;
-        case "ai.removeCredential":
-          removals++;assert.ok(p);p.revision++;p.disabled=true;p.credentialStatus="missing";p.discovery=null;
-          value={...snapshot(),saveStatus:`Removed${p.profileId===fixture.profiles[0].profileId?"; cleanup pending":""}`};break;
-        case "ai.removeProfile":profiles=profiles.filter((p:{profileId:string})=>p.profileId!==payload.profileId);value=snapshot();break;
-        case "probe.runtimeUiReport":reports.push(payload);value={recorded:true};break;
-        default:throw Error(`Unexpected ${operation}`);
-      }
-      if(operation==="ai.enterCredential"&&phase===2&&reloadProof){
-        confirmed=true;
-        if(defect!=="absent-reload")value=structuredClone(reload.expectedResponse);
-        if(defect==="wrong-response")value={...(value as object),cleanupPending:false};
-      }
-      return {protocolVersion:1,requestId:request.requestId,ok:true,value};
-    }}
-  });
-  // Match the real packaged Tauri descriptor: monkey-patching invoke must fail.
-  Object.defineProperty(Reflect.get(browser,"__TAURI_INTERNALS__"),"invoke",{writable:false,configurable:false});
-  try {
-    document.body.innerHTML="<button>Settings</button><button>AI providers</button><main></main><footer></footer>";
-    document.querySelectorAll("button")[1]!.addEventListener("click",()=>mountStudioSettings(document.querySelector("main")!,document.querySelector("footer")!));
-    await browser.eval(script);assert.equal(reports.length,1);return {report:reports[0]!,entries,gets,removals,reloadReads,holds};
-  }finally{await browser.happyDOM.close();}
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import test from 'node:test';
+import {Window} from 'happy-dom';
+import {mountStudioSettings} from '../src/ai-settings-ui.ts';
+const script=readFileSync('src-tauri/src/windows_studio_probe.js','utf8');
+const fixture=JSON.parse(readFileSync('tests/fixtures/windows-studio-credentials.json','utf8'));
+const A='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+async function scenario(phase:number,failedGet=false,reloadProof=false,defect='',evidence=false,signal?:AbortSignal){
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document});
+ let profiles=fixture.profiles.map((p:{profileId:string;settings:Record<string,unknown>})=>({profileId:p.profileId,settings:structuredClone(p.settings),revision:phase===1?1:2,disabled:false,credentialStatus:phase===1?'missing':'configured',discovery:null}));
+ let entries=0,gets=0,removals=0,reloadReads=0,confirmed=false,failedReload=false,draftNumber=0;
+ let draft:{draftId:string;revision:number;profileId:string;credentialReady:boolean;state:string;models:string[];message:string}|undefined;
+ const snapshot=()=>structuredClone({token:profiles.map((p:{revision:number})=>p.revision).join('-'),profiles,cleanup:[{profileId:A,deferred:false}]});
+ const holds:string[]=[],reports:Record<string,unknown>[]=[];
+ Object.assign(browser,{
+  __loomlightWindowsStudioPhase:phase,__loomlightWindowsEvidence:evidence,__loomlightWindowsReloadProof:reloadProof,__loomlightProbeSignal:signal,
+  __loomlightProbeFindButton:(name:string)=>{
+   const found=[...document.querySelectorAll('button')].find(b=>b.textContent===name&&!b.hidden&&!b.closest('[hidden]'));
+   if(defect==='retry-noop'&&confirmed&&name==='Retry loading profiles')return {disabled:false,hidden:false,click:()=>{[...document.querySelectorAll('button')].find(b=>b.textContent==='Save profile')!.disabled=false;}};
+   return found;
+  },
+  __TAURI_INTERNALS__:{invoke:async(_:string,{request}:{request:{requestId:string;operation:string;payload:Record<string,unknown>}})=>{
+   const {operation,payload}=request;assert(!Object.keys(payload).some(k=>['key','password','secret'].includes(k)),'No secret IPC');
+   const ok=(value:unknown)=>({protocolVersion:1,requestId:request.requestId,ok:true,value});
+   const refused=(message:string)=>({protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'FIXTURE_REFUSED',message}});
+   const p=profiles.find((p:{profileId:string})=>p.profileId===(draft?.profileId??payload.profileId));
+   switch(operation){
+    case 'ai.profiles':
+     if(confirmed){reloadReads++;if(!failedReload&&defect!=='absent-reload'){failedReload=true;return refused('One post-save read failed');}if(defect==='retry-mutates'&&reloadReads===3)profiles[0]!.revision++;}
+     return ok(snapshot());
+    case 'probe.windowsStudioStep':if(String(payload.step).endsWith('-observed')){holds.push(String(payload.step));return ok({observed:true});}return ok({recorded:true});
+    case 'ai.beginConnection':{
+     const saved=profiles.find((p:{profileId:string})=>p.profileId===payload.profileId);assert(saved);
+     draft={draftId:'windows-draft-'+(++draftNumber),revision:1,profileId:saved.profileId,credentialReady:saved.credentialStatus==='configured',state:'ready',models:[],message:'Enter key, then Connect.'};return ok(structuredClone(draft));
+    }
+    case 'ai.enterConnectionKey':assert(draft);entries++;if(phase===1&&entries===3)return ok({...draft,cancelled:true});draft.revision++;draft.credentialReady=true;return ok(structuredClone(draft));
+    case 'ai.connect':assert(draft);gets++;if(failedGet&&gets===2)return refused('Refused synthetic discovery');draft.state='connected';draft.models=['loomlight-synthetic-model'];draft.message='Connected. Choose a model, then Save profile.';return ok(structuredClone(draft));
+    case 'ai.saveConnection':
+     assert(p&&draft?.state==='connected');p.revision++;p.credentialStatus='configured';p.settings=structuredClone(payload.settings);p.discovery=null;
+     confirmed=phase===2&&reloadProof;return ok({saved:true,profileId:p.profileId,cleanupPending:p.profileId===A&&defect!=='wrong-response'});
+    case 'ai.discardConnection':if(draft?.draftId===payload.draftId)draft=undefined;return ok({});
+    case 'ai.removeCredential':{
+     const saved=profiles.find((p:{profileId:string})=>p.profileId===payload.profileId);assert(saved);removals++;saved.revision++;saved.disabled=true;saved.credentialStatus='missing';return ok({...snapshot(),saveStatus:'Removed'+(saved.profileId===A?'; cleanup pending':'')});
+    }
+    case 'ai.removeProfile':profiles=profiles.filter((p:{profileId:string})=>p.profileId!==payload.profileId);return ok(snapshot());
+    case 'probe.runtimeUiReport':reports.push(payload);return ok({recorded:true});
+    default:throw Error('Unexpected '+operation);
+   }
+  }}
+ });
+ Object.defineProperty(Reflect.get(browser,'__TAURI_INTERNALS__'),'invoke',{writable:false,configurable:false});
+ let controller:ReturnType<typeof mountStudioSettings>|undefined;
+ try{
+  document.body.innerHTML='<button>Settings</button><button>AI providers</button><main></main><footer></footer>';
+  document.querySelectorAll('button')[1]!.addEventListener('click',()=>{controller=mountStudioSettings(document.querySelector('main')!,document.querySelector('footer')!);});
+  await browser.eval(script);assert.equal(reports.length,1);return {report:reports[0]!,entries,gets,removals,reloadReads,holds};
+ }finally{controller?.dispose();await browser.happyDOM.close();}
 }
-test("prepared Windows probe drives both actual Settings phases with exact secret-free operations",{timeout:10000},async()=>{
-  for(const phase of [1,2]){const result=await scenario(phase);assert.equal(result.report.passed,true,JSON.stringify(result.report));assert.equal(result.entries,phase===1?3:1);assert.equal(result.gets,2);assert.equal(result.removals,phase===1?0:2);}
+test('prepared Windows probe drives both actual Settings phases with exact secret-free operations',{timeout:10000},async t=>{
+ for(const phase of [1,2]){const r=await scenario(phase,false,false,'',false,t.signal);assert.equal(r.report.passed,true,JSON.stringify(r.report));assert.equal(r.entries,phase===1?3:1);assert.equal(r.gets,phase===1?4:3);assert.equal(r.removals,phase===1?0:2);}
 });
-test("Windows probe rejects failed discovery despite earlier availability",{timeout:5000},async()=>{
-  const result=await scenario(2,true);assert.equal(result.report.passed,false);assert.equal(result.gets,2);
+test('Windows probe rejects failed discovery despite earlier availability',{timeout:5000},async t=>{
+ const r=await scenario(2,true,false,'',false,t.signal);assert.equal(r.report.passed,false);assert.equal(r.gets,2);
 });
-test("Windows beta reload branch drives actual disabled controls and one read-only Retry, retaining original phase assertions",{timeout:5000},async()=>{
-  const result=await scenario(2,false,true);
-  assert.equal(result.report.passed,true,JSON.stringify(result.report));
-  assert.deepEqual(result.report.reloadResponse,reload.expectedResponse);
-  assert.equal(result.entries,1);assert.equal(result.gets,2);assert.equal(result.removals,2);
-  for(const marker of reload.checks)assert.ok((result.report.checks as string[]).includes(marker));
+test('Windows beta reload branch drives actual disabled controls and one read-only Retry, retaining original phase assertions',{timeout:5000},async t=>{
+ const r=await scenario(2,false,true,'',false,t.signal);assert.equal(r.report.passed,true,JSON.stringify(r.report));assert.deepEqual(r.report.reloadResponse,{saved:true,profileId:A,cleanupPending:true});assert.equal(r.entries,1);assert.equal(r.gets,3);assert.equal(r.removals,2);
+ for(const marker of ['Windows confirmed beta save requires read-only Settings reload','All Settings mutation and discovery controls disabled; read-only Retry enabled','Read-only Retry restored configured A without entry, Save or discovery'])assert((r.report.checks as string[]).includes(marker));
 });
-test("Windows beta reload gate rejects missing response, wrong pending status and Retry mutation",{timeout:5000},async()=>{
-  for(const defect of ["absent-reload","wrong-response","retry-mutates"]){
-    const result=await scenario(2,false,true,defect);
-    assert.equal(result.report.passed,false,defect);assert.equal(result.entries,1);assert.equal(result.gets,1);assert.equal(result.removals,0);
-  }
+test('Windows beta reload gate rejects missing response, wrong pending status and Retry mutation',{timeout:5000},async t=>{
+ for(const defect of ['absent-reload','wrong-response','retry-mutates']){const r=await scenario(2,false,true,defect,false,t.signal);assert.equal(r.report.passed,false,defect);assert.equal(r.entries,1);assert.equal(r.gets,2);assert.equal(r.removals,0);}
 });
-test("Windows beta reload gate rejects a Retry that enables controls without reading profiles",{timeout:5000},async()=>{
-  const result=await scenario(2,false,true,"retry-noop");
-  assert.equal(result.report.passed,false);assert.equal(result.entries,1);assert.equal(result.gets,1);assert.equal(result.removals,0);
+test('Windows beta reload gate rejects a Retry that enables controls without reading profiles',{timeout:5000},async t=>{
+ const r=await scenario(2,false,true,'retry-noop',false,t.signal);assert.equal(r.report.passed,false);assert.equal(r.entries,1);assert.equal(r.gets,2);assert.equal(r.removals,0);
 });
-
-test("opt-in evidence holds each confirmation and records actual client discovery intervals",{timeout:10000},async()=>{
-  for(const phase of [1,2]){
-    const result=await scenario(phase,false,phase===2,"",true);
-    assert.equal(result.report.passed,true,JSON.stringify(result.report));
-    assert.deepEqual(result.holds,phase===1?
-      ["alpha-saved-observed","gamma-saved-observed","cancelled-observed","get-1-complete-observed","get-2-complete-observed","complete-observed"]:
-      ["reopened-observed","get-1-complete-observed","beta-reload-observed","beta-reloaded-observed","get-2-complete-observed","removed-observed","complete-observed"]);
-    const timings=result.report.clientTimings as {actionStarted:number;requestStarted:number;requestEnded:number;completed:number}[];
-    assert.equal(timings.length,2);
-    for(const t of timings)assert.ok(t.actionStarted<=t.requestStarted&&t.requestStarted<=t.requestEnded&&t.requestEnded<=t.completed);
-    assert.equal(result.entries,phase===1?3:1);assert.equal(result.gets,2);
-  }
-  const ordinary=await scenario(1);assert.deepEqual(ordinary.holds,[]);assert.equal(ordinary.report.clientTimings,undefined);
+test('opt-in evidence holds each confirmation and records actual client discovery intervals',{timeout:10000},async t=>{
+ for(const phase of [1,2]){
+  const r=await scenario(phase,false,phase===2,'',true,t.signal);assert.equal(r.report.passed,true,JSON.stringify(r.report));
+  assert.deepEqual(r.holds,phase===1?['alpha-saved-observed','gamma-saved-observed','cancelled-observed','get-1-complete-observed','get-2-complete-observed','complete-observed']:['reopened-observed','get-1-complete-observed','beta-reload-observed','beta-reloaded-observed','get-2-complete-observed','removed-observed','complete-observed']);
+  const timings=r.report.clientTimings as {actionStarted:number;requestStarted:number;requestEnded:number;completed:number}[];assert.equal(timings.length,2);for(const v of timings)assert(v.actionStarted<=v.requestStarted&&v.requestStarted<=v.requestEnded&&v.requestEnded<=v.completed);
+ }
+ const ordinary=await scenario(1,false,false,'',false,t.signal);assert.deepEqual(ordinary.holds,[]);assert.equal(ordinary.report.clientTimings,undefined);
 });

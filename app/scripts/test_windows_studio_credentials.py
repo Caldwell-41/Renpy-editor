@@ -13,6 +13,15 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class WindowsFixtureGate(unittest.TestCase):
+    def test_historical_runner_refuses_current_probe_before_build_or_launch(self):
+        probe.require_legacy_probe("const details={phase,stage:'open'};")
+        for source in ("const details={contract:2};", "const details = { contract : 2, phase };"):
+            with self.assertRaisesRegex(ValueError, "contract 2"):
+                probe.require_legacy_probe(source)
+        with patch.object(probe,"require_legacy_probe",side_effect=ValueError("incompatible contract")):
+            with self.assertRaisesRegex(ValueError,"incompatible contract"): probe.build_legacy(1)
+            with self.assertRaisesRegex(ValueError,"incompatible contract"): probe.launch(1,1,1)
+
     def test_completion_capture_duration_is_independent_of_request_duration(self):
         names=["reopened","get-alpha","beta-entry","beta-confirmation","reload-required","read-only-retry","get-beta","removed","complete","exit"]
         events=[dict(name=name,startSeconds=i*20,endSeconds=i*20+0.01,passed=True) for i,name in enumerate(names)]
@@ -161,7 +170,7 @@ class WindowsFixtureGate(unittest.TestCase):
                 run.return_value=Mock(stdout="11.9.0\n",stderr="")
                 first=probe.configure_npm_hook();probe.configure_npm_hook()
                 hook=out/"npm-hook/npm.cmd"
-                self.assertIn(f'"{node}" "{cli}" %*',hook.read_text())
+                self.assertIn(f'"{node.resolve()}" "{cli.resolve()}" %*',hook.read_text())
                 self.assertEqual(first["sha256"],probe.sha(hook))
                 self.assertEqual(probe.os.environ["PATH"].split(probe.os.pathsep).count(str(hook.parent)),1)
                 self.assertEqual(run.call_args.args[0],["cmd.exe","/d","/c","npm --version"])
@@ -210,7 +219,7 @@ class WindowsFixtureGate(unittest.TestCase):
             profiles=root/"ai-profiles.json";profiles.write_bytes(b"retained profile bytes")
             probe.write(out/"run-6-launch.json",{"deadlineUnix":time.time()+30,"pid":123})
             probe.write(root/".studio-windows-step.json",{"phase":"1","step":"alpha-entry"})
-            with patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"OUTPUT",out),patch.object(probe,"root_from_state",return_value=root),patch.object(probe.ctypes,"WinDLL",side_effect=AssertionError("No native inspection")):
+            with patch.object(probe,"ACCEPTANCE",True),patch.object(probe,"OUTPUT",out),patch.object(probe,"root_from_state",return_value=root),patch.object(probe.ctypes,"WinDLL",side_effect=AssertionError("No native inspection"),create=True):
                 for action,suffix in [("corrupt","fault.json"),("corrupt","restored.json"),("restore","restored.json")]:
                     receipt=out/("run-6-alpha-"+suffix);receipt.write_bytes(b"retained receipt")
                     with self.subTest(action=action,suffix=suffix),self.assertRaises(ValueError):probe.fault(action,"alpha")

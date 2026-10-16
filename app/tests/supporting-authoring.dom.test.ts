@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
+import { referenceWorkspace } from "./reference-workspace-fixture.ts";
 import type { CoreOperation, CoreResponse } from "../src/protocol.js";
 
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (error: Error) => void } {
@@ -40,6 +41,7 @@ test("supporting authoring ignores stale completions and reports persistence tru
     HTMLElement: browser.HTMLElement,
     HTMLInputElement: browser.HTMLInputElement,
     HTMLSelectElement: browser.HTMLSelectElement,
+    HTMLTextAreaElement: browser.HTMLTextAreaElement,
     Event: browser.Event,
     KeyboardEvent: browser.KeyboardEvent,
   });
@@ -88,8 +90,15 @@ test("supporting authoring ignores stale completions and reports persistence tru
     else if (operation === "project.status" && delayNextStatus) { delayNextStatus = false; const pending = deferred<unknown>(); statuses.push(pending); result = await pending.promise; }
     else if (operation === "project.status") result = "saved";
     else if (operation === "project.flush" && delayNextFlush) { delayNextFlush = false; const pending = deferred<unknown>(); flushes.push(pending); result = await pending.promise; }
-    else if (operation === "authoring.list" && delayNextAuthoring) { delayNextAuthoring = false; const pending = deferred<unknown>(); authoringLoads.push(pending); result = await pending.promise; }
+    else if (operation === "references.list" && delayNextAuthoring) { delayNextAuthoring = false; const pending = deferred<unknown>(); authoringLoads.push(pending); result = await pending.promise; }
+    else if (operation === "references.list") result = referenceWorkspace(model);
     else if (operation === "authoring.list") result = model;
+    else if (operation === "references.apply") {
+      const command=payload.command as {type:string};
+      if(command.type==='previewGameCharacter')result={...referenceWorkspace(model),characterPreview:{digest:'reviewed-character-source',patches:[{path:'game/definitions/characters.rpy',before:'',after:'define new_character = Character("New Character")\n'}]}};
+      else if(command.type==='createGameCharacter'){const pending=deferred<unknown>();characterCreates.push(pending);result=await pending.promise;}
+      else throw Error('Unexpected reference mutation');
+    }
     else if (operation === "character.create") { const pending = deferred<unknown>(); characterCreates.push(pending); result = await pending.promise; }
     else if (operation === "variable.create" && delayNextVariableCreate) { delayNextVariableCreate = false; const pending = deferred<unknown>(); variableCreates.push(pending); result = await pending.promise; }
     else if (operation === "variable.create" && failVariable) { failVariable = false; return { protocolVersion: 1, requestId: "test", ok: false, error: { code: "INVALID_PAYLOAD", message: "Variable rejected" } }; }
@@ -137,22 +146,26 @@ test("supporting authoring ignores stale completions and reports persistence tru
 
   click("Characters");
   await tick();
-  click("Create Character");
-  await tick();
-  assert.equal(characterCreates.length, 0, "empty technical name must fail before IPC");
-  assert.match(document.querySelector("#app-status")?.textContent ?? "", /Technical name/);
-  enter(labelledControl<HTMLInputElement>("Technical variable (fixed after creation)"), " New_Character ");
-  enter(labelledControl<HTMLInputElement>("Display name"), "New Character");
-  click("Create Character");
-  await tick();
-  assert.deepEqual(calls.findLast(call => call.operation === "character.create")?.payload, {
-    sessionId: projectB.sessionId, technicalName: "new_character", displayName: "New Character", dialogueColor: "#c5c8d0",
+  click("New character");await tick();click("Game setup");await tick();
+  click("Review game character source");await tick();
+  assert.equal(characterCreates.length,0,"empty technical name must fail before IPC");
+  assert.match(document.querySelector("#app-status")?.textContent??"",/technical name/);
+  enter(labelledControl<HTMLInputElement>("Technical name"),"new_character");
+  enter(labelledControl<HTMLInputElement>("Display name"),"New Character");
+  click("Review game character source");await tick();
+  assert.equal(characterCreates.length,0,"review never creates the character");
+  click("Create game character");await tick();
+  assert.equal(characterCreates.length,1);
+  assert.deepEqual(calls.findLast(call=>call.operation==="references.apply")?.payload,{
+    sessionId:projectB.sessionId,expectedRevision:'public-reference-revision',command:{type:'createGameCharacter',recordId:null,technicalName:'new_character',displayName:'New Character',dialogueColor:'#c5c8d0',expectedPreviewDigest:'reviewed-character-source'},
   });
   click("Variables");
   await tick();
-  characterCreates[0]!.resolve(model);
+  assert.match(document.querySelector("h1")?.textContent??"",/Characters/,"Navigation waits for the reference transaction");
+  characterCreates[0]!.resolve(referenceWorkspace(model));
   await tick();
   await tick();
+  click("Variables");await tick();
   assert.match(document.querySelector("h1")?.textContent ?? "", /Variables/);
   assert.equal(document.querySelector("#app-status")?.textContent, "Saved");
 
@@ -268,6 +281,7 @@ test("supporting authoring ignores stale completions and reports persistence tru
   assert.equal(calls.some((call) => call.operation === "asset.repairCompatibility"), true);
   click("Characters");
   await tick();
+  document.querySelector<HTMLButtonElement>('.reference-entry[data-entry-key="character:character"]')!.click();await tick();click("Game setup");await tick();
   click("Set default");
   await tick();
   assert.equal(calls.some((call) => call.operation === "appearance.setDefault"), true);
@@ -280,6 +294,7 @@ test("supporting authoring ignores stale completions and reports persistence tru
 
   click("Characters");
   await tick();
+  document.querySelector<HTMLButtonElement>('.reference-entry[data-entry-key="character:character"]')!.click();await tick();click("Game setup");await tick();
   click("Add Appearance");
   enter(labelledControl<HTMLInputElement>("Expression token"), "delighted");
   click("Choose image…");
@@ -288,15 +303,16 @@ test("supporting authoring ignores stale completions and reports persistence tru
 
   click("Characters");
   await tick();
-  enter(labelledControl<HTMLInputElement>("Technical variable (fixed after creation)"), "late_character");
+  click("New character");await tick();click("Game setup");await tick();
+  enter(labelledControl<HTMLInputElement>("Technical name"), "late_character");
   enter(labelledControl<HTMLInputElement>("Display name"), "Late Character");
-  click("Create Character");
+  click("Review game character source");await tick();click("Create game character");
   await tick();
   click("Loomlight");
   await tick();
   assert.match(document.body.textContent ?? "", /Project B/);
-  assert.match(document.querySelector("#app-status")?.textContent ?? "", /operation is still in progress/i);
-  characterCreates[1]!.resolve(model);
+  assert.equal(document.querySelector<HTMLElement>(".character-workspace")?.dataset.busy,"true","Close cannot overtake the pending reference transaction");
+  characterCreates[1]!.resolve(referenceWorkspace(model));
   await tick();
   await tick();
   click("Loomlight");

@@ -6,7 +6,7 @@ import re
 import sys
 import tempfile
 
-from runtime_probe_cases import RUNTIME_CASES
+from runtime_probe_cases import RUNTIME_CASES, RUNTIME_STAGES, runtime_report_ok
 
 
 SUMMARY = re.compile(
@@ -40,13 +40,7 @@ def runtime_case_ok(case, record):
     reports = record.get("reports")
     if not isinstance(reports, list) or len(reports) != 1:
         return False
-    report = reports[0]
-    return (
-        isinstance(report, dict)
-        and report.get("evidence") == "runtime-ui-packaged"
-        and report.get("passed") is True
-        and report.get("cleanupComplete") is True
-    )
+    return runtime_report_ok(case, reports[0])
 
 
 def runtime_cases_ok(directory):
@@ -212,10 +206,26 @@ def self_test():
     ):
         assert not cargo_log_ok(invalid, ["transaction::tests::prepared_fault_state_can_be_safely_abandoned"])[0]
 
+    def report(case):
+        return {"evidence":"runtime-ui-packaged", "case":case,"passed":True,"cleanupComplete":True,
+                "details":{"scenario":case,"stage":"complete","stages":[
+                    {"stage":name,"runningObservedMs":9500} for name in (*RUNTIME_STAGES[case], 'complete')]}}
     case = "route-a"
     valid = {"case": case, "passed": True, "exitCode": 0, "timedOut": False,
-             "reports": [{"evidence": "runtime-ui-packaged", "passed": True, "cleanupComplete": True}]}
+             "reports": [report(case)]}
     assert runtime_case_ok(case, valid)
+    import copy
+    for mutation in ('wrong-case', 'missing-case', 'wrong-scenario', 'missing-stage', 'duplicate-stage', 'incomplete', 'short-run'):
+        bad = copy.deepcopy(valid)
+        nested = bad['reports'][0]
+        if mutation == 'wrong-case': nested['case'] = 'compile'
+        elif mutation == 'missing-case': nested.pop('case')
+        elif mutation == 'wrong-scenario': nested['details']['scenario'] = 'compile'
+        elif mutation == 'missing-stage': nested['details']['stages'].pop(0)
+        elif mutation == 'duplicate-stage': nested['details']['stages'].insert(0, nested['details']['stages'][0])
+        elif mutation == 'incomplete': nested['details']['stage'] = 'open'
+        else: nested['details']['stages'][1]['runningObservedMs'] = 9499
+        assert not runtime_case_ok(case, bad), mutation
     for invalid in (
         None,
         {**valid, "reports": []},
@@ -227,7 +237,7 @@ def self_test():
         directory = Path(temporary)
         records = {
             name: {"case": name, "passed": True, "exitCode": 0, "timedOut": False,
-                   "reports": [{"evidence": "runtime-ui-packaged", "passed": True, "cleanupComplete": True}]}
+                   "reports": [report(name)]}
             for name in RUNTIME_CASES
         }
         for name, record in records.items():

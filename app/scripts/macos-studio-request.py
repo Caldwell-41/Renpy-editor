@@ -42,9 +42,16 @@ def manifest():
     files.extend(package.APP/p for p in ['Cargo.toml','Cargo.lock','src-core/Cargo.toml','src-tauri/Cargo.toml','src-tauri/build.rs','src-tauri/identity_policy.rs','src-tauri/macos-signing.json','src-tauri/tauri.conf.json','package.json','package-lock.json','index.html','tsconfig.json','vite.config.ts'])
     return {p.relative_to(package.APP).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(set(files)) if p.exists()}
 
-def accepted(method,path,auth,body):
-    expected={'model':'synthetic-model','messages':[{'role':'user','content':PROMPT}],'stream':False,'max_tokens':1024,'enable_thinking':False,'enable_tools':False,'enabled_tools':[]}
-    return method=='POST' and path=='/v1/chat/completions' and hmac.compare_digest(auth,'Bearer '+PUBLIC_KEY) and body==expected
+def expected_body(thinking=True):
+    if type(thinking) is not bool:
+        raise ValueError('Explicit synthetic thinking mode required')
+    bodies=json.loads((package.APP/'tests/fixtures/studio-request/bodies.json').read_text(encoding='utf-8'))
+    return bodies['thinkingOn' if thinking else 'thinkingOff']
+
+def accepted(method,path,auth,body,thinking=True):
+    return (method=='POST' and path=='/v1/chat/completions'
+            and hmac.compare_digest(auth,'Bearer '+PUBLIC_KEY) and body==expected_body(thinking)
+            and type(body.get('enable_thinking')) is bool and type(body.get('stream')) is bool)
 
 def start_server(output,count=4):
     events=[];gate=threading.Lock();stop=threading.Event()

@@ -89,9 +89,7 @@ class WindowsRequestTests(unittest.TestCase):
 
     def test_loopback_server_is_shared_and_body_remains_synthetic(self):
         self.assertEqual(p.m.start_server.__module__, 'request_walkthrough')
-        body = {'model': 'synthetic-model', 'messages': [{'role': 'user', 'content': p.m.PROMPT}],
-                'stream': False, 'max_tokens': 1024, 'enable_thinking': False,
-                'enable_tools': False, 'enabled_tools': []}
+        body = p.m.expected_body()
         self.assertTrue(p.m.accepted('POST', '/v1/chat/completions', 'Bearer ' + p.m.PUBLIC_KEY, body))
         body['messages'][0]['content'] = 'project text'
         self.assertFalse(p.m.accepted('POST', '/v1/chat/completions', 'Bearer ' + p.m.PUBLIC_KEY, body))

@@ -20,7 +20,7 @@ export async function requestCore<T>(
   try { response = await invoke("core_request", { request, onProgress }); } finally {
     active=false;
     if (observeWindows) window.dispatchEvent(new window.CustomEvent("loomlight-windows-probe-response", {
-      detail: { operation, response: operation === "ai.enterCredential" ? response : undefined,
+      detail: { operation, response: operation === "ai.enterCredential" || operation === "ai.saveConnection" ? response : undefined,
         started, ended: performance.timeOrigin + performance.now() },
     }));
   }

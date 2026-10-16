@@ -138,6 +138,8 @@ setTimeout(async () => {
     const mediaPurposes = [];
     let projectStatus = "saved";
     let recoveryReport = { items: [] };
+    const references = () => ({document:{schemaVersion:1,projectId:project.projectId,cards:[],loreEntries:[]},revision:'smoke-reference-revision',diagnostic:null,
+      entities:model.characters.map(c=>({kind:'character',id:c.id,title:c.displayName,revision:c.source.sourceRevision})),issues:[],canUndo:false,canRedo:false});
     const smokeRequester = async (operation, payload = {}) => {
       const request = {
         protocolVersion: 1,
@@ -148,6 +150,17 @@ setTimeout(async () => {
       called.add(request.operation);
       operationCounts.set(request.operation, (operationCounts.get(request.operation) ?? 0) + 1);
       let value = model;
+      if (request.operation === "references.list") value=references();
+      if (request.operation === "references.apply") {
+        const command=payload.command;
+        if(command.type==='previewGameCharacter'){
+          called.add('references.previewGameCharacter');
+          value={...references(),characterPreview:{digest:'smoke-character-review',patches:[{path:'game/definitions/characters.rpy',before:'',after:'define new_character = Character("New Character")\n'}]}};
+        }else if(command.type==='createGameCharacter'){
+          if(command.expectedPreviewDigest!=='smoke-character-review')throw Error('Character creation omitted source review');
+          called.add('references.createGameCharacter');value=references();
+        }else throw Error('Unexpected reference mutation');
+      }
       if (request.operation === "project.openPicker") value = project;
       if (request.operation === "project.listRecent") value = [];
       if (request.operation === "project.status") {
@@ -266,6 +279,11 @@ setTimeout(async () => {
       if (!target) throw new Error(`Missing ${label}`);
       return target;
     };
+    const openGameSetup=async()=>{
+      await awaitSurface('Game setup');
+      document.querySelector('.reference-entry[data-entry-key="character:character"]').click();
+      await yieldTask();click('Game setup');await awaitSurface('Add Appearance');
+    };
     const macPlatform = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     supportingAuthoringStage = "welcome";
     click("Loomlight");
@@ -273,13 +291,13 @@ setTimeout(async () => {
     click("Open Loomlight Project");
     await awaitSurface("Characters");
     click("Characters");
-    await awaitSurface("Add Appearance");
+    await openGameSetup();
     const characterVisible = document.body.textContent.includes("Add Appearance");
     supportingAuthoringStage = "set-default";
     click("Set default");
     await awaitCall("appearance.setDefault");
     click("Characters");
-    await awaitSurface("Add Appearance");
+    await openGameSetup();
     supportingAuthoringStage = "edit-character";
     click("Edit");
     const characterName = control("Display name");
@@ -288,7 +306,7 @@ setTimeout(async () => {
     click("Save Character");
     await awaitCall("character.update");
     click("Characters");
-    await awaitSurface("Add Appearance");
+    await openGameSetup();
     supportingAuthoringStage = "add-appearance";
     click("Add Appearance");
     const expression = control("Expression token");
@@ -296,14 +314,15 @@ setTimeout(async () => {
     expression.dispatchEvent(new Event("input", { bubbles: true }));
     click("Choose image…");
     await awaitCall("asset.import");
-    click("Characters");
-    await awaitSurface("Create Character");
-    supportingAuthoringStage = "create-character";
-    click("New character");
-    control("Technical variable (fixed after creation)").value = "new_character";
-    control("Display name").value = "New Character";
-    click("Create Character");
-    await awaitCall("character.create");
+    click("Characters");await awaitSurface("New character");
+    supportingAuthoringStage="create-character";
+    click("New character");await yieldTask();click("Game setup");await yieldTask();
+    for(const [label,value] of [['Technical name','new_character'],['Display name','New Character']]){
+      const field=control(label);field.value=value;field.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+    click("Review game character source");await awaitCall('references.previewGameCharacter');
+    await waitFor(()=>[...document.querySelectorAll('button')].some(b=>b.textContent==='Create game character'&&!b.hidden&&!b.disabled),'reviewed character confirmation');
+    click('Create game character');await awaitCall('references.createGameCharacter');
     click("Variables");
     await awaitSurface("Create Variable");
     supportingAuthoringStage = "create-variable";
@@ -354,7 +373,7 @@ setTimeout(async () => {
       && overlappingFlushSuppressed
       && cancelledPreserved
       && called.has("appearance.setDefault")
-      && called.has("character.create")
+      && called.has("references.createGameCharacter")
       && called.has("character.update")
       && called.has("variable.create")
       && called.has("variable.update")
@@ -362,7 +381,7 @@ setTimeout(async () => {
       && called.has("asset.import")
       && called.has("project.flush")
       && called.has("asset.repairCompatibility");
-    const requiredCalls = ["appearance.setDefault", "character.create", "character.update", "variable.create", "variable.update", "asset.chooseImport", "asset.import", "project.flush", "asset.repairCompatibility"];
+    const requiredCalls = ["appearance.setDefault", "references.createGameCharacter", "character.update", "variable.create", "variable.update", "asset.chooseImport", "asset.import", "project.flush", "asset.repairCompatibility"];
     supportingAuthoringStage = !characterVisible ? "missing-character-surface"
       : !exactInteger ? "inexact-variable-create"
       : !exactIntegerUpdate ? "inexact-variable-update"
@@ -495,8 +514,7 @@ setTimeout(async () => {
     sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${cleanSaveDelta}:flushes=1:saved`);
 
     sourceAuthoringStage = "non-source-flush";
-    click("Characters");
-    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "non-Source workspace");
+    click("Variables");await awaitSurface("Create Variable");
     const nonSourceFlushBefore = operationCounts.get("project.flush") ?? 0;
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true }));
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1, "non-Source Flush");
@@ -521,7 +539,7 @@ setTimeout(async () => {
       mutations: ["stagedWithBaseIntact"],
       affected: [{ path: "game/chapters/chapter_01/scene_001.rpy", acceptedRetained: true, displacedRetained: true }],
     }] };
-    click("Characters"); await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "Characters during recovery smoke"); click("Story");
+    click("Characters"); await openGameSetup(); click("Story");
     await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Keep current project files"), "safe recovery action");
     const recoveryEvidenceVisible = document.body.textContent.includes("Accepted copy")
       && document.body.textContent.includes("Displaced copy");
@@ -538,7 +556,7 @@ setTimeout(async () => {
       mutations: ["ambiguous"],
       affected: [{ path: "game/chapters/chapter_02/scene_001.rpy", acceptedRetained: true, displacedRetained: true }],
     }] };
-    click("Characters"); await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "Characters before ambiguous recovery"); click("Story");
+    click("Characters"); await openGameSetup(); click("Story");
     await waitFor(() => document.body.textContent.includes("This state is ambiguous"), "ambiguous recovery refusal");
     const ambiguousRefused = ![...document.querySelectorAll("button")]
       .some((item) => item.textContent?.includes("project files") || item.textContent?.includes("Loomlight files"));
@@ -547,7 +565,7 @@ setTimeout(async () => {
     sceneAuthoringStage = "conflict-presentation";
     projectStatus = "conflict";
     sceneWorkspace.scenes[0].sourceConflict = true;
-    click("Characters"); await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Appearance"), "Characters before conflict state"); click("Story");
+    click("Characters"); await openGameSetup(); click("Story");
     await waitFor(() => document.body.textContent.includes("Source projection unavailable"), "Scene source conflict state");
     const conflictVisible = document.body.textContent.includes("Scene writes and history remain blocked");
     sceneWorkspace.scenes[0].sourceConflict = false;

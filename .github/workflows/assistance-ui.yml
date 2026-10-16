@@ -108,7 +108,7 @@ jobs:
           test "$(node "$npm_cli" --version)" = 11.9.0
           node "$npm_cli" ci --ignore-scripts
           python -m unittest discover -s scripts -p 'test_redesign_evidence.py' -v > "$RUNNER_TEMP/assistance-ui/gate-tests.log" 2>&1
-          python -c "import os,pathlib,re; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/gate-tests.log').read_text(); n=re.findall(r'Ran (\d+) tests?',s); assert len(n)==1 and int(n[0])==27 and re.search(r'^OK\s*$',s,re.M) and 'skipped' not in s.lower()"
+          python -c "import os,pathlib,re; s=(pathlib.Path(os.environ['RUNNER_TEMP'])/'assistance-ui/gate-tests.log').read_text(); n=re.findall(r'Ran (\d+) tests?',s); assert len(n)==1 and int(n[0])==28 and re.search(r'^OK\s*$',s,re.M) and 'skipped' not in s.lower()"
           node "$npm_cli" run typecheck > "$RUNNER_TEMP/assistance-ui/typecheck.log" 2>&1
           node "$npm_cli" run build:tests > "$RUNNER_TEMP/assistance-ui/test-compile.log" 2>&1
           node --test --test-concurrency=1 --test-reporter=tap dist-tests/tests/ai-settings.dom.test.js dist-tests/tests/reference-ui.dom.test.js dist-tests/tests/assistance-refinement.dom.test.js dist-tests/tests/rewrite-ui.dom.test.js dist-tests/tests/prompt-ui.dom.test.js dist-tests/tests/studio-request.dom.test.js dist-tests/tests/protocol.test.js > "$RUNNER_TEMP/assistance-ui/dom.log" 2>&1

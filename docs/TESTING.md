@@ -47,6 +47,40 @@ evidence. A quickly returned unchanged graph cannot pass an accepted-edit case.
 No second complete source pass, final leaf-binding matrix, 230 ms verifier allocation
 or fixed 1,006/503/504 source-pass count is required.
 
+## Thinking and harness repair qualification
+
+The selected `thinking-settings.yml` workflow runs the complete renderer test command,
+Python harness fixtures, Q1 rejecting/retention gates, affected core scopes and the full
+desktop unit binary on Windows x64 and macOS ARM64. Python helpers require 3.11 or later.
+The two PowerShell helper fixtures are explicitly Windows-only; their Mac skips are
+not Windows proof. Historical SDK, package and credential qualification allowances
+are not reopened by this selection. The current Mac identity probe preserves its
+2/2/4/0 GET schedule by counting draft Connect within each phase. The completed
+Windows credential runner explicitly refuses current probe contract2 before building
+or launching: its fixed legacy store/reload-fault contract is historical. Contract2
+DOM fixtures cover controller behavior only; current native Windows acceptance needs
+a separately selected runner migration and native proof.
+
+Settings browser evidence retains four views per theme/size: connection address,
+native-entry/Connect controls, response defaults/Thinking and model-loading readback.
+Each changed section requires visible hit-tested controls and a named hashed image;
+the four parent receipts therefore retain sixteen images for a Settings-only batch.
+These are production renderer components with passive public IPC fixtures, not native
+credential entry, real Studio generation or human acceptance.
+
+The synthetic text request fixture has explicit thinking-on/off bodies shared with a
+real Rust preparation regression. A missing saved Thinking setting resolves on; a
+fixture must not silently insist on the former off-only request. Runtime evidence
+must bind the requested case, inner report and scenario-specific terminal stages.
+Known wrong/missing/duplicate cases and incomplete duration evidence must refuse.
+
+Available compiled test binaries are collected independently of test success. A later
+failure or malformed second compiler stream retains the first binary and explicit
+failure state; a separate always-running source seal/privacy step retains safe partial
+evidence. Positive qualification additionally requires both test binaries and exact
+checkout-attribute-aware source identity. Failed, interrupted or unrun cases remain
+distinct from passes.
+
 ## SDK hashing regression
 
 Keep large SDK hashing buffers on the heap. The Windows release main thread has a

@@ -93,3 +93,11 @@ test('native observation retries only busy rejection and retains failures and de
   await assert.rejects(scope.__loomlightProbeRetryBusy!(async () => { calls++; throw Object.assign(new Error('busy deadline'), { code: 'RUNTIME_BUSY' }); }, 0), /busy deadline/);
   assert.equal(calls, 1, 'deadline must remain rejecting');
 });
+
+test('native helper selects the visible confirmation when a hidden control has the same caption',async()=>{
+ const browser=new Window();browser.document.body.innerHTML='<button hidden>Remove profile</button><section hidden><button>Remove profile</button></section><button>Remove profile</button>';
+ const scope:{__loomlightProbeFindButton?:(name:string)=>HTMLElement}={};
+ try{runInNewContext(helper,{window:scope,document:browser.document,performance,setTimeout});assert.equal(scope.__loomlightProbeFindButton!('Remove profile'),browser.document.querySelectorAll('button')[2]);
+ browser.document.body.innerHTML='<button hidden disabled>Generate proposal</button>';assert.equal(scope.__loomlightProbeFindButton!('Generate proposal'),browser.document.querySelector('button'));}
+ finally{await browser.happyDOM.close();}
+});

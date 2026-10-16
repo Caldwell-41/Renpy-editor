@@ -1,0 +1,34 @@
+{
+  "thinkingOn": {
+    "model": "synthetic-model",
+    "messages": [
+      {
+        "role": "user",
+        "content": "This is a synthetic Loomlight connection test. Reply with the short text: Loomlight synthetic response. No tools."
+      }
+    ],
+    "stream": false,
+    "max_tokens": 1024,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "enable_thinking": true,
+    "enable_tools": false,
+    "enabled_tools": []
+  },
+  "thinkingOff": {
+    "model": "synthetic-model",
+    "messages": [
+      {
+        "role": "user",
+        "content": "This is a synthetic Loomlight connection test. Reply with the short text: Loomlight synthetic response. No tools."
+      }
+    ],
+    "stream": false,
+    "max_tokens": 1024,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "enable_thinking": false,
+    "enable_tools": false,
+    "enabled_tools": []
+  }
+}
