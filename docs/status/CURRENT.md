@@ -1,35 +1,33 @@
 # Current status
 
-## Thinking and connection setup — portability repair published; awaiting CI3
+## Thinking and connection setup — CI verified; dependency finding open
 
-Updated 2026-10-16. The [selected outcome](../tasks/active/phase-2-initial-llm-assistance.md#thinking-settings-and-full-workflow--selected-2026-10-16)
+Updated2026-10-16. The [selected outcome](../tasks/active/phase-2-initial-llm-assistance.md#thinking-settings-and-full-workflow--selected-2026-10-16)
 implements Thinking on by default, response16384 and Name → Endpoint/private HTTP →
-native key → Connect → model → Save. Existing response limits persist, keys remain
+native key → Connect → model → Save. Existing response limits persist; keys remain
 native-owned and reasoning stays separate. Full native/real Studio proof is pending.
-Branch is `codex/phase3a-story-logic`, published corrective candidate `36feff12ff9acfc1cd6eb0832da3abba243b9463`.
+Branch is `codex/phase3a-story-logic`; qualified implementation candidate
+`36feff12ff9acfc1cd6eb0832da3abba243b9463`, with documentation-only successors.
 
-[CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38850950449) failed;
-terminal audit verified both artifacts,351 material source inputs per host and both
-retained test binaries. Mac passed the full job; Windows passed208 renderer cases,
-build/browser/compilation, then Python failed four Mac POSIX snapshot cases, one Unix
-process-semantics case and one strict clock-progress assertion. Windows Rust was not
-reached. The first failed run and all earlier evidence remain charged and retained.
+[CI3 run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609)
+passed both hosts, attempt1, completed2026-10-16T05:06:23Z. The [terminal audit](../tasks/active/phase-2-initial-llm-assistance.md#ci3-terminal-results-and-retained-evidence-audit--2026-10-16)
+verified both archive digests, all52 manifest entries/53 files per host,351 material
+source inputs per host, all four retained test binaries and16 Settings captures per
+host. No selected step was skipped/cancelled. Seven unselected jobs were excluded.
 
-User authorised [one further corrective run](../tasks/active/phase-2-initial-llm-assistance.md#authorised-portability-correction-and-one-independent-step-ci-run--2026-10-16),
-cumulative CI3/3. Only four real Mac permission cases are host-restricted; shared cases
-remain selected. Cleanup/clock fixtures use controlled inputs and preserve refusals.
-A reviewed second Windows dispatch fixture now takes the existing test lock. No
-production guard changed. Independent named CI steps run after unrelated failures,
-retain blocking outcomes and show logs plus an outcome summary. Exact host exclusions
-are checked. CI supplies Windows evidence; no separate preflight/handoff is required.
+Windows passed208 renderer,75 Rust and186 Python cases (four Mac-only exclusions).
+Mac passed208 renderer,73 Rust and184 Python cases (two Windows-only exclusions).
+Both repaired Windows Settings fixtures executed and passed. Retention fixtures
+passed9 plus one POSIX-only exclusion on Windows and10 on Mac. Q1, build, source,
+privacy and independent outcome gates passed. The two earlier failures stay retained
+and charged; cumulative paired CI is3/3, with no further run selected.
 
-Local preparation: Python184 passed/2 Windows-only skips, Mac desktop36 passed,
-checker15 and retention10 fixtures passed; Q1 gates and all-workflow actionlint passed.
-Prior unchanged renderer208/browser proof is reused locally. [CI3 run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609)
-is confirmed on that exact candidate, attempt1, created2026-10-16T04:59:20Z, initial
-state in_progress. This is cumulative3/3, with no further retry selected. Both host jobs
-include the independent checks. Terminal result/artifact audit remains pending; manually
-resume this chat to audit. No polling/watcher is active. No merge/release.
+One separate dependency finding remains open: npm reports high-severity
+[source-map-js advisory](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) for1.2.1
+through the Vite/PostCSS development dependency chain;1.2.2 is the published fix.
+The selected CI is not a zero-advisory gate. No dependency update or runtime-exploit
+claim was made during this audit. Other warnings are bundle-size/deprecation/test-code
+advisories. Application/test inputs remain unchanged from the qualified candidate.
 
 Native allowances remain packages1/2 (first stale), launches0/2, live0/4,
 output0/65536 and cached loads0/1. A fresh matching signed package and observed user
@@ -40,4 +38,4 @@ unlock/close precede native verification. Leave their protected window to them.
 The [walkthrough](../tasks/active/phase-3-initial-wysiwyg-release.md#restarted-combined-phase-2--3a-guided-walkthrough--2026-10-16)
 remains paused at Step3 with separate budgets/recovery files. Phase2/3A human acceptance
 is pending. Prior model-load and synthetic-comparison allowances stay closed.
-[HANDOVER](HANDOVER.md) owns continuation and recovery.
+[HANDOVER](HANDOVER.md) owns continuation and recovery. No merge/release.

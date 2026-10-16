@@ -1,110 +1,106 @@
 # Current outcome handover
 
-## Selected outcome and continuation
+## Selected outcome and publication
 
-Updated2026-10-16. This chat is the sole implementation owner for Thinking on by default,
-maximum response16384 and the paused walkthrough’s approved draft connection setup.
-The [owning task](../tasks/active/phase-2-initial-llm-assistance.md#thinking-settings-and-full-workflow--selected-2026-10-16)
-records scope and cumulative allowances. Branch `codex/phase3a-story-logic`; published
-implementation candidate `36feff12ff9acfc1cd6eb0832da3abba243b9463`. A documentation successor only records its wait. Preserve unrelated design/phase3
-and older local comparison/task notes. No reset, force push, merge or release.
+Updated2026-10-16. This chat owns Thinking on by default, response16384 and the paused
+walkthrough’s approved draft connection setup. The [owning task](../tasks/active/phase-2-initial-llm-assistance.md#thinking-settings-and-full-workflow--selected-2026-10-16)
+records scope/allowances. Branch `codex/phase3a-story-logic`; qualified implementation
+`36feff12ff9acfc1cd6eb0832da3abba243b9463`, tree
+`be21b78e493c9b2156b66993c985f20246b18643`. Later commits are status/task documentation
+only; there is no material app/workflow delta. Preserve unrelated design/phase3 and
+older local comparison/task notes. No reset, force push, merge or release.
 
 Settings follows Name → Endpoint/private HTTP → native key → Connect → model → Save.
-The opaque native draft binds zeroizing key/origin/revision/profile. Connect is a
-cancellable GET with no generation/model management. Save publishes completed settings
-and credential through existing durable staging. Raw keys never enter renderer IPC.
-Missing Thinking resolves on; explicit off and existing authored limits persist. New
-response defaults are16384. Digest2 expires old off-only readiness. Reasoning never
-becomes saved writing. Mac identity, credential namespaces and single instance persist.
+An opaque native draft binds zeroizing key/origin/revision/profile. Discovery is
+cancellable GET without generation/model management. Save uses existing durable
+credential publication. Raw keys never enter renderer IPC. Missing Thinking resolves
+on; explicit off and existing limits persist. New response defaults are16384. Digest2
+expires old off-only readiness; reasoning is never saved writing. Mac signing identity,
+credential namespaces, data-loss prevention and single instance remain unchanged.
 
-## Audited failures and authorised third run
+## CI3 terminal audit complete
 
-[CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38842223363), candidate
-c6cd017, failed a Windows Settings fixture lock assertion; its audit and original
-artifacts remain retained. The first broad harness repair is published e6e5082.
-[CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38850950449), attempt1,
-workflow354880113, candidatee6e5082, failed2026-10-16T04:34:49Z. Mac job116811812453
-passed208 renderer,182 Python/2 host skips and73 Rust cases plus other selected gates.
-Windows job116811813446 passed208 renderer/build/browser/compilation, then Python188
-had182 passes,5 errors and1 failure. Four POSIX getuid snapshot cases ran on the wrong
-host; one cleanup case assumed Unix missing-PID semantics; one instant mocked build
-required the clock to advance (592.109 equalled592.109). Windows Rust/Q1 were not run.
-A fixed-clock Mac reproduction confirmed that clock failure. This is harness evidence,
-not a demonstrated Thinking/model defect or a pass for the unrun Windows Settings fix.
+[Run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609),
+workflow354880113, attempt1/cumulative paired3/3, completed success2026-10-16T05:06:23Z
+on the exact candidate. Windows job116819482592 and Mac job116819482862 passed every
+required step. Seven unselected jobs were intentionally skipped. No required case is
+claimed from a skipped/cancelled step, and no further CI run is selected.
 
-Both ZIP digests,34 Windows/51 Mac manifest entries,351 source inputs per host and both
-actual retained binaries verified. Failure retention worked. Ignored
-`.toolchains/thinking-toggle-2026-10-16/` owns ci-01/02 audits, archives and logs, the
-qualification ledger and native fixture. Do not backfill failed runs as successes.
+Windows:208 renderer,37 core and38 desktop cases passed (75 Rust total); Python190
+selected/186 passed/four named Mac-only exclusions. Mac:208 renderer,37 core and36
+desktop (73 Rust); Python186 selected/184 passed/two named Windows-only exclusions.
+Both repaired Windows Settings fixtures ran once and passed under the ordinary
+parallel test runner. All selected Cargo names matched results, zero ignored/measured.
+The Python gate accepted only exact host exclusions and required relevant cases.
+Checker15 passed per host; retention9 passed plus one existing POSIX tar-symlink
+exclusion on Windows and10 passed on Mac. Q1/source, typecheck/build and every one of
+the25 retained independent-step outcomes passed. The previous two failures remain
+charged and preserved; they are not rewritten as passes.
 
-The user clarified that CI supplies Windows evidence, then explicitly authorised
-harness fixes, proper review and CI once with independent steps. The
-[new increment](../tasks/active/phase-2-initial-llm-assistance.md#authorised-portability-correction-and-one-independent-step-ci-run--2026-10-16)
-extends paired CI from consumed2/2 to cumulative3/3; preserve history/counters. No
-separate Windows preflight, transfer or extra run is required. Current changes restrict
-only four true Mac permission tests, control cleanup process absence (live/unknown
-still refuse), and use exact mocked clock values. A second Windows Settings dispatch
-fixture also lacked TEST_SERIAL; it now holds the existing guard like all other
-Settings dispatch fixtures. Production ownership/locking/process checks are unchanged.
+Downloaded artifact12026416298 Windows digest
+660fb20e90dce37b4e0fce74ba19cf5b48c77a9f7d558cd1f79f6e700afe6487;
+artifact12025949746 Mac digest
+6ffc72c098235ad9b8f298133a582f0bfb67fbbb833615d082ed2b7813c15223.
+They expire2026-10-23T05:05:43Z/05:03:29Z respectively. Both digests matched GitHub,
+all52 manifest entries/53 retained files per host matched, and all351 source inputs
+matched Git checkout bytes including CRLF/preserved mixed-newline fixtures. Run,
+attempt, candidate/tree and machine identities matched. All four retained test binaries
+matched bytes/hash/header and compiler streams; Windows is PE x64, Mac ARM64 Mach-O.
 
-CI groups are named independent steps with actual setup/compilation prerequisites and
-cancellation conditions. Python/core failures stay blocking but cannot hide unrelated
-compiled groups. There is no continue-on-error. Logs are printed and retained, followed
-by a filtered outcome/conclusion JSON and job summary. The Python gate accepts only the
-four Windows host exclusions/two Mac exclusions by exact test identity, requires the
-relevant results and rejects missing/extra/duplicate/failed/zero evidence. A malformed
-or broad skip cannot qualify. Historical Windows credential contract2 native proof
-remains pending; its frozen legacy runner still refuses incompatible current probes.
-No historical credential/SDK acceptance or budget was reopened.
+All16 Settings images per host passed filenames/dimensions/digests, theme/size matrix,
+visible actions, source identity and browser/server cleanup. Four representative
+connection/response captures were visually inspected; Thinking on and32768/16384 are
+readable. They are passive browser fixtures, not native credential/full Studio proof.
+Privacy re-scan passed53 files per host. Ignored
+`.toolchains/thinking-toggle-2026-10-16/ci-03-audit.json` and its script/logs/archives
+retain audit evidence. The ledger records success/audit complete/both-host qualification.
 
-Final local Python186:184 passed/2 Windows-only skips; gate accepted that report. All15
-checker fixtures and10 package-retention fixtures passed. Mac desktop36 passed with
-normal parallel execution. Q1 rejecting/source gates, actionlint and diff checks passed.
-The actual embedded summary retained failure/success/skipped inputs correctly. A local
-optional-PyYAML review attempt lacked that library; stdlib inspection plus actionlint
-and execution of the actual summary replaced it without installation. Renderer/core
-behavior is unchanged, so prior208 renderer/browser proof is reused locally. CI will
-verify the exact new candidate. No new native app/package/live request occurred.
+The first CI failed Windows fixture isolation; the second exposed Mac POSIX tests on
+Windows, Unix PID assumptions and an instant mocked-clock assertion. The third fixes
+host routing, controlled process/clock data and both missing Settings test guards, then
+uses independent steps without continue-on-error. Historical Windows credential native
+contract2 migration remains separate; its legacy runner refuses incompatible probes.
+CI itself supplied Windows evidence; no additional preflight or host transfer occurred.
 
-CI3 is confirmed: [run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609), workflow354880113,
-created2026-10-16T04:59:20Z, attempt1, exact `36feff12ff9acfc1cd6eb0832da3abba243b9463`. Initial state: in_progress.
-Selected jobs 116819482592/116819482862; initial receipt confirms both host jobs contain the independent
-Python/core/desktop/summary steps. Only thinking_settings=true, ordinal3 and other routes
-false. Cumulative paired3/3 was reserved before the single dispatch; first/second failed
-runs and audits remain in ledger history. Fresh checkout source identity351 inputs,
-repository validation608 and diff checks passed. This is awaiting_ci, not qualification.
+## Separate dependency finding and next action
 
-Next manually resume this same chat to audit terminal jobs, per-step outcomes, Python
-host exclusions, complete Windows Settings/desktop execution, artifacts/digests/manifests,
-source identity and actual retained binaries. No polling/watcher or fourth run is
-active/authorised. A docs-only successor records this wait without changing the tested
-implementation SHA. Publish only selected task/status updates and preserve unrelated
-walkthrough/comparison notes. Full native/Studio proof remains pending as below.
+Both npm-ci logs report one high advisory. Read-only npm audit confirmed source-map-js
+1.2.1 through development-only Vite8.3.0 → PostCSS8.5.28. Published
+[GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) concerns event-loop
+denial of service from indexed source-map offsets; the published patch is1.2.2.
+The selected workflow is not a zero-npm-advisory gate: functional qualification passed,
+but this finding remains open. Packaged-runtime exploitability was not established.
+No install/update/lockfile change occurred. Ignored npm audit/explanation receipts
+record the result. Other warnings concern existing Vite bundle size, action runtime/
+Node deprecations, unused Windows test code and an intentional duplicate-ZIP fixture.
+
+This user turn requested results/evidence audit only; it is complete. Report the open
+advisory and pending native acceptance. A dependency correction/new CI requires its
+own selected increment; do not silently update the lock or renew exhausted CI3/3.
+Original native/full Studio work retains its existing allowance and recovery below.
 
 ## Native recovery and remaining acceptance
 
 Package1/2 passed signature/ARM64/installer checks but is stale after earlier app changes.
-Retain package-01/Loomlight.app and its receipt. Executable SHA256
+Retain package-01/Loomlight.app and receipt. Executable SHA256
 77e818cce4a0cbbdfcd0e3547714a46ab95b5d223a757a1b1bfff152b3867d19;
 installer6701c193eb1f53587b7f73b276a41bec6fba673f6a468f975b05f92ac9d212ee.
-A fresh matching signed package needs its second reservation and approved identity.
+A fresh matching signed package needs its second reservation and the approved identity.
 
-native-root.json already identifies the disposable Beck/Henry fixture, isolated owned
-profile/key and thinking on/context32768/response16384. Original profiles were verified
-unchanged. Keep private endpoint/key/local paths ignored; do not prepare another fixture
-or read its key just to resume. Preserve initial noncanonical-path refusal/recovery.
+native-root.json identifies the disposable Beck/Henry fixture, isolated owned profile/key,
+thinking on/context32768/response16384. Original profiles were unchanged. Keep private
+endpoint/key/local paths ignored; do not prepare another fixture or read its key just
+to resume. Preserve initial noncanonical-path refusal/recovery. User said “I’ll unlock
+the Mac and close Loomlight myself”. Verify that state; intention is not an observed
+close. Do not Save/Discard/Reload/close their protected draft or bypass single instance.
 
-User said “I’ll unlock the Mac and close Loomlight myself”. Verify closed/unlocked state
-before any later launch; intention is not an observed completed close. Leave their draft
-window to them. Do not Save/Discard/Reload/close it, bypass single instance or change
-bundle identity. After CI audit and a matching signed package, reserve launch1 and use
-the existing isolated phase2-studio environment. Exercise native entry cancellation,
-saved-profile draft Connect → model → Save, explicit response-format test and the Beck
-bar-scene card generation. Reserve output before sends. Review → Save → Approve →
-reopen must preserve final writing/settings without reasoning. Reserve launch2 for reopen;
-keep uncertain attempts charged, with no automatic resend or model operation.
-
-Other current allowances remain packages1/2, launches0/2, live0/4, output0/65536,
-cached loads0/1. The two synthetic pairs and earlier model-load/live/CI allowances stay
-closed and separate. Walkthrough stays paused at Step3 with builds2/2, launches2/3 and
-its recovery/session files. Full native/Studio and Phase2/3A human acceptance are pending.
+For the remaining authorised native sequence, reserve launch1 and use the existing
+isolated phase2-studio environment with the matching signed package. Exercise native
+entry cancellation and saved-profile draft Connect → model → Save, explicit response-
+format test and Beck bar-scene generation. Reserve output before sends. Review → Save
+→ Approve → reopen must preserve writing/settings without reasoning. Reserve launch2
+for reopen, keep uncertain attempts charged and avoid automatic resends/model operations.
+Current other counts: packages1/2, launches0/2, live0/4, output0/65536, cached loads0/1.
+Older comparison/model-load/live/CI allowances stay separate/closed. Walkthrough remains
+paused Step3 with builds2/2, launches2/3 and protected recovery/session files. Full
+native/Studio and Phase2/3A human acceptance remain pending.

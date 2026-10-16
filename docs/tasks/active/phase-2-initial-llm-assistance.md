@@ -181,6 +181,75 @@ this task/status record are published; unrelated walkthrough/comparison notes re
 local. The documentation successor records this implementation candidate; it is not
 an additional CI dispatch or a replacement tested SHA.
 
+### CI3 terminal results and retained-evidence audit — 2026-10-16
+
+User requested audit of the finished run and retained evidence. **Automated qualification
+passed and audit complete** for [run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609),
+workflow354880113, attempt1/cumulative paired3/3, exact candidate
+`36feff12ff9acfc1cd6eb0832da3abba243b9463`, tree
+`be21b78e493c9b2156b66993c985f20246b18643`. Completed2026-10-16T05:06:23Z.
+Windows job116819482592 and Mac job116819482862 passed every required step. Seven
+unselected jobs were intentionally skipped; no selected step was skipped/cancelled.
+
+| Selected evidence | Windows x64 | macOS ARM64 |
+| --- | --- | --- |
+| Renderer |208 passed,0 skipped/cancelled |208 passed,0 skipped/cancelled |
+| Python harness |190 selected,186 passed,4 Mac-only exclusions |186 selected,184 passed,2 Windows-only exclusions |
+| Core selected scopes |37 passed |37 passed |
+| Full desktop unit binary |38 passed |36 passed |
+| Result-checker fixtures (within Python) |15 passed |15 passed |
+| Package-retention fixtures |9 passed,1 POSIX-only tar-symlink exclusion |10 passed |
+| Settings browser captures |16 verified |16 verified |
+
+The Python gate's exact named exclusions match the selected host contract; shared
+cleanup/clock tests passed on both hosts. Both previously affected Windows Settings
+fixtures executed once and passed under the ordinary parallel Rust runner. Every
+listed Cargo case matched its selection and passed with zero ignored/measured cases.
+Q1 rejecting/source gates, typecheck/build, privacy, source/binary identity and all25
+retained independent-step outcomes passed on both hosts. The POSIX tar-symlink skip
+is the existing test's explicit host requirement and is not counted as a Windows pass.
+
+Downloaded ZIP digests matched GitHub metadata:
+- Windows artifact12026416298: `660fb20e90dce37b4e0fce74ba19cf5b48c77a9f7d558cd1f79f6e700afe6487`, expires2026-10-23T05:05:43Z.
+- Mac artifact12025949746: `6ffc72c098235ad9b8f298133a582f0bfb67fbbb833615d082ed2b7813c15223`, expires2026-10-23T05:03:29Z.
+
+Each archive contains exactly53 retained files including its manifest; all52 manifest
+entries matched bytes with no missing/extra file. Each identity has the exact run,
+attempt, candidate/tree, expected host/architecture and all351 required material inputs.
+Every input was independently compared to Git's checkout representation, including
+CRLF and the preserved mixed-newline source fixture. Current documentation successors
+have no material app/workflow delta from the tested candidate.
+
+All four actual retained binaries matched receipt hash/size/header and successful
+compiler-artifact streams. Both Windows binaries are PE x64; both Mac binaries are
+ARM64 Mach-O. Sixteen captures per host passed exact filenames/dimensions/digests,
+visible controls, both themes/sizes, source identity and browser/server cleanup. Four
+representative connection/response images were also visually inspected: changed
+controls, context32768/response16384 and Thinking on are readable. Passive fixture
+storage copy is not native host UI proof. Privacy re-scan passed53 files per host.
+Job logs also contain existing Vite bundle-size, action-runtime deprecation and unused
+Windows test-code warnings; the duplicate ZIP warning belongs to a rejecting fixture.
+
+**Separate unresolved finding:** both npm-ci logs report one high-severity dependency
+advisory. A read-only `npm audit --json --package-lock-only --ignore-scripts` confirmed
+source-map-js1.2.1, transitively Vite8.3.0 → PostCSS8.5.28, marked development-only.
+[GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) describes event-loop
+denial of service from indexed source-map offsets; published patched version1.2.2.
+The selected workflow does not gate on zero npm advisories, so the functional CI pass
+is valid but does not establish dependency-audit cleanliness. No packaged-runtime
+exploitability was established. Keep this finding open for a selected dependency
+correction; no install/update/lockfile change or extra CI was performed during audit.
+Read-only npm audit/explanation receipts remain ignored.
+
+Ignored ci-03-audit.json/.py, downloaded archives, original logs and privacy receipts
+retain reproducible audit proof. No app/test source changed, retry, new build/native
+launch or live model request occurred during audit. The two earlier failures stay
+charged and retained. CI is now qualified for this candidate; the original full app
+outcome still needs a fresh matching signed package and the isolated native/real
+Studio workflow. Existing package1/2 is stale. Verify the user's own window close/unlock
+before launch; preserve launches0/2, live0/4, output0/65536 and model loads0/1.
+No further CI run, merge or release is selected.
+
 ## Approved implementation handoff — 2026-10-15
 
 User requests a new Sol6.1/xhigh coordinator chat, Sol6.1/high implementation/testing
