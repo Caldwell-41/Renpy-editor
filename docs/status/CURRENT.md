@@ -1,6 +1,6 @@
 # Current status
 
-## Current native harness — H19 repair reviewed; CI3 authorised
+## Current native harness — CI3 in progress; audit pending
 
 Updated2026-10-17, current branch `codex/phase3a-story-logic`. Deliverables1/2 remain
 complete; deliverable3 remains open. [CI2 audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17)
@@ -8,7 +8,7 @@ retains its full phase1 pass and phase2 recovery/close failure. The user authori
 checking the requirements/build/CI and one further CI attempt on this branch.
 
 [H19 preparation/review](../tasks/active/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17)
-is `review_ready`: current probe opens maintenance and rejects effectively hidden
+is complete: current probe opens maintenance and rejects effectively hidden
 controls; native recovery records status/control facts separately; failure close
 handles the owned Settings modal before application close. Confirmed owner exit is
 handled without swallowing errors on a live process. Product close guards, backend
@@ -22,12 +22,14 @@ in both CI jobs before packaging; browser/synthetic IPC proof is not native acce
 
 Local checks pass34DOM cases, renderer typecheck/build, clean-export203Python
 (200pass/three exact Windows exclusions), Q1/10retention, all-workflow lint and622-file
-validation. State `review_ready`, cumulative local7/7; nativeCI2/3. Actual prior
-Windows use is packages2/3, launches3/6, GETs6/21. One matching package/two launches/
-seven GETs are reserved for the next dispatch after publication/reconciliation.
-No operation is pending before dispatch; no automatic retry or Mac native launch.
-Unrelated edits and human/native recovery remain intact. The task owns exact
-allowances and the eventual terminal acceptance audit.
+validation. Repair published as `e00160b962ac09d70cb95000a6c10e4c205895c7`.
+[CI3run38969448685](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38969448685)
+was **in_progress** at its single confirmation, exact candidate/ordinal3/attempt1,
+created2026-10-16T21:27:01Z. State `awaiting_ci`; nativeCI3/3 charged, local7/7 used.
+One Windows package/two launches/seven native fixture GETs are reserved; actual use
+needs terminal receipts. The [confirmed CI3 audit checklist](../tasks/active/ci-harness-reliability.md#deliverable3-confirmed-ci3-and-manual-wait--2026-10-17)
+owns continuation. Pause under manual same-thread waiting; no polling, fourth dispatch
+or extra local round. Deliverable3 remains open. Unrelated edits/recovery remain intact.
 
 ## Retained app baseline and pending acceptance
 

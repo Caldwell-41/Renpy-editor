@@ -44,7 +44,7 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-Deliverables1/2 remain complete. Active state: `review_ready` for the user-authorised
+Deliverables1/2 remain complete. Active state: `awaiting_ci` for the user-authorised
 H19 continuation and one additional CI3. Both failed native audits and the current
 build/rejecting-gate review are below. Original maintenance
 local5/6 and pairedCI2/2 were used, including failed CI1. That earlier CI2's Windows/Mac
@@ -921,3 +921,47 @@ No automatic retry was introduced. Next: publish this exact reviewed repair, rec
 operations and dispatch CI3 once. Actual Windows PE/input/process/whole-sequence proof
 and terminal artifact/source/rendered/native cleanup audit remain necessary for
 deliverable3 completion. Pause under manual same-thread waiting after confirmation.
+
+## Deliverable3 CI3 reservation — 2026-10-17
+
+Reviewed repair published as `e00160b962ac09d70cb95000a6c10e4c205895c7`, tree
+`42c061927bec9f0bbb0070e1e91f2368b6c93a9d`, only15owned paths. Pre-dispatch
+reconciliation finds no candidate dispatch or unresolved recent manual quality run.
+Reserve nativeCI3/3, exact candidate/ordinal3/attempt1, current native selector only.
+One matching Windows package/two launches/seven GETs; Mac supplies portable/rendered
+checks only. Prior actual use is packages2/3, launches3/6, GETs6/21; local7/7 remains
+consumed. No duplicate, automatic retry or fourth dispatch is selected.
+
+## Deliverable3 confirmed CI3 and manual wait — 2026-10-17
+
+[Run38969448685](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38969448685)
+confirmed workflow354880113/workflow_dispatch/attempt1, exact candidate
+`e00160b962ac09d70cb95000a6c10e4c205895c7`, branch `codex/phase3a-story-logic`,
+created2026-10-16T21:27:01Z (2026-10-17 Brisbane). Inputs were only current native
+selector=true, exact candidate and ordinal3. At the single confirmation it was
+**in_progress**, conclusion null. Dispatch/reconciliation/run metadata stay ignored
+under `d3/native-ci3`/`d3/h19-ci3`. No existing candidate run or unresolved prior
+operation was found, and no duplicate/status polling was performed.
+
+State `awaiting_ci`; nativeCI3/3 charged, local7/7 used. Last audited pre-CI3 native
+use remains packages2/3, launches3/6, actual fixture `/v1/models` GETs6/21; this attempt
+reserves one matching package/two launches/seven such GETs. Browser fixture counters
+describe simulated Connect calls, not additional native model-list HTTP requests.
+Actual CI3 consumption needs terminal build/launch/listener receipts. No fourth
+dispatch or additional local round is selected. This docs-only successor records
+the implementation candidate; it does not become the tested SHA.
+
+Pause under manual same-thread waiting. On user resume, read this exact run/attempt
+once; if pending preserve identity and pause again. If terminal audit both-host
+Python named results/exclusions, Q1/retention,34actual DOM cases, rendered browser
+normal992×665/1440×900 plus collapsed/disabled rejection cases and independent browser/
+server closure. A successful browser process or fixture backend is not native proof.
+Audit required step outcomes, source/tree/run/architecture/toolchain identity and
+complete manifest/published ZIP digests/safe unique entries/CRC/privacy/input hashes.
+Then audit matching Windows PE/build/process identities, both native reports and
+exact assertion sets (including disclosure visibility), owned native input/retained
+Retry/Cancel, status/control diagnostics, one-shot reload/4+3 actual GET order/timing,
+per-phase state/retention/whole-store transitions and native credential presence/
+removal, normal exits/PID/modal/fault/listener cleanup. Reconcile actual totals;
+forced exit or missing/not-reached evidence is failure. Keep both earlier failures
+and any new diagnosis distinct. Complete deliverable3 only after full acceptance.
