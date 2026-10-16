@@ -42,8 +42,9 @@ The pending native Thinking/Studio acceptance and protected user window stay unt
 
 ## Implementation and verification
 
-State: `repair_verified`. Local round5/6 passed after CI1's diagnosed fixture failure;
-paired harness CI1/2 remains charged, with one corrected dispatch remaining.
+State: `awaiting_ci`. Local round5/6 passed after CI1's diagnosed fixture failure;
+paired harness CI2/2 is dispatched. Mac terminal evidence passes; Windows terminal
+status/artifact audit remains pending. Deliverable2 is not yet fully qualified.
 
 The latest100-run review found36 failed outcomes;35 of62 manual dispatches failed.
 This mixed sample is not an app-defect rate. The incident index retains specific
@@ -187,3 +188,136 @@ whitespace pass. The three unrelated files still match their entry hashes.
 Reserve the remaining paired CI2/2 after publication with only `harness_regressions`
 true; confirm no existing run for the new candidate first. No app/native operation
 or deliverable3 implementation is included.
+
+## Confirmed CI2 and partial audit — 2026-10-16
+
+Repair published on the same branch as `0cc56e702e514b30a01378954916a862c618a349`,
+tree `c50c3d46ba8b3c7154eb586ea4f17235d1047cdd`. The pre-dispatch exact-candidate
+lookup returned no existing manual run. Only `harness_regressions=true` was sent.
+[Run38886792055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38886792055),
+workflow354880113/attempt1, was created2026-10-16T10:22:26Z on exact0cc56e7.
+This charges pairedCI2/2; no dispatch remains. Local5/6 is used. No package/native,
+SDK or provider operation was consumed. CI1 remains a failed historical attempt.
+
+The first status snapshot at2026-10-16T10:23Z showed **in_progress**:
+Mac job116926380222 completed success including the positive source/privacy/upload
+steps; Windows116926380554 was running the harness group step. Eight unrelated
+jobs were intentionally skipped. Independent deliverable3 source review was done
+after dispatch; no polling loop, watcher, second writer or automatic wake-up was used.
+
+Mac Python3.15.0 passed191cases (189pass/two exact exclusions); the required cold
+inventory regression passed by name. All four groups and10retention cases passed.
+Artifact12039768955 (`harness-macOS-38886792055-1`), ZIP SHA256
+`d803c431063565633cab675fd1c4d629ec8252157fb3484ae953a4825dc928c5`, expires
+2026-10-23T10:22:57Z. Verified the published digest, ZIP safety/CRC, all10manifest
+entries/11files,353checkout-aware source inputs, exact run/attempt/tree/ARM64 and
+both named Python/retention result gates. Ignored `ci2-audit` retains that proof.
+Independent privacy re-scan passed all11files, and the completed job's raw log
+confirms the new named case and191-case summary. No Windows terminal pass is inferred.
+
+Next on manual same-thread resume: read this exact run/attempt once, then audit the
+terminal Windows job, archive digest/manifests/source/named results and required
+positive steps. Reuse the unchanged Mac audit. If pending, preserve the identity
+and pause again. A docs-only successor is not the tested candidate. Do not claim
+deliverable2 complete until both required hosts are audited. No CI3 is authorised.
+
+## Deliverable3 proposed plan — current native connection harness
+
+**Plan only; implementation and native execution are not selected by this resume.**
+The proposed outcome is a usable, bounded Windows native harness for the current
+draft connection flow, with stricter Mac report admission. Keep routine iteration
+on whichever host the user chooses; use target CI for portable/Windows proof and
+name any signed-Mac capability separately. This rule applies equally when Windows
+becomes the development host. Do not silently substitute hosted Chrome for native
+WebView/input or a hosted unsigned bundle for the approved local signing identity.
+
+### Evidence and scope
+
+- `windows-studio-credentials.py` correctly refuses probe contract2 before build or
+  launch. Its fixed GET schedule is2/2; the current production probe and DOM consumer
+  execute4/3 because draft entry/replacement now includes Connect before Save.
+- The migration includes the whole fixture chain. `windows_studio_probe.rs` still
+  admits the historical phase2 store/service/revision. `ai_reload_fixture.rs` and
+  `ai_settings.rs` target the old native-entry publication seam; `main.rs` routes
+  `ai.saveConnection` to `ai_connection.rs` first. The current reload DOM test simulates
+  the desired failure, but cannot prove that this old native fault fires there.
+- Historical H08 documents actual ownership, child-control/focus and later-step
+  gaps. Reuse its proven primitives and full-sequence lesson; do not assume the
+  unresolved UIA provider cause was an application defect.
+- `macos-identity-probe.py` already rejects duplicate reports and checks PID/path,
+  exit, cleanup, phase and GETs. It does not require contract2, the exact case or
+  the phase's complete named assertion set. Harden these specific omissions.
+
+### Proposed implementation order and acceptance
+
+1. **Version the current scenario before native runs.** Add an explicit contract2
+   selection to the existing Windows harness, with a fresh task/attempt namespace.
+   Leave the default historical guard and completed ordinals intact. Align producer,
+   current-mode validator, Rust fixture admission and exact whole-store snapshots
+   with draft entry → Connect → model → Save. Derive the required store transitions
+   from the real core connection service, then require them; never copy mocked
+   revision assumptions or merely relax counts. Exact authenticated GET order:
+   phase1 alpha/gamma/alpha/alpha; phase2 alpha/beta/beta. Cancel and read-only Retry
+   add no requests. Preserve two explicit post-save discovery timing observations
+   per phase; distinguish them from Connect used to save a draft.
+2. **Prove the fault and the remaining sequence cheaply.** Adapt only the opt-in
+   Windows reload fixture to the current confirmed `ai.saveConnection` publication
+   and subsequent snapshot-read seam. It must fire once after a real confirmed Save,
+   never after draft entry/Cancel, and leave persisted bytes untouched. Exercise the
+   production probe/controller plus real Rust connection/fixture integration through
+   reopen, beta replacement, one read-only Retry, removal and owned cleanup. Reject
+   old/wrong/duplicate/missing reports, wrong contract/case, extra GETs, false cleanup,
+   mutation during Retry and stale phase acknowledgements. Add the Mac report checks
+   above as a pure validator, retaining its existing four-phase2/2/4/0 schedule and
+   same/different signed-binary rules. Run affected portable fixtures on both hosts
+   from clean checkouts; renderer simulations remain preparation evidence.
+3. **Observe risky Windows input early, then finish the same attempt.** Add current
+   stages around the existing verified-control primitives: owned PID/HWND, unique
+   child IDs100/1/2, masked Edit style, enabled/visible controls, foreground, physical
+   focus/action and nonsecret readback. Observe Cancel before committing fixture keys.
+   Retain the selected native failed-entry/retained-input Retry and Cancel assertions;
+   use the existing bounded fixture faults rather than a deliberate crash experiment.
+   Complete the existing two-process save/reopen/replacement/reload/remove journey;
+   an early primitive pass is not final acceptance. Retain independent modal,
+   process/listener/credential cleanup results. Fixed stage/control/type/count/focus
+   diagnostics may be retained; never inspect password text or arbitrary project UI.
+   Failure cancels only the verified owned modal, then attempts ordinary app exit;
+   forced termination remains failure. Keep current product/input deadlines.
+4. **Add one opt-in current-candidate workflow and audit it.** Proposed
+   `.github/workflows/studio-connection-native.yml` runs current Windows native proof
+   plus Mac portable fixture gates, using the existing package/build, privacy and
+   artifact patterns. Require exact reviewed candidate, attempt ordinal and fresh
+   matching package/input receipt. Keep frozen `studio-settings-native.yml` and its
+   929af6f product/evidence route unchanged. Retain failures and exact source/binary,
+   report, request and cleanup evidence. A terminal archive/source/named-result audit
+   closes the Windows migration; a green badge or mock receipt does not.
+
+Primary paths are the Windows credential harness and its tests, the two production
+probe consumers, `windows_studio_probe.rs`, the opt-in reload fixture/current save
+integration, current native-input routines, the Mac identity runner/tests and the
+new focused workflow. Update only their relevant README/NATIVE/AUTOMATED contracts
+and incident/task entries. Avoid unrelated renderer redesign, dependency upgrades,
+generation/provider work or a new generic UI/CI orchestration framework.
+
+### Proposed allowance and completion boundary
+
+Select one implementation owner and at most three meaningful local repair/check
+rounds, then at most two focused Windows-native CI attempts. Each attempt permits
+one matching package and at most two app launches (initial/reopen): maximum two
+packages/four launches cumulatively, including failed/ambiguous launches. Reserve
+seven loopback GETs per complete two-phase attempt, at most14 cumulatively; no
+automatic retry or real provider/model/generation request. The risky input preflight
+is inside those launches. A changed app/probe requires a matching rebuilt package;
+reuse after an external-driver-only change requires the existing exact input gate.
+Stop/reassess after the second failed correction or exhausted allowance; no renewal
+by changing branch, host, checkpoint or attempt name. These are proposed new task
+limits, not a reset of old Thinking/Studio/walkthrough counts.
+
+Completion requires current Windows real-control/whole-sequence/normal-exit proof,
+both-host portable rejecting fixtures, exact receipt/source audit and compact docs.
+Mac validator hardening changes evidence admission only: it does not claim fresh
+Mac native acceptance. The existing signed-Mac connection/real Studio/human work
+remains separately pending under its owning task and approved identity/capability.
+Do not repeat the four-phase cross-binary Keychain qualification solely for this
+parser change. If implementation needs a Mac producer/backend/signing change,
+reassess that boundary before any additional Mac package or native launch.

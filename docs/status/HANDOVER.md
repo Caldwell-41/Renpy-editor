@@ -8,7 +8,7 @@ Windows/macOS evidence host. Implement current runbooks and a searchable inciden
 index, make host-neutral routing explicit, reuse cheap rejecting harness checks and
 include production-probe consumers with independent current UI outcomes.
 
-State `repair_verified`: local round5/6 passed; CI1/2 failed and CI2/2 is reserved.
+State `awaiting_ci`: local round5/6 passed; CI1/2 failed and CI2/2 is dispatched.
 Implementation published at `c33d77cf4cf5826050d1ae367d6219822dc30bc1` on the existing
 branch. Only21 maintenance paths committed; pre-existing walkthrough-design and
 Phase2/3 task edits stay unstaged and unchanged. Later status commits are docs-only.
@@ -32,12 +32,27 @@ All-workflow actionlint,617-file validation and whitespace pass. Prior unchanged
 Full former testing text was preserved exactly apart from relative-link relocation;
 all38 old section anchors resolve to current runbooks or historical evidence.
 
-**Next:** publish only the owned repair, reconcile existing runs, then dispatch the
-remaining CI2/2 with only `harness_regressions=true` and record its exact candidate.
-Audit terminal required steps, archives/source/manifests, named results/exclusions,
-all four groups and privacy/upload. Apply manual same-thread waiting if nonterminal;
-do not poll or duplicate dispatch. Prepare deliverable3's concrete plan only; no
-native migration or package/launch is authorised by this maintenance continuation.
+Repair published at `0cc56e702e514b30a01378954916a862c618a349`, tree
+`c50c3d46ba8b3c7154eb586ea4f17235d1047cdd`. No prior manual run existed for that SHA.
+Only `harness_regressions=true` dispatched [CI2run38886792055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38886792055),
+workflow354880113/attempt1, created10:22:26Z. First snapshot at10:23Z showed Mac
+job116926380222 success and Windows116926380554 running; eight other jobs excluded.
+CI2/2 is charged; no dispatch remains. Mac artifact12039768955 expires2026-10-23T10:22:57Z.
+Its digest, safe ZIP/CRC,10manifest entries/11files,353source inputs and exact
+candidate/tree/run/attempt/ARM64/named results passed audit and privacy re-scan.
+Mac passed191Python cases (189pass/two exact exclusions), Q1 and10retention, including
+the new cold-inventory case. Raw proof is ignored under `ci2-audit`.
+
+**Next on manual same-thread resume:** audit this exact run's terminal Windows job,
+required steps, archive digest/source/manifest and raw named Python/retention results.
+Reuse the unchanged completed Mac audit. If still nonterminal, retain identity and
+pause; no polling, duplicate dispatch or second writer. Deliverable2 remains awaiting
+both-host qualification. Later docs-only heads are not the tested candidate.
+
+The [deliverable3 plan](../tasks/active/ci-harness-reliability.md#deliverable3-proposed-plan--current-native-connection-harness)
+is prepared only. It scopes current Windows contract2/fixture/input proof and Mac
+report admission; proposed local3/nativeCI2 limits require selection and do not renew
+old counts. No native migration, package or launch is authorised by this continuation.
 
 ## Retained app baseline and unrelated pending work
 

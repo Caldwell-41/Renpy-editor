@@ -1,6 +1,6 @@
 # Current status
 
-## CI harness reliability — clean-checkout repair verified; CI2 reserved
+## CI harness reliability — CI2 Mac audited; Windows audit pending
 
 Updated2026-10-16. The [selected maintenance](../tasks/active/ci-harness-reliability.md)
 is published on `codex/phase3a-story-logic` at `c33d77cf4cf5826050d1ae367d6219822dc30bc1`:
@@ -11,12 +11,16 @@ on ignored generated permissions, masked by a prior local build. Both-host failu
 remain recorded; artifact/source identities were verified.
 
 [Harness CI1run38878570023](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38878570023)
-failed on exactc33d77c. A self-contained fixture repair passed all four harness groups
-in a clean export with no generated permissions, dependencies or build output:
-191Python cases (189pass/two named exclusions), Q1 checks and10retention cases.
-Local round5/6 is used; pairedCI1/2 is charged and CI2/2 is reserved after publication.
-The native permission/package guards are unchanged. Deliverable3 is plan-only.
-No platform pass is claimed yet. No package, SDK execution, editor launch,
+failed on exactc33d77c. The self-contained fixture repair is published at
+`0cc56e702e514b30a01378954916a862c618a349`. Clean-export checks pass without generated
+permissions/dependencies/build output. [CI2run38886792055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38886792055)
+tests exact0cc56e7/attempt1: Mac passed and its digest/source/manifest/named results
+are audited; Windows was still running at the10:23Z snapshot. Mac passed191Python
+cases (189pass/two named exclusions), Q1 checks and10retention. Local5/6 and paired
+CI2/2 are used. Deliverable2 qualification awaits the Windows terminal audit on
+manual same-thread resume; no additional dispatch remains. Native gates are unchanged.
+The [deliverable3 plan](../tasks/active/ci-harness-reliability.md#deliverable3-proposed-plan--current-native-connection-harness)
+is prepared only; its native migration/allowance needs selection. No package, SDK execution, editor launch,
 provider request, dependency update, merge or release is selected. Unrelated local
 walkthrough-design and Phase2/3 task edits remain untouched and unpublished.
 
