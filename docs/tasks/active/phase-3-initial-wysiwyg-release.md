@@ -58,6 +58,13 @@ Preserve report, 12 matrix images, ten interaction images and comparison receipt
 receipts. Validation passes for 794 repository files and whitespace. No repair or
 verification remains pending. Work stays local and all approvals remain null.
 
+The verified candidate is local commit
+`5973550de64a634491f74839bdd5799635fc023c`, tree
+`cc0712f91a24d24f1df6df0a498febf393806e0f`. With source files clean,
+`npm run design:source` returns fingerprint
+`70d9beebc45e4783f9f17d374edf9983e03a079e68ca06d475fecec55c06a028`.
+Later documentation receipts preserve this candidate identity. No publication occurred.
+
 ## Element list reordering and opening Design, 2026-10-21
 
 State `review_ready`. The user requests click-and-drag ordering under Choose →

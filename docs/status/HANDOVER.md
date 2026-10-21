@@ -31,6 +31,8 @@ Validation passes for 794 files and whitespace. Final use is continuity local2/3
 the unused repair cycle is closed. No verification or repair is pending. Earlier
 reorder4/4, copy6/7, refresh5/6, refinement4/4 and early11/11 stay closed. No native,
 SDK, package or CI work is selected.
+The verified candidate is local commit `5973550`; the task owns its full commit,
+tree and source fingerprint. Later documentation receipts preserve that identity.
 
 Next is user review of Screen builder. Keep work local. The earlier automatic push
 review rejected publication without explicit payload/destination permission;
