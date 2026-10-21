@@ -8,12 +8,14 @@ export default async function check({ page, open }) {
     await details.evaluate(node => node.open = true);
   };
   const story = async () => page.locator(".sc-story").evaluate(node => node.open = true);
-  const visibleActionText = async row => {
-    await row.scrollIntoViewIfNeeded();
-    await page.waitForFunction(node => node.innerText.trim().length > 0, await row.elementHandle());
-    return row.innerText();
+  const visibleText = async target => {
+    await target.scrollIntoViewIfNeeded();
+    await page.waitForFunction(node => node.checkVisibility({ contentVisibilityAuto: true }) && node.innerText.trim().length > 0, await target.elementHandle());
+    return target.innerText();
   };
   for (const variant of ["workbench", "canvas", "guided"]) {
+    console.log(`Screens journey ${variant}: started`);
+    try {
     await page.setViewportSize({ width: 1100, height: 720 });
     await open({ variant });
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -84,8 +86,8 @@ export default async function check({ page, open }) {
     assert.match(await page.locator(".sc-story-status").innerText(), /Continuations 1/);
     await tree("close").click();
     await page.getByRole("button", { name: "Add action", exact: true }).click();
-    assert.match(await visibleActionText(page.locator(".sc-action-row").first()), /Set help_seen = true/, `${variant}: first visible action assigns the variable`);
-    assert.match(await visibleActionText(page.locator(".sc-action-row").last()), /Finish interaction/, `${variant}: last visible action finishes interaction`);
+    assert.match(await visibleText(page.locator(".sc-action-row").first()), /Set help_seen = true/, `${variant}: first visible action assigns the variable`);
+    assert.match(await visibleText(page.locator(".sc-action-row").last()), /Finish interaction/, `${variant}: last visible action finishes interaction`);
     await page.getByRole("button", { name: "Move action 2 up", exact: true }).click();
     assert.match(await page.getByRole("alert").innerText(), /must stay last/);
     await page.getByRole("button", { name: "Cancel properties", exact: true }).click();
@@ -96,7 +98,9 @@ export default async function check({ page, open }) {
     assert.equal(await property("Screen behavior").isDisabled(), true);
     assert.equal(await page.getByRole("button", { name: "Add element", exact: true }).isDisabled(), true);
     await tree("body").click(); assert.equal(await property("Text content").isDisabled(), true);
-    await tree("close").click(); assert.match(await page.locator(".sc-inspector").innerText(), /Template actions are protected/);
+    await tree("close").click();
+    const protectedActions = page.locator(".sc-property-group .sc-protected").filter({ hasText: "Template actions are protected" });
+    assert.match(await visibleText(protectedActions), /Template actions are protected/, `${variant}: template action protection is visible`);
     await open({ variant, state: "conflict" }); await tree("body").click();
     await property("Text content").fill("Retain during source conflict");
     await page.getByRole("button", { name: "Apply properties", exact: true }).click();
@@ -121,5 +125,18 @@ export default async function check({ page, open }) {
     const next = ["workbench", "canvas", "guided"][(["workbench", "canvas", "guided"].indexOf(variant) + 1) % 3];
     await page.waitForURL(new RegExp(`variant=${next}`));
     await page.locator('#preview[data-ready="true"]').waitFor();
+    console.log(`Screens journey ${variant}: passed`);
+    } catch (error) {
+      const state = await page.evaluate(() => ({
+        selected: document.querySelector('[role="treeitem"][aria-selected="true"]')?.getAttribute("data-node-id"),
+        actions: [...document.querySelectorAll(".sc-action-row")].map(row => ({
+          renderedText: row.innerText, text: row.textContent,
+          groupOpen: row.closest("details")?.open,
+          contentVisibility: getComputedStyle(row.closest("details")).contentVisibility,
+          visible: row.checkVisibility({ contentVisibilityAuto: true }),
+        })),
+      })).catch(diagnosticError => ({ diagnosticError: String(diagnosticError) }));
+      throw new Error(`Screens journey ${variant}: ${error.message}\nState: ${JSON.stringify(state)}`, { cause: error });
+    }
   }
 }

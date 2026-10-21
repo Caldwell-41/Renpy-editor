@@ -2,7 +2,7 @@
 
 ## Phase 3B early outcome, 2026-10-21
 
-State `blocked`, branch `codex/phase3b-screen-designer`, entry `571e76c` from the
+State `review_ready`, branch `codex/phase3b-screen-designer`, entry `571e76c` from the
 clean Phase 3A branch. Mac is the selected development host. The
 [grilling agreement](../tasks/active/phase-3-initial-wysiwyg-release.md#agreed-3b-design-from-the-grilling-session)
 owns the approved design. The user authorized branch publication; merge, release,
@@ -17,25 +17,25 @@ continuation. The task owns artifact IDs, digests, expiry and earlier failures.
 No CI is pending. Later prototype/docs commits do not become this SDK candidate.
 
 The designated agent used the prototype skill's UI branch to build three
-[unapproved Screens layouts](../design/design-lab-screens/README.md). All agents have
-finished. Local9 consumed the approved one-batch extension, rendered 508 cases and
-passed the 13 earlier groups. Screens stopped on an empty action-row `innerText`
-assertion. The focused check now scrolls the row into view before reading; this
-correction is unverified. No product rendering/action code changed. The task owns
-the published candidate identity and static visibility hypothesis.
-The prototype is not review-ready; the task's
-[candidate boundary](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
-owns exact remaining proof and source identity. Batch7/8/9 reports and 12 captures
-per run are ignored under `.toolchains/phase3b/prototype-batch-<number>/`.
-No browser interaction ran after the action-row check correction.
+[unapproved Screens layouts](../design/design-lab-screens/README.md). Root-cause review
+reproduced the CSS arrow/name mismatch and the notebook's offscreen text read.
+Explicit names and user-like scrolling before visible-text assertions fix those
+causes. The same correction covers the protected-action notice. Product action and
+rendering behavior did not change. Per-layout progress/failure state is retained.
 
-Cumulative use is local9/9, preview4/4, CI1/2, review1/1 and follow-up1/1. Further
-verification needs a new user selection in this thread; no retry is authorized.
-The proposed continuation uses one focused Screens cycle before one combined lab
-cycle, plus documentation validation. It grants no new CI, SDK or native operation.
-Explicit layout selection and recorded approval still precede live implementation.
-The lab server was stopped during checks; use the Design Lab README to restart it
-for inspection. Preserve the protected native draft and recovery below.
+Local10 passes 60 focused cases and all three journeys. Local11 passes TypeScript,
+approval/source checks, 508 rendering cases and 20 check groups with no browser
+errors. Reports, reproductions and captures remain ignored under
+`.toolchains/phase3b/prototype-batch-<number>/`; earlier failures are preserved.
+The task's [candidate record](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
+owns source identity and exact qualification. Final use is local11/11, preview4/4,
+CI1/2, review1/1 and follow-up1/1. No further verification or repair is selected.
+No native, SDK, package, CI or independent-review allowance was renewed.
+
+Next is user comparison and layout selection in this thread. All three approval
+entries remain null; recorded approval precedes live implementation. The lab server
+is available at port 5174. Use the Design Lab README to restart it if it ends.
+Preserve the protected native draft and recovery below.
 
 ## Earlier full-app mockups
 
@@ -44,8 +44,9 @@ retains its earlier review-ready result of 448 cases and 19 groups. Its 24 layou
 and starter remain unapproved, with prior references intact. That work was
 published on Phase 3A before this branch; Screens adds three separate candidates.
 [Page notes](../design/design-lab-app/README.md) own controls and simulation limits.
-The new failed combined check does not revoke the earlier unchanged-page evidence,
-but it is not a passing current integration result. Promotion still follows
+The passing local11 combined check includes these unchanged pages and their
+interaction groups; the earlier task retains its original qualification scope.
+Promotion still follows
 [INTEGRATION](../../app/design-lab/INTEGRATION.md), including explicit version selection,
 reproducible source and retained captures. The protected app was untouched.
 

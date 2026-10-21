@@ -12,10 +12,11 @@ milestone acceptance is implied.
 
 ### Selected early outcome and cumulative allowance
 
-State `blocked`. The user approved one additional local verification batch on
-2026-10-21 after the original eight were consumed. The source/runtime proof passes;
-local9 failed on an action-row text assertion. Its focused check correction is
-saved but unverified. Use
+State `review_ready`. On 2026-10-21 the user approved two further local cycles and
+required review with the linked Fix Root Causes skill. Local10 covers focused
+reproduction, diagnosis, repair and Screens verification; local11 covers combined
+lab verification and documentation closure. Both the source/runtime proof and
+prototype comparison checks now pass. The next action is user layout selection. Use
 the current Mac development host; obtain affected Windows
 x64/macOS ARM64 proof through focused CI. Deliver one nested-screen source/runtime
 proof, then a three-layout Screens prototype ready for user selection. The parent
@@ -24,8 +25,8 @@ prototype skill, and a separate agent independently reviews the source/runtime
 change. Live workspace implementation follows explicit design selection.
 
 The user authorized committing and pushing `codex/phase3b-screen-designer` for
-selected checks and recovery. Maximum cumulative use is now nine local verification
-batches, including the one-batch extension, four local Ren'Py preview launches,
+selected checks and recovery. Maximum cumulative use is now eleven local verification
+batches, including the one-batch and two-cycle extensions, four local Ren'Py preview launches,
 two focused CI dispatches including
 retries, one independent review and one follow-up review of fixes. The execution
 ledger owns cumulative use. Preparation and focused repairs share those limits;
@@ -42,11 +43,11 @@ Only after that proof does the prototype agent implement the Design Lab comparis
 
 ### Early execution ledger
 
-Current use is local9/9, preview4/4, CI1/2,
+Current use is local11/11, preview4/4, CI1/2,
 review1/1 and follow-up1/1 complete. CI1's terminal audit below passes the early
-source/runtime gate. Local9 consumed the one-batch extension. The prototype's
-interaction/integration proof remains incomplete; no additional browser attempt
-is selected. No SDK, native, package, CI or independent-review allowance was renewed.
+source/runtime gate. Local10 confirms the root causes and passes focused Screens
+verification; local11 passes combined lab verification. No repair or CI is pending.
+No SDK, native, package, CI or independent-review allowance was renewed.
 
 - Local1 compiled the new source service and ran three cases. Two passed; the third
   stopped on a harness assertion expecting `SOURCE_DRAFT_DIRTY` instead of the
@@ -136,6 +137,52 @@ is selected. No SDK, native, package, CI or independent-review allowance was ren
   reviewed local8 captures, so that appearance review is reused. Closure repository
   validation passes for 785 files, plus whitespace checks. This is metadata proof,
   not a passing browser check of the latest correction.
+- The user approved two more cycles and invoked the linked Fix Root Causes skill.
+  Local10 begins with a focused reproduction using the original unscrolled read.
+  It reproduces the failure in the guided layout: the correct Set/Finish DOM text
+  exists, its disclosure is open, `contentVisibility` is `auto`, and effective
+  visibility is false. Workbench and Canvas journeys complete in that diagnostic
+  before the guided failure. This establishes a legitimate offscreen render state,
+  not missing action data. Scrolling before reading fixes the harness's first wrong
+  assumption. Review found the same pattern in the protected-action notice; both
+  now require visible, nonempty rendered text before unchanged assertions.
+  The same reproduction measures the switcher with and without explicit labels:
+  exact-name count is one with labels and zero without, because CSS arrows become
+  part of the original accessible names. Labels correct the semantic names at the
+  controls. Per-layout start/pass messages and failure DOM/visibility context now
+  expose this evidence without another diagnostic patch. Retain ignored
+  `.toolchains/phase3b/prototype-batch-10/reproduction.json` and its script/log.
+  The first documentation update command used the app directory with root-relative
+  paths and failed before changing files; it was corrected before browser work.
+  No product or browser result is attributed to that metadata command.
+  The corrected focused check passes all 60 rendering cases and complete Workbench,
+  Canvas desk and Screen notebook journeys, with no browser errors. It verifies
+  visible typed actions and the protected notice, all three switcher transitions,
+  draft retention, geometry, source conflict, template protection and Help flow.
+  Retain `focused-report.json`, `focused.log` and 12 captures beside the reproduction.
+
+  The root-cause review also checked the earlier prototype corrections. The check
+  path now resolves from the runner's lab directory; the same focused run loads it.
+  Canvas desk's former minimum rows exceeded its available height, while width-only
+  Fit cropped taller previews. Zero-minimum rows and a width/height-aware Fit fix
+  those layout decisions. Geometry checks and retained before/after captures cover
+  their corrected results. Existing source/runtime fixes retain independent review
+  and the audited both-target CI proof; no native/SDK rerun is selected. No generic
+  retry, swallowed failure, weakened action assertion or product-state guard was
+  added to hide the browser failures.
+- Local11 passes TypeScript, approval/source validation, all 508 rendering cases
+  and 20 check groups on Chromium 155.0.8059.86. All three Screens journeys pass
+  again. Shared navigation/draft cancellation, gallery links, approval/history/HMR,
+  native refusal, read-only serving/network CSP, sample reset/invalid selections
+  and production-build exclusion all complete. The report has no browser errors.
+  Retain `.toolchains/phase3b/prototype-batch-11/report.json`, its 12 Screens captures
+  and the sibling command log. Every final capture has the same SHA256 as its
+  reviewed local8 counterpart; the parent also rechecked representative final
+  wide/compact light/dark captures. Original failures remain preserved separately.
+  This completes the selected early source proof and prototype comparison outcome
+  for review. It does not approve a layout or implement the full live designer.
+  Closure validation passes for 785 repository files, with link/privacy and
+  whitespace checks. CURRENT/HANDOVER remain within their workflow review targets.
 
 ### First focused CI run and manual continuation
 
@@ -215,28 +262,32 @@ The local9 code candidate is `8e2aacb5a6d4ecc22003685e63c8d2b756dcb442`, tree
 Its `design:source` fingerprint is
 `058e6b09bf687c4fe0ba7651b405692117f6d47f943d4ab70541fa1feb45846e`.
 
-The current prepared candidate is `db9abbe411cf3369927407864c8371d330cb7099`, tree
+The earlier prepared candidate is `db9abbe411cf3369927407864c8371d330cb7099`, tree
 `51b5eb660ff5135a01e357af7b31b46246f3272c`, published and verified on the remote branch.
 Its `design:source` fingerprint is
 `56c9e3c8688e96aa73bb111a2ffeb7b733b1fd48b16da55552fcce3d73c3dfb7`.
-It includes the unverified action-row check correction. Neither candidate is a
-passing verification or approval record.
+It includes the action-row check correction before root-cause reproduction and the
+protected-notice fix. Neither earlier candidate records a passing verification.
+The final reviewed candidate's source identity is recorded at publication below.
 Documentation-only successors preserve that distinction and the earlier SDK candidate.
 
 The floating switcher uses `?variant=` and protects edited samples before reset.
-Local9 stops at an action-text assertion. All three approval entries remain null.
-The prototype is available for inspection, but its required
-interaction/integration checks have not passed, so it is not `review_ready`.
+Local10/11 pass the focused and combined checks after root-cause reproduction.
+All three approval entries remain null. The prototype is `review_ready` for layout
+selection. Its required browser interaction/integration checks pass.
 Source/runtime support remains limited to the earlier qualified proof; browser
 imports, source edits, sharing, Story controls and previews use memory only.
 
-Local9 consumed the extension approved on 2026-10-21. Further browser verification
-needs another user selection. The proposed continuation is bounded to one focused
-Screens cycle and one combined lab cycle, with documentation validation. Run the
-focused journeys first so a failure is diagnosed before repeating the full matrix.
-It requires no new SDK, Ren'Py launch, native app, package or CI operation. Preserve
-earlier failures and all cumulative counts. Design selection and recorded approval
-still precede live Screens implementation.
+Local9 consumed the first extension. The user then approved one focused Screens
+cycle and one combined lab cycle, with documentation validation, and required the
+[Fix Root Causes skill](https://github.com/cursor/plugins/blob/101b274dd991f694e1f7024be2157e5f3adf07de/pstack/skills/principle-fix-root-causes/SKILL.md).
+The parent read that exact revision, reproduced both original failures with actual
+accessible names, variant, DOM text, disclosure and visibility facts, then verified
+the corrections. Assertions and product behavior remain intact. Focused journeys
+preceded the full matrix. All eleven local cycles are consumed; no further check
+is selected. No new SDK, Ren'Py launch, native app, package or CI operation occurred
+in these extensions. Design selection and recorded approval still precede live
+Screens implementation.
 
 ### Agreed 3B design from the grilling session
 

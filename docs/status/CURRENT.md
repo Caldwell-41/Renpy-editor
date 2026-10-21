@@ -1,6 +1,6 @@
 # Current status
 
-## Phase 3B source proof passes; prototype verification blocked
+## Phase 3B source proof and Screens comparison ready
 
 2026-10-21: Branch `codex/phase3b-screen-designer` starts from Phase 3A at `571e76c`.
 The [grilling agreement](../tasks/active/phase-3-initial-wysiwyg-release.md#agreed-3b-design-from-the-grilling-session)
@@ -10,15 +10,14 @@ qualifies the narrow source/runtime proof at `0ef1748` on Windows x64 and macOS
 ARM64, including the 720×360 panel and exactly one continuation after Close.
 No CI is pending.
 
-The three-layout [Screens prototype](../design/design-lab-screens/README.md) exists
-in the Design Lab. State `blocked`: local9 rendered 508 cases but stopped on an
-empty action-row text assertion. Its focused visibility-check correction is saved
-and unverified. The
-[task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
-retains failures and exhausted local9/9 use after the approved one-batch extension;
-further browser verification needs a new user
-selection. The prototype is not review-ready. All approval entries remain null;
-layout selection and recorded approval precede live Screens implementation.
+The three-layout [Screens prototype](../design/design-lab-screens/README.md) is
+`review_ready`. Root-cause reproduction confirmed accessible-name and offscreen-text
+harness faults. Local10 passes all 60 focused cases and three journeys; local11
+passes TypeScript, approval/source checks, 508 rendering cases and 20 groups.
+The [task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
+retains all earlier failures and final local11/11 use. No repair is pending.
+All approval entries remain null; layout selection and recorded approval precede
+live Screens implementation. Browser controls use fictional memory only.
 
 ## Earlier full-app mockups
 

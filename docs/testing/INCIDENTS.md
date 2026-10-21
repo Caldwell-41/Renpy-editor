@@ -239,6 +239,21 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   attempts remain in the owning ledger.
 - **Evidence:** [early 3B execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger).
 
+## H21 — Generated arrow names and offscreen inspector text break browser checks
+
+- **Class/search:** browser harness; `Next prototype layout`, `innerText`,
+  `content-visibility: auto`, open disclosure, offscreen action rows.
+- **Cause/correction:** CSS arrow text changed accessible button names; explicit
+  labels correct the controls. The notebook's action data existed in an open but
+  offscreen property group. Scroll the target into view and require effective
+  visibility before rendered-text assertions. Apply the same rule to its protected
+  notice; retain action/order expectations and product behavior.
+- **Regression/evidence:** original failures reproduce in local10; all three
+  focused journeys then pass. Local11 passes 508 cases and 20 groups. Per-layout
+  progress and failure state prevent another missing-variant diagnosis.
+  [3B execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
+  retains both failures, actual visibility/name facts and final results.
+
 ## P01 — Redo refuses an app-owned clean deletion
 
 - **Class/search:** product; Draft Scene Undo/Redo, cached unavailable Source buffer, DIRTY_SOURCE.

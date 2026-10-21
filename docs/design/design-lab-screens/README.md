@@ -3,10 +3,10 @@
 The question is where hierarchy, canvas and property editing should sit while an
 author builds and connects Help screens. The installed prototype skill's UI workflow
 produces three throwaway layouts on the existing Design Lab route. All are unapproved.
-The comparison is blocked on incomplete verification and is not review-ready.
+The comparison is review-ready after focused and combined browser verification.
 The same fictional game, screens, nodes and controls appear in every layout.
 The [owning task](../../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
-records published source identity, cumulative allowance and remaining verification.
+records published source identity, cumulative allowance and retained failure history.
 
 - Layout workbench keeps the hierarchy, canvas and inspector beside one another. It
   favors frequent selection and property changes. Each pane scrolls independently.
@@ -74,54 +74,36 @@ the other lab layouts and approval records.
 
 ## Review status
 
-No layout is selected and no prototype code is promoted. Draft identities are
-`workbench-v1`, `canvas-v1` and `guided-v1`; every approval remains null. The source/runtime
-gate was separately audited at `0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run
-`39555526201`. That proof preceded this prototype and does not qualify its controls.
+All three layouts are ready for comparison. No layout is selected and no prototype
+code is promoted. Draft identities are `workbench-v1`, `canvas-v1` and `guided-v1`;
+every approval remains null. The source/runtime gate was separately audited at
+`0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run `39555526201`. That proof
+qualifies its narrow source slice, not these simulated browser controls.
 
-The selected local allowance is exhausted at 9/9 after the user's one-batch
-extension. No overall combined check passed.
-The remaining work needs a user-selected verification allowance before another check.
+The user approved focused root-cause work followed by combined verification under
+[Fix Root Causes](https://github.com/cursor/plugins/blob/101b274dd991f694e1f7024be2157e5f3adf07de/pstack/skills/principle-fix-root-causes/SKILL.md).
+Reproduction confirmed that CSS arrows changed the original switcher names. Explicit
+accessible labels correct those names at the controls. The notebook's open property
+group contained the expected action data but skipped rendering while offscreen under
+`content-visibility: auto`. Its test read rendered text too early. The corrected test
+scrolls into view and requires effective visibility before reading the action rows
+and the protected-action notice. Assignment/order assertions and product behavior
+remain intact. Per-layout progress and failure visibility facts now identify the
+failed state directly.
 
-- Batch 7 TypeScript module checking passed. The targeted Screens runner could not reach
-  the stopped server on port 5174 and ran zero cases. Its report is preserved at
-  `.toolchains/design-lab/pages/screens/batch7-server-unavailable-report.json`.
-- The planned batch 7 combined check created its own server and rendered all 508 lab
-  cases, including the 60 Screens cases. It then failed to import the Screens interaction
-  module because the registered path was relative to the wrong directory. Parent review
-  of all 12 Screens captures also found a lower-dock overlap and cropped previews/text.
-  The path and layout corrections preceded batch 8. The batch 7 record and captures
-  remain under `.toolchains/phase3b/prototype-batch-07/`.
-- Batch 8 again rendered all 508 cases and passed the 13 earlier interaction groups.
-  The Screens module progressed through the first Workbench journey, including its
-  geometry checks, but timed out at its first Next prototype layout lookup. Canvas desk
-  and Screen notebook interaction journeys remain unproved. The final report is
-  `.toolchains/design-lab/report.json`; the 12 Screens captures use
-  `screens-<variant>-<theme>-<viewport>.png` in that directory.
-- The user approved one further batch. Batch 9 again passes TypeScript,
-  approval/source checks, 508 rendering cases and 13 earlier interaction groups.
-  Screens stops on an empty first action-row `innerText()` at `check.mjs:82`.
-  The failure does not report its active variant, so no completed per-layout
-  journey is inferred. The report and 12 captures remain under
-  `.toolchains/phase3b/prototype-batch-09/`. Shared integration/build-isolation checks
-  remain incomplete.
+Local10 passes all 60 Screens rendering cases and all three complete journeys.
+Local11 passes TypeScript, approval/source validation, all 508 lab rendering cases
+and 20 check groups on Chromium 155.0.8059.86, with no browser errors. Shared
+navigation, gallery, draft guards, approval/HMR, native/network refusal, sample reset,
+invalid-selection handling and production-build exclusion pass. Every registered
+Screens state renders at 1100×720 and 560×640 in both themes.
 
-Static review suggests the CSS arrow contributed to the switcher button's accessible
-name. The buttons have explicit Previous prototype layout and Next prototype layout
-ARIA labels; batch 9 includes that correction but does not complete the module.
-
-The current static hypothesis is that `content-visibility: auto` skips an offscreen
-notebook property group after Add action rebuilds the inspector. The check previously
-read the action row immediately. It now scrolls each asserted row into view, waits
-for nonempty rendered text and includes the layout in the assertion message. Typed
-assignment and last-Finish expectations are unchanged. This check correction remains
-unverified, and no product rendering/action code changed. No browser check or
-interaction ran after it. Current source differs from the batch 9 candidate.
-
-The next selected verification must establish the corrected switcher names, finish all
-three Screens interaction journeys, complete the existing combined lab checks and review
-the final captures. Browser rendering alone does not complete that evidence or approve a
-layout.
+Reports and captures remain ignored under `.toolchains/phase3b/prototype-batch-10/`
+and `prototype-batch-11/`. All 12 final Screens captures match the previously reviewed
+images byte for byte; parent review also rechecked representative final captures.
+The owning task preserves every earlier failed attempt and its evidence. Final use
+is local11/11; no further verification or repair is selected. Browser proof and source
+identity do not approve a layout or qualify durable saves/native behavior.
 
 Open the lab from `app/` with `npm run design:dev` and choose Screens, or use a direct link:
 
