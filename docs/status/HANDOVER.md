@@ -3,25 +3,32 @@
 ## Phase 3B early outcome, 2026-10-21
 
 The user completed the grilling interview and approved the [selected early outcome](../tasks/active/phase-3-initial-wysiwyg-release.md#selected-early-outcome-and-cumulative-allowance).
-State `in_progress`, branch `codex/phase3b-screen-designer`, entry `571e76c`
+State `awaiting_ci`, branch `codex/phase3b-screen-designer`, entry `571e76c`
 from the clean Phase 3A branch. Mac is the selected development host. The narrow
 screen source service passes3 core cases; frontend211 and evidence rejection5 pass.
 Actual rendering is unproved. Preserve four failed local previews and their driver/
-environment diagnoses in the task. The corrected driver is ready for focused CI.
-After actual pinned-SDK rendering proof, then
+environment diagnoses in the task. Published candidate `0ef1748` starts
+[CI1run39555526201](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39555526201),
+workflow391374211, event `push`, attempt1/ordinal1, exact
+`0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
+`521a550ef7d82ecf970a0527a1bab368062bad63`. Last observed updated2026-10-21T06:27:40Z,
+both jobs `in_progress`: Mac119074294342, Windows119074294589. No terminal proof is
+claimed. After actual pinned-SDK rendering proof,
 the designated agent uses the prototype skill for three Screens layouts in the
 existing Design Lab. Live workspace implementation awaits explicit layout selection.
 
 The parent owns source/runtime integration. A separate agent performs independent
 source/runtime review. The task owns accepted product decisions and cumulative
-counts, now local6/8, preview4/4, CI0/2, review1/1, follow-up1/1. No further local
+counts, now local6/8, preview4/4, CI1/2, review1/1, follow-up1/1. No further local
 preview is allowed. Original review findings are fixed; final driver fixes have
 parent review. Commit/push
 to the new branch is authorized for focused CI and recovery. Installer packaging
 and live model requests are outside scope. Existing allowances are not renewed.
-Work is currently local only; no operation is pending. Next is publishing the
-candidate and starting the first focused Windows/macOS proof. Continue in
-this thread. Preserve the protected native draft and unique recovery below.
+The implementation is pushed; this docs-only wait record does not become its tested
+candidate. End active polling. On manual same-thread resume, audit this exact run,
+both host artifacts/inputs/executables/named results, native dimensions/screenshot/
+continuation and cleanup. If passing, hand off the prototype with the two remaining
+local verification batches. Preserve the protected native draft and recovery below.
 
 ## Full-app mockups ready for review, 2026-10-21
 

@@ -12,7 +12,7 @@ milestone acceptance is implied.
 
 ### Selected early outcome and cumulative allowance
 
-State `in_progress`. Use the current Mac development host; obtain affected Windows
+State `awaiting_ci`. Use the current Mac development host; obtain affected Windows
 x64/macOS ARM64 proof through focused CI. Deliver one nested-screen source/runtime
 proof, then a three-layout Screens prototype ready for user selection. The parent
 owns source/runtime integration, the designated prototype agent must use the
@@ -37,7 +37,7 @@ Only after that proof does the prototype agent implement the Design Lab comparis
 
 ### Early execution ledger
 
-Current use is local6/8, preview4/4, CI0/2,
+Current use is local6/8, preview4/4, CI1/2,
 review1/1 and follow-up1/1 complete. Prototype implementation has not started;
 actual rendering evidence is still required before that handoff.
 
@@ -80,6 +80,34 @@ actual rendering evidence is still required before that handoff.
 - The prototype agent has read the required prototype UI workflow and lab rules;
   it remains gated on actual source/runtime proof. Retain all ignored
   `source-local-02` through `source-local-05` reports/logs, including failures.
+
+### First focused CI run and manual continuation
+
+Published implementation candidate `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
+`521a550ef7d82ecf970a0527a1bab368062bad63`, on
+`origin/codex/phase3b-screen-designer`. The authorized first push started
+[run39555526201](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39555526201),
+workflow391374211 / `Phase 3B early screen source proof`, event `push`, attempt1,
+ordinal1. Created2026-10-21T06:27:36Z; last observed updated06:27:40Z, `in_progress`.
+Mac job119074294342 and Windows job119074294589 were both `in_progress` at recording.
+No terminal result, native pass or artifact audit is claimed. The workflow runs only
+focused source/evidence/SDK checks, retains test executables and scans before upload.
+
+Normal chat continuation uses manual same-thread resume under WORKFLOW. End active
+polling after publishing this record. On user resume, audit this exact run/attempt,
+required individual cases, source checkout hashes, toolchains, retained executables,
+rendered dimensions/screenshot/continuation and cleanup on both hosts. If it remains
+pending, preserve its identity and wait again. Failed/skipped/missing evidence is
+not a pass. One CI attempt remains for an in-scope diagnosed repair; local previews
+stay exhausted4/4. Do not restart old Phase 2/3A allowances.
+
+Only after the source/runtime risk proof passes does the designated prototype agent
+use the prototype skill's UI branch to create three structurally different Screens
+layouts in the existing Design Lab. Two local verification batches remain for that
+prototype and its integration checks. No browser prototype is implemented yet.
+Earlier full-app drafts and protected native recovery remain intact. Status review
+retains the separate pending work in CURRENT (516 words before this wait update) and
+the unique recovery in HANDOVER (1169 words); do not remove those facts for brevity.
 
 The user answered yes to all three first-round recommendations:
 
