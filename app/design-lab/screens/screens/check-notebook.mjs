@@ -19,10 +19,8 @@ export default async function checkNotebook({ page, open }) {
   };
   try {
     await page.setViewportSize({ width: 1100, height: 720 });
-    await open({ variant: "guided" }); await settle(); const original = await size();
     await open({ variant: "guided-v2" }); await settle(); const revised = await size();
-    assert(revised.width > original.width * 1.4, `Preview width: ${original.width} -> ${revised.width}`);
-    assert(revised.height > original.height * 1.4, "Default preview must be visibly taller");
+    assert(revised.width > 450 && revised.height > 250, "Notebook keeps its larger default game view");
     assert.equal(await page.locator(".sc-game").evaluate(node => { const game = node.getBoundingClientRect(), view = node.closest(".lp-content").getBoundingClientRect(); return game.top >= view.top && game.bottom <= view.bottom; }), true, "Default game view fits the visible workspace");
     assert.doesNotMatch(await page.locator(".nb-shell").innerText(), /transaction|opaque|serializer|continuations|SDK proof|retained draft/i);
     await field("Help with screen behavior").focus();
@@ -33,6 +31,10 @@ export default async function checkNotebook({ page, open }) {
     await field("Help with front and back order").click();
     assert.match(await page.getByRole("tooltip").innerText(), /same group.*all its contents/s);
     await page.keyboard.press("Escape");
+    await field("Help with elements").click(); assert.match(await page.getByRole("tooltip").innerText(), /text, images, buttons and groups/); await page.keyboard.press("Escape");
+    await tree("body").focus(); assert.match(await page.getByRole("tooltip").innerText(), /Words shown to the player/); await page.keyboard.press("Escape");
+    await field("Element type").selectOption("hbox"); await field("Help with element type").click();
+    assert.match(await page.getByRole("tooltip").innerText(), /side by side/); await page.keyboard.press("Escape");
 
     await tree("body").click(); await field("Text").fill("Keep my unfinished directions");
     const before = await view(); assert.equal(await button("Undo").isDisabled(), true);

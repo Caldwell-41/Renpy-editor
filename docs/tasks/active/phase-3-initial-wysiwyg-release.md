@@ -1,5 +1,71 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Screens research and three-candidate refresh — 2026-10-21
+
+State `review_ready`. The user requests element tooltips, retaining the revised
+Screen notebook, removing the old workbench/canvas/original notebook, and two new
+mockups informed by a research subagent's inspection of comparable apps. Apply
+Experience First and unslop to all three; use writing-for-agents for records. This
+supersedes the earlier instruction to retain the first three runnable candidates.
+Their source and evidence remain recoverable in Git, with no approval implied.
+
+Continue on the chosen Mac and branch `codex/phase3b-screen-designer`, clean entry
+`1b14b44`. The parent owns implementation. One explicitly requested research agent
+inspects official sources and UI images, then recommends concrete patterns. Keep
+the selected notebook's structure and existing editing behavior; make both new
+alternatives structurally distinct. Explain every element type on hover/focus and
+beside the add control. Keep large previews, ordering, resize/focus controls,
+draft retention, protected samples and memory-only actions.
+
+Allow up to four focused implementation/verification cycles, one combined Design
+Lab cycle and one in-scope repair/verification cycle if the combined check finds a
+new issue. Final use is refresh local5/6. Verification is complete; the unused repair
+cycle is closed. This new UI outcome renews no native, SDK, package, CI or live model
+allowance. Prior local4/4 and local11/11 stay closed.
+Publication remains local-only; the earlier rejected push has no fresh approval.
+
+Complete when only the retained notebook and two new alternatives are selectable,
+their element help works with pointer and keyboard, the notes identify the research
+behind each design choice, both themes/sizes receive visual review, and focused/combined lab
+checks pass. All approval entries remain null until explicit version selection.
+
+Local1 passes TypeScript, approval checks, all 60 Screens rendering cases and three
+complete journeys. The user-requested research agent visually inspected official
+Penpot, Unity UI Builder and Godot images. Visual review selected narrower screen
+controls for the new alternatives, a visible Add entry and less prominent removal
+in Canvas focus, and content items before groups in Screen builder's chooser. The
+notebook keeps its layout. Preserve the first report, representative captures and
+log under `.toolchains/phase3b/refresh-focused-01*`.
+Local2 also passes all 60 cases and three journeys. Visual/static review selected
+two final refinements: compact alternatives fit their initial stage to the visible
+workspace; keyboard browsing follows the chooser's displayed content-first order.
+The focused journey now checks both and retains editing-panel captures. Preserve
+local2's evidence under `.toolchains/phase3b/refresh-focused-02*`.
+Local3 passes all 60 cases and three journeys, including initial compact game
+visibility and displayed-order keyboard browsing. Editing-state captures selected
+smaller task-card copy, removal of duplicate selection headings and visible
+disclosure arrows. Canvas focus now names its open-state toggle Hide editor.
+Preserve local3's report and editing captures under
+`.toolchains/phase3b/refresh-focused-03*`. Local4 verifies these final presentation
+changes before combined qualification.
+Local4 passes TypeScript, 60 rendering cases and all three complete journeys. Parent
+visual review covers both themes/sizes and the new editing states. No failure has
+occurred in the four refresh cycles. Preserve all final focused images and report
+under `.toolchains/phase3b/refresh-focused-04/` with its sibling command log. Local5
+is the combined Design Lab check. No source or design-note edits during that run.
+Local5 passes TypeScript, approval/source checks, all 508 rendering cases and 20
+check groups on Chromium 155.0.8059.86, with no browser errors. It includes all
+three Screens journeys, all other lab pages, shared navigation/draft guards,
+approval/HMR behavior, native/network refusal, sample reset, invalid selections and
+production build exclusion. All 12 final Screens captures match the visually
+reviewed local4 images byte for byte. Retain report, 12 matrix captures, two editing
+captures and the comparison receipt under `.toolchains/phase3b/refresh-combined-05/`,
+with its sibling log. No failed refresh cycle or repair remains pending. The
+[comparison notes](../../design/design-lab-screens/README.md) own the observed research,
+design choices, current controls and simulation limits. Next is user comparison of
+the three drafts. No app promotion, native, SDK, CI or publication occurred.
+Closure validation passes for 790 repository files, plus whitespace checks.
+
 ## Screen notebook refinement — 2026-10-21
 
 State `review_ready`. The user prefers Screen notebook and requests plain directions,

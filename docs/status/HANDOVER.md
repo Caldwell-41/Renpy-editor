@@ -1,56 +1,53 @@
 # Current outcome handover
 
-## Phase 3B notebook refinement, 2026-10-21
+## Phase 3B Screens comparison refresh, 2026-10-21
 
-State `review_ready`, branch `codex/phase3b-screen-designer`. Mac remains the chosen
-host. The user prefers Screen notebook and requested plain copy, help, layer
-ordering, border resizing and a larger preview. The
-[refinement record](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-notebook-refinement--2026-10-21)
-owns scope, finite local4/4 use, failures and source identity. The refinement is
-local-only. Automatic approval review rejected its push because explicit payload
-and destination authorization was unavailable; publishing to
-`origin/codex/phase3b-screen-designer` needs fresh user approval. Live implementation
-follows design selection.
+State `review_ready`, branch `codex/phase3b-screen-designer`, chosen host Mac. The
+[refresh record](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-research-and-three-candidate-refresh--2026-10-21)
+owns the user request, finite allowance and continuation. The parent implements;
+the explicitly requested research agent finished its inspection of official Penpot,
+Unity UI Builder and Godot screenshots. The
+[comparison notes](../design/design-lab-screens/README.md) map observed UI to the designs.
 
-The new `guided-v2` draft is first/default. It adds Elements, Position & look and
-Buttons & story, contextual help, sibling front/back controls, a larger Fit view,
-Focus preview and pointer/keyboard border resizing. Original `workbench`, `canvas`
-and `guided` remain runnable. All four approvals are null. The
-[comparison notes](../design/design-lab-screens/README.md) own controls and simulation
-limits. Every action stays in fictional browser memory.
+Keep `guided-v2` Screen notebook. New `direct` Canvas focus uses optional panels;
+new `flow` Screen builder uses a horizontal task rail and one changing card. The old
+`workbench`, `canvas` and `guided` source/registrations are removed at the user's
+request. Element help explains all types on hover/focus and beside insertion.
+All three approvals remain null. These are fictional browser samples.
 
-Refinement local3 passes 80 Screens cases and four complete journeys. Local4 passes
-TypeScript, approval/source checks, 528 rendering cases and 20 groups with no browser
-errors on Chromium 155.0.8059.86. Both sizes/themes received visual review. Reports,
-failed attempts and captures remain ignored under
-`.toolchains/phase3b/notebook-focused-<number>/` and `notebook-combined-04/`, with
-sibling command logs. No repair or verification is pending; the allowance is closed.
-No native, SDK, package, CI or independent-review allowance was renewed.
-The tested refinement candidate is `41e08b1`; the task owns its full commit, tree
-and source fingerprint. Later documentation receipts preserve that identity.
+Refresh local4 passes TypeScript, 60 rendering cases and three journeys after visual
+refinements. Parent review covers both themes/sizes and new editing states. Preserve
+ignored `refresh-focused-01*` through `refresh-focused-04*` reports, images and logs.
+Local5 passes TypeScript, approval/source checks, all 508 lab cases and 20 groups
+with no browser errors on Chromium 155.0.8059.86. Its 12 Screens matrix captures
+match the visually reviewed focused set. Preserve `refresh-combined-05/` report,
+captures and comparison receipt with its sibling log.
+Final use is refresh local5/6. The unused repair cycle is closed; no repair or
+verification remains pending. Earlier local4/4 and local11/11 stay closed. No
+native, SDK, package or CI work is selected.
+
+Next is user comparison and selection among the three drafts. Keep work local.
+Automatic approval review rejected the prior push because explicit
+payload/destination permission was unavailable;
+publication to `origin/codex/phase3b-screen-designer` still needs user approval.
+The lab is on port 5174. Preserve the protected native draft and recovery below.
 
 The earlier [CI1 audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
-still qualifies exact source `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
+still qualifies source `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
 `521a550ef7d82ecf970a0527a1bab368062bad63`, on Windows x64 and macOS ARM64 in
-run39555526201. No CI is pending. Later browser/docs commits do not become that
-SDK candidate. The original three-layout candidate `94824c8` and its passing
-local11/11 remain historical in the task, with all failure evidence preserved.
-
-Next is user review and selection of the revised notebook. Open
-`http://127.0.0.1:5174/?screen=screens&variant=guided-v2`. The lab server is available
-at port 5174; use its README to restart it if needed. Preserve the protected native
-draft and recovery below. Merge, release, installer packaging and live model requests
-remain outside this outcome.
+run39555526201. No CI is pending. Later browser/docs commits do not replace that
+SDK candidate. Prior notebook candidate `41e08b1` and original comparison `94824c8`
+remain historical in the task with their reports and all failure evidence.
 
 ## Earlier full-app mockups
 
 The [12-page comparison](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
 retains its earlier review-ready result of 448 cases and 19 groups. Its 24 layouts
 and starter remain unapproved, with prior references intact. That work was
-published on Phase 3A before this branch; Screens adds four separate candidates.
+published on Phase 3A before this branch; Screens adds three current candidates.
 [Page notes](../design/design-lab-app/README.md) own controls and simulation limits.
-The passing refinement local4 combined check includes these unchanged pages and
-their interaction groups; the earlier task retains its original qualification scope.
+The refresh local5 combined check includes these unchanged pages and their
+interaction groups; the earlier task retains its original qualification scope.
 Promotion still follows
 [INTEGRATION](../../app/design-lab/INTEGRATION.md), including explicit version selection,
 reproducible source and retained captures. The protected app was untouched.

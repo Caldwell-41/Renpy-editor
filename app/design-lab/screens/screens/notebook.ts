@@ -1,14 +1,17 @@
-// Revised notebook prototype. Game edits and workspace sizes stay in browser memory.
+// Three disposable Screens layouts share fictional editing actions and keep state in memory.
 import type { LabContext } from "../../contracts.ts";
 import { action, element as el, labelled, labPage } from "../../page.ts";
 import { icon } from "../../../src/icons.ts";
 import { prototypeSwitcher } from "../../prototype-switcher.ts";
 import { variants } from "./definition.ts";
+import { elementHelp } from "./elements.ts";
+import { directLayout, flowLayout } from "./layouts.ts";
 import { fixture, help, kinds, node, variables, type Screen, type ScreenNode, type Action } from "./fixture.ts";
 import "./screens.css";
 import "./notebook.css";
+import "./alternatives.css";
 
-type Layout = "workbench" | "canvas" | "guided";
+type Layout = "guided-v2" | "direct" | "flow";
 const copy = <T>(value: T): T => structuredClone(value);
 function select(options: readonly (readonly [string, string])[], value: string) {
   const input = el("select"); options.forEach(([id, title]) => input.add(new Option(title, id))); input.value = value; return input;
@@ -19,7 +22,7 @@ const kindName = (kind: string) => kindNames[kind] ?? kind;
 const valueTypes: Record<string, string> = { bool: "Yes/no", int: "Whole number", string: "Text" };
 const valueType = (kind: string) => valueTypes[kind] ?? kind;
 
-function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
+export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: Layout) {
   let screens = fixture(context.state);
   let screenId = context.state === "template" ? "template-0" : context.state === "dialog" ? "help-dialog" : screens[0]!.id;
   let selected = context.state === "template" ? "frame" : "title";
@@ -85,24 +88,31 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
   const divider = resizeHandle("Resize preview width", "width");
   workspace.append(notebook, divider, stage);
   const info = el("div", "sc-info"); frame.content.append(screenbar, workspace, info);
-  const cleanupSwitcher = prototypeSwitcher(frame.shell, variants, "guided-v2", () => anyDirty() || history.length > 0);
+  const parts = { workspace, notebook, hierarchy, stage, inspector, playground, tabs, divider, step: (id: string) => { step = id; render(); } };
+  const view = layout === "direct" ? directLayout(parts) : layout === "flow" ? flowLayout(parts) : undefined;
+  frame.shell.dataset.layout = layout;
+  const cleanupSwitcher = prototypeSwitcher(frame.shell, variants, layout, () => anyDirty() || history.length > 0);
   previewHeight = Math.max(300, Math.min(640, frame.content.clientHeight - screenbar.offsetHeight - 10));
 
-  function helpTip(title: string, message: string) {
-    const button = action("?", () => show()); button.className = "nb-help"; button.ariaLabel = `Help with ${title}`;
+  function explain(control: HTMLElement, message: string | (() => string)) {
     const id = `notebook-help-${++helpSequence}`;
     const show = () => {
       closeHelp?.();
-      const tip = el("div", "nb-tooltip", message); tip.id = id; tip.role = "tooltip"; frame.shell.append(tip);
-      button.setAttribute("aria-describedby", id); button.ariaExpanded = "true";
-      const box = button.getBoundingClientRect();
+      const tip = el("div", "nb-tooltip", typeof message === "function" ? message() : message); tip.id = id; tip.role = "tooltip"; frame.shell.append(tip);
+      control.setAttribute("aria-describedby", id);
+      const box = control.getBoundingClientRect();
       tip.style.left = `${Math.max(8, Math.min(innerWidth - tip.offsetWidth - 8, box.left))}px`;
       tip.style.top = `${Math.max(8, Math.min(innerHeight - tip.offsetHeight - 8, box.bottom + 7))}px`;
-      closeHelp = () => { tip.remove(); button.removeAttribute("aria-describedby"); button.ariaExpanded = "false"; closeHelp = undefined; };
+      closeHelp = () => { tip.remove(); control.removeAttribute("aria-describedby"); closeHelp = undefined; };
     };
-    button.onmouseenter = show; button.onfocus = show;
-    button.onmouseleave = () => { if (document.activeElement !== button) closeHelp?.(); };
-    button.onblur = () => closeHelp?.();
+    control.onmouseenter = show; control.onfocus = show;
+    control.onmouseleave = () => { if (document.activeElement !== control) closeHelp?.(); };
+    control.onblur = () => closeHelp?.();
+    return show;
+  }
+  function helpTip(title: string, message: string | (() => string)) {
+    const button = el("button", "nb-help", "?"); button.type = "button"; button.ariaLabel = `Help with ${title}`;
+    const show = explain(button, message);
     button.onclick = event => { event.preventDefault(); event.stopPropagation(); show(); };
     return button;
   }
@@ -115,7 +125,7 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
   }
   function resizeHandle(title: string, kind: "width" | "height" | "corner") {
     const handle = el("button", `nb-resize nb-resize-${kind}`); handle.type = "button";
-    handle.ariaLabel = title; handle.title = kind === "width" ? "Drag left for a wider preview. Left and right arrow keys also work." : kind === "corner" ? "Drag right and down for a larger preview. Arrow keys also work." : "Drag down for a taller preview. Up and down arrow keys also work.";
+    handle.ariaLabel = title; handle.title = kind === "width" ? "Drag toward the editing panel for a wider preview. Left and right arrow keys also work." : kind === "corner" ? "Drag right and down for a larger preview. Arrow keys also work." : "Drag down for a taller preview. Up and down arrow keys also work.";
     handle.role = "separator"; handle.tabIndex = 0; handle.setAttribute("aria-orientation", kind === "width" ? "vertical" : "horizontal");
     handle.onpointerdown = event => {
       if (event.button !== 0) return;
@@ -125,17 +135,17 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
     handle.onpointermove = event => {
       if (!viewDrag) return;
       const maximum = Math.max(240, workspace.clientWidth - 320);
-      if (kind !== "height" && innerWidth >= 760) notebookWidth = Math.max(240, Math.min(maximum, viewDrag.width + (event.clientX - viewDrag.x) * (kind === "corner" ? -1 : 1)));
-      if (kind !== "width") previewHeight = Math.max(300, Math.min(1200, viewDrag.height + event.clientY - viewDrag.y));
+      if (kind !== "height" && innerWidth >= 760) notebookWidth = Math.max(240, Math.min(maximum, viewDrag.width + (event.clientX - viewDrag.x) * (kind === "corner" || layout !== "guided-v2" ? -1 : 1)));
+      if (kind !== "width") previewHeight = Math.max(innerWidth < 760 ? 200 : 300, Math.min(1200, viewDrag.height + event.clientY - viewDrag.y));
       setViewSize();
     };
-    handle.onpointerup = () => { viewDrag = undefined; status("Preview area resized. Your game size and element changes are kept."); };
+    handle.onpointerup = () => { if (!viewDrag) return; viewDrag = undefined; status("Preview area resized. Your game size and element changes are kept."); };
     handle.onpointercancel = () => cancelViewResize();
     handle.onkeydown = event => {
       if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
       event.preventDefault(); const amount = event.shiftKey ? 40 : 10;
-      if (kind !== "height" && innerWidth >= 760 && ["ArrowLeft", "ArrowRight"].includes(event.key)) notebookWidth = Math.max(240, Math.min(Math.max(240, workspace.clientWidth - 320), notebookWidth + (event.key === "ArrowLeft" ? -amount : amount) * (kind === "corner" ? -1 : 1)));
-      if (kind !== "width" && ["ArrowUp", "ArrowDown"].includes(event.key)) previewHeight = Math.max(300, Math.min(1200, previewHeight + (event.key === "ArrowUp" ? -amount : amount)));
+      if (kind !== "height" && innerWidth >= 760 && ["ArrowLeft", "ArrowRight"].includes(event.key)) notebookWidth = Math.max(240, Math.min(Math.max(240, workspace.clientWidth - 320), notebookWidth + (event.key === "ArrowLeft" ? -amount : amount) * (kind === "corner" || layout !== "guided-v2" ? -1 : 1)));
+      if (kind !== "width" && ["ArrowUp", "ArrowDown"].includes(event.key)) previewHeight = Math.max(innerWidth < 760 ? 200 : 300, Math.min(1200, previewHeight + (event.key === "ArrowUp" ? -amount : amount)));
       setViewSize(); status("Preview area resized. Game size is unchanged.");
     };
     return handle;
@@ -157,7 +167,7 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
   }
 
   function saveHistory() { history.push(copy(screens)); future.length = 0; }
-  function choose(id: string) { selected = id; render(); }
+  function choose(id: string, browse = false) { selected = id; if (!browse) { if (layout !== "guided-v2" && step !== "behavior") step = "layout"; view?.select(); } render(); }
   function dialog(title: string, text: string) {
     const d = el("dialog", "lp-dialog sc-dialog"); d.ariaLabel = title;
     d.append(el("h2", "", title), el("p", "", text)); d.onclose = () => d.remove(); frame.shell.append(d); return d;
@@ -183,19 +193,25 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
     workspace.dataset.step = step;
     tabs.querySelectorAll("button").forEach((button, index) => button.ariaPressed = String(["compose", "layout", "behavior"][index] === step));
     renderTree(); renderCanvas(); renderInspector(); renderInfo();
+    const n = target(); if (n) view?.update({ name: n.name, kind: kindName(n.kind), parent: current().nodes.find(p => p.id === n.parent)?.name ?? "", step, button: ["textbutton", "imagebutton"].includes(n.kind) });
   }
   function renderTree() {
-    hierarchy.replaceChildren(el("h2", "", layout === "guided" ? "Elements" : "Elements"));
+    const heading = el("h2", "nb-elements-heading", "Elements");
+    heading.append(helpTip("elements", "Elements are the text, images, buttons and groups that make up a screen. Select one here or in the preview to edit it. Groups keep related items together.")); hierarchy.replaceChildren(heading);
     if (context.state === "empty" && !screens.some(s => !s.template)) hierarchy.append(el("p", "muted", "Create your first screen with a Help example or a blank page."), action("Create first Help screen", newScreen, true));
     const tree = el("div", "sc-tree"); tree.role = "tree"; tree.ariaLabel = "Screen elements";
-    orderedNodes().forEach(n => {
+    const elements = orderedNodes();
+    if (layout === "flow") elements.sort((a, b) => Number(current().nodes.some(n => n.parent === a.id)) - Number(current().nodes.some(n => n.parent === b.id)));
+    elements.forEach(n => {
       const b = action(`${n.name} · ${kindName(n.kind)}`, () => choose(n.id)); b.role = "treeitem"; b.ariaSelected = String(selected === n.id); b.dataset.nodeId = n.id;
       b.className = `sc-tree-node${selected === n.id ? " selected" : ""}`;
+      if (layout === "flow") b.prepend(icon(["image", "imagebutton"].includes(n.kind) ? "assets" : ["text", "textbutton"].includes(n.kind) ? "lorebook" : "panel"));
+      explain(b, `${kindName(n.kind)}. ${elementHelp[n.kind] ?? "An element on this screen."}`);
       b.style.paddingLeft = `${10 + (n.parent === "stack" ? 24 : n.parent === "frame" ? 16 : n.parent ? 8 : 0)}px`;
       b.onkeydown = e => {
-        const ordered = orderedNodes(), index = ordered.findIndex(x => x.id === selected);
-        if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); choose(ordered[Math.max(0, Math.min(ordered.length - 1, index + (e.key === "ArrowDown" ? 1 : -1)))]!.id); hierarchy.querySelector<HTMLElement>(`[data-node-id="${selected}"]`)?.focus(); }
-        if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const next = e.key === "ArrowLeft" ? target()?.parent : current().nodes.find(n => n.parent === selected)?.id; if (next) choose(next); hierarchy.querySelector<HTMLElement>(`[data-node-id="${selected}"]`)?.focus(); }
+        const ordered = elements, index = ordered.findIndex(x => x.id === selected);
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); choose(ordered[Math.max(0, Math.min(ordered.length - 1, index + (e.key === "ArrowDown" ? 1 : -1)))]!.id, true); hierarchy.querySelector<HTMLElement>(`[data-node-id="${selected}"]`)?.focus(); }
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const next = e.key === "ArrowLeft" ? target()?.parent : current().nodes.find(n => n.parent === selected)?.id; if (next) choose(next, true); hierarchy.querySelector<HTMLElement>(`[data-node-id="${selected}"]`)?.focus(); }
       }; tree.append(b);
     }); hierarchy.append(tree);
     const addKind = select(kinds.map(kind => [kind, kindName(kind)]), "text"); addKind.ariaLabel = "Element type";
@@ -203,9 +219,13 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
       saveHistory(); const n = node(`node-${++sequence}`, addKind.value, `New ${kindName(addKind.value).toLowerCase()}`, 344, 360, 300, 48);
       n.parent = current().nodes.some(n => n.id === "stack") ? "stack" : "root"; n.shared = n.kind === "component";
       if (n.kind === "textbutton" || n.kind === "imagebutton") n.actions = [{ kind: current().mode === "panel" ? "hide" : "finish", variable: "help_seen", value: "true" }];
-      current().nodes.push(n); current().revision++; selected = n.id; render(); status("Element added.");
+      current().nodes.push(n); current().revision++; selected = n.id; if (layout !== "guided-v2") { step = "layout"; view?.select(); } render(); status("Element added.");
     }); add.disabled = current().template;
-    hierarchy.append(labelled("Add element type", addKind), add);
+    const addField = labelled("Add element type", addKind);
+    addField.querySelector(".lp-label")!.append(helpTip("element type", () => `${kindName(addKind.value)}. ${elementHelp[addKind.value]}`));
+    const addDescription = el("p", "muted nb-element-description", elementHelp[addKind.value]);
+    addKind.onchange = () => { closeHelp?.(); addDescription.textContent = elementHelp[addKind.value]!; };
+    hierarchy.append(addField, addDescription, add);
     const moves = el("div", "sc-actions nb-order");
     const orderHeading = el("h3", "", "Front & back");
     orderHeading.append(helpTip("front and back order", "Select an element, then use Bring forward or Send backward. Later items in the same group cover earlier ones. A group and all its contents move together. In a vertical, horizontal or grid group, these buttons change item order instead."));
@@ -225,11 +245,11 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
   function renderCanvas() {
     canvasObserver?.disconnect();
     stage.replaceChildren(); playground.replaceChildren();
-    const toolbar = el("div", "sc-canvas-toolbar"); toolbar.append(el("h2", "", layout === "canvas" ? "Game preview" : "Game preview"));
+    const toolbar = el("div", "sc-canvas-toolbar"); toolbar.append(el("h2", "", "Game preview"));
     const ratio = select(pairs(["1280 × 720", "960 × 720"]), aspect); ratio.ariaLabel = "Game size"; ratio.onchange = () => { aspect = ratio.value; renderCanvas(); renderInfo(); };
     const zoomInput = select(pairs(["Fit", "75%", "100%"]), zoom); zoomInput.ariaLabel = "Zoom"; zoomInput.onchange = () => { zoom = zoomInput.value; renderCanvas(); renderInfo(); };
     const focus = action(focusPreview ? "Back to editing" : "Focus preview", () => { focusPreview = !focusPreview; setViewSize(); renderCanvas(); stage.querySelector<HTMLButtonElement>(".nb-focus-button")?.focus(); }); focus.classList.add("nb-focus-button"); focus.ariaPressed = String(focusPreview);
-    toolbar.append(ratio, zoomInput, focus, helpTip("preview size", "Drag the left border to make the preview wider, or the bottom border to make it taller. The corner changes both. Use the arrow keys when a border is focused. Escape cancels a drag. Game size changes separately in the Game size menu.")); stage.append(toolbar);
+    toolbar.append(ratio, zoomInput, focus, helpTip("preview size", "Drag the divider toward the editing panel for a wider preview, or the bottom border for a taller preview. The corner changes both. Use arrow keys when a border is focused. Escape cancels a drag. Game size changes separately in its menu.")); stage.append(toolbar);
     const note = el("p", "sc-canvas-caption", "Click an element to edit it. Buttons in this preview do not run game actions."); stage.append(note);
     const scroll = el("div", "sc-canvas-scroll"), canvas = el("div", "sc-game"); canvas.ariaLabel = "Game preview";
     canvas.style.aspectRatio = aspect === "1280 × 720" ? "16 / 9" : "4 / 3";
@@ -284,7 +304,7 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
     sampleControls.append(labelled("Button state", appearanceInput));
     variables.forEach(v => { const input = el("input"); input.value = sample[v.id as keyof typeof sample]; input.ariaLabel = `Try ${v.id}`; input.onchange = () => { if ((v.type === "int" && !/^-?\d+$/.test(input.value)) || (v.type === "bool" && !["true", "false"].includes(input.value))) { status(`Enter a ${valueType(v.type).toLowerCase()} value.`, true); return; } sample[v.id as keyof typeof sample] = input.value; renderCanvas(); renderInfo(); }; sampleControls.append(labelled(`${v.id} (${valueType(v.type)})`, input)); });
     sampleControls.append(el("p", "muted", "These values only change this preview. Your game variables are unchanged.")); playground.append(sampleControls);
-    const journey = el("details", "sc-story"); journey.open = storyExpanded || layout === "guided" && step === "behavior"; journey.ontoggle = () => { if (journey.isConnected) storyExpanded = journey.open; }; journey.append(el("summary", "", "Try it in the story"));
+    const journey = el("details", "sc-story"); journey.open = storyExpanded || step === "behavior"; journey.ontoggle = () => { if (journey.isConnected) storyExpanded = journey.open; }; journey.append(el("summary", "", "Try it in the story"));
     const storyButtons = el("div", "sc-actions");
     storyButtons.append(action("Show overlay", () => { if (current().mode === "blocking") { status("This screen pauses the story. Choose Open dialog.", true); return; } storyVisible = true; storyWaiting = false; output = "The overlay is open. You can continue the story."; renderCanvas(); }), action("Hide overlay", () => { if (current().mode === "blocking") { status("Use Close dialog to return to the story.", true); return; } storyVisible = false; output = "The overlay is closed."; renderCanvas(); }), action("Open dialog", () => { if (current().mode !== "blocking") { status("Choose Help dialog above to try a screen that pauses the story.", true); return; } storyVisible = true; storyWaiting = true; output = "The dialog is open. Close it to continue the story."; renderCanvas(); }), action("Next line", () => { output = storyWaiting ? "Close the dialog before continuing." : storyVisible ? "Ada keeps speaking. The overlay stays open." : "Ada continues speaking."; renderCanvas(); }));
     const dismiss = () => { if (!storyVisible) { output = "The screen is already closed."; renderCanvas(); return; } storyVisible = false; if (storyWaiting) { storyWaiting = false; continuations++; } output = `Screen closed. The story has continued ${continuations} ${continuations === 1 ? "time" : "times"}.`; renderCanvas(); };
@@ -304,7 +324,7 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
     const state = el("p", "sc-draft-status"); state.textContent = changed() ? "Unapplied changes" : "No pending changes"; inspector.append(state);
     if (current().template) inspector.append(el("p", "sc-protected", "You can change the look of this game screen. Its required text and controls stay in place so it keeps working."));
     const applyBar = el("div", "sc-apply"); applyBar.append(action("Apply changes", () => applyDraft()), action("Cancel changes", () => { drafts.delete(key()); renderInspector(); renderInfo(); status("Changes cancelled. Previous values restored."); })); inspector.append(applyBar);
-    const group = (title: string, opened = false) => { const details = el("details", "sc-property-group"); details.open = opened; details.append(el("summary", "", title)); inspector.append(details);
+    const group = (title: string, opened = false) => { const details = el("details", "sc-property-group"); details.dataset.group = title; details.open = opened; details.append(el("summary", "", title)); inspector.append(details);
       const explanations: Record<string, string> = {
         "Position & size": "Position sets where an element sits. An anchor chooses which point on the element meets that position. Use 0 for the start, 0.5 for the center, and 1 for the end. Fractional positions use the game width and height; 0.5 is halfway.",
         "Reuse this look": "A shared look keeps matching elements consistent across screens. Apply shows which screens will change. Choose a separate look to change only this element.",
@@ -335,7 +355,7 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
     if (["text", "textbutton", "component"].includes(d.kind)) { input(content, "Text", "text", "textarea", current().template); content.append(el("p", "muted", "Use [destination], [courage] or [help_seen] to display an existing variable.")); }
     if (["image", "imagebutton"].includes(d.kind)) { choice(content, "Image", "asset", pairs(["tram-map.webp", "help-symbol.png", "paper-panel.jpg"])); check(content, "Keep image proportions", "aspect"); content.append(el("p", "muted", "This demo uses the same map drawing for every image. Your choice is kept when you apply it.")); }
     content.append(action("Choose a font or image", () => { const modal = dialog("Project fonts and images", "Choose a font or image from your project. This demo only includes the example files listed below."); modal.append(el("p", "", "NotoSans-Regular.ttf · NotoSerif-Regular.otf · tram-map.webp · help-symbol.png"), action("Use this image", () => { d.asset = "help-symbol.png"; modal.close(); renderInspector(); status("Image selected. Choose Apply changes to keep it."); }), action("Close file picker", () => modal.close())); modal.showModal(); }));
-    const position = group("Position & size", layout !== "guided" || step === "layout");
+    const position = group("Position & size", layout === "guided-v2" && step === "layout");
     const containers = current().nodes.filter(n => n.id !== d.id && ["fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"].includes(n.kind));
     if (d.parent) choice(position, "Inside group", "parent", containers.map(n => [n.id, `${n.name} (${kindName(n.kind)})`])).disabled = current().template;
     choice(position, "Position units", "coordinates", [["px", "Pixels"], ["relative", "Fraction of game size (0 to 1)"]]);
@@ -418,7 +438,11 @@ function mountNotebook(host: HTMLElement, context: LabContext, layout: Layout) {
     if (focusPreview) { event.preventDefault(); focusPreview = false; setViewSize(); renderCanvas(); stage.querySelector<HTMLButtonElement>(".nb-focus-button")?.focus(); }
   };
   document.addEventListener("keydown", escape); render();
+  if (innerWidth < 760 && layout !== "guided-v2") {
+    previewHeight = Math.max(200, frame.content.getBoundingClientRect().bottom - stage.getBoundingClientRect().top);
+    setViewSize();
+  }
   return () => { document.removeEventListener("keydown", escape); canvasObserver?.disconnect(); closeHelp?.(); cleanupSwitcher(); };
 }
 
-export const mount = (host: HTMLElement, context: LabContext) => mountNotebook(host, context, "guided");
+export const mount = (host: HTMLElement, context: LabContext) => mountScreenDemo(host, context, "guided-v2");
