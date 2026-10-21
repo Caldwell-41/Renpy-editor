@@ -11,11 +11,12 @@ ARM64, including the 720×360 panel and exactly one continuation after Close.
 No CI is pending.
 
 The three-layout [Screens prototype](../design/design-lab-screens/README.md) exists
-in the Design Lab. State `blocked`: both local combined runs rendered 508 cases,
-but the final Screens interaction journey timed out on the switcher button lookup.
-Its explicit accessible-label correction is unverified. The
+in the Design Lab. State `blocked`: local9 rendered 508 cases but stopped on an
+empty action-row text assertion. Its focused visibility-check correction is saved
+and unverified. The
 [task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
-retains failures and exhausted local8/8 use; further verification needs a new user
+retains failures and exhausted local9/9 use after the approved one-batch extension;
+further browser verification needs a new user
 selection. The prototype is not review-ready. All approval entries remain null;
 layout selection and recorded approval precede live Screens implementation.
 

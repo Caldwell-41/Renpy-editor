@@ -79,7 +79,8 @@ No layout is selected and no prototype code is promoted. Draft identities are
 gate was separately audited at `0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run
 `39555526201`. That proof preceded this prototype and does not qualify its controls.
 
-The selected local allowance is exhausted at 8/8. No overall combined check passed.
+The selected local allowance is exhausted at 9/9 after the user's one-batch
+extension. No overall combined check passed.
 The remaining work needs a user-selected verification allowance before another check.
 
 - Batch 7 TypeScript module checking passed. The targeted Screens runner could not reach
@@ -97,12 +98,25 @@ The remaining work needs a user-selected verification allowance before another c
   and Screen notebook interaction journeys remain unproved. The final report is
   `.toolchains/design-lab/report.json`; the 12 Screens captures use
   `screens-<variant>-<theme>-<viewport>.png` in that directory.
+- The user approved one further batch. Batch 9 again passes TypeScript,
+  approval/source checks, 508 rendering cases and 13 earlier interaction groups.
+  Screens stops on an empty first action-row `innerText()` at `check.mjs:82`.
+  The failure does not report its active variant, so no completed per-layout
+  journey is inferred. The report and 12 captures remain under
+  `.toolchains/phase3b/prototype-batch-09/`. Shared integration/build-isolation checks
+  remain incomplete.
 
 Static review suggests the CSS arrow contributed to the switcher button's accessible
-name. The buttons now have explicit Previous prototype layout and Next prototype layout
-ARIA labels. This is an unverified correction and a cause hypothesis, not a passing
-result. No browser check or interaction ran after the correction. The current code therefore
-differs from the candidate used for the batch 8 evidence.
+name. The buttons have explicit Previous prototype layout and Next prototype layout
+ARIA labels; batch 9 includes that correction but does not complete the module.
+
+The current static hypothesis is that `content-visibility: auto` skips an offscreen
+notebook property group after Add action rebuilds the inspector. The check previously
+read the action row immediately. It now scrolls each asserted row into view, waits
+for nonempty rendered text and includes the layout in the assertion message. Typed
+assignment and last-Finish expectations are unchanged. This check correction remains
+unverified, and no product rendering/action code changed. No browser check or
+interaction ran after it. Current source differs from the batch 9 candidate.
 
 The next selected verification must establish the corrected switcher names, finish all
 three Screens interaction journeys, complete the existing combined lab checks and review

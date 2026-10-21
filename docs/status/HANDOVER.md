@@ -18,19 +18,21 @@ No CI is pending. Later prototype/docs commits do not become this SDK candidate.
 
 The designated agent used the prototype skill's UI branch to build three
 [unapproved Screens layouts](../design/design-lab-screens/README.md). All agents have
-finished. Both combined runs rendered 508 cases; the last Screens journey stopped
-on its Next button lookup. Explicit accessible labels are added but unverified.
-Prototype candidate `8e2aacb` is published and verified on the remote branch.
+finished. Local9 consumed the approved one-batch extension, rendered 508 cases and
+passed the 13 earlier groups. Screens stopped on an empty action-row `innerText`
+assertion. The focused check now scrolls the row into view before reading; this
+correction is unverified. No product rendering/action code changed. The task owns
+the published candidate identity and static visibility hypothesis.
 The prototype is not review-ready; the task's
 [candidate boundary](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
-owns exact remaining proof and source identity. Batch7/8 reports and all 12 captures
-are ignored under `.toolchains/phase3b/prototype-batch-07/` and `prototype-batch-08/`.
-No browser interaction ran after the label correction.
+owns exact remaining proof and source identity. Batch7/8/9 reports and 12 captures
+per run are ignored under `.toolchains/phase3b/prototype-batch-<number>/`.
+No browser interaction ran after the action-row check correction.
 
-Cumulative use is local8/8, preview4/4, CI1/2, review1/1 and follow-up1/1. Further
+Cumulative use is local9/9, preview4/4, CI1/2, review1/1 and follow-up1/1. Further
 verification needs a new user selection in this thread; no retry is authorized.
-The proposed next batch completes all three focused journeys, the combined lab
-checks and documentation validation, with no new CI, SDK or native operation.
+The proposed continuation uses one focused Screens cycle before one combined lab
+cycle, plus documentation validation. It grants no new CI, SDK or native operation.
 Explicit layout selection and recorded approval still precede live implementation.
 The lab server was stopped during checks; use the Design Lab README to restart it
 for inspection. Preserve the protected native draft and recovery below.

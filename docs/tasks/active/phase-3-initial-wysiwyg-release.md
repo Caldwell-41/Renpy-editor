@@ -12,9 +12,11 @@ milestone acceptance is implied.
 
 ### Selected early outcome and cumulative allowance
 
-State `blocked` on exhausted local verification allowance. The source/runtime proof
-passes; the prototype interaction check remains incomplete after local8. Use the
-current Mac development host; obtain affected Windows
+State `blocked`. The user approved one additional local verification batch on
+2026-10-21 after the original eight were consumed. The source/runtime proof passes;
+local9 failed on an action-row text assertion. Its focused check correction is
+saved but unverified. Use
+the current Mac development host; obtain affected Windows
 x64/macOS ARM64 proof through focused CI. Deliver one nested-screen source/runtime
 proof, then a three-layout Screens prototype ready for user selection. The parent
 owns source/runtime integration, the designated prototype agent must use the
@@ -22,8 +24,9 @@ prototype skill, and a separate agent independently reviews the source/runtime
 change. Live workspace implementation follows explicit design selection.
 
 The user authorized committing and pushing `codex/phase3b-screen-designer` for
-selected checks and recovery. Maximum cumulative use is eight local verification
-batches, four local Ren'Py preview launches, two focused CI dispatches including
+selected checks and recovery. Maximum cumulative use is now nine local verification
+batches, including the one-batch extension, four local Ren'Py preview launches,
+two focused CI dispatches including
 retries, one independent review and one follow-up review of fixes. The execution
 ledger owns cumulative use. Preparation and focused repairs share those limits;
 failed/cancelled attempts remain charged. Reassess after two
@@ -39,10 +42,11 @@ Only after that proof does the prototype agent implement the Design Lab comparis
 
 ### Early execution ledger
 
-Current use is local8/8, preview4/4, CI1/2,
+Current use is local9/9, preview4/4, CI1/2,
 review1/1 and follow-up1/1 complete. CI1's terminal audit below passes the early
-source/runtime gate. No further verification attempt is selected. The prototype
-candidate and remaining check are recorded below.
+source/runtime gate. Local9 consumed the one-batch extension. The prototype's
+interaction/integration proof remains incomplete; no additional browser attempt
+is selected. No SDK, native, package, CI or independent-review allowance was renewed.
 
 - Local1 compiled the new source service and ran three cases. Two passed; the third
   stopped on a harness assertion expecting `SOURCE_DRAFT_DIRTY` instead of the
@@ -111,6 +115,27 @@ candidate and remaining check are recorded below.
   local batches are consumed; no additional browser probe or retry was run.
   Closure documentation validation passes for 785 repository files, with privacy,
   link and whitespace checks. Those metadata checks do not qualify the label fix.
+- The user replied "Approved" to one additional browser verification batch after
+  local8. Local9 again passes TypeScript, approval/source checks, all 508 rendering
+  cases and the 13 earlier interaction groups. Screens stops at `check.mjs:82`
+  because its first action-row `innerText()` is empty, rather than the expected
+  typed assignment. The check does not record the active variant, so no individual
+  layout's completed journey is inferred from this failure. The remaining Screens
+  and shared integration/build-isolation groups are incomplete. No combined pass
+  is claimed.
+  Preserve `.toolchains/phase3b/prototype-batch-09/` and its sibling command log.
+  The incident index has no matching content-visibility entry. Static review finds
+  that the notebook inspector uses `content-visibility: auto`; adding an action
+  rebuilds that inspector, after which the test reads row text without scrolling
+  it into view. This is the current harness-visibility hypothesis, not a confirmed
+  diagnosis. The focused check now scrolls each asserted row into view, waits for
+  nonempty rendered text and includes the variant in those assertion messages.
+  Assignment and finish-order expectations remain unchanged. This correction has
+  no new browser evidence, and no product rendering/action code changed.
+  All 12 retained Screens captures have identical SHA256 values to the visually
+  reviewed local8 captures, so that appearance review is reused. Closure repository
+  validation passes for 785 files, plus whitespace checks. This is metadata proof,
+  not a passing browser check of the latest correction.
 
 ### First focused CI run and manual continuation
 
@@ -189,23 +214,25 @@ Published candidate `8e2aacb5a6d4ecc22003685e63c8d2b756dcb442`, tree
 `6492d40e241a54a1f6c72ffd4ba4b46e0c8f1f0d`, is verified at the remote branch.
 `design:source` records fingerprint
 `058e6b09bf687c4fe0ba7651b405692117f6d47f943d4ab70541fa1feb45846e`.
-This identity includes the unverified explicit-label correction. It preserves a
-reproducible candidate; it is not a passing verification or approval record.
+This identity includes the explicit-label correction tested in local9. The latest
+focused check correction follows it; its source identity is recorded at publication.
+Neither candidate is a passing verification or approval record.
 Documentation-only successors preserve that distinction and the earlier SDK candidate.
 
 The floating switcher uses `?variant=` and protects edited samples before reset.
-Its explicit accessible-name correction remains unverified. All three approval
-entries remain null. The prototype is available for inspection, but its required
+Local9 stops at an action-text assertion. All three approval entries remain null.
+The prototype is available for inspection, but its required
 interaction/integration checks have not passed, so it is not `review_ready`.
 Source/runtime support remains limited to the earlier qualified proof; browser
 imports, source edits, sharing, Story controls and previews use memory only.
 
-Continuation needs the user to select one additional local verification batch for
-the switcher correction, all three focused journeys and the combined lab checks.
-That proposed batch includes documentation validation; it requires no new SDK,
-Ren'Py launch, native app, package or CI operation. Preserve earlier failures and
-all cumulative counts. Design selection and recorded approval still precede live
-Screens implementation.
+Local9 consumed the extension approved on 2026-10-21. Further browser verification
+needs another user selection. The proposed continuation is bounded to one focused
+Screens cycle and one combined lab cycle, with documentation validation. Run the
+focused journeys first so a failure is diagnosed before repeating the full matrix.
+It requires no new SDK, Ren'Py launch, native app, package or CI operation. Preserve
+earlier failures and all cumulative counts. Design selection and recorded approval
+still precede live Screens implementation.
 
 ### Agreed 3B design from the grilling session
 

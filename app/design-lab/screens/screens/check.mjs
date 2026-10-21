@@ -8,6 +8,11 @@ export default async function check({ page, open }) {
     await details.evaluate(node => node.open = true);
   };
   const story = async () => page.locator(".sc-story").evaluate(node => node.open = true);
+  const visibleActionText = async row => {
+    await row.scrollIntoViewIfNeeded();
+    await page.waitForFunction(node => node.innerText.trim().length > 0, await row.elementHandle());
+    return row.innerText();
+  };
   for (const variant of ["workbench", "canvas", "guided"]) {
     await page.setViewportSize({ width: 1100, height: 720 });
     await open({ variant });
@@ -79,8 +84,8 @@ export default async function check({ page, open }) {
     assert.match(await page.locator(".sc-story-status").innerText(), /Continuations 1/);
     await tree("close").click();
     await page.getByRole("button", { name: "Add action", exact: true }).click();
-    assert.match(await page.locator(".sc-action-row").first().innerText(), /Set help_seen = true/);
-    assert.match(await page.locator(".sc-action-row").last().innerText(), /Finish interaction/);
+    assert.match(await visibleActionText(page.locator(".sc-action-row").first()), /Set help_seen = true/, `${variant}: first visible action assigns the variable`);
+    assert.match(await visibleActionText(page.locator(".sc-action-row").last()), /Finish interaction/, `${variant}: last visible action finishes interaction`);
     await page.getByRole("button", { name: "Move action 2 up", exact: true }).click();
     assert.match(await page.getByRole("alert").innerText(), /must stay last/);
     await page.getByRole("button", { name: "Cancel properties", exact: true }).click();
