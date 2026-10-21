@@ -29,6 +29,8 @@ report, images and review receipt with the sibling log. Preserve all earlier
 and diagnostic receipts. Validation passes for792 repository files and whitespace.
 Final use is copy local6/7; the unused repair cycle is closed. Earlier refresh5/6,
 refinement4/4 and early11/11 stay closed. No verification, repair or CI is pending.
+The verified candidate is local commit `9891533`; the task owns its full commit,
+tree and source fingerprint. Later documentation receipts preserve that identity.
 
 Next is user review of Screen builder. Keep work local. The earlier automatic push
 review rejected publication without explicit payload/destination permission;

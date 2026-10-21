@@ -73,6 +73,13 @@ six editing images and review receipt under `.toolchains/phase3b/copy-combined-0
 with its sibling command log. Validation passes for 792 repository files and
 whitespace checks. Browser samples remain fictional and reset on reload.
 
+The verified candidate is local commit
+`989153326381002b5db02b30c9e235a79e1002f6`, tree
+`436cb087914755c41f237506b8a654cdf0d6ae01`. With source files clean,
+`npm run design:source` returns fingerprint
+`9ec7efc3d784f8bb4ad9cb68232f0d333d12d0baa8ec53ec5f6e9a366b858975`.
+Later documentation receipts preserve this identity. No publication is claimed.
+
 ## Screens research and three-candidate refresh — 2026-10-21
 
 State `review_ready`. The user requests element tooltips, retaining the revised
