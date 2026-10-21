@@ -740,6 +740,11 @@ impl LifecycleService {
         let (authority, _) = self.authoring_context()?;
         self.authoring.screens_set_pixel(&authority, request).map_err(LifecycleError::Scene)
     }
+    pub fn screens_set_size(&self, request: crate::screens::SetSizeRequest) -> Result<crate::screens::Document, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring.screens_set_size(&authority, request).map_err(LifecycleError::Scene)
+    }
+
 
     pub fn scene_recovery(&self) -> Result<crate::transaction::RecoveryReport, LifecycleError> {
         let (authority, _) = self.authoring_context()?;

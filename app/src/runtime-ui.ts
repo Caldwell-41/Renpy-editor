@@ -1,6 +1,6 @@
 import type { CoreOperation } from "./protocol.js";
 import type { SourceTarget, SourceWorkspaceController } from "./source-ui.js";
-import { awaitRuntimeRequest, prepareRuntimeInput, type RuntimeKind, type RuntimePreparation, type RuntimeRevisionChoice, type RuntimeTicket } from "./runtime-preparation.js";
+import { awaitRuntimeRequest, prepareRuntimeInput, type RuntimeKind, type RuntimePreparation, type RuntimeRevisionChoice, type RuntimeTicket, type ScreenPreview } from "./runtime-preparation.js";
 
 export interface RuntimeStatus {
   operationId: string; phase: string; exitCode: number | null; output: string;
@@ -101,15 +101,16 @@ export class RuntimeWorkspace {
     this.stop.disabled = !this.active(); this.revoke.disabled = this.inspect.disabled = !this.trust;
   }
   private fail(error: unknown): void { if (this.current()) this.notice.textContent = `Runtime action failed: ${error instanceof Error ? error.message : String(error)}`; }
-  private begin(kind: RuntimeKind): void {
+  previewScreen(preview: ScreenPreview, validate = false): void { this.begin(validate ? "validate" : "run", preview); }
+  private begin(kind: RuntimeKind, preview?: ScreenPreview): void {
     this.panel.hidden = false;
     if (this.active() || document.querySelector('[aria-modal="true"]')) return;
     this.notice.textContent = "";
     this.abort = new AbortController();
-    this.pending = this.execute(kind).catch(error => this.fail(error)).finally(() => { this.pending = undefined; this.controls(); });
+    this.pending = this.execute(kind, preview).catch(error => this.fail(error)).finally(() => { this.pending = undefined; this.controls(); });
     this.controls();
   }
-  private async execute(kind: RuntimeKind): Promise<void> {
+  private async execute(kind: RuntimeKind, preview?: ScreenPreview): Promise<void> {
     const capture = this.actions.capture(); const signal = this.abort!.signal;
     const current = () => this.current() && capture.current() && !signal.aborted;
     this.status.textContent = "Preparing — checking revision and execution consent.";
@@ -132,7 +133,7 @@ export class RuntimeWorkspace {
           `${input.sourceDrafts} Source draft(s); ${input.pendingScene ? "pending Scene form" : "no pending Scene form"}. Use saved revision excludes drafts and retains input. Cancel writes nothing.`,
           [...(input.pendingScene ? [{ label: "Return to Scene Commit", value: "commitScene" as const }] : [{ label: "Save All and continue", value: "saveAll" as const }]),
             { label: "Use saved revision", value: "saved" }, { label: "Cancel", value: "cancel" }], "cancel"),
-      });
+      }, preview);
       this.preparation = preparation;
       if (!preparation || !current()) return;
       const inspection = preparation as Inspection; let trustId = preparation.trustId;

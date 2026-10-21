@@ -70,13 +70,14 @@ pub(crate) struct RuntimeProcess {
 }
 
 impl RuntimeProcess {
-    pub(crate) fn start(
-        sdk: ValidatedSdk,
-        anchor: DirectoryAnchor,
-        kind: RuntimeKind,
-        gate: Arc<ExecutionGate>,
-        manifest: crate::transaction::ExecutionManifest,
+    pub(crate) fn start_preview(
+        sdk: ValidatedSdk, anchor: DirectoryAnchor, kind: RuntimeKind,
+        gate: Arc<ExecutionGate>, manifest: crate::transaction::ExecutionManifest,
+        scratch: Option<crate::scratch_preview::ScratchPreview>,
     ) -> Result<Self, RenpyError> {
+        let source_manifest = manifest;
+        let (anchor, manifest) = scratch.as_ref().map(|s| (s.anchor.clone(), s.manifest.clone()))
+            .unwrap_or((anchor, source_manifest.clone()));
         sdk.revalidate(false)?;
         anchor
             .validate_chain()
@@ -111,15 +112,18 @@ impl RuntimeProcess {
                 command.args(&argv[1..]).current_dir(anchor.path());
                 #[cfg(test)]
                 {
-                    command
-                        .env("RENPY_SKIP_MAIN_MENU", "1")
-                        .env("RENPY_DISABLE_SOUND", "1");
+                    if scratch.is_none() { command.env("RENPY_SKIP_MAIN_MENU", "1"); }
+                    command.env("RENPY_DISABLE_SOUND", "1");
                     if std::env::var("LOOMLIGHT_RUNTIME_TEST_HEADLESS").as_deref() == Ok("1") {
                         command
                             .env("SDL_VIDEODRIVER", "dummy")
                             .env("SDL_AUDIODRIVER", "dummy")
                             .env("RENPY_RENDERER", "sw");
                     }
+                }
+                if scratch.is_some() {
+                    // Enter the ordinary game context before the generated start helper.
+                    command.env("RENPY_SKIP_MAIN_MENU", "1").env("RENPY_SKIP_SPLASHSCREEN", "1");
                 }
                 // Only the exact reviewed project helper uses this; it is not an SDK flag.
                 if kind == RuntimeKind::Run {
@@ -128,16 +132,21 @@ impl RuntimeProcess {
                 Ok(command)
             })
             .collect::<Result<Vec<_>, RenpyError>>()?;
-        Self::spawn_commands(
+        let mut process = Self::spawn_commands_owned(
             commands,
             Some((sdk, anchor, manifest)),
             kind,
             gate,
             VALIDATION_DEADLINE,
             kind == RuntimeKind::Run,
-        )
+            scratch,
+        )?;
+        process.manifest = Arc::new(source_manifest.clone());
+        process.launch_revision = Some(format!("{:x}", Sha256::digest(serde_json::to_vec(&source_manifest).unwrap_or_default())));
+        Ok(process)
     }
 
+    #[cfg(test)]
     fn spawn_commands(
         commands: Vec<Command>,
         context: Option<(
@@ -149,6 +158,14 @@ impl RuntimeProcess {
         gate: Arc<ExecutionGate>,
         validation_deadline: Duration,
         readiness_required: bool,
+    ) -> Result<Self, RenpyError> {
+        Self::spawn_commands_owned(commands, context, kind, gate, validation_deadline, readiness_required, None)
+    }
+    fn spawn_commands_owned(
+        commands: Vec<Command>,
+        context: Option<(ValidatedSdk, DirectoryAnchor, crate::transaction::ExecutionManifest)>,
+        kind: RuntimeKind, gate: Arc<ExecutionGate>, validation_deadline: Duration,
+        readiness_required: bool, mut scratch: Option<crate::scratch_preview::ScratchPreview>,
     ) -> Result<Self, RenpyError> {
         let manifest = context
             .as_ref()
@@ -307,6 +324,14 @@ impl RuntimeProcess {
                     // Cleanup must never wait for filesystem freshness work. The next
                     // preparation performs the full inventory; until then freshness is
                     // conservatively stale, including unknown SDK-generated output.
+                    if cleanup_ok {
+                        if let Some(scratch) = scratch.as_mut() { cleanup_ok = scratch.cleanup(); }
+                        if !cleanup_ok { outcome = "cleanupFailed"; }
+                    }
+                    if !cleanup_ok {
+                        // A child may still own these files. Retain the job for recovery.
+                        if let Some(scratch) = scratch.take() { std::mem::forget(scratch); }
+                    }
                     let stale = context.as_ref().map(|_| true);
                     if let Ok(mut state) = worker_observation.lock() {
                         state.stale = stale;

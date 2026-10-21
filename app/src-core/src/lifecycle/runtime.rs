@@ -41,6 +41,8 @@ pub struct PrepareRequest {
     pub kind: RuntimeKind,
     pub revision_choice: RevisionChoice,
     pub sdk_id: String,
+    #[serde(default)]
+    pub preview: Option<crate::scratch_preview::PreviewPurpose>,
 }
 #[derive(Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -93,6 +95,7 @@ struct Preparation {
     sdk_manifest: ExecutionManifest,
     manifest: ExecutionManifest,
     gate: Option<Arc<ExecutionGate>>,
+    scratch: Option<crate::scratch_preview::ScratchPreview>,
 }
 impl Drop for Preparation {
     fn drop(&mut self) {
@@ -278,7 +281,7 @@ impl LifecycleService {
                 .transactions
                 .execution_snapshot(&authority)
                 .map_err(input_error)?;
-            if request.kind == RuntimeKind::Run {
+            if request.kind == RuntimeKind::Run && request.preview.is_none() {
                 let (bytes, _) = self
                     .authoring
                     .transactions
@@ -302,6 +305,9 @@ impl LifecycleService {
             if !trust_current {
                 self.runtime.trust = None;
             }
+            let scratch = request.preview.as_ref().map(|purpose|
+                crate::scratch_preview::ScratchPreview::prepare(&self.authoring, &authority,
+                    &self.data_root, &manifest, purpose).map_err(input_error)).transpose()?;
             let preparation = Preparation {
                 id: uuid::Uuid::new_v4().to_string(),
                 kind: request.kind,
@@ -311,12 +317,14 @@ impl LifecycleService {
                 sdk_manifest,
                 manifest,
                 gate: Some(gate.clone()),
+                scratch,
             };
             let response = json!({"preparationId": preparation.id, "kind": preparation.kind, "savedRevision": manifest_digest(&preparation.manifest), "draftCount": inventory.dirty_count,
                 "projectPath": preparation.anchor.path(), "sdkPath": preparation.sdk.root, "sdkVersion": preparation.sdk.version,
                 "sdkRevision": manifest_digest(&preparation.sdk_manifest), "inputs": preparation.manifest.keys().collect::<Vec<_>>(),
                 "trustId": self.runtime.trust.as_ref().map(|trust| &trust.id),
-                "trustNotice": "Compile, lint and play execute project Python with your account's permissions. Trust is session-scoped, not a sandbox. Controlled play disables developer tools and reload; Stop then Run executes saved edits."});
+                "preview": request.preview,
+                "trustNotice": "Scratch previews copy accepted inputs and use separate saves. Isolation is not a security sandbox. Compile, lint and play execute project Python with your account's permissions. Trust is session-scoped, not a sandbox. Controlled play disables developer tools and reload; Stop then Run executes saved edits."});
             self.runtime.preparation = Some(preparation);
             Ok(response)
         })();
@@ -404,12 +412,13 @@ impl LifecycleService {
         crate::runtime_work::check().map_err(input_error)?;
         let mut p = self.runtime.preparation.take().unwrap();
         let gate = p.gate.take().unwrap();
-        let process = match RuntimeProcess::start(
+        let process = match RuntimeProcess::start_preview(
             p.sdk.clone(),
             p.anchor.clone(),
             p.kind,
             gate.clone(),
             p.manifest.clone(),
+            p.scratch.take(),
         ) {
             Ok(process) => process,
             Err(_) => {

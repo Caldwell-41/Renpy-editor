@@ -19,6 +19,7 @@ pub mod prompts;
 pub mod renpy;
 mod runtime_work;
 pub mod scene;
+mod scratch_preview;
 pub mod screens;
 pub mod source;
 pub mod transaction;
@@ -112,6 +113,7 @@ pub const OPERATIONS: &[&str] = &[
     "scene.apply",
     "screens.inspect",
     "screens.setPixelProperty",
+    "screens.setSize",
     "scene.recovery",
     "scene.resolveRecovery",
     "media.present",
@@ -535,6 +537,11 @@ pub fn handle_application_request(
             .and_then(|payload| serde_json::from_value::<screens::SetPixelRequest>(Value::Object(payload))
                 .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
             .and_then(|request| lifecycle.screens_set_pixel(request)).and_then(to_value),
+        "screens.setSize" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| serde_json::from_value::<screens::SetSizeRequest>(Value::Object(payload))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
+            .and_then(|request| lifecycle.screens_set_size(request)).and_then(to_value),
         "flow.list" => {
             #[derive(serde::Deserialize)]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]

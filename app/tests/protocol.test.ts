@@ -84,6 +84,7 @@ test("frontend operation list contains only bounded editor and Studio settings o
     "scene.apply",
     "screens.inspect",
     "screens.setPixelProperty",
+    "screens.setSize",
     "scene.recovery",
     "scene.resolveRecovery",
     "media.present",

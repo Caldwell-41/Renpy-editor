@@ -218,3 +218,37 @@ fn screen_source_requests_refuse_invalid_session_schema_range_and_opaque_target(
     assert_eq!(fs::read_to_string(root.join(PATH)).unwrap(), FIXTURE);
     service.close().unwrap();
 }
+
+#[test]
+fn screen_atomic_size_two_tokens_one_history_entry_and_source_reconciliation() {
+    let temporary = tempfile::tempdir().unwrap();
+    let mut service = LifecycleService::prepare_source_foundation_probe(temporary.path().join("profile")).unwrap();
+    let root = temporary.path().join("profile/synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    let before = format!("\u{feff}{}", FIXTURE.replace('\n', "\r\n"));
+    fs::write(root.join(PATH), &before).unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+    let change = |d: &Value, w: u32, h: u32| json!({"path":PATH,"expectedRevision":d["revision"],"screenName":"loomlight_help","nodeStart":frame(d)["span"]["start"],"width":w,"height":h});
+    let after = ipc(&mut service, "screens.setSize", change(&doc, 811, 407));
+    let expected = before.replacen("640", "811", 1).replacen("360", "407", 1);
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
+    assert_eq!(ipc(&mut service, "screens.setSize", change(&after, 811, 407))["revision"], after["revision"]);
+    assert_eq!(reject(&mut service, "screens.setSize", change(&after, 0, 450))["error"]["code"], "INVALID_PAYLOAD");
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
+    for (operation, bytes) in [("undo", before.as_bytes()), ("redo", expected.as_bytes())] {
+        let model = ipc(&mut service, "scene.list", json!({}));
+        ipc(&mut service,"scene.apply",json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":operation}}));
+        assert_eq!(fs::read(root.join(PATH)).unwrap(), bytes);
+    }
+    let opened = ipc(&mut service,"source.open",json!({"path":PATH}));
+    let changed_source = opened["text"].as_str().unwrap().replacen("811", "812", 1);
+    let draft = ipc(&mut service,"source.updateDraft",json!({"path":PATH,"expectedBaseRevision":opened["baseRevision"],"text":changed_source,"selectionStart":0,"selectionEnd":0}));
+    assert_eq!(reject(&mut service,"screens.setSize",change(&after,900,500))["error"]["code"],"DIRTY_SOURCE");
+    ipc(&mut service,"source.save",json!({"path":PATH,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}));
+    let fresh = ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+    assert_eq!(frame(&fresh)["properties"][0]["value"],812);
+    assert_eq!(reject(&mut service,"screens.setSize",change(&after,900,500))["error"]["code"],"SOURCE_CONFLICT");
+    service.close().unwrap(); service.open_path(&root).unwrap();
+    assert_eq!(ipc(&mut service,"screens.inspect",json!({"path":PATH}))["revision"],fresh["revision"]);
+}

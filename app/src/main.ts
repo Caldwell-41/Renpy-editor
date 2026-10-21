@@ -11,6 +11,7 @@ import { openStudioRequest } from "./studio-request-ui.ts";
 import { openSettings } from "./settings-ui.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
 import { RequestLane } from "./request-lane.ts";
+import { ScreensWorkspace } from "./screen-ui.ts";
 import { RuntimeWorkspace } from "./runtime-ui.ts";
 import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
 import { completeApplicationClose, requestCore as desktopRequestCore } from "./bridge.ts";
@@ -50,7 +51,7 @@ interface Asset { id: string; kind: AssetKind; displayName: string; relativePath
 interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | string; source: SourceDefinition }
 interface AuthoringMetadata { schemaVersion: number; projectId: string; characters: Character[]; appearances: Appearance[]; assets: Asset[]; variables: Variable[] }
 interface ImportChoice { authorityId: string; displayName: string; byteCount: number; extension: string; cancelled?: boolean }
-type ProjectSurface = "story" | "source" | "branches" | "characters" | "lorebook" | "assets" | "variables";
+type ProjectSurface = "story" | "source" | "screens" | "branches" | "characters" | "lorebook" | "assets" | "variables";
 type PersistenceStatus = "saved" | "pendingValidation" | "conflict" | "recoveryRequired";
 type SceneTarget = import("./scene-ui.ts").StoryTarget;
 type ProjectTarget = SourceTarget | SceneTarget;
@@ -82,6 +83,7 @@ let sourceRegistrationSequence = 0;
 let activeSourceController: { readonly token: number; readonly project: OpenProject; readonly controller: SourceWorkspaceController } | undefined;
 let statusRequestSequence = 0;
 let runtimeWorkspace: RuntimeWorkspace | undefined;
+let screensWorkspace: ScreensWorkspace | undefined;
 let lifecycleBusy = false;
 let stageDroppedAssets: ((batch:ImportBatch)=>void)|undefined;
 
@@ -128,7 +130,7 @@ interface CompletionToken { view: number; operation: number; scope: object; sess
 function beginView(project?: OpenProject): number {
   activeReferenceController?.dispose(); activeReferenceController=undefined;
   disposeCatalogue?.();disposeCatalogue=undefined;
-  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; }
+  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; }
   disposeBranchesView?.();
   disposeBranchesView = undefined;
   disposeSceneView?.();
@@ -442,10 +444,10 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
   const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
   sidebar.append(projectName, sectionLabel);
-  (["story", "source", "branches", "characters", "lorebook", "assets", "variables"] as const).forEach((name) => {
-    const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", branches: "Branches", characters: "Characters", lorebook: "Lorebook", assets: "Assets", variables: "Variables" };
+  (["story", "source", "screens", "branches", "characters", "lorebook", "assets", "variables"] as const).forEach((name) => {
+    const labels: Record<ProjectSurface, string> = { story: "Story", source: "Source", screens: "Screens", branches: "Branches", characters: "Characters", lorebook: "Lorebook", assets: "Assets", variables: "Variables" };
     const nav = button(labels[name], `tree-item${surface === name ? " selected" : ""}`);
-    nav.prepend(icon(name));nav.title=labels[name];nav.ariaLabel=labels[name];
+    nav.prepend(icon(name === "screens" ? "panel" : name));nav.title=labels[name];nav.ariaLabel=labels[name];
     if (surface === name) nav.ariaCurrent = "page";
     nav.addEventListener("click", () => {
       if (surface === name && name === "story") return;
@@ -473,7 +475,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   }
   if(hasTree){let width=layoutFor(layoutKey).treeWidth??230;layout.style.setProperty("--tree-width",`${width}px`);const resize=document.createElement("div");resize.className="tree-divider";resize.role="separator";resize.tabIndex=0;resize.ariaLabel="Resize scene or file list";resize.setAttribute("aria-orientation","vertical");treePanel.append(resize);const setWidth=(next:number,save=false):void=>{width=Math.max(160,Math.min(400,Math.round(next)));layout.style.setProperty("--tree-width",`${width}px`);resize.setAttribute("aria-valuenow",String(width));if(save)saveLayout(layoutKey,{treeWidth:width});};resize.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();setWidth(width+(e.key==="ArrowLeft"?-10:10),true);}});let start:number|undefined;resize.addEventListener("pointerdown",e=>{start=e.clientX-width;resize.setPointerCapture(e.pointerId);});resize.addEventListener("pointermove",e=>{if(start!==undefined)setWidth(e.clientX-start);});resize.addEventListener("pointerup",()=>{start=undefined;setWidth(width,true);});resize.addEventListener("pointercancel",()=>{start=undefined;});}
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!await allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
-  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : "supporting-workspace";
+  const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : surface === "screens" ? "screens-workspace" : "supporting-workspace";
   layout.append(sidebar);if(hasTree)layout.append(treePanel);layout.append(workspace); shell(layout);
   runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
     request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
@@ -493,6 +495,18 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   setStatus("Checking saved state…");
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
+  else if (surface === "screens") {
+    screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution,
+      request: (operation, payload) => projectValue(project, operation, payload),
+      coordinate: task => runAuthoringOperation(project, screensWorkspace!, task),
+      current: () => currentProject?.sessionId === project.sessionId,
+      source: target => { void requestProjectNavigation(project, "source", target); },
+      preview: (target, validate) => runtimeWorkspace?.previewScreen(target, validate),
+      saved: () => { void refreshPersistenceStatus(project, viewGeneration); },
+    });
+    screensWorkspace.mount(workspace);
+    void refreshPersistenceStatus(project, generation);
+  }
   else if (surface === "branches") {
     disposeBranchesView = renderBranches(workspace, {
       layoutKey,
@@ -711,6 +725,7 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
 }
 
 async function requestProjectClose(project: OpenProject, afterClose: () => void | Promise<void> = showWelcome): Promise<void> {
+  if (screensWorkspace?.hasDraft()) { setStatus("Apply or cancel the unfinished Screens draft before closing the project.", "error"); return; }
   if(rewriteController?.busy()){setStatus("Finish or cancel the Assist request before closing the project.","error");return;}
   if(rewriteController?.hasWork()&&!window.confirm("Discard the unfinished Assist task/proposal and close the project?"))return;
   if (document.querySelector(".leave-source-dialog") || !await allowSceneNavigation()) return;
@@ -1056,6 +1071,7 @@ function installListeners(): void {
 
 export function startApplication(requester: typeof desktopRequestCore = desktopRequestCore): void {
   runtimeWorkspace?.dispose(); runtimeWorkspace = undefined;
+  screensWorkspace?.dispose(); screensWorkspace = undefined;
   coreRequester = requester;
   activeReferenceController?.dispose();activeReferenceController=undefined;
   saveCommandTrace.length = 0;

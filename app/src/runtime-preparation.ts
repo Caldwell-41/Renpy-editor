@@ -2,6 +2,7 @@ import type { CoreOperation } from "./protocol.js";
 import type { SourceInventory, SourceWorkspaceController } from "./source-ui.js";
 import { focusSceneDraft, hasSceneDraft } from "./scene-ui.js";
 
+export interface ScreenPreview { readonly purpose: "screen"; readonly path: string; readonly screenName: string; readonly expectedRevision: string; }
 export type RuntimeKind = "run" | "validate";
 export type RuntimeRevisionChoice = "saveAll" | "saved" | "commitScene" | "cancel";
 export interface RuntimePreparation {
@@ -22,7 +23,7 @@ export interface RuntimePreparationActions {
 
 /** Foundation for both commands; the caller supplies the existing authoring lease
  * and session-bound request function. It never grants trust or starts a process. */
-export async function prepareRuntimeInput(kind: RuntimeKind, sdkId: string, actions: RuntimePreparationActions): Promise<RuntimePreparation | undefined> {
+export async function prepareRuntimeInput(kind: RuntimeKind, sdkId: string, actions: RuntimePreparationActions, preview?: ScreenPreview): Promise<RuntimePreparation | undefined> {
   const accepted = await actions.coordinate(async () => {
     const lease = await actions.controller?.prepareTransition("runtime");
     if (actions.controller && !lease) return undefined;
@@ -42,7 +43,7 @@ export async function prepareRuntimeInput(kind: RuntimeKind, sdkId: string, acti
         await actions.controller?.refreshAccepted();
       }
       if (!actions.current()) return undefined;
-      const preparation = await actions.request<RuntimePreparation | RuntimeTicket>("runtime.prepare", { kind, sdkId, revisionChoice: "saved" });
+      const preparation = await actions.request<RuntimePreparation | RuntimeTicket>("runtime.prepare", { kind, sdkId, revisionChoice: "saved", ...(preview ? { preview } : {}) });
       if (!actions.current()) {
         // This remains bound to the captured old session; it cannot cancel a new one.
         await actions.request("requestToken" in preparation ? "runtime.cancelRequest" : "runtime.cancelPreparation",

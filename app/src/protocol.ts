@@ -71,6 +71,7 @@ export const CORE_OPERATIONS = [
   "scene.apply",
   "screens.inspect",
   "screens.setPixelProperty",
+  "screens.setSize",
   "scene.recovery",
   "scene.resolveRecovery",
   "media.present",

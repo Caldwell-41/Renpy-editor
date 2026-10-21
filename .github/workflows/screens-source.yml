@@ -1,14 +1,9 @@
 name: Phase 3B early screen source proof
 
+# The early source-proof allowance is closed. Production Help uses an explicit
+# selected dispatch; publishing source changes must not restart this old proof.
 on:
-  push:
-    branches: [codex/phase3b-screen-designer]
-    paths:
-      - 'app/src-core/**'
-      - 'app/src/protocol.ts'
-      - 'app/scripts/qualify-screens-source.py'
-      - 'tests/fixtures/phase-3b-screens/**'
-      - '.github/workflows/screens-source.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read

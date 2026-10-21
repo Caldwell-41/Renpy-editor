@@ -107,3 +107,32 @@ test("runtime drawer closes without stopping and exit zero cannot hide a reporte
   click("Run Game");await tick();click("Trust for this session and continue");await tick(40);assert.equal(h.calls.filter(c=>c.operation==='runtime.start').length,2);assert.doesNotMatch(h.runtime.panel.querySelector('[role="status"]')?.textContent??h.runtime.panel.textContent??"",/Game ended with a runtime error/);
  }finally{h.dispose();}
 });
+
+test("screen preview retains its captured purpose and revision through explicit trust; Cancel never starts", async () => {
+  const preview = { purpose: "screen" as const, path: "game/ui/help.rpy", screenName: "loomlight_help", expectedRevision: "accepted-screen-revision" };
+  for (const cancel of [true, false]) {
+    const h = harness();
+    try {
+      h.runtime.previewScreen(preview); await tick();
+      const prepare = h.calls.find(call => call.operation === "runtime.prepare");
+      assert.deepEqual(prepare?.payload?.preview, preview);
+      assert.equal(prepare?.payload?.revisionChoice, "saved");
+      assert.equal(h.calls.some(c => c.operation === "runtime.start"), false);
+      click(cancel ? "Cancel" : "Trust for this session and continue"); await tick();
+      assert.equal(h.calls.filter(c => c.operation === "runtime.start").length, cancel ? 0 : 1);
+      assert.equal(h.calls.some(c => c.operation === "source.saveAll"), false);
+      if (cancel) assert.equal(h.calls.some(c => c.operation === "runtime.cancelPreparation"), true);
+      else await h.runtime.stopOperation();
+    } finally { h.dispose(); }
+  }
+});
+
+test("a stale screen-preview trust completion cancels its preparation without granting or starting", async () => {
+  const h = harness();
+  try {
+    h.runtime.previewScreen({ purpose: "screen", path: "game/ui/help.rpy", screenName: "loomlight_help", expectedRevision: "accepted" });
+    await tick(); h.stale(); click("Trust for this session and continue"); await tick();
+    assert.equal(h.calls.some(c => c.operation === "runtime.grantTrust" || c.operation === "runtime.start"), false);
+    assert.equal(h.calls.some(c => c.operation === "runtime.cancelPreparation"), true);
+  } finally { h.dispose(); }
+});

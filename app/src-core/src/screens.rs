@@ -33,6 +33,18 @@ pub struct SetPixelRequest {
     pub value: u32,
 }
 
+/// Both dimensions are prepared against one revision and accepted in one transaction.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SetSizeRequest {
+    pub path: String,
+    pub expected_revision: String,
+    pub screen_name: String,
+    pub node_start: usize,
+    pub width: u32,
+    pub height: u32,
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum PixelProperty {
@@ -68,6 +80,8 @@ pub struct Property {
 #[serde(rename_all = "camelCase")]
 pub struct Node {
     pub kind: String,
+    pub literal: Option<String>,
+    pub layout: std::collections::BTreeMap<String, f64>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
@@ -202,6 +216,9 @@ fn parse_body(
             kind(line).unwrap()
         }
         .into(),
+        literal: line.code.split_once(' ').and_then(|(_, raw)|
+            serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()),
+        layout: Default::default(),
         span: Span {
             start: line.start,
             end,
@@ -231,6 +248,15 @@ fn parse_body(
             }
         }
         if child.single && child.indent == line.indent + 4 {
+            if let Some((key, value)) = child.code.split_once(' ') {
+                if ["xalign", "yalign", "padding", "spacing"].contains(&key) {
+                    if let Ok(value) = value.trim().parse::<f64>() {
+                        if value.is_finite() && value >= 0.0 && value <= MAX_PIXELS as f64 {
+                            nodes[slot].layout.insert(key.into(), value);
+                        }
+                    }
+                }
+            }
             for property in [PixelProperty::Xsize, PixelProperty::Ysize] {
                 if let Some(raw) = child
                     .code
@@ -416,59 +442,51 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetPixelRequest,
     ) -> Result<Document, SceneError> {
-        let path = path(&request.path)?;
-        if request.value == 0 || request.value > MAX_PIXELS {
+        self.screens_set_properties(project, request.path, request.expected_revision,
+            request.screen_name, request.node_start, &[(request.property, request.value)])
+    }
+
+    pub fn screens_set_size(&self, project: &ProjectId, request: SetSizeRequest) -> Result<Document, SceneError> {
+        self.screens_set_properties(project, request.path, request.expected_revision,
+            request.screen_name, request.node_start,
+            &[(PixelProperty::Xsize, request.width), (PixelProperty::Ysize, request.height)])
+    }
+
+    fn screens_set_properties(&self, project: &ProjectId, source_path: String, expected_revision: String,
+        screen_name: String, node_start: usize, values: &[(PixelProperty, u32)]) -> Result<Document, SceneError> {
+        let path = path(&source_path)?;
+        if values.iter().any(|(_, value)| *value == 0 || *value > MAX_PIXELS) {
             return Err(SceneError::InvalidPayload);
         }
-        self.ensure_source_paths_clean(project, [request.path.as_str()])
+        self.ensure_source_paths_clean(project, [source_path.as_str()])
             .map_err(|_| SceneError::DirtySource)?;
-        let (bytes, revision) = self
-            .transactions
-            .snapshot(project, path.clone())
+        let (bytes, revision) = self.transactions.snapshot(project, path.clone())
             .map_err(|_| SceneError::SourceConflict)?;
-        if revision.sha256 != request.expected_revision {
-            return Err(SceneError::SourceConflict);
-        }
-        let document = inspect(&bytes, request.path.clone(), revision.sha256.clone())?;
-        let node = document
-            .screens
-            .iter()
-            .find(|s| s.name == request.screen_name)
-            .and_then(|s| s.nodes.iter().find(|n| n.span.start == request.node_start))
+        if revision.sha256 != expected_revision { return Err(SceneError::SourceConflict); }
+        let document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+        let node = document.screens.iter().find(|s| s.name == screen_name)
+            .and_then(|s| s.nodes.iter().find(|n| n.span.start == node_start))
             .ok_or(SceneError::UnknownEntity)?;
-        let matches = node
-            .properties
-            .iter()
-            .filter(|p| p.property == request.property)
-            .collect::<Vec<_>>();
-        if matches.len() != 1 {
-            return Err(SceneError::OpaqueBoundary);
+        let mut patches = vec![];
+        for (key, value) in values {
+            let properties = node.properties.iter().filter(|p| p.property == *key).collect::<Vec<_>>();
+            if properties.len() != 1 { return Err(SceneError::OpaqueBoundary); }
+            let property = properties[0];
+            if property.value != *value { patches.push((property.span.clone(), *value)); }
         }
-        let property = matches[0];
-        if property.value == request.value {
-            return Ok(document);
-        }
+        if patches.is_empty() { return Ok(document); }
+        patches.sort_by_key(|(span, _)| std::cmp::Reverse(span.start));
         let mut proposed = bytes.clone();
-        proposed.splice(
-            property.span.start..property.span.end,
-            request.value.to_string().bytes(),
-        );
-        // Reparse before committing; the resulting model is always derived from bytes.
-        inspect(&proposed, request.path.clone(), String::new())?;
-        self.commit_history(
-            project,
-            TransactionProposal {
-                mutations: vec![FileMutation {
-                    path,
-                    kind: MutationKind::ReplaceExisting,
-                    base: revision,
-                    expected_bytes: bytes,
-                    proposed,
-                }],
-                intent: TransactionIntent::Edit,
-            },
-        )?;
-        self.screens_inspect(project, InspectRequest { path: request.path })
+        for (span, value) in patches {
+            proposed.splice(span.start..span.end, value.to_string().bytes());
+        }
+        inspect(&proposed, source_path.clone(), String::new())?;
+        self.commit_history(project, TransactionProposal {
+            mutations: vec![FileMutation { path, kind: MutationKind::ReplaceExisting,
+                base: revision, expected_bytes: bytes, proposed }],
+            intent: TransactionIntent::Edit,
+        })?;
+        self.screens_inspect(project, InspectRequest { path: source_path })
     }
 }
 

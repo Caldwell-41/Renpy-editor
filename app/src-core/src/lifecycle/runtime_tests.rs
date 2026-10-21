@@ -619,6 +619,7 @@ fn synthetic_inventory_sdk(root: &Path) -> ValidatedSdk {
 #[test]
 fn runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion() {
     use std::sync::{mpsc, Arc, Mutex};
+    for screen_preview in [false, true] {
     for stage in ["runtime.prepare", "runtime.grantTrust", "runtime.start"] {
         let temp = tempfile::tempdir().unwrap();
         let root = temp.path().join("project");
@@ -642,7 +643,13 @@ fn runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_compl
         );
         let before = fs::read(root.join("game/script.rpy")).unwrap();
         let host = crate::dispatch::ApplicationHost::new(service);
-        let prepare = json!({"kind":"run","revisionChoice":"saved","sdkId":sdk_id});
+        let mut prepare = json!({"kind":"run","revisionChoice":"saved","sdkId":sdk_id});
+        if screen_preview {
+            fs::create_dir(root.join("game/ui")).unwrap();
+            fs::write(root.join("game/ui/help.rpy"),include_bytes!("../../../../tests/fixtures/phase-3b-screens/help.rpy")).unwrap();
+            let document=host.with_service(|s|s.screens_inspect(crate::screens::InspectRequest { path:"game/ui/help.rpy".into() }).unwrap()).unwrap();
+            prepare["preview"]=json!({"purpose":"screen","path":"game/ui/help.rpy","screenName":"loomlight_help","expectedRevision":document.revision});
+        }
         let mut payload = prepare.clone();
         if stage != "runtime.prepare" {
             let prepared = host_result(
@@ -764,6 +771,8 @@ fn runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_compl
         held.join().unwrap();
         assert!(!host.with_service(|service| service.runtime.busy()).unwrap());
         host.shutdown();
+        assert_eq!(fs::read_dir(temp.path().join("state")).unwrap().filter_map(Result::ok).filter(|e|e.file_name().to_string_lossy().starts_with("scratch-preview-")).count(),0);
+    }
     }
 }
 
@@ -1052,5 +1061,88 @@ fn runtime_diagnostics_sdk_gate() {
         service.close().unwrap(); service.open_path(&root).unwrap();
         assert_eq!(fs::read(root.join("saved-original")).unwrap(),source.as_bytes());
         println!("runtime-diagnostics-sdk-{case}: passed; elapsed_ms={}",stage.elapsed().as_millis());
+    }
+}
+
+#[test]
+#[ignore = "selected Help preview SDK gate; requires renderer-accepted source and pinned official archive"]
+fn help_scratch_preview_sdk_geometry_revision_and_cleanup() {
+    use sha2::{Digest, Sha256};
+    let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").expect("official archive required");
+    let accepted = fs::read(std::env::var_os("LOOMLIGHT_HELP_ACCEPTED").expect("real renderer accepted bytes required")).unwrap();
+    let output = PathBuf::from(std::env::var_os("LOOMLIGHT_HELP_SDK_EVIDENCE").expect("owned evidence directory required"));
+    fs::create_dir_all(&output).unwrap();
+    let temp = tempfile::Builder::new().prefix("loomlight-help-sdk-").tempdir().unwrap();
+    let sdk = crate::renpy::install_supported_sdk_from_archive(&temp.path().join("sdk"), Path::new(&archive)).unwrap();
+    let mut receipts = vec![];
+    let mut launches = vec![];
+    for (index, (width, height)) in [(1280,720),(1024,768)].into_iter().enumerate() {
+        let root = temp.path().join(format!("project-{index}"));
+        make_openable_project(&root,"Help runtime fixture");
+        fs::create_dir(root.join("game/ui")).unwrap();
+        fs::write(root.join("game/ui/help.rpy"), &accepted).unwrap();
+        fs::write(root.join("game/help.png"), include_bytes!("../../../../tests/fixtures/phase-1h/assets/booth.png")).unwrap();
+        fs::write(root.join("game/options.rpy"),format!("define config.name = \"Help runtime fixture\"\ndefine config.screen_width = {width}\ndefine config.screen_height = {height}\ndefine config.save_directory = None\n")).unwrap();
+        fs::write(root.join("game/geometry_probe.rpy"),r#"init python:
+    def loomlight_measure_help():
+        d = renpy.get_displayable("loomlight_help", "help_panel")
+        if d is not None:
+            s = renpy.render(d, config.screen_width, config.screen_height, 0, 0).get_size()
+            print("HELP_SCRATCH_GEOMETRY " + __import__("json").dumps(dict(size=list(s), aspect=[config.screen_width, config.screen_height], menu=main_menu)), flush=True)
+    config.overlay_screens.append("loomlight_geometry_probe")
+screen loomlight_geometry_probe():
+    timer 0.2 repeat True action Function(loomlight_measure_help)
+"#).unwrap();
+        let profile = temp.path().join(format!("profile-{index}"));
+        let mut service = LifecycleService::new(profile.clone()).unwrap();
+        let sdk_id = service.remember_sdk(sdk.clone(),"verified-official-fixture").id;
+        let session = service.open_path(&root).unwrap().session_id;
+        let document = call(&mut service,&session,"screens.inspect",json!({"path":"game/ui/help.rpy"}));
+        let preview = json!({"purpose":"screen","path":"game/ui/help.rpy","screenName":"loomlight_help","expectedRevision":document["revision"]});
+        let mut aspect_receipts = vec![];
+        for kind in ["validate","run"] {
+            let preparation = call(&mut service,&session,"runtime.prepare",json!({"kind":kind,"revisionChoice":"saved","sdkId":sdk_id,"preview":preview}));
+            assert_eq!(preparation["preview"],preview);
+            let trust = call(&mut service,&session,"runtime.grantTrust",json!({"preparationId":preparation["preparationId"]}));
+            launches.push(json!({"aspect":[width,height],"kind":kind,"reserved":true}));
+            fs::write(output.join("launch-reservations.json"),serde_json::to_vec_pretty(&launches).unwrap()).unwrap();
+            let started = call(&mut service,&session,"runtime.start",json!({"preparationId":preparation["preparationId"],"trustId":trust["trustId"]}));
+            let operation = started["operationId"].as_str().unwrap();
+            let status_payload = json!({"operationId":operation,"afterSequence":0});
+            let mut observed = Value::Null;
+            wait_for(|| {
+                observed = call(&mut service,&session,"runtime.status",status_payload.clone());
+                fs::write(output.join(format!("aspect-{index}-{kind}-observed.json")),serde_json::to_vec_pretty(&observed).unwrap()).unwrap();
+                if observed["cleanupComplete"] == true { return true; }
+                kind == "run" && observed["output"].as_str().unwrap().contains("HELP_SCRATCH_GEOMETRY")
+            }, 45);
+            if kind == "validate" {
+                assert_eq!(observed["phase"],"exited","{observed}"); assert_eq!(observed["exitCode"],0,"{observed}");
+            } else {
+                assert_eq!(observed["cleanupComplete"],false,"preview exited before observation: {observed}");
+                let text=observed["output"].as_str().unwrap();
+                let line=text.lines().find_map(|l|l.strip_prefix("HELP_SCRATCH_GEOMETRY ")).expect("actual geometry marker");
+                let geometry:Value=serde_json::from_str(line).unwrap();
+                assert_eq!(geometry["menu"],false,"preview must use ordinary game context");
+                assert_eq!(geometry["size"].as_array().unwrap().len(), 2);
+                assert_eq!(geometry["size"][0].as_f64(),Some(760.0));
+                assert_eq!(geometry["size"][1].as_f64(),Some(360.0));
+                assert_eq!(geometry["aspect"],json!([width,height]));
+                let frame=document["screens"][0]["nodes"].as_array().unwrap().iter().find(|n|n["kind"]=="frame").unwrap();
+                call(&mut service,&session,"screens.setSize",json!({"path":"game/ui/help.rpy","expectedRevision":document["revision"],"screenName":"loomlight_help","nodeStart":frame["span"]["start"],"width":768,"height":360}));
+                let stale=call(&mut service,&session,"runtime.status",status_payload.clone());
+                assert_eq!(stale["earlierRevision"],true); assert_eq!(stale["launchRevision"],preparation["savedRevision"]);
+                aspect_receipts.push(json!({"geometry":geometry,"stale":stale}));
+                call(&mut service,&session,"runtime.stop",json!({"operationId":operation}));
+                wait_for(|| { observed=call(&mut service,&session,"runtime.status",status_payload.clone()); observed["cleanupComplete"]==true },10);
+            }
+            assert_eq!(fs::read_dir(&profile).unwrap().filter_map(Result::ok).filter(|e|e.file_name().to_string_lossy().starts_with("scratch-preview-")).count(),0,"owned scratch jobs cleaned after process reap");
+            assert!(!root.join("game/saves").exists()); assert!(!root.join("game/ui/help.rpyc").exists());
+            aspect_receipts.push(json!({"kind":kind,"preparation":preparation,"terminal":observed}));
+            fs::write(output.join(format!("aspect-{index}-receipts.json")),serde_json::to_vec_pretty(&aspect_receipts).unwrap()).unwrap();
+        }
+        assert!(service.runtime_shutdown()); service.close().unwrap();
+        receipts.push(json!({"aspect":[width,height],"receipts":aspect_receipts}));
+        fs::write(output.join("sdk-receipts.json"),serde_json::to_vec_pretty(&json!({"acceptedSHA256":hex::encode(Sha256::digest(&accepted)),"aspects":receipts,"previewLaunches":index+1,"nativeWebView":false})).unwrap()).unwrap();
     }
 }
