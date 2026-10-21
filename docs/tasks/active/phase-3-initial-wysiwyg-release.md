@@ -1,5 +1,61 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Screen notebook refinement — 2026-10-21
+
+State `review_ready`. The user prefers Screen notebook and requests plain directions,
+help tooltips, clear front/back ordering, a preview workspace that can be resized
+by dragging its border, and a larger default preview. This selects a browser-only
+refinement on the existing branch. Preserve the first three runnable candidates;
+add a revised notebook draft. "Best so far" records a preference, not approval of
+the revised design or authorization to promote it into the app.
+
+Use unslop for interface copy and writing-for-agents for these records. Continue on
+the chosen Mac host. Allow one initial focused verification cycle, up to two focused
+repair cycles if needed, then one combined lab cycle, with documentation closure.
+Final use is refinement local4/4. No repair or verification remains pending. This
+new outcome does not renew the completed
+early source proof's local11/11, native, SDK, CI or independent-review allowances.
+Commit/push authorization for the existing 3B branch continues within this scope.
+
+The resize handles change the editor's available preview area. Game dimensions
+remain a separate control. Front/back controls reorder elements within their parent
+group, and a group's children move together in the preview. A selection outline
+must not lift the selected element above its assigned order. Explain automatic
+vertical/horizontal/grid layout separately. Screen-level Ren'Py `zorder` is distinct
+from child order. Keep all demo changes in browser memory.
+
+Complete when the revised notebook uses clear copy, keyboard-accessible help,
+pointer/keyboard resizing and cancellation, a visibly larger game view, correct
+overlap ordering and undo, retained drafts, and passing focused/combined checks at
+both registered sizes/themes. Record controls and approximation limits in the
+comparison notes. Keep approval null until the user selects the revised version.
+
+Refinement local1 passes TypeScript, approval checks, 80 rendering cases, all three
+original journeys, and the revised help/resize/focus/draft checks. It stops when
+the overlap test tries to fill a collapsed position group after reparenting. The
+test now reopens the group after that real inspector rebuild. Visual review also
+found that the default preview height exceeded its visible container. Default and
+focused heights now use the available workspace height. Preserve the first report,
+captures and command log under `.toolchains/phase3b/notebook-focused-01*`.
+Local2 also passes overlap targeting, selection paint order, group movement and
+undo. It stops when the action test uses the element list hidden by Buttons &
+story. That test now selects Close in the visible canvas, matching the available
+user control. Wide and compact captures show the complete game view. Preserve
+local2's report, captures and log under `.toolchains/phase3b/notebook-focused-02*`.
+Local3 passes all 80 Screens rendering cases and all four complete interaction
+journeys, including the original layouts. Preserve its report, captures and command
+log under `.toolchains/phase3b/notebook-focused-03*`. No further focused cycle is
+selected. Local4 passes TypeScript, approval/source checks, all 528 lab rendering
+cases and 20 check groups on Chromium 155.0.8059.86, with no browser errors. Both
+themes and registered sizes pass. The revised journey covers help, pointer/keyboard
+border resizing, Escape, draft retention, focus mode, overlap targeting, selection
+paint order, group movement, Undo, protected screens and story behavior. Final
+report and revised captures are ignored under
+`.toolchains/phase3b/notebook-combined-04/`. Parent visual review checked both themes
+and sizes. The [comparison notes](../../design/design-lab-screens/README.md) own
+controls and approximation limits. Next is user review of `guided-v2`; all four
+approvals remain null. No native, SDK, package or CI operation was performed.
+
 ## Phase 3B planning entry — 2026-10-21
 
 The user requested a branch from the current Phase 3A Story logic work, a read of

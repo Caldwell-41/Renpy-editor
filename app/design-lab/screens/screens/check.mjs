@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import checkNotebook from "./check-notebook.mjs";
 
 export default async function check({ page, open }) {
   const tree = id => page.locator(`[role="treeitem"][data-node-id="${id}"]`);
@@ -122,7 +123,8 @@ export default async function check({ page, open }) {
     await page.getByRole("button", { name: "Keep editing", exact: true }).click();
     await open({ variant, viewport: "compact" });
     await page.getByRole("button", { name: "Next prototype layout", exact: true }).click();
-    const next = ["workbench", "canvas", "guided"][(["workbench", "canvas", "guided"].indexOf(variant) + 1) % 3];
+    const variantIds = await page.evaluate(async () => (await import("/screens/screens/definition.ts")).variants.map(v => v.id));
+    const next = variantIds[(variantIds.indexOf(variant) + 1) % variantIds.length];
     await page.waitForURL(new RegExp(`variant=${next}`));
     await page.locator('#preview[data-ready="true"]').waitFor();
     console.log(`Screens journey ${variant}: passed`);
@@ -139,4 +141,5 @@ export default async function check({ page, open }) {
       throw new Error(`Screens journey ${variant}: ${error.message}\nState: ${JSON.stringify(state)}`, { cause: error });
     }
   }
+  await checkNotebook({ page, open });
 }

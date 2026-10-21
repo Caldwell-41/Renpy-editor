@@ -1,18 +1,21 @@
 # Screens prototype comparison
 
-The question is where hierarchy, canvas and property editing should sit while an
-author builds and connects Help screens. The installed prototype skill's UI workflow
-produces three throwaway layouts on the existing Design Lab route. All are unapproved.
-The comparison is review-ready after focused and combined browser verification.
-The same fictional game, screens, nodes and controls appear in every layout.
+The user prefers Screen notebook. Its revised draft adds plain directions, help
+tooltips, front/back controls and a larger preview that can be resized. The original
+three layouts remain available for comparison. All four drafts are unapproved and
+use the same fictional game. The comparison is ready for review after focused and
+combined browser verification under the prototype skill's UI workflow.
 The [owning task](../../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
 records published source identity, cumulative allowance and retained failure history.
 
+- Screen notebook · revised puts Elements, Position & look and Buttons & story beside
+  a larger game preview. Focus preview hides the editing controls. Its border handles
+  change the space available for the preview.
 - Layout workbench keeps the hierarchy, canvas and inspector beside one another. It
   favors frequent selection and property changes. Each pane scrolls independently.
 - Canvas desk gives the player view the upper workspace and puts hierarchy and a
   wider property editor in a lower dock. Sample controls sit beside the player view.
-- Screen notebook puts Compose, Arrange and Connect sections in a notebook beside
+- Screen notebook · original puts Compose, Arrange and Connect sections beside
   the player view. It offers a more directed first Help journey. Compact views put
   the player view above the notebook.
 
@@ -21,7 +24,36 @@ bar changes the shareable `variant` parameter. Switching resets the fictional sa
 edited samples require an explicit reset decision. The global arrows leave tree,
 canvas and editable controls to their own keyboard behavior.
 
-## Review journeys
+## Revised notebook controls
+
+Select an element in the preview or Elements list. Apply changes keeps its draft;
+Cancel changes restores its previous values. Shared headings ask which screens
+should change. The `?` controls explain screen behavior, positioning and anchors,
+shared looks, button actions, value bars and preview sizing. Hover, click or focus a
+help control to read it; Escape closes it.
+
+Front & back has Bring forward and Send backward. These move the selected element
+one place within its group. Later siblings cover earlier ones where they overlap.
+Moving a group keeps its children together. Selecting an element adds an outline
+without changing its draw order. Vertical, horizontal and grid groups use those
+buttons to change item order; their automatic reflow remains an approximation here.
+Ren'Py's screen-level `zorder` controls whole screens and is separate from element
+order. See the [screen statement](https://www.renpy.org/doc/html/screens.html#screen-statement).
+
+Drag the preview's left border for width, bottom border for height, or bottom-right
+corner for both. Focus a border and use arrow keys for smaller changes; Shift uses
+larger changes. Escape cancels a drag. These controls keep unfinished edits and add
+no source Undo entry. Game size is a separate menu. Fit shows the full game rectangle;
+75% and 100% use game pixels and allow scrolling. Focus preview gives the game the
+notebook's space; Escape or Back to editing restores the controls. Compact layouts
+put the preview above the notebook and keep both reachable by scrolling.
+
+In Buttons & story, select Close in the canvas to edit its actions. Show overlay and
+Next line demonstrate a screen that stays open during dialogue. Help dialog pauses
+the story until Close or Escape. Clicking outside leaves either screen open. These
+are separate story examples; clicking a button in the preview selects it for editing.
+
+## Original layout journeys
 
 Start with Help panel. Select its title in either hierarchy or canvas, edit its text,
 then Cancel. Change it again and Apply. The shared-style prompt lists affected screens
@@ -74,9 +106,10 @@ the other lab layouts and approval records.
 
 ## Review status
 
-All three layouts are ready for comparison. No layout is selected and no prototype
-code is promoted. Draft identities are `workbench-v1`, `canvas-v1` and `guided-v1`;
-every approval remains null. The source/runtime gate was separately audited at
+All four layouts are ready for comparison. Screen notebook is the user's preference;
+the revised draft still needs their selection. No prototype code is promoted.
+Draft identities are `workbench-v1`, `canvas-v1`, `guided-v1` and `guided-v2`; every
+approval remains null. The source/runtime gate was separately audited at
 `0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run `39555526201`. That proof
 qualifies its narrow source slice, not these simulated browser controls.
 
@@ -91,8 +124,8 @@ and the protected-action notice. Assignment/order assertions and product behavio
 remain intact. Per-layout progress and failure visibility facts now identify the
 failed state directly.
 
-Local10 passes all 60 Screens rendering cases and all three complete journeys.
-Local11 passes TypeScript, approval/source validation, all 508 lab rendering cases
+The original comparison's local10 passes all 60 Screens cases and three journeys.
+Its local11 passes TypeScript, approval/source validation, all 508 lab rendering cases
 and 20 check groups on Chromium 155.0.8059.86, with no browser errors. Shared
 navigation, gallery, draft guards, approval/HMR, native/network refusal, sample reset,
 invalid-selection handling and production-build exclusion pass. Every registered
@@ -102,14 +135,25 @@ Reports and captures remain ignored under `.toolchains/phase3b/prototype-batch-1
 and `prototype-batch-11/`. All 12 final Screens captures match the previously reviewed
 images byte for byte; parent review also rechecked representative final captures.
 The owning task preserves every earlier failed attempt and its evidence. Final use
-is local11/11; no further verification or repair is selected. Browser proof and source
-identity do not approve a layout or qualify durable saves/native behavior.
+is local11/11. The later notebook refinement has its own finite local4/4 allowance.
+
+Refinement local3 passes 80 Screens rendering cases and all four complete journeys.
+Local4 passes TypeScript, approval/source checks, 528 lab rendering cases and 20 check
+groups on Chromium 155.0.8059.86, with no browser errors. It covers both themes at
+1100×720 and 560×640, help, resizing and cancellation, retained drafts, overlap pointer
+targeting, group movement, Undo, protected screens and the story example. The two
+earlier focused failures and their causes remain in the owning task. Final reports
+and four revised captures remain ignored under
+`.toolchains/phase3b/notebook-focused-03/` and `notebook-combined-04/`. Visual review
+checked both themes and sizes. Browser proof and source identity do not approve a
+layout or qualify durable saves/native behavior. No repair or check is pending.
 
 Open the lab from `app/` with `npm run design:dev` and choose Screens, or use a direct link:
 
+- [Screen notebook · revised](http://127.0.0.1:5174/?screen=screens&variant=guided-v2)
 - [Layout workbench](http://127.0.0.1:5174/?screen=screens&variant=workbench)
 - [Canvas desk](http://127.0.0.1:5174/?screen=screens&variant=canvas)
-- [Screen notebook](http://127.0.0.1:5174/?screen=screens&variant=guided)
+- [Screen notebook · original](http://127.0.0.1:5174/?screen=screens&variant=guided)
 
 The existing targeted screen check and combined `design:check` own browser verification.
 Their rendering/interaction evidence remains separate from durable saves, native behavior

@@ -1,6 +1,6 @@
 # Current status
 
-## Phase 3B source proof and Screens comparison ready
+## Phase 3B revised Screen notebook ready
 
 2026-10-21: Branch `codex/phase3b-screen-designer` starts from Phase 3A at `571e76c`.
 The [grilling agreement](../tasks/active/phase-3-initial-wysiwyg-release.md#agreed-3b-design-from-the-grilling-session)
@@ -10,20 +10,22 @@ qualifies the narrow source/runtime proof at `0ef1748` on Windows x64 and macOS
 ARM64, including the 720×360 panel and exactly one continuation after Close.
 No CI is pending.
 
-The three-layout [Screens prototype](../design/design-lab-screens/README.md) is
-`review_ready`. Root-cause reproduction confirmed accessible-name and offscreen-text
-harness faults. Local10 passes all 60 focused cases and three journeys; local11
-passes TypeScript, approval/source checks, 508 rendering cases and 20 groups.
-The [task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
-retains all earlier failures and final local11/11 use. No repair is pending.
-All approval entries remain null; layout selection and recorded approval precede
-live Screens implementation. Browser controls use fictional memory only.
+The user prefers Screen notebook. Its revised [Screens draft](../design/design-lab-screens/README.md)
+is `review_ready`, with plain directions, help tooltips, front/back ordering and a
+larger preview with border resizing and Focus preview. The original three layouts
+remain available. Refinement local3 passes 80 focused cases and four journeys;
+local4 passes TypeScript, approval/source checks, 528 rendering cases and 20 groups.
+The [refinement record](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-notebook-refinement--2026-10-21)
+owns final local4/4 use and the two earlier focused failures. No repair is pending.
+All four approval entries remain null. User selection and recorded approval precede
+live Screens implementation. Browser controls use fictional memory only; the earlier
+source proof's local11/11 and native/CI allowances stay closed.
 
 ## Earlier full-app mockups
 
 The [12-page comparison](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
 retains its earlier `review_ready` result of 448 cases and 19 groups. Its 24 app
-layouts and the starter remain unapproved; Screens adds three candidates separately.
+layouts and the starter remain unapproved; Screens adds four candidates separately.
 The earlier work was published before this branch. [Page notes](../design/design-lab-app/README.md)
 describe fictional memory-only controls and prior references. Promotion still needs
 explicit selection.
