@@ -210,13 +210,17 @@ the same fictional Help panel/dialog and protected-template inventory.
 | Canvas desk | Player view above a hierarchy/property dock | [Canvas](http://127.0.0.1:5174/?screen=screens&variant=canvas) |
 | Screen notebook | Compose/Arrange/Connect notebook beside the player view | [Notebook](http://127.0.0.1:5174/?screen=screens&variant=guided) |
 
-Published candidate `8e2aacb5a6d4ecc22003685e63c8d2b756dcb442`, tree
-`6492d40e241a54a1f6c72ffd4ba4b46e0c8f1f0d`, is verified at the remote branch.
-`design:source` records fingerprint
+The local9 code candidate is `8e2aacb5a6d4ecc22003685e63c8d2b756dcb442`, tree
+`6492d40e241a54a1f6c72ffd4ba4b46e0c8f1f0d`, published before that run.
+Its `design:source` fingerprint is
 `058e6b09bf687c4fe0ba7651b405692117f6d47f943d4ab70541fa1feb45846e`.
-This identity includes the explicit-label correction tested in local9. The latest
-focused check correction follows it; its source identity is recorded at publication.
-Neither candidate is a passing verification or approval record.
+
+The current prepared candidate is `db9abbe411cf3369927407864c8371d330cb7099`, tree
+`51b5eb660ff5135a01e357af7b31b46246f3272c`, published and verified on the remote branch.
+Its `design:source` fingerprint is
+`56c9e3c8688e96aa73bb111a2ffeb7b733b1fd48b16da55552fcce3d73c3dfb7`.
+It includes the unverified action-row check correction. Neither candidate is a
+passing verification or approval record.
 Documentation-only successors preserve that distinction and the earlier SDK candidate.
 
 The floating switcher uses `?variant=` and protects edited samples before reset.
