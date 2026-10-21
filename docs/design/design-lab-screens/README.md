@@ -18,9 +18,10 @@ and changes that reset on reload.
   opens the separate story example. Removal stays inside the Elements panel.
 - [Screen builder](http://127.0.0.1:5174/?screen=screens&variant=flow) puts a Choose /
   Design / Connect rail above a persistent preview. One task card sits on the right.
-  Choose prioritizes text, images and buttons before groups. Selecting an item opens
-  its Design card. Front & back expands there. Connect shows button actions and the
-  story example. The rail allows returning to any step at any time.
+  Choose reuses Screen notebook's nested element list, with a small type icon and
+  hover/focus help on each row. Selecting an item opens its Design card. Front &
+  back expands there. Connect names the selected element, shows its type in smaller
+  text, and explains its available actions. The rail allows returning to any step.
 
 ## Research and design choices
 
@@ -32,7 +33,7 @@ icons and app shell. No external app assets or code were copied.
 | Official source and inspected image | Observed UI | Choice in this comparison |
 | --- | --- | --- |
 | [Penpot interface tour](https://help.penpot.app/user-guide/first-steps/the-interface/) and [workspace image](https://help.penpot.app/img/interface/workspace-dark.webp) | Compact floating tools, selection outline/handles, Design / Prototype / Inspect tabs | Canvas focus separates short selection commands from optional detailed editing. |
-| [Unity UI Builder overview](https://docs.unity.com/en-us/engine/6000.3/manual/uitoolkits/uielements/uibuilder/uib-interface-overview) and [window image](https://docs.unity.com/api/media?file=/engine/6000.3/media/images/UIBuilderAnnotatedMainWindow.png) | Named selection, a small object toolbar, icon-and-label library tiles, stable Fit/zoom/preview tools | Canvas focus keeps view controls stable; Screen builder uses named element tiles. |
+| [Unity UI Builder overview](https://docs.unity.com/en-us/engine/6000.3/manual/uitoolkits/uielements/uibuilder/uib-interface-overview) and [window image](https://docs.unity.com/api/media?file=/engine/6000.3/media/images/UIBuilderAnnotatedMainWindow.png) | Named selection, a small object toolbar, icon-and-label library tiles, stable Fit/zoom/preview tools | Canvas focus keeps view controls stable. Screen builder initially tried tiles; the user then selected the notebook's nested list with type icons. |
 | [Godot theme editor](https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_theme_editor.html) and [picker image](https://docs.godotengine.org/en/stable/_images/theme_preview_picker.webp) | Picker highlights and names the pointed-at element; preview shows control states | Element help identifies purpose, with sample button states available in Connect. |
 
 Experience First favors the select, edit and see-result loop. Detailed forms reserve
@@ -43,8 +44,10 @@ reuse the same fictional editing actions so their behavior is comparable.
 
 ## Shared controls
 
-Hover or focus an element in the list to learn what its type does. Arrow keys browse
-without leaving that list. The Elements heading and Add element type have `?` help.
+Hover or focus an element in the list to learn what its type does. Indentation shows
+its parent groups; rows follow group and sibling order. Each type has a small icon
+using the production icon's stroke and size. Arrow keys browse without leaving that
+list. The Elements heading and Add element type have `?` help.
 Changing the type updates its description and help. Other help explains anchors,
 shared looks, value bars, button actions, screen behavior and preview size. Click,
 hover or focus a help control to read it; Escape closes it.
@@ -53,6 +56,17 @@ Select an item in the preview or list. Apply changes keeps its draft; Cancel cha
 restores its previous values. Shared headings ask which screens should change. Undo
 reverses one accepted change. Unfinished drafts survive selection, screen changes,
 focus mode and resizing. Invalid values or a changed script retain the draft.
+
+Drag any element to select and move it on the first press. Drag its eight edge and
+corner handles to resize it; Shift-drag also resizes from the bottom right. Images
+keep their proportions when that option is checked. Resizing keeps the opposite
+edges fixed, including with centered anchors and fractional positions. Pointer
+changes snap to 8 game pixels and stop at a minimum size of 24×24. Focus a handle
+and use arrows for one-pixel changes, or Shift for eight. Escape cancels a drag;
+Undo reverses a completed move or resize. Moving a group moves its contents.
+The Help examples use a free layout group so individual items can move. Automatic
+groups still arrange their children; their handles allow resizing, while movement
+requires changing item order, moving the group or choosing a free layout parent.
 
 Bring forward and Send backward move an element one place within its parent group.
 Later siblings cover earlier ones where they overlap. Groups keep their children
@@ -69,9 +83,13 @@ rectangle; 75% and 100% allow scrolling at game pixel sizes. Focus preview hides
 editing controls. Escape or Back to editing restores them. Compact layouts put the
 preview first and keep controls reachable by scrolling.
 
-The story example distinguishes an overlay that stays open during dialogue from a
-dialog that pauses the story. Close and Escape dismiss both. Clicking outside leaves
-them open. A dialog continues once after dismissal. Canvas buttons select elements;
+Change preview values edits example variables shown in text and value bars. Button
+appearance affects buttons only. These controls stay open while values change.
+Test opening and closing distinguishes an overlay that stays open during dialogue
+from a dialog that pauses the story. Continue dialogue advances the example text.
+Close and Escape dismiss both screens. Clicking outside leaves them open. A dialog
+continues once after dismissal. These are browser examples; Test in Ren'Py explains
+that it does not launch the game. Canvas buttons select elements;
 they do not run game actions. Required dialogue, choice, menu, navigation, preferences
 and save/load controls remain protected while their appearance can be edited.
 
@@ -84,15 +102,18 @@ components and button states are simplified. Components have no parameters. Nati
 rendering, source preservation, asset discovery, Story Beats and durable editing need
 separate product integration and evidence under the selected task.
 
-The refresh is ready for review. Local4 passes all 60 focused Screens cases and
-three complete journeys. Local5 passes TypeScript, approval/source checks, 508 lab
-rendering cases and 20 check groups on Chromium 155.0.8059.86, with no browser
-errors. Visual review covers both themes at 1100×720 and 560×640, plus the new
-editing states. All 12 combined Screens captures match the reviewed focused set.
-Reports and images remain ignored under `.toolchains/phase3b/refresh-focused-04/`
-and `refresh-combined-05/`. The task owns source identity and final local5/6 use.
-No repair or verification remains pending. Prior notebook refinement local4/4 and the original
-comparison local11/11 stay historical. The separate source/runtime proof remains
+The copy/direct-manipulation refinement is ready for review. Combined local6 passes
+TypeScript, approval/source checks, all 508 rendering cases and 20 interaction groups
+on Chromium 155.0.8059.86, with no browser errors. All three Screens journeys pass,
+including the nested chooser, tooltips, resizing and Undo. Visual review covers all
+12 matrix captures in both themes at 1100×720 and 560×640, plus Choose and Connect
+editing states. Reports, images and review receipt remain ignored under
+`.toolchains/phase3b/copy-combined-06/`. The owning
+[task record](../../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-copy-and-direct-manipulation--2026-10-21)
+retains each failure, repair and tested source identity. Final use is copy local6/7;
+the unused repair cycle is closed. Prior refresh5/6, notebook refinement4/4 and
+original comparison11/11 stay historical. No check or repair remains pending.
+The separate source/runtime proof remains
 qualified at `0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run `39555526201`.
 No later browser commit replaces that proof. No native or CI check is selected here.
 

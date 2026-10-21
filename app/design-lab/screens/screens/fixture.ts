@@ -16,7 +16,7 @@ export function node(id: string, kind: string, name: string, x = 320, y = 216, w
 export function help(id: string, mode: Screen["mode"]): Screen {
   const fixed = node("root", "fixed", "Screen root", 0, 0, 1280, 720); fixed.parent = "";
   const frame = node("frame", "frame", "Help frame", 280, 180, 720, 360); frame.parent = "root";
-  const stack = node("stack", "vbox", "Content stack", 312, 204, 656, 304); stack.parent = "frame";
+  const stack = node("stack", "fixed", "Content group", 312, 204, 656, 304); stack.parent = "frame";
   const title = node("title", "text", "Help title", 328, 214, 610, 46); title.text = "Your next stop"; title.bold = true; title.shared = true;
   const body = node("body", "text", "Instructions", 328, 274, 360, 120); body.text = "Choose a route. Talk to Ada at [destination]."; body.size = "22";
   const image = node("map", "image", "Tram map", 718, 278, 214, 124);

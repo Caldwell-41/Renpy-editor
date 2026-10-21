@@ -4,8 +4,9 @@ import { action, element as el, labelled, labPage } from "../../page.ts";
 import { icon } from "../../../src/icons.ts";
 import { prototypeSwitcher } from "../../prototype-switcher.ts";
 import { variants } from "./definition.ts";
-import { elementHelp } from "./elements.ts";
+import { elementHelp, elementIcon } from "./elements.ts";
 import { directLayout, flowLayout } from "./layouts.ts";
+import { bottomRight, resized, resizeEdges, type ResizeEdge } from "./resize.ts";
 import { fixture, help, kinds, node, variables, type Screen, type ScreenNode, type Action } from "./fixture.ts";
 import "./screens.css";
 import "./notebook.css";
@@ -17,7 +18,7 @@ function select(options: readonly (readonly [string, string])[], value: string) 
   const input = el("select"); options.forEach(([id, title]) => input.add(new Option(title, id))); input.value = value; return input;
 }
 const pairs = (items: readonly string[]) => items.map(item => [item, item] as const);
-const kindNames: Record<string, string> = { fixed: "Free-position group", frame: "Panel", window: "Window", vbox: "Vertical group", hbox: "Horizontal group", grid: "Grid", text: "Text", image: "Image", textbutton: "Button", imagebutton: "Image button", bar: "Value bar", viewport: "Scrolling area", component: "Reusable group" };
+const kindNames: Record<string, string> = { fixed: "Free layout group", frame: "Panel", window: "Window", vbox: "Vertical group", hbox: "Horizontal group", grid: "Grid", text: "Text", image: "Image", textbutton: "Button", imagebutton: "Image button", bar: "Value bar", viewport: "Scrolling area", component: "Reusable group" };
 const kindName = (kind: string) => kindNames[kind] ?? kind;
 const valueTypes: Record<string, string> = { bool: "Yes/no", int: "Whole number", string: "Text" };
 const valueType = (kind: string) => valueTypes[kind] ?? kind;
@@ -27,7 +28,8 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   let screenId = context.state === "template" ? "template-0" : context.state === "dialog" ? "help-dialog" : screens[0]!.id;
   let selected = context.state === "template" ? "frame" : "title";
   const drafts = new Map<string, ScreenNode>();
-  let conflict = context.state === "conflict", gesture: { node: ScreenNode; startX: number; startY: number; dx: number; dy: number; resize: boolean } | undefined;
+  let conflict = context.state === "conflict", gesture: { node: ScreenNode; children: ScreenNode[]; startX: number; startY: number; dx: number; dy: number; resize?: ResizeEdge } | undefined;
+  let skipCanvasClick = false;
   let lastPreview = "Game testing has not been requested.", previewRevision = 0, previewScreenId = "", sampleAppearance = "normal", zoom = "Fit", aspect = "1280 × 720", step = "compose";
   let storyVisible = false, storyWaiting = false, continuations = 0, output = "The last tram is waiting.", sequence = 0;
   let storyExpanded = false, samplesExpanded = false;
@@ -58,7 +60,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   const undo = action("Undo", () => { if (anyDirty()) { status("Apply or cancel your changes before undoing.", true); return; } if (history.length) { future.push(copy(screens)); screens = history.pop()!; drafts.clear(); render(); status("Change undone."); } });
   const redo = action("Redo", () => { if (anyDirty()) { status("Apply or cancel your changes before redoing.", true); return; } if (future.length) { history.push(copy(screens)); screens = future.pop()!; drafts.clear(); render(); status("Change restored."); } });
   frame.tools.append(action("New screen", newScreen, true), undo, redo, action("Test in Ren'Py", () => {
-    previewRevision = current().revision; previewScreenId = screenId; lastPreview = `Desktop testing is not connected in this demo. ${current().name} is ready to test when this feature is built.`; renderInfo(); status(lastPreview);
+    previewRevision = current().revision; previewScreenId = screenId; lastPreview = "This mockup does not open Ren'Py. Use Test opening and closing under Connect to check the example screen."; renderInfo(); status(lastPreview);
   }));
   const screenbar = el("div", "sc-screenbar");
   const picker = select(screens.map(s => [s.id, s.name]), screenId); picker.ariaLabel = "Screen";
@@ -166,7 +168,14 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     render(); status(layoutParent(n) ? "Item order changed. This group arranges its items automatically." : offset > 0 ? "Element moved forward." : "Element moved backward.");
   }
 
-  function saveHistory() { history.push(copy(screens)); future.length = 0; }
+  function saveHistory() {
+    // Unchanged forms must not become stale drafts when a group or shared look changes.
+    for (const [id, value] of drafts) {
+      const [sid, nid] = id.split(":"), saved = screens.find(s => s.id === sid)?.nodes.find(n => n.id === nid);
+      if (saved && JSON.stringify(saved) === JSON.stringify(value)) drafts.delete(id);
+    }
+    history.push(copy(screens)); future.length = 0;
+  }
   function choose(id: string, browse = false) { selected = id; if (!browse) { if (layout !== "guided-v2" && step !== "behavior") step = "layout"; view?.select(); } render(); }
   function dialog(title: string, text: string) {
     const d = el("dialog", "lp-dialog sc-dialog"); d.ariaLabel = title;
@@ -201,13 +210,14 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     if (context.state === "empty" && !screens.some(s => !s.template)) hierarchy.append(el("p", "muted", "Create your first screen with a Help example or a blank page."), action("Create first Help screen", newScreen, true));
     const tree = el("div", "sc-tree"); tree.role = "tree"; tree.ariaLabel = "Screen elements";
     const elements = orderedNodes();
-    if (layout === "flow") elements.sort((a, b) => Number(current().nodes.some(n => n.parent === a.id)) - Number(current().nodes.some(n => n.parent === b.id)));
     elements.forEach(n => {
       const b = action(`${n.name} · ${kindName(n.kind)}`, () => choose(n.id)); b.role = "treeitem"; b.ariaSelected = String(selected === n.id); b.dataset.nodeId = n.id;
       b.className = `sc-tree-node${selected === n.id ? " selected" : ""}`;
-      if (layout === "flow") b.prepend(icon(["image", "imagebutton"].includes(n.kind) ? "assets" : ["text", "textbutton"].includes(n.kind) ? "lorebook" : "panel"));
+      const name = el("span", "", b.textContent ?? ""); b.replaceChildren(elementIcon(n.kind), name);
       explain(b, `${kindName(n.kind)}. ${elementHelp[n.kind] ?? "An element on this screen."}`);
-      b.style.paddingLeft = `${10 + (n.parent === "stack" ? 24 : n.parent === "frame" ? 16 : n.parent ? 8 : 0)}px`;
+      let depth = 0, parent = n.parent;
+      while (parent) { depth++; parent = current().nodes.find(item => item.id === parent)?.parent ?? ""; }
+      b.style.paddingLeft = `${10 + depth * 12}px`; b.ariaLevel = String(depth + 1);
       b.onkeydown = e => {
         const ordered = elements, index = ordered.findIndex(x => x.id === selected);
         if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); choose(ordered[Math.max(0, Math.min(ordered.length - 1, index + (e.key === "ArrowDown" ? 1 : -1)))]!.id, true); hierarchy.querySelector<HTMLElement>(`[data-node-id="${selected}"]`)?.focus(); }
@@ -244,12 +254,18 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   }
   function renderCanvas() {
     canvasObserver?.disconnect();
+    // Read the live disclosure state before replacing controls; toggle events are asynchronous.
+    const previousSamples = playground.querySelector<HTMLDetailsElement>(".sc-samples"), previousStory = playground.querySelector<HTMLDetailsElement>(".sc-story");
+    if (previousSamples) samplesExpanded = previousSamples.open;
+    if (previousStory) storyExpanded = previousStory.open;
+    if (step === "behavior" && playground.dataset.step !== step) storyExpanded = true;
+    playground.dataset.step = step;
     stage.replaceChildren(); playground.replaceChildren();
     const toolbar = el("div", "sc-canvas-toolbar"); toolbar.append(el("h2", "", "Game preview"));
     const ratio = select(pairs(["1280 × 720", "960 × 720"]), aspect); ratio.ariaLabel = "Game size"; ratio.onchange = () => { aspect = ratio.value; renderCanvas(); renderInfo(); };
     const zoomInput = select(pairs(["Fit", "75%", "100%"]), zoom); zoomInput.ariaLabel = "Zoom"; zoomInput.onchange = () => { zoom = zoomInput.value; renderCanvas(); renderInfo(); };
     const focus = action(focusPreview ? "Back to editing" : "Focus preview", () => { focusPreview = !focusPreview; setViewSize(); renderCanvas(); stage.querySelector<HTMLButtonElement>(".nb-focus-button")?.focus(); }); focus.classList.add("nb-focus-button"); focus.ariaPressed = String(focusPreview);
-    toolbar.append(ratio, zoomInput, focus, helpTip("preview size", "Drag the divider toward the editing panel for a wider preview, or the bottom border for a taller preview. The corner changes both. Use arrow keys when a border is focused. Escape cancels a drag. Game size changes separately in its menu.")); stage.append(toolbar);
+    toolbar.append(ratio, zoomInput, focus, helpTip("preview size", "Drag the divider toward the editing panel for a wider preview, or the bottom border for a taller preview. The corner changes both. Use arrow keys when a border is focused. Escape cancels a drag. Game size changes separately in its menu."), helpTip("moving elements", "Drag an element to move it. Drag its edge or corner handles to resize it, or hold Shift while dragging the element. Images keep their proportions when Keep image proportions is checked. Escape cancels. Movement snaps to 8 game pixels. Items in vertical, horizontal or grid groups use automatic placement; resize them with their handles, change their order, or move the group.")); stage.append(toolbar);
     const note = el("p", "sc-canvas-caption", "Click an element to edit it. Buttons in this preview do not run game actions."); stage.append(note);
     const scroll = el("div", "sc-canvas-scroll"), canvas = el("div", "sc-game"); canvas.ariaLabel = "Game preview";
     canvas.style.aspectRatio = aspect === "1280 × 720" ? "16 / 9" : "4 / 3";
@@ -269,47 +285,94 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
       else if (n.kind === "image" || n.kind === "imagebutton") { b.textContent = "Station  •••  Harbour"; b.classList.add("sc-map"); }
       else if (n.kind === "bar") { b.textContent = `${n.variable}  ${sample.courage} / ${n.maximum}`; b.style.background = `linear-gradient(90deg,var(--accent-primary) ${sample.courage}%,var(--surface-panel) ${sample.courage}%)`; }
       else if (!["frame", "fixed"].includes(n.kind)) b.textContent = n.name;
-      b.dataset.appearance = appearance;
-      b.onclick = () => { if (!gesture) choose(n.id); };
-      b.onpointerdown = e => {
-        if (selected !== n.id || e.button !== 0) return;
-        if (changed()) { status("Apply or cancel your changes before dragging.", true); return; }
-        const parent = layoutParent(n);
-        if (parent) { status(`This ${kindName(parent.kind).toLowerCase()} places its items automatically. Change their order or the group spacing.`); return; }
-        const resize = e.shiftKey; gesture = { node: copy(n), startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, resize };
+      b.dataset.appearance = ["textbutton", "imagebutton"].includes(n.kind) ? appearance : "normal";
+      b.onclick = () => { if (!gesture && !skipCanvasClick) choose(n.id); };
+      let selectionBox: HTMLElement | undefined;
+      const paintSelection = (geometry: Pick<ScreenNode, "x" | "y" | "width" | "height">) => {
+        if (!selectionBox) return;
+        const px = Number(geometry.x) * (n.coordinates === "relative" ? width : 1), py = Number(geometry.y) * (n.coordinates === "relative" ? 720 : 1);
+        selectionBox.style.left = `${100 * (px - Number(n.anchorX) * Number(geometry.width)) / width}%`;
+        selectionBox.style.top = `${100 * (py - Number(n.anchorY) * Number(geometry.height)) / 720}%`;
+        selectionBox.style.width = `${100 * Number(geometry.width) / width}%`; selectionBox.style.height = `${100 * Number(geometry.height) / 720}%`;
+      };
+      const beginGesture = (e: PointerEvent, edge?: ResizeEdge) => {
+        if (e.button !== 0) return; skipCanvasClick = false; closeHelp?.();
+        if (anyDirty()) { status("Apply or cancel your changes before dragging.", true); return; }
+        const resize = edge ?? (e.shiftKey ? bottomRight : undefined), parent = layoutParent(n);
+        if (parent && !resize) { status(`${parent.name} arranges its items automatically. Resize the item, move the group, or change its order under Front & back.`); return; }
+        selected = n.id;
+        canvas.querySelectorAll<HTMLButtonElement>("[data-canvas-id]").forEach(item => { item.classList.toggle("selected", item.dataset.canvasId === selected); item.ariaPressed = String(item.dataset.canvasId === selected); });
+        if (!edge) canvas.querySelectorAll(".sc-selection-box").forEach(box => box.remove());
+        gesture = { node: copy(n), children: copy(orderedNodes(n.id)), startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, resize };
         b.setPointerCapture(e.pointerId); e.preventDefault();
       };
+      b.onpointerdown = e => beginGesture(e);
       b.onpointermove = e => {
         if (!gesture) return;
         const rect = canvas.getBoundingClientRect(); gesture.dx = Math.round((e.clientX - gesture.startX) * width / rect.width / 8) * 8; gesture.dy = Math.round((e.clientY - gesture.startY) * 720 / rect.height / 8) * 8;
-        if (gesture.resize) { b.style.width = `${100 * Math.max(24, Number(n.width) + gesture.dx) / width}%`; b.style.height = `${100 * Math.max(24, Number(n.height) + gesture.dy) / 720}%`; }
-        else { b.style.left = `${100 * (x + gesture.dx) / width}%`; b.style.top = `${100 * (y + gesture.dy) / 720}%`; }
-        status("Release to keep the move. Escape cancels it. Hold Shift to resize instead. Movement snaps to 8 game pixels.");
+        if (gesture.resize) {
+          const geometry = resized(gesture.node, gesture.resize, gesture.dx, gesture.dy, width);
+          b.style.left = `${100 * Number(geometry.x) * (n.coordinates === "relative" ? width : 1) / width}%`; b.style.top = `${100 * Number(geometry.y) * (n.coordinates === "relative" ? 720 : 1) / 720}%`;
+          b.style.width = `${100 * Number(geometry.width) / width}%`; b.style.height = `${100 * Number(geometry.height) / 720}%`; paintSelection(geometry);
+        }
+        else { b.style.left = `${100 * (x + gesture.dx) / width}%`; b.style.top = `${100 * (y + gesture.dy) / 720}%`;
+          for (const child of gesture.children) { const item = canvas.querySelector<HTMLElement>(`[data-canvas-id="${child.id}"]`); if (item) { item.style.left = `${100 * (Number(child.x) * (child.coordinates === "relative" ? width : 1) + gesture.dx) / width}%`; item.style.top = `${100 * (Number(child.y) * (child.coordinates === "relative" ? 720 : 1) + gesture.dy) / 720}%`; } }
+        }
+        status(gesture.resize ? "Release to keep this size. Escape cancels it." : "Release to keep the move. Escape cancels it.");
       };
       b.onpointerup = () => {
-        if (!gesture) return; const g = gesture; gesture = undefined;
-        if (g.dx || g.dy) { saveHistory(); if (g.resize) { n.width = String(Math.max(24, Number(n.width) + g.dx)); n.height = String(Math.max(24, Number(n.height) + g.dy)); } else { n.x = String(Number(n.x) + g.dx / (n.coordinates === "relative" ? width : 1)); n.y = String(Number(n.y) + g.dy / (n.coordinates === "relative" ? 720 : 1)); } current().revision++; drafts.delete(key()); render(); status("Move applied. Undo restores its previous size and position."); }
+        if (!gesture) return; const g = gesture; gesture = undefined; skipCanvasClick = true;
+        if (g.dx || g.dy) { saveHistory(); if (g.resize) { Object.assign(n, resized(g.node, g.resize, g.dx, g.dy, width)); } else {
+          for (const original of [g.node, ...g.children]) { const item = current().nodes.find(item => item.id === original.id)!; item.x = String(Number(original.x) + g.dx / (original.coordinates === "relative" ? width : 1)); item.y = String(Number(original.y) + g.dy / (original.coordinates === "relative" ? 720 : 1)); }
+        } current().revision++; drafts.delete(key()); choose(n.id); status(g.resize ? "Size changed. Undo restores the previous size." : "Element moved. Undo restores the previous position."); }
+        else choose(n.id);
       };
+      b.onpointercancel = () => { if (gesture) { gesture = undefined; render(); status("Move cancelled."); } };
       b.onkeydown = e => {
         if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
         e.preventDefault(); const parent = layoutParent(n); if (parent) { status(`This ${kindName(parent.kind).toLowerCase()} places its items automatically. Change their order or the group spacing.`); return; }
-        const d = draft()!; const coordinate = e.key === "ArrowLeft" || e.key === "ArrowRight" ? "x" : "y"; d[coordinate] = String(Number(d[coordinate]) + ((e.key === "ArrowLeft" || e.key === "ArrowUp") ? -1 : 1) * (e.shiftKey ? 8 : 1) / (d.coordinates === "relative" ? (coordinate === "x" ? width : 720) : 1)); renderInspector(); renderInfo(); status("Position changed. Choose Apply to keep it or Cancel to restore it.");
+        if (selected !== n.id) choose(n.id);
+        const d = draft()!; const coordinate = e.key === "ArrowLeft" || e.key === "ArrowRight" ? "x" : "y"; d[coordinate] = String(Number(d[coordinate]) + ((e.key === "ArrowLeft" || e.key === "ArrowUp") ? -1 : 1) * (e.shiftKey ? 8 : 1) / (d.coordinates === "relative" ? (coordinate === "x" ? width : 720) : 1)); renderInspector(); renderInfo(); status("Position changed. Choose Apply changes to keep it or Cancel changes to restore it.");
       }; canvas.append(b);
+      if (selected === n.id) {
+        selectionBox = el("div", "sc-selection-box"); paintSelection(n);
+        for (const edge of resizeEdges) {
+          const handle = el("button", `sc-element-resize sc-element-resize-${edge.id}`); handle.type = "button"; handle.ariaLabel = `Resize ${n.name} ${edge.label}`;
+          handle.title = "Drag to resize. Arrow keys make small changes. Shift uses larger changes. Escape cancels a drag.";
+          handle.onpointerdown = e => { e.stopPropagation(); beginGesture(e, edge); };
+          handle.onclick = e => { e.preventDefault(); e.stopPropagation(); };
+          handle.onkeydown = e => {
+            if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+            e.preventDefault(); if (anyDirty()) { status("Apply or cancel your changes before resizing.", true); return; }
+            const amount = e.shiftKey ? 8 : 1, dx = e.key === "ArrowLeft" ? -amount : e.key === "ArrowRight" ? amount : 0, dy = e.key === "ArrowUp" ? -amount : e.key === "ArrowDown" ? amount : 0;
+            const geometry = resized(n, edge, dx, dy, width);
+            if (geometry.width === n.width && geometry.height === n.height) return;
+            saveHistory(); Object.assign(n, geometry); current().revision++; render(); stage.querySelector<HTMLButtonElement>(`.sc-element-resize-${edge.id}`)?.focus(); status("Size changed. Undo restores the previous size.");
+          };
+          selectionBox.append(handle);
+        }
+        canvas.append(selectionBox);
+      }
     }
-    const canvasHelp = el("p", "muted sc-note", "Drag an element to move it. Hold Shift while dragging to resize it. Automatically arranged items move with their group.");
+    const canvasHelp = el("p", "muted sc-note", target() && layoutParent(target()!) ? "This group places its items automatically. Drag handles to resize; change item order to move." : "Drag an element to move it. Drag its handles to resize. Escape cancels.");
     scroll.append(canvas); stage.append(scroll, canvasHelp);
-    const sampleControls = el("details", "sc-samples"); sampleControls.append(el("summary", "", "Try values and button states"));
+    const sampleControls = el("details", "sc-samples"), valuesHeading = el("summary", "", "Change preview values");
+    valuesHeading.append(helpTip("preview values", "Game variables can change the words and numbers shown on a screen. Enter example values here to check the layout. Button appearance lets you see a button normally, under the pointer, selected or unavailable. These settings affect only the preview."));
+    sampleControls.append(valuesHeading, el("p", "muted", "Change the example values shown in text and bars, or check how buttons look under the pointer."));
     sampleControls.open = samplesExpanded; sampleControls.ontoggle = () => { if (sampleControls.isConnected) samplesExpanded = sampleControls.open; };
-    const appearanceInput = select(pairs(["normal", "hover", "selected", "disabled"]), sampleAppearance); appearanceInput.ariaLabel = "Button state"; appearanceInput.onchange = () => { sampleAppearance = appearanceInput.value; renderCanvas(); renderInfo(); };
-    sampleControls.append(labelled("Button state", appearanceInput));
-    variables.forEach(v => { const input = el("input"); input.value = sample[v.id as keyof typeof sample]; input.ariaLabel = `Try ${v.id}`; input.onchange = () => { if ((v.type === "int" && !/^-?\d+$/.test(input.value)) || (v.type === "bool" && !["true", "false"].includes(input.value))) { status(`Enter a ${valueType(v.type).toLowerCase()} value.`, true); return; } sample[v.id as keyof typeof sample] = input.value; renderCanvas(); renderInfo(); }; sampleControls.append(labelled(`${v.id} (${valueType(v.type)})`, input)); });
-    sampleControls.append(el("p", "muted", "These values only change this preview. Your game variables are unchanged.")); playground.append(sampleControls);
-    const journey = el("details", "sc-story"); journey.open = storyExpanded || step === "behavior"; journey.ontoggle = () => { if (journey.isConnected) storyExpanded = journey.open; }; journey.append(el("summary", "", "Try it in the story"));
+    const appearanceInput = select([["normal", "Normal"], ["hover", "Pointer over button"], ["selected", "Selected"], ["disabled", "Unavailable"]], sampleAppearance); appearanceInput.ariaLabel = "Button appearance"; appearanceInput.onchange = () => { sampleAppearance = appearanceInput.value; renderCanvas(); renderInfo(); };
+    sampleControls.append(labelled("Button appearance", appearanceInput));
+    variables.forEach(v => { const input = v.type === "bool" ? select([["false", "No"], ["true", "Yes"]], sample[v.id as keyof typeof sample]) : el("input"); input.value = sample[v.id as keyof typeof sample]; input.ariaLabel = `Example value for ${v.id}`; input.onchange = () => { if (v.type === "int" && !/^-?\d+$/.test(input.value)) { status("Enter a whole number for this example value.", true); return; } sample[v.id as keyof typeof sample] = input.value; renderCanvas(); renderInfo(); }; sampleControls.append(labelled(`${v.id} (${valueType(v.type)})`, input)); });
+    sampleControls.append(el("p", "muted", "These example values affect this preview only. Your game keeps its own values.")); playground.append(sampleControls);
+    const journey = el("details", "sc-story"); journey.open = storyExpanded; journey.ontoggle = () => { if (journey.isConnected) storyExpanded = journey.open; };
+    const journeyHeading = el("summary", "", "Test opening and closing"); journeyHeading.append(helpTip("screen test", "Open this screen, then continue the example dialogue. An overlay lets dialogue continue while it stays visible. A dialog waits until Close or Escape. Clicking outside leaves either screen open. This test checks those rules without launching Ren'Py."));
+    journey.append(journeyHeading, el("p", "muted", current().mode === "panel" ? "Show the overlay, then continue the example dialogue. The overlay stays open as the story continues." : "Open the dialog, then continue the example dialogue. The story waits until you close the dialog."));
     const storyButtons = el("div", "sc-actions");
-    storyButtons.append(action("Show overlay", () => { if (current().mode === "blocking") { status("This screen pauses the story. Choose Open dialog.", true); return; } storyVisible = true; storyWaiting = false; output = "The overlay is open. You can continue the story."; renderCanvas(); }), action("Hide overlay", () => { if (current().mode === "blocking") { status("Use Close dialog to return to the story.", true); return; } storyVisible = false; output = "The overlay is closed."; renderCanvas(); }), action("Open dialog", () => { if (current().mode !== "blocking") { status("Choose Help dialog above to try a screen that pauses the story.", true); return; } storyVisible = true; storyWaiting = true; output = "The dialog is open. Close it to continue the story."; renderCanvas(); }), action("Next line", () => { output = storyWaiting ? "Close the dialog before continuing." : storyVisible ? "Ada keeps speaking. The overlay stays open." : "Ada continues speaking."; renderCanvas(); }));
+    storyButtons.append(action("Show overlay", () => { if (current().mode === "blocking") { status("This screen pauses the story. Choose Open dialog.", true); return; } storyVisible = true; storyWaiting = false; output = "The overlay is open. You can continue the story."; renderCanvas(); }), action("Hide overlay", () => { if (current().mode === "blocking") { status("Use Close dialog to return to the story.", true); return; } storyVisible = false; output = "The overlay is closed."; renderCanvas(); }), action("Open dialog", () => { if (current().mode !== "blocking") { status("Choose Help dialog above to try a screen that pauses the story.", true); return; } storyVisible = true; storyWaiting = true; output = "The dialog is open. Close it to continue the story."; renderCanvas(); }), action("Continue dialogue", () => { output = storyWaiting ? "Close the dialog before continuing." : storyVisible ? "Ada keeps speaking. The overlay stays open." : "Ada continues speaking."; renderCanvas(); }));
     const dismiss = () => { if (!storyVisible) { output = "The screen is already closed."; renderCanvas(); return; } storyVisible = false; if (storyWaiting) { storyWaiting = false; continuations++; } output = `Screen closed. The story has continued ${continuations} ${continuations === 1 ? "time" : "times"}.`; renderCanvas(); };
     storyButtons.append(action(current().mode === "panel" ? "Close overlay" : "Close dialog", dismiss), action("Press Escape", dismiss), action("Click outside", () => { output = "Clicking outside leaves the screen open."; renderCanvas(); }));
-    journey.append(storyButtons, el("p", "sc-story-status", output), el("p", "muted", "This story example is a demo. It does not launch your game.")); playground.append(journey);
+    storyButtons.querySelectorAll("button").forEach(button => { button.hidden = current().mode === "blocking" ? ["Show overlay", "Hide overlay"].includes(button.textContent!) : button.textContent === "Open dialog"; });
+    journey.append(storyButtons, el("p", "sc-story-status", output), el("p", "muted", "This test uses example dialogue. It does not start Ren'Py or change your game.")); playground.append(journey);
     const bottom = resizeHandle("Resize preview height", "height"), corner = resizeHandle("Resize preview corner", "corner");
     stage.append(bottom, corner);
     const fit = () => {
@@ -321,12 +384,12 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   function renderInspector() {
     inspector.replaceChildren(); const d = draft(); if (!d) return;
     inspector.append(el("h2", "", d.name));
-    const state = el("p", "sc-draft-status"); state.textContent = changed() ? "Unapplied changes" : "No pending changes"; inspector.append(state);
+    const state = el("p", "sc-draft-status"); state.textContent = changed() ? "Changes waiting to be applied" : "No changes to apply"; inspector.append(state);
     if (current().template) inspector.append(el("p", "sc-protected", "You can change the look of this game screen. Its required text and controls stay in place so it keeps working."));
     const applyBar = el("div", "sc-apply"); applyBar.append(action("Apply changes", () => applyDraft()), action("Cancel changes", () => { drafts.delete(key()); renderInspector(); renderInfo(); status("Changes cancelled. Previous values restored."); })); inspector.append(applyBar);
     const group = (title: string, opened = false) => { const details = el("details", "sc-property-group"); details.dataset.group = title; details.open = opened; details.append(el("summary", "", title)); inspector.append(details);
       const explanations: Record<string, string> = {
-        "Position & size": "Position sets where an element sits. An anchor chooses which point on the element meets that position. Use 0 for the start, 0.5 for the center, and 1 for the end. Fractional positions use the game width and height; 0.5 is halfway.",
+        "Position & size": "Position sets where an element sits. An anchor chooses the point on the element placed there. Use 0 for the start, 0.5 for the center, and 1 for the end. Fractional positions use the game size. Padding is space inside a group; spacing is the gap between its items.",
         "Reuse this look": "A shared look keeps matching elements consistent across screens. Apply shows which screens will change. Choose a separate look to change only this element.",
         "Value & range": "Choose a whole-number game variable and the lowest and highest values that the bar represents. For example, courage from 0 to 100.",
         "What this button does": "Actions run in the order shown when the player clicks the button in the game. Change a variable before returning to the story. Buttons in this preview only select elements.",
@@ -338,7 +401,9 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
       const control = el(type === "textarea" ? "textarea" : "input") as HTMLInputElement | HTMLTextAreaElement;
       if (control instanceof HTMLInputElement) control.type = type === "textarea" ? "text" : type;
       control.value = String(d[property]); control.disabled = disabled;
-      control.oninput = () => { (d as unknown as Record<string, unknown>)[property] = control.value; state.textContent = "Unapplied changes"; renderInfo(); };
+      control.oninput = () => { (d as unknown as Record<string, unknown>)[property] = control.value; state.textContent = "Changes waiting to be applied"; renderInfo(); };
+      const explanations: Record<string, string> = { "Element name": "This name identifies the element in the editor. Change Text to edit the words the player sees.", "Horizontal anchor": "The point across this element placed at its horizontal position. Use 0 for the left edge, 0.5 for the center, or 1 for the right edge.", "Vertical anchor": "The point down this element placed at its vertical position. Use 0 for the top edge, 0.5 for the center, or 1 for the bottom edge.", "Padding": "Space inside a group, between its border and the items it contains.", "Spacing": "The gap between items in a vertical, horizontal or grid group.", "Minimum width": "The smallest width this element may use when the game arranges it.", "Maximum width": "The largest width this element may use when the game arranges it." };
+      if (explanations[title]) explain(control, explanations[title]!);
       parent.append(labelled(title, control)); return control;
     };
     const choice = (parent: HTMLElement, title: string, property: keyof ScreenNode, options: readonly (readonly [string, string])[]) => { const control = select(options, String(d[property])); control.onchange = () => {
@@ -346,15 +411,20 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
         const width = aspect === "1280 × 720" ? 1280 : 960, divisor = control.value === "relative" ? 1 : -1;
         d.x = String(Number(d.x) * Math.pow(width, -divisor)); d.y = String(Number(d.y) * Math.pow(720, -divisor));
       }
-      (d as unknown as Record<string, unknown>)[property] = control.value; state.textContent = "Unapplied changes";
+      (d as unknown as Record<string, unknown>)[property] = control.value; state.textContent = "Changes waiting to be applied";
       if (property === "coordinates" || property === "parent") renderInspector(); renderInfo();
     }; parent.append(labelled(title, control)); return control; };
-    const check = (parent: HTMLElement, title: string, property: "bold" | "italic" | "aspect") => { const control = el("input"); control.type = "checkbox"; control.checked = d[property]; control.onchange = () => { d[property] = control.checked; state.textContent = "Unapplied changes"; renderInfo(); }; parent.append(labelled(title, control)); };
+    const check = (parent: HTMLElement, title: string, property: "bold" | "italic" | "aspect") => { const control = el("input"); control.type = "checkbox"; control.checked = d[property]; control.onchange = () => { d[property] = control.checked; state.textContent = "Changes waiting to be applied"; renderInfo(); }; parent.append(labelled(title, control)); };
     const content = group("Text & image", true);
     input(content, "Element name", "name");
-    if (["text", "textbutton", "component"].includes(d.kind)) { input(content, "Text", "text", "textarea", current().template); content.append(el("p", "muted", "Use [destination], [courage] or [help_seen] to display an existing variable.")); }
+    if (["text", "textbutton", "component"].includes(d.kind)) { input(content, "Text", "text", "textarea", current().template); content.append(el("p", "muted", "Write [destination] to show that game variable in the text. Change its example value under Connect to check how the text looks.")); }
     if (["image", "imagebutton"].includes(d.kind)) { choice(content, "Image", "asset", pairs(["tram-map.webp", "help-symbol.png", "paper-panel.jpg"])); check(content, "Keep image proportions", "aspect"); content.append(el("p", "muted", "This demo uses the same map drawing for every image. Your choice is kept when you apply it.")); }
-    content.append(action("Choose a font or image", () => { const modal = dialog("Project fonts and images", "Choose a font or image from your project. This demo only includes the example files listed below."); modal.append(el("p", "", "NotoSans-Regular.ttf · NotoSerif-Regular.otf · tram-map.webp · help-symbol.png"), action("Use this image", () => { d.asset = "help-symbol.png"; modal.close(); renderInspector(); status("Image selected. Choose Apply changes to keep it."); }), action("Close file picker", () => modal.close())); modal.showModal(); }));
+    const imageElement = ["image", "imagebutton"].includes(d.kind);
+    if (imageElement || ["text", "textbutton", "component"].includes(d.kind)) content.append(action(imageElement ? "Browse example images" : "Choose a font", () => {
+      const modal = dialog(imageElement ? "Example images" : "Example fonts", "Choose one of the example files. Apply changes to keep your choice on this element.");
+      const files = imageElement ? ["tram-map.webp", "help-symbol.png", "paper-panel.jpg"] : ["NotoSans-Regular.ttf", "NotoSerif-Regular.otf"], picker = select(pairs(files), imageElement ? d.asset : d.font);
+      modal.append(labelled(imageElement ? "Example image" : "Example font", picker), action("Cancel selection", () => modal.close()), action(imageElement ? "Use image" : "Use font", () => { if (imageElement) d.asset = picker.value; else d.font = picker.value; modal.close(); renderInspector(); renderInfo(); status("File selected. Apply changes to keep it."); })); modal.showModal();
+    }));
     const position = group("Position & size", layout === "guided-v2" && step === "layout");
     const containers = current().nodes.filter(n => n.id !== d.id && ["fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"].includes(n.kind));
     if (d.parent) choice(position, "Inside group", "parent", containers.map(n => [n.id, `${n.name} (${kindName(n.kind)})`])).disabled = current().template;
@@ -362,24 +432,24 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     const numbers = el("div", "sc-number-grid");
     for (const [property, title] of [["x", "Horizontal position"], ["y", "Vertical position"], ["width", "Width"], ["height", "Height"], ["anchorX", "Horizontal anchor"], ["anchorY", "Vertical anchor"], ["minWidth", "Minimum width"], ["maxWidth", "Maximum width"], ["padding", "Padding"], ["spacing", "Spacing"]] as const) input(numbers, title, property, "number"); position.append(numbers);
     choice(position, "Alignment", "alignment", pairs(["left", "center", "right"]));
-    position.append(el("p", "muted", "Position, size and anchors update the preview. Spacing, size limits and changing groups are saved here but are not drawn in this demo."));
-    if (layoutParent(d)) position.append(el("p", "muted", `This item belongs to a ${kindName(layoutParent(d)!.kind).toLowerCase()}. That group arranges its items automatically. This demo shows their starting positions.`));
-    const appearance = group("Type & color");
+    position.append(el("p", "muted", "Apply changes to update the position and size. This mockup keeps spacing and size limits, but does not draw their effects."));
+    if (layoutParent(d)) position.append(el("p", "muted", `${layoutParent(d)!.name} arranges this item automatically. Use Front & back to change its order, or choose a free layout group under Inside group to drag it.`));
+    const appearance = group("Font & color");
     choice(appearance, "Font", "font", pairs(["NotoSans-Regular.ttf", "NotoSerif-Regular.otf"])); input(appearance, "Text size", "size", "number"); input(appearance, "Text color", "color"); check(appearance, "Bold", "bold"); check(appearance, "Italic", "italic"); input(appearance, "Background color", "background"); input(appearance, "Border color", "border");
-    appearance.append(el("p", "muted", "Color, bold, italic and text size update the preview. Font choices are saved here; this demo uses one typeface."));
+    appearance.append(el("p", "muted", "Apply changes to update the text size and colors. This mockup keeps your font choice, but draws one example font."));
     const reusable = group("Reuse this look");
     reusable.append(el("p", "", d.shared ? "This heading shares its look with headings on other screens." : "This element has its own look."), action("Use the shared heading look", () => { d.shared = true; renderInspector(); renderInfo(); }), action("Give this element its own look", () => { d.shared = false; renderInspector(); renderInfo(); status("Choose Apply changes to give this element its own look."); }));
     reusable.append(el("p", "muted", "Before a shared change is applied, you can review the screens that will change."));
     if (["bar", "viewport"].includes(d.kind)) { const bindings = group("Value & range", true); choice(bindings, "Number variable", "variable", [["courage", "courage (whole number)"]]); input(bindings, "Minimum value", "minimum", "number"); input(bindings, "Maximum value", "maximum", "number"); bindings.append(el("p", "muted", "A value bar shows a number from your game. Scrolling areas are a still example in this demo.")); }
     if (["textbutton", "imagebutton"].includes(d.kind)) renderActions(group("What this button does", true), d);
-    const limits = group("Script & custom code"); limits.append(el("p", "sc-protected", "Custom code stays in your script. Open the script to edit code that has no visual control here."), el("pre", "sc-source", sourceSummary()), action("View script", () => showSource()), action("Try a script change", () => {
+    const limits = group("Script & custom code"); limits.append(el("p", "sc-protected", "Custom code stays in your script. Open the script to edit code that has no visual control here."), el("pre", "sc-source", sourceSummary()), action("View script", () => showSource()), action("Edit example script text", () => {
       const modal = dialog("Change text in the script", "Try changing this element's text. This demo leaves the custom code beside it alone.");
-      const text = el("textarea"); text.value = target()!.text; modal.append(labelled("Text in script", text), action("Cancel script change", () => modal.close()), action("Use text change", () => { if (current().template) { status("The game supplies this text, so it cannot be replaced here.", true); return; } saveHistory(); target()!.text = text.value; current().revision++; drafts.delete(key()); modal.close(); render(); status("Text updated in this demo. Custom code was left alone."); })); modal.showModal();
+      const text = el("textarea"); text.value = target()!.text; modal.append(labelled("Text in script", text), action("Cancel script change", () => modal.close()), action("Apply text edit", () => { if (current().template) { status("The game supplies this text, so it cannot be replaced here.", true); return; } saveHistory(); target()!.text = text.value; current().revision++; drafts.delete(key()); modal.close(); render(); status("Text updated in this demo. Custom code was left alone."); })); modal.showModal();
     }));
   }
   function renderActions(parent: HTMLElement, d: ScreenNode) {
     if (current().template) { parent.append(el("p", "sc-protected", "This game screen needs these button actions to work. You can change how the button looks.")); return; }
-    parent.append(el("p", "", current().mode === "panel" ? "Close and Escape hide this overlay. Clicking outside leaves it open." : "Close and Escape return to the story. Put Return to story last. Clicking outside leaves the dialog open."));
+    parent.append(el("p", "", "These actions run from top to bottom when the player clicks this button."), el("p", "muted", current().mode === "panel" ? "Close and Escape hide this overlay. Clicking outside leaves it open." : "Return to story closes the dialog and continues the story. Keep it last."));
     d.actions.forEach((a, index) => {
       const row = el("div", "sc-action-row"); row.append(el("span", "", `${index + 1}. ${a.kind === "set" ? `Set ${a.variable} to ${a.value}` : a.kind === "hide" ? "Close this overlay" : "Return to story"}`));
       for (const [offset, label] of [[-1, "up"], [1, "down"]] as const) { const b = action(`Move action ${index + 1} ${label}`, () => { const next = index + offset; const candidate = copy(d.actions); [candidate[index], candidate[next]] = [candidate[next]!, candidate[index]!]; if (candidate.findIndex(x => x.kind === "finish") >= 0 && candidate.at(-1)!.kind !== "finish") { status("Return to story must be the last action.", true); return; } d.actions = candidate; renderInspector(); renderInfo(); }); b.disabled = index + offset < 0 || index + offset >= d.actions.length; row.append(b); }
@@ -387,8 +457,12 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     });
     const type = select([["set", "Change a game variable"], [current().mode === "panel" ? "hide" : "finish", current().mode === "panel" ? "Close this overlay" : "Return to story"]], "set");
     const variable = select(variables.map(v => [v.id, `${v.id} (${valueType(v.type)})`]), "help_seen"), value = el("input"); value.value = "true";
+    const variableField = labelled("Game variable", variable), valueField = labelled("New value", value);
+    variableField.querySelector(".lp-label")!.append(helpTip("game variables", "A game variable is a named value the story remembers, such as whether Help was opened or the player's courage. Choose the value this button should change."));
+    valueField.querySelector(".lp-label")!.append(helpTip("action values", () => variables.find(v => v.id === variable.value)!.type === "bool" ? "For a yes/no variable, enter true for Yes or false for No." : variables.find(v => v.id === variable.value)!.type === "int" ? "Enter a whole number, such as 35. The button will set this variable to that number." : "Enter the text this variable should contain."));
     variable.onchange = () => { value.value = variables.find(v => v.id === variable.value)!.value; };
-    parent.append(labelled("Action type", type), labelled("Game variable", variable), labelled("New value", value), action("Add action", () => {
+    type.onchange = () => { variableField.hidden = valueField.hidden = type.value !== "set"; };
+    parent.append(labelled("Action type", type), variableField, valueField, action("Add action", () => {
       if (type.value === "set") {
         const t = variables.find(v => v.id === variable.value)!.type;
         if ((t === "bool" && !["true", "false"].includes(value.value)) || (t === "int" && !/^-?\d+$/.test(value.value))) { status("Enter a value that matches this variable: true/false, a whole number, or text.", true); return; }
@@ -434,7 +508,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     if (event.key !== "Escape") return;
     if (closeHelp) { event.preventDefault(); closeHelp(); return; }
     if (viewDrag) { event.preventDefault(); cancelViewResize(); return; }
-    if (gesture) { event.preventDefault(); gesture = undefined; renderCanvas(); status("Move cancelled."); return; }
+    if (gesture) { event.preventDefault(); gesture = undefined; render(); status("Move cancelled."); return; }
     if (focusPreview) { event.preventDefault(); focusPreview = false; setViewSize(); renderCanvas(); stage.querySelector<HTMLButtonElement>(".nb-focus-button")?.focus(); }
   };
   document.addEventListener("keydown", escape); render();

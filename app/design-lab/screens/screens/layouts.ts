@@ -53,9 +53,9 @@ export function directLayout(p: LayoutParts): LayoutView {
 // A freely navigable task rail and one changing task card beside a persistent preview.
 export function flowLayout(p: LayoutParts): LayoutView {
   p.workspace.classList.add("flow-workspace"); p.notebook.classList.add("flow-card");
-  const heading = el("header", "flow-card-heading"), title = el("h2"), note = el("p", "muted");
+  const heading = el("header", "flow-card-heading"), title = el("h2"), type = el("p", "flow-element-type"), note = el("p", "muted");
   const ordering = el("details", "flow-order");
-  heading.append(title, note);
+  heading.append(title, type, note);
   p.tabs.ariaLabel = "Screen building steps";
   [...p.tabs.querySelectorAll("button")].forEach((button, i) => button.textContent = ["1  Choose", "2  Design", "3  Connect"][i]!);
   p.notebook.replaceChildren(heading, p.hierarchy, ordering, p.inspector, p.playground);
@@ -67,8 +67,9 @@ export function flowLayout(p: LayoutParts): LayoutView {
       const order = p.hierarchy.querySelector(".nb-order"), orderHeading = p.hierarchy.querySelector("h3"), position = p.hierarchy.querySelector(".nb-order-position");
       const summary = el("summary"); if (orderHeading) summary.append(...orderHeading.childNodes);
       ordering.replaceChildren(summary); if (position) ordering.append(position); if (order) ordering.append(order); orderHeading?.remove();
-      title.textContent = selection.step === "compose" ? "Choose an element" : selection.step === "layout" ? selection.name : "Connect to the story";
-      note.textContent = selection.step === "compose" ? "Pick something in the preview or choose it below. Hover an item to learn what it does." : selection.step === "layout" ? "Edit this element, then apply your changes." : selection.button ? `Choose what ${selection.name} does when clicked, then try the story below.` : "Select a button in the preview to edit its actions. You can also try opening this screen below.";
+      title.textContent = selection.step === "compose" ? "Choose an element" : selection.name;
+      type.hidden = selection.step === "compose"; type.textContent = selection.kind;
+      note.textContent = selection.step === "compose" ? "Click an element to edit it, or drag it to move it. The list below includes elements hidden behind others." : selection.step === "layout" ? "Edit this element, then apply your changes." : selection.button ? "Choose what happens when the player clicks this button. Test the screen below." : "This element has no click actions. Select a button to set its actions, or test this screen below.";
     },
   };
 }

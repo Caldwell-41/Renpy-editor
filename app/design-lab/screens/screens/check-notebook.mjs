@@ -87,9 +87,9 @@ export default async function checkNotebook({ page, open }) {
     assert.deepEqual(order, ["frame", "body", "map", "title", "close"], "Moving a group keeps its descendants together");
     await button("Undo").click();
 
-    await button("Buttons & story").click(); await button("Show overlay").click(); await button("Next line").click();
+    await button("Buttons & story").click(); await button("Show overlay").click(); await button("Continue dialogue").click();
     assert.match(await page.locator(".sc-story-status").innerText(), /overlay stays open/);
-    await field("Screen").selectOption("help-dialog"); await button("Open dialog").click(); await button("Next line").click();
+    await field("Screen").selectOption("help-dialog"); await button("Open dialog").click(); await button("Continue dialogue").click();
     assert.match(await page.locator(".sc-story-status").innerText(), /Close the dialog/);
     await button("Click outside").click(); assert.match(await page.locator(".sc-story-status").innerText(), /leaves the screen open/);
     await button("Close dialog").click(); await button("Press Escape").click();

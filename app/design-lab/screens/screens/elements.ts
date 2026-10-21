@@ -1,3 +1,26 @@
+import { icon } from "../../../src/icons.ts";
+
+// Use the production icon's size and stroke for element-specific symbols.
+const elementPaths: Record<string, string> = {
+  fixed: "M3 3h18v18H3zM7 7h4v4H7zM13 13h4v4h-4z",
+  frame: "M3 4h18v16H3zM6 7h12v10H6z",
+  window: "M3 4h18v16H3zM3 8h18M6 6h.01M9 6h.01",
+  vbox: "M5 3h14v4H5zM5 10h14v4H5zM5 17h14v4H5z",
+  hbox: "M3 5h4v14H3zM10 5h4v14h-4zM17 5h4v14h-4z",
+  grid: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",
+  text: "M4 5h16M12 5v14M8 19h8M4 5v3M20 5v3",
+  textbutton: "M3 6h18v12H3zM7 12h10",
+  imagebutton: "M3 4h18v16H3zM6 16l4-5 3 3 2-2 3 4M16 8h.01",
+  bar: "M3 8h18v8H3zM3 8h11v8H3",
+  viewport: "M3 3h18v18H3zM17 7v10M16 8l1-1 1 1M16 16l1 1 1-1M7 8h6M7 12h6M7 16h6",
+  component: "m12 2 9 5v10l-9 5-9-5V7zM3 7l9 5 9-5M12 12v10",
+};
+export function elementIcon(kind: string) {
+  const svg = icon("assets");
+  if (elementPaths[kind]) svg.querySelector("path")!.setAttribute("d", elementPaths[kind]!);
+  return svg;
+}
+
 // Plain-language help shared by the three disposable Screens layouts.
 export const elementHelp: Record<string, string> = {
   fixed: "A group with freely positioned items. Move and resize each item separately.",

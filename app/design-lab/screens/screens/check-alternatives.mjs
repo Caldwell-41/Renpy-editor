@@ -18,14 +18,19 @@ export default async function checkAlternatives({ page, open }) {
     try {
       await page.setViewportSize({ width: 1100, height: 720 }); await open({ variant });
       if (variant === "direct") await button("Elements").click();
+      assert.deepEqual(await page.locator("[role=treeitem]").evaluateAll(items => items.map(item => item.dataset.nodeId)), ["root", "frame", "stack", "title", "body", "map", "close"]);
+      assert.equal(await tree("body").getAttribute("aria-level"), "4");
+      assert.equal(await tree("body").locator("svg").count(), 1);
+      assert.equal(await tree("body").evaluate(item => parseFloat(item.style.paddingLeft) > parseFloat(item.parentElement.querySelector('[data-node-id="stack"]').style.paddingLeft)), true);
       await tree("body").hover(); assert.match(await page.getByRole("tooltip").innerText(), /Words shown to the player/);
-      await tree("body").focus(); await page.keyboard.press("Escape");
+      if (variant === "flow") await page.screenshot({ path: fileURLToPath(new URL("flow-choose-light-wide.png", output)) });
+      await page.keyboard.press("Escape"); await tree("body").focus(); assert.match(await page.getByRole("tooltip").innerText(), /Words shown to the player/); await page.keyboard.press("Escape");
       await page.keyboard.press("ArrowLeft");
       assert.equal(await tree("stack").getAttribute("aria-selected"), "true");
       assert.equal(await tree("stack").isVisible(), true, "Arrow browsing stays in the element list");
       assert.match(page.url(), new RegExp(`variant=${variant}`));
       await page.keyboard.press("ArrowDown");
-      assert.equal(await tree(variant === "flow" ? "stack" : "title").getAttribute("aria-selected"), "true", "Keyboard browsing follows the visible list order");
+      assert.equal(await tree("title").getAttribute("aria-selected"), "true", "Keyboard browsing follows the visible list order");
       await field("Element type").selectOption("imagebutton"); await field("Help with element type").click();
       assert.match(await page.getByRole("tooltip").innerText(), /different pictures/); await page.keyboard.press("Escape");
       await tree("body").click(); assert.equal(await field("Text").isVisible(), true);
@@ -45,9 +50,9 @@ export default async function checkAlternatives({ page, open }) {
       await field("Element type").selectOption("textbutton"); await button("Add element").click();
       assert.equal(await field("Element name").inputValue(), "New button"); assert.equal(await field("Text").isVisible(), true);
       await button("Undo").click();
-      await connect(); await button("Show overlay").click(); await button("Next line").click();
+      await connect(); await button("Show overlay").click(); await button("Continue dialogue").click();
       assert.match(await page.locator(".sc-story-status").innerText(), /overlay stays open/);
-      await field("Screen").selectOption("help-dialog"); await button("Open dialog").click(); await button("Next line").click();
+      await field("Screen").selectOption("help-dialog"); await button("Open dialog").click(); await button("Continue dialogue").click();
       assert.match(await page.locator(".sc-story-status").innerText(), /Close the dialog/);
       await button("Select Close Help on canvas").click(); await button("Add action").click();
       assert.match(await page.locator(".sc-action-row").first().innerText(), /Set help_seen to true/);

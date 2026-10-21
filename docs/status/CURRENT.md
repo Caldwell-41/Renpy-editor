@@ -1,28 +1,28 @@
 # Current status
 
-## Phase 3B Screens comparison refresh
+## Phase 3B Screens refinement
 
 2026-10-21: Branch `codex/phase3b-screen-designer` starts from Phase 3A at `571e76c`.
 The [grilling agreement](../tasks/active/phase-3-initial-wysiwyg-release.md#agreed-3b-design-from-the-grilling-session)
-records all approved product choices. Mac is the chosen development host.
+records approved product choices. Mac is the chosen development host.
 [CI1's audited evidence](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
 qualifies the narrow source/runtime proof at `0ef1748` on Windows x64 and macOS
-ARM64, including the 720×360 panel and exactly one continuation after Close.
-No CI is pending.
+ARM64. No CI is pending.
 
-The user kept Screen notebook and requested element help plus two research-informed
-alternatives. The [three-candidate refresh](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-research-and-three-candidate-refresh--2026-10-21)
-is `review_ready`. Canvas focus uses optional panels beside a wide preview; Screen
-builder uses a Choose / Design / Connect rail and one task card. The three retired
-layouts are removed. The research agent inspected official Penpot, Unity and Godot
-UI images; [comparison notes](../design/design-lab-screens/README.md) map those details
-to the designs. All three approvals remain null.
+The user prefers Screen builder. Its
+[copy and direct-manipulation refinement](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-copy-and-direct-manipulation--2026-10-21)
+is `review_ready`. Choose reuses Screen notebook's nested list, type icons and
+hover/focus help. Connect names the selected element and type. Copy explains preview
+values and opening/closing tests. Elements drag on the first press and have visible
+resize handles, with Escape and Undo. Screen notebook and Canvas focus remain.
+[Comparison notes](../design/design-lab-screens/README.md) own controls and limits.
+All three approval entries remain null; next is user review.
 
-All 60 focused cases and three journeys pass. Combined local5 passes 508 rendering
-cases and 20 groups with no browser errors; both themes/sizes received visual
-review. Final use is refresh local5/6, with no repair pending. Browser actions stay
-in fictional memory. Native, SDK, CI and previous verification allowances remain
-closed. Work stays local-only.
+Combined copy local6 passes TypeScript, approval/source checks, 508 rendering cases
+and 20 interaction groups without browser errors. Visual review covers both themes
+and sizes, including Choose tooltips and Connect. Final use is copy local6/7; the
+unused repair cycle is closed. Browser actions stay in fictional memory. Earlier
+refresh, native, SDK and CI allowances stay closed. Work is saved locally.
 
 ## Earlier full-app mockups
 

@@ -1,45 +1,45 @@
 # Current outcome handover
 
-## Phase 3B Screens comparison refresh, 2026-10-21
+## Phase 3B Screens refinement, 2026-10-21
 
 State `review_ready`, branch `codex/phase3b-screen-designer`, chosen host Mac. The
-[refresh record](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-research-and-three-candidate-refresh--2026-10-21)
-owns the user request, finite allowance and continuation. The parent implements;
-the explicitly requested research agent finished its inspection of official Penpot,
-Unity UI Builder and Godot screenshots. The
-[comparison notes](../design/design-lab-screens/README.md) map observed UI to the designs.
+[copy/direct-manipulation record](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-copy-and-direct-manipulation--2026-10-21)
+owns scope, failures, repairs, source identity and final allowance. Screen builder
+is the user's current preference; all three approvals remain null. The
+[comparison notes](../design/design-lab-screens/README.md) own controls and limits.
 
-Keep `guided-v2` Screen notebook. New `direct` Canvas focus uses optional panels;
-new `flow` Screen builder uses a horizontal task rail and one changing card. The old
-`workbench`, `canvas` and `guided` source/registrations are removed at the user's
-request. Element help explains all types on hover/focus and beside insertion.
-All three approvals remain null. These are fictional browser samples.
+Choose reuses Screen notebook's nested list with actual parent depth, type icons and
+hover/focus help. Connect names its selection with smaller type text. Preview-value
+and story-test copy describes the effect of each control. First-press dragging and
+visible edge/corner handles support movement/resizing, Escape and Undo. Starter Help
+items use free positioning; automatic groups still explain their movement limits.
+Undo no longer mistakes stale clean forms for edits after group/shared-look changes.
+Open preview controls persist through changes. Everything stays in fictional browser
+memory. Keep Screen notebook, Canvas focus and Screen builder; retired layouts stay
+recoverable only in Git.
 
-Refresh local4 passes TypeScript, 60 rendering cases and three journeys after visual
-refinements. Parent review covers both themes/sizes and new editing states. Preserve
-ignored `refresh-focused-01*` through `refresh-focused-04*` reports, images and logs.
-Local5 passes TypeScript, approval/source checks, all 508 lab cases and 20 groups
-with no browser errors on Chromium 155.0.8059.86. Its 12 Screens matrix captures
-match the visually reviewed focused set. Preserve `refresh-combined-05/` report,
-captures and comparison receipt with its sibling log.
-The tested candidate is local commit `47418fe`; the task owns its full source/tree
-and fingerprint. Later documentation receipts preserve that identity.
-Final use is refresh local5/6. The unused repair cycle is closed; no repair or
-verification remains pending. Earlier local4/4 and local11/11 stay closed. No
-native, SDK, package or CI work is selected.
+Combined local6 passes TypeScript, approval/source checks, 508 rendering cases and
+20 interaction groups on Chromium155.0.8059.86, with no browser errors. It includes
+60 Screens cases and all three journeys, nested order/icons/tooltips, movement,
+resizing, image proportions/relative anchors, Escape, Undo and shared-look propagation.
+Parent visual review covers all 12 Screens matrix captures plus Choose/Connect
+editing states in both themes/sizes. Retain `.toolchains/phase3b/copy-combined-06/`
+report, images and review receipt with the sibling log. Preserve all earlier
+`copy-focused-02*`, `copy-focused-03*`, `copy-combined-04*`, `copy-focused-05*` failures
+and diagnostic receipts. Validation passes for792 repository files and whitespace.
+Final use is copy local6/7; the unused repair cycle is closed. Earlier refresh5/6,
+refinement4/4 and early11/11 stay closed. No verification, repair or CI is pending.
 
-Next is user comparison and selection among the three drafts. Keep work local.
-Automatic approval review rejected the prior push because explicit
-payload/destination permission was unavailable;
+Next is user review of Screen builder. Keep work local. The earlier automatic push
+review rejected publication without explicit payload/destination permission;
 publication to `origin/codex/phase3b-screen-designer` still needs user approval.
-The lab is on port 5174. Preserve the protected native draft and recovery below.
+The lab is on port5174. Preserve protected native state and recovery below.
 
 The earlier [CI1 audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
 still qualifies source `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
 `521a550ef7d82ecf970a0527a1bab368062bad63`, on Windows x64 and macOS ARM64 in
-run39555526201. No CI is pending. Later browser/docs commits do not replace that
-SDK candidate. Prior notebook candidate `41e08b1` and original comparison `94824c8`
-remain historical in the task with their reports and all failure evidence.
+run39555526201. Later browser/docs commits do not replace that SDK candidate.
+Prior Screens candidates and research remain historical in the owning task.
 
 ## Earlier full-app mockups
 
@@ -48,7 +48,7 @@ retains its earlier review-ready result of 448 cases and 19 groups. Its 24 layou
 and starter remain unapproved, with prior references intact. That work was
 published on Phase 3A before this branch; Screens adds three current candidates.
 [Page notes](../design/design-lab-app/README.md) own controls and simulation limits.
-The refresh local5 combined check includes these unchanged pages and their
+The copy local6 combined check includes these unchanged pages and their
 interaction groups; the earlier task retains its original qualification scope.
 Promotion still follows
 [INTEGRATION](../../app/design-lab/INTEGRATION.md), including explicit version selection,

@@ -1,5 +1,78 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Screen builder copy and direct manipulation — 2026-10-21
+
+State `review_ready`. The user prefers Screen builder and requested first-use copy
+with unslop, clear preview-value/story-test explanations, help for complex controls,
+and the selected element name with smaller type text in Connect. They also requested
+visible element resizing and Screen notebook's nested selection under Choose,
+including hover tooltips and small type icons. These browser refinements are complete;
+all three current drafts remain available and their approval entries remain null.
+
+Chosen host Mac, branch `codex/phase3b-screen-designer`, clean entry `7bf9d1f`.
+Experience First, unslop and writing-for-agents guide this outcome. The original
+five local cycles expanded to seven for the added resizing request. Final use is
+copy local6/7; the unused repair cycle is closed. Prior refresh5/6, refinement4/4
+and early11/11 stay closed. Work is local-only; no native, SDK, CI, package, live
+model or publication allowance is renewed. Next is user review of Screen builder.
+
+Choose now reuses the notebook's nested list in group/sibling order, with type icons,
+actual parent depth and pointer/focus help. Keyboard browsing follows that order.
+Connect names the selection and shows its type in smaller text. Change preview
+values explains example variables and button appearance; Test opening and closing
+explains the example dialogue. Button appearance affects buttons only. Font/image
+pickers and action controls use specific labels and descriptions. The
+[comparison notes](../../design/design-lab-screens/README.md) own current controls,
+research and simulation limits.
+
+Local1 reproduces the drag report. Help title stays at328,214 with an automatic-group
+notice, while Help frame moves from280,180 to352,212. The vbox starter parent blocks
+individual movement; review also finds a selection-only pointer-down guard. The
+starter now uses a free layout group matching its manual positions, and the first
+press starts a drag without replacing the pressed canvas node. Groups translate
+their descendants. Automatic placement still blocks individual movement with clear
+directions, while handles allow resizing. Preserve
+`.toolchains/phase3b/copy-drag-diagnostic-01.json`.
+
+Local2 passes 60 rendered cases, then stops on a group-delta assertion. The local3
+receipt `copy-group-diagnostic-03.json` shows top25%/38.0556% becoming
+30.5556%/43.6111%. Both move40 game pixels; serialized percentages differ by0.0001%.
+The assertion now compares snapped game-pixel deltas. No product correction follows
+this harness finding. Local3 then exposes blocked Undo: a previously inspected
+child's unchanged draft keeps its old position after group movement. The commit
+boundary now prunes only drafts still equal to current source before mutation;
+actual edits stay retained. A shared-look propagation regression covers the same
+cache assumption. Preserve failed `copy-focused-02*` and `copy-focused-03*` reports
+and logs. The user's "Approved" authorizes continuing the repair within this outcome.
+
+Local4 passes TypeScript, approvals, 508 rendering cases, 13 earlier page groups and
+movement/Shift-resize/cancel/group/Undo in all three Screens layouts. It stops when
+the preview-values test clicks the disclosure's center and hits its help button.
+`copy-summary-diagnostic-05.json` records that target and the closed disclosure.
+The test now clicks the label area; help clicks keep their intended behavior.
+Preserve incomplete `copy-combined-04*` evidence. This is not a combined pass.
+
+Local5 passes 60 rendered cases and movement, Shift resize, eight visible handles,
+opposite-edge resizing, keyboard resizing, Escape, group movement and Undo in all
+three layouts. It then finds that changing Button appearance closes its controls.
+`copy-values-diagnostic-05.json` records open=true becoming false in the same Connect
+step. Rebuilding now snapshots live disclosure state before replacing the DOM,
+rather than trusting asynchronous toggle events. Entering Connect opens the story
+test once; a deliberate close persists through updates. Preserve the failed
+`copy-focused-05/` report and sibling log.
+
+Local6 passes TypeScript, approval/source checks, all 508 rendering cases and 20
+interaction groups on Chromium155.0.8059.86, with no browser errors. Its Screens
+checks cover all three journeys, the nested list/order/icons, hover and focus help,
+Connect identity/copy, first-press dragging, group translation, resize handles,
+keyboard resizing, image proportions with fractional positions/centered anchors,
+Escape, Undo, shared-look propagation and preview-control state. Parent visual
+review covers all 12 matrix captures in both themes at1100×720 and560×640, plus
+Choose tooltips and Connect editing states. Preserve report, 12 matrix images,
+six editing images and review receipt under `.toolchains/phase3b/copy-combined-06/`,
+with its sibling command log. Validation passes for 792 repository files and
+whitespace checks. Browser samples remain fictional and reset on reload.
+
 ## Screens research and three-candidate refresh — 2026-10-21
 
 State `review_ready`. The user requests element tooltips, retaining the revised
