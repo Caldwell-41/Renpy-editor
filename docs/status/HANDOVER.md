@@ -6,8 +6,11 @@ State `review_ready`, branch `codex/phase3b-screen-designer`. Mac remains the ch
 host. The user prefers Screen notebook and requested plain copy, help, layer
 ordering, border resizing and a larger preview. The
 [refinement record](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-notebook-refinement--2026-10-21)
-owns scope, finite local4/4 use, failures and source identity. Branch publication
-remains authorized; live implementation follows design selection.
+owns scope, finite local4/4 use, failures and source identity. The refinement is
+local-only. Automatic approval review rejected its push because explicit payload
+and destination authorization was unavailable; publishing to
+`origin/codex/phase3b-screen-designer` needs fresh user approval. Live implementation
+follows design selection.
 
 The new `guided-v2` draft is first/default. It adds Elements, Position & look and
 Buttons & story, contextual help, sibling front/back controls, a larger Fit view,
@@ -23,6 +26,8 @@ failed attempts and captures remain ignored under
 `.toolchains/phase3b/notebook-focused-<number>/` and `notebook-combined-04/`, with
 sibling command logs. No repair or verification is pending; the allowance is closed.
 No native, SDK, package, CI or independent-review allowance was renewed.
+The tested refinement candidate is `41e08b1`; the task owns its full commit, tree
+and source fingerprint. Later documentation receipts preserve that identity.
 
 The earlier [CI1 audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
 still qualifies exact source `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
