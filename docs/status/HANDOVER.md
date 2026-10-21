@@ -28,7 +28,9 @@ approval/source checks, 508 rendering cases and 20 check groups with no browser
 errors. Reports, reproductions and captures remain ignored under
 `.toolchains/phase3b/prototype-batch-<number>/`; earlier failures are preserved.
 The task's [candidate record](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
-owns source identity and exact qualification. Final use is local11/11, preview4/4,
+owns source identity and exact qualification. Review candidate `94824c8` is published
+and verified remotely; later documentation receipts preserve its tested identity.
+Final use is local11/11, preview4/4,
 CI1/2, review1/1 and follow-up1/1. No further verification or repair is selected.
 No native, SDK, package, CI or independent-review allowance was renewed.
 

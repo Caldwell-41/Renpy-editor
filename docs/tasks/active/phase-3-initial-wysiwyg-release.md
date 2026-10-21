@@ -268,7 +268,11 @@ Its `design:source` fingerprint is
 `56c9e3c8688e96aa73bb111a2ffeb7b733b1fd48b16da55552fcce3d73c3dfb7`.
 It includes the action-row check correction before root-cause reproduction and the
 protected-notice fix. Neither earlier candidate records a passing verification.
-The final reviewed candidate's source identity is recorded at publication below.
+The final reviewed candidate is `94824c80c57bba9eb3aaf1a4a6ec2658bd3149c3`, tree
+`d369a03fa5c7dffcffd57f3b33a94e4a2ec4b53c`, published and verified on the remote
+branch. Its `design:source` fingerprint is
+`90eb707f5582770f797f1efb23a49c21c6c3227d0a8b5481687288599bb333e0`.
+This preserves the code that passed local10/11 and the three unapproved candidates.
 Documentation-only successors preserve that distinction and the earlier SDK candidate.
 
 The floating switcher uses `?variant=` and protects edited samples before reset.
