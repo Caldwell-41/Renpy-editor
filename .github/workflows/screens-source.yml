@@ -1,0 +1,94 @@
+name: Phase 3B early screen source proof
+
+on:
+  push:
+    branches: [codex/phase3b-screen-designer]
+    paths:
+      - 'app/src-core/**'
+      - 'app/src/protocol.ts'
+      - 'app/scripts/qualify-screens-source.py'
+      - 'tests/fixtures/phase-3b-screens/**'
+      - '.github/workflows/screens-source.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screens-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused:
+    name: Screen source (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            target: Windows x64
+          - runner: macos-26
+            target: macOS ARM64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    env:
+      CARGO_TERM_COLOR: never
+      PYTHONUTF8: '1'
+      SCREENS_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require selected branch and initial bounded attempt
+        shell: bash
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_RUN_ATTEMPT" = 1
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase3b-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Select locked Rust
+        shell: bash
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          "$SCREENS_PYTHON" -m unittest discover -s app/scripts -p 'test_screens_source_evidence.py' -v
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        id: sdk-cache
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-${{ runner.os }}-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Fetch official checksum metadata and pinned SDK on cache miss
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 180 \
+            --output "$RUNNER_TEMP/screen-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          if test '${{ steps.sdk-cache.outputs.cache-hit }}' != true; then
+            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 \
+              --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+            mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+          fi
+      - name: Exact source edit, history, conflicts and actual SDK rendering
+        shell: bash
+        env:
+          RUSTUP_TOOLCHAIN: 1.90.0
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
+        run: |
+          "$SCREENS_PYTHON" app/scripts/qualify-screens-source.py \
+            --archive "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" \
+            --checksums "$RUNNER_TEMP/screen-checksums.txt" \
+            --output "$RUNNER_TEMP/screens-source" --ordinal 1 --allow-fixture-execution
+      - name: Scan partial or complete proof before upload
+        id: privacy
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/screens-source"
+          node app/scripts/scan-artifacts.mjs "$RUNNER_TEMP/screens-source"
+      - name: Retain partial or complete proof
+        if: ${{ always() && steps.privacy.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: screens-source-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/screens-source/
+          if-no-files-found: warn
+          retention-days: 7

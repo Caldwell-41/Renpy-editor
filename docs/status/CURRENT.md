@@ -1,5 +1,18 @@
 # Current status
 
+## Phase 3B early source proof and Screens prototype
+
+2026-10-21: The user approved the [early 3B outcome](../tasks/active/phase-3-initial-wysiwyg-release.md#selected-early-outcome-and-cumulative-allowance)
+on `codex/phase3b-screen-designer`, branched from Phase 3A at `571e76c`.
+State `in_progress`: the narrow source service passes three core cases and the
+frontend passes211 cases. Five evidence rejection cases pass. Actual SDK rendering
+remains unproved after four retained local preview failures; the corrected driver
+is ready for focused Windows/macOS CI. The three-layout Screens prototype remains
+gated on that proof and its agent must use the prototype skill. Mac is the selected
+development host. The task owns decisions, failures and cumulative limits.
+Design selection precedes live workspace implementation. Phase 2/3A human
+acceptance remains pending; protected native recovery is unchanged.
+
 ## Full-app mockups ready for review
 
 2026-10-21: [The full-app comparison](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)

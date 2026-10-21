@@ -1,5 +1,150 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Phase 3B planning entry — 2026-10-21
+
+The user requested a branch from the current Phase 3A Story logic work, a read of
+the 3B brief and a grilling interview before implementation. Local branch
+`codex/phase3b-screen-designer` starts at `571e76c0eed9775a9280f7d070c0167b56c60d9f`
+on `codex/phase3a-story-logic`; the working tree was clean at entry. The interview
+concluded with the user's "Yes approved" to the final delivery recommendations.
+The agreement below authorizes the early implementation outcome. No earlier
+milestone acceptance is implied.
+
+### Selected early outcome and cumulative allowance
+
+State `in_progress`. Use the current Mac development host; obtain affected Windows
+x64/macOS ARM64 proof through focused CI. Deliver one nested-screen source/runtime
+proof, then a three-layout Screens prototype ready for user selection. The parent
+owns source/runtime integration, the designated prototype agent must use the
+prototype skill, and a separate agent independently reviews the source/runtime
+change. Live workspace implementation follows explicit design selection.
+
+The user authorized committing and pushing `codex/phase3b-screen-designer` for
+selected checks and recovery. Maximum cumulative use is eight local verification
+batches, four local Ren'Py preview launches, two focused CI dispatches including
+retries, one independent review and one follow-up review of fixes. Initial use is
+local0/8, preview0/4, CI0/2, review0/1, follow-up0/1. Preparation and focused repairs
+share those limits; failed/cancelled attempts remain charged. Reassess after two
+unsuccessful corrections of the same hypothesis. Installer packaging and live model
+requests are outside this outcome. Preserve the protected native draft and existing
+Phase 2/3A recovery. No earlier allowance is renewed.
+
+The early proof must inspect a nested custom screen, patch one supported property
+through the existing transaction boundary, preserve an opaque neighbor byte for
+byte, survive reopen/undo/conflict handling and demonstrate actual pinned-SDK
+rendering. Record approximations and distinguish this slice from full 3B support.
+Only after that proof does the prototype agent implement the Design Lab comparison.
+
+### Early execution ledger
+
+Current use is local6/8, preview4/4, CI0/2,
+review1/1 and follow-up1/1 complete. Prototype implementation has not started;
+actual rendering evidence is still required before that handoff.
+
+- Local1 compiled the new source service and ran three cases. Two passed; the third
+  stopped on a harness assertion expecting `SOURCE_DRAFT_DIRTY` instead of the
+  existing `DIRTY_SOURCE` response. Corrected the expectation; no product change
+  was needed for that failure.
+- Local2 passed all three dispatch/parser cases and SDK version/compile/lint. Its
+  preview attempt failed before game start because the driver used
+  `screenproof.layout` instead of the pinned SDK's `screenproof::layout` testcase
+  selector. Retain ignored `source-local-02` logs and partial result.
+- Local3 corrected that selector and reused the unchanged passing core cases.
+  SDK version/compile/lint passed. The sandboxed runtime could not access displays;
+  its Hiservices XPC/display initialization failure supplies no rendering proof.
+- Local4 ran outside the sandbox. All three core cases, four rejecting harness
+  cases and SDK version/compile/lint passed. Native execution reached the story,
+  while the driver incorrectly waited for a generated main menu in the minimal
+  fixture. The frontend check separately caught the new operations missing from
+  its expected list and a default Python 3.9 interpreter without `tomllib`.
+- Local5 corrected the minimal fixture's initial/continuation screens, retained
+  the produced core executable and selected the available Python 3.12 runtime.
+  The frontend check passes all211 cases. Core3/3, harness4/4 and SDK version/
+  compile/lint passed. Native execution activated Help and verified the opaque
+  sentinel, then failed an unsupported `.style.xsize` attribute read. Removed that
+  redundant driver assertion; the decisive `renpy.render(...).get_size()` equality,
+  screenshot, unchanged-source and exactly-one-continuation checks remain required.
+  No successful geometry, screenshot or continuation result is claimed locally.
+- The independent review found duplicate-declaration whitespace and missing
+  protected-property spans, incomplete compiled-input reuse hashes and an absent
+  artifact privacy gate. The follow-up confirms those four fixes. It also identified
+  the wrong runtime start assumption and missing retained test binaries on failure;
+  the parent corrected those driver/evidence paths. Toolchain/source/test-executable
+  identity, named results, durations, retained executables and existing privacy
+  scanning now form the proposed CI evidence. Final driver fixes have parent review,
+  not an additional independent review beyond the selected allowance.
+- Local6 passes all five corrected zero-SDK evidence cases, including executable
+  retention on failure, repository links/privacy/whitespace and the retained local
+  artifact scan. Native preview remains4/4; do not run another local preview. Two
+  focused CI attempts remain available for the corrected native proof.
+- The prototype agent has read the required prototype UI workflow and lab rules;
+  it remains gated on actual source/runtime proof. Retain all ignored
+  `source-local-02` through `source-local-05` reports/logs, including failures.
+
+The user answered yes to all three first-round recommendations:
+
+- Authorize an early 3B slice after the interview, with actual inherited dependency
+  proof. Phase 2/3A human acceptance remains pending.
+- Use a Help screen with a title, explanatory text, image and dismissal button as
+  the first example. Prove it during continuing dialogue and as a blocking
+  interaction through the selected Show/Hide/Call contract.
+- Retain full 3B scope, including custom screens and supported editing of generated
+  dialogue, choice, main-menu/navigation, preferences and save/load screens. The
+  first custom-screen slice does not complete 3B.
+
+The user answered yes to all five second-round recommendations:
+
+- Start Help with fixed/frame/vbox containers, text, images and text buttons. Add
+  horizontal stacks, grids, image buttons, bars, viewports, shared styles and reusable
+  components within the remaining 3B scope. The brief's window container remains
+  part of the release inventory.
+- Give custom screens explicit panel or blocking interaction types, with appropriate
+  dismissal actions. Use separate Help panel and Help dialog examples.
+- Support assigning literal values to existing bool/int/string variables through
+  typed button actions. Arbitrary Python actions remain outside scope.
+- Allow supported layout/style changes and decorative text/images in generated
+  screens, with required controls and game behavior protected and limits explained.
+- Use one layout per screen at the project's game resolution, with relative
+  positions, anchors and container rules. Prove a second aspect ratio; separate
+  resolution layouts and breakpoint editing remain beyond 3B.
+
+The user answered yes to all six third-round recommendations:
+
+- Add project-owned fonts and UI image assets to asset pickers. Start font
+  qualification with TTF/OTF against the pinned SDK and retain existing image
+  formats. Font and UI image support require typed asset/import extensions.
+- Shared style/component edits update all uses, with affected screens listed before
+  apply and an option to make an independent copy. Initial reusable components
+  have no parameters.
+- Allow text to display existing variables and bars to bind to existing integer
+  variables with explicit limits. More complex dynamic screen logic stays in Source.
+- Allow short ordered button-action sequences. Any action that finishes the
+  interaction must be last.
+- Offer blank and Help starter layouts for the selected panel/blocking type. Starter
+  controls remain ordinary editable nodes.
+- Keep inspector property changes in a draft until Apply; Cancel restores saved
+  values. Apply is one undo entry. Each completed drag remains one undo entry.
+
+The user answered yes to all four fourth-round recommendations:
+
+- The property inventory covers position/anchors/alignment, width/height and size
+  limits, padding/spacing; text content/font/size/color/alignment/bold/italic; image
+  asset/displayed size/aspect preservation; and background/border plus supported
+  normal/hover/selected/disabled appearances. Qualify each applicable property's
+  Ren'Py mapping before claiming support; other properties remain in Source.
+- Canvas sample variable values and interaction appearances stay separate from game
+  source/state. Show when sample data is active; never execute button actions there.
+- Panels permit continuing Story interaction. Blocking screens prevent interaction
+  with the underlying game. Both default to Close and Escape dismissal with the
+  appropriate Hide/Finish action; clicking outside leaves them open. Verify native
+  keyboard focus and dismissal.
+- After the source/runtime risk proof, prepare a Screens prototype in the existing
+  Design Lab for user review before live workspace implementation. The user
+  explicitly requires its assigned agent to use the prototype skill. Follow that
+  skill's UI branch: one prototype with three structurally different variants,
+  retaining the agreed hierarchy/canvas/inspector behavior and inert sample data.
+  The design remains unapproved until explicit user selection.
+
 ## Restarted combined Phase 2 / 3A guided walkthrough — 2026-10-16
 
 User requests restarting the guided walkthrough from the beginning after reviewing

@@ -28,6 +28,26 @@ Phase 3A controller tests exercise actual dispatch and ordinary second-process r
 Their SDK cases also prove saved-callee return and edited continuation behavior;
 renderer or controller success cannot replace that runtime proof.
 
+### Early screen-source proof
+
+Phase 3B's selected early outcome adds `screens::tests` in core and
+`test_screens_source_evidence.py` for rejecting incomplete qualification evidence.
+The narrow service inspects revision-bound nodes in `game/ui` and patches existing
+integer `xsize`/`ysize` tokens through shared transactions/history. Opaque spans,
+Source drafts, stale revisions, undo/redo and reopen remain protected. It does not
+implement the full Screens workspace or persistent screen ownership.
+
+`qualify-screens-source.py` takes an explicit verified archive/checksum pair, fresh
+output directory, ordinal and `--allow-fixture-execution`. The named SDK case must
+prove actual rendered dimensions, a captured screen, unchanged accepted bytes and
+one continuation after Close. Retain individual cases, source/toolchain/executable
+identity, the executable on failure, durations and cleanup. Scan before upload.
+The focused branch workflow uses both Windows x64 and macOS ARM64 without packaging
+an editor. The [task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
+owns the fresh allowance and all failures; local preview is exhausted4/4 and actual
+rendering remains pending. An active screen or successful compile/lint is not a
+rendering pass. The Design Lab prototype waits for that risk proof.
+
 ## Official SDK
 
 Use only the project-pinned official SDK, currently 8.5.3, verified against its

@@ -731,6 +731,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn screens_inspect(&self, request: crate::screens::InspectRequest) -> Result<crate::screens::Document, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring.screens_inspect(&authority, request).map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_set_pixel(&self, request: crate::screens::SetPixelRequest) -> Result<crate::screens::Document, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring.screens_set_pixel(&authority, request).map_err(LifecycleError::Scene)
+    }
+
     pub fn scene_recovery(&self) -> Result<crate::transaction::RecoveryReport, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
         Ok(self.authoring.scene_recovery(&authority))

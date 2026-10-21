@@ -225,6 +225,19 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   [H19 build/rejecting-gate review](../tasks/active/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17).
   [CI3 terminal audit and completion](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 
+## H20 — Screen SDK driver assumes an unavailable menu or style attribute
+
+- **Class/search:** harness; `screenproof.layout`, `main_menu`, `Style.xsize`,
+  `video driver did not add any displays`.
+- **Cause/correction:** the minimal fixture starts in Story; it has no generated
+  menu journey. Use the SDK's `suite::case` selector, await the called screen, then
+  measure `renpy.render(...).get_size()` and verify its continuation. An `xsize`
+  source property is not a readable `Style.xsize` attribute in the pinned SDK.
+  Distinguish the separate sandbox display failure from these driver defects.
+- **Regression:** named core/evidence rejection cases and retained native assertions;
+  actual corrected rendering remains pending CI. Preserve all failed attempts.
+- **Evidence:** [early 3B execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger).
+
 ## P01 — Redo refuses an app-owned clean deletion
 
 - **Class/search:** product; Draft Scene Undo/Redo, cached unavailable Source buffer, DIRTY_SOURCE.

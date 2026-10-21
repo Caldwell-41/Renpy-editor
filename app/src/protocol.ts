@@ -69,6 +69,8 @@ export const CORE_OPERATIONS = [
   "scene.list",
   "flow.list",
   "scene.apply",
+  "screens.inspect",
+  "screens.setPixelProperty",
   "scene.recovery",
   "scene.resolveRecovery",
   "media.present",

@@ -1,5 +1,28 @@
 # Current outcome handover
 
+## Phase 3B early outcome, 2026-10-21
+
+The user completed the grilling interview and approved the [selected early outcome](../tasks/active/phase-3-initial-wysiwyg-release.md#selected-early-outcome-and-cumulative-allowance).
+State `in_progress`, branch `codex/phase3b-screen-designer`, entry `571e76c`
+from the clean Phase 3A branch. Mac is the selected development host. The narrow
+screen source service passes3 core cases; frontend211 and evidence rejection5 pass.
+Actual rendering is unproved. Preserve four failed local previews and their driver/
+environment diagnoses in the task. The corrected driver is ready for focused CI.
+After actual pinned-SDK rendering proof, then
+the designated agent uses the prototype skill for three Screens layouts in the
+existing Design Lab. Live workspace implementation awaits explicit layout selection.
+
+The parent owns source/runtime integration. A separate agent performs independent
+source/runtime review. The task owns accepted product decisions and cumulative
+counts, now local6/8, preview4/4, CI0/2, review1/1, follow-up1/1. No further local
+preview is allowed. Original review findings are fixed; final driver fixes have
+parent review. Commit/push
+to the new branch is authorized for focused CI and recovery. Installer packaging
+and live model requests are outside scope. Existing allowances are not renewed.
+Work is currently local only; no operation is pending. Next is publishing the
+candidate and starting the first focused Windows/macOS proof. Continue in
+this thread. Preserve the protected native draft and unique recovery below.
+
 ## Full-app mockups ready for review, 2026-10-21
 
 [The selected task](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)

@@ -26,6 +26,8 @@ supersede them with a later ADR rather than editing history.
 
 | [0017](0017-design-approval-and-app-integration.md) | Accepted workflow | Versioned per-screen approval, retained references and separate visual/functional integration proof |
 
+| [0018](0018-early-screen-source-proof.md) | Implementation proposal; proof/review pending | Revision-bound screen spans and minimal existing pixel-property edits through shared transactions |
+
 Future changes to an accepted decision require a superseding ADR. An accepted design
 is not a claim that its implementation or supported-target acceptance is complete;
 CURRENT, HANDOVER and the linked active task own that delivery state.

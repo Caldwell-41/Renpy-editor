@@ -19,6 +19,7 @@ pub mod prompts;
 pub mod renpy;
 mod runtime_work;
 pub mod scene;
+pub mod screens;
 pub mod source;
 pub mod transaction;
 
@@ -109,6 +110,8 @@ pub const OPERATIONS: &[&str] = &[
     "scene.list",
     "flow.list",
     "scene.apply",
+    "screens.inspect",
+    "screens.setPixelProperty",
     "scene.recovery",
     "scene.resolveRecovery",
     "media.present",
@@ -522,6 +525,16 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.authoring_update_variable(payload))
             .and_then(to_value),
+        "screens.inspect" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| serde_json::from_value::<screens::InspectRequest>(Value::Object(payload))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
+            .and_then(|request| lifecycle.screens_inspect(request)).and_then(to_value),
+        "screens.setPixelProperty" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| serde_json::from_value::<screens::SetPixelRequest>(Value::Object(payload))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
+            .and_then(|request| lifecycle.screens_set_pixel(request)).and_then(to_value),
         "flow.list" => {
             #[derive(serde::Deserialize)]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]
