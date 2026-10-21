@@ -28,6 +28,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   let screenId = context.state === "template" ? "template-0" : context.state === "dialog" ? "help-dialog" : screens[0]!.id;
   let selected = context.state === "template" ? "frame" : "title";
   const drafts = new Map<string, ScreenNode>();
+  const inspectorSections = new Map<string, Map<string, boolean>>();
   let conflict = context.state === "conflict", gesture: { node: ScreenNode; children: ScreenNode[]; startX: number; startY: number; dx: number; dy: number; resize?: ResizeEdge } | undefined;
   let skipCanvasClick = false;
   let listDrag: { id: string; parent: string } | undefined;
@@ -173,11 +174,9 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     const siblings = current().nodes.filter(item => item.parent === n.parent), ordered = siblings.filter(item => item !== n);
     ordered.splice(ordered.indexOf(other) + Number(after), 0, n);
     if (ordered.every((item, index) => item === siblings[index])) { status("Order unchanged."); return; }
-    const positionOpen = inspector.querySelector<HTMLDetailsElement>('[data-group="Position & size"]')?.open;
     saveHistory(); let index = 0;
     current().nodes = current().nodes.map(item => item.parent === n.parent ? ordered[index++]! : item);
     current().revision++; selected = n.id; render();
-    if (positionOpen) inspector.querySelector<HTMLDetailsElement>('[data-group="Position & size"]')!.open = true;
     status(layoutParent(n) ? "Item order changed. This group arranges its items automatically." : "Element order changed. Later items appear in front.");
   }
 
@@ -191,8 +190,13 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   }
   function choose(id: string, browse = false, keepTree = false) { selected = id; if (!browse) { if (layout !== "guided-v2" && step !== "behavior") step = "layout"; view?.select(); } render(keepTree); }
   function dialog(title: string, text: string) {
+    const opener = document.activeElement as HTMLElement | null, focusId = opener?.dataset.inspectorFocus, viewKey = inspector.dataset.viewKey;
     const d = el("dialog", "lp-dialog sc-dialog"); d.ariaLabel = title;
-    d.append(el("h2", "", title), el("p", "", text)); d.onclose = () => d.remove(); frame.shell.append(d); return d;
+    d.append(el("h2", "", title), el("p", "", text)); d.onclose = () => {
+      d.remove();
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
+      else if (viewKey === inspector.dataset.viewKey && focusId) focusInspectorControl(focusId);
+    }; frame.shell.append(d); return d;
   }
   function newScreen() {
     const d = dialog("New screen", "Start with a blank screen or a Help example. You can edit every item in the example.");
@@ -435,12 +439,18 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     canvasObserver = new ResizeObserver(fit); canvasObserver.observe(scroll); fit();
   }
   function renderInspector() {
+    const viewKey = `${key()}:${step}`, previousKey = inspector.dataset.viewKey;
+    if (previousKey) inspectorSections.set(previousKey, new Map([...inspector.querySelectorAll<HTMLDetailsElement>(".sc-property-group")].map(section => [section.dataset.group!, section.open])));
+    const sections = inspectorSections.get(viewKey), sameView = previousKey === viewKey, scrollTop = notebook.scrollTop;
+    const active = document.activeElement as HTMLElement | null, focusId = sameView && active && inspector.contains(active) ? active.dataset.inspectorFocus : undefined;
+    const focusGroup = active?.closest<HTMLElement>("[data-group]")?.dataset.group;
+    closeHelp?.(); inspector.dataset.viewKey = viewKey;
     inspector.replaceChildren(); const d = draft(); if (!d) return;
     inspector.append(el("h2", "", d.name));
     const state = el("p", "sc-draft-status"); state.textContent = changed() ? "Changes waiting to be applied" : "No changes to apply"; inspector.append(state);
     if (current().template) inspector.append(el("p", "sc-protected", "You can change the look of this game screen. Its required text and controls stay in place so it keeps working."));
     const applyBar = el("div", "sc-apply"); applyBar.append(action("Apply changes", () => applyDraft()), action("Cancel changes", () => { drafts.delete(key()); renderInspector(); renderInfo(); status("Changes cancelled. Previous values restored."); })); inspector.append(applyBar);
-    const group = (title: string, opened = false) => { const details = el("details", "sc-property-group"); details.dataset.group = title; details.open = opened; details.append(el("summary", "", title)); inspector.append(details);
+    const group = (title: string, opened = false) => { const details = el("details", "sc-property-group"); details.dataset.group = title; details.open = sections?.get(title) ?? opened; details.append(el("summary", "", title)); inspector.append(details);
       const explanations: Record<string, string> = {
         "Position & size": "Position sets where an element sits. An anchor chooses the point on the element placed there. Use 0 for the start, 0.5 for the center, and 1 for the end. Fractional positions use the game size. Padding is space inside a group; spacing is the gap between its items.",
         "Reuse this look": "A shared look keeps matching elements consistent across screens. Apply shows which screens will change. Choose a separate look to change only this element.",
@@ -452,6 +462,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
       return details; };
     const input = (parent: HTMLElement, title: string, property: keyof ScreenNode, type = "text", disabled = false) => {
       const control = el(type === "textarea" ? "textarea" : "input") as HTMLInputElement | HTMLTextAreaElement;
+      control.dataset.inspectorFocus = `field:${property}`;
       if (control instanceof HTMLInputElement) control.type = type === "textarea" ? "text" : type;
       control.value = String(d[property]); control.disabled = disabled;
       control.oninput = () => { (d as unknown as Record<string, unknown>)[property] = control.value; state.textContent = "Changes waiting to be applied"; renderInfo(); };
@@ -459,7 +470,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
       if (explanations[title]) explain(control, explanations[title]!);
       parent.append(labelled(title, control)); return control;
     };
-    const choice = (parent: HTMLElement, title: string, property: keyof ScreenNode, options: readonly (readonly [string, string])[]) => { const control = select(options, String(d[property])); control.onchange = () => {
+    const choice = (parent: HTMLElement, title: string, property: keyof ScreenNode, options: readonly (readonly [string, string])[]) => { const control = select(options, String(d[property])); control.dataset.inspectorFocus = `field:${property}`; control.onchange = () => {
       if (property === "coordinates" && control.value !== d.coordinates) {
         const width = aspect === "1280 × 720" ? 1280 : 960, divisor = control.value === "relative" ? 1 : -1;
         d.x = String(Number(d.x) * Math.pow(width, -divisor)); d.y = String(Number(d.y) * Math.pow(720, -divisor));
@@ -467,7 +478,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
       (d as unknown as Record<string, unknown>)[property] = control.value; state.textContent = "Changes waiting to be applied";
       if (property === "coordinates" || property === "parent") renderInspector(); renderInfo();
     }; parent.append(labelled(title, control)); return control; };
-    const check = (parent: HTMLElement, title: string, property: "bold" | "italic" | "aspect") => { const control = el("input"); control.type = "checkbox"; control.checked = d[property]; control.onchange = () => { d[property] = control.checked; state.textContent = "Changes waiting to be applied"; renderInfo(); }; parent.append(labelled(title, control)); };
+    const check = (parent: HTMLElement, title: string, property: "bold" | "italic" | "aspect") => { const control = el("input"); control.dataset.inspectorFocus = `field:${property}`; control.type = "checkbox"; control.checked = d[property]; control.onchange = () => { d[property] = control.checked; state.textContent = "Changes waiting to be applied"; renderInfo(); }; parent.append(labelled(title, control)); };
     const content = group("Text & image", true);
     input(content, "Element name", "name");
     if (["text", "textbutton", "component"].includes(d.kind)) { input(content, "Text", "text", "textarea", current().template); content.append(el("p", "muted", "Write [destination] to show that game variable in the text. Change its example value under Connect to check how the text looks.")); }
@@ -502,6 +513,16 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
       const modal = dialog("Change text in the script", "Try changing this element's text. This demo leaves the custom code beside it alone.");
       const text = el("textarea"); text.value = target()!.text; modal.append(labelled("Text in script", text), action("Cancel script change", () => modal.close()), action("Apply text edit", () => { if (current().template) { status("The game supplies this text, so it cannot be replaced here.", true); return; } saveHistory(); target()!.text = text.value; current().revision++; drafts.delete(key()); modal.close(); render(); status("Text updated in this demo. Custom code was left alone."); })); modal.showModal();
     }));
+    inspector.querySelectorAll<HTMLElement>("button,input,select,textarea,summary").forEach(control => {
+      control.dataset.inspectorFocus ??= `${control.closest<HTMLElement>("[data-group]")?.dataset.group ?? "draft"}:${control.tagName}:${control.getAttribute("aria-label") ?? control.textContent?.trim()}`;
+    });
+    if (focusId) focusInspectorControl(focusId, focusGroup);
+    if (sameView) notebook.scrollTop = scrollTop;
+  }
+  function focusInspectorControl(id: string, group?: string) {
+    const controls = [...inspector.querySelectorAll<HTMLElement>("[data-inspector-focus]")];
+    const control = controls.find(control => control.dataset.inspectorFocus === id) ?? controls.find(control => control.tagName === "SUMMARY" && control.parentElement?.dataset.group === group);
+    control?.focus({ preventScroll: true });
   }
   function renderActions(parent: HTMLElement, d: ScreenNode) {
     if (current().template) { parent.append(el("p", "sc-protected", "This game screen needs these button actions to work. You can change how the button looks.")); return; }

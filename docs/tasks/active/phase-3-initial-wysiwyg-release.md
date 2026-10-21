@@ -1,5 +1,63 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Design section continuity and final experience review, 2026-10-22
+
+State `review_ready`. The user reports Design sections collapsing after Reuse this
+look and font-picker actions, and requests a final Experience First pass with a
+concrete change report. Reproduce the issue and repair shared form continuity,
+including deliberate closed sections, draft retention, keyboard focus and picker
+return. Review the existing select/edit/preview loop without adding new features.
+
+Continue on the chosen Mac and branch `codex/phase3b-screen-designer`, clean entry
+`cc92795`. Allow one focused diagnosis/implementation cycle, one combined lab cycle
+and one in-scope repair cycle if needed, with a three-cycle cumulative limit. Current
+use is continuity local2/3. Earlier allowances stay closed. This remains a local
+browser mockup; no native, SDK, CI, package, publication or approval work is selected.
+The affected controls and existing journeys pass, both sizes/themes received visual
+review, and docs record the final result and changes. Final use is continuity
+local2/3; the unused repair cycle is closed. Next is user review.
+
+The ordinary browser receipt `final-ux-diagnostic-01.json` reproduces Reuse this look
+open=true becoming false after Give this element its own look. Font selection also
+returns focus to the page body. `renderInspector` replaces all sections and assigns
+default open values on every rebuild. Preserve the diagnostic under
+`.toolchains/phase3b/`. Apply one shared correction rather than exceptions for each
+button; retain the earlier depth and preview-control behavior.
+
+Local1 passes TypeScript and all 60 rendering cases, then verifies open/closed
+sections, both reuse actions, scroll continuity and font choose/cancel/Escape with
+focus return in Screen notebook. It stops on an assertion that Position units has
+focus after Playwright `selectOption`; that helper does not focus the menu.
+`continuity-select-focus-01.json` records SUMMARY focus before/after the unfocused
+selection, then `field:coordinates` after explicit focus and another change. The
+check now establishes keyboard focus before requiring its restoration. No product
+correction follows this harness issue. Preserve the failed
+`continuity-focused-01/` report and sibling log. The shared repair snapshots actual
+section state per screen/element/editing step before rebuilding and restores stable
+control focus and panel scroll. Picker close resolves its original launcher after
+rebuilds; a removed control falls back to its section heading. The earlier special
+case for Depth is removed in favor of this shared behavior. Local2 is the combined
+check; local3 remains available for an in-scope repair if needed.
+
+Local2 passes TypeScript, approval/source checks, all 508 rendering cases and 20
+interaction groups on Chromium 155.0.8059.86, without browser errors. The new
+continuity journey passes in all three layouts. It checks both reuse actions,
+explicitly closed sections, scroll/focus retention, font choose/cancel/Escape,
+position changes, Apply/Cancel, selection return, image-picker focus, action removal
+and compact Design. Existing list, canvas, depth, Undo/Redo and story journeys pass.
+
+Experience First review concentrates on uninterrupted editing. Design and Connect
+remember sections per selected element and editing step. Rebuilds keep scroll and
+keyboard focus; pickers return focus to the launcher, and removed controls return
+focus to their section heading. The shared repair replaces the earlier Depth-only
+exception. Parent review covers the compact reuse/font-picker captures, wide Design
+and compact Depth. All 12 final matrix captures match the previously reviewed
+reorder local4 set byte for byte, retaining both themes at 1100×720 and 560×640.
+Preserve report, 12 matrix images, ten interaction images and comparison receipt under
+`.toolchains/phase3b/continuity-combined-02/`, with the sibling log and both diagnostic
+receipts. Validation passes for 794 repository files and whitespace. No repair or
+verification remains pending. Work stays local and all approvals remain null.
+
 ## Element list reordering and opening Design, 2026-10-21
 
 State `review_ready`. The user requests click-and-drag ordering under Choose →

@@ -59,6 +59,13 @@ restores its previous values. Shared headings ask which screens should change. U
 reverses one accepted change. Unfinished drafts survive selection, screen changes,
 focus mode and resizing. Invalid values or a changed script retain the draft.
 
+Each element remembers which editing sections are open or closed in Design and
+Connect. Reuse-look actions, font/image selection, position changes and Apply/Cancel
+keep those sections as the user left them. Rebuilding controls retains panel scroll
+and keyboard focus. Closing a picker returns focus to its launcher; removing a
+focused action returns focus to its section heading. This state stays in browser
+memory and resets when the sample is reloaded.
+
 Drag any element to select and move it on the first press. Drag its eight edge and
 corner handles to resize it; Shift-drag also resizes from the bottom right. Images
 keep their proportions when that option is checked. Resizing keeps the opposite
@@ -113,17 +120,17 @@ components and button states are simplified. Components have no parameters. Nati
 rendering, source preservation, asset discovery, Story Beats and durable editing need
 separate product integration and evidence under the selected task.
 
-The element-list refinement is ready for review. Final combined local4 passes
-TypeScript, approval/source checks, all 508 rendering cases and 20 interaction groups
-on Chromium 155.0.8059.86, with no browser errors. It includes all three Screens
-journeys, real pointer dragging, double-click Design, Depth controls, Undo/Redo,
-cancellation and guards. Visual review covers both themes at 1100×720 and 560×640.
-All 12 final matrix captures and the held-drag/compact-Depth images match the reviewed
-local3 set. Evidence remains ignored under `.toolchains/phase3b/reorder-combined-04/`.
-The owning [task record](../../tasks/active/phase-3-initial-wysiwyg-release.md#element-list-reordering-and-opening-design-2026-10-21)
-retains failures, the keyboard-selection repair and source identity. Final use is
-reorder local4/4; no check or repair remains pending. Earlier allowances stay closed.
-No native or CI work is selected for this browser change.
+The final Design continuity/Experience First pass is ready for review. Combined
+local2 passes TypeScript, approval/source checks, all 508 rendering cases and 20
+interaction groups on Chromium 155.0.8059.86, with no browser errors. New continuity
+checks pass in all three layouts; all earlier journeys also pass. Visual review
+covers compact reuse/font selection, wide Design and compact Depth. All 12 matrix
+captures match the previously reviewed set in both themes at 1100×720 and 560×640.
+Evidence remains ignored under `.toolchains/phase3b/continuity-combined-02/`. The
+[task record](../../tasks/active/phase-3-initial-wysiwyg-release.md#design-section-continuity-and-final-experience-review-2026-10-22)
+retains reproduction, the harness focus correction, final source identity and
+continuity local2/3 use. The unused repair cycle is closed; no check or repair is
+pending. All earlier allowances stay closed. No native or CI work is selected here.
 The separate source/runtime proof remains
 qualified at `0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run `39555526201`.
 No later browser commit replaces that proof. No native or CI check is selected here.

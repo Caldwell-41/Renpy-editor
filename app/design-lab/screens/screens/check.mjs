@@ -3,11 +3,13 @@ import checkNotebook from "./check-notebook.mjs";
 import checkAlternatives from "./check-alternatives.mjs";
 import checkManipulation from "./check-manipulation.mjs";
 import checkList from "./check-list.mjs";
+import checkContinuity from "./check-continuity.mjs";
 
 export default async function check(context) {
   const { page, open } = context;
   const ids = await page.evaluate(async () => (await import("/screens/screens/definition.ts")).variants.map(v => v.id));
   assert.deepEqual(ids, ["guided-v2", "direct", "flow"], "Only the three requested Screens drafts remain");
+  await checkContinuity(context);
   await checkList(context);
   await checkManipulation(context);
   await checkNotebook(context);

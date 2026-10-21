@@ -10,20 +10,21 @@ qualifies the narrow source/runtime proof at `0ef1748` on Windows x64 and macOS
 ARM64. No CI is pending.
 
 The user prefers Screen builder. Its
-[element-list refinement](../tasks/active/phase-3-initial-wysiwyg-release.md#element-list-reordering-and-opening-design-2026-10-21)
-is `review_ready`. Click selects an element; double-click or Enter opens Design.
-Drag rows to reorder within a group, with a visible drop marker, Escape and Undo/Redo.
-Depth now sits under Position & size beside horizontal/vertical position. Tooltips,
-drafts, grouped children and protected samples remain intact. Screen notebook and
-Canvas focus share the list behavior. [Comparison notes](../design/design-lab-screens/README.md)
-own controls and limits. All three approval entries remain null; next is user review.
+[final Design continuity review](../tasks/active/phase-3-initial-wysiwyg-release.md#design-section-continuity-and-final-experience-review-2026-10-22)
+is `review_ready`. Reuse-look and font-picker actions keep editing sections open;
+deliberately closed sections stay closed. Design/Connect remember sections per
+selected element. Form updates retain panel scroll and keyboard focus; pickers return
+focus to their launcher. All three mockups share the repair. Earlier list dragging,
+double-click Design, canvas resizing and Depth controls remain qualified.
+[Comparison notes](../design/design-lab-screens/README.md) own controls and limits.
+All three approval entries remain null; next is user review.
 
-Final combined reorder local4 passes TypeScript, approval/source checks, 508 rendering
-cases and 20 interaction groups without browser errors. Visual review covers both
-themes/sizes; all14 retained review captures match the preceding reviewed set.
-Final use is reorder local4/4, with no repair or verification pending. Browser actions
-stay in fictional memory. Earlier copy, refresh, native, SDK and CI allowances remain
-closed. Work is saved locally.
+Combined continuity local2 passes TypeScript, approval/source checks, 508 rendering
+cases and 20 interaction groups without browser errors. Visual review covers the
+changed Design states; all 12 matrix captures match the previously reviewed set in
+both themes/sizes. Final use is continuity local2/3; the unused repair cycle is
+closed. No repair or verification is pending. Browser actions stay in fictional
+memory. Earlier allowances stay closed. Work is saved locally.
 
 ## Earlier full-app mockups
 

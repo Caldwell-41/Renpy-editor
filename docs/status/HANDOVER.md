@@ -1,36 +1,36 @@
 # Current outcome handover
 
-## Phase 3B Screens refinement, 2026-10-21
+## Phase 3B Screens refinement, 2026-10-22
 
 State `review_ready`, branch `codex/phase3b-screen-designer`, chosen host Mac. The
-[element-list record](../tasks/active/phase-3-initial-wysiwyg-release.md#element-list-reordering-and-opening-design-2026-10-21)
-owns scope, failures, repairs, source identity and final allowance. Screen builder
+[final Design continuity record](../tasks/active/phase-3-initial-wysiwyg-release.md#design-section-continuity-and-final-experience-review-2026-10-22)
+owns reproduction, failure, repair, source identity and allowance. Screen builder
 is the user's current preference; all three approvals remain null. The
 [comparison notes](../design/design-lab-screens/README.md) own controls and limits.
 
-Choose retains the nested list, icons and hover/focus help. Single click selects;
-double-click or Enter opens Design. Drag rows to reorder within a group. A line
-marks insertion; Escape/outside drops cancel; Undo/Redo restores accepted changes.
-Groups keep their children. Root/protected template order stays fixed, and unfinished
-edits block reordering. A blocked keyboard move preserves internal and visible
-selection. Depth replaces the separate Front & back section and sits in Position &
-size beside horizontal/vertical position. Repeated depth changes keep the section
-open. All three mockups share these actions in fictional browser memory. Previous
-copy, canvas movement/resize and draft fixes remain intact.
+The final Experience First pass fixes Reuse this look/font-picker actions resetting
+Design sections. All three layouts remember actual open and closed state per
+screen/element/editing step before form rebuilds. Updates preserve panel scroll and
+keyboard focus. Picker close returns to its launcher after a rebuild; removed controls
+return focus to their section heading. The shared correction replaces the earlier
+Depth-only exception. Earlier nested list/dragging, double-click Design, canvas
+move/resize, Depth, draft, Undo/Redo and story behavior remain intact. All actions
+stay in fictional browser memory.
 
-Final combined local4 passes TypeScript, approval/source checks, 508 rendering cases
-and20 interaction groups on Chromium155.0.8059.86, without browser errors. It includes
-60 Screens cases, all three journeys and the new list/depth/keyboard checks. Parent
-visual review covers all12 Screens matrix captures and held-drag/compact-Depth images
-in both themes/sizes; all14 final images match the reviewed local3 set byte for byte.
-Retain `.toolchains/phase3b/reorder-combined-04/` report, 12 matrix/eight interaction
-images and review receipt, with its sibling log. Preserve the two earlier focused
-failures, passing local3 evidence and `reorder-keyboard-diagnostic-03.json`.
-Validation passes for793 repository files and whitespace. Final use is reorder
-local4/4. No verification or repair is pending. Earlier copy6/7, refresh5/6,
-refinement4/4 and early11/11 stay closed; no native, SDK, package or CI work is selected.
-The verified candidate is local commit `b5292b1`; the task owns its full commit,
-tree and source fingerprint. Later documentation receipts preserve that identity.
+Combined continuity local2 passes TypeScript, approval/source checks, 508 rendering
+cases and 20 interaction groups on Chromium 155.0.8059.86, without browser errors.
+The new continuity journey passes all three layouts, including reuse, font selection,
+cancel/Escape, explicit closed sections, selection return, position/Apply/Cancel,
+image picker, action removal and compact Design. Parent visual review covers changed
+Design states in both sizes/themes. All 12 final matrix captures match the previously
+reviewed reorder local4 set byte for byte. Retain
+`.toolchains/phase3b/continuity-combined-02/` report, 12 matrix/ten interaction images
+and comparison receipt with the sibling log. Preserve the local1 harness failure and
+`final-ux-diagnostic-01.json` / `continuity-select-focus-01.json` receipts.
+Validation passes for 794 files and whitespace. Final use is continuity local2/3;
+the unused repair cycle is closed. No verification or repair is pending. Earlier
+reorder4/4, copy6/7, refresh5/6, refinement4/4 and early11/11 stay closed. No native,
+SDK, package or CI work is selected.
 
 Next is user review of Screen builder. Keep work local. The earlier automatic push
 review rejected publication without explicit payload/destination permission;
@@ -50,7 +50,7 @@ retains its earlier review-ready result of 448 cases and 19 groups. Its 24 layou
 and starter remain unapproved, with prior references intact. That work was
 published on Phase 3A before this branch; Screens adds three current candidates.
 [Page notes](../design/design-lab-app/README.md) own controls and simulation limits.
-The reorder local4 combined check includes these unchanged pages and their
+The continuity local2 combined check includes these unchanged pages and their
 interaction groups; the earlier task retains its original qualification scope.
 Promotion still follows
 [INTEGRATION](../../app/design-lab/INTEGRATION.md), including explicit version selection,
