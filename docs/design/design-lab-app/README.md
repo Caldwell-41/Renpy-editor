@@ -73,5 +73,7 @@ approval history, native/network refusal and production-build exclusion checks p
 The final report and captures are ignored under `.toolchains/design-lab/`. Page notes
 separate earlier page reports from final corrections proved by this combined run.
 The owning task retains the initial live-reload interruption and passing rerun.
-All layouts remain local, uncommitted and unapproved. The protected native app was
-not touched. The gallery server remains available on port 5174 for comparison.
+These layouts were published before the Phase 3B branch and remain unapproved.
+The separate [Screens comparison](../design-lab-screens/README.md) adds three
+candidates and owns its incomplete newer verification. The protected native app
+was not touched. Use the Design Lab README to restart the gallery for comparison.

@@ -235,7 +235,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   source property is not a readable `Style.xsize` attribute in the pinned SDK.
   Distinguish the separate sandbox display failure from these driver defects.
 - **Regression:** named core/evidence rejection cases and retained native assertions;
-  actual corrected rendering remains pending CI. Preserve all failed attempts.
+  corrected rendering passes the audited both-host CI1 proof. All failed local
+  attempts remain in the owning ledger.
 - **Evidence:** [early 3B execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger).
 
 ## P01 — Redo refuses an app-owned clean deletion

@@ -44,9 +44,12 @@ one continuation after Close. Retain individual cases, source/toolchain/executab
 identity, the executable on failure, durations and cleanup. Scan before upload.
 The focused branch workflow uses both Windows x64 and macOS ARM64 without packaging
 an editor. The [task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
-owns the fresh allowance and all failures; local preview is exhausted4/4 and actual
-rendering remains pending. An active screen or successful compile/lint is not a
-rendering pass. The Design Lab prototype waits for that risk proof.
+owns the fresh allowance and all failures. Its
+[CI1 audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
+qualifies the early source/runtime proof on both hosts. Require measured virtual
+dimensions separately from capture pixels; successful compile/lint or an active
+screen alone cannot qualify rendering. Broader screen behavior remains under the
+full 3B completion contract.
 
 ## Official SDK
 

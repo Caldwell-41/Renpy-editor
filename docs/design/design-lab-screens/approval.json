@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "screens",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "workbench-v1", "variantId": "workbench", "approval": null },
+    { "id": "canvas-v1", "variantId": "canvas", "approval": null },
+    { "id": "guided-v1", "variantId": "guided", "approval": null }
+  ]
+}

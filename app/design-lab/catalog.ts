@@ -35,7 +35,7 @@ const count = el("p", "gallery-count muted");
 const cards = el("div", "gallery-cards"); cards.ariaLabel = "Page comparisons";
 const empty = el("p", "gallery-empty muted", "No matching pages. Try a page name such as Story or Settings.");
 host.append(header, intro, controls, count, cards, empty);
-const order = ["welcome", "new-project", "story", "source", "branches", "characters-writing", "lorebook", "assets", "variables", "settings", "runtime", "studio-request", "character-notes"];
+const order = ["welcome", "new-project", "story", "screens", "source", "branches", "characters-writing", "lorebook", "assets", "variables", "settings", "runtime", "studio-request", "character-notes"];
 function draw() {
   cards.replaceChildren();
   const needle = search.value.trim().toLocaleLowerCase();

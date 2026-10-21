@@ -2,77 +2,49 @@
 
 ## Phase 3B early outcome, 2026-10-21
 
-The user completed the grilling interview and approved the [selected early outcome](../tasks/active/phase-3-initial-wysiwyg-release.md#selected-early-outcome-and-cumulative-allowance).
-State `awaiting_ci`, branch `codex/phase3b-screen-designer`, entry `571e76c`
-from the clean Phase 3A branch. Mac is the selected development host. The narrow
-screen source service passes3 core cases; frontend211 and evidence rejection5 pass.
-Actual rendering is unproved. Preserve four failed local previews and their driver/
-environment diagnoses in the task. Published candidate `0ef1748` starts
-[CI1run39555526201](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39555526201),
-workflow391374211, event `push`, attempt1/ordinal1, exact
-`0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
-`521a550ef7d82ecf970a0527a1bab368062bad63`. Last observed updated2026-10-21T06:27:40Z,
-both jobs `in_progress`: Mac119074294342, Windows119074294589. No terminal proof is
-claimed. After actual pinned-SDK rendering proof,
-the designated agent uses the prototype skill for three Screens layouts in the
-existing Design Lab. Live workspace implementation awaits explicit layout selection.
+State `blocked`, branch `codex/phase3b-screen-designer`, entry `571e76c` from the
+clean Phase 3A branch. Mac is the selected development host. The
+[grilling agreement](../tasks/active/phase-3-initial-wysiwyg-release.md#agreed-3b-design-from-the-grilling-session)
+owns the approved design. The user authorized branch publication; merge, release,
+installer packaging and live model requests remain outside this outcome.
 
-The parent owns source/runtime integration. A separate agent performs independent
-source/runtime review. The task owns accepted product decisions and cumulative
-counts, now local6/8, preview4/4, CI1/2, review1/1, follow-up1/1. No further local
-preview is allowed. Original review findings are fixed; final driver fixes have
-parent review. Commit/push
-to the new branch is authorized for focused CI and recovery. Installer packaging
-and live model requests are outside scope. Existing allowances are not renewed.
-The implementation is pushed; this docs-only wait record does not become its tested
-candidate. End active polling. On manual same-thread resume, audit this exact run,
-both host artifacts/inputs/executables/named results, native dimensions/screenshot/
-continuation and cleanup. If passing, hand off the prototype with the two remaining
-local verification batches. Preserve the protected native draft and recovery below.
+[CI1's terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
+qualifies exact source `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
+`521a550ef7d82ecf970a0527a1bab368062bad63`, on Windows x64 and macOS ARM64.
+Run39555526201 is terminal success. Each host retains 335 matching inputs, its real
+test binary, named core/evidence/SDK results, a rendered 720×360 panel and one
+continuation. The task owns artifact IDs, digests, expiry and earlier failures.
+No CI is pending. Later prototype/docs commits do not become this SDK candidate.
 
-## Full-app mockups ready for review, 2026-10-21
+The designated agent used the prototype skill's UI branch to build three
+[unapproved Screens layouts](../design/design-lab-screens/README.md). All agents have
+finished. Both combined runs rendered 508 cases; the last Screens journey stopped
+on its Next button lookup. Explicit accessible labels are added but unverified.
+The prototype is not review-ready; the task's
+[candidate boundary](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
+owns exact remaining proof and source identity. Batch7/8 reports and all 12 captures
+are ignored under `.toolchains/phase3b/prototype-batch-07/` and `prototype-batch-08/`.
+No browser interaction ran after the label correction.
 
-[The selected task](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
-owns scope, page assignments, cumulative allowances and failures. The
-[gallery](http://127.0.0.1:5174/catalog.html) lists two layouts each for Home, New
-project, Story, Source, Branches, Characters, Lorebook, Assets, Variables, Settings,
-Runtime & diagnostics and Studio request. [Comparison notes](../design/design-lab-app/README.md)
-link each page's controls, tradeoffs and simulation limits. One agent owned each page;
-Characters was assigned last and now includes prose-first Writing plus interactive
-linked/planning Game setup. Every agent received the user's experience principles.
+Cumulative use is local8/8, preview4/4, CI1/2, review1/1 and follow-up1/1. Further
+verification needs a new user selection in this thread; no retry is authorized.
+The proposed next batch completes all three focused journeys, the combined lab
+checks and documentation validation, with no new CI, SDK or native operation.
+Explicit layout selection and recorded approval still precede live implementation.
+The lab server was stopped during checks; use the Design Lab README to restart it
+for inspection. Preserve the protected native draft and recovery below.
 
-The user authorised committing all local changes and pushing the existing
-`codex/phase3a-story-logic` branch on 2026-10-21. Publication preserves the draft
-design status and existing acceptance boundaries.
-Preserve all prior lab/workflow changes and the three unrelated user edits. All 24
-app layouts and the starter remain null/unapproved. Earlier approved references are
-intact. No native app, real project, model/provider, SDK, CI or package action occurred.
-The protected Loomlight window and draft remain untouched.
+## Earlier full-app mockups
 
-Final Node 24.19.0/npm 11.9.0/Chromium 155.0.8059.85 verification passes TypeScript,
-approval/source checks, 448 rendering cases and 19 browser groups. Every page journey,
-shared navigation/gallery, approval/HMR behavior, native/network refusal and production
-build exclusion passes. Owners reviewed both themes/sizes and key long/error states;
-parent review confirmed the final Game actions/feedback, Settings errors, Home chooser
-and Runtime cleanup layouts. The final report/captures are ignored under
-`.toolchains/design-lab/`; earlier 56-case Characters evidence is preserved under
-`history/characters-writing-2026-10-19/` there. These are review outputs, not approval
-captures. Page notes distinguish scoped reports from later combined proof.
-
-Each page used its initial and two focused repair cycles. Integration used an initial
-cycle and one focused repair. Its first run reached 208 cases before a timeout
-coincided with the last Characters notes write and the lab's design-note live reload.
-The retained failed report and unchanged-code full pass distinguish this interruption
-from a product failure. All agents have finished. No further repair or external operation
-is selected; prior native/CI allowances are not renewed. The loopback review server is
-available on port 5174. If it has ended on resume, use the Design Lab README to restart it.
-
-Next is user comparison and layout selection in this chat. ADR 0017 and
-[INTEGRATION](../../app/design-lab/INTEGRATION.md) require explicit version selection,
-reproducible source identity, retained captures and agreed behavior before promotion.
-Product implementation later maps controls to real services and proves appearance plus
-functionality. Browser proof covers fictional memory-only samples. Preserve the protected
-native window and recovery below; Phase2/3A human acceptance remains separate.
+The [12-page comparison](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
+retains its earlier review-ready result of 448 cases and 19 groups. Its 24 layouts
+and starter remain unapproved, with prior references intact. That work was
+published on Phase 3A before this branch; Screens adds three separate candidates.
+[Page notes](../design/design-lab-app/README.md) own controls and simulation limits.
+The new failed combined check does not revoke the earlier unchanged-page evidence,
+but it is not a passing current integration result. Promotion still follows
+[INTEGRATION](../../app/design-lab/INTEGRATION.md), including explicit version selection,
+reproducible source and retained captures. The protected app was untouched.
 
 ## CI harness reliability — accepted, 2026-10-17
 

@@ -1,70 +1,43 @@
 # Current status
 
-## Phase 3B early source proof and Screens prototype
+## Phase 3B source proof passes; prototype verification blocked
 
-2026-10-21: The user approved the [early 3B outcome](../tasks/active/phase-3-initial-wysiwyg-release.md#selected-early-outcome-and-cumulative-allowance)
-on `codex/phase3b-screen-designer`, branched from Phase 3A at `571e76c`.
-State `awaiting_ci`: the narrow source service passes three core cases and the
-frontend passes211 cases. Five evidence rejection cases pass. Actual SDK rendering
-remains unproved after four retained local preview failures; the corrected driver
-is published at `0ef1748`. [CI1run39555526201](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39555526201)
-was last observed `in_progress` on both hosts. The three-layout Screens prototype remains
-gated on that proof and its agent must use the prototype skill. Mac is the selected
-development host. The task owns decisions, failures and cumulative limits.
-Design selection precedes live workspace implementation. Phase 2/3A human
-acceptance remains pending; protected native recovery is unchanged.
+2026-10-21: Branch `codex/phase3b-screen-designer` starts from Phase 3A at `571e76c`.
+The [grilling agreement](../tasks/active/phase-3-initial-wysiwyg-release.md#agreed-3b-design-from-the-grilling-session)
+records all approved product choices. Mac is the chosen development host.
+[CI1's audited evidence](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
+qualifies the narrow source/runtime proof at `0ef1748` on Windows x64 and macOS
+ARM64, including the 720×360 panel and exactly one continuation after Close.
+No CI is pending.
 
-## Full-app mockups ready for review
+The three-layout [Screens prototype](../design/design-lab-screens/README.md) exists
+in the Design Lab. State `blocked`: both local combined runs rendered 508 cases,
+but the final Screens interaction journey timed out on the switcher button lookup.
+Its explicit accessible-label correction is unverified. The
+[task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
+retains failures and exhausted local8/8 use; further verification needs a new user
+selection. The prototype is not review-ready. All approval entries remain null;
+layout selection and recorded approval precede live Screens implementation.
 
-2026-10-21: [The full-app comparison](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
-is `review_ready`. [The gallery](http://127.0.0.1:5174/catalog.html) has 24 layouts
-for 12 pages, including Characters Writing/Game setup.
-[Page notes](../design/design-lab-app/README.md) map controls and limits.
-All 448 cases, 19 check groups and typing/approval/source checks pass.
-The task records the live-reload interruption and passing rerun. Work is local,
-prepared for branch publication and uses fictional browser memory. All layouts and the starter remain
-unapproved; earlier references are intact. Next is comparison and selection before
-promotion or app work.
+## Earlier full-app mockups
 
-## CI harness reliability — all three deliverables complete
+The [12-page comparison](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
+retains its earlier `review_ready` result of 448 cases and 19 groups. Its 24 app
+layouts and the starter remain unapproved; Screens adds three candidates separately.
+The earlier work was published before this branch. [Page notes](../design/design-lab-app/README.md)
+describe fictional memory-only controls and prior references. Promotion still needs
+explicit selection.
 
-Updated2026-10-17, state `accepted`, current branch `codex/phase3a-story-logic`.
-[CI3 terminal audit](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17)
-closes deliverable3 at `e00160b962ac09d70cb95000a6c10e4c205895c7`.
-[Run38969448685](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38969448685)
-passed both selected hosts. Source/archive/named-result audit admits both-host portable
-and rendered gates plus the complete Windows native save/reopen/replacement/recovery/
-removal sequence, seven authenticated loopback GETs and two normal process exits.
+## Qualified baseline and pending acceptance
 
-Deliverables1/2 retain concise current testing runbooks, searchable incident history,
-symmetric chosen-host iteration/target-CI rules and independent cheap harness gates.
-Current native instrumentation opens maintenance before Retry and verifies effective
-visibility; failure close dismisses owned Settings. Rendered rejecting cases cover the
-previous blind spots. Both earlier native failures remain in the ledger; no product
-Settings/backend/close-guard change was needed. Mac portable proof does not qualify
-fresh signed Mac native or human acceptance.
+[CI harness reliability](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17)
+is accepted at `e00160b`, with both-target proof and the selected Windows native
+sequence. Its allowances are closed; no CI or repair is pending there.
 
-Final deliverable3 use: local7/7, nativeCI3/3, Windows packages3/3, launches5/6,
-fixture GETs13/21. No CI or repair is pending; no further attempt is selected.
-Canonical native guidance/incident entries now link accepted proof. Closure documentation
-records the tested implementation separately; it does not become a new package candidate.
-The three unrelated user edits and existing recovery remain intact.
-
-## Retained app baseline and pending acceptance
-
-Thinking on by default, new response16384 and Name → Endpoint/private HTTP → native
-key → Connect → model → Save remain implemented at `36feff12ff9acfc1cd6eb0832da3abba243b9463`.
-Existing response limits persist; raw keys remain native-owned and reasoning stays
-separate from saved writing. [CI3 and its terminal audit](../tasks/active/phase-2-initial-llm-assistance.md#ci3-terminal-results-and-retained-evidence-audit--2026-10-16)
-retain both-target automated proof and the two earlier failures; that Thinking paired
-allowance is closed3/3. Maintenance changes harness/workflow inputs separately.
-
-The source-map-js development-dependency advisory remains open; no lockfile update
-or packaged-runtime exploit claim was made. Full signed native/real Studio proof
-still requires a matching package and observed user unlock/close. Native counts stay
-packages1/2 (first stale), launches0/2, live0/4, output0/65536 and cached loads0/1.
-Preserve the protected user window and existing isolated fixture.
-
-The [walkthrough](../tasks/active/phase-3-initial-wysiwyg-release.md#restarted-combined-phase-2--3a-guided-walkthrough--2026-10-16)
-remains paused Step3. Phase2/3A human acceptance is pending. [HANDOVER](HANDOVER.md)
-owns continuation and exact native recovery; no prior allowance is renewed.
+Thinking/default response and connection behavior remain qualified at `36feff12`
+by the [Phase 2 CI3 audit](../tasks/active/phase-2-initial-llm-assistance.md#ci3-terminal-results-and-retained-evidence-audit--2026-10-16).
+The source-map-js development advisory remains open. Signed Mac/real Studio proof
+and Phase 2/3A human acceptance remain pending; the walkthrough is paused at Step3.
+Native counts remain packages1/2 (first stale), launches0/2, live0/4,
+output0/65536 and cached loads0/1. Preserve the protected user window and isolated
+fixture. [HANDOVER](HANDOVER.md) owns exact recovery; no earlier allowance is renewed.

@@ -1,6 +1,6 @@
 # ADR 0018: Early screen-source editing proof
 
-- Status: Implementation proposal; local runtime proof and independent review pending
+- Status: Early implementation; source review fixes and scoped both-target runtime proof complete
 - Date: 2026-10-21
 - Scope: Early Phase 3B source/runtime risk proof
 
@@ -56,6 +56,14 @@ adapters, conservative effect summaries and a typed isolated preview service.
 
 ## Evidence
 
-The [owning task](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
-records passing source cases, retained harness failures, cumulative use and pending
-runtime/review/target evidence. No full 3B or earlier milestone acceptance is claimed.
+The [CI1 terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
+qualifies exact candidate `0ef1748` on Windows x64 and macOS ARM64. Each host retains
+335 matching source inputs, its real test executable, three core cases, five evidence
+cases and one actual SDK case. The 720×360 frame renders in a 1280×720 virtual game;
+Close continues exactly once, accepted bytes remain unchanged and cleanup completes.
+Captured window pixels are 922×518 and are distinct from virtual coordinates.
+
+The [execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
+preserves four failed local previews and their corrections. The independent review
+and follow-up resolved the source findings; final driver fixes had parent review
+and CI proof. Full 3B and earlier milestone acceptance remain separate.
