@@ -66,6 +66,13 @@ design choices, current controls and simulation limits. Next is user comparison 
 the three drafts. No app promotion, native, SDK, CI or publication occurred.
 Closure validation passes for 790 repository files, plus whitespace checks.
 
+The tested refresh source is local commit
+`47418fe809588eaca12531977d065da22296de39`, tree
+`96cd3a24c3dbf029a15712dba01e0c6c25582a80`. `npm run design:source` returns fingerprint
+`a075c7b85b177dfde3cdeb5460087b120ac902ef9fec2067b6d4a8a079c32f55`.
+Later documentation receipts preserve this candidate identity. All current approvals
+remain null; no publication is claimed.
+
 ## Screen notebook refinement — 2026-10-21
 
 State `review_ready`. The user prefers Screen notebook and requests plain directions,

@@ -22,6 +22,8 @@ Local5 passes TypeScript, approval/source checks, all 508 lab cases and 20 group
 with no browser errors on Chromium 155.0.8059.86. Its 12 Screens matrix captures
 match the visually reviewed focused set. Preserve `refresh-combined-05/` report,
 captures and comparison receipt with its sibling log.
+The tested candidate is local commit `47418fe`; the task owns its full source/tree
+and fingerprint. Later documentation receipts preserve that identity.
 Final use is refresh local5/6. The unused repair cycle is closed; no repair or
 verification remains pending. Earlier local4/4 and local11/11 stay closed. No
 native, SDK, package or CI work is selected.
