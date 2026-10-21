@@ -28,7 +28,7 @@ export default async function checkNotebook({ page, open }) {
     await page.keyboard.press("Escape"); assert.equal(await page.getByRole("tooltip").count(), 0);
     await field("Help with preview size").hover();
     assert.match(await page.getByRole("tooltip").innerText(), /border.*Game size/s);
-    await field("Help with front and back order").click();
+    await group("Position & size"); await field("Help with depth").click();
     assert.match(await page.getByRole("tooltip").innerText(), /same group.*all its contents/s);
     await page.keyboard.press("Escape");
     await field("Help with elements").click(); assert.match(await page.getByRole("tooltip").innerText(), /text, images, buttons and groups/); await page.keyboard.press("Escape");
@@ -80,9 +80,11 @@ export default async function checkNotebook({ page, open }) {
     await page.locator(".sc-game").scrollIntoViewIfNeeded(); assert.equal(await hit(), "map");
     await tree("body").click(); await page.locator(".sc-game").scrollIntoViewIfNeeded();
     assert.equal(await hit(), "map", "Selecting an element must not lift it above the next element");
-    await button("Bring forward").click(); await page.locator(".sc-game").scrollIntoViewIfNeeded(); assert.equal(await hit(), "body");
+    await group("Position & size"); await button("Bring forward").click();
+    assert.equal(await button("Send backward").isVisible(), true, "Changing depth keeps Position & size open");
+    await page.locator(".sc-game").scrollIntoViewIfNeeded(); assert.equal(await hit(), "body");
     await button("Undo").click(); await page.locator(".sc-game").scrollIntoViewIfNeeded(); assert.equal(await hit(), "map");
-    await button("Send backward").click(); await tree("stack").click(); await button("Bring forward").click();
+    await group("Position & size"); await button("Send backward").click(); await tree("stack").click(); await group("Position & size"); await button("Bring forward").click();
     const order = await page.locator("[data-canvas-id]").evaluateAll(nodes => nodes.map(n => n.dataset.canvasId));
     assert.deepEqual(order, ["frame", "body", "map", "title", "close"], "Moving a group keeps its descendants together");
     await button("Undo").click();
@@ -103,7 +105,7 @@ export default async function checkNotebook({ page, open }) {
     await button("Apply changes").click(); assert.match(await page.getByRole("alert").innerText(), /script changed/);
     await button("Review script change").click(); await button("Apply changes").click(); assert.equal(await field("Text").inputValue(), "Keep during script review");
     await open({ variant: "guided-v2", state: "template" }); await tree("body").click();
-    assert.equal(await field("Text").isDisabled(), true); assert.equal(await button("Bring forward").isDisabled(), true);
+    assert.equal(await field("Text").isDisabled(), true); await group("Position & size"); assert.equal(await button("Bring forward").isDisabled(), true);
     await page.setViewportSize({ width: 560, height: 640 }); await open({ variant: "guided-v2", viewport: "compact", theme: "dark", state: "empty" });
     await button("Create first Help screen").click(); await field("Screen name").fill("Station directions"); await button("Create screen").click();
     await drag("Resize preview height", 0, 30); await button("Focus preview").click(); await page.keyboard.press("Escape");

@@ -67,7 +67,7 @@ export default async function checkManipulation({ page, open }) {
   await button("Undo").click(); assert.equal(await field("Width").inputValue(), "214");
   await open({ variant: "flow" });
   await field("Element type").selectOption("vbox"); await button("Add element").click();
-  await button("1  Choose").click(); await page.locator('[data-node-id="body"]').click();
+  await button("1  Choose").click(); await page.locator('[data-node-id="body"]').dblclick();
   await page.locator('.sc-property-group[data-group="Position & size"]').evaluate(el => el.open = true);
   await field("Inside group").selectOption("node-1"); await button("Apply changes").click();
   const body = await position("body"); await drag("body");
@@ -96,7 +96,7 @@ export default async function checkManipulation({ page, open }) {
   await field("Example value for help_seen").selectOption("true");
   assert.equal(await button("Open dialog").isVisible(), false, "The screen test shows controls for the selected opening behavior");
   await field("Help with screen test").click(); assert.match(await page.getByRole("tooltip").innerText(), /without launching/); await page.keyboard.press("Escape");
-  await button("1  Choose").click(); await page.locator('[data-node-id="title"]').click();
+  await button("1  Choose").click(); await page.locator('[data-node-id="title"]').dblclick();
   await button("Choose a font").click(); await field("Example font").selectOption("NotoSerif-Regular.otf"); await button("Use font").click();
   await page.locator('.sc-property-group[data-group="Font & color"]').evaluate(el => el.open = true);
   assert.equal(await field("Font").inputValue(), "NotoSerif-Regular.otf"); await button("Cancel changes").click();

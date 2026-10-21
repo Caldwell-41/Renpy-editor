@@ -30,6 +30,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   const drafts = new Map<string, ScreenNode>();
   let conflict = context.state === "conflict", gesture: { node: ScreenNode; children: ScreenNode[]; startX: number; startY: number; dx: number; dy: number; resize?: ResizeEdge } | undefined;
   let skipCanvasClick = false;
+  let listDrag: { id: string; parent: string } | undefined;
   let lastPreview = "Game testing has not been requested.", previewRevision = 0, previewScreenId = "", sampleAppearance = "normal", zoom = "Fit", aspect = "1280 × 720", step = "compose";
   let storyVisible = false, storyWaiting = false, continuations = 0, output = "The last tram is waiting.", sequence = 0;
   let storyExpanded = false, samplesExpanded = false;
@@ -99,6 +100,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   function explain(control: HTMLElement, message: string | (() => string)) {
     const id = `notebook-help-${++helpSequence}`;
     const show = () => {
+      if (listDrag) return;
       closeHelp?.();
       const tip = el("div", "nb-tooltip", typeof message === "function" ? message() : message); tip.id = id; tip.role = "tooltip"; frame.shell.append(tip);
       control.setAttribute("aria-describedby", id);
@@ -159,13 +161,24 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
   function orderedNodes(parent = ""): ScreenNode[] {
     return current().nodes.filter(n => n.parent === parent).flatMap(n => [n, ...orderedNodes(n.id)]);
   }
-  function reorder(offset: number) {
-    if (anyDirty()) { status("Apply or cancel your changes before changing the order.", true); return; }
-    const n = target()!, siblings = current().nodes.filter(other => other.parent === n.parent);
+  function reorder(offset: number, id = selected) {
+    const n = current().nodes.find(item => item.id === id)!, siblings = current().nodes.filter(other => other.parent === n.parent);
     const index = siblings.indexOf(n), other = siblings[index + offset]; if (!other) return;
-    saveHistory(); const a = current().nodes.indexOf(n), b = current().nodes.indexOf(other);
-    [current().nodes[a], current().nodes[b]] = [current().nodes[b]!, current().nodes[a]!]; current().revision++;
-    render(); status(layoutParent(n) ? "Item order changed. This group arranges its items automatically." : offset > 0 ? "Element moved forward." : "Element moved backward.");
+    moveInList(n.id, other.id, offset > 0);
+  }
+  function moveInList(id: string, beside: string, after: boolean) {
+    if (anyDirty()) { status("Apply or cancel your changes before changing the order.", true); return; }
+    const n = current().nodes.find(item => item.id === id), other = current().nodes.find(item => item.id === beside);
+    if (current().template || !n?.parent || n.id === other?.id || n.parent !== other?.parent) return;
+    const siblings = current().nodes.filter(item => item.parent === n.parent), ordered = siblings.filter(item => item !== n);
+    ordered.splice(ordered.indexOf(other) + Number(after), 0, n);
+    if (ordered.every((item, index) => item === siblings[index])) { status("Order unchanged."); return; }
+    const positionOpen = inspector.querySelector<HTMLDetailsElement>('[data-group="Position & size"]')?.open;
+    saveHistory(); let index = 0;
+    current().nodes = current().nodes.map(item => item.parent === n.parent ? ordered[index++]! : item);
+    current().revision++; selected = n.id; render();
+    if (positionOpen) inspector.querySelector<HTMLDetailsElement>('[data-group="Position & size"]')!.open = true;
+    status(layoutParent(n) ? "Item order changed. This group arranges its items automatically." : "Element order changed. Later items appear in front.");
   }
 
   function saveHistory() {
@@ -176,7 +189,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     }
     history.push(copy(screens)); future.length = 0;
   }
-  function choose(id: string, browse = false) { selected = id; if (!browse) { if (layout !== "guided-v2" && step !== "behavior") step = "layout"; view?.select(); } render(); }
+  function choose(id: string, browse = false, keepTree = false) { selected = id; if (!browse) { if (layout !== "guided-v2" && step !== "behavior") step = "layout"; view?.select(); } render(keepTree); }
   function dialog(title: string, text: string) {
     const d = el("dialog", "lp-dialog sc-dialog"); d.ariaLabel = title;
     d.append(el("h2", "", title), el("p", "", text)); d.onclose = () => d.remove(); frame.shell.append(d); return d;
@@ -192,7 +205,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
       screens.push(s); screenId = s.id; selected = s.nodes.at(-1)!.id; d.close(); render(); status("Screen created in this demo.");
     }, true)); d.showModal(); name.focus();
   }
-  function render() {
+  function render(keepTree = false) {
     closeHelp?.(); setViewSize();
     if (!current()) screenId = screens[0]!.id;
     if (!target()) selected = current().nodes[0]?.id ?? "root";
@@ -201,29 +214,65 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     undo.disabled = !history.length; redo.disabled = !future.length;
     workspace.dataset.step = step;
     tabs.querySelectorAll("button").forEach((button, index) => button.ariaPressed = String(["compose", "layout", "behavior"][index] === step));
-    renderTree(); renderCanvas(); renderInspector(); renderInfo();
+    renderTree(keepTree); renderCanvas(); renderInspector(); renderInfo();
     const n = target(); if (n) view?.update({ name: n.name, kind: kindName(n.kind), parent: current().nodes.find(p => p.id === n.parent)?.name ?? "", step, button: ["textbutton", "imagebutton"].includes(n.kind) });
   }
-  function renderTree() {
+  function renderTree(keepRows = false) {
+    const existingTree = keepRows ? hierarchy.querySelector<HTMLElement>(".sc-tree") : null;
+    // Keep clicked rows mounted so the browser can deliver a double-click to that row.
+    for (const child of [...hierarchy.children]) if (child !== existingTree) child.remove();
     const heading = el("h2", "nb-elements-heading", "Elements");
-    heading.append(helpTip("elements", "Elements are the text, images, buttons and groups that make up a screen. Select one here or in the preview to edit it. Groups keep related items together.")); hierarchy.replaceChildren(heading);
+    heading.append(helpTip("elements", "Elements are the text, images, buttons and groups that make up a screen. Click a row to select it. Double-click or press Enter to open Design. Drag a row before or after another item in the same group to change its order. Later items appear in front. Groups keep their contents together.")); hierarchy.prepend(heading);
     if (context.state === "empty" && !screens.some(s => !s.template)) hierarchy.append(el("p", "muted", "Create your first screen with a Help example or a blank page."), action("Create first Help screen", newScreen, true));
-    const tree = el("div", "sc-tree"); tree.role = "tree"; tree.ariaLabel = "Screen elements";
+    const tree = existingTree ?? el("div", "sc-tree"); tree.role = "tree"; tree.ariaLabel = "Screen elements";
     const elements = orderedNodes();
-    elements.forEach(n => {
-      const b = action(`${n.name} · ${kindName(n.kind)}`, () => choose(n.id)); b.role = "treeitem"; b.ariaSelected = String(selected === n.id); b.dataset.nodeId = n.id;
+    const clearDrop = () => tree.querySelectorAll<HTMLElement>("[data-drop]").forEach(row => delete row.dataset.drop);
+    const endDrag = () => { listDrag = undefined; clearDrop(); tree.querySelectorAll(".dragging").forEach(row => row.classList.remove("dragging")); };
+    if (!existingTree) elements.forEach(n => {
+      const b = action(`${n.name} · ${kindName(n.kind)}`, () => choose(n.id, true, true)); b.role = "treeitem"; b.ariaSelected = String(selected === n.id); b.dataset.nodeId = n.id;
       b.className = `sc-tree-node${selected === n.id ? " selected" : ""}`;
+      b.ondblclick = () => { step = "layout"; choose(n.id); };
+      b.draggable = !current().template && !!n.parent;
+      b.ondragstart = e => {
+        if (!b.draggable || anyDirty()) { e.preventDefault(); status("Apply or cancel your changes before changing the order.", true); return; }
+        closeHelp?.(); listDrag = { id: n.id, parent: n.parent }; b.classList.add("dragging");
+        e.dataTransfer!.effectAllowed = "move"; e.dataTransfer!.setData("text/plain", n.name);
+        status("Drop before or after an item in the same group. Escape cancels.");
+      };
+      const dropPosition = (e: DragEvent) => {
+        if (!listDrag || listDrag.id === n.id || listDrag.parent !== n.parent) return;
+        return e.clientY >= b.getBoundingClientRect().top + b.offsetHeight / 2;
+      };
+      b.ondragover = e => {
+        clearDrop(); const after = dropPosition(e);
+        if (after === undefined) { if (e.dataTransfer) e.dataTransfer.dropEffect = "none"; return; }
+        e.preventDefault(); e.dataTransfer!.dropEffect = "move";
+        const marker = after ? orderedNodes(n.id).at(-1)?.id ?? n.id : n.id;
+        tree.querySelector<HTMLElement>(`[data-node-id="${marker}"]`)!.dataset.drop = after ? "after" : "before";
+      };
+      b.ondragleave = e => { if (!(e.relatedTarget instanceof Node) || !b.contains(e.relatedTarget)) clearDrop(); };
+      b.ondrop = e => {
+        const after = dropPosition(e), source = listDrag?.id; e.preventDefault(); endDrag();
+        if (source && after !== undefined) { moveInList(source, n.id, after); hierarchy.querySelector<HTMLElement>(`[data-node-id="${source}"]`)?.focus(); }
+      };
+      b.ondragend = () => { if (listDrag) { endDrag(); status("Order unchanged."); } };
       const name = el("span", "", b.textContent ?? ""); b.replaceChildren(elementIcon(n.kind), name);
       explain(b, `${kindName(n.kind)}. ${elementHelp[n.kind] ?? "An element on this screen."}`);
       let depth = 0, parent = n.parent;
       while (parent) { depth++; parent = current().nodes.find(item => item.id === parent)?.parent ?? ""; }
       b.style.paddingLeft = `${10 + depth * 12}px`; b.ariaLevel = String(depth + 1);
       b.onkeydown = e => {
+        if (e.key === "Enter") { e.preventDefault(); step = "layout"; choose(n.id); return; }
+        if (e.altKey && ["ArrowUp", "ArrowDown"].includes(e.key)) { e.preventDefault(); reorder(e.key === "ArrowUp" ? -1 : 1, n.id); hierarchy.querySelector<HTMLElement>(`[data-node-id="${n.id}"]`)?.focus(); return; }
         const ordered = elements, index = ordered.findIndex(x => x.id === selected);
         if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); choose(ordered[Math.max(0, Math.min(ordered.length - 1, index + (e.key === "ArrowDown" ? 1 : -1)))]!.id, true); hierarchy.querySelector<HTMLElement>(`[data-node-id="${selected}"]`)?.focus(); }
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const next = e.key === "ArrowLeft" ? target()?.parent : current().nodes.find(n => n.parent === selected)?.id; if (next) choose(next, true); hierarchy.querySelector<HTMLElement>(`[data-node-id="${selected}"]`)?.focus(); }
       }; tree.append(b);
-    }); hierarchy.append(tree);
+    });
+    tree.querySelectorAll<HTMLElement>("[data-node-id]").forEach(row => { row.classList.toggle("selected", row.dataset.nodeId === selected); row.ariaSelected = String(row.dataset.nodeId === selected); });
+    if (!existingTree) hierarchy.append(tree);
+    if (layout !== "flow") hierarchy.insertBefore(el("p", "muted sc-note", "Click to select. Double-click or press Enter to open Design. Drag rows to reorder within a group."), tree);
+    if (current().template) hierarchy.insertBefore(el("p", "muted sc-note", "This template's element order is protected."), tree);
     const addKind = select(kinds.map(kind => [kind, kindName(kind)]), "text"); addKind.ariaLabel = "Element type";
     const add = action("Add element", () => {
       saveHistory(); const n = node(`node-${++sequence}`, addKind.value, `New ${kindName(addKind.value).toLowerCase()}`, 344, 360, 300, 48);
@@ -236,21 +285,25 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     const addDescription = el("p", "muted nb-element-description", elementHelp[addKind.value]);
     addKind.onchange = () => { closeHelp?.(); addDescription.textContent = elementHelp[addKind.value]!; };
     hierarchy.append(addField, addDescription, add);
-    const moves = el("div", "sc-actions nb-order");
-    const orderHeading = el("h3", "", "Front & back");
-    orderHeading.append(helpTip("front and back order", "Select an element, then use Bring forward or Send backward. Later items in the same group cover earlier ones. A group and all its contents move together. In a vertical, horizontal or grid group, these buttons change item order instead."));
-    hierarchy.append(orderHeading);
+    const remove = action("Remove element", () => {
+      if (current().nodes.some(n => n.parent === selected)) { status("Move or remove the items inside this group first.", true); return; }
+      saveHistory(); current().nodes = current().nodes.filter(n => n.id !== selected); current().revision++; drafts.delete(key()); selected = current().nodes[0]!.id; render(); status("Element removed.");
+    }); remove.disabled = current().template || !target()?.parent; hierarchy.append(remove);
+    hierarchy.append(el("p", "muted sc-note", "Use arrow keys to browse the list. Alt + Up or Down changes the selected item's order."));
+  }
+  function renderDepth(parent: HTMLElement) {
+    const heading = el("h3", "", "Depth");
+    heading.append(helpTip("depth", "Depth controls which items cover others in the same group. Later items appear in front. Drag rows under Elements, or use Bring forward and Send backward. A group keeps all its contents together. Vertical, horizontal and grid groups use this order to arrange their items instead. This is separate from the order of whole screens."));
+    parent.append(heading);
     const siblings = current().nodes.filter(n => n.parent === target()?.parent), index = siblings.findIndex(n => n.id === selected);
-    if (target()?.parent) hierarchy.append(el("p", "nb-order-position", `Order ${index + 1} of ${siblings.length} in ${current().nodes.find(n => n.id === target()!.parent)?.name}. ${layoutParent(target()!) ? "This group arranges items in list order." : "Later items appear in front."}`));
+    parent.append(el("p", "nb-order-position", target()?.parent ? `Item ${index + 1} of ${siblings.length} in ${current().nodes.find(n => n.id === target()!.parent)?.name}. ${layoutParent(target()!) ? "This group arranges items in list order." : "Later items appear in front."}` : "The screen root contains every element. Its depth cannot change."));
+    parent.append(el("p", "muted", "Order changes take effect immediately. Undo restores the previous order."));
+    const moves = el("div", "sc-actions nb-order");
     for (const [offset, title] of [[-1, "Send backward"], [1, "Bring forward"]] as const) {
       const button = action(title, () => reorder(offset));
       button.disabled = current().template || !target()?.parent || index + offset < 0 || index + offset >= siblings.length; moves.append(button);
     }
-    const remove = action("Remove element", () => {
-      if (current().nodes.some(n => n.parent === selected)) { status("Move or remove the items inside this group first.", true); return; }
-      saveHistory(); current().nodes = current().nodes.filter(n => n.id !== selected); current().revision++; drafts.delete(key()); selected = current().nodes[0]!.id; render(); status("Element removed.");
-    }); remove.disabled = current().template || !target()?.parent; moves.append(remove); hierarchy.append(moves);
-    hierarchy.append(el("p", "muted sc-note", "Choose an element here or click it in the preview. Use the arrow keys to browse the list."));
+    parent.append(moves);
   }
   function renderCanvas() {
     canvasObserver?.disconnect();
@@ -299,7 +352,7 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
         if (e.button !== 0) return; skipCanvasClick = false; closeHelp?.();
         if (anyDirty()) { status("Apply or cancel your changes before dragging.", true); return; }
         const resize = edge ?? (e.shiftKey ? bottomRight : undefined), parent = layoutParent(n);
-        if (parent && !resize) { status(`${parent.name} arranges its items automatically. Resize the item, move the group, or change its order under Front & back.`); return; }
+        if (parent && !resize) { status(`${parent.name} arranges its items automatically. Resize the item, move the group, or change its order under Position & size.`); return; }
         selected = n.id;
         canvas.querySelectorAll<HTMLButtonElement>("[data-canvas-id]").forEach(item => { item.classList.toggle("selected", item.dataset.canvasId === selected); item.ariaPressed = String(item.dataset.canvasId === selected); });
         if (!edge) canvas.querySelectorAll(".sc-selection-box").forEach(box => box.remove());
@@ -430,10 +483,13 @@ export function mountScreenDemo(host: HTMLElement, context: LabContext, layout: 
     if (d.parent) choice(position, "Inside group", "parent", containers.map(n => [n.id, `${n.name} (${kindName(n.kind)})`])).disabled = current().template;
     choice(position, "Position units", "coordinates", [["px", "Pixels"], ["relative", "Fraction of game size (0 to 1)"]]);
     const numbers = el("div", "sc-number-grid");
-    for (const [property, title] of [["x", "Horizontal position"], ["y", "Vertical position"], ["width", "Width"], ["height", "Height"], ["anchorX", "Horizontal anchor"], ["anchorY", "Vertical anchor"], ["minWidth", "Minimum width"], ["maxWidth", "Maximum width"], ["padding", "Padding"], ["spacing", "Spacing"]] as const) input(numbers, title, property, "number"); position.append(numbers);
+    for (const [property, title] of [["x", "Horizontal position"], ["y", "Vertical position"]] as const) input(numbers, title, property, "number"); position.append(numbers);
+    renderDepth(position);
+    const dimensions = el("div", "sc-number-grid");
+    for (const [property, title] of [["width", "Width"], ["height", "Height"], ["anchorX", "Horizontal anchor"], ["anchorY", "Vertical anchor"], ["minWidth", "Minimum width"], ["maxWidth", "Maximum width"], ["padding", "Padding"], ["spacing", "Spacing"]] as const) input(dimensions, title, property, "number"); position.append(dimensions);
     choice(position, "Alignment", "alignment", pairs(["left", "center", "right"]));
     position.append(el("p", "muted", "Apply changes to update the position and size. This mockup keeps spacing and size limits, but does not draw their effects."));
-    if (layoutParent(d)) position.append(el("p", "muted", `${layoutParent(d)!.name} arranges this item automatically. Use Front & back to change its order, or choose a free layout group under Inside group to drag it.`));
+    if (layoutParent(d)) position.append(el("p", "muted", `${layoutParent(d)!.name} arranges this item automatically. Use its Depth controls to change the item order, or choose a free layout group under Inside group to drag it.`));
     const appearance = group("Font & color");
     choice(appearance, "Font", "font", pairs(["NotoSans-Regular.ttf", "NotoSerif-Regular.otf"])); input(appearance, "Text size", "size", "number"); input(appearance, "Text color", "color"); check(appearance, "Bold", "bold"); check(appearance, "Italic", "italic"); input(appearance, "Background color", "background"); input(appearance, "Border color", "border");
     appearance.append(el("p", "muted", "Apply changes to update the text size and colors. This mockup keeps your font choice, but draws one example font."));

@@ -1,5 +1,69 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Element list reordering and opening Design, 2026-10-21
+
+State `review_ready`. The user requests click-and-drag ordering under Choose →
+Elements, double-click to open Design, and a clearer name for Front & back.
+Single click selects in the list; double-click or Enter opens Design. Dragging
+reorders within the current parent, matching the existing order buttons. Groups
+keep their children. The user's follow-up places these controls inside Position &
+size as Depth, with a plain explanation of overlapping items and immediate Undo.
+Remove the separate Front & back section. Preserve tooltips, drafts, protected
+samples, Escape and Undo/Redo.
+
+Continue on the chosen Mac and branch `codex/phase3b-screen-designer`, clean entry
+`ee595f6`. Allow one focused cycle, one combined lab cycle and up to two in-scope
+repair cycles if needed, with a four-cycle cumulative limit. Earlier allowances
+remain closed. This is fictional browser behavior only; keep work local and all
+three approvals null. No native, SDK, package, CI or publication work is selected.
+Real pointer drags, single/double-click behavior, cancellation, group order,
+Undo/Redo and draft guards pass, with visual review in both sizes/themes and updated
+canonical notes. Final use is reorder local4/4. No repair or verification remains
+pending. Next is user review of Screen builder.
+
+Local1 passes TypeScript and all60 rendering cases, then the complete new list
+journey in Screen notebook. Canvas focus passes selection, double-click, depth
+location and a real reorder before the check expects Choose's `compose` step.
+That drawer deliberately opens over the current `layout` step. The test now records
+the step before dragging and requires it to remain unchanged, across all variants.
+No product correction follows this harness assumption. Preserve the failed
+`.toolchains/phase3b/reorder-focused-01/` report and sibling log. Local2 verifies the
+corrected assertion, then local3 is the combined check; local4 remains for repair.
+
+Local2 passes all60 rendering cases, all three new list journeys, held-pointer
+insertion-marker/Escape, dirty-draft refusal, group ordering, template protection,
+compact drag/depth and all earlier movement/resize checks. The older notebook
+journey then looks for Bring forward after selecting a different element without
+opening its new Position & size location. The check now opens that section before
+using depth controls. This is a navigation-contract update. Repeated depth changes
+also keep the section open, with a new assertion. Preserve failed
+`reorder-focused-02/` report/captures and sibling log. Local3 verifies the coherent
+candidate through the combined check, including the relocated controls. Depth now
+sits after horizontal/vertical position; Choose avoids repeating its directions.
+
+Local3 passes TypeScript, approval/source checks, all508 rendering cases and20
+interaction groups, including all new list behavior and earlier journeys. Preserve
+`reorder-combined-03/` report/captures and sibling log. Static review then identifies
+selection mutation before a refused Alt-arrow reorder. The ordinary browser probe
+`reorder-keyboard-diagnostic-03.json` confirms the visible selection stays Dialogue
+window after refusal, but opening Design changes it to Dialogue (what). The keyboard
+handler now passes the focused ID to the shared reorder operation; only an accepted
+move changes selection. A protected-template regression checks the visible form
+after opening Design. Local4 is final combined verification of this scoped repair.
+
+Local4 passes TypeScript, approval/source checks, all508 rendering cases and20
+interaction groups on Chromium155.0.8059.86, without browser errors. It covers all
+three complete Screens journeys, list dragging, single/double-click, Enter, depth
+location/repeated changes, cancellation, Undo/Redo, no-op/invalid-parent drops,
+dirty-draft protection, nested group ordering and the blocked-keyboard regression.
+Parent visual review covers both themes at1100×720 and560×640. All12 final matrix
+captures plus held-pointer/drop-marker and compact Depth captures match the reviewed
+local3 set byte for byte. Preserve report, 12 matrix images, eight interaction
+images and review receipt under `.toolchains/phase3b/reorder-combined-04/`, with the
+sibling log. Earlier failures and the keyboard diagnostic remain retained. Validation
+passes for793 repository files and whitespace. All work stays local; no design
+approval or app integration is implied.
+
 ## Screen builder copy and direct manipulation — 2026-10-21
 
 State `review_ready`. The user prefers Screen builder and requested first-use copy

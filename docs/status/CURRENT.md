@@ -10,19 +10,20 @@ qualifies the narrow source/runtime proof at `0ef1748` on Windows x64 and macOS
 ARM64. No CI is pending.
 
 The user prefers Screen builder. Its
-[copy and direct-manipulation refinement](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-copy-and-direct-manipulation--2026-10-21)
-is `review_ready`. Choose reuses Screen notebook's nested list, type icons and
-hover/focus help. Connect names the selected element and type. Copy explains preview
-values and opening/closing tests. Elements drag on the first press and have visible
-resize handles, with Escape and Undo. Screen notebook and Canvas focus remain.
-[Comparison notes](../design/design-lab-screens/README.md) own controls and limits.
-All three approval entries remain null; next is user review.
+[element-list refinement](../tasks/active/phase-3-initial-wysiwyg-release.md#element-list-reordering-and-opening-design-2026-10-21)
+is `review_ready`. Click selects an element; double-click or Enter opens Design.
+Drag rows to reorder within a group, with a visible drop marker, Escape and Undo/Redo.
+Depth now sits under Position & size beside horizontal/vertical position. Tooltips,
+drafts, grouped children and protected samples remain intact. Screen notebook and
+Canvas focus share the list behavior. [Comparison notes](../design/design-lab-screens/README.md)
+own controls and limits. All three approval entries remain null; next is user review.
 
-Combined copy local6 passes TypeScript, approval/source checks, 508 rendering cases
-and 20 interaction groups without browser errors. Visual review covers both themes
-and sizes, including Choose tooltips and Connect. Final use is copy local6/7; the
-unused repair cycle is closed. Browser actions stay in fictional memory. Earlier
-refresh, native, SDK and CI allowances stay closed. Work is saved locally.
+Final combined reorder local4 passes TypeScript, approval/source checks, 508 rendering
+cases and 20 interaction groups without browser errors. Visual review covers both
+themes/sizes; all14 retained review captures match the preceding reviewed set.
+Final use is reorder local4/4, with no repair or verification pending. Browser actions
+stay in fictional memory. Earlier copy, refresh, native, SDK and CI allowances remain
+closed. Work is saved locally.
 
 ## Earlier full-app mockups
 

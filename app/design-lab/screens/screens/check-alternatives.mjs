@@ -12,7 +12,7 @@ export default async function checkAlternatives({ page, open }) {
     const choose = async id => {
       if (variant === "direct") { if (!await tree(id).isVisible()) await button("Elements").click(); }
       else await button("1  Choose").click();
-      await tree(id).click();
+      await tree(id).dblclick();
     };
     const connect = async () => button(variant === "direct" ? "Try story" : "3  Connect").click();
     try {
@@ -33,7 +33,7 @@ export default async function checkAlternatives({ page, open }) {
       assert.equal(await tree("title").getAttribute("aria-selected"), "true", "Keyboard browsing follows the visible list order");
       await field("Element type").selectOption("imagebutton"); await field("Help with element type").click();
       assert.match(await page.getByRole("tooltip").innerText(), /different pictures/); await page.keyboard.press("Escape");
-      await tree("body").click(); assert.equal(await field("Text").isVisible(), true);
+      await tree("body").dblclick(); assert.equal(await field("Text").isVisible(), true);
       assert.equal(await page.locator(".sc-hierarchy").isVisible(), false, "Choosing an item reveals its focused edit card");
       await page.screenshot({ path: fileURLToPath(new URL(`${variant}-editing-wide.png`, output)) });
       assert.equal(await page.evaluate(() => {

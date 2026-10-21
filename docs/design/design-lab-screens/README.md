@@ -13,15 +13,16 @@ and changes that reset on reload.
   the preview. It adds help for Elements, each item and the selected element type.
 - [Canvas focus](http://127.0.0.1:5174/?screen=screens&variant=direct) starts with a
   wide canvas and short selection commands. Elements opens the list; Add element
-  opens its insertion controls. Selecting an item opens its editing panel and
-  reserves space beside the preview. Closing that panel keeps drafts. Try story
+  opens its insertion controls. Double-clicking a list row opens its editing panel
+  and reserves space beside the preview. Closing that panel keeps drafts. Try story
   opens the separate story example. Removal stays inside the Elements panel.
 - [Screen builder](http://127.0.0.1:5174/?screen=screens&variant=flow) puts a Choose /
   Design / Connect rail above a persistent preview. One task card sits on the right.
   Choose reuses Screen notebook's nested element list, with a small type icon and
-  hover/focus help on each row. Selecting an item opens its Design card. Front &
-  back expands there. Connect names the selected element, shows its type in smaller
-  text, and explains its available actions. The rail allows returning to any step.
+  hover/focus help on each row. Click selects; double-click or Enter opens Design.
+  Drag rows to reorder within their group. Position & size includes Depth beside
+  the horizontal and vertical position controls. Connect names the selected element,
+  shows its type in smaller text, and explains its available actions. The rail allows returning to any step.
 
 ## Research and design choices
 
@@ -52,7 +53,8 @@ Changing the type updates its description and help. Other help explains anchors,
 shared looks, value bars, button actions, screen behavior and preview size. Click,
 hover or focus a help control to read it; Escape closes it.
 
-Select an item in the preview or list. Apply changes keeps its draft; Cancel changes
+Click a list row to select it without leaving the list. Double-click or Enter opens
+Design. A preview click also opens editing. Apply changes keeps its draft; Cancel changes
 restores its previous values. Shared headings ask which screens should change. Undo
 reverses one accepted change. Unfinished drafts survive selection, screen changes,
 focus mode and resizing. Invalid values or a changed script retain the draft.
@@ -68,7 +70,16 @@ The Help examples use a free layout group so individual items can move. Automati
 groups still arrange their children; their handles allow resizing, while movement
 requires changing item order, moving the group or choosing a free layout parent.
 
-Bring forward and Send backward move an element one place within its parent group.
+Drag list rows before or after an item in the same group. A line marks the drop
+position; Escape or dropping outside cancels. Single clicks retain the list, and
+Undo/Redo restores accepted order changes. A drop at the current position adds no
+Undo entry. Finish or cancel pending edits before reordering. Root and protected
+template order cannot change. Use Inside group in Design to change an item's parent.
+Alt + Up/Down reorders the focused row by one place.
+
+Position & size includes Depth after horizontal/vertical position. Bring forward and
+Send backward move an element one place within its parent group. Depth changes take
+effect immediately; the section stays open and Undo restores the previous order.
 Later siblings cover earlier ones where they overlap. Groups keep their children
 together. Selection does not alter draw order. In a vertical, horizontal or grid
 group, these controls change item order. Automatic reflow is simplified in this demo.
@@ -102,17 +113,17 @@ components and button states are simplified. Components have no parameters. Nati
 rendering, source preservation, asset discovery, Story Beats and durable editing need
 separate product integration and evidence under the selected task.
 
-The copy/direct-manipulation refinement is ready for review. Combined local6 passes
+The element-list refinement is ready for review. Final combined local4 passes
 TypeScript, approval/source checks, all 508 rendering cases and 20 interaction groups
-on Chromium 155.0.8059.86, with no browser errors. All three Screens journeys pass,
-including the nested chooser, tooltips, resizing and Undo. Visual review covers all
-12 matrix captures in both themes at 1100×720 and 560×640, plus Choose and Connect
-editing states. Reports, images and review receipt remain ignored under
-`.toolchains/phase3b/copy-combined-06/`. The owning
-[task record](../../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-copy-and-direct-manipulation--2026-10-21)
-retains each failure, repair and tested source identity. Final use is copy local6/7;
-the unused repair cycle is closed. Prior refresh5/6, notebook refinement4/4 and
-original comparison11/11 stay historical. No check or repair remains pending.
+on Chromium 155.0.8059.86, with no browser errors. It includes all three Screens
+journeys, real pointer dragging, double-click Design, Depth controls, Undo/Redo,
+cancellation and guards. Visual review covers both themes at 1100×720 and 560×640.
+All 12 final matrix captures and the held-drag/compact-Depth images match the reviewed
+local3 set. Evidence remains ignored under `.toolchains/phase3b/reorder-combined-04/`.
+The owning [task record](../../tasks/active/phase-3-initial-wysiwyg-release.md#element-list-reordering-and-opening-design-2026-10-21)
+retains failures, the keyboard-selection repair and source identity. Final use is
+reorder local4/4; no check or repair remains pending. Earlier allowances stay closed.
+No native or CI work is selected for this browser change.
 The separate source/runtime proof remains
 qualified at `0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run `39555526201`.
 No later browser commit replaces that proof. No native or CI check is selected here.
