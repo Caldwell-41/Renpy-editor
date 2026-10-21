@@ -65,8 +65,8 @@ Closure repository validation passes for 788 files, plus whitespace checks.
 
 Publication remains local-only. Automatic approval review rejected the combined
 receipt commit/push command before execution because it could not confirm explicit
-user authorization for this payload and the `origin` destination. Finish the bounded
-local receipt commit separately; publishing these changes to
+user authorization for this payload and the `origin` destination. The bounded local
+receipt commit succeeded separately. Publishing these changes to
 `origin/codex/phase3b-screen-designer` needs fresh explicit user approval. This does
 not reopen verification or change the review-ready browser result.
 
