@@ -9,22 +9,21 @@ records approved product choices. Mac is the chosen development host.
 qualifies the narrow source/runtime proof at `0ef1748` on Windows x64 and macOS
 ARM64. No CI is pending.
 
-The user prefers Screen builder. Its
-[final Design continuity review](../tasks/active/phase-3-initial-wysiwyg-release.md#design-section-continuity-and-final-experience-review-2026-10-22)
-is `review_ready`. Reuse-look and font-picker actions keep editing sections open;
-deliberately closed sections stay closed. Design/Connect remember sections per
-selected element. Form updates retain panel scroll and keyboard focus; pickers return
-focus to their launcher. All three mockups share the repair. Earlier list dragging,
-double-click Design, canvas resizing and Depth controls remain qualified.
-[Comparison notes](../design/design-lab-screens/README.md) own controls and limits.
-All three approval entries remain null; next is user review.
+The user approved Screen builder on 2026-10-22. The
+[design approval record](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-design-approval-2026-10-22)
+is complete. The [owning JSON](../design/design-lab-screens/approval.json) names
+`flow-v1` / variant `flow` as current, pins the reviewed source and preserves 13
+hashed reference captures. Screen builder opens as the default Screens reference;
+Screen notebook and Canvas focus remain drafts. [Comparison notes](../design/design-lab-screens/README.md)
+own controls, captured conditions and prototype limits.
 
-Combined continuity local2 passes TypeScript, approval/source checks, 508 rendering
-cases and 20 interaction groups without browser errors. Visual review covers the
-changed Design states; all 12 matrix captures match the previously reviewed set in
-both themes/sizes. Final use is continuity local2/3; the unused repair cycle is
-closed. No repair or verification is pending. Browser actions stay in fictional
-memory. Earlier allowances stay closed. Work is saved locally.
+Approval local1 passes TypeScript, approval/source checks, 508 rendering cases and
+20 interaction groups without browser errors. The four baseline captures match the
+retained images; the visible Approved label, history and current-reference link agree.
+Final use is approval local1/2; the unused repair cycle is closed. No verification is
+pending. The selected design now provides the reference for production integration
+under its owning task's real-operation and acceptance requirements. Browser actions
+remain fictional; earlier allowances stay closed. Work is saved locally.
 
 ## Earlier full-app mockups
 

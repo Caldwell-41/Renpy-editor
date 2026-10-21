@@ -1,7 +1,8 @@
 # Screens prototype comparison
 
-The current comparison has three unapproved drafts. The user asked to keep Screen
-notebook, remove the previous workbench/canvas/original notebook, and build two
+Screen builder (`flow-v1`, variant `flow`) is the approved design reference as of
+2026-10-22. Screen notebook and Canvas focus remain drafts. The user asked to keep
+the notebook, remove the previous workbench/canvas/original notebook, and build two
 research-informed alternatives. The retired layouts are removed from the selector
 and source files. Git and the
 [owning task](../../tasks/active/phase-3-initial-wysiwyg-release.md#screens-research-and-three-candidate-refresh--2026-10-21)
@@ -111,7 +112,7 @@ that it does not launch the game. Canvas buttons select elements;
 they do not run game actions. Required dialogue, choice, menu, navigation, preferences
 and save/load controls remain protected while their appearance can be edited.
 
-## Simulation limits and review state
+## Simulation limits and approval
 
 All actions, source examples, file choices and changes use browser memory. No save,
 import, model request or Ren'Py process runs. Source examples illustrate the intended
@@ -120,25 +121,33 @@ components and button states are simplified. Components have no parameters. Nati
 rendering, source preservation, asset discovery, Story Beats and durable editing need
 separate product integration and evidence under the selected task.
 
-The final Design continuity/Experience First pass is ready for review. Combined
-local2 passes TypeScript, approval/source checks, all 508 rendering cases and 20
-interaction groups on Chromium 155.0.8059.86, with no browser errors. New continuity
-checks pass in all three layouts; all earlier journeys also pass. Visual review
-covers compact reuse/font selection, wide Design and compact Depth. All 12 matrix
-captures match the previously reviewed set in both themes at 1100×720 and 560×640.
-Evidence remains ignored under `.toolchains/phase3b/continuity-combined-02/`. The
-[task record](../../tasks/active/phase-3-initial-wysiwyg-release.md#design-section-continuity-and-final-experience-review-2026-10-22)
-retains reproduction, the harness focus correction, final source identity and
-continuity local2/3 use. The unused repair cycle is closed; no check or repair is
-pending. All earlier allowances stay closed. No native or CI work is selected here.
-The separate source/runtime proof remains
-qualified at `0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run `39555526201`.
-No later browser commit replaces that proof. No native or CI check is selected here.
+The user approved Screen builder after the final Design continuity/Experience First
+pass. The [approval record](approval.json) owns the exact decision, date, source
+commit/fingerprint, 13 hashed reference captures, behavior and prototype limits.
+Source `3c7ea31` reproduces the reviewed implementation at the same fingerprint as
+the verified continuity candidate. [Retained images](captures/flow-v1/) include the
+populated view in both themes at 1100×720 and 560×640, plus Choose help/dragging,
+Design text/depth/reuse/font selection and Connect overlay/dialog views. Extra
+interaction-state IDs describe those captures; they are not new state-picker options.
+The current approval pointer, default Screens layout and visible Approved label all
+resolve to `flow-v1`. The other two layouts retain null approvals.
 
-Current draft identities are `guided-v2`, `direct-v1` and `flow-v1`. Every approval
-is null. Promotion follows explicit selection and the existing
-[integration procedure](../../../app/design-lab/INTEGRATION.md). Work remains local;
-the prior push rejection still needs explicit authorization before publication.
+Approval local1 passes TypeScript, approval/source checks, all 508 rendering cases
+and 20 interaction groups on Chromium 155.0.8059.86, without browser errors. The four
+baseline images reproduce the retained captures byte for byte. Parent inspection
+confirms the selected layout, source, current-reference link and approval history.
+The [task record](../../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-design-approval-2026-10-22)
+owns the audit, local1/2 final use and continuation. The unused repair cycle is closed;
+no approval verification remains pending. Earlier continuity and refinement evidence
+remains historical. The separate narrow source/runtime proof remains qualified at
+`0ef174877cbe5ae3fd883afb92940de68916b04a` in CI run `39555526201`.
+
+App implementation follows the [integration procedure](../../../app/design-lab/INTEGRATION.md)
+and the owning task's real-operation and acceptance requirements. Preserve this
+approved source; a new experiment needs a new revision/variant. Use a pinned reference
+checkout for comparison when production frontend changes affect the shared source
+fingerprint. Work is local-only; the prior push rejection still needs explicit
+publication authorization.
 
 Run the lab from `app/` with `npm run design:dev`. The targeted Screens check and
 combined `design:check` own browser verification; screenshots and reports remain

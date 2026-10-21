@@ -1,43 +1,43 @@
 # Current outcome handover
 
-## Phase 3B Screens refinement, 2026-10-22
+## Phase 3B Screen builder design approved, 2026-10-22
 
-State `review_ready`, branch `codex/phase3b-screen-designer`, chosen host Mac. The
-[final Design continuity record](../tasks/active/phase-3-initial-wysiwyg-release.md#design-section-continuity-and-final-experience-review-2026-10-22)
-owns reproduction, failure, repair, source identity and allowance. Screen builder
-is the user's current preference; all three approvals remain null. The
-[comparison notes](../design/design-lab-screens/README.md) own controls and limits.
+State `complete` for design approval, branch `codex/phase3b-screen-designer`, chosen
+host Mac. The [approval record](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-design-approval-2026-10-22)
+owns the exact human decision, source, captures, verification and final allowance.
+The user said "okay, approved" after the final Experience First pass on Screen builder.
+[Approval JSON](../design/design-lab-screens/approval.json) sets `currentApproved` to
+`flow-v1` / variant `flow`; Screen notebook and Canvas focus retain null approvals.
 
-The final Experience First pass fixes Reuse this look/font-picker actions resetting
-Design sections. All three layouts remember actual open and closed state per
-screen/element/editing step before form rebuilds. Updates preserve panel scroll and
-keyboard focus. Picker close returns to its launcher after a rebuild; removed controls
-return focus to their section heading. The shared correction replaces the earlier
-Depth-only exception. Earlier nested list/dragging, double-click Design, canvas
-move/resize, Depth, draft, Undo/Redo and story behavior remain intact. All actions
-stay in fictional browser memory.
+Source commit `3c7ea31d8210538cc987a2d2f4ceb8b7aa8f5437` reproduces fingerprint
+`70d9beebc45e4783f9f17d374edf9983e03a079e68ca06d475fecec55c06a028`, matching the
+verified continuity implementation. The record pins 13 PNGs under
+`docs/design/design-lab-screens/captures/flow-v1/`, including four populated views
+across both themes/sizes and nine interaction views. It records hashes, state IDs,
+dimensions, scale, behavior and reference-only limits. [Comparison notes](../design/design-lab-screens/README.md)
+own the current controls and simulation boundary. Earlier source/failure evidence
+remains in the task, including the final continuity and reordering fixes.
 
-Combined continuity local2 passes TypeScript, approval/source checks, 508 rendering
-cases and 20 interaction groups on Chromium 155.0.8059.86, without browser errors.
-The new continuity journey passes all three layouts, including reuse, font selection,
-cancel/Escape, explicit closed sections, selection return, position/Apply/Cancel,
-image picker, action removal and compact Design. Parent visual review covers changed
-Design states in both sizes/themes. All 12 final matrix captures match the previously
-reviewed reorder local4 set byte for byte. Retain
-`.toolchains/phase3b/continuity-combined-02/` report, 12 matrix/ten interaction images
-and comparison receipt with the sibling log. Preserve the local1 harness failure and
-`final-ux-diagnostic-01.json` / `continuity-select-focus-01.json` receipts.
-Validation passes for 794 files and whitespace. Final use is continuity local2/3;
-the unused repair cycle is closed. No verification or repair is pending. Earlier
-reorder4/4, copy6/7, refresh5/6, refinement4/4 and early11/11 stay closed. No native,
-SDK, package or CI work is selected.
-The verified candidate is local commit `5973550`; the task owns its full commit,
-tree and source fingerprint. Later documentation receipts preserve that identity.
+Approval local1 passes TypeScript, approval/source checks, 508 rendering cases and
+20 interaction groups on Chromium 155.0.8059.86 without browser errors. The four
+baseline captures match retained references byte for byte. Parent browser inspection
+confirms the Approved · flow-v1 label, default flow layout, current-reference link and
+history decision/date. Retain `.toolchains/phase3b/approval-combined-01/` report,
+captures/audit and sibling log, plus `approval-ui-01.json`, `approval-controls-01.png`
+and the source receipt. Repository validation passes for 807 files and whitespace.
+Final use is approval local1/2; the unused repair cycle is closed. No approval repair
+or verification is pending. Earlier continuity2/3, reorder4/4, copy6/7, refresh5/6,
+refinement4/4 and early11/11 remain closed. No native, SDK, package or CI work was selected.
 
-Next is user review of Screen builder. Keep work local. The earlier automatic push
-review rejected publication without explicit payload/destination permission;
-publication to `origin/codex/phase3b-screen-designer` still needs user approval.
-The lab is on port5174. Preserve protected native state and recovery below.
+Next production work uses the approved reference to map controls to actual operations
+and verify them under the selected implementation contract. Follow INTEGRATION;
+use a pinned comparison checkout when app/frontend changes invalidate the shared
+fingerprint. Preserve the approved source and captures; future experiments need a
+new revision/variant. This approval record does not claim live-app implementation.
+Work stays local. The earlier automatic push review rejected publication without
+explicit payload/destination permission; publishing to
+`origin/codex/phase3b-screen-designer` still needs approval. The lab is on port5174.
+Preserve protected native state and recovery below.
 
 The earlier [CI1 audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
 still qualifies source `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
@@ -52,7 +52,7 @@ retains its earlier review-ready result of 448 cases and 19 groups. Its 24 layou
 and starter remain unapproved, with prior references intact. That work was
 published on Phase 3A before this branch; Screens adds three current candidates.
 [Page notes](../design/design-lab-app/README.md) own controls and simulation limits.
-The continuity local2 combined check includes these unchanged pages and their
+The approval local1 combined check includes these unchanged pages and their
 interaction groups; the earlier task retains its original qualification scope.
 Promotion still follows
 [INTEGRATION](../../app/design-lab/INTEGRATION.md), including explicit version selection,

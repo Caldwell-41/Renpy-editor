@@ -1,10 +1,163 @@
 {
   "schemaVersion": 1,
   "screenId": "screens",
-  "currentApproved": null,
+  "currentApproved": "flow-v1",
   "revisions": [
-    { "id": "guided-v2", "variantId": "guided-v2", "approval": null },
-    { "id": "direct-v1", "variantId": "direct", "approval": null },
-    { "id": "flow-v1", "variantId": "flow", "approval": null }
+    {
+      "id": "guided-v2",
+      "variantId": "guided-v2",
+      "approval": null
+    },
+    {
+      "id": "direct-v1",
+      "variantId": "direct",
+      "approval": null
+    },
+    {
+      "id": "flow-v1",
+      "variantId": "flow",
+      "approval": {
+        "date": "2026-10-22",
+        "decision": "The user said \"okay, approved\" after the final Experience First pass on Screen builder, their selected layout. Approve flow-v1 with the recorded source, captures and behavior.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "3c7ea31d8210538cc987a2d2f4ceb8b7aa8f5437",
+          "fingerprint": "70d9beebc45e4783f9f17d374edf9983e03a079e68ca06d475fecec55c06a028"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-populated-light-wide.png",
+            "sha256": "4bcafdd25f75d6fb62124bafa706543f33cd449e11cd15c9adeecadd2035b34b",
+            "state": "populated",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-populated-light-compact.png",
+            "sha256": "10923249191db2ca4fc95b602437a674101ec998b562d8b4bd0ddbc766c10ac3",
+            "state": "populated",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-populated-dark-wide.png",
+            "sha256": "e6a67fb20fe6ed1fed5af5eb16160032e4fe1b226e4042aba12c39450dcfabfc",
+            "state": "populated",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-populated-dark-compact.png",
+            "sha256": "128598b04ea32fefc0633ad2df024a7bd88c13480a73072c31660affce30ab01",
+            "state": "populated",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-choose-help-light-wide.png",
+            "sha256": "4178202d270412e3e8809bf1c452a1c025ee2a2978eee65ff232653e7ff8dcc6",
+            "state": "choose-nested-help",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-choose-help-dark-compact.png",
+            "sha256": "47ad59e14f6266d68961baa16aa1e17b65411db0aeb19b3b20ce1e6c19414bcc",
+            "state": "choose-nested-help",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-choose-dragging-light-wide.png",
+            "sha256": "1602b727d29a15ea7608adaf52dcd12e0e067efaa08031498df0d4c8aa74e285",
+            "state": "choose-dragging",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-design-depth-dark-compact.png",
+            "sha256": "e9dfbbfae2cb23313b1dd01877559e02f8189cf31dd37d774f682838c82da885",
+            "state": "design-depth",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-design-reuse-dark-compact.png",
+            "sha256": "b6070731e75dd79ef66097c9c550eb90dc42444f1574b7e8d7cc2625f641d73a",
+            "state": "design-reuse-own-look",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-design-font-picker-dark-compact.png",
+            "sha256": "d80135a25618c55f282e74b29fa04828f7aa247e73a6a75a0fbdf12ea1a0aa9c",
+            "state": "design-font-picker",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-design-text-light-wide.png",
+            "sha256": "c59237014c2ea3040273b8a8a1626ed961847b20a7259e98d280e7e16d869761",
+            "state": "design-text",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-connect-button-light-wide.png",
+            "sha256": "7c81312be1f2857621171450d34cccc5f64b9bdf27456f106f601f9e4305f57f",
+            "state": "connect-button",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screens/captures/flow-v1/flow-v1-dialog-connect-button-dark-compact.png",
+            "sha256": "26ebe48287d832c1c886b71173aadaf93489d95b7b8a5903d8418249e8e32c90",
+            "state": "dialog-connect-button",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Choose / Design / Connect task rail beside a persistent preview. Single click selects a list row; double-click or Enter opens Design.",
+          "Nested element list follows parent/sibling order, with type icons and hover/focus help. Drag rows within a group to reorder; grouped children stay together. Depth sits under Position & size after horizontal/vertical position, with later items appearing in front.",
+          "Canvas elements move on the first press and resize using eight edge/corner handles, with image proportions, keyboard controls, Escape and Undo/Redo. Automatic layout groups explain their placement limits.",
+          "Dragging preview borders changes the available editor area. Game dimensions and zoom are separate; Focus preview enlarges the game view.",
+          "Connect names the selected element and shows its type in smaller text. Ordered button actions, example variables and opening/closing tests explain overlay and blocking-dialog behavior.",
+          "Apply/Cancel, retained drafts, shared-look confirmation, source-conflict review and protected template controls remain available in the fictional sample.",
+          "Editing sections remember open/closed state per element and editing step. Form updates retain scroll and keyboard focus. Picker close returns focus to its launcher; removing a focused control returns to its section heading.",
+          "This approval selects the browser design reference. Real source editing, durable saves, asset discovery and Ren'Py execution retain their product-task acceptance requirements."
+        ],
+        "deviations": [
+          "The browser reference uses fictional in-memory data and simplified fonts, images, container reflow, scrolling, styles and components, as documented in the comparison notes. These prototype limits do not waive production behavior or acceptance."
+        ]
+      }
+    }
   ]
 }

@@ -1,5 +1,45 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Screen builder design approval, 2026-10-22
+
+State `complete` for design approval. The user said "okay, approved" after the final Experience First
+pass on their selected Screen builder layout. Record the first Screens approval as
+`flow-v1` / variant `flow`, preserving Screen notebook and Canvas focus as drafts.
+Follow Design Lab INTEGRATION and ADR 0017; this outcome records design authority.
+Live app implementation remains under its selected task scope and acceptance.
+
+Chosen host Mac, branch `codex/phase3b-screen-designer`, clean entry `3c7ea31`.
+`npm run design:source` reproduces full source commit
+`3c7ea31d8210538cc987a2d2f4ceb8b7aa8f5437` and fingerprint
+`70d9beebc45e4783f9f17d374edf9983e03a079e68ca06d475fecec55c06a028`, matching the
+verified continuity candidate. Retain 13 reviewed PNGs under
+`docs/design/design-lab-screens/captures/flow-v1/`, with SHA-256, state, theme,
+CSS dimensions and scale in the owning approval JSON. Four populated captures cover
+both themes at 1100×720 and 560×640; nine additional captures preserve Choose help,
+dragging, Design text/depth/reuse/font selection and Connect overlay/dialog controls.
+Interaction state IDs describe these additional views; they are not new state-picker
+options. Prototype limits remain reference limits, not product acceptance waivers.
+
+Allow one approval-record/check cycle and one in-scope metadata repair if needed.
+Final use is approval local1/2; the unused metadata repair cycle is closed. Earlier implementation/browser allowances remain
+closed. No native, SDK, package, CI, live model or publication work is selected.
+Retained capture hashes, source identity, current pointer, history and visible lab
+labels agree. The required combined check passes; no approval-record repair or
+verification remains pending.
+
+Approval local1 passes TypeScript, approval/source checks, all 508 rendering cases
+and 20 interaction groups on Chromium 155.0.8059.86 without browser errors. All four
+populated flow captures reproduce the retained references byte for byte. An ordinary
+browser inspection confirms Approved · flow-v1, default layout flow, the current
+reference link, the 2026-10-22 history entry and the user's exact decision. Preserve
+`.toolchains/phase3b/approval-combined-01/` report/captures/audit with its sibling log,
+`approval-ui-01.json`, `approval-controls-01.png` and the source receipt. Repository
+validation passes for 807 files and whitespace. The approval JSON and 13 captures are
+committed locally; publication is not claimed. Screen notebook and Canvas focus stay
+drafts. The next production step uses this pinned reference and maps controls to real
+operations under the owning implementation contract. No live-app completion or new
+native/CI allowance follows from this record alone.
+
 ## Design section continuity and final experience review, 2026-10-22
 
 State `review_ready`. The user reports Design sections collapsing after Reuse this
