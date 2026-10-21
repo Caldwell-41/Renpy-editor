@@ -185,6 +185,14 @@ the same fictional Help panel/dialog and protected-template inventory.
 | Canvas desk | Player view above a hierarchy/property dock | [Canvas](http://127.0.0.1:5174/?screen=screens&variant=canvas) |
 | Screen notebook | Compose/Arrange/Connect notebook beside the player view | [Notebook](http://127.0.0.1:5174/?screen=screens&variant=guided) |
 
+Published candidate `8e2aacb5a6d4ecc22003685e63c8d2b756dcb442`, tree
+`6492d40e241a54a1f6c72ffd4ba4b46e0c8f1f0d`, is verified at the remote branch.
+`design:source` records fingerprint
+`058e6b09bf687c4fe0ba7651b405692117f6d47f943d4ab70541fa1feb45846e`.
+This identity includes the unverified explicit-label correction. It preserves a
+reproducible candidate; it is not a passing verification or approval record.
+Documentation-only successors preserve that distinction and the earlier SDK candidate.
+
 The floating switcher uses `?variant=` and protects edited samples before reset.
 Its explicit accessible-name correction remains unverified. All three approval
 entries remain null. The prototype is available for inspection, but its required

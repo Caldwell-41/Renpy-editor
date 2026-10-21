@@ -20,6 +20,7 @@ The designated agent used the prototype skill's UI branch to build three
 [unapproved Screens layouts](../design/design-lab-screens/README.md). All agents have
 finished. Both combined runs rendered 508 cases; the last Screens journey stopped
 on its Next button lookup. Explicit accessible labels are added but unverified.
+Prototype candidate `8e2aacb` is published and verified on the remote branch.
 The prototype is not review-ready; the task's
 [candidate boundary](../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
 owns exact remaining proof and source identity. Batch7/8 reports and all 12 captures

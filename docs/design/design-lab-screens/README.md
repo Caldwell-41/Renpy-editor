@@ -5,6 +5,8 @@ author builds and connects Help screens. The installed prototype skill's UI work
 produces three throwaway layouts on the existing Design Lab route. All are unapproved.
 The comparison is blocked on incomplete verification and is not review-ready.
 The same fictional game, screens, nodes and controls appear in every layout.
+The [owning task](../../tasks/active/phase-3-initial-wysiwyg-release.md#screens-prototype-candidate-and-verification-boundary)
+records published source identity, cumulative allowance and remaining verification.
 
 - Layout workbench keeps the hierarchy, canvas and inspector beside one another. It
   favors frequent selection and property changes. Each pane scrolls independently.
