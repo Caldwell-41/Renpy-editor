@@ -1,0 +1,17 @@
+{
+  "fields": {
+    "name": "Use the name you want the AI to use for this character.",
+    "aliases": "List nicknames or other names, separated by commas, so the AI can recognise the same character.",
+    "tags": "Add comma-separated labels to organise and find this card.",
+    "description": "Give a short introduction: who they are, their role and what makes them distinctive.",
+    "personality": "Describe traits, habits and reactions. Concrete examples help the AI keep behaviour consistent.",
+    "motivations": "Write what they want and why it matters. This helps the AI give their choices a clear reason.",
+    "appearance": "Describe visible features and clothing the AI should mention consistently.",
+    "background": "Summarise past events that shape how they act now.",
+    "speakingStyle": "Describe vocabulary, tone and sentence style the AI should follow in dialogue.",
+    "exampleDialogue": "Write a few sample lines in their voice to show the AI the style you want.",
+    "relationship": "Describe how this character feels about the selected person and how they act around them.",
+    "knowledgeNotes": "Describe what this character knows, doesn't know and keeps secret when the story begins.",
+    "relationshipTarget": "Choose who these notes are about."
+  }
+}

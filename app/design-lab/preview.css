@@ -1,0 +1,2 @@
+html, body, #preview { height: 100%; }
+#preview[data-error="true"] { padding: 24px; color: var(--status-error); }

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "studio-request",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "console-v1", "variantId": "console", "approval": null },
+    { "id": "desk-v1", "variantId": "desk", "approval": null }
+  ]
+}

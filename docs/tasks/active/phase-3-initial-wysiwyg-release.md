@@ -1,5 +1,145 @@
 # Phase 3 — Initial WYSIWYG release
 
+## Restarted combined Phase 2 / 3A guided walkthrough — 2026-10-16
+
+User requests restarting the guided walkthrough from the beginning after reviewing
+additional work and ensuring an up-to-date build. This selects walkthrough preparation
+and a matching signed Mac build; it supersedes the completed redesign/amendment's
+no-local-build restriction for this new walkthrough only. No implementation repairs,
+new CI matrix, live Studio sends/management, merge or release are selected.
+
+Entry: clean `codex/phase3a-story-logic` at `95b5cfd`; application inputs match the
+qualified `7551a9c` candidate (successors are documentation only). Reuse the final
+redesign/model-settings both-host automated audit and qualified Phase 3A SDK evidence.
+Prepare one additional signed Mac package using the unchanged approved identity and
+names in a fresh ignored directory. Preserve the old build and original session;
+this adds one build to historical build1/1, without renewing closed qualification
+budgets. Existing walkthrough launches1/3 leaves two starts available; reserve a
+start only after the old session is safely resolved. No automatic retry after failure.
+
+Read-only process inspection confirms original PID8877 still runs the old verified
+package. Its unsaved Mara draft remains protected. The production single-instance
+plugin uses one bundle-ID socket, so a separate profile cannot permit simultaneous
+instances. Do not bypass that gate, close/save/discard/navigate the old session or
+attempt a losing launch. Complete package preparation before asking the user how
+to resolve the old draft and switch. Fresh disposable project/profile state will use
+the existing ordinary-UI fixture; ordinary saved credentials remain separate.
+
+Read-only native UI observation now shows Story in Writing focus with an open Add
+Condition form (All of: flag is True and literal True), plus a Saved source badge.
+This differs from the earlier Mara-card observation: do not assume Mara's draft is
+gone, or that Saved means all form input is committed. No UI action was performed.
+
+Revised guided order, one short question at a time:
+
+1. Settings: local profiles, endpoint/model/key copy, single context and response
+   limits, configurable model-load defaults, explicit Read/Apply and connection test.
+2. Characters: unified Writing/Game setup, game-first and planning-first association,
+   writing topics, relationships/starting knowledge, list collapse and draft actions.
+3. Retained card versions and explicit transactional restore, Undo/Redo.
+4. Project-wide Lorebook: world/starting situation, tone/style, Save/Discard and the
+   visible per-request context omission with separate character voice.
+5. AI Assist: target/task/references, exact request inspection, rewrite/Continue/Draft/
+   generated card/lore review, selected acceptance versus saving and recovery. Actual
+   generation or server management requires a separately selected live step.
+6. Phase 3A: typed conditions, ordered branches, guarded choices, Call/Return,
+   nested insert/move/collapse, manual preview limits, Source/Branches coherence,
+   history/reopen and ordinary external-edit draft protection.
+7. Compact/light/dark readability and separate explicit Phase2/Phase3A decisions.
+
+Preferences, demonstrated defects and explicit acceptance are distinct. This Mac
+walkthrough does not claim Windows human proof or whole-phase acceptance. Private
+paths, receipts and recovery metadata remain ignored.
+
+**Preparation completed; guided Step1 is open.** The additional signed package build
+passed (one attempt, no retry). Executable SHA256
+`5c12f271a58a8fcd72e52e1ca0d20c9ad51d1d3460b685ab3a1bf76534d199ec`;
+installer SHA256
+`367721545177238f6899337fe4096fcd135963a008487db50835e52507ceca32`.
+Strict bundle signature, approved certificate-bound identity, copied bundle, actual
+read-only mounted installer contents and Mach-O ARM64 architecture passed. All
+captured application input hashes remained unchanged through packaging. No signing,
+credential or notarization policy changed. This matching package includes the completed
+Characters/Lorebook redesign and configurable model-load settings; the old package
+did not. Existing automated evidence is reused, with no new qualification test claims.
+
+After the explicit switching question, user said **“i have closed the old app”**.
+Process inspection confirmed no Loomlight process, so no agent Save/Discard/close was
+performed. Fresh launch2/3 then started PID18966 at the exact verified new executable.
+Native UI observed the new example in Recent Projects, opened it and navigated through
+Settings → AI providers. Current screen is the unsaved New Studio profile at the top
+of Connection, with the new local-profile wording and default loopback endpoint.
+Fresh source/reference baseline (42 files) and launch/path receipts are ignored in
+the new session directory. Ordinary saved profile/key and original fixture were not
+reused. No network/test/discovery/management/generation action was performed.
+
+**Cumulative walkthrough usage:** two package attempts/two passes (old1 plus new1),
+editor launches2/3; one reopen remains. No phase approval yet. Task/status changes
+are local-only; no commit/push/merge/release.
+
+**Step1 feedback:** user says “Yes that looks clear, lets move on” about Connection
+labels/help. Recorded as clear; no requested change or whole-phase acceptance. Moved
+by scrolling to Model ID/API Key for Step2. Native observation shows user-edited
+unsaved profile input; preserve it without saving/reloading or contacting Studio.
+Next review response defaults and model-loading controls after this section.
+
+**Step2 feedback — connection workflow change requested:** user rejects the need to
+save before entering a key or discovering models: “Name -> IP -> API key, connect,
+choose model -> save”. Agreed follow-up direction: Profile name → Endpoint/address →
+API Key → Connect → choose model → Save profile. Connect should authenticate and
+retrieve available models from the entered draft connection; it should not require
+an already saved profile or model selection. Save then persists the completed profile.
+Connect is distinct from a model-specific generation/response-format test and does
+not implicitly load a model, generate text or apply model-load overrides. Preserve
+native-only credential entry/storage; the UI need not expose key bytes. Cancellation
+and failed connection should retain entered draft details without silently replacing
+an existing saved profile. Existing key-before-save/unsaved-target management guards
+need deliberate redesign, not a cosmetic reordering or bypass. Source inspection
+confirms credential/discovery controls currently depend on a clean saved selection.
+This is a requested functional/UX follow-up, not implemented or accepted behavior.
+No app input, saved profile/key, service or product source changed during this feedback.
+
+**Step2 confirmation — UI rearrangement agreed:** user explicitly says “Yes, record
+that change, the ui will need to be rearraged”. Reorder the setup UI to match
+Profile name → Endpoint/address (with its applicable private-HTTP option) → API Key →
+Connect → Model selection → Save profile. Move API Key before model selection and
+place Connect after the connection/key inputs; make model selection the next visible
+step after successful connection. Keep connection status/errors with Connect and
+preserve entered details on failure. Save completes local profile setup after model
+selection. Preserve existing themes, native credential protection and draft safety.
+This approves the workflow/layout direction for later implementation; no product
+rearrangement, credential entry, connection or additional build is performed now.
+The consolidated walkthrough decision index records this newer direction, superseding
+conflicting earlier model-before-key/save-first presentation.
+
+**Step3 opened:** user requests moving to Response defaults and Model loading.
+Scrolled only; unsaved connection input remains intact. Native UI shows context32768,
+maximum response8192, parallel1, GPU memory Manual and memory fitting Off. Read/Apply
+remain disabled for the unsaved profile. No preference, profile/key, server setting
+or model state changed; feedback on these sections is pending.
+
+**User-requested pause and implementation transfer — 2026-10-16:** walkthrough is
+paused at Step3 before feedback on Response defaults/Model loading. User explicitly
+authorises messaging [Design Universal Norm Output Test](codex://threads/01a1421f-2ca7-76d2-a786-fa13948014ae)
+and asks that agent to implement the agreed connection layout/workflow alongside its
+LLM changes. Brief successfully sent with the approved sequence, draft Connect/key
+lifecycle, native secret protection, retained drafts/saved profiles, stale-result
+invalidation, no implicit model/generation action and relevant focused test coverage.
+The receiving chat is already implementing thinking on and new-profile maximum
+response16384, so it owns integration and subsequent live status updates. Historical
+budgets remain separate; this transfer does not grant a fresh live/CI/build allowance.
+
+Preserve the open walkthrough and its unsaved connection input; pausing does not
+authorise Save/Discard/Reload/close or reuse for the recipient's test. No further
+walkthrough UI action or technical check is selected here. Current package remains
+the verified earlier candidate; it cannot establish the new thinking/default or
+connection-flow changes. On resume, check the implementation owner's result and
+matching build availability, then continue Step3 with updated behavior identified.
+Connection copy was clear; the setup sequence/layout change is approved direction;
+response/model-loading feedback and both whole-phase decisions remain pending.
+Walkthrough documentation/session records remain local-only, sharing the checkout
+with the receiving agent's ongoing source changes; do not discard or stage its work.
+
 ## Approved implementation handoff — 2026-10-15
 
 User requests a new Sol6.1/xhigh coordinator chat, Sol6.1/high implementation/testing

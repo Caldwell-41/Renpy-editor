@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "lorebook",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "manuscript-v1", "variantId": "manuscript", "approval": null },
+    { "id": "parallel-v1", "variantId": "parallel", "approval": null }
+  ]
+}

@@ -1,0 +1,44 @@
+.lp-shell .navigation-icon { width:18px; height:18px; margin:0; flex:none; }
+.lp-shell .brand { display:flex; align-items:center; gap:9px; }
+.lp-shell .button.primary:disabled { opacity:.55; }
+.lp-project { padding-left:20px; border-left:1px solid var(--border-normal); color:var(--text-secondary); }
+.lp-sample { margin-left:auto; font-size:12px; }
+.lp-project-shell { grid-template-columns:164px minmax(0,1fr); }
+.lp-navigation { padding:14px 10px; gap:3px; }
+.lp-navigation .tree-item { display:flex; gap:12px; }
+.lp-nav-toggle { align-self:flex-start; margin-bottom:12px; }
+.lp-navigation>.tree-item:last-child { margin-top:auto; }
+.lp-studio-link { font-size:12px; padding:7px 11px; }
+.lp-runtime-link { font-size:11px; white-space:nowrap; margin-left:auto; }
+.lp-project-shell[data-navigation-collapsed="true"] { grid-template-columns:58px minmax(0,1fr); }
+.lp-project-shell[data-navigation-collapsed="true"]>.lp-navigation { padding:14px 6px; }
+.lp-project-shell[data-navigation-collapsed="true"]>.lp-navigation>.tree-item { font-size:0; padding:11px; justify-content:center; }
+.lp-project-shell[data-navigation-collapsed="true"] .lp-nav-toggle { align-self:center; }
+.lp-main { min-width:0; min-height:0; padding:22px 24px 16px; display:flex; flex-direction:column; overflow:hidden; }
+.lp-heading { flex:none; display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:18px; }
+.lp-heading h1 { font-size:25px; margin:0; letter-spacing:-.02em; }
+.lp-heading p { margin:5px 0 0; font-size:12px; }
+.lp-tools { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.lp-content { min-width:0; min-height:0; flex:1; position:relative; }
+.lp-field { display:flex; flex-direction:column; gap:7px; margin:0 0 20px; min-width:0; }
+.lp-label { font-size:13px; font-weight:600; }
+.lp-field input,.lp-field select,.lp-field textarea { width:100%; min-width:0; }
+.lp-field textarea { line-height:1.6; resize:vertical; }
+.lp-help { font-size:12px; line-height:1.5; font-weight:400; margin:0; }
+.lp-status { font-size:11px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lp-dialog { width:min(580px,calc(100vw - 40px)); max-height:calc(100dvh - 40px); padding:24px; color:var(--text-primary); background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:7px; }
+.lp-dialog::backdrop { background:#0007; }
+.lp-dialog h2 { font-size:20px; margin:0 0 16px; }
+.lp-dialog p { font-size:13px; line-height:1.6; }
+.lp-dialog .button { margin:12px 8px 0 0; }
+@media(max-width:759px) {
+  .lp-main { padding:14px 12px 10px; }
+  .lp-heading { gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+  .lp-heading h1 { font-size:22px; }
+  .lp-heading p { font-size:11px; }
+  .lp-tools .button { font-size:12px; padding:7px 10px; }
+  .lp-sample { display:none; }
+  .lp-project { font-size:12px; padding-left:10px; }
+  .lp-fiction { display:none; }
+  .lp-status { font-size:11px; }
+}

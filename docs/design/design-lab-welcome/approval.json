@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "welcome",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "desk-v1", "variantId": "desk", "approval": null },
+    { "id": "shelf-v1", "variantId": "shelf", "approval": null }
+  ]
+}

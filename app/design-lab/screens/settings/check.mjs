@@ -1,0 +1,84 @@
+import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
+const capture = (name) => fileURLToPath(new URL(`../../../../.toolchains/design-lab/pages/settings/${name}.png`, import.meta.url));
+export default async function check({ page, open }) {
+  const button = name => page.getByRole("button", { name, exact: true });
+  const category = name => button(name).click();
+  for (const variant of ["book", "desk"]) {
+    await page.setViewportSize({ width: 1100, height: 720 });
+    await open({ variant });
+    await page.getByRole("radio", { name: "Dark theme", exact: true }).click();
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "dark");
+    await page.getByLabel("Interface size", { exact: true }).selectOption("large");
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.density), "large");
+    await category("Source editor");
+    await page.getByLabel("Source text size", { exact: true }).selectOption("18");
+    assert.match(await page.locator(".stg-source-sample").getAttribute("style"), /18px/);
+    await category("Keyboard shortcuts");
+    await page.getByRole("searchbox", { name: "Find a shortcut" }).fill("Dismiss");
+    assert.equal(await page.locator(".stg-shortcut").count(), 1);
+    await category("About"); await button("Preview basic diagnostics").click(); await button("Simulate copy").click();
+    assert.match(await page.locator(".lp-status").innerText(), /clipboard was not changed/); await button("Close diagnostics").click();
+
+    await open({ variant, state: "empty" });
+    assert.equal(await button("Save profile").isDisabled(), true);
+    const name = page.getByRole("textbox", { name: "Profile name", exact: true });
+    await name.fill("Draft studio");
+    await button("Fictional native API Key entry…").click();
+    assert.equal(await page.getByRole("dialog", { name: "Fictional native API Key entry", exact: true }).locator("input").count(), 0);
+    await button("Cancel key entry").click();
+    assert.equal(await name.inputValue(), "Draft studio");
+    await button("Fictional native API Key entry…").click(); await button("Use fictional key").click();
+    await button("Connect").click(); await button("Cancel connection").click();
+    assert.equal(await name.inputValue(), "Draft studio");
+    await button("Connect").click();
+    const model = page.getByRole("combobox", { name: "Model ID", exact: true }); await model.waitFor({ state: "visible" });
+    await model.selectOption("tram-writer-32b");
+    await page.getByRole("spinbutton", { name: "Maximum response length", exact: true }).fill("32768");
+    await button("Save profile").click(); assert.match(await page.locator(".stg-errors").innerText(), /128 tokens/);
+    await page.screenshot({ path: capture(`${variant}-response-validation`) });
+    await page.getByRole("spinbutton", { name: "Maximum response length", exact: true }).fill("16384");
+    await category("Workspace"); await category("AI providers"); assert.equal(await name.inputValue(), "Draft studio");
+    await button("Save profile").click(); await page.waitForFunction(() => document.querySelector(".lp-status")?.textContent?.startsWith("Profile saved in sample"));
+    await page.getByText("Advanced · model loading, sampling & maintenance", { exact: true }).click();
+    await button("Test response format").click(); await button("Cancel response format test").click();
+    await button("Read model-load settings").click(); assert.match(await page.locator(".lp-status").innerText(), /No model was contacted/);
+    await button("Apply model-load settings").click(); assert.match(await page.locator(".lp-status").innerText(), /No model was loaded/);
+    await button("Remove profile").click(); await button("Keep editing").click(); assert.equal(await name.inputValue(), "Draft studio");
+    await name.fill("Kept after reload guard"); await button("Reload profiles").click(); await button("Keep editing").click(); assert.equal(await name.inputValue(), "Kept after reload guard");
+    await button("Reload profiles").click(); await button("Reload sample profiles").click(); assert.equal(await name.inputValue(), "Draft studio");
+
+    await page.getByRole("tab", { name: "Current project", exact: true }).click();
+    await page.getByRole("tab", { name: "System prompts", exact: true }).click();
+    const prompt = page.getByRole("textbox", { name: "Action system prompt", exact: true }), original = await prompt.inputValue();
+    await prompt.fill("Keep the station quiet. Café 雪."); await page.getByRole("combobox", { name: "Prompt action", exact: true }).selectOption("3");
+    await page.getByRole("combobox", { name: "Prompt action", exact: true }).selectOption("0"); assert.equal(await prompt.inputValue(), "Keep the station quiet. Café 雪.");
+    await page.getByRole("tab", { name: "Context preparation", exact: true }).click(); await button("Build context preview").click(); assert.match(await page.locator(".lp-status").innerText(), /Save or discard/);
+    await page.getByRole("tab", { name: "System prompts", exact: true }).click(); await button("Save prompt").click(); await button("Undo project change").click(); assert.equal(await prompt.inputValue(), original);
+    await button("Redo project change").click(); assert.equal(await prompt.inputValue(), "Keep the station quiet. Café 雪.");
+    await button("Restore baseline").click(); assert.equal(await page.getByRole("dialog", { name: "Restore installed baseline?", exact: true }).isVisible(), true); await button("Cancel restore").click();
+    await page.getByRole("tab", { name: "Context preparation", exact: true }).click();
+    await page.getByRole("checkbox", { name: "Mara · Character card · saved version 3", exact: true }).check();
+    await button("Build context preview").click(); assert.match(await page.locator(".stg-context-result").innerText(), /Would-be payload/);
+    await page.getByRole("textbox", { name: "Task instructions", exact: true }).fill("Different task"); assert.equal(await page.locator(".stg-context-result").innerText(), "");
+    await button("Build context preview").click(); await page.getByText("Inspect complete serialized preview", { exact: true }).click(); assert.match(await page.locator(".stg-context-result pre").innerText(), /mara-r3/);
+    await page.screenshot({ path: capture(`${variant}-project-context`) });
+
+    await open({ variant, state: "error", theme: "dark", viewport: "compact" });
+    await page.setViewportSize({ width: 560, height: 640 });
+    await name.fill("Retain after refusal"); await button("Connect").click();
+    await page.waitForFunction(() => document.querySelector(".lp-status")?.textContent?.startsWith("Simulated connection failure"));
+    assert.equal(await name.inputValue(), "Retain after refusal");
+    await page.screenshot({ path: capture(`${variant}-connection-error-dark-compact`) });
+    await button("Connect").click(); await model.waitFor({ state: "visible" }); await model.selectOption("tram-writer-32b");
+    await page.getByRole("textbox", { name: "Endpoint", exact: true }).fill("http://192.0.2.10:8888/v1");
+    await button("Fictional native API Key entry…").click(); await button("Use fictional key").click();
+    await button("Connect").click(); assert.match(await page.locator(".stg-errors").innerText(), /opt-in/);
+    await page.getByRole("checkbox", { name: "Allow private-network HTTP", exact: true }).check();
+    await button("Fictional native API Key entry…").click(); await button("Use fictional key").click(); await button("Connect").click(); await model.waitFor({ state: "visible" });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await page.screenshot({ path: capture(`${variant}-private-http-compact`) });
+    await open({ variant }); assert.equal(await page.getByRole("tab", { name: "Application", exact: true }).getAttribute("aria-selected"), "true");
+    await category("AI providers"); assert.equal(await name.inputValue(), "Writing studio");
+  }
+}

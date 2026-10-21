@@ -1,5 +1,49 @@
 # Current outcome handover
 
+## Full-app mockups ready for review, 2026-10-21
+
+[The selected task](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
+owns scope, page assignments, cumulative allowances and failures. The
+[gallery](http://127.0.0.1:5174/catalog.html) lists two layouts each for Home, New
+project, Story, Source, Branches, Characters, Lorebook, Assets, Variables, Settings,
+Runtime & diagnostics and Studio request. [Comparison notes](../design/design-lab-app/README.md)
+link each page's controls, tradeoffs and simulation limits. One agent owned each page;
+Characters was assigned last and now includes prose-first Writing plus interactive
+linked/planning Game setup. Every agent received the user's experience principles.
+
+The user authorised committing all local changes and pushing the existing
+`codex/phase3a-story-logic` branch on 2026-10-21. Publication preserves the draft
+design status and existing acceptance boundaries.
+Preserve all prior lab/workflow changes and the three unrelated user edits. All 24
+app layouts and the starter remain null/unapproved. Earlier approved references are
+intact. No native app, real project, model/provider, SDK, CI or package action occurred.
+The protected Loomlight window and draft remain untouched.
+
+Final Node 24.19.0/npm 11.9.0/Chromium 155.0.8059.85 verification passes TypeScript,
+approval/source checks, 448 rendering cases and 19 browser groups. Every page journey,
+shared navigation/gallery, approval/HMR behavior, native/network refusal and production
+build exclusion passes. Owners reviewed both themes/sizes and key long/error states;
+parent review confirmed the final Game actions/feedback, Settings errors, Home chooser
+and Runtime cleanup layouts. The final report/captures are ignored under
+`.toolchains/design-lab/`; earlier 56-case Characters evidence is preserved under
+`history/characters-writing-2026-10-19/` there. These are review outputs, not approval
+captures. Page notes distinguish scoped reports from later combined proof.
+
+Each page used its initial and two focused repair cycles. Integration used an initial
+cycle and one focused repair. Its first run reached 208 cases before a timeout
+coincided with the last Characters notes write and the lab's design-note live reload.
+The retained failed report and unchanged-code full pass distinguish this interruption
+from a product failure. All agents have finished. No further repair or external operation
+is selected; prior native/CI allowances are not renewed. The loopback review server is
+available on port 5174. If it has ended on resume, use the Design Lab README to restart it.
+
+Next is user comparison and layout selection in this chat. ADR 0017 and
+[INTEGRATION](../../app/design-lab/INTEGRATION.md) require explicit version selection,
+reproducible source identity, retained captures and agreed behavior before promotion.
+Product implementation later maps controls to real services and proves appearance plus
+functionality. Browser proof covers fictional memory-only samples. Preserve the protected
+native window and recovery below; Phase2/3A human acceptance remains separate.
+
 ## CI harness reliability — accepted, 2026-10-17
 
 All three deliverables are complete on `codex/phase3a-story-logic`, one owner on the
@@ -33,11 +77,10 @@ No further dispatch or repair is selected; no operation or acceptance work remai
 for this maintenance outcome. Closure updates only its task/current/native/incident
 documentation. The three unrelated edits and all recovery text below are preserved.
 
-**Next:** report completion. Do not start a new feature, package, native/user session
-or provider operation automatically. Existing signed-Mac/real Studio and Phase2/3A
-human acceptance remain separate under their owning tasks and the exact capability,
-protected-window and allowance boundaries below. Resume them only within applicable
-user instructions; this maintenance grants no renewed allowance.
+This CI maintenance is closed. Existing signed-Mac/real Studio and Phase2/3A human
+acceptance remain separate under their owning tasks and the exact capability,
+protected-window and allowance boundaries below. This maintenance grants no renewed
+allowance.
 
 ## Retained app baseline and unrelated pending work
 

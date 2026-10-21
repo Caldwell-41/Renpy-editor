@@ -1,6 +1,6 @@
 # Consolidated Phase 2 / 3A walkthrough decisions
 
-Updated 2026-10-15. This is the current design decision index for the walkthrough;
+Updated 2026-10-16. This is the current design decision index for the walkthrough;
 it supersedes conflicting earlier mockup details and pending recommendations. The
 [combined task ledger](../../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
 retains the sequence, qualifications and unique evidence. The Phase 2 task owns the

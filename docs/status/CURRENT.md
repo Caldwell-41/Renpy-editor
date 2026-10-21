@@ -1,5 +1,17 @@
 # Current status
 
+## Full-app mockups ready for review
+
+2026-10-21: [The full-app comparison](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
+is `review_ready`. [The gallery](http://127.0.0.1:5174/catalog.html) has 24 layouts
+for 12 pages, including Characters Writing/Game setup.
+[Page notes](../design/design-lab-app/README.md) map controls and limits.
+All 448 cases, 19 check groups and typing/approval/source checks pass.
+The task records the live-reload interruption and passing rerun. Work is local,
+prepared for branch publication and uses fictional browser memory. All layouts and the starter remain
+unapproved; earlier references are intact. Next is comparison and selection before
+promotion or app work.
+
 ## CI harness reliability — all three deliverables complete
 
 Updated2026-10-17, state `accepted`, current branch `codex/phase3a-story-logic`.

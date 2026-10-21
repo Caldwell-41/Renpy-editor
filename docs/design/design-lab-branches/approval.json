@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "branches",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "atlas-v1", "variantId": "atlas", "approval": null },
+    { "id": "desk-v1", "variantId": "desk", "approval": null }
+  ]
+}

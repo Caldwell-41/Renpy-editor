@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "settings",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "book-v1", "variantId": "book", "approval": null },
+    { "id": "desk-v1", "variantId": "desk", "approval": null }
+  ]
+}

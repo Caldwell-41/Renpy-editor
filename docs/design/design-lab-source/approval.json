@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "source",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "workbench-v1", "variantId": "workbench", "approval": null },
+    { "id": "focus-v1", "variantId": "focus", "approval": null }
+  ]
+}

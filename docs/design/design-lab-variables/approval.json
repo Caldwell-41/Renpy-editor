@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "variables",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "ledger-v1", "variantId": "ledger", "approval": null },
+    { "id": "notebook-v1", "variantId": "notebook", "approval": null }
+  ]
+}

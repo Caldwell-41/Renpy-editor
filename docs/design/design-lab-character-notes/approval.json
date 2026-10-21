@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "screenId": "character-notes",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "starter-v1", "variantId": "starter", "approval": null }
+  ]
+}

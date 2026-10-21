@@ -32,6 +32,12 @@ Rust handler guard. Phase 1C's project/SDK/Git-init capabilities are core-owned,
 picker-mediated, typed operations. Studio credentials stay in Rust/native OS entry
 and Rust-only storage; the renderer receives redacted status through narrow typed operations.
 
+## Browser UI design
+
+Use [Design Lab](design-lab/README.md) for browser mockups and individual component
+previews. Run `npm run design:dev` locally and `npm run design:check` for its focused
+checks. Product integration retains the selected task's normal acceptance gates.
+
 ## Synthetic Studio request
 
 **Studio request** opens a nonmodal panel using an existing remembered Studio profile.

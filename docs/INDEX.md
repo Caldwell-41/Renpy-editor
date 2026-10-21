@@ -41,6 +41,8 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Manual Character-card/lore schema, bounds, lifecycle and fixtures | [REFERENCE_LIBRARY.md](REFERENCE_LIBRARY.md) |
 | Accepted UI designs, implementation, review and final integration evidence | [UI design review](tasks/archive/2026-10-06-ui-design-review.md) |
 | Saved mockups, palette/layout precedence and visual comparison loop | [UI reference index](design/ui-refresh/README.md) |
+| Reusable browser mockups, sample states and agent instructions | [Design Lab](../app/design-lab/README.md) |
+| Design approval, supersession and integration into the live app | [ADR 0017](adr/0017-design-approval-and-app-integration.md), [integration procedure](../app/design-lab/INTEGRATION.md) |
 | Proposed nested Story Beats image, generation prompt and provenance | [Phase 3 Story concept](design/phase-3-story/README.md) |
 | Proposed LLM preparation/review/reference/settings screens, exact prompts and provenance | [Phase 2 LLM concepts](design/phase-2-llm/README.md) |
 | Outcome-sized goals, internal checkpoints, same-thread waiting and handovers | [WORKFLOW.md](WORKFLOW.md) |

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "new-project",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "paced-v1", "variantId": "paced", "approval": null },
+    { "id": "sheet-v1", "variantId": "sheet", "approval": null }
+  ]
+}

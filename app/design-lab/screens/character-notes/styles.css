@@ -1,0 +1,14 @@
+.notes-example { padding: 24px; overflow: auto; }
+.notes-example > h1 { font-size: 1.7rem; }
+.notes-example-picker { display: flex; gap: 8px; margin: 20px 0; }
+.notes-example-picker [aria-pressed="true"] { border-color: var(--accent-primary); background: var(--accent-subtle); }
+.notes-example-editor { max-width: 720px; padding: 24px; border: 1px solid var(--border-normal); border-radius: var(--radius-medium); background: var(--surface-raised); }
+.notes-example-editor h2 { margin-bottom: 20px; font-size: 1.2rem; }
+.notes-example-editor textarea { width: 100%; min-height: 180px; resize: vertical; padding: 12px; line-height: 1.6; border: 1px solid var(--border-strong); border-radius: var(--radius-small); background: var(--surface-app); color: var(--text-primary); }
+.notes-example-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.notes-example-actions [role="status"] { flex: 1 0 140px; font-size: .8rem; color: var(--text-secondary); }
+@media (max-width: 680px) {
+  .notes-example { padding: 16px; }
+  .notes-example-editor { padding: 16px; }
+  .notes-example-actions [role="status"] { flex-basis: 100%; }
+}

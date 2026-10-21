@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "characters-writing",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "dossier-v1", "variantId": "dossier", "approval": null },
+    { "id": "board-v1", "variantId": "board", "approval": null }
+  ]
+}

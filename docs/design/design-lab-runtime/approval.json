@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "runtime",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "desk-v1", "variantId": "desk", "approval": null },
+    { "id": "console-v1", "variantId": "console", "approval": null }
+  ]
+}

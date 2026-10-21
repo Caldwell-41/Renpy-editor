@@ -62,6 +62,9 @@ cancelled or skipped required checks are not passes. No package matrix for docs 
 
 ## Read the relevant reference
 
+- Browser UI mockups or component previews: read [Design Lab](app/design-lab/README.md).
+  For promotion or live app implementation of approved designs, read
+  [Design integration](app/design-lab/INTEGRATION.md) before edits.
 - Build/check commands: [app/README](app/README.md#local-checks); test selection,
   specialist exclusions and native evidence: [TESTING](docs/TESTING.md).
   Commands are references, not a requirement to run every suite.

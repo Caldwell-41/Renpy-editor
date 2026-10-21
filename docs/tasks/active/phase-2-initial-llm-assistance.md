@@ -96,9 +96,247 @@ Native UI access now reports the Mac locked. The user was asked to unlock it and
 either close the protected walkthrough window themselves, authorise recording its
 non-secret draft details and closing it, or keep native proof pending. That required
 decision remains pending; no close/discard/launch is authorised by elapsed time.
-The focused CI route is being wired through the existing quality workflow entry point;
-no CI run yet. Qualification totals: packages1/2, native launches0/2, generations0/4,
-reserved output0/65536, cached loads0/1, paired CI0/2. No merge or release.
+The focused route is now published through the existing quality entry point on
+`c6cd017bca2bd0c27318ebb93898d5ed24941c0c`, with application inputs unchanged from
+`77dbefc`. Dispatch confirmed [run38842223363](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38842223363),
+workflow354880113, run attempt1, created2026-10-16T02:47:24Z on the existing branch.
+Initial selected jobs116784684946 (Windows2025) and116784685120 (macOS26) were
+in_progress; seven unselected older jobs were skipped by design and do not count as
+proof. Terminal status, selected results, exact source/binaries, captures and artifact
+manifests still require audit. Per waiting policy, manually resume this same chat
+when the run completes; no polling/watcher is active. Native unlock/session decision
+remains required. Qualification totals: packages1/2, native launches0/2,
+generations0/4, reserved output0/65536, cached loads0/1, paired CI1/2. No merge or release.
+
+### CI audit and repository harness review — 2026-10-16
+
+User requested the terminal CI audit and review of the whole testing harness. This
+was a review increment: product/harness source is unchanged, no correction dispatch,
+package, native editor start or live generation was consumed. Reviewed workflow
+routing and syntax across all workflows, result/identity/retention gates, current
+browser and native probes, shared process/cleanup helpers, SDK and credential fixture
+boundaries, and the Python harness self-tests. This is not a rerun of all historical
+SDK/native/specialist acceptance or proof of every existing test's assertions.
+
+**CI failed, audit complete:** run38842223363 attempt1 finished2026-10-16T02:54:34Z
+on exact candidatec6cd017. Windows job116784684946 failed one Settings case;
+macOS job116784685120 succeeded. Both archive digests verified against GitHub metadata,
+all34 Windows/39 Mac manifest entries matched retained bytes, and all291 recorded
+source inputs per host matched Git's checkout representation, including attributes.
+Artifacts12022060995 (Windows, digest
+`5bafc022894202f3108ab97b87ad7e80e8e40dfcf6203aba82a866d66326a538`)
+and12021529192 (Mac, digest
+`5a11973d31ee6932acd8799e93656e93c6cec85090d46fa691d73c4b556fd502`)
+expire2026-10-23; ignored downloaded archives/logs and `ci-01-audit.json` retain the audit.
+All51 renderer/protocol cases and six checker self-tests passed per host. Mac passed
+all57 selected Rust cases and retained two verified ARM64 Mach-O test binaries.
+Windows passed53 Rust cases, failed1, and never ran the3 draft-connection cases.
+Its test binaries were not retained. Eight browser images have correct dimensions,
+digests, exact theme/size coverage, stable inputs and browser/server cleanup, but the
+new controls' visual proof is inadequate as described below. No both-host qualification.
+
+**Findings, in priority order:**
+
+1. **P1 — Windows Settings test isolation is incomplete.**
+   `app/src-tauri/src/ai_settings.rs:689` omits `TEST_SERIAL`, while other Settings
+   tests hold it. Production dispatch uses process-global `ACTIVE.try_lock()`.
+   Concurrent fixture operations can return busy before the intended cancellation
+   branch. The CI assertion at741 observed Null instead of true after native UI was
+   deliberately stubbed out. This is a harness contention diagnosis, not evidence
+   that the actual Windows dialog cancelled incorrectly. Apply the same fixture
+   ownership guard to this case and verify parallel execution on Windows; do not
+   weaken the production lock or cancellation assertion.
+2. **P1 — Remaining production-UI probes and full renderer fixtures were not migrated.**
+   The default `npm test` timed out in both identity-probe cases (10s/5s); their
+   embedded script still uses save-before-key/model and `Refresh models`/`Reload
+   saved profiles`. Test timeout does not cancel its 180s polling loop. The owned npm
+   process group was stopped after about60s; resulting27 cancellations are diagnostic
+   interruption, not27 product failures. A separate explicit diagnostic selection,
+   excluding identity and the related Windows-probe file, completed198 tests:
+   **191 passed,7 failed**. Save-command expects a Characters technical-name input
+   at `app/tests/save-command.dom.test.ts:200`; smoke code expects `Add Appearance`
+   directly after Characters at `app/src-tauri/src/smoke_probe.js:276`; supporting
+   authoring delays the former `authoring.list` Characters path instead of the new
+   `references.list` path; selectable probe33 assumes every result detail has an
+   `After` section, failing on the current review structure. These errors leave
+   later safety assertions unexecuted. Migrate the real probes and faithful fixture
+   shapes together, preserve each original guarantee and make cancelled evaluations
+   dispose their timers. Do not remove the regressions or inflate timeouts. Frozen
+   historical-product qualification must remain explicitly separate.
+3. **P2 — Shared synthetic HTTP fixture still requires thinking off.**
+   `app/scripts/macos-studio-request.py:46`, reused by the Windows request helper,
+   hardcodes `enable_thinking=False`; its seeded profile omits thinking and now
+   resolves true. A pure admission reproduction rejects the current default-on body
+   and accepts the former off body. Its unit tests duplicate the old body and pass,
+   so they cannot detect that contract drift. Bind synthetic scenarios to an explicit
+   mode and compare both real prepared bodies with admitted fixture bodies. Keep
+   intentionally frozen old-product fixtures on their own versioned contract.
+4. **P2 — Packaged runtime gates accept the wrong scenario report.**
+   `run-runtime-ui-probes.py:84`, `check-q1-prep-gates.py:35` and the package retainer
+   check generic success/cleanup but never bind the inner report's case to the
+   requested case. Pure receipt reproduction: six successful inner `compile` reports
+   under six outer case names pass `runtime_cases_ok`. Require the matching inner
+   case and the scenario's terminal evidence, with wrong/missing/duplicate-case
+   rejection fixtures. Existing Q1 self-tests currently accept missing inner case.
+5. **P2 — Thinking/connection screenshots do not show the changed controls.**
+   `app/tests/walkthrough-redesign.browser.mjs:153` scrolls to Model loading before
+   the screenshot, then checks only the Save button's visibility. The retained
+   wide/compact captures omit Thinking, response length, key entry and Connect.
+   State/order assertions run, but obscured or inaccessible changed controls can
+   still pass this visual gate. Capture and hit-test the new connection sequence and
+   generation controls in both themes/sizes; keep model-loading captures separately.
+6. **P2 — Compiled test binaries disappear from failed evidence.**
+   `.github/workflows/thinking-settings.yml:99` copies both binaries only after all
+   selected tests finish. `set -e` bypasses that copy on the observed Windows failure,
+   although both compiler-artifact streams prove compilation succeeded. Move bounded
+   binary/identity retention immediately after successful compilation or into an
+   always-running collector; preserve partial-failure state and scan before upload.
+
+Additional portability findings: Python3.12 harness discovery ran175 cases:
+171 passed,1 failed,1 errored,2 explicitly Windows-only skips. The failed Windows
+npm-hook test compares an unresolved `/var` temporary path with the helper's canonical
+path; the other mock patches absent `ctypes.WinDLL` on Mac without `create=True` or
+an explicit target restriction. System Python3.9 first failed importing `tomllib` in
+two modules; that environment result is retained and not treated as a product defect.
+Use/document Python>=3.11 for these helpers, fix portable fixture assumptions or mark
+the actual target requirement, and keep native Windows cases on Windows.
+
+Independent checks: all-workflow actionlint passed; Q1 rejecting self-test/source
+audit, nine package-retention fixtures and repository validation606 passed. The full
+Mac desktop suite initially failed13 cases because sandboxed loopback bind was
+denied; the same36 cases passed with fixture-listener access. The denied run and
+poisoned-fixture consequences remain classified as environment/harness evidence,
+not application network defects. No broad renderer or all-harness pass is claimed.
+Evidence lives under the existing ignored `thinking-toggle-2026-10-16` directory in
+`harness-*-review*` logs. App/workflow source remains exactlyc6cd017.
+
+Next implementation work must repair the selected test isolation and missing/misleading
+proof before consuming focused paired attempt2/2. The broader stale probes and gate
+findings are recorded for an explicit repair selection; this review does not reopen
+historical native budgets. Native unlock/protected-draft decision remains unresolved.
+Cumulative counts remain packages1/2, native launches0/2, generations0/4,
+reserved output0/65536, cached loads0/1 and paired CI1/2. No merge/release.
+
+### Harness repair and second review — 2026-10-16
+
+User authorised “Fix, review your work again for new issues the run ci”. Repaired all
+six recorded findings: shared Windows Settings fixture ownership; current reference,
+Save and native Settings probe flows; explicit shared thinking-on/off wire bodies
+checked against real Rust request preparation; scenario-bound terminal runtime gates;
+visible Thinking/connection captures; and failure-independent compiled-binary retention.
+The CI route now runs the complete renderer suite, Python harness fixtures, rejecting
+Q1/source/retention gates, affected core request/profile scopes and the full desktop
+unit binary on both hosts. Failure evidence is separately sealed and privacy-scanned;
+positive qualification requires exact candidate sources and both retained binaries.
+
+Second review caught a hidden-stage button lookup regression, then verified the visible
+confirmation preference with a hidden unique-action fallback. Further rejecting tests
+cover broken compiler streams retaining the other binary, explicit repository source
+seals, changed retained binary bytes and failed/partial renderer/Cargo summaries.
+The Mac identity probe keeps its historical2/2/4/0 request allowance by counting draft
+Connect within each phase. Historical Windows credential-store/reload-fault contracts
+remain frozen: their runner now refuses current probe contract2 before build/launch.
+The migrated contract2 DOM scenarios are preparation, not current native Windows proof.
+No historical credential/SDK/package acceptance was replayed or allowance renewed.
+
+Final local proof: full renderer208/208 with zero skips/cancellations; Python184 total,
+182 passed and2 explicit Windows-only skips; Mac desktop36 and transport8 passed;
+Q1 rejecting/source checks and10 package-retention fixtures passed. The sixteen Settings
+section captures cover wide/compact and both themes, with hit-tested changed controls;
+four migrated Studio Settings browser captures also passed. Renderer build, actionlint,
+repository validation and diff checks passed. Public fixtures contain no real service
+content. Intermediate failures remain in ignored repair logs, including the button
+lookup regression, stale fixture assumptions, and the new guard's initially omitted
+Python import/mock seams; each was corrected and the affected full suite rerun.
+
+The user's response is “I’ll unlock the Mac and close Loomlight myself”. Leave that
+window to them; verify session state before any later native launch. Package1 is now
+stale for changed application inputs. A fresh signed package and the original isolated
+native/full Studio flow remain pending. Native launches0/2, generations0/4, output0/65536,
+cached loads0/1 and packages1/2 are unchanged. Reserve paired CI2/2 before dispatch;
+retain the first failed run/audit and use manual same-thread resume after confirmation.
+No merge/release or real model operation occurred during this repair.
+
+### Repaired paired CI2 confirmed — 2026-10-16
+
+Published reviewed repair `e6e5082e2f829c4bc6435b41f100481e0f70e1ab` on the existing branch. Thirty-nine in-scope
+application/harness/workflow/technical-document files are committed; unrelated
+walkthrough/design and the live task/status notes remain local. A fresh checkout
+passed the source seal. The existing working copy correctly refused its two cached
+LF PowerShell files against the declared CRLF checkout; no source mismatch was ignored
+or normalised by the gate. Both receipts are retained.
+
+Reserved cumulative paired CI2/2 before one dispatch through quality workflow354880113;
+only thinking_settings is selected, ordinal2, all other routes false. Confirmed
+[run38850950449](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38850950449), run attempt1, exact repaired SHA, created2026-10-16T04:30:14Z.
+Initial observed state: in_progress. The ignored ci-02-initial.json and qualification
+ledger retain selected job identities and the prior failed CI1 audit/history.
+This is awaiting_ci, not a pass: terminal tests, artifacts/digests/manifests, source
+identity and actual retained binaries still need audit on manual same-thread resume.
+No polling/watcher is active. Return here with “Audit the recorded CI and continue”.
+
+Packages1/2 (first stale), launches0/2, generations0/4, output0/65536 and loads0/1
+remain unchanged; CI2/2 leaves no automatic third attempt. A matching fresh signed
+package and observed user close/unlock still precede isolated native/full Studio proof.
+No signing/credential-policy change, historical native replay, merge or release.
+
+### CI2 terminal diagnosis and proposed correction — 2026-10-16
+
+User reported the second failure and requested the cause and a credible plan before
+another run. No retry, source repair, package/native action or model request was selected
+or performed in this diagnosis. CI2/2 is exhausted; no third dispatch is authorised.
+
+Run38850950449 attempt1 on exacte6e5082 finished failed2026-10-16T04:34:49Z.
+Mac job116811812453 passed the whole selected job: renderer208, Python182 passed/2
+explicit Windows-only skips,73 Rust cases across selected core scopes/full desktop,
+Q1/retention/browser/source/binary gates. Windows job116811813446 passed renderer208,
+typecheck/build, sixteen Settings captures and both test-binary compilations, then
+Python188 cases produced182 passes,5 errors and1 failure. No Windows Rust case or
+later Q1 gate executed because the single shell step stopped at Python failure.
+Do not treat the previously failing Windows Settings case as fixed by this run.
+
+Exact causes, all harness defects:
+- Four Mac development-credential snapshot/permission tests invoke POSIX os.getuid,
+  unavailable on Windows. The full Python discovery was broadened without marking
+  their platform requirement. Preserve real Mac ownership/mode checks; do not weaken
+  production helpers to accommodate the wrong test host.
+- The Mac-only unused-fixture cleanup test assumes os.kill(pid,0) yields Unix
+  ProcessLookupError for a nonexistent PID. Windows returned WinError87. Keep native
+  process semantics on their host, or mock the process-absence seam for portable
+  cleanup-logic unit proof.
+- The mocked failed-build test requires endedMonotonic > startedMonotonic. Both
+  values were592.109; a fast mocked operation can finish in one clock tick. The exact
+  failure was reproduced on Mac with a fixed clock, retained in
+  ci-02-clock-reproduction.log. Use a controlled advancing clock to assert exact
+  receipt timing; retain failed-publication, PID proof and no-redispatch assertions.
+
+Both archive digests and all34 Windows/51 Mac manifest entries verified. Each host's
+351 material source inputs matched Git checkout bytes; both actual retained binaries
+matched receipt bytes/hash/header. Artifact IDs12025516827 Windows
+(67e8e06421087447b087fd6d6195744b992728577d872ca0943d6c6b2052f26b)
+and12025985072 Mac
+(7ac3f661a4a49d3ec8fa3fe81d0bc35d1a3e4ac9a0b751d0e44f687053f49ed6)
+remain in ignored ci-02 archives/directories. The repaired failure retention worked.
+ci-02-audit.json retains the case/file/source/binary inventory. This failure does not
+establish a Thinking toggle or model-generation defect.
+
+Proposed correction, not yet implemented/dispatched: explicitly route only POSIX/Mac
+filesystem cases to Mac while keeping shared policy tests on both hosts; inject process
+absence and deterministic clock data in unit fixtures; add rejecting host-selection/count
+checks so a broad skip cannot pass. Split independent workflow groups into named steps,
+retain failures as blocking, and continue independent Python/Q1/core/desktop checks after
+another test group fails when their compilation/setup prerequisites succeeded. Print a
+failure summary rather than leaving the assertion only inside an artifact. Reproduce
+every observed failure before its fix, run affected/full portable checks, then obtain
+actual Windows validation of the corrected Python selection and the currently unrun
+Rust tests before claiming Windows readiness. A Mac pass cannot supply that evidence.
+A new bounded verification allowance/selection is required before any external retry;
+do not install remote access or assume an available Windows execution channel.
+
+All application/test sources remain published e6e5082. These diagnosis/status records
+are local, alongside preserved unrelated walkthrough notes. Native/full Studio proof
+still needs a fresh matching signed package and observed user unlock/close. Packages1/2,
+launches0/2, live0/4, output0/65536 and model loads0/1 remain unchanged. No merge/release.
 
 ### Authorised portability correction and one independent-step CI run — 2026-10-16
 
@@ -249,6 +487,114 @@ outcome still needs a fresh matching signed package and the isolated native/real
 Studio workflow. Existing package1/2 is stale. Verify the user's own window close/unlock
 before launch; preserve launches0/2, live0/4, output0/65536 and model loads0/1.
 No further CI run, merge or release is selected.
+
+## Beck and Henry scene comparison — 2026-10-16
+
+User requests a new synthetic test: Beck23, university science postgraduate, secret
+crush on Henry expressed as frustrated flirting; bar conversation where Henry hints
+that he likes her. User explicitly selected **Compare both modes**. Retained the
+previous context32768/output16384/default-sampling configuration; new allowance is
+exactly two generations with no retries. Henry24/fellow postgraduate is a disclosed
+synthetic assumption. No current game or native walkthrough session is reused.
+
+**Complete:** two generation attempts2/2, reserved output32768/32768, no retry. Both
+HTTP200/finish stop. The previous Mira pair remains separate and unchanged; this
+two-comparison series now totals four generation attempts and65536 reserved output
+tokens. Older phase/amendment budgets are not reset or consumed by this new selection.
+
+The ignored derivative driver prepares two approved manual cards, restores the
+production `generateCard` baseline and asks for a complete600–800-word two-person
+scene in Beck's `exampleDialogue`, preserving her other fields. Offline review proves
+only `enable_thinking` varies, with strict `loomlight_card_v1`, temperature1/top-p0.95
+and tools/streaming off. Full-body byte estimate8944 + margin895 + output16384 =26223.
+The first readiness check found no model loaded and sent no generation. One guarded
+cached load1/1 verified actual context32768/UD-Q4_K_XL; parallel4/GPU auto stayed
+identical across requests. No download, saved settings/profile write or forced reload.
+
+| Measurement | Thinking off | Thinking on |
+| --- | --- | --- |
+| Elapsed seconds | 12.57 | 29.67 |
+| Reported prompt/output/total tokens | 1807/783/2590 | 1805/4409/6214 |
+| Scene words; requested600–800 | 360; missed | 687; met |
+| Strict schema / established Beck fields | Valid / unchanged | Valid / unchanged |
+| Aggregate generated field bytes; limit10000 | 2723 | 4755 |
+| Separate reasoning field | Absent | Present;13308 characters |
+
+Final scenes were reviewed anonymously before mapping reveal. Both show frustrated
+flirting, Henry's interest and Beck hiding her crush. Thinking gives a fuller arc,
+stronger science/university texture and a dinner invitation; off leaves attraction
+unresolved. Both use familiar romance phrases and explicit emotional explanation;
+thinking overuses research metaphors and develops beyond an indirect hint. Owner
+preference is thinking for this sample, not general superiority. Latency2.36x and
+reported generated tokens5.63x; reasoning-token breakdown absent. Single stochastic
+sample per mode, no seed override, off/on order and possible warmup effects remain
+limits. No answer was truncated or rejected by the client.
+
+Ignored/local evidence: `.toolchains/beck-henry-comparison-2026-10-16/`, including
+driver, paired requests, raw responses/receipts, readiness/load/attempt ledgers,
+offline audit, blind review, analysis, complete `scene-thinking-off.txt` and
+`scene-thinking-on.txt`, and `comparison-report.txt`. Response SHA256 off
+`fc86b3e9071a6b6819d511d815208904170b02a195a5ab7fa93cde5e5abb18d0`, on
+`bd61e60f7c84cfac1c1c09a1b896a98378b43f3beab2bec0e4fb9bab0c1925fc`.
+Saved profile tokens remained unchanged. No generated proposal applied, product
+source edited, CI/package launched or commit/push performed. No further send selected.
+Status review: CURRENT484/HANDOVER1254 words; modest target excess retains the
+separate walkthrough recovery and closed amendment evidence without duplicating outputs.
+
+## User-approved thinking comparison — 2026-10-16
+
+User confirmed `unsloth/gemma-4-12B-it-qat-GGUF` and approved the proposed
+two-request synthetic Mira comparison: identical character-generator context/schema,
+thinking off versus on, context32768, maximum generation16384 per request, default
+sampling and no automatic retries. This is a separate experiment allowance, not a
+restart of the older live plan or a product thinking-control implementation.
+
+**Complete:** two generation attempts2/2, reserved response tokens32768/32768; both
+HTTP200/finish stop, no truncation/retry. Studio initially advertised the selected
+UD-Q4_K_XL model unloaded. One existing cached-model load1/1 through production
+`studio_models::ensure_ready` verified actual context32768; no download, forced
+reload, saved settings write or native app action. Observed parallel4/GPU auto stayed
+the same across both requests. Saved profile tokens were unchanged throughout.
+
+The ignored temporary driver uses production `rewrite_prepare_bound/generateCard`,
+an approved manually authored synthetic card and the restored baseline system prompt.
+Offline review verified strict `loomlight_card_v1`, temperature1/top-p0.95,
+tools/streaming off and only `enable_thinking` differing. Full-body byte estimate7600
++ margin760 + response16384 =24744 <=32768. The initial offline fixture lacked
+required card metadata; correcting only the temporary driver resolved preparation
+before any generation. A sandboxed read-only preflight could not connect; the
+permitted network preflight established unloaded state. Neither failure generated text.
+
+| Measurement | Thinking off | Thinking on |
+| --- | --- | --- |
+| Elapsed seconds | 11.03 | 23.51 |
+| Reported prompt/output/total tokens | 1479/435/1914 | 1477/4286/5763 |
+| Dialogue words; requested180–250 | 154; missed | 193; met |
+| Strict schema / established card fields | Valid / unchanged | Valid / unchanged |
+| Aggregate generated field bytes; limit10000 | 1553 | 1735 |
+| Separate reasoning field | Absent | Present;11802 characters |
+
+Reasoning-token counts were absent, not zero. Both answers preserved uncertainty
+about the signal/train safety but missed that23:55 on a clock five minutes slow means
+midnight now. Thinking more clearly refused waiting beyond departure; non-thinking
+ended with maintain-position language. Both sounded formal/procedural and missed the
+requested short distinctive voice. Final dialogue was reviewed as anonymous A/B before
+mapping reveal. This pair shows modest compliance/urgency improvement at2.13x latency
+and9.85x generated tokens, not general superiority: one stochastic sample per mode,
+no seed override, sequential off/on and possible order/warmup effects.
+
+Local evidence is ignored under `.toolchains/thinking-comparison-2026-10-16/`:
+temporary driver/source, exact paired requests, response/receipt files, preflight/load
+and attempt ledgers, offline review, analysis, blind review and `comparison-report.txt`
+with full final dialogue. Response SHA256 off
+`4142ef9579aaed93adca7295049eb469cc06a362110e7078cf8cfaae219af9d8`, on
+`58906418f2682f8674cd035bc4348fbf94fe64876c607455e802e346c1e70f09`.
+Raw reasoning, private endpoint/profile references and generated outputs remain
+local-only. No proposal was applied, product source changed, CI/package launched or
+commit/push made. Older allowances and walkthrough recovery/acceptance remain intact.
+No additional generation or follow-up operation is selected.
+Status review: CURRENT478 words/HANDOVER1216 words retain the separate walkthrough
+recovery and closed amendment evidence; their modest target excess is intentional.
 
 ## Approved implementation handoff — 2026-10-15
 
