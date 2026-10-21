@@ -29,6 +29,8 @@ failures, passing local3 evidence and `reorder-keyboard-diagnostic-03.json`.
 Validation passes for793 repository files and whitespace. Final use is reorder
 local4/4. No verification or repair is pending. Earlier copy6/7, refresh5/6,
 refinement4/4 and early11/11 stay closed; no native, SDK, package or CI work is selected.
+The verified candidate is local commit `b5292b1`; the task owns its full commit,
+tree and source fingerprint. Later documentation receipts preserve that identity.
 
 Next is user review of Screen builder. Keep work local. The earlier automatic push
 review rejected publication without explicit payload/destination permission;

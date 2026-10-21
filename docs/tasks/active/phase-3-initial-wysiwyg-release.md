@@ -64,6 +64,13 @@ sibling log. Earlier failures and the keyboard diagnostic remain retained. Valid
 passes for793 repository files and whitespace. All work stays local; no design
 approval or app integration is implied.
 
+The verified candidate is local commit
+`b5292b1e7fbd11c0ac8c23b796ce5fb9d2c3f727`, tree
+`f2d327c97a488a7041548ed02a9970d7868b5aa6`. With source files clean,
+`npm run design:source` returns fingerprint
+`d0eda81a4cda53a5294ebff2c83e4274392999b15caea7b3d8185fe06f5dbd76`.
+Later documentation receipts preserve this candidate identity. No publication occurred.
+
 ## Screen builder copy and direct manipulation — 2026-10-21
 
 State `review_ready`. The user prefers Screen builder and requested first-use copy
