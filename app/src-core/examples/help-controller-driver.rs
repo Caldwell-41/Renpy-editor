@@ -10,6 +10,8 @@ fn main() {
     let mut service = LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap();
     let game = root.join("synthetic-project");
     fs::create_dir(game.join("game/ui")).unwrap();
+    fs::write(game.join("game/ui/a_styles.rpy"), "style help_label:\n    color \"#ffffff\"\n").unwrap();
+    fs::write(game.join("game/ui/z_compare.rpy"), "screen flow_help():\n    frame:\n        xsize 720\n        ysize 360\n        xalign 0.5\n        yalign 0.5\n        text \"Your next stop\"\n").unwrap();
     fs::write(game.join("game/ui/help.rpy"), format!("\u{feff}{}", include_str!("../../../tests/fixtures/phase-3b-screens/help.rpy").replace('\n', "\r\n"))).unwrap();
     fs::write(game.join("game/help.png"), include_bytes!("../../../tests/fixtures/phase-1h/assets/booth.png")).unwrap();
     service.close().unwrap();

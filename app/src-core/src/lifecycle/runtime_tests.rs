@@ -1065,6 +1065,35 @@ fn runtime_diagnostics_sdk_gate() {
 }
 
 #[test]
+fn help_preview_gate_rejects_runtime_error_after_cleanup() {
+    let status = json!({"phase":"cancelled","exitCode":null,"cleanupComplete":true,"outputTruncated":false,
+        "output":"While running game code:\nAttributeError: 'Layout' object has no attribute 'yesno_prompt'"});
+    let diagnostics = json!({"diagnostics":[{"origin":"runtime","severity":"error","message":"AttributeError"}]});
+    assert!(!help_preview_terminal_clean("run", &status, &diagnostics));
+    let empty = json!({"diagnostics":[]});
+    assert!(!help_preview_terminal_clean("run", &status, &empty), "raw error alone rejects");
+    let mut clean = status.clone(); clean["output"] = json!("HELP_SCRATCH_GEOMETRY {}");
+    assert!(!help_preview_terminal_clean("run", &clean, &diagnostics), "diagnostic alone rejects");
+    assert!(help_preview_terminal_clean("run", &clean, &empty));
+    for (key, value) in [("cleanupComplete",json!(false)),("outputTruncated",json!(true)),("phase",json!("failed")),("exitCode",json!(1))] {
+        let mut failed = clean.clone(); failed[key] = value;
+        assert!(!help_preview_terminal_clean("run", &failed, &empty), "{key}");
+    }
+    assert!(!help_preview_terminal_clean("run", &clean, &json!({})), "missing diagnostics fail closed");
+    clean["phase"] = json!("exited"); clean["exitCode"] = json!(0);
+    assert!(help_preview_terminal_clean("validate", &clean, &empty));
+}
+
+fn help_preview_terminal_clean(kind: &str, status: &Value, diagnostics: &Value) -> bool {
+    let output = status["output"].as_str().unwrap_or_default();
+    status["cleanupComplete"] == true && status["outputTruncated"] == false
+        && if kind == "validate" { status["phase"] == "exited" && status["exitCode"] == 0 }
+           else { status["phase"] == "cancelled" && (status["exitCode"].is_null() || status["exitCode"] == 0) }
+        && !["Traceback (most recent call last):", "While running game code:", "Error:", "Exception:"].iter().any(|marker| output.contains(marker))
+        && diagnostics["diagnostics"].as_array().is_some_and(|records| records.iter().all(|d| d["severity"] != "error"))
+}
+
+#[test]
 #[ignore = "selected Help preview SDK gate; requires renderer-accepted source and pinned official archive"]
 fn help_scratch_preview_sdk_geometry_revision_and_cleanup() {
     use sha2::{Digest, Sha256};
@@ -1082,17 +1111,8 @@ fn help_scratch_preview_sdk_geometry_revision_and_cleanup() {
         fs::create_dir(root.join("game/ui")).unwrap();
         fs::write(root.join("game/ui/help.rpy"), &accepted).unwrap();
         fs::write(root.join("game/help.png"), include_bytes!("../../../../tests/fixtures/phase-1h/assets/booth.png")).unwrap();
-        fs::write(root.join("game/options.rpy"),format!("define config.name = \"Help runtime fixture\"\ndefine config.screen_width = {width}\ndefine config.screen_height = {height}\ndefine config.save_directory = None\n")).unwrap();
-        fs::write(root.join("game/geometry_probe.rpy"),r#"init python:
-    def loomlight_measure_help():
-        d = renpy.get_displayable("loomlight_help", "help_panel")
-        if d is not None:
-            s = renpy.render(d, config.screen_width, config.screen_height, 0, 0).get_size()
-            print("HELP_SCRATCH_GEOMETRY " + __import__("json").dumps(dict(size=list(s), aspect=[config.screen_width, config.screen_height], menu=main_menu)), flush=True)
-    config.overlay_screens.append("loomlight_geometry_probe")
-screen loomlight_geometry_probe():
-    timer 0.2 repeat True action Function(loomlight_measure_help)
-"#).unwrap();
+        fs::write(root.join("game/options.rpy"), super::runtime_probe::help_probe_options(width, height)).unwrap();
+        fs::write(root.join("game/geometry_probe.rpy"), super::runtime_probe::HELP_GEOMETRY_PROBE).unwrap();
         let profile = temp.path().join(format!("profile-{index}"));
         let mut service = LifecycleService::new(profile.clone()).unwrap();
         let sdk_id = service.remember_sdk(sdk.clone(),"verified-official-fixture").id;
@@ -1136,6 +1156,9 @@ screen loomlight_geometry_probe():
                 call(&mut service,&session,"runtime.stop",json!({"operationId":operation}));
                 wait_for(|| { observed=call(&mut service,&session,"runtime.status",status_payload.clone()); observed["cleanupComplete"]==true },10);
             }
+            let diagnostics = call(&mut service,&session,"runtime.diagnostics",json!({"operationId":operation}));
+            fs::write(output.join(format!("aspect-{index}-{kind}-terminal.json")),serde_json::to_vec_pretty(&json!({"status":observed,"diagnostics":diagnostics})).unwrap()).unwrap();
+            assert!(help_preview_terminal_clean(kind,&observed,&diagnostics),"unclean Help preview: {observed}\n{diagnostics}");
             assert_eq!(fs::read_dir(&profile).unwrap().filter_map(Result::ok).filter(|e|e.file_name().to_string_lossy().starts_with("scratch-preview-")).count(),0,"owned scratch jobs cleaned after process reap");
             assert!(!root.join("game/saves").exists()); assert!(!root.join("game/ui/help.rpyc").exists());
             aspect_receipts.push(json!({"kind":kind,"preparation":preparation,"terminal":observed}));

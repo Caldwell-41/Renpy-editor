@@ -3,6 +3,20 @@ use super::*;
 use serde_json::json;
 
 impl LifecycleService {
+    /// Explicit disposable Help case. Only the packaged probe can seed this fixture.
+    pub fn prepare_help_screen_probe(data: PathBuf, archive: &Path) -> Result<Self, String> {
+        let mut service = Self::prepare_source_foundation_probe(data)?;
+        let root = service.data_root.join("synthetic-project");
+        fs::create_dir(root.join("game/ui")).map_err(|e| e.to_string())?;
+        fs::write(root.join("game/ui/a_styles.rpy"), "style help_label:\n    color \"#ffffff\"\n").map_err(|e| e.to_string())?;
+        fs::write(root.join("game/ui/help.rpy"), format!("\u{feff}{}", include_str!("../../../../tests/fixtures/phase-3b-screens/help.rpy").replace('\n', "\r\n"))).map_err(|e| e.to_string())?;
+        fs::write(root.join("game/help.png"), include_bytes!("../../../../tests/fixtures/phase-1h/assets/booth.png")).map_err(|e| e.to_string())?;
+        fs::write(root.join("game/options.rpy"), help_probe_options(1280, 720)).map_err(|e| e.to_string())?;
+        fs::write(root.join("game/geometry_probe.rpy"), HELP_GEOMETRY_PROBE).map_err(|e| e.to_string())?;
+        let sdk = crate::renpy::install_supported_sdk_from_archive(&service.data_root, archive).map_err(|e| format!("Help probe SDK: {e:?}"))?;
+        service.remember_sdk(sdk, "verified-official-help-fixture");
+        Ok(service)
+    }
     /// One Scene, no SDK execution. Uses ordinary service authoring and Source Save.
     pub fn prepare_source_foundation_probe(data: PathBuf) -> Result<Self, String> {
         let mut service = Self::new(data).map_err(|e| format!("probe state: {e:?}"))?;
@@ -330,6 +344,21 @@ label oracle_hold:
         Ok(service)
     }
 }
+
+pub(super) fn help_probe_options(width: u32, height: u32) -> String {
+    format!("define config.name = \"Help runtime fixture\"\ndefine config.sound = False\ndefine config.developer = False\ndefine config.screen_width = {width}\ndefine config.screen_height = {height}\ndefine config.save_directory = None\n# The minimal fixture has no confirmation screen.\ndefine config.quit_action = Quit(confirm=False)\n")
+}
+
+pub(super) const HELP_GEOMETRY_PROBE: &str = r#"init python:
+    def loomlight_measure_help():
+        d = renpy.get_displayable("loomlight_help", "help_panel")
+        if d is not None:
+            s = renpy.render(d, config.screen_width, config.screen_height, 0, 0).get_size()
+            print("HELP_SCRATCH_GEOMETRY " + __import__("json").dumps(dict(size=list(s), aspect=[config.screen_width, config.screen_height], menu=main_menu)), flush=True)
+    config.overlay_screens.append("loomlight_geometry_probe")
+screen loomlight_geometry_probe():
+    timer 0.2 repeat True action Function(loomlight_measure_help)
+"#;
 
 #[cfg(test)]
 mod branches_tests {

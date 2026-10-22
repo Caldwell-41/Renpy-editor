@@ -71,13 +71,13 @@ export class ScreensWorkspace {
     }
     this.rail.ariaLabel = "Screen building steps";
     const caption = el("div", "screen-canvas-tools");
-    caption.append(el("span", "", `${actions.resolution.width} × ${actions.resolution.height} game pixels`), el("span", "muted", "Fit · schematic preview"));
+    caption.append(el("h2", "", "Game preview"), el("span", "", `${actions.resolution.width} × ${actions.resolution.height}`), el("span", "muted", "Fit · schematic"));
     const viewport = el("div", "screen-viewport"); viewport.append(this.canvas);
     this.stage.ariaLabel = "Screen canvas"; this.stage.append(caption, viewport,
       el("p", "muted", "Canvas controls select elements. Ren'Py determines fonts, styling, actions and unsupported layout."));
     const workspace = el("div", "screen-flow"); workspace.append(this.rail, this.stage, this.card);
     this.message.role = "status"; this.message.ariaLive = "polite";
-    this.panel.append(heading, picker, limits, workspace, this.message);
+    this.panel.append(heading, picker, workspace, limits, this.message);
     this.panel.addEventListener("keydown", event => {
       if (event.key === "Escape") { if (this.resize) this.cancelResize(); else this.cancel(); event.stopPropagation(); }
     });
@@ -102,7 +102,9 @@ export class ScreensWorkspace {
         documents.push(await this.actions.request<ScreenDocument>("screens.inspect", { path: file.path }));
       }
       if (!this.current() || sequence !== this.loadSequence) return;
-      const path = this.doc?.path; this.documents = documents; this.doc = documents.find(d => d.path === path) ?? documents[0];
+      const path = this.doc?.path; this.documents = documents;
+      const supported = documents.filter(d => d.screens.length > 0);
+      this.doc = supported.find(d => d.path === path) ?? supported[0];
       if (!this.doc?.screens.some(s => s.name === this.screen)) this.screen = this.doc?.screens[0]?.name ?? "";
       this.selected = Math.min(this.selected, Math.max(0, this.nodes().length - 1));
       this.selection.replaceChildren();
@@ -150,20 +152,31 @@ export class ScreensWorkspace {
         const fields = el("div", "screen-size-fields");
         for (const [label, key, property] of [["Width", "width", "xsize"], ["Height", "height", "ysize"]] as const) {
           const input = el("input"); input.type = "number"; input.min = "1"; input.max = "16384"; input.step = "1";
-          input.ariaLabel = label; input.value = draft?.[key] ?? String(size(node, property)); input.disabled = this.busy;
+          input.ariaLabel = label; input.dataset.size = key; input.value = draft?.[key] ?? String(size(node, property)); input.readOnly = this.busy;
           const field = el("label", "", `${label} (px)`); field.append(input); fields.append(field);
-          input.oninput = () => { const value = this.ensureDraft(); value[key] = input.value; this.renderCanvas(); };
+          input.oninput = () => { if (this.busy) return; const value = this.ensureDraft(); value[key] = input.value; this.renderCanvas(); };
           input.onkeydown = event => { if (event.key === "Enter") { event.preventDefault(); void this.apply(); } };
         }
         const actions = el("div", "screen-edit-actions");
-        const apply = button("Apply changes", () => void this.apply(), "button primary"); apply.disabled = this.busy;
-        const cancel = button("Cancel changes", () => this.cancel()); cancel.disabled = this.busy;
+        const apply = button("Apply changes", () => void this.apply(), "button primary"); apply.ariaDisabled = String(this.busy);
+        const cancel = button("Cancel changes", () => this.cancel()); cancel.ariaDisabled = String(this.busy);
         actions.append(apply, cancel); details.append(fields, actions, el("p", "muted", "Whole numbers from 1 to 16384. Use arrows for one pixel; Shift + arrows on the resize handle changes eight pixels."));
       } else details.append(el("p", "muted", "This node needs existing literal xsize and ysize to resize. Other properties remain editable in Source."));
       this.card.append(details);
     }
     this.card.append(el("p", "muted screen-coverage", this.doc?.partial ? "Partial coverage. Custom Python, actions, styling and unsupported regions are preserved in Source." : "Only existing literal dimensions can change here."));
     this.card.scrollTop = scroll;
+  }
+  private updateSizeControls(): void {
+    const node = this.nodes()[this.selected], draft = this.draft();
+    for (const input of this.card.querySelectorAll<HTMLInputElement>("input[data-size]")) {
+      const key = input.dataset.size as "width" | "height";
+      const value = draft?.[key] ?? String(size(node, key === "width" ? "xsize" : "ysize"));
+      if (input.value !== value) input.value = value;
+      input.readOnly = this.busy;
+    }
+    this.card.ariaBusy = String(this.busy);
+    this.card.querySelectorAll<HTMLButtonElement>(".screen-edit-actions button").forEach(b => b.ariaDisabled = String(this.busy));
   }
   private ensureDraft(): Draft {
     let draft = this.draft();
@@ -172,12 +185,12 @@ export class ScreensWorkspace {
   }
   private cancel(): void {
     if (this.busy) { this.note("The edit is being accepted. Input retained until its result arrives."); return; }
-    this.drafts.delete(this.key()); this.render(); this.note("Changes cancelled. No source was written.");
+    this.drafts.delete(this.key()); this.updateSizeControls(); this.renderCanvas(); this.note("Changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
     const draft = this.draft(); if (!draft || this.busy) return;
     if (![draft.width, draft.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384)) { this.note("Enter whole numbers from 1 to 16384. Input retained.", true); return; }
-    const key = this.key(); this.busy = true; this.loadSequence++; this.renderCard();
+    const key = this.key(); this.busy = true; this.loadSequence++; this.updateSizeControls();
     try {
       const document = await this.actions.coordinate(() => this.actions.request<ScreenDocument>("screens.setSize", {
         path: draft.document.path, expectedRevision: draft.document.revision, screenName: draft.screen,
@@ -193,7 +206,7 @@ export class ScreensWorkspace {
       this.busy = false;
       if (this.current()) {
         const resizeFocused = document.activeElement?.classList.contains("screen-resize");
-        this.render();
+        this.updateSizeControls(); this.renderCanvas();
         if (resizeFocused) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
       }
     }

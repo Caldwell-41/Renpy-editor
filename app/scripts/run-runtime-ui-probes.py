@@ -73,6 +73,23 @@ for case in cases:
             # Resolve and verify containment before recursive cleanup.
             assert profile.resolve().parent == profile.parent.resolve()
             shutil.rmtree(profile)
+    help_disk = None
+    if case == "help-screen":
+        profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-help-screen"
+        if profile.exists():
+            assert not profile.is_symlink() and profile.resolve().parent == profile.parent.resolve()
+            project = profile / "synthetic-project"
+            source = project / "game/ui/help.rpy"
+            original = (Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/help.rpy").read_bytes()
+            expected = b'\xef\xbb\xbf' + original.replace(b'\n', b'\r\n').replace(b'xsize 640', b'xsize 768')
+            help_disk = dict(acceptedBytesMatch=source.is_file() and source.read_bytes() == expected,
+                             scratchJobsRemaining=len(list(profile.glob("scratch-preview-*"))),
+                             sourceBytecode=list(project.glob("game/**/*.rpyc")) != [],
+                             sourceSaves=(project / "game/saves").exists())
+            (output / "help-disk.json").write_text(json.dumps(help_disk, indent=2)+"\n")
+            if source.is_file():
+                (output / "accepted-help.rpy").write_bytes(source.read_bytes())
+            shutil.rmtree(profile)
     reports = []
     for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
@@ -85,9 +102,11 @@ for case in cases:
     if case == "source-foundation":
         details = reports[0].get("details", {}) if len(reports) == 1 else {}
         passed = passed and details.get("extendedChecksComplete") is True and len(details.get("checks", [])) == 33 and (output / "external-write.json").is_file()
+    if case == "help-screen":
+        passed = passed and help_disk == dict(acceptedBytesMatch=True, scratchJobsRemaining=0, sourceBytecode=False, sourceSaves=False)
     failed |= not passed
     result = dict(case=case, passed=passed, exitCode=code, timedOut=timed_out,
-                  elapsedSeconds=round(time.monotonic()-started, 3), reports=reports, externalErrors=external_errors)
+                  elapsedSeconds=round(time.monotonic()-started, 3), reports=reports, externalErrors=external_errors, helpDisk=help_disk)
     (output / f"runtime-ui-{case}.json").write_text(json.dumps(result, indent=2)+"\n")
     print(json.dumps(result), flush=True)
 if failed:

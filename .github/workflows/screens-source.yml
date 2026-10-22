@@ -1,20 +1,28 @@
-name: Phase 3B early screen source proof
+name: Help screen production qualification
 
-# The early source-proof allowance is closed. Production Help uses an explicit
-# selected dispatch; publishing source changes must not restart this old proof.
+# The early source-proof outcome is closed. Only the selected Help outcome runs here.
 on:
   workflow_dispatch:
+    inputs:
+      candidate:
+        description: Exact reviewed Help candidate SHA
+        type: string
+        required: true
+      ordinal:
+        description: Cumulative focused both-target dispatch, 1 or 2
+        type: string
+        required: true
+        default: '1'
 
 permissions:
   contents: read
-
 concurrency:
-  group: screens-source-${{ github.ref }}
+  group: help-screen-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   focused:
-    name: Screen source (${{ matrix.target }})
+    name: Help (${{ matrix.target }})
     strategy:
       fail-fast: false
       matrix:
@@ -24,66 +32,119 @@ jobs:
           - runner: macos-26
             target: macOS ARM64
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 25
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
     env:
       CARGO_TERM_COLOR: never
+      RUSTUP_TOOLCHAIN: 1.90.0
       PYTHONUTF8: '1'
-      SCREENS_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
+      HARNESS_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Require selected branch and initial bounded attempt
-        shell: bash
+      - name: Require selected candidate and allowance
+        env:
+          CANDIDATE: ${{ inputs.candidate }}
+          ORDINAL: ${{ inputs.ordinal }}
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
           test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$ORDINAL" = 1 -o "$ORDINAL" = 2
+          test "$(git rev-parse HEAD)" = "$CANDIDATE"
+          mkdir -p "$RUNNER_TEMP/help-production"
+          git rev-parse HEAD > "$RUNNER_TEMP/help-production/candidate.txt"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         with:
-          key: phase3b-${{ matrix.runner }}
+          key: help-production-${{ matrix.runner }}
           workspaces: app -> target
           cache-bin: 'false'
-      - name: Select locked Rust
-        shell: bash
+      - name: Select pinned tools and dependencies
         run: |
           rustup toolchain install 1.90.0 --profile minimal
-          "$SCREENS_PYTHON" -m unittest discover -s app/scripts -p 'test_screens_source_evidence.py' -v
+          npm install --global npm@11.9.0
+          npm ci
+      - name: Frontend and rejecting receipt gates
+        run: |
+          npm run check
+          "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_help_screen_evidence.py' -v
+      - name: Source transactions, scratch ownership and asynchronous request boundaries
+        run: |
+          cargo test -p loomlight-core screens::tests:: --locked
+          cargo test -p loomlight-core scratch_preview::tests:: --locked
+          cargo test -p loomlight-core help_preview_gate --locked
+          cargo test -p loomlight-core runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion --locked
+          cargo build -p loomlight-core --example help-controller-driver --locked
+          cargo check -p loomlight-desktop --locked
+      - name: Real renderer and core; rehearse native controller with a runtime test double
+        env:
+          HELP_SCREEN_OUTPUT: ${{ runner.temp }}/help-production/browser
+          HELP_PROBE_CONTROLLER_OUTPUT: ${{ runner.temp }}/help-production/controller-only
+        run: |
+          node tests/help-screen.browser.mjs
+          node tests/help-probe-controller.browser.mjs
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        if: runner.os == 'Windows'
         id: sdk-cache
         with:
           path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
           key: phase-1c-renpy-${{ runner.os }}-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
-      - name: Fetch official checksum metadata and pinned SDK on cache miss
-        shell: bash
+      - name: Fetch official checksum metadata and pinned SDK
+        if: runner.os == 'Windows'
         run: |
-          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 180 \
-            --output "$RUNNER_TEMP/screen-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 180 --output "$RUNNER_TEMP/help-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
           if test '${{ steps.sdk-cache.outputs.cache-hit }}' != true; then
-            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 \
-              --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
             mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
           fi
-      - name: Exact source edit, history, conflicts and actual SDK rendering
-        shell: bash
+          "$HARNESS_PYTHON" scripts/verify-help-sdk.py "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" "$RUNNER_TEMP/help-checksums.txt"
+      - name: Use short fresh Windows scratch root
+        if: runner.os == 'Windows'
+        shell: pwsh
         env:
-          RUSTUP_TOOLCHAIN: 1.90.0
-          TEMP: ${{ runner.temp }}
-          TMP: ${{ runner.temp }}
+          ORDINAL: ${{ inputs.ordinal }}
         run: |
-          "$SCREENS_PYTHON" app/scripts/qualify-screens-source.py \
-            --archive "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" \
-            --checksums "$RUNNER_TEMP/screen-checksums.txt" \
-            --output "$RUNNER_TEMP/screens-source" --ordinal 1 --allow-fixture-execution
-      - name: Scan partial or complete proof before upload
+          $scratch = "C:\llhelp$env:ORDINAL"
+          if (Test-Path $scratch) { throw 'Help scratch root already exists' }
+          New-Item -ItemType Directory -Path $scratch | Out-Null
+          "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Two-aspect real SDK compile, lint, geometry, staleness and clean Stop
+        if: runner.os == 'Windows'
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          LOOMLIGHT_HELP_ACCEPTED: ${{ runner.temp }}/help-production/browser/accepted.rpy
+          LOOMLIGHT_HELP_SDK_EVIDENCE: ${{ runner.temp }}/help-production/sdk
+        run: cargo test -p loomlight-core help_scratch_preview_sdk_geometry_revision_and_cleanup --locked -- --ignored --nocapture
+      - name: Build one Windows package
+        if: runner.os == 'Windows'
+        run: |
+          echo 'One Windows package build reserved' > "$RUNNER_TEMP/help-production/package-reservation.txt"
+          npm exec -- tauri build --bundles nsis -- --locked
+      - name: One native WebView to SDK Help round trip
+        if: runner.os == 'Windows'
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+        run: |
+          echo 'One app launch and one preview reserved' > "$RUNNER_TEMP/help-production/native-reservation.txt"
+          "$HARNESS_PYTHON" scripts/run-runtime-ui-probes.py target/release/loomlight.exe "$RUNNER_TEMP/help-production/native" help-screen
+      - name: Scan complete or partial public fixture evidence
         id: privacy
         if: always()
-        shell: bash
         run: |
-          mkdir -p "$RUNNER_TEMP/screens-source"
-          node app/scripts/scan-artifacts.mjs "$RUNNER_TEMP/screens-source"
-      - name: Retain partial or complete proof
+          mkdir -p "$RUNNER_TEMP/help-production"
+          node scripts/scan-artifacts.mjs "$RUNNER_TEMP/help-production"
+      - name: Retain evidence
         if: ${{ always() && steps.privacy.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: screens-source-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/screens-source/
-          if-no-files-found: warn
+          name: help-production-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/help-production/
+          if-no-files-found: error
           retention-days: 7
