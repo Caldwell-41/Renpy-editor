@@ -113,19 +113,56 @@ through the lane, retries only pre-dispatch read refusals, and stops detached
 Screens polling. Remount validates a fresh frame. Held-owner and detached-workspace
 regressions fail before the correction and pass after it. The workflow always
 runs a cheap selector validator and rejects both booleans together. No baseline
-smell findings were reported. Correction review remains pending.
+smell findings were reported. Follow-up review confirms both fixes, with zero unresolved/new Standards findings.
 
 Spec found three incomplete requirements: matched both-target rendering, native
 responsiveness/startup/focus evidence, and element dragging. These remain explicit
 acceptance gaps. No additional wrong implementation or scope creep was reported.
 
-Native package results and final candidate identity will be recorded before closeout.
+## Mac package and locked-session result
+
+Signed Mac ARM64 package 1 was built from product candidate `8c21b7b`. It passes
+strict signature, approved certificate-backed requirement and installer-content
+verification. Its executable SHA-256 is
+`0727e29b7b9281ec706fab5dfeb1600e9a9c68df15b9884aa80ac087258587c4`; installer SHA-256
+is `05779f6325fe40ea2571e1788f8f90dac90ae9f0b3461a8b05a7c81d85f7629b`.
+
+`mac-native-01` failed its native watchdog after 319.13 seconds. Computer Use
+reported that the Mac was locked and automatic unlock failed. The probe reached
+the helper but returned no completed UI-stage receipt. Do not infer a functional
+or focus pass. The app exited 1; all cleanup owners report true. Disk checks pass
+accepted-source equality, zero scratch/helper jobs, no source bytecode and no saves.
+The fixture profile was removed. OS focus, physical input and presentation remain
+blocked by the locked session.
+
+Inspection of the live private helper log exposed a separate adapter fault.
+Ren'Py's `script.make_backups()` backed up the generated renderer outside its
+private profile. The helper now sets the pinned SDK's exact `RENPY_DISABLE_BACKUPS`
+opt-out. Deliberate project runtime backups are unchanged. Nine generated helper
+backup entries were verified by namespace, single renderer file, trusted source
+marker and retained SHA-256, then removed; unrelated backups were preserved.
+`backup-inventory-28.json` and `backup-cleanup-28.json` retain that accounting.
+
+The final allowed Mac SDK process, `helper-isolation-28`, passes actual helper
+rendering at both aspects and project-close cleanup on the fixed adapter. A new
+backup-log regression assertion was placed in that selected SDK test after its
+binary compiled, so that assertion is compiled by portable checks but is not
+claimed as executed evidence. No new generated helper backup appeared. The
+native package above predates this environment fix; its failed launch is retained,
+not reassigned to the corrected source.
+
+Final frontend typecheck/build and all 226 tests pass in `frontend-final-26`.
+A repeated missing harness-Python selection in `frontend-full-25` reproduced the
+same Python 3.9 host failure; the final run explicitly selects Python 3.12.
+`browser-release-25` passes all six groups after the contention fix. It reports
+894.2 ms click-to-first-decoded-PNG startup, 63.5 ms warm image-load p95 and
+149.7 ms completed-capture p95. These remain diagnostic measurements.
 Windows CI is prepared but remains undispatched because this selection authorizes
 a local commit and has no push authorization.
 
 The mandatory outstanding gates include matching drawable-scale fidelity, native
 input-to-visible timing on both targets, OS focus/window observation, startup
-measurement, dragging beyond resizing and Windows native/SDK qualification. DOM
+qualification, dragging beyond resizing and Windows native/SDK qualification. DOM
 focus, image load, render timers and screenshot completion do not substitute for
 native presentation or physical input. Startup has no accepted limit yet. Any
 failure returns to decision review before broader renderer implementation or a

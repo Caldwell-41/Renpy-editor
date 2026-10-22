@@ -151,6 +151,13 @@ fn canvas_helper_sdk_renders_saved_data_and_stops_on_project_close() {
             fs::write(output.join(format!("helper-{width}x{height}.json")),serde_json::to_vec_pretty(&ready).unwrap()).unwrap();
         }
     }
+    let helper = profile.read_dir().unwrap().map(|entry|entry.unwrap().path())
+        .find(|path|path.file_name().unwrap().to_string_lossy().starts_with("canvas-helper-")).unwrap();
+    let log = fs::read_to_string(helper.join("log.txt")).unwrap();
+    assert!(!log.contains("Backing up script files to"),"Generated helper code must not be backed up outside its private directory");
+    if let Some(output)=std::env::var_os("LOOMLIGHT_CANVAS_EVIDENCE") {
+        fs::write(std::path::PathBuf::from(output).join("helper-log.txt"),&log).unwrap();
+    }
     service.close().unwrap();
     assert!(!profile.read_dir().unwrap().any(|entry|entry.unwrap().file_name().to_string_lossy().starts_with("canvas-helper-")));
 }

@@ -39,6 +39,7 @@ impl HelperProcess {
             .env("SDL_AUDIODRIVER", "dummy")
             .env("RENPY_RENDERER", "sw")
             .env("RENPY_DISABLE_SOUND", "1")
+            .env("RENPY_DISABLE_BACKUPS", "I take responsibility for this.")
             .env("RENPY_SKIP_MAIN_MENU", "1")
             .env("RENPY_SKIP_SPLASHSCREEN", "1");
         let observation = Arc::new(Mutex::new(Observation {
