@@ -312,3 +312,78 @@ proof to decision review before broader renderer work or weaker gates. No PR,
 merge or release is selected. Unrelated parallel-policy edits and protected native
 recovery remain separate. CURRENT/HANDOVER retain older unique recovery and
 pending phase acceptance, so their overall sizes exceed their review targets.
+
+## CI2 terminal audit and Windows reader correction
+
+The ci-watch completion event resumed the original chat. Its thread/run/SHA match
+and delivery receipt are verified. GitHub confirms run 39841877779, attempt 1,
+exact head `63a1b037d11054246a019c2e5bb515217111a7c6`, completed with failure at
+2026-10-22 19:48:24 UTC. Later `38b5992` and `b0dbd80` only add local driver-build
+admission and records, so the result applies to the current product code.
+
+The selector, pinned portable checks and official SDK checksum pass. Portable
+Screens results are 14 passed and one selected SDK test ignored. The production
+browser starts one helper and captures its initial 1280x720 frame. Startup
+image-load time is 3,112 ms, diagnostic only. The next provisional width request
+never returns a current frame. The helper traceback records `PermissionError`
+opening its fixed `request.json` input while the Rust publisher replaces that
+file. The UI reports unavailable and retains drafts. This is a Windows product
+file-sharing defect. No new timeout or performance explanation is inferred.
+
+The exact-controller rehearsal and Help regression in that step did not run.
+Deliberate reference, package, native and package-identity steps were skipped.
+Privacy scan and artifact upload pass. The browser driver exits zero after its
+asserted host shutdown and root removal. There is no separate native cleanup
+receipt because no native launch occurred. Windows actual use from CI2 is one
+SDK process, zero packages and zero native launches; CI1 had zero of those.
+Both dispatches remain charged and neither is passing qualification.
+
+Artifact 12453951681 contains ten public-fixture evidence files. Its retained ZIP
+SHA-256, GitHub metadata and upload log agree on
+`eb6b0827bc263d4927cfff84f6478e832c8c2ada2a177a40d74e6f67ae296445`.
+It expires at 2026-10-29 19:48:19 UTC. The ignored `ci-02` directory retains the
+ZIP, extracted files, full log, metadata, terminal receipt and compact audit.
+An independent local privacy scan passes for all ten extracted files.
+
+### Correction and focused review
+
+The helper now opens its fixed request input with Windows read/write/delete
+sharing. The publisher's atomic replacement requests delete access; incompatible
+reader sharing can fail in either order. This follows
+[CreateFileW's sharing contract](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew).
+Typed Win32 arguments preserve pointer-width handles. A failed open raises its
+original Windows error. On success, ownership passes to the CRT descriptor and
+then the Python file object; conversion failures close the current owner.
+The normal context manager closes it after reading complete JSON. Frame IDs
+continue to reject an older complete frame. The change adds no project path,
+expression evaluation, script or action input, and no error swallowing or retry.
+The non-Windows open path is unchanged, so the prior Mac functional evidence is
+reused with that explicit limitation. No Mac SDK process was started.
+
+The existing production browser failure is the red reproduction at the confirmed
+UI/core/helper boundary. The next Windows run must supply the green result at
+that same boundary, including repeated updates; no new private-method test was
+added. Embedded Python blocks parse, frontend typecheck passes and focused
+release core Screens checks pass 14 cases with the selected SDK case ignored.
+The prior 226-test frontend result remains applicable to unchanged UI code.
+
+#### Standards
+
+The independent read-only review reports zero documented-standard breaches,
+substantive bugs or baseline-smell findings. Handle types, sharing and ownership
+cleanup are consistent. No test, app, SDK or CI operation was run by the reviewer.
+
+#### Spec
+
+The independent read-only review reports zero new findings or scope creep. The
+data-only boundary and process reuse remain intact. Static review is not Windows
+qualification. The three existing gaps remain matched both-target fidelity,
+native timing/startup/focus and element-position dragging. This correction closes
+none of those acceptance gates.
+
+Use the remaining existing allowance for CI dispatch 3 of the corrected candidate,
+with the same selected Windows job and maximum reservation of one package, one
+native launch and four SDK processes. Prior Windows actual use is one SDK process.
+Local batches 36-38 cover CI2 audit/correction, focused checks/review and the
+publication/CI3 wait record. Mac use remains packages 3/5, native 3/7, SDK 24/24.
+No further Mac SDK launch, broader rendering work or weaker gate is selected.

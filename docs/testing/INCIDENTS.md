@@ -329,3 +329,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** exact busy/rich-editor browser controller and whole-runner synthetic
   success, early-failure and unreadable-metadata cases. These are not native passes.
 - **Evidence:** [L01 CI2 corrections](../tasks/evidence/owned-blank-screen.md#ci2-terminal-audit-and-native-correction).
+
+## P04. Windows canvas reader conflicts with atomic request replacement
+
+- **Class/search:** product helper; `PermissionError`, `request.json`, first frame
+  succeeds, next draft becomes unavailable, Windows atomic rename.
+- **Cause/correction:** the publisher uses `MoveFileExW` to replace the request.
+  Python's ordinary file open omits Windows delete sharing, so its read can
+  conflict with the publisher's rename handle. The helper reader opens with
+  read/write/delete sharing and transfers ownership through the CRT to its file
+  object. Errors remain visible; no timeout or retry threshold is weakened.
+- **Verification:** CI2 reproduces the failure through the public UI/core/helper
+  path. The existing two-aspect browser and 40-update flow must pass on the
+  corrected Windows candidate; local syntax/core checks are insufficient.
+- **Evidence:** [L17 CI2 audit](../tasks/evidence/canvas-rendering.md#ci2-terminal-audit-and-windows-reader-correction).

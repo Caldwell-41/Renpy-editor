@@ -14,6 +14,36 @@ init python:
     import time as _canvas_time
     _canvas_previous_cleanup_ms = 0.0
 
+    if _canvas_os.name == "nt":
+        import ctypes as _canvas_ctypes
+        from ctypes import wintypes as _canvas_wintypes
+        import msvcrt as _canvas_msvcrt
+        _canvas_kernel = _canvas_ctypes.WinDLL("kernel32", use_last_error=True)
+        _canvas_kernel.CreateFileW.argtypes = [_canvas_wintypes.LPCWSTR, _canvas_wintypes.DWORD, _canvas_wintypes.DWORD, _canvas_wintypes.LPVOID, _canvas_wintypes.DWORD, _canvas_wintypes.DWORD, _canvas_wintypes.HANDLE]
+        _canvas_kernel.CreateFileW.restype = _canvas_wintypes.HANDLE
+        _canvas_kernel.CloseHandle.argtypes = [_canvas_wintypes.HANDLE]
+        _canvas_kernel.CloseHandle.restype = _canvas_wintypes.BOOL
+
+    def _canvas_request_file():
+        path = config.basedir + "/request.json"
+        if _canvas_os.name != "nt":
+            return open(path, encoding="utf-8")
+        # The publisher atomically replaces this file. Windows readers must share
+        # delete access so neither open conflicts with the other's rename handle.
+        handle = _canvas_kernel.CreateFileW(path, 0x80000000, 0x1 | 0x2 | 0x4, None, 3, 0x80, None)
+        if handle == _canvas_ctypes.c_void_p(-1).value:
+            raise _canvas_ctypes.WinError(_canvas_ctypes.get_last_error())
+        try:
+            descriptor = _canvas_msvcrt.open_osfhandle(handle, _canvas_os.O_RDONLY | _canvas_os.O_BINARY)
+        except BaseException:
+            _canvas_kernel.CloseHandle(handle)
+            raise
+        try:
+            return _canvas_os.fdopen(descriptor, "r", encoding="utf-8")
+        except BaseException:
+            _canvas_os.close(descriptor)
+            raise
+
     class _CanvasNode(renpy.Displayable):
         def __init__(self, child, start):
             super(_CanvasNode, self).__init__()
@@ -94,7 +124,7 @@ label start:
         _canvas_previous = None
         while True:
             try:
-                with open(config.basedir + "/request.json", encoding="utf-8") as _canvas_input:
+                with _canvas_request_file() as _canvas_input:
                     _canvas_request = _canvas_json.load(_canvas_input)
                 if _canvas_request["frameId"] != _canvas_previous:
                     _canvas_render(_canvas_request)
