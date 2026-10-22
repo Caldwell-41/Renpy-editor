@@ -23,6 +23,31 @@ init python:
         _canvas_kernel.CreateFileW.restype = _canvas_wintypes.HANDLE
         _canvas_kernel.CloseHandle.argtypes = [_canvas_wintypes.HANDLE]
         _canvas_kernel.CloseHandle.restype = _canvas_wintypes.BOOL
+        _canvas_kernel.SetFileInformationByHandle.argtypes = [_canvas_wintypes.HANDLE, _canvas_ctypes.c_int, _canvas_wintypes.LPVOID, _canvas_wintypes.DWORD]
+        _canvas_kernel.SetFileInformationByHandle.restype = _canvas_wintypes.BOOL
+        class _CanvasRenameInfo(_canvas_ctypes.Structure):
+            _fields_ = [("Flags", _canvas_wintypes.DWORD), ("RootDirectory", _canvas_wintypes.HANDLE), ("FileNameLength", _canvas_wintypes.DWORD), ("FileName", _canvas_ctypes.c_ushort * 1)]
+
+    def _canvas_replace(source, target):
+        if _canvas_os.name != "nt":
+            return _canvas_os.replace(source, target)
+        # The core can still be reading the previous PNG/result. Replace its
+        # directory entry while preserving that reader's complete old file.
+        encoded = target.encode("utf-16-le")
+        size = _canvas_ctypes.sizeof(_CanvasRenameInfo) + len(encoded)
+        alignment = _canvas_ctypes.sizeof(_canvas_wintypes.HANDLE)
+        storage = (_canvas_wintypes.HANDLE * ((size + alignment - 1) // alignment))()
+        info = _CanvasRenameInfo.from_buffer(storage)
+        info.Flags, info.FileNameLength = 0x1 | 0x2, len(encoded)
+        _canvas_ctypes.memmove(_canvas_ctypes.addressof(storage) + _CanvasRenameInfo.FileName.offset, encoded, len(encoded))
+        handle = _canvas_kernel.CreateFileW(source, 0x10000, 0x1 | 0x2 | 0x4, None, 3, 0x200000, None)
+        if handle == _canvas_ctypes.c_void_p(-1).value:
+            raise _canvas_ctypes.WinError(_canvas_ctypes.get_last_error())
+        try:
+            if not _canvas_kernel.SetFileInformationByHandle(handle, 22, _canvas_ctypes.byref(info), size):
+                raise _canvas_ctypes.WinError(_canvas_ctypes.get_last_error())
+        finally:
+            _canvas_kernel.CloseHandle(handle)
 
     def _canvas_request_file():
         path = config.basedir + "/request.json"
@@ -110,11 +135,11 @@ init python:
         surface = renpy.display.draw.render_to_texture(rendered, True)
         image = config.basedir + "/frame-next.png"
         renpy.display.core.pygame.image.save(surface, image)
-        _canvas_os.replace(image, config.basedir + "/frame.png")
+        _canvas_replace(image, config.basedir + "/frame.png")
         rendered_at = _canvas_time.perf_counter()
         with open(config.basedir + "/result-next.json", "w", encoding="utf-8") as output:
             _canvas_json.dump(dict(frameId=request["frameId"], width=plan["width"], height=plan["height"], buttonState=plan["buttonState"], geometry=geometry, renderer=renpy.get_renderer_info()["renderer"], diagnostics=dict(renderMilliseconds=(rendered_at-started)*1000, previousCleanupMilliseconds=_canvas_previous_cleanup_ms)), output)
-        _canvas_os.replace(config.basedir + "/result-next.json", config.basedir + "/result.json")
+        _canvas_replace(config.basedir + "/result-next.json", config.basedir + "/result.json")
         renpy.free_memory()
         _canvas_previous_cleanup_ms = (_canvas_time.perf_counter()-rendered_at)*1000
 

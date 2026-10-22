@@ -601,23 +601,48 @@ fn replace_file_at(
     to_path: &Path,
     _to: &OsStr,
 ) -> io::Result<()> {
-    use std::os::windows::ffi::OsStrExt;
+    use std::{
+        mem::size_of,
+        os::windows::{ffi::OsStrExt, fs::OpenOptionsExt, io::AsRawHandle},
+        ptr,
+    };
     use windows_sys::Win32::Storage::FileSystem::{
-        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
+        FileRenameInfoEx, SetFileInformationByHandle, DELETE, FILE_FLAG_OPEN_REPARSE_POINT,
+        FILE_READ_ATTRIBUTES, FILE_RENAME_INFO, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
     };
-    let wide = |path: &Path| {
-        path.as_os_str()
-            .encode_wide()
-            .chain(Some(0))
-            .collect::<Vec<_>>()
-    };
-    let from = wide(from_path);
-    let to = wide(to_path);
+    let source = OpenOptions::new()
+        .access_mode(DELETE | FILE_READ_ATTRIBUTES)
+        .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+        .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(from_path)?;
+    let metadata = source.metadata()?;
+    if !metadata.is_file() || is_link_or_reparse(&metadata) {
+        return Err(io::Error::from(io::ErrorKind::InvalidInput));
+    }
+    let name: Vec<u16> = to_path.as_os_str().encode_wide().collect();
+    let name_bytes = u32::try_from(name.len() * size_of::<u16>())
+        .map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
+    let size = size_of::<FILE_RENAME_INFO>() + name_bytes as usize;
+    let size_u32 = u32::try_from(size)
+        .map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
+    // Pointer-sized storage provides the ABI alignment and room for the trailing
+    // UTF-16 name. POSIX replacement keeps readers of the old file valid.
+    let mut storage = vec![0usize; size.div_ceil(size_of::<usize>())];
+    let info = storage.as_mut_ptr().cast::<FILE_RENAME_INFO>();
     if unsafe {
-        MoveFileExW(
-            from.as_ptr(),
-            to.as_ptr(),
-            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+        (*info).Anonymous.Flags = 0x1 | 0x2; // REPLACE_IF_EXISTS | POSIX_SEMANTICS
+        (*info).RootDirectory = ptr::null_mut();
+        (*info).FileNameLength = name_bytes;
+        ptr::copy_nonoverlapping(
+            name.as_ptr(),
+            ptr::addr_of_mut!((*info).FileName).cast::<u16>(),
+            name.len(),
+        );
+        SetFileInformationByHandle(
+            source.as_raw_handle(),
+            FileRenameInfoEx,
+            info.cast(),
+            size_u32,
         )
     } != 0
     {

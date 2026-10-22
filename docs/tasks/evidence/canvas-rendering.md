@@ -514,3 +514,92 @@ four SDK processes. Only one more CI dispatch remains. No further Mac SDK proces
 is allocated. All existing rendering/native/dragging gates and publication limits
 remain unchanged. CURRENT/HANDOVER retain protected recovery and earlier pending
 acceptance, which keep their overall size above the review targets.
+
+## CI4 terminal audit and open-reader replacement
+
+The same-chat ci-watch event matches its owner and is acknowledged. GitHub confirms
+[run 39847274208](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39847274208),
+attempt 1, exact head `bea2019cb11de61be4ccd9abf8575cf1bce11308`, completed with
+failure at 2026-10-22 20:25:43 UTC. Later `7170733` only records its wait, so the
+result applies to the current product. Portable checks and official SDK checksum
+pass. Five functional groups and 31 warm captures pass before submission fails.
+The diagnostic log now identifies the first failed operation:
+
+```text
+application-local file replacement failed: kind=PermissionDenied, os=Some(5)
+canvas helper publish request failed: RecoveryRequired
+```
+
+This excludes request creation and asset copying as the observed failure site.
+The legacy `MoveFileExW` publisher cannot reliably replace the request while the
+helper is reading the previous file. Delete sharing corrected the earlier reader
+open conflict but did not give the publisher open-target replacement semantics.
+The helper stays alive; no traceback reports a render failure. The core maps the
+publication failure to the retained generic invariant response. No complete warm
+series or timing pass is available. Startup image load is 2,913.5 ms, diagnostic only.
+
+The driver exits zero after asserted host shutdown/root removal. Exact-controller,
+Help regression, reference, package and native checks did not run. Privacy/upload
+pass; artifact 12456785980 has 45 public-fixture files. Retained ZIP, upload log
+and GitHub metadata match SHA-256
+`d77fa907eb6dd1b1e6a22f05706f6497c6400df9f6c686e7cd605b29aad4f9e4`.
+Expiry is 2026-10-29 20:25:36 UTC. Local privacy scan passes all 45 files. An initial
+incorrect archive-ID lookup returned 404; the metadata-derived ID and final ZIP
+are verified. Ignored `ci-04` retains the exact terminal receipt, full log, metadata,
+ZIP, extracted files and audit. This run uses one SDK process, zero packages and
+zero native launches. Actual Windows use through CI4 is three SDK processes.
+
+### Root correction and pattern check
+
+The user explicitly invoked principle-fix-root-causes. The correction changes the
+publishing operation itself. Windows application-local file replacement now uses
+`SetFileInformationByHandle` with `FileRenameInfoEx` and replacement/POSIX flags.
+[Microsoft's contract](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information)
+specifies that old readers keep their valid file while new opens see the replacement.
+The code adds no retry, swallowed error or wider timeout. Existing diagnostics
+continue to report actual failures.
+
+The same legacy replacement pattern existed in the helper's PNG and result
+publishers. Both now use that Windows operation too. The request reader retains
+compatible read/write/delete sharing. Rust keeps the source handle through the
+synchronous rename, checks a regular non-reparse source and preserves parent
+validation. Python closes its publisher handle in `finally`. Both implementations
+use pointer-aligned buffers with the declared Win32 header and byte-counted UTF-16
+tail. The flags do not override read-only attributes or ACLs. Non-Windows publishers
+still use their existing rename operations. Source transaction/backup replacement
+is a different operation and remains unchanged.
+
+The shared Rust primitive also publishes recent/preferences data. Its staged-file
+flush and commit verification remain; the existing recent-file atomic replacement
+case now runs before SDK work in the selected Windows workflow. Local focused
+release Screens checks pass 14 cases with the selected SDK test ignored, and the
+recent-file case passes. Embedded Python blocks and workflow YAML parse. These
+are local checks, not execution of the new Windows API. No Mac SDK process ran;
+unchanged Mac paths reuse their prior functional evidence. The existing public
+UI/core/helper failure supplies red evidence; CI5 must establish the corrected
+Windows path, including all 200 updates and the selected downstream qualification.
+
+#### Standards
+
+Independent read-only review reports zero hard breaches, substantive correctness
+findings or judgement-smell findings. It confirms ABI layout/alignment, UTF-16
+length/capacity, live buffers/handles, no-follow checks and unchanged transaction
+replacement. The shared recent/preferences caller retains flushing and verification.
+No execution pass is inferred from review.
+
+#### Spec
+
+Independent read-only review reports zero new findings or scope creep. Request,
+PNG and result publishers receive the same correction. Data-only input, paths,
+cleanup and non-Windows behavior remain intact; no ACL/read-only override or weaker
+requirement is added. Windows execution remains the implementation risk. The three
+existing gaps remain matched both-target fidelity, native timing/startup/focus and
+element-position dragging. This correction accepts none of them.
+
+Local batches 42-44 cover CI4 causal audit/correction, focused verification/review
+and publication/CI5 wait preparation, including failed reads and intermediate
+validation. CI dispatch 5 is selected as the last dispatch within the existing
+ceiling. Before it, Windows actual use is zero packages/native launches and three
+SDK processes. Its maximum reservation is one package, one native launch and four
+SDK processes. Mac remains packages 3/5, native 3/7, SDK 24/24. No extra Mac SDK,
+CI dispatch beyond five, broader renderer work or weaker gate is allocated.

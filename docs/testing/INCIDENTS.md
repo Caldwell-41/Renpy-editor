@@ -330,18 +330,22 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   success, early-failure and unreadable-metadata cases. These are not native passes.
 - **Evidence:** [L01 CI2 corrections](../tasks/evidence/owned-blank-screen.md#ci2-terminal-audit-and-native-correction).
 
-## P04. Windows canvas reader conflicts with atomic request replacement
+## P04. Windows canvas readers conflict with legacy file replacement
 
 - **Class/search:** product helper; `PermissionError`, `request.json`, first frame
   succeeds, next draft becomes unavailable, Windows atomic rename.
 - **Cause/correction:** the publisher uses `MoveFileExW` to replace the request.
   Python's ordinary file open omits Windows delete sharing, so its read can
-  conflict with the publisher's rename handle. The helper reader opens with
-  read/write/delete sharing and transfers ownership through the CRT to its file
-  object. Errors remain visible; no timeout or retry threshold is weakened.
+  conflict with the publisher's rename handle. Delete sharing fixes that reader
+  conflict; CI4 then isolates publication itself failing with OS error 5 while a
+  target reader is open. The app-local request publisher and helper PNG/result
+  publishers now use `FileRenameInfoEx` replacement with POSIX semantics, which
+  preserves old readers and publishes the new file. Existing no-follow, source
+  transactions and error/deadline rules remain. No retry hides the failure.
 - **Verification:** CI2 reproduces the failure through the public UI/core/helper
   path. CI3 passes both aspects, five functional groups and 19 warm captures with
-  that reader, then hits a later core submission refusal. Operation and numeric
-  OS-error diagnostics must identify that remaining failure before another fix.
-  The bounded Windows repetition is now 200 samples; local checks are insufficient.
-- **Evidence:** [L17 CI2 audit](../tasks/evidence/canvas-rendering.md#ci2-terminal-audit-and-windows-reader-correction).
+  that reader, then hits a later core submission refusal. CI4 reproduces the
+  publisher failure after 31 warm captures and retains its exact operation/code.
+  CI5 must qualify the corrected primitive, shared recent-file caller and 200
+  Windows updates. Local checks do not establish that execution pass.
+- **Evidence:** [L17 CI4 root cause](../tasks/evidence/canvas-rendering.md#ci4-terminal-audit-and-open-reader-replacement).

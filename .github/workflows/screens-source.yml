@@ -382,6 +382,7 @@ jobs:
           npm run build:tests
           node --test dist-tests/tests/screen-ui.dom.test.js
           cargo test -p loomlight-core --release --locked --lib screens::tests -- --nocapture
+          cargo test -p loomlight-core --release --locked --lib lifecycle::tests::recent_store_replaces_atomically_without_normal_temp_leaks -- --exact --nocapture
           cargo build -p loomlight-core --examples --locked
           cargo build -p loomlight-core --release --example canvas-controller-driver --locked
           npm run build
