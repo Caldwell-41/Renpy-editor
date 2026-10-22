@@ -113,7 +113,8 @@ through the lane, retries only pre-dispatch read refusals, and stops detached
 Screens polling. Remount validates a fresh frame. Held-owner and detached-workspace
 regressions fail before the correction and pass after it. The workflow always
 runs a cheap selector validator and rejects both booleans together. No baseline
-smell findings were reported. Follow-up review confirms both fixes, with zero unresolved/new Standards findings.
+smell findings were reported. Follow-up review confirms both fixes, with zero unresolved/new Standards findings. The helper-only backup prevention
+fix also passed an independent Standards follow-up with no new finding.
 
 Spec found three incomplete requirements: matched both-target rendering, native
 responsiveness/startup/focus evidence, and element dragging. These remain explicit
@@ -147,7 +148,7 @@ The final allowed Mac SDK process, `helper-isolation-28`, passes actual helper
 rendering at both aspects and project-close cleanup on the fixed adapter. A new
 backup-log regression assertion was placed in that selected SDK test after its
 binary compiled, so that assertion is compiled by portable checks but is not
-claimed as executed evidence. No new generated helper backup appeared. The
+claimed as executed evidence. The final cleanup check finds no generated helper backups. The
 native package above predates this environment fix; its failed launch is retained,
 not reassigned to the corrected source.
 
@@ -159,6 +160,29 @@ same Python 3.9 host failure; the final run explicitly selects Python 3.12.
 149.7 ms completed-capture p95. These remain diagnostic measurements.
 Windows CI is prepared but remains undispatched because this selection authorizes
 a local commit and has no push authorization.
+
+
+Package 2 is built from corrected product candidate
+`b7caff3501138860edbdbd2a3e6923ecbff8b279`. It passes the same signature,
+certificate requirement and installer-content gates. Its executable SHA-256 is
+`b336c8115943a602b6afd75623f4a3a52ed74145e1424ac22e177fc9cc45637e`; installer SHA-256
+is `3c1acb85068de50d75da00dcde9a938a6aafa9b25b6d82569636e3ba37867447`.
+The executable hashes differ and both certificate requirements match. Package 2
+was not launched. It supplies no native functional, credential-reuse or focus proof.
+
+The retained public-fixture evidence passes the artifact privacy scan (74 files).
+Final process checks find no owned app/helper/driver; the failed native profile and
+verified generated helper backups are gone. No operation remains pending.
+
+Final cumulative use is 30 local work/check batches, 0 CI dispatches; Mac packages
+2, native launches 1 and SDK processes 20; Windows packages/native/SDK processes 0.
+The user-directed 100% supplement adds one original allocation to the recorded
+ceilings. They are 60 local batches, 5 CI dispatches and, per target, 5 packages,
+7 native launches and 20 SDK processes. Existing contingency is not recalculated.
+All failures and the pre-helper setup reservation remain charged. The Mac SDK
+ceiling is reached. Further Mac SDK work needs an explicit supplement, and native
+observation needs an unlocked session. Windows CI needs authorization to push the
+committed candidate. Earlier closed allowances remain closed.
 
 The mandatory outstanding gates include matching drawable-scale fidelity, native
 input-to-visible timing on both targets, OS focus/window observation, startup

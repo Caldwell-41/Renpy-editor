@@ -1,13 +1,37 @@
 # Current status
 
-## Canvas rendering decision confirmed
+## L17 proof retained; qualification incomplete
+
+2026-10-22: The user selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+implementation and increased its allowance by 100%. Corrected product candidate
+`b7caff3` is committed locally. [Evidence](../tasks/evidence/canvas-rendering.md)
+owns the data-only helper mappings, browser/service proof, captures and failures.
+All 226 frontend tests and the applicable core checks pass. Independent review has
+zero remaining Standards findings and three open Spec gaps. Mac drawable-scale
+text and hover-color differences prevent fidelity acceptance; native presentation,
+focus/startup, dragging and Windows qualification remain incomplete.
+
+Both signed Mac packages pass identity/contents checks. Package 1's native attempt
+failed its watchdog while the Mac was locked, with clean process/disk recovery.
+Package 2 contains the helper-only backup prevention fix and is unlaunched. The
+final service helper passes both aspects and project-close cleanup. No owned
+process, fixture or generated helper backup remains; no operation is pending.
+
+#36 owns cumulative use: 30/60 local batches, 0/5 CI; Mac packages 2/5, native 1/7,
+SDK 20/20; Windows packages/native/SDK 0. Further Mac SDK work needs an explicit
+supplement; native observation needs an unlocked Mac. Windows CI is prepared and
+undispatched because no push is selected. Fidelity requires decision review before
+broader renderer work or a weaker gate. #36 stays open. No PR, merge or release is
+selected. Unrelated parallel-policy edits and protected recovery remain separate.
+
+## Earlier canvas decision closeout
 
 2026-10-22: The user confirmed the decision portion of
 [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
 [ADR 0021](../adr/0021-separate-renpy-canvas-helper.md) records a separate Ren'Py
 canvas helper for the later bounded Help proof. The decision is accepted; the
 helper, matched rendering, performance and visual acceptance remain unproved.
-Representative proof and renderer implementation are unselected. The user selected
+Representative proof and renderer implementation were unselected at that closeout. The user selected
 publication of the ADR, glossary and related contract/status changes as a separate
 documentation commit. #36 records the verified publication and remaining criteria.
 Historical allowances stay closed.

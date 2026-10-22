@@ -1,6 +1,42 @@
 # Current outcome handover
 
-## Canvas decision complete; proof remains unselected
+## Active L17 proof handover
+
+The user selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+through the implement skill, confirmed core/UI/packaged test boundaries and
+increased its allowance by 100%. Mac ARM64 remains the development host on
+`codex/phase3b-screen-designer`, from `7e1e7b3`. Product commits are `fd781a6`,
+`8c21b7b` and corrected candidate `b7caff3`. They remain local. The issue owns live
+selection and cumulative use; [evidence](../tasks/evidence/canvas-rendering.md)
+owns mappings, exact artifacts, failures and qualification gaps.
+
+The real release-browser path passes both aspects, normal/hover/live text samples,
+size gestures, Cancel/Escape and history. Startup image load is 894.2 ms; warm
+image-load p95 is 63.5 ms and completed-capture p95 149.7 ms. These are diagnostics,
+not native presentation. Deliberate Mac reference captures match window sizes and
+outer-widget dimensions. GL2 draws text at Retina scale 2; software draws at scale
+1. Glyph and flat hover-color differences remain unaccepted. Element dragging is
+still missing. Independent Standards reviews have zero unresolved findings; the
+Spec review retains fidelity, native timing/startup/focus and dragging gaps.
+
+Mac package 1 passes signing/contents but its native attempt failed the watchdog
+in a locked session. Cleanup owners and disk checks pass; source is unchanged.
+The helper-only backup fault found during diagnosis is fixed and nine verified
+generated backups were removed. The final service SDK case passes both aspects
+and close cleanup. Package 2 at `b7caff3` passes signing/contents and is unlaunched.
+No owned process, fixture or generated helper backup remains. No operation is pending.
+
+Final use is 30/60 local batches, 0/5 CI; Mac packages 2/5, native 1/7 and SDK 20/20;
+Windows packages/native/SDK 0. The Mac SDK ceiling is reached, including failures
+and the pre-helper setup reservation. Resume needs an unlocked Mac and an explicit
+supplement before another Mac SDK process. Windows CI is ready but needs push
+authorization. Review the retained fidelity comparison before broader renderer
+work or any weaker requirement. Keep #36 open. No push, PR, merge or release is
+selected. Preserve unrelated parallel-policy edits and all protected recovery
+below. Earlier decision/qualification sections are historical; this is the active
+canvas handover. Historical closed allowances stay closed.
+
+## Earlier canvas decision closeout
 
 The user confirmed the full [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
 interview agreement on 2026-10-22 and requested the ADR and ticket update.
