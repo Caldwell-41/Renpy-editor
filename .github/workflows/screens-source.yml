@@ -1,6 +1,6 @@
 name: Screens qualification
 
-# The early source-proof outcome is closed. Only the selected Help outcome runs here.
+# Closed source/Help qualifications retain their guards. L01 has its own explicit selector.
 on:
   workflow_dispatch:
     inputs:
@@ -221,6 +221,7 @@ jobs:
           cargo test -p loomlight-core --release --locked --lib screens::tests -- --nocapture
           cargo test -p loomlight-core --release --locked --lib metadata::tests -- --nocapture
           cargo test -p loomlight-core --release --locked --lib source::tests -- --nocapture
+          cargo test -p loomlight-core --release --locked --lib scene::logic::tests::phase3a_v3_v4_call_menu_refinement_preserves_records_and_reopen -- --exact --nocapture
           cargo build -p loomlight-core --example help-controller-driver --locked
           cargo check -p loomlight-desktop --locked
           npm run build

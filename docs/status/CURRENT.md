@@ -2,15 +2,15 @@
 
 ## Selected L01 implementation
 
-2026-10-22: The user selected [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34).
-Blank-screen creation, screen/root ownership, Source navigation, shared history and
-reopen are implemented locally on `codex/phase3b-screen-designer`.
-[The evidence](../tasks/evidence/owned-blank-screen.md) records the real renderer/core
-and Mac SDK results, retained failures and remaining qualification. The signed Mac
-package passes identity and installer checks; its native run needs an unlocked
-desktop. Windows SDK/WebView proof and publication approval remain pending.
-The issue stays open. Full flow-v1/canvas and phase acceptance remain separate.
-The issue owns the new finite allowance; closed Help allowances stay closed.
+2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is implemented
+locally at `6be4f24` on `codex/phase3b-screen-designer`. Both independent code-review
+axes have no remaining code findings. The frontend, production renderer/core and
+Mac SDK results pass; [L01 evidence](../tasks/evidence/owned-blank-screen.md) records
+final core qualification and retained failures. Current signed-Mac native and Windows
+SDK/WebView proof remain pending. Another Mac package needs approval beyond the
+consumed 3/3 ceiling; publication and focused CI also need authorization. No remote run is
+pending. The ticket stays open. Full flow-v1/canvas and phase acceptance remain separate.
+The retained policy/Help record below predates this selection.
 
 ## Phase 3B migration and retained Help result
 

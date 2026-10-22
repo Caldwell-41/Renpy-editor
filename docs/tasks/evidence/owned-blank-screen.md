@@ -30,7 +30,7 @@ then the existing bundled Python 3.12.14 was selected for checks requiring `toml
   test passed after adding typed catalog/create dispatch and source-map v6 ownership.
 - The reconciliation test then exposed a catalog error on malformed source. The
   correction retains the UUID as unresolved and refuses creation with an incomplete
-  collision inventory. Eight focused Screens tests pass, including the existing Help
+  collision inventory. The initial eight focused Screens tests pass, including the existing Help
   transaction/source cases, collision/dirty/stale refusals and migration/reopen.
 - `browser-01`, `browser-02` and the final browser run exercise eight real
   renderer/ApplicationHost/core groups. `help-regression-01` passes all 11 existing
@@ -73,7 +73,7 @@ then the existing bundled Python 3.12.14 was selected for checks requiring `toml
 | One collision-checked definition/transaction/history entry; Cancel and refusal do not write | Focused IPC tests, real eight-group renderer/core run and existing 11-group Help regression pass. |
 | Metadata-only migration, extras/source preservation, no-op reopen, newer-schema refusal | Focused IPC migration and reopen tests pass. |
 | Source edits/offsets reconcile; rename/deletion/ambiguity stays unresolved | Focused IPC tests and real Source Save/browser path pass. |
-| Actual Choose/core/Source/history/reopen | Browser production path and packaged-controller rehearsal pass. Signed Mac native run awaits an unlocked desktop; Windows native proof awaits selected CI. |
+| Actual Choose/core/Source/history/reopen | Browser production path and packaged-controller rehearsal pass. Current signed Mac native run requires one additional package authorization and an unlocked desktop; Windows native proof awaits selected CI. |
 | Deliberate preview of created screen | Exact browser-accepted source passes actual pinned SDK proof on Mac. Windows SDK proof remains pending. |
 | Retain revision-bound Help behavior | Existing focused core and 11-group real renderer/core regression pass. Earlier unchanged native/SDK Help evidence remains scoped to its accepted candidate. |
 | Whole editor/canvas visual acceptance | Pending under later owners; L01 does not waive those gates. |
@@ -83,3 +83,106 @@ candidate/ordinal. It runs affected frontend/core/controller checks on Windows x
 and Mac ARM64, plus the missing Windows SDK and packaged WebView proof. Mac uses its
 local signed package and SDK evidence, avoiding another SDK launch. Publication and
 dispatch have not occurred. No workflow or worker is pending.
+
+
+## Independent review and corrections
+
+The initial review compares `867528d...da2f8d3`. Two independent read-only reviewers
+checked Standards and Spec. Follow-ups compare `da2f8d3...d43edfe`, then the final
+namespace correction at `6be4f24`.
+
+### Standards
+
+The initial reviewer found one P2 breach of the dirty-buffer/external-edit contract.
+An unowned Source file could retain a dirty draft after external deletion; checking
+only present inventory paths let creation write at that missing destination.
+The destination now participates explicitly in the clean-buffer check. Its regression
+proves refusal, retained input, absent destination and unchanged metadata.
+The independent follow-up reports zero remaining documented-standard breaches and
+zero baseline smell findings.
+
+### Spec
+
+The initial reviewer found three P2 defects against the ticket's collision, preview
+and never-retarget requirements. Static collision inspection missed continued,
+init-prefixed and explicit-version screen declarations. Private double-underscore
+creation names used a different runtime name in the scratch helper. Separate catalog
+and inspection reads could display a different declaration under the original owned
+UUID. The corrections recognize those headers, refuse private/portable reserved names
+and require the catalog's exact source revision and name before showing an owned tree.
+Unavailable inspection also retains an explicit unresolved reference.
+
+The first follow-up closed those three defects but found one remaining P2 collision
+through Ren'Py's filename-mangled `_m1_` namespace. The final correction reserves that
+namespace and bounds nested init-prefix recognition. Its exact IPC regression failed
+before the guard and passes after it. The last independent follow-up at `6be4f24`
+reports zero remaining actionable Spec code defects. Native/Windows qualification
+remains a pending-proof group; no scope additions were found.
+
+Final focused proof is 10/10 Screens tests and 10/10 Screens UI tests, including
+three catalog/inspection race cases. The final complete frontend suite passes
+223/223. Production browser/controller runs pass after the revision-binding fixes.
+The first non-sandboxed broad core run passed 398 cases and failed one historical
+migration assertion that still expected schema 5. That assertion now expects the
+current schema, and its exact test passes. The final coherent-candidate broad-core
+run is recorded below.
+
+## Package ceiling and current continuation
+
+Mac package attempt 3 uses the single original contingency and passes signing and
+installer checks at `d43edfe`. Executable SHA256 is
+`0bea54c59628ac8d443ae67c4df3157248968598500ee1f997d0119f03d72823`;
+DMG SHA256 is `d0336f536409f150a6e03c7cd56a31534064366397d5183d297e82bc24b9c659`.
+It predates the final namespace guard and does not qualify `6be4f24`.
+No fourth package is attempted or authorized. A current signed build/native run
+requires explicit approval beyond the consumed package ceiling, plus an unlocked
+desktop. The earlier unlock request did not receive an answer during implementation.
+No unrelated draft/window was opened, closed, discarded or reloaded.
+
+The implementation is committed locally in `da2f8d3`, `d43edfe` and `6be4f24`.
+No push, remote CI, PR, merge or release occurred. Publication of these concrete
+commits and the prepared focused CI route needs authorization. Keep L01 open.
+The current package and Windows evidence gaps prevent acceptance/closure even
+though both independent code-review axes have no remaining code findings.
+
+
+## Final local result and retained candidate
+
+Code candidate `6be4f24` passes 401 routine core tests, with zero failures, 45
+intentionally ignored SDK/specialist cases and three documented broad-run exclusions.
+The final exact executable is retained privately with SHA256 `bdcb7e3388d225bd32461f51dc332b9dfbb5627ca1100108697907b4d90236a6`.
+The SDK case above was explicitly selected and passed separately; ignored cases are
+not claimed as passes. The earlier pre-namespace broad run also passed 401/0, and all
+original failed/sandboxed runs remain retained. No code changed during the final run.
+
+The frontend passes 223/223, typechecking passes, final real renderer/core creation
+passes eight groups, the exact packaged controller rehearsal passes, and the retained
+Help renderer/core regression passes 11 groups against the final driver. Six focused
+Python evidence-gate tests, workflow actionlint, repository validation and whitespace
+checks pass. The actual Mac SDK source SHA256 is
+`ff94e44deb297d5e75a86070dbf790fff0432c70fb5b7c098d920c94833cabf9`;
+validation exits 0 and explicit Stop ends the run in cancelled phase with exit 0,
+complete cleanup and no error diagnostics. That unchanged generated public-name
+source/runtime path remains qualified; the final changes add creation refusals and
+revision binding, with no scratch-preview implementation changes.
+
+Visual finding: the unresolved-state captures remain readable at wide/compact light
+and dark sizes without page overflow. The blank SDK capture is blank as expected.
+The new creation dialog follows the modal pattern, but this task does not claim a
+full flow-v1 layout match or canvas agreement. Functional finding: the named portable
+creation/ownership/Source/history/reopen operations pass. Current-package native and
+Windows proof remain missing, so the task is not accepted or closed.
+
+Final cumulative use is 18/18 local batches, CI 0/2; Mac package attempts 3/3 at the
+absolute ceiling, native launches 0/2 and SDK operations 4/4; Windows counts are zero.
+Only the single Mac package contingency was used. Local/CI/native/SDK original limits
+and their original contingency calculations remain unchanged. No allowance resets.
+Both parent/group issue bodies read back exactly after their bounded L01 status
+updates, preserving coverage maps and dependencies.
+
+CURRENT (658 words) and HANDOVER (1,370 words) exceed their soft review targets because the pre-existing local
+policy/status edits and unique protected recovery were retained. This task adds one
+compact current L01 continuation and leaves the unrelated documentation work intact.
+The final blocker is a decision for one additional current signed Mac package,
+publication of the reviewed branch commits and the focused CI dispatch. No operation
+is left running or pending remotely.
