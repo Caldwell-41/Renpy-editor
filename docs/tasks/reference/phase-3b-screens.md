@@ -12,6 +12,10 @@ chosen development host on `codex/phase3b-screen-designer`. The selected early
 source/runtime proof and browser-design outcome are complete. Full Screens
 implementation and whole-phase acceptance remain pending. The
 [phase brief](../active/phase-3-initial-wysiwyg-release.md) owns entry and cross-phase state.
+Apply the [standing scheduling exception](phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
+for all remaining 3B tickets. Final Phase 2/3A acceptance remains outstanding but
+does not block their start. Actual technical dependencies still apply; canvas work
+stays deferred until explicitly selected.
 
 The selected [production Help round trip](../active/help-screen-production.md) now
 has bounded functional approval at `c2d9f45`, with audited Windows x64 and signed

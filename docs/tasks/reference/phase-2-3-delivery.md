@@ -18,6 +18,28 @@ keep Phase 2 requirement/gate IDs; the [Phase 3 brief](../active/phase-3-initial
 keeps 3A–3D/3F requirements. The phases retain separate completion gates. Delivery
 stages below neither add product scope nor count as accepted implementation outcomes.
 
+### Standing Phase 3B scheduling exception
+
+On 2026-10-22, the user removed final Phase 2/3A acceptance as a prerequisite for
+starting any remaining Phase 3B ticket. This standing exception supersedes the
+earlier scheduling gate and the requirement for a new bounded early-3B exception
+for each selection. Each ticket still requires explicit user selection and its
+actual technical dependencies, including the source, asset, history and runtime
+contracts needed by that outcome. Preserve the live start dependencies in
+[P3B](https://github.com/Caldwell-41/Renpy-editor/issues/22) and its work tickets.
+
+Outstanding Phase 2/3A, native/Studio, visual, keyboard and human acceptance remain
+pending under their existing owners. Preserve the paused walkthrough and protected
+recovery in [HANDOVER](../../status/HANDOVER.md#native-recovery-and-remaining-acceptance).
+This exception changes scheduling only; it grants no acceptance, renews no exhausted
+allowance and changes no other phase's entry gate. Canvas work, including its design
+session and rendering proof, stays deferred until explicitly selected by the user.
+
+After a work ticket is selected, the agent records and states a finite delivery
+allowance and its basis, then proceeds under [WORKFLOW's budget policy](../../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
+without separate budget approval. That policy owns contingency, cumulative charging
+and intervention boundaries. No product work ticket is selected by this amendment.
+
 <a id="build-shared-capabilities-once-when-first-needed"></a>
 
 ### Build shared capabilities once, when first needed
@@ -55,15 +77,16 @@ are author references and never become runtime state implicitly.
 | 1 — Foundation and Studio feasibility | Minimum source structure/locations from 3A.1/3A.2; introduce only the relevant reusable edit-preparation seams. | 2A.0 Studio qualification, followed by approved 2A.1/2A.2 credentials/request work. | One nested child edit through dispatch, undo and reopen preserves source/IDs; qualified Studio yields a valid bounded synthetic response. 2A.0's review boundary remains before provider production integration. |
 | 2 — First useful AI workflow | Deterministic context and strict proposal planning/acceptance using stage 1 locations/preparation (necessary 2B/2C parts). | Shared manual card/lore records/forms, prompt/limit settings and Assist preparation/review UI against agreed interfaces. | One complete rewrite with selected manual references: exact reviewed send, valid proposal, acceptance, undo and reopen. No hidden draft acceptance or shortened context. Native credentials and affected target checks remain required. |
 | 3 — Overlap milestone completion | Complete 3A conditions/calls, flow/history and Story/Branches controls against the shared model. | Residual Studio verification and 2C.4 integrated/final acceptance. | Reconcile every shared-model change with context/proposal targeting. Existing Phase 2 operations remain correct or visibly refuse unsupported boundaries; complete each milestone's own gates. 3A may be selected after the first safe rewrite without waiting for all 2C.4 work. |
-| 4 — Visual authoring | 3B Screen source adapters, canvas/hierarchy/properties and runtime comparison. | 3C static staging → PNG/ATL idles → native video → supplied transparency → play-once controls, then remaining Timeline/audio inventory. Reuse shared assets/appearances and runtime comparison. | Accepted 3A and Phase 2; stable source/asset/history contracts. Integrate one shared runtime job before independent preview expansion. Each lane proves one real round trip before broadening its inventory. |
+| 4 — Visual authoring | 3B Screen source adapters, canvas/hierarchy/properties and runtime comparison. | 3C static staging → PNG/ATL idles → native video → supplied transparency → play-once controls, then remaining Timeline/audio inventory. Reuse shared assets/appearances and runtime comparison. | 3B uses the standing scheduling exception above; 3C retains accepted 3A and Phase 2 entry. Both require their actual stable source/asset/history contracts. Integrate one shared runtime job before independent preview expansion. Each lane proves one real round trip before broadening its inventory. |
 | 5 — State and integrated release | 3D trace/state inspection and isolated launch, using accepted 3A semantics and qualified 3C effects. | Remaining cross-workspace/UI and affected-target release qualification; fix bounded integrated findings. | Normal-run comparison for supported entry points, then 3F's integrated release gate. Unknown state/timing still refuses unsupported launch; release acceptance follows all required capabilities. |
 
 Stage 1 brings forward source foundations only, not the full 3A UI or state engine.
 Minimum block support must not delay the first rewrite until Screens/Timeline exist.
 Stage 2 is one integrated authoring outcome across both lanes, not separate backend
 and frontend completion claims. Stage 3 overlap is intentional; 2C.4 remains required
-for declaring Phase 2 complete and for stage 4 entry. Story logic precedes Screens;
-3B/3C can then overlap. Portions of 3D state inspection may be scoped earlier once
+for declaring Phase 2 complete and for 3C stage 4 entry. Remaining 3B uses the
+standing exception and each ticket's technical dependencies; 3B/3C can overlap once
+3C's entry conditions hold. Portions of 3D state inspection may be scoped earlier once
 3A is accepted, but final launch qualification needs the supported 3C effects.
 
 The assignments are defaults for bounded tasks, not fixed ownership of an entire
@@ -110,9 +133,10 @@ Source versus Studio feasibility and Screens versus Timeline are suitable candid
 shared schema/transaction/runtime changes need a single writer. No recursive agent tree.
 
 Technical prerequisites differ from scheduling defaults. Missing provider access need
-not stop independent authorised portable work. Stage 4 defaults to accepted Phase 2/3A;
-a narrower earlier 3B/3C slice requires explicit selection and accepted source/asset/
-history/runtime prerequisites, not an automatic phase waiver. Final gates are unchanged.
+not stop independent authorised portable work. Remaining 3B follows the standing
+scheduling exception above. Stage 4 entry for 3C still defaults to accepted Phase
+2/3A; a narrower earlier 3C slice requires explicit selection and accepted
+source/asset/history/runtime prerequisites. Final acceptance gates are unchanged.
 
 Reconcile actual accepted interfaces and ownership when selecting each remaining
 outcome. Earlier planning-only checks and publication instructions are retained in
@@ -154,7 +178,7 @@ do not silently turn it into delivery of the remaining phase.
 | Generated lorebook entries | Draft/update reviewable entries with applicability, citations, approval/staleness and undo/reopen. | Lore portion of 2C.3; reuse the same reference lifecycle. |
 | Conditional Story logic | Author supported nested conditions/choice guards; Story, Source and Branches agree; native routes match the declared variables. | Necessary 3A.1–3A.4 after shared foundation/first rewrite. Can overlap remaining Phase 2. |
 | Scene calls and Story completion | Call a Scene, return to the following Beat and preserve guarded continuation/return labels through edits and persistence; qualify 3A's combined behavior. | Remaining 3A.1–3A.4; build on conditional source/flow. |
-| Screen round trip | One supported custom screen can be edited via synchronized canvas/tree/properties, undone and reopened; unsupported neighbors survive and native layout agrees. | Bounded 3B.1/3B.2/3B.4; accepted Phase 2 and 3A. Introduce shared scratch runtime job once. |
+| Screen round trip | One supported custom screen can be edited via synchronized canvas/tree/properties, undone and reopened; unsupported neighbors survive and native layout agrees. | Bounded 3B.1/3B.2/3B.4 under the standing 3B scheduling exception and actual ticket dependencies. Introduce shared scratch runtime job once. Canvas work requires explicit selection. |
 | Custom screen Story connection | Visually Show/Hide an owned panel or Call an owned screen and finish its interaction before returning to the following Beat; normal play, source, undo and reopen agree. | 3B.2a after Screen round trip, before Screen completion; typed parameterless subset and 3D effect summaries. |
 | Dialogue and choice screens | Edit declared dialogue/choice layout/style slots without breaking speaking, choices or required bindings in the actual game. | Bounded 3B.3 on the proven screen services. |
 | Menu screens and Screen completion | Complete the declared menu/preferences/save/load adapters and remaining supported inventory; qualify native interactions, Source reconciliation and persistence. | Remaining 3B.1–3B.4; split adapters further in the brief if required. |
@@ -175,7 +199,8 @@ queue. The owner can have a paired outcome where both lanes jointly deliver one 
 action (especially the first rewrite); do not launch unrelated phase-sized assignments.
 When one lane completes a target, integrate its proof and prepare its next prompt;
 do not automatically broaden the other lane or repeat unchanged expensive checks.
-Story logic precedes Screens. Screens and animation targets then overlap; State and
+Screens follow their actual Story/source dependencies under the standing exception.
+Screens and animation targets can overlap under 3C's entry rules; State and
 release consume their accepted semantics. The exact sequence follows dependencies,
 not a requirement to serialize every row of this table.
 

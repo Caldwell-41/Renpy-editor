@@ -162,7 +162,9 @@ The [detailed Phase 3 draft](tasks/active/phase-3-initial-wysiwyg-release.md) de
 first usable results, proposed subsets, dependencies, implementation steps, inspected
 code seams, early risk proofs and completion gates. The user selected **Story logic first, then screen design** on 2026-10-02.
 The selected shared-foundation sequence allows scoped 3A work before Phase 2
-completion; after accepted Phase 2/3A, Screens and Timeline can use parallel lanes.
+completion. All remaining Screens work uses the [standing 3B scheduling exception](tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
+and its actual technical dependencies without waiting for final Phase 2/3A acceptance.
+Timeline retains its existing entry gates; the lanes can overlap when those hold.
 State/Run From Here consumes qualified story/effect semantics, and release qualification
 follows all required capabilities. Phase 1 is accepted/integrated/closed; this plan
 does not select Phase 2/3 implementation. Exact screen/Timeline subsets, Run From Here

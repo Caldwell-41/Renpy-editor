@@ -3,6 +3,7 @@
 **Policy established:** 2026-09-19. **Delivery rules updated:** 2026-09-28.
 **CI routing and qualification cadence amended:** 2026-10-10, user approved.
 **Host-neutral clarification and harness prevention:** 2026-10-16, user approved.
+**Standing 3B scheduling exception and delivery allowances:** 2026-10-22, user directed.
 Applies to future project and maintenance tasks.
 
 ## Authority and document ownership
@@ -82,6 +83,10 @@ aggregate requirement acceptance. The selected L work ticket owns bounded scope,
 acceptance, current blocker, selected authorization and the current allowance. Read
 P3B, the relevant group and selected leaf for 3B entry, review or continuation.
 Follow [the tracker convention](agents/issue-tracker.md).
+The [standing 3B scheduling exception](tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
+removes final Phase 2/3A acceptance as a start prerequisite for all remaining 3B
+tickets. Preserve outstanding acceptance, actual technical dependencies and protected
+recovery. Canvas work stays deferred until the user explicitly selects it.
 If tracker access is unavailable, preserve local work, report the access blocker
 and resume when access returns. This migration adds no offline snapshot protocol
 or parallel task record.
@@ -97,8 +102,10 @@ reassignment updates the parent; a product requirement change updates its reposi
 contract and the parent map. Do not create a
 second 3B execution brief or copy a full backlog into status files.
 
-Record a newly selected outcome and its finite allowance in its selected work ticket
-before execution. Keep one allowance record for the problem; if the authorized
+After the user selects a new outcome, determine and record its finite original
+allowance, basis, contingency and absolute ceiling under [the budget policy](#5-budget-the-problem-not-the-checkpoint-name).
+State the allowance and basis before execution; proceed without separate budget
+approval. Keep one allowance record for the problem; if the authorized
 outcome spans leaves, link that record instead of duplicating or resetting counts.
 Preserve cumulative use across continuations; failed/cancelled attempts stay charged.
 Closed proof/design/Help selections stay closed. No issue state,
@@ -159,8 +166,8 @@ again. Allow focused compilation/execution of changed tests in implementation go
 select expensive package/native gates explicitly. Broader completion scope is not a
 larger test matrix. Run cheap applicable checks first and retain exact skips/failures.
 
-Pause when waiting on an external operation, a material decision/approval, missing
-capability, exhausted budget or a user interruption. State the concrete reason and
+Pause for an external operation, a material decision/approval, missing capability,
+a reached allowance ceiling or a user interruption. State the concrete reason and
 next action. A new plan heading, commit or completed preparatory step is not by itself
 a reason to stop. On an unresolved hypothesis, the two-correction reassessment rule
 below still applies; a pause or continuation does not reset totals.
@@ -257,9 +264,33 @@ qualification. Keep failed statuses and all relevant measurements on their real 
 
 ### 5. Budget the problem, not the checkpoint name
 
-For implementation and qualification tasks, select one observable outcome and a
-finite iteration allowance covering preparation, focused checks, in-scope repairs
-and justified retries. Routine steps within that allowance need no separate approval.
+For newly user-selected work outcomes, the agent determines a reasonable finite
+original delivery allowance without requesting budget approval. Record it in the
+owning task and state the allowance and its basis to the user before execution.
+Cover preparation, implementation, verification, review and in-scope corrections,
+including failed attempts and justified retries. Base the limits on the bounded
+scope, implementation risk, required hosts/checks and expected correction work.
+Name measurable units and numerical limits appropriate to the outcome, including
+expensive operations, and retain cumulative usage and the remaining allowance.
+
+The agent may consume contingency of up to 50% above the original allowance without
+further approval. Record the contingency and absolute ceiling at selection. For a
+discrete operation limit A, contingency is floor(A / 2) and the ceiling is
+A + floor(A / 2). Apply that calculation separately to each limit; for example,
+3 dispatches permit 1 contingency dispatch, for a total of 4. Report entry into
+contingency before consuming it and update the owning record. Ask for intervention
+before exceeding any ceiling, expanding scope or making an unresolved product decision.
+Additional spending or paid services require separate authorization.
+
+All preparation, failed/cancelled attempts, uncertain attempts and retries stay
+charged to the same problem. Sessions, hosts, branches, checkpoints, subagents and
+successor tickets share its original limits and cumulative consumption. Never reset
+or compound the allowance or calculate new contingency from an increased ceiling.
+Apply this policy to newly selected outcomes; exhausted historical allowances and
+closed no-retry selections remain closed. A successor ticket does not make the same
+exhausted problem a new outcome.
+
+Routine steps within those limits need no separate approval.
 Keep necessary cost, credential, external-effect and recovery boundaries explicit;
 avoid per-step permission gates for ordinary disposable-fixture work. New attempt
 identities preserve evidence without resetting consumption.
@@ -272,7 +303,7 @@ A changed approach needs evidence and must fit the same scope and allowance. Rep
 checks only for changed inputs, a correction or unresolved evidence. Do not reopen a
 closed finding without a relevant change or new evidence.
 
-Stop for exhausted allowance, unavailable capability or a material scope/safety
+Stop at the absolute ceiling, for unavailable capability or a material scope/safety
 decision. Existing explicit user restrictions remain binding until superseded;
 this policy does not renew old no-retry selections or permit ambiguous redispatch.
 Reconcile conflicting task limits once when selecting an outcome. Chat, host, branch

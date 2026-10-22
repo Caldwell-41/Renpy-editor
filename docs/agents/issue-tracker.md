@@ -12,6 +12,13 @@ Approved product decisions and detailed evidence remain in their repository owne
 Link those records from the issue. Creating, assigning or labelling an issue does
 not authorize implementation, publication or renew an allowance.
 
+For remaining 3B entry, apply [the standing scheduling exception](../tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
+and preserve actual ticket blockers and pending acceptance. Once the user selects
+a work ticket, determine, record and state its allowance and basis under
+[WORKFLOW's budget policy](../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name),
+then proceed without separate budget approval. Canvas remains deferred until
+explicitly selected; exhausted historical allowances remain closed.
+
 ## Operations
 
 - Create: `gh issue create --title "..." --body-file <file>`.

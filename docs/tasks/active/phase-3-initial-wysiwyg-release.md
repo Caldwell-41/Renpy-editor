@@ -11,6 +11,10 @@ After the published cutover receipt, remaining 3B delivery ownership is
 [the GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22) and its children
 under [the scoped exception](../../WORKFLOW.md#phase-3b-github-task-ownership).
 This brief continues to own cross-phase routing and other Phase 3 branches.
+All remaining 3B tickets use the [standing scheduling exception](../reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception),
+so final Phase 2/3A acceptance is no longer a start prerequisite. Outstanding
+acceptance and actual technical dependencies remain. Canvas work stays deferred
+until explicitly selected, and no product work ticket is selected by this policy change.
 
 Read the branch contract for
 the selected outcome. The [shared source/runtime contract](../reference/phase-3-shared-contracts.md)

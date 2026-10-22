@@ -5,8 +5,9 @@
 Loomlight is a single-user Windows x64/macOS ARM64 visual Ren'Py authoring tool,
 built with Tauri 2. [CURRENT](docs/status/CURRENT.md) owns project state;
 [HANDOVER](docs/status/HANDOVER.md) owns continuation and recovery;
-the selected task owns scope and acceptance. For remaining Phase 3B entry or
-continuation, follow the effective owner and entry rules under
+the selected task owns scope and acceptance. Remaining Phase 3B may start before
+final Phase 2/3A acceptance under the standing scheduling exception. For 3B entry or
+continuation, follow the owner, scheduling and dependency rules under
 [3B issue ownership](docs/WORKFLOW.md#phase-3b-github-task-ownership).
 
 For a substantive new outcome or transfer, read those live records and only the
@@ -49,9 +50,11 @@ unrelated work; never reset to a historical SHA from an old prompt.
 Carry an authorised implementation outcome through preparation, implementation,
 focused verification, review and in-scope fixes within its cumulative allowance.
 Checkpoints are internal progress, not automatic stops. Preserve review-only scope
-and explicit user limits. The [budget policy](docs/WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
-owns iteration and reassessment; report a concrete blocker when continuation needs
-a real decision or unavailable capability.
+and explicit user limits. For a newly selected work ticket, determine, record and
+state its finite allowance and basis before execution without separate budget approval.
+The [budget policy](docs/WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
+owns the 50% contingency ceiling, cumulative accounting and reassessment. Report a
+concrete blocker when continuation needs a real decision or unavailable capability.
 
 For test-host selection, qualification cadence or a capability handoff, follow
 [host routing](docs/WORKFLOW.md#test-host-routing-and-ownership). For failures,
@@ -82,3 +85,20 @@ Failed, cancelled or skipped required checks are not passes. No package matrix f
 
 Publish only within actual authorization and disclose local-only work. Historical
 instructions do not override the current selected contract or new user directions.
+
+## Agent skills
+
+### Issue tracker
+
+For engineering skills that read or publish tickets, use GitHub Issues.
+Read `docs/agents/issue-tracker.md` before tracker operations.
+
+### Triage labels
+
+For issue triage, use the five default roles mapped in
+`docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Use the single-context layout. Before domain exploration or architectural
+changes, read `docs/agents/domain.md`.

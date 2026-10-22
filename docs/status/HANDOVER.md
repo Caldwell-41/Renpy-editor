@@ -32,11 +32,20 @@ or probe remains pending. No PR, merge or release is selected.
 
 Await the user's next selected work ticket. B01/P3B aggregate, full editor/canvas,
 physical-keyboard and later human/phase acceptance remain separate. Do not infer new
-work or renew an exhausted allowance from this completion. Preserve unrelated local
-policy/instruction edits, domain/triage guides and protected recovery below. The
-retained policy/Help material below predates L01 delivery and is historical context.
+work or renew an exhausted allowance from this completion. Preserve the policy,
+agent guides and protected recovery below. The retained policy/Help material below
+predates L01 delivery and is historical context.
 
-## Phase 3B migration and retained Help audit, 2026-10-22
+The user selected a local commit of the remaining policy/instruction edits and
+domain/triage guides on 2026-10-22. This documentation closeout has an allowance of
+three local validation/correction passes plus one contingency (ceiling four), based
+on 11 Markdown files and no executable changes. Final use is two passes of three
+(ceiling four), covering repository structure, privacy, links, staged whitespace and
+recovery preservation. CURRENT and HANDOVER exceed their soft size targets to retain
+pending acceptance, qualified candidates and protected recovery. No push or product
+operation is selected; the local documentation commit leaves the branch ahead of origin.
+
+## Phase 3B scheduling policy and retained Help audit, 2026-10-22
 
 Branch codex/phase3b-screen-designer. The bounded Help workflow has functional
 qualification on Windows x64 and signed Mac ARM64. Read the
@@ -78,23 +87,32 @@ as a requirement. It remains unimplemented and separate from the pending flow-v1
 editor-layout decision. Neither gate has visual acceptance; no execution allowance
 is renewed by the progress report or requirement record.
 
-The user authorized the reviewed baseline, 39 GitHub issues and scoped ownership
-cutover on 2026-10-22. Baseline `6d78010` is published; all 39 bodies,
-38 native parent edges and 41 native start edges are verified.
+The [published cutover receipt](https://github.com/Caldwell-41/Renpy-editor/issues/22#issuecomment-6334003397)
+makes remaining 3B GitHub ownership effective at `867528d`, following baseline
+`6d78010`. [P3B](https://github.com/Caldwell-41/Renpy-editor/issues/22) and its selected
+children own delivery; product requirements and detailed evidence retain repository owners.
 
-Remaining 3B delivery is mapped in [the GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22). Existing docs remain
-owners until the verified ownership commit is published and the parent records its
-cutover receipt. No child is selected for execution. After that receipt, the next
-action is selection of a bounded work ticket with its entry gate and finite allowance.
-Approved product requirements and detailed evidence retain their repository owners.
+The user established the [standing 3B scheduling exception](../tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
+and [delivery allowance policy](../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
+on 2026-10-22. Final Phase 2/3A acceptance is no longer a start prerequisite for any
+remaining 3B ticket. Preserve pending acceptance, actual dependencies and all protected
+recovery below. After the user selects a new work ticket, the agent determines,
+records and states its finite original allowance and basis, then proceeds without
+separate budget approval. The linked policy owns the 50% contingency, downward
+rounding, cumulative charges and intervention boundaries. Old exhausted allowances
+remain closed. No product work ticket is selected; canvas work remains deferred
+until explicitly selected, including the design session and rendering proof.
 
-The user selected separate local commits for the completed documentation maintenance
-and these Phase 3B records. Scoped terminal records may
-publish by ordinary fast-forward to origin/Caldwell-41/Renpy-editor/
-refs/heads/codex/phase3b-screen-designer. This docs-only successor records c2d9f45 as
-the tested candidate and needs no package matrix. Preserve protected apps/drafts,
-pinned flow-v1 and ignored receipts. The earlier docs-only selection authorized no push, PR, merge or release.
-The migration selection above now authorizes only its reviewed branch publication.
+L01 was the policy read-back's recommended first ticket. Its later completion is
+recorded above; no successor work ticket is selected.
+
+The parent, 27 leaves and two canvas groups have the policy. First read-back verifies
+all 39 bodies and unchanged 38 parent edges, 41 start edges, titles, states, labels
+and assignees. [The parent allowance record](https://github.com/Caldwell-41/Renpy-editor/issues/22#policy-maintenance-allowance)
+owns this docs/issue-only task's cumulative counts, including its failed patch.
+Repository instruction/status edits and domain/triage guides are included in the
+local documentation commit selected above. No package matrix is needed. No product
+implementation, push, PR, merge or release is selected by this closeout.
 
 ## Retained product state and next work
 
@@ -135,10 +153,10 @@ Its model-load amendment has separate automated proof under the
 [walkthrough task](../tasks/active/walkthrough-redesign-implementation.md).
 
 The earlier automatic push review rejected publication without explicit
-payload/destination permission. The user now explicitly authorizes the reviewed
-migration baseline, 39 issues and 3B ownership cutover to
-`origin/codex/phase3b-screen-designer`. No product implementation, PR, merge or
-release is selected. Preserve unrelated work and the protected native state below.
+payload/destination permission. The subsequent migration publication authorization
+was fulfilled by baseline `6d78010`, ownership commit `867528d` and the parent receipt.
+It does not authorize publishing this policy change. Preserve unrelated work and the
+protected native state below.
 
 ## Native recovery and remaining acceptance
 

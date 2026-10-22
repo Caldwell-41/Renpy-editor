@@ -14,7 +14,7 @@ No run or probe remains pending. L01's allowance is closed; no successor task is
 Full editor/canvas, physical-keyboard and later human/phase acceptance remain separate.
 The retained policy/Help record below predates this delivery.
 
-## Phase 3B migration and retained Help result
+## Phase 3B scheduling policy and retained Help result
 
 2026-10-22: The bounded Help workflow has audited Windows x64 and signed Mac ARM64
 functional proof. [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39712450128),
@@ -35,15 +35,22 @@ The user now requires [canvas agreement with Ren'Py](../tasks/reference/phase-3b
 and requested overall 3B progress before implementation. The requirement is recorded;
 implementation has not started and no execution allowance is renewed.
 
-The user authorized the reviewed baseline, 39 GitHub issues and scoped ownership
-cutover on 2026-10-22. Baseline `6d78010` is published; all 39 bodies,
-38 native parent edges and 41 native start edges are verified.
+The [published cutover receipt](https://github.com/Caldwell-41/Renpy-editor/issues/22#issuecomment-6334003397)
+makes GitHub ownership effective at `867528d`. [P3B](https://github.com/Caldwell-41/Renpy-editor/issues/22)
+owns remaining delivery; product requirements and evidence retain repository owners.
 
-Remaining 3B delivery is mapped in [the GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22). Existing docs remain
-owners until the verified ownership commit is published and the parent records its
-cutover receipt. No child is selected for execution. After that receipt, the next
-action is selection of a bounded work ticket with its entry gate and finite allowance.
-Approved product requirements and detailed evidence retain their repository owners.
+The user established a [standing scheduling exception](../tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
+for all remaining 3B on 2026-10-22. Final Phase 2/3A acceptance no longer blocks
+ticket starts; outstanding acceptance and actual technical dependencies remain.
+After selection, the agent records and states a reasonable finite allowance and basis,
+then proceeds under [the budget policy](../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
+without separate budget approval. Historical exhausted allowances stay closed.
+
+GitHub parent, 27 leaves and two canvas groups carry the policy. The policy read-back
+preserved all 38 parent and 41 start edges and all issue states/labels/assignees;
+L01's later completion is recorded above. Repository policy and agent-guide changes
+are included in the user-selected local documentation commit, with no push selected.
+No successor product ticket is selected. Canvas work stays deferred until explicitly selected.
 
 Documentation/validator maintenance is complete and published with the reviewed baseline under
 [its task](../tasks/active/agent-documentation-ownership.md) and
