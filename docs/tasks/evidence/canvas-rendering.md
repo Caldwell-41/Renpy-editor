@@ -387,3 +387,25 @@ native launch and four SDK processes. Prior Windows actual use is one SDK proces
 Local batches 36-38 cover CI2 audit/correction, focused checks/review and the
 publication/CI3 wait record. Mac use remains packages 3/5, native 3/7, SDK 24/24.
 No further Mac SDK launch, broader rendering work or weaker gate is selected.
+
+### CI3 pending operation
+
+Corrected product candidate `7e53b721e1c345a2388780e3ef00eb781fe09248` is pushed
+and the remote branch SHA is verified. [CI3 run 39844974063](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39844974063),
+attempt 1, tests that exact head/candidate on `codex/phase3b-screen-designer`.
+Workflow `screens-source.yml` inputs are ordinal 3, `canvas_helper=true`,
+`owned_blank=false`. It was last observed queued at 2026-10-22 20:00:04 UTC.
+Ignored `ci-03` retains the reservation, discovery and pending/audit checklist.
+
+Use installed ci-watch for same-chat continuation. Actual registration requires
+its launcher acknowledgement; private paths remain outside committed evidence.
+After its event, verify/acknowledge the thread, audit exact run/attempt/SHA and all
+required jobs/artifacts, including repeated updates through the corrected Windows
+reader, both-aspect reference/helper pixels and geometry, SDK/package identities,
+controller/native receipts, privacy and source/process/disk cleanup.
+
+Current use is 38/60 local batches, 3/5 CI dispatches; Mac packages 3/5, native 3/7
+and SDK 24/24. Windows actual use through CI2 is zero packages, zero native launches
+and one SDK process; CI3 reserves one package, one native launch and four SDK
+processes. Neither skipped checks nor cancelled dispatches become passes. All
+original fidelity/native/dragging gates and publication limits remain unchanged.
