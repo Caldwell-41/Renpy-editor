@@ -473,7 +473,8 @@ file and adds its source-map entry; one shared Undo/Redo reverses/restores both.
 Creation checks static screen names throughout `game`, case-insensitive file/name
 collisions, the captured project/map/inventory revisions and dirty Source buffers,
 including a destination deleted externally while its draft remains open. Public
-portable names exclude Ren'Py double-underscore private names and Windows device names.
+portable names exclude Ren'Py double-underscore private names, its internal `_m1_`
+namespace and Windows device names.
 An empty directory may remain after a rejected file transaction; source and metadata
 remain unchanged. Metadata size and relationship validation precede acceptance.
 

@@ -55,7 +55,12 @@ fn declaration_names(bytes: &[u8]) -> Result<Vec<String>, SceneError> {
         let mut line = logical.trim_start();
         // Ren'Py accepts init [priority] <statement> and screen [language-version].
         // Inspect the lexed header only; authoritative bytes are never normalized.
-        if let Some(tail) = keyword(line, "init") {
+        let mut prefixes = 0;
+        while let Some(tail) = keyword(line, "init") {
+            prefixes += 1;
+            if prefixes > MAX_DEPTH {
+                return Err(SceneError::UnsupportedSource);
+            }
             line = skip_integer(tail);
         }
         if let Some(tail) = keyword(line, "screen") {

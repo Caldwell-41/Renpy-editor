@@ -119,7 +119,7 @@ fn owned_screen_creation_refuses_collisions_stale_source_dirty_drafts_and_invali
     let payload = |name: &str| json!({"name":name,"expectedProjectRevision":catalog["projectRevision"],
         "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"]});
     let before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
-    for name in ["elsewhere", "Elsewhere", "../escape", "", "await", "async", "yield", "__notes", "CON", "nul", "LPT1"] {
+    for name in ["elsewhere", "Elsewhere", "../escape", "", "await", "async", "yield", "__notes", "_m1_helper__notes", "CON", "nul", "LPT1"] {
         reject(&mut service, "screens.create", payload(name));
         assert_eq!(fs::read(root.join(".renpy-editor/source-map.json")).unwrap(), before);
         assert!(!root.join("game/ui").exists(), "refused creation must not prepare a source directory");
@@ -180,7 +180,7 @@ fn owned_screen_creation_checks_versioned_and_init_declarations() {
     let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
     let root = profile.join("synthetic-project"); service.open_path(&root).unwrap();
     let before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
-    for header in ["init -10 screen taken():", "init screen taken():", "screen 2 taken():", "init 10 screen 2 taken():", "init 5:\n    screen taken():", "screen \\\ntaken():"] {
+    for header in ["init -10 screen taken():", "init screen taken():", "screen 2 taken():", "init 10 screen 2 taken():", "init 5:\n    screen taken():", "screen \\\ntaken():", "init init screen taken():"] {
         fs::write(root.join("game/other.rpy"), format!("{header}\n        pass\n")).unwrap();
         let catalog = ipc(&mut service,"screens.list",json!({}));
         reject(&mut service,"screens.create",json!({"name":"taken","expectedProjectRevision":catalog["projectRevision"],

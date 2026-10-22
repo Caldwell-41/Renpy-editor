@@ -18,7 +18,7 @@ mod ownership;
 pub use ownership::{Catalog, CreateRequest};
 
 pub(crate) fn valid_name(name: &str) -> bool {
-    identifier(name) && name.len() <= 64 && !name.starts_with("__")
+    identifier(name) && name.len() <= 64 && !name.starts_with("__") && !name.starts_with("_m1_")
         && !matches!(name.to_ascii_uppercase().as_str(), "CON" | "PRN" | "AUX" | "NUL"
             | "COM1" | "COM2" | "COM3" | "COM4" | "COM5" | "COM6" | "COM7" | "COM8" | "COM9"
             | "LPT1" | "LPT2" | "LPT3" | "LPT4" | "LPT5" | "LPT6" | "LPT7" | "LPT8" | "LPT9")
