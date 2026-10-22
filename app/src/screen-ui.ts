@@ -132,7 +132,7 @@ export class ScreensWorkspace {
     });
     this.observer = new ResizeObserver(() => this.renderCanvas()); this.observer.observe(viewport);
   }
-  mount(host: HTMLElement): void { host.append(this.panel); void this.load(); }
+  mount(host: HTMLElement): void { host.append(this.panel); this.invalidateCanvas("Checking canvas source."); void this.load(); }
   dispose(): void { this.disposed = true; this.canvasSequence++; clearTimeout(this.canvasTimer); this.observer.disconnect(); this.cancelResize(); this.closeCreationDialog(); }
   hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize || !!this.creation; }
   private current(): boolean { return !this.disposed && this.actions.current(); }
@@ -352,7 +352,7 @@ export class ScreensWorkspace {
     this.actions.preview({ purpose: "screen", path: this.doc.path, screenName: this.screen, expectedRevision: this.doc.revision }, validate);
   }
   private renderCanvas(): void {
-    if (!this.current()) return;
+    if (!this.current() || !this.panel.isConnected) return;
     const { width, height } = this.gameResolution;
     const available = this.canvas.parentElement?.clientWidth ?? 600;
     this.scale = this.zoom === "100" ? 1 : Math.max(0.05, Math.min((available - 32) / width, 360 / height, 1));
@@ -376,7 +376,7 @@ export class ScreensWorkspace {
       try {
         let frame = await this.actions.request<CanvasFrame>("screens.canvasRender",payload);
         const poll = async (): Promise<void> => {
-          if (!this.current() || sequence !== this.canvasSequence) return;
+          if (!this.current() || !this.panel.isConnected || sequence !== this.canvasSequence) return;
           if (frame.phase === "starting" && frame.frameId) {
             this.canvasTimer = setTimeout(() => { void (async () => {
               try { frame = await this.actions.request<CanvasFrame>("screens.canvasStatus",{frameId:frame.frameId}); await poll(); }
@@ -385,7 +385,7 @@ export class ScreensWorkspace {
           } else if (frame.phase === "ready" && frame.revision === this.doc?.revision && frame.image?.startsWith("data:image/png;base64,")) {
             this.frame = frame; this.showFrame(sequence);
             const health = async (): Promise<void> => {
-              if(!this.current() || sequence!==this.canvasSequence || !frame.frameId) return;
+              if(!this.current() || !this.panel.isConnected || sequence!==this.canvasSequence || !frame.frameId) return;
               try {
                 const current=await this.actions.request<CanvasFrame>("screens.canvasStatus",{frameId:frame.frameId,includeImage:false});
                 if(!this.current() || sequence!==this.canvasSequence) return;

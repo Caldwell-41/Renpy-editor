@@ -14,10 +14,12 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
   let documents = mixed ? [documentFor("game/ui/a_styles.rpy"), documentFor("game/ui/help.rpy", "help"), documentFor("game/ui/pause.rpy", "pause")] : [documentFor("game/ui/help.rpy", "help")];
   let settle: { resolve: (value: ScreenDocument) => void; reject: (error: Error) => void } | undefined;
   const sources: unknown[] = [];
+  const calls: CoreOperation[] = [];
   let canvasAvailable = true;
   const workspace = new ScreensWorkspace({ resolution: { width: 1280, height: 720 }, current: () => true,
     coordinate: task => task(), source: target => { sources.push(target); }, preview: () => {}, saved: () => {},
     request: async <T>(operation: CoreOperation, payload?: Record<string, unknown>): Promise<T> => {
+      calls.push(operation);
       if (operation === "source.list") return { files: documents.map(d => ({ path: d.path })) } as T;
       if (operation === "screens.list") return { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "files", owned: ownedRace ? [{ id: "owned-help", rootId: "owned-root", name: "help", path: "game/ui/help.rpy", resolved: true, sourceRevision: "before" }] : [] } as T;
       if (operation === "screens.inspect") {
@@ -25,17 +27,33 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
         return ownedRace ? { ...documentFor("game/ui/help.rpy", ownedRace === "rename" ? "neighbor" : "help"), revision: "after" } as T : documents.find(d => d.path === payload?.path) as T;
       }
       if (operation === "screens.setSize") return await new Promise<ScreenDocument>((resolve, reject) => { settle = { resolve, reject }; }) as T;
-      if (operation === "screens.canvasRender" && canvas) return (canvasAvailable ? { phase:"ready", revision:"before", width:1280, height:720,
+      if (operation === "screens.canvasStatus" && canvas) return {phase:"ready"} as T;
+      if (operation === "screens.canvasRender" && canvas) return (canvasAvailable ? { phase:"ready", frameId:"fixture-frame", revision:"before", width:1280, height:720,
         image:"data:image/png;base64,fixture", geometry:[{start:30,x:320,y:180,width:640,height:360}] } : {phase:"unavailable",message:"Helper stopped. Drafts retained."}) as T;
       throw new Error(operation);
     } });
   workspace.mount(document.body);
   const click = (text: string) => { const b = [...document.querySelectorAll("button")].find(b => b.textContent === text)!; assert.ok(b, text); b.focus(); b.click(); return b; };
   const field = (name: string) => { const input = [...document.querySelectorAll("input")].find(i => i.ariaLabel === name); assert.ok(input, document.body.innerHTML); return input; };
-  return { workspace, click, field, sources, stopHelper: () => { canvasAvailable = false; }, removePause: () => { documents = documents.filter(d => !d.path.endsWith("pause.rpy")); },
+  return { workspace, click, field, sources, calls, stopHelper: () => { canvasAvailable = false; }, removePause: () => { documents = documents.filter(d => !d.path.endsWith("pause.rpy")); },
     accept: () => { const accepted = structuredClone(documents.find(d => d.screens.length)!); accepted.revision = "accepted"; accepted.screens[0]!.nodes[0]!.properties[0]!.value = 750; settle!.resolve(accepted); },
     refuse: () => settle!.reject(new Error("Draft conflict")), dispose: () => workspace.dispose() };
 }
+
+test("a hidden Screens workspace releases its polling and validates a fresh frame on remount", async () => {
+  const h=harness(false,undefined,true);
+  try {
+    await tick();await tick();
+    document.querySelector('img')!.dispatchEvent(new window.Event('load'));
+    h.workspace.panel.remove();
+    await new Promise(resolve=>setTimeout(resolve,550));
+    assert.equal(h.calls.filter(op=>op==='screens.canvasStatus').length,0,"Hidden Screens must not compete with another editor's shared service");
+    h.stopHelper();h.workspace.mount(document.body);await tick();await tick();
+    assert.equal(document.querySelector('.screen-game')?.getAttribute('data-stale'),'true');
+    assert.equal(document.querySelector('.screen-node'),null,"A remounted workspace must not reuse unchecked geometry");
+    assert.match(document.querySelector('.screen-canvas-status')!.textContent!,/stopped|unavailable|retained/i);
+  } finally {h.dispose();}
+});
 
 test("Screens keeps a focused draft and disables old geometry when the helper becomes unavailable", async () => {
   const h = harness(false,undefined,true);

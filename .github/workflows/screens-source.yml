@@ -29,6 +29,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-selection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject conflicting qualification selectors
+        env:
+          OWNED_BLANK: ${{ inputs.owned_blank }}
+          CANVAS_HELPER: ${{ inputs.canvas_helper }}
+        run: |
+          if test "$OWNED_BLANK" = true && test "$CANVAS_HELPER" = true; then
+            echo '::error::Select only one qualification outcome.'
+            exit 1
+          fi
+
   focused:
     if: ${{ !inputs.owned_blank && !inputs.canvas_helper }}
     name: Help (${{ matrix.target }})
@@ -370,6 +383,7 @@ jobs:
           node --test dist-tests/tests/screen-ui.dom.test.js
           cargo test -p loomlight-core --release --locked --lib screens::tests -- --nocapture
           cargo build -p loomlight-core --examples --locked
+          cargo build -p loomlight-core --release --example canvas-controller-driver --locked
           npm run build
           cargo check -p loomlight-desktop --locked
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9

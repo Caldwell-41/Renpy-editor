@@ -1,6 +1,6 @@
 // Synthetic DOM actions in the packaged WebView, using production requests and pixels.
 (async () => {
-  const stages=[],frames=[]; let stage="open",serial=0,latest;
+  const stages=[],frames=[]; let stage="open",serial=0,latest,startupImageLoadMilliseconds;
   const started=performance.now(),delay=ms=>new Promise(r=>setTimeout(r,ms));
   const assert=(value,message)=>{if(!value)throw Error(message);};
   const until=async predicate=>{const deadline=performance.now()+30000;while(!predicate()){if(performance.now()>deadline)throw Error(`Timeout: ${stage}`);await delay(20);}};
@@ -18,8 +18,10 @@
   const width=()=>document.querySelector('.screens-editor [aria-label="Width"]');
   const edit=value=>{const input=width();input.focus();input.value=String(value);input.dispatchEvent(new Event("input",{bubbles:true}));return input;};
   try {
-    await until(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await click("Screens");
+    await until(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();
+    await until(()=>find("Screens"));const startup=performance.now();find("Screens").click();
     await until(()=>fresh() && latest?.width===1280);
+    startupImageLoadMilliseconds=performance.now()-startup;
     const project=await read("project.current"),sessionId=project.sessionId;
     const before=await read("source.open",{sessionId,path:"game/ui/help.rpy"});
     frames.push(latest); checkpoint("project-frame-passed");
@@ -41,7 +43,7 @@
     assert(document.querySelector('.screen-game').style.width==="1024px","100% must use logical game pixels");checkpoint("logical-pixels-passed");
     await click("Close Project");await until(()=>document.querySelector('.recent-open'));
     checkpoint("project-close-passed");checkpoint("complete");
-    await call("probe.runtimeUiReport",{passed:true,scenario:"canvas-helper",stage,stages,frames,nativeWebView:true,nativeKeyboard:false,nativeFocusObserved:false,warmPresentationProof:false});
+    await call("probe.runtimeUiReport",{passed:true,scenario:"canvas-helper",stage,stages,frames,startupImageLoadMilliseconds,nativeWebView:true,nativeKeyboard:false,nativeFocusObserved:false,warmPresentationProof:false});
   } catch(error) {
     await call("probe.runtimeUiReport",{passed:false,scenario:"canvas-helper",stage,stages,frames,error:String(error),body:document.body.innerText.slice(-5000)});
   }

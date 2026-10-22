@@ -9,7 +9,7 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {driverProcess} from './phase2-driver-process.mjs';
 const output=resolve(process.env.LOOMLIGHT_CANVAS_EVIDENCE ?? '../.toolchains/canvas-proof/browser-07');
 await mkdir(output,{recursive:true});
-const child=driverProcess(resolve(`target/debug/examples/canvas-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-canvas-controller-${randomUUID()}`)],{timeout:180000});
+const child=driverProcess(resolve(`target/release/examples/canvas-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-canvas-controller-${randomUUID()}`)],{timeout:180000});
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 let browser,page,lastFrame,sessionId,passed=false;
 const cases=[],errors=[],requests=[],timings=[],breakdown=[];
@@ -29,14 +29,19 @@ try {
   });
   await page.route('**/canvas-driver',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/canvas-driver`);
-  await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');window.__canvasRpcTimings=[];startApplication(async(operation,payload)=>{
+  await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');window.__canvasRpcTimings=[];
+  document.addEventListener('load',event=>{if(event.target instanceof HTMLImageElement && event.target.matches('.screen-render'))window.__canvasDecodedAt=performance.now();},true);
+  startApplication(async(operation,payload)=>{
     const began=performance.now();const result=await window.canvasRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation,payload});
     window.__canvasRpcTimings.push({operation,began,ended:performance.now()});return result;
   });});
-  await page.locator('.recent-open').click(); await page.getByRole('button',{name:'Screens',exact:true}).click();
+  await page.locator('.recent-open').click();
+  await page.getByRole('button',{name:'Screens',exact:true}).evaluate(e=>e.addEventListener('click',()=>{window.__canvasStartupAt=performance.now();},{capture:true,once:true}));
+  await page.getByRole('button',{name:'Screens',exact:true}).click();
   const ui=page.locator('.screens-editor');
   await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false',{},{timeout:30000});
   assert.equal(lastFrame.width,1280); assert.equal(lastFrame.height,720);
+  await writeFile(join(output,'startup.json'),JSON.stringify({measurement:'Screens click to first helper PNG load in Chrome; SDK already installed; not native presentation',milliseconds:await page.evaluate(()=>window.__canvasDecodedAt-window.__canvasStartupAt)},null,2));
   await writeFile(join(output,'helper-1280x720.png'),Buffer.from(lastFrame.image.split(',')[1],'base64'));
   await writeFile(join(output,'helper-1280x720.json'),JSON.stringify({...lastFrame,image:undefined},null,2));
   await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
@@ -101,9 +106,6 @@ try {
   cases.push('normal/hover samples at both aspects and literal live text samples preserve accepted source');
   await page.setViewportSize({width:1100,height:760});
   await ui.getByLabel('Width',{exact:true}).evaluate(e=>e.addEventListener('input',()=>{window.__canvasInputAt=performance.now();},{capture:true}));
-  await page.evaluate(()=>document.addEventListener('load',event=>{
-    if(event.target instanceof HTMLImageElement && event.target.matches('.screen-render')) window.__canvasDecodedAt=performance.now();
-  },true));
   for(let index=1;index<=40;index++) {
     await ui.getByLabel('Width',{exact:true}).fill(String(640+index*8));
     await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');

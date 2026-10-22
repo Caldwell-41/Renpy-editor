@@ -44,8 +44,10 @@ def image_ok(value, width, height):
 
 
 def canvas_details_ok(details):
+    startup=details.get('startupImageLoadMilliseconds')
     if (details.get('nativeWebView') is not True or details.get('nativeKeyboard') is not False
             or details.get('nativeFocusObserved') is not False or details.get('warmPresentationProof') is not False
+            or type(startup) not in (int,float) or not math.isfinite(startup) or startup<=0
             or details.get('error')):
         return False
     frames=details.get('frames')

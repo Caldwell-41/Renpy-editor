@@ -34,7 +34,7 @@ size; ordinary editor window resize does not. Accepted edits continue through
 
 The bounded property list is explicit in `screens/canvas.rs`. Unknown properties,
 blocks, custom initialization/styles, archives/orphan bytecode, text tags and
-unsampled source interpolation refuse rendering. This includes ordinary GUI
+source interpolation refuse rendering. This includes ordinary GUI
 initialization that the proof cannot resolve yet. Element lists, fields, Source and
 deliberate Test in Ren'Py remain available. Source/asset inventory and hashes invalidate
 frames. Old frames lose selection/resize geometry immediately; asynchronous old
@@ -92,9 +92,36 @@ or explicitly selected SDK cases remained ignored; three documented broad gates
 were excluded. Focused canvas core/UI and rejecting native receipt checks pass.
 The existing Help browser regression passes 11 groups without SDK execution.
 
-Native package results, independent review and final candidate identity will be
-recorded before closeout. Windows CI is prepared but remains undispatched because
-this selection authorizes a local commit and has no push authorization.
+The measured slow core requests came from the debug driver. In `browser-23`,
+median render submission/status calls took 95.6/49.1 ms; helper rendering itself
+had p95 19.7 ms and cleanup 6.9 ms. Using the production release build in
+`browser-release-24` reduced those medians to 11.3/6.2 ms and input-to-image-load
+p95 to 63.9 ms. Completed Chrome captures still had p95 150 ms, including up to
+89 ms after image load. The browser qualification now builds and uses the release
+driver. This resolves the measurement configuration error; it does not establish
+native visible-frame timing.
+
+## Independent review
+
+The code-review skill reviewed committed candidate `fd781a6` against `7e1e7b3`
+with separate Standards and Spec agents.
+
+Standards found two breaches. Canvas requests did not join the shared service
+lane, permitting polling to contend with saves; conflicting CI booleans skipped
+all jobs. The correction routes Screens operations and its history acceptance
+through the lane, retries only pre-dispatch read refusals, and stops detached
+Screens polling. Remount validates a fresh frame. Held-owner and detached-workspace
+regressions fail before the correction and pass after it. The workflow always
+runs a cheap selector validator and rejects both booleans together. No baseline
+smell findings were reported. Correction review remains pending.
+
+Spec found three incomplete requirements: matched both-target rendering, native
+responsiveness/startup/focus evidence, and element dragging. These remain explicit
+acceptance gaps. No additional wrong implementation or scope creep was reported.
+
+Native package results and final candidate identity will be recorded before closeout.
+Windows CI is prepared but remains undispatched because this selection authorizes
+a local commit and has no push authorization.
 
 The mandatory outstanding gates include matching drawable-scale fidelity, native
 input-to-visible timing on both targets, OS focus/window observation, startup

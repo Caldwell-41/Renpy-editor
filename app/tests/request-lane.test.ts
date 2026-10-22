@@ -76,3 +76,16 @@ test("rewrite preparation, send, acceptance and discard serialize once while can
   assert.deepEqual(calls,["retention","status","cancel",operation]);
  }
 });
+
+test("canvas frames, health and Screens acceptance share the service lane while Stop stays responsive",async()=>{
+ for(const operation of ["screens.canvasPlan","screens.canvasRender","screens.canvasStatus","screens.setPixelProperty","screens.setSize","screens.create","scene.apply"] as const){
+  const lane=new RequestLane(),calls:string[]=[];let release!:()=>void;
+  const held=lane.run("source.updateDraft",async()=>{calls.push("retention");await new Promise<void>(r=>{release=r;});});
+  await Promise.resolve();const canvas=lane.run(operation,async()=>{calls.push(operation);});
+  const close=lane.run("project.close",async()=>{calls.push("close");});
+  await lane.run("runtime.stop",async()=>{calls.push("stop");});
+  try{assert.deepEqual(calls,["retention","stop"],`${operation} must not contend with retention or close`);}
+  finally{release();await held;await canvas;await close;}
+  assert.deepEqual(calls,["retention","stop",operation,"close"]);
+ }
+});

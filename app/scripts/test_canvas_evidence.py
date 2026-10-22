@@ -17,7 +17,7 @@ def png(width, height):
 def receipt():
     stages=['project-frame-passed','draft-cancel-focus-passed','source-history-passed','second-aspect-passed','logical-pixels-passed','project-close-passed','complete']
     return dict(evidence='runtime-ui-packaged',case='canvas-helper',passed=True,cleanupComplete=True,details=dict(
-        scenario='canvas-helper',stage='complete',stages=[dict(stage=s) for s in stages],nativeWebView=True,nativeKeyboard=False,nativeFocusObserved=False,warmPresentationProof=False,
+        scenario='canvas-helper',stage='complete',stages=[dict(stage=s) for s in stages],nativeWebView=True,nativeKeyboard=False,nativeFocusObserved=False,warmPresentationProof=False,startupImageLoadMilliseconds=1000,
         frames=[dict(width=w,height=h,revision='a'*64,phase='ready',renderer='sw',image='data:image/png;base64,'+base64.b64encode(png(w,h)).decode(),
                      geometry=[dict(start=113,x=x,y=y,width=640,height=360)]) for w,h,x,y in [(1280,720,320,180),(1024,768,192,204)]]))
 
@@ -29,7 +29,7 @@ class CanvasEvidence(unittest.TestCase):
     def test_rejects_missing_duplicate_failed_or_wrong_results(self):
         baseline=receipt()
         mutations=[lambda r:r.update(passed=False),lambda r:r.update(cleanupComplete=False),
-                   lambda r:r['details'].update(frames=[]),lambda r:r['details']['stages'].pop(0),
+                   lambda r:r['details'].pop('startupImageLoadMilliseconds'),lambda r:r['details'].update(startupImageLoadMilliseconds=float('nan')),lambda r:r['details'].update(startupImageLoadMilliseconds=-1),lambda r:r['details'].update(frames=[]),lambda r:r['details']['stages'].pop(0),
                    lambda r:r['details']['stages'].insert(0,dict(stage='project-frame-passed')),
                    lambda r:r['details'].update(nativeWebView=False),lambda r:r['details'].update(nativeFocusObserved=True),
                    lambda r:r['details'].update(warmPresentationProof=True),
