@@ -734,3 +734,24 @@ unapplied. If approved, record that authority, update the selector, commit/push 
 dispatch a new attempt 1 at the exact candidate SHA, then use same-chat ci-watch
 and audit every required result. Never reuse ordinal 5. No PR, merge or release is
 selected. Unrelated policy edits and protected recovery remain preserved.
+
+## Approved sixth dispatch
+
+2026-10-23: the user approves exactly one additional Windows CI run. Only the
+cumulative CI ceiling increases from five to six; no new contingency or Mac SDK
+process is allocated. The user also directs that a failed run must be audited,
+then handed off using the handoff skill. After that audit, stop without further
+fixes, execution or retries. Save the handoff in the OS temporary directory and
+link existing owners rather than duplicating their contents.
+
+The workflow admits ordinal 6 while retaining exact candidate SHA, selected branch,
+attempt 1, mutually exclusive outcome selectors and every proof requirement.
+Focused shell checks accept 6 and reject 7/invalid; workflow YAML parses. Both
+independent read-only review axes report zero new findings. This changes no product
+code or rendering gate. The display/reference correction remains unverified on Windows.
+
+Local batch 49 covers authorization/selector preparation and review. Current use
+before dispatch is 49/60 local batches, 5/6 CI; Mac packages 3/5, native 3/7,
+SDK 24/24; Windows packages 0/5, native 0/7, SDK 6/20. The single new dispatch
+reserves at most one Windows package, one native launch and four SDK processes.
+All prior failed/cancelled use stays charged. No seventh dispatch is allocated.
