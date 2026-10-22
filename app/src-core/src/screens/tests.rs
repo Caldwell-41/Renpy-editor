@@ -88,7 +88,8 @@ fn owned_screen_reconciles_source_offsets_and_edits_but_refuses_renames_and_dele
     let draft = ipc(&mut service, "source.updateDraft", json!({"path":path,
         "expectedBaseRevision":source["baseRevision"], "text":changed,"selectionStart":0,"selectionEnd":0}));
     ipc(&mut service, "source.save", json!({"path":path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}));
-    assert_eq!(ipc(&mut service, "screens.list", json!({}))["owned"], created["owned"]);
+    let reconciled = ipc(&mut service, "screens.list", json!({}));
+    for key in ["id", "rootId", "name", "path", "resolved"] { assert_eq!(reconciled["owned"][0][key], created["owned"][0][key]); }
     let document = ipc(&mut service, "screens.inspect", json!({"path":path}));
     assert!(document["screens"][0]["nodes"][0]["span"]["start"].as_u64().unwrap() > 30);
     for replacement in [changed.replace("screen notes()", "screen renamed()"),
@@ -118,7 +119,7 @@ fn owned_screen_creation_refuses_collisions_stale_source_dirty_drafts_and_invali
     let payload = |name: &str| json!({"name":name,"expectedProjectRevision":catalog["projectRevision"],
         "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"]});
     let before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
-    for name in ["elsewhere", "Elsewhere", "../escape", "", "await", "async", "yield"] {
+    for name in ["elsewhere", "Elsewhere", "../escape", "", "await", "async", "yield", "__notes", "CON", "nul", "LPT1"] {
         reject(&mut service, "screens.create", payload(name));
         assert_eq!(fs::read(root.join(".renpy-editor/source-map.json")).unwrap(), before);
         assert!(!root.join("game/ui").exists(), "refused creation must not prepare a source directory");
@@ -170,6 +171,42 @@ fn owned_screen_metadata_migration_and_noop_reopen_preserve_source_and_extras() 
     assert!(service.open_path(&root).is_err());
     assert_eq!(fs::read(&map_path).unwrap(), newer_bytes);
     assert_eq!(fs::read(root.join(PATH)).unwrap(), FIXTURE.as_bytes());
+}
+
+#[test]
+fn owned_screen_creation_checks_versioned_and_init_declarations() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project"); service.open_path(&root).unwrap();
+    let before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+    for header in ["init -10 screen taken():", "init screen taken():", "screen 2 taken():", "init 10 screen 2 taken():", "init 5:\n    screen taken():", "screen \\\ntaken():"] {
+        fs::write(root.join("game/other.rpy"), format!("{header}\n        pass\n")).unwrap();
+        let catalog = ipc(&mut service,"screens.list",json!({}));
+        reject(&mut service,"screens.create",json!({"name":"taken","expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"]}));
+        assert_eq!(fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),before);
+        assert!(!root.join("game/ui/taken.rpy").exists());
+    }
+}
+
+#[test]
+fn owned_screen_creation_retains_dirty_source_after_external_destination_deletion() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project"); fs::create_dir(root.join("game/ui")).unwrap();
+    fs::write(root.join("game/ui/pending.rpy"), "# original\n").unwrap(); service.open_path(&root).unwrap();
+    let opened = ipc(&mut service,"source.open",json!({"path":"game/ui/pending.rpy"}));
+    let draft = ipc(&mut service,"source.updateDraft",json!({"path":"game/ui/pending.rpy","expectedBaseRevision":opened["baseRevision"],
+        "text":"# unfinished writing\n","selectionStart":4,"selectionEnd":4}));
+    fs::remove_file(root.join("game/ui/pending.rpy")).unwrap();
+    let catalog = ipc(&mut service,"screens.list",json!({}));
+    assert_eq!(reject(&mut service,"screens.create",json!({"name":"pending","expectedProjectRevision":catalog["projectRevision"],
+        "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"]}))["error"]["code"],"DIRTY_SOURCE");
+    assert!(!root.join("game/ui/pending.rpy").exists());
+    assert_eq!(ipc(&mut service,"source.open",json!({"path":"game/ui/pending.rpy"}))["text"],draft["text"]);
+    assert_eq!(ipc(&mut service,"screens.list",json!({}))["sourceMapRevision"],catalog["sourceMapRevision"]);
 }
 
 #[test]

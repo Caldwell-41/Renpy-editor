@@ -13,7 +13,7 @@ export interface ScreenDocument {
   path: string; revision: string; partial: boolean;
   screens: { name: string; nodes: ScreenNode[] }[];
 }
-interface OwnedScreen { id: string; rootId: string; path: string; name: string; resolved: boolean }
+interface OwnedScreen { id: string; rootId: string; path: string; name: string; resolved: boolean; sourceRevision: string | null }
 interface ScreenCatalog {
   projectRevision: string; sourceMapRevision: string; inventoryRevision: string; owned: OwnedScreen[];
 }
@@ -116,16 +116,25 @@ export class ScreensWorkspace {
       for (const file of inventory.files) {
         if (!/^game\/ui\/[A-Za-z_][A-Za-z_0-9]{0,63}\.rpy$/.test(file.path)) continue;
         if (catalog.owned.some(s => s.path === file.path && !s.resolved)) continue;
-        documents.push(await this.actions.request<ScreenDocument>("screens.inspect", { path: file.path }));
+        try { documents.push(await this.actions.request<ScreenDocument>("screens.inspect", { path: file.path })); }
+        catch (error) {
+          const owned = catalog.owned.find(s => s.path === file.path);
+          if (!owned) throw error;
+          owned.resolved = false;
+        }
       }
       if (!this.current() || sequence !== this.loadSequence) return;
+      catalog.owned.forEach(owned => {
+        const document = documents.find(d => d.path === owned.path);
+        if (!document || document.revision !== owned.sourceRevision || !document.screens.some(s => s.name === owned.name)) owned.resolved = false;
+      });
       const path = this.doc?.path; this.documents = documents; this.catalog = catalog;
       const supported = documents.filter(d => d.screens.length > 0);
       if (this.owned) this.owned = catalog.owned.find(s => s.id === this.owned!.id) ?? { ...this.owned, resolved: false };
       else if (!path) this.owned = catalog.owned[0];
       this.doc = this.owned ? this.owned.resolved ? supported.find(d => d.path === this.owned!.path) : undefined : supported.find(d => d.path === path) ?? supported[0];
       if (this.owned) this.screen = this.owned.name;
-      if (!this.doc?.screens.some(s => s.name === this.screen)) this.screen = this.doc?.screens[0]?.name ?? "";
+      if (!this.owned && !this.doc?.screens.some(s => s.name === this.screen)) this.screen = this.doc?.screens[0]?.name ?? "";
       this.selected = Math.min(this.selected, Math.max(0, this.nodes().length - 1));
       this.selection.replaceChildren();
       const owned = [...catalog.owned];
@@ -194,7 +203,7 @@ export class ScreensWorkspace {
     this.card.scrollTop = scroll;
   }
   private reportUnresolved(): void {
-    if (this.owned && !this.owned.resolved) this.note(`Unresolved owned screen ${this.owned.name}. Restore its declaration and ownership marker in ${this.owned.path}, then refresh Source.`, true);
+    if (this.owned && !this.owned.resolved) this.note(`Unresolved owned screen ${this.owned.name}. Review its declaration and ownership marker in ${this.owned.path}, then refresh Source.`, true);
   }
   private beginCreation(): void {
     if (this.busy || this.hasDraft() || !this.catalog) { this.note("Finish or cancel unfinished changes before creating a screen. Input retained.", true); return; }
@@ -210,7 +219,7 @@ export class ScreensWorkspace {
     const actions = el("div", "screen-create-actions");
     actions.append(button("Cancel creation", () => { if (!this.busy) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.card.querySelector<HTMLButtonElement>("button")?.focus(); this.note("Creation cancelled. No source was written."); } }), button("Create blank screen", () => void this.create(), "button primary"));
     const status = el("p"); status.role = "status"; status.ariaLive = "polite";
-    form.append(el("h2", "", "New blank screen"), label, el("p", "muted", "Use a source name such as travel_notes. Start with a letter or underscore; then use letters, numbers or underscores."), status, actions);
+    form.append(el("h2", "", "New blank screen"), label, el("p", "muted", "Use a source name such as travel_notes. Use letters, numbers and underscores, starting with a letter or a single underscore."), status, actions);
     form.oncancel = event => { event.preventDefault(); this.cancel(); };
     this.creationDialog = form; this.panel.append(form); form.showModal();
   }

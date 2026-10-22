@@ -769,7 +769,7 @@ mod tests {
                 &project_metadata.project_id,
             )
             .unwrap();
-            assert_eq!(new.schema_version, 5);
+            assert_eq!(new.schema_version, SOURCE_MAP_SCHEMA_VERSION);
             assert_eq!(fs::read(&path).unwrap(), bytes);
             let call = new.scene_mappings[0]
                 .beats

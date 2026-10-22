@@ -8,27 +8,42 @@ const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 const documentFor = (path: string, name?: string): ScreenDocument => ({ path, revision: "before", partial: false,
   screens: name ? [{ name, nodes: [{ kind: "frame", literal: null, layout: {}, span: { start: 30, end: 90 }, parentStart: null,
     properties: [{ property: "xsize", value: 640 }, { property: "ysize", value: 360 }], protected: [] }] }] : [] });
-function harness(mixed = false) {
+function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable") {
   const browser = new Window();
   Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, ResizeObserver: browser.ResizeObserver });
   let documents = mixed ? [documentFor("game/ui/a_styles.rpy"), documentFor("game/ui/help.rpy", "help"), documentFor("game/ui/pause.rpy", "pause")] : [documentFor("game/ui/help.rpy", "help")];
   let settle: { resolve: (value: ScreenDocument) => void; reject: (error: Error) => void } | undefined;
+  const sources: unknown[] = [];
   const workspace = new ScreensWorkspace({ resolution: { width: 1280, height: 720 }, current: () => true,
-    coordinate: task => task(), source: () => {}, preview: () => {}, saved: () => {},
+    coordinate: task => task(), source: target => { sources.push(target); }, preview: () => {}, saved: () => {},
     request: async <T>(operation: CoreOperation, payload?: Record<string, unknown>): Promise<T> => {
       if (operation === "source.list") return { files: documents.map(d => ({ path: d.path })) } as T;
-      if (operation === "screens.list") return { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "files", owned: [] } as T;
-      if (operation === "screens.inspect") return documents.find(d => d.path === payload?.path) as T;
+      if (operation === "screens.list") return { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "files", owned: ownedRace ? [{ id: "owned-help", rootId: "owned-root", name: "help", path: "game/ui/help.rpy", resolved: true, sourceRevision: "before" }] : [] } as T;
+      if (operation === "screens.inspect") {
+        if (ownedRace === "unavailable") throw new Error("Source changed during inspection");
+        return ownedRace ? { ...documentFor("game/ui/help.rpy", ownedRace === "rename" ? "neighbor" : "help"), revision: "after" } as T : documents.find(d => d.path === payload?.path) as T;
+      }
       if (operation === "screens.setSize") return await new Promise<ScreenDocument>((resolve, reject) => { settle = { resolve, reject }; }) as T;
       throw new Error(operation);
     } });
   workspace.mount(document.body);
   const click = (text: string) => { const b = [...document.querySelectorAll("button")].find(b => b.textContent === text)!; assert.ok(b, text); b.focus(); b.click(); return b; };
   const field = (name: string) => { const input = [...document.querySelectorAll("input")].find(i => i.ariaLabel === name); assert.ok(input, document.body.innerHTML); return input; };
-  return { workspace, click, field, removePause: () => { documents = documents.filter(d => !d.path.endsWith("pause.rpy")); },
+  return { workspace, click, field, sources, removePause: () => { documents = documents.filter(d => !d.path.endsWith("pause.rpy")); },
     accept: () => { const accepted = structuredClone(documents.find(d => d.screens.length)!); accepted.revision = "accepted"; accepted.screens[0]!.nodes[0]!.properties[0]!.value = 750; settle!.resolve(accepted); },
     refuse: () => settle!.reject(new Error("Draft conflict")), dispose: () => workspace.dispose() };
 }
+
+for (const race of ["rename", "revision", "unavailable"] as const) test(`Owned selection stays unresolved when ${race} changes between catalog and inspection`, async () => {
+  const h = harness(false, race);
+  try {
+    await tick();
+    assert.deepEqual(JSON.parse(document.querySelector("select")!.value), ["owned", "owned-help"]);
+    assert.match(document.querySelector(".screen-message")!.textContent!, /Unresolved owned screen help/);
+    assert.equal(document.querySelectorAll('.screen-tree [role="option"]').length, 0);
+    h.click("View in Source"); assert.deepEqual(h.sources, []);
+  } finally { h.dispose(); }
+});
 
 test("Screens selects a supported declaration in mixed inventory and keeps a valid selection on refresh", async () => {
   const h = harness(true);

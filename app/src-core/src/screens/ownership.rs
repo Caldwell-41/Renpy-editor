@@ -14,6 +14,7 @@ pub struct OwnedReference {
     #[serde(flatten)]
     pub screen: OwnedScreen,
     pub resolved: bool,
+    pub source_revision: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -47,24 +48,45 @@ fn declaration_names(bytes: &[u8]) -> Result<Vec<String>, SceneError> {
         .map_err(|_| SceneError::UnsupportedSource)?;
     let mut names = vec![];
     for (start, end) in ranges {
-        let line = std::str::from_utf8(&bytes[start..end])
+        let logical = std::str::from_utf8(&bytes[start..end])
             .map_err(|_| SceneError::UnsupportedSource)?
-            .trim_start();
-        if let Some(tail) = line
-            .strip_prefix("screen")
-            .filter(|s| s.starts_with(char::is_whitespace))
-        {
-            let name = tail
+            .replace("\\\r\n", " ")
+            .replace("\\\n", " ");
+        let mut line = logical.trim_start();
+        // Ren'Py accepts init [priority] <statement> and screen [language-version].
+        // Inspect the lexed header only; authoritative bytes are never normalized.
+        if let Some(tail) = keyword(line, "init") {
+            line = skip_integer(tail);
+        }
+        if let Some(tail) = keyword(line, "screen") {
+            let name = skip_integer(tail)
                 .trim_start()
                 .split(['(', ':', ' ', '\t', '\r', '\n'])
                 .next()
                 .unwrap_or("");
-            if identifier(name) {
-                names.push(name.to_owned());
+            if !identifier(name) {
+                return Err(SceneError::UnsupportedSource);
             }
+            names.push(name.to_owned());
         }
     }
     Ok(names)
+}
+
+fn keyword<'a>(line: &'a str, word: &str) -> Option<&'a str> {
+    line.strip_prefix(word)
+        .filter(|tail| tail.starts_with(char::is_whitespace))
+        .map(str::trim_start)
+}
+
+fn skip_integer(line: &str) -> &str {
+    let end = line.find(char::is_whitespace).unwrap_or(line.len());
+    let value = line[..end].strip_prefix(['+', '-']).unwrap_or(&line[..end]);
+    if !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_digit()) {
+        line[end..].trim_start()
+    } else {
+        line
+    }
 }
 
 fn marker(id: &str) -> String {
@@ -198,9 +220,22 @@ impl AuthoringService {
         let owned = map
             .owned_screens
             .into_iter()
-            .map(|screen| OwnedReference {
-                resolved: resolves(&screen, &inventory),
-                screen,
+            .map(|screen| {
+                let resolved = resolves(&screen, &inventory);
+                let source_revision = if resolved {
+                    inventory
+                        .files
+                        .iter()
+                        .find(|(path, _)| path == &screen.path)
+                        .map(|(_, bytes)| hex::encode(Sha256::digest(bytes)))
+                } else {
+                    None
+                };
+                OwnedReference {
+                    resolved,
+                    screen,
+                    source_revision,
+                }
             })
             .collect();
         Ok(Catalog {
@@ -232,12 +267,16 @@ impl AuthoringService {
         if !inventory.complete {
             return Err(SceneError::UnsupportedSource);
         }
+        let destination = format!("game/ui/{}.rpy", request.name);
         self.ensure_source_paths_clean(
             project,
-            inventory.files.iter().map(|(path, _)| path.as_str()),
+            inventory
+                .files
+                .iter()
+                .map(|(path, _)| path.as_str())
+                .chain(std::iter::once(destination.as_str())),
         )
         .map_err(|_| SceneError::DirtySource)?;
-        let destination = format!("game/ui/{}.rpy", request.name);
         if inventory
             .names
             .iter()

@@ -471,7 +471,9 @@ Blank creation writes `# loomlight-screen: <screen UUID>` followed by the ordina
 parameterless screen declaration and `pass`. One shared transaction creates the
 file and adds its source-map entry; one shared Undo/Redo reverses/restores both.
 Creation checks static screen names throughout `game`, case-insensitive file/name
-collisions, the captured project/map/inventory revisions and dirty Source buffers.
+collisions, the captured project/map/inventory revisions and dirty Source buffers,
+including a destination deleted externally while its draft remains open. Public
+portable names exclude Ren'Py double-underscore private names and Windows device names.
 An empty directory may remain after a rejected file transaction; source and metadata
 remain unchanged. Metadata size and relationship validation precede acceptance.
 
@@ -479,7 +481,9 @@ Owned root resolution requires the original path/name, one adjacent matching mar
 one supported declaration and an unambiguous static namespace. Source body edits and
 offset shifts retain the UUIDs. Rename, deletion, missing/duplicated markers,
 ambiguous declarations or malformed source produce an explicit unresolved reference.
-The UI keeps that selected UUID instead of falling back to another declaration.
+The catalog supplies the resolved file revision. The UI requires that same revision
+and declaration in its separately inspected document, retaining an unresolved UUID
+when source changes between reads instead of falling back to another declaration.
 Restoring the original declaration/marker resolves the reference without rewriting
 source. This bounded contract adds only root identity; supported descendant ownership
 and explicit rename/delete commands remain separate work.
