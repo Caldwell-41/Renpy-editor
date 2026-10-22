@@ -73,7 +73,7 @@ then the existing bundled Python 3.12.14 was selected for checks requiring `toml
 | One collision-checked definition/transaction/history entry; Cancel and refusal do not write | Focused IPC tests, real eight-group renderer/core run and existing 11-group Help regression pass. |
 | Metadata-only migration, extras/source preservation, no-op reopen, newer-schema refusal | Focused IPC migration and reopen tests pass. |
 | Source edits/offsets reconcile; rename/deletion/ambiguity stays unresolved | Focused IPC tests and real Source Save/browser path pass. |
-| Actual Choose/core/Source/history/reopen | Browser production path and packaged-controller rehearsal pass. Current signed Mac native run requires one additional package authorization and an unlocked desktop; Windows native proof awaits selected CI. |
+| Actual Choose/core/Source/history/reopen | Browser production path and packaged-controller rehearsal pass. Current signed Mac package passes; its native run needs an unlocked desktop. Windows native proof awaits dispatch 1 below. |
 | Deliberate preview of created screen | Exact browser-accepted source passes actual pinned SDK proof on Mac. Windows SDK proof remains pending. |
 | Retain revision-bound Help behavior | Existing focused core and 11-group real renderer/core regression pass. Earlier unchanged native/SDK Help evidence remains scoped to its accepted candidate. |
 | Whole editor/canvas visual acceptance | Pending under later owners; L01 does not waive those gates. |
@@ -82,7 +82,7 @@ The prepared existing Screens workflow selects `owned_blank=true` with exact
 candidate/ordinal. It runs affected frontend/core/controller checks on Windows x64
 and Mac ARM64, plus the missing Windows SDK and packaged WebView proof. Mac uses its
 local signed package and SDK evidence, avoiding another SDK launch. Publication and
-dispatch have not occurred. No workflow or worker is pending.
+dispatch were pending at the original local checkpoint. The approved dispatch is recorded below.
 
 
 ## Independent review and corrections
@@ -127,7 +127,7 @@ migration assertion that still expected schema 5. That assertion now expects the
 current schema, and its exact test passes. The final coherent-candidate broad-core
 run is recorded below.
 
-## Package ceiling and current continuation
+## Package ceiling at the original local checkpoint
 
 Mac package attempt 3 uses the single original contingency and passes signing and
 installer checks at `d43edfe`. Executable SHA256 is
@@ -183,6 +183,83 @@ updates, preserving coverage maps and dependencies.
 CURRENT (658 words) and HANDOVER (1,370 words) exceed their soft review targets because the pre-existing local
 policy/status edits and unique protected recovery were retained. This task adds one
 compact current L01 continuation and leaves the unrelated documentation work intact.
-The final blocker is a decision for one additional current signed Mac package,
+At that checkpoint the blocker was a decision for one additional current signed Mac package,
 publication of the reviewed branch commits and the focused CI dispatch. No operation
-is left running or pending remotely.
+was left running or pending remotely.
+
+## Approved package and CI continuation, 2026-10-22
+
+The user approved exactly one additional signed Mac package beyond the exhausted
+three-attempt ceiling, publication of the four reviewed commits and focused CI.
+The user then explicitly selected the ci-watch skill over the repository's manual
+wait default for this run. This supplement adds no contingency and resets no limit.
+Local batch 19 enters the original contingency; batch 20 covers publication, dispatch
+and watch registration. Local cumulative use is 20/18, within the original ceiling 27.
+
+Package attempt 4 in ignored `mac-package-04` passes at exact candidate
+`79496c28aba9c91db2a93a97c7b3736396b503e1`, with product code at `6be4f24`.
+Application and workflow inputs are unchanged from that commit. The approved public
+certificate pin and certificate-backed designated requirement remain unchanged.
+Strict signature, ARM64 bundle and read-only installer-content checks pass.
+Executable SHA256 is `d923809dfacc58e0f6c3306921429d2b013d74bbbd4b6ff3abf4677fe692ff15`;
+DMG SHA256 is `6f08875b167dff98c8240dcf9e036f9b561b2b604577aea3c5b57425846efaf3`.
+The current desktop lock checks return true and no Loomlight process is running.
+No Mac native launch was attempted or charged. Unlocking remains a real prerequisite;
+the protected drafts and historical recovery remain untouched.
+
+The four approved commits through `79496c2` are pushed to the existing branch.
+[Screens qualification dispatch 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39749388462)
+is confirmed as run `39749388462`, attempt 1, exact full SHA above, created
+`2026-10-22T08:39:36Z`, last observed queued. Inputs are `owned_blank=true`,
+`ordinal=1` and the exact candidate. Both affected portable targets are selected;
+Windows additionally reserves package 1, native launch 1 and two SDK operations.
+Mac reuses the scoped local signed package and SDK proof. CI cumulative use is 1/2,
+within the original ceiling 3. The ticket stays open pending the terminal artifact
+audit and current Mac native proof. No PR, merge, release or acceptance is selected.
+
+The ci-watch launcher will register this exact run/attempt/SHA to the existing thread,
+with a 30-second interval and one-hour deadline. Registration must acknowledge a
+running worker before monitoring is claimed. Its completion event resumes the same
+task for run/job/artifact identity, required-case and cleanup audit. A timeout is not
+a CI result. These continuation records remain local; the GitHub ticket records the
+current approval, accounting and confirmed run.
+
+## CI1 terminal audit and workflow correction
+
+The registered worker acknowledged `watcher_running: true`, then resumed the same
+thread with the failure event. Its receipt is recorded after matching thread, run,
+attempt and full SHA. GitHub confirms run `39749388462`, attempt 1, completed failure
+at the approved `79496c2` candidate; local HEAD and remote branch still matched it.
+Both required targets passed 223 frontend tests, six Python evidence-gate tests,
+Screens 10/10, metadata 3/3, Source 16/16 and the exact legacy migration case 1/1.
+
+Both jobs then failed at the desktop check. Tauri's `generate_context!` reported
+that configured `frontendDist` at `../dist` did not exist. The L01 workflow placed
+`npm run build` after `cargo check -p loomlight-desktop`; existing local output had
+masked the prerequisite. This is a demonstrated workflow ordering defect, with no
+demonstrated product defect. The correction moves the existing frontend build
+immediately before the same desktop check and preserves every selector and check.
+
+A disposable tracked-source export without `app/dist` reproduces the exact failure.
+Running the frontend build and then the same desktop check in that export passes.
+Generated frontend file hashes match the signed package's input files exactly.
+Actionlint passes. No application/package input changes and no fifth Mac package
+is attempted. Local batches 21 and 22 cover this audit/correction and its publication
+and second dispatch, bringing cumulative local use to 22/18, within ceiling 27.
+
+Both privacy scans and failure-artifact uploads passed. The downloaded Mac core
+executable hashes to `26062d188c0b7fc1b3b25f123ccb995917f80a4a6c1304bd66c98606c10b893c`;
+the Windows core executable hashes to
+`d8c1ccdceac2f58511744e0e290574105c5a9773bda85f831d6480a8d2fdce5c`.
+Both match their retained identity manifests and candidate files. Artifact IDs
+`12413011891` (Mac) and `12413655900` (Windows), exact logs and executable bytes are
+retained under ignored `ci-01`. No desktop executable was produced. Browser,
+Windows SDK/package/native steps were skipped; none is claimed as passing.
+Their dispatch reservations remain charged: Windows package 1, native 1 and SDK
+operations 2. The second dispatch reserves cumulative Windows package/native 2
+and SDK operations 4, and CI 2/2. Mac remains packages 4 under the one-package
+supplement, native 0/2 and SDK operations 4/4. No ceiling resets or compounds.
+
+Current-package Mac native proof still needs an unlocked desktop; repeated actual
+lock checks remain true, so no launch is attempted. L01 remains open pending that
+proof and the terminal second-run audit. The closed Help route is unchanged.

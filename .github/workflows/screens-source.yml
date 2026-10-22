@@ -223,8 +223,8 @@ jobs:
           cargo test -p loomlight-core --release --locked --lib source::tests -- --nocapture
           cargo test -p loomlight-core --release --locked --lib scene::logic::tests::phase3a_v3_v4_call_menu_refinement_preserves_records_and_reopen -- --exact --nocapture
           cargo build -p loomlight-core --example help-controller-driver --locked
-          cargo check -p loomlight-desktop --locked
           npm run build
+          cargo check -p loomlight-desktop --locked
       - name: Production renderer, core and exact packaged controller rehearsal
         env:
           OWNED_SCREEN_OUTPUT: ${{ runner.temp }}/owned-screen/browser

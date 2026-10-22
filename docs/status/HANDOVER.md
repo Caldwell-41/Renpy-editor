@@ -1,30 +1,45 @@
 # Current outcome handover
 
-## L01 owned blank screen, qualification decisions pending
+## L01 owned blank screen, CI1 order correction verified
 
 The user selected [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34)
-on 2026-10-22. Mac ARM64 is the sole writer on `codex/phase3b-screen-designer`.
-Implementation commits are `da2f8d3`, `d43edfe` and final code candidate `6be4f24`.
+on 2026-10-22. Mac ARM64 remains the sole writer on `codex/phase3b-screen-designer`.
+The four reviewed commits are published through
+`79496c28aba9c91db2a93a97c7b3736396b503e1`, with product code at `6be4f24`.
 Both independent review axes have no remaining code findings. The
 [source contract](../DATA_MODEL.md#project-lifecycle-metadata) and
 [evidence](../tasks/evidence/owned-blank-screen.md) own behavior and detailed results.
-Frontend 223/223, real renderer/core creation, retained Help regression and actual
-Mac SDK proof pass. Final routine core qualification passes 401/0 with documented exclusions.
+Frontend 223/223, routine core 401/0, production renderer/core, retained Help regression,
+Mac SDK and current signed Mac package proof pass. Failed attempts remain retained.
 
-Current cumulative use is 18/18 local batches, CI 0/2; Mac package attempts 3/3
-including contingency, native launches 0/2 and SDK operations 4/4. Windows counts
-remain zero. The issue owns the original limits and ceilings. The last signed package,
-ignored `mac-package-03`, predates the final namespace guard and cannot qualify it.
-No fourth package was attempted. A current package needs explicit approval beyond
-that ceiling; native proof also needs an unlocked desktop. The last lock check was
-true, and the unlock request received no reply. No CI or worker audit is pending.
+[CI1 run 39749388462](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39749388462),
+attempt 1 at the exact full SHA above, failed on both targets. Each passed frontend
+223/223, six Python gates and selected core Screens/metadata/Source/migration cases,
+then failed because the desktop check preceded the frontend build. The exact
+missing-frontend error reproduces in a clean export; build then desktop check passes.
+The workflow-only order fix preserves all checks and selectors. Exported frontend
+hashes match the signed package inputs. Both failed core executables, candidate files,
+identity manifests and logs are downloaded and verified under ignored `ci-01`.
+Browser and Windows SDK/package/native steps were skipped, with reservations retained.
 
-Next obtain approval for one additional signed Mac package and publication of the
-reviewed commits to this branch for focused L01 CI. Preserve the unrelated local
-policy/instruction edits, domain/triage guides and protected recovery below.
-No push, PR, merge or release occurred. L01 stays open until its required proof passes;
-full editor/canvas/phase acceptance remains separate. The retained policy/Help record
-below predates this L01 selection.
+Next publish the verified workflow correction and dispatch focused CI2 for its exact
+commit, `owned_blank=true`, ordinal 2. The original allowance covers this correction.
+Register that confirmed run to this thread with ci-watch, as explicitly selected by
+the user; require a running-worker acknowledgement and end the turn immediately.
+On its event, match thread/run/attempt/SHA, acknowledge receipt, then audit required
+jobs/cases, exact artifact executables and cleanup before acceptance. CI1's watcher
+receipt is recorded; its failure is audited, not a pending operation.
+
+Cumulative use/reservation is local 22/18 (original ceiling 27), CI 2/2 (ceiling 3),
+Mac packages 4 including the approved one-package supplement, native 0/2 and SDK
+operations 4/4. Windows package/native 2 and SDK operations 4 are reserved through
+CI2. CI1's skipped expensive steps stay charged. No fifth Mac package is authorized;
+application/package inputs are unchanged by this workflow-only correction.
+Mac native proof needs an actually unlocked desktop; lock checks remain true and
+no launch is attempted. Preserve unrelated policy/instruction edits, domain/triage
+guides and protected recovery below. No PR, merge or release is selected.
+L01 stays open; later editor/canvas/phase acceptance remains separate. The retained
+policy/Help record below predates this selection.
 
 ## Phase 3B migration and retained Help audit, 2026-10-22
 

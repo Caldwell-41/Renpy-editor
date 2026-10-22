@@ -294,3 +294,14 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** Rust/Python gates and the real native probe script through the
   bridge/core with a marked runtime test double cover positive and rejecting states.
 - **Evidence:** [CI2 diagnosis](../tasks/evidence/help-screen-production.md#ci2-retained-audit-and-causal-diagnosis).
+
+## H24. Desktop check precedes the frontend build in a clean checkout
+
+- **Class/search:** workflow prerequisite; Tauri `generate_context!`, `frontendDist`,
+  `../dist`, `this path doesn't exist`, both Windows and Mac.
+- **Cause/correction:** the L01 workflow checked the desktop before running the
+  existing frontend build. Local ignored output masked the dependency. Move the
+  frontend build before the desktop check, preserving both checks and all selectors.
+- **Verification:** reproduce the missing-output failure in a disposable clean
+  export, then run the frontend build and the same desktop check in that export.
+- **Evidence:** [L01 CI1 audit](../tasks/evidence/owned-blank-screen.md#ci1-terminal-audit-and-workflow-correction).

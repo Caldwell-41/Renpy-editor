@@ -2,14 +2,18 @@
 
 ## Selected L01 implementation
 
-2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is implemented
-locally at `6be4f24` on `codex/phase3b-screen-designer`. Both independent code-review
-axes have no remaining code findings. The frontend, production renderer/core and
-Mac SDK results pass; [L01 evidence](../tasks/evidence/owned-blank-screen.md) records
-final core qualification and retained failures. Current signed-Mac native and Windows
-SDK/WebView proof remain pending. Another Mac package needs approval beyond the
-consumed 3/3 ceiling; publication and focused CI also need authorization. No remote run is
-pending. The ticket stays open. Full flow-v1/canvas and phase acceptance remain separate.
+2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is published
+through `79496c2`, with product code at `6be4f24`. Both independent review axes have
+no remaining code findings. Frontend 223/223, routine core 401/0, production
+renderer/core, Mac SDK and current signed Mac package proof pass.
+[CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39749388462), attempt 1
+at the exact published SHA, failed on both targets after passing the selected tests.
+Its desktop check preceded the required frontend build. The workflow-only order fix
+reproduces the failure and passes in a clean export; package inputs are unchanged.
+[L01 evidence](../tasks/evidence/owned-blank-screen.md) retains exact failed-run
+artifacts and counts. CI2 is next within the original allowance. The user selected
+ci-watch for same-thread resumption. Mac native proof still needs the locked desktop
+unlocked. The ticket stays open; full flow-v1/canvas and phase acceptance remain separate.
 The retained policy/Help record below predates this selection.
 
 ## Phase 3B migration and retained Help result
