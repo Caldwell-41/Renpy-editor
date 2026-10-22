@@ -603,3 +603,30 @@ ceiling. Before it, Windows actual use is zero packages/native launches and thre
 SDK processes. Its maximum reservation is one package, one native launch and four
 SDK processes. Mac remains packages 3/5, native 3/7, SDK 24/24. No extra Mac SDK,
 CI dispatch beyond five, broader renderer work or weaker gate is allocated.
+
+### CI5 pending operation
+
+Root correction `3906578eee885978b30c469b74aae83ac5942971` is pushed and its exact
+remote branch SHA is verified. [CI5 run 39850133053](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39850133053),
+attempt 1, tests that head/candidate on `codex/phase3b-screen-designer`. Workflow
+`screens-source.yml` selects ordinal 5, `canvas_helper=true`, `owned_blank=false`.
+Last observed queued at 2026-10-22 20:35:12 UTC. Ignored `ci-05` retains reservation,
+discovery and the pending audit list. Later records do not change the product.
+
+Follow installed ci-watch for same-chat continuation; actual registration requires
+its launcher acknowledgement. On its event, verify and acknowledge delivery, then
+audit exact run/attempt/SHA and every required step. Check the shared recent-file
+case, all 200 Windows updates through corrected request/PNG/result publishers,
+any OS failure diagnostics, official SDK/package identities, privacy, both-aspect
+helper/reference pixels and geometry, exact-controller/native receipts, source
+preservation, process/disk cleanup and actual Windows operations. No status badge
+alone establishes rendering, timing, focus or whole-ticket acceptance.
+
+Cumulative use is 44/60 local batches, 5/5 CI dispatches; Mac packages 3/5, native
+3/7, SDK 24/24. Windows actual use through CI4 is zero packages/native launches and
+three SDK processes. CI5 reserves one package, one native launch and four SDK
+processes. The CI dispatch ceiling is reached; no sixth dispatch or further Mac
+SDK process is allocated. Audit and in-scope local work retain their remaining
+allowance. All fidelity/native/dragging gates and historical closed allowances
+remain. CURRENT/HANDOVER retain older protected recovery and pending acceptance,
+which keep overall word counts above their review targets.

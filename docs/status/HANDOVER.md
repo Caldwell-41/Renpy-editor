@@ -4,70 +4,80 @@
 
 The user selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
 through implement, confirmed core/UI/packaged test boundaries, doubled its allowance
-and authorized push, Windows CI and four extra Mac SDK processes. Development stays
-on Mac ARM64, `codex/phase3b-screen-designer`, from `7e1e7b3`. Published diagnostic
-candidate is `bea2019cb11de61be4ccd9abf8575cf1bce11308`. It adds causal logging and
-bounded Windows repetition, not a further product fix. The issue owns scope and
-cumulative allowance; [evidence](../tasks/evidence/canvas-rendering.md#ci3-terminal-audit-and-submission-diagnostics)
-owns exact failure/artifact identities, partial results and diagnostic limits.
+and authorized push, Windows CI and four extra Mac SDK processes. They explicitly
+invoked principle-fix-root-causes after CI4. Development stays on Mac ARM64,
+`codex/phase3b-screen-designer`, from `7e1e7b3`. Published root correction is
+`3906578eee885978b30c469b74aae83ac5942971`. The issue owns scope and cumulative
+allowance; [evidence](../tasks/evidence/canvas-rendering.md#ci4-terminal-audit-and-open-reader-replacement)
+owns exact failure/artifact identities, correction, review and limits.
 
-CI3 run 39844974063, attempt 1 at `7e53b72`, completed with failure at 2026-10-22
-20:09:48 UTC. Its same-chat event is acknowledged. Portable checks and official SDK
-verification pass. The Windows reader correction passes both aspects, drafts/Cancel,
-history, held resize/Escape, logical pixels and normal/hover/live-text samples.
-Five groups and 19 warm captures pass, then `screens.canvasRender` returns generic
-`SCENE_INVARIANT`. The helper remains alive with no traceback. Core submission
-maps request creation/publication and copied-asset failures to that same response;
-the exact failing operation/native error was not retained. Do not guess a retry or
-claim the remaining cause is fixed. New diagnostics emit only fixed labels, error
-variants, kinds and numeric OS codes. Both review axes report zero new findings.
-Focused release core Screens checks and Node syntax pass; unchanged frontend tests
-retain their prior 226-case pass. No new Mac SDK process ran.
+CI4 run 39847274208, attempt 1 at `bea2019`, completed with failure at 2026-10-22
+20:25:43 UTC. Its same-chat event is acknowledged. Five groups and 31 warm captures
+pass before diagnostics identify application-local replacement `PermissionDenied`,
+native OS code 5, followed by canvas `publish request`/`RecoveryRequired`. Request
+creation and asset copying are excluded as that failure site. The helper remains
+alive. Delete sharing fixed the earlier reader conflict, but legacy `MoveFileExW`
+publication still failed with a target reader open. The root correction uses
+`SetFileInformationByHandle`/`FileRenameInfoEx` with replacement and POSIX flags.
+It applies to input and both helper output publishers. Old readers retain complete
+old files; new opens see the replacement. No retry, error swallowing, ACL/read-only
+override or weaker gate is added. Source transaction/backup and non-Windows rename
+paths remain unchanged.
 
-Both Windows helper PNG aspects match Mac native helper exports exactly in RGBA;
-expected geometry also matches. This is helper transport evidence. Deliberate
-Windows reference, exact-controller/Help, package and native checks were skipped.
-CI3's driver exits zero after asserted shutdown/root removal. Its retained ZIP
-matches GitHub's digest; all 33 public-fixture files pass privacy. Ignored `ci-03`
-retains the full log, metadata, ZIP, extracted files, cross-target comparison and
-audit. CI1 cancellation and CI2 reader failure remain retained and charged.
+Both independent reviews report zero new findings on buffer alignment/UTF-16 sizes,
+live handle ownership, no-follow/parent protection and scope. Local Screens checks
+pass 14 cases with the selected SDK case ignored; the shared recent-file replacement
+case passes. Embedded Python and workflow YAML parse. These do not establish Windows
+execution. The selected workflow now runs that existing recent-file case before SDK
+work because the corrected app-local primitive also serves recent/preferences data.
+No new private-method test or Mac SDK process was added. Prior frontend tests retain
+their 226-case result for unchanged UI code.
 
-Windows CI4 is the sole pending operation: [run 39847274208](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39847274208),
+CI4's driver exits zero after asserted host/root cleanup. Exact-controller, Help,
+reference, package and native checks did not run. The retained ZIP matches GitHub's
+digest and all 45 public-fixture files pass privacy. Ignored `ci-04` retains log,
+metadata, ZIP, extracted files and audit. CI1 cancellation, CI2 reader failure and
+CI3 generic submission failure remain retained and charged. Cross-target helper
+pixels match at both aspects, but deliberate Windows game-render reference and
+native qualification remain unrun.
+
+Windows CI5 is the sole pending operation: [run 39850133053](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39850133053),
 attempt 1, workflow `screens-source.yml`, exact head/candidate
-`bea2019cb11de61be4ccd9abf8575cf1bce11308`. Inputs are ordinal 4,
+`3906578eee885978b30c469b74aae83ac5942971`. Inputs are ordinal 5,
 `canvas_helper=true`, `owned_blank=false`, on `codex/phase3b-screen-designer`.
-Last observed queued at 2026-10-22 20:15:37 UTC. Ignored `ci-04/pending.json`
-retains identity, inputs and audit checklist. The Windows public-path loop is
-bounded to 200 samples; Mac remains 40. Timeouts, retries and performance claims
-are unchanged. Later records do not change the diagnostic candidate.
+Last observed queued at 2026-10-22 20:35:12 UTC. Ignored `ci-05/pending.json`
+retains identity, inputs, reservation and audit list. Later records do not change
+the tested candidate. Next register installed ci-watch for that exact run/SHA and
+yield this chat. The launcher receipt and chat acknowledgement own registration;
+private paths stay outside committed evidence.
 
-Next register installed ci-watch for this exact run/SHA and yield this chat. Its
-launcher receipt and chat acknowledgement own registration status; private paths
-stay outside committed evidence. On its event, verify the chat and acknowledge
-receipt, then audit exact run/attempt/SHA and required steps. First inspect the
-failed operation/ErrorCode/native OS result before selecting a correction. If the
-loop passes, retain all 200 samples and investigate whether the earlier failure
-remains unresolved. Audit SDK/package identity, privacy, both-aspect helper/reference
-pixels and geometry, exact-controller/native receipts, accepted bytes and process/
-disk cleanup. Reconcile actual Windows operations. No badge alone closes #36.
+On its same-chat event, verify/acknowledge delivery and audit exact run/attempt/SHA
+and every required step. Check recent-file replacement, all 200 Windows updates,
+any native OS diagnostics, official SDK/package identity, public privacy,
+both-aspect helper/reference pixels and geometry, exact-controller contention,
+actual native report, accepted bytes and process/disk cleanup. Reconcile actual
+Windows operations against the reservation. A green badge is not acceptance.
+A remaining failure needs its actual cause and existing limits preserved; no sixth
+CI dispatch is allocated.
 
-Mac package 3/native attempt 3 at `63a1b03` retains functional proof and cleanup at
-both aspects. OS focus, physical keyboard, warm native presentation and startup
-qualification remain unproved. Its diagnostic image-load time is 1,251 ms. The
-older controller rehearsal's driver-provenance limitation and verified backup
-cleanup remain recorded; SDK process 21 did execute the backup regression.
-No owned local process, fixture or generated helper backup remains.
+Mac package 3/native attempt 3 at `63a1b03` retains bounded functional proof and
+cleanup at both aspects. Its reuse is limited to unchanged non-Windows I/O. OS
+focus, physical keyboard, warm native presentation and startup qualification remain
+unproved; diagnostic image load is 1,251 ms. Older controller driver provenance and
+verified backup cleanup remain recorded; SDK process 21 did execute the backup
+regression. No owned local process, fixture or generated helper backup remains.
 
-Current use is 41/60 local batches and 4/5 CI; Mac packages 3/5, native 3/7, SDK
-24/24. Windows actual use through CI3 is zero packages/native launches and two SDK
-processes. CI4 reserves one package, one native launch and four SDK processes.
-One further CI dispatch remains; no further Mac SDK process or recalculated
-contingency is allocated. Matched both-target fidelity, native timing/startup/focus
-and element dragging remain Spec gaps. Mac Retina glyph/flat hover-color differences
-have no accepted tolerance. Return proof failures to decision review before broader
-renderer work or weaker gates. Keep #36/B07/B08 and phase acceptance open. No PR,
-merge or release is selected. Preserve unrelated policy work and protected recovery
-below. Older canvas sections are historical.
+Current use is 44/60 local batches, 5/5 CI; Mac packages 3/5, native 3/7, SDK 24/24.
+Windows actual use through CI4 is zero packages/native launches and three SDK
+processes. CI5 reserves one package, one native launch and four SDK processes.
+The dispatch ceiling is reached; required audit still continues within local
+allowance. No further Mac SDK process or recalculated contingency is allocated.
+Matched both-target fidelity, native timing/startup/focus and element dragging
+remain Spec gaps. No Mac glyph/hover-color tolerance is accepted. Return proof
+failures to decision review before broader renderer work or weaker gates. Keep
+#36/B07/B08 and phase acceptance open. No PR, merge or release is selected.
+Preserve unrelated policy work and all protected recovery below. Older canvas
+sections are historical.
 
 ## Earlier canvas decision closeout
 

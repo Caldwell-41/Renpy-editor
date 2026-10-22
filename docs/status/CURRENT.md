@@ -1,37 +1,39 @@
 # Current status
 
-## L17 submission failure under diagnosis; CI4 pending
+## L17 root correction published; CI5 pending
 
 2026-10-23: [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-continues within its existing allowance. CI3 at `7e53b72` passes five Windows
-UI/core/helper groups and 19 warm captures. Its reader correction survives both
-aspects and repeated updates. The next core submission returns a generic invariant
-refusal while the helper stays alive. The exact filesystem cause remains unknown.
-Published diagnostic candidate `bea2019` records fixed operation labels and native
-OS error kind/code without paths or content. No further product fix is claimed.
-[Evidence](../tasks/evidence/canvas-rendering.md#ci3-terminal-audit-and-submission-diagnostics)
-owns the failure, retained artifacts, partial results and diagnostic review.
+continues within its existing allowance. CI4 isolates request publication failing
+with Windows `PermissionDenied`, OS code 5, after five groups and 31 warm captures.
+The legacy replacement operation did not support the required concurrent reader.
+Published correction `3906578` uses Windows POSIX replacement semantics for core
+request publication and helper PNG/result publication. Existing readers keep the
+old file while new opens see the replacement. No retry, deadline or acceptance
+gate is relaxed. [Evidence](../tasks/evidence/canvas-rendering.md#ci4-terminal-audit-and-open-reader-replacement)
+owns the causal audit, source correction, review and remaining limits.
 
-[Windows CI4](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39847274208),
-attempt 1 at `bea2019cb11de61be4ccd9abf8575cf1bce11308`, was last observed queued
-at 2026-10-22 20:15:37 UTC. It repeats up to 200 Windows warm updates to capture
-the first failing operation and OS result, then runs remaining selected checks if
-that succeeds. Follow [HANDOVER](HANDOVER.md#active-l17-proof-handover) for ci-watch
-continuation and exact artifact audit.
+[Windows CI5](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39850133053),
+attempt 1 at `3906578eee885978b30c469b74aae83ac5942971`, was last observed queued
+at 2026-10-22 20:35:12 UTC. It includes the shared recent-file case before SDK work,
+200 Windows updates and the selected controller/reference/package/native checks.
+Local focused checks and both independent reviews pass; Windows execution remains
+pending. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns same-chat ci-watch
+continuation and the required artifact audit.
 
-Mac package 3/native attempt 3 at `63a1b03` retains its bounded functional pass.
-The Windows helper exports exactly equal its Mac helper pixels at both aspects;
-deliberate Windows reference and native checks remain unrun. Rendering fidelity,
-native timing/startup/focus and element dragging remain Spec gaps. No tolerance
-for Mac glyph/hover-color differences is accepted. Keep #36/B07/B08 and whole-phase
-acceptance open; broader renderer work or weaker gates need decision review.
+Mac package 3/native attempt 3 at `63a1b03` retains its bounded functional pass;
+non-Windows I/O and source transactions remain unchanged. The Windows helper pixels
+match Mac helper pixels at both aspects. Deliberate Windows reference/native checks
+remain unrun. Matched fidelity, native timing/startup/focus and element dragging
+remain Spec gaps. No glyph/hover-color tolerance is accepted. Keep #36/B07/B08 and
+phase acceptance open; broader renderer work or weaker gates need decision review.
 
-#36 owns cumulative use: 41/60 local batches, 4/5 CI; Mac packages 3/5, native 3/7,
-SDK 24/24. Windows actual use through CI3 is zero packages/native launches and two
-SDK processes. CI4 reserves one package, one native launch and four SDK processes.
-No further Mac SDK launch is allocated. No owned local process, fixture or generated
-helper backup remains. No PR, merge or release is selected. Preserve unrelated
-parallel-policy edits and protected recovery below.
+#36 owns cumulative use: 44/60 local batches, 5/5 CI; Mac packages 3/5, native 3/7,
+SDK 24/24. Windows actual use through CI4 is zero packages/native launches and three
+SDK processes. CI5 reserves one package, one native launch and four SDK processes.
+The CI dispatch ceiling is reached; its audit remains required. No further Mac SDK
+launch is allocated. No owned local process, fixture or generated helper backup
+remains. No PR, merge or release is selected. Preserve unrelated policy edits and
+protected recovery below.
 
 ## Earlier canvas decision closeout
 
