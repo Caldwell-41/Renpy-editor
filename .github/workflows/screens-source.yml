@@ -213,6 +213,7 @@ jobs:
           npm install --global npm@11.9.0
           npm ci
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_owned_screen_evidence.py' -v
+          "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_owned_screen_runner.py' -v
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_help_screen_evidence.py' -v
           npm run check
       - name: Shared ownership, Source, metadata, Help and desktop gates
@@ -277,7 +278,7 @@ jobs:
           $binary = [IO.File]::ReadAllBytes((Resolve-Path 'target/release/loomlight.exe'))
           $pe = [BitConverter]::ToInt32($binary, 0x3c)
           if ([BitConverter]::ToUInt16($binary, $pe + 4) -ne 0x8664) { throw 'Windows x64 executable required' }
-          @{ candidate=$env:GITHUB_SHA; architecture='Windows x64'; executableSHA256=(Get-FileHash 'target/release/loomlight.exe').Hash } | ConvertTo-Json | Out-File "$RUNNER_TEMP/owned-screen/package-identity.json" -Encoding utf8
+          @{ candidate=$env:GITHUB_SHA; architecture='Windows x64'; executableSHA256=(Get-FileHash 'target/release/loomlight.exe').Hash } | ConvertTo-Json | Out-File "$env:RUNNER_TEMP/owned-screen/package-identity.json" -Encoding utf8
       - name: Retain exact produced test and desktop executables, including failures
         if: always()
         run: |

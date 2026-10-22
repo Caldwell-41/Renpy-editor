@@ -19,7 +19,7 @@ test("Source retention, SDK discovery and runtime submission are ordered while S
 });
 
 test("workspace observations finish before early Source navigation uses the shared service",async()=>{
-  for(const operation of ["scene.list","authoring.list","flow.list"] as const){
+  for(const operation of ["scene.list","authoring.list","flow.list","screens.list","screens.inspect"] as const){
     const lane=new RequestLane(),calls:string[]=[];
     let release!:()=>void;
     const observation=lane.run(operation,async()=>{calls.push(operation);await new Promise<void>(resolve=>{release=resolve;});});

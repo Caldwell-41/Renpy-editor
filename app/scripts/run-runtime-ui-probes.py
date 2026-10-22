@@ -74,6 +74,8 @@ for case in cases:
             assert profile.resolve().parent == profile.parent.resolve()
             shutil.rmtree(profile)
     help_disk = None
+    disk_errors = []
+    fixture_cleanup_complete = True
     if case in ("help-screen", "owned-screen"):
         profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
         if profile.exists():
@@ -84,18 +86,31 @@ for case in cases:
                 original = (Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/help.rpy").read_bytes()
                 expected = b'\xef\xbb\xbf' + original.replace(b'\n', b'\r\n').replace(b'xsize 640', b'xsize 768')
             else:
-                ownership = json.loads((project / ".renpy-editor/source-map.json").read_text())["ownedScreens"]
-                if len(ownership) != 1 or ownership[0]["name"] != "travel_notes":
-                    raise ValueError("One owned blank screen required on disk")
-                expected = f'# loomlight-screen: {ownership[0]["id"]}\nscreen travel_notes():\n    pass\n'.encode()
-            help_disk = dict(acceptedBytesMatch=source.is_file() and source.read_bytes() == expected,
+                expected = None
+                try:
+                    ownership = json.loads((project / ".renpy-editor/source-map.json").read_text())["ownedScreens"]
+                    if len(ownership) != 1 or ownership[0]["name"] != "travel_notes":
+                        raise ValueError("One owned blank screen required on disk")
+                    expected = f'# loomlight-screen: {ownership[0]["id"]}\nscreen travel_notes():\n    pass\n'.encode()
+                except (OSError, ValueError, KeyError, TypeError):
+                    disk_errors.append("Owned screen ownership could not be verified")
+                    metadata = project / ".renpy-editor/source-map.json"
+                    if metadata.is_file() and not metadata.is_symlink():
+                        shutil.copyfile(metadata, output / "disk-source-map.json")
+            help_disk = dict(acceptedBytesMatch=expected is not None and source.is_file() and source.read_bytes() == expected,
                              scratchJobsRemaining=len(list(profile.glob("scratch-preview-*"))),
                              sourceBytecode=list(project.glob("game/**/*.rpyc")) != [],
                              sourceSaves=(project / "game/saves").exists())
             (output / "help-disk.json").write_text(json.dumps(help_disk, indent=2)+"\n")
             if source.is_file():
                 (output / "accepted-help.rpy").write_bytes(source.read_bytes())
-            shutil.rmtree(profile)
+            try:
+                shutil.rmtree(profile)
+            except OSError:
+                if case != "owned-screen":
+                    raise
+                fixture_cleanup_complete = False
+                disk_errors.append("Owned fixture cleanup failed")
     reports = []
     for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
@@ -111,9 +126,13 @@ for case in cases:
         passed = passed and details.get("extendedChecksComplete") is True and len(details.get("checks", [])) == 33 and (output / "external-write.json").is_file()
     if case in ("help-screen", "owned-screen"):
         passed = passed and help_disk == dict(acceptedBytesMatch=True, scratchJobsRemaining=0, sourceBytecode=False, sourceSaves=False)
+    if case == "owned-screen":
+        passed = passed and not disk_errors and fixture_cleanup_complete
     failed |= not passed
     result = dict(case=case, passed=passed, exitCode=code, timedOut=timed_out,
                   elapsedSeconds=round(time.monotonic()-started, 3), reports=reports, externalErrors=external_errors, helpDisk=help_disk)
+    if case == "owned-screen":
+        result.update(diskErrors=disk_errors, fixtureCleanupComplete=fixture_cleanup_complete)
     (output / f"runtime-ui-{case}.json").write_text(json.dumps(result, indent=2)+"\n")
     print(json.dumps(result), flush=True)
 if failed:

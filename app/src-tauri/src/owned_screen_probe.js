@@ -1,9 +1,10 @@
 // Explicit packaged L01 verification. Synthetic DOM input uses production services.
 (async () => {
   const stages = [], started = performance.now();
-  let stage = "open", serial = 0, identity;
+  let stage = "open", serial = 0, identity, awaitedControl = "recent project";
   const assert = (value, message) => { if (!value) throw Error(message); };
-  const until = async condition => {
+  const until = async (condition, control = awaitedControl) => {
+    awaitedControl = control;
     const deadline = performance.now() + 30000;
     while (!condition()) { if (performance.now() > deadline) throw Error(`Timeout: ${stage}`); await new Promise(resolve => setTimeout(resolve, 30)); }
   };
@@ -13,12 +14,12 @@
     return result.value;
   });
   const find = window.__loomlightProbeFindButton;
-  const click = async label => { await until(() => find(label) && !find(label).disabled); find(label).click(); };
+  const click = async label => { await until(() => find(label) && !find(label).disabled, `button ${label}`); find(label).click(); };
   const checkpoint = name => { stage = name; stages.push({ stage, elapsedMs: Math.round(performance.now() - started) }); };
   const message = () => document.querySelector(".screen-message")?.textContent ?? "";
   try {
-    await until(() => document.querySelector(".recent-open")); document.querySelector(".recent-open").click();
-    await click("Screens"); await until(() => find("New blank screen"));
+    await until(() => document.querySelector(".recent-open") && !document.querySelector(".recent-open").disabled); document.querySelector(".recent-open").click();
+    await click("Screens"); await until(() => find("New blank screen"), "Choose creation action");
     let project = await call("project.current"), sessionId = project.sessionId;
     const before = await call("screens.list", { sessionId });
     await click("New blank screen"); await until(() => document.querySelector('[aria-label="Screen name"]'));
@@ -33,9 +34,11 @@
     assert(identity.name === "travel_notes" && identity.resolved && identity.id !== identity.rootId, "Distinct persistent screen and root IDs required");
     assert(document.querySelector('.screen-tree [aria-selected="true"]')?.textContent === "Screen root", "Created root selected");
     checkpoint("creation-passed");
-    await click("View in Source"); await until(() => document.querySelector("textarea.source-editor"));
-    const editor = document.querySelector("textarea.source-editor"), accepted = editor.value;
+    await click("View in Source"); await until(() => document.querySelector(".source-editor"), "Source editor");
+    const editor = window.__loomlightProbeEditor(document.querySelector(".source-editor")), accepted = editor.value;
     assert(accepted.endsWith("screen travel_notes():\n    pass\n"), "Ordinary blank source emitted");
+    editor.focus();
+    await until(() => editor.value.slice(editor.selectionStart, editor.selectionEnd) === "screen travel_notes():\n    pass\n", "Source declaration selection");
     assert(editor.value.slice(editor.selectionStart, editor.selectionEnd) === "screen travel_notes():\n    pass\n", "Exact declaration selected in Source");
     checkpoint("exact-source-passed");
     await click("Screens"); await click("Undo"); await until(() => message().includes("Unresolved owned screen travel_notes"));
@@ -51,6 +54,6 @@
     checkpoint("reopen-passed"); checkpoint("complete");
     await call("probe.runtimeUiReport", { scenario: "owned-screen", passed: true, stage, stages, identity, nativeWebView: true, sdkExecuted: false });
   } catch (error) {
-    await call("probe.runtimeUiReport", { scenario: "owned-screen", passed: false, stage, stages, error: String(error), nativeWebView: true, sdkExecuted: false });
+    await call("probe.runtimeUiReport", { scenario: "owned-screen", passed: false, stage, stages, awaitedControl, error: String(error), nativeWebView: true, sdkExecuted: false });
   }
 })();
