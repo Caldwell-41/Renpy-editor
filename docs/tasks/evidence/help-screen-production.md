@@ -4,17 +4,16 @@ Owning brief: [Help outcome](../active/help-screen-production.md).
 Observation starts 2026-10-22. Baseline `cf4540de1545de93f2bc534812d1176623e47d2c`;
 Mac sole writer. Existing uncommitted maintenance remains preserved.
 
-## Current allowance and next action
+## Current result and allowance
 
-CI2 is audited failed at the Windows native Stop gate. The supervisor preserved a
-legitimate owned console-control exit; the qualification gates required zero or a
-Unix signal result. Local14 reproduced the rejection and corrected the gates without
-changing product termination. Local15 final checks/publication are active, within
-cumulative local cap 15. CI use is 2/3 before dispatch 3. Actual Windows use is one
-package, one native app and one preview; the final run can use the remaining two
-service aspects and one native preview. Mac evidence remains accepted and unchanged
-at packages 3/3, apps 2/3 and previews 7/8. Material visual differences remain unaccepted.
-The implementation owner retains CI3 terminal audit under the manual-resume policy.
+The [CI3 terminal audit](#ci3-terminal-audit-2026-10-22) passes for exact c2d9f45,
+attempt 1/ordinal 3. Windows now has the required two-aspect service and packaged
+WebView/SDK proof. Accepted signed Mac evidence is reused. CI1/CI2 remain failed;
+their actual consumption stays charged. Final cumulative use is local 15/15,
+CI 3/3; Mac packages 3/3, native launches 2/3, previews 7/8; Windows packages 2/2,
+native launches 2/3, previews 4/4. No run or worker audit remains pending.
+Final review belongs to the selecting chat. Material flow-v1 visual differences
+remain unaccepted. No new execution or retry is authorized.
 
 ## Reference preservation
 
@@ -677,3 +676,121 @@ native changes are qualification-only target/Stop metadata and gate logic.
 Current/handover word counts before CI3 wait are 468/896. CURRENT's small excess keeps
 unrelated workstream/acceptance pointers intact during this repair; the Help section
 and linked brief own the new state. No unrelated documentation maintenance is staged.
+
+
+## Published Stop qualification repair and CI3 reservation
+
+Ordinary fast-forward publication succeeded from 4ac3ff1 to
+c2d9f457777dc78975779cb0583f6d1cc494755a. The scoped payload is two commits across
+14 files, 396 insertions and 156 deletions. Artifact privacy, committed content/links
+(815 files) and actual-range whitespace checks pass. Product renderer, runtime,
+transaction and screen editing code is unchanged from the accepted base; native
+changes are qualification-only metadata/gates. All unrelated maintenance and ignored
+private receipts remain excluded. No PR, merge or release occurred.
+
+Reserve the final cumulative dispatch 3 at this exact candidate, inputs ordinal=3.
+Focused CI use becomes 3/3. The Windows-only route reserves cumulative package 2 and
+app 2, plus two service previews and one native preview, ending at most at previews 4/4.
+The original failed attempts remain charged. No further dispatch or retry is authorized.
+
+## CI3 terminal audit, 2026-10-22
+
+The user resumed the implementation worker for the retained audit. [Run 39712450128](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39712450128),
+attempt 1, completed successfully at 2026-10-22 02:59:48 UTC (12:59:48 AEST).
+Exact candidate c2d9f457777dc78975779cb0583f6d1cc494755a matches candidate.txt,
+the package receipt and run metadata. Workflow 391374211 uses screens-source.yml;
+branch codex/phase3b-screen-designer; inputs candidate=that SHA and ordinal=3.
+Windows x64 job 119606706974 ran every required step successfully. No required
+step was skipped or cancelled. The unchanged CI2 full frontend/core proof and
+accepted signed Mac evidence are reused as selected; no Mac repeat ran.
+
+Artifact 12398496866, help-production-Windows-39712450128-1, is 811,815 bytes.
+Its downloaded ZIP SHA-256 is
+351e73bb73358aae97c7ce39cf9b0a4cdcd1c23fd4416d2597f0527d2ab098e5,
+matching GitHub's digest and the upload log. Safe relative ZIP entries, all 44 files,
+metadata, raw job log and a checked receipt summary are retained ignored at
+.toolchains/help-screen/ci3-audit. GitHub expiry is 2026-10-29 02:58:47 UTC. The
+public-fixture artifact privacy scan passes. Private receipts/binaries are excluded
+from the publication payload.
+
+### Required Windows qualification
+
+Five rejecting Python receipt tests and both Rust Help gates pass. Fresh real
+renderer/core tests pass all 11 groups, including source-minimality, one history
+entry, Cancel/refusal retention, Source Save, selection, resize and reopen. The
+controller rehearsal is explicitly a runtime test double and supplies no native or
+SDK proof. Frontend build and desktop check pass. Official Ren'Py 8.5.3 metadata
+and archive bytes match pinned SHA-256
+eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45.
+
+The actual service SDK gate passes in 238.83 seconds for 1280x720 and 1024x768.
+Both preparations bind renderer-produced accepted source SHA-256
+f5dab247af77cd2de93c4479016602cba6554f40cd6d053cabac2917d19387bb.
+Both compile/lint validations exit 0. Each preview measures a 760x360 frame with
+menu=false, retains its frozen launch revision after accepted width changes to 768,
+and records earlierRevision=true. Launch revisions are
+57cc587c5d1949a5c266e2a30b941a581b2d05e8f32f754b2b75f70fcc6f5225
+and d3f11d06211c709b0fb47484b8baeb36e6080e3c675f6cdd3875eab1fa7d3c4a.
+Both owned Stops finish cancelled with raw exit -1073741510, full untruncated output,
+no diagnostics/errors and cleanupComplete=true. The passing service test checks
+scratch-job removal after process reap, no source bytecode/saves and service shutdown.
+
+The single fresh Windows build produces one x64 NSIS package. The PE machine check
+requires 0x8664; the receipt binds the exact candidate and these SHA-256 identities:
+
+- Executable: 66B971D8F2CBA95822C51516076E1091E0E4D361C8598D61256FA03D4B09D1D4.
+- Installer: 6BBBFCF1BC8CA8A774F668ECA9E86B39D6406E86656DFE3366CD45BBC40721A9.
+
+These are runner-generated fresh-build hash receipts. The ZIP contains evidence,
+not executable/installer bytes for a second local rehash. The next step launches
+that same built executable, with no intervening build or mutation.
+
+The actual packaged WebView/IPC/service/SDK Help case passes in 65.39 seconds and
+the app exits 0 without timeout or external errors. Its Windows-target report has
+exactly one occurrence of each required stage: screen inventory, source round trip,
+validation, preview geometry, stale Stop, disk reopen and complete. The source stage
+checks the minimal token change, focus/caret retention, Undo/Redo, invalid input and
+Cancel. Geometry is 760x360 at 1280x720, menu=false. Validation exits 0; explicit Stop
+intent is true, phase is cancelled and raw exit remains -1073741510. Both terminals
+share launch revision e6678ad771da1ec716e2948cafe6a329537bc18c48a08d8620f4b69fc55cc2e4;
+the running preview becomes earlierRevision=true after width 768 is accepted.
+Outputs are untruncated, runtime diagnostics and raw exceptions are absent, and all
+credentials/host/requests cleanup owners finish. Input is synthetic DOM input in the
+real packaged WebView; physical keyboard proof is not claimed.
+
+The outer disk check and independent source-byte comparison both pass. Exactly
+645 accepted bytes survive reopen with BOM/CRLF, comments and opaque neighbors;
+the only dimension change is xsize 640 to 768. Final source SHA-256 is
+54dc5582dee854788bcb6266b2ff5254c42709e807e602f353eee1cfed63ca84.
+No scratch jobs, original-source bytecode or saves remain. The disposable profile
+is removed after the retained disk receipt. CI2's original failed result is retained
+unchanged; CI3 supplies new complete evidence through the corrected strict gates.
+
+### Actual cumulative usage and remaining approval
+
+CI3's package/app reservation files, four service validation/run reservations and
+native preview counter confirm one added package, one native app and three SDK
+previews. CI2's consumed package/app/preview remains charged. Final cumulative use:
+
+| Allowance | Actual use / cap |
+| --- | --- |
+| Local batches | 15/15 |
+| Qualification dispatches | 3/3 |
+| Mac packages / native launches / SDK previews | 3/3, 2/3, 7/8 |
+| Windows packages / native launches / SDK previews | 2/2, 2/3, 4/4 |
+
+No test, package, native app or SDK execution ran during this read-only terminal
+audit. No operation or worker audit remains pending. Both-host functional
+qualification for the selected Help workflow is complete within its recorded limits.
+Final review belongs to the selecting chat. Material flow-v1 visual differences
+remain unaccepted; physical keyboard and whole-phase acceptance remain separate.
+No CI4, rerun, new local batch, PR, merge or release is authorized.
+
+The terminal records are a docs-only successor to the tested c2d9f45 candidate.
+CURRENT/HANDOVER are 399/885 words. Unrelated maintenance changes remain local and
+unstaged; existing recovery is preserved. Only this outcome's status sections are
+selected for publication. No package matrix is needed for this record update.
+Publication content/privacy checks pass across the 815-file staged tree, and all
+four changed records pass section-link checks. The uncommitted stricter validator
+finds two pre-existing broken section links in ROADMAP and the Phase 3 brief. They
+are identical at preceding HEAD and remain with the separate maintenance work.

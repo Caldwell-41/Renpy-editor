@@ -1,47 +1,46 @@
 # Current outcome handover
 
-## Help-screen production continuation, 2026-10-22
+## Help-screen production audit, 2026-10-22
 
-Branch codex/phase3b-screen-designer; qualification source 83e4b36. Read the
+Branch codex/phase3b-screen-designer. The bounded Help workflow has functional
+qualification on Windows x64 and signed Mac ARM64. Read the
 [owning brief](../tasks/active/help-screen-production.md) and
-[CI2 diagnosis](../tasks/evidence/help-screen-production.md#ci2-retained-audit-and-causal-diagnosis).
-The selecting chat accepts the bounded signed Mac workflow and closed the original
-three findings at source/local-regression scope. Visual differences remain unaccepted.
+[CI3 terminal audit](../tasks/evidence/help-screen-production.md#ci3-terminal-audit-2026-10-22)
+for scope, package hashes, artifact identity, receipt limits and cumulative usage.
+The selecting chat accepted the corrected bounded Mac proof and closed the original
+three findings. Final functional/visual review remains there. Material flow-v1
+differences remain unaccepted; full Screens and Phase 2/3A human acceptance are separate.
 
-CI2 run 39704470784, attempt 1, exact head 4ac3ff1f4a8a96e05bf265eb05a815bfa6d70e64,
-is audited failed. It used one Windows package, one native app and one preview. Validation exits 0;
-geometry is 760x360 in game context; owned Stop preserves raw -1073741510 with cancelled
-phase, clean output/diagnostics and complete cleanup. Windows sends CTRL_BREAK_EVENT;
-this code is its console-control exit. Three qualification gates assumed zero or a
-Unix signal exit. The repair retains raw codes and permits that exact Windows result
-only for explicit owned cancellation with complete error-free evidence. It adds
-compile-time target and Stop intent to probe receipts and checks the target against
-the outer host. Unknown exits, validation failure, wrong OS/phase, errors and missing
-cleanup still reject. Product termination and the accepted Mac evidence are unchanged.
+CI3 run 39712450128, attempt 1/ordinal 3, exact candidate
+c2d9f457777dc78975779cb0583f6d1cc494755a, completed successfully at
+2026-10-22 02:59:48 UTC (12:59:48 AEST). Windows job 119606706974 ran every required
+step. The retained ZIP digest matches GitHub metadata and the upload log. Both service
+aspects (1280x720 and 1024x768) compile/lint, measure the renderer-accepted 760x360 frame
+in game context, observe staleness and clean up. The packaged native case passes all
+seven stages through source/history/Cancel, validation, geometry, stale Stop and reopen.
+Raw validation exits 0; all three owned Windows Stops retain -1073741510 with cancelled
+phase, untruncated error-free output and complete cleanup. The native receipt records
+explicit Stop intent and Windows target. Disk bytes match; no source bytecode/saves or
+scratch jobs remain. App exits 0. Input is synthetic DOM input in the real WebView.
 
-Local14 reproduces the old rejection in Rust, Python and the actual native probe
-through real bridge/core with a marked runtime test double. Local14/15 corrected and
-rejecting cases, fresh renderer/core producer, build/check, actionlint and validators
-pass. CI2 artifacts remain byte-identical and failed. The incident/runbook records
-own the lasting qualification rule. Protected apps/drafts, pinned flow-v1 and unrelated
-uncommitted maintenance remain preserved.
+Source 83e4b36 corrected three qualification gates without changing product Stop
+behavior. CI2 remains failed with its original receipts. Accepted signed Mac package 3
+and native launch 2 evidence is reused; no Mac repeat occurred. The Windows package
+hashes are fresh-build runner receipts, not locally rehashed uploaded binaries. Artifact
+12398496866 expires 2026-10-29; an ignored copy, raw job log, metadata and audit summary
+are retained under .toolchains/help-screen/ci3-audit. No private artifact is committed.
 
-The latest human instruction authorizes two added local batches (cap 15) and one
-qualification dispatch (cap 3). Before CI3, actual use is local 15/15 and CI 2/3;
-Mac packages 3/3, native launches 2/3 and previews 7/8; Windows packages 1/2, native
-launches 1/3 and previews 1/4. The new Windows-only ordinal 3 route uses the remaining
-two service previews and one native preview, one package and one app. It supersedes
-the obsolete ordinal 2 service skip, using audited actual capacity. No counter reset,
-fourth CI run or unrelated native repeat is authorized.
+Final cumulative use is local batches 15/15 and CI dispatches 3/3; Mac packages 3/3,
+native launches 2/3 and previews 7/8; Windows packages 2/2, native launches 2/3 and
+previews 4/4. CI1/CI2 failures stay charged. No CI4, rerun, new local batch or unrelated
+native repeat is authorized. No operation, polling loop or worker audit remains pending.
 
-The implementation owner retains terminal-job/artifact audit after manual same-thread
-resume under WORKFLOW. Fetch the recorded run/attempt and verify required service and
-native stages, raw exits/errors, exact package hashes, accepted bytes/history/reopen,
-owned process/scratch cleanup and actual counters. Failed/skipped/missing proof stays
-incomplete. The human is not assigned that audit. No polling loop or monitor is active.
-Report verified results or a precise blocker to the selecting chat for final review.
-Only scoped reviewed Help corrections/records may publish by ordinary fast-forward to
-origin/Caldwell-41/Renpy-editor/refs/heads/codex/phase3b-screen-designer. No PR/merge/release.
+Return the verified audit to the selecting chat for final review. Scoped terminal
+records may publish by ordinary fast-forward to origin/Caldwell-41/Renpy-editor/
+refs/heads/codex/phase3b-screen-designer. This docs-only successor records c2d9f45 as
+the tested candidate and needs no package matrix. Preserve protected apps/drafts,
+pinned flow-v1, ignored receipts and unrelated uncommitted documentation/validator
+maintenance. No PR, merge or release is authorized.
 
 ## Earlier full-app mockups
 
