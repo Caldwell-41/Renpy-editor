@@ -488,3 +488,29 @@ it is zero packages, zero native launches and two SDK processes. Its maximum
 reservation is one package, one native launch and four SDK processes. Mac remains
 packages 3/5, native 3/7, SDK 24/24. No further Mac SDK launch, weaker gate or broader
 renderer work is allocated.
+
+### CI4 pending operation
+
+Published diagnostic candidate `bea2019cb11de61be4ccd9abf8575cf1bce11308` matches
+the verified remote branch. [CI4 run 39847274208](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39847274208),
+attempt 1, tests that exact head/candidate on `codex/phase3b-screen-designer`.
+Workflow `screens-source.yml` selects ordinal 4, `canvas_helper=true`,
+`owned_blank=false`. Last observed queued at 2026-10-22 20:15:37 UTC. Ignored
+`ci-04` owns reservation, discovery and the remaining audit list.
+
+Follow installed ci-watch for same-chat continuation. Registration requires its
+launcher acknowledgement. On its event, verify and acknowledge receipt, then
+inspect exact run/attempt/SHA and first failing operation/native OS result before
+choosing a correction. If 200 updates pass, retain the complete series and assess
+the prior intermittent failure explicitly. Audit all required downstream results,
+SDK/package identities, privacy, both-aspect helper/reference comparison, controller/
+native receipts, accepted source, cleanup and actual operations. A green badge
+alone does not resolve the prior cause or accept rendering.
+
+Current cumulative use is 41/60 local batches, 4/5 CI dispatches; Mac packages 3/5,
+native 3/7, SDK 24/24. Windows actual use through CI3 is zero packages/native
+launches and two SDK processes; CI4 reserves one package, one native launch and
+four SDK processes. Only one more CI dispatch remains. No further Mac SDK process
+is allocated. All existing rendering/native/dragging gates and publication limits
+remain unchanged. CURRENT/HANDOVER retain protected recovery and earlier pending
+acceptance, which keep their overall size above the review targets.

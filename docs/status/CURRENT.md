@@ -1,36 +1,37 @@
 # Current status
 
-## L17 Windows correction published; CI3 pending
+## L17 submission failure under diagnosis; CI4 pending
 
 2026-10-23: [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-continues within its existing allowance. Product correction `7e53b72` is published.
-Windows CI2 passed portable checks and the first helper frame, then failed on a
-Windows request-file sharing conflict during the next draft. The reader now shares
-delete access with the publisher's atomic replacement. Focused core/type/syntax
-checks and both independent reviews pass. This still needs Windows execution.
-[Evidence](../tasks/evidence/canvas-rendering.md#ci2-terminal-audit-and-windows-reader-correction)
-owns the retained failure, cause and correction.
+continues within its existing allowance. CI3 at `7e53b72` passes five Windows
+UI/core/helper groups and 19 warm captures. Its reader correction survives both
+aspects and repeated updates. The next core submission returns a generic invariant
+refusal while the helper stays alive. The exact filesystem cause remains unknown.
+Published diagnostic candidate `bea2019` records fixed operation labels and native
+OS error kind/code without paths or content. No further product fix is claimed.
+[Evidence](../tasks/evidence/canvas-rendering.md#ci3-terminal-audit-and-submission-diagnostics)
+owns the failure, retained artifacts, partial results and diagnostic review.
 
-[Windows CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39844974063),
-attempt 1 at `7e53b721e1c345a2388780e3ef00eb781fe09248`, was last observed queued
-at 2026-10-22 20:00:04 UTC. It must qualify repeated updates and the selected
-browser/reference/package/native paths. Follow [HANDOVER](HANDOVER.md#active-l17-proof-handover)
-for same-chat ci-watch continuation and artifact audit.
+[Windows CI4](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39847274208),
+attempt 1 at `bea2019cb11de61be4ccd9abf8575cf1bce11308`, was last observed queued
+at 2026-10-22 20:15:37 UTC. It repeats up to 200 Windows warm updates to capture
+the first failing operation and OS result, then runs remaining selected checks if
+that succeeds. Follow [HANDOVER](HANDOVER.md#active-l17-proof-handover) for ci-watch
+continuation and exact artifact audit.
 
-Signed Mac package 3/native attempt 3 at `63a1b03` retains its functional pass at
-both aspects with source/history, logical pixels and cleanup. The correction keeps
-the non-Windows read path unchanged; no Mac SDK repeat is allocated. Rendering
-fidelity, native timing/startup/focus and element dragging remain Spec gaps.
-Glyph/hover-color differences against deliberate Ren'Py have no accepted tolerance.
-Keep #36, B07/B08 and whole-phase acceptance open.
+Mac package 3/native attempt 3 at `63a1b03` retains its bounded functional pass.
+The Windows helper exports exactly equal its Mac helper pixels at both aspects;
+deliberate Windows reference and native checks remain unrun. Rendering fidelity,
+native timing/startup/focus and element dragging remain Spec gaps. No tolerance
+for Mac glyph/hover-color differences is accepted. Keep #36/B07/B08 and whole-phase
+acceptance open; broader renderer work or weaker gates need decision review.
 
-#36 owns cumulative use: 38/60 local batches, 3/5 CI; Mac packages 3/5, native 3/7,
-SDK 24/24. Windows actual use through CI2 is zero packages, zero native launches
-and one SDK process. CI3 reserves one package, one native launch and four SDK
-processes. No owned local process, fixture or generated helper backup remains.
-Return fidelity failures to decision review before broader renderer work or weaker
-gates. No PR, merge or release is selected. Preserve unrelated parallel-policy
-edits and protected recovery below.
+#36 owns cumulative use: 41/60 local batches, 4/5 CI; Mac packages 3/5, native 3/7,
+SDK 24/24. Windows actual use through CI3 is zero packages/native launches and two
+SDK processes. CI4 reserves one package, one native launch and four SDK processes.
+No further Mac SDK launch is allocated. No owned local process, fixture or generated
+helper backup remains. No PR, merge or release is selected. Preserve unrelated
+parallel-policy edits and protected recovery below.
 
 ## Earlier canvas decision closeout
 
