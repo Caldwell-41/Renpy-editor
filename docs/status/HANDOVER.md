@@ -1,5 +1,34 @@
 # Current outcome handover
 
+## L01 owned blank screen, current continuation
+
+The user selected [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34)
+through the implement skill on 2026-10-22. Mac ARM64 remains the sole writer on
+`codex/phase3b-screen-designer`, starting at `867528d`. Preserve the pre-existing
+uncommitted instruction/policy/status edits and untracked domain/triage guides.
+
+The local implementation adds source-map v6 ownership, typed catalog/create
+operations and Choose's blank-screen dialog. Real renderer/core Source/history/reopen
+and the corrected actual Mac SDK preview pass. The source contract is in
+[DATA_MODEL](../DATA_MODEL.md#project-lifecycle-metadata); detailed results and failed
+attempts are in [L01 evidence](../tasks/evidence/owned-blank-screen.md).
+The signed package is retained under ignored `.toolchains/owned-screen/mac-package-02`.
+The desktop is locked; an unlock request is pending before the native creation case.
+Do not bypass single instance or touch protected recovery to run it.
+
+Current cumulative use is 12/18 local work/verification batches, 0/2 CI dispatches,
+Mac package attempts 2/2 (one pin refusal before build), native launches 0/2 and SDK
+operations 4/4 (one failed numeric assertion, then complete proof). Windows counts
+remain zero. No contingency is consumed. The issue owns the original limits and
+ceilings. Full frontend passes 220/220 with Python 3.12; broad core qualification and
+independent review are being completed. No remote run is pending.
+
+Next complete local review/native proof where available, commit the ticket's changes
+on the current branch, then obtain publication permission for that concrete candidate
+and the prepared `owned_blank=true` Screens CI route. Windows proof remains required;
+L01 stays open until its acceptance criteria pass. Full editor/canvas/phase gates and
+the historical recovery below remain separate.
+
 ## Phase 3B migration and retained Help audit, 2026-10-22
 
 Branch codex/phase3b-screen-designer. The bounded Help workflow has functional

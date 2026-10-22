@@ -13,6 +13,10 @@ export interface ScreenDocument {
   path: string; revision: string; partial: boolean;
   screens: { name: string; nodes: ScreenNode[] }[];
 }
+interface OwnedScreen { id: string; rootId: string; path: string; name: string; resolved: boolean }
+interface ScreenCatalog {
+  projectRevision: string; sourceMapRevision: string; inventoryRevision: string; owned: OwnedScreen[];
+}
 interface Draft { document: ScreenDocument; screen: string; index: number; width: string; height: string }
 interface Actions {
   resolution: { width: number; height: number };
@@ -43,6 +47,10 @@ export class ScreensWorkspace {
   private readonly rail = el("nav", "screen-steps");
   private readonly drafts = new Map<string, Draft>();
   private documents: ScreenDocument[] = [];
+  private catalog?: ScreenCatalog;
+  private owned?: OwnedScreen;
+  private creation?: { name: string; base: ScreenCatalog };
+  private creationDialog?: HTMLDialogElement;
   private doc?: ScreenDocument;
   private screen = "";
   private selected = 0;
@@ -62,10 +70,13 @@ export class ScreensWorkspace {
     heading.append(tools);
     this.selection.ariaLabel = "Screen"; this.selection.onchange = () => {
       const [path, name] = JSON.parse(this.selection.value) as [string, string];
-      this.doc = this.documents.find(d => d.path === path); this.screen = name; this.selected = 0; this.render();
+      this.owned = path === "owned" ? this.catalog?.owned.find(s => s.id === name) : undefined;
+      this.doc = this.documents.find(d => d.path === (this.owned?.path ?? path));
+      if (this.owned && !this.owned.resolved) this.doc = undefined;
+      this.screen = this.owned?.name ?? name; this.selected = 0; this.render(); this.reportUnresolved();
     };
     const picker = el("label", "screen-picker", "Screen "); picker.append(this.selection);
-    const limits = el("p", "muted screen-limits", "Existing custom screens · width and height only. Add, movement, styles, assets and Story Connect are not available yet.");
+    const limits = el("p", "muted screen-limits", "Blank custom screens and existing width and height edits. Adding elements, movement, styles, assets and Story Connect are not available yet.");
     for (const [id, label] of [["choose", "1  Choose"], ["design", "2  Design"], ["connect", "3  Connect"]]) {
       this.rail.append(button(label!, () => { this.step = id!; this.renderCard(); }));
     }
@@ -84,33 +95,46 @@ export class ScreensWorkspace {
     this.observer = new ResizeObserver(() => this.renderCanvas()); this.observer.observe(viewport);
   }
   mount(host: HTMLElement): void { host.append(this.panel); void this.load(); }
-  dispose(): void { this.disposed = true; this.observer.disconnect(); this.cancelResize(); }
-  hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize; }
+  dispose(): void { this.disposed = true; this.observer.disconnect(); this.cancelResize(); this.closeCreationDialog(); }
+  hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize || !!this.creation; }
   private current(): boolean { return !this.disposed && this.actions.current(); }
   private nodes(): ScreenNode[] { return this.doc?.screens.find(s => s.name === this.screen)?.nodes ?? []; }
   private key(): string { return JSON.stringify([this.doc?.path, this.screen, this.selected]); }
   private draft(): Draft | undefined { return this.drafts.get(this.key()); }
-  private note(text: string, error = false): void { this.message.textContent = text; this.message.dataset.error = String(error); }
+  private note(text: string, error = false): void {
+    this.message.textContent = text; this.message.dataset.error = String(error);
+    const status = this.creationDialog?.querySelector<HTMLElement>('[role="status"]');
+    if (status) { status.textContent = text; status.dataset.error = String(error); }
+  }
   async load(): Promise<void> {
     if (this.busy || this.resize) { this.note("Finish the current operation first. Input retained.", true); return; }
     const sequence = ++this.loadSequence;
     try {
       const inventory = await this.actions.request<SourceInventory>("source.list");
+      const catalog = await this.actions.request<ScreenCatalog>("screens.list");
       const documents: ScreenDocument[] = [];
       for (const file of inventory.files) {
         if (!/^game\/ui\/[A-Za-z_][A-Za-z_0-9]{0,63}\.rpy$/.test(file.path)) continue;
+        if (catalog.owned.some(s => s.path === file.path && !s.resolved)) continue;
         documents.push(await this.actions.request<ScreenDocument>("screens.inspect", { path: file.path }));
       }
       if (!this.current() || sequence !== this.loadSequence) return;
-      const path = this.doc?.path; this.documents = documents;
+      const path = this.doc?.path; this.documents = documents; this.catalog = catalog;
       const supported = documents.filter(d => d.screens.length > 0);
-      this.doc = supported.find(d => d.path === path) ?? supported[0];
+      if (this.owned) this.owned = catalog.owned.find(s => s.id === this.owned!.id) ?? { ...this.owned, resolved: false };
+      else if (!path) this.owned = catalog.owned[0];
+      this.doc = this.owned ? this.owned.resolved ? supported.find(d => d.path === this.owned!.path) : undefined : supported.find(d => d.path === path) ?? supported[0];
+      if (this.owned) this.screen = this.owned.name;
       if (!this.doc?.screens.some(s => s.name === this.screen)) this.screen = this.doc?.screens[0]?.name ?? "";
       this.selected = Math.min(this.selected, Math.max(0, this.nodes().length - 1));
       this.selection.replaceChildren();
-      documents.forEach(d => d.screens.forEach(s => { const option = el("option", "", `${s.name} · ${d.path}`); option.value = JSON.stringify([d.path, s.name]); this.selection.append(option); }));
-      this.selection.value = JSON.stringify([this.doc?.path, this.screen]);
-      this.render(); this.note(this.doc ? this.hasDraft() ? "Source refreshed. Unfinished drafts retain their original revision." : "Saved screen loaded. Unsupported regions remain in Source." : "No supported custom screens in game/ui. Create or edit a screen in Source.");
+      const owned = [...catalog.owned];
+      if (this.owned && !owned.some(s => s.id === this.owned!.id)) owned.push(this.owned);
+      owned.forEach(s => { const option = el("option", "", `${s.name} · ${s.path}${s.resolved ? " · owned" : " · unresolved"}`); option.value = JSON.stringify(["owned", s.id]); this.selection.append(option); });
+      documents.forEach(d => d.screens.forEach(s => { if (catalog.owned.some(o => o.path === d.path && o.name === s.name)) return; const option = el("option", "", `${s.name} · ${d.path}`); option.value = JSON.stringify([d.path, s.name]); this.selection.append(option); }));
+      this.selection.value = this.owned ? JSON.stringify(["owned", this.owned.id]) : JSON.stringify([this.doc?.path, this.screen]);
+      this.render(); this.note(this.doc ? this.hasDraft() ? "Source refreshed. Unfinished drafts retain their original revision." : "Saved screen loaded. Unsupported regions remain in Source." : "No supported custom screens in game/ui. Create a blank screen from Choose.");
+      this.reportUnresolved();
     } catch (error) { if (this.current() && sequence === this.loadSequence) this.note(`${(error as Error).message} Input retained.`, true); }
   }
   private render(): void { this.renderCard(); this.renderCanvas(); }
@@ -125,6 +149,8 @@ export class ScreensWorkspace {
     const node = this.nodes()[this.selected];
     this.card.append(el("h2", "", this.step === "choose" ? "Choose an element" : names[node?.kind ?? ""] ?? "Screen"));
     if (this.step === "choose") {
+      this.card.append(button("New blank screen", () => this.beginCreation()));
+      if (this.creation) this.renderCreation();
       this.card.append(el("p", "muted", "Click a row to select it. Double-click or Enter opens Design."));
       const list = el("div", "screen-tree"); list.role = "listbox"; list.ariaLabel = "Elements";
       this.nodes().forEach((node, index) => {
@@ -167,6 +193,44 @@ export class ScreensWorkspace {
     this.card.append(el("p", "muted screen-coverage", this.doc?.partial ? "Partial coverage. Custom Python, actions, styling and unsupported regions are preserved in Source." : "Only existing literal dimensions can change here."));
     this.card.scrollTop = scroll;
   }
+  private reportUnresolved(): void {
+    if (this.owned && !this.owned.resolved) this.note(`Unresolved owned screen ${this.owned.name}. Restore its declaration and ownership marker in ${this.owned.path}, then refresh Source.`, true);
+  }
+  private beginCreation(): void {
+    if (this.busy || this.hasDraft() || !this.catalog) { this.note("Finish or cancel unfinished changes before creating a screen. Input retained.", true); return; }
+    this.creation = { name: "", base: this.catalog }; this.renderCard(); this.creationDialog?.querySelector<HTMLInputElement>('[aria-label="Screen name"]')?.focus();
+  }
+  private renderCreation(): void {
+    if (this.creationDialog?.isConnected) return;
+    const input = el("input"); input.ariaLabel = "Screen name"; input.value = this.creation!.name; input.maxLength = 64;
+    input.readOnly = this.busy; input.oninput = () => { if (!this.busy && this.creation) this.creation.name = input.value; };
+    input.onkeydown = event => { if (event.key === "Enter") { event.preventDefault(); void this.create(); } };
+    const label = el("label", "", "Screen name"); label.append(input);
+    const form = el("dialog", "screen-create"); form.ariaLabel = "New blank screen";
+    const actions = el("div", "screen-create-actions");
+    actions.append(button("Cancel creation", () => { if (!this.busy) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.card.querySelector<HTMLButtonElement>("button")?.focus(); this.note("Creation cancelled. No source was written."); } }), button("Create blank screen", () => void this.create(), "button primary"));
+    const status = el("p"); status.role = "status"; status.ariaLive = "polite";
+    form.append(el("h2", "", "New blank screen"), label, el("p", "muted", "Use a source name such as travel_notes. Start with a letter or underscore; then use letters, numbers or underscores."), status, actions);
+    form.oncancel = event => { event.preventDefault(); this.cancel(); };
+    this.creationDialog = form; this.panel.append(form); form.showModal();
+  }
+  private closeCreationDialog(): void {
+    this.creationDialog?.close(); this.creationDialog?.remove(); this.creationDialog = undefined;
+  }
+  private async create(): Promise<void> {
+    const draft = this.creation; if (!draft || this.busy) return;
+    if (!/^[A-Za-z_][A-Za-z_0-9]{0,63}$/.test(draft.name)) { this.note("Enter a valid screen name. Input retained.", true); return; }
+    this.busy = true; this.loadSequence++; this.creationDialog!.querySelector<HTMLInputElement>('[aria-label="Screen name"]')!.readOnly = true;
+    try {
+      const catalog = await this.actions.coordinate(() => this.actions.request<ScreenCatalog>("screens.create", {
+        name: draft.name, expectedProjectRevision: draft.base.projectRevision, expectedSourceMapRevision: draft.base.sourceMapRevision, expectedInventoryRevision: draft.base.inventoryRevision,
+      }));
+      if (!this.current()) return;
+      this.owned = catalog.owned.find(s => !draft.base.owned.some(old => old.id === s.id));
+      this.creation = undefined; this.closeCreationDialog(); this.selected = 0; this.actions.saved();
+    } catch (error) { if (this.current()) this.note(`${(error as Error).message} Input retained. Cancel creation and refresh Source before trying again.`, true); }
+    finally { this.busy = false; if (this.current()) { const input = this.creationDialog?.querySelector<HTMLInputElement>('[aria-label="Screen name"]'); if (input) input.readOnly = false; if (!this.creation) { await this.load(); this.card.querySelector<HTMLElement>('[aria-selected="true"]')?.focus(); } } }
+  }
   private updateSizeControls(): void {
     const node = this.nodes()[this.selected], draft = this.draft();
     for (const input of this.card.querySelectorAll<HTMLInputElement>("input[data-size]")) {
@@ -185,6 +249,7 @@ export class ScreensWorkspace {
   }
   private cancel(): void {
     if (this.busy) { this.note("The edit is being accepted. Input retained until its result arrives."); return; }
+    if (this.creation) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.card.querySelector<HTMLButtonElement>("button")?.focus(); }
     this.drafts.delete(this.key()); this.updateSizeControls(); this.renderCanvas(); this.note("Changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
@@ -224,6 +289,7 @@ export class ScreensWorkspace {
     finally { this.busy = false; if (this.current()) await this.load(); }
   }
   private openSource(): void {
+    if (this.owned && !this.owned.resolved) { this.reportUnresolved(); return; }
     const node = this.nodes()[this.selected]; if (this.doc) this.actions.source({ path: this.doc.path, expectedRevision: this.doc.revision, byteStart: node?.span.start, byteEnd: node?.span.end });
   }
   private test(validate: boolean): void {

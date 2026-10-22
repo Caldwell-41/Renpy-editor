@@ -1,5 +1,17 @@
 # Current status
 
+## Selected L01 implementation
+
+2026-10-22: The user selected [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34).
+Blank-screen creation, screen/root ownership, Source navigation, shared history and
+reopen are implemented locally on `codex/phase3b-screen-designer`.
+[The evidence](../tasks/evidence/owned-blank-screen.md) records the real renderer/core
+and Mac SDK results, retained failures and remaining qualification. The signed Mac
+package passes identity and installer checks; its native run needs an unlocked
+desktop. Windows SDK/WebView proof and publication approval remain pending.
+The issue stays open. Full flow-v1/canvas and phase acceptance remain separate.
+The issue owns the new finite allowance; closed Help allowances stay closed.
+
 ## Phase 3B migration and retained Help result
 
 2026-10-22: The bounded Help workflow has audited Windows x64 and signed Mac ARM64

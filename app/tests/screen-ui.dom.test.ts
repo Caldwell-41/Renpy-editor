@@ -17,6 +17,7 @@ function harness(mixed = false) {
     coordinate: task => task(), source: () => {}, preview: () => {}, saved: () => {},
     request: async <T>(operation: CoreOperation, payload?: Record<string, unknown>): Promise<T> => {
       if (operation === "source.list") return { files: documents.map(d => ({ path: d.path })) } as T;
+      if (operation === "screens.list") return { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "files", owned: [] } as T;
       if (operation === "screens.inspect") return documents.find(d => d.path === payload?.path) as T;
       if (operation === "screens.setSize") return await new Promise<ScreenDocument>((resolve, reject) => { settle = { resolve, reject }; }) as T;
       throw new Error(operation);

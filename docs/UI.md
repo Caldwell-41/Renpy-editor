@@ -858,6 +858,15 @@ proof passes; visual fidelity remains unaccepted. For implementation or acceptan
 of canvas rendering, follow [canvas agreement with Ren'Py](tasks/reference/phase-3b-screens.md#canvas-agreement-with-renpy).
 The inventory below remains the full Screens direction.
 
+[L01](https://github.com/Caldwell-41/Renpy-editor/issues/34) adds New blank screen
+under Choose. Its named dialog accepts a source name, creates through the shared core
+transaction and selects the owned root. Cancel/Escape writes nothing; invalid,
+colliding or stale input remains in the dialog. View in Source selects the accepted
+declaration, while shared Undo/Redo and reopen preserve ownership. An unresolved
+owned selection names its original file and does not select a neighboring screen.
+The dialog follows the approved modal pattern; the existing limited editor layout
+still has the previously recorded flow-v1 differences.
+
 | Component hierarchy | Constraint canvas | Properties/source |
 | --- | --- | --- |
 | Frames, containers, text, images, buttons, bars, grids, viewports, components | Selected resolution/aspect preview with layout guides and interaction state | Layout/style/action fields; synchronized screen language; protected custom regions |

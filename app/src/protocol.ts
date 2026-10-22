@@ -70,6 +70,8 @@ export const CORE_OPERATIONS = [
   "flow.list",
   "scene.apply",
   "screens.inspect",
+  "screens.list",
+  "screens.create",
   "screens.setPixelProperty",
   "screens.setSize",
   "scene.recovery",

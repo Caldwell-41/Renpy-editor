@@ -1191,3 +1191,73 @@ fn help_scratch_preview_sdk_geometry_revision_and_cleanup() {
         fs::write(output.join("sdk-receipts.json"),serde_json::to_vec_pretty(&json!({"acceptedSHA256":hex::encode(Sha256::digest(&accepted)),"aspects":receipts,"previewLaunches":index+1,"nativeWebView":false})).unwrap()).unwrap();
     }
 }
+
+#[test]
+#[ignore = "L01 deliberate SDK preview; requires renderer-accepted blank screen and verified archive"]
+fn owned_blank_screen_sdk_preview_and_cleanup() {
+    use sha2::{Digest, Sha256};
+    let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").expect("official archive required");
+    let accepted = fs::read(std::env::var_os("LOOMLIGHT_OWNED_SCREEN_ACCEPTED").expect("renderer-accepted source required")).unwrap();
+    let output = PathBuf::from(std::env::var_os("LOOMLIGHT_OWNED_SCREEN_SDK_EVIDENCE").expect("owned evidence directory required"));
+    fs::create_dir_all(&output).unwrap();
+    let output = fs::canonicalize(output).unwrap();
+    let temp = tempfile::Builder::new().prefix("loomlight-owned-sdk-").tempdir().unwrap();
+    let sdk = crate::renpy::install_supported_sdk_from_archive(&temp.path().join("sdk"), Path::new(&archive)).unwrap();
+    let root = temp.path().join("project"); make_openable_project(&root, "Owned blank screen");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    fs::write(root.join("game/ui/travel_notes.rpy"), &accepted).unwrap();
+    fs::write(root.join("game/options.rpy"), super::runtime_probe::help_probe_options(1280, 720)).unwrap();
+    let capture = serde_json::to_string(&output.join("preview.png").to_string_lossy()).unwrap();
+    // Test-owned observation is separate from the accepted, unchanged blank screen.
+    let probe = format!(r#"init python:
+    def observe_owned_blank():
+        screen = renpy.get_screen("travel_notes")
+        if screen is not None and not getattr(store, "owned_observed", False):
+            store.owned_observed = True
+            size = renpy.render(screen, config.screen_width, config.screen_height, 0, 0).get_size()
+            renpy.take_screenshot()
+            captured = renpy.screenshot({capture})
+            print("OWNED_BLANK_PREVIEW " + __import__("json").dumps(dict(screen="travel_notes", size=list(size), menu=main_menu, captured=captured)), flush=True)
+    config.overlay_screens.append("owned_blank_observer")
+screen owned_blank_observer():
+    timer 0.3 repeat True action Function(observe_owned_blank)
+"#);
+    fs::write(root.join("game/owned_probe.rpy"), probe).unwrap();
+    let profile = temp.path().join("profile");
+    let mut service = LifecycleService::new(profile.clone()).unwrap();
+    let sdk_id = service.remember_sdk(sdk, "verified-official-owned-fixture").id;
+    let session = service.open_path(&root).unwrap().session_id;
+    let document = call(&mut service, &session, "screens.inspect", json!({"path":"game/ui/travel_notes.rpy"}));
+    assert_eq!(document["screens"][0]["nodes"].as_array().unwrap().len(), 1);
+    assert_eq!(document["partial"], false);
+    let preview = json!({"purpose":"screen","path":"game/ui/travel_notes.rpy","screenName":"travel_notes","expectedRevision":document["revision"]});
+    let mut receipts = vec![];
+    for kind in ["validate", "run"] {
+        let preparation = call(&mut service,&session,"runtime.prepare",json!({"kind":kind,"revisionChoice":"saved","sdkId":sdk_id,"preview":preview}));
+        let trust = call(&mut service,&session,"runtime.grantTrust",json!({"preparationId":preparation["preparationId"]}));
+        let started = call(&mut service,&session,"runtime.start",json!({"preparationId":preparation["preparationId"],"trustId":trust["trustId"]}));
+        let status_payload = json!({"operationId":started["operationId"],"afterSequence":0});
+        let mut observed = Value::Null;
+        wait_for(|| { observed=call(&mut service,&session,"runtime.status",status_payload.clone());
+            observed["cleanupComplete"]==true || kind=="run" && observed["output"].as_str().unwrap().contains("OWNED_BLANK_PREVIEW ") }, 45);
+        fs::write(output.join(format!("{kind}-observed.json")),serde_json::to_vec_pretty(&observed).unwrap()).unwrap();
+        if kind == "run" {
+            let line=observed["output"].as_str().unwrap().lines().find_map(|line|line.strip_prefix("OWNED_BLANK_PREVIEW ")).expect("actual blank-screen render");
+            let rendered:Value=serde_json::from_str(line).unwrap();
+            assert_eq!(rendered,json!({"screen":"travel_notes","size":[1280.0,720.0],"menu":false,"captured":true}));
+            assert!(fs::read(output.join("preview.png")).unwrap().starts_with(b"\x89PNG\r\n\x1a\n"));
+            call(&mut service,&session,"runtime.stop",json!({"operationId":started["operationId"]}));
+            wait_for(|| { observed=call(&mut service,&session,"runtime.status",status_payload.clone()); observed["cleanupComplete"]==true },10);
+        }
+        let diagnostics=call(&mut service,&session,"runtime.diagnostics",json!({"operationId":started["operationId"]}));
+        fs::write(output.join(format!("{kind}-terminal.json")),serde_json::to_vec_pretty(&json!({"status":observed,"diagnostics":diagnostics})).unwrap()).unwrap();
+        assert!(help_preview_terminal_clean(kind,&observed,&diagnostics),"{observed}\n{diagnostics}");
+        assert_eq!(fs::read(root.join("game/ui/travel_notes.rpy")).unwrap(),accepted);
+        assert!(!root.join("game/ui/travel_notes.rpyc").exists());
+        assert!(!root.join("game/saves").exists());
+        assert_eq!(fs::read_dir(&profile).unwrap().filter_map(Result::ok).filter(|entry|entry.file_name().to_string_lossy().starts_with("scratch-preview-")).count(),0);
+        receipts.push(json!({"kind":kind,"preparation":preparation,"terminal":observed}));
+    }
+    assert!(service.runtime_shutdown()); service.close().unwrap();
+    fs::write(output.join("result.json"),serde_json::to_vec_pretty(&json!({"passed":true,"acceptedSHA256":hex::encode(Sha256::digest(&accepted)),"receipts":receipts,"nativeWebView":false})).unwrap()).unwrap();
+}

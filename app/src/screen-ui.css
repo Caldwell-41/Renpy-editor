@@ -12,3 +12,6 @@
 
 .screen-tree .button { display:flex; align-items:center; gap:7px; }.screen-tree .navigation-icon { width:16px; height:16px; flex:none; margin:0; }
 .screen-edit-actions [aria-disabled=true] { opacity:.6; cursor:progress; }
+.screen-create { box-sizing:border-box; width:420px; max-width:calc(100vw - 32px); padding:22px; color:var(--text-primary); background:var(--surface-panel); border:1px solid var(--border-normal); border-radius:8px; }
+.screen-create::backdrop { background:#0007; }.screen-create h2 { margin:0 0 18px; font-size:20px; }.screen-create label { display:block; font-size:13px; }.screen-create input { display:block; box-sizing:border-box; width:100%; margin-top:7px; }.screen-create p { font-size:12px; line-height:1.6; }.screen-create-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:20px; }
+.screen-create [role=status][data-error=true] { color:var(--status-error); }

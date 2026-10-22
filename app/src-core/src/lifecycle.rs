@@ -731,6 +731,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn screens_list(&self) -> Result<crate::screens::Catalog, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring.screens_list(&authority, &project_id).map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_create(&self, request: crate::screens::CreateRequest) -> Result<crate::screens::Catalog, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring.screens_create(&authority, &project_id, request).map_err(LifecycleError::Scene)
+    }
+
     pub fn screens_inspect(&self, request: crate::screens::InspectRequest) -> Result<crate::screens::Document, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
         self.authoring.screens_inspect(&authority, request).map_err(LifecycleError::Scene)
@@ -1311,6 +1321,7 @@ fn build_overlay_model(
             "game/chapters/chapter_01/scene_001.rpy".into(),
         ],
         scene_mappings: Vec::new(),
+                owned_screens: Vec::new(),
         extra: Map::new(),
     };
     (metadata, source_map, script, scene_source)

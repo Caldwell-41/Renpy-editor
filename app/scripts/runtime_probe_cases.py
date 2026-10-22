@@ -1,9 +1,10 @@
 """Cases required by the ordinary packaged runtime gate and evidence manifest."""
 RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh")
-OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen")
+OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen")
 
 # Terminal production-probe observations required by each ordinary scenario.
 RUNTIME_STAGES = {
+    'owned-screen': ('cancel-passed', 'creation-passed', 'exact-source-passed', 'history-passed', 'reopen-passed'),
     'help-screen': ('screen-inventory-passed', 'source-roundtrip-passed', 'validation-passed', 'preview-geometry-passed', 'stale-stop-passed', 'disk-reopen-passed'),
     'compile': ('diagnostics-real-ipc-passed',),
     'lint': ('diagnostics-real-ipc-passed',),
@@ -32,6 +33,14 @@ def runtime_report_ok(case, report, target_os=None):
         return False
     if any(names.count(name) != 1 for name in RUNTIME_STAGES[case]):
         return False
+    if case == 'owned-screen':
+        identity = details.get('identity')
+        if (details.get('nativeWebView') is not True or details.get('sdkExecuted') is not False
+                or details.get('error') or not isinstance(identity, dict)
+                or identity.get('name') != 'travel_notes' or identity.get('path') != 'game/ui/travel_notes.rpy'
+                or identity.get('resolved') is not True or not isinstance(identity.get('id'), str)
+                or not isinstance(identity.get('rootId'), str) or identity['id'] == identity['rootId']):
+            return False
     if case == 'help-screen':
         if target_os is not None and target_os not in ('windows', 'macos'):
             return False

@@ -112,6 +112,8 @@ pub const OPERATIONS: &[&str] = &[
     "flow.list",
     "scene.apply",
     "screens.inspect",
+    "screens.list",
+    "screens.create",
     "screens.setPixelProperty",
     "screens.setSize",
     "scene.recovery",
@@ -527,6 +529,14 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.authoring_update_variable(payload))
             .and_then(to_value),
+        "screens.list" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| if payload.is_empty() { lifecycle.screens_list() } else { Err(LifecycleError::Scene(scene::SceneError::InvalidPayload)) }).and_then(to_value),
+        "screens.create" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| serde_json::from_value::<screens::CreateRequest>(Value::Object(payload))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
+            .and_then(|request| lifecycle.screens_create(request)).and_then(to_value),
         "screens.inspect" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| serde_json::from_value::<screens::InspectRequest>(Value::Object(payload))

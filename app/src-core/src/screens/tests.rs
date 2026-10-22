@@ -36,6 +36,143 @@ fn reject(service: &mut LifecycleService, operation: &str, mut payload: Value) -
 }
 
 #[test]
+fn owned_blank_screen_creation_source_history_and_reopen() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    service.open_path(&root).unwrap();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(&mut service, "screens.create", json!({
+        "name":"travel_notes", "expectedProjectRevision":catalog["projectRevision"],
+        "expectedSourceMapRevision":catalog["sourceMapRevision"],
+        "expectedInventoryRevision":catalog["inventoryRevision"]
+    }));
+    let owned = &created["owned"][0];
+    assert_eq!(owned["name"], "travel_notes");
+    assert_eq!(owned["resolved"], true);
+    assert_ne!(owned["id"], owned["rootId"]);
+    let path = owned["path"].as_str().unwrap();
+    assert_eq!(path, "game/ui/travel_notes.rpy");
+    let source = ipc(&mut service, "source.open", json!({"path":path}));
+    assert!(source["text"].as_str().unwrap().ends_with("screen travel_notes():\n    pass\n"));
+    let accepted = source["text"].clone();
+    let model = ipc(&mut service, "scene.list", json!({}));
+    ipc(&mut service, "scene.apply", json!({"expectedProjectRevision":model["projectRevision"],
+        "expectedSourceMapRevision":model["sourceMapRevision"], "command":{"type":"undo"}}));
+    assert!(!root.join(path).exists());
+    assert_eq!(ipc(&mut service, "screens.list", json!({}))["owned"], json!([]));
+    let model = ipc(&mut service, "scene.list", json!({}));
+    ipc(&mut service, "scene.apply", json!({"expectedProjectRevision":model["projectRevision"],
+        "expectedSourceMapRevision":model["sourceMapRevision"], "command":{"type":"redo"}}));
+    assert_eq!(ipc(&mut service, "source.open", json!({"path":path}))["text"], accepted);
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(ipc(&mut service, "screens.list", json!({}))["owned"], created["owned"]);
+}
+
+#[test]
+fn owned_screen_reconciles_source_offsets_and_edits_but_refuses_renames_and_deletions() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    service.open_path(&root).unwrap();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(&mut service, "screens.create", json!({"name":"notes",
+        "expectedProjectRevision":catalog["projectRevision"], "expectedSourceMapRevision":catalog["sourceMapRevision"],
+        "expectedInventoryRevision":catalog["inventoryRevision"]}));
+    let path = created["owned"][0]["path"].as_str().unwrap();
+    let source = ipc(&mut service, "source.open", json!({"path":path}));
+    let changed = format!("# inserted comment\n{}", source["text"].as_str().unwrap().replace("    pass", "    text \"Map\""));
+    let draft = ipc(&mut service, "source.updateDraft", json!({"path":path,
+        "expectedBaseRevision":source["baseRevision"], "text":changed,"selectionStart":0,"selectionEnd":0}));
+    ipc(&mut service, "source.save", json!({"path":path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}));
+    assert_eq!(ipc(&mut service, "screens.list", json!({}))["owned"], created["owned"]);
+    let document = ipc(&mut service, "screens.inspect", json!({"path":path}));
+    assert!(document["screens"][0]["nodes"][0]["span"]["start"].as_u64().unwrap() > 30);
+    for replacement in [changed.replace("screen notes()", "screen renamed()"),
+        changed.replace("screen notes():\n    text \"Map\"", "screen neighbor():\n    pass"),
+        format!("{changed}{changed}"), changed.replace("text \"Map\"", "text \"unfinished")]
+    {
+        fs::write(root.join(path), replacement).unwrap();
+        let current = ipc(&mut service, "screens.list", json!({}));
+        assert_eq!(current["owned"][0]["id"], created["owned"][0]["id"]);
+        assert_eq!(current["owned"][0]["resolved"], false);
+    }
+    fs::remove_file(root.join(path)).unwrap();
+    assert_eq!(ipc(&mut service, "screens.list", json!({}))["owned"][0]["resolved"], false);
+    service.close().unwrap(); service.open_path(&root).unwrap();
+    assert_eq!(ipc(&mut service, "screens.list", json!({}))["owned"][0]["resolved"], false);
+}
+
+#[test]
+fn owned_screen_creation_refuses_collisions_stale_source_dirty_drafts_and_invalid_names() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::write(root.join("game/other.rpy"), "screen elsewhere(argument=1):\n    pass\n").unwrap();
+    service.open_path(&root).unwrap();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let payload = |name: &str| json!({"name":name,"expectedProjectRevision":catalog["projectRevision"],
+        "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"]});
+    let before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+    for name in ["elsewhere", "Elsewhere", "../escape", "", "await", "async", "yield"] {
+        reject(&mut service, "screens.create", payload(name));
+        assert_eq!(fs::read(root.join(".renpy-editor/source-map.json")).unwrap(), before);
+        assert!(!root.join("game/ui").exists(), "refused creation must not prepare a source directory");
+    }
+    fs::write(root.join("game/other.rpy"), "screen added_elsewhere():\n    pass\n").unwrap();
+    assert_eq!(reject(&mut service, "screens.create", payload("fresh"))["error"]["code"], "SOURCE_CONFLICT");
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let mut payload = payload("fresh");
+    payload["expectedInventoryRevision"] = catalog["inventoryRevision"].clone();
+    let opened = ipc(&mut service, "source.open", json!({"path":"game/other.rpy"}));
+    let draft = ipc(&mut service, "source.updateDraft", json!({"path":"game/other.rpy","expectedBaseRevision":opened["baseRevision"],
+        "text":"# pending user input\n","selectionStart":3,"selectionEnd":3}));
+    assert_eq!(reject(&mut service, "screens.create", payload)["error"]["code"], "DIRTY_SOURCE");
+    assert_eq!(ipc(&mut service, "source.open", json!({"path":"game/other.rpy"}))["text"], draft["text"]);
+    assert_eq!(fs::read(root.join(".renpy-editor/source-map.json")).unwrap(), before);
+}
+
+#[test]
+fn owned_screen_metadata_migration_and_noop_reopen_preserve_source_and_extras() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    fs::write(root.join(PATH), FIXTURE).unwrap();
+    service.open_path(&root).unwrap(); service.close().unwrap();
+    let map_path = root.join(".renpy-editor/source-map.json");
+    let mut old: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+    old["schemaVersion"] = json!(5);
+    old.as_object_mut().unwrap().remove("ownedScreens");
+    old["unknownExtension"] = json!({"unchanged":[1,"two"]});
+    fs::write(&map_path, serde_json::to_vec_pretty(&old).unwrap()).unwrap();
+    let script = fs::read(root.join("game/script.rpy")).unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(ipc(&mut service, "screens.list", json!({}))["owned"], json!([]));
+    let migrated_bytes = fs::read(&map_path).unwrap();
+    let migrated: Value = serde_json::from_slice(&migrated_bytes).unwrap();
+    assert_eq!(migrated["schemaVersion"], json!(crate::metadata::SOURCE_MAP_SCHEMA_VERSION));
+    assert_eq!(migrated["unknownExtension"], old["unknownExtension"]);
+    assert_eq!(migrated["sceneMappings"], old["sceneMappings"]);
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), FIXTURE.as_bytes());
+    assert_eq!(fs::read(root.join("game/script.rpy")).unwrap(), script);
+    service.close().unwrap(); service.open_path(&root).unwrap();
+    assert_eq!(fs::read(&map_path).unwrap(), migrated_bytes, "no-op reopen cannot rewrite metadata");
+    service.close().unwrap();
+    let mut newer = migrated; newer["schemaVersion"] = json!(999);
+    let newer_bytes = serde_json::to_vec_pretty(&newer).unwrap();
+    fs::write(&map_path, &newer_bytes).unwrap();
+    assert!(service.open_path(&root).is_err());
+    assert_eq!(fs::read(&map_path).unwrap(), newer_bytes);
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), FIXTURE.as_bytes());
+}
+
+#[test]
 fn screen_source_dispatch_roundtrip_history_conflict_and_reopen() {
     let temporary = tempfile::tempdir().unwrap();
     let mut service =

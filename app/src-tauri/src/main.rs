@@ -787,7 +787,7 @@ fn main() {
                     if !data.starts_with(std::env::temp_dir()) || !data.file_name().is_some_and(|n|n.to_string_lossy().starts_with("loomlight-reference-")){return Err("Reference probe root refused".into());}
                     if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){LifecycleService::new(data).map_err(|_|"Reference reopen failed")?}
                     else {if data.exists(){return Err("Reference fixture already exists".into());}LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?}
-                } else if data.exists() { return Err("probe destination already exists".into()); } else if case == "source-foundation" {
+                } else if data.exists() { return Err("probe destination already exists".into()); } else if matches!(case.as_str(), "source-foundation" | "owned-screen") {
                     LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
                 } else if case == "help-screen" {
                     let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("Help probe SDK archive required")?;
@@ -914,6 +914,7 @@ fn main() {
                         main.show().expect("reference probe show");main.set_focus().expect("reference probe focus");
                         let phase=if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){2}else{1};
                         main.eval(&format!("window.__loomlightReferencePhase={phase};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("reference_library_probe.js"))).expect("reference probe injection");
+                    } else if case == "owned-screen" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("owned_screen_probe.js"))).expect("Owned screen probe injection");
                     } else if case == "help-screen" { main.eval(&format!("window.__loomlightHelpTargetOs = {:?};\n{}\n{}",std::env::consts::OS,include_str!("native_editor_probe.js"),include_str!("help_screen_probe.js"))).expect("Help screen probe injection");
                     } else if case == "source-foundation" { main.eval(&format!("{}\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("source_foundation_extended_probe.js"),include_str!("source_foundation_probe.js"))).expect("source foundation probe injection"); } else if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {
                         main.show().expect("probe show");

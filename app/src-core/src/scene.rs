@@ -4091,6 +4091,7 @@ mod tests {
                 project_id: project_id.clone(),
                 sources: vec!["game/chapters/chapter_01/scene_001.rpy".into()],
                 scene_mappings: Vec::new(),
+                owned_screens: Vec::new(),
                 extra: map_extra,
             };
             fs::write(
@@ -4733,6 +4734,7 @@ mod tests {
                 project_id: project.project_id.clone(),
                 sources: vec![],
                 scene_mappings: vec![],
+                owned_screens: vec![],
                 extra: Map::new(),
             },
             source_map_bytes: vec![],

@@ -74,14 +74,20 @@ for case in cases:
             assert profile.resolve().parent == profile.parent.resolve()
             shutil.rmtree(profile)
     help_disk = None
-    if case == "help-screen":
-        profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-help-screen"
+    if case in ("help-screen", "owned-screen"):
+        profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
         if profile.exists():
             assert not profile.is_symlink() and profile.resolve().parent == profile.parent.resolve()
             project = profile / "synthetic-project"
-            source = project / "game/ui/help.rpy"
-            original = (Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/help.rpy").read_bytes()
-            expected = b'\xef\xbb\xbf' + original.replace(b'\n', b'\r\n').replace(b'xsize 640', b'xsize 768')
+            source = project / ("game/ui/help.rpy" if case == "help-screen" else "game/ui/travel_notes.rpy")
+            if case == "help-screen":
+                original = (Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/help.rpy").read_bytes()
+                expected = b'\xef\xbb\xbf' + original.replace(b'\n', b'\r\n').replace(b'xsize 640', b'xsize 768')
+            else:
+                ownership = json.loads((project / ".renpy-editor/source-map.json").read_text())["ownedScreens"]
+                if len(ownership) != 1 or ownership[0]["name"] != "travel_notes":
+                    raise ValueError("One owned blank screen required on disk")
+                expected = f'# loomlight-screen: {ownership[0]["id"]}\nscreen travel_notes():\n    pass\n'.encode()
             help_disk = dict(acceptedBytesMatch=source.is_file() and source.read_bytes() == expected,
                              scratchJobsRemaining=len(list(profile.glob("scratch-preview-*"))),
                              sourceBytecode=list(project.glob("game/**/*.rpyc")) != [],
@@ -103,7 +109,7 @@ for case in cases:
     if case == "source-foundation":
         details = reports[0].get("details", {}) if len(reports) == 1 else {}
         passed = passed and details.get("extendedChecksComplete") is True and len(details.get("checks", [])) == 33 and (output / "external-write.json").is_file()
-    if case == "help-screen":
+    if case in ("help-screen", "owned-screen"):
         passed = passed and help_disk == dict(acceptedBytesMatch=True, scratchJobsRemaining=0, sourceBytecode=False, sourceSaves=False)
     failed |= not passed
     result = dict(case=case, passed=passed, exitCode=code, timedOut=timed_out,

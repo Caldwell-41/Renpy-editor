@@ -1,7 +1,5 @@
-//! Early screen-source proof. Reads never evaluate screen language or Python.
-//!
-//! Handles are byte locations bound to a source revision, not persistent screen IDs.
-//! This slice edits existing integer xsize/ysize tokens in game/ui files only.
+//! Source inspection and revision-bound edits never evaluate screen language or Python.
+//! Explicit new-screen ownership lives in the source map; existing screens stay in place.
 use crate::{
     authoring::AuthoringService,
     scene::SceneError,
@@ -15,6 +13,17 @@ use std::collections::HashSet;
 const MAX_NODES: usize = 4096;
 const MAX_DEPTH: usize = 32;
 const MAX_PIXELS: u32 = 16384;
+
+mod ownership;
+pub use ownership::{Catalog, CreateRequest};
+
+pub(crate) fn valid_name(name: &str) -> bool {
+    identifier(name) && name.len() <= 64
+        && !["False", "None", "True", "and", "as", "assert", "async", "await", "break", "class",
+            "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global",
+            "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return",
+            "try", "while", "with", "yield", "screen", "default", "python"].contains(&name)
+}
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -233,6 +242,9 @@ fn parse_body(
         let child = &lines[next];
         let after = after_block(lines, next, limit);
         let mut recognized = false;
+        if child.single && child.indent == line.indent + 4 && child.code == "pass" && after == next + 1 {
+            recognized = true;
+        }
         if child.indent == line.indent + 4 {
             for (slot, property) in [PixelProperty::Xsize, PixelProperty::Ysize]
                 .into_iter()

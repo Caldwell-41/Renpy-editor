@@ -678,6 +678,14 @@ retain their existing independent harness behavior. OS termination still uses sh
 
 ### Isolated scratch preview jobs for custom screens
 
+The `screens.list` catalog resolves explicitly owned screen/root UUIDs against
+accepted source. `screens.create` checks its captured project, source-map and static
+source-inventory revisions, then creates one owned file and metadata entry through
+the existing transaction/history service. The renderer has no file authority.
+[Source-map v6](DATA_MODEL.md#project-lifecycle-metadata) owns the marker and
+conservative unresolved-reference rules. Existing revision-bound Help edits retain
+their original path/name/range checks.
+
 The selected Help-screen implementation adds an optional typed `preview` purpose
 on `runtime.prepare`. A screen purpose carries the supported source path, declaration
 name and accepted revision. Inspection and selection never execute a project.

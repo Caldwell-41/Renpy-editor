@@ -461,6 +461,29 @@ Custom Code generally editable. Empty-body replacement and all structural mutati
 re-prove source ownership. Schema remains v5; IDs/extras are retained through qualified
 moves and reindentation, with ambiguous or unsupported promotion refused.
 
+Source-map v6 adds `ownedScreens` for explicitly created custom screens. Each entry
+stores distinct screen/root UUIDs, its source name, `game/ui/<name>.rpy` path and
+preserved extension fields. Migration from older supported maps preserves Scene
+mappings, UUIDs, extras and all `.rpy` bytes. Existing screens are never adopted or
+relocated on open. Newer unsupported schemas refuse before writing.
+
+Blank creation writes `# loomlight-screen: <screen UUID>` followed by the ordinary
+parameterless screen declaration and `pass`. One shared transaction creates the
+file and adds its source-map entry; one shared Undo/Redo reverses/restores both.
+Creation checks static screen names throughout `game`, case-insensitive file/name
+collisions, the captured project/map/inventory revisions and dirty Source buffers.
+An empty directory may remain after a rejected file transaction; source and metadata
+remain unchanged. Metadata size and relationship validation precede acceptance.
+
+Owned root resolution requires the original path/name, one adjacent matching marker,
+one supported declaration and an unambiguous static namespace. Source body edits and
+offset shifts retain the UUIDs. Rename, deletion, missing/duplicated markers,
+ambiguous declarations or malformed source produce an explicit unresolved reference.
+The UI keeps that selected UUID instead of falling back to another declaration.
+Restoring the original declaration/marker resolves the reference without rewriting
+source. This bounded contract adds only root identity; supported descendant ownership
+and explicit rename/delete commands remain separate work.
+
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing
 metadata does not authorize reconstruction from `.rpy` files. IDs are UUIDs and paths

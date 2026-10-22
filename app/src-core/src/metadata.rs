@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 5;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 6;
 pub(crate) const MAX_SOURCE_MAP_BYTES: usize = 1_000_000;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
@@ -93,6 +93,20 @@ pub struct SourceMapMetadata {
     pub sources: Vec<String>,
     #[serde(default)]
     pub scene_mappings: Vec<SceneSourceMapping>,
+    #[serde(default)]
+    pub owned_screens: Vec<OwnedScreen>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+/// Only explicitly created screens are owned. Existing source is never adopted on open.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OwnedScreen {
+    pub id: String,
+    pub root_id: String,
+    pub name: String,
+    pub path: String,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
 }
@@ -318,11 +332,12 @@ impl SourceMapMetadata {
     pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
         if !matches!(
             self.schema_version,
-            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | SOURCE_MAP_SCHEMA_VERSION
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | 5 | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id
             || self.sources.len() > 4096
             || self.scene_mappings.len() > 4096
+            || self.owned_screens.len() > 4096
         {
             return Err(MetadataError::InvalidIdentity);
         }
@@ -330,6 +345,22 @@ impl SourceMapMetadata {
         for source in &self.sources {
             validate_relative_path(source)?;
             if !sources.insert(source.to_ascii_lowercase()) {
+                return Err(MetadataError::InvalidStructure);
+            }
+        }
+        let mut owned_ids = HashSet::new();
+        let mut owned_paths = HashSet::new();
+        let mut owned_names = HashSet::new();
+        for screen in &self.owned_screens {
+            if self.schema_version < 6
+                || !valid_id(&screen.id) || !valid_id(&screen.root_id)
+                || !owned_ids.insert(&screen.id) || !owned_ids.insert(&screen.root_id)
+                || !crate::screens::valid_name(&screen.name)
+                || screen.path != format!("game/ui/{}.rpy", screen.name)
+                || !owned_paths.insert(screen.path.to_ascii_lowercase())
+                || !owned_names.insert(screen.name.to_ascii_lowercase())
+                || !sources.contains(&screen.path.to_ascii_lowercase())
+            {
                 return Err(MetadataError::InvalidStructure);
             }
         }
