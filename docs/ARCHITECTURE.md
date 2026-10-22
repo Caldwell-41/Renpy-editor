@@ -676,6 +676,31 @@ exiting. It grants no filesystem/process-launch privilege. Explicit scaffold-smo
 retain their existing independent harness behavior. OS termination still uses shutdown.
 
 
+### Isolated scratch preview jobs for custom screens
+
+The selected Help-screen implementation adds an optional typed `preview` purpose
+on `runtime.prepare`. A screen purpose carries the supported source path, declaration
+name and accepted revision. Inspection and selection never execute a project.
+Preparation refuses stale inputs, freezes accepted game files and creates one owned
+scratch project under the isolated application profile. It excludes saves, cache
+and source-backed `.rpyc` files. Archives and orphan bytecode require a later adapter.
+The scratch copy keeps source file paths for diagnostic mapping. A generated helper
+calls the selected screen and uses controlled play. It redirects the SDK's game
+entry with [Ren'Py label overrides](https://www.renpy.org/doc/html/config.html#var-config.label_overrides);
+the pinned adapter skips menu/splash startup for this job. This behavior still
+requires the selected SDK/native qualification.
+
+The existing runtime request receipts, cancellation, session trust, SDK adapter and
+process supervisor own the job. Trust covers original accepted inputs and the pinned
+SDK. Scratch isolation is separate from executable trust and is not a security sandbox.
+The original project's execution reservation records accepted edits, so a running
+preview reports its tested source revision and becomes earlier-revision evidence after
+an edit. Drafts stay outside the snapshot. The supervisor removes the owned scratch
+project only after child/pipe cleanup; failed cleanup retains ownership and files.
+Source diagnostics use original revision/byte mappings and refuse stale locations.
+Normal Run/Validate preparation and policy installation keep their existing behavior.
+This implementation remains under the Help outcome's acceptance gates.
+
 ## UI refresh: device state and editor adapter
 
 The UI remains vanilla TypeScript/Vite inside Tauri 2. Catalogue, settings, import,

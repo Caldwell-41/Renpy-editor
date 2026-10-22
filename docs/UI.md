@@ -850,6 +850,12 @@ the accepted theme, shared controls and pending Phase 1 corrections remain autho
 
 ### Screen/UI designer
 
+The selected [Help-screen outcome](tasks/active/help-screen-production.md) implements
+a limited production Choose/Design/Connect layout for existing custom screens.
+Existing literal width/height edits use Apply/Cancel and shared history; the canvas
+is schematic. The brief records supported controls, visual differences and missing
+native/Windows acceptance. The inventory below remains the full Screens direction.
+
 | Component hierarchy | Constraint canvas | Properties/source |
 | --- | --- | --- |
 | Frames, containers, text, images, buttons, bars, grids, viewports, components | Selected resolution/aspect preview with layout guides and interaction state | Layout/style/action fields; synchronized screen language; protected custom regions |

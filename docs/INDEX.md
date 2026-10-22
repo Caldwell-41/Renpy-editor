@@ -64,6 +64,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Selected dialogue rewrite and CI-first qualification authority | [CI-first amendment](tasks/active/phase-2-initial-llm-assistance.md#ci-first-platform-qualification-amendment--2026-10-10), [CURRENT](status/CURRENT.md), [HANDOVER](status/HANDOVER.md) |
 | Completed Windows remembered-credential outcome and its evidence/limits | [Windows credential contract](tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract) |
 | Historical Phase 2 source/provider/native attempts; outcomes not automatically accepted | [Execution history](tasks/archive/2026-10-09-phase-2-execution-history.md) |
+| First production Help sizing, scratch preview and pending qualification | [Help outcome](tasks/active/help-screen-production.md), [evidence](tasks/evidence/help-screen-production.md) |
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
 | Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |
