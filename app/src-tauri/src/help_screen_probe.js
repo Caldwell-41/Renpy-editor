@@ -1,7 +1,8 @@
 // Explicit packaged probe. Synthetic DOM input reaches production IPC and the real SDK.
 (async () => {
   const stages = [], terminals = [];
-  let stage = "open", serial = 0, previewLaunches = 0, latest;
+  let stage = "open", serial = 0, previewLaunches = 0, latest, stopRequested = false;
+  const targetOs = window.__loomlightHelpTargetOs;
   const started = performance.now(), delay = ms => new Promise(r => setTimeout(r, ms));
   const assert = (condition, message) => { if (!condition) throw Error(message); };
   const until = async (condition, timeout = 30000) => {
@@ -39,14 +40,20 @@
   const terminal = async kind => {
     const status = await read("runtime.status", { sessionId, operationId: latest.operationId, afterSequence: 0 });
     const report = await read("runtime.diagnostics", { sessionId, operationId: latest.operationId });
-    terminals.push({ kind, status, diagnostics: report.diagnostics });
-    assert(status.cleanupComplete && !status.outputTruncated, "Complete untruncated runtime evidence required");
-    assert(kind === "validate" ? status.phase === "exited" && status.exitCode === 0 : status.phase === "cancelled" && (status.exitCode === null || status.exitCode === 0), "Expected successful validation or owned Stop");
+    terminals.push({ kind, status, diagnostics: report.diagnostics, stopRequested: kind === "run" && stopRequested });
+    assert(status.cleanupComplete === true && status.outputTruncated === false && typeof status.output === "string", "Complete untruncated runtime evidence required");
+    // STATUS_CONTROL_C_EXIT (0xC000013A) is the default Windows console-control exit.
+    const expectedStop = stopRequested && status.phase === "cancelled" && (status.exitCode === 0
+      || targetOs !== "windows" && status.exitCode === null
+      || targetOs === "windows" && status.exitCode === -1073741510);
+    assert(kind === "validate" ? status.phase === "exited" && status.exitCode === 0 : expectedStop,
+      `Unexpected ${kind} result: ${targetOs}, ${status.phase}, exit ${status.exitCode}, Stop requested ${stopRequested}`);
     assert(!/Traceback \(most recent call last\):|While running game code:|Error:|Exception:/.test(status.output), "Runtime output contains an exception");
     assert(Array.isArray(report.diagnostics) && report.diagnostics.every(d => d.severity !== "error"), "Runtime diagnostics contain an error");
     return status;
   };
   try {
+    assert(["windows", "macos"].includes(targetOs), "Native target OS is required");
     await until(() => document.querySelector(".recent-open")); document.querySelector(".recent-open").click();
     await until(() => find("Screens")); await click("Screens");
     await until(() => document.querySelector('.screen-tree [role="option"]'));
@@ -82,7 +89,7 @@
     await until(() => document.querySelector(".runtime-revision")?.textContent.includes("Started from an earlier revision"));
     const running = await read("runtime.status", { sessionId, operationId: latest.operationId, afterSequence: 0 });
     assert(running.earlierRevision && !running.cleanupComplete, "Preview retains its frozen accepted revision");
-    await click("Stop"); await until(() => latest?.cleanupComplete); await terminal("run"); checkpoint("stale-stop-passed");
+    stopRequested = true; await click("Stop"); await until(() => latest?.cleanupComplete); await terminal("run"); checkpoint("stale-stop-passed");
     await click("Close Project"); await until(() => document.querySelector(".recent-open")); document.querySelector(".recent-open").click();
     await until(() => find("Screens")); const reopened = await read("project.current");
     assert(reopened.sessionId !== sessionId, "Reopen creates a new session"); sessionId = reopened.sessionId;
@@ -91,8 +98,8 @@
     await click("Screens"); await until(() => document.querySelector(".screen-tree button"));
     assert(document.documentElement.scrollWidth <= innerWidth + 2, "No page overflow");
     checkpoint("disk-reopen-passed"); checkpoint("complete");
-    await call("probe.runtimeUiReport", { passed: true, scenario: "help-screen", stage, stages, terminals, geometry, previewLaunches, nativeWebView: true, nativeKeyboard: false });
+    await call("probe.runtimeUiReport", { passed: true, scenario: "help-screen", targetOs, stage, stages, terminals, geometry, previewLaunches, nativeWebView: true, nativeKeyboard: false });
   } catch (error) {
-    await call("probe.runtimeUiReport", { passed: false, scenario: "help-screen", stage, stages, terminals, previewLaunches, error: String(error), message: message(), body: document.body.innerText.slice(-5000) });
+    await call("probe.runtimeUiReport", { passed: false, scenario: "help-screen", targetOs, stage, stages, terminals, previewLaunches, error: String(error), message: message(), body: document.body.innerText.slice(-5000) });
   }
 })();

@@ -11,7 +11,10 @@ const output=resolve(process.env.HELP_PROBE_CONTROLLER_OUTPUT??'../.toolchains/h
 const child=driverProcess(resolve(`target/debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`)]);
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 let browser,kind,operation,stopped=false,stale=false,trusted=false;
-const state=()=>({operationId:operation,phase:kind==='validate'?'exited':stopped?'cancelled':'running',exitCode:kind==='validate'?0:null,cleanupComplete:kind==='validate'||stopped,outputTruncated:false,output:kind==='run'?'HELP_SCRATCH_GEOMETRY {"size":[760,360],"aspect":[1280,720],"menu":false}\n':'',earlierRevision:stale,launchRevision:'fixture-launch',revisionStale:false,nextSequence:0});
+const targetOs=process.env.HELP_PROBE_TARGET_OS??(process.platform==='win32'?'windows':'macos');
+const stopExit=process.env.HELP_PROBE_STOP_EXIT===undefined?(targetOs==='windows'?0:null):Number(process.env.HELP_PROBE_STOP_EXIT);
+const expectedPass=process.env.HELP_PROBE_EXPECT_PASS!=='false';
+const state=()=>({operationId:operation,phase:kind==='validate'?'exited':stopped?'cancelled':'running',exitCode:kind==='validate'?0:stopped?stopExit:null,cleanupComplete:kind==='validate'||stopped,outputTruncated:false,output:kind==='run'?'HELP_SCRATCH_GEOMETRY {"size":[760,360],"aspect":[1280,720],"menu":false}\n':'',earlierRevision:stale,launchRevision:'fixture-launch',revisionStale:false,nextSequence:0});
 try{
  assert.equal((await child.next()).ready,true);await server.listen();browser=await chromium.launch({channel:'chrome',headless:true});const page=await browser.newPage({viewport:{width:1100,height:720}});
  await page.exposeBinding('helpRpc',async(_,request)=>{
@@ -34,9 +37,13 @@ try{
   Object.defineProperty(window.__TAURI_INTERNALS__,'invoke',{writable:false,configurable:false});
   const {startApplication}=await import('/src/main.ts');const {requestCore}=await import('/src/bridge.ts');startApplication(requestCore);
  });
+ await page.evaluate(targetOs=>window.__loomlightHelpTargetOs=targetOs,targetOs);
  await page.evaluate(await readFile('src-tauri/src/native_editor_probe.js','utf8'));
  await page.evaluate(await readFile('src-tauri/src/help_screen_probe.js','utf8'));
  await page.waitForFunction(()=>window.__probeReport,{},{timeout:60000});const report=await page.evaluate(()=>window.__probeReport);
  await writeFile(join(output,'result.json'),JSON.stringify({controllerTestOnly:true,sdkExecuted:false,nativeWebView:false,scriptReport:report},null,2));
- assert.equal(report.passed,true,JSON.stringify(report));console.log('PASS packaged Help controller rehearsal; runtime test double; no SDK/native proof.');
+ assert.equal(report.passed,expectedPass,JSON.stringify(report));
+ if(expectedPass)assert.equal(report.terminals.at(-1).status.exitCode,stopExit,'raw platform exit is preserved');
+ else assert.match(report.error,/Unexpected run result/);
+ console.log(`PASS packaged Help controller rehearsal (${targetOs}, Stop exit ${stopExit}, expected ${expectedPass}); runtime test double; no SDK/native proof.`);
 }finally{await browser?.close();await server.close();await child.stop();}

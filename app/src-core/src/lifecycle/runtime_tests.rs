@@ -1066,7 +1066,7 @@ fn runtime_diagnostics_sdk_gate() {
 
 #[test]
 fn help_preview_gate_rejects_runtime_error_after_cleanup() {
-    let status = json!({"phase":"cancelled","exitCode":null,"cleanupComplete":true,"outputTruncated":false,
+    let status = json!({"phase":"cancelled","exitCode":0,"cleanupComplete":true,"outputTruncated":false,
         "output":"While running game code:\nAttributeError: 'Layout' object has no attribute 'yesno_prompt'"});
     let diagnostics = json!({"diagnostics":[{"origin":"runtime","severity":"error","message":"AttributeError"}]});
     assert!(!help_preview_terminal_clean("run", &status, &diagnostics));
@@ -1084,11 +1084,33 @@ fn help_preview_gate_rejects_runtime_error_after_cleanup() {
     assert!(help_preview_terminal_clean("validate", &clean, &empty));
 }
 
+#[test]
+fn help_preview_gate_recognizes_owned_windows_console_stop() {
+    let status = json!({"phase":"cancelled","exitCode":-1073741510_i64,"cleanupComplete":true,"outputTruncated":false,"output":"LOOMLIGHT_RUNTIME_READY_V1"});
+    assert!(help_preview_terminal_clean_for_target("run", &status, &json!({"diagnostics":[]}), "windows"));
+    let empty = json!({"diagnostics":[]});
+    assert!(!help_preview_terminal_clean_for_target("run", &status, &empty, "macos"));
+    assert!(!help_preview_terminal_clean_for_target("validate", &status, &empty, "windows"));
+    for (key, value) in [("phase",json!("exited")),("cleanupComplete",json!(false)),("outputTruncated",json!(true)),("exitCode",json!(-1073741819_i64)),("exitCode",Value::Null),("output",json!("AttributeError: failure"))] {
+        let mut failed = status.clone(); failed[key] = value;
+        assert!(!help_preview_terminal_clean_for_target("run", &failed, &empty, "windows"), "{key}");
+    }
+    assert!(!help_preview_terminal_clean_for_target("run", &status, &json!({"diagnostics":[{"severity":"error"}]}), "windows"));
+    let mut missing = status.clone(); missing.as_object_mut().unwrap().remove("exitCode");
+    assert!(!help_preview_terminal_clean_for_target("run", &missing, &empty, "windows"));
+}
+
 fn help_preview_terminal_clean(kind: &str, status: &Value, diagnostics: &Value) -> bool {
-    let output = status["output"].as_str().unwrap_or_default();
+    help_preview_terminal_clean_for_target(kind, status, diagnostics, std::env::consts::OS)
+}
+fn help_preview_terminal_clean_for_target(kind: &str, status: &Value, diagnostics: &Value, target_os: &str) -> bool {
+    let Some(output) = status["output"].as_str() else { return false; };
+    let Some(exit) = status.get("exitCode") else { return false; };
+    let owned_stop_exit = exit == 0 || target_os != "windows" && exit.is_null()
+        || target_os == "windows" && exit.as_i64() == Some(-1073741510);
     status["cleanupComplete"] == true && status["outputTruncated"] == false
         && if kind == "validate" { status["phase"] == "exited" && status["exitCode"] == 0 }
-           else { status["phase"] == "cancelled" && (status["exitCode"].is_null() || status["exitCode"] == 0) }
+           else { kind == "run" && status["phase"] == "cancelled" && owned_stop_exit }
         && !["Traceback (most recent call last):", "While running game code:", "Error:", "Exception:"].iter().any(|marker| output.contains(marker))
         && diagnostics["diagnostics"].as_array().is_some_and(|records| records.iter().all(|d| d["severity"] != "error"))
 }

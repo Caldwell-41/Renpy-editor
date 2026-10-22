@@ -14,7 +14,7 @@ RUNTIME_STAGES = {
 }
 
 
-def runtime_report_ok(case, report):
+def runtime_report_ok(case, report, target_os=None):
     if (not isinstance(report, dict) or report.get('evidence') != 'runtime-ui-packaged'
             or report.get('case') != case or report.get('passed') is not True
             or report.get('cleanupComplete') is not True):
@@ -33,6 +33,14 @@ def runtime_report_ok(case, report):
     if any(names.count(name) != 1 for name in RUNTIME_STAGES[case]):
         return False
     if case == 'help-screen':
+        if target_os is not None and target_os not in ('windows', 'macos'):
+            return False
+        recorded_os = details.get('targetOs')
+        if recorded_os is not None and recorded_os not in ('windows', 'macos'):
+            return False
+        if target_os is not None and recorded_os is not None and target_os != recorded_os:
+            return False
+        target_os = target_os or recorded_os
         if details.get('previewLaunches') != 1 or details.get('nativeWebView') is not True or details.get('error'):
             return False
         terminals = details.get('terminals')
@@ -42,16 +50,23 @@ def runtime_report_ok(case, report):
             status = terminal.get('status', {})
             if status.get('cleanupComplete') is not True or status.get('outputTruncated') is not False:
                 return False
-            if any(marker in status.get('output', '') for marker in ('Traceback (most recent call last):', 'While running game code:', 'Error:', 'Exception:')):
+            if not isinstance(status.get('output'), str) or 'exitCode' not in status:
+                return False
+            if any(marker in status['output'] for marker in ('Traceback (most recent call last):', 'While running game code:', 'Error:', 'Exception:')):
                 return False
             diagnostics = terminal.get('diagnostics')
             if not isinstance(diagnostics, list) or any(d.get('severity') == 'error' for d in diagnostics):
                 return False
             if terminal['kind'] == 'validate':
-                if status.get('phase') != 'exited' or status.get('exitCode') != 0:
+                if status.get('phase') != 'exited' or type(status.get('exitCode')) is not int or status['exitCode'] != 0:
                     return False
-            elif status.get('phase') != 'cancelled' or status.get('exitCode') not in (None, 0):
-                return False
+            else:
+                code = status['exitCode']
+                expected_exit = (type(code) is int and code == 0
+                                 or code is None and target_os != 'windows'
+                                 or type(code) is int and code == -1073741510 and target_os == 'windows' and terminal.get('stopRequested') is True)
+                if status.get('phase') != 'cancelled' or not expected_exit:
+                    return False
     if 'long-run-duration-passed' in RUNTIME_STAGES[case]:
         duration = next(row.get('runningObservedMs') for row in stages if row.get('stage') == 'long-run-duration-passed')
         if type(duration) not in (int, float) or not 9500 <= duration < float('inf'):

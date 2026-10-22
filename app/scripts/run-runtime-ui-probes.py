@@ -98,7 +98,8 @@ for case in cases:
                 reports.append(report)
         except (ValueError, AttributeError):
             pass
-    passed = code == 0 and not timed_out and not external_errors and len(reports) == 1 and runtime_report_ok(case, reports[0])
+    target_os = {"win32": "windows", "darwin": "macos"}.get(sys.platform, "unsupported")
+    passed = code == 0 and not timed_out and not external_errors and len(reports) == 1 and runtime_report_ok(case, reports[0], target_os=target_os)
     if case == "source-foundation":
         details = reports[0].get("details", {}) if len(reports) == 1 else {}
         passed = passed and details.get("extendedChecksComplete") is True and len(details.get("checks", [])) == 33 and (output / "external-write.json").is_file()

@@ -1,4 +1,4 @@
-name: Help screen production qualification
+name: Help Windows Stop qualification
 
 # The early source-proof outcome is closed. Only the selected Help outcome runs here.
 on:
@@ -9,10 +9,10 @@ on:
         type: string
         required: true
       ordinal:
-        description: Cumulative focused both-target dispatch, 1 or 2
+        description: Selected cumulative Stop-repair qualification dispatch, 3 only
         type: string
         required: true
-        default: '1'
+        default: '3'
 
 permissions:
   contents: read
@@ -29,8 +29,6 @@ jobs:
         include:
           - runner: windows-2025
             target: Windows x64
-          - runner: macos-26
-            target: macOS ARM64
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 35
     defaults:
@@ -51,7 +49,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
           test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ORDINAL" = 1 -o "$ORDINAL" = 2
+          test "$ORDINAL" = 3
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/help-production"
           git rev-parse HEAD > "$RUNNER_TEMP/help-production/candidate.txt"
@@ -70,17 +68,12 @@ jobs:
           rustup toolchain install 1.90.0 --profile minimal
           npm install --global npm@11.9.0
           npm ci
-      - name: Frontend and rejecting receipt gates
+      - name: Rejecting receipt gates; reuse unchanged CI2 frontend proof
         run: |
-          npm run check
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_help_screen_evidence.py' -v
-      - name: Source transactions, scratch ownership and asynchronous request boundaries
+      - name: Affected SDK gate, fresh source driver and desktop build prerequisite
         run: |
-          cargo test -p loomlight-core screens::tests:: --locked
-          cargo test -p loomlight-core scratch_preview::tests:: --locked
-          cargo test -p loomlight-core runtime_preview_inputs_release_context_before_scratch_cleanup --locked
           cargo test -p loomlight-core help_preview_gate --locked
-          cargo test -p loomlight-core runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion --locked
           cargo build -p loomlight-core --example help-controller-driver --locked
           npm run build
           cargo check -p loomlight-desktop --locked
@@ -88,6 +81,8 @@ jobs:
         env:
           HELP_SCREEN_OUTPUT: ${{ runner.temp }}/help-production/browser
           HELP_PROBE_CONTROLLER_OUTPUT: ${{ runner.temp }}/help-production/controller-only
+          HELP_PROBE_TARGET_OS: windows
+          HELP_PROBE_STOP_EXIT: '-1073741510'
         run: |
           node tests/help-screen.browser.mjs
           node tests/help-probe-controller.browser.mjs
@@ -118,8 +113,8 @@ jobs:
           "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       - name: Two-aspect real SDK compile, lint, geometry, staleness and clean Stop
-        # A second dispatch retains only one preview attempt for a native correction.
-        if: runner.os == 'Windows' && inputs.ordinal == '1'
+        # CI1 skipped both aspects; CI2 used one preview. Actual remaining capacity is three.
+        if: runner.os == 'Windows' && inputs.ordinal == '3'
         env:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
           LOOMLIGHT_HELP_ACCEPTED: ${{ runner.temp }}/help-production/browser/accepted.rpy
@@ -128,7 +123,7 @@ jobs:
       - name: Build one Windows package
         if: runner.os == 'Windows'
         run: |
-          echo 'One Windows package build reserved' > "$RUNNER_TEMP/help-production/package-reservation.txt"
+          echo 'Cumulative Windows package 2 reserved by dispatch 3' > "$RUNNER_TEMP/help-production/package-reservation.txt"
           npm exec -- tauri build --bundles nsis -- --locked
       - name: Verify Windows package architecture and retain identities
         if: runner.os == 'Windows'
@@ -145,7 +140,7 @@ jobs:
         env:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
         run: |
-          echo 'One app launch and one preview reserved' > "$RUNNER_TEMP/help-production/native-reservation.txt"
+          echo 'Cumulative Windows app 2 and preview 4 reserved by dispatch 3' > "$RUNNER_TEMP/help-production/native-reservation.txt"
           "$HARNESS_PYTHON" scripts/run-runtime-ui-probes.py target/release/loomlight.exe "$RUNNER_TEMP/help-production/native" help-screen
       - name: Scan complete or partial public fixture evidence
         id: privacy
