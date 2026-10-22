@@ -1,5 +1,17 @@
 # Current status
 
+## Canvas rendering decision confirmed
+
+2026-10-22: The user confirmed the decision portion of
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
+[ADR 0021](../adr/0021-separate-renpy-canvas-helper.md) records a separate Ren'Py
+canvas helper for the later bounded Help proof. The decision is accepted; the
+helper, matched rendering, performance and visual acceptance remain unproved.
+Representative proof and renderer implementation are unselected. The user selected
+publication of the ADR, glossary and related contract/status changes as a separate
+documentation commit. #36 records the verified publication and remaining criteria.
+Historical allowances stay closed.
+
 ## Completed L01 owned blank screen
 
 2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is accepted
@@ -10,7 +22,8 @@ package 5 and native attempt 2 pass creation, exact Source, shared history and r
 with accepted bytes, stable distinct IDs and complete process/disk/fixture cleanup.
 Both review axes have no remaining code findings. [Evidence](../tasks/evidence/owned-blank-screen.md)
 owns criterion mapping, exact identities, original failures and final allowance use.
-No run or probe remains pending. L01's allowance is closed; no successor task is selected.
+No run or probe remains pending. L01's allowance is closed; the successor canvas
+decision session is recorded above and selects no implementation.
 Full editor/canvas, physical-keyboard and later human/phase acceptance remain separate.
 The retained policy/Help record below predates this delivery.
 
@@ -50,7 +63,8 @@ GitHub parent, 27 leaves and two canvas groups carry the policy. The policy read
 preserved all 38 parent and 41 start edges and all issue states/labels/assignees;
 L01's later completion is recorded above. Repository policy and agent-guide changes
 are included in the user-selected local documentation commit, with no push selected.
-No successor product ticket is selected. Canvas work stays deferred until explicitly selected.
+The later canvas decision session is recorded above. Representative proof and
+renderer implementation stay deferred until explicitly selected.
 
 Documentation/validator maintenance is complete and published with the reviewed baseline under
 [its task](../tasks/active/agent-documentation-ownership.md) and

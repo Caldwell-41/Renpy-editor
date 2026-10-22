@@ -855,7 +855,9 @@ a limited production Choose/Design/Connect layout for existing custom screens.
 Existing literal width/height edits use Apply/Cancel and shared history; the canvas
 still approximates content, text styles and layout. Bounded Mac/Windows functional
 proof passes; visual fidelity remains unaccepted. For implementation or acceptance
-of canvas rendering, follow [canvas agreement with Ren'Py](tasks/reference/phase-3b-screens.md#canvas-agreement-with-renpy).
+of canvas rendering, follow [canvas agreement with Ren'Py](tasks/reference/phase-3b-screens.md#canvas-agreement-with-renpy)
+and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md). The accepted helper design
+and live draft/failure behavior await their separately selected proof and implementation.
 The inventory below remains the full Screens direction.
 
 [L01](https://github.com/Caldwell-41/Renpy-editor/issues/34) adds New blank screen

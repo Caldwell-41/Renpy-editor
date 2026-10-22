@@ -104,8 +104,10 @@ separate from game source and runtime values.
 
 The user required a 1:1, or as-close-as-possible, canvas on 2026-10-22. For the
 declared supported screen subset, the project's pinned Ren'Py render is the visual
-authority. At 100% zoom, one game pixel maps to one canvas pixel; Fit and other zoom
-levels scale that same composition without changing the game's dimensions.
+authority. At 100% zoom, one game pixel maps to one logical editor pixel, with normal
+display scaling; physical monitor pixels remain distinct. Fit and other zoom levels
+scale that same composition without changing the game's dimensions. Qualify two
+internal game shapes and check ordinary window resizing separately.
 
 Compare the same accepted source revision, game resolution, images, fonts, sample
 values and control state. Supported layout, anchors, container spacing, clipping,
@@ -124,9 +126,15 @@ creator-defined rendering are outside the supported subset, not a blanket allowa
 for approximating supported content.
 
 The canvas remains inert. Real Ren'Py comparisons use deliberate runtime preview;
-opening, selecting or editing a screen never executes its Python or actions. This
-requirement does not choose a rendering architecture. Implementation has not started
-and no new implementation or qualification allowance is selected by this record.
+opening, selecting or editing a screen never executes its Python or actions.
+The user confirmed [ADR 0021](../../adr/0021-separate-renpy-canvas-helper.md) on
+2026-10-22. Read it before canvas/helper implementation, proof selection or review.
+It owns the separate Ren'Py canvas helper decision, live draft feedback, partial and
+failure behavior, initial 100 ms warm-update target, smooth gesture requirement and
+bounded Help proof scope. Supported layout and text wrapping must match; edge
+tolerances and startup limits remain pending evidence. [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+owns delivery and the completed interview's allowance. Representative proof and
+renderer implementation remain unselected and unqualified.
 
 <a id="properties-assets-reuse-and-actions"></a>
 

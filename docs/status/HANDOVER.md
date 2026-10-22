@@ -1,6 +1,25 @@
 # Current outcome handover
 
-## L01 complete; await the next selected outcome
+## Canvas decision complete; proof remains unselected
+
+The user confirmed the full [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+interview agreement on 2026-10-22 and requested the ADR and ticket update.
+[ADR 0021](../adr/0021-separate-renpy-canvas-helper.md) owns the chosen separate
+Ren'Py canvas helper, rationale, feedback/failure rules and representative Help proof.
+Read it and #36 before selecting proof or implementing the helper. No renderer, SDK,
+app, build or CI operation was performed for this decision. No operation is pending.
+
+Mac ARM64 remains the development host on `codex/phase3b-screen-designer`.
+The user selected committing and pushing the ADR, glossary and related contract/status
+changes as one documentation commit. Preceding policy and CI-wait work remains in
+its separate commits. GitHub #36 and its parent coverage record the decision and
+missing proof; #36 owns the verified publication receipt and separate publication-only
+allowance. The interview/documentation allowance remains closed. Next action requires a
+separate user selection and finite allowance for the representative proof. Actual
+matched captures, startup limits, edge tolerances and rendering/performance acceptance
+remain pending. L01 and all historical closed allowances retain their results below.
+
+## Completed L01 and preceding local documentation closeout
 
 [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is accepted for its
 bounded owned-blank-screen scope on 2026-10-22. Mac ARM64 remains the development host;
@@ -30,11 +49,11 @@ supplements beyond original ceiling 3; native 2/2 (ceiling 3), SDK operations 4/
 (ceiling 6). No limit resets or compounds. L01's allowance is closed; no run, watcher
 or probe remains pending. No PR, merge or release is selected.
 
-Await the user's next selected work ticket. B01/P3B aggregate, full editor/canvas,
-physical-keyboard and later human/phase acceptance remain separate. Do not infer new
-work or renew an exhausted allowance from this completion. Preserve the policy,
-agent guides and protected recovery below. The retained policy/Help material below
-predates L01 delivery and is historical context.
+The later canvas decision session is recorded above. B01/P3B aggregate, full
+editor/canvas, physical-keyboard and later human/phase acceptance remain separate.
+L01 completion renews no exhausted allowance. Preserve the policy, agent guides and
+protected recovery below. The retained policy/Help material below predates L01
+delivery and is historical context.
 
 The user selected a local commit of the remaining policy/instruction edits and
 domain/triage guides on 2026-10-22. This documentation closeout has an allowance of

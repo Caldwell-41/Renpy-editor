@@ -220,7 +220,7 @@ not be imported as the Phase 1 production architecture.
 | Transaction service | Preview, validate, commit, undo/redo, recovery | Maintain separate visual/source/LLM edit paths |
 | File coordinator | Watch, hash/revision, conflict detection, safe paths | Follow unchecked symlinks or overwrite conflicts |
 | Ren'Py adapter | Versioned CLI discovery, compile/lint/run/test/build | Treat CLI output or private internals as stable |
-| Preview service | Fast editor approximation plus official runtime launch | Claim full fidelity without Ren'Py runtime |
+| Preview service | Supported editor views, the planned [Screens canvas helper](adr/0021-separate-renpy-canvas-helper.md) and deliberate official project preview | Execute project code during editing or claim unqualified rendering fidelity |
 | Git adapter | Status, diff, checkpoints, history, safe restore, remote flows | Force-push or destructively reset by default |
 | LLM service | Providers, context selection, proposals, schema validation | Send content without explicit user action |
 | Credential service | OS keychain/credential store references | Store plaintext secrets in project metadata |

@@ -67,6 +67,9 @@ For each selected extension:
 
 ADRs 0014-0016 own the implemented nested mapping and Story decisions. Record any
 new scratch-preview/runtime decision at its selected implementation checkpoint.
+For Screens canvas rendering, [ADR 0021](../../adr/0021-separate-renpy-canvas-helper.md)
+selects a data-only Ren'Py helper for later proof; actual-project scratch preview
+retains the explicit execution boundary above.
 Confirm font discovery/import needs before extending the media allowlist. Long
 preview/render/SDK work releases authoring ownership; only snapshot, precondition
 and commit work holds it. The Rust core, TypeScript UI and Tauri boundary remain.
