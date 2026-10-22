@@ -72,7 +72,7 @@ impl Session {
             .anchor()
             .open_child(OsStr::new("game"), false)
             .and_then(|game| game.open_child(OsStr::new("assets"), true))
-            .map_err(|_| SceneError::InvariantBlocked)?;
+            .map_err(|error| input_error("open asset directory", error))?;
         let mut total = 0;
         let mut dependencies = std::mem::take(&mut plan.dependencies);
         for node in &mut plan.nodes {
@@ -115,17 +115,23 @@ impl Session {
             return Err(SceneError::InvalidPayload);
         }
         let name = OsStr::new("request-next.json");
+        {
+            let mut input = self
+                .anchor()
+                .create_new_file(name)
+                .map_err(|error| input_error("create request", error))?;
+            input.write_all(&bytes).map_err(|error| {
+                eprintln!(
+                    "canvas helper request write failed: kind={:?}, os={:?}",
+                    error.kind(),
+                    error.raw_os_error()
+                );
+                SceneError::InvariantBlocked
+            })?;
+        }
         self.anchor()
-            .create_new_file(name)
-            .and_then(|mut f| {
-                f.write_all(&bytes)
-                    .map_err(|_| crate::transaction::ErrorCode::IoFailure)
-            })
-            .and_then(|_| {
-                self.anchor()
-                    .replace_file_within(name, OsStr::new("request.json"))
-            })
-            .map_err(|_| SceneError::InvariantBlocked)?;
+            .replace_file_within(name, OsStr::new("request.json"))
+            .map_err(|error| input_error("publish request", error))?;
         Ok(json!({"phase":"starting","frameId":self.frame,"revision":self.revision}))
     }
     pub(crate) fn status(
@@ -235,6 +241,10 @@ impl Session {
         true
     }
 }
+fn input_error(stage: &str, error: crate::transaction::ErrorCode) -> SceneError {
+    eprintln!("canvas helper {stage} failed: {error:?}");
+    SceneError::InvariantBlocked
+}
 fn read(anchor: &DirectoryAnchor, name: &str, maximum: usize) -> Result<Vec<u8>, SceneError> {
     let mut bytes = vec![];
     anchor
@@ -278,7 +288,7 @@ fn copy_asset(
     let name = format!("{:x}.{extension}", Sha256::digest(&bytes));
     if target
         .entry_absent(OsStr::new(&name))
-        .map_err(|_| SceneError::InvariantBlocked)?
+        .map_err(|error| input_error("inspect copied asset", error))?
     {
         target
             .create_new_file(OsStr::new(&name))
@@ -286,7 +296,7 @@ fn copy_asset(
                 f.write_all(&bytes)
                     .map_err(|_| crate::transaction::ErrorCode::IoFailure)
             })
-            .map_err(|_| SceneError::InvariantBlocked)?;
+            .map_err(|error| input_error("copy asset", error))?;
     }
     Ok(format!("assets/{name}"))
 }

@@ -107,7 +107,8 @@ try {
   cases.push('normal/hover samples at both aspects and literal live text samples preserve accepted source');
   await page.setViewportSize({width:1100,height:760});
   await ui.getByLabel('Width',{exact:true}).evaluate(e=>e.addEventListener('input',()=>{window.__canvasInputAt=performance.now();},{capture:true}));
-  for(let index=1;index<=40;index++) {
+  const sampleCount=process.platform==='win32'?200:40;
+  for(let index=1;index<=sampleCount;index++) {
     await ui.getByLabel('Width',{exact:true}).fill(String(640+index*8));
     await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
     await ui.locator('.screen-render').screenshot({path:join(output,`warm-${String(index).padStart(2,'0')}.png`)});
@@ -118,7 +119,7 @@ try {
   await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
   const sorted=[...timings].sort((a,b)=>a-b),p95=sorted[Math.ceil(sorted.length*.95)-1];
   await writeFile(join(output,'timings.json'),JSON.stringify({measurement:'DOM input to completed Chrome pixel capture, including capture/automation overhead; image decode is diagnostic only; not native WebView presentation proof',milliseconds:timings,breakdown,p95,target:100},null,2));
-  cases.push(`40 warm input-to-captured-image samples retained; p95 ${p95.toFixed(1)} ms`);
+  cases.push(`${sampleCount} warm input-to-captured-image samples retained; p95 ${p95.toFixed(1)} ms`);
   await page.screenshot({path:join(output,'production-canvas.png'),fullPage:true});
   assert.deepEqual(errors,[]);
   passed=true;

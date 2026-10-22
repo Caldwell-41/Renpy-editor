@@ -409,3 +409,82 @@ and SDK 24/24. Windows actual use through CI2 is zero packages, zero native laun
 and one SDK process; CI3 reserves one package, one native launch and four SDK
 processes. Neither skipped checks nor cancelled dispatches become passes. All
 original fidelity/native/dragging gates and publication limits remain unchanged.
+
+## CI3 terminal audit and submission diagnostics
+
+The same-chat ci-watch event is verified and acknowledged. GitHub confirms
+[run 39844974063](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39844974063),
+attempt 1, exact head `7e53b721e1c345a2388780e3ef00eb781fe09248`, completed with
+failure at 2026-10-22 20:09:48 UTC. The later `d3defea` only records the wait, so
+this failure applies to the current product. Selector, portable checks and the
+official SDK checksum pass. Portable Screens tests pass 14 cases with the selected
+SDK case ignored. The existing Windows reader correction passes initial/repeated
+reads, both aspects, drafts/Cancel, keyboard Undo, provisional held resize/Escape,
+logical pixels/window resize, normal/hover appearances and literal text samples.
+
+Five functional groups pass and 19 warm captures complete. The next
+`screens.canvasRender` returns `SCENE_INVARIANT` in 26.47 ms. There is no helper
+traceback; the helper log remains in software rendering. The failure comes from
+core submission, whose filesystem operations currently discard the detailed
+cause. Request creation, publication and copied-asset operations remain possible
+sources. No exact OS failure or corrective retry is inferred from the generic
+response. The UI retains the draft and disables current-frame use. This is an
+unresolved product-path failure, not a warm-timing pass. Startup image load is
+4,060.9 ms, diagnostic only. No complete p95 series is available.
+
+Both accepted-source helper aspects retain the expected geometry. The frame is
+640x360; wrapped text is 331x87, its vertical group 331x204, image 64x48 and button
+143x45. Exact RGBA comparison against Mac native helper exports matches at both
+aspects in `helper-cross-target-pixels.json`. This is helper transport evidence;
+the deliberate Windows reference did not run and independent game-render fidelity
+is still unqualified. The Mac glyph/hover-color differences remain unresolved.
+
+Exact-controller rehearsal, Help regression, reference, package and native steps
+were skipped. The driver exits zero after its asserted host shutdown/root removal.
+Privacy and upload pass. Artifact 12454129451 contains 33 public-fixture files;
+its retained ZIP, GitHub metadata and upload log match SHA-256
+`99317497223b188d8e09ecb18743a7fef7dd681c89fe1c5fc9a0d7ee3142a3c3`.
+Expiry is 2026-10-29 20:09:43 UTC. An independent local privacy scan passes all
+33 files. Ignored `ci-03` retains terminal metadata, log, ZIP, extracted evidence
+and compact audit. Windows actual use from this run is one SDK process, zero
+packages and zero native launches. Through CI3, actual Windows SDK use is two.
+
+### Diagnostic change and review
+
+The next candidate adds fixed operation labels before the existing error mapping
+and retains the native error kind/numeric OS code when application-local atomic
+replacement fails. These logs omit paths, file names, source and asset content.
+Request create/write/publish steps now have distinct diagnostic labels. The write
+handle still closes before publication, and all error propagation and cleanup
+rules remain unchanged. No product correction is claimed from this instrumentation.
+
+The existing Windows public UI/core/helper scenario now takes 200 bounded warm
+samples to reproduce the intermittent submission failure. Mac remains at 40.
+Neither retry behavior, deadlines nor the diagnostic-only performance claim changes.
+The purpose is to capture the failing operation and OS result before selecting
+another fix. No additional private-method tests or Mac SDK processes were added.
+Focused release Screens checks pass 14 cases, with the selected SDK case ignored;
+Node syntax and whitespace checks pass. The earlier frontend suite is reused
+because UI code is unchanged.
+
+#### Standards
+
+Independent read-only review reports zero hard violations or judgement-smell
+findings. Diagnostics contain only fixed labels, fieldless error variants, kinds
+and numbers. File ownership, error propagation and cleanup remain unchanged.
+The 200-sample Windows check remains bounded by existing waits and job deadline.
+
+#### Spec
+
+Independent read-only review reports zero new findings. The change supplies
+diagnosis, not a product fix or qualification pass. Data-only input, source
+acceptance and cleanup rules remain intact. Matched both-target fidelity, native
+timing/startup/focus and element-position dragging remain separate open gaps.
+
+Local batches 39-41 cover CI3 audit/instrumentation, focused checks/review and
+publication/CI4 wait preparation. CI dispatch 4 is selected within the existing
+ceiling of five to obtain the missing causal evidence. Windows actual use before
+it is zero packages, zero native launches and two SDK processes. Its maximum
+reservation is one package, one native launch and four SDK processes. Mac remains
+packages 3/5, native 3/7, SDK 24/24. No further Mac SDK launch, weaker gate or broader
+renderer work is allocated.

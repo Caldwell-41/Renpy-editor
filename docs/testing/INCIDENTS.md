@@ -340,6 +340,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   read/write/delete sharing and transfers ownership through the CRT to its file
   object. Errors remain visible; no timeout or retry threshold is weakened.
 - **Verification:** CI2 reproduces the failure through the public UI/core/helper
-  path. The existing two-aspect browser and 40-update flow must pass on the
-  corrected Windows candidate; local syntax/core checks are insufficient.
+  path. CI3 passes both aspects, five functional groups and 19 warm captures with
+  that reader, then hits a later core submission refusal. Operation and numeric
+  OS-error diagnostics must identify that remaining failure before another fix.
+  The bounded Windows repetition is now 200 samples; local checks are insufficient.
 - **Evidence:** [L17 CI2 audit](../tasks/evidence/canvas-rendering.md#ci2-terminal-audit-and-windows-reader-correction).

@@ -210,7 +210,14 @@ impl DirectoryAnchor {
             &self.path().join(to),
             to,
         )
-        .map_err(|_| ErrorCode::RecoveryRequired)?;
+        .map_err(|error| {
+            eprintln!(
+                "application-local file replacement failed: kind={:?}, os={:?}",
+                error.kind(),
+                error.raw_os_error()
+            );
+            ErrorCode::RecoveryRequired
+        })?;
         self.validate_chain()
     }
 
