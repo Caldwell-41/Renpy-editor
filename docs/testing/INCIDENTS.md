@@ -305,3 +305,27 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** reproduce the missing-output failure in a disposable clean
   export, then run the frontend build and the same desktop check in that export.
 - **Evidence:** [L01 CI1 audit](../tasks/evidence/owned-blank-screen.md#ci1-terminal-audit-and-workflow-correction).
+
+## P03. Initial Screens catalog read stops on service contention
+
+- **Class/search:** product integration; `RUNTIME_BUSY`, Screens, missing Choose,
+  `Another request is in progress. Input retained.`
+- **Cause/correction:** the new `screens.list` read bypassed the existing ordered
+  observations and bounded read retry. Add catalog/inspection reads to the request
+  lane and catalog reads to the read-only retry list. Never replay mutations.
+- **Regression:** held-service request-lane cases and the production renderer/core
+  controller with a refused initial catalog read reproduce the failure and pass
+  after correction. Current-package native proof remains required.
+- **Evidence:** [L01 native diagnosis](../tasks/evidence/owned-blank-screen.md#ci2-terminal-audit-and-native-correction).
+
+## H25. Screen probe omits rich-editor and early-failure states
+
+- **Class/search:** harness; textarea, CodeMirror, `Timeout: open`, missing owned
+  metadata, missing result JSON, PowerShell `RUNNER_TEMP`.
+- **Cause/correction:** rehearse the packaged rich editor, observe its existing
+  selection after focus and retain the awaited control on failure. Failed ownership
+  and metadata retention must still reach fixture cleanup and failed-result emission.
+  PowerShell identity output uses `$env:RUNNER_TEMP`.
+- **Regression:** exact busy/rich-editor browser controller and whole-runner synthetic
+  success, early-failure and unreadable-metadata cases. These are not native passes.
+- **Evidence:** [L01 CI2 corrections](../tasks/evidence/owned-blank-screen.md#ci2-terminal-audit-and-native-correction).

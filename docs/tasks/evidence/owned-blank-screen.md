@@ -5,6 +5,9 @@ Observation period starts 2026-10-22. Baseline `867528d`, Mac ARM64 sole writer,
 branch `codex/phase3b-screen-designer`. The issue owns selection, finite cumulative
 allowance and bounded acceptance. This file records detailed results, not a second brief.
 Existing documentation/instruction edits and protected native recovery are preserved.
+Current correction `58b191c` has no remaining independent review findings and passes
+local checks. Current native proof needs a newly authorized Mac package; CI2 failed
+native verification, and CI3 has not been dispatched. Detailed accounting is below.
 
 ## Implemented path and limits
 
@@ -73,8 +76,8 @@ then the existing bundled Python 3.12.14 was selected for checks requiring `toml
 | One collision-checked definition/transaction/history entry; Cancel and refusal do not write | Focused IPC tests, real eight-group renderer/core run and existing 11-group Help regression pass. |
 | Metadata-only migration, extras/source preservation, no-op reopen, newer-schema refusal | Focused IPC migration and reopen tests pass. |
 | Source edits/offsets reconcile; rename/deletion/ambiguity stays unresolved | Focused IPC tests and real Source Save/browser path pass. |
-| Actual Choose/core/Source/history/reopen | Browser production path and packaged-controller rehearsal pass. Current signed Mac package passes; its native run needs an unlocked desktop. Windows native proof awaits dispatch 1 below. |
-| Deliberate preview of created screen | Exact browser-accepted source passes actual pinned SDK proof on Mac. Windows SDK proof remains pending. |
+| Actual Choose/core/Source/history/reopen | Browser production path and strengthened busy/rich-editor controller pass. Native attempts exposed a startup defect; its correction needs a new signed Mac package and both-target native proof. |
+| Deliberate preview of created screen | Exact browser-accepted source passes actual pinned SDK proof on both Mac and Windows. The latest correction changes renderer read ordering and the qualification controller, with no SDK/runtime or source-generator changes. |
 | Retain revision-bound Help behavior | Existing focused core and 11-group real renderer/core regression pass. Earlier unchanged native/SDK Help evidence remains scoped to its accepted candidate. |
 | Whole editor/canvas visual acceptance | Pending under later owners; L01 does not waive those gates. |
 
@@ -263,3 +266,116 @@ supplement, native 0/2 and SDK operations 4/4. No ceiling resets or compounds.
 Current-package Mac native proof still needs an unlocked desktop; repeated actual
 lock checks remain true, so no launch is attempted. L01 remains open pending that
 proof and the terminal second-run audit. The closed Help route is unchanged.
+
+## Confirmed second dispatch
+
+The verified workflow-only correction is published at
+`81465339401ba1c118a31a92b8f3e3856e9feeb4`. Its entire `app` tree matches the signed
+package candidate `79496c2`; the source-tree equality receipt is retained privately.
+[CI2 run 39751077426](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39751077426),
+attempt 1, is confirmed at that exact full SHA, created `2026-10-22T08:52:50Z`, last
+observed in progress. Inputs are exact candidate, `owned_blank=true`, ordinal 2.
+The same-thread ci-watch registration is next, with its default 30-second interval
+and one-hour deadline. The terminal job/artifact/identity/case/cleanup audit remains
+required. Local cumulative use remains 22/18 (ceiling 27), CI 2/2 (ceiling 3); other
+counts and reservations remain as recorded above. No new Mac package is attempted.
+
+## CI2 terminal audit and native correction
+
+The second watcher resumed this same thread; its identity matched and its receipt
+is recorded. GitHub confirms run `39751077426`, attempt 1, exact
+`81465339401ba1c118a31a92b8f3e3856e9feeb4`, completed failure. Local HEAD and the
+remote branch still matched before correction. Mac's required portable job passed.
+Both hosts passed frontend 223/223, six Python gates, selected Screens/metadata/Source/
+migration cases, eight real creation groups, the exact controller rehearsal and
+11 Help regression groups. The closed Help job was deliberately unselected.
+
+Windows verified the official archive checksum and passed actual pinned SDK compile,
+lint, ordinary-game-context blank render, PNG capture, explicit Stop and complete
+scratch cleanup. The accepted renderer source SHA256 is
+`636faca7e3122dee42d0837fc538b9bef97cf9128a8032354ccc5bc1f4ef7477`, matching the
+SDK receipt. Validation exited 0; owned Stop ended cancelled with raw Windows
+`-1073741510`, complete cleanup and no error output. The retained PNG is blank as
+expected. Virtual dimensions remain 1280 by 720. This is SDK service proof, with
+no native WebView claim.
+
+The Windows application and NSIS installer built, but native verification failed
+with `Timeout: open` and no completed stages. The report independently records host,
+request and credential cleanup true. The old Python runner then raised on empty
+ownership before writing its result or removing its owned fixture. The identity
+step separately failed because PowerShell used `$RUNNER_TEMP` instead of its
+environment variable. These failed and skipped states are not passes. Both privacy
+scans and artifact uploads passed. Downloaded candidate files and executable hashes
+match their manifests. The Mac core hash remains the CI1 hash; Windows core is
+`6fcedc641ecaf9488c9f5f2cfe1912758806c8f9f48134e13f07eb6342dc7a9d`, and the
+Windows desktop executable is
+`e661286e83e2e783e120b5e5b518f0afe475a624ad015d19eb08a1a6d4b884b1`.
+Its PE header independently verifies x64. Exact artifacts/logs remain under `ci-02`.
+
+The first empty-fixture reproduction command used the wrong working directory and
+stopped before building; the corrected invocation used pinned tools. That browser/
+controller run with the exact native empty-screen fixture passed, disproving missing
+initial screen files as the cause. A later driver restore reused the temporary
+example in a shared Cargo target directory, so the ordinary browser fixture lacked
+its expected initial Help screen. Explicitly recompiling the original example fixed
+the experiment setup; the final eight-group creation and 11-group Help runs pass.
+Modified export experiments need separate targets or an explicit original rebuild.
+Neither setup failure is a product pass or an erased attempt.
+
+After the user confirmed unlock, the preflight expected an explicit false lock flag
+but received no flag. The initial assertion failed; it is not recorded as a passing
+lock check. Native CUA inspection then confirmed the accessible owned app window.
+Mac native attempt 1 used signed package 4 and reproduced the startup failure. Its
+Screens view showed the busy refusal and no Choose creation action. The new
+`screens.list` operation was missing from the existing ordered observation and
+bounded read-only retry lists. The window observation and a browser refusal of the
+first renderer catalog read establish the same cause. The original browser probe
+failed at `open`; the held-service lane regression failed for `screens.list`.
+The correction adds catalog/inspection reads to the lane and catalog reads to the
+existing bounded read retry, preserving single-dispatch writes, trust and starts.
+The old runner's leftover public fixture was identified by its unique owned name,
+expected public project title and empty ownership map, then its metadata was retained
+and that exact fixture removed. No Loomlight process remains.
+
+The strengthened rehearsal enables the actual rich Source editor. It exposed the
+controller's textarea-only wait, then its assumption that an unfocused contenteditable
+DOM selection was already observable. The revised controller uses the existing
+rendered-editor adapter, focuses the control and waits for the exact existing Source
+selection without setting it. It records the awaited control on failure. The final
+busy-read/rich-editor controller passes all required stages against real core services.
+The Python runner now preserves early native failures, records ownership errors and
+cleans its owned fixture. PowerShell uses the correct environment path.
+
+Independent follow-up compares `8146533...0cf5753`.
+
+### Standards follow-up
+
+Standards found one P2: unreadable metadata could also fail its retention copy, skipping cleanup and the
+result. The controlled regression fails before the correction in `58b191c` and passes
+after it. The independent follow-up closes that finding with zero remaining Standards
+breaches or baseline smells.
+
+### Spec follow-up
+
+Spec reports zero actionable code defects or scope additions and one pending native-proof
+group. Ordered reads preserve write, trust and runtime-start behavior; the probe observes
+the existing selection. Required current native proof prevents acceptance.
+
+### Current verification and allowance
+
+Final correction proof is frontend/typechecking 223/223, focused lane/Screens UI
+16/16, real creation eight groups, retained Help 11 groups, the exact busy/rich-editor
+controller and nine Python evidence/runner tests. No core/SDK implementation changed;
+the earlier 401/0 routine core and both-target SDK proofs keep their stated scope.
+No native pass is inferred from these checks. Current product correction is at
+`0cf5753`, with the runner review correction at `58b191c`.
+
+Local batches 23–25 cover CI2/native diagnosis, the reproduced fixes, verification
+and independent review, bringing cumulative local use to 25/18 within ceiling 27.
+CI remains 2/2, ceiling 3; Windows package/native reservations are 2/2 each, ceiling
+3, and SDK operations 4/4, ceiling 6. Mac remains packages 4 under the explicit
+one-package supplement, native 1/2 and SDK operations 4/4. No CI3, Mac package 5
+or second Mac launch is attempted. The changed frontend/controller means package 4
+cannot qualify this correction. One additional signed Mac package requires explicit
+authorization beyond the four consumed attempts. Keep L01 open; later editor/canvas/
+phase acceptance remains separate.

@@ -2,19 +2,19 @@
 
 ## Selected L01 implementation
 
-2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is published
-through `79496c2`, with product code at `6be4f24`. Both independent review axes have
-no remaining code findings. Frontend 223/223, routine core 401/0, production
-renderer/core, Mac SDK and current signed Mac package proof pass.
-[CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39749388462), attempt 1
-at the exact published SHA, failed on both targets after passing the selected tests.
-Its desktop check preceded the required frontend build. The workflow-only order fix
-reproduces the failure and passes in a clean export; package inputs are unchanged.
-[L01 evidence](../tasks/evidence/owned-blank-screen.md) retains exact failed-run
-artifacts and counts. CI2 is next within the original allowance. The user selected
-ci-watch for same-thread resumption. Mac native proof still needs the locked desktop
-unlocked. The ticket stays open; full flow-v1/canvas and phase acceptance remain separate.
-The retained policy/Help record below predates this selection.
+2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) has reviewed
+corrections at `0cf5753` and `58b191c`. Initial Screens reads now use the existing
+ordered, bounded read retry. The native probe handles rich Source and retains early
+failures. Frontend 223/223, focused UI/lane 16/16, eight real creation groups, 11 Help
+groups, the strengthened controller and nine Python gates pass. Both review axes have
+no remaining code findings. [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39751077426)
+passed Mac portable and Windows SDK proof, but failed Windows native verification.
+Mac attempt 1 then exposed the same startup defect in the actual unlocked app window.
+[L01 evidence](../tasks/evidence/owned-blank-screen.md) records the failures and fixes.
+Current native proof requires one more signed Mac package beyond the four authorized
+attempts. No package 5, second Mac launch, CI3 or watcher is pending. The ticket stays
+open; full flow-v1/canvas and phase acceptance remain separate. The retained policy/Help
+record below predates this selection.
 
 ## Phase 3B migration and retained Help result
 

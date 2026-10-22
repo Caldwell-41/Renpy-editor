@@ -1,44 +1,52 @@
 # Current outcome handover
 
-## L01 owned blank screen, CI1 order correction verified
+## L01 owned blank screen, current native package approval needed
 
 The user selected [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34)
 on 2026-10-22. Mac ARM64 remains the sole writer on `codex/phase3b-screen-designer`.
-The four reviewed commits are published through
-`79496c28aba9c91db2a93a97c7b3736396b503e1`, with product code at `6be4f24`.
+Product correction is `0cf5753`, with the runner review correction at `58b191c`.
 Both independent review axes have no remaining code findings. The
 [source contract](../DATA_MODEL.md#project-lifecycle-metadata) and
 [evidence](../tasks/evidence/owned-blank-screen.md) own behavior and detailed results.
-Frontend 223/223, routine core 401/0, production renderer/core, retained Help regression,
-Mac SDK and current signed Mac package proof pass. Failed attempts remain retained.
+Current checks pass frontend 223/223, focused lane/Screens UI 16/16, real creation
+eight groups, retained Help 11 groups, the exact busy/rich-editor controller and nine
+Python evidence/runner cases. Core/SDK code is unchanged; earlier 401/0 routine core
+and both-host SDK proof retain their stated scope.
 
-[CI1 run 39749388462](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39749388462),
-attempt 1 at the exact full SHA above, failed on both targets. Each passed frontend
-223/223, six Python gates and selected core Screens/metadata/Source/migration cases,
-then failed because the desktop check preceded the frontend build. The exact
-missing-frontend error reproduces in a clean export; build then desktop check passes.
-The workflow-only order fix preserves all checks and selectors. Exported frontend
-hashes match the signed package inputs. Both failed core executables, candidate files,
-identity manifests and logs are downloaded and verified under ignored `ci-01`.
-Browser and Windows SDK/package/native steps were skipped, with reservations retained.
+[CI2 run 39751077426](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39751077426),
+attempt 1 at `81465339401ba1c118a31a92b8f3e3856e9feeb4`, completed failure. Mac portable
+passed; Windows portable/browser/SDK checks passed and the package built. Its native
+probe timed out at startup; the old runner then omitted its result/fixture cleanup.
+PowerShell independently used the wrong environment-variable syntax for package identity.
+Both watchers have matched same-thread receipts; neither run/worker remains pending.
+Exact core/desktop artifacts, manifests and logs are downloaded and verified under
+ignored `ci-02`. The Windows SDK PNG and accepted-source hash are audited.
 
-Next publish the verified workflow correction and dispatch focused CI2 for its exact
-commit, `owned_blank=true`, ordinal 2. The original allowance covers this correction.
-Register that confirmed run to this thread with ci-watch, as explicitly selected by
-the user; require a running-worker acknowledgement and end the turn immediately.
-On its event, match thread/run/attempt/SHA, acknowledge receipt, then audit required
-jobs/cases, exact artifact executables and cleanup before acceptance. CI1's watcher
-receipt is recorded; its failure is audited, not a pending operation.
+After the user unlocked Mac, native attempt 1 against signed package 4 reproduced the
+startup failure. Native inspection showed Screens' busy refusal with no Choose action.
+The initial lock helper returned no flag and failed its explicit-false assertion;
+that is not a passing preflight. The accessible owned app window was then inspected.
+The renderer omitted `screens.list` from ordered/read-retry rules. The reproduced fix
+retains single-dispatch writes. Rich-editor and failure-recording assumptions are also
+corrected. The failed public fixture was identified, its metadata retained and only
+that exact fixture removed; no Loomlight process remains.
 
-Cumulative use/reservation is local 22/18 (original ceiling 27), CI 2/2 (ceiling 3),
-Mac packages 4 including the approved one-package supplement, native 0/2 and SDK
-operations 4/4. Windows package/native 2 and SDK operations 4 are reserved through
-CI2. CI1's skipped expensive steps stay charged. No fifth Mac package is authorized;
-application/package inputs are unchanged by this workflow-only correction.
-Mac native proof needs an actually unlocked desktop; lock checks remain true and
-no launch is attempted. Preserve unrelated policy/instruction edits, domain/triage
-guides and protected recovery below. No PR, merge or release is selected.
-L01 stays open; later editor/canvas/phase acceptance remains separate. The retained
+Next obtain explicit approval for exactly one additional signed Mac package, attempt 5.
+Package 4 predates the changed renderer/controller and cannot qualify this correction.
+No fifth package is authorized or attempted. Then verify a current signed package and
+second native Mac attempt before the final focused Windows/Mac CI dispatch. CI3 and
+Windows package/native attempt 3 plus SDK operations through 6 fit original contingency;
+announce and record their entry before consuming them. Use the user's selected ci-watch
+for a confirmed run, require its running-worker acknowledgement, then end the turn.
+On its event, acknowledge delivery and audit exact run/attempt/SHA, cases, artifacts,
+executable identities and cleanup. No CI3 is reserved yet. No PR, merge or release is selected.
+
+Cumulative use is local 25/18 (original ceiling 27), CI 2/2 (ceiling 3); Mac packages 4
+including the consumed one-package supplement, native 1/2 (ceiling 3), SDK operations
+4/4 (ceiling 6). Windows package/native reservations are 2/2 each (ceiling 3), SDK
+operations 4/4 (ceiling 6). No limit resets or compounds. L01 stays open pending current
+native proof; later editor/canvas/phase acceptance remains separate. Preserve unrelated
+policy/instruction edits, domain/triage guides and protected recovery below. The retained
 policy/Help record below predates this selection.
 
 ## Phase 3B migration and retained Help audit, 2026-10-22
