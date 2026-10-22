@@ -1,29 +1,28 @@
 # Current status
 
-## Phase 3B Screens refinement
+## Selected Help-screen outcome
 
-2026-10-21: Branch `codex/phase3b-screen-designer` starts from Phase 3A at `571e76c`.
-The [grilling agreement](../tasks/active/phase-3-initial-wysiwyg-release.md#agreed-3b-design-from-the-grilling-session)
-records approved product choices. Mac is the chosen development host.
-[CI1's audited evidence](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
-qualifies the narrow source/runtime proof at `0ef1748` on Windows x64 and macOS
-ARM64. No CI is pending.
+2026-10-22: Corrected app source `5925bb6` passes the signed Mac WebView-to-SDK Help
+workflow. The exact package verifies signature, ARM64 and installer identity. Native
+proof covers accepted bytes, Undo/Redo, Cancel/reopen, SDK validation, 760x360 geometry,
+frozen-revision staleness and Stop with exit 0, no errors and owned scratch/process
+cleanup. [The brief](../tasks/active/help-screen-production.md) owns scope;
+[the evidence](../tasks/evidence/help-screen-production.md) owns hashes and receipts.
+The three original review findings are closed at source/local-regression scope.
+Final visual/functional approval remains with the selecting chat.
 
-The user approved Screen builder on 2026-10-22. The
-[design approval record](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-design-approval-2026-10-22)
-is complete. The [owning JSON](../design/design-lab-screens/approval.json) names
-`flow-v1` / variant `flow` as current, pins the reviewed source and preserves 13
-hashed reference captures. Screen builder opens as the default Screens reference;
-Screen notebook and Canvas focus remain drafts. [Comparison notes](../design/design-lab-screens/README.md)
-own controls, captured conditions and prototype limits.
+CI1 run 39702239464 at 00ee110, attempt 1, failed before Windows SDK/package/native work.
+Mac lacked the frontend build before desktop check; Windows scratch cleanup retained
+its own delete-blocking handles. Both causes are corrected at 5925bb6. Local13 passes
+focused scratch/context-drop/runtime/source/request tests, build/check and validators.
+CI2 is ready under the existing ordinal 2 selector, which skips service previews.
+Windows native qualification and two-aspect service proof remain missing.
 
-Approval local1 passes TypeScript, approval/source checks, 508 rendering cases and
-20 interaction groups without browser errors. The four baseline captures match the
-retained images; the visible Approved label, history and current-reference link agree.
-Final use is approval local1/2; the unused repair cycle is closed. No verification is
-pending. The selected design now provides the reference for production integration
-under its owning task's real-operation and acceptance requirements. Browser actions
-remain fictional; earlier allowances stay closed. Work is saved locally.
+Actual use is local 13/13; Mac packages 3/3, native launches 2/3 and SDK previews 7/8.
+Windows packages 0/2, launches 0/3 and previews 0/4; focused CI 1/2 before CI2 dispatch.
+No fourth Mac package or fourteenth local batch is authorized. Preserve unrelated
+maintenance and private receipts. Material flow-v1 differences remain unaccepted.
+No PR, merge or release is authorized.
 
 ## Earlier full-app mockups
 

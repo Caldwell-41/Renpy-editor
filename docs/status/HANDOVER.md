@@ -1,49 +1,37 @@
 # Current outcome handover
 
-## Phase 3B Screen builder design approved, 2026-10-22
+## Help-screen production candidate, 2026-10-22
 
-State `complete` for design approval, branch `codex/phase3b-screen-designer`, chosen
-host Mac. The [approval record](../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-design-approval-2026-10-22)
-owns the exact human decision, source, captures, verification and final allowance.
-The user said "okay, approved" after the final Experience First pass on Screen builder.
-[Approval JSON](../design/design-lab-screens/approval.json) sets `currentApproved` to
-`flow-v1` / variant `flow`; Screen notebook and Canvas focus retain null approvals.
+Read the [owning brief](../tasks/active/help-screen-production.md) and
+[evidence](../tasks/evidence/help-screen-production.md). App source 5925bb6 passes the
+corrected signed Mac native Help workflow. Package 3's executable SHA-256 is
+b8fe33be7da97d4166773c06a2fe3afc53fa4a53857bb24cf05ef0b3ed754c19.
+The 68.034-second native result proves accepted bytes/history/reopen, validation,
+760x360 geometry, frozen staleness and clean Stop. Both terminal exit codes are 0,
+with complete untruncated output and no raw/runtime diagnostic errors. All cleanup
+owners pass; no scratch, source bytecode or saves remain. Physical native keyboard
+input is not claimed. The source includes the inspection-read and immutable-bridge
+corrections, plus Windows context/job-handle teardown ordering.
 
-Source commit `3c7ea31d8210538cc987a2d2f4ceb8b7aa8f5437` reproduces fingerprint
-`70d9beebc45e4783f9f17d374edf9983e03a079e68ca06d475fecec55c06a028`, matching the
-verified continuity implementation. The record pins 13 PNGs under
-`docs/design/design-lab-screens/captures/flow-v1/`, including four populated views
-across both themes/sizes and nine interaction views. It records hashes, state IDs,
-dimensions, scale, behavior and reference-only limits. [Comparison notes](../design/design-lab-screens/README.md)
-own the current controls and simulation boundary. Earlier source/failure evidence
-remains in the task, including the final continuity and reordering fixes.
+CI1 run 39702239464, attempt 1, exact head 00ee110a7e0c0c63a3d3c647ccb43fc86db04a51,
+is terminal failure. Both frontend gates pass. Mac's desktop check lacked dist;
+Windows failed scratch cleanup while its own directory handles were open. These
+causes are repaired. Both retained artifacts contain only the candidate; actual
+Windows package/app/SDK use is zero. CI2 may run the diagnosed correction with
+ordinal 2. Preserve its skip of service previews. Windows native and two-aspect
+service evidence remain incomplete, and skipped gates cannot pass.
 
-Approval local1 passes TypeScript, approval/source checks, 508 rendering cases and
-20 interaction groups on Chromium 155.0.8059.86 without browser errors. The four
-baseline captures match retained references byte for byte. Parent browser inspection
-confirms the Approved · flow-v1 label, default flow layout, current-reference link and
-history decision/date. Retain `.toolchains/phase3b/approval-combined-01/` report,
-captures/audit and sibling log, plus `approval-ui-01.json`, `approval-controls-01.png`
-and the source receipt. Repository validation passes for 807 files and whitespace.
-Final use is approval local1/2; the unused repair cycle is closed. No approval repair
-or verification is pending. Earlier continuity2/3, reorder4/4, copy6/7, refresh5/6,
-refinement4/4 and early11/11 remain closed. No native, SDK, package or CI work was selected.
+Actual use is local 13/13, Mac packages 3/3, native launches 2/3 and previews 7/8;
+Windows packages 0/2, launches 0/3 and previews 0/4; focused CI 1/2 before CI2 dispatch.
+No fourth package or fourteenth local batch is authorized. CI waits require manual
+same-thread resume/audit, with exact run, attempt and candidate recorded after dispatch.
+No polling loop or monitor is authorized. The selecting chat owns final review and
+visual/functional approval. Report delivery there is explicitly approved.
 
-Next production work uses the approved reference to map controls to actual operations
-and verify them under the selected implementation contract. Follow INTEGRATION;
-use a pinned comparison checkout when app/frontend changes invalidate the shared
-fingerprint. Preserve the approved source and captures; future experiments need a
-new revision/variant. This approval record does not claim live-app implementation.
-Work stays local. The earlier automatic push review rejected publication without
-explicit payload/destination permission; publishing to
-`origin/codex/phase3b-screen-designer` still needs approval. The lab is on port5174.
-Preserve protected native state and recovery below.
-
-The earlier [CI1 audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
-still qualifies source `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
-`521a550ef7d82ecf970a0527a1bab368062bad63`, on Windows x64 and macOS ARM64 in
-run39555526201. Later browser/docs commits do not replace that SDK candidate.
-Prior Screens candidates and research remain historical in the owning task.
+Publish only scoped corrections and separable Help records by ordinary fast-forward
+to origin/Caldwell-41/Renpy-editor/refs/heads/codex/phase3b-screen-designer. Preserve
+unrelated uncommitted maintenance, protected apps/drafts, pinned flow-v1 and private
+ignored receipts. No PR, merge or release is authorized.
 
 ## Earlier full-app mockups
 

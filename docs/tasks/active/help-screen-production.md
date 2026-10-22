@@ -15,7 +15,8 @@ acceptance remains pending. Develop on Mac as sole writer on
 Preserve existing uncommitted documentation, validator and workflow maintenance.
 Initial candidate `eda1cdcc0af8f7dcf0ac9ead951b83bb3d8725b0` was local-only and incomplete.
 The approved continuation repairs its reviewed findings. Corrected source is
-`0ba3bc0`; Mac native and Windows qualification remain incomplete.
+`5925bb6`; the signed Mac native workflow passes. Windows qualification and
+final visual acceptance remain incomplete.
 Return the candidate and evidence to the selecting chat for final review; no merge,
 release or unrelated publication is selected.
 
@@ -53,12 +54,12 @@ work. Explain unavailable operations beside their controls.
 | Cancel, invalid fields, drafts/conflicts, stale/cancelled completion, contention | Pass in renderer/core tests. The shared async cancellation test covers normal and screen-preview purposes at prepare, grant and start. |
 | Source reconciliation, undo/redo, reopen | Pass locally through production Source Save, shared history and new project sessions. |
 | `flow-v1` visual comparison, four theme/viewport combinations | Compared. All 13 reference hashes verify and four baseline renders reproduce exactly. Matched disposable frame/text content is compared in all four states. Production retains a schematic canvas, one resize handle, reduced controls and documented layout differences. Fidelity is not accepted. |
-| Actual app preview, SDK compile/lint, two-aspect geometry, revision/staleness/cleanup on both targets | Corrected Mac compile/lint, two-aspect geometry and clean Stop pass with the stricter gate. Signed package 2 verifies, but its native launch found a read-policy defect before preview. The source repair passes browser/core proof. Corrected signed Mac and Windows native qualification remain incomplete. |
-| Browser, packaged/native and human evidence separated; selecting-chat review | Evidence layers are separate. The reviewed defects have rejecting regressions and repairs. Final selecting-chat acceptance remains pending. Native workflow and visual acceptance remain pending. |
+| Actual app preview, SDK compile/lint, two-aspect geometry, revision/staleness/cleanup on both targets | Mac two-aspect service proof and the corrected signed native workflow pass with accepted bytes/history/reopen, geometry, staleness, clean Stop and owned cleanup. CI1 failed before Windows SDK/package/native steps. The diagnosed correction is ready for CI2; Windows native and two-aspect service proof remain incomplete. |
+| Browser, packaged/native and human evidence separated; selecting-chat review | The selecting chat closes the three original findings at source/local-regression scope. Corrected SDK receipts have no errors. The corrected Mac native workflow passes. CI2/Windows and visual acceptance remain pending; final approval is withheld. |
 
-The human approved continuation on 2026-10-22. Cumulative limits are 12 local batches,
-2 focused both-target CI runs, Mac SDK previews 8 and Windows SDK previews 4. Per-target
-package builds stay capped at 2 and app launches at 3. Charge implicit, failed and
+The human approved continuation on 2026-10-22. Cumulative limits are 13 local batches,
+2 focused both-target CI runs, Mac SDK previews 8 and Windows SDK previews 4. Mac package builds are capped at 3, Windows package builds at 2, and app launches
+at 3 per target. Charge implicit, failed and
 cancelled attempts. Before local9, use is 8/12 local batches, CI 0/2, Mac packages 1/2,
 app launches 0/3 and SDK previews 4/8; Windows packages 0/2, launches 0/3 and previews 0/4. Reassess after two unsuccessful corrections of one hypothesis. Earlier
 allowances stay closed. [The outcome evidence](../evidence/help-screen-production.md)
@@ -90,3 +91,22 @@ The new limits above supersede this outcome's exhausted initial local/Mac-previe
 limits. Earlier unrelated allowances remain closed. All repairs, qualification and
 review share the cumulative totals; reassess after two unsuccessful corrections of
 one hypothesis. Mac remains sole writer. The selecting chat owns final approval.
+
+
+## Approved local13 qualification
+
+The human approved one additional local batch and one matching signed Mac package
+on 2026-10-22. Cumulative caps are now local 13 and Mac packages 3. Before local13,
+actual use is local 12, Mac packages 2, native launches 1/3 and SDK previews 6/8.
+All other caps remain unchanged. Build the corrected source once with the approved
+identity and verify the real native Help workflow. No fourth Mac package or
+fourteenth local batch is authorized. CI1 is terminal and failed before any Windows
+package, app or SDK step; its exact cause and partial artifacts require audit.
+CI2 remains available for a diagnosed correction within the remaining target caps.
+
+Local13's package at corrected source 5925bb6 passes the full native Help workflow.
+Actual Mac use is packages 3/3, native launches 2/3 and SDK previews 7/8. CI1's terminal
+audit confirms no Windows package/app/SDK use. The diagnosed correction may use CI2
+with the recorded ordinal 2 selector; service previews stay skipped. The resulting
+Windows two-aspect service gap must stay explicit. No fourth Mac package or
+fourteenth local batch is authorized.

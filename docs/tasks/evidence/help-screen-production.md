@@ -6,15 +6,14 @@ Mac sole writer. Existing uncommitted maintenance remains preserved.
 
 ## Current allowance and next action
 
-Continuation and scoped publication are human-approved. Local batches are 12/12;
-Mac packages 2/2, native app launches 1/3 and actual SDK previews 6/8. The native launch
-failed before any preview; its cleanup passes. Windows packages 0/2, launches 0/3 and
-previews 0/4; focused CI 0/2 before dispatch. The three reviewed findings are repaired
-and tested. The real signed native launch exposed a missing safe-read retry; its
-source fix and frozen-invoke probe rehearsal pass, but Mac needs one additional
-package build to qualify the corrected source. That build is outside this allowance.
-Next authorized action is scoped branch publication and focused CI1, then manual
-same-thread resume/audit. Preserve unrelated maintenance and the pinned reference.
+Corrected source 5925bb6 passes the signed Mac WebView-to-SDK Help workflow in
+local13. Actual cumulative use is local 13/13, Mac packages 3/3, native launches 2/3
+and SDK previews 7/8. CI1 failed before Windows package/app/SDK work; Windows actual
+use is 0/2, 0/3, 0/4 and focused CI 1/2. Its diagnosed Windows handle-lifetime defect and
+Mac frontend prerequisite are repaired. Next is approved publication and CI2 with
+its unchanged service-preview skip selector. Windows two-aspect service proof remains
+missing. Final native/CI and visual acceptance remain with the selecting chat.
+No fourth Mac package or fourteenth local batch is authorized.
 
 ## Reference preservation
 
@@ -369,7 +368,7 @@ the renderer already receives and grants no IPC or filesystem capability.
 
 Focused CI uses the registered screens-source.yml workflow as Help production
 qualification. It keeps manual dispatch only, verifies exact branch/SHA/attempt/ordinal,
-and runs portable renderer/core gates on both targets. Windows dispatch1 reserves
+and runs portable renderer/core gates on both targets. Windows dispatch 1 reserves
 one package, one native app and three previews (two service aspects and one native).
 Dispatch2 skips the two service previews and permits only one native preview, keeping
 Windows within packages2, launches3 and previews4 if all reserved work executes.
@@ -391,3 +390,149 @@ native-read/observer correction 0ba3bc0. A separate documentation commit adds on
 brief/evidence, the scratch-preview architecture contract and narrow UI/index pointers.
 Unrelated maintenance stays in the working tree. Local raw receipts, packages, SDKs,
 logs and comparison captures stay ignored and are excluded from the branch payload.
+
+
+## Published candidate and pending CI1
+
+Ordinary fast-forward publication succeeded from d1959fa to
+00ee110a7e0c0c63a3d3c647ccb43fc86db04a51 on origin,
+Caldwell-41/Renpy-editor, refs/heads/codex/phase3b-screen-designer.
+The exact payload is 16 commits and 74 changed paths (4105 insertions, 763 deletions).
+The 70 present changed files pass the artifact privacy scan. Committed-tree content
+and relative links pass validation for 815 files; the actual publication range passes
+whitespace checks. A first exported-tree validation lacked Git metadata; staging the
+entire historical tree then reported legacy whitespace. Those context errors do not
+change source. Content/link checks and the real-range Git check are the final proof.
+No unrelated maintenance or ignored evidence was published. No PR, merge or release
+occurred. Later live status/CI wait notes remain local until the terminal audit.
+
+Focused workflow 391374211, .github/workflows/screens-source.yml, was dispatched once
+with inputs candidate=00ee110a7e0c0c63a3d3c647ccb43fc86db04a51 and ordinal=1.
+Run 39702239464, attempt 1, is confirmed in_progress at 2026-10-22 00:51:52 UTC.
+[https://github.com/Caldwell-41/Renpy-editor/actions/runs/39702239464](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39702239464)
+
+Cumulative focused CI use is 1/2. Audit terminal jobs, all required steps and retained
+artifacts on manual same-thread resume. Confirm the exact head/attempt, native stage
+receipts, package architecture/hashes, both Windows aspects and exception-free Stop,
+source bytes and scratch/process cleanup. Failed, skipped, cancelled or absent gates
+remain incomplete. Determine actual Windows package/app/preview use from reservations
+and receipts, bounded by one package, one app and three previews in this run. CI2
+skips the two service previews and retains at most one native preview. Do not poll,
+schedule a wake-up or dispatch another run automatically.
+
+Current actual local use remains 12/12 batches, Mac packages 2/2, launches 1/3 and SDK
+previews 6/8. The native Mac report failed before any preview; it is not native success.
+Corrected source and the immutable-IPC probe pass browser/core checks. Completing Mac
+qualification needs one added local batch and one added signed package build; its
+next app launch and preview fit existing caps. Bring that concrete allowance decision
+to the selecting chat with the failed native receipt. The same chat owns final visual
+and functional approval. Unaccepted flow-v1 differences remain recorded above.
+
+## Selecting-chat review of repairs and CI wait
+
+The orchestrator reviewed published head `00ee110` without running further tests,
+builds or apps. The three original findings are closed at source/local-regression
+scope. The mixed-inventory and Apply-focus regressions cover initial load, refresh,
+Enter and successful/refused writes. The corrected two-aspect SDK receipts each have
+validation/Stop exit code 0, complete untruncated output, no raw exception and no
+error diagnostics. The stricter receipt gates reject the original false positive.
+
+The failed Mac native receipt confirms an opening-stage refusal before any preview,
+with all cleanup owners complete. Its signed package predates the `screens.inspect`
+read-policy and immutable-bridge-observer corrections; it cannot qualify the repaired
+app. A successful browser/core regression does not replace that native evidence.
+
+One direct GitHub status inspection found CI1 jobs `119573962382` (Mac) and
+`119573962602` (Windows) in progress. Frontend/rejecting gates passed on each; the
+source/scratch/request step was running and no artifacts were available. Terminal
+results and actual Windows execution counts remain pending. No redispatch or
+monitor was started. Final visual/functional approval remains withheld.
+
+The concrete remaining local request is one additional batch (cumulative cap 13)
+and one signed Mac package build (cumulative cap 3) at the corrected candidate.
+Existing Mac app/preview limits cover the next attempt. All other limits remain
+unchanged until the user selects a further allowance.
+
+
+## Approved local 13 and CI1 terminal audit
+
+The selecting chat's human message says "Yes approved" to one extra local batch
+and signed Mac build. The actual message was verified through read_thread. Record
+local13 before execution: cumulative local use becomes 13/13. Reserve Mac package 3,
+raising packages to 3/3. App use remains 1/3 and actual SDK previews 6/8 until launch.
+The existing approved certificate and ordinary signing policy remain required.
+No fourth package or fourteenth local batch is authorized.
+
+CI1 run 39702239464, attempt 1, exact head 00ee110a7e0c0c63a3d3c647ccb43fc86db04a51,
+is terminal failure (updated 2026-10-22 00:54:40 UTC). Both jobs passed frontend and
+rejecting-receipt gates, then failed the source/scratch/request step. All renderer,
+SDK, package and native steps were skipped. Actual Windows use is packages 0/2,
+launches 0/3, previews 0/4. The two retained artifacts are 181 bytes each; no package
+identity or native receipt exists. Further audit will retain the failing logs and
+confirm their artifact contents before choosing any correction or CI2.
+
+The CI1 artifacts contain only candidate.txt, each matching the exact head. Logs are
+retained locally under .toolchains/help-screen/ci1-audit. Mac job 119573962382 passed
+all selected core tests and the driver build, then tauri::generate_context! failed
+because ../dist did not exist. CI did not run npm run build before cargo check;
+local builds had already populated dist. The workflow now builds the frontend first.
+
+Windows job 119573962602 passed four Screens tests, then failed the existing scratch
+cleanup assertion. DirectoryAnchor intentionally opens Windows directories without
+FILE_SHARE_DELETE. ScratchPreview held that anchor while deleting its root; runtime
+context held a second clone. The correction validates then releases the job anchor,
+and drops the runtime context after child/pipe cleanup and before removal. An owned
+RuntimeInputs value also enforces context-before-job drop on pre-spawn/thread errors.
+Failed process cleanup still retains the job; global anchor protection is unchanged.
+A new real scratch/context teardown regression covers the clone ordering on both
+platforms, alongside the existing successful/idempotent cleanup/cancellation case.
+
+Local13 passes scratch cleanup, context-before-job teardown, four real-process runtime
+cases (the child fixture remains intentionally ignored), async request cancellation,
+four Screens tests, the rejecting gate, frontend build, desktop check and three
+receipt-gate tests. The exact Windows correction still requires CI2. Its existing
+ordinal 2 selector skips service previews and remains unchanged. Since CI1 skipped
+all Windows SDK work, CI2 can qualify the native one-aspect workflow but will not
+supply the missing two-aspect Windows service receipts. Do not claim that skipped
+proof or silently widen the selector. Focused CI use remains 1/2 before dispatch.
+
+Mac package3 at source 5925bb6ae147fe7357433227e3453cf29df8c3df passes strict certificate
+signature, ARM64/designated requirement and installer-content verification. Executable
+SHA-256 is b8fe33be7da97d4166773c06a2fe3afc53fa4a53857bb24cf05ef0b3ed754c19;
+installer SHA-256 is 64b5a5a57c42d39e23d6040300f2d2f975d31182cfdfad286c2e43009b579abb.
+The existing approved certificate pin is unchanged. Reserve native launch 2/3 and
+one possible preview, within the existing 6/8 actual preview use. No fourth build.
+
+
+## Local13 corrected signed Mac result
+
+Native launch 2 at 5925bb6 passes in 68.034 seconds with ordinary exit 0 and no timeout.
+The actual signed executable is b8fe33be7da97d4166773c06a2fe3afc53fa4a53857bb24cf05ef0b3ed754c19.
+The retained native result has all required stages exactly once: screen inventory,
+accepted-source/history/Cancel, validation, geometry, stale/Stop, disk reopen and complete.
+It uses the real packaged WebView, production IPC/service and pinned official SDK.
+DOM input is synthetic; physical native keyboard interaction is not claimed.
+
+The SDK measures 760x360 at 1280x720 with main_menu false. Validation and Stop share
+launch revision dd4a66f7c1de1f41989e7e501dc46987c86090ebdfd25e4230b5bb50610ce827.
+Validation exits 0; the stopped preview reaches cancelled with exit 0 and earlierRevision
+true after the accepted width edit. Both terminal receipts have cleanupComplete true,
+untruncated output, no raw exception and zero error diagnostics. Credentials, host
+and request cleanup owners all report true. The outer runner independently confirms
+exact final accepted bytes, zero remaining scratch jobs, no source bytecode or saves,
+and removes the disposable profile after ordinary process exit.
+
+The 645-byte accepted-help.rpy has SHA-256
+54dc5582dee854788bcb6266b2ff5254c42709e807e602f353eee1cfed63ca84.
+It equals the public BOM/CRLF fixture with only xsize 640 changed to 768 after the frozen
+760px preview started. The native code separately checked the earlier 760px accepted
+bytes against the original source and exercised Undo/Redo before SDK validation.
+Raw receipts stay ignored under .toolchains/help-screen/native-local13; package3's
+identity receipt remains under .toolchains/releases/help-screen-production-package-03.
+
+Cumulative actual use is local 13/13, Mac packages 3/3, native launches 2/3 and SDK
+previews 7/8; focused CI 1/2. Windows remains packages0/2, launches0/3 and previews0/4
+before CI2. Local13 also passes repository validation and 13 validator regressions.
+No fourth package or fourteenth local batch was attempted. The Mac native gap is
+closed for this bounded workflow. Windows qualification and material visual acceptance
+remain incomplete; final approval stays with the selecting chat.

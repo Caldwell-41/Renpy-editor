@@ -696,7 +696,9 @@ SDK. Scratch isolation is separate from executable trust and is not a security s
 The original project's execution reservation records accepted edits, so a running
 preview reports its tested source revision and becomes earlier-revision evidence after
 an edit. Drafts stay outside the snapshot. The supervisor removes the owned scratch
-project only after child/pipe cleanup; failed cleanup retains ownership and files.
+project only after child/pipe cleanup. The runtime releases its context and job
+directory handles before removal; Windows anchors retain their delete-sharing
+protection during execution. Failed cleanup retains ownership and files.
 Source diagnostics use original revision/byte mappings and refuse stale locations.
 Normal Run/Validate preparation and policy installation keep their existing behavior.
 This implementation remains under the Help outcome's acceptance gates.
