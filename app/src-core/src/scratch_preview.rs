@@ -17,7 +17,7 @@ pub enum PreviewPurpose {
 /// Owns only a newly created per-job directory, never the source project.
 pub(crate) struct ScratchPreview {
     root: PathBuf,
-    pub(crate) anchor: DirectoryAnchor,
+    anchor: Option<DirectoryAnchor>,
     pub(crate) manifest: ExecutionManifest,
 }
 impl ScratchPreview {
@@ -36,7 +36,7 @@ impl ScratchPreview {
         let anchor = DirectoryAnchor::open_root(&root).map_err(|e| {
             let _ = fs::remove_dir(&root); format!("{e:?}")
         })?;
-        let mut scratch = Self { root, anchor, manifest: Default::default() };
+        let mut scratch = Self { root, anchor: Some(anchor), manifest: Default::default() };
         let mut total = 0_u64;
         for (path, expected) in source_manifest {
             crate::runtime_work::check().map_err(|e| format!("{e:?}"))?;
@@ -61,11 +61,19 @@ impl ScratchPreview {
         let helper = format!("{}\ninit 999 python:\n    config.label_overrides[\"start\"] = \"{entry}\"\nlabel {entry}:\n    call screen {screen_name}\n    $ renpy.quit()\n", std::str::from_utf8(crate::lifecycle::runtime::POLICY).unwrap());
         fs::create_dir_all(scratch.root.join("game")).map_err(|e| e.to_string())?;
         fs::write(scratch.root.join(format!("game/{entry}.rpy")), helper).map_err(|e| e.to_string())?;
-        scratch.manifest = crate::transaction::execution_manifest(&scratch.anchor, true).map_err(|e| format!("{e:?}"))?;
+        scratch.manifest = crate::transaction::execution_manifest(scratch.anchor(), true).map_err(|e| format!("{e:?}"))?;
         Ok(scratch)
+    }
+    pub(crate) fn anchor(&self) -> &DirectoryAnchor {
+        self.anchor.as_ref().expect("scratch job is not being cleaned")
     }
     pub(crate) fn cleanup(&mut self) -> bool {
         if self.root.as_os_str().is_empty() { return true; }
+        let Some(anchor) = self.anchor.take() else { return false; };
+        if anchor.validate_chain().is_err() { self.anchor = Some(anchor); return false; }
+        // Windows pins the directory against deletion while this owned handle is open.
+        // The runtime drops its context clone after child/pipe cleanup, before this call.
+        drop(anchor);
         if fs::remove_dir_all(&self.root).is_err() { return false; }
         self.root.clear(); true
     }
@@ -97,7 +105,8 @@ mod tests {
         fs::write(root.join("game/ui/help.rpy"), b"# source changed").unwrap();
         assert_eq!(fs::read(job.root.join("game/ui/help.rpy")).unwrap(), bytes);
         assert!(ScratchPreview::prepare(&authoring, &project, &data, &manifest, &purpose).is_err());
-        assert!(job.cleanup()); assert!(!job_root.exists());
+        assert!(job.cleanup()); assert!(!job_root.exists()); assert!(job.anchor.is_none());
+        assert!(job.cleanup(), "completed cleanup is idempotent");
         fs::write(root.join("game/ui/help.rpy"), bytes).unwrap();
         let (_, manifest) = authoring.transactions.execution_snapshot(&project).unwrap();
         let cancel = std::sync::Arc::new(crate::runtime_work::Cancellation::default()); cancel.cancel();

@@ -69,6 +69,16 @@ pub(crate) struct RuntimeProcess {
     pub(crate) manifest: Arc<crate::transaction::ExecutionManifest>,
 }
 
+// Release runtime context handles before a scratch job's destructor can remove its
+// directory, including pre-spawn errors and a failed worker-thread creation.
+struct RuntimeInputs {
+    context: Option<(ValidatedSdk, DirectoryAnchor, crate::transaction::ExecutionManifest)>,
+    scratch: Option<crate::scratch_preview::ScratchPreview>,
+}
+impl Drop for RuntimeInputs {
+    fn drop(&mut self) { self.context.take(); }
+}
+
 impl RuntimeProcess {
     pub(crate) fn start_preview(
         sdk: ValidatedSdk, anchor: DirectoryAnchor, kind: RuntimeKind,
@@ -76,7 +86,7 @@ impl RuntimeProcess {
         scratch: Option<crate::scratch_preview::ScratchPreview>,
     ) -> Result<Self, RenpyError> {
         let source_manifest = manifest;
-        let (anchor, manifest) = scratch.as_ref().map(|s| (s.anchor.clone(), s.manifest.clone()))
+        let (anchor, manifest) = scratch.as_ref().map(|s| (s.anchor().clone(), s.manifest.clone()))
             .unwrap_or((anchor, source_manifest.clone()));
         sdk.revalidate(false)?;
         anchor
@@ -165,13 +175,14 @@ impl RuntimeProcess {
         commands: Vec<Command>,
         context: Option<(ValidatedSdk, DirectoryAnchor, crate::transaction::ExecutionManifest)>,
         kind: RuntimeKind, gate: Arc<ExecutionGate>, validation_deadline: Duration,
-        readiness_required: bool, mut scratch: Option<crate::scratch_preview::ScratchPreview>,
+        readiness_required: bool, scratch: Option<crate::scratch_preview::ScratchPreview>,
     ) -> Result<Self, RenpyError> {
-        let manifest = context
+        let mut inputs = RuntimeInputs { context, scratch };
+        let manifest = inputs.context
             .as_ref()
             .map(|(_, _, manifest)| manifest.clone())
             .unwrap_or_default();
-        let launch_revision = context.as_ref().map(|(_, _, manifest)| {
+        let launch_revision = inputs.context.as_ref().map(|(_, _, manifest)| {
             format!(
                 "{:x}",
                 Sha256::digest(serde_json::to_vec(manifest).unwrap_or_default())
@@ -224,13 +235,13 @@ impl RuntimeProcess {
                             outcome = "cancelled";
                             break;
                         }
-                        if context.as_ref().is_some_and(|(sdk, anchor, _)| {
+                        if inputs.context.as_ref().is_some_and(|(sdk, anchor, _)| {
                             sdk.revalidate(false).is_err() || anchor.validate_chain().is_err()
                         }) {
                             outcome = "identityChanged";
                             break;
                         }
-                        let anchor = context.as_ref().map(|(_, anchor, _)| anchor);
+                        let anchor = inputs.context.as_ref().map(|(_, anchor, _)| anchor);
                         // Atomic cancellation/spawn boundary: cancellation that wins
                         // before this commitment spawns nothing; later cancellation
                         // stops/reaps the owned tree through this same worker.
@@ -324,15 +335,16 @@ impl RuntimeProcess {
                     // Cleanup must never wait for filesystem freshness work. The next
                     // preparation performs the full inventory; until then freshness is
                     // conservatively stale, including unknown SDK-generated output.
+                    let stale = inputs.context.as_ref().map(|_| true);
                     if cleanup_ok {
-                        if let Some(scratch) = scratch.as_mut() { cleanup_ok = scratch.cleanup(); }
+                        inputs.context.take();
+                        if let Some(scratch) = inputs.scratch.as_mut() { cleanup_ok = scratch.cleanup(); }
                         if !cleanup_ok { outcome = "cleanupFailed"; }
                     }
                     if !cleanup_ok {
                         // A child may still own these files. Retain the job for recovery.
-                        if let Some(scratch) = scratch.take() { std::mem::forget(scratch); }
+                        if let Some(scratch) = inputs.scratch.take() { std::mem::forget(scratch); }
                     }
-                    let stale = context.as_ref().map(|_| true);
                     if let Ok(mut state) = worker_observation.lock() {
                         state.stale = stale;
                         state.phase = outcome;

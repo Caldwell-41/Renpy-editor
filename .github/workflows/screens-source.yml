@@ -78,9 +78,11 @@ jobs:
         run: |
           cargo test -p loomlight-core screens::tests:: --locked
           cargo test -p loomlight-core scratch_preview::tests:: --locked
+          cargo test -p loomlight-core runtime_preview_inputs_release_context_before_scratch_cleanup --locked
           cargo test -p loomlight-core help_preview_gate --locked
           cargo test -p loomlight-core runtime_dispatch_cancels_inventory_prepare_grant_start_and_isolates_old_completion --locked
           cargo build -p loomlight-core --example help-controller-driver --locked
+          npm run build
           cargo check -p loomlight-desktop --locked
       - name: Real renderer and core; rehearse native controller with a runtime test double
         env:
