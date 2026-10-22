@@ -2,27 +2,25 @@
 
 ## Selected Help-screen outcome
 
-2026-10-22: Corrected app source `5925bb6` passes the signed Mac WebView-to-SDK Help
-workflow. The exact package verifies signature, ARM64 and installer identity. Native
-proof covers accepted bytes, Undo/Redo, Cancel/reopen, SDK validation, 760x360 geometry,
-frozen-revision staleness and Stop with exit 0, no errors and owned scratch/process
-cleanup. [The brief](../tasks/active/help-screen-production.md) owns scope;
-[the evidence](../tasks/evidence/help-screen-production.md) owns hashes and receipts.
-The three original review findings are closed at source/local-regression scope.
-Final visual/functional approval remains with the selecting chat.
+2026-10-22: The bounded signed Mac Help workflow is accepted; the three original
+review findings are closed at source/local-regression scope. Windows CI2 reached
+validation, geometry and owned cleanup, then its native gate rejected the legitimate
+Windows console-control Stop exit. [The brief](../tasks/active/help-screen-production.md)
+owns scope and caps; [the evidence](../tasks/evidence/help-screen-production.md#local14-ci2-stop-diagnosis-and-finite-continuation)
+owns the audit, source trace, raw codes and regressions.
 
-CI1 run 39702239464 at 00ee110, attempt 1, failed before Windows SDK/package/native work.
-Mac lacked the frontend build before desktop check; Windows scratch cleanup retained
-its own delete-blocking handles. Both causes are corrected at 5925bb6. Local13 passes
-focused scratch/context-drop/runtime/source/request tests, build/check and validators.
-CI2 is ready under the existing ordinal 2 selector, which skips service previews.
-Windows native qualification and two-aspect service proof remain missing.
+Qualification repair 83e4b36 preserves product Stop behavior and raw exit codes. Only
+cancelled owned Windows Stop with complete, untruncated, error-free evidence accepts
+STATUS_CONTROL_C_EXIT. Validation, crashes, wrong OS/phase and incomplete/error output
+still reject. Local14/15 focused gates, renderer/core and probe rehearsals pass.
+Windows-only CI3 is prepared for both missing service aspects plus one native preview;
+unchanged qualified CI2/Mac evidence is reused. Material visual differences remain
+unaccepted. Final functional/visual approval belongs to the selecting chat.
 
-Actual use is local 13/13; Mac packages 3/3, native launches 2/3 and SDK previews 7/8.
-Windows packages 0/2, launches 0/3 and previews 0/4; focused CI 1/2 before CI2 dispatch.
-No fourth Mac package or fourteenth local batch is authorized. Preserve unrelated
-maintenance and private receipts. Material flow-v1 differences remain unaccepted.
-No PR, merge or release is authorized.
+Actual use before CI3 is local 15/15, CI 2/3; Mac packages 3/3, native launches 2/3,
+previews 7/8; Windows packages 1/2, native launches 1/3, previews 1/4. The worker owns the
+terminal audit on manual resume. Preserve unrelated maintenance/private receipts.
+No further local batch, fourth CI run, PR, merge or release is authorized.
 
 ## Earlier full-app mockups
 

@@ -1,37 +1,47 @@
 # Current outcome handover
 
-## Help-screen production candidate, 2026-10-22
+## Help-screen production continuation, 2026-10-22
 
-Read the [owning brief](../tasks/active/help-screen-production.md) and
-[evidence](../tasks/evidence/help-screen-production.md). App source 5925bb6 passes the
-corrected signed Mac native Help workflow. Package 3's executable SHA-256 is
-b8fe33be7da97d4166773c06a2fe3afc53fa4a53857bb24cf05ef0b3ed754c19.
-The 68.034-second native result proves accepted bytes/history/reopen, validation,
-760x360 geometry, frozen staleness and clean Stop. Both terminal exit codes are 0,
-with complete untruncated output and no raw/runtime diagnostic errors. All cleanup
-owners pass; no scratch, source bytecode or saves remain. Physical native keyboard
-input is not claimed. The source includes the inspection-read and immutable-bridge
-corrections, plus Windows context/job-handle teardown ordering.
+Branch codex/phase3b-screen-designer; qualification source 83e4b36. Read the
+[owning brief](../tasks/active/help-screen-production.md) and
+[CI2 diagnosis](../tasks/evidence/help-screen-production.md#ci2-retained-audit-and-causal-diagnosis).
+The selecting chat accepts the bounded signed Mac workflow and closed the original
+three findings at source/local-regression scope. Visual differences remain unaccepted.
 
-CI1 run 39702239464, attempt 1, exact head 00ee110a7e0c0c63a3d3c647ccb43fc86db04a51,
-is terminal failure. Both frontend gates pass. Mac's desktop check lacked dist;
-Windows failed scratch cleanup while its own directory handles were open. These
-causes are repaired. Both retained artifacts contain only the candidate; actual
-Windows package/app/SDK use is zero. CI2 may run the diagnosed correction with
-ordinal 2. Preserve its skip of service previews. Windows native and two-aspect
-service evidence remain incomplete, and skipped gates cannot pass.
+CI2 run 39704470784, attempt 1, exact head 4ac3ff1f4a8a96e05bf265eb05a815bfa6d70e64,
+is audited failed. It used one Windows package, one native app and one preview. Validation exits 0;
+geometry is 760x360 in game context; owned Stop preserves raw -1073741510 with cancelled
+phase, clean output/diagnostics and complete cleanup. Windows sends CTRL_BREAK_EVENT;
+this code is its console-control exit. Three qualification gates assumed zero or a
+Unix signal exit. The repair retains raw codes and permits that exact Windows result
+only for explicit owned cancellation with complete error-free evidence. It adds
+compile-time target and Stop intent to probe receipts and checks the target against
+the outer host. Unknown exits, validation failure, wrong OS/phase, errors and missing
+cleanup still reject. Product termination and the accepted Mac evidence are unchanged.
 
-Actual use is local 13/13, Mac packages 3/3, native launches 2/3 and previews 7/8;
-Windows packages 0/2, launches 0/3 and previews 0/4; focused CI 1/2 before CI2 dispatch.
-No fourth package or fourteenth local batch is authorized. CI waits require manual
-same-thread resume/audit, with exact run, attempt and candidate recorded after dispatch.
-No polling loop or monitor is authorized. The selecting chat owns final review and
-visual/functional approval. Report delivery there is explicitly approved.
+Local14 reproduces the old rejection in Rust, Python and the actual native probe
+through real bridge/core with a marked runtime test double. Local14/15 corrected and
+rejecting cases, fresh renderer/core producer, build/check, actionlint and validators
+pass. CI2 artifacts remain byte-identical and failed. The incident/runbook records
+own the lasting qualification rule. Protected apps/drafts, pinned flow-v1 and unrelated
+uncommitted maintenance remain preserved.
 
-Publish only scoped corrections and separable Help records by ordinary fast-forward
-to origin/Caldwell-41/Renpy-editor/refs/heads/codex/phase3b-screen-designer. Preserve
-unrelated uncommitted maintenance, protected apps/drafts, pinned flow-v1 and private
-ignored receipts. No PR, merge or release is authorized.
+The latest human instruction authorizes two added local batches (cap 15) and one
+qualification dispatch (cap 3). Before CI3, actual use is local 15/15 and CI 2/3;
+Mac packages 3/3, native launches 2/3 and previews 7/8; Windows packages 1/2, native
+launches 1/3 and previews 1/4. The new Windows-only ordinal 3 route uses the remaining
+two service previews and one native preview, one package and one app. It supersedes
+the obsolete ordinal 2 service skip, using audited actual capacity. No counter reset,
+fourth CI run or unrelated native repeat is authorized.
+
+The implementation owner retains terminal-job/artifact audit after manual same-thread
+resume under WORKFLOW. Fetch the recorded run/attempt and verify required service and
+native stages, raw exits/errors, exact package hashes, accepted bytes/history/reopen,
+owned process/scratch cleanup and actual counters. Failed/skipped/missing proof stays
+incomplete. The human is not assigned that audit. No polling loop or monitor is active.
+Report verified results or a precise blocker to the selecting chat for final review.
+Only scoped reviewed Help corrections/records may publish by ordinary fast-forward to
+origin/Caldwell-41/Renpy-editor/refs/heads/codex/phase3b-screen-designer. No PR/merge/release.
 
 ## Earlier full-app mockups
 

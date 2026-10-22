@@ -270,3 +270,15 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** header/body cancellation requires owned socket, shutdown, Cancelled,
   EOF and the original two-second bounds. Initial timing-only diagnosis was provisional.
 - **Evidence:** [decisive handle/phase evidence](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-third-ci-audit-and-exact-handle-repair--2026-10-11).
+
+## H23. Help gate assumes an owned Windows Stop exits with zero
+
+- **Class/search:** qualification assumption; `STATUS_CONTROL_C_EXIT`, `-1073741510`,
+  `CTRL_BREAK_EVENT`, `Expected successful validation or owned Stop`.
+- **Cause/correction:** the supervisor requests console-control cancellation and keeps
+  its raw exit status. Three gates accepted only zero or a Unix signal result. Accept
+  the exact Windows control exit only for cancelled owned Stop with complete cleanup,
+  untruncated evidence and no runtime error. Keep raw codes and reject abnormal results.
+- **Regression:** Rust/Python gates and the real native probe script through the
+  bridge/core with a marked runtime test double cover positive and rejecting states.
+- **Evidence:** [CI2 diagnosis](../tasks/evidence/help-screen-production.md#ci2-retained-audit-and-causal-diagnosis).

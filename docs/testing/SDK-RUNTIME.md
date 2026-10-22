@@ -107,6 +107,17 @@ retains a mapped draft through Cancel/refused Save All and deliberately runs sav
 source. The minimal fixture's explicit quit action avoids its missing confirmation
 screen; never suppress production diagnostics or relax Stop to accommodate a fixture.
 
+Help qualification distinguishes validation from owned cancellation. Validation requires
+an ordinary successful exit. Stop requires the cancelled phase, completed process/pipe
+and scratch cleanup, complete output and no raw/runtime diagnostic error. Windows
+`GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pid)` can produce `STATUS_CONTROL_C_EXIT`
+(`0xC000013A`, signed `-1073741510`) for that explicit owned Stop. The native receipt
+records the compile-time target OS and Stop intent; the outer runner checks the OS
+against its host. Preserve the raw exit code. The exact Windows control exit is
+accepted only in that context. Validation failures, other exit codes/phases, errors,
+missing evidence and incomplete cleanup still fail. Unix signal exits can lack a
+numeric exit code; Windows qualification requires its numeric result.
+
 The optional `source-foundation` case retains the extended 33-check nested source,
 EOF/ownership/draft/external-refusal and close/reopen contract. Optional Branches
 performance cases remain separately selected. Neither is silently appended to the

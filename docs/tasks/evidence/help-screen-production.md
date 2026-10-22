@@ -6,14 +6,15 @@ Mac sole writer. Existing uncommitted maintenance remains preserved.
 
 ## Current allowance and next action
 
-Corrected source 5925bb6 passes the signed Mac WebView-to-SDK Help workflow in
-local13. Actual cumulative use is local 13/13, Mac packages 3/3, native launches 2/3
-and SDK previews 7/8. CI1 failed before Windows package/app/SDK work; Windows actual
-use is 0/2, 0/3, 0/4 and focused CI 1/2. Its diagnosed Windows handle-lifetime defect and
-Mac frontend prerequisite are repaired. Next is approved publication and CI2 with
-its unchanged service-preview skip selector. Windows two-aspect service proof remains
-missing. Final native/CI and visual acceptance remain with the selecting chat.
-No fourth Mac package or fourteenth local batch is authorized.
+CI2 is audited failed at the Windows native Stop gate. The supervisor preserved a
+legitimate owned console-control exit; the qualification gates required zero or a
+Unix signal result. Local14 reproduced the rejection and corrected the gates without
+changing product termination. Local15 final checks/publication are active, within
+cumulative local cap 15. CI use is 2/3 before dispatch 3. Actual Windows use is one
+package, one native app and one preview; the final run can use the remaining two
+service aspects and one native preview. Mac evidence remains accepted and unchanged
+at packages 3/3, apps 2/3 and previews 7/8. Material visual differences remain unaccepted.
+The implementation owner retains CI3 terminal audit under the manual-resume policy.
 
 ## Reference preservation
 
@@ -536,3 +537,143 @@ before CI2. Local13 also passes repository validation and 13 validator regressio
 No fourth package or fourteenth local batch was attempted. The Mac native gap is
 closed for this bounded workflow. Windows qualification and material visual acceptance
 remain incomplete; final approval stays with the selecting chat.
+
+
+## Published local13 candidate and CI2 wait
+
+Source 5925bb6 and scoped evidence/status commit 4ac3ff1 were published by ordinary
+fast-forward from 00ee110 to 4ac3ff1f4a8a96e05bf265eb05a815bfa6d70e64. The payload is
+two commits, nine files, 297 insertions and 98 deletions. The nine files pass artifact
+privacy scanning; committed content/links pass for 815 files, and the actual range
+passes whitespace checks. Application code at 4ac3ff1 is byte-identical to 5925bb6,
+which produced the qualified signed package. The executable hash was rechecked after
+the native run and still matches its identity receipt. Explicit lipo inspection
+reports arm64. qualification.json binds these local facts and the native receipt hash.
+Unrelated maintenance/private receipts remain excluded. No PR, merge or release.
+
+### Pending Help CI2
+
+[Run 39704470784](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39704470784), attempt 1, is confirmed in_progress
+at 2026-10-22 01:13:57 UTC. Workflow 391374211 uses .github/workflows/screens-source.yml;
+inputs are candidate=4ac3ff1f4a8a96e05bf265eb05a815bfa6d70e64 and ordinal=2.
+The branch is codex/phase3b-screen-designer. Focused CI use is 2/2; no CI3 is authorized.
+Resume this same chat manually for terminal audit. Inspect both jobs and all selected
+steps/artifacts, exact package architecture/hashes, the Windows native stages,
+accepted bytes, no-error Stop and process/scratch cleanup. Charge actual Windows
+package/app/preview attempts from reservations and receipts. At dispatch their totals
+were 0/2, 0/3, 0/4; this run can add at most one package, one app and one preview.
+Service previews remain intentionally skipped, so Windows two-aspect service proof
+is still missing even if all selected CI2 steps pass. Skipped gates cannot pass.
+No model polling loop, monitor or automatic redispatch is active. Mac use remains
+packages 3/3, native launches 2/3 and previews 7/8; local batches 13/13. Read-only terminal
+audit and status reporting remain in scope. Any additional local correction/build or
+third CI run needs a new allowance. Final approval belongs to the selecting chat.
+
+## Selecting-chat verification of signed Mac proof
+
+The orchestrator accepts the bounded Mac WebView-to-SDK evidence at app source
+`5925bb6` and published candidate `4ac3ff1`. Read-only review verified the executable
+and installer hashes against package3, the accepted 645-byte source hash, every named
+native stage and independent disk/cleanup results. Validation and Stop both exit 0
+with complete output and no error diagnostics. The published documentation changes
+no application inputs. This accepts synthetic input in the native WebView; physical
+keyboard and whole-phase human acceptance remain outside that proof.
+
+One direct GitHub inspection of CI2 found jobs `119581134648` (Windows) and
+`119581134968` (Mac) in progress. Both frontend/rejecting gates passed; the selected
+source/scratch/request step was running and no artifacts were available. No new
+execution, monitor or redispatch occurred during review. Terminal CI2 audit and
+actual Windows counts remain pending. The ordinal-2 service skip means the required
+two-aspect Windows proof is missing independently of the selected job conclusions.
+Final functional/visual approval remains withheld. Select any further qualification
+only after auditing CI2 and reconciling actual consumption with the remaining caps.
+
+
+
+## Local14 CI2 Stop diagnosis and finite continuation
+
+The human requested that the implementation owner audit and fix the failed CI with
+Fix Root Causes. The selecting chat authorized at most two additional local batches
+(cumulative cap 15) and one qualification dispatch (cumulative cap 3). Local14 is
+charged before reproduction/checks. Actual Mac use stays packages 3/3, apps 2/3 and
+previews 7/8; no Mac repeat is selected. CI2's reported Windows use is one package,
+one app and one preview, to be verified from artifacts. Its remaining three Windows
+previews can cover two service aspects plus a corrected native preview. The previous
+ordinal2 service-skip restriction is superseded for cumulative dispatch 3. Preserve
+all consumed attempts. No fourth CI run is authorized. Final approval and the
+unaccepted visual differences stay with the selecting chat.
+
+
+### CI2 retained audit and causal diagnosis
+
+The exact Windows and Mac ZIP hashes match the selecting chat's supplied values.
+Windows artifact 12395335972 has SHA-256
+5108ad4a3c7215929ca089cb9d968e973e81e439662d570817e52878a8dde1bb;
+Mac artifact 12394114166 has SHA-256
+42675d9d76ec8252e99e9530b951667833a6112c6f1d31fd61634e56b16aece0.
+Both candidate files match 4ac3ff1. Logs and extracted artifacts stay ignored under
+.toolchains/help-screen/ci2-audit. Windows reservations plus the native preview counter
+confirm packages 1/2, apps 1/3 and previews 1/4. The two service aspects did not run.
+Its x64 package identity reports executable SHA-256
+C1AAA7D1A173E2DE661A9E973C84EAF0D7C60528E5DA113E86B370494CBA6A22
+and installer SHA-256
+BD29286716DB9849C8F2426DCB066F8FDF0737944C0BF6F5BD398BDC266305AC.
+
+The original 64.172-second native result stays failed. Validation exits 0. The preview
+measures 760x360 at 1280x720 in ordinary game context and observes the accepted edit as
+earlierRevision true. Its owned Stop reaches cancelled with raw exitCode -1073741510,
+complete untruncated output, no diagnostics, no raw exception and all cleanup owners
+true. Outer disk checks pass and no source bytecode/saves or scratch job remain.
+The gate, not the supervisor, rejects that terminal code before reopen/complete stages.
+
+Causal evidence: Windows graceful(pid) calls GenerateConsoleCtrlEvent with
+CTRL_BREAK_EVENT for the child process group. The supervisor records cancelled only
+after an owned cancellation and retains the actual child exit code after process,
+pipe and job cleanup. Microsoft documents console-control default termination via
+ExitProcess and identifies 0xC000013A (signed -1073741510) as STATUS_CONTROL_C_EXIT.
+This source/receipt chain establishes legitimate owned console cancellation here;
+it does not justify accepting arbitrary nonzero exits. References:
+[console-control delivery](https://learn.microsoft.com/en-us/windows/console/generateconsolectrlevent),
+[process termination](https://learn.microsoft.com/en-us/windows/win32/procthread/terminating-a-process),
+[NTSTATUS values](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/596a1078-e883-4972-9bbc-49e60bebca55).
+
+The first wrong decision was a qualification assumption that every clean owned Stop
+must exit 0 or lack a Unix signal exit code. Three gates shared that assumption.
+Local14 reproduces the rejection in Python, the Rust SDK gate and the actual native
+probe script through the real bridge/core with a marked runtime test double. The
+correction accepts only the exact Windows control exit for cancelled/owned Stop,
+with complete untruncated evidence and no raw/runtime error diagnostics. Native
+receipts now record the compile-time target OS and explicit Stop request; the outer
+runner checks that OS against its host. Raw exitCode is never normalized. Windows
+null, crash/unknown codes, wrong OS/phase, validation failure, missing cleanup/output,
+truncation and errors remain rejecting. No product termination behavior is changed.
+
+Local14 passes five Python receipt tests, two Rust gate tests, desktop check, and four
+probe rehearsals: Windows control exit, unchanged Mac signal exit, rejected access
+violation and rejected Windows control code on Mac. No package, native app or SDK
+execution occurred. Historical CI2 remains failed, with its original bytes preserved.
+
+## Local15 final qualification preparation
+
+Local15 is charged before final review/checks and publication. Cumulative local use
+is 15/15. CI use remains 2/3 before the final dispatch. Existing Windows consumption is
+package 1, app 1 and preview 1; the next run reserves package 2, app 2 and three further
+previews, ending at most at previews 4/4. Mac caps/use stay unchanged. Qualification
+runs only Windows. Unchanged CI2 frontend/core and accepted signed-Mac evidence is
+reused; the affected Rust/Python/JS gates and fresh renderer-accepted source for the
+two service aspects are checked. The prior ordinal2 skip is not carried forward:
+this is cumulative ordinal3, selected from audited actual remaining capacity.
+
+
+Local15 final verification passes five Python receipt tests, two Rust SDK-gate tests,
+all 11 real renderer/core groups producing fresh accepted source, and the Windows
+console-control probe rehearsal through the real immutable bridge/core. Frontend
+build, desktop check, actionlint, repository validation and 13 validator regressions
+pass. The original CI2 native result remains failed and byte-identical under audit.
+Source correction is 83e4b36. No Mac package/app/SDK repeat occurred. Current product
+renderer/runtime/transaction code is unchanged from the accepted base; the compiled
+native changes are qualification-only target/Stop metadata and gate logic.
+
+Current/handover word counts before CI3 wait are 468/896. CURRENT's small excess keeps
+unrelated workstream/acceptance pointers intact during this repair; the Help section
+and linked brief own the new state. No unrelated documentation maintenance is staged.
