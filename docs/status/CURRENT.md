@@ -1,34 +1,33 @@
 # Current status
 
-## L17 CI6 audited; partial proof handed off
+## L17 movement implemented; representative acceptance blocked
 
-2026-10-23: [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-retains partial proof after audited [CI6](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39854099159/attempts/1),
-attempt 1 at `571dfa98b448048d5504bc110d903673959da88c`. The workflow succeeds.
-Display preparation produces both matched reference windows; all 200 updates,
-controller/Help, reference geometry/cleanup and Windows package/native functional
-checks pass. The 257-file artifact passes privacy and matches GitHub's ZIP digest.
-Windows native helper pixels exactly equal browser and prior Mac helper pixels at
-both aspects. [Evidence](../tasks/evidence/canvas-rendering.md#ci6-terminal-audit-and-remaining-proof-handoff)
-owns exact receipts, comparisons and limits.
+2026-10-23: The user resumed [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
+Product commits `7729ccf` and `a91be99` add bounded aligned-frame movement through
+the real Screens controller and shared source transactions. Pointer deltas snap
+to eight game pixels; keyboard movement uses one or eight. Escape/Cancel, capture
+ownership, fractional endpoint literals, stale/dirty Source and shared history have
+focused proof. [The continuation evidence](../tasks/evidence/canvas-rendering.md#continued-implementation-and-resource-closeout-2026-10-23)
+owns exact results, review corrections and limits.
 
-The representative proof remains unaccepted. Matched Windows helper/reference
-pixels differ, including flat hover color, and no tolerance is approved. Native
-receipts leave OS focus, physical keyboard and warm presentation unproved; startup
-and browser p95 values are diagnostic. Element-position dragging remains missing.
-Both independent audit reviews have zero new findings and retain these three Spec
-gaps. Keep #36/B07/B08 and phase acceptance open.
+| Capability | Automated proof | Acceptance |
+| --- | --- | --- |
+| Bounded movement and minimal source writes | Core, DOM and real UI/core controller with a fixture image | Implemented; real helper/native movement remains unqualified |
+| Helper rendering and lifecycle | Earlier audited CI6 at `571dfa9`, plus prior Mac functional proof | Glyph/color differences remain unaccepted |
+| Native feedback, keyboard and focus | Existing native flags remain false | Measurement implementation and target proof remain missing |
 
-Stop with the requested temporary handoff; no further product fixes or retries
-follow this audit. ADR 0021 requires decision review before broader renderer work
-or weaker gates. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns recovery.
-No operation/watch remains pending. The user-selected one-run supplement is consumed.
+Both independent reviews cleared the four corrected code defects. Spec retains
+helper/native movement, feedback/focus and fidelity gates. No tolerance, weaker gate,
+new renderer approach or full 3B acceptance is selected. The retained CI6 browser
+data has 197/200 input-to-decode samples above 100 ms; it is diagnostic, not native
+presentation proof. A repeat of the existing probe cannot establish the missing gates.
 
-Final cumulative use is 53/60 local batches, 6/6 CI; Mac packages 3/5, native 3/7,
-SDK 24/24; Windows packages 1/5, native 1/7, SDK 10/20. No seventh CI dispatch or
-further Mac SDK process is allocated. No owned local process, fixture or generated
-helper backup remains. No PR, merge or release is selected. Preserve unrelated
-policy edits and protected recovery below.
+The six remaining local batches are consumed, cumulative 60/60. CI remains 6/6;
+Mac packages 3/5, native 3/7, SDK 24/24; Windows packages 1/5, native 1/7, SDK 10/20.
+No new SDK, native app, package or CI operation ran. Further work needs an allowance
+and ADR 0021 decision review. Keep #36/B07/B08 open. No operation/watch is pending
+at closeout. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns continuation.
+Preserve unrelated policy edits and protected recovery below.
 
 ## Earlier canvas decision closeout
 

@@ -2,52 +2,54 @@
 
 ## Active L17 proof handover
 
-The user selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-through implement, confirmed core/UI/packaged test boundaries and authorized push
-and Windows CI. They doubled the allowance and added four Mac SDK processes, all
-used. Their final supplement approves one extra Windows run and directs audit,
-then stop and use the handoff skill if it fails. This chat stops with a temporary
-handoff because the successful workflow still leaves representative acceptance
-unmet. No product correction or retry follows the audit.
+The user resumed [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+in a new chat on 2026-10-23, superseding the earlier stop direction within the
+existing cumulative allowance. Development remains on Mac ARM64,
+`codex/phase3b-screen-designer`. Product `7729ccf` plus review correction `a91be99`
+adds bounded aligned-frame movement. Existing commit/push authority carries forward;
+no PR, merge or release is selected. The previous CI6 candidate remains `571dfa9`;
+its native/package pass does not qualify the new movement code.
 
-Development remains on Mac ARM64, `codex/phase3b-screen-designer`, from `7e1e7b3`.
-[CI6](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39854099159/attempts/1),
-attempt 1 at `571dfa98b448048d5504bc110d903673959da88c`, succeeds and is audited.
-Its same-chat event is acknowledged. Later record commits do not change the tested
-product. #36 owns scope/allowance; [evidence](../tasks/evidence/canvas-rendering.md#ci6-terminal-audit-and-remaining-proof-handoff)
-owns exact identity, artifacts, comparisons, prior failures, review and limits.
+The frame must have literal floating-point xalign/yalign, existing dimensions and
+an unambiguous fixed parent. Movement preserves those coordinate types, snaps pointer
+deltas to eight game pixels and uses one/eight pixels for keyboard input. It submits
+provisional values as data and patches only changed source tokens on acceptance,
+through shared transactions/history. Automatic layout and competing placement refuse
+movement. Cancel/Escape and Apply terminate capture; selection cannot change during
+capture or acceptance. Conflicted drafts remain available for Apply/Cancel.
 
-Windows open-reader publication now passes 200 updates, shared recent-file usage,
-controller busy-read/exactly-one-write checks and Help regression. Desktop
-1024x768 becomes 1920x1080; actual reference windows match 1280x720 and 1024x768
-in both states. All five widget dimensions and explicit reference cleanup pass.
-One Windows x64 NSIS package and native WebView functional probe pass, including
-accepted bytes, both aspects, drafts/history/project close and every cleanup owner.
-Windows native helper PNGs exactly equal browser and prior Mac native PNGs at both
-aspects. No installer execution or retained package bytes are claimed.
+[The continuation evidence](../tasks/evidence/canvas-rendering.md#continued-implementation-and-resource-closeout-2026-10-23)
+owns test identities/results, original red tests, four independent-review findings and
+corrections, retained timing analysis and resource accounting. The UI/core integration
+uses a fixture image for pointer targets and runs no SDK. It proves source writes and
+controller behavior, not helper pixels or native presentation. Both independent review
+axes report zero remaining code findings. Spec keeps the acceptance gaps below.
 
-Keep three acceptance gaps explicit. Matched Windows helper/reference differences
-are 5,856/11,268 pixels at 1280x720 normal/hover and 7,819/13,227 at 1024x768,
-maximum channel difference 64, including a flat hover blue difference. No tolerance
-is approved. Native OS focus, physical keyboard and warm presentation remain false;
-startup and browser timings are diagnostic. Element-position dragging is missing.
-The earlier Mac functional pass and Retina differences retain their stated limits.
-Both independent audit axes report zero new findings and preserve the gaps.
+Native input-to-visible timing, OS focus, physical keyboard, startup disposition and
+smooth real helper dragging remain unproved. The current native probe explicitly
+reports the missing capabilities false. Mac SDK 24/24 and CI 6/6 prevent executing
+the required next target checks under this authority. Matched Windows helper/reference
+glyph and flat hover-color differences, plus earlier Mac Retina/hover differences,
+still have no accepted tolerance. The producer forces software rendering while the
+reference uses GPU rendering. Its exact compositing cause remains unisolated.
+No renderer change, tolerance or weaker gate is accepted. ADR 0021 requires decision
+review before broader renderer work. Keep #36/B07/B08 and phase acceptance open.
 
-No operation/watch is pending. Ignored `ci-06` retains log, terminal receipt,
-artifact metadata/ZIP/files, audit and exact pixel comparisons. Its 257 files pass
-privacy and the ZIP matches GitHub's digest. The temporary handoff links these
-owners and suggested skills without duplicating them. A fresh agent needs new user
-direction before implementation, probes, retry or any additional CI dispatch.
-Return to decision review under ADR 0021 before broader renderer work or weaker
-proof gates. Keep #36/B07/B08 and phase acceptance open.
+Batches 55-60 cover preparation/diagnosis, core TDD, UI TDD, integration/verification,
+independent review/corrections and publication/closeout. Cumulative use is 60/60 local,
+6/6 CI; Mac packages 3/5, native 3/7, SDK 24/24; Windows packages 1/5, native 1/7,
+SDK 10/20. No expensive operation was added and no contingency resets. No owned
+operation/watch remains pending at closeout. The portable test driver exits zero and
+asserts fixture removal. No game scripts/actions ran. Protected recovery below and
+unrelated uncommitted policy work remain intact.
 
-Final use is 53/60 local batches, 6/6 CI; Mac packages 3/5, native 3/7, SDK 24/24;
-Windows packages 1/5, native 1/7, SDK 10/20. All failures/cancelled attempts remain
-charged; no reset or new contingency applies. No seventh dispatch or further Mac
-SDK process is allocated. No owned local process, fixture or generated helper
-backup remains. No PR, merge or release is selected. Preserve unrelated policy
-work and all protected recovery below. Older canvas sections are historical.
+Next action is the user's allowance/decision review. The smallest rendering experiment
+would compare the same composition through software and GPU producers, using matched
+reference captures, before choosing a correction. Native measurement needs OS focus/input
+observation and captured visible results outside the WebView, not true flags or another
+functional-only run. Qualify changed movement on each target once those capabilities
+and operations are allocated. Resume in this chat by default; no host transfer is
+selected. New chats do not renew limits.
 
 ## Earlier canvas decision closeout
 

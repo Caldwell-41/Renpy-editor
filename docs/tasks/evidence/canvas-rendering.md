@@ -903,3 +903,140 @@ pending, no seventh dispatch or further Mac SDK process is allocated, and no pro
 change follows this audit. Keep #36/B07/B08 and phase acceptance open. ADR 0021
 requires decision review before broader renderer work or weaker gates. Preserve
 unrelated policy edits and protected recovery. No PR, merge or release is selected.
+
+## Continued implementation and resource closeout, 2026-10-23
+
+The user explicitly resumed #36 in a new chat, superseding the preceding stop
+direction for in-scope work. The issue's new-chat continuation records batch 54
+and six remaining local batches. No seventh CI dispatch or Mac SDK process was
+authorized. The checkout still held `332b4aa` and unrelated policy edits; these
+were preserved. Product `7729ccf05d4c4f0af664d74488a5524b7bde509c` implements bounded
+movement, with review correction `a91be99771be51faa1531100304cceb2f70942b0`.
+
+### Criterion results and mappings
+
+| Criterion | Result and proof boundary |
+| --- | --- |
+| Source/revision, inert editing and history | Focused production request tests pass minimal edits, comments/BOM/CRLF, no-op, invalid/stale/dirty refusal, Undo/Redo and reopen. Existing helper execution isolation remains unchanged. |
+| Representative element dragging | Implemented for an existing sized frame with fractional literal alignments inside a fixed parent. DOM and real UI/core source-controller proof pass. Actual helper/native dragging and smoothness remain unqualified. |
+| Native focus, keyboard, warm presentation and startup | Missing measurement implementation/evidence. The native probe still reports its capabilities false. No native run was available within the exhausted Mac SDK and CI limits. |
+| Both-target/two-aspect fidelity | Existing matched captures retain observed glyph/color differences. No renderer code changed and no tolerance is accepted. |
+| L18-L20 extension mapping | Existing renderer mappings remain in ADR 0021 and this record. The new provisional alignment and transaction mapping below is documented but has no new SDK/native qualification. Full coordinate/property coverage remains with later tickets. |
+
+Inspection exposes `position` only for the bounded frame when both `xalign` and
+`yalign` are unambiguous floating-point literals in [0,1]. Integer source coordinates,
+automatic parents and competing placement properties, including `xycenter`, refuse
+movement. Frame and parent bounds come from the latest helper geometry. An axis must
+have positive available travel. Each delta converts logical editor pixels to game
+pixels using the captured zoom, then to alignment by dividing by parent size minus
+element size. Pointer deltas snap to eight game pixels; keyboard deltas use one,
+or eight with Shift. Alignment stays in [0,1]. Moving the frame moves its children.
+
+Provisional `positions` carry node start and the two alignments through
+`screens.canvasPlan`/`screens.canvasRender`; they do not write source. Release sends
+`screens.setPosition` with the captured source revision. Core patches only changed
+literal spans, in descending byte order, and commits one shared transaction/history
+entry. Endpoint source literals remain `0.0`/`1.0`, preserving fractional semantics.
+Cancel/Escape end capture before removing the draft; Apply ends capture before
+acceptance. The Screen picker cannot change the originating view during a gesture
+or write. Invalid/stale/conflicted drafts remain retained. Other placement forms,
+general numeric position editing and full manipulation are not claimed by this slice.
+No new layout design was introduced; the existing approved flow-v1 movement rules
+own the interaction. Full editor visual conformance remains pending.
+
+### Focused verification and failures
+
+Core TDD first rejected the new request as `OPERATION_NOT_ALLOWED`. A second red
+case exposed token corruption when yalign preceded xalign; descending span ordering
+corrected it. UI TDD first failed because no provisional position reached the request.
+The subsequent focused movement test passes preview/no-write, Escape, Cancel followed
+by more pointer events, picker interruption, one acceptance and conflicted-draft retention.
+
+Corrected product `a91be99` passes 16 Screens core cases; its selected SDK test remains
+ignored. Typechecking and 29 focused UI/protocol/lane cases pass. The preceding full
+frontend suite passes all 227 cases with Python 3.12 selected for receipt validators.
+The final frontend build passes, retaining its existing bundle-size warning.
+The ordinary release core suite built from `7729ccf` passes 407 cases, with 47
+explicitly ignored and the three documented broad gates filtered out. It does not
+execute the selected SDK or specialist cases. The subsequent `a91be99` correction
+has the focused core/UI checks above and a rebuilt real controller; the earlier
+broad result is not presented as a full-suite run of the later source.
+
+`screen-position.browser.mjs` uses the existing public Help driver with the
+representative source. Real production UI, dispatch, canvas-plan validation and
+transactions prove held preview/no write, Escape, minimal accepted alignment tokens,
+one history entry, Undo/Redo, Source reconciliation and keyboard movement. The test
+driver exits zero and asserts owned-root removal. Its fixed test image supplies
+pointer targets only; it neither launches nor qualifies the helper, native WebView,
+rendering, focus or timing. The corrected-candidate repeat passes with no page errors.
+
+The first browser attempt was denied loopback access by the sandbox. The authorized
+loopback rerun reached a test race: the existing fresh-image flag preceded completion
+of Undo. The test now waits for the expected source revision as well as freshness.
+An invalid CRC in the test image was also corrected. The first broad frontend run
+found the stale operation allowlist expectation and the host's Python 3.9 `tomllib`
+absence; parity and the supported Python selection correct them. No product or native
+pass is inferred from those failed attempts. Raw controller receipts, build/test logs
+and retained-timing analysis are under ignored `continuation-55-60`.
+
+### Independent review and corrections
+
+Both read-only axes reviewed `332b4aa...7729ccf` against the repository standards and
+the complete #36/ADR 0021 criteria, then reviewed `7729ccf...a91be99` independently.
+No agent edited files or launched app/SDK/CI operations.
+
+#### Standards
+
+Three findings in the first commit were corrected: source serialization stripped
+the fractional type at alignment endpoints; the Screen picker could redirect an
+active gesture; and the competing-placement check missed `xycenter`. Focused red
+tests demonstrated endpoint and picker failures before correction. Final follow-up
+reports zero documented-standard violations and zero worthwhile code smells.
+
+#### Spec
+
+Two actionable findings were corrected: fractional endpoint serialization and Cancel
+leaving a held move active. The latter reproduced a write after Cancel and further
+pointer movement; the rejecting test now passes. Apply also ends capture before
+acceptance. Final follow-up reports zero new defects or scope creep. It retains three
+acceptance gaps: real helper/native movement, native feedback/focus qualification and
+rendering agreement. The fixture-image controller test cannot satisfy those gates.
+
+### Producer diagnosis and next decision
+
+The adapter explicitly selects SDL dummy video and `RENPY_RENDERER=sw`. The matched
+Windows reference uses ANGLE2. Pinned 8.5.3 source confirms that the software helper
+draws a Render into its own alpha surface, while reference export uses the active
+draw backend's screenshot path. This identifies different producers; it does not
+isolate the exact glyph/alpha or flat-color compositing cause. The unchanged retained
+captures still prevent accepting agreement. The smallest discriminating experiment
+is a matched composition through software and GPU producers before choosing a fix.
+It requires new execution authority. No tolerance or renderer replacement was chosen.
+
+Analysis of the retained CI6 browser data finds 197/200 input-to-decode samples above
+100 ms. Decode p95 is 114.2 ms; helper render p95 is 64.8 ms and previous per-frame
+cleanup p95 is 28.8 ms. The helper calls `renpy.free_memory()` every frame; pinned
+source shows that this clears render, texture, surface and font caches and collects
+garbage. This is a concrete candidate cost to measure, not a measured native cause
+or authority to delete cleanup without checking memory/render behavior. Capture
+overhead alone cannot explain the over-100-ms decode measurements. These remain
+browser diagnostics, not native input-to-visible proof.
+
+Native evidence needs host observation of OS focus/input and visible results outside
+the WebView. Changing false flags or rerunning the functional-only probe cannot prove
+it. Its measurement implementation and both-target execution remain blocked by the
+current resource limits. ADR 0021 requires decision review before broader renderer
+implementation or weaker gates. Keep #36/B07/B08 open.
+
+### Cumulative allowance
+
+Batch 55 covered preparation/diagnosis; 56 core request/plan TDD; 57 UI TDD; 58
+controller integration and broad verification; 59 independent review, corrections and
+focused checks; 60 records, validation and publication. Final local use is 60/60.
+CI stays 6/6; Mac packages 3/5, native 3/7, SDK 24/24; Windows packages 1/5, native
+1/7, SDK 10/20. No new package, native app, SDK process or CI dispatch ran. Failed
+portable attempts stay charged. No new contingency or allowance reset applies.
+Further work needs the user's allowance/decision review. No PR, merge or release
+is selected; unrelated policy edits and protected recovery remain intact.
+CURRENT and HANDOVER remain above their soft word-count targets because this scoped
+closeout preserves the existing phase acceptance and protected recovery records.
