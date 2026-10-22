@@ -5,11 +5,11 @@ Observation period starts 2026-10-22. Baseline `867528d`, Mac ARM64 sole writer,
 branch `codex/phase3b-screen-designer`. The issue owns selection, finite cumulative
 allowance and bounded acceptance. This file records detailed results, not a second brief.
 Existing documentation/instruction edits and protected native recovery are preserved.
-Current correction `58b191c` has no remaining independent review findings and passes
-local checks. The user-approved current Mac package 5 passes signing/installer checks;
-its native attempt waits for the relocked desktop. CI3 is audited and passes both
-portable jobs and Windows native/SDK proof. Detailed accounting and original failures
-remain retained.
+L01 is accepted as a bounded functional outcome. Current correction `58b191c` has no
+remaining independent review findings. CI3 passes both portable targets and Windows
+native/SDK proof; signed Mac package 5 and its native attempt 2 pass. The unchanged
+Mac SDK path retains its scoped qualification. Detailed accounting and original failures
+remain retained. Later editor/canvas/phase acceptance is separate.
 
 ## Implemented path and limits
 
@@ -71,14 +71,14 @@ then the existing bundled Python 3.12.14 was selected for checks requiring `toml
   and retain its log. The replacement run uses the required local socket permission.
   Neither failed run is a pass.
 
-## Acceptance map and pending proof
+## L01 acceptance map
 
 | Criterion | Evidence and state |
 | --- | --- |
 | One collision-checked definition/transaction/history entry; Cancel and refusal do not write | Focused IPC tests, real eight-group renderer/core run and existing 11-group Help regression pass. |
 | Metadata-only migration, extras/source preservation, no-op reopen, newer-schema refusal | Focused IPC migration and reopen tests pass. |
 | Source edits/offsets reconcile; rename/deletion/ambiguity stays unresolved | Focused IPC tests and real Source Save/browser path pass. |
-| Actual Choose/core/Source/history/reopen | Production renderer and strengthened controller pass; CI3 packaged Windows path passes all stages with exact source/identity/cleanup. Current signed Mac package passes, but its native proof waits for the unlocked desktop. |
+| Actual Choose/core/Source/history/reopen | Production renderer and strengthened controller pass. CI3 packaged Windows and signed Mac package 5/native attempt 2 pass all ordered stages, with exact accepted source, distinct identities, process and fixture cleanup. |
 | Deliberate preview of created screen | Exact browser-accepted source passes actual pinned SDK proof on both Mac and Windows. The latest correction changes renderer read ordering and the qualification controller, with no SDK/runtime or source-generator changes. |
 | Retain revision-bound Help behavior | Existing focused core and 11-group real renderer/core regression pass. Earlier unchanged native/SDK Help evidence remains scoped to its accepted candidate. |
 | Whole editor/canvas visual acceptance | Pending under later owners; L01 does not waive those gates. |
@@ -476,3 +476,48 @@ inputs is ready, but the current console lock flag is still true and no app proc
 is running. Mac attempt 2 has not been launched or charged. Continue only that already
 authorized verification when the desktop is unlocked. Keep L01 open until it passes;
 no required native proof is waived by CI success. No worker/run remains pending.
+
+## Final Mac native audit and L01 completion
+
+The user confirmed unlock. Active-console preflight verifies an unlocked session with
+no Loomlight process, the exact approved package-5 executable hash, unchanged tested
+application/workflow inputs and a fresh output directory. Mac native attempt 2 is
+reserved and completed inside the already-open final verification cycle, batch 27.
+The existing `owned-screen` runner launches the exact signed executable with its
+isolated public fixture. It exits 0 in 4.585 seconds, with no timeout.
+
+The report passes ordered Cancel, creation, exact Source selection, shared Undo/Redo,
+reopen and complete stages. Screen UUID `c9127833-cbf1-4c24-b4d9-2473c429e452` and
+root UUID `22419de7-7d65-406c-96e5-fa0652696542` are distinct and persist through
+reopen. Retained accepted source exactly matches the owned marker and blank
+`travel_notes` definition. Its SHA256 is
+`819a9594e4c0bf4614c174d635f27678f0e4e560aac559806d2501a79bdfff5d`, matching
+the reported source revision. Native WebView is true and SDK execution in this probe
+is false. This proves synthetic DOM input in the actual signed WKWebView/core path;
+physical-keyboard and human visual acceptance are not inferred.
+
+Independent host/request/credential cleanup owners all report true. Disk errors and
+external errors are empty, accepted bytes match, no source bytecode/saves/scratch jobs
+remain and fixture cleanup is complete. A separate process/owned-root check confirms
+no Loomlight process or owned probe fixture remains. The executable SHA256 still
+matches `7fa6c606eeac5c7a1713926c85213e57464b76563b3a89b556d2421f248377d5`.
+Detailed native receipt, accepted source, preflight and structured audit remain under
+ignored `mac-native-02`. The exact tested application inputs remain those of
+`9313cc5ee593549df70a80f6dde1e09f16a49b89`; later commits only maintain evidence/status.
+
+All four L01 criteria now pass at their stated scope: collision-safe transactional
+creation/refusal; metadata-only migration/source preservation; conservative Source
+reconciliation; and actual UI/core/Source/history/reopen plus deliberate pinned-SDK
+preview. Existing Help regressions pass. Both independent code-review axes have no
+remaining code findings, and the previously pending native-proof group is satisfied
+by the audited Windows CI3 and signed Mac evidence. B01/P3B aggregate, full editor/
+canvas fidelity, physical keyboard and later human/phase acceptance remain separate.
+No successor work is selected by this completion.
+
+Final cumulative use is local 27/18 at original ceiling 27; CI 3/2 at ceiling 3;
+Windows package/native reservations 3/2 each at ceilings 3 and SDK operations 6/4
+at ceiling 6, including skipped reservations. Mac packages 5 comprise original
+ceiling 3 and two explicitly approved one-attempt supplements; native launches 2/2
+(ceiling 3), SDK operations 4/4 (ceiling 6). No limit reset or compounded; original
+failed attempts remain charged. The L01 allowance closes with this bounded outcome.
+No extra package, SDK operation or CI was started for final documentation.

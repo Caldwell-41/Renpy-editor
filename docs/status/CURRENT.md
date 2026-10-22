@@ -1,18 +1,18 @@
 # Current status
 
-## Selected L01 implementation
+## Completed L01 owned blank screen
 
-2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is implemented
-and reviewed through `58b191c`, tested at `9313cc5`. [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39756288431)
-is audited and passes both portable targets plus Windows native creation/Source/history/
-reopen and pinned-SDK render/Stop/cleanup. Both review axes have no remaining code
-findings. User-approved signed Mac package 5 passes ARM64/signature/installer checks.
-Its current native run is the sole missing L01 proof; the console still reports locked.
-[L01 evidence](../tasks/evidence/owned-blank-screen.md) owns exact identities, retained
-failures and allowance use. Batch 27 is the final verification cycle; its already
-approved Mac attempt 2 remains pending unlock. No new package, CI or watcher is pending.
-L01 stays open. Full flow-v1/canvas and phase acceptance remain separate. The retained
-policy/Help record below predates this selection.
+2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is accepted
+for its bounded functional scope. Tested product candidate is `9313cc5`, with reviewed
+corrections through `58b191c`. [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39756288431)
+is audited and passes both portable targets plus Windows native/SDK proof. Signed Mac
+package 5 and native attempt 2 pass creation, exact Source, shared history and reopen
+with accepted bytes, stable distinct IDs and complete process/disk/fixture cleanup.
+Both review axes have no remaining code findings. [Evidence](../tasks/evidence/owned-blank-screen.md)
+owns criterion mapping, exact identities, original failures and final allowance use.
+No run or probe remains pending. L01's allowance is closed; no successor task is selected.
+Full editor/canvas, physical-keyboard and later human/phase acceptance remain separate.
+The retained policy/Help record below predates this delivery.
 
 ## Phase 3B migration and retained Help result
 
