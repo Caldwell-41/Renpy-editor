@@ -755,3 +755,31 @@ before dispatch is 49/60 local batches, 5/6 CI; Mac packages 3/5, native 3/7,
 SDK 24/24; Windows packages 0/5, native 0/7, SDK 6/20. The single new dispatch
 reserves at most one Windows package, one native launch and four SDK processes.
 All prior failed/cancelled use stays charged. No seventh dispatch is allocated.
+
+## CI6 pending operation
+
+Candidate `571dfa98b448048d5504bc110d903673959da88c` is pushed and its exact remote branch SHA is verified.
+[Windows CI6](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39854099159), attempt 1 at exact head/candidate
+`571dfa98b448048d5504bc110d903673959da88c`, is the sole pending operation. Workflow `screens-source.yml`
+selects ordinal 6, `canvas_helper=true`, `owned_blank=false`, on
+`codex/phase3b-screen-designer`. Last observed `in_progress` at 2026-10-22 21:03:45 UTC.
+The user approved exactly one additional run. The CI ceiling is now six with no
+new contingency; no seventh dispatch is allocated. If this run fails, audit it,
+then stop without further fixes, execution or retries and write the requested
+handoff in the OS temporary directory using the handoff skill.
+
+Local batch 50 covers dispatch, identity verification, live records and wait
+preparation. Current use is 50/60 local batches, 6/6 CI; Mac packages 3/5, native
+3/7, SDK 24/24. Windows actual use through CI5 is packages 0/5, native 0/7, SDK 6/20.
+CI6 reserves at most one package, one native launch and four SDK processes.
+Ignored `ci-06` retains dispatch/discovery, exact inputs, identity and reservation.
+Later evidence-only commits do not change the tested candidate.
+
+Register installed ci-watch for same-chat continuation and yield after its launcher
+acknowledgement. On its event, acknowledge delivery and audit exact run/attempt/SHA,
+display dimensions, shared recent-file case, all 200 updates, controller/Help,
+matched two-aspect normal/hover reference and geometry, actual native/package
+identity, official SDK checksum, privacy, source preservation, cleanup and actual
+operations. A green status is not acceptance. On failure, complete the audit and
+requested temporary handoff, then stop without fixes or retries. Existing Spec
+gaps, protected recovery and unrelated policy edits remain.
