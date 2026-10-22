@@ -8,15 +8,14 @@
     const deadline = performance.now() + timeout;
     while (!condition()) { if (performance.now() > deadline) throw Error(`Timeout: ${stage}`); await delay(30); }
   };
-  const invoke = window.__TAURI_INTERNALS__.invoke.bind(window.__TAURI_INTERNALS__);
-  window.__TAURI_INTERNALS__.invoke = async (...args) => {
-    const response = await invoke(...args);
-    if (args[0] === "core_request" && response?.ok) {
+  window.__loomlightHelpEvidence = true;
+  window.addEventListener("loomlight-help-probe-response", event => {
+    const response = event.detail.response;
+    if (response?.ok) {
       const value = response.value?.response?.value ?? response.value;
       if (value?.operationId && value?.phase) latest = value;
     }
-    return response;
-  };
+  });
   const call = async (operation, payload = {}) => {
     const response = await window.__TAURI_INTERNALS__.invoke("core_request", { request: { protocolVersion: 1, requestId: `help-${++serial}`, operation, payload } });
     if (!response.ok) throw Object.assign(Error(`${operation}: ${response.error.code}`), { code: response.error.code });

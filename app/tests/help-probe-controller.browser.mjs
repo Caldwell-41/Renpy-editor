@@ -31,7 +31,8 @@ try{
  await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/help-probe-rehearsal`);
  await page.evaluate(async()=>{
   window.__TAURI_INTERNALS__={invoke:async(command,args)=>{const result=await window.helpRpc(args.request);if(args.request.operation==='probe.runtimeUiReport')window.__probeReport=args.request.payload;return result;}};
-  const {startApplication}=await import('/src/main.ts');startApplication((operation,payload)=>window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}}));
+  Object.defineProperty(window.__TAURI_INTERNALS__,'invoke',{writable:false,configurable:false});
+  const {startApplication}=await import('/src/main.ts');const {requestCore}=await import('/src/bridge.ts');startApplication(requestCore);
  });
  await page.evaluate(await readFile('src-tauri/src/native_editor_probe.js','utf8'));
  await page.evaluate(await readFile('src-tauri/src/help_screen_probe.js','utf8'));

@@ -116,7 +116,8 @@ jobs:
           "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       - name: Two-aspect real SDK compile, lint, geometry, staleness and clean Stop
-        if: runner.os == 'Windows'
+        # A second dispatch retains only one preview attempt for a native correction.
+        if: runner.os == 'Windows' && inputs.ordinal == '1'
         env:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
           LOOMLIGHT_HELP_ACCEPTED: ${{ runner.temp }}/help-production/browser/accepted.rpy
@@ -127,6 +128,16 @@ jobs:
         run: |
           echo 'One Windows package build reserved' > "$RUNNER_TEMP/help-production/package-reservation.txt"
           npm exec -- tauri build --bundles nsis -- --locked
+      - name: Verify Windows package architecture and retain identities
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $binary = [IO.File]::ReadAllBytes((Resolve-Path 'target/release/loomlight.exe'))
+          $pe = [BitConverter]::ToInt32($binary, 0x3c)
+          if ([BitConverter]::ToUInt16($binary, $pe + 4) -ne 0x8664) { throw 'Windows x64 executable required' }
+          $installers = @(Get-ChildItem 'target/release/bundle/nsis/*.exe')
+          if ($installers.Count -ne 1) { throw 'Exactly one NSIS installer required' }
+          @{ candidate=$env:GITHUB_SHA; architecture='Windows x64'; executableSHA256=(Get-FileHash 'target/release/loomlight.exe').Hash; installerSHA256=(Get-FileHash $installers[0].FullName).Hash } | ConvertTo-Json | Out-File "$env:RUNNER_TEMP/help-production/package-identity.json" -Encoding utf8
       - name: One native WebView to SDK Help round trip
         if: runner.os == 'Windows'
         env:

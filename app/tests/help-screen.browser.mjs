@@ -11,7 +11,15 @@ const output=resolve(process.env.HELP_SCREEN_OUTPUT??'../.toolchains/help-screen
 await mkdir(output,{recursive:true});
 const child=driverProcess(resolve(`target/debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`)]);
 const receipts=[],errors=[],cases=[],comparisonLayouts=[];
-const rpc=async request=>{const response=await child.request(request);receipts.push({request,response});return response;};
+let busyInspectOnce=true;
+const rpc=async request=>{
+  if(request.operation==='screens.inspect'&&busyInspectOnce){
+    busyInspectOnce=false;await child.request({driver:'hold'});
+    const response=await child.request(request);receipts.push({request,response});
+    assert.equal(response.error?.code,'RUNTIME_BUSY');setTimeout(()=>void child.request({driver:'release'}),100);return response;
+  }
+  const response=await child.request(request);receipts.push({request,response});return response;
+};
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 let browser,page;
 const hash=source=>createHash('sha256').update(Buffer.from(source)).digest('hex');
