@@ -6,8 +6,10 @@ branch `codex/phase3b-screen-designer`. The issue owns selection, finite cumulat
 allowance and bounded acceptance. This file records detailed results, not a second brief.
 Existing documentation/instruction edits and protected native recovery are preserved.
 Current correction `58b191c` has no remaining independent review findings and passes
-local checks. Current native proof needs a newly authorized Mac package; CI2 failed
-native verification, and CI3 has not been dispatched. Detailed accounting is below.
+local checks. The user-approved current Mac package 5 passes signing/installer checks;
+its native attempt waits for the relocked desktop. CI3 is audited and passes both
+portable jobs and Windows native/SDK proof. Detailed accounting and original failures
+remain retained.
 
 ## Implemented path and limits
 
@@ -76,7 +78,7 @@ then the existing bundled Python 3.12.14 was selected for checks requiring `toml
 | One collision-checked definition/transaction/history entry; Cancel and refusal do not write | Focused IPC tests, real eight-group renderer/core run and existing 11-group Help regression pass. |
 | Metadata-only migration, extras/source preservation, no-op reopen, newer-schema refusal | Focused IPC migration and reopen tests pass. |
 | Source edits/offsets reconcile; rename/deletion/ambiguity stays unresolved | Focused IPC tests and real Source Save/browser path pass. |
-| Actual Choose/core/Source/history/reopen | Browser production path and strengthened busy/rich-editor controller pass. Native attempts exposed a startup defect; its correction needs a new signed Mac package and both-target native proof. |
+| Actual Choose/core/Source/history/reopen | Production renderer and strengthened controller pass; CI3 packaged Windows path passes all stages with exact source/identity/cleanup. Current signed Mac package passes, but its native proof waits for the unlocked desktop. |
 | Deliberate preview of created screen | Exact browser-accepted source passes actual pinned SDK proof on both Mac and Windows. The latest correction changes renderer read ordering and the qualification controller, with no SDK/runtime or source-generator changes. |
 | Retain revision-bound Help behavior | Existing focused core and 11-group real renderer/core regression pass. Earlier unchanged native/SDK Help evidence remains scoped to its accepted candidate. |
 | Whole editor/canvas visual acceptance | Pending under later owners; L01 does not waive those gates. |
@@ -379,3 +381,98 @@ or second Mac launch is attempted. The changed frontend/controller means package
 cannot qualify this correction. One additional signed Mac package requires explicit
 authorization beyond the four consumed attempts. Keep L01 open; later editor/canvas/
 phase acceptance remains separate.
+
+## Approved fifth package and final CI contingency
+
+The user approved exactly one additional signed Mac package, attempt 5, and explicitly
+selected the root-cause skill. This is a one-attempt supplement beyond the consumed
+four attempts, with no new contingency or reset. Local batch 26 covers the audit,
+package/native qualification and final dispatch preparation; cumulative local use is
+26/18, within the original ceiling 27.
+
+The root-cause audit confirms that the host can legitimately have its service checked
+out for ordinary concurrent work. It returns `RUNTIME_BUSY` before dispatch. The first
+wrong renderer decision was excluding the new catalog read from the existing ordering
+and bounded read retry. Both Screens reads now share the lane and eligible read retry;
+no mutation, trust decision or process start is replayed. The native observation,
+held-service regression and real renderer/core refusal reproduce this omission.
+Separate rich-editor and metadata-recorder failures were reproduced and corrected at
+their owners. No widened timeout or fixed delay replaces the product correction.
+The failed probe now identifies its awaited control; the recorder keeps disk errors
+separate from cleanup, making the deciding observation available in the next failure.
+
+Signed package 5 in ignored `mac-package-05` passes at exact candidate
+`9313cc5ee593549df70a80f6dde1e09f16a49b89`. Application/workflow inputs were unchanged
+through the build. ARM64, strict signature, unchanged approved certificate-backed
+requirement and read-only installer-content checks pass. Executable SHA256 is
+`7fa6c606eeac5c7a1713926c85213e57464b76563b3a89b556d2421f248377d5`; DMG SHA256 is
+`8e89ab10b18c8627d730444354ba61e66aae7b20cec8d359519d9a6d0e833ab5`.
+No sixth package is authorized. The desktop has locked again: the active-console row
+explicitly reports `CGSSessionScreenIsLocked=true`, with no Loomlight process. The
+unlock request is pending. Mac native attempt 2 has not been reserved or started.
+
+While that capability is unavailable, independent focused
+[CI3 run 39756288431](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39756288431)
+is confirmed, attempt 1, exact full SHA above, created `2026-10-22T09:33:01Z`, last
+observed in progress. Inputs are exact candidate, `owned_blank=true`, ordinal 3.
+Contingency entry was announced and recorded before dispatch: CI 3/2 at ceiling 3;
+Windows package/native reservations 3/2 each at ceilings 3; SDK operations 6/4 at
+ceiling 6. Failed/skipped prior reservations remain charged. Mac remains packages 5
+under the two explicit one-attempt supplements, native 1/2 and SDK operations 4/4.
+No limits reset or compound. There is no fourth CI dispatch authorized.
+
+Register ci-watch for this confirmed run/attempt/SHA in the same thread, require its
+running-worker acknowledgement, then yield. Terminal audit remains necessary for
+required jobs, cases, artifact identities, exact executable hashes and cleanup.
+Current Mac native proof remains required separately. The ticket stays open. These
+new continuation records remain local; the issue records approval and exact run.
+
+## CI3 terminal audit, current Mac native pending
+
+The third registered watcher resumed this thread. Its thread/run/attempt/full-SHA
+identity matches and receipt is recorded. GitHub confirms completed success for
+run `39756288431`, attempt 1, exact candidate
+`9313cc5ee593549df70a80f6dde1e09f16a49b89`. Local HEAD and remote ref matched that
+candidate before audit. Both required portable jobs pass frontend 223/223, nine
+Python evidence/runner cases, Screens 10/10, metadata 3/3, Source 16/16, the exact
+legacy-migration case 1/1, desktop check, eight real creation groups, the strengthened
+busy/rich-editor controller and 11 retained Help groups. The closed Help job is
+unselected. Mac CI intentionally does not package, launch native or run SDK; it does
+not replace those local scoped gates.
+
+Windows verifies the official pinned checksum, compiles/lints and actually renders
+the accepted blank screen in ordinary game context. Renderer source SHA256
+`fc24f470356f1c601a2d3a071652c1f01131e4d32b45859242a6a9f17c07e538` matches the
+SDK receipt. Validation exits 0; explicit owned Stop ends cancelled with raw
+`-1073741510`, complete untruncated cleanup and no runtime error markers. The retained
+blank PNG is inspected: virtual dimensions are 1280 by 720, physical capture 922 by
+518. These measurements are distinct.
+
+The actual packaged Windows WebView passes ordered Cancel, creation, exact Source
+selection, shared history, reopen and complete stages. Distinct persistent screen/root
+IDs and accepted bytes match the retained source and revision. Process exit is 0 with
+no timeout, all host/request/credential cleanup owners are true, disk errors are empty
+and fixture cleanup is complete. Disk proof finds no source bytecode, saves or scratch
+jobs. This uses injected DOM input in the native WebView, not physical-keyboard proof.
+The SDK proof above is separate; the native creation probe reports SDK not executed.
+
+Windows executable SHA256 is
+`caad54eb401aef53ff117aa1911a0ea7361d9a318b0798e527ab4100065150ef`, matching its
+package and retained-executable manifests. PE architecture is independently x64.
+Windows core SHA256 is
+`e10addf6cf406d545c834069eac1251f98c6d13dba23bae466c8de3c4645fb79`; Mac core SHA256
+is `26062d188c0b7fc1b3b25f123ccb995917f80a4a6c1304bd66c98606c10b893c`.
+Both downloaded candidate files and exact executable bytes match their identity
+manifests. Both privacy scans and artifact uploads pass. Artifact IDs are
+`12415858420` (Windows) and `12416346177` (Mac); exact bytes, complete logs and the
+structured audit are retained under ignored `ci-03`. Original CI1/CI2 failures remain.
+
+The CI audit is complete. The final local verification cycle is batch 27/18 at the
+original ceiling 27; its remaining current Mac native check is pending capability,
+not a fresh cycle or renewed allowance. CI and Windows reservations remain at original
+ceilings 3/3/6. Mac packages remain 5 under explicit supplements, native 1/2 and SDK
+operations 4/4. No new package or CI is authorized. Package 5 at the same exact product
+inputs is ready, but the current console lock flag is still true and no app process
+is running. Mac attempt 2 has not been launched or charged. Continue only that already
+authorized verification when the desktop is unlocked. Keep L01 open until it passes;
+no required native proof is waived by CI success. No worker/run remains pending.

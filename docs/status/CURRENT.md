@@ -2,19 +2,17 @@
 
 ## Selected L01 implementation
 
-2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) has reviewed
-corrections at `0cf5753` and `58b191c`. Initial Screens reads now use the existing
-ordered, bounded read retry. The native probe handles rich Source and retains early
-failures. Frontend 223/223, focused UI/lane 16/16, eight real creation groups, 11 Help
-groups, the strengthened controller and nine Python gates pass. Both review axes have
-no remaining code findings. [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39751077426)
-passed Mac portable and Windows SDK proof, but failed Windows native verification.
-Mac attempt 1 then exposed the same startup defect in the actual unlocked app window.
-[L01 evidence](../tasks/evidence/owned-blank-screen.md) records the failures and fixes.
-Current native proof requires one more signed Mac package beyond the four authorized
-attempts. No package 5, second Mac launch, CI3 or watcher is pending. The ticket stays
-open; full flow-v1/canvas and phase acceptance remain separate. The retained policy/Help
-record below predates this selection.
+2026-10-22: [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34) is implemented
+and reviewed through `58b191c`, tested at `9313cc5`. [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39756288431)
+is audited and passes both portable targets plus Windows native creation/Source/history/
+reopen and pinned-SDK render/Stop/cleanup. Both review axes have no remaining code
+findings. User-approved signed Mac package 5 passes ARM64/signature/installer checks.
+Its current native run is the sole missing L01 proof; the console still reports locked.
+[L01 evidence](../tasks/evidence/owned-blank-screen.md) owns exact identities, retained
+failures and allowance use. Batch 27 is the final verification cycle; its already
+approved Mac attempt 2 remains pending unlock. No new package, CI or watcher is pending.
+L01 stays open. Full flow-v1/canvas and phase acceptance remain separate. The retained
+policy/Help record below predates this selection.
 
 ## Phase 3B migration and retained Help result
 

@@ -1,53 +1,50 @@
 # Current outcome handover
 
-## L01 owned blank screen, current native package approval needed
+## L01 owned blank screen, CI3 audited; unlock Mac for final native proof
 
 The user selected [L01 #34](https://github.com/Caldwell-41/Renpy-editor/issues/34)
-on 2026-10-22. Mac ARM64 remains the sole writer on `codex/phase3b-screen-designer`.
-Product correction is `0cf5753`, with the runner review correction at `58b191c`.
-Both independent review axes have no remaining code findings. The
-[source contract](../DATA_MODEL.md#project-lifecycle-metadata) and
-[evidence](../tasks/evidence/owned-blank-screen.md) own behavior and detailed results.
-Current checks pass frontend 223/223, focused lane/Screens UI 16/16, real creation
-eight groups, retained Help 11 groups, the exact busy/rich-editor controller and nine
-Python evidence/runner cases. Core/SDK code is unchanged; earlier 401/0 routine core
-and both-host SDK proof retain their stated scope.
+on 2026-10-22. Mac ARM64 is the sole writer on `codex/phase3b-screen-designer`.
+Tested product candidate is `9313cc5ee593549df70a80f6dde1e09f16a49b89`; product fix
+is `0cf5753`, runner review correction `58b191c`. Both independent review axes have
+no remaining code findings. [Evidence](../tasks/evidence/owned-blank-screen.md) owns
+original failures, root-cause diagnosis, detailed checks and exact identities.
 
-[CI2 run 39751077426](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39751077426),
-attempt 1 at `81465339401ba1c118a31a92b8f3e3856e9feeb4`, completed failure. Mac portable
-passed; Windows portable/browser/SDK checks passed and the package built. Its native
-probe timed out at startup; the old runner then omitted its result/fixture cleanup.
-PowerShell independently used the wrong environment-variable syntax for package identity.
-Both watchers have matched same-thread receipts; neither run/worker remains pending.
-Exact core/desktop artifacts, manifests and logs are downloaded and verified under
-ignored `ci-02`. The Windows SDK PNG and accepted-source hash are audited.
+[CI3 run 39756288431](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39756288431),
+attempt 1 at that exact SHA, is audited and passes both required portable jobs and
+Windows package/native/SDK proof. It passes frontend 223/223, nine Python gates,
+selected core Screens/metadata/Source/migration cases, eight real creation groups,
+the exact busy/rich-editor controller and 11 Help groups. Windows packaged WebView
+passes ordered Cancel/create/exact Source/history/reopen; exact accepted bytes,
+distinct IDs, process exit and all cleanup owners match receipts. The native probe
+uses DOM input and reports SDK not executed. Separate pinned SDK proof passes actual
+compile/lint/blank render/capture/Stop/cleanup. Windows executable SHA256 is
+`caad54eb401aef53ff117aa1911a0ea7361d9a318b0798e527ab4100065150ef`. Downloaded exact
+core/desktop artifacts, manifests, SDK PNG and source hashes are audited under ignored
+`ci-03`. All three watcher events have same-thread receipts; no run/worker is pending.
 
-After the user unlocked Mac, native attempt 1 against signed package 4 reproduced the
-startup failure. Native inspection showed Screens' busy refusal with no Choose action.
-The initial lock helper returned no flag and failed its explicit-false assertion;
-that is not a passing preflight. The accessible owned app window was then inspected.
-The renderer omitted `screens.list` from ordered/read-retry rules. The reproduced fix
-retains single-dispatch writes. Rich-editor and failure-recording assumptions are also
-corrected. The failed public fixture was identified, its metadata retained and only
-that exact fixture removed; no Loomlight process remains.
+Only current signed Mac native proof remains. Package 5 is already approved and passes
+at the exact tested product inputs in ignored `mac-package-05`, executable SHA256
+`7fa6c606eeac5c7a1713926c85213e57464b76563b3a89b556d2421f248377d5`.
+The approved signing pin and certificate-backed requirement are unchanged; ARM64,
+strict signature and installer-content checks pass. The console lock flag remains true,
+no Loomlight process runs, and the unlock request is pending. Do not launch while locked.
+When unlocked, verify console/lock facts and no existing app, reserve Mac attempt 2,
+then use the existing runner and package 5 for `owned-screen` in fresh `mac-native-02`.
+Audit ordered stages, source/IDs/reopen and independent process/disk/fixture cleanup.
+Do not disturb protected real drafts. No new package, SDK operation or CI is needed.
+Later evidence-only commits leave the exact tested application inputs unchanged.
 
-Next obtain explicit approval for exactly one additional signed Mac package, attempt 5.
-Package 4 predates the changed renderer/controller and cannot qualify this correction.
-No fifth package is authorized or attempted. Then verify a current signed package and
-second native Mac attempt before the final focused Windows/Mac CI dispatch. CI3 and
-Windows package/native attempt 3 plus SDK operations through 6 fit original contingency;
-announce and record their entry before consuming them. Use the user's selected ci-watch
-for a confirmed run, require its running-worker acknowledgement, then end the turn.
-On its event, acknowledge delivery and audit exact run/attempt/SHA, cases, artifacts,
-executable identities and cleanup. No CI3 is reserved yet. No PR, merge or release is selected.
-
-Cumulative use is local 25/18 (original ceiling 27), CI 2/2 (ceiling 3); Mac packages 4
-including the consumed one-package supplement, native 1/2 (ceiling 3), SDK operations
-4/4 (ceiling 6). Windows package/native reservations are 2/2 each (ceiling 3), SDK
-operations 4/4 (ceiling 6). No limit resets or compounds. L01 stays open pending current
-native proof; later editor/canvas/phase acceptance remains separate. Preserve unrelated
-policy/instruction edits, domain/triage guides and protected recovery below. The retained
-policy/Help record below predates this selection.
+Cumulative use is local 27/18, at original ceiling 27. This final verification cycle
+still contains the authorized Mac native check; it is not a fresh edit/verification
+cycle or renewed allowance. CI 3/2 is at ceiling 3. Windows package/native reservations
+3/2 each and SDK operations 6/4 are at original ceilings 3/3/6, including skipped prior
+reservations. Mac packages 5 include two explicit one-attempt supplements; native 1/2
+(ceiling 3), SDK operations 4/4 (ceiling 6). No fourth CI or sixth package is authorized.
+A new corrective cycle needs intervention beyond this ceiling. Keep L01 open until
+current Mac native proof passes; later editor/canvas/full-phase acceptance is separate.
+Preserve unrelated policy/instruction edits, domain/triage guides and protected recovery
+below. No PR, merge or release is selected. The retained policy/Help record below
+predates this selection.
 
 ## Phase 3B migration and retained Help audit, 2026-10-22
 
