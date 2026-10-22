@@ -7,7 +7,14 @@ in a new chat on 2026-10-23, superseding the earlier stop direction within the
 existing cumulative allowance. Development remains on Mac ARM64,
 `codex/phase3b-screen-designer`. Product `7729ccf` plus review correction `a91be99`
 adds bounded aligned-frame movement. Existing commit/push authority carries forward;
-no PR, merge or release is selected. The previous CI6 candidate remains `571dfa9`;
+no PR, merge or release is selected. The implementation and closeout commits remain
+local. Automatic approval review rejected public push twice, including after the
+connected account/repository ownership and carried-forward authorization were
+verified. It requires explicit approval of this exact public payload. No workaround
+publication was attempted. The prepared #36/#29/#22 updates remain unpublished;
+the remote allowance record still shows transfer batch 54. Finish this publication
+within batch 60 only after approval; it renews no implementation allowance.
+The previous CI6 candidate remains `571dfa9`;
 its native/package pass does not qualify the new movement code.
 
 The frame must have literal floating-point xalign/yalign, existing dimensions and

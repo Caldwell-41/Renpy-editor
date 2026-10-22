@@ -16,6 +16,11 @@ owns exact results, review corrections and limits.
 | Helper rendering and lifecycle | Earlier audited CI6 at `571dfa9`, plus prior Mac functional proof | Glyph/color differences remain unaccepted |
 | Native feedback, keyboard and focus | Existing native flags remain false | Measurement implementation and target proof remain missing |
 
+Commits `7729ccf`, `a91be99` and the closeout remain local. Automatic approval
+review blocked public push pending explicit approval of the exact payload. GitHub
+status updates are prepared but unpublished; their remote allowance record still
+shows the transferred 54/60 state.
+
 Both independent reviews cleared the four corrected code defects. Spec retains
 helper/native movement, feedback/focus and fidelity gates. No tolerance, weaker gate,
 new renderer approach or full 3B acceptance is selected. The retained CI6 browser

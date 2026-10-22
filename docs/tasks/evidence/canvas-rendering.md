@@ -1040,3 +1040,15 @@ Further work needs the user's allowance/decision review. No PR, merge or release
 is selected; unrelated policy edits and protected recovery remain intact.
 CURRENT and HANDOVER remain above their soft word-count targets because this scoped
 closeout preserves the existing phase acceptance and protected recovery records.
+
+Publication is pending. Automatic approval review rejected the combined commit/push
+and then the standalone public push. Between attempts, fresh connected GitHub checks
+confirmed authenticated user Caldwell-41 owns the public Caldwell-41/Renpy-editor
+repository, has push/admin permission, and its clone URL exactly matches origin.
+Fresh #36 continuation still explicitly carried forward commit/push authorization.
+The second rejection nevertheless requires explicit approval of this exact payload's
+public exposure. No alternative tool or indirect publication was attempted. Product
+`7729ccf`/`a91be99` and closeout `feab802` remain local. The temporary publication
+review lists the commits and prepared #36/#29/#22 updates. Those GitHub records remain
+unchanged at the transferred allowance state until approval. This is a publication
+blocker in final batch 60, not a renewed implementation allowance.
