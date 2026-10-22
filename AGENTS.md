@@ -73,7 +73,7 @@ Failed, cancelled or skipped required checks are not passes. No package matrix f
   and follow relevant evidence links; do not read the full historical ledger by default.
 - Multi-step delivery, test-host routing or integration:
   [WORKFLOW](docs/WORKFLOW.md). Read the sections needed by the task.
-- CI or external waits: [waiting policy](docs/WORKFLOW.md#waiting-without-model-polling).
+- CI or external waits: follow [ci-watch selection and manual fallback](docs/WORKFLOW.md#waiting-without-model-polling).
 - Meaningful pause, transfer or closure:
   [status maintenance](docs/WORKFLOW.md#status-document-maintenance).
   Record compact results in the owning task, keep one live handover and update

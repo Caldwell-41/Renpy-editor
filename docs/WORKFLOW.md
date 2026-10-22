@@ -369,9 +369,9 @@ steps do not require repeated user test-selection approval within the existing a
 The rule is the same in both directions; capabilities need not be identical. A Mac
 runner without the approved signing identity, or a runner without the required native
 input/observation surface, leaves that named case pending. Mocked contracts and passing
-local tests do not establish the other platform's behavior. This clarification does
-not alter [manual same-thread waiting](#waiting-without-model-polling), create a
-background polling loop or authorize another writer while CI is pending.
+local tests do not establish the other platform's behavior. Waiting and resumption
+follow [the waiting policy](#waiting-without-model-polling).
+Keep one implementation writer while CI is pending.
 
 Within the selected outcome, the agent may prepare, dispatch, monitor and review focused
 CI checks, including necessary workflow adjustments. Verify runner capabilities and retain
@@ -503,11 +503,10 @@ branch, task, handover, pending operation and unchanged budget in the recovery p
 
 ## Waiting without model polling
 
-**Default: manual same-thread resume.** A workflow wait pauses execution of the current
-outcome; it does not complete the outcome, create a new one, or require a new chat.
-CI-first routing changes where checks run, not this wait/resume policy. Monitoring means
-recording dispatch/status, user-requested status checks and the terminal audit; it does
-not authorize an autonomous polling or automatic wake-up loop.
+For a confirmed GitHub Actions run, use the installed `ci-watch` skill.
+If the skill is absent or cannot register a working watch, use manual same-thread
+resume. Other external waits use manual resume.
+A wait preserves the current outcome, chat, remaining audit and cumulative allowance.
 
 1. **Start and record.** Check existing operations, candidate and allowance; dispatch
    only the authorised workflow. Capture workflow/run ID, attempt, exact head SHA,
@@ -516,24 +515,37 @@ not authorize an autonomous polling or automatic wake-up loop.
    A successful request without a confirmed run identity is not a confirmed run;
    a rejected request is not pending CI. Preserve ambiguous dispatch state and resolve
    it without duplicate dispatch.
-2. **Actually pause.** Publish the checkpoint and end active model polling. For an
+2. **Select the wait route.** Check whether `ci-watch` is installed on the current
+   host. If installed, read and follow its current `SKILL.md`, including execution
+   approval, registration, recovery and event acknowledgement. Require
+   `watcher_running: true` before reporting an active watch. Record registration
+   status with the pending operation; retain private watcher paths outside committed
+   evidence. After successful registration, report it and end the turn immediately.
+   On `CI_WATCH_EVENT`, follow the skill's resume/audit steps and step 4 below.
+   For an existing or uncertain registration, follow the skill's recovery procedure
+   before starting another watch. If the skill is absent or monitoring cannot be
+   confirmed, report that limitation and use step 3. Missing skills use manual
+   fallback; installation is a separate user selection.
+3. **Manual fallback.** Publish the checkpoint and end the turn. For an
    autonomous Codex Goal, use only a documented, available and authorised lifecycle
    control and confirm its result. If the agent cannot pause it, tell the user to use
    the client's actual pause control. In the CLI this is `/goal pause`; use the
    installed app's verified equivalent rather than assuming identical commands.
    A prose reply, a Markdown `awaiting_ci` label or an ended turn is not proof of a
    runtime pause. Never mark unfinished work complete just to stop continuation.
-3. **Resume on user command.** The user returns to the same thread and uses its actual
+
+   Resume on user command. The user returns to the same thread and uses its actual
    Resume control (`/goal resume` in the CLI), optionally adding `The workflow is
    complete; audit the recorded run and continue the existing goal.` A normal chat
    without autonomous Goal mode can continue with that message alone. If the client
    was closed, reopen/resume the saved thread instead of creating a new goal. Do not
-   clear/reset the goal, install watchers or manipulate private client state.
+   clear/reset the goal or manipulate private client state.
 4. **Verify and continue.** Read the recorded run/attempt, current terminal status and
-   relevant repository/worktree changes. Treat the user's completion report as the
-   cue to check, not proof of success. If still pending, preserve the identity and
-   pause again; do not start an autonomous check loop. If terminal, audit required
-   jobs/artifacts/identity and continue the remaining authorised work. Missing, expired,
+   relevant repository/worktree changes. A watcher event or user completion report
+   is a cue to inspect CI, not proof of success. Watcher timeouts and monitoring
+   errors do not establish that GitHub completed. If still pending, preserve the
+   identity and pause again; do not start an autonomous check loop. If terminal, audit
+   required jobs/artifacts/identity and continue the remaining authorised work. Missing, expired,
    failed, cancelled or skipped evidence stays unresolved; a green badge is not enough.
    Changed refs or a newer attempt do not silently replace the recorded candidate.
 
@@ -542,11 +554,13 @@ Bounded fixes continue only when already covered by the outcome and remaining al
 otherwise name the decision needed. Do not re-audit unrelated history, rewrite unchanged
 wait records or start a second executor just because CI is slow. Respect one writer.
 
-There is no model polling, keep-alive loop, automatic notification or automatic wake-up
-in this policy. A user-requested status check is permitted. W0/OPT-1A automatic wait/wake
-remains abandoned; this does not authorise client-database edits, a scheduler, service,
-new orchestration framework or work on PR #12. No client pause/resume capability is
-claimed validated by a documentation change.
+The model does not poll or run keep-alive loops. Background polling and automatic
+same-thread continuation are permitted through the installed `ci-watch` skill under
+its current instructions. User-requested status checks remain permitted.
+W0/OPT-1A remains abandoned; this exception does not authorize client-database edits,
+a new scheduler, service, orchestration framework or work on PR #12.
+A documentation change does not validate client lifecycle controls or watcher
+support on a host.
 
 Official references checked 2026-09-28: [Codex Goal commands](https://developers.openai.com/codex/cli/slash-commands/),
 [Goal lifecycle and user/system authority](https://developers.openai.com/cookbook/examples/codex/using_goals_in_codex),

@@ -2,7 +2,7 @@
 
 When recording results, follow [brief and evidence ownership](../WORKFLOW.md#task-briefs-and-supporting-files).
 For retries or exhausted allowance, follow the [budget policy](../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name);
-CI and external waits follow [manual same-thread waiting](../WORKFLOW.md#waiting-without-model-polling).
+CI and external waits follow [ci-watch selection and manual fallback](../WORKFLOW.md#waiting-without-model-polling).
 An available workflow selector does not grant a new attempt.
 
 ## Diagnose before correcting
