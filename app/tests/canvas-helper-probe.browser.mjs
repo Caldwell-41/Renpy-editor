@@ -7,9 +7,10 @@ import {randomUUID} from 'node:crypto';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
 import {driverProcess} from './phase2-driver-process.mjs';
+import {buildCanvasDriver} from './canvas-driver.mjs';
 const output=resolve(process.env.LOOMLIGHT_CANVAS_EVIDENCE??'../.toolchains/canvas-proof/controller-32');
 await mkdir(output,{recursive:true});
-const child=driverProcess(resolve(`target/release/examples/canvas-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-canvas-controller-${randomUUID()}`)],{timeout:180000});
+const child=driverProcess(buildCanvasDriver(),[join(tmpdir(),`loomlight-canvas-controller-${randomUUID()}`)],{timeout:180000});
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 let browser,page,accepted=false,initialBusy=false,acceptedBusy=false,acceptedWrites=0;
 try {
