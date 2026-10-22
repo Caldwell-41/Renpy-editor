@@ -279,11 +279,11 @@ fn parse_body(
             if matches!(key, "xalign" | "yalign") {
                 let axis = usize::from(key == "yalign");
                 let raw = child.code[key.len()..].trim();
-                let value = raw.parse::<f64>().ok().filter(|v| v.is_finite() && (0.0..=1.0).contains(v));
+                let value = raw.parse::<f64>().ok().filter(|v| raw.contains(['.', 'e', 'E']) && v.is_finite() && (0.0..=1.0).contains(v));
                 let start = child.start + child.indent + child.code.len() - raw.len();
                 alignment[axis].push((value.filter(|_| child.single && after == next + 1), Span { start, end: start + raw.len() }));
             }
-            other_placement |= matches!(key, "xpos" | "ypos" | "pos" | "xanchor" | "yanchor" | "anchor" | "align" | "xcenter" | "ycenter" | "xoffset" | "yoffset" | "offset" | "at");
+            other_placement |= matches!(key, "xpos" | "ypos" | "pos" | "xanchor" | "yanchor" | "anchor" | "align" | "xcenter" | "ycenter" | "xycenter" | "xoffset" | "yoffset" | "offset" | "at");
             for (slot, property) in [PixelProperty::Xsize, PixelProperty::Ysize]
                 .into_iter()
                 .enumerate()
@@ -525,7 +525,7 @@ impl AuthoringService {
         let mut patches = position.spans.iter().zip([position.xalign, position.yalign]).zip([request.xalign, request.yalign]).collect::<Vec<_>>();
         patches.sort_by_key(|((span, _), _)| std::cmp::Reverse(span.start));
         for ((span, before), value) in patches {
-            if before != value { proposed.splice(span.start..span.end, value.to_string().bytes()); }
+            if before != value { proposed.splice(span.start..span.end, format!("{value:?}").bytes()); }
         }
         if proposed == bytes { return Ok(document); }
         inspect(&proposed, source_path.clone(), String::new())?;

@@ -91,6 +91,10 @@ export class ScreensWorkspace {
       button("Validate screen", () => this.test(true)), button("Test in Ren'Py", () => this.test(false), "button primary"));
     heading.append(tools);
     this.selection.ariaLabel = "Screen"; this.selection.onchange = () => {
+      if(this.move || this.resize || this.busy) {
+        this.selection.value=this.owned ? JSON.stringify(["owned",this.owned.id]) : JSON.stringify([this.doc?.path,this.screen]);
+        this.note("Finish the current operation before changing screens. Input retained.",true);return;
+      }
       const [path, name] = JSON.parse(this.selection.value) as [string, string];
       this.owned = path === "owned" ? this.catalog?.owned.find(s => s.id === name) : undefined;
       this.doc = this.documents.find(d => d.path === (this.owned?.path ?? path));
@@ -306,11 +310,18 @@ export class ScreensWorkspace {
   }
   private cancel(): void {
     if (this.busy) { this.note("The edit is being accepted. Input retained until its result arrives."); return; }
+    if (this.move) {this.cancelMove();return;}
+    if (this.resize) {this.cancelResize();return;}
     if (this.creation) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.card.querySelector<HTMLButtonElement>("button")?.focus(); }
     this.drafts.delete(this.key()); this.updateSizeControls(); this.renderCanvas(); this.note("Changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
     const draft = this.draft(); if (!draft || this.busy) return;
+    this.releaseMove();
+    if(this.resize) {
+      const {handle,pointer}=this.resize;this.resize=undefined;
+      if(handle.hasPointerCapture(pointer))handle.releasePointerCapture(pointer);
+    }
     if (![draft.width, draft.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384)) { this.note("Enter whole numbers from 1 to 16384. Input retained.", true); return; }
     const key = this.key(); this.busy = true; this.loadSequence++; this.updateSizeControls();
     try {

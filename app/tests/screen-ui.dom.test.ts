@@ -16,6 +16,7 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
     const nodes=documents[0]!.screens[0]!.nodes;
     nodes[0]!.parentStart=10; nodes[0]!.position={xalign:0.5,yalign:0.5};
     nodes.unshift({kind:"fixed",literal:null,layout:{},span:{start:10,end:90},parentStart:null,properties:[],protected:[]});
+    documents.push(documentFor("game/ui/pause.rpy","pause"));
   }
   let settle: { resolve: (value: ScreenDocument) => void; reject: (error: Error) => void } | undefined;
   const sources: unknown[] = [];
@@ -62,10 +63,21 @@ test("aligned frame dragging previews game coordinates, cancels and retains a re
     const draft=h.payloads.filter(p=>p.operation==="screens.canvasRender").at(-1)!.payload!;
     assert.deepEqual(draft.positions,[{nodeStart:30,xalign:0.6,yalign:0.6111111111111112}],"64 by 40 snapped game pixels must preserve alignment coordinates");
     assert.equal(h.calls.includes("screens.setPosition"),false,"Holding the pointer must not write");
+    const picker=document.querySelector("select")!;
+    picker.value=JSON.stringify(["game/ui/pause.rpy","pause"]);picker.dispatchEvent(new window.Event("change"));
+    assert.deepEqual(JSON.parse(picker.value),["game/ui/help.rpy","help"],"A held gesture must keep its originating screen");
     target.dispatchEvent(new window.KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
     pointer("pointerup",464,236);
     assert.equal(h.workspace.hasDraft(),false); assert.equal(h.calls.includes("screens.setPosition"),false);
     await tick(); await tick(); document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    const cancelled=document.querySelector<HTMLButtonElement>('.screen-node-frame')!;
+    cancelled.setPointerCapture=()=>{};cancelled.releasePointerCapture=()=>{};cancelled.hasPointerCapture=()=>true;
+    cancelled.dispatchEvent(new window.PointerEvent("pointerdown",{button:0,pointerId:3,clientX:400,clientY:200,bubbles:true}));
+    h.click("Cancel changes");
+    cancelled.dispatchEvent(new window.PointerEvent("pointermove",{pointerId:3,clientX:464,clientY:232,bubbles:true}));
+    cancelled.dispatchEvent(new window.PointerEvent("pointerup",{pointerId:3,bubbles:true}));
+    assert.equal(h.calls.includes("screens.setPosition"),false,"Cancel must release the held gesture before another pointer event");
+    await tick(); await tick();document.querySelector("img")!.dispatchEvent(new window.Event("load"));
     const next=document.querySelector<HTMLButtonElement>('.screen-node-frame')!;
     next.setPointerCapture=()=>{};next.releasePointerCapture=()=>{};next.hasPointerCapture=()=>true;
     next.dispatchEvent(new window.PointerEvent("pointerdown",{button:0,pointerId:2,clientX:400,clientY:200,bubbles:true}));

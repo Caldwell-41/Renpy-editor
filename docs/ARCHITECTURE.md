@@ -689,7 +689,7 @@ text tags/interpolation make the composition unavailable. These conservative lim
 are specific to the proof and do not accept the full Screens subset.
 
 The representative sized frame can move inside a `fixed` parent when both axes
-have unambiguous literal `xalign`/`yalign` values and no competing placement property.
+have unambiguous floating-point literal `xalign`/`yalign` values and no competing placement property.
 Dragging changes those existing alignment coordinates, snaps pointer deltas to eight
 game pixels and stays within the parent. Arrow keys move by one pixel, Shift by eight.
 Provisional alignment values enter `screens.canvasPlan`/`screens.canvasRender` as

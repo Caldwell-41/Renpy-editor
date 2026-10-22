@@ -528,6 +528,8 @@ fn screen_position_handles_source_order_and_refuses_ambiguous_or_automatic_layou
         ("fixed", "xalign 0.5\n            xalign 0.4\n            yalign 0.5", false),
         ("fixed", "xalign 0.5\n            yalign calculated()", false),
         ("fixed", "xalign 0.5\n            yalign 0.5\n            xoffset 20", false),
+        ("fixed", "xalign 0.5\n            yalign 0.5\n            xycenter (0.2, 0.3)", false),
+        ("fixed", "xalign 1\n            yalign 0.5", false),
     ] {
         let temporary=tempfile::tempdir().unwrap();
         let mut service=LifecycleService::prepare_source_foundation_probe(temporary.path().join("profile")).unwrap();
@@ -560,6 +562,10 @@ fn screen_position_preserves_alignment_source_and_one_history_entry() {
     service.open_path(&root).unwrap();
     let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
     let change = |d: &Value, x: f64, y: f64| json!({"path":PATH,"expectedRevision":d["revision"],"screenName":"help","nodeStart":frame(d)["span"]["start"],"xalign":x,"yalign":y});
+    ipc(&mut service,"screens.setPosition",change(&doc,1.0,0.0));
+    assert_eq!(fs::read_to_string(root.join(PATH)).unwrap(),before.replacen("xalign 0.5","xalign 1.0",1).replacen("yalign 0.5","yalign 0.0",1),"Ren'Py float fractions must remain floats at the endpoints");
+    let model=ipc(&mut service,"scene.list",json!({}));
+    ipc(&mut service,"scene.apply",json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"undo"}}));
     let after = ipc(&mut service, "screens.setPosition", change(&doc, 0.6, 0.4));
     let expected = before.replacen("xalign 0.5", "xalign 0.6", 1).replacen("yalign 0.5", "yalign 0.4", 1);
     assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
