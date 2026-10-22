@@ -414,6 +414,7 @@ jobs:
           HELP_SCREEN_OUTPUT: ${{ runner.temp }}/canvas-proof/help-regression
         run: |
           node tests/canvas-helper.browser.mjs
+          LOOMLIGHT_CANVAS_EVIDENCE="$RUNNER_TEMP/canvas-proof/controller" node tests/canvas-helper-probe.browser.mjs
           node tests/help-screen.browser.mjs
       - name: Deliberate Ren'Py reference captures and clean Stop
         env:

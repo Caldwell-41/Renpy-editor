@@ -8,7 +8,7 @@
   window.addEventListener("loomlight-canvas-probe-response",event=>{const response=event.detail.response;if(response?.ok && response.value?.phase==="ready" && response.value.image)latest=response.value;});
   const call=async(operation,payload={})=>{
     const response=await window.__TAURI_INTERNALS__.invoke("core_request",{request:{protocolVersion:1,requestId:`canvas-${++serial}`,operation,payload}});
-    if(!response.ok)throw Error(`${operation}: ${response.error.code}`); return response.value;
+    if(!response.ok)throw Object.assign(Error(`${operation}: ${response.error.code}`),{code:response.error.code}); return response.value;
   };
   const read=(operation,payload)=>window.__loomlightProbeRetryBusy(()=>call(operation,payload));
   const find=window.__loomlightProbeFindButton;
