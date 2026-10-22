@@ -96,7 +96,10 @@ for case in cases:
                     disk_errors.append("Owned screen ownership could not be verified")
                     metadata = project / ".renpy-editor/source-map.json"
                     if metadata.is_file() and not metadata.is_symlink():
-                        shutil.copyfile(metadata, output / "disk-source-map.json")
+                        try:
+                            shutil.copyfile(metadata, output / "disk-source-map.json")
+                        except OSError:
+                            disk_errors.append("Owned metadata evidence could not be retained")
             help_disk = dict(acceptedBytesMatch=expected is not None and source.is_file() and source.read_bytes() == expected,
                              scratchJobsRemaining=len(list(profile.glob("scratch-preview-*"))),
                              sourceBytecode=list(project.glob("game/**/*.rpyc")) != [],
