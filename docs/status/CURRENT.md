@@ -1,35 +1,31 @@
 # Current status
 
-## L17 approved CI6 pending; audit then hand off on failure
+## L17 CI6 audited; partial proof handed off
 
 2026-10-23: [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-continues under the user's single-run supplement. [Windows CI6](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39854099159), attempt 1 at exact head/candidate
-`571dfa98b448048d5504bc110d903673959da88c`, is the sole pending operation. Workflow `screens-source.yml`
-selects ordinal 6, `canvas_helper=true`, `owned_blank=false`, on
-`codex/phase3b-screen-designer`. Last observed `in_progress` at 2026-10-22 21:03:45 UTC.
-The user approved exactly one additional run. The CI ceiling is now six with no
-new contingency; no seventh dispatch is allocated. If this run fails, audit it,
-then stop without further fixes, execution or retries and write the requested
-handoff in the OS temporary directory using the handoff skill.
+retains partial proof after audited [CI6](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39854099159/attempts/1),
+attempt 1 at `571dfa98b448048d5504bc110d903673959da88c`. The workflow succeeds.
+Display preparation produces both matched reference windows; all 200 updates,
+controller/Help, reference geometry/cleanup and Windows package/native functional
+checks pass. The 257-file artifact passes privacy and matches GitHub's ZIP digest.
+Windows native helper pixels exactly equal browser and prior Mac helper pixels at
+both aspects. [Evidence](../tasks/evidence/canvas-rendering.md#ci6-terminal-audit-and-remaining-proof-handoff)
+owns exact receipts, comparisons and limits.
 
-The prior Windows publication fix passes 200 updates, the shared recent-file case,
-controller rehearsal and Help regression. CI5's later reference failure came from
-undersized physical windows. Reviewed correction `82e2d28` provisions/verifies the
-desktop before SDK work and includes all reference criteria after explicit cleanup.
-CI6 adds the approved ordinal selector. Local compilation, YAML parsing, focused
-selector checks and both reviews pass. Windows qualification remains pending.
-[Evidence](../tasks/evidence/canvas-rendering.md#ci6-pending-operation) owns exact
-identity and the audit requirements. [HANDOVER](HANDOVER.md#active-l17-proof-handover)
-owns continuation. A green badge alone does not accept the ticket.
+The representative proof remains unaccepted. Matched Windows helper/reference
+pixels differ, including flat hover color, and no tolerance is approved. Native
+receipts leave OS focus, physical keyboard and warm presentation unproved; startup
+and browser p95 values are diagnostic. Element-position dragging remains missing.
+Both independent audit reviews have zero new findings and retain these three Spec
+gaps. Keep #36/B07/B08 and phase acceptance open.
 
-Mac package 3/native attempt 3 at `63a1b03` retains bounded functional proof.
-Matched both-target fidelity, native timing/startup/focus and element dragging
-remain Spec gaps. No glyph/hover-color tolerance is accepted. Keep #36/B07/B08
-and phase acceptance open; broader renderer work or weaker gates need decision review.
+Stop with the requested temporary handoff; no further product fixes or retries
+follow this audit. ADR 0021 requires decision review before broader renderer work
+or weaker gates. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns recovery.
+No operation/watch remains pending. The user-selected one-run supplement is consumed.
 
-#36 owns cumulative use: 50/60 local batches, 6/6 CI; Mac packages 3/5, native 3/7,
-SDK 24/24. Windows actual use through CI5 is packages 0/5, native 0/7, SDK 6/20.
-CI6 reserves at most one package, one native launch and four SDK processes. No
+Final cumulative use is 53/60 local batches, 6/6 CI; Mac packages 3/5, native 3/7,
+SDK 24/24; Windows packages 1/5, native 1/7, SDK 10/20. No seventh CI dispatch or
 further Mac SDK process is allocated. No owned local process, fixture or generated
 helper backup remains. No PR, merge or release is selected. Preserve unrelated
 policy edits and protected recovery below.

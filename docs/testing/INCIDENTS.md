@@ -361,7 +361,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Receipt correction:** the old JSON `passed` field covered runtime cleanup
   before later assertions. Compute the full sample/window/geometry/source result
   after explicit cleanup, then write the receipt before asserting it.
-- **Verification:** CI5 is the retained red reference case. Workflow YAML parses
-  and the Rust test compiles; Windows display preparation and reference/native proof need
-  an explicitly allocated next run. The five-dispatch ceiling is exhausted.
+- **Verification:** CI5 retains the red reference case. The single user-approved
+  CI6 supplement verifies 1024x768 to 1920x1080 desktop preparation, both matched
+  reference windows, every reference criterion/cleanup result and Windows native
+  functional proof. The workflow succeeds; pixel fidelity and native timing/focus
+  remain unaccepted. Six dispatches are consumed; no further run is allocated.
 - **Evidence:** [L17 CI5 audit](../tasks/evidence/canvas-rendering.md#ci5-terminal-audit-and-prepared-reference-correction).

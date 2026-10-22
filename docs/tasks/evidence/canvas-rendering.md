@@ -783,3 +783,123 @@ identity, official SDK checksum, privacy, source preservation, cleanup and actua
 operations. A green status is not acceptance. On failure, complete the audit and
 requested temporary handoff, then stop without fixes or retries. Existing Spec
 gaps, protected recovery and unrelated policy edits remain.
+
+## CI6 terminal audit and remaining proof handoff
+
+The same-chat ci-watch event matches its owner and is acknowledged. GitHub confirms
+[run 39854099159](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39854099159/attempts/1),
+attempt 1, exact head `571dfa98b448048d5504bc110d903673959da88c`, completed with
+success. The selected Windows job completes at 2026-10-22 21:23:51 UTC. The later
+`05bff30` changes only evidence/status, so the result applies to the current product.
+All selected required steps pass; closed Help/L01 jobs remain deliberately skipped.
+This is a successful workflow and a partial representative proof. It does not
+accept #36, B07/B08 or whole 3B.
+
+### Functional, reference and native results
+
+The display receipt verifies 1024x768 before preparation and 1920x1080 after it.
+Both requested reference windows now match exactly at 1280x720 and 1024x768, with
+normal/hover samples and drawable scale 1.0. All five logical widget dimensions
+match. The final reference receipt passes every sample/window/context/geometry/source
+criterion and explicit scratch-removal/runtime-shutdown/project-close result.
+Source bytes are unchanged, diagnostics are empty and runtime cleanup completes
+after owned Stop. Exit -1073741510 is the recorded cancelled runtime result.
+
+The shared recent-file replacement case and Screens portable checks pass. The
+browser passes six groups, all 200 updates, source/history/drafts/samples and driver
+shutdown with exit zero and no page errors. Exact-controller rehearsal passes
+initial/accepted busy reads and exactly one accepted size write; it is explicitly
+controller-only. Help regression and official pinned 8.5.3 SDK checksum pass.
+
+The workflow builds one Windows x64 NSIS package and launches one native WebView
+probe. Its functional report passes both aspects, drafts/Cancel, source history,
+logical pixels and project close. Exit is zero, timeout is false and external
+errors are empty. Credentials/host/requests cleanup owners all pass. Independent
+disk checks find exact accepted fixture bytes, zero scratch/helper jobs, no source
+bytecode and no saves; the probe removes its owned profile. Local receipt admission
+also passes. The accepted-source SHA-256 is
+`08201efc692198063ed9d66a814da99683643cfbdccd45189fd8736e3aed422b`.
+
+The package-identity receipt binds Windows x64 to the exact candidate and executable
+SHA-256 `87a8a4d59b9632473315788e49316cd85731175121eb42b53a579e4fffd6f830`.
+The success artifact retains that identity and native receipts, not the executable
+or installer bytes. No independent installer hash or installer execution is claimed.
+Actual Windows native helper PNGs exactly equal browser helper PNGs and the prior
+Mac native helper PNGs in RGBA at both aspects. Delivery preserves those pixels.
+
+### Matched rendering and responsiveness remain unaccepted
+
+Windows now provides an actual matched physical-window comparison. The software
+helper still differs from deliberate ANGLE2 rendering on Microsoft Basic Render
+Driver. Comparison uses the same accepted source/assets/font, state and game size,
+without editor guides or resizing either image.
+
+| Aspect/state | Different RGBA pixels | Total pixels | Maximum channel difference |
+| --- | ---: | ---: | ---: |
+| 1280x720 normal | 5,856 | 921,600 | 64 |
+| 1280x720 hover | 11,268 | 921,600 | 64 |
+| 1024x768 normal | 7,819 | 786,432 | 64 |
+| 1024x768 hover | 13,227 | 786,432 | 64 |
+
+Differences occupy the shared content bounds and include alpha/color values. The flat
+hover region still differs by one blue value, helper 40 versus reference 39.
+Inspection shows different glyph rasterization despite matching widget dimensions.
+These results exclude the prior window downscale and PNG transport as those causes.
+They do not isolate the exact software/ANGLE2 compositing cause. No pixel threshold,
+glyph/color waiver or platform tolerance is accepted. Prior Mac Retina differences
+remain retained; this Windows result does not resolve them.
+
+The 200 browser samples have capture p95 196.9 ms and image-decode p95 114.2 ms;
+startup image load is 3,289.4 ms. Native startup image load is 2,840.3 ms. These
+measurements remain diagnostic. The native receipt explicitly reports
+`nativeWebView: true`, `nativeFocusObserved: false`, `nativeKeyboard: false` and
+`warmPresentationProof: false`. Synthetic DOM focus stages do not establish OS
+focus or physical input, and neither image decode nor helper rendering proves
+native input-to-visible p95 within 100 ms. Startup acceptance remains undecided.
+Element-position dragging remains missing; resizing is the proved gesture.
+
+### Independent audit review
+
+#### Standards
+
+Independent read-only review reports zero substantive audit findings. It verifies
+the exact run/candidate, ZIP digest/CRCs and extracted bytes, 257-file count,
+reference criteria/cleanup, native accepted-source/frame revisions and package
+identity. The recorded Windows totals match the selected operations. No app, SDK,
+build, CI or external write runs during that review.
+
+#### Spec
+
+Independent read-only review reports zero new findings and retains three incomplete
+requirements. Matched Windows captures now exist, but helper agreement with the
+actual reference remains unaccepted, including a flat color difference outside
+the edge-tolerance question. Native presentation/startup/focus qualification and
+element-position dragging remain incomplete. Exact helper pixels across hosts
+prove consistent helper output; they do not establish reference fidelity.
+
+### Artifact and allowance closeout
+
+Artifact 12459229010 retains 257 public-fixture files. The independent local scan
+passes all files. GitHub metadata, upload log and retained ZIP agree on SHA-256
+`5b0ec89b2c97f43510e2fa0f36bf8659a8393c8a260455d077d4c3c282bd57cf`.
+Expiry is 2026-10-29 21:22:59 UTC. Ignored `ci-06` retains full log, terminal
+identity, metadata/ZIP/files, complete audit and exact pixel-comparison results.
+No downloaded program is executed during the audit.
+
+Actual CI6 use is one Windows package, one native launch and four SDK processes
+(browser helper, controller helper, deliberate reference and native helper).
+Cumulative Windows use is packages 1/5, native 1/7 and SDK 10/20. Mac remains
+packages 3/5, native 3/7, SDK 24/24. CI use is 6/6. Local batches 51-53 cover
+terminal/artifact/pixel audit, independent review and evidence/status/issue
+publication with the temporary handoff. Final local use is 53/60. All prior
+failed/cancelled operations remain charged; no allowance or contingency resets.
+
+The workflow succeeds, but the audited acceptance gaps remain matched fidelity,
+native timing/startup/focus and element-position dragging. Stop with partial proof
+and the requested handoff rather than continuing fixes or retries. The handoff skill
+saves its document in the OS temporary directory with links and suggested skills;
+private temporary paths stay outside committed records. No operation/watch is
+pending, no seventh dispatch or further Mac SDK process is allocated, and no product
+change follows this audit. Keep #36/B07/B08 and phase acceptance open. ADR 0021
+requires decision review before broader renderer work or weaker gates. Preserve
+unrelated policy edits and protected recovery. No PR, merge or release is selected.

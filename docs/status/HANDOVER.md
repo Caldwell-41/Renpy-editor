@@ -3,59 +3,51 @@
 ## Active L17 proof handover
 
 The user selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-through implement and confirmed core/UI/packaged test boundaries. They authorized
-push/Windows CI, doubled the allowance and added four Mac SDK processes, all used.
-They invoked principle-fix-root-causes and now approve exactly one extra Windows
-run. Development stays on Mac ARM64, `codex/phase3b-screen-designer`, from `7e1e7b3`.
-#36 owns scope/allowance; [evidence](../tasks/evidence/canvas-rendering.md#ci6-pending-operation)
-owns exact identities, prior failures, review and required audit.
+through implement, confirmed core/UI/packaged test boundaries and authorized push
+and Windows CI. They doubled the allowance and added four Mac SDK processes, all
+used. Their final supplement approves one extra Windows run and directs audit,
+then stop and use the handoff skill if it fails. This chat stops with a temporary
+handoff because the successful workflow still leaves representative acceptance
+unmet. No product correction or retry follows the audit.
 
-[Windows CI6](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39854099159), attempt 1 at exact head/candidate
-`571dfa98b448048d5504bc110d903673959da88c`, is the sole pending operation. Workflow `screens-source.yml`
-selects ordinal 6, `canvas_helper=true`, `owned_blank=false`, on
-`codex/phase3b-screen-designer`. Last observed `in_progress` at 2026-10-22 21:03:45 UTC.
-The user approved exactly one additional run. The CI ceiling is now six with no
-new contingency; no seventh dispatch is allocated. If this run fails, audit it,
-then stop without further fixes, execution or retries and write the requested
-handoff in the OS temporary directory using the handoff skill.
+Development remains on Mac ARM64, `codex/phase3b-screen-designer`, from `7e1e7b3`.
+[CI6](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39854099159/attempts/1),
+attempt 1 at `571dfa98b448048d5504bc110d903673959da88c`, succeeds and is audited.
+Its same-chat event is acknowledged. Later record commits do not change the tested
+product. #36 owns scope/allowance; [evidence](../tasks/evidence/canvas-rendering.md#ci6-terminal-audit-and-remaining-proof-handoff)
+owns exact identity, artifacts, comparisons, prior failures, review and limits.
 
-Product correction `3906578` fixes Windows publication with prior readers open.
-CI5 passes the shared recent-file case, six browser groups, 200 warm updates,
-controller-only busy/write/project-close checks and Help regression. Its deliberate
-reference fails because requested windows shrink; the raw partial `passed` field
-is not a gate pass. Package/native checks are skipped. The retained 249-file ZIP
-matches GitHub's digest and passes privacy. Reviewed correction `82e2d28` provisions
-and verifies the desktop, retains actual-window equality, and writes all reference
-criteria after explicit cleanup. CI6's only later code change admits ordinal 6.
-Both reviews report zero new findings; local compile/YAML/selector checks pass.
-PowerShell has static review only. Windows execution is pending.
+Windows open-reader publication now passes 200 updates, shared recent-file usage,
+controller busy-read/exactly-one-write checks and Help regression. Desktop
+1024x768 becomes 1920x1080; actual reference windows match 1280x720 and 1024x768
+in both states. All five widget dimensions and explicit reference cleanup pass.
+One Windows x64 NSIS package and native WebView functional probe pass, including
+accepted bytes, both aspects, drafts/history/project close and every cleanup owner.
+Windows native helper PNGs exactly equal browser and prior Mac native PNGs at both
+aspects. No installer execution or retained package bytes are claimed.
 
-Next register installed ci-watch for the exact run/SHA and yield immediately after
-its launcher acknowledgement. On the event, verify thread/run/attempt/SHA and
-acknowledge receipt. Audit every required step and artifact: display receipt,
-shared recent-file case, 200 updates, controller/Help, both-aspect normal/hover
-reference windows/geometry/pixels, native receipt and package identities, official
-SDK checksum, privacy, accepted bytes, cleanup and actual Windows operations.
-A successful status still requires this audit and does not erase retained Spec gaps.
+Keep three acceptance gaps explicit. Matched Windows helper/reference differences
+are 5,856/11,268 pixels at 1280x720 normal/hover and 7,819/13,227 at 1024x768,
+maximum channel difference 64, including a flat hover blue difference. No tolerance
+is approved. Native OS focus, physical keyboard and warm presentation remain false;
+startup and browser timings are diagnostic. Element-position dragging is missing.
+The earlier Mac functional pass and Retina differences retain their stated limits.
+Both independent audit axes report zero new findings and preserve the gaps.
 
-If the audited run fails, the user's explicit stop-and-handoff instruction takes
-precedence over ordinary in-scope correction authority. Update compact evidence,
-status and issue records, create the handoff outside the workspace with links and
-suggested skills, then stop. Do not fix, launch a probe, retry, or dispatch again.
-A fresh agent needs new user direction before resuming implementation.
+No operation/watch is pending. Ignored `ci-06` retains log, terminal receipt,
+artifact metadata/ZIP/files, audit and exact pixel comparisons. Its 257 files pass
+privacy and the ZIP matches GitHub's digest. The temporary handoff links these
+owners and suggested skills without duplicating them. A fresh agent needs new user
+direction before implementation, probes, retry or any additional CI dispatch.
+Return to decision review under ADR 0021 before broader renderer work or weaker
+proof gates. Keep #36/B07/B08 and phase acceptance open.
 
-Current use is 50/60 local batches, 6/6 CI; Mac packages 3/5, native 3/7, SDK 24/24.
-Windows actual use through CI5 is packages 0/5, native 0/7, SDK 6/20. CI6's maximum
-reservation is one package, one native launch and four SDK processes. No new
-contingency, seventh dispatch or further Mac SDK process is allocated.
-
-Mac package 3/native attempt 3 at `63a1b03` retains its bounded functional pass and
-cleanup for unchanged non-Windows paths. Matched fidelity, native timing/startup/focus
-and element dragging remain Spec gaps. No glyph/hover-color tolerance is accepted.
-Keep #36/B07/B08 and phase acceptance open. Return proof failures to decision review
-before broader renderer work or weaker gates. No owned local process, fixture or
-helper backup remains. No PR, merge or release is selected. Preserve unrelated
-policy work and all protected recovery below. Older canvas sections are historical.
+Final use is 53/60 local batches, 6/6 CI; Mac packages 3/5, native 3/7, SDK 24/24;
+Windows packages 1/5, native 1/7, SDK 10/20. All failures/cancelled attempts remain
+charged; no reset or new contingency applies. No seventh dispatch or further Mac
+SDK process is allocated. No owned local process, fixture or generated helper
+backup remains. No PR, merge or release is selected. Preserve unrelated policy
+work and all protected recovery below. Older canvas sections are historical.
 
 ## Earlier canvas decision closeout
 
