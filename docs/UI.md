@@ -853,8 +853,10 @@ the accepted theme, shared controls and pending Phase 1 corrections remain autho
 The selected [Help-screen outcome](tasks/active/help-screen-production.md) implements
 a limited production Choose/Design/Connect layout for existing custom screens.
 Existing literal width/height edits use Apply/Cancel and shared history; the canvas
-is schematic. The brief records supported controls, visual differences and missing
-native/Windows acceptance. The inventory below remains the full Screens direction.
+still approximates content, text styles and layout. Bounded Mac/Windows functional
+proof passes; visual fidelity remains unaccepted. For implementation or acceptance
+of canvas rendering, follow [canvas agreement with Ren'Py](tasks/reference/phase-3b-screens.md#canvas-agreement-with-renpy).
+The inventory below remains the full Screens direction.
 
 | Component hierarchy | Constraint canvas | Properties/source |
 | --- | --- | --- |

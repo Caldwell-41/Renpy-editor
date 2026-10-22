@@ -10,11 +10,16 @@ round trip. Source/history, frozen revision, Stop and cleanup pass.
 owns hashes, receipt limits and final counts; [the brief](../tasks/active/help-screen-production.md)
 owns scope and acceptance.
 
-The selecting chat accepted Mac proof and closed the original findings.
-Final review remains there; material flow-v1 visual differences, physical keyboard
-proof and whole-phase acceptance remain pending. Local/CI allowances are spent.
+The orchestrator approves the bounded functional implementation after independent
+CI3 artifact/source review and the accepted Mac evidence. Full sign-off remains
+withheld for material flow-v1 visual differences. Physical keyboard proof and
+whole-phase acceptance remain separate. Local/CI allowances are spent.
 No run or worker audit remains pending. Preserve unrelated maintenance/private receipts.
 No PR, merge or release is authorized.
+
+The user now requires [canvas agreement with Ren'Py](../tasks/reference/phase-3b-screens.md#canvas-agreement-with-renpy)
+and requested overall 3B progress before implementation. The requirement is recorded;
+implementation has not started and no execution allowance is renewed.
 
 Documentation/validator maintenance is complete and committed locally under
 [its task](../tasks/active/agent-documentation-ownership.md) and
@@ -26,7 +31,7 @@ pass. No remote CI result is claimed.
 
 | Workstream | Implementation or reference | Evidence and remaining acceptance |
 | --- | --- | --- |
-| 3B Screens | Screen builder `flow-v1` approved; bounded Help sizing/preview published at `c2d9f45` | [Approved reference and scope](../tasks/reference/phase-3b-screens.md); Windows x64/macOS ARM64 functional proof passes. Selecting-chat review and material visual acceptance remain pending. Full 3B remains pending. |
+| 3B Screens | Screen builder `flow-v1` approved; bounded Help sizing/preview published and functionally approved at `c2d9f45` | [Approved reference and scope](../tasks/reference/phase-3b-screens.md); audited Windows x64/macOS ARM64 functional proof passes. Material visual differences still prevent full sign-off. Full 3B remains pending. |
 | Phase 2 Thinking and draft connection | Implemented at `36feff12` | [CI3 audit](../tasks/evidence/phase-2-execution.md#ci3-terminal-results-and-retained-evidence-audit--2026-10-16) supplies automated both-host proof. Matching signed-Mac/real Studio and Phase 2/3A human acceptance remain pending. |
 | CI reliability | Accepted at `e00160b` | [Closed task](../tasks/active/ci-harness-reliability.md) owns portable/rendered and selected Windows native proof; allowances are closed. |
 | Walkthrough model-load amendment | Automated scope review_ready at `7551a9c` | [Walkthrough task](../tasks/active/walkthrough-redesign-implementation.md) distinguishes controlled proof from remaining native/live/human acceptance. |

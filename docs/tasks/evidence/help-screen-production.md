@@ -794,3 +794,37 @@ Publication content/privacy checks pass across the 815-file staged tree, and all
 four changed records pass section-link checks. The uncommitted stricter validator
 finds two pre-existing broken section links in ROADMAP and the Phase 3 brief. They
 are identical at preceding HEAD and remain with the separate maintenance work.
+
+## Orchestrator final review, 2026-10-22
+
+Decision: approve the bounded functional implementation at tested candidate
+`c2d9f457777dc78975779cb0583f6d1cc494755a`. Published head `6fb39f7` changes only four
+documents after that candidate; application inputs are unchanged. Full outcome
+approval remains withheld for visual acceptance. No further execution is selected.
+
+Independent read-only review confirms GitHub's successful CI3 job and every required
+step, the live artifact digest, all 44 safe ZIP entries and their extracted bytes.
+The two Windows service aspects bind the fresh browser-accepted source and retain
+760x360 geometry, frozen-revision staleness, clean owned Stop and no error diagnostics.
+The native report has every required stage once, explicit Windows Stop intent,
+ordinary app exit, complete cleanup and no external errors. Independent comparison
+against the public BOM/CRLF fixture confirms the exact 645 accepted bytes, with only
+the intended xsize change to 768. Package identities remain runner hash receipts;
+Windows binary bytes were not uploaded for a second rehash. Accepted signed Mac
+evidence remains applicable because product behavior is unchanged by the Stop gate
+correction. The three original findings and subsequent functional blockers are closed.
+
+The Windows console-control exception is bounded to the known raw exit code,
+Windows target, owned cancellation and complete error-free results. Review confirms
+that the correction preserves raw results and rejecting coverage rather than changing
+production Stop behavior. Earlier failed results remain failed and charged.
+
+Matched captures in both themes and both viewport sizes were inspected. The selected
+width/height-only scope explains the reduced editing inventory and bounded handle;
+it does not establish approval of the schematic canvas and remaining panel/layout
+differences against flow-v1. A visual-alignment pass or explicit user acceptance of
+those differences is needed before full sign-off. Physical keyboard and whole-phase
+human acceptance remain separate. No new tests, builds, launches or dispatches ran
+during this review; cumulative use is unchanged. The user selected a local commit
+of these review notes and the canvas requirement, separate from the documentation
+maintenance. No push or new implementation is selected.

@@ -7,9 +7,10 @@ qualification on Windows x64 and signed Mac ARM64. Read the
 [owning brief](../tasks/active/help-screen-production.md) and
 [CI3 terminal audit](../tasks/evidence/help-screen-production.md#ci3-terminal-audit-2026-10-22)
 for scope, package hashes, artifact identity, receipt limits and cumulative usage.
-The selecting chat accepted the corrected bounded Mac proof and closed the original
-three findings. Final functional/visual review remains there. Material flow-v1
-differences remain unaccepted; full Screens and Phase 2/3A human acceptance are separate.
+The orchestrator approves the bounded functional implementation after independent
+CI3 artifact/source review and the accepted Mac evidence. The original findings and
+subsequent functional blockers are closed. Material flow-v1 differences still prevent
+full sign-off; full Screens and Phase 2/3A human acceptance are separate.
 
 CI3 run 39712450128, attempt 1/ordinal 3, exact candidate
 c2d9f457777dc78975779cb0583f6d1cc494755a, completed successfully at
@@ -35,8 +36,14 @@ native launches 2/3 and previews 7/8; Windows packages 2/2, native launches 2/3 
 previews 4/4. CI1/CI2 failures stay charged. No CI4, rerun, new local batch or unrelated
 native repeat is authorized. No operation, polling loop or worker audit remains pending.
 
-Return the verified audit to the selecting chat for final review. Scoped terminal
-records may publish by ordinary fast-forward to origin/Caldwell-41/Renpy-editor/
+The user requested overall 3B progress before starting further implementation and
+added [canvas agreement with Ren'Py](../tasks/reference/phase-3b-screens.md#canvas-agreement-with-renpy)
+as a requirement. It remains unimplemented and separate from the pending flow-v1
+editor-layout decision. Neither gate has visual acceptance; no execution allowance
+is renewed by the progress report or requirement record.
+The user selected separate local commits for the completed documentation maintenance
+and these Phase 3B records. Scoped terminal records may
+publish by ordinary fast-forward to origin/Caldwell-41/Renpy-editor/
 refs/heads/codex/phase3b-screen-designer. This docs-only successor records c2d9f45 as
 the tested candidate and needs no package matrix. Preserve protected apps/drafts,
 pinned flow-v1 and ignored receipts. No push, PR, merge or release is selected here.

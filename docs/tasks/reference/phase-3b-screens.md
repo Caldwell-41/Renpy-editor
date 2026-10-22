@@ -7,9 +7,9 @@ implementation and whole-phase acceptance remain pending. The
 [phase brief](../active/phase-3-initial-wysiwyg-release.md) owns entry and cross-phase state.
 
 The selected [production Help round trip](../active/help-screen-production.md) now
-has local candidate `eda1cdc`, with Mac source/renderer/SDK/package proof. It remains
-incomplete pending native app-to-SDK, Windows and final review. Its brief owns its
-separate cumulative allowance; earlier proof/design allowances stay closed.
+has bounded functional approval at `c2d9f45`, with audited Windows x64 and signed
+Mac ARM64 source/UI/SDK proof. Visual fidelity remains unaccepted. Its brief owns
+its exhausted local/CI allowance; earlier proof/design allowances stay closed.
 
 ## Approved reference and evidence
 
@@ -89,6 +89,34 @@ Canvas controls remain inert. Authors can set sample variable values and select
 normal/hover/selected/disabled appearances. Mark active sample data and keep it
 separate from game source and runtime values.
 
+#### Canvas agreement with Ren'Py
+
+The user required a 1:1, or as-close-as-possible, canvas on 2026-10-22. For the
+declared supported screen subset, the project's pinned Ren'Py render is the visual
+authority. At 100% zoom, one game pixel maps to one canvas pixel; Fit and other zoom
+levels scale that same composition without changing the game's dimensions.
+
+Compare the same accepted source revision, game resolution, images, fonts, sample
+values and control state. Supported layout, anchors, container spacing, clipping,
+layering, image scaling, text placement/wrapping, colors and control appearances
+must agree with Ren'Py. Render actual supported assets and text styles rather than
+filename labels or generic substitutes. Selection and editing guides are editor
+overlays and are excluded from the game-image comparison.
+
+Qualify this agreement with matched canvas and actual Ren'Py captures and geometry
+at the project resolution and a second supported aspect on both targets. Record
+every remaining visible difference, its cause and its affected scope. Define any
+necessary platform font/rasterization tolerance against that evidence before
+claiming acceptance; the current geometry proof alone does not pass this gate.
+Unsupported/custom regions must state their coverage limits. Arbitrary Python and
+creator-defined rendering are outside the supported subset, not a blanket allowance
+for approximating supported content.
+
+The canvas remains inert. Real Ren'Py comparisons use deliberate runtime preview;
+opening, selecting or editing a screen never executes its Python or actions. This
+requirement does not choose a rendering architecture. Implementation has not started
+and no new implementation or qualification allowance is selected by this record.
+
 <a id="properties-assets-reuse-and-actions"></a>
 
 #### Properties, assets, reuse and actions
@@ -130,8 +158,9 @@ can claim support.
 
 Start with a disposable custom screen. Prove safe ownership and round-trip mapping
 before enabling the agreed generated-screen adapters; do not rewrite the full
-generated screen file. Arbitrary existing-project import,
-dynamic screen Python, unrestricted actions and complete WYSIWYG fidelity are excluded.
+generated screen file. Arbitrary existing-project import, dynamic screen Python,
+unrestricted actions and visual fidelity for unsupported code remain excluded.
+Supported content must meet [canvas agreement with Ren'Py](#canvas-agreement-with-renpy).
 
 **Selected Story connection (2026-10-07):** provide a small typed set of Story Beats
 for owned custom screens: **Show screen**, **Hide screen** and **Call screen**. Show

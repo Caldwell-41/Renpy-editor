@@ -14,7 +14,7 @@ and shared-file ownership; specific selected outcomes retain their own limits.
 | Branch | Current state | Read when selected |
 | --- | --- | --- |
 | 3A Story | Technically qualified; human acceptance pending. | [Story requirements and acceptance](../reference/phase-3a-story.md) |
-| 3B Screens | Narrow source/runtime proof qualified; Screen builder design approved. Production workspace and full 3B acceptance remain pending. | [Screens scope, approved design and source/runtime gates](../reference/phase-3b-screens.md) |
+| 3B Screens | Screen builder design approved; bounded Help sizing/preview functionally approved on both targets. Canvas fidelity and full authoring/acceptance remain pending. | [Screens scope, approved design and source/runtime gates](../reference/phase-3b-screens.md) |
 | 3C Timeline | Planned; no implementation or native-media qualification claimed. | [Timeline and native-media requirements](../reference/phase-3c-timeline.md) |
 | 3D State and Run From Here | Planned; consumes qualified 3A/3B/3C semantics. | [State reconstruction and launch requirements](../reference/phase-3d-state-run.md) |
 | 3F Release | Planned; audience/channel and release selection remain open. | [Integrated acceptance and distribution requirements](../reference/phase-3f-release.md) |

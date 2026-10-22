@@ -16,8 +16,9 @@ Preserve existing uncommitted documentation, validator and workflow maintenance.
 Initial candidate `eda1cdcc0af8f7dcf0ac9ead951b83bb3d8725b0` was local-only and incomplete.
 The approved continuation repairs its reviewed findings. Corrected source is
 `5925bb6`; the signed Mac native workflow passes. Windows CI3 at c2d9f45
-now supplies the missing native and two-aspect service proof. Final review and
-material visual acceptance remain pending.
+supplies the missing native and two-aspect service proof. The orchestrator approves
+the bounded functional implementation. Full sign-off remains withheld for material
+visual differences against flow-v1.
 Return the candidate and evidence to the selecting chat for final review; no merge,
 release or unrelated publication is selected.
 
@@ -56,12 +57,12 @@ work. Explain unavailable operations beside their controls.
 | Source reconciliation, undo/redo, reopen | Pass locally through production Source Save, shared history and new project sessions. |
 | `flow-v1` visual comparison, four theme/viewport combinations | Compared. All 13 reference hashes verify and four baseline renders reproduce exactly. Matched disposable frame/text content is compared in all four states. Production retains a schematic canvas, one resize handle, reduced controls and documented layout differences. Fidelity is not accepted. |
 | Actual app preview, SDK compile/lint, two-aspect geometry, revision/staleness/cleanup on both targets | Pass within this bounded workflow. Accepted Mac service/signed native evidence is unchanged. Audited Windows CI3 supplies both service aspects and the packaged WebView/SDK round trip, accepted bytes/history/reopen, geometry, frozen revision/staleness, strict raw-code Stop and owned cleanup. CI1/CI2 remain failed historical attempts. |
-| Browser, packaged/native and human evidence separated; selecting-chat review | The selecting chat closes the original findings and accepts the bounded corrected Mac WebView/SDK evidence. Windows native/two-aspect proof and terminal audit now pass. Final functional/visual review remains with that chat; material visual differences remain unaccepted. Physical keyboard and whole-phase human acceptance are separate. |
+| Browser, packaged/native and human evidence separated; selecting-chat review | The orchestrator approves the bounded functional implementation after independent CI3 artifact/source review and the accepted Mac evidence. Material visual differences remain unaccepted, so full sign-off is withheld. Physical keyboard and whole-phase human acceptance are separate. |
 
 ## Current continuation and allowance
 
-The latest human instruction selects the focused CI2 failure repair and necessary
-verification. It supersedes the prior exhausted local/CI allowance and ordinal 2
+The completed execution selection covered the focused CI2 failure repair and necessary
+verification. It superseded the prior exhausted local/CI allowance and ordinal 2
 service-skip routing. Cumulative caps are local 15 and qualification dispatch 3,
 including failed/cancelled/implicit attempts. Mac caps remain packages 3, apps 3 and
 SDK previews 8. Windows caps remain packages 2, apps 3 and SDK previews 4.
@@ -97,6 +98,12 @@ aspects, native stages, raw Stop exits, package identity, accepted bytes/history
 and cleanup pass. [The terminal audit](../evidence/help-screen-production.md#ci3-terminal-audit-2026-10-22)
 owns exact hashes, receipts and limits. No run or worker audit remains pending.
 
-Return the verified result to the selecting chat for final review. The bounded
-functional qualification is complete; material flow-v1 visual differences remain
-unaccepted. No further execution, retry or whole-phase acceptance is selected.
+The selecting chat approves the bounded functional implementation. Material flow-v1
+visual differences still need correction or explicit user acceptance before full
+sign-off. The evidence owns the final review and its limits. No further execution,
+retry or whole-phase acceptance is selected.
+
+On 2026-10-22 the user added [canvas agreement with Ren'Py](../reference/phase-3b-screens.md#canvas-agreement-with-renpy)
+as a requirement and requested an overall 3B progress report before implementation.
+This game-render requirement is separate from editor-layout agreement with flow-v1.
+Both remain pending; recording the requirement does not renew an execution allowance.
