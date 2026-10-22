@@ -13,6 +13,8 @@ pub struct Request {
     #[serde(default)]
     pub drafts: Vec<Draft>,
     #[serde(default)]
+    pub positions: Vec<PositionDraft>,
+    #[serde(default)]
     pub text_samples: Vec<TextSample>,
     #[serde(default)]
     pub button_state: ButtonState,
@@ -39,6 +41,14 @@ pub struct Draft {
     pub node_start: usize,
     pub width: u32,
     pub height: u32,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PositionDraft {
+    pub node_start: usize,
+    pub xalign: f64,
+    pub yalign: f64,
 }
 
 #[derive(Debug, Serialize)]
@@ -78,6 +88,7 @@ impl AuthoringService {
             || request.width > 1920
             || request.height > 1080
             || request.drafts.len() > MAX_NODES
+            || request.positions.len() > MAX_NODES
             || request.text_samples.len() > MAX_NODES
         {
             return Err(SceneError::InvalidPayload);
@@ -106,7 +117,7 @@ impl AuthoringService {
             dependencies: vec![],
             script_files: vec![],
         };
-        for node in screen.nodes {
+        for node in &screen.nodes {
             let mut properties = Map::new();
             // Read only direct, single-line properties. The shared source parser owns
             // node boundaries; unsupported blocks are never flattened into children.
@@ -207,8 +218,8 @@ impl AuthoringService {
             plan.nodes.push(CanvasNode {
                 start: node.span.start,
                 parent: node.parent_start,
-                kind: node.kind,
-                literal: node.literal,
+                kind: node.kind.clone(),
+                literal: node.literal.clone(),
                 properties,
             });
         }
@@ -229,6 +240,16 @@ impl AuthoringService {
                 .ok_or(SceneError::InvalidPayload)?;
             node.properties.insert("xsize".into(), draft.width.into());
             node.properties.insert("ysize".into(), draft.height.into());
+        }
+        let mut positioned = HashSet::new();
+        for draft in request.positions {
+            if !positioned.insert(draft.node_start)
+                || ![draft.xalign, draft.yalign].iter().all(|v| v.is_finite() && (0.0..=1.0).contains(v))
+                || !screen.nodes.iter().any(|n| n.span.start == draft.node_start && n.position.is_some())
+            { return Err(SceneError::InvalidPayload); }
+            let node = plan.nodes.iter_mut().find(|n| n.start == draft.node_start).ok_or(SceneError::InvalidPayload)?;
+            node.properties.insert("xalign".into(), draft.xalign.into());
+            node.properties.insert("yalign".into(), draft.yalign.into());
         }
         let mut sampled = HashSet::new();
         for sample in request.text_samples {

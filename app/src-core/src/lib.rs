@@ -119,6 +119,7 @@ pub const OPERATIONS: &[&str] = &[
     "screens.create",
     "screens.setPixelProperty",
     "screens.setSize",
+    "screens.setPosition",
     "scene.recovery",
     "scene.resolveRecovery",
     "media.present",
@@ -573,6 +574,11 @@ pub fn handle_application_request(
             .and_then(|payload| serde_json::from_value::<screens::SetSizeRequest>(Value::Object(payload))
                 .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
             .and_then(|request| lifecycle.screens_set_size(request)).and_then(to_value),
+        "screens.setPosition" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| serde_json::from_value::<screens::SetPositionRequest>(Value::Object(payload))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
+            .and_then(|request| lifecycle.screens_set_position(request)).and_then(to_value),
         "flow.list" => {
             #[derive(serde::Deserialize)]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]

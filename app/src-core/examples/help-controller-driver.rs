@@ -4,6 +4,7 @@ use serde_json::{json, Value};
 use std::{io::{self, BufRead, Write}, path::PathBuf, fs};
 fn emit(value: Value) { println!("{value}"); io::stdout().flush().unwrap(); }
 fn main() {
+    let position_probe = std::env::args().nth(2).is_some_and(|mode| { assert_eq!(mode,"canvas-position"); true });
     let root = PathBuf::from(std::env::args().nth(1).expect("owned temporary root"));
     assert!(root.is_absolute() && root.file_name().unwrap().to_str().unwrap().starts_with("loomlight-help-controller-"));
     assert!(!root.exists());
@@ -13,6 +14,9 @@ fn main() {
     fs::write(game.join("game/ui/a_styles.rpy"), "style help_label:\n    color \"#ffffff\"\n").unwrap();
     fs::write(game.join("game/ui/z_compare.rpy"), "screen flow_help():\n    frame:\n        xsize 720\n        ysize 360\n        xalign 0.5\n        yalign 0.5\n        text \"Your next stop\"\n").unwrap();
     fs::write(game.join("game/ui/help.rpy"), format!("\u{feff}{}", include_str!("../../../tests/fixtures/phase-3b-screens/help.rpy").replace('\n', "\r\n"))).unwrap();
+    if position_probe {
+        fs::write(game.join("game/ui/help.rpy"),include_bytes!("../../../tests/fixtures/phase-3b-screens/canvas-help.rpy")).unwrap();
+    }
     fs::write(game.join("game/help.png"), include_bytes!("../../../tests/fixtures/phase-1h/assets/booth.png")).unwrap();
     service.close().unwrap();
     let host = ApplicationHost::new(service);
@@ -47,7 +51,7 @@ fn main() {
             "project.listRecent"|"project.openRecent"|"project.current"|"project.close"|"project.status"|"project.flush"|
             "scene.list"|"scene.apply"|"source.list"|"source.open"|"source.updateDraft"|"source.save"|"source.discard"|
             "source.saveAll"|"source.discardAll"|"authoring.list"|"flow.list"|"screens.inspect"|"screens.setSize"|"screens.list"|"screens.create"|
-            "screens.canvasPlan"|"screens.canvasRender"|"screens.canvasStatus"));
+            "screens.canvasPlan"|"screens.canvasRender"|"screens.canvasStatus"|"screens.setPosition"));
         emit(serde_json::to_value(host.dispatch(request, false)).unwrap());
     }
     assert!(host.shutdown());

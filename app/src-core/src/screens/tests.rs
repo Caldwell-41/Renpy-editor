@@ -521,6 +521,70 @@ fn screen_source_requests_refuse_invalid_session_schema_range_and_opaque_target(
 }
 
 #[test]
+fn screen_position_handles_source_order_and_refuses_ambiguous_or_automatic_layout() {
+    for (layout, placement, allowed) in [
+        ("fixed", "yalign 0.5\n            xalign 0.5", true),
+        ("vbox", "xalign 0.5\n            yalign 0.5", false),
+        ("fixed", "xalign 0.5\n            xalign 0.4\n            yalign 0.5", false),
+        ("fixed", "xalign 0.5\n            yalign calculated()", false),
+        ("fixed", "xalign 0.5\n            yalign 0.5\n            xoffset 20", false),
+    ] {
+        let temporary=tempfile::tempdir().unwrap();
+        let mut service=LifecycleService::prepare_source_foundation_probe(temporary.path().join("profile")).unwrap();
+        let root=temporary.path().join("profile/synthetic-project");
+        fs::create_dir_all(root.join("game/ui")).unwrap();
+        let before=format!("screen help():\n    {layout}:\n        frame:\n            xsize 640\n            ysize 360\n            {placement}\n");
+        fs::write(root.join(PATH),&before).unwrap(); service.open_path(&root).unwrap();
+        let doc=ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+        let payload=json!({"path":PATH,"expectedRevision":doc["revision"],"screenName":"help","nodeStart":frame(&doc)["span"]["start"],"xalign":0.625,"yalign":0.25});
+        if allowed {
+            ipc(&mut service,"screens.setPosition",payload);
+            assert_eq!(fs::read_to_string(root.join(PATH)).unwrap(),before.replacen("xalign 0.5","xalign 0.625",1).replacen("yalign 0.5","yalign 0.25",1));
+        } else {
+            assert!(frame(&doc)["position"].is_null());
+            assert_eq!(reject(&mut service,"screens.setPosition",payload)["error"]["code"],"OPAQUE_BOUNDARY");
+            assert_eq!(fs::read_to_string(root.join(PATH)).unwrap(),before);
+        }
+        service.close().unwrap();
+    }
+}
+
+#[test]
+fn screen_position_preserves_alignment_source_and_one_history_entry() {
+    let temporary = tempfile::tempdir().unwrap();
+    let mut service = LifecycleService::prepare_source_foundation_probe(temporary.path().join("profile")).unwrap();
+    let root = temporary.path().join("profile/synthetic-project");
+    fs::create_dir_all(root.join("game/ui")).unwrap();
+    let before = "\u{feff}# retained\r\nscreen help():\r\n    fixed:\r\n        frame:\r\n            xsize 640\r\n            ysize 360\r\n            xalign 0.5 # center\r\n            yalign 0.5\r\n            text \"untouched\"\r\n";
+    fs::write(root.join(PATH), before).unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+    let change = |d: &Value, x: f64, y: f64| json!({"path":PATH,"expectedRevision":d["revision"],"screenName":"help","nodeStart":frame(d)["span"]["start"],"xalign":x,"yalign":y});
+    let after = ipc(&mut service, "screens.setPosition", change(&doc, 0.6, 0.4));
+    let expected = before.replacen("xalign 0.5", "xalign 0.6", 1).replacen("yalign 0.5", "yalign 0.4", 1);
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
+    assert_eq!(ipc(&mut service,"screens.setPosition",change(&after,0.6,0.4))["revision"],after["revision"]);
+    assert_eq!(reject(&mut service,"screens.setPosition",change(&after,1.1,0.4))["error"]["code"],"INVALID_PAYLOAD");
+    assert_eq!(reject(&mut service,"screens.setPosition",change(&doc,0.7,0.4))["error"]["code"],"SOURCE_CONFLICT");
+    for (operation, bytes) in [("undo", before.as_bytes()), ("redo", expected.as_bytes())] {
+        let model=ipc(&mut service,"scene.list",json!({}));
+        ipc(&mut service,"scene.apply",json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":operation}}));
+        assert_eq!(fs::read(root.join(PATH)).unwrap(),bytes);
+    }
+    let plan=ipc(&mut service,"screens.canvasPlan",json!({"path":PATH,"screenName":"help","expectedRevision":after["revision"],"width":1280,"height":720,"positions":[{"nodeStart":frame(&after)["span"]["start"],"xalign":0.7,"yalign":0.3}]}));
+    assert_eq!(plan["nodes"][2]["properties"]["xalign"],0.7);
+    assert_eq!(fs::read(root.join(PATH)).unwrap(),expected.as_bytes(),"Provisional movement must not save source");
+    let opened=ipc(&mut service,"source.open",json!({"path":PATH}));
+    let draft=ipc(&mut service,"source.updateDraft",json!({"path":PATH,"expectedBaseRevision":opened["baseRevision"],"text":expected.replace("untouched","source draft"),"selectionStart":0,"selectionEnd":0}));
+    assert_eq!(reject(&mut service,"screens.setPosition",change(&after,0.8,0.2))["error"]["code"],"DIRTY_SOURCE");
+    ipc(&mut service,"source.save",json!({"path":PATH,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}));
+    let fresh=ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+    service.close().unwrap(); service.open_path(&root).unwrap();
+    assert_eq!(ipc(&mut service,"screens.inspect",json!({"path":PATH}))["revision"],fresh["revision"]);
+    service.close().unwrap();
+}
+
+#[test]
 fn screen_atomic_size_two_tokens_one_history_entry_and_source_reconciliation() {
     let temporary = tempfile::tempdir().unwrap();
     let mut service = LifecycleService::prepare_source_foundation_probe(temporary.path().join("profile")).unwrap();

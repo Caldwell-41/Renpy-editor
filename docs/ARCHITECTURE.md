@@ -681,12 +681,22 @@ retain their existing independent harness behavior. OS termination still uses sh
 The selected [L17 proof](tasks/evidence/canvas-rendering.md) adds session-bound
 `screens.canvasPlan`, `screens.canvasRender` and `screens.canvasStatus` requests.
 Core derives the plan from lossless screen inspection and the expected source
-revision. Literal properties, size drafts and canvas-only text/button samples enter
+revision. Literal properties, size/position drafts and canvas-only text/button samples enter
 the helper as JSON. It receives copied, hashed image/font assets and a Loomlight
 renderer. It receives no project scripts, bytecode, actions or expressions.
 Unknown initialization, inherited styles, unsupported statements and unresolved
 text tags/interpolation make the composition unavailable. These conservative limits
 are specific to the proof and do not accept the full Screens subset.
+
+The representative sized frame can move inside a `fixed` parent when both axes
+have unambiguous literal `xalign`/`yalign` values and no competing placement property.
+Dragging changes those existing alignment coordinates, snaps pointer deltas to eight
+game pixels and stays within the parent. Arrow keys move by one pixel, Shift by eight.
+Provisional alignment values enter `screens.canvasPlan`/`screens.canvasRender` as
+data. Release uses `screens.setPosition` to patch only the two changed tokens in one
+shared source transaction; Escape cancels and conflicts retain the draft. Automatic
+layout children and other coordinate forms remain outside this bounded movement.
+Native rendering, presentation and full manipulation acceptance remain pending.
 
 The verified pinned SDK runs a private software-rendered project with SDL's dummy
 video/audio drivers. The existing process-tree owner stops it on project close,

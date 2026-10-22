@@ -59,6 +59,26 @@ pub struct SetSizeRequest {
     pub height: u32,
 }
 
+/// Move the representative aligned frame without changing its coordinate type.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SetPositionRequest {
+    pub path: String,
+    pub expected_revision: String,
+    pub screen_name: String,
+    pub node_start: usize,
+    pub xalign: f64,
+    pub yalign: f64,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct Position {
+    pub xalign: f64,
+    pub yalign: f64,
+    #[serde(skip)]
+    spans: Vec<Span>,
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum PixelProperty {
@@ -96,6 +116,7 @@ pub struct Node {
     pub kind: String,
     pub literal: Option<String>,
     pub layout: std::collections::BTreeMap<String, f64>,
+    pub position: Option<Position>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
@@ -233,6 +254,7 @@ fn parse_body(
         literal: line.code.split_once(' ').and_then(|(_, raw)|
             serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()),
         layout: Default::default(),
+        position: None,
         span: Span {
             start: line.start,
             end,
@@ -243,6 +265,8 @@ fn parse_body(
     });
     let mut next = index + 1;
     let mut property_counts = [0usize; 2];
+    let mut alignment = [vec![], vec![]];
+    let mut other_placement = false;
     while next < limit {
         let child = &lines[next];
         let after = after_block(lines, next, limit);
@@ -251,6 +275,15 @@ fn parse_body(
             recognized = true;
         }
         if child.indent == line.indent + 4 {
+            let key = child.code.split_whitespace().next().unwrap_or("");
+            if matches!(key, "xalign" | "yalign") {
+                let axis = usize::from(key == "yalign");
+                let raw = child.code[key.len()..].trim();
+                let value = raw.parse::<f64>().ok().filter(|v| v.is_finite() && (0.0..=1.0).contains(v));
+                let start = child.start + child.indent + child.code.len() - raw.len();
+                alignment[axis].push((value.filter(|_| child.single && after == next + 1), Span { start, end: start + raw.len() }));
+            }
+            other_placement |= matches!(key, "xpos" | "ypos" | "pos" | "xanchor" | "yanchor" | "anchor" | "align" | "xcenter" | "ycenter" | "xoffset" | "yoffset" | "offset" | "at");
             for (slot, property) in [PixelProperty::Xsize, PixelProperty::Ysize]
                 .into_iter()
                 .enumerate()
@@ -343,6 +376,12 @@ fn parse_body(
         } else {
             nodes[slot].protected.push(property.span);
         }
+    }
+    if nodes[slot].kind == "frame" && !other_placement
+        && parent.is_some_and(|start| nodes.iter().any(|n| n.span.start == start && n.kind == "fixed"))
+        && alignment.iter().all(|axis| axis.len() == 1 && axis[0].0.is_some())
+    {
+        nodes[slot].position = Some(Position { xalign: alignment[0][0].0.unwrap(), yalign: alignment[1][0].0.unwrap(), spans: alignment.iter().map(|axis| axis[0].1.clone()).collect() });
     }
     Ok(())
 }
@@ -467,6 +506,34 @@ impl AuthoringService {
         self.screens_set_properties(project, request.path, request.expected_revision,
             request.screen_name, request.node_start,
             &[(PixelProperty::Xsize, request.width), (PixelProperty::Ysize, request.height)])
+    }
+
+    pub fn screens_set_position(&self, project: &ProjectId, request: SetPositionRequest) -> Result<Document, SceneError> {
+        if ![request.xalign, request.yalign].iter().all(|v| v.is_finite() && (0.0..=1.0).contains(v)) {
+            return Err(SceneError::InvalidPayload);
+        }
+        let source_path = request.path;
+        let path = path(&source_path)?;
+        self.ensure_source_paths_clean(project, [source_path.as_str()]).map_err(|_| SceneError::DirtySource)?;
+        let (bytes, revision) = self.transactions.snapshot(project, path.clone()).map_err(|_| SceneError::SourceConflict)?;
+        if revision.sha256 != request.expected_revision { return Err(SceneError::SourceConflict); }
+        let document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+        let position = document.screens.iter().find(|s| s.name == request.screen_name)
+            .and_then(|s| s.nodes.iter().find(|n| n.span.start == request.node_start))
+            .and_then(|n| n.position.as_ref()).ok_or(SceneError::OpaqueBoundary)?;
+        let mut proposed = bytes.clone();
+        let mut patches = position.spans.iter().zip([position.xalign, position.yalign]).zip([request.xalign, request.yalign]).collect::<Vec<_>>();
+        patches.sort_by_key(|((span, _), _)| std::cmp::Reverse(span.start));
+        for ((span, before), value) in patches {
+            if before != value { proposed.splice(span.start..span.end, value.to_string().bytes()); }
+        }
+        if proposed == bytes { return Ok(document); }
+        inspect(&proposed, source_path.clone(), String::new())?;
+        self.commit_history(project, TransactionProposal {
+            mutations: vec![FileMutation { path, kind: MutationKind::ReplaceExisting, base: revision, expected_bytes: bytes, proposed }],
+            intent: TransactionIntent::Edit,
+        })?;
+        self.screens_inspect(project, InspectRequest { path: source_path })
     }
 
     fn screens_set_properties(&self, project: &ProjectId, source_path: String, expected_revision: String,
