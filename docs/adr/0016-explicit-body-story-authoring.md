@@ -63,9 +63,9 @@ not a general Ren'Py parser or an arbitrary reindentation tool.
 
 Independent review and 30 focused core tests cover all command paths, stable IDs/extras,
 minimal headers, selected trivia, pass replacement, moves, history/reopen and exact
-refusals. Earlier failed runs remain in the [Phase 3 ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13).
+refusals. Earlier failed runs remain in the [Phase 3 ledger](../tasks/evidence/phase-3-history.md#3a-execution-ledger--2026-10-13).
 Actual frontend-to-core and final both-target saved-callee/runtime proof pass CI4.
 This decision does not accept Phase3A or resume Phase2.
 
-Scoped final CI4 evidence and limits are recorded in the [terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
+Scoped final CI4 evidence and limits are recorded in the [terminal audit](../tasks/evidence/phase-3-history.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
 Prior failures, portable visual self-review and user acceptance remain distinct.

@@ -36,7 +36,7 @@ tabs. Settings context preview remains read-only. Story → Assist now adds the
 separately selected first safe rewrite workflow described below.
 This is a bounded part of 2B.1; routes, other action prompts, generated references,
 automatic retrieval, destination expansion and full Phase 2 remain separate.
-The [owning selection and ledger](tasks/active/phase-2-initial-llm-assistance.md#prompts-and-context-preparation-selection--2026-10-10)
+The [owning selection and ledger](tasks/evidence/phase-2-execution.md#prompts-and-context-preparation-selection--2026-10-10)
 own acceptance and target evidence.
 
 The 2026-10-12 closeout amendment defers selected-route context, repeated visits and
@@ -91,7 +91,7 @@ author task/comparison; a changed input requires fresh preparation. Discard drop
 the proposal and retains task; Close/replacement/project close confirms unfinished
 work and performs cancellation/discard cleanup. Proposals do not survive sessions.
 
-The [selected rewrite ledger](tasks/active/phase-2-initial-llm-assistance.md#first-safe-dialogue-rewrite-selection--2026-10-10)
+The [selected rewrite ledger](tasks/evidence/phase-2-execution.md#first-safe-dialogue-rewrite-selection--2026-10-10)
 owns qualification and cumulative host allowances. Full 2B.1/2A.2/Phase 2 acceptance
 is not implied. The following sections retain the Settings preview contract.
 
@@ -229,7 +229,7 @@ Use only the selected ledger's remaining cumulative build/launch allowance.
 ## Continue Scene
 
 The bounded action is qualified on Windows x64 and macOS ARM64; the
-[owning task](tasks/active/phase-2-initial-llm-assistance.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
+[owning task](tasks/evidence/phase-2-execution.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
 records exact CI/native evidence and remaining phase-wide limits.
 Story offers **Assist · Continue Scene** at an eligible saved root Beat. The anchor is
 explicitly **before that Beat**, bound to its ID, byte offset, source/structure revisions
@@ -300,7 +300,7 @@ the result. No incoming connection is created. Cancels, malformed/unsafe/stale/d
 external-edit refusal writes nothing; competing prepared reviews consume old identity.
 
 This bounded action is qualified on Windows x64 and macOS ARM64; the
-[task closure](tasks/active/phase-2-initial-llm-assistance.md#draft-scene-qualified-closure--2026-10-11)
+[task closure](tasks/evidence/phase-2-execution.md#draft-scene-qualified-closure--2026-10-11)
 records exact candidate, native/source/history/refusal and pinned-SDK evidence.
 Generated Character cards/lore, incoming/terminal replacement and custom source remain
 separately selected deliverables. SDK validation is a separate explicit execution
@@ -340,7 +340,7 @@ memory-only until accepted. Reopen retains saved statuses/provenance/revisions.
 No runnable Character, Appearance, asset, lore or source change is in this action.
 
 This bounded action is qualified on Windows x64 and macOS ARM64. The
-[task closure](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
+[task closure](tasks/evidence/phase-2-execution.md#generated-character-cards-qualified-closure--2026-10-11)
 records exact dispatch, passive review, approval separation, zero-write refusals,
 byte-exact source and shared history/reopen evidence.
 
@@ -373,7 +373,7 @@ lore entry** retains it. Stale sent-source support and stale cited references bl
 approval/inclusion, including supporting staleness behind an unchanged approved ID.
 Shared Undo/Redo and reopen retain exact metadata. Runnable source is byte-exact.
 No keyword/recursive injection, embeddings, runtime inference or automatic inclusion.
-Qualification state and allowances belong to the [selected task](tasks/active/phase-2-initial-llm-assistance.md#generated-lorebook-entries-selection--2026-10-11).
+Qualification state and allowances belong to the [selected task](tasks/evidence/phase-2-execution.md#generated-lorebook-entries-selection--2026-10-11).
 
 
 ## Selectable Scene edits
@@ -412,4 +412,4 @@ in memory; Character source/authoring metadata and Scene source/map share the co
 One Undo/Redo covers the selected result. Unselected suggestions become read-only;
 further changes require a freshly prepared proposal. No preview executes project code.
 Qualification and remaining acceptance belong to the
-[selected task](tasks/active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11).
+[selected task](tasks/evidence/phase-2-execution.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11).

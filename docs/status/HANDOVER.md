@@ -39,73 +39,50 @@ Return the verified audit to the selecting chat for final review. Scoped termina
 records may publish by ordinary fast-forward to origin/Caldwell-41/Renpy-editor/
 refs/heads/codex/phase3b-screen-designer. This docs-only successor records c2d9f45 as
 the tested candidate and needs no package matrix. Preserve protected apps/drafts,
-pinned flow-v1, ignored receipts and unrelated uncommitted documentation/validator
-maintenance. No PR, merge or release is authorized.
+pinned flow-v1 and ignored receipts. No push, PR, merge or release is selected here.
 
-## Earlier full-app mockups
+## Retained product state and next work
 
-The [12-page comparison](../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
-retains its earlier review-ready result of 448 cases and 19 groups. Its 24 layouts
-and starter remain unapproved, with prior references intact. That work was
-published on Phase 3A before this branch; Screens adds three current candidates.
-[Page notes](../design/design-lab-app/README.md) own controls and simulation limits.
-The approval local1 combined check includes these unchanged pages and their
-interaction groups; the earlier task retains its original qualification scope.
-Promotion still follows
-[INTEGRATION](../../app/design-lab/INTEGRATION.md), including explicit version selection,
-reproducible source and retained captures. The protected app was untouched.
+Screen builder is approved as `flow-v1` / variant `flow`, dated 2026-10-22. The
+[approval JSON](../design/design-lab-screens/approval.json) pins source
+`3c7ea31d8210538cc987a2d2f4ceb8b7aa8f5437`, fingerprint and 13 reviewed captures.
+[The Screens contract](../tasks/reference/phase-3b-screens.md) owns agreed product
+scope and points to the completed approval/browser audit. Screen notebook and Canvas
+focus remain drafts. Use [INTEGRATION](../../app/design-lab/INTEGRATION.md) for
+production work; approved source/captures stay pinned. A new experiment needs a new
+revision. The selected Help outcome above has its own exhausted local/preview allowance;
+full Screens and phase acceptance remain pending.
+The lab's last recorded port is 5174; verify availability before reuse.
 
-## CI harness reliability — accepted, 2026-10-17
+The [early 3B CI audit](../tasks/evidence/phase-3-history.md#ci1-terminal-audit-and-prototype-continuation)
+qualifies source `0ef174877cbe5ae3fd883afb92940de68916b04a`, tree
+`521a550ef7d82ecf970a0527a1bab368062bad63`, run39555526201, on Windows x64/macOS
+ARM64. Later lab/docs changes do not replace that SDK candidate. Earlier 3B allowances
+are closed. No verification or CI is pending for the completed design/proof outcomes.
 
-All three deliverables are complete on `codex/phase3a-story-logic`, one owner on the
-chosen Mac development host. [CI3 terminal audit and completion](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17)
-owns detailed source, archive, named-test, package, native-state and cleanup evidence.
-The accepted implementation is `e00160b962ac09d70cb95000a6c10e4c205895c7`, tree
-`42c061927bec9f0bbb0070e1e91f2368b6c93a9d`. Later documentation commits record its
-qualification; they do not become the tested candidate.
+The [earlier full-app comparison](../tasks/active/browser-ui-design-lab.md)
+remains review_ready with 24 app layouts and the starter unapproved. Its original
+scope, evidence and fictional controls remain in that task and its design notes.
 
-[Run38969448685](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38969448685)
-(workflow354880113/workflow_dispatch/attempt1/ordinal3) is terminal success,
-updated2026-10-16T21:40:46Z. Windows job117203939861 and Mac job117203939807 passed
-all selected steps. Both358-input maps/ZIPs/manifests/named results pass independent
-audit. Windows completes both native phases,4+3authenticated GETs, exact whole-store
-transitions, owned credential presence/removal and two exit0/PID/listener cleanups
-without forced termination. Recovery capture shows visible Retry in open maintenance.
-Mac supplies portable/rendered and report-admission proof only.
+[CI reliability](../tasks/active/ci-harness-reliability.md) is accepted at
+`e00160b962ac09d70cb95000a6c10e4c205895c7`. Its final audit owns both-target
+portable/rendered and selected Windows native proof, retained failures and closed
+allowances. Mac native input, signed-Mac/real Studio and phase human acceptance are
+separate. No maintenance operation remains pending.
 
-The rendered production probe/controller/close-guard cases pass both viewports,
-reject collapsed/disabled Retry and prove ordinary Settings dismissal permits close.
-Successful native flow does not exercise failure cleanup; actual Windows helper
-fixtures and rendered guard checks cover that repair. Product Settings/backend/close
-protections, frozen routes/dependencies/signing remain unchanged. Both native CI1/CI2
-failures and CI2's missing individual UIA subcondition remain historical. Archives
-expire2026-10-23; ignored `d3/native-ci3` retains raw receipts/audit. The task ledger
-preserves findings after hosted artifact expiry. No raw logs/packages are committed.
+Thinking/default-response and draft connection behavior remain qualified at
+`36feff12ff9acfc1cd6eb0832da3abba243b9463` by the
+[Phase 2 CI3 audit](../tasks/evidence/phase-2-execution.md#ci3-terminal-results-and-retained-evidence-audit--2026-10-16).
+Paired CI3/3 is closed. The source-map-js development advisory remains open; no
+lockfile update or zero-advisory qualification is selected. Signed-Mac/real Studio
+and Phase 2/3A human acceptance remain pending. The walkthrough is paused at Step3.
+Its model-load amendment has separate automated proof under the
+[walkthrough task](../tasks/active/walkthrough-redesign-implementation.md).
 
-Final deliverable3 usage: local7/7, nativeCI3/3, Windows packages3/3, launches5/6,
-native fixture GETs13/21. Original deliverables1/2 remain local5/6/pairedCI2/2.
-No further dispatch or repair is selected; no operation or acceptance work remains
-for this maintenance outcome. Closure updates only its task/current/native/incident
-documentation. The three unrelated edits and all recovery text below are preserved.
-
-This CI maintenance is closed. Existing signed-Mac/real Studio and Phase2/3A human
-acceptance remain separate under their owning tasks and the exact capability,
-protected-window and allowance boundaries below. This maintenance grants no renewed
-allowance.
-
-## Retained app baseline and unrelated pending work
-
-Thinking/default response and draft connection behavior remain qualified at
-`36feff12ff9acfc1cd6eb0832da3abba243b9463` by [CI3run38853421609](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609).
-The [terminal audit](../tasks/active/phase-2-initial-llm-assistance.md#ci3-terminal-results-and-retained-evidence-audit--2026-10-16)
-retains exact archive/source/test-binary/browser inventories and both earlier failures.
-Its paired3/3 allowance is closed; current maintenance proof concerns changed harness
-inputs, not renewed app/native qualification. Mac-signed/native/real Studio and
-Phase2/3A human acceptance remain pending. The walkthrough is paused at Step3.
-
-The separate source-map-js development-dependency advisory remains open. No lockfile
-update or zero-advisory qualification is selected. Prior ordinary profile credentials,
-protected user window, signing policy and native recovery below are unchanged.
+The earlier automatic push review rejected publication without explicit
+payload/destination permission. Publishing the retained work to
+`origin/codex/phase3b-screen-designer` still needs approval. This documentation
+selection keeps changes local. Preserve the protected native state below.
 
 ## Native recovery and remaining acceptance
 
@@ -118,17 +95,17 @@ A fresh matching signed package needs its second reservation and the approved id
 native-root.json identifies the disposable Beck/Henry fixture, isolated owned profile/key,
 thinking on/context32768/response16384. Original profiles were unchanged. Keep private
 endpoint/key/local paths ignored; do not prepare another fixture or read its key just
-to resume. Preserve initial noncanonical-path refusal/recovery. User said “I’ll unlock
-the Mac and close Loomlight myself”. Verify that state; intention is not an observed
-close. Do not Save/Discard/Reload/close their protected draft or bypass single instance.
+to resume. Preserve initial noncanonical-path refusal/recovery. A read-only 2026-10-22 check found no running `loomlight` process. Protected draft
+contents were not inspected; preserve existing recovery files and recheck before
+native continuation. Do not Save/Discard/Reload a protected draft or bypass single instance.
 
-For the remaining authorised native sequence, reserve launch1 and use the existing
+For the remaining authorised native sequence, reserve launch 1 and use the existing
 isolated phase2-studio environment with the matching signed package. Exercise native
 entry cancellation and saved-profile draft Connect → model → Save, explicit response-
 format test and Beck bar-scene generation. Reserve output before sends. Review → Save
 → Approve → reopen must preserve writing/settings without reasoning. Reserve launch2
 for reopen, keep uncertain attempts charged and avoid automatic resends/model operations.
-Current other counts: packages1/2, launches0/2, live0/4, output0/65536, cached loads0/1.
+Current other counts: packages 1/2, launches0/2, live0/4, output0/65536, cached loads0/1.
 Older comparison/model-load/live/CI allowances stay separate/closed. Walkthrough remains
 paused Step3 with builds2/2, launches2/3 and protected recovery/session files. Full
 native/Studio and Phase2/3A human acceptance remain pending.

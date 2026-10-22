@@ -34,7 +34,7 @@ failure disables writes until read-only reload. Existing namespace, backend, sig
 and per-model management policies remain unchanged. The separate **Test response
 format** operation is explicit and model-specific; Connect never runs it implicitly.
 Scoped tests, real Studio and native/platform evidence remain distinct in the
-[owning outcome](../tasks/active/phase-2-initial-llm-assistance.md#thinking-settings-and-full-workflow--selected-2026-10-16).
+[owning outcome](../tasks/evidence/phase-2-execution.md#thinking-settings-and-full-workflow--selected-2026-10-16).
 
 ## Generation-time Studio readiness — 2026-10-15
 
@@ -151,7 +151,7 @@ an error. No specific Unsloth Studio version is an acceptance gate.
 **Current closeout disposition, 2026-10-12:** Phase 2 is Studio-only. The selected
 literal-HTTP/nonstreaming/off-only client slices are qualified; full-phase scope and
 final integrated acceptance remain incomplete. The
-[closeout map](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+[closeout map](../tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
 identifies missing configuration-bound capability readiness, editable sampling and
 the unresolved full-phase TLS/hostname boundary. The LAN amendment's exclusions apply
 to that slice, not automatically to the entire phase. Thinking-on/default failures,
@@ -361,7 +361,7 @@ Existing reviewed interpolation/formatting is protected by core-owned opaque tok
 bound to target revision. Refuse altered, reordered, duplicated, removed or invented
 tokens and unsupported target boundaries. The qualification fixture verifies the
 wire boundary only; it does not emit `.rpy` or claim SDK literal-display evidence.
-Cards/lore remain metadata prose. [Phase 2 section 7](../tasks/active/phase-2-initial-llm-assistance.md#7-structured-proposals-and-source-preparation)
+Cards/lore remain metadata prose. [Phase 2 section 7](../tasks/reference/phase-2-requirements.md#7-structured-proposals-and-source-preparation)
 owns the generated-text boundary and first-rewrite gates.
 
 ### Transport, states and resource limits

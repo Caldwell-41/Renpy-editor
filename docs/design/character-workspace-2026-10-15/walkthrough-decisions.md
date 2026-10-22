@@ -2,10 +2,10 @@
 
 Updated 2026-10-16. This is the current design decision index for the walkthrough;
 it supersedes conflicting earlier mockup details and pending recommendations. The
-[combined task ledger](../../tasks/active/phase-3-initial-wysiwyg-release.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
+[combined task ledger](../../tasks/evidence/phase-3-history.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
 retains the sequence, qualifications and unique evidence. The Phase 2 task owns the
-[model-loading follow-up](../../tasks/active/phase-2-initial-llm-assistance.md#walkthrough-follow-up--studio-model-loading-and-one-context-setting--2026-10-14)
-and [linked-character follow-up](../../tasks/active/phase-2-initial-llm-assistance.md#walkthrough-follow-up--linked-character-workspace--2026-10-15).
+[model-loading follow-up](../../tasks/evidence/phase-2-execution.md#walkthrough-follow-up--studio-model-loading-and-one-context-setting--2026-10-14)
+and [linked-character follow-up](../../tasks/evidence/phase-2-execution.md#walkthrough-follow-up--linked-character-workspace--2026-10-15).
 
 **Character-card design review: COMPLETE — approved on 2026-10-15.** The user also
 agrees to omit generic Related story items controls while preserving stored links.
@@ -56,7 +56,7 @@ distinct from the model-specific response-format test. This newer direction supe
 conflicting earlier Model ID/Refresh placement and save-first interaction assumptions;
 local-only Save semantics remain. The user confirms the UI needs rearranging. This is
 an agreed functional/layout follow-up, not an implemented change or phase acceptance.
-The [restart ledger](../../tasks/active/phase-3-initial-wysiwyg-release.md#restarted-combined-phase-2--3a-guided-walkthrough--2026-10-16)
+The [restart ledger](../../tasks/evidence/phase-3-history.md#restarted-combined-phase-2--3a-guided-walkthrough--2026-10-16)
 owns current build/session state; the earlier scope/budget paragraph above is historical
 to the 2026-10-15 design review. No implementation, live connection or credential
 operation is performed to record this amendment.

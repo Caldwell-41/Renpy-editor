@@ -1909,7 +1909,7 @@ has its own managed worktree; the original feature checkout remains in place.
 Remote feature head was `3c5ce24` at planning entry, so the fork also preserves the
 then-unpublished chapter/Writing-focus documentation commit. No feature ref is moved.
 
-[Phase 2](../active/phase-2-initial-llm-assistance.md#14-october-milestone-sequencing)
+[Phase 2](../evidence/phase-2-execution.md#14-october-milestone-sequencing)
 retains existing requirements with an early complete rewrite outcome and current
 workflow/testing policy. [Phase 3](../active/phase-3-initial-wysiwyg-release.md)
 is a reviewable draft with proposed subsets and open decisions. The planning request,
@@ -1997,7 +1997,7 @@ Phase 3 subsets, not implementation. Resolve this checkpoint's SHA from Git.
 
 LLM screen planning — 2026-10-02: the user delegated equivalent Phase 2 UX planning
 and image generation to a GPT-6.1 Sol subagent. The
-[expanded Phase 2 design](../active/phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design)
+[expanded Phase 2 design](../evidence/phase-2-execution.md#18-proposed-llm-screen-and-interaction-design)
 and [four proposed concepts](../../design/phase-2-llm/README.md) cover preparation, semantic
 review, cards/lorebook and AI settings, including cancellation/errors/draft safety and
 compact/accessibility contracts. Total-budget, approval/inclusion, explicit proposed

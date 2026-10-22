@@ -903,7 +903,7 @@ real provider or authorise credential/network access.
 
 Use [CURRENT](../../status/CURRENT.md), [HANDOVER](../../status/HANDOVER.md) and their selected task
 for current operations, remaining allowance, readiness and CI/local routing. The
-[completed Windows credential contract](../active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+[completed Windows credential contract](../evidence/phase-2-execution.md#current-windows-qualification-contract)
 below owns that outcome's evidence, not a new execution allowance.
 [Windows commands](../../../app/README.md#windows-native-studio-credentials) and the existing
 controller own executable routes; check their actual arguments before dispatch.
@@ -1285,7 +1285,7 @@ the separate archive-backed SDK gate must remain excluded until explicitly selec
 The existing foundation test now expects supported combinations/nesting and guarded
 unknown diagnostics, with exact source-byte and ownership assertions. It still requires
 unsupported custom statements to remain protected. That contract update does not
-reclassify earlier failures. The [3A execution ledger](../active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
+reclassify earlier failures. The [3A execution ledger](../evidence/phase-3-history.md#3a-execution-ledger--2026-10-13)
 retains the broad local run's descendant-cleanup failure and its isolated passing rerun.
 Neither these local checks nor unchanged Phase 2 proof establish new SDK/target or full
 3A acceptance. The separately reviewed focused CI harness now provides an explicitly
@@ -1363,7 +1363,7 @@ identity and terminal cleanup. Artifact upload requires a successful privacy sca
 when preserving partial evidence from a failed run. CI2 is early proof; final ordinals
 3–5 select the full51 DOM and ten-case controller recipe in addition to core/SDK checks.
 
-Final [CI4 terminal audit](../active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14)
+Final [CI4 terminal audit](../evidence/phase-3-history.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14)
 passed Windows x64/macOS ARM64 on exact `49dba1f`: checker13,30 named core/preflight,
 51 named DOM, production build and ten real frontend/core cases with two normal
 observed/reaped helpers per host. The six pinned8.5.3 SDK cases pass with exactly twelve
@@ -1598,7 +1598,7 @@ deletes only that newly created synthetic target and verifies absence without re
 its blob. Only then remove the precisely marked fixture root; preserve receipts.
 No cleanup relaunch or unrelated credential enumeration/recovery is needed.
 
-The [completed Windows selection](../active/phase-2-initial-llm-assistance.md#final-windows-request-acceptance--2026-10-09)
+The [completed Windows selection](../evidence/phase-2-execution.md#final-windows-request-acceptance--2026-10-09)
 used one package build and all three permitted launches. Its final five-request native
 walkthrough includes a 280 ms successful Source Save with the stalled worker still
 active, reported/unknown usage, cancellation/auth error and active-request normal exit.
@@ -1623,7 +1623,7 @@ screenshots remain outside Git and are not a new mandatory acceptance gate.
 
 ## Continue Scene focused qualification
 
-The [selected task](../active/phase-2-initial-llm-assistance.md#continue-scene-selection--2026-10-10)
+The [selected task](../evidence/phase-2-execution.md#continue-scene-selection--2026-10-10)
 owns cumulative allowances and results. Local/core selectors are `cargo test -p
 loomlight-core --locked rewrite`, `prompts::tests`, `ai_request::tests`, desktop
 `ai_requests::tests`, `npm run check`, and the actual native-worker controller fixture:
@@ -1671,13 +1671,13 @@ zero HTTP and unchanged project bytes. Windows has five validated action-specifi
 UIA/OS-input receipts/seven captures; Mac uses observed Computer Use layouts and
 physical Generate/Accept. This is agent/automated native evidence, not final human
 phase-wide acceptance or new live-provider qualification. The
-[closure ledger](../active/phase-2-initial-llm-assistance.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
+[closure ledger](../evidence/phase-2-execution.md#continue-scene-both-target-qualification-and-closure--2026-10-10)
 owns actual consumed attempts and retained failures.
 
 
 ## Draft Scene focused qualification
 
-The selected [task ledger](../active/phase-2-initial-llm-assistance.md#draft-scene-selection--2026-10-10)
+The selected [task ledger](../evidence/phase-2-execution.md#draft-scene-selection--2026-10-10)
 owns selection, allowance and results. Use core `cargo test -p loomlight-core --locked
 rewrite` (21 selected tests), `prompts::tests`, `ai_request::tests`, desktop
 `ai_requests::tests`, `npm run check` (127 cases), and actual controller fixture
@@ -1721,13 +1721,13 @@ exact reviewed/HTTP bodies, source/history/refusal and native PID/binary/capture
 Final signed Mac package3/native launches4–5 proves the same changed-action22+3 cases;
 CI supplies its automated/SDK proof. Exact candidate and native/SDK identities, privacy,
 cleanup, prior honest failures and cumulative allowances are in the
-[closure ledger](../active/phase-2-initial-llm-assistance.md#draft-scene-qualified-closure--2026-10-11).
+[closure ledger](../evidence/phase-2-execution.md#draft-scene-qualified-closure--2026-10-11).
 No remaining required case is skipped or waived. Agent/native proof is distinct from
 final human/full Phase2 acceptance; no docs-only package rerun is required.
 
 ## Generated Character card focused qualification
 
-The [selected task](../active/phase-2-initial-llm-assistance.md#generated-character-cards-selection--2026-10-11)
+The [selected task](../evidence/phase-2-execution.md#generated-character-cards-selection--2026-10-11)
 owns this bounded outcome and cumulative allowance. Focused core `rewrite` selects26
 cases, including5 generated-card regressions; `references::tests`12 and `prompts::tests`5
 retain the qualified manual/context foundations. Renderer `npm run check`129 cases;
@@ -1766,7 +1766,7 @@ new all-source-byte assertions establish this scope, with no new SDK execution c
 Audit actual cases, manifests, binaries, input hashes and cleanup; green badges alone
 are insufficient. Final human/full Phase2 acceptance remains separate.
 
-The [qualified closure](../active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
+The [qualified closure](../evidence/phase-2-execution.md#generated-character-cards-qualified-closure--2026-10-11)
 records candidate `8a230a9`, run `38093296977` attempt 1, both-target focused results,
 Windows native 25 + 3 checks, renewed signed Mac native proof, and final actual budgets.
 Windows stalled-header and partial-body shutdown/Cancelled/EOF both pass the unchanged
@@ -1775,7 +1775,7 @@ remain separately selected work. A docs-only closure requires no package or CI r
 
 ## Generated lorebook entry focused qualification
 
-The [selection](../active/phase-2-initial-llm-assistance.md#generated-lorebook-entries-selection--2026-10-11)
+The [selection](../evidence/phase-2-execution.md#generated-lorebook-entries-selection--2026-10-11)
 owns allowance and acceptance. `cargo test -p loomlight-core --locked rewrite` requires
 34 cases (including eight lore cases); reference12/prompt5 and renderer131 remain
 focused shared checks. `node tests/rewrite-controller.dispatch.mjs <compiled native
@@ -1798,7 +1798,7 @@ on the retained approved local host; CI does not have the signing identity. Proc
 reopen sends zero HTTP and changes zero project bytes. Editor-only metadata mutation
 reuses unchanged pinned SDK evidence1320d0a/run38056790759 with explicit zero new SDK
 execution, backed by all-source byte assertions. Bounded native/artifact acceptance is
-recorded in the [qualified closure](../active/phase-2-initial-llm-assistance.md#generated-lorebook-entries-qualified-closure--2026-10-11):
+recorded in the [qualified closure](../evidence/phase-2-execution.md#generated-lorebook-entries-qualified-closure--2026-10-11):
 candidate 233454b/run38105665896 attempt1, both focused targets pass, signed local Mac
 native proof and Windows25 distinct+3/six receipts/nine captures independently audited.
 Exact manifests/checkout inputs and cleanup verified. No new live/generic-provider or
@@ -1820,7 +1820,7 @@ user decision; saved-key reuse remains required.
 
 **Current full-phase closeout, 2026-10-12:** the user selected a separate residual
 matrix/final workflow outcome. Its
-[entry map](../active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+[entry map](../evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
 records exact reused evidence, missing proof and exclusions, and stops before expensive
 qualification for a material scope decision. Historical slice exclusions do not become
 full-phase passes. CI4's five-action chain and CI7's selectable chain have different
@@ -1829,7 +1829,7 @@ editor-start, dispatch, discovery or live-send attempts have occurred at this au
 The selectors below describe the previously qualified bounded Studio slice, not a
 completed full Studio-only phase or a new CI dispatch.
 
-The [Studio-only amendment](../active/phase-2-initial-llm-assistance.md#studio-only-qualification-amendment--2026-10-11)
+The [Studio-only amendment](../evidence/phase-2-execution.md#studio-only-qualification-amendment--2026-10-11)
 owns scope and cumulative allowance; generic/live two-provider/full Phase2 acceptance
 remain deferred. Focused core `rewrite` now requires35cases, including all-five-action
 LAN passive disclosure, exact capture and profile/consent-change stale-send refusal.
@@ -1874,7 +1874,7 @@ separately with exact provider/model/configuration and at most2attempts per acti
 ## Selectable proposal editing focused qualification
 
 The approved selectable outcome is owned by the
-[active task](../active/phase-2-initial-llm-assistance.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11).
+[active task](../evidence/phase-2-execution.md#selectable-proposal-editing-implementation-and-focused-proof--2026-10-11).
 `cargo test -p loomlight-core --locked selectable` requires8 ordinary focused cases:
 same-file/subset/dependency/stable-ID/history/reopen, supported Character update,
 literal names/manual update preservation, aggregate UTF-8 boundaries, malformed whole

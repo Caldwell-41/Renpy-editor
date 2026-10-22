@@ -1,24 +1,18 @@
 # Results, retention and diagnosis
 
-The selected task owns commands, scope, run/attempt/candidate, actual consumed
-allowance, results and next action. CURRENT/HANDOVER link to that record rather
-than copy its execution history. [WORKFLOW](../WORKFLOW.md) owns waiting/retries;
-an available workflow selector does not grant a new attempt.
+When recording results, follow [brief and evidence ownership](../WORKFLOW.md#task-briefs-and-supporting-files).
+For retries or exhausted allowance, follow the [budget policy](../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name);
+CI and external waits follow [manual same-thread waiting](../WORKFLOW.md#waiting-without-model-polling).
+An available workflow selector does not grant a new attempt.
 
 ## Diagnose before correcting
 
-Classify the observed failure as product defect, harness defect, environment
-limitation, missing evidence or requirement mismatch. Multiple/provisional labels
-are valid. Record the failed layer, decisive evidence, uncertainty and the smallest
-discriminating check. A timeout alone does not establish a slow application, and a
-passing mock does not establish native behavior. Keep failed, cancelled, skipped,
-unrun and passed states distinct, including cascading prerequisite failures.
-
-Search [INCIDENTS](INCIDENTS.md) by symptom, host, control, test or script when fixing
-a failure or changing that harness. Read the relevant original task section, not
-every historical ledger. After a correction, update that task; update the index
-only for a new cause, changed diagnosis or lasting regression/prevention lesson.
-Never relabel a real product fault as harmless timing to obtain a green run.
+Before correcting a failure or changing its harness, follow
+[WORKFLOW diagnosis](../WORKFLOW.md#4-classify-failures-before-fixing) for classification,
+failed-layer investigation, [incident lookup](INCIDENTS.md) and index maintenance.
+A timeout alone does not establish a slow application, and a passing mock does not
+establish native behavior. Keep failed, cancelled, skipped, unrun and passed states
+distinct, including cascading prerequisite failures.
 
 ## Retain useful evidence on failure
 
@@ -65,7 +59,8 @@ native key entry or real Studio generation.
 
 ## Historical evidence
 
-Detailed attempts stay with their owning task/archive. The one-time
+Detailed attempts stay in linked task evidence; older unsplit archived tasks remain
+valid historical lookup destinations. The one-time
 [former testing reference](../tasks/archive/2026-10-16-testing-reference.md) preserves
 unique mixed historical material from the documentation migration. Its old counts,
 commands, selected outcomes and next-step wording are not current instructions.

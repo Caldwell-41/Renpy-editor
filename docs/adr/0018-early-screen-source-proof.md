@@ -56,14 +56,14 @@ adapters, conservative effect summaries and a typed isolated preview service.
 
 ## Evidence
 
-The [CI1 terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
+The [CI1 terminal audit](../tasks/evidence/phase-3-history.md#ci1-terminal-audit-and-prototype-continuation)
 qualifies exact candidate `0ef1748` on Windows x64 and macOS ARM64. Each host retains
 335 matching source inputs, its real test executable, three core cases, five evidence
 cases and one actual SDK case. The 720×360 frame renders in a 1280×720 virtual game;
 Close continues exactly once, accepted bytes remain unchanged and cleanup completes.
 Captured window pixels are 922×518 and are distinct from virtual coordinates.
 
-The [execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
+The [execution ledger](../tasks/evidence/phase-3-history.md#early-execution-ledger)
 preserves four failed local previews and their corrections. The independent review
 and follow-up resolved the source findings; final driver fixes had parent review
 and CI proof. Full 3B and earlier milestone acceptance remain separate.

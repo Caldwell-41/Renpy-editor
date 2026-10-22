@@ -55,13 +55,13 @@ credential runner refuses it before building/launching; its frozen store/reload-
 qualification is not current native connection proof. The frozen Studio Settings
 external verification route and its old ordinals remain historical. A current native
 migration needs its own selected task.
-The [selected deliverable3 continuation](../tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
+The [selected deliverable3 continuation](../tasks/evidence/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
 adds explicit `windows-studio-credentials.py current` build/run selection and the
 `Repository quality` → `studio_connection_native` route. This current mode uses a
 fresh namespace, exact candidate/ordinal, two processes and seven loopback GETs
 (alpha/gamma/alpha/alpha, then alpha/beta/beta). The ordinary legacy entry and frozen
 929 workflow remain unchanged. The current Windows sequence and both-host portable/
-rendered gates are qualified by the [CI3 terminal audit](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+rendered gates are qualified by the [CI3 terminal audit](../tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 This is exact-candidate evidence; the selector is not permission to replay old attempts.
 The current driver alone fits its owned main window inside the measured monitor
 work area, including frame/DPI and the product's minimum client size. Frozen layout

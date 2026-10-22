@@ -16,7 +16,9 @@ instructions take precedence and must be recorded before conflicting work contin
 | [AGENTS.md](../AGENTS.md) | Stable operating rules and entry points. |
 | [CURRENT.md](status/CURRENT.md) | Current project state, accepted baseline and active workstreams. |
 | [HANDOVER.md](status/HANDOVER.md) | One live continuation record: branch, checkpoint, evidence and next action. |
-| `docs/tasks/active/` | Detailed scope, implementation plan, checkpoint gates and execution ledger. |
+| `docs/tasks/active/` | Current outcome briefs, scope, acceptance, applicable limits and remaining work. |
+| `docs/tasks/reference/` | Substantial requirements disclosed by task branch; each requirement has one current owner. |
+| `docs/tasks/evidence/` | Linked execution history, detailed validation receipts, failures and historical directions. |
 | [WORKFLOW.md](WORKFLOW.md) / [TESTING.md](TESTING.md) | Workflow owns test selection, investigation budgets and host routing; TESTING owns technical gates and evidence details. |
 | `docs/testing/` | Focused current technical runbooks; INCIDENTS is a compact lookup index linking to original task evidence. |
 | Canonical technical docs / `docs/adr/` | Durable behavior, decisions, lessons and operational contracts. |
@@ -26,6 +28,47 @@ Prompts select one coherent approved outcome and point to the repo. They must no
 location of requirements, test commands, unresolved risks or continuation state.
 Avoid independent copies of a plan in attachments, PR comments and several Markdown
 files. PRs link to the canonical plan; comments may record publication/CI receipts.
+
+## Task briefs and supporting files
+
+[ADR 0019](adr/0019-task-briefs-and-evidence-ownership.md) records the ownership
+decision. Maintain the following separation when creating or updating task documents.
+
+For a new substantial outcome, adapt the optional [task brief template](tasks/TEMPLATE.md).
+Small changes may use a short complete record in their owning task.
+
+A brief contains the selected outcome and authorization, current scope, acceptance
+criteria, applicable constraints and allowance, unresolved decisions and next action.
+Replace obsolete live instructions when state changes. Keep a compact acceptance
+map linking each criterion or coherent group to its result and supporting evidence;
+failed, missing and pending proof stays visible alongside passing results.
+
+Put detailed attempts, validation receipts, artifact inventories and superseded
+prompts in `docs/tasks/evidence/<task>.md`. Start with one evidence file per
+substantial outcome, and split only for a useful retrieval boundary. A small task
+may keep a short result in its brief while there is no substantial history to disclose.
+Label historical records with their owning brief and observation period. Preserve
+original results, candidate identities, uncertainty and consumed allowances. Raw logs,
+packages and private artifacts remain outside Git under the evidence/privacy rules.
+
+Split substantial current requirements into `docs/tasks/reference/` or separate
+outcome briefs when they apply to independently selected branches. Keep what every
+branch needs in the brief. Give each rule one current owner and point shared work
+there. Canonical technical docs and ADRs own lasting behavior and decisions.
+
+Write pointers with a retrieval condition: read a requirement reference when changing
+that branch; read matching evidence when diagnosing a failure, assessing result reuse,
+recovering needed state or performing a requested audit. Evidence links do not require
+loading an entire ledger at task entry. Historical instructions cannot select work,
+renew allowances or replace the current contract. If old wording is still required,
+make its current authority explicit in the live brief/reference.
+
+Review a brief that exceeds roughly 1,000 words or covers several independent outcomes.
+This is a prompt to inspect its hierarchy, not a hard limit or a reason to omit
+acceptance criteria. When relocating material, account for all unique requirements
+and evidence, repair relative and inbound section links, and verify the current
+contract against the original and later amendments. Link maintenance may repair an
+accepted ADR's references without changing its decision or recorded result.
 
 <a id="start-of-each-checkpoint-chat"></a>
 
@@ -51,7 +94,7 @@ not a reset or second writer. A new timestamp is not evidence of integration.
 The recorded working branch remains authoritative for unfinished work; main is the
 integration baseline. If main moved, assess its relevant delta without force-pushing
 or discarding work. Create a branch only when HANDOVER calls for one and fresh refs/PRs
-show no matching work. Record the outcome/branch/PR early in the existing task ledger.
+show no matching work. Record the outcome/branch/PR early in the current task brief.
 
 <a id="one-checkpoint-one-chat"></a>
 
@@ -155,8 +198,9 @@ missing evidence or requirement mismatch; multiple/provisional classifications a
 allowed. State evidence, uncertainty and the smallest discriminating experiment.
 Search the [incident index](testing/INCIDENTS.md) for the matching symptom/host/test
 or changed harness, then read the relevant original evidence. Keep detailed attempts
-in the owning task; index only a new cause, changed diagnosis or durable prevention
-lesson. An expired artifact remains unavailable, not freshly verified evidence.
+in the task's linked evidence file; index only a new cause, changed diagnosis or
+durable prevention lesson. An expired artifact remains unavailable, not freshly
+verified evidence.
 A red job alone is not a diagnosis. Do not change production code to satisfy an
 unvalidated harness or relax a threshold to turn a run green. Reproduce at the failed
 layer; use a native target when that is needed to assess actual desktop behavior.
@@ -295,9 +339,9 @@ early tests, fewer speculative/full-matrix reruns; no quantified saving is claim
 
 Record meaningful decisions, completed increments, defects and evidence as they arise.
 Do not rewrite the full handover or create receipt-only commits at each small step.
-Before a genuine pause, transfer or completion, update the task ledger and replace the
-live HANDOVER continuation once with sufficient recovery state. Update CURRENT when
-overall project state changes. Keep detailed history in its owning ledger;
+Before a genuine pause, transfer or completion, update the brief and relevant evidence,
+then replace the live HANDOVER continuation once with sufficient recovery state.
+Update CURRENT when overall project state changes. Keep detailed history in linked task evidence;
 CURRENT/HANDOVER must agree about the live outcome and distinguish evidence from approval.
 
 ### Status-document maintenance
@@ -306,7 +350,7 @@ CURRENT is the project overview: accepted baseline, capability/acceptance state,
 active workstreams and links. HANDOVER is the selected outcome's recovery record:
 continuation location and candidate, key acceptance limits, pending operation/ownership,
 material recovery state, cumulative budget reference and next action. Detailed procedures,
-attempts, measurements and receipts belong in the owning task ledger; lasting behavior
+attempts, measurements and receipts belong in linked task evidence; lasting behavior
 and decisions belong in canonical technical docs/ADRs.
 
 Aim for 200-400 words in CURRENT and 600-1,200 in HANDOVER. These are review targets,
@@ -326,7 +370,7 @@ retains previous live wording. No new size validator is required.
 | --- | --- |
 | Outcome/checkpoint and state | Approved outcome, completed increments, implemented versus accepted status. |
 | Continuation location | Branch/PR, candidate and available ownership/local-only state. |
-| Evidence | Key results and exact workflow/run/attempt/SHA when applicable; section links to detailed commands, counts, artifacts and receipts in the owning ledger. |
+| Evidence | Key result and candidate; direct section links to detailed workflow/run/attempt, commands, counts, artifacts and receipts in task evidence. |
 | Pending operation | Last observed status, observation time, unresolved identity/access and artifact expiry. |
 | Remaining work | Next action, relevant paths, blockers, approval boundary and cumulative budget reference. |
 | Resume route | Same thread by default; actual client control or user action needed, not an invented helper. |
@@ -391,9 +435,10 @@ not authorize an autonomous polling or automatic wake-up loop.
 1. **Start and record.** Check existing operations, candidate and allowance; dispatch
    only the authorised workflow. Capture workflow/run ID, attempt, exact head SHA,
    branch, material inputs and last observed status/time. Record the remaining audit
-   and applicable budgets in HANDOVER/the ledger. A successful request without a
-   confirmed run identity is not a confirmed run; a rejected request is not pending
-   CI. Preserve ambiguous dispatch state and resolve it without duplicate dispatch.
+   and applicable budgets in task evidence; link the pending operation from HANDOVER.
+   A successful request without a confirmed run identity is not a confirmed run;
+   a rejected request is not pending CI. Preserve ambiguous dispatch state and resolve
+   it without duplicate dispatch.
 2. **Actually pause.** Publish the checkpoint and end active model polling. For an
    autonomous Codex Goal, use only a documented, available and authorised lifecycle
    control and confirm its result. If the agent cannot pause it, tell the user to use
@@ -453,9 +498,9 @@ not premature deletion during feasibility/planning.
 
 Consolidate architecture decisions, operational recovery instructions and regression
 lessons before archiving a completed task. Preserve unique acceptance/failure evidence
-and unresolved issues. Archive the completed task/ledger with a final status and update
-INDEX/CURRENT/HANDOVER links. Pure duplicate handovers can be removed once useful
-content is preserved; Git history retains earlier live HANDOVER revisions.
+and unresolved issues. Archive the completed brief with a final status, retain its
+linked evidence and update INDEX/CURRENT/HANDOVER links. Pure duplicate handovers can
+be removed once useful content is preserved; Git history retains earlier live HANDOVER revisions.
 
 Finish with short live status records for the next actual state under
 [status-document maintenance](#status-document-maintenance). A completed milestone's

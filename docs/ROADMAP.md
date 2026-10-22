@@ -84,10 +84,10 @@ reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-caden
 
 ## Phase 2 — Initial LLM assistance
 
-**Status — 2026-10-13: PAUSED — INCOMPLETE.** The user selected Phase 3A implementation
-without resuming or closing Phase 2. Final human acceptance remains pending; scoped
-technical qualification is preserved. The [pause record](tasks/active/phase-2-initial-llm-assistance.md#user-pause--2026-10-13)
-owns outstanding work and supersedes historical execution directions below.
+Phase 2 acceptance remains incomplete. The [current Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md)
+owns outstanding work and qualified evidence; CURRENT and HANDOVER own live state
+and recovery. Read this roadmap for product scope, and follow the brief's current
+contract rather than dated execution directions when selecting further work.
 
 **Outcome:** Unsloth Studio alone supports user-initiated structured scene, Character
 and proposed-lore actions, with reviewable semantic/file changes. Persistent Character
@@ -101,7 +101,7 @@ The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) reco
 selected-context rules, proposal/history ownership and separately selected execution.
 The bounded source foundation, settings/credentials, synthetic request lifecycle,
 manual references, prompts/context, first rewrite, Continue Scene, Draft Scene,
-[Generated Character cards](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11),
+[Generated Character cards](tasks/evidence/phase-2-execution.md#generated-character-cards-qualified-closure--2026-10-11),
 Generated lorebook entries, the Studio integrated/live slice and selectable proposal
 editing are qualified within their recorded scopes. The remaining Phase 2 outcome is
 Studio-only closure: reconcile the residual verification-matrix gaps and complete the
@@ -115,17 +115,17 @@ configuration-bound setup readiness and verified HTTPS/hostname generation are n
 selected and locally implemented, with qualification pending. AI changes to existing Scene endings/connections
 are explicitly deferred beyond Phase 2, as possible future work. Earlier slice
 exclusions do not waive the remaining phase requirements. See the
-[requirement map](tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
+[requirement map](tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
 
 The selected delivery sequence brought forward bounded 3A source foundations alongside
 Studio feasibility, then completed the reviewed dialogue workflow using manual
 cards/lorebook and configurable prompts/limits. Residual Studio verification and 3A
 Story logic may overlap under separately selected bounded outcomes.
-[Shared foundations and lane assignments](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
+[Shared foundations and lane assignments](tasks/reference/phase-2-3-delivery.md#19-selected-shared-foundations-and-two-lane-delivery)
 own the detailed gates and GPT-6.1 Sol High owner with zero to two useful independent helpers.
 Phase 2 still requires residual verification and final integrated acceptance; these
 stages do not enlarge its AI operation allowlist or authorize implementation.
-[The deliverable queue](tasks/active/phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts)
+[The deliverable queue](tasks/reference/phase-2-3-delivery.md#20-bounded-deliverables-and-next-outcome-prompts)
 maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio
 and its five actions. Generic-compatible providers are deferred. Checkpoints use
 internal commits in the same outcome/chat under WORKFLOW, not mandatory chat transfers.

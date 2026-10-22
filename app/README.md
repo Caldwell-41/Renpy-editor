@@ -1,8 +1,9 @@
-# Loomlight production scaffold
+# Loomlight application workspace
 
-This directory contains the Phase 1 production workspace, including the completed 1A
-scaffold and 1B transaction foundation plus the active bounded 1C project lifecycle.
-It remains separate from disposable Phase 0 evidence under `spikes/`.
+This directory contains Loomlight's Tauri desktop application, Rust core and
+TypeScript UI, with build, test and packaging tools. Disposable prototypes live in
+`spikes/`. [Current project state](../docs/status/CURRENT.md) owns active work and
+acceptance status.
 
 ## Local checks
 
@@ -339,7 +340,7 @@ references remain preserved and require explicit Windows re-entry; no Mac key/fi
 operation is attempted. See [ADR 0011](../docs/adr/0011-ai-settings-secrets-and-reference-storage.md)
 and [the data model](../docs/DATA_MODEL.md).
 
-The [selected Windows qualification](../docs/tasks/active/phase-2-initial-llm-assistance.md#final-windows-acceptance-and-cleanup--2026-10-09)
+The [selected Windows qualification](../docs/tasks/evidence/phase-2-execution.md#final-windows-acceptance-and-cleanup--2026-10-09)
 is complete: run 14 proves phase 1; run 16 proves reopen, replacement, discovery,
 reload recovery, removal and normal exit. All known synthetic credentials are cleaned
 up. Run 16 reused unchanged production-code evidence across probe-only build 7;
@@ -356,7 +357,7 @@ identity, loopback requests, whole-store snapshots and external process exit.
 `--acceptance --combined-attempts 10 --replacement --sequence 14 --completion-run 16`
 was the final selection; these arguments are a record, not permission to replay a
 completed run. Commands refuse reused identities and count cumulative attempts.
-The [contract](../docs/tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+The [contract](../docs/tasks/evidence/phase-2-execution.md#current-windows-qualification-contract)
 owns authorization and final accounting; [historical failures](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
 remain preserved without repaired/backfilled manifests.
 
@@ -371,11 +372,11 @@ observations cannot be replaced by probe markers. The opt-in
 the fixed beta post-save reload failure and requires one read-only Retry.
 
 Focused controller checks: `python -m unittest discover -s scripts -p test_windows_studio_credentials.py -v`.
-The selected [current native harness migration](../docs/tasks/active/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
+The selected [current native harness migration](../docs/tasks/evidence/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
 uses `scripts/windows-studio-credentials.py current build|run --output <fresh-output>
 --candidate <exact-reviewed-sha> --ordinal 1|2|3` through the focused Repository quality
 selector `studio_connection_native`. The current Windows sequence and both-host
-portable/rendered gates passed the [CI3 terminal audit](../docs/tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+portable/rendered gates passed the [CI3 terminal audit](../docs/tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 This exact-candidate proof does not qualify signed Mac native or human acceptance.
 It retains the approved Windows credential namespace, uses the current native draft
 dialog, observes Cancel before committing keys, proves failed-entry retained-field

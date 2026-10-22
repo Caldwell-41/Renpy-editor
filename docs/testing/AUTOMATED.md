@@ -139,5 +139,6 @@ renderer build/browser, Rust/core, context and desktop outcomes separately. A fa
 core scope does not suppress the other scopes. Historical recipe branches retain
 their scoped meaning; this does not qualify them on current application contracts.
 
-See [INCIDENTS](INCIDENTS.md) before correcting a matching failure, and update the
-owning task with the classification and smallest discriminating check.
+See [INCIDENTS](INCIDENTS.md) before correcting a matching failure. Record its
+classification and smallest discriminating check in linked task evidence, and keep
+the brief's unresolved result current.

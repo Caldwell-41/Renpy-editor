@@ -1,33 +1,36 @@
 # Architecture decision records
 
-ADRs capture material decisions after evidence is available. Use sequential names
-such as `0001-desktop-stack.md`, state the status and date, and include context,
-decision, consequences, alternatives, and evidence. Accepted ADRs are immutable;
-supersede them with a later ADR rather than editing history.
+ADRs record durable architecture, product and workflow decisions with their context,
+rationale, consequences, alternatives and evidence. Use sequential filenames, state
+the date and decision status, and link supporting records. Accepted decisions and
+recorded results are immutable; supersede them with a later ADR. Reference-only link
+repairs may follow relocated material without changing a decision or result.
 
-| ADR | Status | Decision |
+The status column describes the decision, not implementation or native/human
+acceptance. "Recorded decision" means the ADR gives delivery status without a separate
+acceptance label; it does not infer approval. Reviewed and proposed scope retains
+those limits. For current delivery, qualification and unresolved work, read
+[CURRENT](../status/CURRENT.md), [HANDOVER](../status/HANDOVER.md) and the owning task.
+Dated evidence inside an ADR remains evidence for its recorded scope and candidate.
+
+| ADR | Decision status | Decision |
 | --- | --- | --- |
-| [0001](0001-lossless-source-model.md) | Accepted | Exact source bytes, conservative partial CST, verified range patches |
-| [0002](0002-versioned-renpy-sdk-adapter.md) | Accepted | Exact-version SDK adapter and verified staged installation |
-| [0003](0003-tauri-desktop-runtime.md) | Accepted | Tauri 2 desktop runtime with a narrow Rust privileged core |
-| [0004](0004-journalled-platform-file-transactions.md) | Accepted | Journalled platform replacement with retained competing revisions |
-| [0005](0005-staged-project-creation.md) | Accepted | Version-pinned starter generation with sibling staging and no-replace promotion |
-| [0006](0006-scene-authoring-source-and-media-boundary.md) | Accepted | Exact-range Scene operations, schema v2, revision-bound history, and asset-ID-only media presentation |
-| [0007](0007-shell-save-command-ownership.md) | Accepted design | Shell-owned Save arbitration, document-bound Source acceptance and shared operation/lifecycle coordination; delivery tracked in 1F-SAVE |
-| [0008](0008-controlled-runtime.md) | Implemented; native R1 evidence verified | Explicit session execution, controlled play and independent request/control ownership |
-| [0009](0009-flow-observation-candidates.md) | Reviewed proposal; feasibility unproved | Cached flow candidates with mandatory fresh content verification; no cached write or execution authority |
-| [0011](0011-ai-settings-secrets-and-reference-storage.md) | Accepted design; not implemented | Device profiles, OS/session keys, project prompts/native references and explicit LAN HTTP |
-
-| [0012](0012-bounded-nested-dialogue-ownership.md) | Implemented locally; target qualification pending | Source-map v3, explicit group/branch ownership and minimal existing-child dialogue edits |
-
-| [0014](0014-typed-conditions-and-recursive-source-ownership.md) | Reviewed; local proof passed, target qualification pending | Source-map v4, bounded typed conditions and recursive exact-source ownership |
-
-| [0015](0015-guarded-choices-and-stable-call-continuations.md) | Reviewed; local proof passed, target qualification pending | Source-map v5 refinement, guarded choices and stable Call continuations |
-
-| [0017](0017-design-approval-and-app-integration.md) | Accepted workflow | Versioned per-screen approval, retained references and separate visual/functional integration proof |
-
-| [0018](0018-early-screen-source-proof.md) | Early source/runtime proof qualified on both targets | Revision-bound screen spans and minimal existing pixel-property edits through shared transactions |
-
-Future changes to an accepted decision require a superseding ADR. An accepted design
-is not a claim that its implementation or supported-target acceptance is complete;
-CURRENT, HANDOVER and the linked active task own that delivery state.
+| [0001](0001-lossless-source-model.md) | Accepted | Original source bytes, conservative partial CST and verified minimal range patches. |
+| [0002](0002-versioned-renpy-sdk-adapter.md) | Accepted | Exact-version Ren'Py adapter and checksum-verified staged SDK installation. |
+| [0003](0003-tauri-desktop-runtime.md) | Accepted | Tauri 2 with an unprivileged web UI and narrow Rust commands. |
+| [0004](0004-journalled-platform-file-transactions.md) | Accepted | Journalled platform replacement and retention of competing revisions. |
+| [0005](0005-staged-project-creation.md) | Accepted for Phase 1C | Version-pinned starter generation, sibling staging and no-replace promotion. |
+| [0006](0006-scene-authoring-source-and-media-boundary.md) | Accepted for Phase 1E | Exact-range Scene operations, revision-bound history and asset-ID-only media presentation. |
+| [0007](0007-shell-save-command-ownership.md) | Accepted design | Shell-owned Save arbitration, document-bound Source acceptance and shared lifecycle coordination. |
+| [0008](0008-controlled-runtime.md) | Recorded decision | Explicit session execution, controlled play and separate request/control ownership. |
+| [0009](0009-flow-observation-candidates.md) | Superseded by [0010](0010-local-project-safety-and-observed-flow.md) | Historical cached flow candidates with fresh content verification. |
+| [0010](0010-local-project-safety-and-observed-flow.md) | Accepted | Local hobby-project safety, ordinary external-edit handling and last-observed Branches. |
+| [0011](0011-ai-settings-secrets-and-reference-storage.md) | Accepted design with temporary Mac exception | Device-local profiles and credentials, project prompts/references and explicit private-network HTTP. |
+| [0012](0012-bounded-nested-dialogue-ownership.md) | Accepted bounded checkpoint | Source-map v3, explicit group/branch ownership and minimal existing-child dialogue edits. |
+| [0013](0013-provider-request-and-transport-contract.md) | Accepted Studio-scoped design; remaining proposed contracts | Bounded Studio request, credential-origin and transport contracts; generic support deferred. |
+| [0014](0014-typed-conditions-and-recursive-source-ownership.md) | Independently reviewed | Source-map v4, typed conditions and recursive exact-source ownership. |
+| [0015](0015-guarded-choices-and-stable-call-continuations.md) | Independently reviewed | Source-map v5, guarded choices and stable Call continuations. |
+| [0016](0016-explicit-body-story-authoring.md) | Independently reviewed | Explicit body/node/position ownership for Story structural commands through shared transactions. |
+| [0017](0017-design-approval-and-app-integration.md) | Accepted workflow | Versioned design approval, retained references and separate visual/functional integration proof. |
+| [0018](0018-early-screen-source-proof.md) | Recorded decision | Revision-bound screen spans and minimal existing pixel-property edits through shared transactions. |
+| [0019](0019-task-briefs-and-evidence-ownership.md) | Accepted documentation workflow | Current task briefs, conditional requirement references and separate historical evidence. |

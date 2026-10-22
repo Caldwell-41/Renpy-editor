@@ -7,7 +7,7 @@ of current uncommitted Phase 1 work. No private game content was used.
 
 ![Proposed nested Story Beats](nested-beats-light-v1.png)
 
-The [Phase 3 UX specification](../../tasks/active/phase-3-initial-wysiwyg-release.md#story-interaction-design)
+The [Phase 3 UX specification](../../tasks/reference/phase-3a-story.md#story-interaction-design)
 owns behavior and acceptance. This image is a reviewable proposal, not an accepted
 design, implemented feature, or runtime test. It illustrates 3A, not the whole phase.
 The [existing UI references](../ui-refresh/README.md) still own the accepted shell,

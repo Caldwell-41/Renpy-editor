@@ -10,27 +10,12 @@ or missing state. Follow the
 here; goals select one coherent outcome with internal checkpoints. Workflow waits
 resume the same goal/thread on user command rather than require a new chat.
 
-Phase 1E PR #9 and CI-SIMPLE PR #13 are merged, as are corrected Phase 1A-1D and
-PR #8's UI follow-up. [Phase 1F](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md)
-is accepted by [final review 7.29](tasks/archive/2026-09-23-phase-1f-save-correction.md#729-final-phase-1f-closeout-review).
-Integration through [PR #14](https://github.com/Caldwell-41/Renpy-editor/pull/14) is complete;
-CURRENT/HANDOVER own the verified result.
-[Phase 1G](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md) is accepted and
-integrated through [PR #17](https://github.com/Caldwell-41/Renpy-editor/pull/17).
-[Final closeout](tasks/archive/2026-10-06-ui-design-review.md#phase-1g-integration-and-closeout--2026-10-06)
-retains exact qualification/merge identities, both-platform feedback and limitations.
-[Phase 1H](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
-is accepted and integrated through [PR #18](https://github.com/Caldwell-41/Renpy-editor/pull/18).
-Phase 1 is closed after independent review, both-target qualification and required main quality.
-Unique failures and acceptance limits remain in the archived ledger. The bounded Phase 2
-source foundation is reviewed, qualified on both targets and integrated through PR19;
-provider/AI execution requires separate user selection. CURRENT/HANDOVER own live state.
-The September 25 amendment removes new Git work from Phase 1, clarifies runtime/draft
-contracts and assigns testing ownership; CURRENT/HANDOVER track its publication.
-The [CI-SIMPLE closeout](tasks/archive/2026-09-20-ci-simple-cleanup.md) retains
-acceptance and failed-run evidence; HANDOVER records any remaining housekeeping.
-[W0 and OPT-1A are abandoned](tasks/active/ci-optimisation.md); the old wait/wake
-programme is not the next task. CURRENT/HANDOVER own live state.
+For task documentation changes, follow [brief and evidence ownership](WORKFLOW.md#task-briefs-and-supporting-files).
+Current briefs in `tasks/active` route to branch-specific requirements in
+`tasks/reference` and historical attempts in `tasks/evidence`. Follow evidence links
+for a matching diagnosis, result reuse, recovery detail or requested audit. Earlier
+unsplit archived tasks remain valid lookup records. Live project state belongs to
+CURRENT and HANDOVER.
 
 Read the [Phase 1 plan](tasks/archive/2026-10-07-phase-1-vertical-slice.md) for product prerequisites
 and [ROADMAP.md](ROADMAP.md) for Phases 2-5 and release boundaries. Neither is an
@@ -46,6 +31,9 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Proposed nested Story Beats image, generation prompt and provenance | [Phase 3 Story concept](design/phase-3-story/README.md) |
 | Proposed LLM preparation/review/reference/settings screens, exact prompts and provenance | [Phase 2 LLM concepts](design/phase-2-llm/README.md) |
 | Outcome-sized goals, internal checkpoints, same-thread waiting and handovers | [WORKFLOW.md](WORKFLOW.md) |
+| Task briefs, conditional requirement references and evidence ownership | [ADR 0019](adr/0019-task-briefs-and-evidence-ownership.md), [maintenance rules](WORKFLOW.md#task-briefs-and-supporting-files) |
+| Documentation ownership migration and preservation review | [Documentation task](tasks/active/agent-documentation-ownership.md) |
+| Starting a substantial task brief | [Optional task template](tasks/TEMPLATE.md) |
 | Phase 1F Source editing, synchronisation and partial-visual handling | [Accepted Phase 1F brief](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md) |
 | Phase 1F Save correction, precise regressions and target acceptance | [Completed correction ledger](tasks/archive/2026-09-23-phase-1f-save-correction.md) |
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
@@ -59,20 +47,20 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Published 0.1.0 preview, approved exception and verified assets | [Release task](tasks/archive/2026-10-07-release-0.1.0.md) |
 | Accepted CI-SIMPLE implementation, integration and retained failure | [tasks/archive/2026-09-20-ci-simple-cleanup.md](tasks/archive/2026-09-20-ci-simple-cleanup.md) |
 | Abandoned W0/OPT-1A programme and historical evidence | [tasks/active/ci-optimisation.md](tasks/active/ci-optimisation.md) |
-| Planned Phase 2 LLM assistance, Studio-only provider scope and proposal gates | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
-| Selected Studio-only closeout, requirement/evidence map and material-scope stop | [Closeout entry audit](tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12) |
-| Selected dialogue rewrite and CI-first qualification authority | [CI-first amendment](tasks/active/phase-2-initial-llm-assistance.md#ci-first-platform-qualification-amendment--2026-10-10), [CURRENT](status/CURRENT.md), [HANDOVER](status/HANDOVER.md) |
-| Completed Windows remembered-credential outcome and its evidence/limits | [Windows credential contract](tasks/active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract) |
+| Phase 2 current acceptance, remaining work and Studio-only requirement owners | [tasks/active/phase-2-initial-llm-assistance.md](tasks/active/phase-2-initial-llm-assistance.md) |
+| Historical Studio-only closeout requirement/evidence map and stop decision | [Closeout entry audit](tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12) |
+| Historical dialogue rewrite selection and CI-first amendment | [CI-first amendment](tasks/evidence/phase-2-execution.md#ci-first-platform-qualification-amendment--2026-10-10), [CURRENT](status/CURRENT.md), [HANDOVER](status/HANDOVER.md) |
+| Completed Windows remembered-credential outcome and its evidence/limits | [Windows credential contract](tasks/evidence/phase-2-execution.md#current-windows-qualification-contract) |
 | Historical Phase 2 source/provider/native attempts; outcomes not automatically accepted | [Execution history](tasks/archive/2026-10-09-phase-2-execution-history.md) |
 | First production Help sizing, scratch preview and pending qualification | [Help outcome](tasks/active/help-screen-production.md), [evidence](tasks/evidence/help-screen-production.md) |
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
-| Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery) |
+| Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/reference/phase-2-3-delivery.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |
 | Typed conditions and recursive source ownership | [ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md) |
 | Guarded Choices and stable Call continuations | [ADR 0015](adr/0015-guarded-choices-and-stable-call-continuations.md) |
 | Explicit-body structural authoring, source qualification and empty branches | [ADR 0016](adr/0016-explicit-body-story-authoring.md) |
 | AI settings, remembered keys, project prompts and references | [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) |
-| Selected temporary Mac file credentials, recovery workflow and implementation prompt; code/native proof not started | [Development credential plan](tasks/active/2026-10-08-macos-development-credential-storage.md) |
+| Mac development credential storage and historical recovery selection | [Development credential plan](tasks/active/2026-10-08-macos-development-credential-storage.md) |
 | Studio-scoped provider/credential contract and qualification history | [ADR 0013](adr/0013-provider-request-and-transport-contract.md), [provider ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#25-provider-qualification-ledger--2026-10-07) |
 | Source foundation integration closure | [tasks/archive/2026-10-07-source-foundation-integration.md](tasks/archive/2026-10-07-source-foundation-integration.md) |
 | Accepted bounded source target: nested child edit | [Source foundation](tasks/archive/2026-10-09-phase-2-execution-history.md#21-first-bounded-source-foundation-assignment) |
@@ -89,7 +77,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Pinned SDK, source/runtime and performance gates | [SDK/runtime](testing/SDK-RUNTIME.md) |
 | Native/package/human evidence and result retention | [Native evidence](testing/NATIVE.md), [results](testing/EVIDENCE.md) |
 | Searchable CI causes, corrections and preventing regressions | [Incident index](testing/INCIDENTS.md) |
-| Selected testing-documentation and harness maintenance | [CI harness reliability](tasks/active/ci-harness-reliability.md) |
+| Accepted testing-documentation and harness maintenance | [CI harness reliability](tasks/active/ci-harness-reliability.md) |
 | Former mixed testing reference; historical selections and receipts only | [Migrated reference](tasks/archive/2026-10-16-testing-reference.md) |
 | Transaction, durability and recovery contract | [TRANSACTIONS.md](TRANSACTIONS.md) |
 | Product phases and exit criteria | [ROADMAP.md](ROADMAP.md) |
@@ -131,7 +119,7 @@ and [Phase 0 evidence task](tasks/archive/2026-09-13-phase-0-evidence-spikes.md)
 remain historical evidence.
 
 For needed or user-requested historical review, use the concern links above to find
-the owning ledger in `tasks/active` or `tasks/archive`. Follow the specific evidence
+the owning record in `tasks/evidence` or `tasks/archive`. Follow the specific evidence
 heading, or search by issue, date, candidate or result and read matching sections.
 An archive link does not require reading the whole ledger. Git history supplies earlier
 CURRENT/HANDOVER wording. [Status-document maintenance](WORKFLOW.md#status-document-maintenance)

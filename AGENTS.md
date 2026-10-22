@@ -51,14 +51,10 @@ and explicit user limits. The [budget policy](docs/WORKFLOW.md#5-budget-the-prob
 owns iteration and reassessment; report a concrete blocker when continuation needs
 a real decision or unavailable capability.
 
-Verify the changed user behavior on the required test host. Reuse valid evidence;
-repeat or broaden checks only for changed inputs, failures or unresolved concerns.
-Iterate on the user's chosen development host; use CI for affected Windows/macOS
-proof in either direction. Record the chosen host once in the task; do not assume
-Mac-first development or require routine machine switches. WORKFLOW owns cadence,
-capability exceptions and any necessary local handoff.
-Keep product defects, harness failures and missing evidence distinct. Failed,
-cancelled or skipped required checks are not passes. No package matrix for docs alone.
+For test-host selection, qualification cadence or a capability handoff, follow
+[host routing](docs/WORKFLOW.md#test-host-routing-and-ownership). For failures,
+follow [diagnosis](docs/WORKFLOW.md#4-classify-failures-before-fixing).
+Failed, cancelled or skipped required checks are not passes. No package matrix for docs alone.
 
 ## Read the relevant reference
 
@@ -77,6 +73,8 @@ cancelled or skipped required checks are not passes. No package matrix for docs 
   [status maintenance](docs/WORKFLOW.md#status-document-maintenance).
   Record compact results in the owning task, keep one live handover and update
   canonical contracts when behavior changes. Preserve unique failure/recovery evidence.
+- Task documentation: follow [brief and evidence ownership](docs/WORKFLOW.md#task-briefs-and-supporting-files)
+  when creating or updating briefs, requirements or validation records.
 - Product, architecture, data, UI and ADR ownership: [INDEX](docs/INDEX.md).
 
 Publish only within actual authorization and disclose local-only work. Historical

@@ -5,7 +5,7 @@
 **Current closeout disposition, 2026-10-12:** Phase 2 is Studio-only. Remembered
 credential slices remain qualified within their exact evidence; full-phase integrated
 saved-key qualification remains incomplete as recorded in the
-[closeout map](../tasks/active/phase-2-initial-llm-assistance.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
+[closeout map](../tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
 The user's subsequent 2026-10-12 decision removes session-only credentials from the
 product requirement: reuse the saved profile key across sessions. This supersedes
 earlier session-mode design clauses below; it does not change the approved Mac storage

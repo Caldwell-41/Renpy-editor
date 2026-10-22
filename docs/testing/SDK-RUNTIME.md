@@ -43,9 +43,9 @@ prove actual rendered dimensions, a captured screen, unchanged accepted bytes an
 one continuation after Close. Retain individual cases, source/toolchain/executable
 identity, the executable on failure, durations and cleanup. Scan before upload.
 The focused branch workflow uses both Windows x64 and macOS ARM64 without packaging
-an editor. The [task ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
+an editor. The [task ledger](../tasks/evidence/phase-3-history.md#early-execution-ledger)
 owns the fresh allowance and all failures. Its
-[CI1 audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci1-terminal-audit-and-prototype-continuation)
+[CI1 audit](../tasks/evidence/phase-3-history.md#ci1-terminal-audit-and-prototype-continuation)
 qualifies the early source/runtime proof on both hosts. Require measured virtual
 dimensions separately from capture pixels; successful compile/lint or an active
 screen alone cannot qualify rendering. Broader screen behavior remains under the

@@ -5,7 +5,7 @@ Screen builder (`flow-v1`, variant `flow`) is the approved design reference as o
 the notebook, remove the previous workbench/canvas/original notebook, and build two
 research-informed alternatives. The retired layouts are removed from the selector
 and source files. Git and the
-[owning task](../../tasks/active/phase-3-initial-wysiwyg-release.md#screens-research-and-three-candidate-refresh--2026-10-21)
+[owning task](../../tasks/evidence/phase-3-history.md#screens-research-and-three-candidate-refresh--2026-10-21)
 retain their history and evidence. This is a browser prototype, with fictional data
 and changes that reset on reload.
 
@@ -136,7 +136,7 @@ Approval local1 passes TypeScript, approval/source checks, all 508 rendering cas
 and 20 interaction groups on Chromium 155.0.8059.86, without browser errors. The four
 baseline images reproduce the retained captures byte for byte. Parent inspection
 confirms the selected layout, source, current-reference link and approval history.
-The [task record](../../tasks/active/phase-3-initial-wysiwyg-release.md#screen-builder-design-approval-2026-10-22)
+The [task record](../../tasks/evidence/phase-3-history.md#screen-builder-design-approval-2026-10-22)
 owns the audit, local1/2 final use and continuation. The unused repair cycle is closed;
 no approval verification remains pending. Earlier continuity and refinement evidence
 remains historical. The separate narrow source/runtime proof remains qualified at

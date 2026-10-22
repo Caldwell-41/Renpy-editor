@@ -2,7 +2,7 @@
 
 Generated 2026-10-13 using the built-in imagegen skill, two calls, public fixture
 content only. These are **proposed**, not implemented, verified or accepted screens.
-The selected refinement in the [owning task](../../../tasks/active/phase-2-initial-llm-assistance.md#studio-ui-refinement-selection-and-finite-allowance--2026-10-13)
+The selected refinement in the [owning task](../../../tasks/evidence/phase-2-execution.md#studio-ui-refinement-selection-and-finite-allowance--2026-10-13)
 owns scope, allowance and approval. Current written contracts and accepted
 [UI guidelines](../../../UI.md#accepted-uiux-guidelines-for-implementation-agents)
 take precedence over generated details and Section 18's older proposal.
@@ -108,5 +108,5 @@ schematic; compact reference approval is reached by scrolling its comparison.
 
 No new editor package/Tauri WebView physical interaction/screen-reader/native UI proof,
 model discovery, paid/live send, merge, release or human acceptance is claimed.
-The [guided feedback prompt](../../../tasks/active/phase-2-initial-llm-assistance.md#prepared-guided-feedback-session--not-started)
+The [guided feedback prompt](../../../tasks/evidence/phase-2-execution.md#prepared-guided-feedback-session--not-started)
 is prepared as a separate session and has not started.

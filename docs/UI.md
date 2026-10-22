@@ -831,14 +831,14 @@ external revision boundaries rather than overwriting newer work.
 
 ### Proposed Phase 2–3 interaction direction — 2026-10-02
 
-The [Phase 2 interaction journey](tasks/active/phase-2-initial-llm-assistance.md#18-proposed-llm-screen-and-interaction-design)
+The [Phase 2 interaction journey](tasks/evidence/phase-2-execution.md#18-proposed-llm-screen-and-interaction-design)
 places reviewed assistance next to writing, extends Characters with cards, introduces
 Lorebook, and exposes prompt/context/response controls. Its
 [four generated LLM screen concepts](design/phase-2-llm/README.md) illustrate preparation,
 semantic proposal review, reference editing and AI settings, with explicit schematic
 corrections. Approval and inclusion remain separate, context budget includes output
 and margin, and unaccepted proposals are transient. The
-[Phase 3 Story interaction design](tasks/active/phase-3-initial-wysiwyg-release.md#story-interaction-design)
+[Phase 3 Story interaction design](tasks/reference/phase-3a-story.md#story-interaction-design)
 keeps the Beat list and adds expandable, labelled conditional bodies, explicit insertion
 parents and continuations, returning Call rows and an honest manual branch preview.
 Its [generated concept](design/phase-3-story/README.md) uses a saved actual Story UI
@@ -869,7 +869,7 @@ Selected Phase 3 Story integration exposes **Show screen**, **Hide screen** and
 visible while Story continues; Hide dismisses it. Call waits for **Finish interaction**
 before continuing at the following Beat. Keep screen calls distinct from Scene calls;
 show the selected target and preserve draft/history behavior. Dynamic arguments and
-captured return values are deferred. [3B.2a](tasks/active/phase-3-initial-wysiwyg-release.md#4-3b--supported-screen-designer)
+captured return values are deferred. [3B.2a](tasks/reference/phase-3b-screens.md#4-3b--supported-screen-designer)
 owns source, action-context and normal-play proof. This is planned, not implemented.
 
 ### Animation/audio timeline
@@ -891,10 +891,10 @@ continues while dialogue waits and stops on hide/replacement; base placement edi
 preserve its animation binding. Preview play/stop is deliberate, with native Preview
 in Ren'Py when the WebView cannot faithfully decode that profile. Import refusal lists
 supported exports; no GIF/video conversion action is offered. The
-[3C contract](tasks/active/phase-3-initial-wysiwyg-release.md#selected-staging-native-media-and-idle-playback)
+[3C contract](tasks/reference/phase-3c-timeline.md#selected-staging-native-media-and-idle-playback)
 owns exact format, source/persistence and runtime proof requirements.
 
-The [agreed implementation sequence](tasks/active/phase-3-initial-wysiwyg-release.md#agreed-implementation-order-and-source-bindings)
+The [agreed implementation sequence](tasks/reference/phase-3c-timeline.md#agreed-implementation-order-and-source-bindings)
 delivers static controls, PNG/ATL idles, native looping video, prepared transparency
 and play-once/end choices in order. Frame/video content shares the same placement
 controls. Play once exposes a declared end state: disappear, hold last frame or show
@@ -1161,7 +1161,7 @@ and selector focus/scroll. This closes the prior clipping finding by self-review
 user approval. CI4 passes the full ten-case frontend/core journey and two separately
 reaped helpers on both hosts, plus actual pinned-SDK saved-callee/caller-edit/load-return
 qualification. Portable visual/controller proof does not claim packaged physical input
-or human acceptance. Phase3A remains incomplete; the [terminal audit](tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14)
+or human acceptance. Phase3A remains incomplete; the [terminal audit](tasks/evidence/phase-3-history.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14)
 owns exact evidence and limits.
 
 An existing declared-bool If/Otherwise group with direct dialogue children is displayed
@@ -1237,7 +1237,7 @@ card and approved text** shows both versions. **Approve this card revision** exp
 replaces approved text; **Reject proposed card** retains it. Supporting source and
 reference staleness prevents approval or later inclusion. Both Save and review decisions
 use shared Undo/Redo; reopen retains the exact saved revision. Settings edits/restores
-the action prompt. The [qualified task closure](tasks/active/phase-2-initial-llm-assistance.md#generated-character-cards-qualified-closure--2026-10-11)
+the action prompt. The [qualified task closure](tasks/evidence/phase-2-execution.md#generated-character-cards-qualified-closure--2026-10-11)
 records Windows and signed Mac native evidence; final human acceptance remains separate.
 
 ### Generated lorebook entry review
@@ -1355,7 +1355,7 @@ Selection has a visible highlight and status text. Comparisons stack at compact
 widths. Prompt/scope tabs have arrow/Home/End traversal and associated panels;
 prompt save/restore/Undo and draft protection retain their existing contract.
 
-The [owning task](tasks/active/phase-2-initial-llm-assistance.md#studio-ui-refinement-selection-and-finite-allowance--2026-10-13)
+The [owning task](tasks/evidence/phase-2-execution.md#studio-ui-refinement-selection-and-finite-allowance--2026-10-13)
 owns changed-input evidence and limits. [CI1run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511)
 passes both-target renderer/controller-service proof at462cf08 with independent audit.
 These contracts do not claim new packaged native interaction or human acceptance.

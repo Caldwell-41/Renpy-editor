@@ -3,7 +3,7 @@
 Historical evidence extracted at `015579a`. Phase 2 and Windows qualification remain
 incomplete; archiving these records does not accept or close their outcomes.
 Old prompts, approvals, counters and next actions describe their recorded checkpoint.
-Use the [current Windows contract](../active/phase-2-initial-llm-assistance.md#current-windows-qualification-contract)
+Use the [current Windows contract](../evidence/phase-2-execution.md#current-windows-qualification-contract)
 and [HANDOVER](../../status/HANDOVER.md) for live scope, limits and recovery state.
 Search this record by section, date, candidate or failure; full reading is unnecessary.
 Original results, failures and unresolved Mac identity evidence are retained below.
@@ -4944,8 +4944,8 @@ supersedes the proposed-review continuation, not historical failures or proof li
 
 #### Gate disposition for the selected remembered Studio slice
 
-Sections [10](../active/phase-2-initial-llm-assistance.md#10-checkpoint-sequence-and-gates), [19](../active/phase-2-initial-llm-assistance.md#19-selected-shared-foundations-and-two-lane-delivery)
-and [20](../active/phase-2-initial-llm-assistance.md#20-bounded-deliverables-and-next-outcome-prompts) preserve full milestone
+Sections [10](../reference/phase-2-requirements.md#10-checkpoint-sequence-and-gates), [19](../reference/phase-2-3-delivery.md#19-selected-shared-foundations-and-two-lane-delivery)
+and [20](../reference/phase-2-3-delivery.md#20-bounded-deliverables-and-next-outcome-prompts) preserve full milestone
 requirements. The [first-slice selection](#first-studio-settingscredential-slice--2026-10-08)
 selected remembered Studio profiles, explicit GET readiness and safe replacement/removal;
 it explicitly deferred generic/session-only completion. The table maps that current

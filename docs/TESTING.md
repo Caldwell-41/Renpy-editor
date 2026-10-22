@@ -2,7 +2,8 @@
 
 ## Scope and ownership
 
-Select the changed behavior and required evidence under [WORKFLOW](WORKFLOW.md).
+Select changed behavior and required evidence under
+[WORKFLOW routing](WORKFLOW.md#test-host-routing-and-ownership).
 [CURRENT](status/CURRENT.md), [HANDOVER](status/HANDOVER.md) and the selected task
 own current state, acceptance and remaining allowance. Commands are references,
 not a requirement to run every suite. Documentation alone needs no package matrix.
@@ -18,25 +19,11 @@ settings to pass a test. Exact dispositions remain in the [selector record](task
 
 ## Development host and test cadence
 
-Iterate on the user's chosen host. Use CI for required automated evidence on other
-supported platforms, symmetrically: Mac development → Windows CI; Windows development
-→ macOS CI. Select evidence from affected behavior, not from the development OS.
-There is no routine machine switch or extra standalone CI cycle per feature.
-
-| Stage | Selection |
-| --- | --- |
-| Local iteration | Cheap affected unit, renderer, harness and production-consumer checks |
-| New platform-sensitive assumption | One representative real path through focused CI on affected targets, early enough to inform implementation |
-| Coherent candidate | Required Windows x64/macOS ARM64 qualification and any remaining named native/human checks |
-| Diagnosed correction | Reproduce at the failed layer, repair, repeat only affected or unresolved checks within the same allowance |
-
-Place cheap harness checks at the start of an existing selected qualification job.
-Use the isolated harness-only CI selector only when that is the smallest necessary
-platform proof. CI cannot supply a missing signing/native/human capability merely
-by running on the right OS; name that gap and arrange the minimum remaining check.
-[Routing](WORKFLOW.md#test-host-routing-and-ownership), [budgets](WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
-and [manual same-thread waiting](WORKFLOW.md#waiting-without-model-polling) remain owned
-by WORKFLOW. No autonomous polling, duplicate dispatch or second writer is introduced.
+When selecting a test host, scheduling qualification or resolving missing native
+capability, follow [host routing](WORKFLOW.md#test-host-routing-and-ownership). For diagnosed corrections
+and evidence reuse, follow the [cumulative budget](WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
+and [executable-gate policy](WORKFLOW.md#6-make-policy-and-executable-gates-agree).
+CI and external waits follow [manual same-thread waiting](WORKFLOW.md#waiting-without-model-polling).
 
 ## Focused runbooks
 
@@ -45,7 +32,7 @@ by WORKFLOW. No autonomous polling, duplicate dispatch or second writer is intro
 | Local commands, Python host exclusions, renderer/probe consumers and workflow gates | [Automated checks](testing/AUTOMATED.md) |
 | Source/transaction expectations, pinned SDK, packaged scenarios and performance boundaries | [SDK and runtime](testing/SDK-RUNTIME.md) |
 | Native input, package identity, credentials and human evidence reuse | [Native evidence](testing/NATIVE.md) |
-| Failure classification, summaries, source identity, artifact retention and audit | [Evidence](testing/EVIDENCE.md) |
+| Result summaries, source identity, artifact retention and audit | [Evidence](testing/EVIDENCE.md) |
 | A matching past symptom, diagnosis or prevention lesson | [Searchable incident index](testing/INCIDENTS.md) |
 | Exact build/signing commands and approved identity | [App README](../app/README.md#local-checks) |
 
@@ -71,15 +58,15 @@ thresholds, blanket-skip cases or retry until green.
 
 ## Results and historical lookup
 
-Record observed failures and uncertainty in the owning task as product, harness,
-environment, missing evidence or requirement mismatch. Preserve original outcomes
-and all relevant cleanup/timing facts. A green badge or hash manifest alone cannot
-qualify required behavior. Search the incident index by symptom/host/test/script
-before correcting a matching failure; update it only for a new cause or material
-lesson, with links to original evidence. No full-ledger reading is required at entry.
+Before correcting a failure or changing its harness, follow
+[WORKFLOW diagnosis](WORKFLOW.md#4-classify-failures-before-fixing) for classification,
+incident lookup and index maintenance. [Evidence](testing/EVIDENCE.md) owns technical
+result summaries, retained measurements, artifact identity and terminal audit.
 
 Run-specific counts, attempt ordinals, SHAs, artifact receipts and old next-step
-instructions belong in task history. The one-time [former testing reference](tasks/archive/2026-10-16-testing-reference.md)
+instructions belong in linked task evidence. Keep required validation and a concise
+acceptance result in the brief under [document ownership](WORKFLOW.md#task-briefs-and-supporting-files).
+The one-time [former testing reference](tasks/archive/2026-10-16-testing-reference.md)
 preserves unique material moved here in the migration. Its selected outcomes and
 allowances are historical. Current and frozen harness contracts must stay explicit;
 this maintenance does not reopen native acceptance or exhausted attempts.

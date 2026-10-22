@@ -26,6 +26,10 @@ The repository validator is:
 python3 scripts/validate.py
 ```
 
+It checks local document files and heading/named-anchor links, with fenced examples
+excluded. Focused validator regression fixtures run with
+`python3 -m unittest discover -s scripts -p test_validate.py -v` and in existing CI preflight jobs.
+
 Ren'Py is a separate project. This repository does not currently bundle or
 redistribute the Ren'Py SDK.
 

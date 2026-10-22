@@ -3,7 +3,7 @@
 Search by symptom, host, test, control or script (for example `rg -n -i 'BOM|focus' docs/testing/INCIDENTS.md`).
 Read only matching entries and their linked original task sections. This is a compact
 lookup index, not another execution ledger or current task selection. Detailed attempts,
-hashes, budgets and uncertainty stay in the owning task. Links to CI may outlive artifacts;
+hashes, consumed attempts and uncertainty stay in linked task evidence. Links to CI may outlive artifacts;
 an expired archive is not freshly auditable evidence.
 
 Add an entry for a new cause, materially revised diagnosis or lasting regression lesson.
@@ -18,7 +18,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** two Settings-dispatch fixtures omitted the shared ownership guard.
   Use the same fixture guard and preserve production locking/cancellation assertions.
 - **Regression:** full desktop tests under the ordinary parallel runner on Windows.
-- **Evidence:** [first diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#ci-audit-and-repository-harness-review--2026-10-16),
+- **Evidence:** [first diagnosis](../tasks/evidence/phase-2-execution.md#ci-audit-and-repository-harness-review--2026-10-16),
   [both-host corrected CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609).
 
 ## H02 — POSIX fixture errors or nonexistent-PID behavior on Windows
@@ -28,7 +28,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Unix process absence. Route only named host cases; inject absence for portable logic.
 - **Regression:** `test_macos_development_credentials`, cleanup live/unknown-state refusal,
   and exact named Python exclusions in `check-thinking-evidence.py`.
-- **Evidence:** [CI2 diagnosis and correction](../tasks/active/phase-2-initial-llm-assistance.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16),
+- **Evidence:** [CI2 diagnosis and correction](../tasks/evidence/phase-2-execution.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16),
   [failed run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38850950449).
 
 ## H03 — Mocked operation finishes in one clock tick
@@ -37,7 +37,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** immediate failed-build fixture asserted strict elapsed progress.
   Use a controlled advancing clock with exact expected receipt values.
 - **Regression:** `test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch`.
-- **Evidence:** [CI2 diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16).
+- **Evidence:** [CI2 diagnosis](../tasks/evidence/phase-2-execution.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16).
 
 ## H04 — Native path separators differ from fixture or preview keys
 
@@ -45,8 +45,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** use native `Path` for executable arguments; use normal relative
   components joined with `/` for portable snapshot keys. Preserve exact bytes/containment.
 - **Regression:** `test_npm_routes_through_pinned_node_cli_without_shell`, `snapshot_paths`.
-- **Evidence:** [argument fixture](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci2-windows-harness-failure-and-narrow-correction--2026-10-12),
-  [snapshot diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci4-terminal-audit-and-portable-snapshot-correction--2026-10-12).
+- **Evidence:** [argument fixture](../tasks/evidence/phase-2-execution.md#selectable-ci2-windows-harness-failure-and-narrow-correction--2026-10-12),
+  [snapshot diagnosis](../tasks/evidence/phase-2-execution.md#selectable-ci4-terminal-audit-and-portable-snapshot-correction--2026-10-12).
 
 ## H05 — ZIP fixture name normalized before archive refusal
 
@@ -54,7 +54,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** reader and writer can normalize unsafe names. Reject raw versus
   normalized name differences before extraction; preserve archive-entry defenses.
 - **Regression:** `test_studio_settings_evidence.py` archive normalization/refusal cases.
-- **Evidence:** [CI2 archive diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#ci2-terminal-audit-and-unlocked-owner-continuation--2026-10-13).
+- **Evidence:** [CI2 archive diagnosis](../tasks/evidence/phase-2-execution.md#ci2-terminal-audit-and-unlocked-owner-continuation--2026-10-13).
 
 ## H06 — Approved temporary root rejected before launch
 
@@ -62,7 +62,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** Python and inherited Rust child resolved different temporary
   parents. Align environment with the approved runner root, retaining containment.
 - **Regression:** native root admission fixtures and actual target preparation.
-- **Evidence:** [CI3 root diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#ci3-terminal-audit-and-explicit-ci-allowance-extension--2026-10-13).
+- **Evidence:** [CI3 root diagnosis](../tasks/evidence/phase-2-execution.md#ci3-terminal-audit-and-explicit-ci-allowance-extension--2026-10-13).
 
 ## H07 — Fixture preparation consumes the request deadline
 
@@ -70,7 +70,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** construct/drop the unrelated project before starting the stalled
   request timer. Preserve original cancellation, EOF and shutdown assertions.
 - **Regression:** `ordinary_external_configuration_change_and_project_session_reject_results`.
-- **Evidence:** [generated-card first failure](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-first-ci-failure-and-correction--2026-10-11).
+- **Evidence:** [generated-card first failure](../tasks/evidence/phase-2-execution.md#generated-card-first-ci-failure-and-correction--2026-10-11).
 
 ## H08 — Native focus/readiness or dialog children unproven
 
@@ -81,8 +81,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   dismissal/readback; cancel the owned modal before failure cleanup.
 - **Regression:** `test_studio_setup_native.py`, Windows focus fixtures and actual native
   sequence. Mocks do not establish native proof; CI8's exact UIA provider cause remained unknown.
-- **Evidence:** [whole-sequence reassessment](../tasks/active/phase-2-initial-llm-assistance.md#ci7-terminal-audit-and-whole-sequence-reassessment--2026-10-13),
-  [child-control gap](../tasks/active/phase-2-initial-llm-assistance.md#ci8-terminal-review--native-child-control-observation-gap--2026-10-13),
+- **Evidence:** [whole-sequence reassessment](../tasks/evidence/phase-2-execution.md#ci7-terminal-audit-and-whole-sequence-reassessment--2026-10-13),
+  [child-control gap](../tasks/evidence/phase-2-execution.md#ci8-terminal-review--native-child-control-observation-gap--2026-10-13),
   [historical CI9 completion](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38317425509).
 
 ## H09 — Remount toggles an already-selected Beat off
@@ -91,7 +91,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** production selection toggles; the probe clicked unconditionally.
   Select idempotently and observe the selected state before the next operation.
 - **Regression:** `native-probe-driver.test.ts`, full `selectable-native-sequence.dom.test.ts`.
-- **Evidence:** [selectable CI6 diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci6-terminal-audit-and-idempotent-remount-correction--2026-10-12).
+- **Evidence:** [selectable CI6 diagnosis](../tasks/evidence/phase-2-execution.md#selectable-ci6-terminal-audit-and-idempotent-remount-correction--2026-10-12).
 
 ## H10 — Snapshot overlaps async history; cleanup hides owner failures
 
@@ -100,8 +100,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   pre-dispatch contention; do not retry inner I/O failures. Attempt cleanup owners
   independently, retain timeout output, and read only the exact attempted phase report.
 - **Regression:** `snapshot_paths`, `probe_cleanup`, rejecting selectable/phase gates.
-- **Evidence:** [CI5 ownership diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci5-terminal-audit-and-probe-ownership-correction--2026-10-12),
-  [remaining-sequence audit](../tasks/active/phase-2-initial-llm-assistance.md#remaining-windows-suite-review-and-approved-ci7--2026-10-12).
+- **Evidence:** [CI5 ownership diagnosis](../tasks/evidence/phase-2-execution.md#selectable-ci5-terminal-audit-and-probe-ownership-correction--2026-10-12),
+  [remaining-sequence audit](../tasks/evidence/phase-2-execution.md#remaining-windows-suite-review-and-approved-ci7--2026-10-12).
 
 ## H11 — SDK driver advances dialogue while at a menu
 
@@ -109,7 +109,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** await/assert the choice screen before the route click; retain
   ordinary advance for no-option continuation and all expected route assertions.
 - **Regression:** zero-SDK generated-driver preflight in `renpy/tests/phase3a.rs`.
-- **Evidence:** [CI1 diagnosis](../tasks/active/phase-3-initial-wysiwyg-release.md#resume-and-exact-ci1-failure-audit--2026-10-13),
+- **Evidence:** [CI1 diagnosis](../tasks/evidence/phase-3-history.md#resume-and-exact-ci1-failure-audit--2026-10-13),
   [failed run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499).
 
 ## H12 — SDK scaffold import uses an accepted-document BOM rule
@@ -118,7 +118,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** distinguish external import encoding from captured document
   editing; retain actual input bytes, accept one transport BOM and reject multiple BOMs.
 - **Regression:** all three scaffold imports in the zero-SDK `phase3a_` preflight.
-- **Evidence:** [CI3 diagnosis](../tasks/active/phase-3-initial-wysiwyg-release.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14),
+- **Evidence:** [CI3 diagnosis](../tasks/evidence/phase-3-history.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14),
   [failed run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556).
 
 ## H13 — UI/request fixtures retain an old application contract
@@ -130,8 +130,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Dispose cancelled timers; version/refuse incompatible frozen-product contracts.
 - **Regression:** full renderer critical consumer names, synthetic Thinking on/off
   preparation/admission, legacy Windows contract2 refusal before build/launch.
-- **Evidence:** [repository harness review](../tasks/active/phase-2-initial-llm-assistance.md#ci-audit-and-repository-harness-review--2026-10-16),
-  [repair record](../tasks/active/phase-2-initial-llm-assistance.md#harness-repair-and-second-review--2026-10-16).
+- **Evidence:** [repository harness review](../tasks/evidence/phase-2-execution.md#ci-audit-and-repository-harness-review--2026-10-16),
+  [repair record](../tasks/evidence/phase-2-execution.md#harness-repair-and-second-review--2026-10-16).
 
 ## H14 — Official checksum host times out before tests
 
@@ -140,7 +140,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   published manifest; bounded official download on miss, corrupted cache refusal.
   Record bootstrap before acquisition and retain safe early failures.
 - **Regression:** `selectable-evidence.py` acquisition/identity/early-failure gates.
-- **Evidence:** [selectable acquisition diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#selectable-ci1-failure-audit-and-acquisition-correction--2026-10-12).
+- **Evidence:** [selectable acquisition diagnosis](../tasks/evidence/phase-2-execution.md#selectable-ci1-failure-audit-and-acquisition-correction--2026-10-12).
 
 ## H15 — Verbose unittest warning interrupts a completed result row
 
@@ -149,7 +149,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Parse the completed result across warning lines, while requiring exact row/count
   agreement and rejecting missing/duplicate results and extra host exclusions.
 - **Regression:** `test_check_thinking_evidence.py` warning/unterminated-result fixtures.
-- **Evidence:** [maintenance verification](../tasks/active/ci-harness-reliability.md#implementation-and-verification).
+- **Evidence:** [maintenance verification](../tasks/evidence/ci-harness-reliability.md#implementation-and-verification).
 
 ## H16 — Hyphenated test script is absent from unittest discovery
 
@@ -158,7 +158,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Invoke `test-q1-package-retention.py -v` directly and require its exact named results.
 - **Regression:** `test_harness_checks.py` retention missing/duplicate/skip rejection;
   the shared runner's actual retention execution remains required on both hosts.
-- **Evidence:** [maintenance verification](../tasks/active/ci-harness-reliability.md#implementation-and-verification).
+- **Evidence:** [maintenance verification](../tasks/evidence/ci-harness-reliability.md#implementation-and-verification).
 
 ## H17 — Inventory unit fixtures depend on an earlier Tauri build
 
@@ -171,9 +171,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** named `test_source_inventory_requires_generated_permissions_without_prior_builds`
   is required by the Python evidence gate. Run the shared harness from a clean export
   without generated permissions, dependencies or build output before affected CI.
-- **Evidence:** [CI1 audit and repair](../tasks/active/ci-harness-reliability.md#ci1-terminal-audit-and-selected-repair--2026-10-16),
-  [clean-checkout verification](../tasks/active/ci-harness-reliability.md#clean-checkout-repair-verification--2026-10-16),
-  [both-host CI2 completion](../tasks/active/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
+- **Evidence:** [CI1 audit and repair](../tasks/evidence/ci-harness-reliability.md#ci1-terminal-audit-and-selected-repair--2026-10-16),
+  [clean-checkout verification](../tasks/evidence/ci-harness-reliability.md#clean-checkout-repair-verification--2026-10-16),
+  [both-host CI2 completion](../tasks/evidence/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
 
 ## H18 — Current native window exceeds the runner desktop; cleanup repeats the gate
 
@@ -192,9 +192,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   after observation refusal run on Windows before packaging. CI2 proves geometry,
   state retention and phase1; phase2 reaches the distinct H19 recovery/close gap.
   CI3 completes both native phases with normal exit. No app defect is established by CI1.
-- **Evidence:** [native CI1 terminal audit and proposal](../tasks/active/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16).
-  [Approved repair and local results](../tasks/active/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16).
-  [CI3 complete native audit](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+- **Evidence:** [native CI1 terminal audit and proposal](../tasks/evidence/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16).
+  [Approved repair and local results](../tasks/evidence/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16).
+  [CI3 complete native audit](../tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 
 ## H19 — Retry inside closed disclosure; Settings modal blocks app-close cleanup
 
@@ -221,9 +221,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   prove Retry visible/enabled; successful flow does not exercise failure cleanup.
   CI1 had stopped earlier at geometry, so CI2 reaching this later state required no
   product regression. Embedded probe changes still require a matching rebuilt package.
-- **Evidence:** [final native CI2 audit](../tasks/active/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17).
-  [H19 build/rejecting-gate review](../tasks/active/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17).
-  [CI3 terminal audit and completion](../tasks/active/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+- **Evidence:** [final native CI2 audit](../tasks/evidence/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17).
+  [H19 build/rejecting-gate review](../tasks/evidence/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17).
+  [CI3 terminal audit and completion](../tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 
 ## H20 — Screen SDK driver assumes an unavailable menu or style attribute
 
@@ -237,7 +237,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** named core/evidence rejection cases and retained native assertions;
   corrected rendering passes the audited both-host CI1 proof. All failed local
   attempts remain in the owning ledger.
-- **Evidence:** [early 3B execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger).
+- **Evidence:** [early 3B execution ledger](../tasks/evidence/phase-3-history.md#early-execution-ledger).
 
 ## H21 — Generated arrow names and offscreen inspector text break browser checks
 
@@ -251,7 +251,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression/evidence:** original failures reproduce in local10; all three
   focused journeys then pass. Local11 passes 508 cases and 20 groups. Per-layout
   progress and failure state prevent another missing-variant diagnosis.
-  [3B execution ledger](../tasks/active/phase-3-initial-wysiwyg-release.md#early-execution-ledger)
+  [3B execution ledger](../tasks/evidence/phase-3-history.md#early-execution-ledger)
   retains both failures, actual visibility/name facts and final results.
 
 ## P01 — Redo refuses an app-owned clean deletion
@@ -260,7 +260,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Correction:** evict only exact accepted clean buffers after successful app deletion;
   preserve external missing-source and dirty/conflict protections.
 - **Regression:** production Draft history with refresh, Undo/Redo and process reopen.
-- **Evidence:** [reproduced product diagnosis](../tasks/active/phase-2-initial-llm-assistance.md#draft-scene-ci-artifact-audit-and-redo-correction--2026-10-10).
+- **Evidence:** [reproduced product diagnosis](../tasks/evidence/phase-2-execution.md#draft-scene-ci-artifact-audit-and-redo-correction--2026-10-10).
 
 ## P02 — Windows partial-body cancellation does not close promptly
 
@@ -269,7 +269,19 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   exact Winsock internal cause was not established; do not generalize clone behavior.
 - **Regression:** header/body cancellation requires owned socket, shutdown, Cancelled,
   EOF and the original two-second bounds. Initial timing-only diagnosis was provisional.
-- **Evidence:** [decisive handle/phase evidence](../tasks/active/phase-2-initial-llm-assistance.md#generated-card-third-ci-audit-and-exact-handle-repair--2026-10-11).
+- **Evidence:** [decisive handle/phase evidence](../tasks/evidence/phase-2-execution.md#generated-card-third-ci-audit-and-exact-handle-repair--2026-10-11).
+
+
+## H22 — Scratch screen preview selects a menu context
+
+- **Class/search:** product/helper and missing diagnostic evidence; scratch preview,
+  geometry timeout, `_main_menu_screen`, `suppress_overlay`.
+- **Cause/correction:** the initial job redirected a menu label. The pinned SDK's
+  `_enter_menu` enables menu state and suppresses overlays. The correction redirects
+  the ordinary `start` label and keeps skip-menu/skip-splash behavior inside the SDK
+  runtime adapter. Qualification requires `main_menu == False`, geometry, retained
+  process status and cleanup. The correction passes both-aspect Mac SDK service proof; native/Windows proof remains pending.
+- **Evidence:** [Help outcome attempts](../tasks/evidence/help-screen-production.md#local5-result-cancelled-local6-and-corrected-local7).
 
 ## H23. Help gate assumes an owned Windows Stop exits with zero
 

@@ -59,8 +59,8 @@ logic opaque would prevent the selected nested authoring outcome.
 
 This decision alone does not deliver editable conditions, calls, Story controls or
 3A acceptance. Those slices retain their own review and runtime requirements. The
-[Phase 3 task](../tasks/active/phase-3-initial-wysiwyg-release.md#3a-execution-ledger--2026-10-13)
+[Phase 3 task](../tasks/evidence/phase-3-history.md#3a-execution-ledger--2026-10-13)
 owns exact check outcomes, failures, source identities and qualification status.
 
-Scoped final CI4 evidence and limits are recorded in the [terminal audit](../tasks/active/phase-3-initial-wysiwyg-release.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
+Scoped final CI4 evidence and limits are recorded in the [terminal audit](../tasks/evidence/phase-3-history.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
 Prior failures, portable visual self-review and user acceptance remain distinct.

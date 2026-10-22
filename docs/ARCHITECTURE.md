@@ -249,7 +249,7 @@ syntax as well as source-string syntax. Core protects existing reviewed interpol
 and formatting as immutable revision-bound tokens; unsupported target boundaries or
 token changes refuse before acceptance. Model prose cannot introduce active expressions
 or action-bearing tags. This does not alter manual Source editing or stored reference
-prose. The [Phase 2 proposal contract](tasks/active/phase-2-initial-llm-assistance.md#7-structured-proposals-and-source-preparation)
+prose. The [Phase 2 proposal contract](tasks/reference/phase-2-requirements.md#7-structured-proposals-and-source-preparation)
 owns preparation and proof; this is selected design, not implemented behavior.
 External file-watch events enter the source service with a content hash; supported
 changes update the visual model, while unsupported regions remain visible custom code
@@ -533,7 +533,7 @@ alone cannot establish variable changes made by buttons during an interaction.
 effects unknown and refuses affected starts. Qualified conventional interactions and
 proven passive screens remain eligible. Relevant screen/action edits invalidate launch
 preparation. Full screen-interaction recording/replay is deferred; manual values cannot
-erase unknown side effects. The [3D contract](tasks/active/phase-3-initial-wysiwyg-release.md#6-3d--supported-state-and-run-from-here)
+erase unknown side effects. The [3D contract](tasks/reference/phase-3d-state-run.md#6-3d--supported-state-and-run-from-here)
 owns the eligible subset and rejecting tests; no current implementation is claimed.
 
 ## Resolved Phase 0 boundaries and implementation risks
