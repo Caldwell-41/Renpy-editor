@@ -172,6 +172,7 @@ pub struct LifecycleService {
     current: Option<(PathBuf, OpenProject, crate::transaction::ProjectId)>,
     authoring: AuthoringService,
     runtime: runtime::RuntimeState,
+    canvas: Option<crate::screens::canvas_session::Session>,
 }
 
 struct InspectedProject {
@@ -229,6 +230,7 @@ impl LifecycleService {
             current: None,
             authoring: AuthoringService::default(),
             runtime: runtime::RuntimeState::default(),
+            canvas: None,
         })
     }
 
@@ -439,7 +441,9 @@ impl LifecycleService {
         {
             return Err(LifecycleError::Source(SourceError::DirtySource));
         }
+        if !self.canvas_shutdown() { return Err(LifecycleError::Io); }
         self.runtime = runtime::RuntimeState::default();
+        self.canvas = None;
         if let Some((_, _, authority)) = self.current.take() {
             self.authoring.unregister_project(&authority);
         }
@@ -463,6 +467,7 @@ impl LifecycleService {
         {
             return Err(LifecycleError::Source(SourceError::DirtySource));
         }
+        if !self.canvas_shutdown() { return Err(LifecycleError::Io); }
         let authority = self
             .authoring
             .register_inspected_project(inspected.root.clone(), inspected.anchor)
@@ -490,6 +495,7 @@ impl LifecycleService {
             return Err(error);
         }
         self.runtime = runtime::RuntimeState::default();
+        self.canvas = None;
         let activated = inspected.project.clone();
         let previous = self
             .current
@@ -744,6 +750,37 @@ impl LifecycleService {
     pub fn screens_inspect(&self, request: crate::screens::InspectRequest) -> Result<crate::screens::Document, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
         self.authoring.screens_inspect(&authority, request).map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_canvas_plan(&self, request: crate::screens::canvas::Request) -> Result<crate::screens::canvas::Plan, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring.screens_canvas_plan(&authority, request).map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_canvas_render(&mut self, request: crate::screens::canvas::Request) -> Result<serde_json::Value, LifecycleError> {
+        let source = request.path.clone();
+        let plan = self.screens_canvas_plan(request)?;
+        if !plan.available { return Ok(serde_json::json!({"phase":"unavailable","revision":plan.revision,"limits":plan.limits,
+            "message":"This composition has unresolved source dependencies."})); }
+        if self.canvas.is_none() {
+            let Some(sdk) = discover_managed_sdk(&self.data_root).map_err(|_|LifecycleError::UnsupportedSdk)? else {
+                return Ok(serde_json::json!({"phase":"unavailable","message":"The verified project SDK is unavailable."}));
+            };
+            if self.current.as_ref().is_none_or(|(_,p,_)|p.sdk_version != sdk.version) { return Err(LifecycleError::UnsupportedSdk); }
+            self.canvas = Some(crate::screens::canvas_session::Session::new(&self.data_root,sdk).map_err(LifecycleError::Scene)?);
+        }
+        let (authority,_) = self.authoring_context()?;
+        self.canvas.as_mut().unwrap().submit(plan,source,&self.authoring,&authority).map_err(LifecycleError::Scene)
+    }
+    pub fn screens_canvas_status(&self, frame: String, include_image: bool) -> Result<serde_json::Value, LifecycleError> {
+        if frame.len() != 36 { return Err(LifecycleError::Scene(SceneError::InvalidPayload)); }
+        let (authority,_) = self.authoring_context()?;
+        self.canvas.as_ref().ok_or(LifecycleError::Scene(SceneError::SourceConflict))?
+            .status(&frame,include_image,&self.authoring,&authority).map_err(LifecycleError::Scene)
+    }
+    pub(crate) fn canvas_shutdown(&mut self) -> bool {
+        if self.canvas.as_mut().is_some_and(|canvas|!canvas.shutdown()) { return false; }
+        self.canvas = None; true
     }
 
     pub fn screens_set_pixel(&self, request: crate::screens::SetPixelRequest) -> Result<crate::screens::Document, LifecycleError> {

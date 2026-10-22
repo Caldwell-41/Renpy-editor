@@ -76,15 +76,17 @@ for case in cases:
     help_disk = None
     disk_errors = []
     fixture_cleanup_complete = True
-    if case in ("help-screen", "owned-screen"):
+    if case in ("help-screen", "owned-screen", "canvas-helper"):
         profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
         if profile.exists():
             assert not profile.is_symlink() and profile.resolve().parent == profile.parent.resolve()
             project = profile / "synthetic-project"
-            source = project / ("game/ui/help.rpy" if case == "help-screen" else "game/ui/travel_notes.rpy")
+            source = project / ("game/ui/travel_notes.rpy" if case == "owned-screen" else "game/ui/help.rpy")
             if case == "help-screen":
                 original = (Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/help.rpy").read_bytes()
                 expected = b'\xef\xbb\xbf' + original.replace(b'\n', b'\r\n').replace(b'xsize 640', b'xsize 768')
+            elif case=='canvas-helper':
+                expected=(Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/canvas-help.rpy").read_bytes()
             else:
                 expected = None
                 try:
@@ -104,6 +106,8 @@ for case in cases:
                              scratchJobsRemaining=len(list(profile.glob("scratch-preview-*"))),
                              sourceBytecode=list(project.glob("game/**/*.rpyc")) != [],
                              sourceSaves=(project / "game/saves").exists())
+            if case=='canvas-helper':
+                help_disk['canvasJobsRemaining']=len(list(profile.glob('canvas-helper-*')))
             (output / "help-disk.json").write_text(json.dumps(help_disk, indent=2)+"\n")
             if source.is_file():
                 (output / "accepted-help.rpy").write_bytes(source.read_bytes())
@@ -129,6 +133,17 @@ for case in cases:
         passed = passed and details.get("extendedChecksComplete") is True and len(details.get("checks", [])) == 33 and (output / "external-write.json").is_file()
     if case in ("help-screen", "owned-screen"):
         passed = passed and help_disk == dict(acceptedBytesMatch=True, scratchJobsRemaining=0, sourceBytecode=False, sourceSaves=False)
+    if case=='canvas-helper':
+        passed=passed and help_disk==dict(acceptedBytesMatch=True,scratchJobsRemaining=0,sourceBytecode=False,sourceSaves=False,canvasJobsRemaining=0)
+        if len(reports)==1:
+            for frame in reports[0].get('details',{}).get('frames',[]):
+                if isinstance(frame,dict) and isinstance(frame.get('image'),str):
+                    import base64
+                    try:
+                        image=base64.b64decode(frame['image'].split(',',1)[1],validate=True)
+                        (output / f"native-helper-{frame['width']}x{frame['height']}.png").write_bytes(image)
+                    except (ValueError,KeyError,IndexError):
+                        passed=False
     if case == "owned-screen":
         passed = passed and not disk_errors and fixture_cleanup_complete
     failed |= not passed
@@ -137,6 +152,6 @@ for case in cases:
     if case == "owned-screen":
         result.update(diskErrors=disk_errors, fixtureCleanupComplete=fixture_cleanup_complete)
     (output / f"runtime-ui-{case}.json").write_text(json.dumps(result, indent=2)+"\n")
-    print(json.dumps(result), flush=True)
+    print(json.dumps(dict(case=case,passed=passed,exitCode=code,timedOut=timed_out,helpDisk=help_disk) if case=='canvas-helper' else result), flush=True)
 if failed:
     raise SystemExit(1)

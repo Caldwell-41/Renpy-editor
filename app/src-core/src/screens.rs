@@ -15,6 +15,8 @@ const MAX_DEPTH: usize = 32;
 const MAX_PIXELS: u32 = 16384;
 
 mod ownership;
+pub mod canvas;
+pub(crate) mod canvas_session;
 pub use ownership::{Catalog, CreateRequest};
 
 pub(crate) fn valid_name(name: &str) -> bool {

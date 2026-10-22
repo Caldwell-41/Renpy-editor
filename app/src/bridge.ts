@@ -17,6 +17,7 @@ export async function requestCore<T>(
   // is immutable in packaged WebViews. No request payload or native key is exposed.
   const observeWindows = Reflect.get(window, "__loomlightWindowsEvidence") === true || Reflect.get(window, "__loomlightWindowsReloadProof") === true;
   const observeHelp = Reflect.get(window, "__loomlightHelpEvidence") === true && ["runtime.start", "runtime.requestStatus", "runtime.status", "runtime.stop"].includes(operation);
+  const observeCanvas = Reflect.get(window,"__loomlightCanvasEvidence") === true && ["screens.canvasRender","screens.canvasStatus"].includes(operation);
   const started = observeWindows ? performance.timeOrigin + performance.now() : 0;
   try { response = await invoke("core_request", { request, onProgress }); } finally {
     active=false;
@@ -25,6 +26,7 @@ export async function requestCore<T>(
         started, ended: performance.timeOrigin + performance.now() },
     }));
     if (observeHelp) window.dispatchEvent(new window.CustomEvent("loomlight-help-probe-response", { detail: { response } }));
+    if (observeCanvas) window.dispatchEvent(new window.CustomEvent("loomlight-canvas-probe-response", {detail:{response}}));
   }
   if (!isCoreResponse(response, request.requestId)) {
     throw new Error("The desktop core returned an invalid response.");

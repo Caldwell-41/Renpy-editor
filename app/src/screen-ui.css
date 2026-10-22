@@ -15,3 +15,8 @@
 .screen-create { box-sizing:border-box; width:420px; max-width:calc(100vw - 32px); padding:22px; color:var(--text-primary); background:var(--surface-panel); border:1px solid var(--border-normal); border-radius:8px; }
 .screen-create::backdrop { background:#0007; }.screen-create h2 { margin:0 0 18px; font-size:20px; }.screen-create label { display:block; font-size:13px; }.screen-create input { display:block; box-sizing:border-box; width:100%; margin-top:7px; }.screen-create p { font-size:12px; line-height:1.6; }.screen-create-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:20px; }
 .screen-create [role=status][data-error=true] { color:var(--status-error); }
+.screen-render { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.screen-game[data-renderer=renpy] .screen-node { color:transparent; background:transparent; border:0; border-radius:0; }
+.screen-game[data-stale=true] .screen-render { opacity:.5; }
+.screen-game[data-renderer=renpy] .screen-node,.screen-game[data-renderer=renpy] .screen-selection { z-index:1; }
+.screen-text-sample { display:block; margin:14px; font-size:12px; }.screen-text-sample textarea { box-sizing:border-box; width:100%; min-height:85px; margin-top:6px; }

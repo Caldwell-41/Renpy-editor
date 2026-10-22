@@ -15,6 +15,7 @@ impl OwnedChild {
     pub(super) fn spawn(
         command: &mut Command,
         anchor: Option<&DirectoryAnchor>,
+        hide_console: bool,
     ) -> io::Result<Self> {
         command
             .stdin(Stdio::null())
@@ -22,6 +23,7 @@ impl OwnedChild {
             .stderr(Stdio::piped());
         #[cfg(unix)]
         {
+            let _ = hide_console;
             use std::os::{fd::AsRawFd, unix::process::CommandExt};
             let held = anchor
                 .map(DirectoryAnchor::runtime_handle)
@@ -45,7 +47,7 @@ impl OwnedChild {
         {
             use std::os::windows::process::CommandExt;
             let _ = anchor;
-            command.creation_flags(0x4 | 0x200); // suspended + new process group
+            command.creation_flags(0x4 | 0x200 | if hide_console { 0x0800_0000 } else { 0 }); // suspended + new process group; optional CREATE_NO_WINDOW
         }
         let mut child = command.spawn()?;
         #[cfg(windows)]

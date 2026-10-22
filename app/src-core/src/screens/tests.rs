@@ -36,6 +36,126 @@ fn reject(service: &mut LifecycleService, operation: &str, mut payload: Value) -
 }
 
 #[test]
+fn canvas_plan_uses_saved_literals_and_revision_bound_drafts_without_running_neighbors() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir_all(root.join("game/ui")).unwrap();
+    fs::write(root.join(PATH), "init python:\n    raise Exception('must never run')\n\nscreen help():\n    frame:\n        xsize 640\n        ysize 360\n        xalign 0.5\n        vbox:\n            spacing 12\n            text \"Help [unknown]\":\n                size 28\n").unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+    let request = json!({"path":PATH,"screenName":"help","expectedRevision":doc["revision"],
+        "width":1280,"height":720,"drafts":[{"nodeStart":frame(&doc)["span"]["start"],"width":760,"height":360}]});
+    let plan = ipc(&mut service, "screens.canvasPlan", request.clone());
+    assert_eq!(plan["available"], false, "Custom initialization and unsampled interpolation remain explicit");
+    assert_eq!(plan["nodes"][1]["properties"]["xsize"], 760);
+    assert_eq!(plan["nodes"][2]["properties"]["spacing"], 12);
+    assert_eq!(plan["nodes"][3]["literal"], "Help [unknown]");
+    let mut sampled=request.clone();
+    sampled["textSamples"]=json!([{"nodeStart":doc["screens"][0]["nodes"][3]["span"]["start"],"value":"Literal sample [value]"}]);
+    sampled["buttonState"]=json!("hover");
+    let sample=ipc(&mut service,"screens.canvasPlan",sampled);
+    assert_eq!(sample["nodes"][3]["literal"],"Literal sample [value]");
+    assert_eq!(sample["buttonState"],"hover");
+    assert_eq!(ipc(&mut service, "screens.inspect", json!({"path":PATH}))["revision"], doc["revision"]);
+    let mut stale = request; stale["expectedRevision"] = json!("stale");
+    assert_eq!(reject(&mut service,"screens.canvasPlan",stale)["error"]["code"],"SOURCE_CONFLICT");
+}
+
+#[test]
+fn canvas_refuses_unknown_layout_and_retains_source_when_the_sdk_is_unavailable() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir_all(root.join("game/ui")).unwrap();
+    fs::write(root.join(PATH), "screen help():\n    frame:\n        xsize 640\n        ysize 360\n        padding calculate_padding()\n        text \"Help\"\n").unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+    let request = json!({"path":PATH,"screenName":"help","expectedRevision":doc["revision"],"width":1280,"height":720});
+    let plan = ipc(&mut service,"screens.canvasPlan",request.clone());
+    assert_eq!(plan["available"],false);
+    assert!(plan["limits"].as_array().unwrap().iter().any(|v|v.as_str().unwrap().contains("padding")));
+    let unavailable = ipc(&mut service,"screens.canvasRender",request.clone());
+    assert_eq!(unavailable["phase"],"unavailable");
+    assert!(unavailable["image"].is_null());
+    let plan = ipc(&mut service,"screens.canvasPlan",request);
+    assert_eq!(plan["revision"],doc["revision"]);
+    service.close().unwrap();
+    assert!(!profile.read_dir().unwrap().any(|entry|entry.unwrap().file_name().to_string_lossy().starts_with("canvas-helper-")));
+}
+
+#[test]
+fn canvas_representative_plan_preserves_padding_and_excludes_game_actions() {
+    let temporary=tempfile::tempdir().unwrap();
+    let profile=temporary.path().join("profile");
+    let mut service=LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root=profile.join("synthetic-project"); fs::create_dir_all(root.join("game/ui")).unwrap();
+    fs::write(root.join(PATH),include_bytes!("../../../../tests/fixtures/phase-3b-screens/canvas-help.rpy")).unwrap();
+    service.open_path(&root).unwrap();
+    let doc=ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+    let plan=ipc(&mut service,"screens.canvasPlan",json!({"path":PATH,"screenName":"loomlight_help","expectedRevision":doc["revision"],"width":1280,"height":720}));
+    assert_eq!(plan["available"],true,"{plan}");
+    assert_eq!(plan["nodes"][2]["properties"]["padding"],json!([24,24]));
+    assert!(!plan.to_string().contains("Return"));
+}
+
+#[test]
+fn canvas_marks_inherited_styles_and_unsampled_interpolation_unavailable() {
+    let temporary=tempfile::tempdir().unwrap(); let profile=temporary.path().join("profile");
+    let mut service=LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root=profile.join("synthetic-project"); fs::create_dir_all(root.join("game/ui")).unwrap();
+    fs::write(root.join(PATH),"screen help():\n    text \"[unknown]\"\n").unwrap();
+    fs::write(root.join("game/ui/styles.rpy"),"style default:\n    size 80\n").unwrap();
+    service.open_path(&root).unwrap();
+    let doc=ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+    let plan=ipc(&mut service,"screens.canvasPlan",json!({"path":PATH,"screenName":"help","expectedRevision":doc["revision"],"width":1280,"height":720}));
+    assert_eq!(plan["available"],false,"Unresolved inherited styles and expressions cannot be presented as qualified pixels");
+    let limits=plan["limits"].to_string(); assert!(limits.contains("styles.rpy")); assert!(limits.contains("sample"));
+}
+
+#[test]
+#[ignore = "selected pinned-SDK canvas proof; one helper launch"]
+fn canvas_helper_sdk_renders_saved_data_and_stops_on_project_close() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").expect("verified SDK archive");
+    let sdk = crate::renpy::install_supported_sdk_from_archive(&profile, std::path::Path::new(&archive)).unwrap();
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir_all(root.join("game/ui")).unwrap();
+    fs::create_dir_all(root.join("game/assets")).unwrap();
+    fs::copy(sdk.root.join("renpy/common/DejaVuSans.ttf"),root.join("game/assets/canvas.ttf")).unwrap();
+    fs::write(root.join(PATH), "screen help():\n    frame:\n        xsize 640\n        ysize 360\n        xalign 0.5\n        yalign 0.5\n        background \"#202938\"\n        vbox:\n            spacing 12\n            text \"Help café. A long sentence wraps onto several lines in this deliberately narrow text box.\":\n                font \"assets/canvas.ttf\"\n                size 28\n                xsize 300\n                color \"#f4e4d0\"\n").unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+    for (width,height) in [(1280,720),(1024,768)] {
+        let response = ipc(&mut service,"screens.canvasRender",json!({"path":PATH,"screenName":"help","expectedRevision":doc["revision"],"width":width,"height":height}));
+        assert_eq!(response["phase"],"starting","{response}");
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        let ready = loop {
+            let value = ipc(&mut service,"screens.canvasStatus",json!({"frameId":response["frameId"]}));
+            if value["phase"] == "ready" { break value; }
+            assert_eq!(value["phase"],"starting","{value}");
+            assert!(std::time::Instant::now() < deadline,"{value}");
+            std::thread::sleep(std::time::Duration::from_millis(16));
+        };
+        assert!(ready["image"].as_str().unwrap().starts_with("data:image/png;base64,"));
+        assert_eq!(ready["width"],width); assert_eq!(ready["height"],height);
+        assert_eq!(ready["geometry"][1]["width"].as_f64(),Some(640.0));
+        assert_eq!(ready["geometry"][1]["x"].as_f64(),Some(((width-640)/2) as f64));
+        assert_eq!(ipc(&mut service,"screens.inspect",json!({"path":PATH}))["revision"],doc["revision"]);
+        if let Some(output)=std::env::var_os("LOOMLIGHT_CANVAS_EVIDENCE") {
+            let output=std::path::PathBuf::from(output); fs::create_dir_all(&output).unwrap();
+            fs::write(output.join(format!("helper-{width}x{height}.json")),serde_json::to_vec_pretty(&ready).unwrap()).unwrap();
+        }
+    }
+    service.close().unwrap();
+    assert!(!profile.read_dir().unwrap().any(|entry|entry.unwrap().file_name().to_string_lossy().starts_with("canvas-helper-")));
+}
+
+#[test]
 fn owned_blank_screen_creation_source_history_and_reopen() {
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");

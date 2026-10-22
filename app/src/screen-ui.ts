@@ -18,6 +18,13 @@ interface ScreenCatalog {
   projectRevision: string; sourceMapRevision: string; inventoryRevision: string; owned: OwnedScreen[];
 }
 interface Draft { document: ScreenDocument; screen: string; index: number; width: string; height: string }
+interface CanvasFrame {
+  phase: "starting" | "ready" | "stale" | "unavailable";
+  frameId?: string; revision?: string; image?: string; width?: number; height?: number;
+  buttonState?: string;
+  message?: string;
+  geometry?: { start: number; x: number; y: number; width: number; height: number }[];
+}
 interface Actions {
   resolution: { width: number; height: number };
   request: <T>(operation: CoreOperation, payload?: Record<string, unknown>) => Promise<T>;
@@ -44,6 +51,17 @@ export class ScreensWorkspace {
   private readonly card = el("section", "screen-card");
   private readonly canvas = el("div", "screen-game");
   private readonly stage = el("section", "screen-stage");
+  private readonly canvasStatus = el("p", "muted screen-canvas-status");
+  private frame?: CanvasFrame;
+  private canvasKey = "";
+  private canvasSequence = 0;
+  private canvasTimer?: ReturnType<typeof setTimeout>;
+  private geometryCurrent = false;
+  private focusResize = false;
+  private readonly gameResolution: {width:number; height:number};
+  private zoom = "fit";
+  private buttonState = "normal";
+  private readonly textSamples = new Map<string,{revision:string; screen:string; path:string; index:number; value:string}>();
   private readonly rail = el("nav", "screen-steps");
   private readonly drafts = new Map<string, Draft>();
   private documents: ScreenDocument[] = [];
@@ -62,6 +80,7 @@ export class ScreensWorkspace {
   private resize?: { width: number; height: number; x: number; y: number; pointer: number; handle: HTMLElement };
   private readonly observer: ResizeObserver;
   constructor(private readonly actions: Actions) {
+    this.gameResolution = {...actions.resolution};
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     tools.append(button("Undo", () => void this.history("undo")), button("Redo", () => void this.history("redo")),
@@ -82,10 +101,29 @@ export class ScreensWorkspace {
     }
     this.rail.ariaLabel = "Screen building steps";
     const caption = el("div", "screen-canvas-tools");
-    caption.append(el("h2", "", "Game preview"), el("span", "", `${actions.resolution.width} × ${actions.resolution.height}`), el("span", "muted", "Fit · schematic"));
+    const aspects = el("select"); aspects.ariaLabel = "Canvas resolution (sample)";
+    const secondary = actions.resolution.width===1024 && actions.resolution.height===768 ? {width:1280,height:720} : {width:1024,height:768};
+    const resolutions=[actions.resolution,secondary];
+    for (const [index,resolution] of resolutions.entries()) {
+      const option=el("option","",`${index===0 ? "Project" : "Sample"} ${resolution.width} × ${resolution.height}`);
+      option.value=`${resolution.width}x${resolution.height}`; aspects.append(option);
+    }
+    aspects.onchange=() => {
+      if(this.hasDraft()) { aspects.value=`${this.gameResolution.width}x${this.gameResolution.height}`; this.note("Apply or cancel the draft before changing the canvas resolution. Input retained."); return; }
+      const resolution=resolutions.find(r=>`${r.width}x${r.height}`===aspects.value); if(!resolution)return;
+      Object.assign(this.gameResolution,resolution); this.renderCanvas();
+    };
+    const zoom=el("select"); zoom.ariaLabel="Canvas zoom";
+    for (const [value,label] of [["fit","Fit"],["100","100% (game pixels)"]]) { const option=el("option","",label); option.value=value!; zoom.append(option); }
+    zoom.onchange=() => {this.zoom=zoom.value; this.renderCanvas();};
+    const state=el("select"); state.ariaLabel="Button state (sample)";
+    for(const value of ["normal","hover"]) {const option=el("option","",`Button sample: ${value}`);option.value=value;state.append(option);}
+    state.onchange=()=>{this.buttonState=state.value;this.renderCanvas();};
+    caption.append(el("h2", "", "Screen canvas"),aspects,zoom,state);
     const viewport = el("div", "screen-viewport"); viewport.append(this.canvas);
-    this.stage.ariaLabel = "Screen canvas"; this.stage.append(caption, viewport,
-      el("p", "muted", "Canvas controls select elements. Ren'Py determines fonts, styling, actions and unsupported layout."));
+    this.canvasStatus.role = "status";
+    this.stage.ariaLabel = "Screen canvas"; this.stage.append(caption, viewport, this.canvasStatus,
+      el("p", "muted", "Canvas controls select elements. Editing never runs game scripts or actions. Test in Ren'Py runs accepted source."));
     const workspace = el("div", "screen-flow"); workspace.append(this.rail, this.stage, this.card);
     this.message.role = "status"; this.message.ariaLive = "polite";
     this.panel.append(heading, picker, workspace, limits, this.message);
@@ -95,7 +133,7 @@ export class ScreensWorkspace {
     this.observer = new ResizeObserver(() => this.renderCanvas()); this.observer.observe(viewport);
   }
   mount(host: HTMLElement): void { host.append(this.panel); void this.load(); }
-  dispose(): void { this.disposed = true; this.observer.disconnect(); this.cancelResize(); this.closeCreationDialog(); }
+  dispose(): void { this.disposed = true; this.canvasSequence++; clearTimeout(this.canvasTimer); this.observer.disconnect(); this.cancelResize(); this.closeCreationDialog(); }
   hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize || !!this.creation; }
   private current(): boolean { return !this.disposed && this.actions.current(); }
   private nodes(): ScreenNode[] { return this.doc?.screens.find(s => s.name === this.screen)?.nodes ?? []; }
@@ -180,6 +218,13 @@ export class ScreensWorkspace {
       this.card.append(el("p", "muted", "Button actions and Story connections remain in Source. The canvas never runs game actions."), button("View in Source", () => this.openSource()));
     } else if (node) {
       this.card.append(el("p", "muted", `${node.kind} · Edit existing literal dimensions, then apply your changes.`));
+      if(node.kind==="text" || node.kind==="textbutton") {
+        const label=el("label","screen-text-sample","Canvas text sample");
+        const input=el("textarea"); input.ariaLabel="Canvas text sample";input.maxLength=8192;
+        input.value=this.textSamples.get(this.key())?.value ?? node.literal ?? "";
+        input.oninput=()=>{this.textSamples.set(this.key(),{revision:this.doc!.revision,screen:this.screen,path:this.doc!.path,index:this.selected,value:input.value});this.renderCanvas();};
+        label.append(input);this.card.append(label,el("p","muted","Sample only. Source and runtime values do not change."),button("Use source text",()=>{this.textSamples.delete(this.key());this.renderCard();this.renderCanvas();}));
+      }
       const details = el("details", "screen-properties"); details.open = true;
       details.append(el("summary", "", "Position & size"));
       if (size(node, "xsize") !== undefined && size(node, "ysize") !== undefined) {
@@ -280,6 +325,7 @@ export class ScreensWorkspace {
       this.busy = false;
       if (this.current()) {
         const resizeFocused = document.activeElement?.classList.contains("screen-resize");
+        this.focusResize = !!resizeFocused;
         this.updateSizeControls(); this.renderCanvas();
         if (resizeFocused) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
       }
@@ -306,46 +352,100 @@ export class ScreensWorkspace {
     this.actions.preview({ purpose: "screen", path: this.doc.path, screenName: this.screen, expectedRevision: this.doc.revision }, validate);
   }
   private renderCanvas(): void {
-    if (this.resize) return;
-    this.canvas.replaceChildren();
-    const { width, height } = this.actions.resolution;
+    if (!this.current()) return;
+    const { width, height } = this.gameResolution;
     const available = this.canvas.parentElement?.clientWidth ?? 600;
-    this.scale = Math.max(0.05, Math.min((available - 32) / width, 360 / height, 1));
+    this.scale = this.zoom === "100" ? 1 : Math.max(0.05, Math.min((available - 32) / width, 360 / height, 1));
     this.canvas.style.width = `${width * this.scale}px`; this.canvas.style.height = `${height * this.scale}px`;
-    const nodes = this.nodes(), frameIndex = nodes.findIndex(n => n.kind === "frame");
-    nodes.forEach((node, index) => {
-      if (node.kind === "screen") return;
-      const target = button(node.literal ?? names[node.kind] ?? node.kind, () => this.choose(index, true), `screen-node screen-node-${node.kind}`);
-      target.ariaLabel = `Select ${node.literal ?? names[node.kind] ?? node.kind}`;
-      target.dataset.index = String(index); target.ariaPressed = String(index === this.selected);
-      const w = size(node, "xsize"), h = size(node, "ysize");
-      if (index === frameIndex) {
-        target.textContent = ""; target.ariaLabel = "Select Help frame";
-        const fw = w ?? 640, fh = h ?? 360;
-        target.style.left = `${(width - fw) * (node.layout.xalign ?? 0) * this.scale}px`;
-        target.style.top = `${(height - fh) * (node.layout.yalign ?? 0) * this.scale}px`;
-        target.style.width = `${fw * this.scale}px`; target.style.height = `${fh * this.scale}px`;
-      } else {
-        const frame = nodes[frameIndex], fw = size(frame, "xsize") ?? 640, fh = size(frame, "ysize") ?? 360;
-        const left = (width - fw) * (frame?.layout.xalign ?? 0) + 24;
-        const top = (height - fh) * (frame?.layout.yalign ?? 0) + 24 + Math.max(0, index - frameIndex - 1) * 48;
-        target.style.left = `${left * this.scale}px`; target.style.top = `${top * this.scale}px`;
-        target.style.width = `${(w ?? Math.max(48, fw - 48)) * this.scale}px`; target.style.height = `${(h ?? 40) * this.scale}px`;
-        target.style.fontSize = `${Math.max(10, 22 * this.scale)}px`;
+    if (!this.doc) { this.canvas.replaceChildren(); this.invalidateCanvas("Select a supported screen to render."); return; }
+    const drafts = [...this.drafts.values()].filter(d => d.document.path === this.doc!.path && d.screen === this.screen);
+    const samples=[...this.textSamples.values()].filter(s=>s.path===this.doc!.path && s.screen===this.screen);
+    if(samples.some(s=>s.revision!==this.doc!.revision)) {this.invalidateCanvas("Text sample uses an earlier Source revision. Edit the sample or use source text. Input retained.");return;}
+    if (drafts.some(d => d.document.revision !== this.doc!.revision || ![d.width,d.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384))) {
+      this.invalidateCanvas("Canvas unavailable for this invalid or stale draft. Input retained."); return;
+    }
+    const payload = { path:this.doc.path, screenName:this.screen, expectedRevision:this.doc.revision, width, height,
+      drafts:drafts.map(d => ({ nodeStart:d.document.screens.find(s => s.name === d.screen)!.nodes[d.index]!.span.start, width:Number(d.width), height:Number(d.height) })),
+      textSamples:samples.map(s=>({nodeStart:this.nodes()[s.index]!.span.start,value:s.value})),buttonState:this.buttonState };
+    const key = JSON.stringify(payload);
+    if (key === this.canvasKey) { if (this.geometryCurrent) this.showFrame(); return; }
+    this.canvasKey = key;
+    this.invalidateCanvas(this.frame?.image ? "Updating canvas. Previous image is out of date." : "Starting the Ren'Py canvas helper…", false);
+    const sequence = this.canvasSequence;
+    const update = async () => {
+      try {
+        let frame = await this.actions.request<CanvasFrame>("screens.canvasRender",payload);
+        const poll = async (): Promise<void> => {
+          if (!this.current() || sequence !== this.canvasSequence) return;
+          if (frame.phase === "starting" && frame.frameId) {
+            this.canvasTimer = setTimeout(() => { void (async () => {
+              try { frame = await this.actions.request<CanvasFrame>("screens.canvasStatus",{frameId:frame.frameId}); await poll(); }
+              catch (error) { if (this.current() && sequence === this.canvasSequence) this.invalidateCanvas(`${(error as Error).message} Drafts retained.`); }
+            })(); },16);
+          } else if (frame.phase === "ready" && frame.revision === this.doc?.revision && frame.image?.startsWith("data:image/png;base64,")) {
+            this.frame = frame; this.showFrame(sequence);
+            const health = async (): Promise<void> => {
+              if(!this.current() || sequence!==this.canvasSequence || !frame.frameId) return;
+              try {
+                const current=await this.actions.request<CanvasFrame>("screens.canvasStatus",{frameId:frame.frameId,includeImage:false});
+                if(!this.current() || sequence!==this.canvasSequence) return;
+                if(current.phase!=="ready") {this.invalidateCanvas(current.message ?? "Canvas unavailable. Drafts retained.");return;}
+                this.canvasTimer=setTimeout(()=>{void health();},500);
+              } catch(error) {if(this.current() && sequence===this.canvasSequence) this.invalidateCanvas(`${(error as Error).message} Drafts retained.`);}
+            };
+            if(frame.frameId) this.canvasTimer=setTimeout(()=>{void health();},500);
+          } else this.invalidateCanvas(frame.message ?? "Canvas unavailable. Drafts retained; open Source or use Test in Ren'Py.");
+        };
+        await poll();
+      } catch (error) { if (this.current() && sequence === this.canvasSequence) this.invalidateCanvas(`${(error as Error).message} Drafts retained.`); }
+    };
+    this.canvasTimer = setTimeout(() => { void update(); },0);
+  }
+  private invalidateCanvas(message: string, resetKey = true): void {
+    this.canvasSequence++; clearTimeout(this.canvasTimer); this.geometryCurrent = false;
+    if (resetKey) this.canvasKey = "";
+    if (resetKey && this.resize) {
+      const {handle,pointer}=this.resize; this.resize=undefined;
+      if(handle.hasPointerCapture(pointer)) handle.releasePointerCapture(pointer);
+      this.updateSizeControls();
+    }
+    if (!this.resize) this.canvas.querySelectorAll(".screen-node,.screen-selection").forEach(e => e.remove());
+    this.canvas.dataset.stale = "true"; this.canvasStatus.textContent = message;
+  }
+  private showFrame(sequence = this.canvasSequence): void {
+    const frame = this.frame; if (!frame?.image) return;
+    if (!this.resize) this.canvas.replaceChildren(); this.canvas.dataset.renderer = "renpy";
+    const image = this.canvas.querySelector<HTMLImageElement>(".screen-render") ?? el("img", "screen-render");
+    image.setAttribute("aria-label", "Ren'Py screen canvas"); image.alt = "Inert screen rendering";
+    image.dataset.buttonState=frame.buttonState ?? "";
+    image.onload = () => {
+      if (!this.current() || sequence !== this.canvasSequence) return;
+      this.geometryCurrent = true; this.canvas.dataset.stale = "false"; this.canvasStatus.textContent = "Ren'Py canvas. Selection guides are editor overlays.";
+      for (const geometry of frame.geometry ?? []) {
+        const index = this.nodes().findIndex(n => n.span.start === geometry.start);
+        const node = this.nodes()[index]; if (!node || node.kind === "screen") continue;
+        const target = this.canvas.querySelector<HTMLButtonElement>(`[data-index="${index}"]`) ?? button("",() => this.choose(index,true),`screen-node screen-node-${node.kind}`);
+        target.ariaLabel = `Select ${node.literal ?? names[node.kind] ?? node.kind}`;
+        target.dataset.index = String(index); target.ariaPressed = String(index === this.selected);
+        for (const [key,value] of Object.entries({left:geometry.x,top:geometry.y,width:geometry.width,height:geometry.height})) target.style.setProperty(key,`${value*this.scale}px`);
+        this.canvas.append(target);
       }
-      this.canvas.append(target);
-    }); this.positionSelection();
+      if(this.resize) {
+        const outline=this.canvas.querySelector<HTMLElement>(".screen-selection"), target=this.canvas.querySelector<HTMLElement>(`[data-index="${this.selected}"]`);
+        if(outline && target) for(const key of ["left","top","width","height"] as const) outline.style[key]=target.style[key];
+      } else {
+        this.positionSelection();
+        if(this.focusResize && document.activeElement===document.body) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
+        this.focusResize=false;
+      }
+    };
+    image.onerror=() => {if(this.current() && sequence===this.canvasSequence) this.invalidateCanvas("Canvas image unavailable. Drafts retained.");};
+    image.src = frame.image; this.canvas.append(image);
   }
   private positionSelection(): void {
     this.canvas.querySelector(".screen-selection")?.remove();
     const node = this.nodes()[this.selected], target = this.canvas.querySelector<HTMLElement>(`[data-index="${this.selected}"]`);
-    if (!node || !target || size(node, "xsize") === undefined || size(node, "ysize") === undefined) return;
-    const draft = this.draft();
-    if (draft && [draft.width, draft.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384)) {
-      const dw = Number(draft.width), dh = Number(draft.height);
-      target.style.width = `${dw * this.scale}px`; target.style.height = `${dh * this.scale}px`;
-      if (node.kind === "frame") { target.style.left = `${(this.actions.resolution.width - dw) * (node.layout.xalign ?? 0) * this.scale}px`; target.style.top = `${(this.actions.resolution.height - dh) * (node.layout.yalign ?? 0) * this.scale}px`; }
-    }
+    if (!this.geometryCurrent || !node || !target || size(node, "xsize") === undefined || size(node, "ysize") === undefined) return;
     const outline = el("div", "screen-selection");
     for (const property of ["left", "top", "width", "height"] as const) outline.style[property] = target.style[property];
     const handle = button("", () => {}, "screen-resize"); handle.ariaLabel = "Resize selected element"; handle.title = "Drag to resize. Arrows resize by one pixel, Shift by eight. Escape cancels.";
@@ -362,9 +462,10 @@ export class ScreensWorkspace {
       draft.width = String(Math.max(24, Math.min(16384, Math.round((gesture.width + (event.clientX - gesture.x) / this.scale / (1 - ax)) / 8) * 8)));
       draft.height = String(Math.max(24, Math.min(16384, Math.round((gesture.height + (event.clientY - gesture.y) / this.scale / (1 - ay)) / 8) * 8)));
       target.style.width = `${Number(draft.width) * this.scale}px`; target.style.height = `${Number(draft.height) * this.scale}px`;
-      target.style.left = node.kind === "frame" ? `${(this.actions.resolution.width - Number(draft.width)) * ax * this.scale}px` : target.style.left;
-      target.style.top = node.kind === "frame" ? `${(this.actions.resolution.height - Number(draft.height)) * ay * this.scale}px` : target.style.top;
+      target.style.left = node.kind === "frame" ? `${(this.gameResolution.width - Number(draft.width)) * ax * this.scale}px` : target.style.left;
+      target.style.top = node.kind === "frame" ? `${(this.gameResolution.height - Number(draft.height)) * ay * this.scale}px` : target.style.top;
       for (const property of ["left", "top", "width", "height"] as const) outline.style[property] = target.style[property];
+      this.renderCanvas();
     };
     handle.onpointerup = () => { if (!this.resize) return; this.resize = undefined; void this.apply(); };
     handle.onpointercancel = () => this.cancelResize();

@@ -112,6 +112,9 @@ pub const OPERATIONS: &[&str] = &[
     "flow.list",
     "scene.apply",
     "screens.inspect",
+    "screens.canvasPlan",
+    "screens.canvasRender",
+    "screens.canvasStatus",
     "screens.list",
     "screens.create",
     "screens.setPixelProperty",
@@ -542,6 +545,24 @@ pub fn handle_application_request(
             .and_then(|payload| serde_json::from_value::<screens::InspectRequest>(Value::Object(payload))
                 .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
             .and_then(|request| lifecycle.screens_inspect(request)).and_then(to_value),
+        "screens.canvasPlan" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| serde_json::from_value::<screens::canvas::Request>(Value::Object(payload))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
+            .and_then(|request| lifecycle.screens_canvas_plan(request)).and_then(to_value),
+        "screens.canvasRender" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| serde_json::from_value::<screens::canvas::Request>(Value::Object(payload))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
+            .and_then(|request| lifecycle.screens_canvas_render(request)),
+        "screens.canvasStatus" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                #[derive(serde::Deserialize)]
+                #[serde(rename_all="camelCase",deny_unknown_fields)]
+                struct Request { frame_id: String, include_image: Option<bool> }
+                serde_json::from_value::<Request>(Value::Object(payload)).map_err(|_|LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            }).and_then(|request|lifecycle.screens_canvas_status(request.frame_id,request.include_image.unwrap_or(true))),
         "screens.setPixelProperty" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| serde_json::from_value::<screens::SetPixelRequest>(Value::Object(payload))

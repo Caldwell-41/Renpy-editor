@@ -1,0 +1,129 @@
+// Production Screens component, dispatch and pinned helper. Chrome is not native WebView proof.
+import assert from 'node:assert/strict';
+import {createServer} from 'vite';
+import {chromium} from 'playwright';
+import {randomUUID} from 'node:crypto';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {driverProcess} from './phase2-driver-process.mjs';
+const output=resolve(process.env.LOOMLIGHT_CANVAS_EVIDENCE ?? '../.toolchains/canvas-proof/browser-07');
+await mkdir(output,{recursive:true});
+const child=driverProcess(resolve(`target/debug/examples/canvas-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-canvas-controller-${randomUUID()}`)],{timeout:180000});
+const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
+let browser,page,lastFrame,sessionId,passed=false;
+const cases=[],errors=[],requests=[],timings=[],breakdown=[];
+try {
+  assert.equal((await child.next()).ready,true);
+  await server.listen(); browser=await chromium.launch({channel:'chrome',headless:true});
+  page=await browser.newPage({viewport:{width:1100,height:760}});
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.exposeBinding('canvasRpc',async(_,request)=>{
+    const began=performance.now();
+    const response=await child.request(request);
+    if(response.ok && typeof response.value?.sessionId==='string') sessionId=response.value.sessionId;
+    requests.push({operation:request.operation,ok:response.ok,error:response.error,
+      phase:response.value?.phase,revision:response.value?.revision,frameId:response.value?.frameId,rpcMilliseconds:performance.now()-began});
+    if(response.ok && response.value?.phase==='ready' && response.value.image) lastFrame=response.value;
+    return response;
+  });
+  await page.route('**/canvas-driver',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));
+  await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/canvas-driver`);
+  await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');window.__canvasRpcTimings=[];startApplication(async(operation,payload)=>{
+    const began=performance.now();const result=await window.canvasRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation,payload});
+    window.__canvasRpcTimings.push({operation,began,ended:performance.now()});return result;
+  });});
+  await page.locator('.recent-open').click(); await page.getByRole('button',{name:'Screens',exact:true}).click();
+  const ui=page.locator('.screens-editor');
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false',{},{timeout:30000});
+  assert.equal(lastFrame.width,1280); assert.equal(lastFrame.height,720);
+  await writeFile(join(output,'helper-1280x720.png'),Buffer.from(lastFrame.image.split(',')[1],'base64'));
+  await writeFile(join(output,'helper-1280x720.json'),JSON.stringify({...lastFrame,image:undefined},null,2));
+  await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
+  await ui.getByLabel('Width',{exact:true}).fill('760');
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false' && document.querySelector('.screen-node-frame')?.style.width===`${760 * parseFloat(document.querySelector('.screen-game').style.width)/1280}px`);
+  assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'760');
+  assert.equal(await ui.getByLabel('Width',{exact:true}).evaluate(e=>document.activeElement===e),true);
+  await ui.getByRole('button',{name:'Cancel changes',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+  assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'640');
+  cases.push('real source/assets/font to helper pixels; provisional size and Cancel retain focused controls');
+  const handle=ui.getByRole('button',{name:'Resize selected element',exact:true});
+  await handle.focus(); await handle.press('Shift+ArrowRight');
+  await ui.getByText('Size saved. Undo reverses both dimensions together.',{exact:true}).waitFor();
+  await page.waitForFunction(()=>document.querySelector('.screen-edit-actions button')?.getAttribute('aria-disabled')==='false');
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false' && document.querySelector('.screens-editor [aria-label="Width"]')?.value==='648');
+  await ui.getByRole('button',{name:'Undo',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false' && document.querySelector('.screens-editor [aria-label="Width"]')?.value==='640');
+  cases.push('keyboard resize reaches the transactional core and Undo restores its rendered source');
+  const rectangle=await handle.boundingBox();
+  await page.mouse.move(rectangle.x+6,rectangle.y+6); await page.mouse.down();
+  await page.mouse.move(rectangle.x+30,rectangle.y+20);
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+  assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'640','A held gesture is still provisional');
+  await page.keyboard.press('Escape'); await page.mouse.up();
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+  assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'640');
+  cases.push('live resize renders while the pointer remains held; Escape accepts no source change');
+  await ui.getByLabel('Canvas resolution (sample)',{exact:true}).selectOption('1024x768');
+  await page.waitForFunction(()=>document.querySelector('.screen-render')?.naturalWidth===1024 && document.querySelector('.screen-game')?.dataset.stale==='false');
+  await writeFile(join(output,'helper-1024x768.png'),Buffer.from(lastFrame.image.split(',')[1],'base64'));
+  await writeFile(join(output,'helper-1024x768.json'),JSON.stringify({...lastFrame,image:undefined},null,2));
+  await ui.getByLabel('Canvas zoom',{exact:true}).selectOption('100');
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.style.width==='1024px');
+  await page.setViewportSize({width:950,height:700});
+  assert.equal(await ui.locator('.screen-render').evaluate(e=>e.naturalWidth),1024);
+  await ui.getByLabel('Canvas zoom',{exact:true}).selectOption('fit');
+  await ui.getByLabel('Canvas resolution (sample)',{exact:true}).selectOption('1280x720');
+  await page.waitForFunction(()=>document.querySelector('.screen-render')?.naturalWidth===1280 && document.querySelector('.screen-game')?.dataset.stale==='false');
+  cases.push('two internal aspects; 100% uses logical game pixels; window resize preserves the internal aspect');
+  await ui.getByLabel('Button state (sample)',{exact:true}).selectOption('hover');
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false' && document.querySelector('.screen-render')?.dataset.buttonState==='hover');
+  await writeFile(join(output,'helper-1280x720-hover.png'),Buffer.from(lastFrame.image.split(',')[1],'base64'));
+  await ui.getByLabel('Canvas resolution (sample)',{exact:true}).selectOption('1024x768');
+  await page.waitForFunction(()=>document.querySelector('.screen-render')?.naturalWidth===1024 && document.querySelector('.screen-game')?.dataset.stale==='false');
+  await writeFile(join(output,'helper-1024x768-hover.png'),Buffer.from(lastFrame.image.split(',')[1],'base64'));
+  await ui.getByLabel('Button state (sample)',{exact:true}).selectOption('normal');
+  await ui.getByLabel('Canvas resolution (sample)',{exact:true}).selectOption('1280x720');
+  await page.waitForFunction(()=>document.querySelector('.screen-render')?.naturalWidth===1280 && document.querySelector('.screen-game')?.dataset.stale==='false');
+  const sourceRequest=()=>child.request({protocolVersion:1,requestId:randomUUID(),operation:'source.open',payload:{sessionId,path:'game/ui/help.rpy'}});
+  const beforeSample=await sourceRequest();assert.equal(beforeSample.ok,true);
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+  await ui.getByRole('option',{name:/^Text ·/}).dblclick();
+  await ui.getByLabel('Canvas text sample',{exact:true}).fill('Literal sample [not_a_game_variable]. This text changes without accepting source.');
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+  assert.equal(await ui.getByLabel('Canvas text sample',{exact:true}).evaluate(e=>document.activeElement===e),true);
+  await writeFile(join(output,'live-text-sample.png'),Buffer.from(lastFrame.image.split(',')[1],'base64'));
+  assert.equal((await sourceRequest()).value.text,beforeSample.value.text);
+  await ui.getByRole('button',{name:'Use source text',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
+  cases.push('normal/hover samples at both aspects and literal live text samples preserve accepted source');
+  await page.setViewportSize({width:1100,height:760});
+  await ui.getByLabel('Width',{exact:true}).evaluate(e=>e.addEventListener('input',()=>{window.__canvasInputAt=performance.now();},{capture:true}));
+  await page.evaluate(()=>document.addEventListener('load',event=>{
+    if(event.target instanceof HTMLImageElement && event.target.matches('.screen-render')) window.__canvasDecodedAt=performance.now();
+  },true));
+  for(let index=1;index<=40;index++) {
+    await ui.getByLabel('Width',{exact:true}).fill(String(640+index*8));
+    await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+    await ui.locator('.screen-render').screenshot({path:join(output,`warm-${String(index).padStart(2,'0')}.png`)});
+    const sample=await page.evaluate(()=>({inputToDecode:window.__canvasDecodedAt-window.__canvasInputAt,inputToCapture:performance.now()-window.__canvasInputAt,rpc:window.__canvasRpcTimings.filter(v=>v.began>=window.__canvasInputAt)}));
+    timings.push(sample.inputToCapture);breakdown.push({...sample,decodeToCapture:sample.inputToCapture-sample.inputToDecode,helper:lastFrame.diagnostics});
+  }
+  await ui.getByRole('button',{name:'Cancel changes',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+  const sorted=[...timings].sort((a,b)=>a-b),p95=sorted[Math.ceil(sorted.length*.95)-1];
+  await writeFile(join(output,'timings.json'),JSON.stringify({measurement:'DOM input to completed Chrome pixel capture, including capture/automation overhead; image decode is diagnostic only; not native WebView presentation proof',milliseconds:timings,breakdown,p95,target:100},null,2));
+  cases.push(`40 warm input-to-captured-image samples retained; p95 ${p95.toFixed(1)} ms`);
+  await page.screenshot({path:join(output,'production-canvas.png'),fullPage:true});
+  assert.deepEqual(errors,[]);
+  passed=true;
+} catch(error) {
+  if(page) { await writeFile(join(output,'failure.txt'),`${error.stack}\n${await page.locator('body').innerText()}`); await page.screenshot({path:join(output,'failure.png'),fullPage:true}); }
+  throw error;
+} finally {
+  await browser?.close(); await server.close(); await child.stop();
+  await writeFile(join(output,'requests.json'),JSON.stringify(requests,null,2));
+  await writeFile(join(output,'summary.json'),JSON.stringify({passed,cases,errors,driver:child.exitStatus()},null,2));
+}

@@ -220,7 +220,7 @@ not be imported as the Phase 1 production architecture.
 | Transaction service | Preview, validate, commit, undo/redo, recovery | Maintain separate visual/source/LLM edit paths |
 | File coordinator | Watch, hash/revision, conflict detection, safe paths | Follow unchecked symlinks or overwrite conflicts |
 | Ren'Py adapter | Versioned CLI discovery, compile/lint/run/test/build | Treat CLI output or private internals as stable |
-| Preview service | Supported editor views, the planned [Screens canvas helper](adr/0021-separate-renpy-canvas-helper.md) and deliberate official project preview | Execute project code during editing or claim unqualified rendering fidelity |
+| Preview service | Supported editor views, the bounded [Screens canvas helper proof](tasks/evidence/canvas-rendering.md) and deliberate official project preview | Execute project code during editing or claim unqualified rendering fidelity |
 | Git adapter | Status, diff, checkpoints, history, safe restore, remote flows | Force-push or destructively reset by default |
 | LLM service | Providers, context selection, proposals, schema validation | Send content without explicit user action |
 | Credential service | OS keychain/credential store references | Store plaintext secrets in project metadata |
@@ -675,6 +675,26 @@ requires the core service to have no open project plus confirmed process cleanup
 exiting. It grants no filesystem/process-launch privilege. Explicit scaffold-smoke exits
 retain their existing independent harness behavior. OS termination still uses shutdown.
 
+
+### Data-only Screens canvas proof
+
+The selected [L17 proof](tasks/evidence/canvas-rendering.md) adds session-bound
+`screens.canvasPlan`, `screens.canvasRender` and `screens.canvasStatus` requests.
+Core derives the plan from lossless screen inspection and the expected source
+revision. Literal properties, size drafts and canvas-only text/button samples enter
+the helper as JSON. It receives copied, hashed image/font assets and a Loomlight
+renderer. It receives no project scripts, bytecode, actions or expressions.
+Unknown initialization, inherited styles, unsupported statements and unresolved
+text tags/interpolation make the composition unavailable. These conservative limits
+are specific to the proof and do not accept the full Screens subset.
+
+The verified pinned SDK runs a private software-rendered project with SDL's dummy
+video/audio drivers. The existing process-tree owner stops it on project close,
+change or application shutdown. A helper failure retains drafts. Frame IDs, source
+and asset revisions bind exported PNGs and actual Ren'Py selection geometry to the
+request. A stale image cannot supply editing geometry. The UI has no simplified
+canvas fallback. The [proof record](tasks/evidence/canvas-rendering.md) owns the
+observed drawable-resolution differences and pending native presentation/focus gates.
 
 ### Isolated scratch preview jobs for custom screens
 

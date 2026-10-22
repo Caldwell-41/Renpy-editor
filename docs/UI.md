@@ -852,12 +852,17 @@ the accepted theme, shared controls and pending Phase 1 corrections remain autho
 
 The selected [Help-screen outcome](tasks/active/help-screen-production.md) implements
 a limited production Choose/Design/Connect layout for existing custom screens.
-Existing literal width/height edits use Apply/Cancel and shared history; the canvas
-still approximates content, text styles and layout. Bounded Mac/Windows functional
-proof passes; visual fidelity remains unaccepted. For implementation or acceptance
+Existing literal width/height edits use Apply/Cancel and shared history. The selected
+[L17 proof](tasks/evidence/canvas-rendering.md) replaces the approximate canvas with
+pinned-SDK helper images for its bounded literal composition. Unsupported content
+shows an explicit unavailable state. An older image is marked stale and supplies no
+editing geometry. Numeric and resize drafts render before acceptance; canvas-only
+text and normal/hover button samples do not change source or runtime values. Fit and
+100% scale the same internal composition, with a separate resolution sample selector.
+Earlier Help Mac/Windows functional proof remains separate; helper fidelity and
+native presentation remain unaccepted. For implementation or acceptance
 of canvas rendering, follow [canvas agreement with Ren'Py](tasks/reference/phase-3b-screens.md#canvas-agreement-with-renpy)
-and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md). The accepted helper design
-and live draft/failure behavior await their separately selected proof and implementation.
+and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md).
 The inventory below remains the full Screens direction.
 
 [L01](https://github.com/Caldwell-41/Renpy-editor/issues/34) adds New blank screen

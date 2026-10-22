@@ -1,6 +1,6 @@
 # ADR 0021: Separate Ren'Py helper for the Screens canvas
 
-- Status: Accepted design for a later bounded proof; implementation and qualification pending
+- Status: Accepted design; bounded implementation proof selected; rendering qualification pending
 - Date: 2026-10-22
 - Authority: The user confirmed the complete interview agreement and requested this
   ADR and the update to [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
@@ -11,6 +11,11 @@ Use a separate Ren'Py canvas helper as the approach for the later representative
 proof. Reusing Ren'Py's layout and text rendering reduces the behavior Loomlight
 must reproduce. This decision accepts the approach and proof scope; it supplies
 no rendering evidence or authorization to implement or run that proof now.
+
+The user subsequently selected implementation of #36. The
+[proof record](../tasks/evidence/canvas-rendering.md) owns implementation mappings,
+observed differences and remaining qualification. This does not weaken the fidelity
+or feedback requirements below.
 
 ## Execution and editing boundary
 

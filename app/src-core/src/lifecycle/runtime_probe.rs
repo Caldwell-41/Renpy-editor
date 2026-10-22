@@ -3,6 +3,20 @@ use super::*;
 use serde_json::json;
 
 impl LifecycleService {
+    /// Disposable representative canvas composition with public SDK font/image assets.
+    pub fn prepare_canvas_screen_probe(data: PathBuf, archive: &Path) -> Result<Self,String> {
+        let mut service = Self::prepare_source_foundation_probe(data)?;
+        let root = service.data_root.join("synthetic-project");
+        let sdk = crate::renpy::install_supported_sdk_from_archive(&service.data_root,archive).map_err(|e|format!("Canvas SDK: {e:?}"))?;
+        fs::create_dir_all(root.join("game/ui")).map_err(|e|e.to_string())?;
+        fs::create_dir_all(root.join("game/assets")).map_err(|e|e.to_string())?;
+        fs::copy(sdk.root.join("renpy/common/DejaVuSans.ttf"),root.join("game/assets/canvas.ttf")).map_err(|e|e.to_string())?;
+        fs::write(root.join("game/assets/help.png"),include_bytes!("../../../../tests/fixtures/phase-1h/assets/booth.png")).map_err(|e|e.to_string())?;
+        fs::write(root.join("game/ui/help.rpy"),include_bytes!("../../../../tests/fixtures/phase-3b-screens/canvas-help.rpy")).map_err(|e|e.to_string())?;
+        fs::write(root.join("game/options.rpy"),help_probe_options(1280,720)).map_err(|e|e.to_string())?;
+        service.remember_sdk(sdk,"verified-canvas-fixture");
+        Ok(service)
+    }
     /// Explicit disposable Help case. Only the packaged probe can seed this fixture.
     pub fn prepare_help_screen_probe(data: PathBuf, archive: &Path) -> Result<Self, String> {
         let mut service = Self::prepare_source_foundation_probe(data)?;

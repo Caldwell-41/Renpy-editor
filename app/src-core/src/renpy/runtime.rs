@@ -7,6 +7,7 @@ use std::process::{ChildStderr, ChildStdout};
 
 pub(crate) mod diagnostics;
 mod platform;
+pub(crate) mod canvas;
 
 const READY_MARKER: &[u8] = b"LOOMLIGHT_RUNTIME_READY_V1";
 const RETAINED_OUTPUT: usize = 2 * 1024 * 1024;
@@ -251,7 +252,7 @@ impl RuntimeProcess {
                         }
                         #[cfg(test)]
                         worker_cancel.record_spawn();
-                        let mut child = match platform::OwnedChild::spawn(&mut command, anchor) {
+                        let mut child = match platform::OwnedChild::spawn(&mut command, anchor, false) {
                             Ok(value) => value,
                             Err(_) => {
                                 outcome = "spawnFailed";

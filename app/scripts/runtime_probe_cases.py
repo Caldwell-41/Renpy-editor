@@ -1,9 +1,10 @@
 """Cases required by the ordinary packaged runtime gate and evidence manifest."""
 RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh")
-OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen")
+OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "canvas-helper")
 
 # Terminal production-probe observations required by each ordinary scenario.
 RUNTIME_STAGES = {
+    'canvas-helper': ('project-frame-passed','draft-cancel-focus-passed','source-history-passed','second-aspect-passed','logical-pixels-passed','project-close-passed'),
     'owned-screen': ('cancel-passed', 'creation-passed', 'exact-source-passed', 'history-passed', 'reopen-passed'),
     'help-screen': ('screen-inventory-passed', 'source-roundtrip-passed', 'validation-passed', 'preview-geometry-passed', 'stale-stop-passed', 'disk-reopen-passed'),
     'compile': ('diagnostics-real-ipc-passed',),
@@ -33,6 +34,9 @@ def runtime_report_ok(case, report, target_os=None):
         return False
     if any(names.count(name) != 1 for name in RUNTIME_STAGES[case]):
         return False
+    if case=='canvas-helper':
+        from canvas_evidence import canvas_details_ok
+        return canvas_details_ok(details)
     if case == 'owned-screen':
         identity = details.get('identity')
         if (details.get('nativeWebView') is not True or details.get('sdkExecuted') is not False

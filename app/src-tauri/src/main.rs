@@ -297,7 +297,9 @@ fn core_request(
         && request.get("operation").and_then(Value::as_str) == Some("probe.runtimeUiReport")
     {
         let payload = request.get("payload").cloned().unwrap_or(Value::Null);
-        let report_limit = if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()
+        let report_limit = if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper") {
+            256 * 1024
+        } else if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()
             == Ok("branches-performance")
         {
             128 * 1024
@@ -789,6 +791,9 @@ fn main() {
                     else {if data.exists(){return Err("Reference fixture already exists".into());}LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?}
                 } else if data.exists() { return Err("probe destination already exists".into()); } else if matches!(case.as_str(), "source-foundation" | "owned-screen") {
                     LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
+                } else if case == "canvas-helper" {
+                    let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("Canvas probe SDK archive required")?;
+                    LifecycleService::prepare_canvas_screen_probe(data,std::path::Path::new(&archive)).map_err(std::io::Error::other)?
                 } else if case == "help-screen" {
                     let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("Help probe SDK archive required")?;
                     LifecycleService::prepare_help_screen_probe(data, std::path::Path::new(&archive)).map_err(std::io::Error::other)?
@@ -914,6 +919,7 @@ fn main() {
                         main.show().expect("reference probe show");main.set_focus().expect("reference probe focus");
                         let phase=if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){2}else{1};
                         main.eval(&format!("window.__loomlightReferencePhase={phase};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("reference_library_probe.js"))).expect("reference probe injection");
+                    } else if case == "canvas-helper" { main.show().expect("Canvas probe show");main.set_focus().expect("Canvas probe focus");main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("canvas_helper_probe.js"))).expect("Canvas probe injection");
                     } else if case == "owned-screen" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("owned_screen_probe.js"))).expect("Owned screen probe injection");
                     } else if case == "help-screen" { main.eval(&format!("window.__loomlightHelpTargetOs = {:?};\n{}\n{}",std::env::consts::OS,include_str!("native_editor_probe.js"),include_str!("help_screen_probe.js"))).expect("Help screen probe injection");
                     } else if case == "source-foundation" { main.eval(&format!("{}\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("source_foundation_extended_probe.js"),include_str!("source_foundation_probe.js"))).expect("source foundation probe injection"); } else if case == "ui-refresh" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_refresh_probe.js"))).expect("UI refresh probe injection"); } else if matches!(case.as_str(), "branches-performance" | "branches-interactive") {

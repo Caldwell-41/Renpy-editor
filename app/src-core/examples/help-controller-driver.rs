@@ -46,7 +46,8 @@ fn main() {
         assert!(matches!(op, "system.health"|"system.version"|"preferences.read"|"preferences.write"|
             "project.listRecent"|"project.openRecent"|"project.current"|"project.close"|"project.status"|"project.flush"|
             "scene.list"|"scene.apply"|"source.list"|"source.open"|"source.updateDraft"|"source.save"|"source.discard"|
-            "source.saveAll"|"source.discardAll"|"authoring.list"|"flow.list"|"screens.inspect"|"screens.setSize"|"screens.list"|"screens.create"));
+            "source.saveAll"|"source.discardAll"|"authoring.list"|"flow.list"|"screens.inspect"|"screens.setSize"|"screens.list"|"screens.create"|
+            "screens.canvasPlan"|"screens.canvasRender"|"screens.canvasStatus"));
         emit(serde_json::to_value(host.dispatch(request, false)).unwrap());
     }
     assert!(host.shutdown());

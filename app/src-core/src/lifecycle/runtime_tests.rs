@@ -17,6 +17,68 @@ fn call(
     assert_eq!(response["ok"], true, "{operation}: {response}");
     response["value"].clone()
 }
+
+#[test]
+#[ignore = "selected L17 deliberate reference; one SDK process for two virtual aspects"]
+fn canvas_reference_sdk_captures_actual_screen_at_two_internal_aspects() {
+    use sha2::{Digest,Sha256};
+    let archive=PathBuf::from(std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").expect("pinned official archive"));
+    let output=PathBuf::from(std::env::var_os("LOOMLIGHT_CANVAS_EVIDENCE").expect("fresh ignored evidence root"));
+    fs::create_dir_all(&output).unwrap();
+    let temporary=tempfile::Builder::new().prefix("loomlight-canvas-reference-").tempdir().unwrap();
+    let profile=temporary.path().join("profile");
+    let mut service=LifecycleService::prepare_canvas_screen_probe(profile.clone(),&archive).unwrap();
+    let root=profile.join("synthetic-project");
+    let session=service.open_path(&root).unwrap().session_id;
+    let sdk_id=service.discover_sdks()[0].id.clone();
+    let accepted=fs::read(root.join("game/ui/help.rpy")).unwrap();
+    let doc=call(&mut service,&session,"screens.inspect",json!({"path":"game/ui/help.rpy"}));
+    let preview=json!({"purpose":"screen","path":"game/ui/help.rpy","screenName":"loomlight_help","expectedRevision":doc["revision"]});
+    let preparation=call(&mut service,&session,"runtime.prepare",json!({"kind":"run","revisionChoice":"saved","sdkId":sdk_id,"preview":preview}));
+    // This instrumentation is not a renderer input or project write capability.
+    // The ordinary frozen preview contains the accepted screen and identical assets.
+    let scratch_root=service.prepare_canvas_reference_fixture();
+    let trust=call(&mut service,&session,"runtime.grantTrust",json!({"preparationId":preparation["preparationId"]}));
+    fs::write(output.join("reservation.json"),serde_json::to_vec_pretty(&json!({"sdkProcesses":1,"aspects":[[1280,720],[1024,768]],"acceptedSHA256":hex::encode(Sha256::digest(&accepted))})).unwrap()).unwrap();
+    let started=call(&mut service,&session,"runtime.start",json!({"preparationId":preparation["preparationId"],"trustId":trust["trustId"]}));
+    let payload=json!({"operationId":started["operationId"],"afterSequence":0});
+    let mut observed=Value::Null;
+    wait_for(|| {
+        observed=call(&mut service,&session,"runtime.status",payload.clone());
+        fs::write(output.join("observed.json"),serde_json::to_vec_pretty(&observed).unwrap()).unwrap();
+        observed["cleanupComplete"]==true || observed["output"].as_str().unwrap().lines().filter(|s|s.starts_with("CANVAS_REFERENCE ")).count()==4
+    },45);
+    fs::write(output.join("observed.json"),serde_json::to_vec_pretty(&observed).unwrap()).unwrap();
+    let records=observed["output"].as_str().unwrap().lines().filter_map(|s|s.strip_prefix("CANVAS_REFERENCE "))
+        .map(|s|serde_json::from_str::<Value>(s).unwrap()).collect::<Vec<_>>();
+    for record in &records {
+        for key in ["filename","drawableFilename"] {
+            let name=record[key].as_str().unwrap();
+            assert!(name.starts_with("reference-") && name.ends_with(".png") && !name.contains(['/', '\\']));
+            fs::copy(scratch_root.join(name),output.join(name)).unwrap();
+        }
+    }
+    if observed["cleanupComplete"]!=true {
+        call(&mut service,&session,"runtime.stop",json!({"operationId":started["operationId"]}));
+        wait_for(|| {observed=call(&mut service,&session,"runtime.status",payload.clone());observed["cleanupComplete"]==true},10);
+    }
+    let diagnostics=call(&mut service,&session,"runtime.diagnostics",json!({"operationId":started["operationId"]}));
+    let passed=records.len()==4 && help_preview_terminal_clean("run",&observed,&diagnostics);
+    fs::write(output.join("result.json"),serde_json::to_vec_pretty(&json!({"passed":passed,"records":records,"status":observed,"diagnostics":diagnostics,"sourceUnchanged":fs::read(root.join("game/ui/help.rpy")).unwrap()==accepted,"nativeWebView":false})).unwrap()).unwrap();
+    assert!(passed,"Actual reference failed: {observed}");
+    for record in &records {
+        assert_eq!(record["menu"],false);
+        assert_eq!(record["widgetSelection"],"base");
+        assert_eq!(record["physical"],record["aspect"],"matched window scaling required");
+        for (name,width,height) in [("help_panel",640.0,360.0),("help_image",64.0,48.0),("help_button",143.0,45.0)] {
+            assert_eq!(record["geometry"][name][0].as_f64(),Some(width),"{record}");
+            assert_eq!(record["geometry"][name][1].as_f64(),Some(height),"{record}");
+        }
+    }
+    assert_eq!(fs::read(root.join("game/ui/help.rpy")).unwrap(),accepted);
+    assert!(!root.join("game/ui/help.rpyc").exists()); assert!(!root.join("game/saves").exists());
+    assert!(!scratch_root.exists()); assert!(service.runtime_shutdown()); service.close().unwrap();
+}
 #[test]
 fn runtime_literal_refusal_cancel_and_policy_install_are_write_bounded() {
     let temp = tempfile::tempdir().unwrap();

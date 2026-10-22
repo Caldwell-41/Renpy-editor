@@ -59,6 +59,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Completed Windows remembered-credential outcome and its evidence/limits | [Windows credential contract](tasks/evidence/phase-2-execution.md#current-windows-qualification-contract) |
 | Historical Phase 2 source/provider/native attempts; outcomes not automatically accepted | [Execution history](tasks/archive/2026-10-09-phase-2-execution-history.md) |
 | Bounded Help functional approval, historical execution and visual limits | [Help outcome](tasks/active/help-screen-production.md), [evidence](tasks/evidence/help-screen-production.md) |
+| L17 data-only canvas helper proof, rendering differences and pending qualification | [GitHub outcome](https://github.com/Caldwell-41/Renpy-editor/issues/36), [evidence](tasks/evidence/canvas-rendering.md), [design](adr/0021-separate-renpy-canvas-helper.md) |
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
 | Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/reference/phase-2-3-delivery.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |

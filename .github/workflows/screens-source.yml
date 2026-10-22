@@ -17,6 +17,10 @@ on:
         description: Select L01 owned blank screen proof; leaves closed Help qualification untouched
         type: boolean
         default: false
+      canvas_helper:
+        description: Select L17 bounded canvas helper proof; preserve closed Help/L01 selections
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -26,7 +30,7 @@ concurrency:
 
 jobs:
   focused:
-    if: ${{ !inputs.owned_blank }}
+    if: ${{ !inputs.owned_blank && !inputs.canvas_helper }}
     name: Help (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -163,7 +167,7 @@ jobs:
           retention-days: 7
 
   owned-blank:
-    if: ${{ inputs.owned_blank }}
+    if: ${{ inputs.owned_blank && !inputs.canvas_helper }}
     name: Owned blank screen (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -316,5 +320,116 @@ jobs:
         with:
           name: owned-screen-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/owned-screen/
+          if-no-files-found: error
+          retention-days: 7
+
+  canvas-helper:
+    if: ${{ inputs.canvas_helper && !inputs.owned_blank }}
+    name: L17 canvas helper (Windows x64)
+    runs-on: windows-2025
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    env:
+      CARGO_TERM_COLOR: never
+      RUSTUP_TOOLCHAIN: 1.90.0
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require selected L17 candidate and cumulative ordinal
+        env:
+          CANDIDATE: ${{ inputs.candidate }}
+          ORDINAL: ${{ inputs.ordinal }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          case "$ORDINAL" in 1|2|3|4|5) ;; *) exit 1 ;; esac
+          test "$(git rev-parse HEAD)" = "$CANDIDATE"
+          mkdir -p "$RUNNER_TEMP/canvas-proof"
+          git rev-parse HEAD > "$RUNNER_TEMP/canvas-proof/candidate.txt"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: canvas-helper-windows
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Pinned dependencies and portable checks
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          npm install --global npm@11.9.0
+          npm ci
+          python -m unittest discover -s scripts -p 'test_canvas_evidence.py' -v
+          npm run typecheck
+          npm run build:tests
+          node --test dist-tests/tests/screen-ui.dom.test.js
+          cargo test -p loomlight-core --release --locked --lib screens::tests -- --nocapture
+          cargo build -p loomlight-core --examples --locked
+          npm run build
+          cargo check -p loomlight-desktop --locked
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        id: canvas-sdk-cache
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-Windows-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Verify official pinned SDK
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 180 --output "$RUNNER_TEMP/canvas-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          if test '${{ steps.canvas-sdk-cache.outputs.cache-hit }}' != true; then
+            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+            mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+          fi
+          python scripts/verify-help-sdk.py "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" "$RUNNER_TEMP/canvas-checksums.txt"
+      - name: Short fresh Windows scratch root
+        shell: pwsh
+        run: |
+          $scratch = "C:\llcanvas${{ inputs.ordinal }}"
+          if (Test-Path $scratch) { throw 'L17 scratch root already exists' }
+          New-Item -ItemType Directory -Path $scratch | Out-Null
+          "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Production browser to helper, two aspects, samples and draft/history regression
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          LOOMLIGHT_CANVAS_EVIDENCE: ${{ runner.temp }}/canvas-proof/browser
+          HELP_SCREEN_OUTPUT: ${{ runner.temp }}/canvas-proof/help-regression
+        run: |
+          node tests/canvas-helper.browser.mjs
+          node tests/help-screen.browser.mjs
+      - name: Deliberate Ren'Py reference captures and clean Stop
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          LOOMLIGHT_CANVAS_EVIDENCE: ${{ runner.temp }}/canvas-proof/reference
+        run: cargo test -p loomlight-core --release --locked --lib lifecycle::runtime_tests::canvas_reference_sdk_captures_actual_screen_at_two_internal_aspects -- --exact --ignored --nocapture
+      - name: One Windows package and native WebView to helper round trip
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+        run: |
+          npm exec -- tauri build --bundles nsis -- --locked
+          python scripts/run-runtime-ui-probes.py target/release/loomlight.exe "$RUNNER_TEMP/canvas-proof/native" canvas-helper
+      - name: Retain package identity
+        if: ${{ always() && hashFiles('app/target/release/loomlight.exe') != '' }}
+        shell: pwsh
+        run: |
+          $binary = [IO.File]::ReadAllBytes((Resolve-Path 'target/release/loomlight.exe'))
+          $pe = [BitConverter]::ToInt32($binary, 0x3c)
+          if ([BitConverter]::ToUInt16($binary, $pe + 4) -ne 0x8664) { throw 'Windows x64 executable required' }
+          @{ candidate=$env:GITHUB_SHA; architecture='Windows x64'; executableSHA256=(Get-FileHash 'target/release/loomlight.exe').Hash } | ConvertTo-Json | Out-File "$env:RUNNER_TEMP/canvas-proof/package-identity.json" -Encoding utf8
+      - name: Scan complete or partial public fixture evidence
+        id: canvas-privacy
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/canvas-proof"
+          node scripts/scan-artifacts.mjs "$RUNNER_TEMP/canvas-proof"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ always() && steps.canvas-privacy.outcome == 'success' }}
+        with:
+          name: canvas-helper-Windows-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/canvas-proof/
           if-no-files-found: error
           retention-days: 7

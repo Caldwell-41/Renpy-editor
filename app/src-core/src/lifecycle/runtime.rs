@@ -128,6 +128,14 @@ fn input_error(_: impl std::fmt::Debug) -> LifecycleError {
 }
 
 impl LifecycleService {
+    #[cfg(test)]
+    pub(super) fn prepare_canvas_reference_fixture(&mut self) -> std::path::PathBuf {
+        let scratch=self.runtime.preparation.as_mut().expect("explicit prepared preview").scratch.as_mut().expect("screen scratch preview");
+        let root=scratch.anchor().path().to_owned();
+        std::fs::write(root.join("game/canvas_reference.rpy"),include_bytes!("../../../../tests/fixtures/phase-3b-screens/canvas-reference.rpy")).unwrap();
+        scratch.manifest=crate::transaction::execution_manifest(scratch.anchor(),true).unwrap();
+        root
+    }
     pub(crate) fn runtime_request_capability(
         &self,
         operation: &str,
@@ -185,7 +193,7 @@ impl LifecycleService {
             return false;
         }
         self.runtime.process = None;
-        true
+        self.canvas_shutdown()
     }
     pub fn runtime_cancel_preparation(
         &mut self,
