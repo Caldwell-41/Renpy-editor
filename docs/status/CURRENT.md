@@ -1,28 +1,31 @@
 # Current status
 
-## L17 proof retained; qualification incomplete
+## L17 Mac functional proof passes; Windows CI pending
 
-2026-10-22: The user selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-implementation and increased its allowance by 100%. Corrected product candidate
-`b7caff3` is committed locally. [Evidence](../tasks/evidence/canvas-rendering.md)
-owns the data-only helper mappings, browser/service proof, captures and failures.
-All 226 frontend tests and the applicable core checks pass. Independent review has
-zero remaining Standards findings and three open Spec gaps. Mac drawable-scale
-text and hover-color differences prevent fidelity acceptance; native presentation,
-focus/startup, dragging and Windows qualification remain incomplete.
+2026-10-23: The user authorized publication, Windows CI and four more Mac SDK
+launches for [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
+Product candidate `63a1b03` is published. Signed Mac package 3/native attempt 3
+passes both aspects, drafts/Cancel, source history, logical pixels and cleanup.
+Its exported pixels equal the earlier browser-helper captures. This establishes
+functional transport, while glyph/hover-color differences against deliberate
+Ren'Py remain unaccepted. Native presentation/startup/focus and element dragging
+also remain incomplete. [Evidence](../tasks/evidence/canvas-rendering.md#authorized-continuation-2026-10-23)
+owns the failures, fixes, measurements and remaining gates.
 
-Both signed Mac packages pass identity/contents checks. Package 1's native attempt
-failed its watchdog while the Mac was locked, with clean process/disk recovery.
-Package 2 contains the helper-only backup prevention fix and is unlaunched. The
-final service helper passes both aspects and project-close cleanup. No owned
-process, fixture or generated helper backup remains; no operation is pending.
+[Windows CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39841877779),
+attempt 1 at `63a1b037d11054246a019c2e5bb515217111a7c6`, was last observed queued
+at 19:38:35 UTC on 2026-10-22. CI1 was cancelled during portable compilation;
+SDK/package/native checks were skipped. CI2 needs a full artifact audit. Follow
+[HANDOVER](HANDOVER.md#active-l17-proof-handover) for same-chat ci-watch continuation.
 
-#36 owns cumulative use: 30/60 local batches, 0/5 CI; Mac packages 2/5, native 1/7,
-SDK 20/20; Windows packages/native/SDK 0. Further Mac SDK work needs an explicit
-supplement; native observation needs an unlocked Mac. Windows CI is prepared and
-undispatched because no push is selected. Fidelity requires decision review before
-broader renderer work or a weaker gate. #36 stays open. No PR, merge or release is
-selected. Unrelated parallel-policy edits and protected recovery remain separate.
+#36 owns cumulative use: 35/60 local batches, 2/5 CI; Mac packages 3/5, native 3/7,
+SDK 24/24. Windows actual package/native/SDK use was zero before CI2, which reserves
+one package, one native launch and four SDK processes. No further Mac SDK launch
+is allocated. No owned local process, fixture or generated helper backup remains.
+All 226 frontend tests pass; review has zero new code findings and three open Spec
+gaps. Keep #36 open and return fidelity failures to decision review before broader
+renderer work or weaker gates. No PR, merge or release is selected. Preserve
+unrelated parallel-policy edits and protected recovery below.
 
 ## Earlier canvas decision closeout
 

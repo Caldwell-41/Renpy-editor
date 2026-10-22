@@ -3,38 +3,57 @@
 ## Active L17 proof handover
 
 The user selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-through the implement skill, confirmed core/UI/packaged test boundaries and
-increased its allowance by 100%. Mac ARM64 remains the development host on
-`codex/phase3b-screen-designer`, from `7e1e7b3`. Product commits are `fd781a6`,
-`8c21b7b` and corrected candidate `b7caff3`. They remain local. The issue owns live
-selection and cumulative use; [evidence](../tasks/evidence/canvas-rendering.md)
-owns mappings, exact artifacts, failures and qualification gaps.
+through implement, confirmed core/UI/packaged test boundaries, doubled the original
+allowance and then authorized push, Windows CI and four more Mac SDK launches.
+Development remains on Mac ARM64, `codex/phase3b-screen-designer`, from `7e1e7b3`.
+Published product candidate is `63a1b037d11054246a019c2e5bb515217111a7c6`.
+Harness-only correction `38b5992` makes both local browser entrypoints build the
+locked release driver before starting a fixture. Later documentation does not
+change the tested product. The issue owns scope and cumulative allowance;
+[evidence](../tasks/evidence/canvas-rendering.md#authorized-continuation-2026-10-23)
+owns exact results, identities and original failures.
 
-The real release-browser path passes both aspects, normal/hover/live text samples,
-size gestures, Cancel/Escape and history. Startup image load is 894.2 ms; warm
-image-load p95 is 63.5 ms and completed-capture p95 149.7 ms. These are diagnostics,
-not native presentation. Deliberate Mac reference captures match window sizes and
-outer-widget dimensions. GL2 draws text at Retina scale 2; software draws at scale
-1. Glyph and flat hover-color differences remain unaccepted. Element dragging is
-still missing. Independent Standards reviews have zero unresolved findings; the
-Spec review retains fidelity, native timing/startup/focus and dragging gaps.
+Signed Mac package 3/native attempt 3 passes both aspects, drafts/Cancel, accepted
+Source/Undo/Redo, logical pixels and project-close cleanup. Its exported RGBA pixels
+match the browser-helper captures. Native image load is 1,251 ms, diagnostic only.
+The receipt explicitly leaves OS focus, physical keyboard and warm presentation
+unproved. Package 2/native attempt 2 failed because the qualification controller
+dropped `RUNTIME_BUSY` codes on source reads. The corrected common wrapper preserves
+the code; the exact-controller rehearsal proves bounded read retries with one
+accepted write. That rehearsal used an older core driver, so it does not qualify
+backup isolation. The rebuilt driver and build-before-fixture guard address that
+provenance fault. SDK process 21 executed and passed the backup-log regression.
+No owned local app/helper/driver, fixture or generated helper backup remains.
 
-Mac package 1 passes signing/contents but its native attempt failed the watchdog
-in a locked session. Cleanup owners and disk checks pass; source is unchanged.
-The helper-only backup fault found during diagnosis is fixed and nine verified
-generated backups were removed. The final service SDK case passes both aspects
-and close cleanup. Package 2 at `b7caff3` passes signing/contents and is unlaunched.
-No owned process, fixture or generated helper backup remains. No operation is pending.
+Windows CI2 is the sole pending operation: [run 39841877779](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39841877779),
+attempt 1, workflow `screens-source.yml`, exact candidate/head `63a1b037d11054246a019c2e5bb515217111a7c6`.
+Inputs are ordinal 2, `canvas_helper=true`, `owned_blank=false`. Last observed queued
+at 2026-10-22 19:38:35 UTC. CI1 run 39840720074 was cancelled during portable
+compilation; all SDK/reference/browser/package/native checks were skipped. Both
+dispatches remain charged. Ignored `ci-01` and `ci-02` directories retain dispatch,
+terminal/pending and artifact receipts. CI2 already builds the fresh release driver;
+the later local-entrypoint guard does not require cancelling or redispatching it.
 
-Final use is 30/60 local batches, 0/5 CI; Mac packages 2/5, native 1/7 and SDK 20/20;
-Windows packages/native/SDK 0. The Mac SDK ceiling is reached, including failures
-and the pre-helper setup reservation. Resume needs an unlocked Mac and an explicit
-supplement before another Mac SDK process. Windows CI is ready but needs push
-authorization. Review the retained fidelity comparison before broader renderer
-work or any weaker requirement. Keep #36 open. No push, PR, merge or release is
-selected. Preserve unrelated parallel-policy edits and all protected recovery
-below. Earlier decision/qualification sections are historical; this is the active
-canvas handover. Historical closed allowances stay closed.
+Next register the installed ci-watch for this exact run/SHA and yield this chat.
+The launcher receipt and chat acknowledgement own actual registration status;
+private watcher paths stay outside committed evidence. On the same-chat event,
+verify and acknowledge it, then audit the exact attempt/SHA and every required
+step, official SDK/package identity, public artifact privacy, helper/reference
+images and geometry at both aspects, exact-controller contention, native receipt,
+accepted bytes and process/disk cleanup. Audit actual Windows operations against
+the reservation. A green status alone does not complete #36.
+
+Current use is 35/60 local batches and 2/5 CI; Mac packages 3/5, native launches 3/7,
+SDK processes 24/24. Windows actual use was zero before CI2, which reserves one
+package, one native launch and four SDK processes. No further Mac SDK process is
+allocated and no contingency is recalculated. All 226 frontend tests, typecheck,
+production build and focused rejecting receipt tests pass. Both review axes report
+zero new code findings; matched both-target rendering, native timing/startup/focus
+and element dragging remain Spec gaps. Mac Retina glyph and flat hover-color
+differences have no accepted tolerance. Return proof failures to decision review
+before broader renderer work or weaker gates. Keep #36, B07/B08 and phase
+acceptance open. No PR, merge or release is selected. Preserve unrelated policy
+work and all protected recovery below. Older canvas sections are historical.
 
 ## Earlier canvas decision closeout
 

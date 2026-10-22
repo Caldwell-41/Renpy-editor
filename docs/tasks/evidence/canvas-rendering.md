@@ -191,3 +191,124 @@ focus, image load, render timers and screenshot completion do not substitute for
 native presentation or physical input. Startup has no accepted limit yet. Any
 failure returns to decision review before broader renderer implementation or a
 weaker requirement is accepted. Keep #36 open while these gates remain.
+
+## Authorized continuation, 2026-10-23
+
+The user authorized push and Windows CI, reported the Mac unlocked and allocated
+four additional Mac SDK launches. This raises only the cumulative Mac SDK ceiling
+to 24. Earlier failures and closed allowances remain charged; no contingency is
+recalculated. The original implementation and evidence commits are published.
+Current product candidate is `63a1b037d11054246a019c2e5bb515217111a7c6`.
+
+### Mac failures, corrections and qualification
+
+- SDK process 21, `helper-isolation-31`, executes the selected release service
+  regression including the backup-log assertion. Both aspects and project-close
+  cleanup pass in 20.55 seconds. This supplies the assertion execution missing at
+  the earlier closeout.
+- Package 2/native attempt 2 uses SDK process 22. It fails after 22.375 seconds
+  following `draft-cancel-focus-passed`. The qualification wrapper discarded the
+  `RUNTIME_BUSY` error code, preventing the intended bounded retry of a source
+  read after acceptance. The failed fixture retains its accepted width of 760;
+  accepted-byte equality correctly reports false. Cleanup owners, zero scratch/
+  helper jobs, no source bytecode/saves and profile removal pass. This is a
+  controller defect, not evidence of a failed accepted write.
+- `63a1b03` preserves the structured error code. `controller-32`, SDK process 23,
+  runs the exact packaged controller over the real production UI and release core
+  in Chrome. Injected busy reads before and after acceptance retry; exactly one
+  size write occurs. All stages pass. Its outer receipt explicitly records
+  `controllerTestOnly=true` and `nativeWebView=false`.
+- That rehearsal used a local driver executable built before the backup fix.
+  Its read-retry result remains applicable because the exercised request contract
+  is unchanged. It does not qualify the current core artifact or backup isolation.
+  One generated renderer backup is attributable by file birth time, rehearsal
+  interval, namespace, trusted renderer marker and retained hash. Only that
+  verified file/entry was removed. `driver-provenance.json` and
+  `backup-cleanup.json` retain the attribution and limitation. Both signed package
+  binaries contain the backup opt-out. The release driver was rebuilt and checked.
+- Harness correction `38b5992` makes both browser entrypoints build the locked
+  release driver before creating a fixture. The shared build helper fails on
+  build errors, timeout or nonzero exit. A direct admission check passes without
+  starting an SDK. Both independent review axes report zero new findings on the
+  controller correction and this guard.
+
+Signed Mac package 3 is built from `63a1b03`. Strict signature, the approved
+certificate-backed requirement and installer contents pass. Executable SHA-256 is
+`c0406be436987d56fbb5e228f5c6a4cb5b1aa8be7854e934c91c433c5aa418b1`;
+installer SHA-256 is
+`496b5e9db4c6c8e2ef9fd40455fe8bef3524ff972c9b7d3e7400627cf40d3528`.
+The ignored `mac-package-03/identity-receipt.json` owns the exact identity.
+Signing and credential policy are unchanged.
+
+`mac-native-03`, native launch 3 and SDK process 24, passes in the actual packaged
+WebView. Total runner time is 49.455 seconds including fixture preparation.
+Ordered stages pass first frame, drafts/Cancel and field focus, source/history,
+second aspect, logical pixels and project close. The complete UI receipt is at
+28,123 ms; startup image load is 1,251 ms. Startup is diagnostic, with no accepted
+limit or warm native input-to-visible claim. The receipt records
+`nativeWebView=true`, `nativeKeyboard=false`, `nativeFocusObserved=false` and
+`warmPresentationProof=false`. Synthetic DOM field focus does not establish OS
+focus or physical-keyboard behavior.
+
+The actual WebView exports 1280x720 and 1024x768 helper PNGs. Independent exact
+RGBA comparison in `pixel-transport.json` matches the earlier release-browser
+helper captures at both aspects. This qualifies pixel transport, not agreement
+with the deliberate GL reference. Accepted source bytes match, no source bytecode
+or saves exist, all credential/host/request cleanup owners pass, zero scratch/
+helper jobs remain and the fixture profile is removed. Final process checks find
+no owned app/helper/driver. Generated helper backup inventory is zero after the
+single verified stale-driver cleanup. Original failures remain in their own
+attempt directories.
+
+### Checks and pending Windows run
+
+`resume-32-checks` passes typecheck, focused Screens/request-lane tests and desktop
+Cargo check. `resume-full-32` passes all 226 frontend tests with Python 3.12
+explicitly selected. The production build and two rejecting receipt-schema tests
+pass. Both modified browser entrypoints pass Node syntax checking. The shared
+fresh-build admission passes in `driver-admission-34`. The existing full core
+results and authorized loopback rerun remain applicable to unchanged code. The
+new public-fixture continuation evidence passes its privacy scan for 22 files.
+No native or SDK repeat is needed for this documentation update.
+
+CI dispatch 1, [run 39840720074](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39840720074),
+attempt 1 at `50fce710a9991574e3bc14e4dd8153d4ac0b7820`, is retained as cancelled.
+It was superseded by the diagnosed controller correction during portable Rust
+compilation. All SDK/reference/browser/package/native steps were skipped; privacy
+and artifact upload passed. No Windows SDK, package or native operation occurred.
+This is not passing qualification and its dispatch stays charged. `ci-01` retains
+the terminal receipt, full log and partial artifacts.
+
+CI dispatch 2, [run 39841877779](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39841877779),
+attempt 1, tests exact candidate/head `63a1b037d11054246a019c2e5bb515217111a7c6`
+on `codex/phase3b-screen-designer`. Workflow `screens-source.yml` inputs are
+ordinal 2, `canvas_helper=true`, `owned_blank=false`. Last observed status was
+queued at 2026-10-22 19:38:35 UTC. The ignored `ci-02/pending.json` retains the
+identity, inputs and audit checklist. It reserves one Windows package, one native
+launch and four SDK processes. Later commit `38b5992` only guards local test-driver
+build admission; this CI already explicitly builds the fresh release driver.
+Subsequent evidence/status edits do not change the tested product.
+
+Follow installed ci-watch for same-chat continuation. Registration status belongs
+to the launcher receipt and chat acknowledgement, not an assumed active watch.
+After its event, audit exact run/attempt/SHA, required steps, SDK/package identity,
+artifact privacy, both-aspect helper/reference pixels and geometry, controller and
+native receipts, accepted bytes, process/disk cleanup and actual Windows use.
+Failed, cancelled or skipped checks remain unresolved.
+
+Current cumulative use is 35/60 local work/check batches, 2/5 CI dispatches; Mac
+packages 3/5, native launches 3/7 and SDK processes 24/24. Windows actual package,
+native and SDK use was zero before CI2; its reservation above remains pending
+audit. Batches 31-35 cover resume/service/native failure, controller correction,
+package/native qualification, driver-provenance correction/review and publication/
+wait preparation. All four additional Mac SDK processes are used. No further Mac
+SDK launch is allocated. Historical allowances remain closed.
+
+The three Spec gaps remain: matched both-target rendering, native responsiveness/
+startup/focus qualification and element-position dragging. No tolerance has been
+accepted for the Mac Retina glyph or flat hover-color differences. The functional
+Mac pass closes neither those gates nor #36/B07/B08/phase acceptance. Return failed
+proof to decision review before broader renderer work or weaker gates. No PR,
+merge or release is selected. Unrelated parallel-policy edits and protected native
+recovery remain separate. CURRENT/HANDOVER retain older unique recovery and
+pending phase acceptance, so their overall sizes exceed their review targets.
