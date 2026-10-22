@@ -630,3 +630,107 @@ SDK process is allocated. Audit and in-scope local work retain their remaining
 allowance. All fidelity/native/dragging gates and historical closed allowances
 remain. CURRENT/HANDOVER retain older protected recovery and pending acceptance,
 which keep overall word counts above their review targets.
+
+## CI5 terminal audit and prepared reference correction
+
+The same-chat ci-watch event matches its owner and is acknowledged. GitHub confirms
+[run 39850133053](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39850133053),
+attempt 1, exact head `3906578eee885978b30c469b74aae83ac5942971`, completed with
+failure at 2026-10-22 20:43:41 UTC. Later `76666e9` only records its wait, so this
+result applies to the current product. The Windows open-reader replacement fix
+passes the shared recent-file case, all six browser groups and 200 warm updates.
+The browser reports zero page errors and its driver exits zero after asserted
+host shutdown/root removal. The exact-controller rehearsal passes initial and
+accepted busy reads, exactly one accepted size write, all stages and project close.
+Its outer receipt says `controllerTestOnly: true`, `nativeWebView: false`; the
+generic nested script's WebView flag does not establish native execution. The
+existing Help regression also passes. Portable checks and official SDK checksum pass.
+
+Browser startup image load is 1,790.7 ms, capture p95 is 169.2 ms across 200 samples
+and image-decode p95 is 83.8 ms. These are diagnostic measurements. They do not
+prove the required native input-to-visible timing, startup, focus or keyboard behavior.
+The controller's startup image measurement is likewise diagnostic.
+
+### Reference failure and artifact audit
+
+The later deliberate reference test fails its physical-window equality assertion.
+Both normal and hover captures request 1280x720 but receive 922x519; the 1024x768
+pair receives 888x666. Ren'Py reports these clamped values as `max_window_size`,
+with `angle2` on Microsoft Basic Render Driver. All five logical widget dimensions
+match: panel 640x360, group 331x204, text 331x87, image 64x48 and button 143x45.
+The runner cannot provide the requested matched windows at its current desktop size.
+These downscaled images cannot qualify fidelity or establish a pixel tolerance.
+
+The raw reference receipt's `passed: true` covered only runtime cleanup before the
+later window assertion. The Rust test exits 101, and the whole reference gate
+fails. Source bytes are unchanged; runtime `cleanupComplete` is true, diagnostics
+are empty and output is untruncated. Owned Stop records cancelled exit -1073741510.
+The assertion skipped the final explicit runtime-shutdown/project-close assertions;
+RAII unwinds, but no explicit complete project-close receipt is claimed for this case.
+Package, native WebView and package-identity steps are skipped, so Windows still
+has no package/native proof. No skipped check counts as a pass.
+
+Privacy and artifact upload pass. Artifact 12457377566 contains 249 public-fixture
+files, all passing the independent local scan. Retained ZIP, upload log and GitHub
+metadata agree on SHA-256
+`be5161bfc499797f8ec6cbfface1f767f6073cbaab5cc3e6036f080a3bf02735`.
+Expiry is 2026-10-29 20:43:36 UTC. Ignored `ci-05` retains terminal identity, full
+log, metadata, ZIP, extracted browser/controller/Help/reference files and audit.
+The three SDK processes are browser helper, controller helper and deliberate
+reference. Package/native use is zero. Actual Windows totals are six SDK processes
+and zero packages/native launches.
+
+### Prepared correction and verification
+
+The correction provisions a 1920x1080 runner desktop when needed, then checks fresh
+user32 metrics for at least 1600x1000 before any SDK work. This follows the existing
+Windows qualification scripts' display preparation. Missing capability or an
+undersized result fails admission and retains `display.json`. The reference's
+actual physical-window equality remains mandatory; the test never normalizes away
+the failed condition. Windows execution of this preparation remains unverified.
+
+The reference test now computes all four distinct samples, window/context/geometry
+criteria, source preservation and cleanup before writing its final `passed` field.
+It adds the known group/text geometry to the existing checks. Explicit runtime
+shutdown and project close occur before the final assertion. The receipt retains
+each criterion and cleanup result even when matched windows fail. CI5's raw
+artifact remains unchanged. This correction changes qualification code only.
+
+Local release compilation of the selected reference test with `--no-run` passes.
+Workflow YAML parses and the whitespace check passes. PowerShell is unavailable
+locally, so its display script has static review only. No SDK/native process or
+package runs in this continuation; the earlier 226 frontend results remain valid
+for unchanged UI code. Documentation validation accompanies publication.
+
+#### Standards
+
+Independent read-only review reports zero hard breaches, substantive findings or
+judgement-smell findings. Fresh display metrics, fail-fast admission and receipt
+writing in `finally` preserve the qualification boundary. The full reference
+receipt includes explicit cleanup before its final assertion. The workflow's
+dispatch selector still permits only ordinals 1-5.
+
+#### Spec
+
+Independent read-only review reports zero new findings or scope creep. Provisioning
+the runner does not waive the actual-window gate. The three retained gaps are
+matched both-target fidelity, native timing/startup/focus and element-position
+dragging. Mac Retina glyph and flat hover-color differences have no accepted
+tolerance. Keep #36/B07/B08 and phase acceptance open. ADR 0021 requires decision
+review before broader renderer work or weaker proof requirements.
+
+Local batches 45-48 cover terminal audit, correction/compile, independent review
+and evidence/status/publication preparation, including failed reads and intermediate
+checks. Current cumulative use is 48/60 local batches and 5/5 CI dispatches; Mac
+packages 3/5, native 3/7, SDK 24/24; Windows packages 0/5, native 0/7, SDK 6/20.
+No operation or watcher remains pending. No further Mac SDK process is allocated.
+
+The correction is prepared for review, but a sixth dispatch requires user approval
+under the existing ceiling. The proposal raises only the CI ceiling from five to
+six, with no new contingency. Its maximum Windows reservation would be one package,
+one native launch and four SDK processes within existing target ceilings. The
+selector change to admit ordinal 6 is prepared outside tracked files and remains
+unapplied. If approved, record that authority, update the selector, commit/push and
+dispatch a new attempt 1 at the exact candidate SHA, then use same-chat ci-watch
+and audit every required result. Never reuse ordinal 5. No PR, merge or release is
+selected. Unrelated policy edits and protected recovery remain preserved.

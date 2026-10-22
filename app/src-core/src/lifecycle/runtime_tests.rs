@@ -63,21 +63,34 @@ fn canvas_reference_sdk_captures_actual_screen_at_two_internal_aspects() {
         wait_for(|| {observed=call(&mut service,&session,"runtime.status",payload.clone());observed["cleanupComplete"]==true},10);
     }
     let diagnostics=call(&mut service,&session,"runtime.diagnostics",json!({"operationId":started["operationId"]}));
-    let passed=records.len()==4 && help_preview_terminal_clean("run",&observed,&diagnostics);
-    fs::write(output.join("result.json"),serde_json::to_vec_pretty(&json!({"passed":passed,"records":records,"status":observed,"diagnostics":diagnostics,"sourceUnchanged":fs::read(root.join("game/ui/help.rpy")).unwrap()==accepted,"nativeWebView":false})).unwrap()).unwrap();
-    assert!(passed,"Actual reference failed: {observed}");
-    for record in &records {
-        assert_eq!(record["menu"],false);
-        assert_eq!(record["widgetSelection"],"base");
-        assert_eq!(record["physical"],record["aspect"],"matched window scaling required");
-        for (name,width,height) in [("help_panel",640.0,360.0),("help_image",64.0,48.0),("help_button",143.0,45.0)] {
-            assert_eq!(record["geometry"][name][0].as_f64(),Some(width),"{record}");
-            assert_eq!(record["geometry"][name][1].as_f64(),Some(height),"{record}");
-        }
-    }
-    assert_eq!(fs::read(root.join("game/ui/help.rpy")).unwrap(),accepted);
-    assert!(!root.join("game/ui/help.rpyc").exists()); assert!(!root.join("game/saves").exists());
-    assert!(!scratch_root.exists()); assert!(service.runtime_shutdown()); service.close().unwrap();
+    let runtime_clean=help_preview_terminal_clean("run",&observed,&diagnostics);
+    let samples_match=[(1280,720),(1024,768)].into_iter().all(|(width,height)| {
+        ["normal","hover"].into_iter().all(|state| records.iter().filter(|r| {
+            r["aspect"]==json!([width,height]) && r["state"]==state
+        }).count()==1)
+    });
+    let windows_match=records.iter().all(|r| r["physical"]==r["aspect"]);
+    let context_matches=records.iter().all(|r| r["menu"]==false && r["widgetSelection"]=="base");
+    let geometry_matches=records.iter().all(|r| {
+        [("help_panel",640.0,360.0),("help_group",331.0,204.0),("help_text",331.0,87.0),
+         ("help_image",64.0,48.0),("help_button",143.0,45.0)].into_iter().all(|(name,width,height)| {
+            r["geometry"][name][0].as_f64()==Some(width) && r["geometry"][name][1].as_f64()==Some(height)
+        })
+    });
+    let source_unchanged=fs::read(root.join("game/ui/help.rpy")).is_ok_and(|bytes| bytes==accepted);
+    let source_clean=!root.join("game/ui/help.rpyc").exists() && !root.join("game/saves").exists();
+    let scratch_removed=!scratch_root.exists();
+    let runtime_shutdown=service.runtime_shutdown();
+    let project_closed=service.close().is_ok();
+    let passed=records.len()==4 && runtime_clean && samples_match && windows_match && context_matches
+        && geometry_matches && source_unchanged && source_clean && scratch_removed && runtime_shutdown && project_closed;
+    fs::write(output.join("observed.json"),serde_json::to_vec_pretty(&observed).unwrap()).unwrap();
+    fs::write(output.join("result.json"),serde_json::to_vec_pretty(&json!({"passed":passed,"records":records,
+        "status":observed,"diagnostics":diagnostics,"sourceUnchanged":source_unchanged,"nativeWebView":false,
+        "criteria":{"runtimeClean":runtime_clean,"samplesMatch":samples_match,"windowsMatch":windows_match,
+            "contextMatches":context_matches,"geometryMatches":geometry_matches,"sourceClean":source_clean},
+        "cleanup":{"scratchRemoved":scratch_removed,"runtimeShutdown":runtime_shutdown,"projectClosed":project_closed}})).unwrap()).unwrap();
+    assert!(passed,"Actual reference criteria failed; see retained result.json");
 }
 #[test]
 fn runtime_literal_refusal_cancel_and_policy_install_are_write_bounded() {

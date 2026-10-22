@@ -5,79 +5,64 @@
 The user selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
 through implement, confirmed core/UI/packaged test boundaries, doubled its allowance
 and authorized push, Windows CI and four extra Mac SDK processes. They explicitly
-invoked principle-fix-root-causes after CI4. Development stays on Mac ARM64,
-`codex/phase3b-screen-designer`, from `7e1e7b3`. Published root correction is
+invoked principle-fix-root-causes. Development stays on Mac ARM64,
+`codex/phase3b-screen-designer`, from `7e1e7b3`. Published product root correction is
 `3906578eee885978b30c469b74aae83ac5942971`. The issue owns scope and cumulative
-allowance; [evidence](../tasks/evidence/canvas-rendering.md#ci4-terminal-audit-and-open-reader-replacement)
-owns exact failure/artifact identities, correction, review and limits.
+allowance; [evidence](../tasks/evidence/canvas-rendering.md#ci5-terminal-audit-and-prepared-reference-correction)
+owns exact receipts, terminal audit, reviewed qualification correction and limits.
 
-CI4 run 39847274208, attempt 1 at `bea2019`, completed with failure at 2026-10-22
-20:25:43 UTC. Its same-chat event is acknowledged. Five groups and 31 warm captures
-pass before diagnostics identify application-local replacement `PermissionDenied`,
-native OS code 5, followed by canvas `publish request`/`RecoveryRequired`. Request
-creation and asset copying are excluded as that failure site. The helper remains
-alive. Delete sharing fixed the earlier reader conflict, but legacy `MoveFileExW`
-publication still failed with a target reader open. The root correction uses
-`SetFileInformationByHandle`/`FileRenameInfoEx` with replacement and POSIX flags.
-It applies to input and both helper output publishers. Old readers retain complete
-old files; new opens see the replacement. No retry, error swallowing, ACL/read-only
-override or weaker gate is added. Source transaction/backup and non-Windows rename
-paths remain unchanged.
+[CI5 run 39850133053](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39850133053),
+attempt 1 at that exact head/candidate, completed with failure at 2026-10-22
+20:43:41 UTC. Its same-chat event is acknowledged and audited. Windows POSIX
+replacement semantics fix the prior open-reader failure. The shared recent-file
+case, all six browser groups, 200 warm updates, exact-controller rehearsal and Help
+regression pass. The controller accepts exactly one size write and closes cleanly;
+its outer receipt explicitly says controller-only, with no native WebView proof.
+Browser capture p95 169.2 ms and decode p95 83.8 ms are diagnostic only.
 
-Both independent reviews report zero new findings on buffer alignment/UTF-16 sizes,
-live handle ownership, no-follow/parent protection and scope. Local Screens checks
-pass 14 cases with the selected SDK case ignored; the shared recent-file replacement
-case passes. Embedded Python and workflow YAML parse. These do not establish Windows
-execution. The selected workflow now runs that existing recent-file case before SDK
-work because the corrected app-local primitive also serves recent/preferences data.
-No new private-method test or Mac SDK process was added. Prior frontend tests retain
-their 226-case result for unchanged UI code.
+The later reference requests 1280x720 and 1024x768 but receives 922x519 and 888x666
+in both states. All five logical widget sizes match. The raw receipt's `passed`
+field covered runtime cleanup before the failing physical-window assertion. Source
+bytes and runtime cleanup pass; explicit trailing project-close assertions were
+skipped by the panic. Package/native/identity checks are skipped. The verified
+249-file ZIP matches GitHub's SHA-256 and passes privacy. Ignored `ci-05` retains
+full log, artifact metadata/ZIP/files and audit. Actual CI5 use is three SDK
+processes, zero packages/native launches. Earlier failed/cancelled attempts remain
+retained and charged; they are not superseded passes.
 
-CI4's driver exits zero after asserted host/root cleanup. Exact-controller, Help,
-reference, package and native checks did not run. The retained ZIP matches GitHub's
-digest and all 45 public-fixture files pass privacy. Ignored `ci-04` retains log,
-metadata, ZIP, extracted files and audit. CI1 cancellation, CI2 reader failure and
-CI3 generic submission failure remain retained and charged. Cross-target helper
-pixels match at both aspects, but deliberate Windows game-render reference and
-native qualification remain unrun.
+The reviewed qualification correction provisions 1920x1080 when needed and verifies
+fresh desktop metrics before SDK work. Actual reference-window equality remains a
+required gate. Missing capability or insufficient size fails admission. The final
+reference receipt now includes all sample/window/context/geometry/source criteria
+and explicit cleanup before asserting the result. Both independent reviews have
+zero new findings. Local release test compilation with `--no-run` and YAML parsing
+pass; PowerShell is unavailable locally and has static review only. Windows
+execution remains unproved. No new SDK/native/package operation ran locally.
 
-Windows CI5 is the sole pending operation: [run 39850133053](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39850133053),
-attempt 1, workflow `screens-source.yml`, exact head/candidate
-`3906578eee885978b30c469b74aae83ac5942971`. Inputs are ordinal 5,
-`canvas_helper=true`, `owned_blank=false`, on `codex/phase3b-screen-designer`.
-Last observed queued at 2026-10-22 20:35:12 UTC. Ignored `ci-05/pending.json`
-retains identity, inputs, reservation and audit list. Later records do not change
-the tested candidate. Next register installed ci-watch for that exact run/SHA and
-yield this chat. The launcher receipt and chat acknowledgement own registration;
-private paths stay outside committed evidence.
+Current use is 48/60 local batches, 5/5 CI; Mac packages 3/5, native 3/7, SDK 24/24;
+Windows packages 0/5, native 0/7, SDK 6/20. No operation or watcher is pending.
+The next Windows dispatch is blocked by the exhausted five-dispatch ceiling.
+Ask the user for exactly one extra CI dispatch, raising only that ceiling to six
+without new contingency. Existing Windows target ceilings cover a maximum
+reservation of one package, one native launch and four SDK processes. No further
+Mac SDK launch is needed or allocated.
 
-On its same-chat event, verify/acknowledge delivery and audit exact run/attempt/SHA
-and every required step. Check recent-file replacement, all 200 Windows updates,
-any native OS diagnostics, official SDK/package identity, public privacy,
-both-aspect helper/reference pixels and geometry, exact-controller contention,
-actual native report, accepted bytes and process/disk cleanup. Reconcile actual
-Windows operations against the reservation. A green badge is not acceptance.
-A remaining failure needs its actual cause and existing limits preserved; no sixth
-CI dispatch is allocated.
+If the user approves, record that authority in #36, activate/review the prepared
+ordinal-6 selector change, commit/push and dispatch a new attempt 1 at its exact
+candidate SHA with `canvas_helper=true`, `owned_blank=false`. Never reuse ordinal 5.
+Register installed ci-watch and yield immediately after its launcher acknowledgement.
+On the event, audit exact identity, display receipt, all 200 updates, shared recent
+case, controller/Help, matched reference, actual native/package identities, privacy,
+accepted bytes, cleanup and actual operations. A green badge alone is not acceptance.
 
-Mac package 3/native attempt 3 at `63a1b03` retains bounded functional proof and
-cleanup at both aspects. Its reuse is limited to unchanged non-Windows I/O. OS
-focus, physical keyboard, warm native presentation and startup qualification remain
-unproved; diagnostic image load is 1,251 ms. Older controller driver provenance and
-verified backup cleanup remain recorded; SDK process 21 did execute the backup
-regression. No owned local process, fixture or generated helper backup remains.
-
-Current use is 44/60 local batches, 5/5 CI; Mac packages 3/5, native 3/7, SDK 24/24.
-Windows actual use through CI4 is zero packages/native launches and three SDK
-processes. CI5 reserves one package, one native launch and four SDK processes.
-The dispatch ceiling is reached; required audit still continues within local
-allowance. No further Mac SDK process or recalculated contingency is allocated.
-Matched both-target fidelity, native timing/startup/focus and element dragging
-remain Spec gaps. No Mac glyph/hover-color tolerance is accepted. Return proof
-failures to decision review before broader renderer work or weaker gates. Keep
-#36/B07/B08 and phase acceptance open. No PR, merge or release is selected.
-Preserve unrelated policy work and all protected recovery below. Older canvas
-sections are historical.
+Mac package 3/native attempt 3 at `63a1b03` retains bounded functional proof at both
+aspects and cleanup for unchanged non-Windows paths. Matched both-target fidelity,
+native timing/startup/focus and element dragging remain Spec gaps. No Mac glyph or
+hover-color tolerance is accepted. Return proof failures to decision review before
+broader renderer work or weaker gates. Keep #36/B07/B08 and phase acceptance open.
+No owned local process, fixture or generated helper backup remains. No PR, merge
+or release is selected. Preserve unrelated policy work and all protected recovery
+below. Older canvas sections are historical.
 
 ## Earlier canvas decision closeout
 

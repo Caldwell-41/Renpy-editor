@@ -1,39 +1,38 @@
 # Current status
 
-## L17 root correction published; CI5 pending
+## L17 Windows root fix verified; next CI dispatch needs approval
 
 2026-10-23: [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-continues within its existing allowance. CI4 isolates request publication failing
-with Windows `PermissionDenied`, OS code 5, after five groups and 31 warm captures.
-The legacy replacement operation did not support the required concurrent reader.
-Published correction `3906578` uses Windows POSIX replacement semantics for core
-request publication and helper PNG/result publication. Existing readers keep the
-old file while new opens see the replacement. No retry, deadline or acceptance
-gate is relaxed. [Evidence](../tasks/evidence/canvas-rendering.md#ci4-terminal-audit-and-open-reader-replacement)
-owns the causal audit, source correction, review and remaining limits.
+continues within its local allowance. [Windows CI5](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39850133053),
+attempt 1 at `3906578eee885978b30c469b74aae83ac5942971`, completed with failure
+at 2026-10-22 20:43:41 UTC. The same-chat event is acknowledged and audited.
+The Windows open-reader publication correction passes the shared recent-file case,
+all six browser groups, 200 warm updates, exact-controller rehearsal and Help
+regression. The later reference gate fails because requested windows shrink to
+922x519 and 888x666. Package/native checks are skipped. Its raw `passed: true`
+field covered runtime cleanup only and does not mean the reference gate passes.
+[Evidence](../tasks/evidence/canvas-rendering.md#ci5-terminal-audit-and-prepared-reference-correction)
+owns exact identity, artifact audit, limits and the prepared correction.
 
-[Windows CI5](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39850133053),
-attempt 1 at `3906578eee885978b30c469b74aae83ac5942971`, was last observed queued
-at 2026-10-22 20:35:12 UTC. It includes the shared recent-file case before SDK work,
-200 Windows updates and the selected controller/reference/package/native checks.
-Local focused checks and both independent reviews pass; Windows execution remains
-pending. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns same-chat ci-watch
-continuation and the required artifact audit.
+The reviewed correction provisions/verifies the runner desktop before SDK work and
+makes the reference receipt include all criteria after explicit cleanup. Release
+compilation and YAML parsing pass; PowerShell has static review only. Both independent
+reviews have zero new findings. Windows execution of this correction remains
+unverified. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns the next action.
 
-Mac package 3/native attempt 3 at `63a1b03` retains its bounded functional pass;
-non-Windows I/O and source transactions remain unchanged. The Windows helper pixels
-match Mac helper pixels at both aspects. Deliberate Windows reference/native checks
-remain unrun. Matched fidelity, native timing/startup/focus and element dragging
-remain Spec gaps. No glyph/hover-color tolerance is accepted. Keep #36/B07/B08 and
-phase acceptance open; broader renderer work or weaker gates need decision review.
+Mac package 3/native attempt 3 at `63a1b03` retains its bounded functional pass.
+Helper pixels match across targets. Matched fidelity, native timing/startup/focus
+and element dragging remain Spec gaps. No glyph/hover-color tolerance is accepted.
+Keep #36/B07/B08 and phase acceptance open; broader renderer work or weaker gates
+need decision review.
 
-#36 owns cumulative use: 44/60 local batches, 5/5 CI; Mac packages 3/5, native 3/7,
-SDK 24/24. Windows actual use through CI4 is zero packages/native launches and three
-SDK processes. CI5 reserves one package, one native launch and four SDK processes.
-The CI dispatch ceiling is reached; its audit remains required. No further Mac SDK
-launch is allocated. No owned local process, fixture or generated helper backup
-remains. No PR, merge or release is selected. Preserve unrelated policy edits and
-protected recovery below.
+#36 owns cumulative use: 48/60 local batches, 5/5 CI; Mac packages 3/5, native 3/7,
+SDK 24/24; Windows packages 0/5, native 0/7, SDK 6/20. No operation/watch is pending.
+The five-dispatch ceiling is exhausted. One additional Windows dispatch is proposed;
+its ordinal-6 selector change remains unapplied pending user approval. No further
+Mac SDK process is allocated. No owned local process, fixture or generated helper
+backup remains. No PR, merge or release is selected. Preserve unrelated policy edits
+and protected recovery below.
 
 ## Earlier canvas decision closeout
 

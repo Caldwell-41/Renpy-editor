@@ -346,6 +346,22 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   path. CI3 passes both aspects, five functional groups and 19 warm captures with
   that reader, then hits a later core submission refusal. CI4 reproduces the
   publisher failure after 31 warm captures and retains its exact operation/code.
-  CI5 must qualify the corrected primitive, shared recent-file caller and 200
-  Windows updates. Local checks do not establish that execution pass.
+  CI5 passes the corrected primitive, shared recent-file caller, 200 Windows
+  updates and exact-controller rehearsal. Its later reference-size failure is H26.
 - **Evidence:** [L17 CI4 root cause](../tasks/evidence/canvas-rendering.md#ci4-terminal-audit-and-open-reader-replacement).
+
+## H26. Ren'Py reference capture shrinks to the runner desktop
+
+- **Class/search:** harness/environment; `matched window scaling required`,
+  922x519, 888x666, `max_window_size`, premature reference `passed: true`.
+- **Cause/correction:** the requested 1280x720 and 1024x768 windows exceeded the
+  runner's available window size. Provision 1920x1080 and verify fresh user32
+  metrics before SDK work. Keep actual reference-window equality as a required
+  gate. A missing or undersized display fails admission; never normalize it away.
+- **Receipt correction:** the old JSON `passed` field covered runtime cleanup
+  before later assertions. Compute the full sample/window/geometry/source result
+  after explicit cleanup, then write the receipt before asserting it.
+- **Verification:** CI5 is the retained red reference case. Workflow YAML parses
+  and the Rust test compiles; Windows display preparation and reference/native proof need
+  an explicitly allocated next run. The five-dispatch ceiling is exhausted.
+- **Evidence:** [L17 CI5 audit](../tasks/evidence/canvas-rendering.md#ci5-terminal-audit-and-prepared-reference-correction).
