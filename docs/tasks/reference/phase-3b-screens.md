@@ -1,5 +1,12 @@
 # Phase 3B Screens requirements and approved design
 
+After the published cutover receipt, [the 3B parent](https://github.com/Caldwell-41/Renpy-editor/issues/22) and its children own remaining
+delivery scopes, acceptance tracking, dependencies and execution allowances.
+This reference retains approved product requirements and design decisions.
+Read P3B, the relevant B group and selected L work ticket with the applicable
+sections here before implementation or
+acceptance. The old step map below is traceability, not an independently selectable task.
+
 Read this contract for Screens production implementation or acceptance. Mac is the
 chosen development host on `codex/phase3b-screen-designer`. The selected early
 source/runtime proof and browser-design outcome are complete. Full Screens
@@ -191,7 +198,7 @@ Record supported properties and visible approximation limits alongside the resul
 
 <a id="implementation-plan-1"></a>
 
-### Implementation plan
+### Original implementation step map
 
 **Approved release inventory:** screen roots; fixed/frame/window/vbox/hbox/grid
 containers; text, image/add, textbutton/imagebutton, bars and viewports; selected
@@ -214,6 +221,14 @@ general screen execution to the editor. Establish this contract with 3B.1–3B.3
 | 3B.2a — Story screen connection | Add typed Show/Hide/Call screen Beats with an owned-screen picker and exact source navigation. Expose Hide for shown panels and Finish interaction for called screens; qualify these contexts before offering the actions. Share references, history and effect summaries with the screen service. | Create and connect one custom screen in normal play: Show persists through dialogue, Hide removes it, Call waits and Finish continues at the following Beat exactly once. Verify source round trip, missing-reference refusal, cancel, undo/reopen and conservative 3D uncertainty; scratch preview alone is insufficient. |
 | 3B.3 — Real game screen adapters | Add schema-aware adapters for the pinned generated `say`, `choice`, main-menu/navigation, preferences and save/load templates. Expose supported layout/style slots while preserving required parameters/IDs, action bindings and dynamic list/slot logic. Support reused components by explicit owned definitions. | Change dialogue box/name placement, choice styling and menu layout in a generated project; continue dialogue, choose a route, change a preference and save/load normally in the SDK. Unsupported template versions fall back to source. |
 | 3B.4 — Preview and completion | Use the shared scratch preview job with synthetic `who`/`what`, menu choices and other template inputs. Compare supported layout/hit targets against actual Ren'Py, plus full-game screen integration. Offer an explicit rerun after edits. | Native fonts/scaling/focus at project resolution and a second aspect, accessible tree/property operations, Source edit/reconcile, undo and reopen. Record preview approximations; browser geometry alone cannot qualify native output. |
+
+| Original step | Remaining delivery tickets |
+| --- | --- |
+| 3B.1 | [Ownership](https://github.com/Caldwell-41/Renpy-editor/issues/23), [source nodes/properties](https://github.com/Caldwell-41/Renpy-editor/issues/24), [actions/effects](https://github.com/Caldwell-41/Renpy-editor/issues/26) |
+| 3B.2 | [Assets/reuse](https://github.com/Caldwell-41/Renpy-editor/issues/25), [actions/effects](https://github.com/Caldwell-41/Renpy-editor/issues/26), [editor workflow](https://github.com/Caldwell-41/Renpy-editor/issues/28), [rendering decision](https://github.com/Caldwell-41/Renpy-editor/issues/29), [canvas rendering](https://github.com/Caldwell-41/Renpy-editor/issues/30) |
+| 3B.2a | [Story screen connections](https://github.com/Caldwell-41/Renpy-editor/issues/27) |
+| 3B.3 | [Dialogue/choice](https://github.com/Caldwell-41/Renpy-editor/issues/31), [menus/preferences/save/load](https://github.com/Caldwell-41/Renpy-editor/issues/32) |
+| 3B.4 | [Rendering proof](https://github.com/Caldwell-41/Renpy-editor/issues/29), [canvas comparison](https://github.com/Caldwell-41/Renpy-editor/issues/30), [integrated preview/acceptance](https://github.com/Caldwell-41/Renpy-editor/issues/33) |
 
 Candidate file conventions are `game/ui/<screen>.rpy` for new screens and a dedicated
 owned style file, finalized against actual generated projects. Do not replace all of

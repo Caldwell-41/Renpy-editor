@@ -24,6 +24,9 @@ instructions take precedence and must be recorded before conflicting work contin
 | Canonical technical docs / `docs/adr/` | Durable behavior, decisions, lessons and operational contracts. |
 | `docs/tasks/archive/` | Completed task evidence and historical decisions, not current instructions. |
 
+Remaining Phase 3B delivery uses the [GitHub task ownership exception](#phase-3b-github-task-ownership);
+the table continues to apply to other work and to 3B product contracts, evidence and status.
+
 Prompts select one coherent approved outcome and point to the repo. They must not be the only
 location of requirements, test commands, unresolved risks or continuation state.
 Avoid independent copies of a plan in attachments, PR comments and several Markdown
@@ -70,6 +73,45 @@ and evidence, repair relative and inbound section links, and verify the current
 contract against the original and later amendments. Link maintenance may repair an
 accepted ADR's references without changing its decision or recorded result.
 
+### Phase 3B GitHub task ownership
+
+After all issues/dependencies verify, the reviewed ownership commit is published
+and the parent records its cutover receipt, [the 3B parent](https://github.com/Caldwell-41/Renpy-editor/issues/22) owns remaining Phase 3B
+delivery coverage, dependencies and aggregate acceptance. Its 11 B groups own
+aggregate requirement acceptance. The selected L work ticket owns bounded scope,
+acceptance, current blocker, selected authorization and the current allowance. Read
+P3B, the relevant group and selected leaf for 3B entry, review or continuation.
+Follow [the tracker convention](agents/issue-tracker.md).
+If tracker access is unavailable, preserve local work, report the access blocker
+and resume when access returns. This migration adds no offline snapshot protocol
+or parallel task record.
+
+The [Screens contract](tasks/reference/phase-3b-screens.md) and pinned design
+approval retain approved product requirements and decisions. Canonical docs/ADRs
+own lasting behavior; repository task evidence owns detailed results, failed
+attempts, exact candidate/artifact identity and historical allowance use. CURRENT
+and HANDOVER retain project state and live recovery, linking the selected issue.
+Keep the live requirement-ID-to-outcome/work-ticket and acceptance map in the parent,
+with direct evidence links. The repository migration table is a dated baseline. Delivery
+reassignment updates the parent; a product requirement change updates its repository
+contract and the parent map. Do not create a
+second 3B execution brief or copy a full backlog into status files.
+
+Record a newly selected outcome and its finite allowance in its selected work ticket
+before execution. Keep one allowance record for the problem; if the authorized
+outcome spans leaves, link that record instead of duplicating or resetting counts.
+Preserve cumulative use across continuations; failed/cancelled attempts stay charged.
+Closed proof/design/Help selections stay closed. No issue state,
+label or assignment grants execution, retry or publication authority. Keep the
+existing not_started/in_progress/awaiting_ci/blocked/review_ready/accepted meanings;
+GitHub open/closed alone does not represent these acceptance states. Close a child
+only with its acceptance decision, or an explicit recorded scope disposition.
+
+This exception applies only to remaining 3B delivery, under ADR 0020. The accepted
+ADR 0019 split still governs every other task. The Help brief is retained as the
+historical selected execution contract; its original results and limits remain
+intact. New 3B issues do not renew its allowance or change other phases' entry gates.
+
 <a id="start-of-each-checkpoint-chat"></a>
 
 ## Goal entry and continuation
@@ -84,6 +126,10 @@ Read relevant code, diffs and selected evidence sections. A linked archive is a 
 destination, not a requirement to read the whole historical ledger. When needed or
 requested by the user, follow its section link or search by issue, date, candidate or
 result, then read the matching sections. INDEX routes to owning active/archive records.
+
+After the published cutover receipt, substitute P3B, its relevant B group and
+the selected L work ticket for
+the active execution brief, then read only the applicable product contracts and evidence.
 
 Within the same thread, retain the established plan and decisions. After a pause,
 check the pending operation, fresh refs/relevant diff, local edits and ownership.

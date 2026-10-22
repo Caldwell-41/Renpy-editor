@@ -5,7 +5,14 @@
 ## Current state and entry
 
 Updated 2026-10-22 on `codex/phase3b-screen-designer`; Mac is the chosen development
-host. This brief routes Phase 3 scope and acceptance. Read the branch contract for
+host. This brief routes Phase 3 scope and acceptance.
+
+After the published cutover receipt, remaining 3B delivery ownership is
+[the GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22) and its children
+under [the scoped exception](../../WORKFLOW.md#phase-3b-github-task-ownership).
+This brief continues to own cross-phase routing and other Phase 3 branches.
+
+Read the branch contract for
 the selected outcome. The [shared source/runtime contract](../reference/phase-3-shared-contracts.md)
 applies when implementing a new Phase 3 capability. The
 [shared Phase 2/3 delivery contract](../reference/phase-2-3-delivery.md) owns sequencing
@@ -14,17 +21,20 @@ and shared-file ownership; specific selected outcomes retain their own limits.
 | Branch | Current state | Read when selected |
 | --- | --- | --- |
 | 3A Story | Technically qualified; human acceptance pending. | [Story requirements and acceptance](../reference/phase-3a-story.md) |
-| 3B Screens | Screen builder design approved; bounded Help sizing/preview functionally approved on both targets. Canvas fidelity and full authoring/acceptance remain pending. | [Screens scope, approved design and source/runtime gates](../reference/phase-3b-screens.md) |
+| 3B Screens | Screen builder design approved; bounded Help sizing/preview functionally approved on both targets. Canvas fidelity and full authoring/acceptance remain pending. | After the published cutover receipt: [parent, outcome group and selected work ticket](https://github.com/Caldwell-41/Renpy-editor/issues/22), then [approved Screens requirements](../reference/phase-3b-screens.md). Until then, use the existing repository scope and acceptance owners. |
 | 3C Timeline | Planned; no implementation or native-media qualification claimed. | [Timeline and native-media requirements](../reference/phase-3c-timeline.md) |
 | 3D State and Run From Here | Planned; consumes qualified 3A/3B/3C semantics. | [State reconstruction and launch requirements](../reference/phase-3d-state-run.md) |
 | 3F Release | Planned; audience/channel and release selection remain open. | [Integrated acceptance and distribution requirements](../reference/phase-3f-release.md) |
 
 ## Selected Help-screen production outcome
 
-The user selected the [first production Help-screen round trip](help-screen-production.md)
-on 2026-10-22 as an early 3B exception. That brief owns its source/UI/runtime gates,
-control map and cumulative allowance. Phase 2/3A human acceptance remains pending.
-Mac remains sole writer. Existing documentation and workflow maintenance stays preserved.
+After the published cutover receipt, the [Help brief](help-screen-production.md)
+retains the historical 2026-10-22
+execution selection, bounded functional approval and exhausted allowance. Its
+evidence remains current for that recorded scope. Remaining editor visual work
+belongs to [B06](https://github.com/Caldwell-41/Renpy-editor/issues/28), canvas agreement to [B08](https://github.com/Caldwell-41/Renpy-editor/issues/30), and integrated 3B
+acceptance to [B11](https://github.com/Caldwell-41/Renpy-editor/issues/33). Phase 2/3A human acceptance remains pending.
+Mac remains sole writer. Preserve unrelated documentation and workflow maintenance.
 
 ## Acceptance and continuation
 

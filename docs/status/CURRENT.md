@@ -1,6 +1,6 @@
 # Current status
 
-## Selected Help-screen outcome
+## Phase 3B migration and retained Help result
 
 2026-10-22: The bounded Help workflow has audited Windows x64 and signed Mac ARM64
 functional proof. [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39712450128),
@@ -21,7 +21,17 @@ The user now requires [canvas agreement with Ren'Py](../tasks/reference/phase-3b
 and requested overall 3B progress before implementation. The requirement is recorded;
 implementation has not started and no execution allowance is renewed.
 
-Documentation/validator maintenance is complete and committed locally under
+The user authorized the reviewed baseline, 39 GitHub issues and scoped ownership
+cutover on 2026-10-22. Baseline `6d78010` is published; all 39 bodies,
+38 native parent edges and 41 native start edges are verified.
+
+Remaining 3B delivery is mapped in [the GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22). Existing docs remain
+owners until the verified ownership commit is published and the parent records its
+cutover receipt. No child is selected for execution. After that receipt, the next
+action is selection of a bounded work ticket with its entry gate and finite allowance.
+Approved product requirements and detailed evidence retain their repository owners.
+
+Documentation/validator maintenance is complete and published with the reviewed baseline under
 [its task](../tasks/active/agent-documentation-ownership.md) and
 [ADR 0019](../adr/0019-task-briefs-and-evidence-ownership.md). It remains separate from
 the Phase 3B requirement/review commit. The 213 frontend tests and 13 validator regressions

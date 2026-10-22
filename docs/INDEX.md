@@ -17,12 +17,18 @@ for a matching diagnosis, result reuse, recovery detail or requested audit. Earl
 unsplit archived tasks remain valid lookup records. Live project state belongs to
 CURRENT and HANDOVER.
 
+After the published cutover receipt, remaining 3B delivery uses
+[the GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22), relevant B group and selected L work ticket under
+[the scoped ownership rule](WORKFLOW.md#phase-3b-github-task-ownership).
+Approved Screens requirements and detailed evidence remain in the repo.
+
 Read the [Phase 1 plan](tasks/archive/2026-10-07-phase-1-vertical-slice.md) for product prerequisites
 and [ROADMAP.md](ROADMAP.md) for Phases 2-5 and release boundaries. Neither is an
 open-ended coding task. Historical snapshots are evidence, not current instructions.
 
 | Concern | Canonical document |
 | --- | --- |
+| Remaining 3B delivery and acceptance after the published cutover receipt | [GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22), [approved Screens requirements](tasks/reference/phase-3b-screens.md), [ownership decision](adr/0020-phase-3b-github-task-ownership.md) |
 | Manual Character-card/lore schema, bounds, lifecycle and fixtures | [REFERENCE_LIBRARY.md](REFERENCE_LIBRARY.md) |
 | Accepted UI designs, implementation, review and final integration evidence | [UI design review](tasks/archive/2026-10-06-ui-design-review.md) |
 | Saved mockups, palette/layout precedence and visual comparison loop | [UI reference index](design/ui-refresh/README.md) |
@@ -52,7 +58,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Historical dialogue rewrite selection and CI-first amendment | [CI-first amendment](tasks/evidence/phase-2-execution.md#ci-first-platform-qualification-amendment--2026-10-10), [CURRENT](status/CURRENT.md), [HANDOVER](status/HANDOVER.md) |
 | Completed Windows remembered-credential outcome and its evidence/limits | [Windows credential contract](tasks/evidence/phase-2-execution.md#current-windows-qualification-contract) |
 | Historical Phase 2 source/provider/native attempts; outcomes not automatically accepted | [Execution history](tasks/archive/2026-10-09-phase-2-execution-history.md) |
-| First production Help sizing, scratch preview and pending qualification | [Help outcome](tasks/active/help-screen-production.md), [evidence](tasks/evidence/help-screen-production.md) |
+| Bounded Help functional approval, historical execution and visual limits | [Help outcome](tasks/active/help-screen-production.md), [evidence](tasks/evidence/help-screen-production.md) |
 | Planned Phase 3 implementation: Story logic, Screens, Timeline, state/run and release; Git deferred | [tasks/active/phase-3-initial-wysiwyg-release.md](tasks/active/phase-3-initial-wysiwyg-release.md) |
 | Selected shared foundations, staged Phase 2/3 overlap and adaptive helpers | [Delivery sequence](tasks/reference/phase-2-3-delivery.md#19-selected-shared-foundations-and-two-lane-delivery) |
 | Bounded nested dialogue ownership and source-map v3 | [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) |

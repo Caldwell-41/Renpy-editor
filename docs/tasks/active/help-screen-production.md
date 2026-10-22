@@ -1,5 +1,12 @@
 # First production Help-screen round trip
 
+Historical execution contract after the published 3B cutover receipt. This selected
+allowance is closed and its bounded functional result remains accepted. Read
+[the final review](../evidence/help-screen-production.md#orchestrator-final-review-2026-10-22)
+for its limits. [B06](https://github.com/Caldwell-41/Renpy-editor/issues/28) owns remaining editor visual delivery,
+[B08](https://github.com/Caldwell-41/Renpy-editor/issues/30) owns canvas agreement and [B11](https://github.com/Caldwell-41/Renpy-editor/issues/33) owns full 3B acceptance.
+The preserved directions below apply only to their original execution selection.
+
 Owning Phase 3 outcome selected on 2026-10-22. The
 [Phase 3 brief](phase-3-initial-wysiwyg-release.md) owns cross-phase state.
 [ADR 0018](../../adr/0018-early-screen-source-proof.md) owns the narrow source contract;

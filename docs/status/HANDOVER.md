@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Help-screen production audit, 2026-10-22
+## Phase 3B migration and retained Help audit, 2026-10-22
 
 Branch codex/phase3b-screen-designer. The bounded Help workflow has functional
 qualification on Windows x64 and signed Mac ARM64. Read the
@@ -41,12 +41,24 @@ added [canvas agreement with Ren'Py](../tasks/reference/phase-3b-screens.md#canv
 as a requirement. It remains unimplemented and separate from the pending flow-v1
 editor-layout decision. Neither gate has visual acceptance; no execution allowance
 is renewed by the progress report or requirement record.
+
+The user authorized the reviewed baseline, 39 GitHub issues and scoped ownership
+cutover on 2026-10-22. Baseline `6d78010` is published; all 39 bodies,
+38 native parent edges and 41 native start edges are verified.
+
+Remaining 3B delivery is mapped in [the GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22). Existing docs remain
+owners until the verified ownership commit is published and the parent records its
+cutover receipt. No child is selected for execution. After that receipt, the next
+action is selection of a bounded work ticket with its entry gate and finite allowance.
+Approved product requirements and detailed evidence retain their repository owners.
+
 The user selected separate local commits for the completed documentation maintenance
 and these Phase 3B records. Scoped terminal records may
 publish by ordinary fast-forward to origin/Caldwell-41/Renpy-editor/
 refs/heads/codex/phase3b-screen-designer. This docs-only successor records c2d9f45 as
 the tested candidate and needs no package matrix. Preserve protected apps/drafts,
-pinned flow-v1 and ignored receipts. No push, PR, merge or release is selected here.
+pinned flow-v1 and ignored receipts. The earlier docs-only selection authorized no push, PR, merge or release.
+The migration selection above now authorizes only its reviewed branch publication.
 
 ## Retained product state and next work
 
@@ -87,9 +99,10 @@ Its model-load amendment has separate automated proof under the
 [walkthrough task](../tasks/active/walkthrough-redesign-implementation.md).
 
 The earlier automatic push review rejected publication without explicit
-payload/destination permission. Publishing the retained work to
-`origin/codex/phase3b-screen-designer` still needs approval. This documentation
-selection keeps changes local. Preserve the protected native state below.
+payload/destination permission. The user now explicitly authorizes the reviewed
+migration baseline, 39 issues and 3B ownership cutover to
+`origin/codex/phase3b-screen-designer`. No product implementation, PR, merge or
+release is selected. Preserve unrelated work and the protected native state below.
 
 ## Native recovery and remaining acceptance
 

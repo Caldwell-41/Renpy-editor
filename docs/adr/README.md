@@ -34,3 +34,4 @@ Dated evidence inside an ADR remains evidence for its recorded scope and candida
 | [0017](0017-design-approval-and-app-integration.md) | Accepted workflow | Versioned design approval, retained references and separate visual/functional integration proof. |
 | [0018](0018-early-screen-source-proof.md) | Recorded decision | Revision-bound screen spans and minimal existing pixel-property edits through shared transactions. |
 | [0019](0019-task-briefs-and-evidence-ownership.md) | Accepted documentation workflow | Current task briefs, conditional requirement references and separate historical evidence. |
+| [0020](0020-phase-3b-github-task-ownership.md) | Accepted scoped workflow | After the published cutover receipt, GitHub owns remaining 3B delivery; approved product requirements, detailed evidence and live recovery retain their repository owners. |

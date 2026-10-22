@@ -5,7 +5,9 @@
 Loomlight is a single-user Windows x64/macOS ARM64 visual Ren'Py authoring tool,
 built with Tauri 2. [CURRENT](docs/status/CURRENT.md) owns project state;
 [HANDOVER](docs/status/HANDOVER.md) owns continuation and recovery;
-the selected active task owns scope and acceptance.
+the selected task owns scope and acceptance. For remaining Phase 3B entry or
+continuation, follow the effective owner and entry rules under
+[3B issue ownership](docs/WORKFLOW.md#phase-3b-github-task-ownership).
 
 For a substantive new outcome or transfer, read those live records and only the
 relevant task sections. Narrow edits need applicable instructions and relevant code
@@ -74,7 +76,8 @@ Failed, cancelled or skipped required checks are not passes. No package matrix f
   Record compact results in the owning task, keep one live handover and update
   canonical contracts when behavior changes. Preserve unique failure/recovery evidence.
 - Task documentation: follow [brief and evidence ownership](docs/WORKFLOW.md#task-briefs-and-supporting-files)
-  when creating or updating briefs, requirements or validation records.
+  when creating or updating briefs, requirements or validation records. For remaining
+  3B delivery, apply the [GitHub ownership exception](docs/WORKFLOW.md#phase-3b-github-task-ownership).
 - Product, architecture, data, UI and ADR ownership: [INDEX](docs/INDEX.md).
 
 Publish only within actual authorization and disclose local-only work. Historical

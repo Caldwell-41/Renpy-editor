@@ -3,9 +3,14 @@
 Engineering-skill tickets and issue specs live in GitHub Issues for
 Caldwell-41/Renpy-editor. Use the `gh` CLI from this repository.
 
-Existing task briefs, requirements, evidence and status records keep their
-ownership under docs/WORKFLOW.md. Link relevant records from issues.
-Creating an issue does not authorize implementation or renew an allowance.
+Existing records keep their ownership under docs/WORKFLOW.md, except for the
+approved [remaining Phase 3B delivery migration](../WORKFLOW.md#phase-3b-github-task-ownership).
+After the published cutover receipt, read P3B, the relevant B group and selected
+L work ticket for 3B execution. The leaf owns bounded acceptance, start dependencies
+and the current allowance; its B group owns aggregate acceptance.
+Approved product decisions and detailed evidence remain in their repository owners.
+Link those records from the issue. Creating, assigning or labelling an issue does
+not authorize implementation, publication or renew an allowance.
 
 ## Operations
 
