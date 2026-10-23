@@ -1302,3 +1302,24 @@ The selection, failed result and status reconciliation remain local. Public reco
 still end with the previous completed diagnosis and GPU proposal. No new push,
 issue write, PR, merge or release is claimed. Unrelated policy edits and protected
 recovery remain intact.
+
+Independent code-review checked `d34676f...ef2a2bd` on both axes. Standards reports
+no documented violations or baseline smell findings. Spec reports no defects in
+the failed-test record, confirms that the selected hidden capability failed and
+retains all GPU/native/target acceptance gaps. Neither review accepts the unrun fix.
+
+Final repository validation passes for 872 files; whitespace checks pass. The
+ignored-artifact secret scan passes for 34 files, and a separate process inventory
+confirms the helper PID and observer are absent. No product TypeScript/Rust source
+changed, so the preceding 227-test/typecheck result is retained without claiming a
+new product qualification. CURRENT/HANDOVER remain above soft word targets at
+1,101/2,330 words to preserve preceding phase acceptance and protected recovery.
+Only the live L17 sections changed; unrelated policy hunks remain unstaged.
+
+The next proposed supplement is six local batches and two Mac SDK launches, raising
+cumulative ceilings to 82 and 34 if the user approves. It would diagnose the native
+installation refusal and retest the guarded hidden startup/GPU frames. It supplies
+no promise of full L17 acceptance and adds no CI/package/native-editor allowance or
+contingency. This proposal is not an allocation. Exact #36/#29/#22 status payloads
+are prepared locally for publication approval; none was sent after the rejection.
+The local commits and raw evidence remain separate from published history.
