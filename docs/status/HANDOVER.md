@@ -2,56 +2,49 @@
 
 ## Active L17 integration handover
 
-Continue #36 on `codex/phase3b-screen-designer`. The user approved `handle-v2`
-on 2026-10-24 and requested transfer for integration and ticket continuation.
-[Approval](../design/design-lab-canvas-drag/approval.json) pins source `6e7bb1a`,
-its full fingerprint and four hashed dark reference captures. The reference
-includes the move icon, fixed-size handle, provisional panel translation and settled
-release. Production integration remains pending. The separate flow-v1 reference
-retains its existing approval and layout authority.
+Continue #36 on `codex/phase3b-screen-designer`. Approved `handle-v2` integration
+is committed locally through `8527998`, including the reviewed spacing/test correction.
+[Evidence](../tasks/evidence/canvas-rendering.md#approved-move-handle-integration-2026-10-24)
+owns the control/action map, attempts, actual-helper captures and acceptance limits.
+[Approval](../design/design-lab-canvas-drag/approval.json) still pins `6e7bb1a` and
+its four captures. The separate flow-v1 layout reference remains authoritative.
 
-Production capture correction `5df62d3` is already present. Its Standards/Spec
-reviews found no remaining issue. `showFrame` now leaves attached targets in place. The existing controller test holds
-a drag through image delivery and further input, then verifies Cancel, one accepted
-write, exact Source and Undo/Redo. HMR is blocked in that test to prevent development
-edits from reloading its document mid-gesture. One real-helper Chrome rehearsal,
-SDK19, passes all eight input stages with normal image delivery and full cleanup.
-Types, 13 focused Screens tests and all 227 frontend tests pass.
+The explicit move handle stays 30 CSS pixels tall. Provisional translation is limited
+to a selected subtree that owns the image's painted content and was not clipped;
+other compositions identify provisional guides while the helper responds. Existing
+source transactions, history, child selection, keyboard movement and anchor-aware
+resizing remain in use. Release keeps the handle attached and focused. Both review
+axes report zero integration findings. Types, 14 Screens tests and 228 frontend tests
+pass. SDK 21 passes all eight real-helper controller input stages and all cleanup
+owners. These results establish browser/controller behavior, not native smoothness
+or numerical presentation. No accepted matched-rendering comparison was repeated.
 
-Next implement the approved manipulation design using
-[Design integration](../../app/design-lab/INTEGRATION.md). The prototype is the
-interaction reference, not a second source model or replacement editor layout.
-Keep fixed-corner sample resize and the artificial delay control out of production.
-Source/capture approval validation and the scoped 24-case preview checks pass.
-The known full-lab failure is the older flow-v1 source lock in this changed checkout;
-its fingerprint must not be weakened. Once implementation changes frontend inputs,
-use a separate reference checkout at `6e7bb1a` with the new approval record/captures.
+The next required qualification is native manipulation and independent warm
+p95 <=100 ms presentation, then Windows and whole-ticket acceptance. Recorder/input
+permissions remain unavailable under the existing selection; no permission change
+is approved. Physical input requires an available user or approved native driver.
+No package, native editor or CI operation ran here. Signed package 2 remains the
+older `ea09e2f` candidate and cannot qualify the new handle. No push, PR, merge or
+release is selected. The local allowance is spent. A further execution supplement
+is required for remaining qualification; transfer does not renew it.
 
-The existing capture fix does not establish native smoothness. Native drag/resize,
-independent warm p95 <=100 ms presentation, Windows and whole-ticket acceptance
-remain pending. No recorder/input-driver or capture permission change is approved.
-Do not repeat accepted matched-rendering checks for this interaction work.
+Ignored receipts remain in `.toolchains/canvas-proof/native-feedback-2026-10-23/`.
+SDK 20's build used the global Rust environment and auto-installed 1.90.0; it stopped
+before fixture creation and remains charged. SDK 21 used `enter-macos.sh` and cleaned
+up completely. Preserve `usage.json`, all earlier receipts and one-use launchers.
+The pinned comparison checkout is `.toolchains/canvas-handle-reference`; its frontend
+fingerprint matches the approval, with later approval records copied into place.
+The older full-lab flow-v1 source-lock failure remains incomplete and unchanged.
+The original preview server remains on 5174; the temporary reference server on 5175
+is stopped.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24)
-owns retained failures, checks and allowance details. Ignored receipts remain under
-`.toolchains/canvas-proof/native-feedback-2026-10-23/`, including SDK19 and every prior
-manual/rehearsal/diagnostic attempt. Preserve `usage.json` and never replay a one-use
-native launcher. Signed package 2 remains the older `ea09e2f` candidate. No new package
-or native editor attempt ran. No editor/helper/controller/CI process remains; the
-Design Lab preview server on 127.0.0.1:5174 remains open for review.
-
-The user explicitly selected continuation and approved any SDK allowance on
-2026-10-24. #36 records the published supplement and exact readback: 12 SDK launches
-plus 6 contingency per target, raising cumulative ceilings from 18 to 36; 12 local
-batches plus 6 contingency raise the local ceiling from 36 to 54. Original limits
-and spent use remain historical. CI/package/editor-launch ceilings remain 4/4/9.
-Current cumulative use is local 47, CI 0; Mac packages 2, native 3, SDK 19; Windows
-zero. Earlier allowances stay closed. New supplement contingency begins after local
-48 or SDK30 on a target. Code is local only, repository publication remains `ccebf3e`;
-One nominal local batch plus six contingency batches remain; announce contingency
-before batch 49 and reassess any work that cannot fit the ceiling. No push, PR,
-merge or release is selected. Preserve unrelated policy edits, including
-the separate hunks in CURRENT/HANDOVER, and protected recovery below.
+The published supplement remains 12 local batches plus 6 contingency and 12 SDK
+launches plus 6 contingency per target. Absolute cumulative ceilings are local 54,
+CI 4, packages 4, native 9 and SDK 36 per target. Final use is local 54, CI 0;
+Mac packages 2, native 3, SDK 21; Windows zero. Contingency was announced before batch 49.
+Earlier allowances remain closed. Code is local only; publication remains `ccebf3e`.
+Preserve unrelated policy edits, including separate CURRENT/HANDOVER hunks, and all
+protected recovery below. No helper/controller/editor or watcher remains pending.
 
 ## Earlier canvas decision closeout
 

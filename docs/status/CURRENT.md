@@ -1,27 +1,26 @@
 # Current status
 
-## L17 capture fixed; drag alternatives await approval
+## L17 approved move handle integrated locally
 
-2026-10-24: Local capture correction `5df62d3` preserves pointer capture across helper-image
-updates. The controller regression passes held movement, Cancel, exact Source and
-Undo/Redo. One real SDK/controller rehearsal passes all eight input stages with
-normal image delivery and complete cleanup. Types and 227 frontend tests pass.
+2026-10-24: `handle-v2` is integrated through `8527998`, including the reviewed spacing
+and controller-test correction. The selected frame has a fixed 30 CSS-pixel move handle,
+immediate provisional Help-panel and child-target movement, and retained release
+focus. Shared source transactions, Escape/Cancel, child selection, keyboard editing
+and Undo/Redo remain in use. Sibling or clipped compositions show provisional guides
+until the helper supplies their image.
 
-The user selected the move handle. Its [refined prototype](../design/design-lab-canvas-drag/README.md)
-adds a move icon, constant handle sizing across zoom, immediate provisional panel
-movement and settled release. The user approved `handle-v2`; its source and captures are pinned for integration.
-The earlier alternatives remain available. Their 24-case
-matrix and interactions pass at `e9b5fc1`; all remain unapproved. Both review axes
-have no remaining finding. The full lab check stops at the existing flow-v1
-source lock; approval validation and separate production-build isolation pass. Production integration is next under the approved move-handle design. Native drag/resize, numerical
-presentation, Windows and whole-ticket acceptance remain pending.
+Types, 14 focused Screens tests and all 228 frontend tests pass. SDK 21 passes all
+eight real-helper controller input stages and cleanup. Both independent review axes
+found no actionable issue in the integration. Wide/compact browser captures cover
+the approved control, with actual Help content and the existing editor layout.
+Native smoothness, numerical presentation, Windows and whole-ticket acceptance
+remain pending. The full lab's earlier flow-v1 source-lock failure remains recorded.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24)
-owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns recovery. #36 records the explicit supplement. Current use is local 47/54,
-CI 0/4; Mac packages 2/4, native 3/9, SDK 19/36; Windows zero. Denominators are
-absolute ceilings. Code is local only; repository publication remains `ccebf3e`.
-Unrelated policy edits remain unstaged. The preview server remains available on 5174.
+[Evidence](../tasks/evidence/canvas-rendering.md#approved-move-handle-integration-2026-10-24)
+owns attempts and scope; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
+recovery. Current cumulative use is local 54/54, CI 0/4; Mac packages 2/4, native 3/9,
+SDK 21/36; Windows zero. Code is local only; publication remains `ccebf3e`.
+The local allowance is spent. Unrelated policy edits and protected recovery remain intact.
 
 ## L17 matched rendering passes on both targets
 

@@ -2841,3 +2841,91 @@ One nominal local batch and six contingency batches remain. No SDK, package,
 native launch, production edit, push or CI operation was performed for this handoff.
 The preview server remains available on port 5174. Unrelated policy edits remain
 unstaged and protected recovery is unchanged. Integration is the next selected work.
+
+
+### Approved move-handle integration, 2026-10-24
+
+The user selected integration from the approved handoff. Baseline is `187251b`;
+implementation candidate is `14ef7d3`, with the final icon-spacing and controller-test
+correction at `8527998`. All work remains on `codex/phase3b-screen-designer` locally.
+The `handle-v2` approval and the separate flow-v1 layout authority remain unchanged.
+
+| Approved action | Production operation and evidence |
+| --- | --- |
+| Move icon and labelled handle | Selected aligned frame exposes one 30 CSS-pixel control. Fit/100%, wide/compact and canvas-bound checks cover its sizing and reachability. |
+| Immediate panel and child feedback | The last complete Ren'Py image follows provisional alignment for the isolated Help subtree; descendant hit targets follow the same delta. Delayed controller delivery checks this before any helper response or source write. |
+| Settled release and focus | Existing handle stays attached through acceptance and matching image delivery. Controller checks retained focus and one accepted `screens.setPosition` write. |
+| Child selection and keyboard | Canvas clicks select children. Arrow/Shift movement uses existing game-pixel alignment; Escape/Cancel retains unchanged Source. |
+| Shared history and resize | Controller checks exact Source and Undo/Redo. SDK 21 passes the real helper's anchor-aware resize and movement stages; no artificial delay or fixed-corner sample resizing enters production. |
+
+The composite image can translate only when the selected subtree owns all painted
+content and its measured bounds were inside the game image. Sibling content or
+clipped bounds use explicitly labelled provisional guides while Ren'Py renders the
+panel. This conservative limit avoids translating unrelated content or inventing
+missing pixels. The existing helper remains the rendering authority. Its failures
+clear provisional geometry and preserve unfinished drafts. The architecture owner
+records this behavior; full-subset rendering remains outside this slice.
+
+Visual comparison uses a separate reference checkout at `6e7bb1a`, with the current
+approval JSON and retained captures copied into it. `design:source` reproduces the
+approved fingerprint `6a92dede7c75b6ad4788cc42d44fef911114ec5730cb18eea6db6accab06a75c`.
+The ready dark reference runs at 1100x720 and 560x640. Actual-helper captures at those
+viewport sizes confirm the icon, label, amber control and constant 30-pixel height.
+Comparison caught a 12-pixel icon-margin difference; production now retains the
+reference spacing. Production uses the existing editor layout, focus outline and
+actual public Help content. The reference has fictional HTML content, so this is
+control fidelity evidence, not a pixel-equality claim for the whole editor or panel.
+The earlier full-lab flow-v1 source-lock failure remains incomplete; its lock was
+not changed or rerun. The pinned `handle-v2` reference remains reproducible.
+
+Verification and attempts:
+
+- TDD used the already agreed Screens UI/controller boundary. The initial red
+  check found the absent handle. An exact floating-point CSS string assertion was
+  corrected to compare the independently expected 64x40 displacement numerically.
+  A sibling-content check then caught overwritten provisional-status text; the
+  implementation preserves that status. All 14 focused Screens tests pass.
+- The real controller with a fixture image passes delayed delivery, continued
+  capture, immediate frame/child movement, release focus, cancellation, one write,
+  exact Source and Undo/Redo. The additional child/no-op/bounds run retains its
+  first premature child-selection assertion. Waiting for the Text heading and removal
+  of the move handle corrects that observation; child selection, no-op and both bounds
+  then pass without a product logic change.
+- Typechecking and the full frontend suite pass, 228/228 with the supported Python.
+  No full core/package matrix was selected for this renderer/probe-only change.
+- Reserved SDK 20 stopped during build before fixture creation because the shell
+  inherited the global Rust environment. Rustup auto-installed 1.90.0 and Cargo
+  populated its global cache. The build was stopped; the reservation stays charged.
+  SDK 21 uses the existing repository environment and passes all eight exact
+  controller/native-probe input stages with real helper rendering. Its drag ends
+  at (360,204), size 640x360; resize ends at (296,164), size 688x392. Source restoration
+  and all three cleanup owners pass. This is Chrome/controller evidence, not native
+  WebView, physical-input, numerical presentation or human smoothness evidence.
+- Independent read-only Standards and Spec reviews of `187251b...14ef7d3` each
+  report zero actionable findings. Both follow-up reviews of the spacing, controller checks and records also report
+  no material findings. The Standards follow-up requested prose spacing corrections;
+  those are included.
+
+Ignored receipts, captures and original failures remain under
+`.toolchains/canvas-proof/native-feedback-2026-10-23/` in `handle-position-controller`,
+`handle-position-bounds`, `handle-position-bounds-02`, `handle-reference` and
+`handle-sdk-21`, plus `handle-frontend-tests.log`. The reference checkout is
+`.toolchains/canvas-handle-reference`. Preserve prior native receipts and never
+replay a one-use native launcher.
+
+Batches 48-54 cover entry, implementation, verification, real-helper rehearsal,
+independent reviews, scoped corrections and final validation/commits. The production
+build and repository validation pass; Vite retains its existing large-chunk warning. Contingency entry was announced before
+batch 49; no allowance resets. The local ceiling is reached.
+Final use is local 54/54, CI 0/4; Mac packages 2/4, native 3/9, SDK 21/36; Windows zero.
+The integration does not close #36. Native manipulation, independent warm p95 <=100 ms
+presentation, Windows and whole-ticket acceptance remain pending. No recorder or
+permission change, package/native launch, push, PR, merge or release was performed.
+
+No helper, controller, editor or watcher remains pending. The temporary reference
+server on 5175 is stopped; the earlier preview on 5174 remains. CURRENT/HANDOVER
+exceed their soft size targets because they retain separate pending phase acceptance
+and protected native recovery. This update replaces only their active L17 sections.
+Further local implementation or native qualification needs an explicit supplement;
+unused SDK/native/package counts do not renew the local-batch ceiling. Repository
+publication remains `ccebf3e`. No issue update was published in this session.

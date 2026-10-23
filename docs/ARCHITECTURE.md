@@ -696,6 +696,15 @@ Provisional alignment values enter `screens.canvasPlan`/`screens.canvasRender` a
 data. Release uses `screens.setPosition` to patch only the two changed tokens in one
 shared source transaction; Escape cancels and conflicts retain the draft. Automatic
 layout children and other coordinate forms remain outside this bounded movement.
+The approved `handle-v2` control starts pointer movement and stays 30 CSS pixels tall
+at Fit and 100%. Canvas body clicks select children. The last complete helper image
+and descendant hit targets follow provisional movement when the selected subtree
+owns all painted content and its measured bounds were inside the game image.
+Compositions with sibling content or clipped bounds retain the image and identify
+provisional guides until the helper responds. The UI never translates unrelated
+content. Release retains the handle and keyboard focus while the source transaction
+and matching helper frame settle. Helper failure clears provisional geometry and
+retains the draft. Existing alignment-aware resizing remains unchanged.
 Native rendering, presentation and full manipulation acceptance remain pending.
 
 The verified pinned SDK runs a private project with GL2 on macOS and ANGLE2 on
