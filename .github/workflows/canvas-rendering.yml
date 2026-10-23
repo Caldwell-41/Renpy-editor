@@ -1,0 +1,115 @@
+name: Matched canvas rendering
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: Exact reviewed candidate SHA
+        type: string
+        required: true
+      ordinal:
+        description: Cumulative L17 dispatch ordinal
+        type: string
+        required: true
+
+permissions:
+  contents: read
+concurrency:
+  group: help-screen-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  comparison:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    env:
+      CARGO_TERM_COLOR: never
+      RUSTUP_TOOLCHAIN: 1.90.0
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require selected candidate and allowance
+        env:
+          CANDIDATE: ${{ inputs.candidate }}
+          ORDINAL: ${{ inputs.ordinal }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$ORDINAL" = 12
+          test "$(git rev-parse HEAD)" = "$CANDIDATE"
+          mkdir -p "$RUNNER_TEMP/canvas-comparison"
+          git rev-parse HEAD > "$RUNNER_TEMP/canvas-comparison/candidate.txt"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: canvas-helper-windows
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Pinned tools and focused checks
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          npm install --global npm@11.9.0
+          npm ci
+          python -m pip install Pillow==12.3.0
+          npm run typecheck
+          cargo test -p loomlight-core --release --locked --lib screens::tests -- --nocapture
+          cargo build -p loomlight-core --release --example canvas-controller-driver --locked
+      - name: Provision and verify matched-reference desktop
+        shell: pwsh
+        run: ./scripts/prepare-canvas-display.ps1 -Output "$env:RUNNER_TEMP/canvas-comparison/display.json"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        id: sdk-cache
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-Windows-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Verify official pinned SDK
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 180 --output "$RUNNER_TEMP/canvas-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          if test '${{ steps.sdk-cache.outputs.cache-hit }}' != true; then
+            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+            mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+          fi
+          python scripts/verify-help-sdk.py "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" "$RUNNER_TEMP/canvas-checksums.txt"
+      - name: Short fresh scratch root
+        shell: pwsh
+        run: |
+          $scratch = "C:\llmatch${{ inputs.ordinal }}"
+          if (Test-Path $scratch) { throw 'Matched-rendering scratch root already exists' }
+          New-Item -ItemType Directory -Path $scratch | Out-Null
+          "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Capture four production frames with one helper
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          LOOMLIGHT_CANVAS_EVIDENCE: ${{ runner.temp }}/canvas-comparison/helper
+        run: node tests/canvas-matched-capture.mjs
+      - name: Deliberate accepted-screen reference with one SDK process
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          LOOMLIGHT_CANVAS_EVIDENCE: ${{ runner.temp }}/canvas-comparison/reference
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked --lib lifecycle::runtime_tests::canvas_reference_sdk_captures_actual_screen_at_two_internal_aspects -- --exact --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/canvas-comparison/reference.log"
+      - name: Require matching inputs, geometry and exact RGBA pixels
+        run: python scripts/compare-canvas-rendering.py "$RUNNER_TEMP/canvas-comparison/helper" "$RUNNER_TEMP/canvas-comparison/reference" "$RUNNER_TEMP/canvas-comparison/comparison"
+      - name: Scan retained public fixture evidence
+        id: privacy
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/canvas-comparison"
+          node scripts/scan-artifacts.mjs "$RUNNER_TEMP/canvas-comparison"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ always() && steps.privacy.outcome == 'success' }}
+        with:
+          name: canvas-comparison-Windows-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/canvas-comparison/
+          if-no-files-found: error
+          retention-days: 7

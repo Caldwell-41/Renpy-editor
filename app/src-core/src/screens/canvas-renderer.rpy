@@ -151,7 +151,7 @@ init python:
         _canvas_replace(image, config.basedir + "/frame.png")
         rendered_at = _canvas_time.perf_counter()
         with open(config.basedir + "/result-next.json", "w", encoding="utf-8") as output:
-            _canvas_json.dump(dict(frameId=request["frameId"], width=plan["width"], height=plan["height"], buttonState=plan["buttonState"], geometry=geometry, renderer=renpy.get_renderer_info()["renderer"], diagnostics=dict(native=_canvas_native, renderMilliseconds=(rendered_at-started)*1000, previousCleanupMilliseconds=_canvas_previous_cleanup_ms)), output)
+            _canvas_json.dump(dict(frameId=request["frameId"], width=plan["width"], height=plan["height"], buttonState=plan["buttonState"], geometry=geometry, renderer=renpy.get_renderer_info()["renderer"], diagnostics=dict(native=_canvas_native, physical=list(renpy.get_physical_size()), drawPerVirtual=renpy.display.draw.draw_per_virt, renderMilliseconds=(rendered_at-started)*1000, previousCleanupMilliseconds=_canvas_previous_cleanup_ms)), output)
         _canvas_replace(config.basedir + "/result-next.json", config.basedir + "/result.json")
         renpy.free_memory()
         _canvas_previous_cleanup_ms = (_canvas_time.perf_counter()-rendered_at)*1000

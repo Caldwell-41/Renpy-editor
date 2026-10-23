@@ -22,6 +22,8 @@ init python:
         renpy.display.render.invalidate(button)
         screen = renpy.get_screen("loomlight_help")
         renpy.display.render.invalidate(screen)
+        # Match the helper's fresh render after changing sample appearances.
+        renpy.free_memory()
         filename = "reference-" + aspect + "-" + state + ".png"
         renpy.render_to_file(screen, filename, resize=True)
         physical_filename = "reference-" + aspect + "-" + state + "-drawable.png"
@@ -31,7 +33,12 @@ init python:
             d = renpy.get_displayable("loomlight_help", name, base=True)
             r = renpy.render(d, config.screen_width, config.screen_height, 0, 0)
             measured[name] = list(r.get_size())
-        print("CANVAS_REFERENCE " + __import__("json").dumps(dict(filename=filename, drawableFilename=physical_filename, aspect=[config.screen_width, config.screen_height], state=state, geometry=measured, menu=main_menu, renderer=renpy.get_renderer_info(), physical=list(renpy.get_physical_size()), drawPerVirtual=renpy.display.draw.draw_per_virt, widgetSelection="base")), flush=True)
+        import hashlib
+        inputs = {}
+        for path in ("ui/help.rpy", "assets/canvas.ttf", "assets/help.png"):
+            with open(config.gamedir + "/" + path, "rb") as source:
+                inputs[path] = hashlib.sha256(source.read()).hexdigest()
+        print("CANVAS_REFERENCE " + __import__("json").dumps(dict(filename=filename, drawableFilename=physical_filename, aspect=[config.screen_width, config.screen_height], state=state, geometry=measured, inputs=inputs, menu=main_menu, renderer=renpy.get_renderer_info(), physical=list(renpy.get_physical_size()), drawPerVirtual=renpy.display.draw.draw_per_virt, widgetSelection="base")), flush=True)
         _canvas_reference_phase += 1
     config.overlay_screens.append("loomlight_canvas_reference")
 screen loomlight_canvas_reference():
