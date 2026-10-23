@@ -1,27 +1,24 @@
 # Current status
 
-## L17 production integration and shutdown complete
+## L17 matched rendering comparison prepared
 
-2026-10-23: The selected production GPU integration and graceful-shutdown work for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is complete on Mac ARM64
-and Windows x64. Production candidate is `7ad845c`; final lifecycle qualification
-candidate is `580d5a4`. Signed Mac package 6/native launches 5–6 and audited
-[CI11](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39918738346), attempt 1,
-pass refusal, helper restart, project change, application quit and app restart.
-Both targets pass cooperative normal exits, actual editor exits, source preservation
-and process/fixture cleanup. Bounded observations find no visible helper or foreground
-change; Mac activation observations also pass. Both review axes have no remaining findings.
+2026-10-23: The user selected the next [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+outcome, starting with matched rendering. Local candidate `340fcf2` adds four-sample
+production-helper/reference comparison, exact input/geometry/RGBA admission and a
+focused Windows workflow. Reviews have no remaining code findings after the binary
+retention correction. Portable checks pass after documented environment reruns.
+The first Mac helper attempt returned no frame; the desktop is locked and unlock
+was requested. No CI run or watcher is active. Publication for Windows CI is pending.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
-owns exact identities, results, original failures and limits;
-[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns closure and recovery.
-No operation or watcher remains pending. Unrelated policy edits remain local and
-uncommitted. No PR, merge or release is selected.
-
-Final use is local 120/120, CI 11/11, Mac SDK 50/50 and Windows SDK 23/24. Mac
-package/native use is 6/6 against 6/7; Windows is 3/4 against 5/7. The selected allowance
-is closed. #36 remains open for physical keyboard, matched fidelity, native presentation
-timing, smooth manipulation and whole-ticket acceptance; no broader proof is inferred.
+Retained Mac normal-state native frames exactly match the old Ren'Py reference at
+both aspects. Fresh matched manifests, hover and Windows comparison remain unproved.
+[Evidence](../tasks/evidence/canvas-rendering.md#matched-rendering-comparison-preparation-2026-10-23)
+owns results, failures and allowance use; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns continuation. New use is local13/24, CI0/2, MacSDK1/6 and WindowsSDK0/6.
+Earlier integration/shutdown qualification and its closed allowance remain intact.
+#36 stays open for matched fidelity, physical keyboard, native presentation timing,
+smooth manipulation and whole-ticket acceptance. Unrelated policy edits remain local
+and uncommitted. No PR, merge or release is selected.
 
 ## Earlier canvas decision closeout
 

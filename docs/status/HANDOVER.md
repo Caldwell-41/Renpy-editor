@@ -2,38 +2,47 @@
 
 ## Active L17 integration handover
 
-The selected production GPU integration and graceful-shutdown outcome for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is complete on both
-targets. Production candidate is `7ad845c73447003e1278e180f10e800fb05ebc2b`; final
-lifecycle qualification candidate is `580d5a46e47d0f140c1f033f8e7e4fe658fea5cc`.
-Later commits maintain evidence/status only. Development remains on the existing
-Mac checkout and `codex/phase3b-screen-designer`. Preserve unrelated policy edits
-and the native recovery section below. No PR, merge, release or signing change is selected.
+The active [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) outcome is
+the user-selected matched Ren'Py rendering comparison. Prepared candidate `340fcf2`
+and its implementation `27c83f6` are local on `codex/phase3b-screen-designer`.
+Development stays in this Mac checkout. Preserve the unrelated policy edits and
+protected native recovery below. No push, PR, merge, release or signing change is selected.
 
-[The closeout evidence](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
-owns exact package/run identities, both-target results, limits and final accounting.
-Signed Mac package 6/native launches 5–6 and audited Windows CI11 run 39918738346,
-attempt 1, pass all four selected native lifecycle cases. CI10 retains the earlier
-production rendering, source/history and ordinary project-close proof. Both independent
-review axes have no remaining concrete findings for this selected scope.
+[Comparison evidence](../tasks/evidence/canvas-rendering.md#matched-rendering-comparison-preparation-2026-10-23)
+owns the capture/admission changes, reviews, original failures and current allowance.
+Portable checks pass after the documented Python and loopback environment reruns.
+Standards' binary-retention finding is fixed; both review axes have no remaining
+code finding. Actual both-target/four-sample fidelity is still unproved. The old
+Mac normal-state native frames equal the old reference at both aspects, but that
+read-only diagnostic does not supply the fresh manifests or hover/Windows proof.
 
-The Mac unlock request is resolved. All owned app/helper processes and fixtures are
-gone; no run, watcher, reservation or capability request is pending. Retain the ignored
-integration receipts, original failures, exact package 6 and CI10/CI11 archives.
-CI11 artifact 12485948843 expires 2026-10-30 at 07:44:43 UTC; its downloaded copy is
-already audited. All raw evidence remains outside tracked source.
+The Mac is locked. Its first helper attempt produced no frame, exited through the
+controller's cleanup and removed the fixture. The user has been asked to unlock it.
+No owned process, fixture, test, CI run or watcher remains active. After unlock,
+run `app/tests/canvas-matched-capture.mjs` with a fresh ignored evidence directory,
+then the exact ignored Rust `canvas_reference_sdk_captures_actual_screen_at_two_internal_aspects`
+case and `app/scripts/compare-canvas-rendering.py`. Use the pinned local toolchain,
+verified archive and an outside-sandbox native execution. These take two SDK
+processes. Keep original failures, hashes, side-by-side captures and all differences.
+Only after actual evidence may any edge tolerance return to the user for decision.
 
-Final use is local 120/120, CI 11/11, Mac SDK 50/50, Windows SDK 23/24, Mac package/native
-6/6 against 6/7, and Windows 3/4 against 5/7. The selected allowance is closed. Unused
-discrete headroom does not authorize another execution or renew exhausted limits.
-Further work requires a newly selected scope and finite allowance; do not rerun this
-completed sequence or create a replacement package under the closed allowance.
+The prepared Windows workflow is `canvas-rendering.yml`, cumulative ordinal 12,
+against the exact published candidate. It needs the branch push authorized before
+dispatch. It uses two SDK processes, no package/editor launches, and retains binaries
+and comparison artifacts. Register ci-watch for the actual run and yield under its
+policy; terminal artifact audit remains required. No run has been dispatched yet.
 
-#36 stays open for matched rendering fidelity, physical keyboard delivery, native
-presentation timing, smooth manipulation and whole-ticket acceptance. The completed
-native observations are bounded and script-initiated; they do not establish continuous
-focus, Windows activation events or physical GPU acceleration. Preserve those limits
-when reporting or selecting subsequent work.
+New allocation is local24, CI2 and SDK6 per target, with absolute ceilings36,3,9.
+Use is local13, CI0, MacSDK1, WindowsSDK0. #36 owns the allocation; failures and
+preparation are charged. Historical local120/120, CI11/11, MacSDK50/50 and WindowsSDK23/24
+remain closed. No contingency has been used or recalculated.
+
+[Earlier integration/shutdown evidence](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
+retains tested candidate `580d5a4`, signed Mac package6 and audited CI11. Its lifecycle
+acceptance is unchanged. Keep the ignored original receipts/packages/archives;
+CI11's local archive is already audited. Physical keyboard, native presentation timing,
+smooth manipulation and whole-ticket acceptance remain separate. Bounded scripted
+focus observations do not establish continuous focus or physical GPU acceleration.
 
 ## Earlier canvas decision closeout
 

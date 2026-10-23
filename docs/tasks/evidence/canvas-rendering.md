@@ -2203,3 +2203,87 @@ remains pending. The selected allowance is closed; unused discrete Windows/nativ
 headroom does not authorize another execution after the local ceiling is exhausted.
 Further #36 work needs a new selected outcome and an explicit finite allowance.
 Unrelated policy edits and all historical recovery evidence remain preserved.
+
+
+## Matched rendering comparison preparation, 2026-10-23
+
+The user selected #36 through implement, starting with the matched Ren'Py rendering
+comparison. Entry was `66c0790`. The prepared candidate is `340fcf2`, following
+comparison implementation `27c83f6`. These commits are local. No push, CI dispatch,
+PR, merge or release has occurred in this selection.
+
+The new `canvas-matched-capture.mjs` uses the existing release controller and production
+Screens dispatch for four accepted-source frames, one helper process, both internal
+aspects and normal/hover samples. It records the source/font/image hashes and plans,
+preserves those inputs, and requires driver exit zero and removal of its fixture.
+The reference remains the explicit trusted frozen-preview SDK test. Its instrumentation
+now hashes the same inputs and clears cached surfaces after changing sample appearance,
+following the retained producer diagnosis. Helper diagnostics expose actual physical
+window dimensions and drawable sampling ratio; rendering behavior is unchanged.
+
+`compare-canvas-rendering.py` requires both capture results and cleanup, exactly four
+unique samples, identical accepted inputs and source revision, renderer, physical
+window size, drawable ratio and widget sizes. It checks centered frame placement,
+compares decoded RGBA without resizing or tolerance, and requires distinct normal/hover
+pixels. It retains counts, maximum channel difference, bounds, pixel digests,
+difference images and full-scale side-by-side images. An admission failure or any
+pixel difference exits unsuccessfully and retains the result. A difference requires
+cause/scope analysis before any acceptance decision.
+
+The dedicated `canvas-rendering.yml` prepares a 1920x1080 Windows desktop and reserves
+one helper plus one reference SDK process. It has no package or native editor step.
+The guarded first dispatch is cumulative ordinal 12 on the existing branch, against
+an exact supplied candidate. It retains both compiler streams, produced binaries,
+toolchain/hash identity, logs and images behind the privacy gate, including on failure.
+The existing lifecycle workflow and its closed ordinal remain unchanged.
+
+### Results and original failures
+
+- Mac helper attempt 1 returned unavailable with no frame. Computer Use independently
+  reported a locked desktop and failed automatic unlock. The helper log ends before
+  display initialization; this does not isolate a renderer defect or distinguish every
+  possible sandbox restriction. The controller exited zero and removed the fixture.
+  The process attempt remains charged. The user was asked to unlock the Mac; no later
+  SDK process has run. Resume native work outside the command sandbox after unlock.
+- A read-only diagnostic compared retained signed-Mac `native04` normal-state frames
+  against `reference-21`. Both 1280x720 and 1024x768 have zero differing RGBA pixels,
+  maximum channel difference zero, and the same accepted-source hash
+  `08201efc692198063ed9d66a814da99683643cfbdccd45189fd8736e3aed422b`.
+  These old captures do not supply the new matched input manifests, hover samples or
+  Windows evidence. They support proceeding, but do not pass the new comparison gate.
+- Typechecking passes. The full renderer run reports 226 passes and one Python 3.9
+  `tomllib` environment failure. The affected eight-test file passes with bundled
+  Python. The ordinary broad core run reports 376 passes, 31 loopback permission
+  failures, 47 ignored opt-in/specialist cases and three documented exclusions.
+  All 38 tests in the affected `ai_request::` scope pass outside the sandbox,
+  including the 31 failures. No product correction was needed for either environment.
+- Synthetic comparator admission passes for equal pixels and rejects a wrong font,
+  missing criteria, a duplicate state, wrong drawable ratio and one alpha-only pixel.
+  These are six offline validator checks, not SDK or visual qualification.
+- Node/Python syntax, actionlint and repository validation pass. An initial Python
+  compile attempted the system cache outside the sandbox; the explicit temporary
+  cache rerun passes. These failed environment attempts remain charged.
+
+### Review and continuation
+
+The implement skill's independent Standards and Spec reviews covered
+`66c0790...27c83f6`. Standards identified missing binary retention; `340fcf2` corrects
+it and follow-up review has no remaining blocking finding. Spec reports no new code
+finding and retains the unexecuted both-target comparison and difference analysis.
+Whole #36, physical keyboard, native presentation timing, smooth manipulation and
+full supported-subset acceptance remain pending. No tolerance or weaker gate is adopted.
+
+Ignored evidence is under `.toolchains/canvas-proof/matched-rendering-2026-10-23/`.
+The new selection's original limits are 24 work/check batches, two CI dispatches and
+six SDK launches per target; absolute ceilings are 36, three and nine. Basis and
+selection are recorded in #36. Current use is 13 batches, zero CI, one Mac SDK and
+zero Windows SDK. Historical integration use remains closed at local120/120, CI11/11,
+MacSDK50/50 and WindowsSDK23/24. Overall historical plus new use is local133,
+CI11, MacSDK51 and WindowsSDK23. No contingency has been used.
+
+Remaining work is a fresh Mac four-sample comparison, authorized publication and
+Windows dispatch/audit, then analysis and in-scope corrections for any differences.
+The Mac unlock request remains pending. Publication is not selected by implement's
+commit instruction; ask for the prepared branch push needed by CI. No process,
+fixture, test run or CI watcher remains active at this checkpoint. Preserve unrelated
+policy edits. This is prepared tooling with partial retained evidence, not completion.
