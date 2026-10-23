@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -56,6 +57,23 @@ def native_ok(value):
                     ("foregroundChanges", "focusChanges", "visibleSamples", "inventoryFailures")))
 
 
+def case_ok(native, acknowledgment, desktop, frame_count, refuse):
+    if not native_ok(native) or native.get("helperExit") != (72 if refuse else 0):
+        return False
+    if refuse:
+        return acknowledgment == dict(refused=True, stage="selected-refusal") and frame_count == 0
+    return (acknowledgment == dict(stopped=True) and frame_count == 4
+            and desktop == dict(privateDesktop=True, differsFromInputDesktop=True)
+            and native.get("privateWindows", 0) > 0)
+
+
+def read_record(path):
+    try:
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+
+
 def check():
     # Check the expensive-run admission gate against missing/failed evidence.
     baseline = dict(stage="complete", forced=False, jobEmpty=True, desktopClosed=True,
@@ -70,6 +88,16 @@ def check():
         assert not native_ok(dict(baseline, **{key: 1})), key
     assert not native_ok(dict(baseline, forced=True))
     assert not native_ok(dict(baseline, samples=0))
+    refusal = dict(baseline, helperExit=72)
+    assert case_ok(refusal, dict(refused=True, stage="selected-refusal"), None, 0, True)
+    for wrong in (None, {}, dict(refused=True), dict(refused=True, stage="desktop-verification")):
+        assert not case_ok(refusal, wrong, None, 0, True)
+    normal = dict(baseline, helperExit=0, privateWindows=1)
+    desktop = dict(privateDesktop=True, differsFromInputDesktop=True)
+    assert case_ok(normal, dict(stopped=True), desktop, 4, False)
+    assert not case_ok(normal, None, desktop, 4, False)
+    assert not case_ok(normal, dict(stopped=True), None, 4, False)
+    assert not case_ok(normal, dict(stopped=True), desktop, 0, False)
     generated = renderer()
     # Parse each Ren'Py Python block with the host interpreter before spending an SDK run.
     import textwrap
@@ -129,6 +157,9 @@ def run_case(owner, sdk, output, scratch, refuse):
                     time.sleep(.01)
                 assert result["renderer"] == "gl2" and (result["width"], result["height"]) == (width, height)
                 assert result["geometry"][1]["width"] == 640 and result["geometry"][1]["height"] == 360
+                pixels = (scratch / "frame.png").read_bytes()
+                assert pixels.startswith(b"\x89PNG\r\n\x1a\n") and pixels[12:16] == b"IHDR"
+                assert struct.unpack(">II", pixels[16:24]) == (width, height)
                 name = f"{width}x{height}-{state}"
                 shutil.copyfile(scratch / "frame.png", output / f"{name}.png")
                 (output / f"{name}.json").write_text(json.dumps(result, indent=2))
@@ -150,11 +181,14 @@ def run_case(owner, sdk, output, scratch, refuse):
         for name in ("log.txt", "process.log", "traceback.txt", "desktop.json", "refusal.json", "stopped.json"):
             if (scratch / name).exists():
                 shutil.copyfile(scratch / name, output / name)
-        native = json.loads((output / "native.json").read_text()) if (output / "native.json").exists() else {}
-        acknowledgment = (output / ("refusal.json" if refuse else "stopped.json")).is_file()
-        passed = (error is None and process.returncode == 0 and native_ok(native)
-                  and native.get("helperExit") == (72 if refuse else 0) and acknowledgment
-                  and (refuse or (len(records) == 4 and native.get("privateWindows", 0) > 0)))
+        native = read_record(output / "native.json")
+        if not isinstance(native, dict):
+            native = {}
+        ack_path = output / ("refusal.json" if refuse else "stopped.json")
+        acknowledgment = read_record(ack_path)
+        desktop = read_record(output / "desktop.json")
+        passed = (error is None and process.returncode == 0
+                  and case_ok(native, acknowledgment, desktop, len(records), refuse))
         if (output / "log.txt").exists():
             passed = passed and "Backing up script files to" not in (output / "log.txt").read_text(errors="replace")
         try:
@@ -163,7 +197,8 @@ def run_case(owner, sdk, output, scratch, refuse):
             error = f"Fixture cleanup failed: {exc}"
             passed = False
         result = dict(passed=passed, error=error, frames=len(records), native=native,
-                      acknowledged=acknowledgment, fixtureRemoved=not scratch.exists(),
+                      acknowledgment=acknowledgment, desktop=desktop,
+                      fixtureRemoved=not scratch.exists(),
                       physicalKeyboard=False, productionIntegration=False, matchedFidelity=False)
         (output / "result.json").write_text(json.dumps(result, indent=2))
         print(json.dumps(result))

@@ -4,6 +4,7 @@ init -999 python:
     from ctypes import wintypes as _probe_types
     import json as _probe_json
     import os as _probe_os
+    _probe_stage = "desktop-verification"
     try:
         _probe_user = _probe_ctypes.WinDLL("user32", use_last_error=True)
         _probe_kernel = _probe_ctypes.WinDLL("kernel32", use_last_error=True)
@@ -32,6 +33,7 @@ init -999 python:
         if _probe_actual != _probe_os.environ["LOOMLIGHT_PROBE_DESKTOP"] or _probe_actual == _probe_input_name:
             raise RuntimeError("Private desktop required")
         if _probe_os.environ.get("LOOMLIGHT_PROBE_REFUSE") == "1":
+            _probe_stage = "selected-refusal"
             raise RuntimeError("Selected startup refusal")
         with open(config.basedir + "/desktop.json", "w") as _probe_output:
             _probe_json.dump(dict(privateDesktop=True, differsFromInputDesktop=True), _probe_output)
@@ -39,6 +41,6 @@ init -999 python:
         # Never enter Ren'Py's graphical error handler on bootstrap refusal.
         try:
             with open(config.basedir + "/refusal.json", "w") as _probe_output:
-                _probe_json.dump(dict(refused=True), _probe_output)
+                _probe_json.dump(dict(refused=True, stage=_probe_stage), _probe_output)
         finally:
             _probe_os._exit(72)
