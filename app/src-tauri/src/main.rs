@@ -305,6 +305,16 @@ fn core_request(
         }
         return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),json!({"done":done})));
     }
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-input")
+        && request["operation"] == "probe.canvasInputStage" {
+        let payload = &request["payload"];
+        if payload.to_string().len() > 8192 || !payload["stage"].is_string() {
+            return Err("Invalid native input checkpoint");
+        }
+        println!("{}", json!({"evidence":"canvas-input-stage","details":payload}));
+        let _ = std::io::stdout().flush();
+        return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(), json!({})));
+    }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper")
         && request["operation"] == "probe.canvasObservation" {
         let root = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_CANVAS_OBSERVER_ROOT").ok_or("Canvas observer root required")?);
@@ -342,7 +352,7 @@ fn core_request(
         if std::env::var("LOOMLIGHT_STUDIO_WINDOWS_CONTRACT").as_deref() == Ok("2")
             && std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("studio-settings")
         { ai_connection::service().shutdown(); }
-        if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper") {
+        if matches!(std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref(), Ok("canvas-helper" | "canvas-input")) {
             payload["targetOs"] = json!(std::env::consts::OS);
             payload["canvasShutdown"] = host.with_service(|service| serde_json::to_value(service.canvas_shutdown_report()).unwrap_or(Value::Null)).unwrap_or(Value::Null);
         }
@@ -819,7 +829,7 @@ fn main() {
                     else {if data.exists(){return Err("Reference fixture already exists".into());}LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?}
                 } else if data.exists() { return Err("probe destination already exists".into()); } else if matches!(case.as_str(), "source-foundation" | "owned-screen") {
                     LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
-                } else if case == "canvas-helper" {
+                } else if matches!(case.as_str(), "canvas-helper" | "canvas-input") {
                     let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("Canvas probe SDK archive required")?;
                     LifecycleService::prepare_canvas_screen_probe(data,std::path::Path::new(&archive)).map_err(std::io::Error::other)?
                 } else if case == "help-screen" {
@@ -951,6 +961,9 @@ fn main() {
                         main.show().expect("Lifecycle probe show");main.set_focus().expect("Lifecycle probe focus");
                         let phase=std::env::var("LOOMLIGHT_CANVAS_LIFECYCLE_PHASE").expect("Lifecycle phase");
                         main.eval(&format!("window.__loomlightLifecyclePhase={phase};\n{}",include_str!("canvas_lifecycle_probe.js"))).expect("Lifecycle probe injection");
+                    } else if case == "canvas-input" {
+                        main.show().expect("Canvas input show"); main.set_focus().expect("Canvas input focus");
+                        main.eval(&format!("{}\n{}", include_str!("native_editor_probe.js"), include_str!("canvas_input_probe.js"))).expect("Canvas input probe injection");
                     } else if case == "canvas-helper" { main.show().expect("Canvas probe show");main.set_focus().expect("Canvas probe focus");main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("canvas_helper_probe.js"))).expect("Canvas probe injection");
                     } else if case == "owned-screen" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("owned_screen_probe.js"))).expect("Owned screen probe injection");
                     } else if case == "help-screen" { main.eval(&format!("window.__loomlightHelpTargetOs = {:?};\n{}\n{}",std::env::consts::OS,include_str!("native_editor_probe.js"),include_str!("help_screen_probe.js"))).expect("Help screen probe injection");

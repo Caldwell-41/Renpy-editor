@@ -1,6 +1,6 @@
 """Cases required by the ordinary packaged runtime gate and evidence manifest."""
 RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh")
-OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "canvas-helper")
+OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "canvas-helper", "canvas-input")
 
 # Terminal production-probe observations required by each ordinary scenario.
 RUNTIME_STAGES = {
@@ -21,6 +21,9 @@ def runtime_report_ok(case, report, target_os=None):
             or report.get('case') != case or report.get('passed') is not True
             or report.get('cleanupComplete') is not True):
         return False
+    if case == "canvas-input":
+        from canvas_input_evidence import admit
+        return admit(report.get("details", {}), target_os)
     if case not in RUNTIME_STAGES:
         return case in OPTIONAL_CASES
     details = report.get('details')

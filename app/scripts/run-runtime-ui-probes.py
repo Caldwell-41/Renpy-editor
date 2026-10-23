@@ -9,8 +9,37 @@ import time
 import threading
 import shutil
 import hashlib
+import ctypes
 
 from runtime_probe_cases import RUNTIME_CASES, OPTIONAL_CASES, runtime_report_ok
+
+def stop_remaining_mac_canvas_helpers(profile):
+    """Failure cleanup for the owned disposable SDK only; never counts as normal exit."""
+    if sys.platform != "darwin":
+        return []
+    library = ctypes.CDLL('/usr/lib/libproc.dylib')
+    library.proc_pidpath.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32]
+    library.proc_pidpath.restype = ctypes.c_int
+    expected = (profile / 'sdks/renpy-8.5.3-sdk-verified-v1/lib/py3-mac-universal/renpy').resolve()
+    def owned(pid):
+        path = ctypes.create_string_buffer(4096)
+        return (library.proc_pidpath(pid, path, len(path)) > 0
+                and Path(os.fsdecode(path.value)).resolve() == expected)
+    listing = subprocess.run(['ps', '-axo', 'pid='], capture_output=True, text=True, check=True, timeout=5)
+    found = [int(p) for p in listing.stdout.split() if owned(int(p))]
+    rows = []
+    for pid in found:
+        try:
+            if owned(pid):
+                os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        deadline = time.monotonic() + 3
+        while owned(pid) and time.monotonic() < deadline:
+            time.sleep(.02)
+        rows.append(dict(pid=pid, stopped=not owned(pid)))
+    return rows
+
 
 executable = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
@@ -77,7 +106,7 @@ for case in cases:
         reader = threading.Thread(target=retain_output)
         reader.start()
         try:
-            code = process.wait(timeout=300 if case == "source-foundation" else 420)
+            code = process.wait(timeout=1800 if case == "canvas-input" else 300 if case == "source-foundation" else 420)
         except subprocess.TimeoutExpired:
             timed_out = True
             if os.name == "nt":
@@ -95,6 +124,15 @@ for case in cases:
                 except subprocess.TimeoutExpired:
                     owned.kill(); owned.wait()
                     external_errors.append("Canvas observer cleanup timed out")
+    fallback_helpers = []
+    if case == "canvas-input":
+        profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
+        fallback_helpers = stop_remaining_mac_canvas_helpers(profile)
+        if fallback_helpers:
+            external_errors.append("Owned helper required forced cleanup")
+        (output / "canvas-input-fallback-cleanup.json").write_text(json.dumps(fallback_helpers, indent=2))
+        if any(not row['stopped'] for row in fallback_helpers):
+            raise RuntimeError("Owned helper remains alive; fixture retained")
     if case == "source-foundation":
         profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-source-foundation"
         if profile.exists():
@@ -105,7 +143,7 @@ for case in cases:
     help_disk = None
     disk_errors = []
     fixture_cleanup_complete = True
-    if case in ("help-screen", "owned-screen", "canvas-helper"):
+    if case in ("help-screen", "owned-screen", "canvas-helper", "canvas-input"):
         profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
         if profile.exists():
             assert not profile.is_symlink() and profile.resolve().parent == profile.parent.resolve()
@@ -114,7 +152,7 @@ for case in cases:
             if case == "help-screen":
                 original = (Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/help.rpy").read_bytes()
                 expected = b'\xef\xbb\xbf' + original.replace(b'\n', b'\r\n').replace(b'xsize 640', b'xsize 768')
-            elif case=='canvas-helper':
+            elif case in ('canvas-helper', 'canvas-input'):
                 expected=(Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/canvas-help.rpy").read_bytes()
             else:
                 expected = None
@@ -135,7 +173,7 @@ for case in cases:
                              scratchJobsRemaining=len(list(profile.glob("scratch-preview-*"))),
                              sourceBytecode=list(project.glob("game/**/*.rpyc")) != [],
                              sourceSaves=(project / "game/saves").exists())
-            if case=='canvas-helper':
+            if case in ('canvas-helper', 'canvas-input'):
                 help_disk['canvasJobsRemaining']=len(list(profile.glob('canvas-helper-*')))
             (output / "help-disk.json").write_text(json.dumps(help_disk, indent=2)+"\n")
             if source.is_file():
@@ -177,6 +215,9 @@ for case in cases:
                         (output / f"native-helper-{frame['width']}x{frame['height']}.png").write_bytes(image)
                     except (ValueError,KeyError,IndexError):
                         passed=False
+    if case == "canvas-input":
+        # Trusted renderer events alone never qualify the OS delivery route.
+        passed = passed and help_disk == dict(acceptedBytesMatch=True,scratchJobsRemaining=0,sourceBytecode=False,sourceSaves=False,canvasJobsRemaining=0)
     if case == "owned-screen":
         passed = passed and not disk_errors and fixture_cleanup_complete
     failed |= not passed
@@ -184,6 +225,8 @@ for case in cases:
                   elapsedSeconds=round(time.monotonic()-started, 3), reports=reports, externalErrors=external_errors, helpDisk=help_disk)
     if case == "canvas-helper":
         result.update(nativeObservation=observation)
+    if case == "canvas-input":
+        result.update(nativeInputQualified=False, warmPresentationProof=False, perceivedSmoothnessProof=False)
     if case == "owned-screen":
         result.update(diskErrors=disk_errors, fixtureCleanupComplete=fixture_cleanup_complete)
     (output / f"runtime-ui-{case}.json").write_text(json.dumps(result, indent=2)+"\n")
