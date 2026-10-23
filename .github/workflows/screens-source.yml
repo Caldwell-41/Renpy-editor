@@ -21,6 +21,10 @@ on:
         description: Select L17 bounded canvas helper proof; preserve closed Help/L01 selections
         type: boolean
         default: false
+      canvas_comparison:
+        description: Select L17 matched rendering only; no package or native editor
+        type: boolean
+        default: false
       canvas_gpu_capability:
         description: Select L17 private-desktop GPU capability only; no package or native editor
         type: boolean
@@ -41,9 +45,10 @@ jobs:
           OWNED_BLANK: ${{ inputs.owned_blank }}
           CANVAS_HELPER: ${{ inputs.canvas_helper }}
           CANVAS_GPU_CAPABILITY: ${{ inputs.canvas_gpu_capability }}
+          CANVAS_COMPARISON: ${{ inputs.canvas_comparison }}
         run: |
           selected_count=0
-          for selected in "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY"; do
+          for selected in "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY" "$CANVAS_COMPARISON"; do
             if test "$selected" = true; then selected_count=$((selected_count + 1)); fi
           done
           if test "$selected_count" -gt 1; then
@@ -52,7 +57,7 @@ jobs:
           fi
 
   focused:
-    if: ${{ !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability }}
+    if: ${{ !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison }}
     name: Help (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -189,7 +194,7 @@ jobs:
           retention-days: 7
 
   owned-blank:
-    if: ${{ inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability }}
+    if: ${{ inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison }}
     name: Owned blank screen (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -346,7 +351,7 @@ jobs:
           retention-days: 7
 
   canvas-helper:
-    if: ${{ inputs.canvas_helper && !inputs.owned_blank && !inputs.canvas_gpu_capability }}
+    if: ${{ inputs.canvas_helper && !inputs.owned_blank && !inputs.canvas_gpu_capability && !inputs.canvas_comparison }}
     name: L17 canvas helper (Windows x64)
     runs-on: windows-2025
     timeout-minutes: 40
@@ -449,7 +454,7 @@ jobs:
           retention-days: 7
 
   canvas-gpu-capability:
-    if: ${{ inputs.canvas_gpu_capability && !inputs.owned_blank && !inputs.canvas_helper }}
+    if: ${{ inputs.canvas_gpu_capability && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_comparison }}
     runs-on: windows-2025
     timeout-minutes: 15
     defaults:
@@ -527,3 +532,11 @@ jobs:
           path: ${{ runner.temp }}/canvas-gpu/
           if-no-files-found: error
           retention-days: 7
+
+  canvas-comparison:
+    needs: validate-selection
+    if: ${{ inputs.canvas_comparison && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability }}
+    uses: ./.github/workflows/canvas-rendering.yml
+    with:
+      candidate: ${{ inputs.candidate }}
+      ordinal: ${{ inputs.ordinal }}

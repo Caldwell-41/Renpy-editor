@@ -396,3 +396,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** portable checks pass; CI9 passes corrected ANGLE2 rendering, bounded desktop
   observation and cooperative shutdown in the capability probe.
 - **Evidence:** [L17 CI8 audit](../tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction).
+
+## H29. A new workflow cannot be dispatched before GitHub registers it
+
+- **Class/search:** workflow discovery; HTTP 404, workflow not found on default branch.
+- **Cause/correction:** the comparison workflow existed only on the development
+  branch. GitHub rejected its standalone dispatch before creating a run. Call it
+  with `workflow_call` from the registered Screens workflow at the same commit.
+  Keep an exclusive comparison selector, legacy-job exclusions and caller-only
+  concurrency. Preserve exact candidate, attempt and cumulative-ordinal guards.
+- **Verification:** actionlint and all 16 selector combinations pass; both review
+  axes report no findings. The rejected attempt remains charged. Actual Windows
+  execution remains pending under the owning evidence record.
+- **Evidence:** [Matched comparison continuation](../tasks/evidence/canvas-rendering.md#mac-matched-comparison-and-dispatch-correction).

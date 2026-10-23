@@ -1,7 +1,7 @@
 name: Matched canvas rendering
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       candidate:
         description: Exact reviewed candidate SHA
@@ -14,9 +14,6 @@ on:
 
 permissions:
   contents: read
-concurrency:
-  group: help-screen-${{ github.ref }}
-  cancel-in-progress: false
 
 jobs:
   comparison:
@@ -39,7 +36,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
           test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ORDINAL" = 12
+          test "$ORDINAL" = 13
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/canvas-comparison"
           git rev-parse HEAD > "$RUNNER_TEMP/canvas-comparison/candidate.txt"

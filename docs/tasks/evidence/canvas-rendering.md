@@ -2287,3 +2287,43 @@ The Mac unlock request remains pending. Publication is not selected by implement
 commit instruction; ask for the prepared branch push needed by CI. No process,
 fixture, test run or CI watcher remains active at this checkpoint. Preserve unrelated
 policy edits. This is prepared tooling with partial retained evidence, not completion.
+
+### Mac matched comparison and dispatch correction
+
+The user reported the Mac unlocked and directed continuation. This authorizes the
+prepared branch publication and Windows qualification requested at the prior pause.
+The three reviewed commits were pushed, with remote `ae48ef9011522261cd3b17999fee85b73bd370b8`
+verified before execution continued.
+
+Mac helper attempt2 and deliberate reference attempt1 pass at that candidate. All
+four 1280x720/1024x768 normal/hover pairs have zero differing RGBA pixels and maximum
+channel delta zero. The three source/font/image hashes agree, as do source revisions,
+GL2 renderer, physical window dimensions, drawable/game ratio2 and widget sizes.
+Frame placement is centered. Normal and hover images differ from one another on both
+sides. The full-scale side-by-side capture was also inspected. No pixel tolerance,
+resizing or color correction was applied. The reference test reports one pass;
+all its runtime/source/context/geometry criteria and cleanup owners are true.
+The helper driver exits zero and removes its fixture. This completes the bounded
+Mac source-derived composition comparison, without native input/presentation or
+full-subset acceptance.
+
+Ignored `helper-02`, `reference-01` and `comparison-01` retain the manifests, original
+PNGs, drawable references, geometry, exact differences and cleanup. Both executed
+binaries are retained locally with hashes in `mac-binary-identity.json`. Driver hash
+is `00c842bf9b7a7caf5f29519e11d2ce0a0a4249a5e42315cfa7998694d13c032b`;
+core test binary hash is `6ebcb0cd620e9b7391eaa899f8257d473928263f992134c20d3f8855e1a8c067`.
+The artifact privacy scan passes. Earlier type/core/renderer results are reused;
+the continuation changes only CI routing and evidence.
+
+Dispatch attempt12 was rejected with HTTP404 because `canvas-rendering.yml` was not
+registered on the default branch. The request created no run, runner or SDK process;
+its failed discovery file is retained. The attempt remains charged. The correction
+adds `canvas_comparison` to the registered Screens workflow and calls the comparison
+with `workflow_call`. Every older job excludes that selector; the comparison requires
+selection validation. Only the caller holds the concurrency group. The relative
+workflow reference uses the caller's commit under
+[GitHub's documented reuse rules](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows).
+Exact branch/candidate/attempt guards remain; the next dispatch ordinal is13.
+Actionlint, whitespace and all16 selector combinations pass. Independent Standards
+and Spec follow-up reviews report no findings. Windows execution and terminal
+artifact audit remain pending. The rejected dispatch supplies no Windows evidence.
