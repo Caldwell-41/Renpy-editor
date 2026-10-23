@@ -418,7 +418,10 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   drops pointer capture and cancels movement. The outline also waits for helper
   images; child selection targets intercept clicks over parts of the frame.
 - **Verification:** the real controller/Chrome diagnostic reproduces capture loss.
-  Skipping existing-node reattachment in the browser preserves capture. Production
-  correction and native smoothness remain pending. The separate probe-clamping
-  correction passes both parent bounds with exact source/geometry/Undo checks.
-- **Evidence:** [Probe bounds and drag diagnosis](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis).
+  The production correction leaves attached targets in place; the controller test
+  and real-helper Chrome rehearsal pass. The test blocks HMR during held gestures.
+  Immediate feedback and drag-target alternatives await design approval; native
+  smoothness remains pending. The separate probe-clamping correction passes both
+  parent bounds with exact source/geometry/Undo checks.
+- **Evidence:** [Diagnosis](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis)
+  and [capture correction](../tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24).

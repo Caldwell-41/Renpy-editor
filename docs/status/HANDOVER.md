@@ -2,52 +2,45 @@
 
 ## Active L17 integration handover
 
-Continue #36 on `codex/phase3b-screen-designer`. Local correction `19ea87b`
-fixes the probe's expected movement clamping and retains down/last-move/up inputs
-on failure. Rehearsal 10 reproduces the original source mismatch; 11/12 pass both
-bounds, all eight stages, exact accepted source/geometry and Undo restoration.
-Explicit boundary mode holds image responses until pointer release to isolate the
-oracle. The default rehearsal retains ordinary image delivery and interior dragging.
-Types, 13 focused Screens tests, 227 frontend tests, 38 desktop tests and three
-evidence-admission tests pass. Independent Standards and Spec reviews have no findings.
+Continue #36 on `codex/phase3b-screen-designer`. Candidate `e9b5fc1` includes production capture correction `5df62d3` and three
+unapproved Design Lab drag alternatives. Both review axes have no remaining finding.
+The scoped draft matrix passes 24 cases and interactions. The full lab check stops
+at the existing flow-v1 source lock; approval validation and separate production
+build exclusion pass. The lock and original approved source remain unchanged.
+`showFrame` now leaves attached targets in place. The existing controller test holds
+a drag through image delivery and further input, then verifies Cancel, one accepted
+write, exact Source and Undo/Redo. HMR is blocked in that test to prevent development
+edits from reloading its document mid-gesture. One real-helper Chrome rehearsal,
+SDK19, passes all eight input stages with normal image delivery and full cleanup.
+Types, 13 focused Screens tests and all 227 frontend tests pass.
 
-Diagnosis 03 reproduces production-path capture loss in Chrome: `showFrame`
-reattaches the existing frame target, dropping capture and cancelling the drag.
-A browser-only intervention that skips that reattachment preserves capture across
-subsequent movement/images. Movement outlines wait for helper image delivery;
-text and vertical-group targets intercept clicks over parts of the frame, including
-its blank center. All have the same pointer cursor. Production code is unchanged.
-This is a controlled mechanism diagnosis, not native timing or smoothness acceptance.
-Manual-03's exact gesture remains unreconstructed. Its six keyboard passes and
-adverse drag observation remain valid under their original package/candidate.
+Next action is the user's choice among the [three previews](../design/design-lab-canvas-drag/README.md).
+The move handle is recommended because it keeps single-click child selection.
+All revisions remain unapproved. Follow Design Lab integration before changing
+production feedback or target behavior; preserve the pinned flow-v1 reference.
+The existing capture fix does not establish native smoothness. Native drag/resize,
+independent warm p95 <=100 ms presentation, Windows and whole-ticket acceptance
+remain pending. No recorder/input-driver or capture permission change is approved.
+Do not repeat accepted matched-rendering checks for this interaction work.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis)
-owns attempts, traces and limits. Ignored root is
-`.toolchains/canvas-proof/native-feedback-2026-10-23/`. Preserve manual-01/02/03,
-rehearsals 07..12, all three diagnosis attempts, scripts, logs and `usage.json`.
-Every cleanup owner passes; no process, fixture, CI run or watcher remains pending.
-Never replay a one-use manual launcher. Signed package 2 remains the earlier
-`ea09e2f` candidate; it does not contain the new probe correction. No package/native
-attempt ran in this continuation. Code/evidence are local only; remote publication
-remains `ccebf3e`. No PR, merge or release is selected.
+[Evidence](../tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24)
+owns retained failures, checks and allowance details. Ignored receipts remain under
+`.toolchains/canvas-proof/native-feedback-2026-10-23/`, including SDK19 and every prior
+manual/rehearsal/diagnostic attempt. Preserve `usage.json` and never replay a one-use
+native launcher. Signed package 2 remains the older `ea09e2f` candidate. No new package
+or native editor attempt ran. No editor/helper/controller/CI process remains; the
+Design Lab preview server on 127.0.0.1:5174 remains open for review.
 
-Next work is a production capture-preservation correction and Design Lab review
-of movement feedback/drag-target alternatives before non-trivial interaction changes.
-The requested probe fix and diagnosis are complete. Native drag/resize, independent
-warm p95 <=100 ms presentation, Windows and whole-ticket acceptance remain pending.
-No recorder/input-driver or capture permission change is approved. Do not rerun
-accepted matched rendering or infer native acceptance from Chrome receipts.
-
-Original allowance remains local 24, CI 3 and per target packages 3, native launches 6,
-SDK launches 12; ceilings are 36, 4, 4, 9, 18. Final use is local 33, CI 0;
-Mac packages 2, native 3, SDK 18; Windows zero. Three local batches remain; SDK
-allowance is exhausted and further SDK launches require an explicit supplement.
-Local contingency began before batch 25 and SDK contingency was announced before
-attempt 13. `usage.json`, evidence and #36 own current accounting. The user explicitly
-authorized the prepared issue update after the initial automatic approval rejection.
-Its exact body is published and verified; #36 remains open. This completes deferred
-publication in batch 33 without new execution. Earlier allowances stay closed.
-Preserve unrelated policy edits and the protected recovery below.
+The user explicitly selected continuation and approved any SDK allowance on
+2026-10-24. #36 records the published supplement and exact readback: 12 SDK launches
+plus 6 contingency per target, raising cumulative ceilings from 18 to 36; 12 local
+batches plus 6 contingency raise the local ceiling from 36 to 54. Original limits
+and spent use remain historical. CI/package/editor-launch ceilings remain 4/4/9.
+Current cumulative use is local 42, CI 0; Mac packages 2, native 3, SDK 19; Windows
+zero. Earlier allowances stay closed. New supplement contingency begins after local
+48 or SDK30 on a target. Code is local only, repository publication remains `ccebf3e`;
+no push, PR, merge or release is selected. Preserve unrelated policy edits, including
+the separate hunks in CURRENT/HANDOVER, and protected recovery below.
 
 ## Earlier canvas decision closeout
 

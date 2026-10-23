@@ -1,27 +1,26 @@
 # Current status
 
-## L17 probe bounds verified; drag causes reproduced
+## L17 capture fixed; drag alternatives await approval
 
-2026-10-23: Local correction `19ea87b` clamps the probe's expected movement to
-parent bounds and retains gesture inputs on failure. The controller rehearsal
-reproduces the old source mismatch; both boundary directions now pass exact source,
-geometry and Undo checks. Types, 227 frontend tests, 38 desktop tests and independent
-Standards/Spec reviews pass.
+2026-10-24: Local capture correction `5df62d3` preserves pointer capture across helper-image
+updates. The controller regression passes held movement, Cancel, exact Source and
+Undo/Redo. One real SDK/controller rehearsal passes all eight input stages with
+normal image delivery and complete cleanup. Types and 227 frontend tests pass.
 
-Separate controller diagnosis shows that helper-image updates reattach the drag
-target, lose pointer capture and cancel movement. The outline waits for the helper
-image, and child selection targets intercept parts of the apparent frame. These
-explain reproducible jumps and unclear dragging; manual-03's exact native gesture
-remains unreconstructed. Production interaction is unchanged. Native drag/resize,
-numerical presentation and Windows acceptance remain pending.
+Three [Design Lab alternatives](../design/design-lab-canvas-drag/README.md) compare
+a move handle, draggable border and dragging the selected frame body. Their 24-case
+matrix and interactions pass at `e9b5fc1`; all remain unapproved. Both review axes
+have no remaining finding. The full lab check stops at the existing flow-v1
+source lock; approval validation and separate production-build isolation pass. Immediate movement feedback and
+drag-target production changes await the user's choice. Native drag/resize, numerical
+presentation, Windows and whole-ticket acceptance remain pending.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis)
-owns traces, failures and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns recovery. Use is local 33/24 (ceiling 36), CI 0/3; Mac packages 2/3,
-native 3/6, SDK 18/12 (ceiling 18); Windows zero. SDK allowance is exhausted.
-No process/run remains active. Code/evidence are local only; publication remains
-`ccebf3e`. The user-approved #36 update is published and its exact body verified;
-the issue remains open. Unrelated policy edits remain unstaged.
+[Evidence](../tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24)
+owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns recovery. #36 records the explicit supplement. Current use is local 42/54,
+CI 0/4; Mac packages 2/4, native 3/9, SDK 19/36; Windows zero. Denominators are
+absolute ceilings. Code is local only; repository publication remains `ccebf3e`.
+Unrelated policy edits remain unstaged. The preview server remains available on 5174.
 
 ## L17 matched rendering passes on both targets
 

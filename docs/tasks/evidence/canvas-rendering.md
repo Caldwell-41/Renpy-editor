@@ -2699,3 +2699,92 @@ issue edits; publication succeeded and readback matches the prepared body exactl
 The issue remains open. Ignored `issue36-published-clamp-closeout.json` retains the
 receipt. This completes deferred publication in batch 33; counts are unchanged.
 Repository code/evidence remain local, and unrelated edits are preserved.
+
+### Capture preservation and drag alternatives, 2026-10-24
+
+The user selected continuation from the drag diagnosis with the implement skill
+and explicitly approved an SDK allowance of any size. #36 records the published,
+exact-readback-verified supplement: 12 additional SDK launches per target plus 6
+contingency, raising the cumulative SDK ceiling from 18 to 36 per target. The local
+supplement is 12 batches plus 6 contingency, raising its ceiling from 36 to 54.
+This adds a finite allowance to the same problem; original use remains charged.
+CI, package and editor-launch limits are unchanged. Basis is the capture correction,
+reviewed interaction alternatives and bounded verification/correction capacity.
+
+Candidate `5df62d3` preserves an attached selection target in `showFrame` rather
+than appending it again. Geometry and image updates continue normally. This avoids
+the demonstrated browser capture loss without changing drag-target selection or
+movement-feedback design. Production interaction changes beyond this correction
+still require the Design Lab decision.
+
+The existing `screen-position.browser.mjs` controller test now holds a frame drag
+across image delivery and further movement. It asserts retained pointer capture,
+no held-gesture source write, Escape restoration, one accepted position write,
+exact Source, Undo/Redo and keyboard movement. It uses the existing fixed image and
+real controller/transactions, not SDK rendering evidence. A configurable ignored
+output directory keeps each attempt. The test blocks HMR so source changes in the
+development checkout cannot reload its document during a gesture.
+
+Retained receipts are under `.toolchains/canvas-proof/native-feedback-2026-10-23/`:
+
+| Attempt | Result |
+| --- | --- |
+| `capture-red` | Original code fails the capture assertion. The first assertion also attached its pointer-ID listener to an initial target later replaced during initial rendering, so this first failure alone is insufficient proof. |
+| `capture-green`, `capture-inspect` | First corrected-code check still fails the flawed observation; the diagnostic trace records actual capture true and the element-local pointer ID absent. Types and all 13 Screens tests pass separately. |
+| `capture-red-verified` | Document-level pointer-ID observation rejects the original production code with the same capture assertion. |
+| `capture-green-verified`, `capture-inspect-2` | Failed checks while source edits and Vite HMR remained possible; retained as failures. The second trace records capture false without establishing another production cause. |
+| `capture-inspect-3`, `capture-final` | HMR isolated. Corrected production code passes the entire controller test, including held capture and exact source/history checks. Temporary tracing is removed from the final test. |
+| `capture-sdk-19` | One charged real SDK/controller rehearsal with normal image delivery passes all eight input stages, source/geometry readback and restoration. All three cleanup owners pass. This is Chrome/controller evidence, not native presentation or subjective smoothness acceptance. |
+
+The new [canvas-drag Design Lab comparison](../../design/design-lab-canvas-drag/README.md)
+contains three unapproved choices: labelled move handle, draggable border, and whole
+selected-frame dragging with double-click child selection. Each shows an immediate
+draft guide and delayed fictional content. All operations remain in memory. The
+notes disclose fixed-corner sample resizing, approximate child hit testing and the
+absence of real helper timing. The approved flow-v1 source and approval records are
+unchanged.
+
+The first focused lab run failed compact overflow. Setting the canvas grid column's
+minimum width to zero fixes it; the second run passes 24 variant/state/theme/size
+cases and the interaction checks. Wide/compact dark captures were visually inspected.
+Types and all 227 frontend tests pass with the supported Python runtime. No Rust or
+native-probe code changed, so the previous scoped desktop evidence is retained; no
+new desktop-suite or package result is claimed.
+
+Independent review of `5551ea2...5df62d3` found no Spec issue and one minor Standards
+issue: experimental editor chrome used independent colours. The correction uses
+production editor tokens while retaining separate fictional game colours. Both
+reviewers cleared the production capture correction.
+
+The full `design:check` passes approval-history validation but fails when opening the
+existing approved flow-v1 preview from the changed checkout. Its pinned source is
+`3c7ea31`; the refusal is intentional protection, not a new approval or a full-suite
+pass. Retained `drag-lab-full-report.json` and `drag-lab-full.log` own that failure.
+The scoped draft matrix remains separate. The final production graph exclusion
+check runs the existing in-memory Vite-build assertion independently because the
+full runner stopped before reaching it; it does not write `dist`.
+
+The palette recheck exposed an initial preview drag failure before the outline
+moved. Initial Fit sizing previously waited for ResizeObserver. The sample now
+sets its initial scale synchronously and retains the observer for later resizing.
+The failed `drag-lab-palette.log` remains evidence; later scoped checks determine
+the corrected sample's result. This changes only the draft, not production geometry.
+
+Final draft candidate is `e9b5fc1`; production capture code remains the tested
+`5df62d3` implementation. The final scoped lab run passes all 24 cases and interactions,
+TypeScript and the independent production-build exclusion assertion. The revised
+wide dark preview was inspected. Standards and Spec reviewers rechecked the
+corrections with zero remaining findings. The full lab check remains incomplete at
+the existing approved-source refusal; no gate or approval record was weakened.
+
+Final use for this continuation is local 42/54, CI 0/4; Mac packages 2/4,
+native editor launches 3/9, SDK launches 19/36; Windows use is zero. Denominators
+are absolute ceilings. Supplement contingency begins above local batch 48 or SDK launch 30 per
+target, not by resetting historical use. Batches 34-42 cover entry/allowance,
+controller red/green and diagnostic corrections, SDK19, draft creation/checks,
+review/fixes and final records. No package, native editor or CI operation ran.
+Process inspection finds no remaining helper/controller/editor process. The owned
+Design Lab server remains on port 5174 so the user can review the choices. No watcher
+or external run is pending. Code and evidence remain local; no push was selected.
+Unrelated policy edits are preserved. #36 remains open, awaiting the user's design
+choice before production feedback/target integration and later native qualification.
