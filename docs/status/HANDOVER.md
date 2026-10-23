@@ -30,9 +30,9 @@ Preserve original failures and never replay earlier launchers. A later native ru
 needs its own fresh reservation and a named unresolved case; this functional pass
 alone does not justify repeating the sequence.
 
-The user selected 16 additional local batches plus 8 contingency. Nominal cumulative
-bound is 70, absolute ceiling 78; announce contingency before batch 71. Current use
-is local 66, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
+The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
+bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
+Announce contingency before batch 81. Current use is local 67, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
 Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
 acceptance remain pending. No recorder or permission change, push, PR, merge or

@@ -17,8 +17,8 @@ remain pending. Original failed attempts remain recorded.
 
 [Evidence](../tasks/evidence/canvas-rendering.md#manual-7-physical-input-pass-2026-10-24)
 owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
-recovery. The supplement is 16 local batches plus 8 contingency. Cumulative use
-is local 66/70, absolute ceiling 78; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
+recovery. The user added 10 local batches for continuation, preserving the existing
+8 contingency batches. Cumulative use is local 67/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
 Windows zero. No process or watcher remains pending. Code is local only; publication
 remains `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
 

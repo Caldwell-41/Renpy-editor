@@ -3084,3 +3084,21 @@ Repository validation passes for 905 files, and scoped whitespace checks pass. N
 product or test code changed during this physical-input retry, so the earlier 229-test
 result remains applicable without repeating the frontend suite. Unrelated policy
 edits and protected recovery remain outside this commit.
+
+
+### Continuation handoff allowance, 2026-10-24
+
+After the manual 7 pass at `cf18e8d`, the user requested a new-agent handoff and
+explicitly added 10 to the allowance. This adds 10 local work batches: nominal
+cumulative bound 80, absolute ceiling 88, with the existing 8 contingency batches
+unchanged. Announce contingency before batch 81. No new contingency is calculated.
+The handoff and recovery update consume batch 67, leaving 13 nominal batches and
+8 contingency batches. Expensive-operation ceilings remain unchanged: CI 4 and,
+per target, packages 4, native launches 9 and SDK launches 36. Current use is CI 0;
+Mac packages 4, native 7, SDK 29; Windows zero. No further Mac package is allocated.
+
+This transfer retains the selected #36 scope, physical Mac functional pass, original
+failures and publication/permission boundaries. Manual 7's visual smoothness question
+has no answer yet; the earlier manual 6 move was reported smooth. No new runtime
+operation or external publication occurs. The temporary handoff points to these
+canonical records; it does not replace them or renew historical closed allowances.
