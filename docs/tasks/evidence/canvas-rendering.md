@@ -3195,3 +3195,12 @@ is pending. Missing capability approval prevents presentation execution; the
 prepared plan does not close #36. The long status files retain unrelated policy
 work, outstanding acceptance and protected recovery; this continuation does not
 reorganize them.
+
+Independent read-only Standards and Spec reviews of `31e9e18...c32d1e9` each
+report zero actionable findings. Standards checks cumulative accounting, evidence
+separation and host/status ownership. Spec checks the full input-to-visible endpoint,
+unchanged threshold and permission boundaries; whole-ticket proof remains pending.
+Repository validation passes for 905 files and scoped whitespace checks pass. No
+executable code changed, so the accepted 229-test result is reused within its
+existing scope. Unrelated policy changes remain unstaged. The recorder permission
+request is pending; no permission-dependent work has started.
