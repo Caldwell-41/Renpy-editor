@@ -28,7 +28,7 @@ exist on the private desktop; they must never appear on the input desktop.
 Run `python3 spikes/canvas-gpu/probe.py --check` for portable generation and
 rejecting receipt checks. The `Screens qualification` workflow's `canvas_gpu_capability` selector owns the Windows
 compiler and two SDK runs. It admits only the selected branch, exact candidate,
-attempt 1 and cumulative CI ordinal 7. Artifacts retain partial failures and
+attempt 1 and cumulative CI ordinal 8. Artifacts retain partial failures and
 cleanup results after a privacy scan. Do not infer a pass from a dispatched run.
 
 The OS mechanism uses documented [CreateDesktopW](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createdesktopw)
