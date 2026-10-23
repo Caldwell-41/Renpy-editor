@@ -1,27 +1,28 @@
 # Current status
 
-## L17 Mac matched rendering passes; Windows running
+## L17 matched rendering passes on both targets
 
-2026-10-23: The fresh Mac [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-comparison passes normal and hover samples at 1280x720 and 1024x768, with zero
-RGBA differences, matching input hashes/geometry/window/drawable scale and complete
-cleanup. No tolerance is needed for this bounded composition. The prepared code
-and evidence are published; unrelated policy edits remain local and uncommitted.
+2026-10-23: The selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+matched-rendering comparison is complete. Mac ARM64 and Windows x64 each match the
+accepted Ren'Py Help composition exactly in normal/hover states at 1280x720 and
+1024x768. All eight samples have zero differing RGBA pixels, matching inputs and
+geometry, and complete cleanup. No tolerance was required. Independent terminal
+Standards and Spec reviews have no remaining finding for this bounded comparison.
 
-[CI13](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39948440369), attempt1
-at `d1d3d99`, is the pending Windows counterpart. The earlier new-workflow dispatch
-was rejected before creating a run; the reviewed correction uses the registered
-Screens workflow's exclusive comparison selector. Both review axes have no findings.
-[Evidence](../tasks/evidence/canvas-rendering.md#ci13-pending-matched-windows-comparison)
-owns identity, results, failures and allowance;
-[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns resumption and audit.
+Mac tested `ae48ef9`; audited [CI13](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39948440369)
+tested `d1d3d99`, whose intervening changes affect only workflow routing and evidence.
+The exact downloaded archive and both Windows executables pass hash verification.
+[Evidence](../tasks/evidence/canvas-rendering.md#both-target-matched-rendering-closeout)
+owns identities, mappings, original failures and limits;
+[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns recovery.
+No operation or watcher remains pending.
 
-Comparison use is local18/24, CI2/2, MacSDK3/6 and WindowsSDK0/6, with two Windows
-SDK attempts reserved. The rejected dispatch remains charged; no contingency is used.
-Earlier integration/shutdown qualification and its closed allowance remain intact.
-#36 stays open for Windows matched fidelity, physical keyboard, native presentation
-timing, smooth manipulation and whole-ticket acceptance. No PR, merge or release
-is selected. Watch registration follows this checkpoint in the same thread.
+Final comparison use is local 22/24, CI 2/2, Mac SDK 3/6 and Windows SDK 2/6;
+no contingency was used and this allowance is closed. Earlier integration/shutdown
+qualification remains intact. #36 stays open for physical keyboard, native presentation
+timing, smooth manipulation and whole-ticket acceptance. The full supported subset
+remains separate. Unrelated policy edits are local and uncommitted. No PR, merge or
+release is selected.
 
 ## Earlier canvas decision closeout
 

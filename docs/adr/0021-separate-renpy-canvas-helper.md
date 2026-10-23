@@ -1,6 +1,6 @@
 # ADR 0021: Separate Ren'Py helper for the Screens canvas
 
-- Status: Accepted design; bounded production integration and shutdown qualified; rendering qualification pending
+- Status: Accepted design; bounded production integration, shutdown and matched Help rendering qualified; native feedback/input qualification pending
 - Date: 2026-10-22
 - Authority: The user confirmed the complete interview agreement and requested this
   ADR and the update to [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
@@ -16,6 +16,11 @@ The user subsequently selected implementation of #36. The
 [proof record](../tasks/evidence/canvas-rendering.md) owns implementation mappings,
 observed differences and remaining qualification. This does not weaken the fidelity
 or feedback requirements below.
+
+The [matched comparison closeout](../tasks/evidence/canvas-rendering.md#both-target-matched-rendering-closeout)
+qualifies the accepted Help composition at both internal aspects and normal/hover
+states on both targets, with no pixel tolerance. The full supported subset, physical
+input, native presentation timing and smooth manipulation retain their separate gates.
 
 ## Execution and editing boundary
 

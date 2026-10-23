@@ -133,8 +133,10 @@ It owns the separate Ren'Py canvas helper decision, live draft feedback, partial
 failure behavior, initial 100 ms warm-update target, smooth gesture requirement and
 bounded Help proof scope. Supported layout and text wrapping must match; edge
 tolerances and startup limits remain pending evidence. [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-owns delivery and the completed interview's allowance. Representative proof and
-renderer implementation remain unselected and unqualified.
+owns delivery, the current allowance and remaining acceptance. The
+[matched Help comparison](../evidence/canvas-rendering.md#both-target-matched-rendering-closeout)
+qualifies that bounded composition on both targets without a pixel tolerance.
+Broader subset, physical input and native feedback acceptance remain separate.
 
 <a id="properties-assets-reuse-and-actions"></a>
 

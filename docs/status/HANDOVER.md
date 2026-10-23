@@ -2,49 +2,49 @@
 
 ## Active L17 integration handover
 
-The user unlocked the Mac and authorized continuing the selected
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) comparison, including
-the prepared branch push and Windows qualification. Development remains in this
-Mac checkout on `codex/phase3b-screen-designer`. Preserve unrelated unstaged policy
-edits and protected recovery below. No PR, merge, release or signing change is selected.
+The user-selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+matched-rendering comparison is complete on Mac ARM64 and Windows x64. Development
+remains in this checkout on `codex/phase3b-screen-designer`. Preserve unrelated
+unstaged policy edits and protected native recovery below. No PR, merge, release
+or signing change is selected.
 
-Mac helper02 and deliberate reference01 pass all four normal/hover samples at
-1280x720 and 1024x768 with zero RGBA differences, matching source/font/image hashes,
-geometry, GL2, window size and drawable/game ratio2. Cleanup passes. No tolerance
-or rendering correction is needed for this bounded Mac composition. The tested Mac
-candidate is `ae48ef9`; later `d1d3d99` changes only workflow routing and evidence.
-[The comparison evidence](../tasks/evidence/canvas-rendering.md#mac-matched-comparison-and-dispatch-correction)
-records exact binaries, original failures, retained captures and acceptance limits.
+[Closeout evidence](../tasks/evidence/canvas-rendering.md#both-target-matched-rendering-closeout)
+owns exact candidates, binary/artifact hashes, property mappings, original failures,
+results and limits. Mac helper02/reference01 at `ae48ef9` and Windows CI13 at
+`d1d3d991262cb088615908ac7dfc07a5f95c65d6` each pass the four normal/hover,
+1280x720/1024x768 comparisons. Product/capture/comparator code is identical between
+those candidates; intervening changes affect routing and documentation only.
+All eight samples have zero RGBA differences and matching accepted source/font/image
+hashes, state, geometry, window size and drawable scale. GL2 scale 2 and ANGLE2 scale 1
+are each compared against the same target's Ren'Py reference. This does not claim
+identical rasterization across operating systems. No tolerance is needed.
 
-[CI13 run39948440369](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39948440369),
-attempt1, tests full SHA `d1d3d991262cb088615908ac7dfc07a5f95c65d6` through
-`screens-source.yml` with only `canvas_comparison=true`, ordinal13 and the exact
-candidate. It calls `canvas-rendering.yml` at the same commit. The run was queued
-at discovery, 2026-10-23 11:46:24 UTC. The exact initial run receipt is retained locally.
-The earlier standalone dispatch12 received HTTP404 and created no run/SDK process;
-it remains charged. Both reviews and all16 selector combinations pass the correction.
+[CI13 run 39948440369](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39948440369),
+attempt 1, is complete and audited. Its same-thread watcher event is acknowledged.
+Artifact 12500005536 contains 37 files; its ZIP digest matches GitHub metadata, both
+retained Windows binaries match their hashes and x64 PE headers, and local pixel
+recomputation exactly matches CI. The downloaded archive is retained before its
+2026-10-30 11:53:46 UTC expiry. Both targets pass source/fixture/process cleanup.
+Independent terminal Standards and Spec reviews find no remaining scoped gap.
+All ignored comparison evidence lives under `matched-rendering-2026-10-23/` within
+`.toolchains/canvas-proof/`. Keep raw failures, captures and exact binaries.
 
-Register ci-watch at the end of this turn and yield under its policy. The ignored
-`matched-rendering-2026-10-23/ci13-watch-registration.json` receipt owns registration
-confirmation. On the same-thread event, acknowledge the matching watcher, audit this
-run/attempt/SHA, download and hash the exact artifact, verify retained binaries,
-source/assets, four samples, exact pixels/geometry and all cleanup. A green badge
-alone is insufficient. Continue in-scope diagnosis only within the remaining allowance.
-If registration fails, preserve this run and use manual same-thread resume.
+No process, fixture, run, watcher or capability request remains pending. The Mac
+unlock request is resolved. Final comparison use is local 22/24, CI 2/2, Mac SDK 3/6
+and Windows SDK 2/6, with no contingency. Absolute ceilings were 36, 3 and 9.
+The locked first Mac attempt and rejected standalone dispatch remain charged.
+The completed comparison allowance is closed. Historical integration allowances
+remain closed; combined use is local 142, CI 13 dispatch attempts, Mac SDK 53 and
+Windows SDK 25. No package/native editor was added by this comparison.
 
-New allocation is local24, CI2 and SDK6 per target, with absolute ceilings36,3,9.
-Use is local18, CI2, MacSDK3 and WindowsSDK0, with two Windows SDK attempts reserved
-for CI13. #36 owns this allocation; failures and preparation remain charged. No
-contingency has been consumed. Another dispatch would use the single contingency
-attempt and must be announced/recorded before dispatch. Historical local120/120,
-CI11/11, MacSDK50/50 and WindowsSDK23/24 remain closed.
-
-All selected Mac processes and fixtures are gone. The outstanding operation is CI13
-and its terminal artifact audit. Earlier integration/shutdown candidate `580d5a4`,
-signed Mac package6 and audited CI11 retain their qualified lifecycle scope. Physical
-keyboard, native presentation timing, smooth manipulation, full supported-subset and
-whole-ticket acceptance remain separate. No broader native/focus/GPU claim follows
-from matching image pixels. Keep original ignored evidence and packages intact.
+#36 remains open for physical keyboard delivery, native input-to-presentation timing,
+smooth manipulation and whole-ticket acceptance. L18-L20 retain their broader
+composition/control qualification. This completed comparison does not select those
+campaigns or renew old allowances. A next selected outcome needs its own finite
+scope and accounting under WORKFLOW. Earlier native integration/shutdown at `580d5a4`,
+Mac package 6 and CI11 retain their accepted scope and existing limits. Existing
+zoom/window-resize evidence is reused; no new native input or continuous-focus claim
+follows from these image captures.
 
 ## Earlier canvas decision closeout
 

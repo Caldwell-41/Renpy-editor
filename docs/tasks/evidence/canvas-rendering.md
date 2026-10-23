@@ -9,8 +9,10 @@ It does not qualify the full Screens subset or close B07/B08.
 
 The production Screens UI requests a revision-bound data plan through the core.
 The pinned 8.5.3 adapter starts one private Ren'Py project, supplies only the trusted
-renderer plus JSON and copied assets, and reuses its process. SDL dummy video/audio
-and software rendering avoid a game window. The runtime process-tree owner handles
+renderer plus JSON and copied assets, and reuses its process. The current adapter
+uses GL2 on Mac and ANGLE2 on Windows, with native hidden-window controls and a
+private Windows desktop. Earlier software-renderer experiments remain in the dated
+evidence below. The runtime process-tree owner handles
 Stop and cleanup independently of deliberate project execution. Project close/change
 and application shutdown join the helper before removing its directory.
 
@@ -2355,3 +2357,71 @@ claimed. The watcher event must be acknowledged and matched to this run/attempt/
 before terminal audit. Keep #36 open; Mac image fidelity does not establish Windows,
 physical keyboard, native presentation timing, smooth manipulation or full-subset
 acceptance. Unrelated policy edits remain unstaged.
+
+### Both-target matched rendering closeout
+
+The selected matched-rendering comparison is complete. The watcher event was matched
+to this thread, run 39948440369, attempt 1 and exact candidate
+`d1d3d991262cb088615908ac7dfc07a5f95c65d6`, then acknowledged. CI13 completed successfully
+at 2026-10-23 11:54:36 UTC. Only selector validation and the comparison job executed;
+closed Help/L01/capability/lifecycle jobs were intentionally skipped.
+
+The downloaded artifact 12500005536 contains 37 files. Its ZIP SHA256
+`b40df28bf45a93a867420410f5b87b5294bfe1e68a62feda451160bbb67963b4` matches GitHub
+metadata. It expires 2026-10-30 11:53:46 UTC; the exact archive and extracted copy
+are retained locally. Safe extraction checks and the privacy scan pass. The artifact
+candidate and binary manifest agree with the run. Both retained executables have
+verified hashes and Windows x64 PE headers: core test
+`64882ede8ff3fdec11e0fb9cc412f32a2dbe54b76eb2a5af5b2dd0d60d9e616f`, controller
+`a696a5cb6728feed50ffec25e95d0564c3ba338be95c11dff3785abfff4594de`.
+Pinned SDK checksum verification, types, 16 focused Screens tests and the one selected
+reference SDK test pass. The sole ignored Screens test is the separately qualified,
+opt-in four-launch lifecycle case; it is not missing comparison coverage.
+
+| Target | Backend / drawable scale | 1280x720 normal / hover RGBA differences | 1024x768 normal / hover RGBA differences |
+| --- | --- | --- | --- |
+| Mac ARM64 | GL2 / 2 | 0 / 0 | 0 / 0 |
+| Windows x64 | ANGLE2 / 1 | 0 / 0 | 0 / 0 |
+
+All eight samples have maximum channel difference zero. The local Windows
+recomparison exactly equals the retained CI report. The two hosts use identical
+accepted source, font and image hashes. On each host, helper and reference agree
+on source revision, control state, widget sizes, centered frame placement, physical
+window dimensions and drawable sampling. Both reference cleanup records require
+source preservation, no source bytecode/saves, scratch removal and project closure;
+both helper controllers exit zero and remove their fixtures. Normal and hover differ
+as expected. Matching pixels are per-target; Mac and Windows rasterization need not
+be identical to one another. No tolerance, scaling normalization or source-color
+adjustment was used.
+
+The proof qualifies the source-derived fixed/frame/vbox/Text/image/textbutton graph
+and literal properties in the retained plan. The frame is 640x360 with centered
+alignment and 24-pixel padding; vbox spacing is 12. The project font at size 24 wraps
+the literal text into a 331x87 rendered widget, within its 360-pixel width constraint.
+The image is 64x48 and the padded button 143x45. Their composition and exact pixels
+agree at both internal aspects. The earlier mapping table identifies engine classes
+and source-byte geometry; no project action or expression enters helper rendering.
+
+| Extension | Required continuation of this qualified baseline |
+| --- | --- |
+| L18 #46 | Extend the base composition and property cases; retain actual assets/fonts, text wrapping and both-target/two-aspect matched captures. This one fixture does not exhaust the supported property combinations. |
+| L19 #50 | Qualify window/hbox/grid/viewport, clipping/layering, reusable components and shared invalidation with their own matched cases. None is accepted by this fixture. |
+| L20 #54 | Qualify variable samples and remaining control states/actions. This comparison covers literal text and normal/hover textbutton appearance only; actions remain inert during editing. |
+
+Independent terminal Standards and Spec audits find no remaining gap in this selected
+comparison. Both reviewers inspected the retained identity/results and cleanup;
+Spec confirms the Mac and Windows product/capture/comparator code is identical.
+The intervening commit changes only workflow routing and documentation. Existing
+native integration, zoom and editor-window resizing results are reused with their
+original candidate/scope. This comparison is exported game-image/geometry proof,
+not new physical keyboard, native presentation, smooth-gesture, full-subset or whole
+#36 acceptance. No unresolved edge tolerance requires a user decision.
+
+Final selected use is local 22/24, CI 2/2, Mac SDK 3/6 and Windows SDK 2/6. The failed locked
+Mac attempt and rejected dispatch are included; no contingency was used. Absolute
+ceilings remained 36,3,9. This completed comparison allowance is closed. Historical
+integration use remains closed and unchanged; combined use is local 142, CI 13 dispatch
+attempts, Mac SDK 53 and Windows SDK 25. No new package or native editor was launched.
+No process, fixture, run or watcher remains pending. #36/B07/B08 remain open for
+broader acceptance. Unrelated policy edits are preserved. No PR, merge or release
+is selected.
