@@ -8,7 +8,7 @@ const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 const documentFor = (path: string, name?: string): ScreenDocument => ({ path, revision: "before", partial: false,
   screens: name ? [{ name, nodes: [{ kind: "frame", literal: null, layout: {}, span: { start: 30, end: 90 }, parentStart: null,
     properties: [{ property: "xsize", value: 640 }, { property: "ysize", value: 360 }], protected: [] }] }] : [] });
-function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable", canvas = false, movable = false) {
+function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable", canvas = false, movable = false, sibling = false) {
   const browser = new Window();
   Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, ResizeObserver: browser.ResizeObserver });
   let documents = mixed ? [documentFor("game/ui/a_styles.rpy"), documentFor("game/ui/help.rpy", "help"), documentFor("game/ui/pause.rpy", "pause")] : [documentFor("game/ui/help.rpy", "help")];
@@ -16,6 +16,7 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
     const nodes=documents[0]!.screens[0]!.nodes;
     nodes[0]!.parentStart=10; nodes[0]!.position={xalign:0.5,yalign:0.5};
     nodes.unshift({kind:"fixed",literal:null,layout:{},span:{start:10,end:90},parentStart:null,properties:[],protected:[]});
+    if(sibling) nodes.push({kind:"text",literal:"Sibling",layout:{},span:{start:100,end:120},parentStart:10,properties:[],protected:[]});
     documents.push(documentFor("game/ui/pause.rpy","pause"));
   }
   let settle: { resolve: (value: ScreenDocument) => void; reject: (error: Error) => void } | undefined;
@@ -55,10 +56,17 @@ test("aligned frame dragging previews game coordinates, cancels and retains a re
     const zoom=[...document.querySelectorAll("select")].find(e=>e.ariaLabel==="Canvas zoom")!;
     zoom.value="100"; zoom.dispatchEvent(new window.Event("change"));
     document.querySelector("img")!.dispatchEvent(new window.Event("load"));
-    const target=document.querySelector<HTMLButtonElement>('.screen-node-frame')!;
+    document.querySelector<HTMLButtonElement>('.screen-node-frame')!.click();
+    document.querySelector('img')!.dispatchEvent(new window.Event('load'));
+    const target=document.querySelector<HTMLButtonElement>('.screen-move')!;
+    assert.ok(target, 'The selected aligned frame has an explicit move handle');
     target.setPointerCapture=()=>{};target.releasePointerCapture=()=>{};target.hasPointerCapture=()=>true;
     const pointer=(type:string,x:number,y:number)=>target.dispatchEvent(new window.PointerEvent(type,{button:0,pointerId:1,clientX:x,clientY:y,bubbles:true}));
     pointer("pointerdown",400,200); pointer("pointermove",464,236);
+    assert.equal(document.querySelector<HTMLElement>('.screen-node-frame')!.style.left, '384px', 'Selection follows the pointer before helper delivery');
+    const translation=document.querySelector<HTMLImageElement>('.screen-render')!.style.transform;
+    const offsets=translation.match(/-?[\d.]+/g)!.map(Number);
+    assert.ok(Math.abs(offsets[0]!-64)<0.001 && Math.abs(offsets[1]!-40)<0.001, 'The last complete panel image follows the pointer');
     await tick(); await tick();
     const draft=h.payloads.filter(p=>p.operation==="screens.canvasRender").at(-1)!.payload!;
     assert.deepEqual(draft.positions,[{nodeStart:30,xalign:0.6,yalign:0.6111111111111112}],"64 by 40 snapped game pixels must preserve alignment coordinates");
@@ -70,7 +78,7 @@ test("aligned frame dragging previews game coordinates, cancels and retains a re
     pointer("pointerup",464,236);
     assert.equal(h.workspace.hasDraft(),false); assert.equal(h.calls.includes("screens.setPosition"),false);
     await tick(); await tick(); document.querySelector("img")!.dispatchEvent(new window.Event("load"));
-    const cancelled=document.querySelector<HTMLButtonElement>('.screen-node-frame')!;
+    const cancelled=document.querySelector<HTMLButtonElement>('.screen-move')!;
     cancelled.setPointerCapture=()=>{};cancelled.releasePointerCapture=()=>{};cancelled.hasPointerCapture=()=>true;
     cancelled.dispatchEvent(new window.PointerEvent("pointerdown",{button:0,pointerId:3,clientX:400,clientY:200,bubbles:true}));
     h.click("Cancel changes");
@@ -78,15 +86,33 @@ test("aligned frame dragging previews game coordinates, cancels and retains a re
     cancelled.dispatchEvent(new window.PointerEvent("pointerup",{pointerId:3,bubbles:true}));
     assert.equal(h.calls.includes("screens.setPosition"),false,"Cancel must release the held gesture before another pointer event");
     await tick(); await tick();document.querySelector("img")!.dispatchEvent(new window.Event("load"));
-    const next=document.querySelector<HTMLButtonElement>('.screen-node-frame')!;
+    const next=document.querySelector<HTMLButtonElement>('.screen-move')!;
     next.setPointerCapture=()=>{};next.releasePointerCapture=()=>{};next.hasPointerCapture=()=>true;
     next.dispatchEvent(new window.PointerEvent("pointerdown",{button:0,pointerId:2,clientX:400,clientY:200,bubbles:true}));
     next.dispatchEvent(new window.PointerEvent("pointermove",{pointerId:2,clientX:464,clientY:232,bubbles:true}));
     next.dispatchEvent(new window.PointerEvent("pointerup",{pointerId:2,bubbles:true}));
     assert.equal(h.calls.filter(op=>op==="screens.setPosition").length,1);
+    assert.equal(document.activeElement, next, 'Release retains focus while acceptance is pending');
+    assert.equal(next.isConnected, true);
     h.refuse(); await tick();
     assert.equal(h.workspace.hasDraft(),true); assert.match(document.querySelector('.screen-message')!.textContent!,/Draft conflict.*retained/);
     h.click("Cancel changes"); assert.equal(h.workspace.hasDraft(),false);
+  } finally {h.dispose();}
+});
+
+test("moving a frame with sibling content keeps the composite image stationary", async () => {
+  const h=harness(false,undefined,true,true,true);
+  try {
+    await tick();await tick();document.querySelector('img')!.dispatchEvent(new window.Event('load'));
+    document.querySelector<HTMLButtonElement>('.screen-node-frame')!.click();
+    document.querySelector('img')!.dispatchEvent(new window.Event('load'));
+    const handle=document.querySelector<HTMLButtonElement>('.screen-move')!;
+    handle.setPointerCapture=()=>{};handle.hasPointerCapture=()=>false;
+    handle.dispatchEvent(new window.PointerEvent('pointerdown',{button:0,pointerId:1,clientX:20,clientY:20,bubbles:true}));
+    handle.dispatchEvent(new window.PointerEvent('pointermove',{pointerId:1,clientX:36,clientY:36,bubbles:true}));
+    assert.equal(document.querySelector<HTMLImageElement>('.screen-render')!.style.transform,'');
+    assert.equal(document.querySelector<HTMLElement>('.screen-game')!.dataset.provisional,'guides');
+    assert.match(document.querySelector('.screen-canvas-status')!.textContent!,/Panel rendering is pending/);
   } finally {h.dispose();}
 });
 

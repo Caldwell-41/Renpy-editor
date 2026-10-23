@@ -54,6 +54,7 @@ export class ScreensWorkspace {
   private readonly stage = el("section", "screen-stage");
   private readonly canvasStatus = el("p", "muted screen-canvas-status");
   private frame?: CanvasFrame;
+  private provisionalMove?: { index: number; position: { xalign: number; yalign: number } };
   private canvasKey = "";
   private canvasSequence = 0;
   private canvasTimer?: ReturnType<typeof setTimeout>;
@@ -313,7 +314,7 @@ export class ScreensWorkspace {
     if (this.move) {this.cancelMove();return;}
     if (this.resize) {this.cancelResize();return;}
     if (this.creation) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.card.querySelector<HTMLButtonElement>("button")?.focus(); }
-    this.drafts.delete(this.key()); this.updateSizeControls(); this.renderCanvas(); this.note("Changes cancelled. No source was written.");
+    this.provisionalMove = undefined; this.drafts.delete(this.key()); this.updateSizeControls(); this.renderCanvas(); this.note("Changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
     const draft = this.draft(); if (!draft || this.busy) return;
@@ -340,7 +341,7 @@ export class ScreensWorkspace {
       if (this.current()) {
         const resizeFocused = document.activeElement?.classList.contains("screen-resize");
         this.focusResize = !!resizeFocused;
-        this.focusMove = !!document.activeElement?.classList.contains("screen-node");
+        this.focusMove = !!document.activeElement?.matches(".screen-node,.screen-move");
         this.updateSizeControls(); this.renderCanvas();
         if (resizeFocused) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
       }
@@ -399,7 +400,7 @@ export class ScreensWorkspace {
               catch (error) { if (this.current() && sequence === this.canvasSequence) this.invalidateCanvas(`${(error as Error).message} Drafts retained.`); }
             })(); },16);
           } else if (frame.phase === "ready" && frame.revision === this.doc?.revision && frame.image?.startsWith("data:image/png;base64,")) {
-            this.frame = frame; this.showFrame(sequence);
+            this.showFrame(sequence, frame);
             const health = async (): Promise<void> => {
               if(!this.current() || !this.panel.isConnected || sequence!==this.canvasSequence || !frame.frameId) return;
               try {
@@ -419,32 +420,45 @@ export class ScreensWorkspace {
   }
   private invalidateCanvas(message: string, resetKey = true): void {
     this.canvasSequence++; clearTimeout(this.canvasTimer); this.geometryCurrent = false;
-    if (resetKey) this.canvasKey = "";
+    if (resetKey) {
+      this.canvasKey = ""; this.provisionalMove = undefined;
+      const image = this.canvas.querySelector<HTMLImageElement>(".screen-render");
+      if (image) image.style.transform = "";
+      delete this.canvas.dataset.provisional;
+    }
     if (resetKey && this.resize) {
       const {handle,pointer}=this.resize; this.resize=undefined;
       if(handle.hasPointerCapture(pointer)) handle.releasePointerCapture(pointer);
       this.updateSizeControls();
     }
     if (resetKey && this.move) this.releaseMove();
-    if (!this.resize && !this.move) this.canvas.querySelectorAll(".screen-node,.screen-selection").forEach(e => e.remove());
+    if (!this.resize && !this.move && !this.provisionalMove) this.canvas.querySelectorAll(".screen-node,.screen-selection").forEach(e => e.remove());
     this.canvas.dataset.stale = "true"; this.canvasStatus.textContent = message;
+    if (!resetKey) this.showMovement();
   }
-  private showFrame(sequence = this.canvasSequence): void {
-    const frame = this.frame; if (!frame?.image) return;
-    if (!this.resize && !this.move) this.canvas.replaceChildren(); this.canvas.dataset.renderer = "renpy";
+  private showFrame(sequence = this.canvasSequence, frame = this.frame): void {
+    if (!frame?.image) return;
+    this.canvas.dataset.renderer = "renpy";
     const image = this.canvas.querySelector<HTMLImageElement>(".screen-render") ?? el("img", "screen-render");
     image.setAttribute("aria-label", "Ren'Py screen canvas"); image.alt = "Inert screen rendering";
     image.dataset.buttonState=frame.buttonState ?? "";
     image.onload = () => {
       if (!this.current() || sequence !== this.canvasSequence) return;
+      this.frame = frame;
+      if (!this.move && !this.draft() && !this.busy) this.provisionalMove = undefined;
+      image.style.transform = ""; delete this.canvas.dataset.provisional;
       this.geometryCurrent = true; this.canvas.dataset.stale = "false"; this.canvasStatus.textContent = "Ren'Py canvas. Selection guides are editor overlays.";
+      const present = new Set((frame.geometry ?? []).map(g => this.nodes().findIndex(n => n.span.start === g.start)));
+      this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => {
+        if (!present.has(Number(target.dataset.index))) target.remove();
+      });
       for (const geometry of frame.geometry ?? []) {
         const index = this.nodes().findIndex(n => n.span.start === geometry.start);
         const node = this.nodes()[index]; if (!node || node.kind === "screen") continue;
         const target = this.canvas.querySelector<HTMLButtonElement>(`[data-index="${index}"]`) ?? button("",() => this.choose(index,true),`screen-node screen-node-${node.kind}`);
         target.ariaLabel = `Select ${node.literal ?? names[node.kind] ?? node.kind}`;
         target.dataset.index = String(index); target.ariaPressed = String(index === this.selected);
-        if (!this.move) this.bindMovement(target, index);
+        if (!this.move) this.bindMovement(target, index, false);
         for (const [key,value] of Object.entries({left:geometry.x,top:geometry.y,width:geometry.width,height:geometry.height})) target.style.setProperty(key,`${value*this.scale}px`);
         // Reattaching a captured target makes the browser cancel the gesture.
         if (target.parentElement !== this.canvas) this.canvas.append(target);
@@ -455,30 +469,33 @@ export class ScreensWorkspace {
       } else {
         this.positionSelection();
         if(this.focusResize && document.activeElement===document.body) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
-        if(this.focusMove && document.activeElement===document.body) this.canvas.querySelector<HTMLElement>(`[data-index="${this.selected}"]`)?.focus();
+        if(this.focusMove && document.activeElement===document.body) this.canvas.querySelector<HTMLElement>(".screen-move")?.focus();
         this.focusResize=false;
         this.focusMove=false;
       }
+      this.showMovement();
+      this.positionMoveHandle();
     };
     image.onerror=() => {if(this.current() && sequence===this.canvasSequence) this.invalidateCanvas("Canvas image unavailable. Drafts retained.");};
-    image.src = frame.image; this.canvas.append(image);
+    image.src = frame.image; if (image.parentElement !== this.canvas) this.canvas.prepend(image);
   }
-  private bindMovement(target: HTMLButtonElement, index: number): void {
+  private bindMovement(target: HTMLButtonElement, index: number, pointer = true): void {
     const node=this.nodes()[index];
     const geometry=this.frame?.geometry?.find(g=>g.start===node?.span.start);
     const parent=this.frame?.geometry?.find(g=>g.start===node?.parentStart);
     if (!node?.position || !geometry || !parent || size(node,"xsize")===undefined || size(node,"ysize")===undefined) return;
     const rangeX=parent.width-geometry.width,rangeY=parent.height-geometry.height;
     if (rangeX<=0 || rangeY<=0) return;
-    target.style.touchAction="none";
-    target.title="Drag to move this aligned frame. Arrows move one game pixel, Shift by eight. Escape cancels.";
+    target.title="Arrows move one game pixel, Shift by eight. Escape cancels.";
+    if (pointer) {
+    target.title="Drag to move. Arrows move one game pixel, Shift by eight. Escape cancels.";
     target.onpointerdown=event=>{
       if(event.button!==0 || !this.geometryCurrent || this.busy || this.hasDraft()) return;
-      this.selected=index;this.step="design";this.renderCard();this.positionSelection();
+      this.selected=index;this.step="design";this.renderCard();
       this.ensureDraft().position={...node.position!};
       this.updateSizeControls();
       this.move={...node.position!,x:event.clientX,y:event.clientY,rangeX,rangeY,scale:this.scale,pointer:event.pointerId,target};
-      target.setPointerCapture(event.pointerId);target.focus();event.preventDefault();
+      this.canvas.dataset.dragging="true";target.setPointerCapture(event.pointerId);target.focus();event.preventDefault();
     };
     target.onpointermove=event=>{
       const move=this.move;if(!move || event.pointerId!==move.pointer) return;
@@ -486,42 +503,92 @@ export class ScreensWorkspace {
         xalign:Math.max(0,Math.min(1,move.xalign+Math.round((event.clientX-move.x)/move.scale/8)*8/move.rangeX)),
         yalign:Math.max(0,Math.min(1,move.yalign+Math.round((event.clientY-move.y)/move.scale/8)*8/move.rangeY)),
       };
-      this.renderCanvas();
+      this.provisionalMove={index,position:{...this.draft()!.position!}};
+      this.showMovement(); this.renderCanvas();
     };
     target.onpointerup=event=>{
       if(!this.move || event.pointerId!==this.move.pointer) return;
       const position=this.draft()?.position,move=this.move;
       this.releaseMove();
-      if(position?.xalign===move.xalign && position?.yalign===move.yalign) {this.drafts.delete(this.key());this.updateSizeControls();return;}
+      if(position?.xalign===move.xalign && position?.yalign===move.yalign) {this.provisionalMove=undefined;this.drafts.delete(this.key());this.updateSizeControls();this.renderCanvas();return;}
       void this.apply();
     };
     target.onpointercancel=()=>this.cancelMove();
     target.onlostpointercapture=()=>{if(this.move)this.cancelMove();};
+    }
     target.onkeydown=event=>{
       if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key) || !this.geometryCurrent || this.busy || this.hasDraft())return;
       event.preventDefault();this.selected=index;this.step="design";this.renderCard();
       const position={...node.position!},axis=event.key==="ArrowLeft" || event.key==="ArrowRight" ? "xalign":"yalign";
       position[axis]=Math.max(0,Math.min(1,position[axis]+(event.shiftKey?8:1)*(event.key==="ArrowLeft" || event.key==="ArrowUp"?-1:1)/(axis==="xalign"?rangeX:rangeY)));
-      this.ensureDraft().position=position;void this.apply();
+      this.ensureDraft().position=position;this.provisionalMove={index,position};this.showMovement();void this.apply();
     };
   }
+  private showMovement(): void {
+    const provisional=this.provisionalMove, frame=this.frame;
+    if (!provisional || !frame?.geometry) return;
+    const nodes=this.nodes(), node=nodes[provisional.index];
+    const geometry=frame.geometry.find(g=>g.start===node?.span.start);
+    const parent=frame.geometry.find(g=>g.start===node?.parentStart);
+    if (!node || !geometry || !parent) return;
+    const dx=parent.x+(parent.width-geometry.width)*provisional.position.xalign-geometry.x;
+    const dy=parent.y+(parent.height-geometry.height)*provisional.position.yalign-geometry.y;
+    const descendants=new Set([node.span.start]);
+    for (const candidate of nodes) if (candidate.parentStart!==null && descendants.has(candidate.parentStart)) descendants.add(candidate.span.start);
+    const ancestors=new Set<number>();
+    let ancestor=nodes.find(n=>n.span.start===node.parentStart);
+    while(ancestor && ["screen","fixed"].includes(ancestor.kind)) { ancestors.add(ancestor.span.start); ancestor=nodes.find(n=>n.span.start===ancestor!.parentStart); }
+    // A composite PNG can move as one piece only when all its painted content
+    // belongs to this subtree. Clipped pixels cannot be recovered by translation.
+    const isolated=nodes.every(n=>descendants.has(n.span.start) || ancestors.has(n.span.start)) &&
+      frame.geometry.filter(g=>descendants.has(g.start)).every(g=>g.x>=0 && g.y>=0 && g.x+g.width<=this.gameResolution.width && g.y+g.height<=this.gameResolution.height);
+    const image=this.canvas.querySelector<HTMLImageElement>(".screen-render");
+    if (image) image.style.transform=isolated ? `translate(${dx*this.scale}px, ${dy*this.scale}px)` : "";
+    this.canvas.dataset.provisional=isolated ? "panel" : "guides";
+    this.canvasStatus.textContent=isolated ? "Provisional move. Waiting for Ren'Py confirmation." : "Provisional guides. Panel rendering is pending.";
+    for (const g of frame.geometry) {
+      if (!descendants.has(g.start)) continue;
+      const index=nodes.findIndex(n=>n.span.start===g.start);
+      const target=this.canvas.querySelector<HTMLElement>(`[data-index="${index}"].screen-node`);
+      if(target) { target.style.left=`${(g.x+dx)*this.scale}px`; target.style.top=`${(g.y+dy)*this.scale}px`; }
+    }
+    const target=this.canvas.querySelector<HTMLElement>(`[data-index="${provisional.index}"].screen-node`);
+    const outline=this.canvas.querySelector<HTMLElement>(".screen-selection");
+    if(target && outline) for(const key of ["left","top","width","height"] as const) outline.style[key]=target.style[key];
+    this.positionMoveHandle();
+  }
+  private positionMoveHandle(): void {
+    const outline=this.canvas.querySelector<HTMLElement>(".screen-selection"), handle=outline?.querySelector<HTMLElement>(".screen-move");
+    if(!outline || !handle) return;
+    const x=parseFloat(outline.style.left), y=parseFloat(outline.style.top);
+    handle.style.left=`${Math.max(-x,Math.min(0,this.gameResolution.width*this.scale-x-handle.offsetWidth))}px`;
+    handle.style.top=`${y>=34 ? -34 : Math.max(-y,Math.min(4,this.gameResolution.height*this.scale-y-30))}px`;
+  }
   private releaseMove(): void {
-    const move=this.move;this.move=undefined;
+    const move=this.move;this.move=undefined; delete this.canvas.dataset.dragging;
     if(move?.target.hasPointerCapture(move.pointer))move.target.releasePointerCapture(move.pointer);
   }
   private cancelMove(): void {
     if(!this.move)return;
-    this.releaseMove();this.drafts.delete(this.key());this.render();this.note("Move cancelled. No source was written.");
+    this.releaseMove();this.provisionalMove=undefined;this.drafts.delete(this.key());this.render();this.note("Move cancelled. No source was written.");
   }
   private positionSelection(): void {
-    this.canvas.querySelector(".screen-selection")?.remove();
     const node = this.nodes()[this.selected], target = this.canvas.querySelector<HTMLElement>(`[data-index="${this.selected}"]`);
-    if (!this.geometryCurrent || !node || !target || size(node, "xsize") === undefined || size(node, "ysize") === undefined) return;
-    const outline = el("div", "screen-selection");
+    if (!this.geometryCurrent || !node || !target || size(node, "xsize") === undefined || size(node, "ysize") === undefined) { this.canvas.querySelector(".screen-selection")?.remove(); return; }
+    let outline = this.canvas.querySelector<HTMLElement>(".screen-selection");
+    if (outline?.dataset.index !== String(this.selected)) { outline?.remove(); outline = null; }
+    if (outline) {
+      for (const property of ["left", "top", "width", "height"] as const) outline.style[property] = target.style[property];
+      const moveHandle=outline.querySelector<HTMLButtonElement>(".screen-move");
+      if(moveHandle && !this.move) this.bindMovement(moveHandle,this.selected);
+      this.positionMoveHandle(); return;
+    }
+    outline = el("div", "screen-selection"); outline.dataset.index=String(this.selected);
     for (const property of ["left", "top", "width", "height"] as const) outline.style[property] = target.style[property];
     const handle = button("", () => {}, "screen-resize"); handle.ariaLabel = "Resize selected element"; handle.title = "Drag to resize. Arrows resize by one pixel, Shift by eight. Escape cancels.";
     handle.onpointerdown = event => {
-      if (event.button !== 0 || this.busy || this.hasDraft()) { this.note("Apply or cancel unfinished changes before resizing.", true); return; }
+      const node=this.nodes()[this.selected]!;
+      if (event.button !== 0 || !this.geometryCurrent || this.busy || this.hasDraft()) { this.note("Apply or cancel unfinished changes before resizing.", true); return; }
       const frame = node.kind === "frame", x = frame ? node.layout.xalign ?? 0 : 0, y = frame ? node.layout.yalign ?? 0 : 0;
       if (x >= 1 || y >= 1) { this.note("This anchor needs numeric editing in this slice.", true); return; }
       this.ensureDraft(); this.resize = { width: size(node, "xsize")!, height: size(node, "ysize")!, x: event.clientX, y: event.clientY, pointer: event.pointerId, handle };
@@ -529,6 +596,7 @@ export class ScreensWorkspace {
     };
     handle.onpointermove = event => {
       const gesture = this.resize; if (!gesture) return;
+      const node=this.nodes()[this.selected]!;
       const draft = this.draft()!, ax = node.kind === "frame" ? node.layout.xalign ?? 0 : 0, ay = node.kind === "frame" ? node.layout.yalign ?? 0 : 0;
       draft.width = String(Math.max(24, Math.min(16384, Math.round((gesture.width + (event.clientX - gesture.x) / this.scale / (1 - ax)) / 8) * 8)));
       draft.height = String(Math.max(24, Math.min(16384, Math.round((gesture.height + (event.clientY - gesture.y) / this.scale / (1 - ay)) / 8) * 8)));
@@ -542,13 +610,19 @@ export class ScreensWorkspace {
     handle.onpointercancel = () => this.cancelResize();
     handle.onlostpointercapture = () => { if (this.resize) this.cancelResize(); };
     handle.onkeydown = event => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) || this.busy) return;
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) || !this.geometryCurrent || this.busy) return;
       event.preventDefault(); if (this.hasDraft()) { this.note("Apply or cancel unfinished changes before resizing.", true); return; }
       const draft = this.ensureDraft(), key = event.key === "ArrowLeft" || event.key === "ArrowRight" ? "width" : "height";
       const amount = (event.shiftKey ? 8 : 1) * (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1);
       draft[key] = String(Math.max(1, Math.min(16384, Number(draft[key]) + amount))); void this.apply();
     };
-    outline.append(handle); this.canvas.append(outline);
+    if (node.position) {
+      const moveHandle=button("Move frame",()=>{},"screen-move");
+      const moveIcon=icon("plus");
+      moveIcon.querySelector("path")!.setAttribute("d","M12 3v18M3 12h18m-12-6 3-3 3 3m-6 12 3 3 3-3M6 9l-3 3 3 3m12-6 3 3-3 3");
+      moveHandle.prepend(moveIcon); this.bindMovement(moveHandle,this.selected); outline.append(moveHandle);
+    }
+    outline.append(handle); this.canvas.append(outline); this.positionMoveHandle();
   }
   private cancelResize(): void {
     if (!this.resize) return;

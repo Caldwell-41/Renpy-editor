@@ -22,7 +22,7 @@ let movementImageGate,releaseMovementImage;
 try {
   server=await create();
   assert.equal((await child.next()).ready,true);
-  await server.listen();browser=await chromium.launch({channel:'chrome',headless:true});page=await browser.newPage({viewport:{width:1280,height:900}});
+  await server.listen();browser=await chromium.launch({channel:'chrome',headless:true});page=await browser.newPage({viewport:{width:1280,height:900}});await page.routeWebSocket('**',()=>{});
   await page.exposeBinding('canvasProbeRpc',async(_,request)=>{
     if(request.operation==='probe.canvasInputStage'){current=request.payload;stages.push(current);return {ok:true,value:{}};}
     if(request.operation==='probe.runtimeUiReport'){report=request.payload;return {ok:true,value:{}};}
@@ -55,12 +55,27 @@ try {
   await wait('resize-arrow-right');await page.keyboard.press('ArrowRight');
   await wait('move-arrow-right');await page.keyboard.press('ArrowRight');
   // Boundary mode isolates the oracle; the default retains normal image delivery.
-  await wait('drag-frame');let r=current.rect;
+  await wait('drag-frame');
+  for(const [name,width,height] of [['wide',1100,720],['compact',560,640]]) {
+    await page.setViewportSize({width,height});
+    await page.getByLabel('Canvas zoom',{exact:true}).selectOption('fit');
+    await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+    const handle=page.getByRole('button',{name:'Move frame',exact:true});
+    assert.equal((await handle.boundingBox()).height,30);
+    await page.screenshot({path:join(output,`handle-${name}-ready.png`)});
+  }
+  await page.setViewportSize({width:1280,height:900});
+  await page.getByLabel('Canvas zoom',{exact:true}).selectOption('100');
+  await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false');
+  let r=await page.locator('.screen-move').boundingBox();
+  const panel=await page.locator('.screen-node-frame').boundingBox();
   if(boundary) movementImageGate=new Promise(resolve=>{releaseMovementImage=resolve;});
-  const start=boundary==='min' ? {x:r.x+r.width-12,y:r.y+r.height-12} : {x:r.x+8,y:r.y+8};
-  const end=boundary==='min' ? {x:r.x-r.width/2+8,y:r.y-r.height/2+8}
-    : boundary==='max' ? {x:r.x+r.width-8,y:r.y+r.height-8} : {x:r.x+48,y:r.y+32};
-  await page.mouse.move(start.x,start.y);await page.mouse.down();await page.mouse.move(end.x,end.y,{steps:12});await page.mouse.up();
+  const start={x:r.x+r.width/2,y:r.y+r.height/2};
+  const end=boundary==='min' ? {x:start.x-panel.width,y:start.y-panel.height}
+    : boundary==='max' ? {x:start.x+panel.width,y:start.y+panel.height} : {x:start.x+40,y:start.y+24};
+  await page.mouse.move(start.x,start.y);await page.mouse.down();await page.mouse.move(end.x,end.y,{steps:12});
+  assert.equal(await page.locator('.screen-game').getAttribute('data-provisional'),'panel');
+  await page.screenshot({path:join(output,'handle-held.png')});await page.mouse.up();
   releaseMovementImage?.();movementImageGate=undefined;
   await page.mouse.move(20,20,{steps:4});
   await wait('drag-resize');r=current.rect;await page.mouse.move(r.x+r.width/2,r.y+r.height/2);await page.mouse.down();await page.mouse.move(r.x+30,r.y+20,{steps:12});await page.mouse.up();await page.mouse.move(20,20,{steps:4});

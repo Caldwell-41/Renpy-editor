@@ -39,7 +39,7 @@
     "keyboard-undo":"4/8: Undo is focused. Press Enter to restore width 640.",
     "resize-arrow-right":"5/8: The resize handle is focused. Press Right Arrow once.",
     "move-arrow-right":"6/8: The Help frame is focused. Press Right Arrow once.",
-    "drag-frame":"7/8: Drag from the blank top-left inside the Help panel a short distance right and down. Stay inside the canvas; use no modifier keys.",
+    "drag-frame":"7/8: Drag the Move frame handle a short distance right and down. Stay inside the canvas; use no modifier keys.",
     "drag-resize":"8/8: Drag the small bottom-right resize handle a short distance right and down. Stay inside the canvas; use no modifier keys.",
   };
   const guide=document.createElement("div"); guide.setAttribute("role","status");
@@ -133,7 +133,7 @@
     await accepted(original.replace("xalign 0.5", "xalign 0.5015625")); checkGeometry(321,180,640,360); rows.push({stage, passed:true});
     find("Undo").click(); await restored();
     assert((await source()).text === original, "Move Undo failed");
-    await announce("drag-frame", frame());
+    await announce("drag-frame", document.querySelector(".screen-move"));
     await until(() => trusted("pointerup") && fresh() && document.querySelector('.screen-message')?.textContent.startsWith("Position saved"));
     assert(trusted("pointerdown") && events.filter(e => e.stage === stage && e.type === "pointermove" && e.trusted).length >= 3, "Drag path missing");
     const movement=await gestureResult(false); rows.push({stage, passed:true, geometry:movement});
