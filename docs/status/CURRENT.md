@@ -8,17 +8,17 @@ Signed Mac package 4 passes signature and installer-content verification. Types,
 229 frontend tests and the corrected SDK 28 controller rehearsal pass. Both
 independent review axes report zero actionable findings.
 
-Native attempts 4-6 each pass all six keyboard stages; attempt 6 uses physical user
-input. Automated drags fail the path-sampling requirement. The physical drag exposes
-a last-bit numeric mismatch in the probe, now corrected and rehearsed through all
-eight controller stages. Physical drag/resize acceptance is still pending. A fresh
-one-use manual 7 launcher is ready for the corrected package. Numerical presentation,
-perceived smoothness, Windows and whole-ticket acceptance remain pending.
+Manual 7 passes all eight physical-input stages in signed Mac package 4, including
+move-handle dragging and anchor-aware resizing. Exact source restoration, admitted
+source/helper geometry, cooperative helper exit and all cleanup owners pass. The
+user reports that the earlier manual 6 move followed smoothly. The retry's perceived
+smoothness report, numerical presentation, Windows and whole-ticket acceptance
+remain pending. Original failed attempts remain recorded.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#signed-mac-handle-qualification-2026-10-24)
+[Evidence](../tasks/evidence/canvas-rendering.md#manual-7-physical-input-pass-2026-10-24)
 owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
-recovery. The new supplement is 16 local batches plus 8 contingency. Cumulative use
-is local 64/70, absolute ceiling 78; CI 0/4; Mac packages 4/4, native 6/9, SDK 28/36;
+recovery. The supplement is 16 local batches plus 8 contingency. Cumulative use
+is local 66/70, absolute ceiling 78; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
 Windows zero. No process or watcher remains pending. Code is local only; publication
 remains `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
 

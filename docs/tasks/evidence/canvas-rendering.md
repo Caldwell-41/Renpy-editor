@@ -3038,3 +3038,49 @@ files and whitespace checks pass. No Loomlight or Ren'Py process remains. CURREN
 HANDOVER retain separate outstanding phase acceptance and protected recovery despite
 their soft size limits. Manual 7 remains ready for the user's availability; no new
 launch is charged while waiting. All work and records in this continuation remain local.
+
+
+### Manual 7 physical-input pass, 2026-10-24
+
+The user reports that manual 6's first move-handle drag followed smoothly and confirms
+availability for the corrected retry. Manual 7 uses signed package 4 at `68f95c3`,
+with unchanged product code at `8527998`. Its one-use launcher rechecks the executable
+hash, strict signature, runner hash, unlocked console and absence of another editor.
+It charges native attempt 7, SDK 29 and local batch 65 before launch. The agent sends
+no UI input during this run; the user performs the eight guided physical-input stages.
+
+All eight stages pass: draft width 760 without source writes, Escape restoration,
+Enter acceptance at width 752, keyboard Undo, one-pixel arrow resize and movement,
+move-handle dragging and anchor-aware resizing. The move records 122 pointer moves
+and snaps to (592,324), size 640x360. The resize records 47 pointer moves and accepts
+816x512 at (232,104). Source admission preserves every other byte and checks the
+bounded alignment roundoff described above. Helper geometry agrees exactly with
+the admitted source. Each gesture is undone; final source matches the original bytes.
+
+The renderer admission check passes. The editor exits with code 0 after 121.482
+seconds, including user preparation time. The helper reports cooperative shutdown
+with code 0. Credentials, host and request cleanup owners all pass. No fallback kill,
+remaining scratch/canvas jobs, source bytecode or source saves are recorded. A terminal
+process check finds no Loomlight or Ren'Py process. Receipts, restored source and the
+separate native-route audit remain in `manual-07` under the existing ignored evidence
+root. The executable hash still matches package 4's recorded identity.
+
+The raw renderer report correctly retains `nativeInputQualified: false`,
+`warmPresentationProof: false` and `perceivedSmoothnessProof: false`. The independent
+`external-audit.json` records the signed native app, explicit user readiness and
+physical-input route, which establish this bounded Mac functional pass. They do not
+measure presentation latency or replace the user's visual judgement. The manual 6
+smoothness report applies to movement only; feedback for the retry's movement and
+resizing is requested separately. Windows manipulation and numerical presentation
+remain pending, as does whole-ticket acceptance. No recorder or permissions changed.
+
+Batch 66 covers the terminal audit, user observation, evidence and recovery update,
+focused validation and local commit. Cumulative use is local 66/70 with absolute
+ceiling 78; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Contingency
+remains unused in this supplement. No operation or watcher remains pending. The
+manual 7 launcher is consumed and must not be replayed. No remote publication occurs.
+
+Repository validation passes for 905 files, and scoped whitespace checks pass. No
+product or test code changed during this physical-input retry, so the earlier 229-test
+result remains applicable without repeating the frontend suite. Unrelated policy
+edits and protected recovery remain outside this commit.

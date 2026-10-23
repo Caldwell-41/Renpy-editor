@@ -17,19 +17,22 @@ exactly, checks geometry exactly against admitted source, and restores source ex
 This grants no image-pixel tolerance or native-presentation acceptance.
 
 Mac package 4 contains `68f95c3` and passes strict signature and installer-content
-verification. Native attempts 4-6 pass six keyboard stages, with physical input in
-manual 6. Automated drags lack enough sampled moves; manual 6 supplies the path but
-hits the now-corrected rounding oracle. Physical drag/resize remains pending. The
-one-use `start-manual-check-07.py` under the evidence directory is ready, unlaunched
-and uncharged. It validates package 4, the runner, unlocked console and process
-absence, then charges native 7, SDK 29 and one local batch. Run it with the supported
-Python after sourcing `enter-macos.sh`, only when the user is available. After each
-physical drag, wait for the next instruction. Preserve original failures; never
-replay earlier launchers or use older packages to qualify the corrected probe.
+verification. Manual 7 passes all eight physical-input stages, including dragging
+the move handle to (592,324) and resizing to 816x512 at (232,104). Both operations
+undo to byte-identical original source. Helper exit is cooperative with code 0;
+all three cleanup owners pass, with no fallback or process/disk leftovers. The raw
+renderer report retains its false native/presentation/smoothness qualification flags;
+`manual-07/external-audit.json` separately records the verified signed native app and
+physical-user route. [Manual 7 evidence](../tasks/evidence/canvas-rendering.md#manual-7-physical-input-pass-2026-10-24)
+owns that distinction. The user reports manual 6's first move followed smoothly;
+the retry's perceived-smoothness report is pending. Its one-use launcher is consumed.
+Preserve original failures and never replay earlier launchers. A later native run
+needs its own fresh reservation and a named unresolved case; this functional pass
+alone does not justify repeating the sequence.
 
 The user selected 16 additional local batches plus 8 contingency. Nominal cumulative
 bound is 70, absolute ceiling 78; announce contingency before batch 71. Current use
-is local 64, CI 0; Mac packages 4/4, native 6/9, SDK 28/36; Windows zero. Remaining
+is local 66, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
 Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
 acceptance remain pending. No recorder or permission change, push, PR, merge or
