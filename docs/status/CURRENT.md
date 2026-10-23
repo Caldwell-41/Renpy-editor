@@ -1,34 +1,25 @@
 # Current status
 
-## L17 bounded hidden GPU-helper proof passes on Mac
+## L17 GPU production integration selected
 
-2026-10-23: The user approved six local batches and two Mac SDK launches for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36), plus publication of
-the four reviewed commits and #36/#29/#22 updates. Publication through `0bc6954`
-and the three exact issue payloads is verified. The earlier publication blocker
-is resolved. [The retest evidence](../tasks/evidence/canvas-rendering.md#guarded-gpu-helper-retest-and-publication-2026-10-23)
-owns exact results, failures and limits.
+2026-10-23: The user selected production GPU-helper integration and graceful
+shutdown for [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36), approving
+24 more local batches, 12 Mac SDK launches, three CI dispatches and four Windows
+SDK launches. #36 records the supplement; historical use remains charged.
 
-SDK33 identifies the native refusal and exits without a visible window. The
-corrected policy check lets SDK34 produce four GPU helper frames. Every PNG is
-byte-identical to the matched GL2 source-screen reference at both aspects and
-normal/hover states. External observation finds no visible helper window or
-foreground application change; native frame receipts report no key/activation event.
-This proves the bounded Mac prototype's observed hidden/focus behavior.
+The guarded Mac prototype and its review are published through `aded9c8`. Its four
+matched GL2 images and bounded hidden/focus observation pass; it needed forced
+termination. Production still uses the software helper. The new Windows probe at
+`848d50f` tests a private desktop, GL2 frames, cooperative stop and safe refusal
+before production integration. Portable generation/admission checks, typecheck and
+repository validation pass. Windows execution has not started.
 
-The production helper is unchanged. The native guard is Mac-only prototype code,
-not a shipping adapter. SDK34 requires forced process termination, so graceful
-shutdown is unqualified. Windows fidelity, packaged native focus, physical keyboard,
-input-to-visible timing, startup acceptance and smooth manipulation remain open.
-Keep #36/B07/B08 and full 3B acceptance open. No tolerance or weaker gate is accepted.
-
-Final use is 82/82 local batches, 34/34 Mac SDK processes and 6/6 CI. Mac packages/
-native editor remain 3/5 and 3/7; Windows packages/native/SDK remain 1/5, 1/7 and
-10/20. Helper/observer processes and game fixtures are removed; no operation/watch
-remains. The new retest record is committed locally; the approved four preceding
-commits are published. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns the
-remaining production/target gates and allocation boundary. Preserve unrelated policy
-edits and protected recovery below.
+[Integration evidence](../tasks/evidence/canvas-rendering.md#gpu-production-integration-and-shutdown-2026-10-23)
+owns the current candidate, review, pending operation and cumulative usage.
+[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns continuation. Windows
+capability and production lifecycle remain unproved. Native timing, physical keyboard,
+smooth manipulation and whole-ticket/3B acceptance remain open. No tolerance or weaker
+gate is accepted. Preserve unrelated policy edits and protected recovery below.
 
 ## Earlier canvas decision closeout
 

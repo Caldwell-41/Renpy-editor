@@ -1,59 +1,46 @@
 # Current outcome handover
 
-## Active L17 proof handover
+## Active L17 integration handover
 
-The user approved six local batches and two Mac SDK launches for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)'s hidden GPU-helper
-retest on 2026-10-23, with no visible window or keyboard focus theft. Development
-remains on Mac ARM64, `codex/phase3b-screen-designer`. The four approved commits
-`6ad37ce`, `d34676f`, `ef2a2bd` and `0bc6954` are published; exact remote SHA is
-`0bc69547ccc14ab9f8e74843fe0cc0bb4edc4d5e`. Approved #36/#29/#22 payloads are
-published/read back and #36 records the retry allowance. The previous publication
-blocker is resolved. This new retest record remains local; production code is unchanged.
+The user selected production GPU-helper integration and graceful shutdown for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) on 2026-10-23, approving
+the pending handoff supplement. Development stays on Mac ARM64 in
+`codex/phase3b-screen-designer`. The earlier guarded Mac prototype and review are
+published at `aded9c805e503415159942b31eef5a2f1f012ac2`.
 
-[The guarded retest](../tasks/evidence/canvas-rendering.md#guarded-gpu-helper-retest-and-publication-2026-10-23)
-owns SDK33's safe refusal, the native check correction, SDK34's matched frames,
-external observation and forced cleanup. SDK33 refuses at activation-policy-check
-although the effective policy is prohibited (2); the corrected bootstrap exits 72
-without Ren'Py error UI. SDK34 checks the effective state and installs the process-
-local native ordering/key-window guard. The private helper produces four GL2 PNGs
-at 1280x720/1024x768 and normal/hover. All pixels and PNG hashes match the retained
-source-screen GL2 reference. It uses the production source-derived builder/request
-loop with prototype native policy/export changes, not the production adapter.
+The first integration checkpoint is an early Windows capability probe, committed
+through `848d50f`. Production remains unchanged. The probe starts the data-only
+GL2 helper on a private desktop that is never switched into view, observes the
+input desktop's foreground/focus and requires four frames at two aspects, a stop
+acknowledgment, exit 0 and no forced cleanup. A second SDK launch requires the
+selected bootstrap-refusal reason and exit 72. Native resources and fixtures must
+close. This does not qualify production, matched fidelity or physical keyboard input.
 
-External SDK34 observation has 703 samples, no visible helper window, no foreground
-change/activation event and no inventory failure. At each frame the helper reports
-one window, one blocked ordering request, zero visible/key windows or key/activation
-events, inactive state and prohibited policy. This establishes observed hidden/focus
-behavior for the bounded Mac prototype, without physical-keyboard/continuous-input
-or packaged Loomlight qualification. SDK34 needs SIGKILL after SIGTERM's five-second
-deadline; graceful shutdown remains unqualified. The owner removes process groups,
-observers and game/bytecode/saves. No operation/watch or owned helper remains.
+[Integration evidence](../tasks/evidence/canvas-rendering.md#gpu-production-integration-and-shutdown-2026-10-23)
+owns detailed checks, review and the operation record. Windows CI has not yet been
+dispatched. After review, publish the scoped candidate and dispatch ordinal 7, then
+register ci-watch and resume this same chat for terminal artifact audit. No PR,
+merge, release, signing-policy or broader renderer requirement change is selected.
 
-The native method replacement depends on Mac/private SDL classes and is not a
-qualified shipping adapter. Production renderer/helper code is unchanged. Windows
-rendering/focus, native input-to-visible timing, physical input, startup acceptance,
-real helper dragging/smoothness and production lifecycle remain missing. Earlier
-[producer diagnosis](../tasks/evidence/canvas-rendering.md#matched-producer-diagnosis-2026-10-23)
-and the original failed SDK32 remain retained; no tolerance, product Retina-text
-change, source-color compensation or weaker requirement is accepted. Keep #36/B07/
-B08 and full 3B open. Movement `7729ccf`/`a91be99` keeps its earlier controller/source
-proof; CI6 at `571dfa9` does not qualify later movement or the GPU prototype.
+Cumulative ceilings are local 106, Mac SDK 46, CI 9 and Windows SDK 24. Use before
+dispatch is local 87, Mac SDK 34, CI 6 and Windows SDK 10. Package/native ceilings
+remain five/seven per target; Mac use is three/three and Windows use one/one.
+CI7 reserves two Windows SDK launches. Failures and retries stay charged, with no
+new contingency. #36 owns the live allowance; evidence owns detailed batches.
 
-Final use is 82/82 local batches, 34/34 Mac SDK processes and 6/6 CI. Mac package/
-native editor use remains 3/5 and 3/7; Windows package/native/SDK use remains 1/5,
-1/7 and 10/20. Batches 77-82 cover publication/preparation, SDK33, correction/SDK34,
-verification/evidence, independent review/corrections and final closeout. No allowance
-reset or new contingency applies. Raw evidence, failed/corrected native sources and
-binaries remain ignored under `.toolchains/canvas-proof/hidden-gpu-2026-10-23/`.
-No package or native editor launch ran. Protected recovery and unrelated policy
-work remain intact. No PR, merge or release is selected.
+Once Windows capability is established, integrate the pinned GPU adapter and
+approved packaging route, then prove cooperative stop before forced cleanup at
+project close/change, application quit and restart. Preserve startup-failure focus
+retention, inert source-derived inputs, SDK checks and geometry/source safeguards.
+The Mac prototype's native library is not yet a shipping adapter. Its passing
+four-frame fidelity and sampled hidden/focus evidence remain bounded; forced-stop,
+Windows, native timing and smooth manipulation gates remain open. Keep #36/B07/B08
+and full 3B open. No tolerance or weaker requirement is accepted.
 
-The selected Mac capability test is complete within its stated boundary. Next work
-needs a selected production-integration/qualification scope and finite allocation,
-including graceful stop and affected both-target proof. Public issue updates retain
-that scope and do not close the ticket. Resume in this chat by default; no host
-transfer is selected and all historical use stays charged.
+The implementation owner is this chat. Reviewers are read-only; no other writer,
+SDK helper or local native operation is pending. Preserve unrelated policy hunks
+in this checkout and all protected recovery below. The protected user fixture has
+not been inspected or launched.
 
 ## Earlier canvas decision closeout
 

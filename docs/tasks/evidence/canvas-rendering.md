@@ -1442,3 +1442,88 @@ its existing scope and is not new GPU qualification. Only the live L17 status
 sections and this evidence owner change; unrelated policy hunks remain unstaged.
 The new retest commits remain local. The user-authorized four preceding commits
 are published; #36/#29/#22 receive the final retest result and unchanged open gates.
+
+
+## GPU production integration and shutdown, 2026-10-23
+
+The user selected production integration and graceful shutdown through the implement
+workflow, approving the handoff supplement. #36 records the selection and verified
+read-back. Ceilings are now local 106, Mac SDK 46, CI 9 and Windows SDK 24. Existing
+package/native ceilings remain five/seven per target. Entry use was local 82,
+Mac SDK 34, CI 6, Windows SDK 10; Mac package/native three/three, Windows one/one.
+Historical use stays charged and no new contingency applies. The handoff's pending
+approval is resolved. The published branch at entry is `aded9c8`.
+
+### Early Windows capability preparation
+
+The missing Windows hidden GPU path is tested before broad integration. The selected
+probe uses documented private-desktop creation and process startup placement, never
+switches desktops and makes no ACL, signing or permission-policy change. Its native
+owner starts a focus sentinel on the disposable CI input desktop, attaches the
+suspended SDK process to a kill-on-close job, then resumes. The helper independently
+checks its desktop identity against the owner and input desktop. The owner samples
+foreground/focus and helper visibility on the input desktop, recording inventory
+failures and maximum sample gaps. Private-desktop windows are not claimed absent.
+
+One SDK launch requests GL2 frames at 1280x720/1024x768 and normal/hover, checks PNG
+header dimensions and geometry, then requests stop. Acceptance requires a parsed
+stop acknowledgment, exit 0 and an empty job without forced cleanup. The second
+launch selects bootstrap refusal after desktop verification and requires its exact
+reason and exit 72. Both require complete native cleanup and fixture removal.
+The generated renderer uses the production data-only builder/request loop with
+checked GL2 export and cooperative-stop substitutions. It reads synthetic values
+and the pinned SDK font, not user scripts. The official checksum and existing
+archive checks remain mandatory. The inspected archive contains zero link entries.
+
+This is a disposable capability check, not a production-path pass. It does not prove
+matched source fidelity, physical keyboard input, continuous observation, packaged
+Loomlight lifecycle, native timing or smooth manipulation. Production is unchanged.
+After capability passes, the shipping adapter still needs production integration
+and affected both-target qualification. Full #36/B07/B08/3B acceptance stays open.
+
+### Review and local checks
+
+Candidate `2ca7a7f` adds the probe and ordinal-7-only workflow. Independent Standards
+and Spec reviews both identify one P2 admission defect: unrelated desktop/API
+bootstrap failures produce the same refusal receipt as the selected refusal.
+Correction `e51eb97` records the failure stage and checks the exact parsed reason,
+normal desktop identity and stop acknowledgment. Negative admission checks reject
+missing/wrong refusal reasons, missing acknowledgments/desktop identity and zero
+frames. Both follow-up reviews close the P2 and report zero new findings.
+
+Portable generation and negative admission checks pass. Every generated Ren'Py
+Python block parses with the host Python interpreter; this is not SDK compilation.
+TypeScript typecheck, workflow YAML parsing and whitespace checks pass. Repository
+validation passes for 877 files before this status update. No SDK, package or native
+editor ran locally. The full product suite remains due at the integrated candidate.
+Unrelated policy edits and protected recovery remain intact.
+
+Routing correction `848d50f` moves the unchanged capability job into the registered
+Screens workflow (`screens-source.yml`, workflow ID 391374211). The explicit
+`canvas_gpu_capability` selector excludes old Help/L01/canvas jobs, and conflicting
+selectors fail validation without running a workload. All eight selector combinations
+pass the portable truth-table check. Both reviewers found no new routing defects.
+
+#### Standards
+
+The refusal-admission P2 is closed. No remaining documented-standard or baseline
+smell findings in the scoped candidate. Review was read-only and performed no SDK,
+native or CI execution.
+
+#### Spec
+
+The refusal-admission P2 is closed. No remaining checkpoint implementation defect.
+Windows execution and later production/whole-ticket acceptance remain pending.
+Review was read-only and performed no SDK, native or CI execution.
+
+### Allowance and next operation
+
+Batches 83-87 cover fresh state/tracker/contracts, Windows mechanism investigation,
+probe implementation/checkpoint, independent review/correction, then publication and
+CI preparation. Current use is local 87/106, Mac SDK 34/46, CI 6/9 and Windows SDK 10/24. Package/native use
+is unchanged. CI7 will reserve two Windows SDK launches and no package/native-editor
+launches. No CI run or watcher is pending at this preparation checkpoint.
+
+CURRENT and HANDOVER still exceed their soft word targets because they retain
+unrelated policy work, earlier pending acceptance and protected recovery. This
+update replaces only their live L17 sections; no protected recovery text changes.
