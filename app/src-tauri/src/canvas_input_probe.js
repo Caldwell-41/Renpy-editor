@@ -1,6 +1,6 @@
 // Qualification setup/readback only. Measured actions must arrive as trusted OS events.
 (async () => {
-  let stage = "setup", serial = 0, latest, eventOverflow = false;
+  let stage = "setup", serial = 0, latest, gesture, eventOverflow = false;
   const rows = [], events = [];
   const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
   const assert = (condition, message) => { if (!condition) throw Error(message); };
@@ -95,10 +95,13 @@
         expected=expected.replace("xsize 640",`xsize ${width}`).replace("ysize 360",`ysize ${height}`);
         x=(1280-width)/2;y=(720-height)/2;
       } else {
-        x+=Math.round(dx/8)*8;y+=Math.round(dy/8)*8;
+        x=Math.max(0,Math.min(640,x+Math.round(dx/8)*8));
+        y=Math.max(0,Math.min(360,y+Math.round(dy/8)*8));
         const pos=(n,d)=>{const v=n/d;return Number.isInteger(v)?`${v}.0`:String(v);};
         expected=expected.replace("xalign 0.5",`xalign ${pos(x,640)}`).replace("yalign 0.5",`yalign ${pos(y,360)}`);
       }
+      // Retain the actual displacement inputs even if accepted-source readback fails.
+      gesture={stage,resize,down,last,up,scale,dx,dy,x,y,width,height};
       assert(expected!==original,"Gesture was a no-op");
       await accepted(expected);checkGeometry(x,y,width,height);
       return {dx,dy,x,y,width,height,pointerMoves:moves.length};
@@ -143,8 +146,8 @@
     assert((await source()).text === original, "Resize Undo failed");
     find("Close Project").click(); await until(() => document.querySelector('.recent-open'));
     await call("probe.runtimeUiReport", {passed:true, scenario:"canvas-input", stage:"complete", rows, events:events.filter(e => e.type !== "pointermove"), pointerMoves:events.filter(e => e.type === "pointermove").length,
-      inputKind:"trusted-events", nativeInputQualified:false, warmPresentationProof:false, perceivedSmoothnessProof:false});
+      gesture,inputKind:"trusted-events", nativeInputQualified:false, warmPresentationProof:false, perceivedSmoothnessProof:false});
   } catch (error) {
-    await call("probe.runtimeUiReport", {passed:false, scenario:"canvas-input", stage, rows, events:events.filter(e => e.type !== "pointermove"), pointerMoves:events.filter(e => e.type === "pointermove").length, error:String(error)});
+    await call("probe.runtimeUiReport", {passed:false, scenario:"canvas-input", stage, rows, gesture, events:events.filter(e => e.type !== "pointermove"), pointerMoves:events.filter(e => e.type === "pointermove").length, error:String(error)});
   }
 })();

@@ -9,6 +9,8 @@ import {chromium} from 'playwright';
 import {driverProcess} from './phase2-driver-process.mjs';
 import {buildCanvasDriver} from './canvas-driver.mjs';
 const output=resolve(process.env.LOOMLIGHT_CANVAS_EVIDENCE);
+const boundary=process.env.LOOMLIGHT_CANVAS_MOVE_BOUNDARY;
+assert(boundary===undefined || ['min','max'].includes(boundary),'Expected min or max movement boundary');
 await mkdir(output,{recursive:false});
 const child=driverProcess(buildCanvasDriver(),[join(tmpdir(),`loomlight-canvas-controller-${randomUUID()}`)],{timeout:180000});
 let server;
@@ -16,6 +18,7 @@ const create=()=>createServer({root:resolve('.'),logLevel:'error',server:{host:'
 let browser,page,current,report;
 const stages=[];
 let busySourceReads=0, retriedSourceRead=false;
+let movementImageGate,releaseMovementImage;
 try {
   server=await create();
   assert.equal((await child.next()).ready,true);
@@ -32,7 +35,11 @@ try {
       }
       retriedSourceRead=true;
     }
-    return child.request(request);
+    const response=await child.request(request);
+    // Isolate the source/geometry oracle from image-driven pointer-capture loss.
+    // Normal mid-gesture image delivery is diagnosed separately, not qualified here.
+    if(response.ok && response.value?.image && movementImageGate) await movementImageGate;
+    return response;
   });
   await page.route('**/canvas-controller',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/canvas-controller`);
@@ -47,15 +54,27 @@ try {
   await wait('keyboard-undo');await page.keyboard.press('Enter');
   await wait('resize-arrow-right');await page.keyboard.press('ArrowRight');
   await wait('move-arrow-right');await page.keyboard.press('ArrowRight');
-  await wait('drag-frame');let r=current.rect;await page.mouse.move(r.x+8,r.y+8);await page.mouse.down();await page.mouse.move(r.x+48,r.y+32,{steps:12});await page.mouse.up();await page.mouse.move(20,20,{steps:4});
+  // Boundary mode isolates the oracle; the default retains normal image delivery.
+  await wait('drag-frame');let r=current.rect;
+  if(boundary) movementImageGate=new Promise(resolve=>{releaseMovementImage=resolve;});
+  const start=boundary==='min' ? {x:r.x+r.width-12,y:r.y+r.height-12} : {x:r.x+8,y:r.y+8};
+  const end=boundary==='min' ? {x:r.x-r.width/2+8,y:r.y-r.height/2+8}
+    : boundary==='max' ? {x:r.x+r.width-8,y:r.y+r.height-8} : {x:r.x+48,y:r.y+32};
+  await page.mouse.move(start.x,start.y);await page.mouse.down();await page.mouse.move(end.x,end.y,{steps:12});await page.mouse.up();
+  releaseMovementImage?.();movementImageGate=undefined;
+  await page.mouse.move(20,20,{steps:4});
   await wait('drag-resize');r=current.rect;await page.mouse.move(r.x+r.width/2,r.y+r.height/2);await page.mouse.down();await page.mouse.move(r.x+30,r.y+20,{steps:12});await page.mouse.up();await page.mouse.move(20,20,{steps:4});
   const deadline=Date.now()+30000;while(!report){assert(Date.now()<deadline,'Awaiting report');await new Promise(r=>setTimeout(r,20));}
   assert.equal(busySourceReads,1,'Expected the pre-dispatch busy source read');
   assert.equal(retriedSourceRead,true,'Expected the probe to retry its source read');
-  await writeFile(join(output,'result.json'),JSON.stringify({controllerOnly:true,nativeEvidence:false,busySourceReads,retriedSourceRead,stages,report},null,2));
-  assert.equal(report.passed,true,JSON.stringify(report));console.log('PASS native input probe rehearsal; no native/presentation claim.');
+  await writeFile(join(output,'result.json'),JSON.stringify({controllerOnly:true,nativeEvidence:false,boundary:boundary??null,movementImagesHeldUntilRelease:!!boundary,busySourceReads,retriedSourceRead,stages,report},null,2));
+  assert.equal(report.passed,true,JSON.stringify(report));
+  const movement=report.rows.find(row=>row.stage==='drag-frame').geometry;
+  if(boundary) assert.deepEqual([movement.x,movement.y],boundary==='max' ? [640,360] : [0,0]);
+  console.log(`PASS ${boundary??'interior'} input probe rehearsal; no native/presentation claim.`);
 } catch(error) {await writeFile(join(output,'failure.txt'),String(error.stack));if(page)await page.screenshot({path:join(output,'failure.png')});throw error;}
 finally {
+  releaseMovementImage?.();
   const cleanup=await Promise.allSettled([browser?.close(),server?.close(),child.stop()]);
   await writeFile(join(output,'cleanup.json'),JSON.stringify(cleanup.map(r=>({status:r.status,error:r.reason?.message})),null,2));
   assert(cleanup.every(r=>r.status==='fulfilled'),'An owner failed cleanup');
