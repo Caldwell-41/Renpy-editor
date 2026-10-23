@@ -90,6 +90,22 @@ try {
   await ui.getByRole('button',{name:'Undo',exact:true}).click();await fresh(before);
   await target.focus();await target.press('Shift+ArrowRight');await page.getByText('Position saved. Undo reverses the move.',{exact:true}).waitFor();await fresh();
   assert.equal(await snapshot(),before.replace('xalign 0.5','xalign 0.5125'));
+  await ui.getByRole('button',{name:'Undo',exact:true}).click();await fresh(before);
+  await page.locator('.screen-node-text').first().click();
+  await page.locator('.screen-card h2').filter({hasText:/^Text$/}).waitFor();
+  await page.locator('.screen-move').waitFor({state:'detached'});
+  assert.equal(await page.locator('.screen-move').count(),0,'A child click selects that child');
+  await frameTarget.click({position:{x:10,y:10}});await fresh();
+  const writes=receipts.filter(r=>r.request.operation==='screens.setPosition').length;
+  await target.click();
+  assert.equal(receipts.filter(r=>r.request.operation==='screens.setPosition').length,writes,'Clicking a handle without movement is a no-op');
+  for(const coordinate of [-1000,5000]) {
+    await target.scrollIntoViewIfNeeded();const handle=await target.boundingBox();
+    await page.mouse.move(handle.x+10,handle.y+10);await page.mouse.down();await page.mouse.move(coordinate,coordinate);await fresh();
+    const atEdge=await target.boundingBox(),canvas=await page.locator('.screen-game').boundingBox();
+    assert(atEdge.x>=canvas.x && atEdge.y>=canvas.y && atEdge.x+atEdge.width<=canvas.x+canvas.width+1 && atEdge.y+atEdge.height<=canvas.y+canvas.height+1,'The handle remains inside the canvas at both bounds');
+    await page.keyboard.press('Escape');await page.mouse.up();await fresh(before);assert.equal(await snapshot(),before);
+  }
   assert.deepEqual(errors,[]);passed=true;
 } finally {
   releaseImages?.();await browser?.close();await server.close();await child.stop();

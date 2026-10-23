@@ -22,7 +22,7 @@
 .screen-text-sample { display:block; margin:14px; font-size:12px; }.screen-text-sample textarea { box-sizing:border-box; width:100%; min-height:85px; margin-top:6px; }
 
 .screen-move { position:absolute; display:flex; align-items:center; gap:6px; box-sizing:border-box; height:30px; min-height:30px; width:max-content; padding:5px 9px; border:0; border-radius:0; background:#e4bb70; color:#17181c; font-size:13px; white-space:nowrap; pointer-events:auto; touch-action:none; cursor:grab; }
-.screen-move .navigation-icon { width:16px; height:16px; flex:none; margin:0; pointer-events:none; }
+.screen-move .navigation-icon { width:16px; height:16px; flex:none; margin:0 12px 0 0; pointer-events:none; }
 .screen-game[data-dragging=true] .screen-move { cursor:grabbing; }
 .screen-game[data-provisional=panel] .screen-render { opacity:1; }
 .screen-move:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
