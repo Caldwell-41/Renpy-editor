@@ -9,16 +9,16 @@ normal image delivery and complete cleanup. Types and 227 frontend tests pass.
 
 The user selected the move handle. Its [refined prototype](../design/design-lab-canvas-drag/README.md)
 adds a move icon, constant handle sizing across zoom, immediate provisional panel
-movement and settled release. The refinement awaits a tryout before integration.
+movement and settled release. The user approved `handle-v2`; its source and captures are pinned for integration.
 The earlier alternatives remain available. Their 24-case
 matrix and interactions pass at `e9b5fc1`; all remain unapproved. Both review axes
 have no remaining finding. The full lab check stops at the existing flow-v1
-source lock; approval validation and separate production-build isolation pass. Production integration awaits review of the refined prototype. Native drag/resize, numerical
+source lock; approval validation and separate production-build isolation pass. Production integration is next under the approved move-handle design. Native drag/resize, numerical
 presentation, Windows and whole-ticket acceptance remain pending.
 
 [Evidence](../tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24)
 owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns recovery. #36 records the explicit supplement. Current use is local 45/54,
+owns recovery. #36 records the explicit supplement. Current use is local 47/54,
 CI 0/4; Mac packages 2/4, native 3/9, SDK 19/36; Windows zero. Denominators are
 absolute ceilings. Code is local only; repository publication remains `ccebf3e`.
 Unrelated policy edits remain unstaged. The preview server remains available on 5174.

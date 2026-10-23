@@ -43,7 +43,7 @@ There are no disk writes, native requests, runtime execution or source parsing.
 
 ## Review status
 
-The user selected the move-handle direction and requested these refinements before integration. `handle-v2` remains a draft for that review; no production integration or formal source/capture promotion is claimed. The earlier `handle-v1` source remains in commit `e9b5fc1`. The focused module check
+The user selected the move-handle direction and requested these refinements before integration. `handle-v2` is approved as of 2026-10-24. Its approval record pins source `6e7bb1a`, the fingerprint and four hashed dark captures at wide/compact sizes. Production integration remains pending. The earlier `handle-v1` source remains in commit `e9b5fc1`. The focused module check
 covers 24 variant/state/theme/viewport combinations, with gesture cancellation,
 commit/history, keyboard movement/resize, numeric size, child selection and reload
 checks at wide and compact sizes. Captures are retained in ignored
@@ -53,6 +53,5 @@ no longer matches its pinned source. Its approval lock is preserved; the full ch
 is incomplete. Approval-record validation and the separate production-build exclusion
 assertion pass. Product native acceptance and the full ticket remain pending.
 
-Before production integration, obtain the exact variant decision, preserve the
-reviewed source/captures and follow [Design integration](../../../app/design-lab/INTEGRATION.md).
+For production integration, use the approved `handle-v2` source/captures and follow [Design integration](../../../app/design-lab/INTEGRATION.md).
 The existing pinned flow-v1 approval remains unchanged.

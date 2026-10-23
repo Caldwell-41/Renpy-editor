@@ -2,25 +2,31 @@
 
 ## Active L17 integration handover
 
-Continue #36 on `codex/phase3b-screen-designer`. Candidate `e9b5fc1` includes production capture correction `5df62d3` and three
-unapproved Design Lab drag alternatives. Both review axes have no remaining finding.
-The scoped draft matrix passes 24 cases and interactions. The full lab check stops
-at the existing flow-v1 source lock; approval validation and separate production
-build exclusion pass. The lock and original approved source remain unchanged.
-`showFrame` now leaves attached targets in place. The existing controller test holds
+Continue #36 on `codex/phase3b-screen-designer`. The user approved `handle-v2`
+on 2026-10-24 and requested transfer for integration and ticket continuation.
+[Approval](../design/design-lab-canvas-drag/approval.json) pins source `6e7bb1a`,
+its full fingerprint and four hashed dark reference captures. The reference
+includes the move icon, fixed-size handle, provisional panel translation and settled
+release. Production integration remains pending. The separate flow-v1 reference
+retains its existing approval and layout authority.
+
+Production capture correction `5df62d3` is already present. Its Standards/Spec
+reviews found no remaining issue. `showFrame` now leaves attached targets in place. The existing controller test holds
 a drag through image delivery and further input, then verifies Cancel, one accepted
 write, exact Source and Undo/Redo. HMR is blocked in that test to prevent development
 edits from reloading its document mid-gesture. One real-helper Chrome rehearsal,
 SDK19, passes all eight input stages with normal image delivery and full cleanup.
 Types, 13 focused Screens tests and all 227 frontend tests pass.
 
-The user selected the move handle and requested an icon, constant on-screen size,
-immediate provisional panel movement and settled release in the prototype first.
-The [updated handle-v2 preview](../design/design-lab-canvas-drag/README.md) passes
-24 matrix cases/interactions, typechecking and approval-record validation. No
-production integration occurred. Next action is user review of this refinement.
-Formal source/capture promotion remains pending. Follow Design Lab integration before changing
-production feedback or target behavior; preserve the pinned flow-v1 reference.
+Next implement the approved manipulation design using
+[Design integration](../../app/design-lab/INTEGRATION.md). The prototype is the
+interaction reference, not a second source model or replacement editor layout.
+Keep fixed-corner sample resize and the artificial delay control out of production.
+Source/capture approval validation and the scoped 24-case preview checks pass.
+The known full-lab failure is the older flow-v1 source lock in this changed checkout;
+its fingerprint must not be weakened. Once implementation changes frontend inputs,
+use a separate reference checkout at `6e7bb1a` with the new approval record/captures.
+
 The existing capture fix does not establish native smoothness. Native drag/resize,
 independent warm p95 <=100 ms presentation, Windows and whole-ticket acceptance
 remain pending. No recorder/input-driver or capture permission change is approved.
@@ -39,10 +45,12 @@ The user explicitly selected continuation and approved any SDK allowance on
 plus 6 contingency per target, raising cumulative ceilings from 18 to 36; 12 local
 batches plus 6 contingency raise the local ceiling from 36 to 54. Original limits
 and spent use remain historical. CI/package/editor-launch ceilings remain 4/4/9.
-Current cumulative use is local 45, CI 0; Mac packages 2, native 3, SDK 19; Windows
+Current cumulative use is local 47, CI 0; Mac packages 2, native 3, SDK 19; Windows
 zero. Earlier allowances stay closed. New supplement contingency begins after local
 48 or SDK30 on a target. Code is local only, repository publication remains `ccebf3e`;
-no push, PR, merge or release is selected. Preserve unrelated policy edits, including
+One nominal local batch plus six contingency batches remain; announce contingency
+before batch 49 and reassess any work that cannot fit the ceiling. No push, PR,
+merge or release is selected. Preserve unrelated policy edits, including
 the separate hunks in CURRENT/HANDOVER, and protected recovery below.
 
 ## Earlier canvas decision closeout

@@ -2814,3 +2814,30 @@ Batches 43-45 cover prototype edits, focused checks and review records. Cumulati
 use is local 45/54, CI 0/4; Mac packages 2/4, native launches 3/9, SDK 19/36; Windows
 zero. These are absolute ceilings. No SDK/package/native/CI operation ran. The next
 action is user review of the refined prototype, before formal promotion/integration.
+
+
+### Move-handle approval and integration handoff, 2026-10-24
+
+The user explicitly approved the refined prototype and requested a handoff for
+another agent to integrate it and continue #36. The approval record in
+`docs/design/design-lab-canvas-drag/approval.json` pins `handle-v2` at source
+`6e7bb1aa053de327737cfbb1a8ec5f87f67ca361`, its verified fingerprint and four hashed
+wide/compact dark captures for ready/delayed states. The record owns agreed
+behavior and sample limitations. The prior flow-v1 approval is unchanged.
+Approval-history/hash/source validation passes. The full lab's existing flow-v1
+source mismatch remains as recorded above; unchanged source inputs do not justify
+repeating that known failure. The selected approved preview is checked separately.
+
+The prepared prototype result note was explicitly approved for publication by the
+user, published to #36, and its body read back exactly at
+https://github.com/Caldwell-41/Renpy-editor/issues/36#issuecomment-6374816031.
+That comment predates this design approval; no later issue publication was selected.
+The live repository handover and approval record carry the newer decision.
+
+Batches 46-47 cover source/capture approval, scoped checks and the temporary handoff.
+Cumulative use is local 47/54, CI 0/4; Mac packages 2/4, native launches 3/9,
+SDK 19/36; Windows zero. Counts use absolute ceilings and retain all earlier use.
+One nominal local batch and six contingency batches remain. No SDK, package,
+native launch, production edit, push or CI operation was performed for this handoff.
+The preview server remains available on port 5174. Unrelated policy edits remain
+unstaged and protected recovery is unchanged. Integration is the next selected work.

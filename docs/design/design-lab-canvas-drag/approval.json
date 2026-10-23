@@ -1,12 +1,72 @@
 {
   "schemaVersion": 1,
   "screenId": "canvas-drag",
-  "currentApproved": null,
+  "currentApproved": "handle-v2",
   "revisions": [
     {
       "id": "handle-v2",
       "variantId": "handle",
-      "approval": null
+      "approval": {
+        "date": "2026-10-24",
+        "decision": "The user approved the refined move-handle prototype and requested a handoff for another agent to integrate it and continue #36. This follows selection of the move handle and agreement to the icon, fixed on-screen handle size, immediate provisional panel movement and settled release.",
+        "reason": "Make the drag target explicit while preserving single-click child selection and direct visual feedback.",
+        "supersedes": null,
+        "source": {
+          "commit": "6e7bb1aa053de327737cfbb1a8ec5f87f67ca361",
+          "fingerprint": "6a92dede7c75b6ad4788cc42d44fef911114ec5730cb18eea6db6accab06a75c"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-canvas-drag/handle-v2-ready-dark-wide.png",
+            "sha256": "fc61aacffb4dddb4769d284af1b685a51b662749826fab157392a99549c42dc9",
+            "state": "ready",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-canvas-drag/handle-v2-ready-dark-compact.png",
+            "sha256": "2c8a880dd16799e307f606d9ef5ba683722dc6eeb26ecb70babc397c7559417b",
+            "state": "ready",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-canvas-drag/handle-v2-delayed-dark-wide.png",
+            "sha256": "a0fe4a93067f0383accc1e5f560a9c003dcce4853a347ec473e549f123ed644c",
+            "state": "delayed",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-canvas-drag/handle-v2-delayed-dark-compact.png",
+            "sha256": "3fc5e43d0222688b6c6d0fa6d0edd95188f3d51dd3df8064436f70b3195cc16b",
+            "state": "delayed",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Four-direction move icon and Move frame label form one draggable handle, with grab/grabbing cursors.",
+          "The handle stays 30 CSS pixels tall at the tested zoom levels and remains reachable at canvas bounds.",
+          "Visible panel and child hit targets follow provisional movement immediately. Release retains position and keyboard focus while rendering confirmation is pending.",
+          "Single-click child selection, Escape cancellation, keyboard adjustments and one Undo entry per completed drag remain available."
+        ],
+        "deviations": [
+          "This approves the manipulation design, not the isolated sample editor layout or a replacement for flow-v1.",
+          "HTML content and delayed confirmation are simulated. Production must preserve Ren'Py fidelity, validated source transactions and native qualification.",
+          "The sample uses fixed-corner resizing and bounded sample sizes. Production retains its existing alignment/anchor semantics.",
+          "Zoom and delay controls support prototype review; the simulated delay control does not belong in production.",
+          "Light theme and unrecorded viewport/gesture conditions are outside the retained visual comparison captures."
+        ]
+      }
     },
     {
       "id": "border-v1",
