@@ -53,15 +53,19 @@ jobs:
           key: canvas-helper-windows
           workspaces: app -> target
           cache-bin: 'false'
-      - name: Pinned tools and focused checks
+      - name: Pinned tools and typechecking
         run: |
           rustup toolchain install 1.90.0 --profile minimal
           npm install --global npm@11.9.0
           npm ci
           python -m pip install Pillow==12.3.0
           npm run typecheck
-          cargo test -p loomlight-core --release --locked --lib screens::tests -- --nocapture
-          cargo build -p loomlight-core --release --example canvas-controller-driver --locked
+      - name: Build and check the production connection
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --release --locked --lib --no-run --message-format=json > "$RUNNER_TEMP/canvas-comparison/core-build.jsonl"
+          cargo build -p loomlight-core --release --example canvas-controller-driver --locked --message-format=json > "$RUNNER_TEMP/canvas-comparison/driver-build.jsonl"
+          cargo test -p loomlight-core --release --locked --lib screens::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/canvas-comparison/screens-tests.log"
       - name: Provision and verify matched-reference desktop
         shell: pwsh
         run: ./scripts/prepare-canvas-display.ps1 -Output "$env:RUNNER_TEMP/canvas-comparison/display.json"
@@ -100,6 +104,50 @@ jobs:
           cargo test -p loomlight-core --release --locked --lib lifecycle::runtime_tests::canvas_reference_sdk_captures_actual_screen_at_two_internal_aspects -- --exact --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/canvas-comparison/reference.log"
       - name: Require matching inputs, geometry and exact RGBA pixels
         run: python scripts/compare-canvas-rendering.py "$RUNNER_TEMP/canvas-comparison/helper" "$RUNNER_TEMP/canvas-comparison/reference" "$RUNNER_TEMP/canvas-comparison/comparison"
+      - name: Retain produced binaries and toolchain identity after success or failure
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib, platform, shutil, subprocess
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / 'canvas-comparison'
+          binaries = output / 'binaries'
+          binaries.mkdir(parents=True, exist_ok=True)
+          manifest = {'candidate': os.environ['GITHUB_SHA'], 'runId': os.environ['GITHUB_RUN_ID'],
+                      'attempt': os.environ['GITHUB_RUN_ATTEMPT'], 'machine': platform.machine(), 'builds': []}
+          manifest['tools'] = {}
+          for name, command in [('rust', ['rustc', '--version']), ('node', ['node', '--version']), ('python', ['python', '--version'])]:
+              try:
+                  manifest['tools'][name] = subprocess.check_output(command, text=True).strip()
+              except (OSError, subprocess.CalledProcessError):
+                  manifest['tools'][name] = 'unavailable'
+          for name in ['core-build.jsonl', 'driver-build.jsonl']:
+              entry = {'stream': name, 'state': 'not-compiled', 'executables': []}
+              stream = output / name
+              for line in stream.read_text().splitlines() if stream.exists() else []:
+                  try:
+                      record = json.loads(line)
+                  except json.JSONDecodeError:
+                      entry['incompleteStream'] = True
+                      continue
+                  if record.get('reason') != 'compiler-artifact' or not record.get('executable'):
+                      continue
+                  source = pathlib.Path(record['executable']).resolve()
+                  assert source.is_relative_to(pathlib.Path('target').resolve())
+                  if not source.is_file():
+                      entry['executables'].append({'name': source.name, 'state': 'unavailable'})
+                      continue
+                  try:
+                      destination = binaries / source.name
+                      shutil.copyfile(source, destination)
+                      entry['executables'].append({'name': source.name, 'state': 'retained', 'sha256': hashlib.sha256(destination.read_bytes()).hexdigest()})
+                  except OSError as error:
+                      entry['executables'].append({'name': source.name, 'state': 'retention-failed', 'error': str(error)})
+              if entry['executables']:
+                  entry['state'] = 'compiled'
+              manifest['builds'].append(entry)
+          (output / 'binary-identity.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          assert all(e['state'] == 'retained' for b in manifest['builds'] for e in b['executables'])
+          PY
       - name: Scan retained public fixture evidence
         id: privacy
         if: always()
