@@ -1678,3 +1678,25 @@ capability probe. It consumes the last approved dispatch; production integration
 qualification remain unfinished even if it passes. After its audit, continue work
 that fits the existing authority and report any concrete missing allowance or host
 capability before further execution. No extra contingency is created.
+
+### CI9 pending operation
+
+[CI9 run 39906453139](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39906453139),
+attempt 1, tests published candidate `96dabf226523d1445eb8f729360b2ab1812aab76`.
+Remote read-back matches. The registered Screens workflow selects ordinal 9 and
+only `canvas_gpu_capability=true`. GitHub accepted the dispatch at 2026-10-23
+05:33:52 UTC (15:33:52 AEST). No terminal result is inferred.
+
+Use is local 93/106, CI 9/9, Mac SDK 34/46 and Windows SDK 12/24, with two Windows
+SDK launches reserved. Package/native counts are unchanged. The CI allowance is
+exhausted; no rerun, attempt 2 or additional dispatch is authorized. Audit this run
+before deciding further work or any required allowance/capability request.
+
+Same-chat ci-watch registration follows this receipt. The ignored
+`ci9-watch-registration.json` records its acknowledgment; only `watcher_running: true`
+establishes monitoring. On delivery, match the thread and acknowledge, verify the
+exact run/attempt/SHA, inspect required steps and audit artifacts, frames, stop/refusal
+receipts, normal exits, observer/job/desktop/fixture cleanup and actual launch counts.
+Artifact retention is seven days; the ID and expiry will be available after upload.
+Later documentation commits do not change the tested candidate. If monitoring does
+not register, retain the run identity and use manual same-chat resume.

@@ -24,15 +24,18 @@ The probe requires four frames at two aspects, a stop acknowledgment, SDK exit 0
 no forced cleanup and empty job/closed desktop/removed fixture. Its refusal case
 requires the exact selected reason and exit 72. This is capability evidence only.
 
-CI9 is the next selected operation, ordinal 9 on the registered Screens workflow,
-with `canvas_gpu_capability=true` and both other selectors false. Reserve two Windows
-SDK launches and no package/native-editor launches. It is the final approved CI slot.
-Record its exact candidate/run/attempt and use ci-watch in this chat; audit terminal
-artifacts before making any acceptance claim. Even a pass leaves production integration
-and both-target qualification unfinished. Continue work within authority after the
-audit; do not invent extra dispatches or renew contingency.
+CI9 run `39906453139`, attempt 1 at `96dabf226523d1445eb8f729360b2ab1812aab76`,
+was dispatched at 2026-10-23 05:33:52 UTC on the registered Screens workflow, ordinal
+9, with only `canvas_gpu_capability=true`. Two Windows SDK launches are reserved;
+no package/native-editor operation is selected. This is the final approved CI slot.
+[The pending receipt](../tasks/evidence/canvas-rendering.md#ci9-pending-operation)
+owns exact audit instructions. Same-chat ci-watch registration follows; inspect its
+ignored `ci9-watch-registration.json` acknowledgment before assuming monitoring exists.
+Even a pass leaves production integration and both-target qualification unfinished.
+After audit, continue within authority and report concrete blockers; no rerun,
+attempt 2 or additional dispatch is authorized by the exhausted allowance.
 
-Cumulative use before CI9 is local 92/106, Mac SDK 34/46, Windows SDK 12/24 and CI 8/9.
+Cumulative use at dispatch is local 93/106, Mac SDK 34/46, Windows SDK 12/24 and CI 9/9.
 Package/native ceilings remain five/seven per target; use is Mac three/three and
 Windows one/one. Original CI7/CI8 failures and receipts remain ignored under the
 integration evidence directory. No Mac SDK, package or native editor ran during

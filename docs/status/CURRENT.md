@@ -11,8 +11,8 @@ bounded hidden/focus observation; it required forced termination.
 CI8 compiled the Windows capability probe, but forced OpenGL fell back to software
 and timed out. The refusal exited correctly but failed desktop observation. Both
 cases remain failed. The correction selects the earlier Windows reference's `angle2`
-backend and requires successful enumeration of both desktop observers. CI9 will test
-that correction and consume the last approved dispatch. Production integration and
+backend and requires successful enumeration of both desktop observers. [CI9](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39906453139) tests
+reviewed correction `96dabf2` and consumes the last approved dispatch. Production integration and
 both-target qualification remain unfinished even if capability passes.
 
 [Integration evidence](../tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction)
