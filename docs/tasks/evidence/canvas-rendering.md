@@ -1868,3 +1868,48 @@ one packaged-helper launch, plus one Windows package/native attempt. CI use befo
 dispatch is9/11, actual WindowsSDK14/24; MacSDK45/46, Mac package/native4/3 and
 Windows1/1. Local use is108/114. Broad core verification remains running at this
 checkpoint. No unrun result or remaining acceptance criterion is marked passed.
+
+### Signed Mac native result and CI10 handover
+
+The final staged whitespace check removed one trailing blank line from the embedded
+bootstrap. Package 5 was rebuilt from published production candidate
+`7ad845c73447003e1278e180f10e800fb05ebc2b` so the native check uses the exact committed
+source. This consumes the last Mac package build. Its strict signature and installer
+contents pass with the unchanged approved identity. Rehashed executable SHA256 is
+`213fc163d8a197b4e40febd72f3079747566f51fb89ece1b15dd4dd801077bdb`; installer SHA256
+is `c3e8e298c0bf8a3f366c448d983262394d2173fc528b66be4170621772b61939`.
+
+After the user unlocked the Mac, preflight confirmed an unlocked console and no
+unrelated Loomlight process. Native 4/SDK 46 passes the real WKWebView controller
+sequence with two GL2 frames, draft cancellation/focused field retention, source
+Apply/Undo/Redo, logical sizing and project close. The helper acknowledges stop,
+exits 0 without force and completes cleanup. App exit is 0, no timeout, all host/
+request/credential cleanup owners pass, accepted disk bytes match, no source
+bytecode/saves or helper/scratch jobs remain, and the owned fixture is removed.
+A post-run process inventory finds no owned app, SDK helper or observer remaining.
+
+The independent Mac observer reports 273 samples, 163 with the helper PID known,
+maximum gap 27.60005 ms, and zero visible-helper samples, foreground changes,
+activation events away from the editor or inventory failures. Every inventory
+sample requires the known visible editor. The observer stops normally. This is
+bounded OS observation of normal startup/render/close, not continuous observation,
+physical keyboard delivery or native observation of every refusal/change/quit case.
+Startup image-load measurement is 1,237 ms; warm presentation remains explicitly unproved.
+
+The corrected broad core run passes 407 tests, with 47 named existing ignored gates
+and the three documented broad-suite exclusions. Doc tests contain no cases.
+The original sandbox run retains 376 passes and 31 socket/poisoned-fixture failures;
+it remains failed. Desktop 38 passes, renderer 226 plus the corrected Python-validator
+case pass, and repository validation covers 881 files. No specialist ignored case
+or extra SDK operation was selected by these suites.
+
+[CI10 run 39910668596](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39910668596),
+attempt 1, tests exact candidate `7ad845c73447003e1278e180f10e800fb05ebc2b`.
+Selection validation passes; only the Windows production canvas job is selected.
+The run is pending audit. Reserve five Windows SDK launches, one package and one
+native attempt. After local 109, actual use is local 109/114, CI 10/11, Mac SDK 46/46,
+Windows SDK 14/24, Mac package/native 5/4 and Windows 1/1 against ceilings 5/7 per target.
+The Mac SDK and package ceilings are exhausted. No automatic retry is authorized.
+CI11 and five unreserved Windows SDK launches remain for an in-scope correction.
+Whole-ticket, matched-fidelity, physical-keyboard and native presentation gates stay
+open. Register ci-watch after publication and audit the exact terminal attempt.

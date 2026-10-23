@@ -1,21 +1,23 @@
 # Current status
 
-## L17 production GPU integration awaiting qualification
+## L17 production integration awaiting Windows qualification
 
-2026-10-23: The selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-production integration is implemented and independently reviewed. The helper uses
-GL2 on Mac and ANGLE2 on Windows, with hidden startup and bounded cooperative
-shutdown. Mac service checks pass close, reopen/project change, application shutdown
-and exact startup refusal. The production controller rehearsal passes both aspects,
-draft cancellation, source/history and close. The signed Mac package is verified.
+2026-10-23: Production candidate `7ad845c` for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is published and
+independently reviewed. Mac service checks pass close, reopen/project change,
+application shutdown and exact startup refusal. The production controller rehearsal
+and signed native app pass both GL2 aspects and cooperative close. Bounded native
+observation finds no helper window, foreground change or activation change.
 
-The Mac desktop is locked, so packaged native observation has not launched. Windows
-production qualification is next under CI10. Broad core verification remains running;
-no full-suite or both-target acceptance is claimed. Native keyboard, presentation
-timing, smooth manipulation, matched fidelity and whole #36 acceptance remain open.
-[Evidence](../tasks/evidence/canvas-rendering.md#production-gpu-integration-and-lifecycle-qualification-2026-10-23)
-records original failures, corrections and limits. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns continuation and exact remaining allowances. Preserve unrelated policy edits
+[CI10](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39910668596), attempt 1,
+qualifies the Windows production adapter at the exact candidate. Its result awaits
+audit. The broad core 407, desktop 38 and all 227 renderer cases pass after correcting
+the documented test environment. Mac SDK/package ceilings are exhausted.
+[Evidence](../tasks/evidence/canvas-rendering.md#signed-mac-native-result-and-ci10-handover)
+owns identities, original failures, counts and limits.
+[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns the pending run and
+remaining allowance. Native keyboard, presentation timing, smooth manipulation,
+matched fidelity and whole #36 acceptance remain open. Preserve unrelated edits
 and protected native recovery.
 
 ## Earlier canvas decision closeout

@@ -4,37 +4,37 @@
 
 Continue the selected production GPU integration and graceful shutdown for
 [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) on the existing Mac
-checkout and `codex/phase3b-screen-designer`. The implementation and both review axes
-are ready for Windows qualification. Preserve unrelated policy edits and the native
-recovery section below. No PR, merge, release or signing-policy change is selected.
+checkout and `codex/phase3b-screen-designer`. Production candidate
+`7ad845c73447003e1278e180f10e800fb05ebc2b` is published and independently reviewed.
+Preserve unrelated policy edits and the native recovery section below. No PR,
+merge, release or signing-policy change is selected.
 
-[Production evidence](../tasks/evidence/canvas-rendering.md#production-gpu-integration-and-lifecycle-qualification-2026-10-23)
-owns the adapter, shutdown contract, reviews and original failures. SDK41–44 pass
-three normal lifecycle exits and exact startup refusal; SDK45 passes the exact
-production controller at both aspects. Signed Mac package4 has executable SHA256
-`2688310cf684496c414261c832325f2e0b412d916fbea670ca007bd57650fe16`.
-Native observation has not launched because the desktop is locked. The unlock request
-is pending. After unlock, recheck the console and absence of unrelated Loomlight,
-then run only the canvas-helper case against package4. One Mac SDK launch remains.
-Do not bypass single instance or touch protected recovery.
+Next audit [CI10 run 39910668596](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39910668596),
+attempt 1 at that exact SHA. Only canvas_helper is selected, ordinal 10. Verify the
+terminal jobs, artifact identity, four service lifecycles and packaged native
+observer/cleanup. ci-watch registration follows publication; acknowledge its event
+in this chat, then continue within the remaining allowance.
 
-The ordinary renderer suite has 226 passing cases and one interpreter failure;
-that exact remaining case passes with Python3.12.14. Desktop38 passes outside the
-socket-restricting sandbox. The broad core suite is still running; preserve and audit
-both its original sandbox failure and corrected run before claiming a full pass.
-Local receipts and process details are under the ignored GPU integration directory.
+[Evidence](../tasks/evidence/canvas-rendering.md#signed-mac-native-result-and-ci10-handover)
+owns final Mac identities and limits. SDK 41–44 pass three cooperative normal exits
+and exact startup refusal. SDK 45 passes the production controller. Signed package 5
+and native 4/SDK 46 pass real WKWebView rendering and cooperative close, with bounded
+external window/foreground/activation observation. Core 407, desktop 38 and all 227
+renderer cases pass after the retained environment corrections. No local process
+or native operation remains pending. Detailed ignored receipts are under
+`.toolchains/canvas-proof/gpu-integration-2026-10-23`.
 
-User-approved cumulative ceilings are local114, CI11, MacSDK46 and WindowsSDK24.
-Use before CI10 is local108, CI9, MacSDK45, WindowsSDK14, Mac package/native4/3 and
-Windows package/native1/1. Package/native ceilings remain5/7 per target. CI10 selects
-only canvas_helper at ordinal10 and reserves five Windows SDK launches, one package
-and one native launch. CI11 is the single remaining correction dispatch. Release
-unused reservations only on exact not-run evidence; a new chat does not reset use.
+Cumulative use is local 109/114, CI 10/11, Mac SDK 46/46 and Windows SDK 14/24. Mac
+package/native use is 5/4 and Windows 1/1 against ceilings 5/7 per target. CI10 reserves
+five Windows SDK launches, one package and one native attempt. Release unused
+reservations only on exact not-run evidence. Mac SDK/package ceilings are exhausted;
+no retry or new contingency is authorized. CI11 and five unreserved Windows SDK
+launches remain for an in-scope correction. A new chat does not reset use.
 
-Audit the exact CI10 attempt, SHA, artifacts, lifecycle receipts and native observer
-before continuing. Native refusal/focus cases, physical keyboard, native presentation,
-matched fidelity and whole-ticket acceptance remain distinct gaps. The earlier CI9
-capability pass and failures remain retained; they do not qualify production.
+Service failure/change/quit proof does not establish packaged native observation of
+each case. Physical keyboard, native presentation, smooth manipulation, matched
+fidelity and whole-ticket acceptance remain open. The earlier CI9 capability pass
+and failed runs remain retained and do not qualify production.
 
 ## Earlier canvas decision closeout
 
