@@ -1594,3 +1594,24 @@ CI8 preparation. Use before CI8 is local 89/106, CI 7/9, Mac SDK 34/46 and Windo
 SDK 10/24. Existing package/native use is unchanged. CI8 selects the same two-SDK
 capability probe and no package or native editor. After dispatch, one CI slot remains
 for integrated qualification; no extra allowance or contingency is created.
+
+### CI8 pending operation
+
+[CI8 run 39905615261](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39905615261),
+attempt 1, tests published candidate `1cc4e8e3661b45b010d350a8c0120cbc830af2eb`
+on `codex/phase3b-screen-designer`. Workflow ID is `391374211`; inputs are
+ordinal `8`, `canvas_gpu_capability=true`, `canvas_helper=false`,
+`owned_blank=false`. Remote candidate read-back matches. At 2026-10-23
+05:24:58 UTC (15:24:58 AEST), GitHub reports the run in progress.
+
+Use at dispatch is local 89/106, CI 8/9, Mac SDK 34/46 and Windows SDK 10/24,
+with two Windows SDK launches reserved for CI8. No package/native-editor operation
+is selected. Audit the same rendering/stop/refusal/native cleanup criteria described
+for CI7, plus the corrected compiler invocation. Missing or skipped proof remains
+unaccepted. Preserve the CI7 failure and do not reset counts.
+
+ci-watch registration follows this receipt. Its ignored `ci8-watch-registration.json`
+in the existing integration evidence directory records the actual acknowledgment;
+require `watcher_running: true`. Otherwise use manual same-chat resume. On a matching
+event, acknowledge delivery and audit the exact run/attempt/SHA and retained artifacts
+before continuing. Later documentation commits do not change this candidate.

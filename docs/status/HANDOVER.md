@@ -21,11 +21,15 @@ owns the CI7 terminal audit. Run `39905179001`, attempt 1 at `3f04698`, failed
 before compiler startup due to nested PowerShell/cmd quoting. No SDK or native work
 ran. The exact artifact digest and candidate match; watcher delivery is acknowledged.
 Correction `3d7bac8` uses Visual Studio's PowerShell setup and direct compiler
-arguments. Both review axes report no findings. CI8 selects the same two-launch
-probe at ordinal 8; native compilation and capability remain pending.
+arguments. Both review axes report no findings. CI8 run `39905615261`, attempt 1 at
+`1cc4e8e3661b45b010d350a8c0120cbc830af2eb`, selects the same probe at ordinal 8.
+It is in progress as of 2026-10-23 05:24:58 UTC (15:24:58 AEST). Resume this chat
+through ci-watch for exact terminal artifact audit; actual registration status is in
+the ignored `ci8-watch-registration.json`. Without confirmed registration, use manual
+same-chat resume. Native compilation and capability remain pending.
 
-Cumulative ceilings are local 106, Mac SDK 46, CI 9 and Windows SDK 24. Use before
-CI8 is local 89, Mac SDK 34, CI 7 and Windows SDK 10. The two unused CI7 SDK
+Cumulative ceilings are local 106, Mac SDK 46, CI 9 and Windows SDK 24. Use at CI8 dispatch
+is local 89, Mac SDK 34, CI 8 and Windows SDK 10. The two unused CI7 SDK
 reservations are released on exact skipped-step evidence; no actual use is reset.
 Package/native ceilings remain five/seven per target; Mac use is three/three and
 Windows use one/one. CI8 reserves two Windows SDK launches and no package/native

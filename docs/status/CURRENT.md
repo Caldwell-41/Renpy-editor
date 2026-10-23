@@ -11,8 +11,8 @@ The guarded Mac prototype and its review are published through `aded9c8`. Its fo
 matched GL2 images and bounded hidden/focus observation pass; it needed forced
 termination. Production still uses the software helper. CI7 failed before compiler
 startup because of command quoting; no SDK work ran. Reviewed correction `3d7bac8`
-uses direct PowerShell setup/compiler calls. CI8 will repeat the bounded Windows
-private-desktop GPU, cooperative-stop and startup-refusal probe. Both review axes
+uses direct PowerShell setup/compiler calls. [CI8](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39905615261) is running at
+`1cc4e8e` for the same Windows private-desktop GPU, stop and refusal probe. Both review axes
 have no remaining findings; actual Windows capability remains unproved.
 
 [Integration evidence](../tasks/evidence/canvas-rendering.md#gpu-production-integration-and-shutdown-2026-10-23)
