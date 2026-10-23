@@ -409,3 +409,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   axes report no findings. The rejected attempt remains charged. Actual Windows
   execution remains pending under the owning evidence record.
 - **Evidence:** [Matched comparison continuation](../tasks/evidence/canvas-rendering.md#mac-matched-comparison-and-dispatch-correction).
+
+## P05. Canvas image updates cancel a captured drag
+
+- **Class/search:** product interaction; `showFrame`, `append(target)`,
+  `lostpointercapture`, `Move cancelled`, jumping frame, unclear drag target.
+- **Cause:** reattaching an existing selection target on helper-image delivery
+  drops pointer capture and cancels movement. The outline also waits for helper
+  images; child selection targets intercept clicks over parts of the frame.
+- **Verification:** the real controller/Chrome diagnostic reproduces capture loss.
+  Skipping existing-node reattachment in the browser preserves capture. Production
+  correction and native smoothness remain pending. The separate probe-clamping
+  correction passes both parent bounds with exact source/geometry/Undo checks.
+- **Evidence:** [Probe bounds and drag diagnosis](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis).

@@ -2,50 +2,51 @@
 
 ## Active L17 integration handover
 
-Continue #36 on `codex/phase3b-screen-designer`. Local correction `ea09e2f`
-preserves `error.code` for the existing read-only busy retry. Writes, deadlines
-and production rendering are unchanged. Rehearsal 07 reproduces the old defect;
-rehearsal 08 passes all eight stages. Types, frontend 227 and desktop 38 pass.
-Original sandbox loopback failures are retained. Independent Standards and Spec
-reviews have no correction findings.
+Continue #36 on `codex/phase3b-screen-designer`. Local correction `19ea87b`
+fixes the probe's expected movement clamping and retains down/last-move/up inputs
+on failure. Rehearsal 10 reproduces the original source mismatch; 11/12 pass both
+bounds, all eight stages, exact accepted source/geometry and Undo restoration.
+Explicit boundary mode holds image responses until pointer release to isolate the
+oracle. The default rehearsal retains ordinary image delivery and interior dragging.
+Types, 13 focused Screens tests, 227 frontend tests, 38 desktop tests and three
+evidence-admission tests pass. Independent Standards and Spec reviews have no findings.
 
-Signed Mac package 2 matches `ea09e2f` and passes strict identity, installer and
-rehashed-artifact checks. Manual-03 passes all six keyboard stages, including the
-previously failing resize and subsequent movement. It fails at `drag-frame` with
-`Accepted source did not settle`; dragging resize is not reached. The user reports
-an unclear target, initial reluctance and a jump, and calls dragging unintuitive.
-This is not a smoothness pass. Final source changes only alignment to 0.725/0.7.
-All cleanup owners pass, fallback cleanup is empty and no process remains.
+Diagnosis 03 reproduces production-path capture loss in Chrome: `showFrame`
+reattaches the existing frame target, dropping capture and cancelling the drag.
+A browser-only intervention that skips that reattachment preserves capture across
+subsequent movement/images. Movement outlines wait for helper image delivery;
+text and vertical-group targets intercept clicks over parts of the frame, including
+its blank center. All have the same pointer cursor. Production code is unchanged.
+This is a controlled mechanism diagnosis, not native timing or smoothness acceptance.
+Manual-03's exact gesture remains unreconstructed. Its six keyboard passes and
+adverse drag observation remain valid under their original package/candidate.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#busy-read-correction-and-native-continuation)
-owns original attempts, hashes and diagnosis. Ignored root is
-`.toolchains/canvas-proof/native-feedback-2026-10-23/`. Preserve manual-01/02/03
-and rehearsals 07/08. None of their one-use launchers may be replayed. No fixture,
-CI run or watcher is pending. Publication remains `ccebf3e`; correction/package
-and evidence are local only. No PR, merge or release is selected.
+[Evidence](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis)
+owns attempts, traces and limits. Ignored root is
+`.toolchains/canvas-proof/native-feedback-2026-10-23/`. Preserve manual-01/02/03,
+rehearsals 07..12, all three diagnosis attempts, scripts, logs and `usage.json`.
+Every cleanup owner passes; no process, fixture, CI run or watcher remains pending.
+Never replay a one-use manual launcher. Signed package 2 remains the earlier
+`ea09e2f` candidate; it does not contain the new probe correction. No package/native
+attempt ran in this continuation. Code/evidence are local only; remote publication
+remains `ccebf3e`. No PR, merge or release is selected.
 
-Next diagnose the drag failure through the existing controller seam. Production
-clamps movement to the parent bounds; the probe predicts unbounded movement.
-The first native drag appears to reach those bounds, but individual pointermove
-coordinates were not retained, so the exact first-gesture mismatch is unproved.
-Rehearse a boundary drag before changing the oracle. Investigate the reported
-native jump and unclear target separately; do not treat an oracle correction as
-product acceptance. Non-trivial interaction changes need Design Lab review under
-the user's standing instructions. No second correction/retry has been made.
+Next work is a production capture-preservation correction and Design Lab review
+of movement feedback/drag-target alternatives before non-trivial interaction changes.
+The requested probe fix and diagnosis are complete. Native drag/resize, independent
+warm p95 <=100 ms presentation, Windows and whole-ticket acceptance remain pending.
+No recorder/input-driver or capture permission change is approved. Do not rerun
+accepted matched rendering or infer native acceptance from Chrome receipts.
 
-Original allowance is local 24, CI 3 and per target packages 3, native launches 6,
-SDK launches 12; ceilings are 36, 4, 4, 9, 18. Current use is local 26, CI 0;
-Mac packages 2, native 3, SDK 11; Windows zero. Local contingency was announced
-before batch 25. Report SDK contingency separately before exceeding 12.
-`usage.json` and #36 own cumulative accounting. Earlier allowances remain closed.
-
-Preserve actual physical observations separately from functional receipts, whose
-`nativeInputQualified:false` flag remains unchanged. Numerical warm p95 <=100 ms
-still needs independently timestamped inputs and captured visible results. No
-recorder/input driver or capture permission change is approved. Windows remains
-a separate target. Drag/resize smoothness, numerical timing and whole-ticket
-acceptance remain pending. Do not rerun accepted matched rendering. Preserve
-unrelated policy edits and protected recovery below.
+Original allowance remains local 24, CI 3 and per target packages 3, native launches 6,
+SDK launches 12; ceilings are 36, 4, 4, 9, 18. Final use is local 33, CI 0;
+Mac packages 2, native 3, SDK 18; Windows zero. Three local batches remain; SDK
+allowance is exhausted and further SDK launches require an explicit supplement.
+Local contingency began before batch 25 and SDK contingency was announced before
+attempt 13. Local `usage.json` and evidence own current accounting. The prepared
+`issue36-clamp-closeout.md` body was rejected by automatic approval review for lack
+of explicit payload/destination permission. #36 still has the preceding result and
+counts; publication awaits the user. Earlier allowances stay closed. Preserve unrelated policy edits and the protected recovery below.
 
 ## Earlier canvas decision closeout
 

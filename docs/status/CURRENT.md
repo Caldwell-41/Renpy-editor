@@ -1,25 +1,27 @@
 # Current status
 
-## L17 busy-read fix verified; native drag check fails
+## L17 probe bounds verified; drag causes reproduced
 
-2026-10-23: Local correction `ea09e2f` preserves the probe's structured error code.
-The controller rehearsal reproduces the old failure and passes after the fix.
-Types, 227 frontend tests, 38 desktop tests and independent Standards/Spec reviews
-pass. Signed package 2 passes identity and installer checks.
+2026-10-23: Local correction `19ea87b` clamps the probe's expected movement to
+parent bounds and retains gesture inputs on failure. The controller rehearsal
+reproduces the old source mismatch; both boundary directions now pass exact source,
+geometry and Undo checks. Types, 227 frontend tests, 38 desktop tests and independent
+Standards/Spec reviews pass.
 
-Manual-03 passes all six keyboard stages, including resize and movement, then
-fails at dragging with `Accepted source did not settle`. The user reports an
-unclear drag target, initial reluctance and a jump. Read-only inspection also finds
-that the probe omits production's movement clamping; that does not resolve the
-usability finding. Drag/resize acceptance, numerical presentation and Windows
-proof remain pending. Cleanup passes and no process or run remains active.
+Separate controller diagnosis shows that helper-image updates reattach the drag
+target, lose pointer capture and cancel movement. The outline waits for the helper
+image, and child selection targets intercept parts of the apparent frame. These
+explain reproducible jumps and unclear dragging; manual-03's exact native gesture
+remains unreconstructed. Production interaction is unchanged. Native drag/resize,
+numerical presentation and Windows acceptance remain pending.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#busy-read-correction-and-native-continuation)
-owns results and hashes; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns continuation. Use is local 26/24, CI 0/3; Mac packages 2/3, native 3/6,
-SDK 11/12; Windows zero. Local contingency began before batch 25; original
-ceilings remain 36, 4, 4, 9, 18. Earlier allowances stay closed. Publication
-remains `ccebf3e`; unrelated policy edits remain unstaged.
+[Evidence](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis)
+owns traces, failures and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns recovery. Use is local 33/24 (ceiling 36), CI 0/3; Mac packages 2/3,
+native 3/6, SDK 18/12 (ceiling 18); Windows zero. SDK allowance is exhausted.
+No process/run remains active. Code/evidence are local only; publication remains
+`ccebf3e`. The prepared #36 update awaits publication permission after automatic
+approval review rejected the external write. Unrelated policy edits remain unstaged.
 
 ## L17 matched rendering passes on both targets
 

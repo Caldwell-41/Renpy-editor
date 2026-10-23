@@ -2608,3 +2608,93 @@ Code is local only, published baseline remains `ccebf3e`, and #36 stays open.
 CURRENT/HANDOVER retain historical acceptance and unrelated policy/recovery sections,
 so their word counts remain above the soft targets; this continuation replaces only
 the active #36 sections and stages no unrelated policy hunks.
+
+### Probe movement bounds and drag diagnosis
+
+The user selected correction of the probe's movement clamping and a separate drag
+usability diagnosis on 2026-10-23. Local commit `19ea87b` changes only the input
+probe and its controller rehearsal. Production movement/rendering are unchanged.
+The existing native-feedback allowance continues; historical allowances stay closed.
+
+The probe now clamps its snapped expected frame origin to x=0..640 and y=0..360,
+matching the bounded 1280x720 Help fixture and its 640x360 frame. It retains the
+pointer-down, last-move and pointer-up inputs, scale and expected geometry in the
+failure report. This addresses the missing inputs in manual-03 without treating
+that earlier native gesture as reconstructed.
+
+All receipts below remain under ignored
+`.toolchains/canvas-proof/native-feedback-2026-10-23/`.
+
+| Attempt | Result and scope |
+| --- | --- |
+| Rehearsal 09 | Normal image delivery cancels the held boundary drag before oracle readback. The driver times out awaiting resize; the screenshot shows `Move cancelled. No source was written.` This is a separate interaction defect. |
+| Rehearsal 10 | Hold helper image responses until pointer release to isolate clamping. The original oracle fails at `drag-frame` with `Accepted source did not settle`, after all six keyboard stages pass. |
+| Rehearsal 11 | Corrected oracle passes all eight stages. A displacement of 608/328 game pixels clamps the origin to 640/360. Exact source, fresh geometry and Undo restoration pass. |
+| Rehearsal 12 | Corrected oracle passes all eight stages. A displacement of -920/-500 clamps the origin to 0/0. Exact source, fresh geometry and Undo restoration pass. |
+| Diagnosis 01 | The first diagnostic assertion expected the shifted frame to remain visible; cancellation had already restored it. Failed attempt retained. |
+| Diagnosis 02 | Normal reattachment cancels; the browser-only intervention preserves capture. A diagnostic assertion incorrectly treats the previous cancellation message as a new cancellation. Its partial trace proves capture survives two image updates. Failed attempt retained. |
+| Diagnosis 03 | Corrected event-based assertions pass both cases, retaining the hit map and full bounded traces. Normal reattachment loses capture; skipping existing-node reattachment preserves it until explicit Escape. |
+
+The red/green command is `node tests/canvas-input-probe.browser.mjs` from `app`,
+with the checkout toolchain, a fresh `LOOMLIGHT_CANVAS_EVIDENCE` directory and
+`LOOMLIGHT_CANVAS_MOVE_BOUNDARY=max` or `min`. Upper-bound runs initially used the
+same max path as the temporary default; the committed test restores ordinary
+interior dragging and normal image delivery as the default. Only explicit boundary
+mode holds image replies. Literal endpoint assertions independently check each
+bound. These isolated tests do not qualify normal drag feedback or native input.
+
+The retained `diagnose-drag.mjs` drives the same production UI/controller/helper.
+It pauses the guided probe at the drag stage and compares normal DOM reattachment
+with a browser-only suppression of reattaching existing selection targets. It
+holds one image response for 100 ms to separate pointer input from image delivery.
+That artificial delay is not a performance measurement. No diagnostic patch enters
+production files. The first two versions and their failures remain retained.
+
+The third diagnosis establishes these causes at the controller/browser layer:
+
+- Movement updates only the draft coordinates immediately. The outline waits for
+  `showFrame` to receive a helper image. With image delivery held, the pointer moves
+  32/16 CSS pixels while the frame stays at 424/372. Delivery moves it to 456/388.
+- `showFrame` calls `canvas.append(target)` for an already attached frame target.
+  The browser drops its pointer capture, invoking `cancelMove`. The frame jumps
+  back to 424/372 before the mouse is released. Suppressing that reattachment
+  preserves capture through the next move and image update to 464/396. Escape
+  then cancels deliberately. Final source alignment remains 0.5/0.5.
+- Hit testing finds the frame inset draggable, visible text owned by a text target,
+  and even the blank center owned by the vertical-group target. The latter two have
+  no movement handler. All three use the same pointer cursor, with no distinct
+  visible drag affordance. This supports the user's report of an unclear target.
+
+These results explain reproducible reluctance and jumps in the production path.
+They do not identify every event in manual-03 or qualify WKWebView presentation.
+A production correction should preserve capture across image updates. Immediate
+movement feedback and a clear frame drag target need Design Lab alternatives and
+user approval under the standing visual-design instructions. No such design or
+production change is selected by this diagnosis-only continuation.
+
+Typechecking, all 13 focused Screens tests, 227 frontend tests, 38 desktop tests
+and three canvas evidence-admission tests pass. The first full frontend run is
+retained as 226/227: the inherited Python lacks `tomllib`. The supported Python
+rerun passes all 227 without a code change. Both independent Standards and Spec
+reviews of `fe9df78...19ea87b` report zero findings. JavaScript syntax and whitespace
+checks pass. Every rehearsal/diagnostic passes all three cleanup owners, including
+failed attempts; process inspection finds no remaining editor/helper/driver.
+
+Final continuation use is local 33/24 (ceiling 36), CI 0/3 (ceiling 4); Mac
+packages 2/3, native launches 3/6 and SDK launches 18/12 (ceiling 18); Windows zero.
+Local contingency was already active; SDK contingency was announced before attempt
+13. SDK allowance is exhausted. Three local batches remain within the original
+ceiling. No new package, native launch or CI dispatch ran in this continuation.
+No process, fixture or watcher remains pending. Code and detailed evidence are
+local only; publication remains `ccebf3e`. #36 stays open for production drag fixes,
+native drag/resize acceptance, numerical presentation and Windows proof. Further
+SDK execution requires an explicit supplement. Unrelated policy edits and protected
+recovery remain untouched. CURRENT/HANDOVER still exceed their soft size targets
+because they retain separate pending acceptance and protected recovery records.
+
+The prepared #36 body update was not published. Automatic approval review rejected
+sending this local evidence/status payload to GitHub without explicit permission
+for the payload and destination. The prepared body remains ignored as
+`issue36-clamp-closeout.md`; the remote issue still carries the preceding result
+and counts. Local `usage.json` and this evidence own current accounting until
+publication is authorized. No workaround or external retry was attempted.
