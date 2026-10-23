@@ -1206,3 +1206,99 @@ remains a proposal subject to ADR 0021 decision review.
 The diagnostic commit and this final validation/review receipt remain local. No new
 push is claimed. #36 records the supplement and final result; B07/P3B receive the
 compact status reconciliation. Existing publication through `6b74c61` is unchanged.
+
+## Hidden GPU-helper capability test, 2026-10-23
+
+The user selected the next GPU-helper test and required it to stay hidden and
+retain keyboard focus in the existing application. The experiment continues from
+local `d34676f` within the existing allowance, with seven local batches and one
+Mac SDK process remaining at entry. This selects a capability test, not a renderer
+acceptance, tolerance or weaker gate. Production code is unchanged.
+
+### Preparation and proposed mechanism
+
+Ignored `.toolchains/canvas-proof/hidden-gpu-2026-10-23/` retains exact native and
+renderer sources, binaries, upstream source, reservations, process output, observer
+receipts and the later unqualified guard correction. The pinned 8.5.3
+`renpy/pygame/display.pyx` creates a hidden SDL window, then unconditionally calls
+`SDL_ShowWindow`. The `gl2_modify_window_flags` hook alone cannot keep it hidden.
+[SDL's Mac background hint](https://wiki.libsdl.org/SDL2/SDL_HINT_MAC_BACKGROUND_APP)
+prevents forced application activation; it does not suppress window display.
+
+The disposable native adapter attempted to replace ordering/key-window methods
+on the helper process's `SDLWindow` class before display creation and require
+prohibited application activation. It made no change to SDK files, system settings,
+signing policy or another process. A cloned production helper renderer loaded the
+adapter in early initialization, refused software fallback and used GPU export.
+It retained the production JSON request loop and source-derived public Help plan.
+The test intended four aspect/state frames and external observation over the whole
+SDK lifetime. No project source or action entered this private helper.
+
+An independent AppKit/CoreGraphics observer started before the SDK process. It
+recorded foreground application changes and visible windows owned by the helper,
+without capturing screen pixels or window titles. Native compilation and its
+zero-SDK observer preflight passed. An initial Python bytecode preflight could not
+write the system cache under the sandbox; an in-memory syntax check passed instead.
+No permission or machine setting was changed to make that check pass.
+
+### Actual SDK result and failure
+
+SDK process 32 fails. The native installation function returned refusal before
+any requested helper frame completed. Its original return value did not identify
+which precondition failed: main thread, native class, existing window, activation
+policy or method installation. The exact cause remains unknown. No GPU image or
+pixel agreement is established by this run.
+
+The prototype raised `RuntimeError` on refusal. Ren'Py's graphical exception handler
+then opened an error window. This violates the user's hidden-window requirement.
+The agent's failure path caused that violation; a successful normal-start design
+would not excuse it. The controller retained the full trace and expired its
+15-second frame deadline, then stopped the owned process group. Driver exit is 1.
+
+| Criterion | Observed result |
+| --- | --- |
+| Hidden throughout startup and rendering | Failed; 1,508 of 1,683 external samples report a visible helper-owned window |
+| Existing application's foreground ownership | No change observed; zero activation events and zero changed-foreground samples |
+| Keyboard focus | No foreground takeover observed; no physical-keyboard or complete key-window proof is claimed |
+| Four GPU frames through the helper | Failed; zero frames completed |
+| External observation | 15.246 seconds, no inventory failure, maximum sample gap 33.468 ms |
+| Cleanup | Helper and observer exited; diagnostic game, bytecode and saves removed |
+
+The visible window was error UI. This is neither a hidden-startup pass nor a
+rendering pass. The external observer supplies sampled visibility and application
+activation evidence; it is not continuous physical-keyboard observation.
+
+### Unqualified correction and offline checks
+
+The exact failed native source/binary and renderer are preserved under `failed-*`
+names. A corrected prototype catches native loading/installation failure, writes
+a refusal receipt and directly exits with code 72. It bypasses Ren'Py's graphical
+exception handler, including when writing the receipt fails. Later native-window
+violations use the same direct-exit path. Native installation-stage instrumentation
+was added and compiled; it does not establish the cause of the original refusal.
+
+Two plain-Python subprocess checks execute the actual corrected bootstrap with a
+simulated native refusal or missing library. Both exit 72, write the expected
+refusal receipt and produce no traceback. These checks launch no SDK and prove
+only that bootstrap failure path under the simulated inputs. The corrected native
+adapter and renderer have not run in Ren'Py. They supply no repaired hidden-startup,
+GPU, focus or production proof. Production helper behavior remains unchanged.
+
+### Allowance, review and publication
+
+Batches 70-76 cover preparation and source inspection, native prototype, harness
+preflight, the single SDK test, diagnosis/offline guard correction, independent
+review and final corrections/validation/commit. Cumulative use reaches 76/76 local
+batches and 32/32 Mac SDK processes. CI remains 6/6; Mac packages/native editor
+remain 3/5 and 3/7; Windows packages/native/SDK remain 1/5, 1/7 and 10/20.
+No contingency resets or further run is authorized. No owned operation/watch remains.
+A new native/SDK test needs an explicit supplement. Keep #36/B07/B08 open.
+
+Automatic approval review rejected the attempted #36 selection update. It cited
+public issue publication without authorization to an unverified destination. The
+upstream read bundled in that rejected call did not execute; a separate read-only
+upstream-source request later succeeded. No alternate publication route was used.
+The selection, failed result and status reconciliation remain local. Public records
+still end with the previous completed diagnosis and GPU proposal. No new push,
+issue write, PR, merge or release is claimed. Unrelated policy edits and protected
+recovery remain intact.

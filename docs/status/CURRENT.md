@@ -1,34 +1,33 @@
 # Current status
 
-## L17 producer diagnosis complete; GPU correction proposed
+## L17 hidden GPU-helper test failed
 
-2026-10-23: The user supplemented [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-with 16 local batches and 8 Mac SDK launches. The matched experiment reproduces
-retained Mac rendering differences and isolates them to backend/export and drawable
-sampling. Within each backend, the existing source-derived helper graph and original
-Help screen have identical RGBA pixels at both aspects and control states.
-[The diagnosis](../tasks/evidence/canvas-rendering.md#matched-producer-diagnosis-2026-10-23)
-owns exact counts, controls, original invalid captures and the correction proposal.
+2026-10-23: The user selected GPU rendering in the Ren'Py canvas helper and required
+hidden operation without keyboard focus theft. SDK process 32 failed before any
+frame completed. The native adapter refused initialization; its failure path then
+allowed Ren'Py to open an error window. External observation confirms the hidden
+requirement failed and records no foreground application change.
+[The failed capability test](../tasks/evidence/canvas-rendering.md#hidden-gpu-helper-capability-test-2026-10-23)
+owns exact evidence, the unisolated refusal cause and the corrected guard's limits.
 
-Keep the existing source mapping. A GPU helper matching deliberate preview is
-proposed for decision review; hidden startup without focus theft must pass first.
-No production renderer change, tolerance or weaker requirement is selected.
-Windows fidelity, native timing/focus/physical input, startup acceptance and smooth
-helper dragging remain unqualified. #36/B07/B08 and full 3B acceptance stay open.
+The prototype now exits directly on native startup refusal. Two zero-SDK simulated
+failure checks pass; the corrected adapter/renderer remain unqualified in Ren'Py.
+Production code is unchanged. The earlier matched producer diagnosis supports a
+GPU-helper direction for the bounded Help composition, but hidden startup and
+GPU rendering in the helper remain unproved. Windows fidelity, native timing,
+physical keyboard, startup acceptance and smooth real helper dragging remain open.
+Keep #36/B07/B08 and full 3B acceptance open.
 
-Bounded movement product commits `7729ccf`/`a91be99` and closeout through `6b74c61`
-are published; the earlier public-push blocker is resolved in #36. Core/UI/controller
-proof retains its fixture-image limits. CI6 at `571dfa9` remains the earlier
-functional result and does not qualify later movement. This diagnosis changes no
-product code and supplies no new native-editor or Windows acceptance.
+Cumulative use is 76/76 local batches, 32/32 Mac SDK processes and 6/6 CI. Mac
+packages/native editor remain 3/5 and 3/7; Windows packages/native/SDK remain
+1/5, 1/7 and 10/20. A further test needs an explicit allowance supplement. Helper and observer have
+exited; the game fixture is removed. No operation/watch remains pending.
 
-Cumulative use is 69/76 local batches, 31/32 Mac SDK launches and 6/6 CI.
-Mac packages/native remain 3/5 and 3/7; Windows packages/native/SDK remain 1/5,
-1/7 and 10/20. Seven local batches and one Mac SDK launch remain, with no new
-contingency. Diagnostic fixtures/processes are removed; retained evidence is ignored.
-No operation/watch is pending. The diagnostic closeout remains local;
-[HANDOVER](HANDOVER.md#active-l17-proof-handover) owns continuation and decision gates.
-Preserve unrelated policy edits and protected recovery below.
+Product/movement publication through `6b74c61` remains unchanged. The producer
+diagnosis commits and this test record are local. Automatic approval review blocked
+the #36 selection update as public publication without authorization; no workaround
+write or push occurred. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns the
+next action, publication blocker and protected recovery. Unrelated policy edits remain.
 
 ## Earlier canvas decision closeout
 
