@@ -12,7 +12,9 @@ matched GL2 images and bounded hidden/focus observation pass; it needed forced
 termination. Production still uses the software helper. The new Windows probe at
 `848d50f` tests a private desktop, GL2 frames, cooperative stop and safe refusal
 before production integration. Portable generation/admission checks, typecheck and
-repository validation pass. Windows execution has not started.
+repository validation pass. [CI7](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39905179001),
+attempt 1 at `3f04698`, is in progress. Only the capability job is selected; its
+result and artifacts require audit before production integration.
 
 [Integration evidence](../tasks/evidence/canvas-rendering.md#gpu-production-integration-and-shutdown-2026-10-23)
 owns the current candidate, review, pending operation and cumulative usage.

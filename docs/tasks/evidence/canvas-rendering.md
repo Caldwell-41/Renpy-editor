@@ -1520,10 +1520,38 @@ Review was read-only and performed no SDK, native or CI execution.
 
 Batches 83-87 cover fresh state/tracker/contracts, Windows mechanism investigation,
 probe implementation/checkpoint, independent review/correction, then publication and
-CI preparation. Current use is local 87/106, Mac SDK 34/46, CI 6/9 and Windows SDK 10/24. Package/native use
-is unchanged. CI7 will reserve two Windows SDK launches and no package/native-editor
-launches. No CI run or watcher is pending at this preparation checkpoint.
+CI preparation. Current use is local 87/106, Mac SDK 34/46 and CI 7/9. Windows SDK
+use is 10/24, with two further launches reserved for CI7. Package/native use is
+unchanged. CI7 selects no package/native-editor launch.
 
 CURRENT and HANDOVER still exceed their soft word targets because they retain
 unrelated policy work, earlier pending acceptance and protected recovery. This
 update replaces only their live L17 sections; no protected recovery text changes.
+
+### CI7 pending operation
+
+The reviewed probe/routing commits are `2ca7a7f`, `e51eb97` and `848d50f`.
+Documentation checkpoint `3f04698e129a1fcb2ecdb00c5940113ff579b0d2` is published and
+verified by remote read-back. [CI7 run 39905179001](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39905179001),
+attempt 1, tests that exact SHA on `codex/phase3b-screen-designer` through registered
+workflow `391374211` (`screens-source.yml`). Inputs are ordinal `7`,
+`canvas_gpu_capability=true`, `canvas_helper=false`, `owned_blank=false`.
+
+At 2026-10-23 05:20:16 UTC (15:20:16 AEST), the run is in progress. The selection
+job passed; the Windows capability job is running. The three old qualification
+jobs are deliberately excluded, not accepted by this run. No result is inferred.
+
+On terminal completion, verify run/attempt/SHA and required steps, download the
+privacy-scanned artifacts and audit the native owner, all four frames, exact
+refusal/stop receipts, helper exits, job/desktop/fixture cleanup and SDK count.
+Retain failures and classify them before correction. Artifact retention is seven
+days from upload; an actual artifact ID and expiry are not yet available. This
+capability cannot accept the full production or rendering requirement.
+
+The selected wait route is ci-watch in this same chat. Registration is attempted
+after this publication receipt. Its ignored `ci7-watch-registration.json` under
+`.toolchains/canvas-proof/gpu-integration-2026-10-23/` records the actual startup
+acknowledgment; only `watcher_running: true` establishes an active watch. If it
+cannot register, leave the run identity intact and use manual same-chat resume.
+The watcher event is a cue for audit, not proof of success. Later documentation
+commits do not replace CI7's tested SHA.

@@ -17,13 +17,20 @@ selected bootstrap-refusal reason and exit 72. Native resources and fixtures mus
 close. This does not qualify production, matched fidelity or physical keyboard input.
 
 [Integration evidence](../tasks/evidence/canvas-rendering.md#gpu-production-integration-and-shutdown-2026-10-23)
-owns detailed checks, review and the operation record. Windows CI has not yet been
-dispatched. After review, publish the scoped candidate and dispatch ordinal 7, then
-register ci-watch and resume this same chat for terminal artifact audit. No PR,
-merge, release, signing-policy or broader renderer requirement change is selected.
+owns detailed checks, review and the operation record. The scoped checkpoint is
+published at `3f04698e129a1fcb2ecdb00c5940113ff579b0d2`. CI7 run `39905179001`,
+attempt 1, tests that exact SHA through workflow `391374211` with ordinal `7`,
+`canvas_gpu_capability=true`, `canvas_helper=false`, `owned_blank=false`. It was
+in progress at 2026-10-23 05:20:16 UTC (15:20:16 AEST). Selection validation passed;
+only the capability workload runs. ci-watch registration follows this receipt;
+the ignored startup receipt owns actual registration status. Require confirmed
+`watcher_running: true` before claiming an active watch, otherwise use manual
+same-chat resume. On completion, audit the exact run and both case artifacts.
+No PR, merge, release, signing-policy or broader requirement change is selected.
 
-Cumulative ceilings are local 106, Mac SDK 46, CI 9 and Windows SDK 24. Use before
-dispatch is local 87, Mac SDK 34, CI 6 and Windows SDK 10. Package/native ceilings
+Cumulative ceilings are local 106, Mac SDK 46, CI 9 and Windows SDK 24. Use at dispatch
+is local 87, Mac SDK 34, CI 7 and Windows SDK 10, with two more Windows launches
+reserved for CI7. Package/native ceilings
 remain five/seven per target; Mac use is three/three and Windows use one/one.
 CI7 reserves two Windows SDK launches. Failures and retries stay charged, with no
 new contingency. #36 owns the live allowance; evidence owns detailed batches.
