@@ -2,44 +2,50 @@
 
 ## Active L17 integration handover
 
-The user requested a new-agent handoff after auditing signed Mac manual-02.
-Continue #36's selected physical keyboard, native presentation timing and smooth
-manipulation outcome. Read the [attempt audit](../tasks/evidence/canvas-rendering.md#manual-native-attempts-and-transfer)
-for the concrete failure and retained evidence; do not repeat the completed rendering
-comparison or whole historical suite.
+Continue #36 on `codex/phase3b-screen-designer`. Local correction `ea09e2f`
+preserves `error.code` for the existing read-only busy retry. Writes, deadlines
+and production rendering are unchanged. Rehearsal 07 reproduces the old defect;
+rehearsal 08 passes all eight stages. Types, frontend 227 and desktop 38 pass.
+Original sandbox loopback failures are retained. Independent Standards and Spec
+reviews have no correction findings.
 
-Current code is local commit `10658bf7b75ae27a2779c01ac301245be1db979f`, with preparation
-records at `5abd92d`; remote publication remains `ccebf3e`. The same signed Mac
-package 1 was used for both manual attempts. Manual-01 was closed by the user at
-step 1 and remains incomplete. Manual-02 passes typing, Escape, Enter acceptance
-and keyboard Undo, then fails during resize on `source.open: RUNTIME_BUSY`.
-The resize saved only width 640 to 641. All cleanup owners pass, fallback cleanup
-is empty and no app/helper process remains. Movement and smoothness were not reached.
+Signed Mac package 2 matches `ea09e2f` and passes strict identity, installer and
+rehashed-artifact checks. Manual-03 passes all six keyboard stages, including the
+previously failing resize and subsequent movement. It fails at `drag-frame` with
+`Accepted source did not settle`; dragging resize is not reached. The user reports
+an unclear target, initial reluctance and a jump, and calls dragging unintuitive.
+This is not a smoothness pass. Final source changes only alignment to 0.725/0.7.
+All cleanup owners pass, fallback cleanup is empty and no process remains.
 
-The next small correction is in `app/src-tauri/src/canvas_input_probe.js`: preserve
-structured `error.code` when throwing so `__loomlightProbeRetryBusy` can retry the
-pre-dispatch busy read. Rehearse that read refusal through the existing actual
-controller seam; never replay accepted writes. Then review and prepare a matching
-signed package before another native attempt. The user requested audit/handoff,
-so no correction or restart was made after manual-02. Preserve both failed records.
-The old one-use launchers refuse replay; a next run needs a fresh attempt identity.
+[Evidence](../tasks/evidence/canvas-rendering.md#busy-read-correction-and-native-continuation)
+owns original attempts, hashes and diagnosis. Ignored root is
+`.toolchains/canvas-proof/native-feedback-2026-10-23/`. Preserve manual-01/02/03
+and rehearsals 07/08. None of their one-use launchers may be replayed. No fixture,
+CI run or watcher is pending. Publication remains `ccebf3e`; correction/package
+and evidence are local only. No PR, merge or release is selected.
 
-Original allowance remains local 24, CI 3 and per target packages 3, editor launches 6,
-SDK launches 12. Absolute ceilings are 36, 4, 4, 9, 18. Current use is local 19,
-CI 0; Mac packages 1, native 2, SDK 8; Windows zero. No contingency. Keep cumulative
-accounting in #36 and ignored `native-feedback-2026-10-23/usage.json`; sessions do not
-renew it. Earlier integration and matched-rendering allowances remain closed.
+Next diagnose the drag failure through the existing controller seam. Production
+clamps movement to the parent bounds; the probe predicts unbounded movement.
+The first native drag appears to reach those bounds, but individual pointermove
+coordinates were not retained, so the exact first-gesture mismatch is unproved.
+Rehearse a boundary drag before changing the oracle. Investigate the reported
+native jump and unclear target separately; do not treat an oracle correction as
+product acceptance. Non-trivial interaction changes need Design Lab review under
+the user's standing instructions. No second correction/retry has been made.
 
-The user prefers a lower-effort physical pass where possible. That can establish
-keyboard delivery and subjective smoothness on the tested target, with their actual
-observations. It cannot establish warm p95 <=100 ms. No separate recorder/input driver
-or capture permission change was approved. The shell process lacks native capture/
-input permissions, and slow CUA screenshots do not qualify presentation. Windows
-remains a separate target. Leave functional probe flags unchanged and supplement
-with external native/human evidence. No native whole-ticket acceptance is claimed.
+Original allowance is local 24, CI 3 and per target packages 3, native launches 6,
+SDK launches 12; ceilings are 36, 4, 4, 9, 18. Current use is local 26, CI 0;
+Mac packages 2, native 3, SDK 11; Windows zero. Local contingency was announced
+before batch 25. Report SDK contingency separately before exceeding 12.
+`usage.json` and #36 own cumulative accounting. Earlier allowances remain closed.
 
-No process, fixture, CI run or watcher remains pending. Preserve unrelated policy
-edits and protected native recovery below. No PR, merge or release is selected.
+Preserve actual physical observations separately from functional receipts, whose
+`nativeInputQualified:false` flag remains unchanged. Numerical warm p95 <=100 ms
+still needs independently timestamped inputs and captured visible results. No
+recorder/input driver or capture permission change is approved. Windows remains
+a separate target. Drag/resize smoothness, numerical timing and whole-ticket
+acceptance remain pending. Do not rerun accepted matched rendering. Preserve
+unrelated policy edits and protected recovery below.
 
 ## Earlier canvas decision closeout
 

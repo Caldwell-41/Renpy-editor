@@ -1,22 +1,25 @@
 # Current status
 
-## L17 native input probe needs a harness correction
+## L17 busy-read fix verified; native drag check fails
 
-2026-10-23: The user's second signed Mac manual attempt passes typing, Escape,
-Enter acceptance and keyboard Undo. It stops at keyboard resize on a busy source
-read. The probe drops `error.code`, preventing its existing read-only retry.
-The one-pixel resize is the only saved source change; cleanup passes and no process
-remains. Movement and smoothness were not reached. Numerical presentation and
-Windows evidence remain pending.
+2026-10-23: Local correction `ea09e2f` preserves the probe's structured error code.
+The controller rehearsal reproduces the old failure and passes after the fix.
+Types, 227 frontend tests, 38 desktop tests and independent Standards/Spec reviews
+pass. Signed package 2 passes identity and installer checks.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#manual-native-attempts-and-transfer)
-owns the diagnosis and original attempts;
-[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns continuation.
-The user requested a new-agent handoff. No correction or restart followed the audit.
-Current use is local 19/24, CI 0/3; Mac packages 1/3, native launches 2/6,
-SDK launches 8/12; Windows use is zero. The original ceilings remain 36, 4, 4, 9, 18.
-No contingency was used. Earlier closed allowances remain closed. Code is local at
-`10658bf`; publication remains `ccebf3e`. Unrelated policy edits remain unstaged.
+Manual-03 passes all six keyboard stages, including resize and movement, then
+fails at dragging with `Accepted source did not settle`. The user reports an
+unclear drag target, initial reluctance and a jump. Read-only inspection also finds
+that the probe omits production's movement clamping; that does not resolve the
+usability finding. Drag/resize acceptance, numerical presentation and Windows
+proof remain pending. Cleanup passes and no process or run remains active.
+
+[Evidence](../tasks/evidence/canvas-rendering.md#busy-read-correction-and-native-continuation)
+owns results and hashes; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns continuation. Use is local 26/24, CI 0/3; Mac packages 2/3, native 3/6,
+SDK 11/12; Windows zero. Local contingency began before batch 25; original
+ceilings remain 36, 4, 4, 9, 18. Earlier allowances stay closed. Publication
+remains `ccebf3e`; unrelated policy edits remain unstaged.
 
 ## L17 matched rendering passes on both targets
 

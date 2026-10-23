@@ -2532,3 +2532,79 @@ launches 8/12; Windows use is zero. No contingency was used and the same allowan
 remains open. No process/run/watcher remains pending. The user asked for a new-agent
 handoff; this selects no additional run or capture permission. `10658bf` and `5abd92d`
 remain local, with remote baseline `ccebf3e`. Preserve unrelated policy work.
+
+
+### Busy-read correction and native continuation
+
+Continuation from `ed33d4d` fixes the diagnosed harness defect in local commit
+`ea09e2f`. The RPC wrapper now preserves the backend code on its Error, allowing
+the existing bounded read-only retry to recognize `RUNTIME_BUSY`. Write dispatch,
+retry deadlines, production rendering and qualification flags are unchanged.
+
+The existing production-controller rehearsal injects one busy refusal before
+dispatching the probe's source read at keyboard resize. Rehearsal 07 reproduces
+the exact manual-02 failure after the first four stages pass. Rehearsal 08 with
+the correction retries that read and passes all eight stages, including exact
+accepted source, geometry and restoration. Both attempts pass all three cleanup
+owners. Original failures and results remain in ignored native-feedback evidence.
+These Chrome/controller results do not establish native input or presentation.
+
+Typechecking and all 227 frontend tests pass. The first desktop run passes 24 and
+fails 14 because the sandbox denies loopback binding; the original log is retained.
+The same suite outside the sandbox passes all 38 tests. Repository validation
+passes for 892 files and whitespace checks pass. Independent Standards and Spec
+reviews of `ed33d4d...ea09e2f` find no correction defect. Only the two probe/test
+files are in that commit; unrelated policy edits remain unstaged.
+
+Signed Mac package 2 matches `ea09e2f`. Strict signature verification preserves
+the approved certificate-bound identity, and the mounted installer contains the
+verified app. Rehashed executable SHA256 is
+`bd4c5eaa44393bc4c49b003b6b79bd9b4ecbec9574572f7f3345b39ad3744f5a`; installer SHA256
+is `09fda6d00f7a47aac8aa4a33e20423bcba825b9c96fdc6877535495d46971273`.
+
+The fresh ignored manual-03 launcher verifies package 2, requires an unlocked
+console and no existing Loomlight process, and charges one native/SDK attempt
+before launching. After the user confirmed availability, preflight passed and
+the exact package opened with Width focused at 640. The user supplied all editing
+input. CUA only inspected the window; its initial name-based inspection timed out,
+and exact-package inspection observed step 1. Later inspection reported app exit.
+
+Manual-03 passes the six keyboard stages, including the previously failing resize
+and subsequent one-pixel movement with exact accepted-source/geometry checks.
+The busy-error correction is therefore verified in the signed native package.
+The run then fails at `drag-frame` with `Accepted source did not settle`, exit 1
+after 107.252 seconds and no runner timeout. Resize dragging is not reached.
+
+The user reports that the top-left drag target was unclear, dragging initially
+seemed not to work, then the panel jumped and moved. They found the interaction
+unintuitive. This is adverse usability/smoothness evidence, not a successful drag
+check and not attributed to user error. The probe stayed at the drag stage while
+several gestures occurred. Final retained source changes only `xalign 0.5` to
+`xalign 0.725` and `yalign 0.5` to `yalign 0.7`; restoration was not reached.
+
+Read-only diagnosis also finds a distinct harness mismatch. Production
+`bindMovement` clamps alignment to 0..1; `gestureResult` predicts unbounded
+movement. The first recorded down/up displacement, divided by the logged scale
+262/640, would exceed both available movement ranges. This supports a boundary
+expectation mismatch, but the report omits individual pointermove coordinates,
+which supply the accepted draft. It cannot establish the exact first-gesture
+expectation or explain the reported jump. Do not change production movement or
+relax acceptance based on this report. A focused boundary rehearsal and separate
+investigation of the native drag feedback are the next discriminating checks.
+No second correction or native retry was made in this continuation.
+
+All credential, host and request cleanup owners pass; fallback cleanup is empty.
+Disk checks find no helper/scratch directories, bytecode or saves. Independent
+process inventory finds no editor or Ren'Py process. All three manual attempts and
+the original red/green rehearsals remain retained. No fixture, CI run or watcher
+is pending. Numerical presentation and Windows proof remain unavailable.
+
+Final continuation use is local 26/24, CI 0/3; Mac packages 2/3, native 3/6,
+SDK 11/12; Windows zero. Entry into existing local contingency was reported before
+batch 25. Absolute ceilings remain 36, 4, 4, 9, 18. No new allowance is created.
+Only local batches have used contingency; future SDK use above 12 must report its
+own entry before consumption. No recorder or capture permission change is selected.
+Code is local only, published baseline remains `ccebf3e`, and #36 stays open.
+CURRENT/HANDOVER retain historical acceptance and unrelated policy/recovery sections,
+so their word counts remain above the soft targets; this continuation replaces only
+the active #36 sections and stages no unrelated policy hunks.
