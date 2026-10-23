@@ -10,7 +10,7 @@ export default async function check({page,open}) {
       const target=await move.boundingBox();
       await page.mouse.move(target.x+target.width/2,target.y+target.height/2);await page.mouse.down();
       await page.mouse.move(target.x+target.width/2+24,target.y+target.height/2+16);
-      assert.notEqual(await outline.getAttribute('style'),before,'Guide follows held input');
+      assert.notEqual(await outline.getAttribute('style'),before,`${variant}/${viewport}: guide follows held input`);
       assert.equal(await content.evaluate(e=>e.style.left),'320px','Delayed content stays at previous position');
       await page.keyboard.press('Escape');await page.mouse.up();
       assert.equal(await outline.getAttribute('style'),before,'Escape restores original guide');

@@ -49,8 +49,10 @@ covers 24 variant/state/theme/viewport combinations, with gesture cancellation,
 commit/history, keyboard movement/resize, numeric size, child selection and reload
 checks at wide and compact sizes. Captures are retained in ignored
 `.toolchains/design-lab/pages/canvas-drag/`. The first compact check exposed an
-intrinsic grid-width overflow; the corrected grid passes. Product native acceptance
-and the full ticket remain pending.
+intrinsic grid-width overflow; the corrected grid passes. The full lab runner refuses the existing flow-v1 reference because this checkout
+no longer matches its pinned source. Its approval lock is preserved; the full check
+is incomplete. Approval-record validation and the separate production-build exclusion
+assertion pass. Product native acceptance and the full ticket remain pending.
 
 Before production integration, obtain the exact variant decision, preserve the
 reviewed source/captures and follow [Design integration](../../../app/design-lab/INTEGRATION.md).

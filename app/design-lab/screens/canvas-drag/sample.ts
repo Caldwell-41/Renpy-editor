@@ -155,9 +155,10 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
   };
   root.onkeydown = event => { if (event.key === "Escape") { event.preventDefault(); cancel(); } };
   delay.onchange = () => paint(true);
-  const observer = new ResizeObserver(() => {
+  const fit = () => {
     scale = stage.clientWidth / 1280; game.style.transform = `scale(${scale})`; stage.style.height = `${720 * scale}px`;
-  });
-  observer.observe(stage); paint(true);
+  };
+  const observer = new ResizeObserver(fit);
+  fit(); observer.observe(stage); paint(true);
   return () => { clearTimeout(timer); observer.disconnect(); release(); };
 }
