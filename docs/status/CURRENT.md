@@ -1,30 +1,26 @@
 # Current status
 
-## L17 native lifecycle supplement in progress
+## L17 Windows lifecycle audited; Mac awaits unlock
 
-2026-10-23: The user approved the remaining native lifecycle observations for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36). Production GPU
-integration and cooperative shutdown are published at `7ad845c`; CI10 and its exact
-artifacts are audited. The selected outcome still needs native refusal, project-change,
-application-quit and restart observations on both targets.
-
-The focused probe is reviewed and published at `580d5a4`. Core 407, desktop 38,
-renderer 227 and focused admission/type/workflow/repository checks pass. Signed Mac
-package 6 is verified. The desktop is locked; an unlock request is pending and the
-four-SDK/two-editor Mac sequence has not started.
-
+2026-10-23: Production GPU integration and cooperative shutdown are published.
+The focused native lifecycle candidate for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is `580d5a4`.
 [CI11](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39918738346), attempt 1,
-runs the independent Windows counterpart at that exact candidate. Same-chat ci-watch
-registration follows. [Evidence](../tasks/evidence/canvas-rendering.md#signed-mac-package-6-and-ci11-dispatch)
-owns identities, counts and pending audit;
-[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns continuation.
-Unrelated policy edits remain local and uncommitted.
+and its exact nine-file artifact are audited. Windows passes refusal, helper restart,
+project change, application quit and app restart with normal cleanup. All four bounded
+observation intervals record no visible helper or foreground change.
 
-Current use is local 117/120, CI 11/11, Mac SDK 46/50 and Windows SDK 19/24, with
-four Windows SDK attempts reserved. Mac package/native use is 6/4 against 6/7;
-Windows is 2/2 against 5/7, with one package and two native launches reserved.
-Physical keyboard, matched fidelity, presentation timing and smooth manipulation
-remain separate #36 acceptance gates. No PR, merge or release is selected.
+Signed Mac package 6 is verified, but the desktop is locked. The approved four-SDK,
+two-editor Mac sequence has not started; the unlock request remains pending. This
+keeps the selected both-target outcome unfinished. No CI run or watcher remains pending.
+[Evidence](../tasks/evidence/canvas-rendering.md#ci11-terminal-audit-mac-native-sequence-awaits-unlock)
+owns identities, results and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns continuation. Unrelated policy edits remain local and uncommitted.
+
+Use is local 118/120, CI 11/11, Mac SDK 46/50 and Windows SDK 23/24. Mac package/native
+use is 6/4 against 6/7; Windows is 3/4 against 5/7. No reservations remain. Physical
+keyboard, matched fidelity, presentation timing and smooth manipulation remain separate
+#36 gates. No PR, merge or release is selected.
 
 ## Earlier canvas decision closeout
 

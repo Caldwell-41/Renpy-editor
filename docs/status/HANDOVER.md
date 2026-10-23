@@ -25,21 +25,21 @@ Loomlight processes, reserve four SDK launches and two editor launches, then run
 `app/scripts/run-canvas-lifecycle.py` once against package 6 in a fresh ignored output
 directory, using the verified 8.5.3 SDK archive. No new package build is available.
 
-CI11 run 39918738346, attempt 1, reports the exact candidate. It runs the independent
-Windows counterpart while Mac waits for the available desktop. Same-chat ci-watch
-registration follows; yield immediately when registered. On delivery, acknowledge
-receipt, verify run/attempt/SHA and audit artifacts, lifecycle rows, OS observations,
-actual launches and cleanup. A green workflow alone does not accept the result.
-An unlock reply may resume the Mac sequence while CI is still running; do not dispatch
-another workflow or register a duplicate watcher.
+[CI11's terminal audit](../tasks/evidence/canvas-rendering.md#ci11-terminal-audit-mac-native-sequence-awaits-unlock)
+passes for run 39918738346, attempt 1, at the exact candidate. Watcher delivery is
+acknowledged; artifact 12485948843 and all nine files are verified. Windows passes
+four native lifecycle stages, two actual application exits, bounded hidden/foreground
+observations and all cleanup gates. Its observations do not establish physical keyboard,
+continuous focus or physical GPU acceleration. No workflow or watcher is pending.
 
-Current use: local 117/120, CI 11/11, Mac SDK 46/50, actual Windows SDK 19/24, Mac
-package/native 6/4 against 6/7, Windows 2/2 against 5/7. CI11 reserves four Windows
-SDK attempts, one package and two native launches. Three local batches remain for
-native execution, audit and publication/correction. No further automatic contingency,
-CI dispatch or Mac package build is authorized. The ignored integration ledger retains
-counts, original failures and pending operations. Preserve the current native recovery
-section below and unrelated policy edits.
+The only remaining selected execution is the Mac sequence after unlock, followed by
+its audit and final publication. Keep the exact package 6 executable; later commits
+change documentation only. Do not rebuild or dispatch another workflow. Current use is
+local 118/120, CI 11/11, Mac SDK 46/50, Windows SDK 23/24, Mac package/native 6/4 against
+6/7, and Windows 3/4 against 5/7. All CI11 reservations are charged. Two local batches
+remain for Mac execution and final audit/publication; no further automatic contingency
+is authorized. The ignored integration ledger and receipts retain counts, original
+failures and exact identities. Preserve native recovery below and unrelated policy edits.
 
 ## Earlier canvas decision closeout
 

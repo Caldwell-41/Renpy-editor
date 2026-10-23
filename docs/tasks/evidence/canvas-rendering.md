@@ -2088,3 +2088,62 @@ Mac package/native use is 6/4 against 6/7, Windows 2/2 against 5/7. CI11 reserve
 Windows SDK attempts, one package and two native launches. No further CI dispatch or
 Mac package build is authorized. Three local batches remain for the Mac sequence,
 terminal audit and final publication/correction. All failures remain charged.
+
+### CI11 terminal audit; Mac native sequence awaits unlock
+
+2026-10-23: Same-chat watcher delivery `fd2377386820bad459fd9ae8` is acknowledged.
+[Run 39918738346](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39918738346),
+attempt 1, succeeds at `580d5a46e47d0f140c1f033f8e7e4fe658fea5cc`.
+The current branch differs only in status/evidence documentation, so this result still
+applies. All steps in the selected Windows job and selection check succeed. Other
+unselected jobs are skipped, not treated as passes.
+
+Artifact `12485948843` contains nine files and expires 2026-10-30 at 07:44:43 UTC.
+The downloaded ZIP SHA256 matches GitHub metadata and the upload log:
+`d8790b138c09c8df5259de182dc785516525ac3e70237f306bc620f5992dabcb`.
+The retained candidate and package receipt match the run. Windows x64 executable
+SHA256 is `5587e263158599bb40746d156438138abcb8cf1c0ca2d46f969fba52b857eeea`.
+The ignored integration directory retains the exact archive, terminal/artifact
+metadata, job log, extracted receipts and `ci11-audit.json`.
+
+| Native stage | Renderer/result | Shutdown | Samples with helper identified / all samples | Largest sample gap |
+| --- | --- | --- | ---: | ---: |
+| Refusal | Exact selected startup refusal | Exit 72; cleanup complete | 24 / 399 | 32 ms |
+| Helper restart and project change | Ready ANGLE2 frame | Cooperative exit 0; cleanup complete | 138 / 388 | 16 ms |
+| Application quit | Ready ANGLE2 frame | Cooperative exit 0; cleanup complete | 119 / 406 | 16 ms |
+| Application restart | Ready ANGLE2 frame | Cooperative exit 0; cleanup complete | 120 / 393 | 46 ms |
+
+All four external observers record zero visible helper samples, foreground changes
+or inventory failures and stop normally. Four distinct helper PIDs corroborate the
+four recorded SDK attempts. Two distinct editor PIDs exit with code 0 and actual
+application Exit receipts. Source/assets remain unchanged; helpers, helper directories
+and the owned fixture are removed. No fallback cleanup or qualification error is
+reported. The two WebView teardown messages about unregistering `Chrome_WidgetWin_0`
+(error 1412) are retained; both processes exit normally and all cleanup gates pass.
+No product correction is inferred from those messages.
+
+The same admission functions used by the runner pass again against the downloaded
+receipts, with ordered stage/phase/launch cross-checks. The selected Windows portable
+checks also pass, including four admission tests, the renderer suite selected by the
+workflow, 16 screen core tests and the atomic recent-store test. The older SDK test
+remains ignored and did not consume extra launches.
+
+Independent terminal review finds no remaining concrete Windows acceptance gap.
+The quit cases leave the helper live for the existing application-close callback and
+ordinary project/runtime cleanup. Initiation is scripted. These are bounded native
+window/foreground observations and DOM focus checks; Windows activation events,
+physical keyboard delivery, continuous focus, physical GPU acceleration, matched
+fidelity and presentation timing are not established. The Windows supplement passes
+within those limits. The selected both-target outcome and #36 remain open.
+
+The Mac desktop remains locked, with no competing Loomlight process observed. Its
+approved package 6 is already verified; all four supplemental Mac SDK launches and
+two editor launches remain unused. The pending unlock request is a capability need,
+not a new approval request. After unlock, run the existing package's selected sequence
+once and audit it. No new package build or CI dispatch is available.
+
+Cumulative use after charging CI11 is local 118/120, CI 11/11, Mac SDK 46/50,
+Windows SDK 23/24, Mac package/native 6/4 against 6/7, and Windows 3/4 against 5/7.
+All CI11 reservations are charged. No run, watcher or process remains pending.
+Two local batches remain for the Mac sequence and final audit/publication. Preserve
+unrelated policy edits and the historical native recovery record.
