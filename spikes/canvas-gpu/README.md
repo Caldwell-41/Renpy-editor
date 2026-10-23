@@ -26,7 +26,7 @@ packaged app behavior or production lifecycle integration. Windows windows may
 exist on the private desktop; they must never appear on the input desktop.
 
 Run `python3 spikes/canvas-gpu/probe.py --check` for portable generation and
-rejecting receipt checks. The `Canvas GPU capability` workflow owns the Windows
+rejecting receipt checks. The `Screens qualification` workflow's `canvas_gpu_capability` selector owns the Windows
 compiler and two SDK runs. It admits only the selected branch, exact candidate,
 attempt 1 and cumulative CI ordinal 7. Artifacts retain partial failures and
 cleanup results after a privacy scan. Do not infer a pass from a dispatched run.

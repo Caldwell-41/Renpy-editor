@@ -21,6 +21,10 @@ on:
         description: Select L17 bounded canvas helper proof; preserve closed Help/L01 selections
         type: boolean
         default: false
+      canvas_gpu_capability:
+        description: Select L17 private-desktop GPU capability only; no package or native editor
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -36,14 +40,19 @@ jobs:
         env:
           OWNED_BLANK: ${{ inputs.owned_blank }}
           CANVAS_HELPER: ${{ inputs.canvas_helper }}
+          CANVAS_GPU_CAPABILITY: ${{ inputs.canvas_gpu_capability }}
         run: |
-          if test "$OWNED_BLANK" = true && test "$CANVAS_HELPER" = true; then
+          selected_count=0
+          for selected in "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY"; do
+            if test "$selected" = true; then selected_count=$((selected_count + 1)); fi
+          done
+          if test "$selected_count" -gt 1; then
             echo '::error::Select only one qualification outcome.'
             exit 1
           fi
 
   focused:
-    if: ${{ !inputs.owned_blank && !inputs.canvas_helper }}
+    if: ${{ !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability }}
     name: Help (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -180,7 +189,7 @@ jobs:
           retention-days: 7
 
   owned-blank:
-    if: ${{ inputs.owned_blank && !inputs.canvas_helper }}
+    if: ${{ inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability }}
     name: Owned blank screen (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -337,7 +346,7 @@ jobs:
           retention-days: 7
 
   canvas-helper:
-    if: ${{ inputs.canvas_helper && !inputs.owned_blank }}
+    if: ${{ inputs.canvas_helper && !inputs.owned_blank && !inputs.canvas_gpu_capability }}
     name: L17 canvas helper (Windows x64)
     runs-on: windows-2025
     timeout-minutes: 40
@@ -450,5 +459,84 @@ jobs:
         with:
           name: canvas-helper-Windows-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/canvas-proof/
+          if-no-files-found: error
+          retention-days: 7
+
+  canvas-gpu-capability:
+    if: ${{ inputs.canvas_gpu_capability && !inputs.owned_blank && !inputs.canvas_helper }}
+    runs-on: windows-2025
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require selected candidate and seventh dispatch
+        env:
+          CANDIDATE: ${{ inputs.candidate }}
+          ORDINAL: ${{ inputs.ordinal }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$ORDINAL" = 7
+          test "$(git rev-parse HEAD)" = "$CANDIDATE"
+          mkdir -p "$RUNNER_TEMP/canvas-gpu"
+          git rev-parse HEAD > "$RUNNER_TEMP/canvas-gpu/candidate.txt"
+          python ../spikes/canvas-gpu/probe.py --check
+      - name: Compile the disposable Windows owner
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installation = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $installation) { throw 'MSVC x64 compiler is required' }
+          $setup = Join-Path $installation 'VC\Auxiliary\Build\vcvars64.bat'
+          $source = (Resolve-Path '../spikes/canvas-gpu/windows-owner.c').Path
+          $owner = "$env:RUNNER_TEMP\canvas-gpu\windows-owner.exe"
+          $object = "$env:RUNNER_TEMP\canvas-gpu\windows-owner.obj"
+          & cmd.exe /d /s /c "`"`"$setup`" && cl /nologo /std:c17 /W4 /WX /O2 `"$source`" /Fo`"$object`" /Fe`"$owner`" user32.lib`""
+          if ($LASTEXITCODE -ne 0) { throw 'Capability owner compilation failed' }
+          Get-FileHash $owner | Select-Object Algorithm,Hash | ConvertTo-Json | Set-Content "$env:RUNNER_TEMP/canvas-gpu/owner-identity.json"
+      - name: Provision the disposable CI desktop
+        shell: pwsh
+        run: ./scripts/prepare-canvas-display.ps1 -Output "$env:RUNNER_TEMP/canvas-gpu/display.json"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        id: sdk-cache
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-Windows-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Verify official pinned SDK
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 180 --output "$RUNNER_TEMP/canvas-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          if test '${{ steps.sdk-cache.outputs.cache-hit }}' != true; then
+            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+            mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+          fi
+          python scripts/verify-help-sdk.py "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" "$RUNNER_TEMP/canvas-checksums.txt"
+      - name: Short isolated SDK path
+        shell: pwsh
+        run: |
+          $scratch = 'C:\llgpu7'
+          if (Test-Path $scratch) { throw 'Capability scratch root already exists' }
+          New-Item -ItemType Directory -Path $scratch | Out-Null
+          "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Two Windows SDK launches for hidden GPU rendering, stop and refusal
+        run: |
+          python ../spikes/canvas-gpu/probe.py --owner "$RUNNER_TEMP/canvas-gpu/windows-owner.exe" --archive "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" --output "$RUNNER_TEMP/canvas-gpu/probe"
+      - name: Scan complete or partial public evidence
+        id: privacy
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/canvas-gpu"
+          node scripts/scan-artifacts.mjs "$RUNNER_TEMP/canvas-gpu"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ always() && steps.privacy.outcome == 'success' }}
+        with:
+          name: canvas-gpu-Windows-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/canvas-gpu/
           if-no-files-found: error
           retention-days: 7
