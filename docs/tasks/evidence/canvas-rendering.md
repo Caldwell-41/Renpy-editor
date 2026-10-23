@@ -2425,3 +2425,74 @@ attempts, Mac SDK 53 and Windows SDK 25. No new package or native editor was lau
 No process, fixture, run or watcher remains pending. #36/B07/B08 remain open for
 broader acceptance. Unrelated policy edits are preserved. No PR, merge or release
 is selected.
+
+### Native input and feedback preparation
+
+The user selected physical keyboard, native presentation timing and smooth
+manipulation for #36. Original allowance is local 24, CI 3 and, per target,
+packages 3, editor launches 6 and SDK launches 12. The respective contingency
+ceilings are 36, 4, 4, 9 and 18. This covers native measurement preparation,
+focused corrections, both-target qualification and review. Earlier comparison and
+integration allowances remain closed. Mac remains the development host; Windows
+CI is used only where it supplies the required capability.
+
+Candidate `10658bf7b75ae27a2779c01ac301245be1db979f` adds an opt-in `canvas-input`
+qualification case and its exact controller rehearsal. Production editing behavior
+is unchanged. The probe prepares the existing public Help composition, displays
+plain stage instructions and waits for trusted input. Its eight steps cover width
+drafting, Escape, Enter, keyboard activation of Undo, one-pixel keyboard resize and
+movement, pointer movement and pointer resizing. Accepted results must match exact
+source changes, fresh revisions and expected engine geometry. Undo restores the
+original bytes. The packaged runner retains cleanup/source results and refuses
+forced helper cleanup as success.
+
+Six Mac controller/SDK rehearsals remain charged and retained. Attempt 1 exposed
+an asynchronous Undo readback race. Attempt 2 used the wrong SourceDocument revision
+field; the corrected check uses `baseRevision` and waits for matching fresh pixels.
+Attempt 3 passed the initial functional sequence. Review required exact geometry,
+minimal source changes, independent cleanup and truthful input classification.
+Attempt 4 exposed the probe's incorrect integer placement expectation: the pinned
+Ren'Py `displayable.place` retains x=319.5 for a centered 641-pixel frame. Correcting
+that expectation made attempt 5 pass. Attempt 6 also moves the mouse after release;
+the gesture oracle now considers only events between matching down/up events.
+It passes all eight stages, and all three owner cleanup results pass. These are
+Chrome/controller results, not packaged-native or presentation evidence.
+
+Types and desktop compilation pass. The full renderer suite passes all 227 tests
+with the required Python runtime; desktop tests pass all 38. Functional receipt
+admission accepts the complete rehearsal and rejects untrusted events, forced
+cleanup and invented native/presentation/smoothness claims. Repository validation
+and whitespace pass. Standards and Spec reviews have no remaining preparation
+finding after the corrections. No new production rendering behavior was changed.
+
+Native preflight confirms an unlocked Mac console and no Loomlight process. The
+shell measurement process lacks screen-capture, event-posting and Accessibility
+permissions. Native CUA can inspect UI, but its delayed snapshots cannot establish
+100 ms presentation. The user asked whether a physical pass would require less work.
+A guided manual session can supply keyboard and subjective smoothness evidence;
+precise warm p95 <=100 ms still requires independently timestamped inputs and
+captured visible frames. No recorder or permission change has been approved or made.
+
+The functional report keeps `inputKind=trusted-events`, `nativeInputQualified=false`,
+`warmPresentationProof=false` and `perceivedSmoothnessProof=false`. An actual signed
+package session needs its own identity, external native/human observations and
+cleanup audit. A Mac pass supplies no Windows evidence. No native acceptance or
+whole-ticket closure is claimed at preparation.
+
+Signed Mac package 1 at `10658bf` passes the existing certificate-bound strict
+signature and installer-content gates. Executable SHA256 is
+`191637379e5feee9b49d809babaf2003249303884ee4f9ed7092fe1031ba7324`; installer SHA256
+is `7fe451fb361871d7bb929d1b561ffca925817b0e1e6c8c105e5844ca21ce14f4`.
+Both were rehashed. The ignored `Start native check.command` launcher verifies
+identity/desktop/single-process preconditions and reserves one native/SDK attempt
+only when the user runs it. Its syntax and root mapping pass inspection. It has
+not been run. The eight-step banner is rehearsal-qualified; signed-native behavior
+still needs the physical session and result audit. Preserve actual user observations
+of focus, visible updates, stalls and gesture behavior as separate human evidence.
+
+Preparation use is local 15/24, CI 0/3; Mac packages 1/3, native launches 0/6,
+SDK launches 6/12; Windows use is zero. No contingency is used. This allowance
+remains open for the selected outcome. No operation or watcher is pending.
+Implementation is committed locally at `10658bf`; published baseline remains
+`ccebf3e`. No separate recorder, permission change, Windows pass or timing acceptance
+is claimed. Unrelated policy edits and protected recovery remain intact.

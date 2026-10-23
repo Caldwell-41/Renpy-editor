@@ -2,49 +2,48 @@
 
 ## Active L17 integration handover
 
-The user-selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-matched-rendering comparison is complete on Mac ARM64 and Windows x64. Development
-remains in this checkout on `codex/phase3b-screen-designer`. Preserve unrelated
-unstaged policy edits and protected native recovery below. No PR, merge, release
-or signing change is selected.
+The current user-selected #36 outcome is physical keyboard delivery, native
+presentation timing and smooth manipulation. Mac remains the development host;
+Windows remains a separate required target. Original limits are local 24, CI 3,
+packages 3/editor launches 6/SDK launches 12 per target; ceilings 36, 4, 4, 9, 18.
+Earlier closed allowances are unchanged. The
+[preparation record](../tasks/evidence/canvas-rendering.md#native-input-and-feedback-preparation)
+owns detailed failures, checks and current use.
 
-[Closeout evidence](../tasks/evidence/canvas-rendering.md#both-target-matched-rendering-closeout)
-owns exact candidates, binary/artifact hashes, property mappings, original failures,
-results and limits. Mac helper02/reference01 at `ae48ef9` and Windows CI13 at
-`d1d3d991262cb088615908ac7dfc07a5f95c65d6` each pass the four normal/hover,
-1280x720/1024x768 comparisons. Product/capture/comparator code is identical between
-those candidates; intervening changes affect routing and documentation only.
-All eight samples have zero RGBA differences and matching accepted source/font/image
-hashes, state, geometry, window size and drawable scale. GL2 scale 2 and ANGLE2 scale 1
-are each compared against the same target's Ren'Py reference. This does not claim
-identical rasterization across operating systems. No tolerance is needed.
+Candidate `10658bf7b75ae27a2779c01ac301245be1db979f` adds the opt-in `canvas-input`
+case. It prepares a fresh public Help fixture and shows eight instructions inside
+the window. Trusted keyboard/pointer events, exact source changes, frame revisions
+and geometry are functional readback only. External native/human observation must
+supplement that receipt; leave its `nativeInputQualified:false` flag intact.
+Presentation and perceived smoothness are explicitly unqualified by the probe.
+The final controller rehearsal includes mouse motion after release and passes;
+227 frontend and 38 desktop tests pass. Both review axes clear preparation.
 
-[CI13 run 39948440369](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39948440369),
-attempt 1, is complete and audited. Its same-thread watcher event is acknowledged.
-Artifact 12500005536 contains 37 files; its ZIP digest matches GitHub metadata, both
-retained Windows binaries match their hashes and x64 PE headers, and local pixel
-recomputation exactly matches CI. The downloaded archive is retained before its
-2026-10-30 11:53:46 UTC expiry. Both targets pass source/fixture/process cleanup.
-Independent terminal Standards and Spec reviews find no remaining scoped gap.
-All ignored comparison evidence lives under `matched-rendering-2026-10-23/` within
-`.toolchains/canvas-proof/`. Keep raw failures, captures and exact binaries.
+The user asked if a physical pass would be less work. It can cover keyboard and
+subjective smoothness, but cannot establish p95 <=100 ms. A separate capture/input
+driver and permission changes have not been approved. The existing shell process
+reports no screen-capture, post-event or Accessibility access. CUA can access native
+UI but its slow snapshots cannot measure the timing target. Preserve that distinction.
 
-No process, fixture, run, watcher or capability request remains pending. The Mac
-unlock request is resolved. Final comparison use is local 22/24, CI 2/2, Mac SDK 3/6
-and Windows SDK 2/6, with no contingency. Absolute ceilings were 36, 3 and 9.
-The locked first Mac attempt and rejected standalone dispatch remain charged.
-The completed comparison allowance is closed. Historical integration allowances
-remain closed; combined use is local 142, CI 13 dispatch attempts, Mac SDK 53 and
-Windows SDK 25. No package/native editor was added by this comparison.
+Signed Mac package 1 is verified under ignored
+`.toolchains/canvas-proof/native-feedback-2026-10-23/`. No native editor has been
+launched. `Start native check.command` is a guarded one-use launcher for `manual-01`.
+It checks package hashes, signature, unlocked console and absence of another Loomlight
+process, then charges one editor/SDK attempt before launch. It opens only the fresh
+public fixture. Await the user's physical session and audit its exact result afterward.
+Current use is local 15/24, CI 0/3, Mac packages 1/3, native 0/6, SDK 6/12; Windows
+use is zero. No contingency is used. The allowance stays open. `10658bf` is local;
+remote publication remains `ccebf3e`.
+A manual session needs the user's physical input and a subsequent observation record;
+Windows and numerical presentation remain pending. Do not dispatch a broad CI matrix
+or infer acceptance from the controller rehearsal. Keep the same allowance on resume.
 
-#36 remains open for physical keyboard delivery, native input-to-presentation timing,
-smooth manipulation and whole-ticket acceptance. L18-L20 retain their broader
-composition/control qualification. This completed comparison does not select those
-campaigns or renew old allowances. A next selected outcome needs its own finite
-scope and accounting under WORKFLOW. Earlier native integration/shutdown at `580d5a4`,
-Mac package 6 and CI11 retain their accepted scope and existing limits. Existing
-zoom/window-resize evidence is reused; no new native input or continuous-focus claim
-follows from these image captures.
+The prior matched-rendering comparison is complete at Mac `ae48ef9` and Windows
+`d1d3d99`, with audited CI13, eight exact samples and complete cleanup. Its closed
+allowance used local 22, CI 2, Mac SDK 3 and Windows SDK 2. Earlier integration/shutdown
+at `580d5a4`, Mac package 6 and CI11 retains its original scope. Preserve raw evidence,
+unrelated policy edits and protected native recovery below. No PR, merge or release
+is selected.
 
 ## Earlier canvas decision closeout
 
