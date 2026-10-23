@@ -1,24 +1,26 @@
 # Current status
 
-## L17 production integration awaiting Windows qualification
+## L17 production integration audited on both targets
 
-2026-10-23: Production candidate `7ad845c` for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is published and
-independently reviewed. Mac service checks pass close, reopen/project change,
-application shutdown and exact startup refusal. The production controller rehearsal
-and signed native app pass both GL2 aspects and cooperative close. Bounded native
-observation finds no helper window, foreground change or activation change.
+2026-10-23: Production GPU-helper integration and cooperative shutdown for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) are published at
+`7ad845c`. Mac and Windows service checks pass close, reopen/project change,
+application shutdown and exact startup refusal. Both packaged apps pass two-aspect
+rendering, source/history and cooperative close. Bounded external observations
+find no visible helper or foreground change.
 
 [CI10](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39910668596), attempt 1,
-qualifies the Windows production adapter at the exact candidate. Its result awaits
-audit. The broad core 407, desktop 38 and all 227 renderer cases pass after correcting
-the documented test environment. Mac SDK/package ceilings are exhausted.
-[Evidence](../tasks/evidence/canvas-rendering.md#signed-mac-native-result-and-ci10-handover)
-owns identities, original failures, counts and limits.
-[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns the pending run and
-remaining allowance. Native keyboard, presentation timing, smooth manipulation,
-matched fidelity and whole #36 acceptance remain open. Preserve unrelated edits
-and protected native recovery.
+and its exact artifacts are audited. The
+[evidence](../tasks/evidence/canvas-rendering.md#ci10-terminal-audit-and-production-integration-result)
+owns identities, review, original failures, counts and limits. No operation or watcher
+remains pending. [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns recovery
+and the remaining allowance. Unrelated policy edits remain local and uncommitted.
+
+The code is implemented, but the selected outcome remains unfinished. Native
+hidden/focus observation during refusal, project change, quit and restart is still
+missing. Mac SDK/package ceilings are exhausted; the linked evidence records a
+concrete supplement proposal awaiting approval. Physical keyboard, matched fidelity,
+presentation timing and smooth manipulation remain separate #36 acceptance gates.
 
 ## Earlier canvas decision closeout
 

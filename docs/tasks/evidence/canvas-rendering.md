@@ -1913,3 +1913,106 @@ The Mac SDK and package ceilings are exhausted. No automatic retry is authorized
 CI11 and five unreserved Windows SDK launches remain for an in-scope correction.
 Whole-ticket, matched-fidelity, physical-keyboard and native presentation gates stay
 open. Register ci-watch after publication and audit the exact terminal attempt.
+
+
+### CI10 terminal audit and production integration result
+
+Run [39910668596](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39910668596),
+attempt 1 at `7ad845c73447003e1278e180f10e800fb05ebc2b`, completed successfully.
+The same-chat watcher receipt is recorded. The exact GitHub run/attempt/SHA match;
+HEAD differs from the tested candidate only in evidence/status documentation.
+Selection validation and every required Windows production job step pass. The
+unselected historical Help, owned-screen and capability jobs are skipped as intended.
+No required failure or skipped step is counted as a pass.
+
+Artifact `12483375952`, `canvas-helper-Windows-39910668596-1`, contains 17 files and
+expires on 2026-10-30 at 06:29:51 UTC. The downloaded ZIP SHA256 matches both GitHub
+metadata and the upload log:
+`7dafb5a81d13bfda9ccfafaaea6bd802e3ff1e356faa513235a5e13499e172b7`.
+Candidate and Windows x64 package identity match the tested SHA. The retained
+runner receipt records executable SHA256
+`7ac9036445e53a0e16cf5f473254a7ccd0059040ba9f6072fa175f1ae6a23612`.
+The executable itself is not uploaded, so that hash is a fresh-build runner receipt,
+not a locally rehashed binary. The privacy scan passes all 17 files. Exact archive,
+job log, metadata and per-file hashes remain in the ignored integration directory.
+
+The four Windows service SDK launches pass two ANGLE2 aspects, three cooperative
+normal exits and the selected startup refusal. Close, reopen/project change and
+application shutdown each report complete cleanup, cooperative stop and exit 0.
+Refusal reports the exact selected reason, exit 72 and complete cleanup, without
+claiming a cooperative stop. All generated helper fixtures are removed.
+
+The fifth SDK launch runs through the packaged WebView. It passes draft cancellation,
+focused-field retention, exact source Apply/Undo/Redo, both aspects, logical sizing
+and project close. Helper shutdown is cooperative with exit 0; app exit is 0 without
+timeout. Host/request/credential cleanup owners pass. Accepted disk bytes match the
+public fixture, with no source bytecode/saves or remaining scratch/helper jobs.
+The downloaded PNGs exactly match the frame data in the native report. Trusted local
+admission code revalidates the retained service/native receipts and source bytes.
+
+Windows external observation reports 1,163 samples, 587 with the helper identified,
+a maximum gap of 16 ms, and zero visible-helper samples, foreground changes or
+inventory failures. The observer stops normally. Activation events are explicitly
+unobserved. The renderer is ANGLE2 on Microsoft Basic Render Driver, which does not
+establish physical GPU acceleration. Startup image-load time is 3,378.8 ms; this is
+not an accepted startup limit or warm-presentation result. Portable Windows checks
+pass the three evidence-gate tests, 13 renderer tests, 16 ordinary Screens tests,
+the selected recent-store regression, typecheck, builds and desktop check. The
+ignored service test is then selected separately and passes all four SDK cases.
+
+The production integration and graceful shutdown code is implemented with
+both-target service and packaged normal-path evidence. The selected outcome remains
+unfinished because native hidden/focus observation during refusal, project change,
+application quit and restart is missing. The remaining acceptance also includes physical keyboard
+delivery, continuous observation, matched fidelity, native presentation timing and
+smooth manipulation. Service checks cover the lifecycle cases but do not substitute
+for those native observations. No tolerance or requirement was weakened, and #36,
+B07 and whole-phase acceptance remain open.
+
+Five Windows SDK launches, one package and one native attempt are charged, leaving
+no reservation pending. Final use after terminal review and publication is local
+112/114, CI 10/11, Mac SDK 46/46, Windows SDK 19/24, Mac package/native 5/4 and
+Windows package/native 2/2 against ceilings 5/7 per target. Historical failures remain
+charged. No new SDK, package, native editor or CI operation ran during this audit.
+Mac SDK/package ceilings are exhausted. Finishing the remaining native acceptance
+on Mac needs an explicit SDK supplement; full #36 proof needs its own concrete
+remaining-work selection and allowance. No PR, merge or release is selected.
+
+
+### Remaining native lifecycle proposal, not approved
+
+Independent terminal Spec review confirms the selected handoff includes hidden/focus
+checks during startup refusal, project change, application quit and restart. These
+are not optional whole-ticket extensions. CI10 supplies functional lifecycle results
+but does not close that native acceptance gap. The implementation has no identified
+code defect requiring another production correction; the missing work is explicit
+native observation of those paths.
+
+Prepare one focused native lifecycle sequence using the existing public fixture,
+production helper/service and external observer. In the first editor launch, observe
+selected startup refusal, restart the helper, change projects, render again and quit
+through the application's shutdown path. In a second editor launch, reopen the owned
+fixture, render and close. Retain separate normal/refusal, foreground/visibility,
+application exit and process/desktop/fixture cleanup receipts. Four SDK launches per
+target cover refusal, helper restart, project change and app restart. Two native editor
+launches per target fit the existing native ceilings. A new Mac package is needed to
+include the focused native probe; signing identity and production behavior stay fixed.
+Run the same selected sequence in CI11 using the existing Windows headroom. This
+proposal does not add matched-image, warm-timing or physical-keyboard campaigns.
+
+| Unit | Requested addition | Proposed cumulative ceiling |
+| --- | ---: | ---: |
+| Local work/check batches | 6 | 120 |
+| Mac SDK launches | 4 | 50 |
+| Mac package builds | 1 | 6 |
+
+All other ceilings stay unchanged. At final use 112, the two existing local batches
+plus six requested batches cover probe/observer preparation, focused checks, review,
+Mac package/native qualification, Windows dispatch/audit and publication/correction.
+CI11 and four of the five remaining Windows SDK launches cover the counterpart.
+The proposal creates no automatic contingency and all failures remain charged.
+No further SDK/package/native/CI execution is started while approval is pending.
+
+Status records remain above their soft word targets to preserve unrelated live
+acceptance and protected native recovery. Only the L17 prefix was replaced; the
+unrelated policy edits remain unstaged. No execution or watcher remains pending.

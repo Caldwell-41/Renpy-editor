@@ -1,6 +1,6 @@
 # ADR 0021: Separate Ren'Py helper for the Screens canvas
 
-- Status: Accepted design; bounded implementation proof selected; rendering qualification pending
+- Status: Accepted design; production GPU integration implemented; rendering qualification pending
 - Date: 2026-10-22
 - Authority: The user confirmed the complete interview agreement and requested this
   ADR and the update to [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
