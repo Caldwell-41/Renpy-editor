@@ -1700,3 +1700,83 @@ receipts, normal exits, observer/job/desktop/fixture cleanup and actual launch c
 Artifact retention is seven days; the ID and expiry will be available after upload.
 Later documentation commits do not change the tested candidate. If monitoring does
 not register, retain the run identity and use manual same-chat resume.
+
+### CI9 terminal audit and integration reassessment
+
+[CI9 run 39906453139](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39906453139),
+attempt 1 at `96dabf226523d1445eb8f729360b2ab1812aab76`, completed successfully.
+The watcher matches this chat and delivery is acknowledged. The later `eb12a19`
+changes documentation only, so this result applies to the current probe. All selected
+compile, display, checksum, SDK, privacy and upload steps pass. The three unselected
+qualification jobs are skipped and establish no additional acceptance.
+
+The normal case emits four ANGLE2 frames, covering 1280x720 and 1024x768 with both
+normal and hover request metadata. Independent audit verifies each frame ID, state,
+PNG dimensions and centered 640x360 frame geometry. The SDK log identifies ANGLE
+on Microsoft Basic Render Driver. This establishes use of Ren'Py's model renderer;
+it does not establish physical GPU acceleration. Normal and hover PNGs have identical
+bytes at each aspect, so distinct hover appearance is not proved. No matched-source
+fidelity or tolerance is accepted by this capability fixture.
+
+The helper verifies private-desktop placement, acknowledges stop, exits 0 and leaves
+an empty job without force. The observer exits normally, desktop closes and fixture
+is removed. Across 321 samples, maximum gap 31 ms, the owner records zero foreground
+or focus changes, input-desktop helper visibility or inventory failures. Three helper
+windows exist on the private desktop, which is never switched into view.
+
+The refusal case emits no frame, records the exact selected refusal and exits 72
+without force. Job, observer, desktop and fixture cleanup pass. Its 98 samples,
+maximum gap 16 ms, likewise record zero focus/foreground/visibility/inventory failures.
+These are bounded observations, not continuous or physical-keyboard proof.
+
+Artifact `12480209227` contains 27 public-fixture files and expires at 2026-10-30
+05:35:12 UTC. The retained ZIP digest is
+`ca9a3250e94466e5c5ba3f09752ed87c6be9b2ca7e107fd12cfa26a439b32bc2`, matching GitHub.
+Probe hashes, executable identity, exact candidate and local privacy scan pass.
+The archive, extracted evidence, full log and terminal metadata remain ignored.
+Independent Spec audit finds no material gap against this bounded capability claim.
+The observer/renderer corrections remain independently reviewed with no open findings.
+
+Both SDK launches are charged. Use after audit, reassessment and publication is local
+96/106, Mac SDK 34/46, Windows SDK 14/24 and CI 9/9. Package/native use remains Mac
+three/three and Windows one/one, against five/seven per target. No helper, observer,
+CI run or watcher remains pending. Production files remain unchanged; cooperative
+shutdown passes only in the Windows probe. The Mac prototype still has its earlier
+forced-shutdown limitation. Whole-ticket, B07 and phase acceptance remain open.
+
+#### Remaining implementation and proposed supplement
+
+The approved three-dispatch supplement was consumed by one compiler-invocation
+failure, one renderer/observation failure and the passing capability correction.
+It did not reach the planned integrated qualification. The absolute CI ceiling is
+now reached; no additional dispatch, rerun or new contingency is authorized.
+
+The remaining implementation has concrete existing entry points:
+
+- Promote the Mac process-local bootstrap guard into the approved build/package
+  route, retaining fail-closed startup and existing signing identity/policy.
+- Integrate Windows private-desktop lifetime and startup placement with owned process
+  and job cleanup. Keep the native observation windows in qualification code.
+- Select platform GPU backends, export frames at the required aspect and reject an
+  unexpected software renderer in the production session's admission check.
+- Add a helper-specific cooperative stop/acknowledgment and bounded normal-exit path
+  before forced cleanup. Preserve general runtime descendant-cleanup behavior and
+  require separate evidence that normal close/change/quit/restart did not need force.
+- Exercise the existing service/lifecycle seams, startup refusal, source/draft
+  preservation and affected package/native paths on both targets. Run the full
+  portable suite once for the integrated candidate, then independent review and fixes.
+
+Proposed, not approved: eight additional local batches, cumulative ceiling 114,
+and two additional CI dispatches, cumulative ceiling 11. At current use this leaves
+18 local batches and two dispatches. Basis: five batches for native/build/platform
+integration, three for cooperative lifecycle handling, three for focused service/SDK
+checks, two for package/native qualification, three for review and corrections, and
+two for final audit/status. CI covers one integrated Windows qualification and one
+bounded correction. No contingency is added to this supplement.
+
+Existing remaining allowance is 12 Mac SDK launches, ten Windows SDK launches,
+Mac two package/four native launches and Windows four package/six native launches.
+The proposal does not increase those ceilings, change signing policy or reduce any
+fidelity, hidden/focus, lifecycle or acceptance gate. It selects the same production
+outcome and does not promise whole-#36 closure. Record the user's decision before
+resuming beyond the reached ceiling; retain current totals if approval is deferred.

@@ -393,6 +393,6 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   windows exist. Keep both desktop enumerations nonempty with observer windows,
   require each observer to be enumerated, and retain API-failure rejection. A
   window-owning observer thread must process messages and stop within a bound.
-- **Verification:** portable checks pass; actual corrected rendering, observation
-  and cooperative shutdown remain pending CI9.
+- **Verification:** portable checks pass; CI9 passes corrected ANGLE2 rendering, bounded desktop
+  observation and cooperative shutdown in the capability probe.
 - **Evidence:** [L17 CI8 audit](../tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction).

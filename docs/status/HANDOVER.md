@@ -3,43 +3,39 @@
 ## Active L17 integration handover
 
 The user selected production GPU-helper integration and graceful shutdown for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36), approving the handoff
-supplement. Use the existing Mac ARM64 checkout and `codex/phase3b-screen-designer`.
-The guarded Mac prototype is published through `aded9c8`; production remains unchanged.
-Establish the Windows hidden GPU capability before broad production integration.
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36). The implementation
+outcome remains unfinished. Use the existing Mac ARM64 checkout and branch
+`codex/phase3b-screen-designer`; preserve unrelated policy edits and protected recovery.
 
-[CI8 audit and correction](../tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction)
-own the current evidence. Run `39905615261`, attempt 1 at
-`1cc4e8e3661b45b010d350a8c0120cbc830af2eb`, failed after native compilation passed.
-The forced `gl2` backend fell back to software and timed out; stop required force.
-The exact refusal exited 72 but failed inventory observation. Both SDK processes
-ran and are charged. Artifact identity and all retained hashes match. Watcher delivery
-is acknowledged; that run has no remaining wait.
+[CI9 audit and reassessment](../tasks/evidence/canvas-rendering.md#ci9-terminal-audit-and-integration-reassessment)
+own exact results, artifact identity, limits, remaining implementation and the proposed
+supplement. Run `39906453139`, attempt 1 at
+`96dabf226523d1445eb8f729360b2ab1812aab76`, passes the Windows capability check.
+Four ANGLE2 frames, cooperative stop/exit 0, exact refusal/exit 72 and observer/job/
+desktop/fixture cleanup pass without force. Bounded observations report no focus or
+foreground change or visible helper on the input desktop. Both SDK launches are charged.
+Watcher delivery is acknowledged; no operation or watch remains pending.
 
-The correction pins `angle2`, as used by the earlier Windows reference. Both desktop
-observations require their sentinel window on every sample. A separate thread creates
-a hidden private-desktop observer and pumps messages while awaiting stop. Its bounded
-join and normal exit are mandatory. Neither API errors nor software frames are accepted.
-The probe requires four frames at two aspects, a stop acknowledgment, SDK exit 0,
-no forced cleanup and empty job/closed desktop/removed fixture. Its refusal case
-requires the exact selected reason and exit 72. This is capability evidence only.
+Production remains unchanged. The Windows proof uses Microsoft Basic Render Driver,
+not evidence of physical GPU acceleration. Normal and hover images are byte-identical;
+request metadata covers both states but distinct hover appearance is unproved. The
+Mac prototype remains published through `aded9c8`, with its forced-shutdown limitation.
+Production adapters, cooperative lifecycle handling and both-target qualification
+are still required. The evidence record maps the existing code and verification seams.
 
-CI9 run `39906453139`, attempt 1 at `96dabf226523d1445eb8f729360b2ab1812aab76`,
-was dispatched at 2026-10-23 05:33:52 UTC on the registered Screens workflow, ordinal
-9, with only `canvas_gpu_capability=true`. Two Windows SDK launches are reserved;
-no package/native-editor operation is selected. This is the final approved CI slot.
-[The pending receipt](../tasks/evidence/canvas-rendering.md#ci9-pending-operation)
-owns exact audit instructions. Same-chat ci-watch registration follows; inspect its
-ignored `ci9-watch-registration.json` acknowledgment before assuming monitoring exists.
-Even a pass leaves production integration and both-target qualification unfinished.
-After audit, continue within authority and report concrete blockers; no rerun,
-attempt 2 or additional dispatch is authorized by the exhausted allowance.
-
-Cumulative use at dispatch is local 93/106, Mac SDK 34/46, Windows SDK 12/24 and CI 9/9.
+Cumulative use is local 96/106, Mac SDK 34/46, Windows SDK 14/24 and CI 9/9.
 Package/native ceilings remain five/seven per target; use is Mac three/three and
-Windows one/one. Original CI7/CI8 failures and receipts remain ignored under the
-integration evidence directory. No Mac SDK, package or native editor ran during
-these corrections. Preserve unrelated policy edits and protected native recovery.
+Windows one/one. CI is exhausted. Under WORKFLOW's ceiling rule, do not dispatch,
+rerun or invent contingency. The prepared continuation proposal requests eight more
+local batches (ceiling 114) and two more CI dispatches (ceiling 11), leaving all
+SDK/package/native ceilings unchanged. It is not approved. Record the user's decision
+in #36 before resuming beyond the reached ceiling. A new chat or host does not reset use.
+
+Original CI7/CI8 failures and exact CI9 artifacts remain ignored under the integration
+evidence directory. Preserve all unique evidence. No Mac SDK, package or native editor
+ran in these corrections or terminal audit. No broader renderer requirement, PR,
+merge, release or signing/credential policy change is selected. Older acceptance and
+protected recovery below retain their prior state.
 
 ## Earlier canvas decision closeout
 
