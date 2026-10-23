@@ -19,7 +19,11 @@
   const edit=value=>{const input=width();input.focus();input.value=String(value);input.dispatchEvent(new Event("input",{bubbles:true}));return input;};
   try {
     await until(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();
-    await until(()=>find("Screens"));const startup=performance.now();find("Screens").click();
+    await until(()=>find("Screens"));
+    await call("probe.canvasObservation",{announce:true});
+    const observationDeadline=performance.now()+10000;
+    while(!(await call("probe.canvasObservation")).ready){assert(performance.now()<observationDeadline,"External observer unavailable");await delay(20);}
+    const startup=performance.now();find("Screens").click();
     await until(()=>fresh() && latest?.width===1280);
     startupImageLoadMilliseconds=performance.now()-startup;
     const project=await read("project.current"),sessionId=project.sessionId;

@@ -36,6 +36,23 @@ leaves the element list and property fields usable and retains drafts. An older
 image may remain as a clearly out-of-date reference; its old geometry cannot drive
 dragging. There is no silent fallback to a simplified renderer.
 
+The selected production adapter uses GL2 on macOS and ANGLE2 on Windows. It
+refuses a different backend. A trusted early bootstrap suppresses SDL window
+ordering and activation on macOS before display initialization. Windows starts
+the SDK on a private desktop through a small bundled owner, inside core's existing
+kill-on-close job. It never switches the input desktop. These mechanisms retain
+the same data-only renderer and pinned SDK boundary; they do not establish
+physical GPU acceleration or full rendering equivalence.
+
+Normal shutdown writes a stop request and allows three seconds for the helper's
+acknowledgment and exit. Success requires exit 0, drained output and no remaining
+owned process. Windows also requires the private desktop to close. If any part
+fails, core retains its bounded process-tree cleanup fallback. Project close,
+project change and application shutdown use this same owner. Startup refusal
+exits before Ren'Py can display a graphical error dialog. The linked proof record
+distinguishes service checks from packaged native observation and unproved focus
+or presentation cases.
+
 The canvas shows provisional property changes and gestures before acceptance.
 Keep drafts and sample values distinct from accepted source and runtime values.
 Canvas clicks select elements. Existing Apply/Cancel, gesture Escape and shared

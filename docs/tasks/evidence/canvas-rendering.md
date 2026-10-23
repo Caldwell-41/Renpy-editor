@@ -1780,3 +1780,91 @@ The proposal does not increase those ceilings, change signing policy or reduce a
 fidelity, hidden/focus, lifecycle or acceptance gate. It selects the same production
 outcome and does not promise whole-#36 closure. Record the user's decision before
 resuming beyond the reached ceiling; retain current totals if approval is deferred.
+
+## Production GPU integration and lifecycle qualification, 2026-10-23
+
+The user approved eight additional local batches and two CI dispatches after CI9.
+Cumulative ceilings are now local 114 and CI 11. Mac SDK 46, Windows SDK 24,
+package five per target and native seven per target remain unchanged. Historical
+failures stay charged. The approval was recorded in #36 and verified by read-back
+before implementation resumed at local batch 97.
+
+### Implementation and review
+
+The production helper now selects GL2 on Mac and ANGLE2 on Windows. It exports
+through Ren'Py's model renderer and rejects software fallback. The early Mac
+bootstrap applies the qualified SDLWindow ordering/activation guards through the
+system Objective-C runtime. Windows embeds a small native owner, built with the
+static C runtime, that creates the private desktop and launches the SDK inside
+core's existing kill-on-close job. No additional SDK interpreter or distributed
+runtime dependency is introduced. Both paths retain data-only requests, copied
+assets, pinned SDK validation and the existing private directory ownership.
+
+Project close, project change and application shutdown request a stop, then wait
+up to three seconds for acknowledgment and natural exit. Normal completion requires
+exit 0, drained pipes and an empty owned process tree; Windows also requires the
+private desktop closure receipt. Existing bounded forced cleanup remains the
+failure fallback. The host records cleanup, cooperative status and actual exit
+separately. An early native refusal exits before Ren'Py's graphical error handler.
+
+Independent Standards and Spec reviews found two qualification/build defects:
+the standalone Windows owner initially inherited the compiler's dynamic runtime
+linkage, and the Mac observer lacked a positive window-inventory control. The
+owner now links its C runtime statically. Every Mac sample must include the known
+visible editor window. Both review axes confirm these corrections with no remaining
+findings. The Windows observer explicitly records that it does not observe native
+activation events. Sampled foreground/window checks do not become physical keyboard
+or native input-delivery evidence.
+
+### Local service checks and original failures
+
+SDK35 supplied the red test against the previous software backend. SDK36 passed
+production GL2 rendering at 1280x720 and 1024x768 with source preservation and
+cooperative project-close exit 0. SDK37–40 exercised close, reopen/project change
+and application shutdown successfully, but the selected refusal case failed. Its
+test-only profile selector used a path alias while core compared a canonical path,
+so the fourth helper rendered normally instead of refusing. All four launches remain
+charged. The selector now canonicalizes the test profile; the production environment
+continues to scrub this test-only switch.
+
+Portable checks cover platform-specific backend and shutdown receipt admission,
+external observer refusal cases, ordinary Screens service tests, desktop compilation,
+typechecking, workflow expressions and whitespace. The signed/native and Windows
+production results must be recorded below before claiming this integration qualified.
+No complete #36, matched fidelity, physical keyboard, native presentation timing or
+smooth manipulation acceptance is implied.
+
+SDK41–44 pass the corrected service sequence. Three normal shutdown reports have
+`cleanupComplete=true`, `cooperative=true` and `exitCode=0`. The exact selected
+startup refusal reports exit 72, complete cleanup and no cooperative-stop claim.
+All generated helper directories are removed. This is lifecycle service evidence;
+it does not replace external native observation of startup or failure.
+
+The ordinary full renderer suite ran 227 tests. One validator failed because the
+system Python 3.9 lacks `tomllib`; all other 226 passed. That exact producer/validator
+case passes with the required Python 3.12.14. The initial broad core and desktop
+runs were blocked by the command sandbox's local socket policy; their original
+failures remain retained. The desktop rerun with controlled loopback access passes
+all 38 tests. Core rerun results remain pending. No product change was made for
+these environment failures. Three canvas evidence admission tests and the updated
+Mac observer's strict compiler check pass.
+
+SDK45 passes the exact production controller rehearsal in Chrome: two GL2 aspects,
+provisional draft/Cancel, unchanged source until Apply, Undo/Redo, logical pixel
+sizing and project close. Both injected pre-dispatch busy reads recover with exactly
+one accepted source write. This is explicitly browser/controller evidence.
+
+Signed Mac package4 passes strict certificate-backed signature and installer-content
+verification with the unchanged approved pin. Executable SHA256 is
+`2688310cf684496c414261c832325f2e0b412d916fbea670ca007bd57650fe16`; installer SHA256
+is `57f884633c1037ec13e6d0ec757f3eeb038baad4c5b4350cb095bde385f85c52`.
+The console is locked, so no native launch has been attempted. The user has been
+asked to unlock it; SDK46 remains available for that check. Do not infer a native
+pass from the service or Chrome results.
+
+Local108 prepares scoped publication and Windows integration qualification. CI10
+will select only canvas_helper, ordinal10, reserving four service SDK launches and
+one packaged-helper launch, plus one Windows package/native attempt. CI use before
+dispatch is9/11, actual WindowsSDK14/24; MacSDK45/46, Mac package/native4/3 and
+Windows1/1. Local use is108/114. Broad core verification remains running at this
+checkpoint. No unrun result or remaining acceptance criterion is marked passed.

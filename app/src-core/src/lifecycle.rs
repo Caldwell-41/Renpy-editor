@@ -1,6 +1,7 @@
 #[cfg(test)]
 pub(crate) mod acceptance;
 pub mod runtime;
+pub use crate::renpy::runtime::canvas::CanvasShutdown;
 mod runtime_probe;
 use crate::ai_credentials::Records;
 use crate::{
@@ -173,6 +174,7 @@ pub struct LifecycleService {
     authoring: AuthoringService,
     runtime: runtime::RuntimeState,
     canvas: Option<crate::screens::canvas_session::Session>,
+    last_canvas_shutdown: Option<CanvasShutdown>,
 }
 
 struct InspectedProject {
@@ -231,6 +233,7 @@ impl LifecycleService {
             authoring: AuthoringService::default(),
             runtime: runtime::RuntimeState::default(),
             canvas: None,
+            last_canvas_shutdown: None,
         })
     }
 
@@ -778,8 +781,15 @@ impl LifecycleService {
         self.canvas.as_ref().ok_or(LifecycleError::Scene(SceneError::SourceConflict))?
             .status(&frame,include_image,&self.authoring,&authority).map_err(LifecycleError::Scene)
     }
+    pub fn canvas_shutdown_report(&self) -> Option<&CanvasShutdown> {
+        self.last_canvas_shutdown.as_ref()
+    }
     pub(crate) fn canvas_shutdown(&mut self) -> bool {
-        if self.canvas.as_mut().is_some_and(|canvas|!canvas.shutdown()) { return false; }
+        if let Some(canvas) = self.canvas.as_mut() {
+            let clean = canvas.shutdown();
+            self.last_canvas_shutdown = Some(canvas.shutdown_report());
+            if !clean { return false; }
+        }
         self.canvas = None; true
     }
 

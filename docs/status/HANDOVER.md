@@ -2,40 +2,39 @@
 
 ## Active L17 integration handover
 
-The user selected production GPU-helper integration and graceful shutdown for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36). The implementation
-outcome remains unfinished. Use the existing Mac ARM64 checkout and branch
-`codex/phase3b-screen-designer`; preserve unrelated policy edits and protected recovery.
+Continue the selected production GPU integration and graceful shutdown for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) on the existing Mac
+checkout and `codex/phase3b-screen-designer`. The implementation and both review axes
+are ready for Windows qualification. Preserve unrelated policy edits and the native
+recovery section below. No PR, merge, release or signing-policy change is selected.
 
-[CI9 audit and reassessment](../tasks/evidence/canvas-rendering.md#ci9-terminal-audit-and-integration-reassessment)
-own exact results, artifact identity, limits, remaining implementation and the proposed
-supplement. Run `39906453139`, attempt 1 at
-`96dabf226523d1445eb8f729360b2ab1812aab76`, passes the Windows capability check.
-Four ANGLE2 frames, cooperative stop/exit 0, exact refusal/exit 72 and observer/job/
-desktop/fixture cleanup pass without force. Bounded observations report no focus or
-foreground change or visible helper on the input desktop. Both SDK launches are charged.
-Watcher delivery is acknowledged; no operation or watch remains pending.
+[Production evidence](../tasks/evidence/canvas-rendering.md#production-gpu-integration-and-lifecycle-qualification-2026-10-23)
+owns the adapter, shutdown contract, reviews and original failures. SDK41–44 pass
+three normal lifecycle exits and exact startup refusal; SDK45 passes the exact
+production controller at both aspects. Signed Mac package4 has executable SHA256
+`2688310cf684496c414261c832325f2e0b412d916fbea670ca007bd57650fe16`.
+Native observation has not launched because the desktop is locked. The unlock request
+is pending. After unlock, recheck the console and absence of unrelated Loomlight,
+then run only the canvas-helper case against package4. One Mac SDK launch remains.
+Do not bypass single instance or touch protected recovery.
 
-Production remains unchanged. The Windows proof uses Microsoft Basic Render Driver,
-not evidence of physical GPU acceleration. Normal and hover images are byte-identical;
-request metadata covers both states but distinct hover appearance is unproved. The
-Mac prototype remains published through `aded9c8`, with its forced-shutdown limitation.
-Production adapters, cooperative lifecycle handling and both-target qualification
-are still required. The evidence record maps the existing code and verification seams.
+The ordinary renderer suite has 226 passing cases and one interpreter failure;
+that exact remaining case passes with Python3.12.14. Desktop38 passes outside the
+socket-restricting sandbox. The broad core suite is still running; preserve and audit
+both its original sandbox failure and corrected run before claiming a full pass.
+Local receipts and process details are under the ignored GPU integration directory.
 
-Cumulative use is local 96/106, Mac SDK 34/46, Windows SDK 14/24 and CI 9/9.
-Package/native ceilings remain five/seven per target; use is Mac three/three and
-Windows one/one. CI is exhausted. Under WORKFLOW's ceiling rule, do not dispatch,
-rerun or invent contingency. The prepared continuation proposal requests eight more
-local batches (ceiling 114) and two more CI dispatches (ceiling 11), leaving all
-SDK/package/native ceilings unchanged. It is not approved. Record the user's decision
-in #36 before resuming beyond the reached ceiling. A new chat or host does not reset use.
+User-approved cumulative ceilings are local114, CI11, MacSDK46 and WindowsSDK24.
+Use before CI10 is local108, CI9, MacSDK45, WindowsSDK14, Mac package/native4/3 and
+Windows package/native1/1. Package/native ceilings remain5/7 per target. CI10 selects
+only canvas_helper at ordinal10 and reserves five Windows SDK launches, one package
+and one native launch. CI11 is the single remaining correction dispatch. Release
+unused reservations only on exact not-run evidence; a new chat does not reset use.
 
-Original CI7/CI8 failures and exact CI9 artifacts remain ignored under the integration
-evidence directory. Preserve all unique evidence. No Mac SDK, package or native editor
-ran in these corrections or terminal audit. No broader renderer requirement, PR,
-merge, release or signing/credential policy change is selected. Older acceptance and
-protected recovery below retain their prior state.
+Audit the exact CI10 attempt, SHA, artifacts, lifecycle receipts and native observer
+before continuing. Native refusal/focus cases, physical keyboard, native presentation,
+matched fidelity and whole-ticket acceptance remain distinct gaps. The earlier CI9
+capability pass and failures remain retained; they do not qualify production.
 
 ## Earlier canvas decision closeout
 

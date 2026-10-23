@@ -43,7 +43,13 @@ def image_ok(value, width, height):
         return False
 
 
-def canvas_details_ok(details):
+def canvas_details_ok(details, target_os=None):
+    recorded_os = details.get('targetOs')
+    if recorded_os not in ('windows', 'macos') or (target_os is not None and target_os != recorded_os):
+        return False
+    if details.get('canvasShutdown') != dict(cleanupComplete=True, cooperative=True, exitCode=0):
+        return False
+    renderer = 'angle2' if recorded_os == 'windows' else 'gl2'
     startup=details.get('startupImageLoadMilliseconds')
     if (details.get('nativeWebView') is not True or details.get('nativeKeyboard') is not False
             or details.get('nativeFocusObserved') is not False or details.get('warmPresentationProof') is not False
@@ -55,7 +61,7 @@ def canvas_details_ok(details):
         return False
     for frame,(width,height,x,y) in zip(frames,[(1280,720,320,180),(1024,768,192,204)]):
         if (not isinstance(frame,dict) or frame.get('width')!=width or frame.get('height')!=height
-                or frame.get('phase')!='ready' or frame.get('renderer')!='sw'
+                or frame.get('phase')!='ready' or frame.get('renderer')!=renderer
                 or not isinstance(frame.get('revision'),str) or len(frame['revision'])!=64
                 or any(c not in '0123456789abcdef' for c in frame['revision'])
                 or not image_ok(frame.get('image'),width,height)):
@@ -68,3 +74,21 @@ def canvas_details_ok(details):
                                for k,v in dict(x=x,y=y,width=640,height=360).items()):
             return False
     return True
+
+
+def canvas_observation_ok(value, editor_pid, target_os):
+    if target_os not in ('windows', 'macos') or not isinstance(value, dict):
+        return False
+    helpers = value.get('helperPIDs')
+    if (value.get('editorPID') != editor_pid or value.get('stopped') is not True
+            or type(value.get('samples')) is not int or value['samples'] <= 10
+            or type(value.get('helperSamples')) is not int or not 10 < value['helperSamples'] <= value['samples']
+            or not isinstance(helpers, list) or len(helpers) != 1
+            or type(helpers[0]) is not int or helpers[0] <= 0 or helpers[0] == editor_pid
+            or any(type(value.get(key)) is not int or value[key] != 0 for key in ('visibleSamples', 'foregroundChanges', 'inventoryFailures'))):
+        return False
+    gap = value.get('maximumSampleGapMilliseconds')
+    if type(gap) not in (int, float) or not math.isfinite(gap) or gap <= 0:
+        return False
+    return (value.get('activationEventsObserved') is (target_os == 'macos')
+            and value.get('activationChanges') == (0 if target_os == 'macos' else None))

@@ -16,6 +16,15 @@ executable = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
 failed = False
+observer_command = None
+if "canvas-helper" in sys.argv[3:]:
+    if sys.platform == "darwin":
+        observer_binary = output / "canvas-observer"
+        subprocess.run(["clang", "-fobjc-arc", "-fblocks", "-Wno-incompatible-pointer-types", str(Path(__file__).with_name("canvas-observer.m")), "-framework", "AppKit", "-framework", "CoreGraphics", "-o", str(observer_binary)], check=True)
+        observer_command = [str(observer_binary)]
+    elif sys.platform == "win32":
+        observer_command = [sys.executable, str(Path(__file__).with_name("canvas-observer.py"))]
+
 allowed = RUNTIME_CASES + OPTIONAL_CASES
 cases = sys.argv[3:] or RUNTIME_CASES
 if any(case not in allowed for case in cases):
@@ -27,6 +36,12 @@ for case in cases:
     env.pop("LOOMLIGHT_SCAFFOLD_SMOKE", None)
     env.pop("LOOMLIGHT_SINGLE_INSTANCE_SMOKE", None)
     timed_out = False
+    observer = []
+    observer_stop = output / "canvas-observation.stop"
+    observation_path = output / "canvas-observation.json"
+    if case == "canvas-helper":
+        assert observer_command and not observation_path.exists() and not observer_stop.exists()
+        env["LOOMLIGHT_CANVAS_OBSERVER_ROOT"] = str(output)
     with log.open("wb") as stream:
         process = subprocess.Popen([str(executable)], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                    start_new_session=os.name != "nt")
@@ -36,6 +51,12 @@ for case in cases:
                 stream.write(line); stream.flush()
                 try:
                     checkpoint = json.loads(line)
+                    if case == "canvas-helper" and checkpoint.get("evidence") == "canvas-observer-ready":
+                        assert not observer, "Only one canvas observation interval is allowed"
+                        profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
+                        observer.append(subprocess.Popen([*observer_command, str(process.pid), str(profile), str(observer_stop), str(observation_path)]))
+                    if case == "canvas-helper" and checkpoint.get("evidence") == "runtime-ui-packaged":
+                        observer_stop.touch()
                     if case == "source-foundation" and checkpoint.get("evidence") == "foundation-external-ready":
                         profile = Path(checkpoint["profile"]).resolve()
                         assert profile.parent == Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp").resolve()
@@ -66,6 +87,14 @@ for case in cases:
             process.wait(timeout=15)
             code = -1
         reader.join(timeout=10)
+        if case == "canvas-helper":
+            observer_stop.touch()
+            for owned in observer:
+                try:
+                    owned.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    owned.kill(); owned.wait()
+                    external_errors.append("Canvas observer cleanup timed out")
     if case == "source-foundation":
         profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-source-foundation"
         if profile.exists():
@@ -134,6 +163,10 @@ for case in cases:
     if case in ("help-screen", "owned-screen"):
         passed = passed and help_disk == dict(acceptedBytesMatch=True, scratchJobsRemaining=0, sourceBytecode=False, sourceSaves=False)
     if case=='canvas-helper':
+        observation = json.loads(observation_path.read_text()) if observation_path.exists() else {}
+        from canvas_evidence import canvas_observation_ok
+        observed = len(observer) == 1 and observer[0].returncode == 0 and canvas_observation_ok(observation, process.pid, target_os)
+        passed = passed and observed
         passed=passed and help_disk==dict(acceptedBytesMatch=True,scratchJobsRemaining=0,sourceBytecode=False,sourceSaves=False,canvasJobsRemaining=0)
         if len(reports)==1:
             for frame in reports[0].get('details',{}).get('frames',[]):
@@ -149,6 +182,8 @@ for case in cases:
     failed |= not passed
     result = dict(case=case, passed=passed, exitCode=code, timedOut=timed_out,
                   elapsedSeconds=round(time.monotonic()-started, 3), reports=reports, externalErrors=external_errors, helpDisk=help_disk)
+    if case == "canvas-helper":
+        result.update(nativeObservation=observation)
     if case == "owned-screen":
         result.update(diskErrors=disk_errors, fixtureCleanupComplete=fixture_cleanup_complete)
     (output / f"runtime-ui-{case}.json").write_text(json.dumps(result, indent=2)+"\n")

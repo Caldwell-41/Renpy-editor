@@ -169,6 +169,34 @@ impl OwnedChild {
             .wait_empty(deadline.saturating_sub(started.elapsed()))?;
         Ok(status.code())
     }
+
+    /// Finish an already exited helper only when its owned tree is empty. Keep
+    /// the leader PID reserved until inspection; failure leaves force cleanup safe.
+    pub(super) fn finish_without_force(&mut self, observation: &Mutex<Observation>) -> io::Result<Option<i32>> {
+        if !self.exited()? { return Err(io::Error::other("helper still running")); }
+        #[cfg(target_os = "macos")]
+        {
+            let mut pids = [0i32; 1024];
+            // PROC_PGRP_ONLY from libproc.h. A full buffer is not complete evidence.
+            let bytes = unsafe { libc::proc_listpids(2, self.child.id(), pids.as_mut_ptr().cast(), std::mem::size_of_val(&pids) as i32) };
+            if bytes <= 0 || bytes as usize >= std::mem::size_of_val(&pids)
+                || pids.iter().any(|pid| *pid != 0 && *pid != self.child.id() as i32) {
+                return Err(io::Error::other("helper descendants remain"));
+            }
+        }
+        #[cfg(windows)]
+        self.job.wait_empty(Duration::ZERO)?;
+        #[cfg(not(any(target_os = "macos", windows)))]
+        return Err(io::Error::other("unsupported canvas host"));
+        let start = Instant::now();
+        while !self.drain(observation)? {
+            if start.elapsed() >= Duration::from_secs(1) { return Err(io::Error::other("helper pipes remain")); }
+            thread::sleep(Duration::from_millis(8));
+        }
+        let status = self.child.wait()?;
+        self.reaped = true;
+        Ok(status.code())
+    }
 }
 impl Drop for OwnedChild {
     fn drop(&mut self) {

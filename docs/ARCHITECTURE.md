@@ -698,9 +698,14 @@ shared source transaction; Escape cancels and conflicts retain the draft. Automa
 layout children and other coordinate forms remain outside this bounded movement.
 Native rendering, presentation and full manipulation acceptance remain pending.
 
-The verified pinned SDK runs a private software-rendered project with SDL's dummy
-video/audio drivers. The existing process-tree owner stops it on project close,
-change or application shutdown. A helper failure retains drafts. Frame IDs, source
+The verified pinned SDK runs a private project with GL2 on macOS and ANGLE2 on
+Windows, with audio disabled. A trusted early macOS bootstrap prevents SDL window
+ordering and application activation. A bundled Windows owner starts the SDK on a
+private desktop inside core's kill-on-close job; it never switches desktops.
+Normal project close, change or application shutdown requests a cooperative stop.
+Core requires the acknowledgment, exit 0 and complete process/pipe cleanup, plus
+Windows desktop closure, before reporting normal shutdown. The existing bounded
+process-tree cleanup remains the failure fallback. A helper failure retains drafts. Frame IDs, source
 and asset revisions bind exported PNGs and actual Ren'Py selection geometry to the
 request. A stale image cannot supply editing geometry. The UI has no simplified
 canvas fallback. The [proof record](tasks/evidence/canvas-rendering.md) owns the

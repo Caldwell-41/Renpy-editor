@@ -17,6 +17,8 @@ try {
   assert.equal((await child.next()).ready,true);
   await server.listen();browser=await chromium.launch({channel:'chrome',headless:true});page=await browser.newPage({viewport:{width:1100,height:760}});
   await page.exposeBinding('canvasProbeRpc',async(_,request)=>{
+    // Browser rehearsal has no OS observer; only packaged runs admit native evidence.
+    if(request.operation==='probe.canvasObservation')return {protocolVersion:1,requestId:request.requestId,ok:true,value:{ready:true}};
     if(request.operation==='probe.runtimeUiReport')return {protocolVersion:1,requestId:request.requestId,ok:true,value:{recorded:true}};
     if(request.operation==='source.open' && request.requestId.startsWith('canvas-') && (!initialBusy || (accepted && !acceptedBusy))) {
       if(accepted)acceptedBusy=true;else initialBusy=true;

@@ -1,4 +1,13 @@
 # Loomlight-only renderer. This private project contains no game source or bytecode.
+init -999 python:
+    import os as _canvas_early_os
+    try:
+        import runpy as _canvas_runpy
+        _canvas_bootstrap = _canvas_runpy.run_path(config.basedir + "/canvas-bootstrap.py", run_name="_loomlight_canvas")
+        _canvas_native = _canvas_bootstrap["install"](config.basedir)
+    except BaseException:
+        _canvas_early_os._exit(72)
+
 define config.screen_width = 1920
 define config.screen_height = 1080
 define config.name = "Loomlight canvas helper"
@@ -121,6 +130,13 @@ init python:
         started = _canvas_time.perf_counter()
         plan = request["plan"]
         config.screen_width, config.screen_height = plan["width"], plan["height"]
+        if getattr(_canvas_render, "dimensions", None) != (plan["width"], plan["height"]):
+            renpy.set_physical_size((plan["width"], plan["height"]))
+            renpy.display.interface.set_mode()
+            _canvas_render.dimensions = (plan["width"], plan["height"])
+        if renpy.get_renderer_info()["renderer"] != ("angle2" if _canvas_os.name == "nt" else "gl2"):
+            _canvas_os._exit(74)
+        _canvas_native = _canvas_bootstrap["status"](config.basedir)
         root, objects = _canvas_build(plan)
         rendered = renpy.render(root, plan["width"], plan["height"], 0, 0)
         geometry = []
@@ -130,15 +146,12 @@ init python:
             for child, offset in zip(getattr(d,"children",[]), getattr(d,"offsets",[])):
                 locate(child, x+offset[0], y+offset[1])
         locate(root, 0, 0)
-        # 8.5.3 software screenshot() returns the display buffer, ignoring its
-        # argument. Draw the supplied Render into its own engine surface instead.
-        surface = renpy.display.draw.render_to_texture(rendered, True)
         image = config.basedir + "/frame-next.png"
-        renpy.display.core.pygame.image.save(surface, image)
+        renpy.render_to_file(rendered, image, resize=True)
         _canvas_replace(image, config.basedir + "/frame.png")
         rendered_at = _canvas_time.perf_counter()
         with open(config.basedir + "/result-next.json", "w", encoding="utf-8") as output:
-            _canvas_json.dump(dict(frameId=request["frameId"], width=plan["width"], height=plan["height"], buttonState=plan["buttonState"], geometry=geometry, renderer=renpy.get_renderer_info()["renderer"], diagnostics=dict(renderMilliseconds=(rendered_at-started)*1000, previousCleanupMilliseconds=_canvas_previous_cleanup_ms)), output)
+            _canvas_json.dump(dict(frameId=request["frameId"], width=plan["width"], height=plan["height"], buttonState=plan["buttonState"], geometry=geometry, renderer=renpy.get_renderer_info()["renderer"], diagnostics=dict(native=_canvas_native, renderMilliseconds=(rendered_at-started)*1000, previousCleanupMilliseconds=_canvas_previous_cleanup_ms)), output)
         _canvas_replace(config.basedir + "/result-next.json", config.basedir + "/result.json")
         renpy.free_memory()
         _canvas_previous_cleanup_ms = (_canvas_time.perf_counter()-rendered_at)*1000
@@ -148,6 +161,10 @@ label start:
     python:
         _canvas_previous = None
         while True:
+            if _canvas_os.path.exists(config.basedir + "/stop"):
+                with open(config.basedir + "/stopped.json", "w") as _canvas_ack:
+                    _canvas_json.dump(dict(stopped=True), _canvas_ack)
+                break
             try:
                 with _canvas_request_file() as _canvas_input:
                     _canvas_request = _canvas_json.load(_canvas_input)
@@ -157,3 +174,4 @@ label start:
             except FileNotFoundError:
                 pass
             _canvas_time.sleep(0.004)
+        renpy.quit(relaunch=False, status=0, save=False)

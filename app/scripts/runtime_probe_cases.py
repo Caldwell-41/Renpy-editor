@@ -36,7 +36,7 @@ def runtime_report_ok(case, report, target_os=None):
         return False
     if case=='canvas-helper':
         from canvas_evidence import canvas_details_ok
-        return canvas_details_ok(details)
+        return canvas_details_ok(details, target_os)
     if case == 'owned-screen':
         identity = details.get('identity')
         if (details.get('nativeWebView') is not True or details.get('sdkExecuted') is not False

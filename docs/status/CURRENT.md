@@ -1,25 +1,21 @@
 # Current status
 
-## L17 Windows capability passed; production integration pending
+## L17 production GPU integration awaiting qualification
 
-2026-10-23: The selected GPU-helper production integration and graceful shutdown
-for [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) remains unfinished.
-Production still uses the software helper. [CI9](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39906453139),
-attempt 1 at `96dabf2`, passes the audited Windows private-desktop ANGLE2 capability,
-cooperative stop and selected startup refusal. Both cases retain focus and show no
-helper on the input desktop in bounded observations; cleanup passes without force.
-This is prototype evidence, not production qualification or physical GPU proof.
+2026-10-23: The selected [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+production integration is implemented and independently reviewed. The helper uses
+GL2 on Mac and ANGLE2 on Windows, with hidden startup and bounded cooperative
+shutdown. Mac service checks pass close, reopen/project change, application shutdown
+and exact startup refusal. The production controller rehearsal passes both aspects,
+draft cancellation, source/history and close. The signed Mac package is verified.
 
-The earlier Mac prototype has matched GL2 captures but required forced shutdown.
-Both adapters still need production integration and affected both-target qualification.
-Normal/hover Windows images are identical; no distinct hover appearance or matched
-fidelity is established. Native timing, physical keyboard, smooth manipulation and
-whole-ticket acceptance remain open. No tolerance or weaker gate is accepted.
-
-CI use is 9/9. [The audited result and reassessment](../tasks/evidence/canvas-rendering.md#ci9-terminal-audit-and-integration-reassessment)
-record use, remaining work and a proposed, unapproved supplement of eight local
-batches and two CI dispatches. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns continuation. No run or watcher is pending. Preserve unrelated policy edits
+The Mac desktop is locked, so packaged native observation has not launched. Windows
+production qualification is next under CI10. Broad core verification remains running;
+no full-suite or both-target acceptance is claimed. Native keyboard, presentation
+timing, smooth manipulation, matched fidelity and whole #36 acceptance remain open.
+[Evidence](../tasks/evidence/canvas-rendering.md#production-gpu-integration-and-lifecycle-qualification-2026-10-23)
+records original failures, corrections and limits. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns continuation and exact remaining allowances. Preserve unrelated policy edits
 and protected native recovery.
 
 ## Earlier canvas decision closeout

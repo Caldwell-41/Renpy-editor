@@ -52,6 +52,10 @@ impl Session {
                     .map_err(|_| crate::transaction::ErrorCode::IoFailure)
             })
             .map_err(|_| SceneError::InvariantBlocked)?;
+        session.anchor().create_new_file(OsStr::new("canvas-bootstrap.py"))
+            .and_then(|mut f| f.write_all(include_bytes!("../renpy/runtime/canvas-bootstrap.py"))
+                .map_err(|_| crate::transaction::ErrorCode::IoFailure))
+            .map_err(|_| SceneError::InvariantBlocked)?;
         session.worker = Some(
             HelperProcess::start(sdk, session.anchor().clone())
                 .map_err(|_| SceneError::InvariantBlocked)?,
@@ -202,7 +206,7 @@ impl Session {
         if result["frameId"] != frame {
             return Ok(starting());
         }
-        if result["renderer"] != "sw" {
+        if result["renderer"] != crate::renpy::runtime::canvas::RENDERER {
             return Err(SceneError::InvariantBlocked);
         }
         if include_image {
@@ -219,6 +223,9 @@ impl Session {
         result["phase"] = json!("ready");
         Ok(result)
     }
+    pub(crate) fn shutdown_report(&self) -> crate::renpy::runtime::canvas::CanvasShutdown {
+        self.worker.as_ref().map(HelperProcess::shutdown_report).unwrap_or_default()
+    }
     pub(crate) fn shutdown(&mut self) -> bool {
         if self.root.as_os_str().is_empty() {
             return true;
@@ -232,7 +239,6 @@ impl Session {
         {
             return false;
         }
-        self.worker.take();
         drop(self.anchor.take());
         if fs::remove_dir_all(&self.root).is_err() {
             return false;

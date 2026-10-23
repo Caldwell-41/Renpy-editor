@@ -116,7 +116,7 @@ fn canvas_marks_inherited_styles_and_unsampled_interpolation_unavailable() {
 }
 
 #[test]
-#[ignore = "selected pinned-SDK canvas proof; one helper launch"]
+#[ignore = "selected pinned-SDK canvas lifecycle proof; four helper launches"]
 fn canvas_helper_sdk_renders_saved_data_and_stops_on_project_close() {
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");
@@ -137,11 +137,24 @@ fn canvas_helper_sdk_renders_saved_data_and_stops_on_project_close() {
         let ready = loop {
             let value = ipc(&mut service,"screens.canvasStatus",json!({"frameId":response["frameId"]}));
             if value["phase"] == "ready" { break value; }
+            if value["phase"] != "starting" || std::time::Instant::now() >= deadline {
+                if let Some(output) = std::env::var_os("LOOMLIGHT_CANVAS_EVIDENCE") {
+                    let output = std::path::PathBuf::from(output); fs::create_dir_all(&output).unwrap();
+                    for entry in profile.read_dir().unwrap().flatten() {
+                        if entry.file_name().to_string_lossy().starts_with("canvas-helper-") {
+                            for name in ["log.txt", "traceback.txt", "startup-refusal.json", "desktop-closed.json"] {
+                                if entry.path().join(name).is_file() { fs::copy(entry.path().join(name), output.join(name)).unwrap(); }
+                            }
+                        }
+                    }
+                }
+            }
             assert_eq!(value["phase"],"starting","{value}");
             assert!(std::time::Instant::now() < deadline,"{value}");
             std::thread::sleep(std::time::Duration::from_millis(16));
         };
         assert!(ready["image"].as_str().unwrap().starts_with("data:image/png;base64,"));
+        assert_eq!(ready["renderer"], if cfg!(windows) { "angle2" } else { "gl2" });
         assert_eq!(ready["width"],width); assert_eq!(ready["height"],height);
         assert_eq!(ready["geometry"][1]["width"].as_f64(),Some(640.0));
         assert_eq!(ready["geometry"][1]["x"].as_f64(),Some(((width-640)/2) as f64));
@@ -159,7 +172,68 @@ fn canvas_helper_sdk_renders_saved_data_and_stops_on_project_close() {
         fs::write(std::path::PathBuf::from(output).join("helper-log.txt"),&log).unwrap();
     }
     service.close().unwrap();
+    let shutdown = service.canvas_shutdown_report().unwrap();
+    assert!(shutdown.cleanup_complete && shutdown.cooperative, "{shutdown:?}");
+    assert_eq!(shutdown.exit_code, Some(0));
+    if let Some(output) = std::env::var_os("LOOMLIGHT_CANVAS_EVIDENCE") {
+        fs::write(std::path::PathBuf::from(output).join("shutdown.json"),serde_json::to_vec_pretty(shutdown).unwrap()).unwrap();
+    }
     assert!(!profile.read_dir().unwrap().any(|entry|entry.unwrap().file_name().to_string_lossy().starts_with("canvas-helper-")));
+    // Reopen after close, then change projects while the reused helper is live.
+    let other_profile = temporary.path().join("other-profile");
+    let mut other = LifecycleService::prepare_source_foundation_probe(other_profile.clone()).unwrap();
+    other.close().unwrap();
+    let mut reports = vec![serde_json::to_value(shutdown).unwrap()];
+    for change_project in [true, false] {
+        service.open_path(&root).unwrap();
+        let doc = ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+        let response = ipc(&mut service,"screens.canvasRender",json!({"path":PATH,"screenName":"help","expectedRevision":doc["revision"],"width":1280,"height":720}));
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        loop {
+            let ready = ipc(&mut service,"screens.canvasStatus",json!({"frameId":response["frameId"]}));
+            if ready["phase"] == "ready" { break; }
+            assert_eq!(ready["phase"], "starting", "{ready}");
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(std::time::Duration::from_millis(8));
+        }
+        if change_project {
+            service.open_path(&other_profile.join("synthetic-project")).unwrap();
+        } else {
+            assert!(service.runtime_shutdown(), "Application shutdown must stop the canvas");
+        }
+        let report = service.canvas_shutdown_report().unwrap();
+        assert!(report.cleanup_complete && report.cooperative && report.exit_code == Some(0), "{report:?}");
+        reports.push(serde_json::to_value(report).unwrap());
+        assert!(!profile.read_dir().unwrap().any(|entry|entry.unwrap().file_name().to_string_lossy().starts_with("canvas-helper-")));
+    }
+    // The test build alone forwards this profile-scoped refusal switch. Normal
+    // production launches scrub it with the rest of the inherited environment.
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service,"screens.inspect",json!({"path":PATH}));
+    std::env::set_var("LOOMLIGHT_CANVAS_REFUSAL_TEST_ROOT", fs::canonicalize(&profile).unwrap());
+    let response = ipc(&mut service,"screens.canvasRender",json!({"path":PATH,"screenName":"help","expectedRevision":doc["revision"],"width":1280,"height":720}));
+    std::env::remove_var("LOOMLIGHT_CANVAS_REFUSAL_TEST_ROOT");
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+    loop {
+        let value = ipc(&mut service,"screens.canvasStatus",json!({"frameId":response["frameId"]}));
+        if value["phase"] == "unavailable" { break; }
+        assert_eq!(value["phase"], "starting", "{value}");
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::sleep(std::time::Duration::from_millis(8));
+    }
+    let helper = profile.read_dir().unwrap().flatten().map(|entry|entry.path())
+        .find(|path|path.file_name().unwrap().to_string_lossy().starts_with("canvas-helper-")).unwrap();
+    let refusal: Value = serde_json::from_slice(&fs::read(helper.join("startup-refusal.json")).unwrap()).unwrap();
+    assert_eq!(refusal, json!({"refused":true,"stage":"selected-refusal"}));
+    service.close().unwrap();
+    let refusal_shutdown = service.canvas_shutdown_report().unwrap();
+    assert!(refusal_shutdown.cleanup_complete && !refusal_shutdown.cooperative);
+    assert_eq!(refusal_shutdown.exit_code, Some(72));
+    assert!(!profile.read_dir().unwrap().any(|entry|entry.unwrap().file_name().to_string_lossy().starts_with("canvas-helper-")));
+    if let Some(output) = std::env::var_os("LOOMLIGHT_CANVAS_EVIDENCE") {
+        let proof = json!({"normalShutdowns":reports,"startupRefusal":refusal,"refusalShutdown":refusal_shutdown,"sdkLaunches":4,"fixturesRemoved":true});
+        fs::write(std::path::PathBuf::from(output).join("lifecycle.json"),serde_json::to_vec_pretty(&proof).unwrap()).unwrap();
+    }
 }
 
 #[test]

@@ -367,7 +367,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
           test "$GITHUB_RUN_ATTEMPT" = 1
-          case "$ORDINAL" in 1|2|3|4|5|6) ;; *) exit 1 ;; esac
+          test "$ORDINAL" = 10
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/canvas-proof"
           git rev-parse HEAD > "$RUNNER_TEMP/canvas-proof/candidate.txt"
@@ -420,20 +420,11 @@ jobs:
           New-Item -ItemType Directory -Path $scratch | Out-Null
           "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-      - name: Production browser to helper, two aspects, samples and draft/history regression
+      - name: Four production SDK lifecycles, GPU frames, normal shutdown and refusal
         env:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
-          LOOMLIGHT_CANVAS_EVIDENCE: ${{ runner.temp }}/canvas-proof/browser
-          HELP_SCREEN_OUTPUT: ${{ runner.temp }}/canvas-proof/help-regression
-        run: |
-          node tests/canvas-helper.browser.mjs
-          LOOMLIGHT_CANVAS_EVIDENCE="$RUNNER_TEMP/canvas-proof/controller" node tests/canvas-helper-probe.browser.mjs
-          node tests/help-screen.browser.mjs
-      - name: Deliberate Ren'Py reference captures and clean Stop
-        env:
-          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
-          LOOMLIGHT_CANVAS_EVIDENCE: ${{ runner.temp }}/canvas-proof/reference
-        run: cargo test -p loomlight-core --release --locked --lib lifecycle::runtime_tests::canvas_reference_sdk_captures_actual_screen_at_two_internal_aspects -- --exact --ignored --nocapture
+          LOOMLIGHT_CANVAS_EVIDENCE: ${{ runner.temp }}/canvas-proof/lifecycle
+        run: cargo test -p loomlight-core --release --locked --lib screens::tests::canvas_helper_sdk_renders_saved_data_and_stops_on_project_close -- --exact --ignored --nocapture
       - name: One Windows package and native WebView to helper round trip
         env:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2

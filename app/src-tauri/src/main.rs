@@ -293,10 +293,20 @@ fn core_request(
         }
         return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),json!({"done":done})));
     }
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper")
+        && request["operation"] == "probe.canvasObservation" {
+        let root = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_CANVAS_OBSERVER_ROOT").ok_or("Canvas observer root required")?);
+        if request["payload"]["announce"] == true {
+            println!("{}", json!({"evidence":"canvas-observer-ready"}));
+            let _ = std::io::stdout().flush();
+        }
+        return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),
+            json!({"ready":root.join("canvas-observation.json.ready").is_file()})));
+    }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").is_ok()
         && request.get("operation").and_then(Value::as_str) == Some("probe.runtimeUiReport")
     {
-        let payload = request.get("payload").cloned().unwrap_or(Value::Null);
+        let mut payload = request.get("payload").cloned().unwrap_or(Value::Null);
         let report_limit = if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper") {
             256 * 1024
         } else if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()
@@ -320,6 +330,10 @@ fn core_request(
         if std::env::var("LOOMLIGHT_STUDIO_WINDOWS_CONTRACT").as_deref() == Ok("2")
             && std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("studio-settings")
         { ai_connection::service().shutdown(); }
+        if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper") {
+            payload["targetOs"] = json!(std::env::consts::OS);
+            payload["canvasShutdown"] = host.with_service(|service| serde_json::to_value(service.canvas_shutdown_report()).unwrap_or(Value::Null)).unwrap_or(Value::Null);
+        }
         let owners=rewrite_probe::cleanup_owners(||ai_requests::service().shutdown(),||if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && (!passed || std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2")) {
             rewrite_probe::cleanup_when_idle(&host)
         } else {true},||host.shutdown());
