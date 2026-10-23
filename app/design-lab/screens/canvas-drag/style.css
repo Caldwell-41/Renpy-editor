@@ -1,25 +1,25 @@
-.drag-lab { --drag-accent:#dfb568; box-sizing:border-box; min-height:100%; padding:20px; background:#171b20; color:#e3e5e8; font-size:13px; }
+.drag-lab { --drag-accent:#e4bb70; box-sizing:border-box; min-height:100%; padding:20px; background:var(--surface-app); color:var(--text-primary); font-size:13px; }
 .drag-lab * { box-sizing:border-box; }
-.drag-lab header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; border-bottom:1px solid #3b4149; padding-bottom:12px; }
+.drag-lab header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; border-bottom:1px solid var(--border-normal); padding-bottom:12px; }
 .drag-lab h1 { margin:0; font-size:20px; }
 .drag-lab h2 { margin:0 0 12px; font-size:13px; }
-.drag-lab header span,.drag-lab footer { color:#adb4bd; font-size:12px; }
-.drag-lab .drag-instructions { margin:14px 0; color:#e3e5e8; }
-.drag-lab button,.drag-lab input,.drag-lab select { font:inherit; color:inherit; background:#252b32; border:1px solid #525b66; border-radius:2px; padding:5px 8px; }
+.drag-lab header span,.drag-lab footer { color:var(--text-muted); font-size:12px; }
+.drag-lab .drag-instructions { margin:14px 0; color:var(--text-primary); }
+.drag-lab button,.drag-lab input,.drag-lab select { font:inherit; color:inherit; background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:2px; padding:5px 8px; }
 .drag-lab button { cursor:pointer; }
 .drag-lab button:disabled { opacity:.45; cursor:default; }
-.drag-lab button:focus-visible,.drag-lab input:focus-visible { outline:2px solid #dfb568; outline-offset:2px; }
+.drag-lab button:focus-visible,.drag-lab input:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
 .drag-lab .drag-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
 .drag-lab .drag-toolbar label { margin-left:auto; }
 .drag-lab .drag-workspace { display:grid; grid-template-columns:158px minmax(0,1fr); gap:20px; }
-.drag-lab nav { border-right:1px solid #3b4149; padding-right:12px; }
+.drag-lab nav { border-right:1px solid var(--border-normal); padding-right:12px; }
 .drag-lab nav button { display:block; width:100%; text-align:left; border:0; background:transparent; padding:8px 4px; }
-.drag-lab nav button[aria-pressed=true] { color:var(--drag-accent); background:#2c3034; }
-.drag-lab nav p { color:#adb4bd; font-size:12px; line-height:1.7; margin-top:24px; }
+.drag-lab nav button[aria-pressed=true] { color:var(--drag-accent); background:var(--surface-selected); }
+.drag-lab nav p { color:var(--text-muted); font-size:12px; line-height:1.7; margin-top:24px; }
 .drag-lab .drag-canvas-column { min-width:0; }
 .drag-lab .drag-canvas-caption { display:flex; justify-content:space-between; gap:10px; font-size:11px; margin:0 0 12px; }
 .drag-lab [data-feedback] { color:var(--drag-accent); }
-.drag-lab .drag-stage { width:100%; position:relative; overflow:hidden; background:#101316; outline:1px solid #3b4149; }
+.drag-lab .drag-stage { width:100%; position:relative; overflow:hidden; background:var(--surface-panel); outline:1px solid var(--border-normal); }
 .drag-lab .drag-game { position:relative; width:1280px; height:720px; transform-origin:top left; }
 .drag-lab .drag-content { position:absolute; background:#293b3b; border:1px solid #7b8d85; color:#f0e7d4; padding:40px 48px; overflow:hidden; }
 .drag-lab .drag-content h2 { font-size:28px; margin:0 0 20px; }
@@ -30,7 +30,7 @@
 .drag-lab .drag-child:hover,.drag-lab .drag-child:focus-visible { outline:2px solid #83a8bc; }
 .drag-lab .drag-move { display:none; pointer-events:auto; cursor:grab; }
 .drag-lab .drag-move:active { cursor:grabbing; }
-.drag-lab[data-target=handle] .drag-handle { display:block; top:-43px; left:-3px; height:38px; padding:3px 12px; font-size:22px; background:#dfb568; color:#171b20; }
+.drag-lab[data-target=handle] .drag-handle { display:block; top:-43px; left:-3px; height:38px; padding:3px 12px; font-size:22px; background:var(--drag-accent); color:#17181c; }
 .drag-lab[data-target=border] .drag-edge { display:block; }
 .drag-lab .edge-top { top:-10px; left:-3px; width:calc(100% + 6px); height:20px; }
 .drag-lab .edge-bottom { bottom:-10px; left:-3px; width:calc(100% + 6px); height:20px; }
@@ -38,9 +38,9 @@
 .drag-lab .edge-right { right:-10px; top:0; width:20px; height:100%; }
 .drag-lab[data-target=body] .drag-body { display:block; inset:0; width:100%; height:100%; }
 .drag-lab .drag-resize { right:-10px; bottom:-10px; width:20px; height:20px; pointer-events:auto; cursor:nwse-resize; background:#ffe4ad; border:2px solid #5b4725; z-index:2; }
-.drag-lab .drag-coordinates { display:block; font-variant-numeric:tabular-nums; white-space:pre-wrap; margin-top:12px; color:#d1d5da; }
-.drag-lab .drag-properties { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:20px; padding-top:14px; border-top:1px solid #3b4149; }
+.drag-lab .drag-coordinates { display:block; font-variant-numeric:tabular-nums; white-space:pre-wrap; margin-top:12px; color:var(--text-secondary); }
+.drag-lab .drag-properties { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:20px; padding-top:14px; border-top:1px solid var(--border-normal); }
 .drag-lab .drag-properties input { width:76px; }
-.drag-lab [role=status] { margin:14px 0; min-height:18px; color:#e3e5e8; }
-.drag-lab footer { border-top:1px solid #3b4149; padding-top:12px; line-height:1.5; }
-@media(max-width:650px) { .drag-lab { padding:14px; } .drag-lab header { align-items:flex-start; } .drag-lab header span { max-width:100px; } .drag-lab .drag-workspace { grid-template-columns:minmax(0,1fr); gap:12px; } .drag-lab nav { display:flex; flex-wrap:wrap; gap:8px; padding:0 0 10px; border-right:0; border-bottom:1px solid #3b4149; } .drag-lab nav h2 { width:100%; margin:0; } .drag-lab nav button { width:auto; } .drag-lab nav p { display:none; } .drag-lab .drag-toolbar { margin-bottom:14px; } .drag-lab .drag-properties { gap:8px; } }
+.drag-lab [role=status] { margin:14px 0; min-height:18px; color:var(--text-primary); }
+.drag-lab footer { border-top:1px solid var(--border-normal); padding-top:12px; line-height:1.5; }
+@media(max-width:650px) { .drag-lab { padding:14px; } .drag-lab header { align-items:flex-start; } .drag-lab header span { max-width:100px; } .drag-lab .drag-workspace { grid-template-columns:minmax(0,1fr); gap:12px; } .drag-lab nav { display:flex; flex-wrap:wrap; gap:8px; padding:0 0 10px; border-right:0; border-bottom:1px solid var(--border-normal); } .drag-lab nav h2 { width:100%; margin:0; } .drag-lab nav button { width:auto; } .drag-lab nav p { display:none; } .drag-lab .drag-toolbar { margin-bottom:14px; } .drag-lab .drag-properties { gap:8px; } }

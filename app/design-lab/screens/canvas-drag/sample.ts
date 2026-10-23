@@ -35,7 +35,7 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
           <button class="drag-child drag-text" data-pick="text" aria-label="Select Help text"></button>
           <button class="drag-child drag-button" data-pick="button" aria-label="Select Close button"></button>
           <div class="drag-outline">
-            <button class="drag-move drag-handle" aria-label="Move frame">↔ Move frame</button>
+            <button class="drag-move drag-handle" aria-label="Move frame">Move frame</button>
             <button class="drag-move drag-edge edge-top" aria-label="Move frame from top border"></button>
             <button class="drag-move drag-edge edge-left" aria-label="Move frame from left border"></button>
             <button class="drag-move drag-edge edge-right" aria-label="Move frame from right border"></button>

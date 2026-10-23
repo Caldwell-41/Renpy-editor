@@ -23,8 +23,9 @@ pointer snapping, one-pixel keyboard movement/resize, Shift for eight pixels, Es
 cancellation and one history entry per completed gesture. Undo, Redo and Reset work
 in memory. Child selection and numeric input are interactive. The shared outline
 moves immediately while the simulated content waits for the selected delay. No
-continuous CSS animation runs. Dark styling is intentional even when the lab shell
-selects its light-theme matrix; these drafts do not propose a light theme.
+continuous CSS animation runs. Review links use the requested dark theme and existing editor colour tokens.
+The lab also checks compatibility with its inherited light-theme tokens; no new
+theme design is selected.
 
 ## Scope and limits
 
