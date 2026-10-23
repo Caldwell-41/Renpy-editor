@@ -1615,3 +1615,66 @@ in the existing integration evidence directory records the actual acknowledgment
 require `watcher_running: true`. Otherwise use manual same-chat resume. On a matching
 event, acknowledge delivery and audit the exact run/attempt/SHA and retained artifacts
 before continuing. Later documentation commits do not change this candidate.
+
+### CI8 terminal audit and Windows renderer correction
+
+CI8 run `39905615261`, attempt 1 at
+`1cc4e8e3661b45b010d350a8c0120cbc830af2eb`, completed with failure. The watcher
+matches this chat and its receipt is acknowledged. The later commit only records
+the wait, so the result applies to the current probe. Native compilation now passes,
+closing H27. Desktop provisioning, official SDK verification, privacy scan and
+artifact upload also pass. Both selected SDK processes ran; Windows use is now
+12/24. No package or native editor ran. CI use remains 8/9.
+
+The render/stop case verifies private-desktop placement but produces zero frames.
+Its log reports unavailable OpenGL functions, then software-renderer initialization.
+It times out and requires forced termination, exiting 73. The job empties, desktop
+closes and fixture is removed. Across 5,045 samples it records no foreground/focus
+change or helper visibility on the input desktop, but 154 inventory failures.
+This is a failed capability and shutdown gate, not a hidden-startup pass.
+
+The refusal case records the exact selected refusal and exit 72 without forced
+cleanup. Its job, desktop and fixture close. All 72 samples report an inventory
+failure, with no helper window on the private desktop. The case fails its observation
+gate despite the correct refusal. Maximum sample gaps are 32 ms and 16 ms respectively.
+No physical keyboard, matched fidelity or production lifecycle proof is established.
+
+Artifact `12480737184` contains 18 files and expires at 2026-10-30 05:26:41 UTC.
+Its ZIP digest is
+`aa388fd6e6f80ca3de9f056211dcf901207d1fd9ac07ac66cc5367872be837c3`, matching GitHub.
+Every extracted member, probe hash, native executable identity and candidate matches
+the retained archive. Original logs, receipts, binaries, ZIP and metadata remain
+ignored alongside the CI7 failure; no historical evidence is overwritten.
+
+The ranked diagnosis is (1) the forced OpenGL renderer disabled the working Windows
+fallback, (2) private-desktop rendering itself is unavailable, and (3) enumeration
+fails while the private desktop is empty. The pinned SDK's `get_draw_constructors`
+selects only the forced backend plus software; the earlier Windows reference used
+`angle2` on Microsoft Basic Render Driver. The corrected probe requires `angle2`
+for both environment selection and frame admission. Software remains rejected.
+This tests the same model renderer family used by the Windows reference, without
+claiming a matched-image comparison or physical GPU acceleration.
+
+A hidden STATIC observer window on a dedicated private-desktop thread keeps its
+enumeration nonempty. Each sample must actually observe both desktop sentinels;
+API failures remain fatal. This avoids treating a zero return as success based on
+an assumed empty-desktop error convention. The observer processes window messages
+while awaiting its stop event, joins within five seconds, and must exit normally.
+The mandatory `observerStopped` receipt rejects missing/false cleanup evidence.
+The SDK's private-window count still excludes the observer PID. No desktop is
+switched or permission/ACL policy changed.
+
+Both independent reviewers identified the initial observer's non-message-pumping
+wait as P2. The corrected message-aware loop addresses it; both follow-up reviews report no
+remaining findings. Repository validation passes for 876 files. Portable generation,
+negative admission checks, workflow YAML and whitespace checks pass. Windows native
+compilation and execution of this correction remain for CI9. The full product suite
+remains due at the integrated candidate; this checkpoint changes no production code.
+
+Batches 90-92 cover audit/diagnosis, correction/checks, independent review and records.
+Use is local 92/106, Mac SDK 34/46, Windows SDK 12/24 and CI 8/9. Package/native use
+remains Mac three/three and Windows one/one. CI9 selects only the corrected two-SDK
+capability probe. It consumes the last approved dispatch; production integration and
+qualification remain unfinished even if it passes. After its audit, continue work
+that fits the existing authority and report any concrete missing allowance or host
+capability before further execution. No extra contingency is created.

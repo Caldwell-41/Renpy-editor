@@ -377,5 +377,22 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   reached `cmd.exe` with doubled leading quotes. Initialize Visual Studio through
   its PowerShell script, then pass compiler arguments directly in PowerShell.
 - **Verification:** CI7 fails before compiler/SDK execution. Portable checks and
-  independent review pass for the correction; native compilation is pending CI8.
+  independent review pass for the correction; native compilation passes in CI8.
 - **Evidence:** [L17 CI7 audit](../tasks/evidence/canvas-rendering.md#ci7-terminal-audit-and-compiler-invocation-correction).
+
+
+## H28. Forced OpenGL disables the Windows ANGLE fallback
+
+- **Class/search:** harness; `RENPY_RENDERER`, `gl2`, `angle2`, missing OpenGL
+  functions, software fallback, private desktop, empty enumeration.
+- **Cause/correction:** the pinned SDK limits an explicit renderer selection to that
+  backend plus software. CI8 forces `gl2`, loses the prior Windows reference's
+  working `angle2` fallback and times out. Select `angle2` explicitly and continue
+  rejecting software frames. Capability on the private desktop still needs proof.
+- **Observation correction:** CI8 also counts inventory failures before helper
+  windows exist. Keep both desktop enumerations nonempty with observer windows,
+  require each observer to be enumerated, and retain API-failure rejection. A
+  window-owning observer thread must process messages and stop within a bound.
+- **Verification:** portable checks pass; actual corrected rendering, observation
+  and cooperative shutdown remain pending CI9.
+- **Evidence:** [L17 CI8 audit](../tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction).

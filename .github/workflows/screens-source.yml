@@ -474,14 +474,14 @@ jobs:
       PYTHONUTF8: '1'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Require selected candidate and eighth dispatch
+      - name: Require selected candidate and ninth dispatch
         env:
           CANDIDATE: ${{ inputs.candidate }}
           ORDINAL: ${{ inputs.ordinal }}
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
           test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ORDINAL" = 8
+          test "$ORDINAL" = 9
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/canvas-gpu"
           git rev-parse HEAD > "$RUNNER_TEMP/canvas-gpu/candidate.txt"
@@ -520,7 +520,7 @@ jobs:
       - name: Short isolated SDK path
         shell: pwsh
         run: |
-          $scratch = 'C:\llgpu8'
+          $scratch = 'C:\llgpu9'
           if (Test-Path $scratch) { throw 'Capability scratch root already exists' }
           New-Item -ItemType Directory -Path $scratch | Out-Null
           "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8

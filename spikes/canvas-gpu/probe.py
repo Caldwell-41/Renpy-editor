@@ -30,7 +30,7 @@ def renderer():
             renpy.set_physical_size((plan["width"], plan["height"]))
             renpy.display.interface.set_mode()
             _canvas_render.dimensions = (plan["width"], plan["height"])
-        if renpy.get_renderer_info()["renderer"] != "gl2":
+        if renpy.get_renderer_info()["renderer"] != "angle2":
             _canvas_os._exit(74)
         root, objects = _canvas_build(plan)''')
     text = replace_once(text, '''        # 8.5.3 software screenshot() returns the display buffer, ignoring its
@@ -52,6 +52,7 @@ def renderer():
 def native_ok(value):
     return (value.get("stage") == "complete" and value.get("forced") is False
             and value.get("jobEmpty") is True and value.get("desktopClosed") is True
+            and value.get("observerStopped") is True
             and type(value.get("samples")) is int and value["samples"] > 1
             and all(type(value.get(key)) is int and value[key] == 0 for key in
                     ("foregroundChanges", "focusChanges", "visibleSamples", "inventoryFailures")))
@@ -76,7 +77,7 @@ def read_record(path):
 
 def check():
     # Check the expensive-run admission gate against missing/failed evidence.
-    baseline = dict(stage="complete", forced=False, jobEmpty=True, desktopClosed=True,
+    baseline = dict(stage="complete", forced=False, jobEmpty=True, desktopClosed=True, observerStopped=True,
                     samples=10, foregroundChanges=0, focusChanges=0,
                     visibleSamples=0, inventoryFailures=0)
     assert native_ok(baseline)
@@ -87,6 +88,7 @@ def check():
     for key in ("foregroundChanges", "focusChanges", "visibleSamples", "inventoryFailures"):
         assert not native_ok(dict(baseline, **{key: 1})), key
     assert not native_ok(dict(baseline, forced=True))
+    assert not native_ok(dict(baseline, observerStopped=False))
     assert not native_ok(dict(baseline, samples=0))
     refusal = dict(baseline, helperExit=72)
     assert case_ok(refusal, dict(refused=True, stage="selected-refusal"), None, 0, True)
@@ -131,7 +133,7 @@ def run_case(owner, sdk, output, scratch, refuse):
     (game / "renderer.rpy").write_text(renderer(), encoding="utf-8")
     shutil.copyfile(sdk / "renpy/common/DejaVuSans.ttf", game / "assets/canvas.ttf")
     env = {key: value for key, value in os.environ.items() if not key.startswith(("RENPY_", "SDL_", "PYTHON", "LOOMLIGHT_PROBE_"))}
-    env.update(RENPY_RENDERER="gl2", SDL_AUDIODRIVER="dummy", RENPY_DISABLE_SOUND="1",
+    env.update(RENPY_RENDERER="angle2", SDL_AUDIODRIVER="dummy", RENPY_DISABLE_SOUND="1",
                RENPY_DISABLE_BACKUPS="I take responsibility for this.", RENPY_SKIP_MAIN_MENU="1",
                RENPY_SKIP_SPLASHSCREEN="1", LOOMLIGHT_PROBE_REFUSE="1" if refuse else "0")
     (output / "reservation.json").write_text(json.dumps(dict(sdkProcesses=1, case="refusal" if refuse else "render-stop")))
@@ -155,7 +157,7 @@ def run_case(owner, sdk, output, scratch, refuse):
                     assert process.poll() is None, "Native owner exited before frame"
                     assert time.monotonic() < deadline, "GPU frame deadline expired"
                     time.sleep(.01)
-                assert result["renderer"] == "gl2" and (result["width"], result["height"]) == (width, height)
+                assert result["renderer"] == "angle2" and (result["width"], result["height"]) == (width, height)
                 assert result["geometry"][1]["width"] == 640 and result["geometry"][1]["height"] == 360
                 pixels = (scratch / "frame.png").read_bytes()
                 assert pixels.startswith(b"\x89PNG\r\n\x1a\n") and pixels[12:16] == b"IHDR"

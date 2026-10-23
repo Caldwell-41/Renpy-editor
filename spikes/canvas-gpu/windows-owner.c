@@ -10,10 +10,43 @@ typedef struct {
     DWORD pid;
     unsigned windows;
     unsigned visible;
+    HWND observer;
+    BOOL observer_seen;
 } Inventory;
+
+typedef struct {
+    HDESK desktop;
+    HANDLE ready;
+    HANDLE stop;
+    HWND window;
+} DesktopObserver;
+
+static DWORD WINAPI observe_desktop(void *context) {
+    DesktopObserver *observer = (DesktopObserver *)context;
+    if (SetThreadDesktop(observer->desktop)) {
+        // Keep enumeration nonempty before SDK startup and after refusal.
+        observer->window = CreateWindowExW(0, L"STATIC", L"Loomlight private observer",
+            WS_POPUP, 0, 0, 1, 1, NULL, NULL, NULL, NULL);
+    }
+    SetEvent(observer->ready);
+    DWORD result = 0;
+    for (;;) {
+        DWORD waited = MsgWaitForMultipleObjects(1, &observer->stop, FALSE, INFINITE, QS_ALLINPUT);
+        if (waited == WAIT_OBJECT_0) break;
+        if (waited != WAIT_OBJECT_0 + 1) { result = 1; break; }
+        MSG message;
+        while (PeekMessageW(&message, NULL, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&message);
+            DispatchMessageW(&message);
+        }
+    }
+    if (observer->window) DestroyWindow(observer->window);
+    return result;
+}
 
 static BOOL CALLBACK inventory(HWND window, LPARAM context) {
     Inventory *result = (Inventory *)context;
+    if (window == result->observer) result->observer_seen = TRUE;
     DWORD pid = 0;
     GetWindowThreadProcessId(window, &pid);
     if (pid == result->pid) {
@@ -29,13 +62,15 @@ int wmain(int argc, wchar_t **argv) {
     for (int i = 1; i < argc; i++) if (wcschr(argv[i], L'"')) return 2;
     const char *stage = "sentinel";
     DWORD error = 0, exit_code = STILL_ACTIVE;
-    BOOL forced = FALSE, job_empty = FALSE, desktop_closed = FALSE;
+    BOOL forced = FALSE, job_empty = FALSE, desktop_closed = FALSE, observer_stopped = FALSE;
     unsigned samples = 0, front_changes = 0, focus_changes = 0, visible_samples = 0;
     unsigned inventory_failures = 0, private_windows = 0;
     ULONGLONG last = 0, max_gap = 0;
     PROCESS_INFORMATION process = {0};
     HANDLE job = NULL, output = INVALID_HANDLE_VALUE, input = INVALID_HANDLE_VALUE;
     HDESK desktop = NULL;
+    HANDLE observer_thread = NULL;
+    DesktopObserver observer = {0};
     HWND sentinel = CreateWindowExW(0, L"STATIC", L"Loomlight GPU capability observer",
         WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 420, 100, NULL, NULL, NULL, NULL);
     HDESK original = GetThreadDesktop(GetCurrentThreadId());
@@ -53,6 +88,15 @@ int wmain(int argc, wchar_t **argv) {
         DESKTOP_CREATEWINDOW | DESKTOP_READOBJECTS | DESKTOP_WRITEOBJECTS | DESKTOP_ENUMERATE, NULL);
     if (!desktop || GetThreadDesktop(GetCurrentThreadId()) != original) goto cleanup;
     if (!SetEnvironmentVariableW(L"LOOMLIGHT_PROBE_DESKTOP", desktop_name)) goto cleanup;
+
+    stage = "desktop-observer";
+    observer.desktop = desktop;
+    observer.ready = CreateEventW(NULL, TRUE, FALSE, NULL);
+    observer.stop = CreateEventW(NULL, TRUE, FALSE, NULL);
+    if (!observer.ready || !observer.stop) goto cleanup;
+    observer_thread = CreateThread(NULL, 0, observe_desktop, &observer, 0, NULL);
+    if (!observer_thread || WaitForSingleObject(observer.ready, 5000) != WAIT_OBJECT_0 ||
+        !observer.window) goto cleanup;
 
     stage = "job";
     job = CreateJobObjectW(NULL, NULL);
@@ -98,11 +142,13 @@ int wmain(int argc, wchar_t **argv) {
         GUITHREADINFO gui = {0}; gui.cbSize = sizeof(gui);
         if (!GetGUIThreadInfo(0, &gui)) inventory_failures++;
         else focus_changes += gui.hwndFocus != sentinel;
-        Inventory current = {process.dwProcessId, 0, 0};
+        Inventory current = {process.dwProcessId, 0, 0, sentinel, FALSE};
         if (!EnumDesktopWindows(original, inventory, (LPARAM)&current)) inventory_failures++;
+        if (!current.observer_seen) inventory_failures++;
         visible_samples += current.visible != 0;
-        Inventory hidden = {process.dwProcessId, 0, 0};
+        Inventory hidden = {process.dwProcessId, 0, 0, observer.window, FALSE};
         if (!EnumDesktopWindows(desktop, inventory, (LPARAM)&hidden)) inventory_failures++;
+        if (!hidden.observer_seen) inventory_failures++;
         if (hidden.windows > private_windows) private_windows = hidden.windows;
         DWORD waited = WaitForSingleObject(process.hProcess, 0);
         if (waited == WAIT_OBJECT_0) break;
@@ -139,18 +185,32 @@ cleanup:
     if (process.hProcess) CloseHandle(process.hProcess);
     if (output != INVALID_HANDLE_VALUE) CloseHandle(output);
     if (input != INVALID_HANDLE_VALUE) CloseHandle(input);
-    if (desktop) desktop_closed = CloseDesktop(desktop);
+    if (observer_thread) {
+        SetEvent(observer.stop);
+        observer_stopped = WaitForSingleObject(observer_thread, 5000) == WAIT_OBJECT_0;
+        DWORD observer_exit = STILL_ACTIVE;
+        observer_stopped = observer_stopped && GetExitCodeThread(observer_thread, &observer_exit) && observer_exit == 0;
+        CloseHandle(observer_thread);
+    }
+    // On a stuck observer, process exit releases its handles. Do not close handles
+    // beneath the thread or accept this as successful resource cleanup.
+    if (!observer_thread || observer_stopped) {
+        if (observer.ready) CloseHandle(observer.ready);
+        if (observer.stop) CloseHandle(observer.stop);
+        if (desktop) desktop_closed = CloseDesktop(desktop);
+    }
     if (sentinel) DestroyWindow(sentinel);
     FILE *receipt = NULL;
     if (_wfopen_s(&receipt, argv[4], L"w") || !receipt) return 3;
     fprintf(receipt, "{\"stage\":\"%s\",\"win32Error\":%lu,\"helperPID\":%lu,\"helperExit\":%lu,"
-        "\"forced\":%s,\"jobEmpty\":%s,\"desktopClosed\":%s,\"samples\":%u,"
+        "\"forced\":%s,\"jobEmpty\":%s,\"desktopClosed\":%s,\"observerStopped\":%s,\"samples\":%u,"
         "\"foregroundChanges\":%u,\"focusChanges\":%u,\"visibleSamples\":%u,"
         "\"inventoryFailures\":%u,\"privateWindows\":%u,\"maximumSampleGapMilliseconds\":%llu}",
         stage, error, process.dwProcessId, exit_code, forced ? "true" : "false",
-        job_empty ? "true" : "false", desktop_closed ? "true" : "false", samples,
+        job_empty ? "true" : "false", desktop_closed ? "true" : "false",
+        observer_stopped ? "true" : "false", samples,
         front_changes, focus_changes, visible_samples, inventory_failures, private_windows, max_gap);
     fclose(receipt);
-    return strcmp(stage, "complete") || forced || !job_empty || !desktop_closed ||
+    return strcmp(stage, "complete") || forced || !job_empty || !desktop_closed || !observer_stopped ||
         !samples || front_changes || focus_changes || visible_samples || inventory_failures ? 1 : 0;
 }

@@ -2,25 +2,24 @@
 
 ## L17 GPU production integration selected
 
-2026-10-23: The user selected production GPU-helper integration and graceful
+2026-10-23: The user selected GPU-helper production integration and graceful
 shutdown for [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36), approving
-24 more local batches, 12 Mac SDK launches, three CI dispatches and four Windows
-SDK launches. #36 records the supplement; historical use remains charged.
+the handoff supplement. Production still uses the software helper. The guarded Mac
+prototype remains published through `aded9c8`, with four matched GL2 images and
+bounded hidden/focus observation; it required forced termination.
 
-The guarded Mac prototype and its review are published through `aded9c8`. Its four
-matched GL2 images and bounded hidden/focus observation pass; it needed forced
-termination. Production still uses the software helper. CI7 failed before compiler
-startup because of command quoting; no SDK work ran. Reviewed correction `3d7bac8`
-uses direct PowerShell setup/compiler calls. [CI8](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39905615261) is running at
-`1cc4e8e` for the same Windows private-desktop GPU, stop and refusal probe. Both review axes
-have no remaining findings; actual Windows capability remains unproved.
+CI8 compiled the Windows capability probe, but forced OpenGL fell back to software
+and timed out. The refusal exited correctly but failed desktop observation. Both
+cases remain failed. The correction selects the earlier Windows reference's `angle2`
+backend and requires successful enumeration of both desktop observers. CI9 will test
+that correction and consume the last approved dispatch. Production integration and
+both-target qualification remain unfinished even if capability passes.
 
-[Integration evidence](../tasks/evidence/canvas-rendering.md#gpu-production-integration-and-shutdown-2026-10-23)
-owns the current candidate, review, pending operation and cumulative usage.
-[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns continuation. Windows
-capability and production lifecycle remain unproved. Native timing, physical keyboard,
-smooth manipulation and whole-ticket/3B acceptance remain open. No tolerance or weaker
-gate is accepted. Preserve unrelated policy edits and protected recovery below.
+[Integration evidence](../tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction)
+owns the audit, correction, limits and usage. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns continuation. Native timing, physical keyboard, smooth manipulation and whole-ticket
+acceptance remain open. No tolerance or weaker gate is accepted. Preserve unrelated
+policy edits and protected recovery.
 
 ## Earlier canvas decision closeout
 

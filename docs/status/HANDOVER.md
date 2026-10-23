@@ -3,51 +3,40 @@
 ## Active L17 integration handover
 
 The user selected production GPU-helper integration and graceful shutdown for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) on 2026-10-23, approving
-the pending handoff supplement. Development stays on Mac ARM64 in
-`codex/phase3b-screen-designer`. The earlier guarded Mac prototype and review are
-published at `aded9c805e503415159942b31eef5a2f1f012ac2`.
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36), approving the handoff
+supplement. Use the existing Mac ARM64 checkout and `codex/phase3b-screen-designer`.
+The guarded Mac prototype is published through `aded9c8`; production remains unchanged.
+Establish the Windows hidden GPU capability before broad production integration.
 
-The first integration checkpoint is an early Windows capability probe, committed
-through `848d50f`. Production remains unchanged. The probe starts the data-only
-GL2 helper on a private desktop that is never switched into view, observes the
-input desktop's foreground/focus and requires four frames at two aspects, a stop
-acknowledgment, exit 0 and no forced cleanup. A second SDK launch requires the
-selected bootstrap-refusal reason and exit 72. Native resources and fixtures must
-close. This does not qualify production, matched fidelity or physical keyboard input.
+[CI8 audit and correction](../tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction)
+own the current evidence. Run `39905615261`, attempt 1 at
+`1cc4e8e3661b45b010d350a8c0120cbc830af2eb`, failed after native compilation passed.
+The forced `gl2` backend fell back to software and timed out; stop required force.
+The exact refusal exited 72 but failed inventory observation. Both SDK processes
+ran and are charged. Artifact identity and all retained hashes match. Watcher delivery
+is acknowledged; that run has no remaining wait.
 
-[Integration evidence](../tasks/evidence/canvas-rendering.md#ci7-terminal-audit-and-compiler-invocation-correction)
-owns the CI7 terminal audit. Run `39905179001`, attempt 1 at `3f04698`, failed
-before compiler startup due to nested PowerShell/cmd quoting. No SDK or native work
-ran. The exact artifact digest and candidate match; watcher delivery is acknowledged.
-Correction `3d7bac8` uses Visual Studio's PowerShell setup and direct compiler
-arguments. Both review axes report no findings. CI8 run `39905615261`, attempt 1 at
-`1cc4e8e3661b45b010d350a8c0120cbc830af2eb`, selects the same probe at ordinal 8.
-It is in progress as of 2026-10-23 05:24:58 UTC (15:24:58 AEST). Resume this chat
-through ci-watch for exact terminal artifact audit; actual registration status is in
-the ignored `ci8-watch-registration.json`. Without confirmed registration, use manual
-same-chat resume. Native compilation and capability remain pending.
+The correction pins `angle2`, as used by the earlier Windows reference. Both desktop
+observations require their sentinel window on every sample. A separate thread creates
+a hidden private-desktop observer and pumps messages while awaiting stop. Its bounded
+join and normal exit are mandatory. Neither API errors nor software frames are accepted.
+The probe requires four frames at two aspects, a stop acknowledgment, SDK exit 0,
+no forced cleanup and empty job/closed desktop/removed fixture. Its refusal case
+requires the exact selected reason and exit 72. This is capability evidence only.
 
-Cumulative ceilings are local 106, Mac SDK 46, CI 9 and Windows SDK 24. Use at CI8 dispatch
-is local 89, Mac SDK 34, CI 8 and Windows SDK 10. The two unused CI7 SDK
-reservations are released on exact skipped-step evidence; no actual use is reset.
-Package/native ceilings remain five/seven per target; Mac use is three/three and
-Windows use one/one. CI8 reserves two Windows SDK launches and no package/native
-editor. After dispatch, one CI slot remains. No new contingency applies.
+CI9 is the next selected operation, ordinal 9 on the registered Screens workflow,
+with `canvas_gpu_capability=true` and both other selectors false. Reserve two Windows
+SDK launches and no package/native-editor launches. It is the final approved CI slot.
+Record its exact candidate/run/attempt and use ci-watch in this chat; audit terminal
+artifacts before making any acceptance claim. Even a pass leaves production integration
+and both-target qualification unfinished. Continue work within authority after the
+audit; do not invent extra dispatches or renew contingency.
 
-Once Windows capability is established, integrate the pinned GPU adapter and
-approved packaging route, then prove cooperative stop before forced cleanup at
-project close/change, application quit and restart. Preserve startup-failure focus
-retention, inert source-derived inputs, SDK checks and geometry/source safeguards.
-The Mac prototype's native library is not yet a shipping adapter. Its passing
-four-frame fidelity and sampled hidden/focus evidence remain bounded; forced-stop,
-Windows, native timing and smooth manipulation gates remain open. Keep #36/B07/B08
-and full 3B open. No tolerance or weaker requirement is accepted.
-
-The implementation owner is this chat. Reviewers are read-only; no other writer,
-SDK helper or local native operation is pending. Preserve unrelated policy hunks
-in this checkout and all protected recovery below. The protected user fixture has
-not been inspected or launched.
+Cumulative use before CI9 is local 92/106, Mac SDK 34/46, Windows SDK 12/24 and CI 8/9.
+Package/native ceilings remain five/seven per target; use is Mac three/three and
+Windows one/one. Original CI7/CI8 failures and receipts remain ignored under the
+integration evidence directory. No Mac SDK, package or native editor ran during
+these corrections. Preserve unrelated policy edits and protected native recovery.
 
 ## Earlier canvas decision closeout
 
