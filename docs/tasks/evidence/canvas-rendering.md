@@ -2147,3 +2147,59 @@ Windows SDK 23/24, Mac package/native 6/4 against 6/7, and Windows 3/4 against 5
 All CI11 reservations are charged. No run, watcher or process remains pending.
 Two local batches remain for the Mac sequence and final audit/publication. Preserve
 unrelated policy edits and the historical native recovery record.
+
+### Both-target production integration and shutdown closeout
+
+2026-10-23: After the user unlocked the Mac, the selected four-SDK/two-editor native
+sequence passed once against the verified signed package 6. Production integration
+candidate is `7ad845c73447003e1278e180f10e800fb05ebc2b`; final lifecycle qualification
+candidate is `580d5a46e47d0f140c1f033f8e7e4fe658fea5cc`. Both targets tested the latter
+candidate. Subsequent commits change documentation only. Package identity remains
+as recorded above; the executable hash was checked again before and after execution.
+
+| Mac native stage | Renderer/result | Shutdown | Samples with helper identified / all samples | Largest sample gap |
+| --- | --- | --- | ---: | ---: |
+| Refusal | Exact selected startup refusal | Exit 72; cleanup complete | 15 / 125 | 17.08 ms |
+| Helper restart and project change | Ready GL2 frame | Cooperative exit 0; cleanup complete | 52 / 118 | 15.05 ms |
+| Application quit | Ready GL2 frame | Cooperative exit 0; cleanup complete | 43 / 111 | 16.95 ms |
+| Application restart | Ready GL2 frame | Cooperative exit 0; cleanup complete | 46 / 109 | 15.51 ms |
+
+Mac SDK launches 47–50 and native editor launches 5–6 are charged. Four distinct
+helper PIDs and two editor PIDs agree with the independent launch receipts. Both
+editors exit 0 with actual application Exit events. All four observers stop normally;
+463 samples record zero visible helper samples, foreground changes, activation
+changes or inventory failures. The same structural admission and phase/launch checks
+pass against the retained receipts. A separate process check confirms all six owned
+processes are gone. Source/assets remain unchanged; helper directories and the owned
+fixture are removed. There are no qualification errors or fallback cleanups.
+
+The ignored `mac-native-lifecycle-05-06` directory retains both phase logs/receipts,
+launch counts and all observations. `mac-lifecycle-audit.json` records the exact
+package, process check and audit. The earlier CI11 snapshot correctly says the Mac
+had not run at that checkpoint; this closeout and the Mac audit supersede that live
+state without rewriting the historical evidence.
+
+Independent Standards and Spec terminal reviews find no remaining concrete finding
+for the selected production integration and graceful-shutdown scope. Combined with
+CI10's audited production rendering, source/history, service lifecycle and packaged
+project-close checks, CI11 and this Mac sequence complete the selected both-target
+outcome. The production helper uses GL2 on Mac and ANGLE2 on Windows, suppresses its
+native window/activation through the reviewed adapters, and stops cooperatively with
+bounded process cleanup. Startup refusal, helper restart, project change, application
+quit and app restart now have the selected native observations on both targets.
+
+This closes the selected integration work, not all of #36. The native actions use
+scripted UI initiation and a synthetic DOM focus control. Sampled windows/foreground
+observations do not prove continuous focus; Windows activation events and physical
+keyboard delivery remain unproved. Physical GPU acceleration, matched rendering
+fidelity, native input-to-presentation timing, smooth manipulation and whole-ticket
+acceptance remain separate. No tolerance, source-safety rule or signing policy changed.
+No PR, merge or release is selected.
+
+Final cumulative use is local 120/120, CI 11/11, Mac SDK 50/50 and Windows SDK 23/24.
+Mac package/native use is 6/6 against ceilings 6/7; Windows is 3/4 against 5/7.
+All reservations are charged. No process, fixture, run, watcher or requested capability
+remains pending. The selected allowance is closed; unused discrete Windows/native
+headroom does not authorize another execution after the local ceiling is exhausted.
+Further #36 work needs a new selected outcome and an explicit finite allowance.
+Unrelated policy edits and all historical recovery evidence remain preserved.

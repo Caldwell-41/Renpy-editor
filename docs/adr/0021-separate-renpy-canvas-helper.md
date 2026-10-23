@@ -1,6 +1,6 @@
 # ADR 0021: Separate Ren'Py helper for the Screens canvas
 
-- Status: Accepted design; production GPU integration implemented; rendering qualification pending
+- Status: Accepted design; bounded production integration and shutdown qualified; rendering qualification pending
 - Date: 2026-10-22
 - Authority: The user confirmed the complete interview agreement and requested this
   ADR and the update to [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
@@ -130,8 +130,10 @@ owns full supported canvas acceptance.
 - Capturing the actual project supplies its initialized behavior but executes game
   code. Keep it for deliberate comparison under the existing runtime boundary.
 - The chosen helper requires the pinned SDK and a new editor connection. Its
-  responsiveness, hidden operation and fidelity remain unproved. Unknown custom
-  dependencies stay explicit even though Ren'Py performs the drawing.
+  responsiveness and fidelity remain unproved. The
+  [bounded production integration and shutdown proof](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
+  records the selected both-target native observations and their limits. Unknown
+  custom dependencies stay explicit even though Ren'Py performs the drawing.
 
 This refines the proposed Preview service's Screens responsibility in
 [ARCHITECTURE](../ARCHITECTURE.md#proposed-components). It preserves

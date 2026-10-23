@@ -1,26 +1,27 @@
 # Current status
 
-## L17 Windows lifecycle audited; Mac awaits unlock
+## L17 production integration and shutdown complete
 
-2026-10-23: Production GPU integration and cooperative shutdown are published.
-The focused native lifecycle candidate for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is `580d5a4`.
+2026-10-23: The selected production GPU integration and graceful-shutdown work for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is complete on Mac ARM64
+and Windows x64. Production candidate is `7ad845c`; final lifecycle qualification
+candidate is `580d5a4`. Signed Mac package 6/native launches 5–6 and audited
 [CI11](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39918738346), attempt 1,
-and its exact nine-file artifact are audited. Windows passes refusal, helper restart,
-project change, application quit and app restart with normal cleanup. All four bounded
-observation intervals record no visible helper or foreground change.
+pass refusal, helper restart, project change, application quit and app restart.
+Both targets pass cooperative normal exits, actual editor exits, source preservation
+and process/fixture cleanup. Bounded observations find no visible helper or foreground
+change; Mac activation observations also pass. Both review axes have no remaining findings.
 
-Signed Mac package 6 is verified, but the desktop is locked. The approved four-SDK,
-two-editor Mac sequence has not started; the unlock request remains pending. This
-keeps the selected both-target outcome unfinished. No CI run or watcher remains pending.
-[Evidence](../tasks/evidence/canvas-rendering.md#ci11-terminal-audit-mac-native-sequence-awaits-unlock)
-owns identities, results and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns continuation. Unrelated policy edits remain local and uncommitted.
+[Evidence](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
+owns exact identities, results, original failures and limits;
+[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns closure and recovery.
+No operation or watcher remains pending. Unrelated policy edits remain local and
+uncommitted. No PR, merge or release is selected.
 
-Use is local 118/120, CI 11/11, Mac SDK 46/50 and Windows SDK 23/24. Mac package/native
-use is 6/4 against 6/7; Windows is 3/4 against 5/7. No reservations remain. Physical
-keyboard, matched fidelity, presentation timing and smooth manipulation remain separate
-#36 gates. No PR, merge or release is selected.
+Final use is local 120/120, CI 11/11, Mac SDK 50/50 and Windows SDK 23/24. Mac
+package/native use is 6/6 against 6/7; Windows is 3/4 against 5/7. The selected allowance
+is closed. #36 remains open for physical keyboard, matched fidelity, native presentation
+timing, smooth manipulation and whole-ticket acceptance; no broader proof is inferred.
 
 ## Earlier canvas decision closeout
 

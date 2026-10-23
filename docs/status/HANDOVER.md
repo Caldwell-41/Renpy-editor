@@ -2,44 +2,38 @@
 
 ## Active L17 integration handover
 
-Continue the approved native lifecycle supplement for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) on the existing Mac
-checkout and `codex/phase3b-screen-designer`. Production integration is published at
-`7ad845c`; CI10 and artifact 12483375952 are audited, with watcher receipt recorded.
-Preserve unrelated policy edits and the native recovery section below. No PR, merge,
-release or signing-policy change is selected.
+The selected production GPU integration and graceful-shutdown outcome for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is complete on both
+targets. Production candidate is `7ad845c73447003e1278e180f10e800fb05ebc2b`; final
+lifecycle qualification candidate is `580d5a46e47d0f140c1f033f8e7e4fe658fea5cc`.
+Later commits maintain evidence/status only. Development remains on the existing
+Mac checkout and `codex/phase3b-screen-designer`. Preserve unrelated policy edits
+and the native recovery section below. No PR, merge, release or signing change is selected.
 
-[The current evidence](../tasks/evidence/canvas-rendering.md#native-lifecycle-supplement-approved-and-prepared)
-owns the approval, focused probe, review and portable checks. Both review axes have
-no remaining findings. The probe observes four separate helper lifecycles across two
-editor launches, including the existing application-close flow and actual Exit event.
-All source/assets and process/fixture cleanup gates remain blocking. Physical keyboard,
-matched fidelity, presentation timing and smooth manipulation stay separate.
+[The closeout evidence](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
+owns exact package/run identities, both-target results, limits and final accounting.
+Signed Mac package 6/native launches 5–6 and audited Windows CI11 run 39918738346,
+attempt 1, pass all four selected native lifecycle cases. CI10 retains the earlier
+production rendering, source/history and ordinary project-close proof. Both independent
+review axes have no remaining concrete findings for this selected scope.
 
-Candidate `580d5a46e47d0f140c1f033f8e7e4fe658fea5cc` is published. Signed Mac
-package 6 is verified and retained in the ignored integration directory; its exact
-[identity and CI dispatch receipt](../tasks/evidence/canvas-rendering.md#signed-mac-package-6-and-ci11-dispatch)
-owns hashes and limits. Mac native execution has not started because the desktop is
-locked. An unlock request is pending. After unlock, recheck console state and competing
-Loomlight processes, reserve four SDK launches and two editor launches, then run
-`app/scripts/run-canvas-lifecycle.py` once against package 6 in a fresh ignored output
-directory, using the verified 8.5.3 SDK archive. No new package build is available.
+The Mac unlock request is resolved. All owned app/helper processes and fixtures are
+gone; no run, watcher, reservation or capability request is pending. Retain the ignored
+integration receipts, original failures, exact package 6 and CI10/CI11 archives.
+CI11 artifact 12485948843 expires 2026-10-30 at 07:44:43 UTC; its downloaded copy is
+already audited. All raw evidence remains outside tracked source.
 
-[CI11's terminal audit](../tasks/evidence/canvas-rendering.md#ci11-terminal-audit-mac-native-sequence-awaits-unlock)
-passes for run 39918738346, attempt 1, at the exact candidate. Watcher delivery is
-acknowledged; artifact 12485948843 and all nine files are verified. Windows passes
-four native lifecycle stages, two actual application exits, bounded hidden/foreground
-observations and all cleanup gates. Its observations do not establish physical keyboard,
-continuous focus or physical GPU acceleration. No workflow or watcher is pending.
+Final use is local 120/120, CI 11/11, Mac SDK 50/50, Windows SDK 23/24, Mac package/native
+6/6 against 6/7, and Windows 3/4 against 5/7. The selected allowance is closed. Unused
+discrete headroom does not authorize another execution or renew exhausted limits.
+Further work requires a newly selected scope and finite allowance; do not rerun this
+completed sequence or create a replacement package under the closed allowance.
 
-The only remaining selected execution is the Mac sequence after unlock, followed by
-its audit and final publication. Keep the exact package 6 executable; later commits
-change documentation only. Do not rebuild or dispatch another workflow. Current use is
-local 118/120, CI 11/11, Mac SDK 46/50, Windows SDK 23/24, Mac package/native 6/4 against
-6/7, and Windows 3/4 against 5/7. All CI11 reservations are charged. Two local batches
-remain for Mac execution and final audit/publication; no further automatic contingency
-is authorized. The ignored integration ledger and receipts retain counts, original
-failures and exact identities. Preserve native recovery below and unrelated policy edits.
+#36 stays open for matched rendering fidelity, physical keyboard delivery, native
+presentation timing, smooth manipulation and whole-ticket acceptance. The completed
+native observations are bounded and script-initiated; they do not establish continuous
+focus, Windows activation events or physical GPU acceleration. Preserve those limits
+when reporting or selecting subsequent work.
 
 ## Earlier canvas decision closeout
 
