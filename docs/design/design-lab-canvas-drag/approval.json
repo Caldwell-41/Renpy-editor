@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "canvas-drag",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "handle-v1", "variantId": "handle", "approval": null },
+    { "id": "border-v1", "variantId": "border", "approval": null },
+    { "id": "body-v1", "variantId": "body", "approval": null }
+  ]
+}

@@ -446,7 +446,8 @@ export class ScreensWorkspace {
         target.dataset.index = String(index); target.ariaPressed = String(index === this.selected);
         if (!this.move) this.bindMovement(target, index);
         for (const [key,value] of Object.entries({left:geometry.x,top:geometry.y,width:geometry.width,height:geometry.height})) target.style.setProperty(key,`${value*this.scale}px`);
-        this.canvas.append(target);
+        // Reattaching a captured target makes the browser cancel the gesture.
+        if (target.parentElement !== this.canvas) this.canvas.append(target);
       }
       if(this.resize || this.move) {
         const outline=this.canvas.querySelector<HTMLElement>(".screen-selection"), target=this.canvas.querySelector<HTMLElement>(`[data-index="${this.selected}"]`);

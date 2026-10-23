@@ -9,7 +9,7 @@ import {join,resolve} from 'node:path';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {driverProcess} from './phase2-driver-process.mjs';
 
-const output=resolve('../.toolchains/canvas-proof/continuation-55-60/position-controller');
+const output=resolve(process.env.LOOMLIGHT_CANVAS_EVIDENCE ?? '../.toolchains/canvas-proof/continuation-55-60/position-controller');
 await mkdir(output,{recursive:true});
 const child=driverProcess(resolve(`target/debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'canvas-position']);
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
@@ -32,7 +32,7 @@ const rpc=async request=>{
 };
 try {
   assert.equal((await child.next()).ready,true);await server.listen();
-  browser=await chromium.launch({channel:'chrome',headless:true});page=await browser.newPage({viewport:{width:1100,height:760}});
+  browser=await chromium.launch({channel:'chrome',headless:true});page=await browser.newPage({viewport:{width:1100,height:760}});await page.routeWebSocket('**',()=>{});
   page.on('pageerror',error=>errors.push(error.message));await page.exposeBinding('positionRpc',(_,request)=>rpc(request));
   await page.route('**/position-controller',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/position-controller`);
@@ -48,12 +48,18 @@ try {
   await page.getByLabel('Canvas zoom',{exact:true}).selectOption('100');await fresh();
   // Keep the pointer on exposed frame background, outside all child targets.
   const target=page.locator('.screen-node-frame'),box=await target.boundingBox();
+  await page.evaluate(()=>document.addEventListener('pointerdown',event=>{window.__dragPointer=event.pointerId;},true));
   await page.mouse.move(box.x+10,box.y+10);await page.mouse.down();await page.mouse.move(box.x+74,box.y+42);await fresh();
+  // Image delivery must not cancel a held gesture. The next input flushes the
+  // browser's pending lostpointercapture event before we inspect capture.
+  await page.mouse.move(box.x+82,box.y+50);await fresh();
+  assert.equal(await target.evaluate(element=>element.hasPointerCapture(window.__dragPointer)),true,'Image updates must preserve a held frame drag');
   assert.equal(await snapshot(),before,'Held movement cannot write source');
   await page.keyboard.press('Escape');await page.mouse.up();await fresh();
   assert.equal(await snapshot(),before);assert.equal(receipts.filter(r=>r.request.operation==='screens.setPosition').length,0);
   const next=await target.boundingBox();
-  await page.mouse.move(next.x+10,next.y+10);await page.mouse.down();await page.mouse.move(next.x+74,next.y+42);await page.mouse.up();
+  await page.mouse.move(next.x+10,next.y+10);await page.mouse.down();await page.mouse.move(next.x+42,next.y+26);await fresh();
+  await page.mouse.move(next.x+74,next.y+42);await fresh();await page.mouse.up();
   await page.getByText('Position saved. Undo reverses the move.',{exact:true}).waitFor();await fresh();
   const accepted=before.replace('xalign 0.5','xalign 0.6').replace('yalign 0.5','yalign 0.5888888888888889');
   assert.equal(await snapshot(),accepted);
