@@ -3102,3 +3102,96 @@ failures and publication/permission boundaries. Manual 7's visual smoothness que
 has no answer yet; the earlier manual 6 move was reported smooth. No new runtime
 operation or external publication occurs. The temporary handoff points to these
 canonical records; it does not replace them or renew historical closed allowances.
+
+### Presentation capability and proposed run, 2026-10-24
+
+Continuation starts at `31e9e18` on the existing branch. Live #36, B07 and P3B were
+read through `gh`; no tracker content was changed. Manual 7's external audit and
+disk receipt remain intact. Package 4's executable rehash matches
+`7cac273f852f71520238e9a3b9ae8d76548b48913716b92513216c7d12cfabef`.
+Product code remains `8527998`, with probe correction `68f95c3`. Neither completed
+matched rendering nor Mac functional input needs another run for this continuation.
+
+Read-only macOS permission preflight reports screen capture, event posting and
+Accessibility all unavailable to the shell measurement process. The sandboxed
+console query exits 2. The same query outside the sandbox confirms an unlocked
+console and exits 0; all three permission results remain false. No permission was
+requested, screen captured or input sent. No Loomlight process is running. Exact
+preflights remain under ignored `continuation-2026-10-24` beside the usage ledger.
+This is an environment capability limit and missing evidence, not a product failure.
+
+The Windows `screens-source.yml` selectors still cover helper lifecycle, GPU
+capability and matched rendering. The helper selector is pinned to historical
+ordinal 11. It has no continuous input/presentation recorder. Existing Windows
+native scripts have SendInput and isolated screenshots, which do not establish the
+required frame sequence. No historical selector was dispatched or repurposed.
+This establishes a missing prepared route, not that hosted Windows capture is
+impossible. Default routing remains focused Windows CI; another computer is only
+a fallback if that capability check fails and the user authorizes a named handoff.
+
+The following is a proposed measurement procedure, not implemented or qualified
+instrumentation. It requires a recorder permission decision on Mac. Windows CI
+requires a separately reviewed adapter and explicit publication authorization.
+
+1. Use package 4 unchanged on Mac and one matching-source Windows x64 package.
+   Open only the disposable public Help composition with an isolated profile and
+   pinned SDK. Record executable/fixture hashes, OS, WebView, display dimensions,
+   scaling, refresh and focus. Preserve protected recovery. Use normal app mode
+   for repeated measurements; consumed eight-stage launchers cannot supply them.
+2. Prepare a separate Mac recorder using window-filtered ScreenCaptureKit and
+   timestamped native input. Limit retained capture to the owned test window,
+   with no audio, other windows or network upload. Request only the permissions
+   required by the chosen recorder/driver identity after user approval. Verify
+   capture, native input and clock conversion before reserving an editor launch.
+   Apple's installed SDK describes `SCStreamFrameInfoDisplayTime` as WindowServer
+   display time in mach absolute units; validate conversion to event timestamps.
+   The [API reference](https://developer.apple.com/documentation/screencapturekit/scstreamframeinfo/displaytime)
+   identifies that frame metadata. Capture callback arrival alone is insufficient.
+3. Prepare a focused Windows selector with a pre-build capability check for an
+   interactive input desktop, usable capture, monotonic timestamps and focus.
+   Use OS SendInput and Windows.Graphics.Capture. Microsoft documents frame
+   [SystemRelativeTime](https://learn.microsoft.com/en-us/uwp/api/windows.graphics.capture.direct3d11captureframe.systemrelativetime)
+   as compositor QPC time, and [SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)
+   as injected input. Validate time-unit conversion and captured content before
+   building. Failure leaves the named case pending without a package launch.
+4. Record startup separately, through the first correct helper image. After that
+   image, preselect three warm series per target: 100 single-character Canvas text
+   sample replacements, 100 move updates and 100 resize updates. Text samples
+   remain sample data. Send text replacements at fixed 200 ms intervals; send
+   gesture updates at 60 Hz with steady paths inside the canvas. Retain every
+   input, capture timestamp, dropped frame and unmatched result. Report each
+   series separately; do not average away a failing interaction.
+5. Match each input to the first captured correct screen-canvas result using the
+   known glyph or expected geometry and recorded zoom. Report provisional guides
+   separately from helper-rendered content. A moving guide alone cannot pass the
+   content endpoint. Keep slow samples; an input superseded without an observed
+   result is unmatched, not a zero-latency success. Bound observation at one second
+   after the final input. Report nearest-rank p95, maximum, within-100-ms count,
+   unmatched inputs and capture uncertainty. A pass requires at least 95% of each
+   complete series within 100 ms, with usable capture coverage and clock mapping.
+   Recorder tests must reject missing frames, wrong content, clock mismatch and
+   injected delays over 100 ms before native measurements are admitted.
+6. Retain source/history and independent cleanup audits. Windows also runs its
+   missing eight functional stages through the fresh native driver. Automated
+   input establishes OS delivery only. Ask for a separate smoothness observation
+   on Windows; manual 7's move/resize observation is still unanswered on Mac.
+   Neither compositor measurement establishes physical panel scanout or replaces
+   subjective acceptance. Full supported-subset and phase acceptance stay separate.
+
+Proposed initial reservations after preparation and permission checks are one Mac
+native/SDK launch, then one Windows CI dispatch with one package, two native
+launches and two SDK launches. This leaves one Mac native retry. Reserve attempts
+immediately before execution; this plan itself reserves none. Keep the existing
+ceilings and reassess any failed measurement before a retry. Recorder/adapter
+preparation, qualification, review and closeout must fit the remaining allowance.
+
+Batches 68-69 cover entry, capability checks, package/evidence readback and this
+plan. Batch 70 covers scoped documentation validation, independent review and
+local commit. Cumulative use is local 70/80, absolute ceiling 88; CI 0/4;
+Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Ten nominal local batches
+and eight contingency batches remain. No app, SDK, package, CI, permission change
+or remote publication occurred in these batches. No runtime operation or watcher
+is pending. Missing capability approval prevents presentation execution; the
+prepared plan does not close #36. The long status files retain unrelated policy
+work, outstanding acceptance and protected recovery; this continuation does not
+reorganize them.

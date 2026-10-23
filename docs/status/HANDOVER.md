@@ -32,12 +32,23 @@ alone does not justify repeating the sequence.
 
 The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
 bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
-Announce contingency before batch 81. Current use is local 67, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
+Announce contingency before batch 81. Current use is local 70, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
 Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
 acceptance remain pending. No recorder or permission change, push, PR, merge or
 release is selected. Registered historical Windows jobs do not supply the missing
 continuous-input/presentation observation; matched rendering is already accepted.
+
+Continuation preflight confirms an unlocked console outside the sandbox, but the
+shell measurement process lacks screen-capture, event-posting and Accessibility
+permissions. No permission request, capture or input occurred. The
+[proposed measurement run](../tasks/evidence/canvas-rendering.md#presentation-capability-and-proposed-run-2026-10-24)
+owns the endpoints, sample series, capability gates and initial operation plan.
+It is a procedure, not qualified instrumentation. Next prepare the external Mac
+recorder and Windows CI adapter; obtain explicit approval before recorder permission
+setup or remote publication. Use existing package 4 on Mac. Do not consume a native
+launch until capture/input capability and clock mapping work. A Windows host handoff
+is only a fallback for a named failed CI capability and needs user authorization.
 
 Ignored receipts and `usage.json` remain in
 `.toolchains/canvas-proof/native-feedback-2026-10-23/`. The reference checkout is
