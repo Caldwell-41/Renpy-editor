@@ -2,48 +2,44 @@
 
 ## Active L17 integration handover
 
-The current user-selected #36 outcome is physical keyboard delivery, native
-presentation timing and smooth manipulation. Mac remains the development host;
-Windows remains a separate required target. Original limits are local 24, CI 3,
-packages 3/editor launches 6/SDK launches 12 per target; ceilings 36, 4, 4, 9, 18.
-Earlier closed allowances are unchanged. The
-[preparation record](../tasks/evidence/canvas-rendering.md#native-input-and-feedback-preparation)
-owns detailed failures, checks and current use.
+The user requested a new-agent handoff after auditing signed Mac manual-02.
+Continue #36's selected physical keyboard, native presentation timing and smooth
+manipulation outcome. Read the [attempt audit](../tasks/evidence/canvas-rendering.md#manual-native-attempts-and-transfer)
+for the concrete failure and retained evidence; do not repeat the completed rendering
+comparison or whole historical suite.
 
-Candidate `10658bf7b75ae27a2779c01ac301245be1db979f` adds the opt-in `canvas-input`
-case. It prepares a fresh public Help fixture and shows eight instructions inside
-the window. Trusted keyboard/pointer events, exact source changes, frame revisions
-and geometry are functional readback only. External native/human observation must
-supplement that receipt; leave its `nativeInputQualified:false` flag intact.
-Presentation and perceived smoothness are explicitly unqualified by the probe.
-The final controller rehearsal includes mouse motion after release and passes;
-227 frontend and 38 desktop tests pass. Both review axes clear preparation.
+Current code is local commit `10658bf7b75ae27a2779c01ac301245be1db979f`, with preparation
+records at `5abd92d`; remote publication remains `ccebf3e`. The same signed Mac
+package 1 was used for both manual attempts. Manual-01 was closed by the user at
+step 1 and remains incomplete. Manual-02 passes typing, Escape, Enter acceptance
+and keyboard Undo, then fails during resize on `source.open: RUNTIME_BUSY`.
+The resize saved only width 640 to 641. All cleanup owners pass, fallback cleanup
+is empty and no app/helper process remains. Movement and smoothness were not reached.
 
-The user asked if a physical pass would be less work. It can cover keyboard and
-subjective smoothness, but cannot establish p95 <=100 ms. A separate capture/input
-driver and permission changes have not been approved. The existing shell process
-reports no screen-capture, post-event or Accessibility access. CUA can access native
-UI but its slow snapshots cannot measure the timing target. Preserve that distinction.
+The next small correction is in `app/src-tauri/src/canvas_input_probe.js`: preserve
+structured `error.code` when throwing so `__loomlightProbeRetryBusy` can retry the
+pre-dispatch busy read. Rehearse that read refusal through the existing actual
+controller seam; never replay accepted writes. Then review and prepare a matching
+signed package before another native attempt. The user requested audit/handoff,
+so no correction or restart was made after manual-02. Preserve both failed records.
+The old one-use launchers refuse replay; a next run needs a fresh attempt identity.
 
-Signed Mac package 1 is verified under ignored
-`.toolchains/canvas-proof/native-feedback-2026-10-23/`. No native editor has been
-launched. `Start native check.command` is a guarded one-use launcher for `manual-01`.
-It checks package hashes, signature, unlocked console and absence of another Loomlight
-process, then charges one editor/SDK attempt before launch. It opens only the fresh
-public fixture. Await the user's physical session and audit its exact result afterward.
-Current use is local 15/24, CI 0/3, Mac packages 1/3, native 0/6, SDK 6/12; Windows
-use is zero. No contingency is used. The allowance stays open. `10658bf` is local;
-remote publication remains `ccebf3e`.
-A manual session needs the user's physical input and a subsequent observation record;
-Windows and numerical presentation remain pending. Do not dispatch a broad CI matrix
-or infer acceptance from the controller rehearsal. Keep the same allowance on resume.
+Original allowance remains local 24, CI 3 and per target packages 3, editor launches 6,
+SDK launches 12. Absolute ceilings are 36, 4, 4, 9, 18. Current use is local 19,
+CI 0; Mac packages 1, native 2, SDK 8; Windows zero. No contingency. Keep cumulative
+accounting in #36 and ignored `native-feedback-2026-10-23/usage.json`; sessions do not
+renew it. Earlier integration and matched-rendering allowances remain closed.
 
-The prior matched-rendering comparison is complete at Mac `ae48ef9` and Windows
-`d1d3d99`, with audited CI13, eight exact samples and complete cleanup. Its closed
-allowance used local 22, CI 2, Mac SDK 3 and Windows SDK 2. Earlier integration/shutdown
-at `580d5a4`, Mac package 6 and CI11 retains its original scope. Preserve raw evidence,
-unrelated policy edits and protected native recovery below. No PR, merge or release
-is selected.
+The user prefers a lower-effort physical pass where possible. That can establish
+keyboard delivery and subjective smoothness on the tested target, with their actual
+observations. It cannot establish warm p95 <=100 ms. No separate recorder/input driver
+or capture permission change was approved. The shell process lacks native capture/
+input permissions, and slow CUA screenshots do not qualify presentation. Windows
+remains a separate target. Leave functional probe flags unchanged and supplement
+with external native/human evidence. No native whole-ticket acceptance is claimed.
+
+No process, fixture, CI run or watcher remains pending. Preserve unrelated policy
+edits and protected native recovery below. No PR, merge or release is selected.
 
 ## Earlier canvas decision closeout
 

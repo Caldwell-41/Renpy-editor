@@ -2496,3 +2496,39 @@ remains open for the selected outcome. No operation or watcher is pending.
 Implementation is committed locally at `10658bf`; published baseline remains
 `ccebf3e`. No separate recorder, permission change, Windows pass or timing acceptance
 is claimed. Unrelated policy edits and protected recovery remain intact.
+
+### Manual native attempts and transfer
+
+The user ran manual-01, then requested a restart after closing the window. Attempt 1
+ended at its first stage with editor exit 0, no terminal proof and unchanged source.
+Its disk checks found no helper/scratch directories, bytecode or saves; fallback
+cleanup was empty. It remains incomplete and charged.
+
+Manual-02 used the same verified signed package and fresh fixture. The first four
+stages pass: physical typing to width 760, Escape cancellation, Enter acceptance of
+752, and keyboard activation of Undo. CUA observed the exact package's focused Width
+field and step 3 banner; the user's subsequent input supplied the test actions.
+At resize-arrow-right, the probe received the trusted key event and saved only
+`xsize 640` to `xsize 641`. It then failed on `source.open: RUNTIME_BUSY` before its
+accepted-frame check, so resize remains unqualified. Movement and drag/resize stages
+were not reached. No subjective smoothness or numerical presentation pass is recorded.
+
+Diagnosis is a harness defect. `canvas_input_probe.js` creates an Error containing
+the code in its message but discards the structured `error.code` property.
+`native_editor_probe.js` retries only `error.code === RUNTIME_BUSY`, so the existing
+read-only retry cannot run. The next correction should preserve that code and
+exercise a pre-dispatch busy source read in the existing controller rehearsal.
+Do not replay a write or relax the busy deadline. No correction was made in this
+session because the user requested result audit followed by handoff.
+
+Attempt 2 exits 1 with no runner timeout. Credentials, host and request cleanup owners
+all pass; disk has no helper/scratch directories, bytecode or saves. Fallback cleanup
+is empty. The saved source differs only by the one-pixel resize. A process inventory
+finds no Loomlight or Ren'Py process. Both original attempts and logs remain under
+ignored `native-feedback-2026-10-23/manual-01` and `manual-02`.
+
+Transfer use is local 19/24, CI 0/3; Mac packages 1/3, native launches 2/6 and SDK
+launches 8/12; Windows use is zero. No contingency was used and the same allowance
+remains open. No process/run/watcher remains pending. The user asked for a new-agent
+handoff; this selects no additional run or capture permission. `10658bf` and `5abd92d`
+remain local, with remote baseline `ccebf3e`. Preserve unrelated policy work.

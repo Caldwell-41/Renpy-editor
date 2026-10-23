@@ -1,30 +1,22 @@
 # Current status
 
-## L17 native input checks prepared
+## L17 native input probe needs a harness correction
 
-2026-10-23: The user selected physical keyboard, native presentation timing and
-smooth manipulation for [#36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
-The new finite allowance is 24 local batches, 3 CI dispatches and, per target,
-3 packages, 6 editor launches and 12 SDK launches. Ceilings are 36, 4, 4, 9 and 18.
-Earlier comparison/integration allowances remain closed.
+2026-10-23: The user's second signed Mac manual attempt passes typing, Escape,
+Enter acceptance and keyboard Undo. It stops at keyboard resize on a busy source
+read. The probe drops `error.code`, preventing its existing read-only retry.
+The one-pixel resize is the only saved source change; cleanup passes and no process
+remains. Movement and smoothness were not reached. Numerical presentation and
+Windows evidence remain pending.
 
-Candidate `10658bf` adds an opt-in guided input probe for the existing disposable
-Help composition. Six controller rehearsals include retained failures; the final
-sequence passes all eight stages with exact accepted source and frame geometry.
-All 227 frontend and 38 desktop tests pass. Both review axes clear preparation.
-This supplies no native keyboard, presentation or perceived-smoothness acceptance.
-The matched rendering result below retains its accepted scope.
-
-The user asked whether a physical pass would reduce work. A guided manual check
-can cover keyboard and subjective smoothness; exact warm p95 <=100 ms still needs
-recorded presentation evidence. The shell measurement process lacks capture/input
-permissions. No separate recorder or new permissions were approved. Signed Mac package 1 is verified. A one-use manual launcher is ready; no native
-editor has been launched and no CI is pending. Code is committed locally at
-`10658bf`; publication remains at `ccebf3e`. Current use is local 15/24, CI 0/3,
-Mac packages 1/3, native 0/6 and SDK 6/12; Windows use is zero.
-[Evidence](../tasks/evidence/canvas-rendering.md#native-input-and-feedback-preparation)
-owns results and accounting; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns the next action. Unrelated policy edits remain unstaged.
+[Evidence](../tasks/evidence/canvas-rendering.md#manual-native-attempts-and-transfer)
+owns the diagnosis and original attempts;
+[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns continuation.
+The user requested a new-agent handoff. No correction or restart followed the audit.
+Current use is local 19/24, CI 0/3; Mac packages 1/3, native launches 2/6,
+SDK launches 8/12; Windows use is zero. The original ceilings remain 36, 4, 4, 9, 18.
+No contingency was used. Earlier closed allowances remain closed. Code is local at
+`10658bf`; publication remains `ccebf3e`. Unrelated policy edits remain unstaged.
 
 ## L17 matched rendering passes on both targets
 
