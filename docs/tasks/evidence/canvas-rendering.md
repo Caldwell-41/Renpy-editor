@@ -2327,3 +2327,31 @@ Exact branch/candidate/attempt guards remain; the next dispatch ordinal is13.
 Actionlint, whitespace and all16 selector combinations pass. Independent Standards
 and Spec follow-up reviews report no findings. Windows execution and terminal
 artifact audit remain pending. The rejected dispatch supplies no Windows evidence.
+
+
+### CI13 pending matched Windows comparison
+
+The corrected routing/evidence candidate `d1d3d991262cb088615908ac7dfc07a5f95c65d6`
+was committed and pushed, and the remote SHA was verified. No renderer or capture
+logic changed from the passing Mac candidate. [CI13 run39948440369](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39948440369),
+attempt1, confirms that exact SHA. Dispatch inputs select only `canvas_comparison`,
+ordinal13, on `codex/phase3b-screen-designer`. Initial discovery reports queued at
+2026-10-23 11:46:24 UTC. The run calls the reusable comparison from the same commit.
+It reserves one production helper and one deliberate reference process, with no
+package or native editor. Terminal result, binary/artifact identity, exact four-pair
+pixel/geometry comparison and cleanup still require audit.
+
+Current comparison use is local18/24, dispatch2/2, MacSDK3/6 and WindowsSDK0/6, with
+two Windows attempts reserved. Absolute ceilings remain36,3,9. No contingency has
+been used. Closed historical consumption stays unchanged; combined actual use is
+local138, CI13 dispatch attempts, MacSDK53 and WindowsSDK23 before CI13 SDK execution.
+Both local SDK attempts in this continuation are complete and cleaned. Retained
+Mac evidence passes the 47-file privacy scan, including exact executed binaries.
+No local process/fixture remains. CI13 is the sole pending execution.
+
+Same-thread ci-watch registration follows the committed handover. Its ignored
+registration receipt must confirm `watcher_running: true` before monitoring is
+claimed. The watcher event must be acknowledged and matched to this run/attempt/SHA
+before terminal audit. Keep #36 open; Mac image fidelity does not establish Windows,
+physical keyboard, native presentation timing, smooth manipulation or full-subset
+acceptance. Unrelated policy edits remain unstaged.

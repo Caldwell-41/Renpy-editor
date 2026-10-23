@@ -2,47 +2,49 @@
 
 ## Active L17 integration handover
 
-The active [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) outcome is
-the user-selected matched Ren'Py rendering comparison. Prepared candidate `340fcf2`
-and its implementation `27c83f6` are local on `codex/phase3b-screen-designer`.
-Development stays in this Mac checkout. Preserve the unrelated policy edits and
-protected native recovery below. No push, PR, merge, release or signing change is selected.
+The user unlocked the Mac and authorized continuing the selected
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) comparison, including
+the prepared branch push and Windows qualification. Development remains in this
+Mac checkout on `codex/phase3b-screen-designer`. Preserve unrelated unstaged policy
+edits and protected recovery below. No PR, merge, release or signing change is selected.
 
-[Comparison evidence](../tasks/evidence/canvas-rendering.md#matched-rendering-comparison-preparation-2026-10-23)
-owns the capture/admission changes, reviews, original failures and current allowance.
-Portable checks pass after the documented Python and loopback environment reruns.
-Standards' binary-retention finding is fixed; both review axes have no remaining
-code finding. Actual both-target/four-sample fidelity is still unproved. The old
-Mac normal-state native frames equal the old reference at both aspects, but that
-read-only diagnostic does not supply the fresh manifests or hover/Windows proof.
+Mac helper02 and deliberate reference01 pass all four normal/hover samples at
+1280x720 and 1024x768 with zero RGBA differences, matching source/font/image hashes,
+geometry, GL2, window size and drawable/game ratio2. Cleanup passes. No tolerance
+or rendering correction is needed for this bounded Mac composition. The tested Mac
+candidate is `ae48ef9`; later `d1d3d99` changes only workflow routing and evidence.
+[The comparison evidence](../tasks/evidence/canvas-rendering.md#mac-matched-comparison-and-dispatch-correction)
+records exact binaries, original failures, retained captures and acceptance limits.
 
-The Mac is locked. Its first helper attempt produced no frame, exited through the
-controller's cleanup and removed the fixture. The user has been asked to unlock it.
-No owned process, fixture, test, CI run or watcher remains active. After unlock,
-run `app/tests/canvas-matched-capture.mjs` with a fresh ignored evidence directory,
-then the exact ignored Rust `canvas_reference_sdk_captures_actual_screen_at_two_internal_aspects`
-case and `app/scripts/compare-canvas-rendering.py`. Use the pinned local toolchain,
-verified archive and an outside-sandbox native execution. These take two SDK
-processes. Keep original failures, hashes, side-by-side captures and all differences.
-Only after actual evidence may any edge tolerance return to the user for decision.
+[CI13 run39948440369](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39948440369),
+attempt1, tests full SHA `d1d3d991262cb088615908ac7dfc07a5f95c65d6` through
+`screens-source.yml` with only `canvas_comparison=true`, ordinal13 and the exact
+candidate. It calls `canvas-rendering.yml` at the same commit. The run was queued
+at discovery, 2026-10-23 11:46:24 UTC. The exact initial run receipt is retained locally.
+The earlier standalone dispatch12 received HTTP404 and created no run/SDK process;
+it remains charged. Both reviews and all16 selector combinations pass the correction.
 
-The prepared Windows workflow is `canvas-rendering.yml`, cumulative ordinal 12,
-against the exact published candidate. It needs the branch push authorized before
-dispatch. It uses two SDK processes, no package/editor launches, and retains binaries
-and comparison artifacts. Register ci-watch for the actual run and yield under its
-policy; terminal artifact audit remains required. No run has been dispatched yet.
+Register ci-watch at the end of this turn and yield under its policy. The ignored
+`matched-rendering-2026-10-23/ci13-watch-registration.json` receipt owns registration
+confirmation. On the same-thread event, acknowledge the matching watcher, audit this
+run/attempt/SHA, download and hash the exact artifact, verify retained binaries,
+source/assets, four samples, exact pixels/geometry and all cleanup. A green badge
+alone is insufficient. Continue in-scope diagnosis only within the remaining allowance.
+If registration fails, preserve this run and use manual same-thread resume.
 
 New allocation is local24, CI2 and SDK6 per target, with absolute ceilings36,3,9.
-Use is local13, CI0, MacSDK1, WindowsSDK0. #36 owns the allocation; failures and
-preparation are charged. Historical local120/120, CI11/11, MacSDK50/50 and WindowsSDK23/24
-remain closed. No contingency has been used or recalculated.
+Use is local18, CI2, MacSDK3 and WindowsSDK0, with two Windows SDK attempts reserved
+for CI13. #36 owns this allocation; failures and preparation remain charged. No
+contingency has been consumed. Another dispatch would use the single contingency
+attempt and must be announced/recorded before dispatch. Historical local120/120,
+CI11/11, MacSDK50/50 and WindowsSDK23/24 remain closed.
 
-[Earlier integration/shutdown evidence](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
-retains tested candidate `580d5a4`, signed Mac package6 and audited CI11. Its lifecycle
-acceptance is unchanged. Keep the ignored original receipts/packages/archives;
-CI11's local archive is already audited. Physical keyboard, native presentation timing,
-smooth manipulation and whole-ticket acceptance remain separate. Bounded scripted
-focus observations do not establish continuous focus or physical GPU acceleration.
+All selected Mac processes and fixtures are gone. The outstanding operation is CI13
+and its terminal artifact audit. Earlier integration/shutdown candidate `580d5a4`,
+signed Mac package6 and audited CI11 retain their qualified lifecycle scope. Physical
+keyboard, native presentation timing, smooth manipulation, full supported-subset and
+whole-ticket acceptance remain separate. No broader native/focus/GPU claim follows
+from matching image pixels. Keep original ignored evidence and packages intact.
 
 ## Earlier canvas decision closeout
 
