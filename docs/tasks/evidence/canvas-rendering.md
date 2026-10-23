@@ -2016,3 +2016,44 @@ No further SDK/package/native/CI execution is started while approval is pending.
 Status records remain above their soft word targets to preserve unrelated live
 acceptance and protected native recovery. Only the L17 prefix was replaced; the
 unrelated policy edits remain unstaged. No execution or watcher remains pending.
+
+### Native lifecycle supplement approved and prepared
+
+2026-10-23: The user approved the preceding proposal. Ceilings are now local 120,
+Mac SDK 50 and Mac packages 6. All other ceilings remain unchanged: CI 11, Windows
+SDK 24, Windows packages 5 and native launches 7 per target. The approval is saved
+and read back exactly in #36. Starting use was local 112, CI 10, Mac SDK 46,
+Windows SDK 19, Mac package/native 5/4 and Windows package/native 2/2.
+
+The focused qualification runs refusal, helper restart/project change, quit and app
+restart with four SDK attempts across two editor launches. Each has its own bounded
+external observer. The quit cases keep the helper live, load the project through the
+actual Recent Projects control, and invoke the existing application-close flow.
+The probe observes its shutdown report, owner cleanup and actual application Exit
+event. It does not replace the close guard or shutdown implementation. A synthetic
+WebView field supplies the DOM focus control; this is not physical keyboard proof.
+Windows uses the same selected sequence in CI11 without replaying CI10's SDK cases.
+
+Receipt admission requires all four ordered cases, the selected refusal reason and
+exit 72, three ready GL2/ANGLE2 frames with cooperative exit 0, both actual editor
+exits, unchanged fixture source/assets, removed helper directories, and four accepted
+OS observations. Launch counts are retained independently of successful receipts.
+Failure cleanup verifies the exact fixture SDK executable and process group on Mac;
+forced cleanup remains a failed qualification. Windows retains its production job
+ownership. Fixtures, logs, packages and receipts remain outside tracked source.
+
+Standards and Spec reviews found and corrected premature project-close substitution
+for quit, Windows marker newline/canonical-path handling, separate Mac helper-group
+cleanup and failure accounting. Both axes report no remaining findings. Portable
+checks pass: core 407, desktop 38, renderer 227, four Python admission cases, types,
+JavaScript syntax, Rust desktop check and workflow validation. The existing 47 ignored
+core cases and three documented exclusions remain separate. Two initial desktop
+runs failed because the command sandbox denied local test-server sockets; the same
+38 cases pass with the required loopback access. The original failures are retained.
+Python bytecode-cache permission failure was corrected by using an owned cache path.
+
+Preparation and review use local batches 113–116. No additional SDK, package,
+native or CI run is claimed by these checks. Mac package 6 is next, followed by the
+approved native sequence once the desktop is unlocked. Native results and CI11 still
+require audit. Matched fidelity, physical keyboard, native presentation timing and
+smooth manipulation remain separate open #36 gates.

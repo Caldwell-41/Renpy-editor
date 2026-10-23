@@ -39,6 +39,7 @@ int main(int argc, const char **argv) { @autoreleasepool {
         }
         samples++;
         helperSamples += targets.count > 0;
+        if (helperSamples == 11) [@"observed" writeToFile:[output stringByAppendingString:@".observed"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         CFAbsoluteTime now = CFAbsoluteTimeGetCurrent(); gap = MAX(gap, now-last); last = now;
         CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.002, true);
     }

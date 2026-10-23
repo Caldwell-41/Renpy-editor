@@ -1,26 +1,25 @@
 # Current status
 
-## L17 production integration audited on both targets
+## L17 native lifecycle supplement in progress
 
-2026-10-23: Production GPU-helper integration and cooperative shutdown for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) are published at
-`7ad845c`. Mac and Windows service checks pass close, reopen/project change,
-application shutdown and exact startup refusal. Both packaged apps pass two-aspect
-rendering, source/history and cooperative close. Bounded external observations
-find no visible helper or foreground change.
+2026-10-23: The user approved the remaining native lifecycle observations for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36). Production GPU
+integration and cooperative shutdown are published at `7ad845c`; CI10 and its exact
+artifacts are audited. The selected outcome still needs native refusal, project-change,
+application-quit and restart observations on both targets.
 
-[CI10](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39910668596), attempt 1,
-and its exact artifacts are audited. The
-[evidence](../tasks/evidence/canvas-rendering.md#ci10-terminal-audit-and-production-integration-result)
-owns identities, review, original failures, counts and limits. No operation or watcher
-remains pending. [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns recovery
-and the remaining allowance. Unrelated policy edits remain local and uncommitted.
+The focused probe is implemented and reviewed. Core 407, desktop 38, renderer 227
+and focused admission/type/workflow checks pass. Mac package 6 and the four-SDK,
+two-editor sequence are next; the desktop must be unlocked for native observation.
+CI11 covers the same Windows sequence. No new SDK/native/CI operation is pending.
+[Evidence](../tasks/evidence/canvas-rendering.md#native-lifecycle-supplement-approved-and-prepared)
+owns approval, review, checks and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns continuation. Unrelated policy edits remain local and uncommitted.
 
-The code is implemented, but the selected outcome remains unfinished. Native
-hidden/focus observation during refusal, project change, quit and restart is still
-missing. Mac SDK/package ceilings are exhausted; the linked evidence records a
-concrete supplement proposal awaiting approval. Physical keyboard, matched fidelity,
-presentation timing and smooth manipulation remain separate #36 acceptance gates.
+Current use is local 116/120, CI 10/11, Mac SDK 46/50 and Windows SDK 19/24.
+Mac package/native use is 5/4 against ceilings 6/7; Windows is 2/2 against 5/7.
+Physical keyboard, matched fidelity, presentation timing and smooth manipulation
+remain separate #36 acceptance gates. No PR, merge or release is selected.
 
 ## Earlier canvas decision closeout
 

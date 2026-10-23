@@ -1,4 +1,5 @@
 mod ai_native;
+mod canvas_lifecycle_probe;
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 mod ai_reload_fixture;
 mod ai_requests;
@@ -135,6 +136,7 @@ fn complete_application_close(
     if !host.with_service(|service| service.current().is_none())? {
         return Err("Close the project through its runtime and draft flow first.");
     }
+    canvas_lifecycle_probe::project_closed(&host)?;
     ai_connection::service().shutdown();
     if !ai_requests::service().shutdown() || !host.shutdown() {
         return Err("Runtime cleanup is incomplete.");
@@ -146,6 +148,7 @@ fn complete_application_close(
         );
         let _ = std::io::stdout().flush();
     }
+    canvas_lifecycle_probe::closing()?;
     APPLICATION_CLOSE_CONFIRMED.store(true, Ordering::SeqCst);
     app.exit(0);
     Ok(())
@@ -161,6 +164,15 @@ fn core_request(
 ) -> Result<loomlight_core::CoreResponse, &'static str> {
     if window.label() != "main" {
         return Err("Command is not authorised for this window.");
+    }
+    if request.get("operation").and_then(Value::as_str) == Some("probe.canvasLifecycle") {
+        let host = state.0.lock().map_err(|_| "Probe host unavailable")?.clone().ok_or("Probe host unavailable")?;
+        let value = canvas_lifecycle_probe::step(&host, request.get("payload").cloned().unwrap_or(Value::Null)).map_err(|error| {
+            println!("{}", json!({"evidence":"canvas-lifecycle-error","error":error}));
+            let _ = std::io::stdout().flush();
+            error
+        })?;
+        return Ok(CoreResponse::success("canvas-lifecycle".into(), value));
     }
     #[cfg(target_os = "windows")]
     if request.get("operation").and_then(Value::as_str) == Some("probe.windowsStudioStep") {
@@ -770,7 +782,9 @@ fn main() {
                 .map_err(|_| "application data path is unavailable")?;
             let lifecycle = if let Ok(case) = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE") {
                 let data = std::env::temp_dir().join(format!("loomlight-r2-probe-{}-{}",std::process::id(),case));
-                if case == "studio-request" {
+                if case == "canvas-lifecycle" {
+                    canvas_lifecycle_probe::prepare()?
+                } else if case == "studio-request" {
                     let data=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_STUDIO_PROBE_ROOT").ok_or("Request fixture root required")?);
                     request_probe::prepare(&data)?
                 } else if case == "studio-settings" {
@@ -933,6 +947,10 @@ fn main() {
                         main.show().expect("reference probe show");main.set_focus().expect("reference probe focus");
                         let phase=if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){2}else{1};
                         main.eval(&format!("window.__loomlightReferencePhase={phase};\n{}\n{}",include_str!("native_editor_probe.js"),include_str!("reference_library_probe.js"))).expect("reference probe injection");
+                    } else if case == "canvas-lifecycle" {
+                        main.show().expect("Lifecycle probe show");main.set_focus().expect("Lifecycle probe focus");
+                        let phase=std::env::var("LOOMLIGHT_CANVAS_LIFECYCLE_PHASE").expect("Lifecycle phase");
+                        main.eval(&format!("window.__loomlightLifecyclePhase={phase};\n{}",include_str!("canvas_lifecycle_probe.js"))).expect("Lifecycle probe injection");
                     } else if case == "canvas-helper" { main.show().expect("Canvas probe show");main.set_focus().expect("Canvas probe focus");main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("canvas_helper_probe.js"))).expect("Canvas probe injection");
                     } else if case == "owned-screen" { main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("owned_screen_probe.js"))).expect("Owned screen probe injection");
                     } else if case == "help-screen" { main.eval(&format!("window.__loomlightHelpTargetOs = {:?};\n{}\n{}",std::env::consts::OS,include_str!("native_editor_probe.js"),include_str!("help_screen_probe.js"))).expect("Help screen probe injection");
@@ -1083,6 +1101,7 @@ fn main() {
             if matches!(event, tauri::RunEvent::Exit) {
                 let host = app.state::<DesktopState>().0.lock().ok().and_then(|state| state.clone());
                 if let Some(host) = host { ai_connection::service().shutdown(); ai_requests::service().shutdown(); host.shutdown(); }
+                canvas_lifecycle_probe::exited();
             }
         });
 }

@@ -367,7 +367,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
           test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ORDINAL" = 10
+          test "$ORDINAL" = 11
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/canvas-proof"
           git rev-parse HEAD > "$RUNNER_TEMP/canvas-proof/candidate.txt"
@@ -389,7 +389,7 @@ jobs:
           rustup toolchain install 1.90.0 --profile minimal
           npm install --global npm@11.9.0
           npm ci
-          python -m unittest discover -s scripts -p 'test_canvas_evidence.py' -v
+          python -m unittest discover -s scripts -p 'test_canvas*evidence.py' -v
           npm run typecheck
           npm run build:tests
           node --test dist-tests/tests/screen-ui.dom.test.js
@@ -420,17 +420,12 @@ jobs:
           New-Item -ItemType Directory -Path $scratch | Out-Null
           "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-      - name: Four production SDK lifecycles, GPU frames, normal shutdown and refusal
-        env:
-          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
-          LOOMLIGHT_CANVAS_EVIDENCE: ${{ runner.temp }}/canvas-proof/lifecycle
-        run: cargo test -p loomlight-core --release --locked --lib screens::tests::canvas_helper_sdk_renders_saved_data_and_stops_on_project_close -- --exact --ignored --nocapture
-      - name: One Windows package and native WebView to helper round trip
+      - name: One package, two editor launches and four native helper lifecycles
         env:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
         run: |
           npm exec -- tauri build --bundles nsis -- --locked
-          python scripts/run-runtime-ui-probes.py target/release/loomlight.exe "$RUNNER_TEMP/canvas-proof/native" canvas-helper
+          python scripts/run-canvas-lifecycle.py target/release/loomlight.exe "$RUNNER_TEMP/canvas-proof/native-lifecycle"
       - name: Retain package identity
         if: ${{ always() && hashFiles('app/target/release/loomlight.exe') != '' }}
         shell: pwsh

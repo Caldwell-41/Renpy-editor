@@ -2,44 +2,32 @@
 
 ## Active L17 integration handover
 
-The selected production GPU integration and graceful shutdown implementation for
-[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) is published at
-`7ad845c73447003e1278e180f10e800fb05ebc2b` on `codex/phase3b-screen-designer`.
-Independent Standards and Spec code reviews have no remaining findings. Preserve
-unrelated policy edits and the native recovery section below. No PR, merge, release
-or signing-policy change is selected.
+Continue the approved native lifecycle supplement for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36) on the existing Mac
+checkout and `codex/phase3b-screen-designer`. Production integration is published at
+`7ad845c`; CI10 and artifact 12483375952 are audited, with watcher receipt recorded.
+Preserve unrelated policy edits and the native recovery section below. No PR, merge,
+release or signing-policy change is selected.
 
-[CI10 terminal audit](../tasks/evidence/canvas-rendering.md#ci10-terminal-audit-and-production-integration-result)
-owns both-target results, hashes, limits and final use. Windows run 39910668596,
-attempt 1, passes at the exact candidate; artifact 12483375952 and its 17 files are
-audited. It expires 2026-10-30 at 06:29:51 UTC; the downloaded archive is retained
-locally. Same-chat watcher delivery is acknowledged. No operation, reservation or
-watcher remains pending.
+[The current evidence](../tasks/evidence/canvas-rendering.md#native-lifecycle-supplement-approved-and-prepared)
+owns the approval, focused probe, review and portable checks. Both review axes have
+no remaining findings. The probe observes four separate helper lifecycles across two
+editor launches, including the existing application-close flow and actual Exit event.
+All source/assets and process/fixture cleanup gates remain blocking. Physical keyboard,
+matched fidelity, presentation timing and smooth manipulation stay separate.
 
-Mac SDK 41–44 and Windows service checks pass three cooperative normal exits and
-exact startup refusal. Mac package 5/native 4 and the Windows packaged app pass two
-aspects, source/history and cooperative project close with bounded native observation.
-The ignored integration directory retains all original failures and final receipts.
-Core 407, desktop 38 and all 227 renderer cases pass after the recorded environment
-corrections; Windows affected checks also pass. Excluded/ignored cases remain distinct.
+Next: commit the reviewed probe, build signed Mac package 6 with the existing pinned
+identity, then run `app/scripts/run-canvas-lifecycle.py` once against that exact package
+in a fresh ignored output directory. Use the verified 8.5.3 SDK archive. The Mac is
+currently locked; the user has been asked to unlock it. Recheck before launching.
+Reserve four Mac SDK launches and two editor launches before the native run. If it
+passes, publish the candidate and select CI11's four-SDK/two-editor Windows sequence.
+Register ci-watch only after all local work is complete, then yield immediately.
 
-The selected outcome remains unfinished. Independent review confirms native
-hidden/focus observation during refusal, project change, application quit and restart
-is still in scope. The
-[remaining native lifecycle proposal](../tasks/evidence/canvas-rendering.md#remaining-native-lifecycle-proposal-not-approved)
-uses two editor launches and four SDK launches per target. It requests six local
-batches (ceiling 120), four Mac SDK launches (ceiling 50) and one Mac package build
-(ceiling 6), with every other ceiling unchanged. It is not approved. Record the user
-decision in #36 before dependent execution. Continue here on the existing Mac checkout;
-CI11 covers Windows within its existing headroom. Physical keyboard, matched fidelity,
-native presentation and smooth manipulation remain separate #36 gates.
-
-Final cumulative use is local 112/114, CI 10/11, Mac SDK 46/46 and Windows SDK 19/24.
-Mac package/native use is 5/4 and Windows 2/2 against ceilings 5/7 per target. Two local
-batches, one CI dispatch and five Windows SDK launches remain, but Mac SDK/package
-ceilings are exhausted. Further Mac native proof needs an explicit SDK supplement;
-a new chat or host does not reset use or authorize a broader proof campaign.
-No automatic retry or extra contingency is authorized.
+Current use: local 116/120, CI 10/11, Mac SDK 46/50, Windows SDK 19/24, Mac package/native
+5/4 against 6/7, Windows 2/2 against 5/7. No SDK/package/native/CI reservation or watcher
+is pending. The approved supplement creates no further automatic contingency.
+The ignored integration usage ledger and receipts retain detailed counts and failures.
 
 ## Earlier canvas decision closeout
 

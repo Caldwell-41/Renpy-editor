@@ -48,6 +48,8 @@ while not stop.exists() and time.monotonic() - started < 90:
         failures += 1
     samples += 1
     helper_samples += bool(targets)
+    if helper_samples == 11:
+        output.with_name(output.name + '.observed').write_text('observed')
     now = time.monotonic()
     maximum_gap = max(maximum_gap, now - previous)
     previous = now

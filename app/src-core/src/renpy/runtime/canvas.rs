@@ -69,8 +69,10 @@ impl HelperProcess {
             .env("RENPY_DISABLE_BACKUPS", "I take responsibility for this.")
             .env("RENPY_SKIP_MAIN_MENU", "1")
             .env("RENPY_SKIP_SPLASHSCREEN", "1");
-        #[cfg(test)]
-        if std::env::var_os("LOOMLIGHT_CANVAS_REFUSAL_TEST_ROOT").as_deref() == anchor.path().parent().map(Path::as_os_str) {
+        let native_refusal = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-lifecycle")
+            && std::env::var_os("LOOMLIGHT_CANVAS_LIFECYCLE_ROOT").and_then(|p| std::fs::canonicalize(p).ok()).as_deref() == anchor.path().parent()
+            && anchor.path().parent().is_some_and(|root| std::fs::read_to_string(root.join(".owner")).ok().as_deref() == Some("loomlight-canvas-lifecycle-v1\n"));
+        if (cfg!(test) || native_refusal) && std::env::var_os("LOOMLIGHT_CANVAS_REFUSAL_TEST_ROOT").as_deref() == anchor.path().parent().map(Path::as_os_str) {
             command.env("LOOMLIGHT_CANVAS_REFUSE", "1");
         }
         let observation = Arc::new(Mutex::new(Observation {
