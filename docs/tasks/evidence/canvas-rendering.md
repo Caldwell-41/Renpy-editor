@@ -2929,3 +2929,112 @@ and protected native recovery. This update replaces only their active L17 sectio
 Further local implementation or native qualification needs an explicit supplement;
 unused SDK/native/package counts do not renew the local-batch ceiling. Repository
 publication remains `ccebf3e`. No issue update was published in this session.
+
+
+### Handle qualification continuation allowance, 2026-10-24
+
+After integration through `8527998` and its record commit `d3f0a78`, the user
+instructed the agent to decide an allowance and proceed. The new supplement is
+16 local work batches plus 8 contingency, added to the previous ceiling of 54.
+The nominal cumulative bound is 70 and the absolute ceiling is 78. Basis is native
+capability inspection, a matching signed Mac build, qualification, focused
+corrections, independent review and evidence. Announce contingency before batch 71.
+Existing absolute ceilings remain CI 4 and, per target, packages 4, editor launches
+9 and SDK launches 36. No historical attempt is removed or renumbered.
+Entry use is local 55, CI 0; Mac packages 2, native 3, SDK 21; Windows zero.
+The existing signing identity, protected recovery and publication boundaries remain.
+
+
+### Signed Mac handle qualification, 2026-10-24
+
+Package 3 builds the integrated candidate at `d3f0a78`; its last product change is
+`8527998`. The build used `enter-macos.sh` and the existing approved signing identity.
+Strict signature and installer-content verification pass. The executable SHA-256 is
+`59f864030e13d4bb1d8a4a79f1f1b9c73490e268f861e32e7180103ff8f9fe77`; the DMG SHA-256 is
+`fc267ef1ce73b5567988b270db4d2c386d6e473396463783b40dc8640adbd9af`.
+Package 3 and native attempts 4-5 use unchanged product and probe code.
+
+The existing native-control tool could inspect the unlocked Mac app and deliver
+keyboard input without new permissions. Native attempts 4 and 5, SDK attempts 22
+and 23, each pass the six keyboard stages: draft width, Escape, Enter acceptance,
+keyboard Undo, arrow resize and arrow movement. The controller retains focus and
+checks exact source and helper geometry at those stages. The OS-delivered automated
+input does not establish physical-human input or perceived smoothness.
+
+Both runs fail at `drag-frame` with `Drag path missing`. Attempt 4 sends a 20x12
+CSS-pixel displacement in 71 ms; attempt 5 tests a 100x60 displacement but completes
+in 28 ms. Neither supplies the required three trusted movement events at that stage.
+The larger-displacement retry therefore does not resolve the input-driver limitation.
+The source records movement in each disposable fixture, but neither drag is admitted;
+resize dragging is not reached. Classify this as missing gesture evidence with a
+native-driver limitation, not an established product defect. The test threshold and
+production code remain unchanged.
+
+Both failed attempts exit with code 1, retain their original receipts and accepted
+source, and report all three cleanup owners complete. No fallback kill, scratch job,
+canvas job, source bytecode or source saves remain. Their disposable source is not
+restored to the original because the probe exits at the failed drag assertion.
+Evidence remains under `native-cua-04` and `native-cua-05` alongside `package-03` in
+`.toolchains/canvas-proof/native-feedback-2026-10-23/`.
+
+The one-use `start-manual-check-06.py` verifies the same executable hash, strict
+signature, unchanged runner, unlocked console and absence of an existing editor.
+The user confirmed availability for the physical-input run. It reserves native
+attempt 6, SDK 24 and local batch 60 before starting the disposable fixture. Its
+on-screen sequence requests steady physical drag/resize input. No recorder or
+permission change is included; numerical presentation remains a separate gate.
+
+
+Manual 6 passes the six physical keyboard stages, then fails exact source admission
+on its first drag. The retained gesture moves about 282.74x152.43 game pixels,
+which snaps to (600,332). Expected `yalign` is `0.9222222222222223`; the saved literal
+is `0.9222222222222224`. The user makes further gestures while the stage waits, but
+the final source still records the first drag. The probe never reaches resize.
+All cleanup owners pass, with no fallback or leftover jobs/saves/bytecode. Original
+receipts, gesture and accepted source remain in `manual-06`.
+
+SDK 25 reproduces the source mismatch with a controlled 280x152 drag. A standalone
+check linked to the existing serde_json library parses the expected decimal into
+the observed final-bit value, isolating a probe-oracle defect. The correction allows
+at most two machine epsilons in only the two alignment literals. Every other source
+byte remains exact; unit cases reject a one-game-pixel alignment error and changes
+to dimensions, comments, whitespace, literal type or line count. SDK 26 then exposes
+the same bit in helper geometry, (600,332.00000000000006). The probe now requires exact
+geometry agreement with the admitted saved-source alignment, while retaining the
+independent snapped-input calculation. Source restoration remains byte-exact. This
+numeric check is not a pixel-comparison tolerance or a relaxation of rendering fidelity.
+No product logic, dependencies or signing policy changes are needed.
+
+
+SDK 27 fails before its oracle because a new local `document` binding shadows the
+browser document; the corrected name is `savedDocument`. SDK 28 then passes all
+eight stages, including the (600,332) snapped move, 688x392 resize, exact saved-source
+geometry, byte-exact restoration and all three cleanup owners. Every failed receipt
+is retained. The allowance charges SDK attempts 25-28. Typechecking, all five native
+probe-helper tests and the full frontend suite pass, 229/229. Independent Standards
+and Spec reviews of `d3f0a78...68f95c3` report zero actionable findings. The Spec
+review clarifies that the numeric bound is the absolute value `2 * Number.EPSILON`,
+not one ULP at every possible alignment. The committed correction affects probes
+and tests only. The approved handle's product code remains at `8527998`.
+
+
+Package 4 contains the probe correction `68f95c3` and passes strict signature and
+installer-content verification with the existing identity. Executable SHA-256 is
+`7cac273f852f71520238e9a3b9ae8d76548b48913716b92513216c7d12cfabef`; DMG SHA-256 is
+`837af62bb2c95b26d1ed0e7056258b0f456fde95b013de7f5d39cd3d256091ce`. Both hashes are
+rechecked before preparing manual 7. Its one-use launcher is ready but unlaunched;
+it will charge native 7, SDK 29 and one local batch only on physical-user readiness.
+The earlier native input records do not qualify the corrected packaged probe.
+Current use is local 64/70, absolute ceiling 78; CI 0/4; Mac packages 4/4, native 6/9,
+SDK 28/36; Windows zero. No operation remains pending. Numerical presentation and
+Windows continuous-input observation still lack a selected capable capture route.
+No recorder/permission change or remote publication was performed.
+
+
+The final scoped evidence review reports no Standards finding. Its one Spec wording
+correction narrows the unchanged-code statement to package 3/native attempts 4-5;
+the later probe correction remains explicit. Repository validation passes for 905
+files and whitespace checks pass. No Loomlight or Ren'Py process remains. CURRENT and
+HANDOVER retain separate outstanding phase acceptance and protected recovery despite
+their soft size limits. Manual 7 remains ready for the user's availability; no new
+launch is charged while waiting. All work and records in this continuation remain local.

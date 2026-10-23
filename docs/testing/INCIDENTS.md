@@ -425,3 +425,19 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   parent bounds with exact source/geometry/Undo checks.
 - **Evidence:** [Diagnosis](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis)
   and [capture correction](../tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24).
+
+
+## H30. Native drag oracle rejects JSON alignment roundoff
+
+- **Class/search:** harness; `Accepted source did not settle`, `0.9222222222222224`,
+  `332.00000000000006`, `canvas-input`, physical drag.
+- **Cause/correction:** the oracle demands one decimal spelling for a floating-point
+  alignment. Arithmetic and the pinned JSON parser can change its last bit. Admit
+  at most two machine epsilons in the two alignment literals while requiring all
+  other source bytes unchanged. Compare helper geometry exactly with the admitted
+  source values; retain the independent snapped-input calculation and exact Undo.
+- **Regression:** the real-controller 280x152 movement reproduces the failure;
+  a linked parser check isolates its last-bit change. The source comparator rejects
+  a one-pixel difference, changed dimensions/comments/whitespace, integer alignment,
+  expressions and extra lines. This change grants no image-pixel tolerance.
+- **Evidence:** [Signed Mac qualification](../tasks/evidence/canvas-rendering.md#signed-mac-handle-qualification-2026-10-24).

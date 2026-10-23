@@ -2,49 +2,48 @@
 
 ## Active L17 integration handover
 
-Continue #36 on `codex/phase3b-screen-designer`. Approved `handle-v2` integration
-is committed locally through `8527998`, including the reviewed spacing/test correction.
-[Evidence](../tasks/evidence/canvas-rendering.md#approved-move-handle-integration-2026-10-24)
-owns the control/action map, attempts, actual-helper captures and acceptance limits.
+Continue #36 on `codex/phase3b-screen-designer`. Approved `handle-v2` product code
+remains at `8527998`; qualification correction `68f95c3` changes probes/tests only.
+[Evidence](../tasks/evidence/canvas-rendering.md#signed-mac-handle-qualification-2026-10-24)
+owns package identities, original failures and numeric-admission limits.
 [Approval](../design/design-lab-canvas-drag/approval.json) still pins `6e7bb1a` and
 its four captures. The separate flow-v1 layout reference remains authoritative.
 
-The explicit move handle stays 30 CSS pixels tall. Provisional translation is limited
-to a selected subtree that owns the image's painted content and was not clipped;
-other compositions identify provisional guides while the helper responds. Existing
-source transactions, history, child selection, keyboard movement and anchor-aware
-resizing remain in use. Release keeps the handle attached and focused. Both review
-axes report zero integration findings. Types, 14 Screens tests and 228 frontend tests
-pass. SDK 21 passes all eight real-helper controller input stages and all cleanup
-owners. These results establish browser/controller behavior, not native smoothness
-or numerical presentation. No accepted matched-rendering comparison was repeated.
+Types and 229 frontend tests pass. SDK 28 passes all eight real-helper controller
+stages and cleanup after reproducing the native alignment-roundoff failure. Both
+independent reviews report zero actionable findings. The probe admits an absolute
+`2 * Number.EPSILON` difference only in alignment literals, preserves other bytes
+exactly, checks geometry exactly against admitted source, and restores source exactly.
+This grants no image-pixel tolerance or native-presentation acceptance.
 
-The next required qualification is native manipulation and independent warm
-p95 <=100 ms presentation, then Windows and whole-ticket acceptance. Recorder/input
-permissions remain unavailable under the existing selection; no permission change
-is approved. Physical input requires an available user or approved native driver.
-No package, native editor or CI operation ran here. Signed package 2 remains the
-older `ea09e2f` candidate and cannot qualify the new handle. No push, PR, merge or
-release is selected. The local allowance is spent. A further execution supplement
-is required for remaining qualification; transfer does not renew it.
+Mac package 4 contains `68f95c3` and passes strict signature and installer-content
+verification. Native attempts 4-6 pass six keyboard stages, with physical input in
+manual 6. Automated drags lack enough sampled moves; manual 6 supplies the path but
+hits the now-corrected rounding oracle. Physical drag/resize remains pending. The
+one-use `start-manual-check-07.py` under the evidence directory is ready, unlaunched
+and uncharged. It validates package 4, the runner, unlocked console and process
+absence, then charges native 7, SDK 29 and one local batch. Run it with the supported
+Python after sourcing `enter-macos.sh`, only when the user is available. After each
+physical drag, wait for the next instruction. Preserve original failures; never
+replay earlier launchers or use older packages to qualify the corrected probe.
 
-Ignored receipts remain in `.toolchains/canvas-proof/native-feedback-2026-10-23/`.
-SDK 20's build used the global Rust environment and auto-installed 1.90.0; it stopped
-before fixture creation and remains charged. SDK 21 used `enter-macos.sh` and cleaned
-up completely. Preserve `usage.json`, all earlier receipts and one-use launchers.
-The pinned comparison checkout is `.toolchains/canvas-handle-reference`; its frontend
-fingerprint matches the approval, with later approval records copied into place.
-The older full-lab flow-v1 source-lock failure remains incomplete and unchanged.
-The original preview server remains on 5174; the temporary reference server on 5175
-is stopped.
+The user selected 16 additional local batches plus 8 contingency. Nominal cumulative
+bound is 70, absolute ceiling 78; announce contingency before batch 71. Current use
+is local 64, CI 0; Mac packages 4/4, native 6/9, SDK 28/36; Windows zero. Remaining
+work stays within these cumulative limits. No package build remains allocated.
+Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
+acceptance remain pending. No recorder or permission change, push, PR, merge or
+release is selected. Registered historical Windows jobs do not supply the missing
+continuous-input/presentation observation; matched rendering is already accepted.
 
-The published supplement remains 12 local batches plus 6 contingency and 12 SDK
-launches plus 6 contingency per target. Absolute cumulative ceilings are local 54,
-CI 4, packages 4, native 9 and SDK 36 per target. Final use is local 54, CI 0;
-Mac packages 2, native 3, SDK 21; Windows zero. Contingency was announced before batch 49.
-Earlier allowances remain closed. Code is local only; publication remains `ccebf3e`.
-Preserve unrelated policy edits, including separate CURRENT/HANDOVER hunks, and all
-protected recovery below. No helper/controller/editor or watcher remains pending.
+Ignored receipts and `usage.json` remain in
+`.toolchains/canvas-proof/native-feedback-2026-10-23/`. The reference checkout is
+`.toolchains/canvas-handle-reference`; preserve its approved fingerprint and captures.
+SDK 20's accidental global Rust setup remains recorded; later runs use `enter-macos.sh`.
+The older full-lab flow-v1 source-lock failure remains incomplete. Preview 5174 remains;
+the temporary reference server 5175 is stopped. No editor/helper/controller or watcher
+remains pending. Publication remains `ccebf3e`. Preserve unrelated policy edits,
+including separate CURRENT/HANDOVER hunks, and all protected recovery below.
 
 ## Earlier canvas decision closeout
 

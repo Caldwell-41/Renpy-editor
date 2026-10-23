@@ -1,26 +1,26 @@
 # Current status
 
-## L17 approved move handle integrated locally
+## L17 move handle native qualification
 
-2026-10-24: `handle-v2` is integrated through `8527998`, including the reviewed spacing
-and controller-test correction. The selected frame has a fixed 30 CSS-pixel move handle,
-immediate provisional Help-panel and child-target movement, and retained release
-focus. Shared source transactions, Escape/Cancel, child selection, keyboard editing
-and Undo/Redo remain in use. Sibling or clipped compositions show provisional guides
-until the helper supplies their image.
+2026-10-24: Approved `handle-v2` remains integrated through `8527998`. Qualification
+continues at `68f95c3`, which corrects only the native probe's float-roundoff oracle.
+Signed Mac package 4 passes signature and installer-content verification. Types,
+229 frontend tests and the corrected SDK 28 controller rehearsal pass. Both
+independent review axes report zero actionable findings.
 
-Types, 14 focused Screens tests and all 228 frontend tests pass. SDK 21 passes all
-eight real-helper controller input stages and cleanup. Both independent review axes
-found no actionable issue in the integration. Wide/compact browser captures cover
-the approved control, with actual Help content and the existing editor layout.
-Native smoothness, numerical presentation, Windows and whole-ticket acceptance
-remain pending. The full lab's earlier flow-v1 source-lock failure remains recorded.
+Native attempts 4-6 each pass all six keyboard stages; attempt 6 uses physical user
+input. Automated drags fail the path-sampling requirement. The physical drag exposes
+a last-bit numeric mismatch in the probe, now corrected and rehearsed through all
+eight controller stages. Physical drag/resize acceptance is still pending. A fresh
+one-use manual 7 launcher is ready for the corrected package. Numerical presentation,
+perceived smoothness, Windows and whole-ticket acceptance remain pending.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#approved-move-handle-integration-2026-10-24)
-owns attempts and scope; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
-recovery. Current cumulative use is local 54/54, CI 0/4; Mac packages 2/4, native 3/9,
-SDK 21/36; Windows zero. Code is local only; publication remains `ccebf3e`.
-The local allowance is spent. Unrelated policy edits and protected recovery remain intact.
+[Evidence](../tasks/evidence/canvas-rendering.md#signed-mac-handle-qualification-2026-10-24)
+owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
+recovery. The new supplement is 16 local batches plus 8 contingency. Cumulative use
+is local 64/70, absolute ceiling 78; CI 0/4; Mac packages 4/4, native 6/9, SDK 28/36;
+Windows zero. No process or watcher remains pending. Code is local only; publication
+remains `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
 
 ## L17 matched rendering passes on both targets
 
