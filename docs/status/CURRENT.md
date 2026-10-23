@@ -8,16 +8,21 @@ integration and cooperative shutdown are published at `7ad845c`; CI10 and its ex
 artifacts are audited. The selected outcome still needs native refusal, project-change,
 application-quit and restart observations on both targets.
 
-The focused probe is implemented and reviewed. Core 407, desktop 38, renderer 227
-and focused admission/type/workflow checks pass. Mac package 6 and the four-SDK,
-two-editor sequence are next; the desktop must be unlocked for native observation.
-CI11 covers the same Windows sequence. No new SDK/native/CI operation is pending.
-[Evidence](../tasks/evidence/canvas-rendering.md#native-lifecycle-supplement-approved-and-prepared)
-owns approval, review, checks and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns continuation. Unrelated policy edits remain local and uncommitted.
+The focused probe is reviewed and published at `580d5a4`. Core 407, desktop 38,
+renderer 227 and focused admission/type/workflow/repository checks pass. Signed Mac
+package 6 is verified. The desktop is locked; an unlock request is pending and the
+four-SDK/two-editor Mac sequence has not started.
 
-Current use is local 116/120, CI 10/11, Mac SDK 46/50 and Windows SDK 19/24.
-Mac package/native use is 5/4 against ceilings 6/7; Windows is 2/2 against 5/7.
+[CI11](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39918738346), attempt 1,
+runs the independent Windows counterpart at that exact candidate. Same-chat ci-watch
+registration follows. [Evidence](../tasks/evidence/canvas-rendering.md#signed-mac-package-6-and-ci11-dispatch)
+owns identities, counts and pending audit;
+[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns continuation.
+Unrelated policy edits remain local and uncommitted.
+
+Current use is local 117/120, CI 11/11, Mac SDK 46/50 and Windows SDK 19/24, with
+four Windows SDK attempts reserved. Mac package/native use is 6/4 against 6/7;
+Windows is 2/2 against 5/7, with one package and two native launches reserved.
 Physical keyboard, matched fidelity, presentation timing and smooth manipulation
 remain separate #36 acceptance gates. No PR, merge or release is selected.
 

@@ -16,18 +16,30 @@ editor launches, including the existing application-close flow and actual Exit e
 All source/assets and process/fixture cleanup gates remain blocking. Physical keyboard,
 matched fidelity, presentation timing and smooth manipulation stay separate.
 
-Next: commit the reviewed probe, build signed Mac package 6 with the existing pinned
-identity, then run `app/scripts/run-canvas-lifecycle.py` once against that exact package
-in a fresh ignored output directory. Use the verified 8.5.3 SDK archive. The Mac is
-currently locked; the user has been asked to unlock it. Recheck before launching.
-Reserve four Mac SDK launches and two editor launches before the native run. If it
-passes, publish the candidate and select CI11's four-SDK/two-editor Windows sequence.
-Register ci-watch only after all local work is complete, then yield immediately.
+Candidate `580d5a46e47d0f140c1f033f8e7e4fe658fea5cc` is published. Signed Mac
+package 6 is verified and retained in the ignored integration directory; its exact
+[identity and CI dispatch receipt](../tasks/evidence/canvas-rendering.md#signed-mac-package-6-and-ci11-dispatch)
+owns hashes and limits. Mac native execution has not started because the desktop is
+locked. An unlock request is pending. After unlock, recheck console state and competing
+Loomlight processes, reserve four SDK launches and two editor launches, then run
+`app/scripts/run-canvas-lifecycle.py` once against package 6 in a fresh ignored output
+directory, using the verified 8.5.3 SDK archive. No new package build is available.
 
-Current use: local 116/120, CI 10/11, Mac SDK 46/50, Windows SDK 19/24, Mac package/native
-5/4 against 6/7, Windows 2/2 against 5/7. No SDK/package/native/CI reservation or watcher
-is pending. The approved supplement creates no further automatic contingency.
-The ignored integration usage ledger and receipts retain detailed counts and failures.
+CI11 run 39918738346, attempt 1, reports the exact candidate. It runs the independent
+Windows counterpart while Mac waits for the available desktop. Same-chat ci-watch
+registration follows; yield immediately when registered. On delivery, acknowledge
+receipt, verify run/attempt/SHA and audit artifacts, lifecycle rows, OS observations,
+actual launches and cleanup. A green workflow alone does not accept the result.
+An unlock reply may resume the Mac sequence while CI is still running; do not dispatch
+another workflow or register a duplicate watcher.
+
+Current use: local 117/120, CI 11/11, Mac SDK 46/50, actual Windows SDK 19/24, Mac
+package/native 6/4 against 6/7, Windows 2/2 against 5/7. CI11 reserves four Windows
+SDK attempts, one package and two native launches. Three local batches remain for
+native execution, audit and publication/correction. No further automatic contingency,
+CI dispatch or Mac package build is authorized. The ignored integration ledger retains
+counts, original failures and pending operations. Preserve the current native recovery
+section below and unrelated policy edits.
 
 ## Earlier canvas decision closeout
 

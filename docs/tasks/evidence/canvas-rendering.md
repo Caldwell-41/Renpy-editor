@@ -2057,3 +2057,34 @@ native or CI run is claimed by these checks. Mac package 6 is next, followed by 
 approved native sequence once the desktop is unlocked. Native results and CI11 still
 require audit. Matched fidelity, physical keyboard, native presentation timing and
 smooth manipulation remain separate open #36 gates.
+
+### Signed Mac package 6 and CI11 dispatch
+
+2026-10-23: Reviewed candidate `580d5a46e47d0f140c1f033f8e7e4fe658fea5cc`
+is published. Mac package 6 passes strict signature, designated requirement,
+approved certificate and installer-content verification. The certificate remains
+`358372708164C7273A551D746449357C12A3A806`. Executable SHA256 is
+`6534b87074d37e313d17d5d1f722b625fdb22ac05b7ebf4d8704db405bc7b62c`;
+installer SHA256 is
+`f6c02a03be561378797fba47ec285c04d644356d44d36b918dcd49e00f179ef9`.
+The ignored `package06` directory retains the exact bundle, installer, build log
+and identity receipt. The final desktop hooks pass all 38 desktop tests. Repository
+validation passes 886 files. Only unrelated policy edits remain outside the commit.
+
+The Mac desktop is locked. An unlock request is pending; no Mac SDK or native editor
+launch has started for this supplement. Continue with the exact package after the
+user makes the desktop available. Verify unlocked console state and absence of a
+conflicting Loomlight process before reserving/running the four-SDK/two-editor sequence.
+
+The independent Windows counterpart proceeds within the existing allowance.
+[CI11 run 39918738346](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39918738346),
+attempt 1, reports the exact candidate above. It selects ordinal 11, one Windows
+package, two native editor launches and four SDK attempts; CI10's SDK cases are not
+replayed. Same-chat ci-watch registration follows. Terminal status, exact artifacts,
+launch counts and all lifecycle/observer/cleanup receipts still require audit.
+
+Cumulative use is local 117/120, CI 11/11, Mac SDK 46/50 and actual Windows SDK 19/24.
+Mac package/native use is 6/4 against 6/7, Windows 2/2 against 5/7. CI11 reserves four
+Windows SDK attempts, one package and two native launches. No further CI dispatch or
+Mac package build is authorized. Three local batches remain for the Mac sequence,
+terminal audit and final publication/correction. All failures remain charged.
