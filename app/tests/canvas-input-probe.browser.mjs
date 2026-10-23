@@ -72,7 +72,7 @@ try {
   if(boundary) movementImageGate=new Promise(resolve=>{releaseMovementImage=resolve;});
   const start={x:r.x+r.width/2,y:r.y+r.height/2};
   const end=boundary==='min' ? {x:start.x-panel.width,y:start.y-panel.height}
-    : boundary==='max' ? {x:start.x+panel.width,y:start.y+panel.height} : {x:start.x+40,y:start.y+24};
+    : boundary==='max' ? {x:start.x+panel.width,y:start.y+panel.height} : {x:start.x+280,y:start.y+152};
   await page.mouse.move(start.x,start.y);await page.mouse.down();await page.mouse.move(end.x,end.y,{steps:12});
   assert.equal(await page.locator('.screen-game').getAttribute('data-provisional'),'panel');
   await page.screenshot({path:join(output,'handle-held.png')});await page.mouse.up();

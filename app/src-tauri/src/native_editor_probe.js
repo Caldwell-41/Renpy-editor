@@ -49,3 +49,19 @@ window.__loomlightProbeRetryBusy = async (task, timeoutMs = 10000) => {
     }
   }
 };
+
+// Alignment arithmetic and the JSON float roundtrip can differ in the last bit.
+// Only those two literal values may vary; every other source byte stays exact.
+window.__loomlightProbePositionSourceMatches = (actual, expected) => {
+  const lines = actual.split('\n'), wanted = expected.split('\n');
+  if (lines.length !== wanted.length) return false;
+  const alignment = /^(\s*(?:xalign|yalign) )([0-9]+\.[0-9]+)$/;
+  return wanted.every((line, index) => {
+    if (lines[index] === line) return true;
+    const a = alignment.exec(lines[index]), b = alignment.exec(line);
+    if (!a || !b || a[1] !== b[1]) return false;
+    const value = Number(a[2]), target = Number(b[2]);
+    return value >= 0 && value <= 1 && target >= 0 && target <= 1
+      && Math.abs(value - target) <= 2 * Number.EPSILON;
+  });
+};

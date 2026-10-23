@@ -64,14 +64,14 @@
     const project = await read("project.current"), sessionId = project.sessionId;
     const source = () => read("source.open", {sessionId, path:"game/ui/help.rpy"});
     const original = (await source()).text;
-    const accepted = async (expected) => {
+    const accepted = async (expected, matches = actual => actual === expected) => {
       const deadline = performance.now() + 15000;
       let document;
       do {
         document = await source();
         assert(performance.now() < deadline, "Accepted source did not settle");
-        if (document.text !== expected) await pause(20);
-      } while (document.text !== expected);
+        if (!matches(document.text)) await pause(20);
+      } while (!matches(document.text));
       await until(() => fresh() && latest?.revision === document.baseRevision);
       return document;
     };
@@ -103,7 +103,15 @@
       // Retain the actual displacement inputs even if accepted-source readback fails.
       gesture={stage,resize,down,last,up,scale,dx,dy,x,y,width,height};
       assert(expected!==original,"Gesture was a no-op");
-      await accepted(expected);checkGeometry(x,y,width,height);
+      const savedDocument = await accepted(expected, resize ? undefined : actual => window.__loomlightProbePositionSourceMatches(actual, expected));
+      if (resize) checkGeometry(x,y,width,height);
+      else {
+        // Match geometry exactly to the admitted source's float values. Keep the
+        // independently calculated snapped position above as the input oracle.
+        const alignment = name => Number(savedDocument.text.split('\n').find(line => line.trimStart().startsWith(`${name} `)).trim().split(' ')[1]);
+        gesture.savedAlignment = {xalign:alignment('xalign'), yalign:alignment('yalign')};
+        checkGeometry(gesture.savedAlignment.xalign * 640,gesture.savedAlignment.yalign * 360,width,height);
+      }
       return {dx,dy,x,y,width,height,pointerMoves:moves.length};
     };
     const row = [...document.querySelectorAll('.screen-tree [role="option"]')].find(e => e.textContent === "Help frame");

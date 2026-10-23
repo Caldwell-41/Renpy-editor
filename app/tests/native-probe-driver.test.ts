@@ -101,3 +101,19 @@ test('native helper selects the visible confirmation when a hidden control has t
  browser.document.body.innerHTML='<button hidden disabled>Generate proposal</button>';assert.equal(scope.__loomlightProbeFindButton!('Generate proposal'),browser.document.querySelector('button'));}
  finally{await browser.happyDOM.close();}
 });
+
+
+test('canvas source comparison allows only alignment float roundoff and preserves every other byte', () => {
+  const scope: { __loomlightProbePositionSourceMatches?: (actual: string, expected: string) => boolean } = {};
+  runInNewContext(helper, { window: scope, document: {}, performance, setTimeout });
+  const matches = scope.__loomlightProbePositionSourceMatches!;
+  const expected = '# retained\n    xalign 0.9375\n    yalign 0.9222222222222223\n    xsize 640\n';
+  const actual = expected.replace('0.9222222222222223', '0.9222222222222224');
+  assert.equal(matches(actual, expected), true, 'native JSON roundtrip differs by one representable float');
+  assert.equal(matches(expected, expected), true);
+  for (const bad of [actual.replace('0.9375', '0.9390625'), actual.replace('640', '641'),
+    actual.replace('# retained', '# changed'), actual.replace('yalign ', 'yalign  '),
+    actual.replace('0.9375', '1'), actual.replace('0.9375', 'float(0.9375)'), actual + '\n']) {
+    assert.equal(matches(bad, expected), false, bad);
+  }
+});
