@@ -9,12 +9,11 @@ SDK launches. #36 records the supplement; historical use remains charged.
 
 The guarded Mac prototype and its review are published through `aded9c8`. Its four
 matched GL2 images and bounded hidden/focus observation pass; it needed forced
-termination. Production still uses the software helper. The new Windows probe at
-`848d50f` tests a private desktop, GL2 frames, cooperative stop and safe refusal
-before production integration. Portable generation/admission checks, typecheck and
-repository validation pass. [CI7](https://github.com/Caldwell-41/Renpy-editor/actions/runs/39905179001),
-attempt 1 at `3f04698`, is in progress. Only the capability job is selected; its
-result and artifacts require audit before production integration.
+termination. Production still uses the software helper. CI7 failed before compiler
+startup because of command quoting; no SDK work ran. Reviewed correction `3d7bac8`
+uses direct PowerShell setup/compiler calls. CI8 will repeat the bounded Windows
+private-desktop GPU, cooperative-stop and startup-refusal probe. Both review axes
+have no remaining findings; actual Windows capability remains unproved.
 
 [Integration evidence](../tasks/evidence/canvas-rendering.md#gpu-production-integration-and-shutdown-2026-10-23)
 owns the current candidate, review, pending operation and cumulative usage.

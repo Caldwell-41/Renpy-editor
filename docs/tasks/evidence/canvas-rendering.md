@@ -1555,3 +1555,42 @@ acknowledgment; only `watcher_running: true` establishes an active watch. If it
 cannot register, leave the run identity intact and use manual same-chat resume.
 The watcher event is a cue for audit, not proof of success. Later documentation
 commits do not replace CI7's tested SHA.
+
+### CI7 terminal audit and compiler invocation correction
+
+CI7 run `39905179001`, attempt 1 at
+`3f04698e129a1fcb2ecdb00c5940113ff579b0d2`, completed with failure. The watcher
+matched this chat and its event receipt is acknowledged. Branch changes since the
+tested SHA were documentation only, so the failure applies to this capability probe.
+
+The native-owner compile step failed before the compiler ran. PowerShell passed
+the nested `cmd.exe` command with doubled leading quotes, and the shell rejected
+the Visual Studio path at `Program Files`. This is a harness argument-quoting defect,
+not a compiler or GPU failure. The failed command/log isolates the mechanism;
+there is no evidence supporting a renderer or SDK correction. Desktop setup, SDK
+verification/execution and both probe cases were skipped. CI7 consumes one dispatch
+but zero SDK/package/native-editor launches. Its two SDK reservations are released
+because the exact step inventory proves they did not run; historical launches remain
+Windows 10 and Mac 34.
+
+Artifact `12480940420` contains only `candidate.txt`, matching the tested SHA. Its
+retained ZIP SHA-256 is
+`76d4d6dc4c6f3b67ab97b95f007f1ad747aa4a78ce73897ac5a32b0b7f745de1`, equal to GitHub
+metadata. It expires at 2026-10-30 05:20:28 UTC. The privacy scan/upload passed.
+The original ZIP, extracted file, run/step metadata and failed log remain ignored.
+No rendering, startup, focus or shutdown pass is claimed.
+
+Correction `3d7bac8` uses Microsoft's documented `Launch-VsDevShell.ps1` with
+`-Arch amd64 -HostArch amd64 -SkipAutomaticLocation`, then invokes `cl.exe` with
+separate PowerShell arguments. No extra shell parses the compiler command. The
+workflow admits only ordinal 8 and a fresh scratch path; all candidate/branch/
+attempt/selection guards remain. Portable generation/admission checks, YAML parsing
+and whitespace pass. This host has no Windows compiler; native verification remains
+with CI8. Both independent review axes report no findings in the correction.
+The incident index records the quoting mechanism as H27.
+
+Batches 88-89 cover terminal audit/correction/review, then scoped publication and
+CI8 preparation. Use before CI8 is local 89/106, CI 7/9, Mac SDK 34/46 and Windows
+SDK 10/24. Existing package/native use is unchanged. CI8 selects the same two-SDK
+capability probe and no package or native editor. After dispatch, one CI slot remains
+for integrated qualification; no extra allowance or contingency is created.

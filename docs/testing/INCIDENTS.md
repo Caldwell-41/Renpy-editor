@@ -367,3 +367,15 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   functional proof. The workflow succeeds; pixel fidelity and native timing/focus
   remain unaccepted. Six dispatches are consumed; no further run is allocated.
 - **Evidence:** [L17 CI5 audit](../tasks/evidence/canvas-rendering.md#ci5-terminal-audit-and-prepared-reference-correction).
+
+
+## H27. Nested PowerShell and cmd quoting prevents compiler startup
+
+- **Class/search:** harness; Visual Studio, `Program Files`, `not recognized`,
+  `vcvars64.bat`, compiler invocation.
+- **Cause/correction:** nested quoting around a batch setup and compiler command
+  reached `cmd.exe` with doubled leading quotes. Initialize Visual Studio through
+  its PowerShell script, then pass compiler arguments directly in PowerShell.
+- **Verification:** CI7 fails before compiler/SDK execution. Portable checks and
+  independent review pass for the correction; native compilation is pending CI8.
+- **Evidence:** [L17 CI7 audit](../tasks/evidence/canvas-rendering.md#ci7-terminal-audit-and-compiler-invocation-correction).

@@ -16,24 +16,20 @@ acknowledgment, exit 0 and no forced cleanup. A second SDK launch requires the
 selected bootstrap-refusal reason and exit 72. Native resources and fixtures must
 close. This does not qualify production, matched fidelity or physical keyboard input.
 
-[Integration evidence](../tasks/evidence/canvas-rendering.md#gpu-production-integration-and-shutdown-2026-10-23)
-owns detailed checks, review and the operation record. The scoped checkpoint is
-published at `3f04698e129a1fcb2ecdb00c5940113ff579b0d2`. CI7 run `39905179001`,
-attempt 1, tests that exact SHA through workflow `391374211` with ordinal `7`,
-`canvas_gpu_capability=true`, `canvas_helper=false`, `owned_blank=false`. It was
-in progress at 2026-10-23 05:20:16 UTC (15:20:16 AEST). Selection validation passed;
-only the capability workload runs. ci-watch registration follows this receipt;
-the ignored startup receipt owns actual registration status. Require confirmed
-`watcher_running: true` before claiming an active watch, otherwise use manual
-same-chat resume. On completion, audit the exact run and both case artifacts.
-No PR, merge, release, signing-policy or broader requirement change is selected.
+[Integration evidence](../tasks/evidence/canvas-rendering.md#ci7-terminal-audit-and-compiler-invocation-correction)
+owns the CI7 terminal audit. Run `39905179001`, attempt 1 at `3f04698`, failed
+before compiler startup due to nested PowerShell/cmd quoting. No SDK or native work
+ran. The exact artifact digest and candidate match; watcher delivery is acknowledged.
+Correction `3d7bac8` uses Visual Studio's PowerShell setup and direct compiler
+arguments. Both review axes report no findings. CI8 selects the same two-launch
+probe at ordinal 8; native compilation and capability remain pending.
 
-Cumulative ceilings are local 106, Mac SDK 46, CI 9 and Windows SDK 24. Use at dispatch
-is local 87, Mac SDK 34, CI 7 and Windows SDK 10, with two more Windows launches
-reserved for CI7. Package/native ceilings
-remain five/seven per target; Mac use is three/three and Windows use one/one.
-CI7 reserves two Windows SDK launches. Failures and retries stay charged, with no
-new contingency. #36 owns the live allowance; evidence owns detailed batches.
+Cumulative ceilings are local 106, Mac SDK 46, CI 9 and Windows SDK 24. Use before
+CI8 is local 89, Mac SDK 34, CI 7 and Windows SDK 10. The two unused CI7 SDK
+reservations are released on exact skipped-step evidence; no actual use is reset.
+Package/native ceilings remain five/seven per target; Mac use is three/three and
+Windows use one/one. CI8 reserves two Windows SDK launches and no package/native
+editor. After dispatch, one CI slot remains. No new contingency applies.
 
 Once Windows capability is established, integrate the pinned GPU adapter and
 approved packaging route, then prove cooperative stop before forced cleanup at
