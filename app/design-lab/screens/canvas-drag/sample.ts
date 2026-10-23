@@ -1,5 +1,6 @@
 import type { LabContext } from "../../contracts.ts";
 import "./style.css";
+import { icon } from "../../../src/icons.ts";
 
 type Box = { x: number; y: number; width: number; height: number };
 type Variant = "handle" | "border" | "body";
@@ -17,6 +18,7 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
     <div class="drag-toolbar">
       <button data-action="undo">Undo</button><button data-action="redo">Redo</button>
       <button data-action="reset">Reset</button>
+      ${variant === "handle" ? `<label>Zoom <select aria-label="Canvas zoom"><option value="fit">Fit</option><option value="0.5">50%</option><option value="1">100%</option></select></label>` : ""}
       <label>Content delay <select aria-label="Content delay"><option value="0">None</option><option value="180">180 ms</option><option value="600">600 ms</option></select></label>
     </div>
     <div class="drag-workspace">
@@ -28,8 +30,8 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
         <p>Arrows move 1 px.<br>Shift moves 8 px.<br>Escape cancels.</p>
       </nav>
       <div class="drag-canvas-column">
-        <div class="drag-canvas-caption"><span>1280 × 720 · Fit</span><span data-feedback>Content current</span></div>
-        <div class="drag-stage"><div class="drag-game">
+        <div class="drag-canvas-caption"><span>1280 × 720</span><span data-feedback>Content current</span></div>
+        <div class="drag-stage"><div class="drag-plane"><div class="drag-game">
           <div class="drag-content"><div class="drag-content-group"><h2>Help</h2><p>Find your way through the story.</p><p>Click to continue.<br>Scroll back to revisit a line.<br>Press Escape to open the menu.</p><span>Close</span></div></div>
           <button class="drag-child drag-group" data-pick="group" aria-label="Select vertical group"></button>
           <button class="drag-child drag-text" data-pick="text" aria-label="Select Help text"></button>
@@ -43,7 +45,7 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
             <button class="drag-move drag-body" aria-label="Move selected frame"></button>
             <button class="drag-resize" aria-label="Resize frame"></button>
           </div>
-        </div></div>
+        </div></div></div>
         <output class="drag-coordinates"></output>
       </div>
     </div>
@@ -53,12 +55,21 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
       <button data-action="apply">Apply size</button><button data-action="cancel">Cancel</button>
     </div>
     <p role="status">Ready. Dragging previews a draft; release accepts one in-memory change.</p>
-    <footer>Fictional HTML content. The outline follows input immediately; content arrival is simulated. This preview does not measure Ren'Py or native performance.</footer>
+    <footer>Fictional HTML content. ${variant === "handle" ? "The panel follows input provisionally; confirmation is simulated." : "The outline follows input immediately; content arrival is simulated."} This preview does not measure Ren'Py or native performance.</footer>
   </section>`;
   const root = host.querySelector<HTMLElement>(".drag-lab")!;
   const get = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
   const game = get<HTMLDivElement>(".drag-game"), stage = get<HTMLDivElement>(".drag-stage");
   const outline = get<HTMLDivElement>(".drag-outline"), content = get<HTMLDivElement>(".drag-content");
+  const handle = get<HTMLButtonElement>(".drag-handle");
+  if (variant === "handle") {
+    // Use the shared icon construction and stroke style; this draft shape stays in the lab.
+    const moveIcon = icon("plus");
+    moveIcon.querySelector("path")!.setAttribute("d", "M12 3v18M3 12h18m-12-6 3-3 3 3m-6 12 3 3 3-3M6 9l-3 3 3 3m12-6 3 3-3 3");
+    handle.prepend(moveIcon);
+    handle.title = "Drag to move. Arrows adjust by one pixel; Shift by eight. Escape cancels.";
+  }
+  const zoom = root.querySelector<HTMLSelectElement>('[aria-label="Canvas zoom"]');
   const width = get<HTMLInputElement>('[aria-label="Frame width"]'), height = get<HTMLInputElement>('[aria-label="Frame height"]');
   const delay = get<HTMLSelectElement>('[aria-label="Content delay"]');
   delay.value = context.state === "delayed" ? "600" : "180";
@@ -69,23 +80,37 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
   function place(element: HTMLElement, value: Box) {
     Object.assign(element.style, { left: `${value.x}px`, top: `${value.y}px`, width: `${value.width}px`, height: `${value.height}px` });
   }
-  function paintContent() {
-    displayed = { ...box }; place(content, displayed);
+  function positionContent(value: Box) {
+    displayed = { ...value }; place(content, displayed);
     place(get(".drag-group"), { x: displayed.x + 48, y: displayed.y + 40, width: displayed.width - 96, height: displayed.height - 80 });
     place(get(".drag-text"), { x: displayed.x + 48, y: displayed.y + 90, width: displayed.width - 96, height: 100 });
     place(get(".drag-button"), { x: displayed.x + 48, y: displayed.y + displayed.height - 85, width: 110, height: 38 });
+  }
+  function paintContent() {
+    positionContent(box);
     get("[data-feedback]").textContent = "Content current";
+    root.dataset.pending = "false";
+  }
+  function positionHandle() {
+    if (variant !== "handle") return;
+    handle.style.transform = `scale(${1 / scale})`;
+    handle.style.top = `${box.y * scale >= 34 ? -34 / scale : 4 / scale}px`;
+    // Keep the whole hit area within the game canvas at either horizontal edge.
+    handle.style.left = `${Math.max(-box.x + 4 / scale, Math.min(0, (1280 - box.x) - handle.offsetWidth / scale - 4 / scale))}px`;
   }
   function paint(immediate = false) {
-    get(".drag-handle").style.top = box.y < 44 ? "4px" : "-43px";
+    positionHandle();
     place(outline, box); outline.hidden = selected !== "frame";
     get(".drag-coordinates").textContent = `x ${box.x}   y ${box.y}   width ${box.width}   height ${box.height}${gesture ? "   · draft" : ""}`;
     width.value = String(box.width); height.value = String(box.height);
     get<HTMLButtonElement>('[data-action="undo"]').disabled = !undo.length || !!gesture;
     get<HTMLButtonElement>('[data-action="redo"]').disabled = !redo.length || !!gesture;
     clearTimeout(timer);
+    // Translation uses the last visible panel while the simulated helper catches up.
+    // Resizing keeps its separate delayed layout behavior.
+    if (variant === "handle") positionContent({ ...displayed, x: box.x, y: box.y });
     if (immediate || Number(delay.value) === 0) paintContent();
-    else { get("[data-feedback]").textContent = "Draft guide · content pending"; timer = setTimeout(paintContent, Number(delay.value)); }
+    else { root.dataset.pending = "true"; get("[data-feedback]").textContent = variant === "handle" ? (gesture ? "Draft position" : "Confirming position") : "Draft guide · content pending"; timer = setTimeout(paintContent, Number(delay.value)); }
   }
   function choose(value: string) {
     selected = value;
@@ -101,7 +126,7 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
     paint();
   }
   function release() {
-    const previous = gesture; gesture = undefined;
+    const previous = gesture; gesture = undefined; root.dataset.dragging = "false";
     if (previous?.target.hasPointerCapture(previous.pointer)) previous.target.releasePointerCapture(previous.pointer);
     return previous;
   }
@@ -113,6 +138,7 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
     target.onpointerdown = event => {
       if (event.button !== 0 || gesture || selected !== "frame") return;
       gesture = { before: { ...box }, x: event.clientX, y: event.clientY, pointer: event.pointerId, target, resize: target.classList.contains("drag-resize") };
+      root.dataset.dragging = "true";
       target.setPointerCapture(event.pointerId); target.focus(); event.preventDefault();
     };
     target.onpointermove = event => {
@@ -156,8 +182,14 @@ export function mountDrag(host: HTMLElement, context: LabContext, variant: Varia
   root.onkeydown = event => { if (event.key === "Escape") { event.preventDefault(); cancel(); } };
   delay.onchange = () => paint(true);
   const fit = () => {
-    scale = stage.clientWidth / 1280; game.style.transform = `scale(${scale})`; stage.style.height = `${720 * scale}px`;
+    scale = zoom && zoom.value !== "fit" ? Number(zoom.value) : stage.clientWidth / 1280;
+    game.style.transform = `scale(${scale})`;
+    const plane = get<HTMLElement>(".drag-plane");
+    plane.style.width = `${1280 * scale}px`; plane.style.height = `${720 * scale}px`;
+    stage.style.height = `${Math.min(720 * scale, 500)}px`;
+    positionHandle();
   };
+  if (zoom) zoom.onchange = () => { if (gesture) cancel(); fit(); };
   const observer = new ResizeObserver(fit);
   fit(); observer.observe(stage); paint(true);
   return () => { clearTimeout(timer); observer.disconnect(); release(); };

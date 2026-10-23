@@ -14,9 +14,12 @@ edits from reloading its document mid-gesture. One real-helper Chrome rehearsal,
 SDK19, passes all eight input stages with normal image delivery and full cleanup.
 Types, 13 focused Screens tests and all 227 frontend tests pass.
 
-Next action is the user's choice among the [three previews](../design/design-lab-canvas-drag/README.md).
-The move handle is recommended because it keeps single-click child selection.
-All revisions remain unapproved. Follow Design Lab integration before changing
+The user selected the move handle and requested an icon, constant on-screen size,
+immediate provisional panel movement and settled release in the prototype first.
+The [updated handle-v2 preview](../design/design-lab-canvas-drag/README.md) passes
+24 matrix cases/interactions, typechecking and approval-record validation. No
+production integration occurred. Next action is user review of this refinement.
+Formal source/capture promotion remains pending. Follow Design Lab integration before changing
 production feedback or target behavior; preserve the pinned flow-v1 reference.
 The existing capture fix does not establish native smoothness. Native drag/resize,
 independent warm p95 <=100 ms presentation, Windows and whole-ticket acceptance
@@ -36,7 +39,7 @@ The user explicitly selected continuation and approved any SDK allowance on
 plus 6 contingency per target, raising cumulative ceilings from 18 to 36; 12 local
 batches plus 6 contingency raise the local ceiling from 36 to 54. Original limits
 and spent use remain historical. CI/package/editor-launch ceilings remain 4/4/9.
-Current cumulative use is local 42, CI 0; Mac packages 2, native 3, SDK 19; Windows
+Current cumulative use is local 45, CI 0; Mac packages 2, native 3, SDK 19; Windows
 zero. Earlier allowances stay closed. New supplement contingency begins after local
 48 or SDK30 on a target. Code is local only, repository publication remains `ccebf3e`;
 no push, PR, merge or release is selected. Preserve unrelated policy edits, including

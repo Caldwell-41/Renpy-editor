@@ -2788,3 +2788,29 @@ Design Lab server remains on port 5174 so the user can review the choices. No wa
 or external run is pending. Code and evidence remain local; no push was selected.
 Unrelated policy edits are preserved. #36 remains open, awaiting the user's design
 choice before production feedback/target integration and later native qualification.
+
+
+### Move-handle prototype refinement, 2026-10-24
+
+The user selected the move-handle direction, agreed to Experience First refinements
+and requested an updated prototype before integration. Draft `handle-v2` adds a
+four-direction icon using the shared icon factory/stroke style, a 30-CSS-pixel handle
+at Fit/50%/100% zoom, edge clamping and immediate provisional panel translation.
+Child hit targets follow the visible panel. Release keeps focus and position while
+simulated confirmation arrives; Escape and one-entry gesture Undo remain intact.
+Resize layout still uses the separate delayed sample behavior. No production code
+or rendering helper changed. The earlier draft remains recoverable at `e9b5fc1`.
+
+Types, approval-record validation and all 24 scoped lab matrix cases/interactions
+pass. Checks cover panel/outline agreement during a held drag, stable placement after
+confirmation, retained focus, constant handle dimensions at each zoom and reachable
+top-left bounds. Wide and compact dark captures were visually inspected. The existing
+full-lab approved-source limitation remains; no full-suite or native pass is claimed.
+The already-running server on port 5174 serves the update; a redundant start refused
+the occupied port without affecting it. Logs are `handle-refinement-*.log` in the
+existing ignored native-feedback evidence directory.
+
+Batches 43-45 cover prototype edits, focused checks and review records. Cumulative
+use is local 45/54, CI 0/4; Mac packages 2/4, native launches 3/9, SDK 19/36; Windows
+zero. These are absolute ceilings. No SDK/package/native/CI operation ran. The next
+action is user review of the refined prototype, before formal promotion/integration.

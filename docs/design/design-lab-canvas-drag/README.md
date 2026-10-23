@@ -1,6 +1,6 @@
 # Canvas drag alternatives
 
-Three unapproved interaction drafts for [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36),
+The selected move-handle direction and two alternative drafts for [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36),
 after the [capture-loss diagnosis](../../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis).
 They compare how to grab the bounded Help frame and distinguish immediate draft
 guides from delayed content. They do not replace the approved flow-v1 reference.
@@ -8,9 +8,9 @@ guides from delayed content. They do not replace the approved flow-v1 reference.
 Open the Design Lab on port 5174, then use these direct previews:
 
 - [Move handle](http://127.0.0.1:5174/preview.html?screen=canvas-drag&variant=handle&state=delayed&theme=dark&viewport=wide).
-  A labelled handle identifies the movable frame. Content remains available for
+  A four-direction icon and label identify the movable frame. Content remains available for
   single-click child selection. Recommended because it addresses the unclear target
-  without changing nested selection. The handle moves inside the frame at the top edge.
+  without changing nested selection. The handle stays 30 CSS pixels tall at Fit, 50% and 100% zoom, and moves inside the frame at the top edge. The visible panel follows draft movement immediately and stays in place while confirmation arrives. Release retains handle focus for keyboard adjustment.
 - [Drag border](http://127.0.0.1:5174/preview.html?screen=canvas-drag&variant=border&state=delayed&theme=dark&viewport=wide).
   The selected frame's border is the drag target. Content still selects children.
   This adds less chrome, but requires aiming at the edge, especially at small zoom.
@@ -21,8 +21,7 @@ Open the Design Lab on port 5174, then use these direct previews:
 All drafts preserve a visible frame selection, numeric size controls, eight-pixel
 pointer snapping, one-pixel keyboard movement/resize, Shift for eight pixels, Escape
 cancellation and one history entry per completed gesture. Undo, Redo and Reset work
-in memory. Child selection and numeric input are interactive. The shared outline
-moves immediately while the simulated content waits for the selected delay. No
+in memory. Child selection and numeric input are interactive. The move-handle draft translates the visible panel and child-selection targets immediately; its size/layout confirmation remains delayed. The other alternatives keep immediate outlines and delayed content. No
 continuous CSS animation runs. Review links use the requested dark theme and existing editor colour tokens.
 The lab also checks compatibility with its inherited light-theme tokens; no new
 theme design is selected.
@@ -36,15 +35,15 @@ capabilities are neither removed nor reimplemented here. Only the production
 capture-preservation bug fix is selected before design approval.
 
 The Help panel is fictional HTML, not a Ren'Py image. The delay control simulates
-content arrival after input stops; it is not helper throughput or presentation
+content confirmation after input stops; it is not helper throughput or presentation
 measurement. Resize uses a fixed top-left corner and bounded sample dimensions;
 production alignment/anchor semantics still apply to any later integration.
-Double-click hit testing is approximate sample geometry. Zoom is Fit only.
+Double-click hit testing is approximate sample geometry. The move-handle draft offers Fit, 50% and 100% zoom to inspect handle sizing. The other alternatives remain Fit only.
 There are no disk writes, native requests, runtime execution or source parsing.
 
 ## Review status
 
-All three revisions remain drafts in `approval.json`. The focused module check
+The user selected the move-handle direction and requested these refinements before integration. `handle-v2` remains a draft for that review; no production integration or formal source/capture promotion is claimed. The earlier `handle-v1` source remains in commit `e9b5fc1`. The focused module check
 covers 24 variant/state/theme/viewport combinations, with gesture cancellation,
 commit/history, keyboard movement/resize, numeric size, child selection and reload
 checks at wide and compact sizes. Captures are retained in ignored

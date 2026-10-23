@@ -11,7 +11,8 @@ export default async function check({page,open}) {
       await page.mouse.move(target.x+target.width/2,target.y+target.height/2);await page.mouse.down();
       await page.mouse.move(target.x+target.width/2+24,target.y+target.height/2+16);
       assert.notEqual(await outline.getAttribute('style'),before,`${variant}/${viewport}: guide follows held input`);
-      assert.equal(await content.evaluate(e=>e.style.left),'320px','Delayed content stays at previous position');
+      if(variant==='handle') assert.equal(await content.evaluate(e=>e.style.left),await outline.evaluate(e=>e.style.left),'Visible panel follows the held draft');
+      else assert.equal(await content.evaluate(e=>e.style.left),'320px','Delayed content stays at previous position');
       await page.keyboard.press('Escape');await page.mouse.up();
       assert.equal(await outline.getAttribute('style'),before,'Escape restores original guide');
       assert.equal(await page.getByRole('button',{name:'Undo',exact:true}).isEnabled(),false);
@@ -25,6 +26,12 @@ export default async function check({page,open}) {
       const next=await move.boundingBox();
       await page.mouse.move(next.x+next.width/2,next.y+next.height/2);await page.mouse.down();
       await page.mouse.move(next.x+next.width/2+24,next.y+next.height/2+16);await page.mouse.up();
+      if(variant==='handle') {
+        const released=await content.evaluate(e=>e.style.left);
+        assert.equal(await move.evaluate(e=>document.activeElement===e),true,'Release retains handle focus');
+        await page.waitForFunction(()=>document.querySelector('[data-feedback]').textContent==='Content current');
+        assert.equal(await content.evaluate(e=>e.style.left),released,'Confirmation does not move the panel backwards');
+      }
       assert.equal(await page.getByRole('button',{name:'Undo',exact:true}).isEnabled(),true);
       await page.getByRole('button',{name:'Undo',exact:true}).click();
       assert.equal(await outline.evaluate(e=>e.style.left),'320px');
@@ -41,6 +48,21 @@ export default async function check({page,open}) {
       assert.equal(await outline.isVisible(),false,'Child selection remains available');
       await page.getByRole('button',{name:'Help frame',exact:true}).click();
       assert.equal(await outline.isVisible(),true);
+      if(variant==='handle') {
+        const originalSize=await move.boundingBox();
+        const zoom=page.getByRole('combobox',{name:'Canvas zoom',exact:true});
+        for(const value of ['0.5','1','fit']) {
+          await zoom.selectOption(value);
+          const resized=await move.boundingBox();
+          assert(Math.abs(resized.width-originalSize.width)<1 && Math.abs(resized.height-30)<1,'Handle size stays constant across zoom');
+        }
+        const handleBox=await move.boundingBox();
+        await page.mouse.move(handleBox.x+handleBox.width/2,handleBox.y+handleBox.height/2);await page.mouse.down();
+        await page.mouse.move(0,0);await page.mouse.up();
+        const edge=await move.boundingBox(),stage=await page.locator('.drag-stage').boundingBox();
+        assert(edge.x>=stage.x && edge.y>=stage.y && edge.x+edge.width<=stage.x+stage.width,'Handle stays reachable at the top-left bound');
+        assert.equal(await move.locator('svg[aria-hidden=true]').count(),1);
+      }
       await page.reload();await page.locator('#preview[data-ready=true]').waitFor();
       assert.equal(await outline.evaluate(e=>e.style.left),'320px','Reload resets the sample');
     }
