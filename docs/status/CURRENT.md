@@ -20,8 +20,8 @@ owns traces, failures and limits; [HANDOVER](HANDOVER.md#active-l17-integration-
 owns recovery. Use is local 33/24 (ceiling 36), CI 0/3; Mac packages 2/3,
 native 3/6, SDK 18/12 (ceiling 18); Windows zero. SDK allowance is exhausted.
 No process/run remains active. Code/evidence are local only; publication remains
-`ccebf3e`. The prepared #36 update awaits publication permission after automatic
-approval review rejected the external write. Unrelated policy edits remain unstaged.
+`ccebf3e`. The user-approved #36 update is published and its exact body verified;
+the issue remains open. Unrelated policy edits remain unstaged.
 
 ## L17 matched rendering passes on both targets
 

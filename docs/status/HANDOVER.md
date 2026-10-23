@@ -43,10 +43,11 @@ SDK launches 12; ceilings are 36, 4, 4, 9, 18. Final use is local 33, CI 0;
 Mac packages 2, native 3, SDK 18; Windows zero. Three local batches remain; SDK
 allowance is exhausted and further SDK launches require an explicit supplement.
 Local contingency began before batch 25 and SDK contingency was announced before
-attempt 13. Local `usage.json` and evidence own current accounting. The prepared
-`issue36-clamp-closeout.md` body was rejected by automatic approval review for lack
-of explicit payload/destination permission. #36 still has the preceding result and
-counts; publication awaits the user. Earlier allowances stay closed. Preserve unrelated policy edits and the protected recovery below.
+attempt 13. `usage.json`, evidence and #36 own current accounting. The user explicitly
+authorized the prepared issue update after the initial automatic approval rejection.
+Its exact body is published and verified; #36 remains open. This completes deferred
+publication in batch 33 without new execution. Earlier allowances stay closed.
+Preserve unrelated policy edits and the protected recovery below.
 
 ## Earlier canvas decision closeout
 

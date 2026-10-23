@@ -2692,9 +2692,10 @@ SDK execution requires an explicit supplement. Unrelated policy edits and protec
 recovery remain untouched. CURRENT/HANDOVER still exceed their soft size targets
 because they retain separate pending acceptance and protected recovery records.
 
-The prepared #36 body update was not published. Automatic approval review rejected
-sending this local evidence/status payload to GitHub without explicit permission
-for the payload and destination. The prepared body remains ignored as
-`issue36-clamp-closeout.md`; the remote issue still carries the preceding result
-and counts. Local `usage.json` and this evidence own current accounting until
-publication is authorized. No workaround or external retry was attempted.
+Automatic approval review initially rejected publication of the prepared #36 body
+without explicit payload/destination permission. The user then explicitly approved
+publishing that prepared update to GitHub #36. A fresh read found no intervening
+issue edits; publication succeeded and readback matches the prepared body exactly.
+The issue remains open. Ignored `issue36-published-clamp-closeout.json` retains the
+receipt. This completes deferred publication in batch 33; counts are unchanged.
+Repository code/evidence remain local, and unrelated edits are preserved.
