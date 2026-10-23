@@ -1323,3 +1323,108 @@ no promise of full L17 acceptance and adds no CI/package/native-editor allowance
 contingency. This proposal is not an allocation. Exact #36/#29/#22 status payloads
 are prepared locally for publication approval; none was sent after the rejection.
 The local commits and raw evidence remain separate from published history.
+
+## Guarded GPU-helper retest and publication, 2026-10-23
+
+The user approved six more local batches and two Mac SDK launches, publication of
+four reviewed commits and updates to #36/#29/#22. Hidden operation and keyboard
+focus retention remain required. Ceilings become 82 local batches and 34 Mac SDK
+processes, with no reset or new contingency. CI remains 6/6; other limits do not
+change. This is the bounded Mac helper capability test, not production promotion.
+
+### Approved publication
+
+Ordinary push publishes `6ad37ce`, `d34676f`, `ef2a2bd` and `0bc6954`. The exact
+remote branch SHA is verified as `0bc69547ccc14ab9f8e74843fe0cc0bb4edc4d5e`.
+The three approved issue payloads match their fresh remote baselines before write;
+all three are published and read back exactly, with their issues remaining open.
+#36 also records this approved retry allowance. This resolves the preceding public
+publication blocker. No PR, merge or release is selected. The new retest evidence
+and status changes are committed locally; the approval named the preceding four
+commits. Raw machine-local evidence remains ignored.
+
+### SDK33 refusal diagnosis and guarded exit
+
+The instrumented installer refuses at `activation-policy-check`. The effective
+activation policy is already the required prohibited value (2), with zero windows,
+key windows, activation/key events or application activation. The old installer
+rejects the setter's false return rather than checking that effective state.
+
+The corrected bootstrap exits directly with code 72. No requested frame completes.
+External observation records 162 samples over 1.204 seconds, zero visible helper
+windows, zero changed-foreground samples, zero activation events and no inventory
+failure. The maximum sample gap is 23.932 ms. This qualifies the observed safe
+refusal path for this SDK run; it is not GPU rendering success. Cleanup removes
+the private game after helper and observer exit.
+
+### Native condition correction and preflight
+
+The native installer now reads the effective activation policy. It attempts the
+setter only when necessary, then requires the effective policy to be prohibited.
+It does not accept accessory/regular policy or weaken signing/OS permissions.
+Two windowless native subprocess checks use a synthetic `SDLWindow` subclass and
+no SDK code or window allocation. With the required policy already present, the
+old native binary refuses and the corrected binary installs successfully.
+
+The initial sandboxed native checks cannot access the required WindowServer state
+and report activation policy -1; those are not passes. Their outputs are retained.
+The same checks with authorized native access pass the expected old-refusal/new-
+installation conditions. The original SDK33 native/renderer inputs and corrected
+SDK34 inputs are separately preserved in ignored evidence.
+
+### SDK34 bounded capability result
+
+SDK34 passes the four-frame rendering and observed hidden/focus checks. It uses the
+same private JSON helper request loop and production `_canvas_build`, with the
+process-local Mac native ordering guard and GL2 export in the prototype copy.
+The SDK logs identify GL2 on Apple M4. All frames use drawable/game ratio 2.0 and
+physical dimensions equal to the requested game dimensions. No source or action
+from a user project enters the helper.
+
+| Aspect/state | Exact RGBA differences from the retained GL2 source-screen reference | PNG SHA-256 |
+| --- | ---: | --- |
+| 1280x720 normal | 0 | `b01e22e0b0e0d4862fe81e517cd9e865207463119fa9851089a75bbea1c7849d` |
+| 1280x720 hover | 0 | `4eab0ec81268f5aaa248ab333d34db7ef727692db380608a117352ac7849e3cb` |
+| 1024x768 normal | 0 | `1c4fd529f9af308a5ccd1f37d964773fb2d25cd106c60412c104688be97ab4a8` |
+| 1024x768 hover | 0 | `5030d478b37bd86c556d1cb050efaa6671a894029b3763edb67b055335d1a426` |
+
+These compare SDK34's helper PNGs with the original screen's GL2 virtual captures
+from run 28. Every PNG file hash also matches. Assets, source-derived plan, styles,
+font, state, dimensions and Retina sampling match; no outside image scaling or
+pixel tolerance is used. This extends the earlier same-process comparison to the
+private helper's actual request loop and separately retained source-screen images.
+
+The external observer records 703 samples over 6.838 seconds with no visible
+helper window, no changed-foreground sample, no activation event and no inventory
+failure. Its maximum sample gap is 28.275 ms. At every completed frame the helper
+reports one native window, one blocked ordering request, zero visible/key windows,
+zero key/activation events, inactive application state and prohibited policy 2.
+The native guard is installed before the attempted window ordering. The result
+supports hidden operation and no observed keyboard-focus takeover in this bounded
+Mac experiment. It is not continuous OS input observation or physical-keyboard proof.
+
+### Cleanup, limits and continuation
+
+SDK33 exits 72 through the safe refusal path. SDK34 does not exit on the owner's
+SIGTERM within five seconds; the owner escalates to SIGKILL, and exit is -9.
+The capability receipt's pass therefore does not qualify graceful shutdown.
+Both process groups/observers are stopped, private game/bytecode/save directories
+are removed, and a fresh process inventory finds neither helper PID nor observer.
+The forced stop and failed SDK33 remain charged and visible. No backup, signing
+policy, system permission or unrelated project changes are introduced.
+
+Production helper/renderer code remains unchanged. The process-local native method
+replacement is a prototype, with private-SDL-class and Mac-only dependencies. This
+is not a qualified shipping adapter, packaged Loomlight focus result, Windows proof,
+native input-to-visible timing, smooth drag/resize, startup acceptance or complete
+shutdown qualification. Those acceptance gates remain with #36/B07/B08. Keep all
+three open. No tolerance, weaker requirement or broad subset acceptance is selected.
+
+Batches 77-82 cover publication/preparation, guarded SDK33 diagnosis, native
+correction/SDK34, pixel/cleanup verification and evidence, independent review with
+in-scope corrections, then final validation/commit/tracker reconciliation. Cumulative
+use is 82/82 local batches, 34/34 Mac SDK processes and 6/6 CI. Mac package/native
+editor use remains 3/5 and 3/7; Windows package/native/SDK use remains 1/5, 1/7 and
+10/20. No operation/watch remains pending and no new contingency applies.
+Next work needs a selected production-integration/qualification scope and allocation;
+retain this bounded capability result and the prior failed attempts.

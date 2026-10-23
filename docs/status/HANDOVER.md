@@ -2,63 +2,58 @@
 
 ## Active L17 proof handover
 
-The user selected a GPU-helper test for [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-on 2026-10-23 and explicitly required hidden operation without keyboard focus
-loss. Development remains on Mac ARM64, `codex/phase3b-screen-designer`, from local
-`d34676f`. This used the final seven local batches and one Mac SDK launch from the
-approved supplement. The capability test failed; production code is unchanged.
+The user approved six local batches and two Mac SDK launches for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)'s hidden GPU-helper
+retest on 2026-10-23, with no visible window or keyboard focus theft. Development
+remains on Mac ARM64, `codex/phase3b-screen-designer`. The four approved commits
+`6ad37ce`, `d34676f`, `ef2a2bd` and `0bc6954` are published; exact remote SHA is
+`0bc69547ccc14ab9f8e74843fe0cc0bb4edc4d5e`. Approved #36/#29/#22 payloads are
+published/read back and #36 records the retry allowance. The previous publication
+blocker is resolved. This new retest record remains local; production code is unchanged.
 
-[The failed test evidence](../tasks/evidence/canvas-rendering.md#hidden-gpu-helper-capability-test-2026-10-23)
-owns source inspection, exact prototype/observer identity, the failure, cleanup and
-later unqualified guard correction. The pinned SDK's window wrapper unconditionally
-shows its window. A disposable process-local native adapter attempted to suppress
-SDL window ordering and key-window eligibility before display startup. Its installer
-refused; the original generic return does not identify the failing precondition.
-The renderer raised an exception, allowing Ren'Py's graphical error handler to show
-a window. Zero requested frames completed. External observation finds a visible
-helper window in 1,508/1,683 samples over 15.246 seconds. There are no foreground
-application changes or activation events. This fails hidden operation and supplies
-no GPU rendering pass or complete keyboard-focus acceptance.
+[The guarded retest](../tasks/evidence/canvas-rendering.md#guarded-gpu-helper-retest-and-publication-2026-10-23)
+owns SDK33's safe refusal, the native check correction, SDK34's matched frames,
+external observation and forced cleanup. SDK33 refuses at activation-policy-check
+although the effective policy is prohibited (2); the corrected bootstrap exits 72
+without Ren'Py error UI. SDK34 checks the effective state and installs the process-
+local native ordering/key-window guard. The private helper produces four GL2 PNGs
+at 1280x720/1024x768 and normal/hover. All pixels and PNG hashes match the retained
+source-screen GL2 reference. It uses the production source-derived builder/request
+loop with prototype native policy/export changes, not the production adapter.
 
-The controller stops the owned process group after the frame deadline. Helper and
-observer exit; the diagnostic game/bytecode/saves are removed. Raw sources, original
-failed binary/renderer, process trace and receipts remain ignored under
-`.toolchains/canvas-proof/hidden-gpu-2026-10-23/`. A later prototype guard catches
-native loading/installation refusal and directly exits 72 before Ren'Py's error UI.
-Two plain-Python checks with simulated refusal/missing-library inputs pass. Added
-native stage instrumentation compiles. Neither correction has SDK qualification;
-do not treat it as repaired hidden startup or a new production helper.
+External SDK34 observation has 703 samples, no visible helper window, no foreground
+change/activation event and no inventory failure. At each frame the helper reports
+one window, one blocked ordering request, zero visible/key windows or key/activation
+events, inactive state and prohibited policy. This establishes observed hidden/focus
+behavior for the bounded Mac prototype, without physical-keyboard/continuous-input
+or packaged Loomlight qualification. SDK34 needs SIGKILL after SIGTERM's five-second
+deadline; graceful shutdown remains unqualified. The owner removes process groups,
+observers and game/bytecode/saves. No operation/watch or owned helper remains.
 
-The [earlier producer diagnosis](../tasks/evidence/canvas-rendering.md#matched-producer-diagnosis-2026-10-23)
-remains valid for its same-process comparison. The existing helper/source graphs
-match within each backend, while software/GPU glyph/color differences remain.
-GPU testing is now selected, but the capability gate failed. No tolerance, weaker
-requirement, product Retina-text change or source-color compensation is accepted.
-Windows fidelity, native input-to-visible timing, physical input, startup acceptance
-and real helper dragging/smoothness remain unqualified. Keep #36/B07/B08 open.
-Movement commits `7729ccf`/`a91be99` retain their earlier minimal-source/controller
-proof; CI6 at `571dfa9` does not qualify later movement or this GPU experiment.
+The native method replacement depends on Mac/private SDL classes and is not a
+qualified shipping adapter. Production renderer/helper code is unchanged. Windows
+rendering/focus, native input-to-visible timing, physical input, startup acceptance,
+real helper dragging/smoothness and production lifecycle remain missing. Earlier
+[producer diagnosis](../tasks/evidence/canvas-rendering.md#matched-producer-diagnosis-2026-10-23)
+and the original failed SDK32 remain retained; no tolerance, product Retina-text
+change, source-color compensation or weaker requirement is accepted. Keep #36/B07/
+B08 and full 3B open. Movement `7729ccf`/`a91be99` keeps its earlier controller/source
+proof; CI6 at `571dfa9` does not qualify later movement or the GPU prototype.
 
-Cumulative use is 76/76 local batches, 32/32 Mac SDK processes and 6/6 CI. Mac
-package/native editor use remains 3/5 and 3/7; Windows package/native/SDK use remains
-1/5, 1/7 and 10/20. Batches 70-76 cover preparation, native prototype, preflight,
-SDK run, diagnosis/offline correction, independent review and final closeout.
-No contingency resets. No package, native editor or CI operation ran. No owned
-operation/watch remains pending. Protected recovery and unrelated policy work remain.
+Final use is 82/82 local batches, 34/34 Mac SDK processes and 6/6 CI. Mac package/
+native editor use remains 3/5 and 3/7; Windows package/native/SDK use remains 1/5,
+1/7 and 10/20. Batches 77-82 cover publication/preparation, SDK33, correction/SDK34,
+verification/evidence, independent review/corrections and final closeout. No allowance
+reset or new contingency applies. Raw evidence, failed/corrected native sources and
+binaries remain ignored under `.toolchains/canvas-proof/hidden-gpu-2026-10-23/`.
+No package or native editor launch ran. Protected recovery and unrelated policy
+work remain intact. No PR, merge or release is selected.
 
-Publication through `6b74c61` is unchanged. The two preceding diagnosis commits and
-this failed-test closeout remain local. Automatic approval review rejected the #36
-selection update because it treated that public write as unauthorized publication
-to an unverified destination. No connector, alternate account or indirect write was
-used. Public #36/#29/#22 therefore still describe the earlier diagnosis/proposal.
-The reviewed local records need explicit publication approval before retrying.
-No PR, merge or release is selected.
-
-Next action needs a finite allowance supplement before another SDK test. The next
-experiment should identify the native install refusal using the new stage receipt,
-with the direct-exit guard preventing error UI. A later passing hidden/focus test
-must also produce GPU frames and retain native observation. Resume in this chat by
-default; no host transfer is selected and historical use stays charged.
+The selected Mac capability test is complete within its stated boundary. Next work
+needs a selected production-integration/qualification scope and finite allocation,
+including graceful stop and affected both-target proof. Public issue updates retain
+that scope and do not close the ticket. Resume in this chat by default; no host
+transfer is selected and all historical use stays charged.
 
 ## Earlier canvas decision closeout
 

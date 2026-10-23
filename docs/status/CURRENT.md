@@ -1,33 +1,34 @@
 # Current status
 
-## L17 hidden GPU-helper test failed
+## L17 bounded hidden GPU-helper proof passes on Mac
 
-2026-10-23: The user selected GPU rendering in the Ren'Py canvas helper and required
-hidden operation without keyboard focus theft. SDK process 32 failed before any
-frame completed. The native adapter refused initialization; its failure path then
-allowed Ren'Py to open an error window. External observation confirms the hidden
-requirement failed and records no foreground application change.
-[The failed capability test](../tasks/evidence/canvas-rendering.md#hidden-gpu-helper-capability-test-2026-10-23)
-owns exact evidence, the unisolated refusal cause and the corrected guard's limits.
+2026-10-23: The user approved six local batches and two Mac SDK launches for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36), plus publication of
+the four reviewed commits and #36/#29/#22 updates. Publication through `0bc6954`
+and the three exact issue payloads is verified. The earlier publication blocker
+is resolved. [The retest evidence](../tasks/evidence/canvas-rendering.md#guarded-gpu-helper-retest-and-publication-2026-10-23)
+owns exact results, failures and limits.
 
-The prototype now exits directly on native startup refusal. Two zero-SDK simulated
-failure checks pass; the corrected adapter/renderer remain unqualified in Ren'Py.
-Production code is unchanged. The earlier matched producer diagnosis supports a
-GPU-helper direction for the bounded Help composition, but hidden startup and
-GPU rendering in the helper remain unproved. Windows fidelity, native timing,
-physical keyboard, startup acceptance and smooth real helper dragging remain open.
-Keep #36/B07/B08 and full 3B acceptance open.
+SDK33 identifies the native refusal and exits without a visible window. The
+corrected policy check lets SDK34 produce four GPU helper frames. Every PNG is
+byte-identical to the matched GL2 source-screen reference at both aspects and
+normal/hover states. External observation finds no visible helper window or
+foreground application change; native frame receipts report no key/activation event.
+This proves the bounded Mac prototype's observed hidden/focus behavior.
 
-Cumulative use is 76/76 local batches, 32/32 Mac SDK processes and 6/6 CI. Mac
-packages/native editor remain 3/5 and 3/7; Windows packages/native/SDK remain
-1/5, 1/7 and 10/20. A further test needs an explicit allowance supplement. Helper and observer have
-exited; the game fixture is removed. No operation/watch remains pending.
+The production helper is unchanged. The native guard is Mac-only prototype code,
+not a shipping adapter. SDK34 requires forced process termination, so graceful
+shutdown is unqualified. Windows fidelity, packaged native focus, physical keyboard,
+input-to-visible timing, startup acceptance and smooth manipulation remain open.
+Keep #36/B07/B08 and full 3B acceptance open. No tolerance or weaker gate is accepted.
 
-Product/movement publication through `6b74c61` remains unchanged. The producer
-diagnosis commits and this test record are local. Automatic approval review blocked
-the #36 selection update as public publication without authorization; no workaround
-write or push occurred. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns the
-next action, publication blocker and protected recovery. Unrelated policy edits remain.
+Final use is 82/82 local batches, 34/34 Mac SDK processes and 6/6 CI. Mac packages/
+native editor remain 3/5 and 3/7; Windows packages/native/SDK remain 1/5, 1/7 and
+10/20. Helper/observer processes and game fixtures are removed; no operation/watch
+remains. The new retest record is committed locally; the approved four preceding
+commits are published. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns the
+remaining production/target gates and allocation boundary. Preserve unrelated policy
+edits and protected recovery below.
 
 ## Earlier canvas decision closeout
 
