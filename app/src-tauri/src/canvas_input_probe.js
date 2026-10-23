@@ -12,7 +12,11 @@
     const result = await window.__TAURI_INTERNALS__.invoke("core_request", {request: {
       protocolVersion: 1, requestId: `canvas-input-${++serial}`, operation, payload,
     }});
-    if (!result.ok) throw Error(`${operation}: ${result.error.code}`);
+    if (!result.ok) {
+      const error = Error(`${operation}: ${result.error.code}`);
+      error.code = result.error.code;
+      throw error;
+    }
     return result.value;
   };
   const read = (operation, payload) => window.__loomlightProbeRetryBusy(() => call(operation, payload));
