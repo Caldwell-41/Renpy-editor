@@ -2,61 +2,61 @@
 
 ## Active L17 proof handover
 
-The user resumed [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
-in a new chat on 2026-10-23, superseding the earlier stop direction within the
-existing cumulative allowance. Development remains on Mac ARM64,
-`codex/phase3b-screen-designer`. Product `7729ccf` plus review correction `a91be99`
-adds bounded aligned-frame movement. Existing commit/push authority carries forward;
-no PR, merge or release is selected. The implementation and closeout commits remain
-local. Automatic approval review rejected public push twice, including after the
-connected account/repository ownership and carried-forward authorization were
-verified. It requires explicit approval of this exact public payload. No workaround
-publication was attempted. The prepared #36/#29/#22 updates remain unpublished;
-the remote allowance record still shows transfer batch 54. Finish this publication
-within batch 60 only after approval; it renews no implementation allowance.
-The previous CI6 candidate remains `571dfa9`;
-its native/package pass does not qualify the new movement code.
+The user approved 16 additional local batches and 8 Mac SDK launches for
+[L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)'s matched producer
+diagnosis and correction proposal on 2026-10-23. Development remains on Mac ARM64,
+`codex/phase3b-screen-designer`, from published `6b74c61`. GitHub #36 confirms the
+prior four-commit publication and #29/#22 updates; that publication-only blocker
+is resolved. No PR, merge or release is selected. The new diagnostic closeout remains
+local. Product code is unchanged.
 
-The frame must have literal floating-point xalign/yalign, existing dimensions and
-an unambiguous fixed parent. Movement preserves those coordinate types, snaps pointer
-deltas to eight game pixels and uses one/eight pixels for keyboard input. It submits
-provisional values as data and patches only changed source tokens on acceptance,
-through shared transactions/history. Automatic layout and competing placement refuse
-movement. Cancel/Escape and Apply terminate capture; selection cannot change during
-capture or acceptance. Conflicted drafts remain available for Apply/Cancel.
+[The diagnosis](../tasks/evidence/canvas-rendering.md#matched-producer-diagnosis-2026-10-23)
+owns experiment identity, invalid first captures, controls, exact pixel counts,
+cleanup and the proposed correction. The production core generates the plan.
+The unchanged helper builder and original public screen are rendered in the same
+SDK/backend. Every valid same-backend comparison has zero different RGBA pixels
+at both aspects and normal/hover states. Cross-backend results exactly reproduce
+the retained Mac discrepancy. A measured GL2 ratio-1 control retains glyph/color
+differences, so Retina scaling is not the sole cause. Solid controls narrow the
+color difference to engine scaling/compositing/export; exact arithmetic remains
+unisolated. Raw evidence and scripts remain ignored under
+`.toolchains/canvas-proof/producer-diagnosis-2026-10-23/`.
 
-[The continuation evidence](../tasks/evidence/canvas-rendering.md#continued-implementation-and-resource-closeout-2026-10-23)
-owns test identities/results, original red tests, four independent-review findings and
-corrections, retained timing analysis and resource accounting. The UI/core integration
-uses a fixture image for pointer targets and runs no SDK. It proves source writes and
-controller behavior, not helper pixels or native presentation. Both independent review
-axes report zero remaining code findings. Spec keeps the acceptance gaps below.
+The proposed correction keeps the source-derived graph and uses a GPU-backed
+helper matching deliberate preview's renderer/drawable sampling. ADR 0021 decision
+review must select that change. Its first capability gate is hidden startup with
+no OS focus theft. The experiment's four GL2 processes created test windows;
+it proves neither hidden startup nor native focus. No renderer replacement,
+source-color compensation, disabled product Retina text or tolerance is accepted.
+The remaining single Mac SDK launch cannot promise a complete correction proof.
 
-Native input-to-visible timing, OS focus, physical keyboard, startup disposition and
-smooth real helper dragging remain unproved. The current native probe explicitly
-reports the missing capabilities false. Mac SDK 24/24 and CI 6/6 prevent executing
-the required next target checks under this authority. Matched Windows helper/reference
-glyph and flat hover-color differences, plus earlier Mac Retina/hover differences,
-still have no accepted tolerance. The producer forces software rendering while the
-reference uses GPU rendering. Its exact compositing cause remains unisolated.
-No renderer change, tolerance or weaker gate is accepted. ADR 0021 requires decision
-review before broader renderer work. Keep #36/B07/B08 and phase acceptance open.
+Bounded aligned-frame movement remains implemented in `7729ccf` and reviewed
+correction `a91be99`. [Its evidence](../tasks/evidence/canvas-rendering.md#continued-implementation-and-resource-closeout-2026-10-23)
+retains minimal transactions, floating-point coordinates, capture/Cancel ownership,
+Source conflict handling and controller proof with fixture-image pointer targets.
+CI6 at `571dfa9` remains the earlier functional result and does not qualify later
+movement. Both earlier review axes cleared code defects while retaining acceptance
+gaps. Native input-to-visible timing, OS focus, physical keyboard, startup acceptance,
+real helper dragging/smoothness and Windows rendering agreement remain unproved.
+The functional-only native receipt still reports its missing capabilities false.
+Keep #36/B07/B08 and full phase acceptance open.
 
-Batches 55-60 cover preparation/diagnosis, core TDD, UI TDD, integration/verification,
-independent review/corrections and publication/closeout. Cumulative use is 60/60 local,
-6/6 CI; Mac packages 3/5, native 3/7, SDK 24/24; Windows packages 1/5, native 1/7,
-SDK 10/20. No expensive operation was added and no contingency resets. No owned
-operation/watch remains pending at closeout. The portable test driver exits zero and
-asserts fixture removal. No game scripts/actions ran. Protected recovery below and
-unrelated uncommitted policy work remain intact.
+Cumulative use is 69/76 local batches, 31/32 Mac SDK launches and 6/6 CI. Mac
+package/native use remains 3/5 and 3/7; Windows package/native/SDK use remains
+1/5, 1/7 and 10/20. Batches 61-67 cover preparation, experiment attempts, corrected
+controls and analysis; 68 independent review; 69 corrections, validation, selective
+commit and tracker closeout. Seven local batches and one Mac SDK launch remain.
+No contingency resets. No package or native editor launch occurred. Every SDK
+process exited; process inventory is clean, controller fixtures are removed, and
+all diagnostic game directories/bytecode/saves are removed after recording hashes.
+No user game content or project action entered the helper. No operation/watch is
+pending. Protected recovery below and unrelated policy edits remain intact.
 
-Next action is the user's allowance/decision review. The smallest rendering experiment
-would compare the same composition through software and GPU producers, using matched
-reference captures, before choosing a correction. Native measurement needs OS focus/input
-observation and captured visible results outside the WebView, not true flags or another
-functional-only run. Qualify changed movement on each target once those capabilities
-and operations are allocated. Resume in this chat by default; no host transfer is
-selected. New chats do not renew limits.
+Next action is ADR 0021 decision review of the GPU-helper proposal. Native
+measurement still needs OS input/focus observation and visible results outside
+the WebView, followed by affected both-target qualification when allocated.
+Resume in this chat by default; no host transfer is selected. Historical use
+remains charged across chats.
 
 ## Earlier canvas decision closeout
 

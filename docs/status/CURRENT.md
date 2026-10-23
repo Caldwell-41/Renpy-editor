@@ -1,37 +1,33 @@
 # Current status
 
-## L17 movement implemented; representative acceptance blocked
+## L17 producer diagnosis complete; GPU correction proposed
 
-2026-10-23: The user resumed [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
-Product commits `7729ccf` and `a91be99` add bounded aligned-frame movement through
-the real Screens controller and shared source transactions. Pointer deltas snap
-to eight game pixels; keyboard movement uses one or eight. Escape/Cancel, capture
-ownership, fractional endpoint literals, stale/dirty Source and shared history have
-focused proof. [The continuation evidence](../tasks/evidence/canvas-rendering.md#continued-implementation-and-resource-closeout-2026-10-23)
-owns exact results, review corrections and limits.
+2026-10-23: The user supplemented [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
+with 16 local batches and 8 Mac SDK launches. The matched experiment reproduces
+retained Mac rendering differences and isolates them to backend/export and drawable
+sampling. Within each backend, the existing source-derived helper graph and original
+Help screen have identical RGBA pixels at both aspects and control states.
+[The diagnosis](../tasks/evidence/canvas-rendering.md#matched-producer-diagnosis-2026-10-23)
+owns exact counts, controls, original invalid captures and the correction proposal.
 
-| Capability | Automated proof | Acceptance |
-| --- | --- | --- |
-| Bounded movement and minimal source writes | Core, DOM and real UI/core controller with a fixture image | Implemented; real helper/native movement remains unqualified |
-| Helper rendering and lifecycle | Earlier audited CI6 at `571dfa9`, plus prior Mac functional proof | Glyph/color differences remain unaccepted |
-| Native feedback, keyboard and focus | Existing native flags remain false | Measurement implementation and target proof remain missing |
+Keep the existing source mapping. A GPU helper matching deliberate preview is
+proposed for decision review; hidden startup without focus theft must pass first.
+No production renderer change, tolerance or weaker requirement is selected.
+Windows fidelity, native timing/focus/physical input, startup acceptance and smooth
+helper dragging remain unqualified. #36/B07/B08 and full 3B acceptance stay open.
 
-Commits `7729ccf`, `a91be99` and the closeout remain local. Automatic approval
-review blocked public push pending explicit approval of the exact payload. GitHub
-status updates are prepared but unpublished; their remote allowance record still
-shows the transferred 54/60 state.
+Bounded movement product commits `7729ccf`/`a91be99` and closeout through `6b74c61`
+are published; the earlier public-push blocker is resolved in #36. Core/UI/controller
+proof retains its fixture-image limits. CI6 at `571dfa9` remains the earlier
+functional result and does not qualify later movement. This diagnosis changes no
+product code and supplies no new native-editor or Windows acceptance.
 
-Both independent reviews cleared the four corrected code defects. Spec retains
-helper/native movement, feedback/focus and fidelity gates. No tolerance, weaker gate,
-new renderer approach or full 3B acceptance is selected. The retained CI6 browser
-data has 197/200 input-to-decode samples above 100 ms; it is diagnostic, not native
-presentation proof. A repeat of the existing probe cannot establish the missing gates.
-
-The six remaining local batches are consumed, cumulative 60/60. CI remains 6/6;
-Mac packages 3/5, native 3/7, SDK 24/24; Windows packages 1/5, native 1/7, SDK 10/20.
-No new SDK, native app, package or CI operation ran. Further work needs an allowance
-and ADR 0021 decision review. Keep #36/B07/B08 open. No operation/watch is pending
-at closeout. [HANDOVER](HANDOVER.md#active-l17-proof-handover) owns continuation.
+Cumulative use is 69/76 local batches, 31/32 Mac SDK launches and 6/6 CI.
+Mac packages/native remain 3/5 and 3/7; Windows packages/native/SDK remain 1/5,
+1/7 and 10/20. Seven local batches and one Mac SDK launch remain, with no new
+contingency. Diagnostic fixtures/processes are removed; retained evidence is ignored.
+No operation/watch is pending. The diagnostic closeout remains local;
+[HANDOVER](HANDOVER.md#active-l17-proof-handover) owns continuation and decision gates.
 Preserve unrelated policy edits and protected recovery below.
 
 ## Earlier canvas decision closeout

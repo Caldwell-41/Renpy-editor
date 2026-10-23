@@ -1052,3 +1052,130 @@ public exposure. No alternative tool or indirect publication was attempted. Prod
 review lists the commits and prepared #36/#29/#22 updates. Those GitHub records remain
 unchanged at the transferred allowance state until approval. This is a publication
 blocker in final batch 60, not a renewed implementation allowance.
+
+## Matched producer diagnosis, 2026-10-23
+
+The user approved 16 additional local batches and 8 Mac SDK launches for a matched
+software/GPU comparison and an evidence-based correction proposal. Cumulative
+ceilings are 76 local batches and 32 Mac SDK launches. CI remains 6/6; package,
+native-app and Windows ceilings are unchanged. No new contingency applies.
+The experiment starts from published `6b74c61`; product code is unchanged.
+The prior publication blocker was resolved by the user's exact-payload approval
+and verified push through that commit, as recorded in #36.
+
+### Method and original failures
+
+Ignored `.toolchains/canvas-proof/producer-diagnosis-2026-10-23/` retains the
+experiment scripts, reservations, PNGs, JSON, process logs and cleanup receipt.
+A fresh release build of the existing `canvas-controller-driver` supplies the
+production `screens.canvasPlan` for the public Help fixture. The official archive
+passes its existing checksum, `eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+Accepted fixture SHA-256 is
+`08201efc692198063ed9d66a814da99683643cfbdccd45189fd8736e3aed422b`.
+The driver exits zero and removes its verified-SDK fixture without launching Ren'Py.
+Two preparation attempts failed on request shape: a missing open project and an
+extra `screenName` field in `screens.inspect`. One premature software setup failed
+before copying the font or spawning a process. All are charged to local batch 62.
+
+Each SDK experiment loads only the public fixture and Loomlight's trusted renderer
+in a disposable project. The unchanged production `_canvas_build` builds the core
+plan; the original screen definition builds the reference. Both run in the same
+backend and process with identical assets, styles and control state. Software
+captures use `render_to_texture(render, True)`; GL2 captures use
+`render_to_file(render, resize=True/False)`. This isolates graph construction from
+backend/export differences. It does not exercise a production GPU helper or its
+transport, lifecycle, hidden startup or focus behavior.
+
+Runs 25/26 exposed stale reference hover renders because the experiment changed
+style and captured again before clearing cached surfaces. Their hover comparisons
+are invalid. Software `screenshot()` also ignores its Render argument; the first
+experiment's software window/opaque captures are excluded. Runs 27 onward call
+`renpy.free_memory()` after changing the reference style and retain alpha-surface
+captures only for software. These are rendering diagnostics, with no timing claim.
+
+### Decisive results
+
+| Run | Backend/control | Same-backend helper versus source screen |
+| --- | --- | --- |
+| 27 | Software, drawable/game ratio 1 | Zero different RGBA pixels in all four aspect/state captures |
+| 28 | GL2, ordinary Retina ratio 2 | Zero different RGBA pixels in all four virtual captures and all four drawable captures |
+| 29 | GL2 ratio 2, text sampling forced to game resolution for diagnosis | Zero different RGBA pixels in all virtual/drawable captures |
+| 30 | Software repeat plus solid-color controls | Calibration evidence; no product change |
+| 31 | GL2, high-DPI window disabled, measured ratio 1 | Zero different RGBA pixels in all virtual/drawable captures |
+
+Every run finishes with exit code zero and a complete four-sample receipt. Both
+aspects are 1280x720 and 1024x768, with matching physical window dimensions. The
+frame remains 640x360, group 331x204, text 331x87, image 64x48 and button 143x45.
+Text wrapping and those widget dimensions agree. Exact cross-backend RGBA counts
+below compare the helper graphs; each source-screen graph equals its helper graph
+in that backend. No image resizing outside Ren'Py or tolerance is applied.
+
+| Aspect/state | Software versus GL2 Retina (28) | Software versus GL2 ratio 1 (31) |
+| --- | ---: | ---: |
+| 1280x720 normal | 8,780 | 5,715 |
+| 1280x720 hover | 14,013 | 11,110 |
+| 1024x768 normal | 9,706 | 7,603 |
+| 1024x768 hover | 14,893 | 12,996 |
+
+The Retina counts exactly reproduce the retained Mac comparison from reference-21
+and browser-21. Maximum channel differences are 213 at Retina scale and 64 at
+ratio 1. Forcing only GL2 text sampling to game resolution still differs by
+11,880 normal and 16,785 hover pixels at either aspect, with maximum difference 94.
+That diagnostic control does not establish a fidelity correction.
+
+Pinned `renpy/text/text.py` sets text oversampling to the backend's
+`draw_per_virt`; this explains the different glyph sampling at Retina scale.
+Run 31 uses [SDL's high-DPI window hint](https://wiki.libsdl.org/SDL2/SDL_HINT_VIDEO_HIGHDPI_DISABLED)
+only as an experimental control and verifies the resulting ratio. Residual
+scale-1 differences show that Retina scaling is not the sole cause.
+
+Solid controls isolate an engine rendering/export difference without text or
+Loomlight's widget graph. At size 8, software exports `#6b4d28` as RGBA
+`[107,77,40,255]`; GL2 exports `[106,76,39,254]`. At sizes 16 and 128, both export
+`[106,76,39,254]`. The other three fixture colors also lose one unit per channel
+and alpha in these scaled/export paths. Pinned `imagelike.Solid.render` uses an
+unscaled texture below size 10 and a transformed 10-pixel texture above it;
+`swdraw.solid_texture` fills the source surface with the input color. In the actual
+hover composition, software blue is 40 and GL2 blue is 39 at an interior point,
+with the other channels equal. This narrows the flat-color discrepancy to backend
+scaling/compositing/export. It does not isolate the exact arithmetic instruction.
+
+### Correction proposal and acceptance boundary
+
+Keep the existing source-derived graph and qualify a GPU-backed helper using the
+same renderer and drawable sampling as deliberate Ren'Py preview. The same-backend
+zero-difference result supports this proposal for the bounded public composition.
+Do not compensate source colors, disable Retina text in the product or introduce
+a pixel tolerance to accept the current software output.
+
+The first proposed capability gate is hidden GPU startup without OS focus theft.
+Only after that passes should the private helper adapter/export path change, with
+explicit drawable-scale handling and the existing data-only, draft/revision and
+process-cleanup rules. This is a proposal for ADR 0021 decision review, not an
+accepted renderer change. A failed hidden-startup gate requires reconsidering the
+approach. A passing pixel experiment alone cannot justify relaxing it.
+
+The experiment does not qualify Windows, a production GPU process, native timing,
+physical input, focus retention, startup acceptance or smooth helper dragging.
+It does not reopen the full supported subset. Keep #36/B07/B08 open. One additional
+Mac SDK launch remains; CI has no remaining dispatch. A full correction and target
+qualification cannot be promised within that single process.
+
+### Allowance, verification and cleanup
+
+Batches 61-67 cover preparation/allowance, fixture setup and failed preparation,
+first producer runs, corrected captures, text-sampling control, scale/color controls,
+and analysis/cleanup/evidence. Batch 68 is independent Standards/Spec review;
+batch 69 covers corrections, final validation, selective commit and tracker closeout.
+Final planned use is 69/76 local batches, 31/32 Mac SDK launches and 6/6 CI.
+Mac package/native use remains 3/5 and 3/7; Windows package/native/SDK use remains
+1/5, 1/7 and 10/20. Remaining allocation is seven local batches and one Mac SDK
+launch, with no reset or new contingency. No editor package or native editor
+launch occurred; the four GL2 diagnostic processes did create test windows.
+
+Every SDK process exits; the owned process-group cleanup runs. A fresh process
+inventory finds no experiment/controller process. All diagnostic game directories,
+including their generated bytecode and saves, are removed after recording file
+hashes. PNGs, JSON and logs remain as ignored evidence. The accepted repository
+fixture is unchanged. No user game content or project actions entered the helper.
+Repository policy edits and protected recovery remain intact.
