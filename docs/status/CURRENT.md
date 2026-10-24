@@ -1,40 +1,33 @@
 # Current status
 
-## L17 Windows functional and smoothness checks selected
+## L17 bounded Help proof accepted
 
-Windows preparation is complete at source `8dae4e3`. The NSIS package and retained
-x64 executable are ready; the editor has not been launched. Node/npm, Rust/rustfmt,
-Python, MSVC/Windows SDK, WebView2 and the official pinned SDK pass readiness.
-Locked dependencies were refreshed without changing pins or lockfiles; typechecking
-and all 231 frontend tests pass. Two sandbox bundling failures are retained; the
-third attempt completed outside the sandbox using the unchanged compiled executable.
-The [preparation evidence](../tasks/evidence/canvas-rendering.md#windows-readiness-and-packaged-candidate-2026-10-24)
-owns hashes, commands and limits. Wait for the user's availability before the guided
-physical-input session. #36 remains open for that check, smoothness acceptance and cleanup.
+2026-10-24: [#36](https://github.com/Caldwell-41/Renpy-editor/issues/36)'s remaining
+Windows functional and smoothness acceptance is complete. Guided attempt 2 passed
+all eight stages on source `8dae4e3`, executable SHA256
+`b896066a534073f86fb20898150f15dc93f3671e7719b85cf514fcc2a9cb8810`.
+The user confirmed, "I supplied all input; both were smooth", in response to the
+question about moving/resizing without sticking, jumps or lost focus. Exact source
+restoration, fresh geometry, normal editor/helper exit and owned cleanup pass.
+Attempt 1 remains a failed sequence check after extra movement during the resize
+stage; no product, probe or admission code changed between attempts.
 
-2026-10-24: The user selected the remaining Windows functional input and observed
-smoothness checks for [#36](https://github.com/Caldwell-41/Renpy-editor/issues/36),
-waived numerical timing as a release gate on Windows too, and authorized commit,
-push and ticket update. The numerical 95/100-within-100-ms target remains unverified
-on both targets. Mac performance is accepted; Windows functional and smoothness
-acceptance is still pending. Timing qualification is closed for this release.
-Do not schedule timing tests, request timing allowance or repeat missing numerical
-proof as a blocker or reminder. Reopen only on explicit user request or a newly
-observed, concrete performance regression.
+[Windows closeout evidence](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-closeout-2026-10-24)
+maps each criterion and retains the original failure, hashes and user acceptance.
+Earlier ADR, both-target/two-aspect matched rendering, Mac physical input and Mac
+smoothness retain their accepted scope. The recorded release timing decision is
+unchanged. Full supported-subset, editor layout and phase acceptance remain separate.
 
-The [bounded Windows continuation](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
-owns the decision, reused evidence and finite limits. It adds 16 work batches to
-historical use 123, with absolute cumulative ceiling 139 and no added contingency.
-Mac preparation/publication used three batches; Windows readiness, package attempts
-and preparation records use five more. Cumulative use is 131/139, eight remaining.
-The user increased the Windows package cap from two to four in the receiving chat.
-Use is 3/4 package attempts, 0/3 editor sessions and 0/4 SDK launches. No Mac run or
-CI dispatch is selected. Earlier unused headroom stays closed.
+Current cumulative use is 135/139 work batches, with two final review batches and
+one publication batch reserved within the ceiling. Windows use is 3/4 package
+attempts, 2/3 editor sessions and 2/4 SDK launches. The user increased only the
+package cap from two to four. No CI dispatch, Mac run or added contingency occurred.
+Historical unused allowances remain closed.
 
-[HANDOVER](HANDOVER.md#active-l17-integration-handover) provides the Windows entry
-prompt. Continue on `codex/phase3b-screen-designer`; no Windows native input test
-has run and #36 stays open until its remaining evidence and acceptance are complete.
-Unrelated policy edits remain local. No PR, merge or release is selected.
+Continue on `codex/phase3b-screen-designer` for review/publication and #36 closeout.
+No process, job or watcher remains. No successor task, PR, merge or release is
+selected. [HANDOVER](HANDOVER.md#l17-closeout) preserves recovery and local evidence;
+the prior Windows checkout's unrelated edit remains safely stashed.
 
 ## L17 matched rendering passes on both targets
 

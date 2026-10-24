@@ -1,6 +1,6 @@
 # ADR 0021: Separate Ren'Py helper for the Screens canvas
 
-- Status: Accepted design; bounded production integration, shutdown and matched Help rendering qualified; native feedback/input qualification pending
+- Status: Accepted design; bounded Help integration, shutdown, matched rendering, physical input and observed smoothness accepted
 - Date: 2026-10-22
 - Authority: The user confirmed the complete interview agreement and requested this
   ADR and the update to [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
@@ -19,8 +19,9 @@ or feedback requirements below.
 
 The [matched comparison closeout](../tasks/evidence/canvas-rendering.md#both-target-matched-rendering-closeout)
 qualifies the accepted Help composition at both internal aspects and normal/hover
-states on both targets, with no pixel tolerance. The full supported subset, physical
-input, native presentation timing and smooth manipulation retain their separate gates.
+states on both targets, with no pixel tolerance. The [Windows closeout](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-closeout-2026-10-24)
+and recorded Mac evidence accept physical input and observed move/resize smoothness
+for this bounded Help proof. The full supported subset retains its separate gates.
 
 ## Execution and editing boundary
 
@@ -83,13 +84,13 @@ Any allowance for differences at letter or image edges requires matched evidence
 and a later user decision. There is no universal pixel threshold, layout/wrapping
 waiver or general unsupported-code exemption for supported content.
 
-The initial warm-update target is at least 95% of editing inputs visible on the
-canvas within 100 ms. Dragging and resizing must also appear smooth. Measure the
-complete input-to-visible-result path on each target and retain delayed updates;
-a core timer or rendering-opportunity callback alone cannot establish presentation.
-Report startup separately. Startup limits and acceptance of any residual stalls
-remain pending evidence. The 100 ms target follows response-time guidance and the
-existing input/pan target; neither establishes helper performance.
+The initial warm-update target was at least 95% of editing inputs visible on the
+canvas within 100 ms. For #36 in this release, the user accepted functional behavior
+and observed smoothness on both targets and closed that numerical qualification.
+[The recorded release decision](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
+retains the unverified numerical result without claiming a measured pass. Reopen
+only on explicit user request or a newly observed concrete performance regression.
+This scoped decision does not change other features' performance contracts.
 
 ## Later representative proof
 
@@ -124,7 +125,8 @@ weaker requirement is accepted.
 Each extension retains matched both-target/two-aspect comparison and explicit
 coverage limits. One Help proof does not accept the full subset, generated-screen
 adapters, editor layout or whole 3B. [B07 #29](https://github.com/Caldwell-41/Renpy-editor/issues/29)
-and #36 remain open for missing proof; [B08 #30](https://github.com/Caldwell-41/Renpy-editor/issues/30)
+retains aggregate ownership; #36's bounded Help proof is accepted.
+[B08 #30](https://github.com/Caldwell-41/Renpy-editor/issues/30)
 owns full supported canvas acceptance.
 
 ## Alternatives and consequences
@@ -135,7 +137,7 @@ owns full supported canvas acceptance.
 - Capturing the actual project supplies its initialized behavior but executes game
   code. Keep it for deliberate comparison under the existing runtime boundary.
 - The chosen helper requires the pinned SDK and a new editor connection. Its
-  responsiveness and fidelity remain unproved. The
+  bounded Help responsiveness and fidelity are accepted; the full subset remains unproved. The
   [bounded production integration and shutdown proof](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
   records the selected both-target native observations and their limits. Unknown
   custom dependencies stay explicit even though Ren'Py performs the drawing.

@@ -1,61 +1,40 @@
 # Current outcome handover
 
-## Active L17 integration handover
+<a id="active-l17-integration-handover"></a>
 
-Windows preparation is complete; wait for the user's availability before launching
-the editor. The receiving Windows chat owns #36. Fetched source is exactly
-`8dae4e33427e79fc82b3a4bed046402c7610ae8c`, with no branch divergence. The previous
-`feature/phase-1g-branches-runtime` checkout's unrelated one-line HANDOVER edit is
-preserved in named stash `5dfd4b9ad9c0c7ac12a999685f098ff084f416a4`; do not apply it
-to this branch. Other worktrees are untouched.
+## L17 closeout
 
-Readiness, locked refresh and typechecking/231 frontend tests pass. No system
-installation or pin/lockfile change was needed. Package attempts 1 and 2 compiled
-but failed downloading installer tools inside the restricted sandbox. Attempt 3
-successfully bundled the same executable with existing NSIS outside the sandbox.
-[The preparation record](../tasks/evidence/canvas-rendering.md#windows-readiness-and-packaged-candidate-2026-10-24)
-retains exact tool versions, commands, failures and candidate hashes.
+Windows #36 acceptance is complete. Source candidate is
+`8dae4e33427e79fc82b3a4bed046402c7610ae8c`, product `8527998`, functional probe
+`68f95c3`; executable SHA256 is
+`b896066a534073f86fb20898150f15dc93f3671e7719b85cf514fcc2a9cb8810`.
+The unchanged package passed all eight physical-input stages in guided attempt 2.
+The user confirmed all input was theirs and both moving and resizing were smooth
+without sticking, jumps or lost focus. Exact source/history restoration, fresh
+geometry, cooperative helper exit 0, editor exit 0 and owned cleanup pass.
 
-Ignored Windows evidence is under `.toolchains/reports/l17-windows-functional-01/`.
-`package.json` and `build-inputs.json` bind the source, executable/installer and 531
-unchanged application/fixture inputs. `GUIDE.md` gives the eight steps;
-`launch-guided.ps1` invokes the existing explicit `canvas-input` runner, reserves
-one editor/SDK attempt and retains a read-only process/window audit. Execute it
-outside the restricted sandbox only after the user is available. The user supplies
-all physical input and judges moving/resizing for sticking, jumps and lost focus.
-Do not run the installer. No editor, SDK, job or watcher is pending.
+[The closeout evidence](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-closeout-2026-10-24)
+owns criterion mapping, the failed first attempt, raw receipt identities and limits.
+Ignored `.toolchains/reports/l17-windows-functional-01/` retains both guided outputs,
+package copies, 531 input hashes, process/terminal audits, human acceptance and
+`usage.json`. Both launchers are consumed; do not replay either. No editor/helper,
+profile, job or watcher remains. The installer was not run. The first attempt's
+changed accepted-source copy is retained as failure evidence, not a restored-source pass.
 
-The user selected Windows functional input and observed move/resize smoothness as
-#36's remaining bounded work, waived numerical timing on Windows for this release,
-and authorized commit, push and ticket update. [The decision and allowance](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
-own the scope. Mac performance is accepted; Windows functional/smoothness acceptance
-is pending. Numerical timing remains unverified on both targets and is no longer a
-release gate. No timing instrumentation, tests, allowance requests or reminders are
-next steps. Reopen only on explicit user request or a newly observed, concrete
-performance regression; existing unverified measurements alone are insufficient.
+Current cumulative use is 135/139 work batches. Two review batches and one publication
+batch are reserved within that ceiling. Windows use is 3/4 package attempts, 2/3
+editor sessions and 2/4 SDK launches; the user raised only the package cap to four.
+No CI, Mac run or added contingency occurred. Earlier unused allowances stay closed.
+Finish the read-only reviews, publish the in-scope closeout and update/close #36.
+No successor task, PR, merge or release is selected. The recorded release timing
+decision and separate full supported-subset/editor/phase acceptance remain unchanged.
 
-Branch: `codex/phase3b-screen-designer`. Publication includes local work through
-`39faa34` and this documentation checkpoint. Product code remains `8527998`, the
-functional probe correction is `68f95c3`, and offline Mac measurement correction
-`9875512` does not change the app. The Windows package is now prepared from that
-fetched branch candidate. Earlier both-target rendering and
-lifecycle proof retains its candidate-specific scope; assess subsequent deltas for
-the missing Windows interaction cases rather than rerunning the comparison matrix.
-
-The Mac preparation/publication used three of 16 additional work batches; Windows
-entry, locked dependencies/checks, failed packaging, corrected bundling and records
-used five. Cumulative use is 131/139, leaving eight. The user increased the Windows
-package cap to four in this chat. Use is 3/4 package attempts, 0/3 editor sessions
-and 0/4 SDK launches. No added contingency, Mac run or CI dispatch.
-All failed or uncertain attempts count. Historical 123/126 and its three unused
-batches remain closed. #36 owns the live cumulative count after transfer.
-
-No process, job, watcher or consumed launcher is pending. Native 11's
-[terminal closeout](../tasks/evidence/canvas-rendering.md#corrected-move-terminal-audit-and-closeout)
-retains normal exit, removed owned scratch and preserved source/assets. Do not copy
-Mac binaries, private capture files, PIDs or consumed launchers to Windows. Earlier
-Mac failures and recorder limits remain historical evidence. Unrelated policy work
-and protected recovery below remain untouched. No PR, merge or release is selected.
+Branch is `codex/phase3b-screen-designer`. Preparation is published at `4a4bef9`.
+The previous `feature/phase-1g-branches-runtime` checkout's unrelated one-line
+HANDOVER edit remains in named stash `5dfd4b9ad9c0c7ac12a999685f098ff084f416a4`;
+do not apply it to this branch. Other worktrees and protected recovery below are
+untouched. The original entry prompt is retained below to preserve its selected
+scope and acceptance boundaries; its work is complete and it is not a replay instruction.
 
 ### Windows entry prompt
 

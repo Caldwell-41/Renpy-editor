@@ -4464,3 +4464,73 @@ No editor/helper, watcher or test is running. Wait for the user's availability,
 then obtain the guided functional result, physical-input/smoothness confirmation
 and normal-exit/owned-cleanup audit before #36 closeout. No acceptance is inferred
 from preparation; #36 remains open. No PR, merge or release is selected.
+
+### Windows functional and smoothness closeout (2026-10-24)
+
+The user said ready and supplied the physical keyboard/mouse input. Both attempts
+used the same source `8dae4e33427e79fc82b3a4bed046402c7610ae8c`, executable hash
+`b896066a534073f86fb20898150f15dc93f3671e7719b85cf514fcc2a9cb8810`, existing
+eight-stage probe and conservative admission code. No application/probe code,
+dependencies or pins changed between them. Only the disposable profile/output,
+attempt reservation and user guidance differed.
+
+Attempt 1 passed seven stages, then failed `drag-resize` with `Accepted source did
+not settle`. The first pointer-down in that stage targeted Move frame, followed by
+further movement and later resize input. The probe's resize oracle used that first
+gesture against original source, so its expected size and source no longer matched.
+The user reported that the instruction appeared delayed after moving, so they moved
+again. The accepted-source copy ended with changed size/position and did not match
+the baseline. The failure, seven passing rows and missing cooperative-shutdown
+receipt remain unchanged. Editor exit was 1. External audit observed the editor
+and its two helper processes during the session, then verified all were gone and
+the owned profile was removed without forced cleanup. This is a failed sequence
+check with complete external cleanup, not a passing source-restoration result.
+
+The focused correction was guidance for the same case: make one move, release,
+wait for 8/8, then drag only the bottom-right resize handle once. Attempt 2 used a
+fresh profile/output and passed all eight ordered stages. No rebuild or gate
+change was required. The user later said it felt smoother; no implementation
+change occurred and the cause of that difference was not established.
+
+| Remaining #36 criterion | Exact Windows result and evidence |
+| --- | --- |
+| Pinned environment and coherent package | Readiness and package record above; NSIS attempt 3 completed, retained executable/installer hashes match. All 531 application/fixture inputs still match source `8dae4e3`. |
+| Width draft, Escape, Enter and keyboard Undo | Attempt 2 rows `draft-width-760`, `escape-cancel`, `enter-apply-752`, `keyboard-undo` pass. Draft/Cancel preserve original source; width 752 has matching accepted source/geometry and one keyboard Undo restores width 640. |
+| One-pixel resize and movement | `resize-arrow-right` accepts width 641 and geometry (319.5,180,641,360); Undo restores it. `move-arrow-right` accepts xalign 0.5015625 / x=321, then Undo restores original source. |
+| Move handle and anchored resize | `drag-frame` passes at (528,292,640,360); after Undo, `drag-resize` passes centered geometry (256,148,768,424). Fresh helper revision/geometry readback and exact final source restoration pass. |
+| External physical-input and smoothness acceptance | At all eight stage snapshots, the exact candidate process/window is owned and foreground, DPI 96. The user answered "I supplied all input; both were smooth" when asked about moving/resizing without sticking, jumps or lost focus. This direct confirmation supplies human acceptance separately from raw renderer flags. |
+| Normal exit and owned cleanup | Editor and runner exit 0; helper receipt is cooperative, exit 0, cleanup complete. All cleanup owners pass. External audit finds no editor PID or process under the owned profile, and the profile is removed. No forced stop occurred. |
+
+`canvas_input_evidence.admit` and `runtime_report_ok` accept the actual second
+receipt. Offline negative controls reject a missing stage, a false native-proof
+claim, missing shutdown and a failed row. Disk evidence confirms byte-exact Help
+source, zero scratch/helper jobs, no source bytecode and no saves. Both raw native
+and smoothness flags remain false; they were not rewritten. The external human
+and process audits supply the additional facts. The release timing decision remains
+unchanged, with no new numerical series or Computer Use.
+
+Ignored `guided-01/` retains the original report, event/gesture trace, changed source,
+process/terminal observations and sequence diagnosis. `guided-02/` retains the
+passing raw report/log, accepted source, eight process/window snapshots, terminal
+and functional audits, and direct human acceptance. The second helper observation
+ran after exit and therefore contains no live helper PIDs; the cooperative core
+shutdown receipt and external path/process/profile absence establish cleanup.
+`guided-02-evidence-hashes.json` binds all eleven retained evidence files.
+The passing raw JSON SHA256 is
+`7d7cb95dd3e71dab04fec1fff156dc925fdefdb5096fa5c0eca8febc7543201d`;
+restored Help bytes SHA256 is
+`08201efc692198063ed9d66a814da99683643cfbdccd45189fd8736e3aed422b`.
+No raw logs, packages, SDKs or personal paths are committed.
+
+Together with the accepted architecture, matched both-target/two-aspect rendering,
+difference analysis, extension mappings and Mac input/smoothness evidence, this
+completes #36's bounded Help acceptance. L18-L20, full supported-subset, editor
+layout and aggregate phase acceptance remain separate. No successor, PR, merge or
+release is selected. Local work and protected recovery are preserved.
+
+Current cumulative use is 135/139 work batches, including native attempt 1,
+diagnosis, native attempt 2 and terminal/human audit/records. Two final review
+batches and one publication batch are reserved within the ceiling. Windows use
+is 3/4 package attempts, 2/3 editor sessions and 2/4 SDK launches. The original
+failed attempts count. There is no added contingency, Mac run or CI dispatch.
+No process, job, watcher or fixture remains pending.
