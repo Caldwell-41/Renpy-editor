@@ -3711,6 +3711,9 @@ report zero findings on each axis. Focused documentation links and whitespace pa
 
 ### Mac timing gesture measurements and text preparation (2026-10-24)
 
+The numerical interpretation below is superseded by the full-response-window
+correction in the next section. Original recordings and reports remain intact.
+
 The user's manual click clears the cursor overlay in batch 98. Native focus,
 permissions and clock pass without access changes. The slow move run records 26
 distinct native states. Each maps to the expected eight-game-pixel translation of
@@ -3783,3 +3786,92 @@ the public text sample is transient. No stream or owned pointer is pending. Text
 Escape/foreground interruption, final audit and app/profile cleanup remain pending.
 No full Mac timing pass or publication is claimed. Completed evidence, unrelated
 work and protected recovery remain preserved.
+
+### Mac timing full-response-window correction and manual setup handoff (2026-10-24)
+
+The user asked to handle Mac UI setup while the agent runs the recorder without
+Computer Use. A user-authorized side-chat relay then identified a test-validity
+error. ADR 0021 requires at least 95% of editing inputs visible within 100 ms. The
+original analyzer ended each match window at the next action. At 60 Hz this usually
+imposed about 16.7 ms, and even an unsampled caret action could truncate a response.
+The earlier move 2/100 and resize 0/100 figures describe that stricter obsolete
+check; they are not valid results for the agreed 100 ms responsiveness requirement.
+The agent retracts that interpretation. The recorded workload does not establish a
+new response deadline, and no skipped-state waiver has been granted.
+
+Batch 102 first discovers native 9's 90-minute timeout. Its editor exits -15; its
+owned helper remains orphaned. Exact PID/executable verification precedes cleanup.
+SIGTERM does not stop it within five seconds; SIGKILL stops only that verified
+helper. All ten public game source/asset hashes still match baseline. Profile,
+scratch and evidence are retained. `terminal-timeout-audit.json` records this forced
+cleanup; it is not a cooperative lifecycle pass. No editor or helper is left live,
+no stream or pointer is pending, and no replacement session is launched.
+
+The initial offline diagnostic finds 98 move inputs with some matching transition
+inside a full 100 ms window, but eight have shared-frame ambiguity. This is a
+candidate count, not a pass. It motivates a conservative correction rather than
+blindly crediting a later revisit with identical pixels.
+
+Batch 103 adds four focused tests at the existing analyzer seam. Before the fix,
+40 ms responses after a later 16.7 ms input and after an unsampled caret action are
+incorrectly missed; unresolved repeated-state attribution is not represented.
+`03182c7` introduces analysis version 2. It keeps different expected states pending
+across later actions and retains observed delays beyond 100 ms. A new pixel-content
+transition can satisfy one unresolved input. If several unresolved inputs expect
+that same state, they remain ambiguous; the transition cannot be credited to a
+later revisit. Already-visible states cannot prove a response. Every ambiguous,
+already-visible or unobserved input stays in the full denominator. Resolved states
+can later be revisited and receive a new response. Exact pixel matching, receipt
+validation and false native-qualification flags remain unchanged. Generation
+ordering, native routing, references and capture coverage still require an audit.
+
+All sixteen focused offline/compiled-recorder checks pass with no app launch,
+capture or input. Independent Standards and Spec reviews of
+`0c9a19e...03182c7` report zero findings on each axis. The recorder runbook documents
+the changed policy. No product code or permissions are changed.
+
+Copied receipts under `timing-mac-03/reanalysis-full100ms/` retain identical native
+pixels, plans, sessions and input timestamps. New `analysis.json` files are written
+there, while the original analyses and analyzer source/hash remain preserved.
+Provenance pins analyzer SHA-256
+`1412cab3d36ccdfdacc0ec7bdcd15bcc38313a8b134d4fbde3bc6ec90559ce36`.
+The conservative revised arithmetic is:
+
+| Series | Inputs | Within 100 ms | Ambiguous | Already visible | Not observed |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Move | 100 | 92 | 6 | 2 | 0 |
+| Resize | 100 | 0 | 2 | 0 | 98 |
+
+Neither establishes the required 95/100 pass. P95/maximum stay null with unresolved
+samples retained. The resize crop has only baseline and an alternate appearance,
+not any nonzero resized reference. The alternate fits the baseline blended at
+half opacity over a constant background with maximum RGB residual 1.5. That is
+consistent with the source's stale-image opacity rule. It supports a stale-content
+finding, not a measured latency greater than 100 ms for every missing state.
+`resize-pixel-diagnostic.json` preserves this distinction. The separate accepted
+rendering and manual 7 evidence remain intact; text, interruption paths and full
+Mac qualification remain incomplete.
+
+Batch 104 records the correction and terminal handoff. Cumulative use is local
+104/104, no remaining local batches or added contingency; CI 0/4, Mac packages 4/4,
+native 9/9, SDK 31/36; Windows zero. The active allowance is exhausted. A proposed
+manual finish would add four hard-limit local batches, one native session and its
+SDK use, giving local 108 and native 10 while SDK use 32 remains within 36. It adds
+no contingency, build, CI, Windows or publication. This proposal is not approval;
+no native 10 or replacement launch has occurred. The workflow requires intervention
+before exceeding a ceiling.
+
+After explicit approval, launch the existing signed app in the same isolated public
+profile and prepare a fresh receipt identity. The user will handle fullscreen,
+Screens Design, Fit/project resolution, text selection and sample-field focus. The
+agent will make no Computer Use calls. It will wait ten seconds after a ready reply
+for the user to return to Loomlight, verify native target/focus/overlap metadata,
+and run the reviewed recorder only after the corrected analysis and live bindings
+are admitted. New window IDs/crops must be derived, not copied from the expired
+session. Further measurement uses the agreed 100 ms target; continuous-drag state
+coverage and smoothness stay separately reported. All failed/interrupted attempts
+remain charged and preserved. No push, issue update, PR, merge or release occurred.
+
+Final Standards and Spec reviews of the batch 104 closeout report zero findings
+on each axis. Scoped links, private-path exclusion and whitespace checks pass;
+protected recovery is byte-for-byte preserved.

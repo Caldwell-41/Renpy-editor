@@ -2,73 +2,78 @@
 
 ## Active L17 integration handover
 
-Continue #36 Mac timing on `codex/phase3b-screen-designer`. Signed package 4 and
-product code are unchanged. Preserve manual 7's physical-input/source/history/cleanup
-and user smoothness evidence, plus accepted both-target matched rendering. Windows,
-full supported-subset and whole-ticket acceptance remain pending. No publication
-is selected. [Gesture measurements and text preparation](../tasks/evidence/canvas-rendering.md#mac-timing-gesture-measurements-and-text-preparation-2026-10-24)
-own this continuation's latest results and recorder identity.
+Selected work is #36 Mac timing on `codex/phase3b-screen-designer`. Signed package 4
+and product behavior remain unchanged. Preserve manual 7's physical-input/history/
+cleanup/user smoothness evidence and accepted both-target matched rendering. Text,
+remaining interruption paths and full Mac qualification are incomplete. Windows,
+full supported-subset and whole-ticket acceptance remain separate. No publication
+is selected. [Full-response-window correction and manual setup](../tasks/evidence/canvas-rendering.md#mac-timing-full-response-window-correction-and-manual-setup-handoff-2026-10-24)
+own the latest result and proposal.
 
-Use is local 101/104, three batches remaining, no added contingency; CI 0/4, Mac
-packages 4/4, native 9/9, SDK 31/36; Windows zero. No further editor launch or app
-rebuild is allocated. Preserve all failed attempts and charge before execution.
+The allowance is exhausted at local 104/104; CI 0/4, Mac packages 4/4, native 9/9,
+SDK 31/36; Windows zero. Stop before further execution. Proposed, not approved: four
+additional hard-limit local batches and one native session, no added contingency,
+build, CI, Windows or publication. That would raise local to 108 and native to 10;
+its SDK use would be 32 within the existing 36. The four batches cover fresh manual
+setup/bindings, text/remaining native checks, complete audit, and review/evidence
+closeout. Await explicit user approval before exceeding either reached ceiling.
 
-Native 8 timed out without helper/capture and stays charged. Native 9 remains the
-same isolated ordinary-UI public fixture. Editor PID 25908, main window 33836, bounds
-(0,33,1512,949), scale two, fullscreen Screens Design with Text selected. Helper
-26652 is alive. All ten game source/asset hashes match baseline; the sample text is
-transient. The one-use launcher writes `timing-mac-03/exit.json` on exit and has a
-5,400-second bound; about 2,207 seconds remain at the latest audit. Check receipt and
-liveness before continuing; do not replay its launcher. Exact private paths are in
-`fixture.json` and `process.json`; `waiting-recovery.json` owns the current state.
-No recorder stream or held pointer is pending. App/profile cleanup remains pending.
-Use supported Python 3.12 for monotonic arithmetic. Keep protected recovery intact.
+Native 9 expired at its 5,400-second bound; `timing-mac-03/exit.json` records -15.
+The orphan helper PID/executable was verified against the isolated SDK before
+SIGTERM, then SIGKILL after it stayed live for five seconds. No editor/helper is
+left live; no recorder stream or owned pointer is pending. All ten public game
+source/asset hashes match baseline. `terminal-timeout-audit.json` records the forced
+cleanup, not a cooperative lifecycle pass. Keep the profile, scratch and all
+receipts. `fixture.json` owns exact private paths; no real project is selected.
+Do not replay any old launcher. Native 10 has not been authorized or launched.
 
-Use reviewed `recorder-text-hit-2026-10-24/canvas-measure-macos`, SHA-256
-`8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`.
-`55d5e6f` fixes direct text hits through unnamed WebKit children with a bounded,
-same-PID named-ancestor check. All twelve tests and both review axes pass. Live
-positive text retry remains pending. Earlier console-key/focused-window corrections
-and original artifacts remain preserved. Window, foreground, overlap and permission
-guards remain intact. Approved parent grants pass outside the shell sandbox; ask
-before any access change. Sandboxed false preflight results require no access fix.
+A user-authorized side-chat relay identified the analyzer's next-action cutoff as
+a test-validity error. ADR 0021's target is 95% of editing inputs visible within
+100 ms; the 60 Hz input workload is not a 16.7 ms response deadline. Earlier 2/100
+move and 0/100 resize figures are obsolete for that target. Preserve them as old
+analysis, not current acceptance evidence. No skipped/coalesced-state waiver exists.
 
-Move and resize each have 26 independently captured reference states. Their complete
-100-update series fail the preselected exact-state test: move 2/100 within 100 ms,
-98 unmatched; resize 0/100, 99 unmatched and one 101.494 ms match. P95/max stay null
-with misses included. Both independent numerical audits reproduce the results,
-verify pixels/inputs and confirm capture/cleanup. Keep resize's raster limitation
-explicit; its initial strict RGB comparison fails odd states at delta nine, while
-alignment verifies the expected shift. Measurement matches exact native hashes.
-Do not attribute all misses solely to product latency. Source is baseline after a
-recorded resize Undo; earlier move restoration is unattributed, not a history pass.
-Startup is separately 1,453.5 ms; SIGINT owned-release/stream-stop proof is retained.
+`03182c7` fixes offline analysis at the existing seam. Version 2 follows new content
+transitions across subsequent inputs, retains observations beyond 100 ms and keeps
+unresolved repeated states ambiguous rather than crediting a later revisit. Already
+visible, ambiguous and unobserved states remain misses in the full denominator.
+Sixteen focused checks pass; both fixed-point review axes report zero findings.
+Copied receipts and new reports live under `timing-mac-03/reanalysis-full100ms/`,
+with original analyzer/hash and provenance. Original recordings/reports stay intact.
+Revised move arithmetic is 92 within 100 ms, six ambiguous, two already visible.
+Resize is zero within 100 ms, two ambiguous and 98 unobserved. Neither establishes
+95/100. Generation order, reference content and coverage require external audit.
+The resize alternate crop fits dimmed unchanged baseline content, consistent with
+the stale-opacity rule; do not call all absent states measured delays over 100 ms.
 
-Text setup is incomplete. A direct pointer hit initially refuses on an unnamed
-child; keyboard-focused reference attempt 02 is interrupted by a native suggestion
-popup and its 18x18 crop catches a guide edge. Its map/unused measurement plan and
-`text-reference-audit/` are excluded. The corrected prepared
-`text-reference-interior-plan.json` uses a 6x10 glyph-only crop, same-PID ancestor
+Use reviewed native recorder `recorder-text-hit-2026-10-24/canvas-measure-macos`,
+SHA-256 `8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`.
+`55d5e6f` verifies unnamed WebKit children through at most eight same-PID ancestors
+inside the exact named control. Tests/reviews pass; positive live text binding is
+still unproved. The console-key/focused-window corrections and original tools are
+retained. Permission, foreground, window and overlap guards stay intact. Parent
+grants were available outside the shell sandbox; approve any actual access change.
+No Computer Use calls are allowed under the user's selected manual workflow.
+
+Text attempt 02 is interrupted by a native suggestion popup and its 18x18 crop
+includes a guide edge. Its map, unused plan and audit are excluded. Prepared
+`text-reference-interior-plan.json` uses a 6x10 glyph interior, native ancestor-checked
 focus, pointer parking and caret moves to avoid suggestions without settings changes.
-Attempts 03/04 refuse before output on the Computer Use cursor overlay. No admitted
-text reference or measured sample exists. Recheck complete reference sessions before
-mapping hashes; failed attempt 02 must never supply measurement references.
+Its expired PID/window/crop must be rebound from the replacement session's native
+metadata. Admit complete references before hashes supply a 100-key series. Keep
+unknowns and misses; final analysis alone never sets native qualification true.
 
-Read-only `overlap-meta.py` identifies the separate Computer Use cursor window at
-the sample field. Movement alone has not removed it. The latest user request is to
-click the plain header beside the public project title once, then move to the far
-top-right and reply ready. This cleared an earlier overlay. After clearance, use the
-reviewed recorder for prepared native setup; further CUA pointer actions recreate
-the overlay. Confirm native window/overlap metadata before retrying and retain all
-refusals. Keep full-window overlap refusal intact.
+Manual checklist after approval and isolated app launch: use the public Help timing
+fixture, fullscreen on the measured display, Screens then 2 Design, project 1280x720
+and Fit, select the Help paragraph, then click Canvas text sample without typing.
+Dismiss ordinary popups; stop on any new access prompt. Reply ready, immediately
+return to Loomlight and leave the field focused with the pointer parked at the far
+top-right. The agent waits ten seconds before native metadata/preflight checks,
+then runs only the reviewed recorder. It must not use Computer Use to help setup.
 
-Remaining work within three batches: positive text reference and 100-key series,
-Escape/foreground interruption checks, complete native-route/reference/coverage audit,
-ordinary app shutdown and isolated cleanup audit, evidence/recovery review and local
-commit. Failure remains a valid measured outcome; incomplete checks remain pending.
-Existing fixture source and unrelated work must be preserved. No package matrix is
-needed for evidence-only edits. Preview 5174 remains separate, reference server 5175
-is stopped, no CI/watcher is pending, publication remains `ccebf3e`.
+Preserve unrelated policy hunks and protected recovery below. Source/history/cleanup
+claims stay bounded to their actual receipts. Preview 5174 remains separate,
+reference server 5175 is stopped, no CI/watcher is pending, publication is `ccebf3e`.
 
 ## Earlier canvas decision closeout
 

@@ -2,30 +2,29 @@
 
 ## L17 move handle native qualification
 
-2026-10-24: Signed Mac package 4 retains manual 7's physical-input, source/history,
-cleanup and user smoothness evidence. Both-target matched rendering remains accepted.
+2026-10-24: Mac timing is incomplete. The [full-response-window correction](../tasks/evidence/canvas-rendering.md#mac-timing-full-response-window-correction-and-manual-setup-handoff-2026-10-24)
+supersedes the earlier move 2/100 and resize 0/100 interpretation. The analyzer had
+mistakenly cut response windows at the next input, usually about 16.7 ms rather than
+the agreed 100 ms. Version 2 retains delayed transitions and repeated-state ambiguity.
+Sixteen focused checks and both review axes pass; original receipts remain intact.
 
-[Gesture timing measurements](../tasks/evidence/canvas-rendering.md#mac-timing-gesture-measurements-and-text-preparation-2026-10-24)
-complete both 100-update native series. Move has 2/100 within 100 ms and 98 unmatched;
-resize has 0/100 and 99 unmatched, with one match at 101.494 ms. Both fail the
-preselected exact-state test. Independent audits reproduce the arithmetic and verify
-all pixels/inputs. This does not attribute every miss to product latency alone.
-Startup remains a separate 1,453.5 ms observation. Full Mac timing remains incomplete.
+Revised arithmetic has 92/100 clear move responses within 100 ms, six ambiguous and
+two already visible. Resize has zero, two ambiguous and 98 unobserved states. Its
+captured content is baseline or dimmed stale baseline; this does not assign a latency
+to every missing state. Neither result establishes a 95/100 pass. Text remains
+unmeasured. Manual 7 and both-target matched rendering evidence remain accepted.
 
-The reviewed external recorder correction `55d5e6f` handles unnamed WebKit children
-inside a named text input while preserving process, focus, window and overlap
-guards. Twelve checks and both review axes pass; positive live text retry is pending.
-Text references and measurements are not admitted. The Computer Use cursor window
-still overlaps after movement alone; the user is asked to click the plain header
-once and move away. [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns the
-current native session and prepared text plan.
+The old test session timed out. Its orphan helper required verified force-stop;
+all ten game source/assets match baseline and evidence/profile remain retained.
+No app, helper, stream or held pointer is pending. The user selected human UI setup
+with no Computer Use, but no replacement session has launched.
 
-Use is local 101/104, three batches remaining with no added contingency; CI 0/4,
-Mac packages 4/4, native 9/9, SDK 31/36; Windows zero. The editor/helper are alive,
-all game source/assets match baseline, and no stream or held pointer is pending.
-No further editor launch or app rebuild is allocated. Windows and whole-ticket
-acceptance remain pending. Work is local; publication remains `ccebf3e`. Unrelated
-policy edits and protected recovery remain intact.
+Use is local 104/104, zero remaining; CI 0/4, Mac packages 4/4, native 9/9, SDK 31/36;
+Windows zero. The proposed manual finish adds four local batches and one native
+session, without contingency, builds or publication; it awaits explicit approval
+before exceeding the ceilings. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns that proposal and checklist. Work is local; publication remains `ccebf3e`.
+Unrelated policy edits and protected recovery remain intact.
 
 ## L17 matched rendering passes on both targets
 
