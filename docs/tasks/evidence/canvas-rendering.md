@@ -3333,3 +3333,48 @@ timing within the remaining allowance. No package rebuild remains allocated.
 Preserve completed Mac functional and both-target rendering evidence, original
 failures, unrelated policy work and protected recovery. No execution, recorder
 permission, remote publication or additional allowance is granted by this transfer.
+
+### Mac timing permission gate, 2026-10-24
+
+Continuation starts at `88f4bc0` on the existing branch. The implement skill and
+live #36, B07 and P3B were read; no tracker content changed. Batch 84 covers entry,
+artifact verification, permission preflight, capture-route preparation and this
+pause record. Current local use is 84/80, absolute ceiling 88, leaving four existing
+contingency batches for live preparation, measurement, audit, review and closeout.
+CI remains 0/4; Mac packages 4/4, native 7/9 and SDK 29/36; Windows zero. No runtime
+attempt was reserved and no package rebuild is allocated.
+
+The existing recorder and source match the final reviewed receipt exactly. Its
+read-only unsandboxed preflight passes the CoreMedia/Mach clock bracket and exits 3
+because Screen Recording, event posting and Accessibility access remain false.
+It requests no permissions, captures nothing and posts no input. Explicit approval
+was requested for that exact binary and those permissions; no answer has arrived.
+This is a permission/capability blocker, not a product timing failure.
+
+Package 4 retains executable SHA-256
+`7cac273f852f71520238e9a3b9ae8d76548b48913716b92513216c7d12cfabef`.
+Strict signature verification outside the sandbox passes; the sandboxed trust check
+returned `CSSMERR_TP_NOT_TRUSTED`, with no signing change. The console is unlocked.
+Ignored `timing-mac-01-preparation/preparation.json` pins current artifact and public
+fixture hashes and the exact clock/permission observation. Its `capture-plan.md`
+records the proposed ordinary UI route, series, crop/reference requirements,
+startup endpoint, audit and cleanup. A first preparation write used an incorrect
+fixture path and failed before creating a manifest; the corrected write is retained.
+
+Source inspection identifies an existing fresh isolated profile route through
+`studio-settings` with the development phase selector. It shows the ordinary UI
+without injected JavaScript or a watchdog. Before use, verify the same route in
+package 4's source and prepare only a new public Help fixture with the pinned SDK.
+This selects no credential setup or LLM operation. No guided launcher is replayed.
+The actual PID/window, coordinates, crop, startup initiation receipt and independently
+checked reference hashes are still absent. There is no runnable qualification
+manifest, positive recorder-path result or timing sample. Obtain the pending
+permission approval, complete setup and capability checks, then reserve attempts
+immediately before launch within the unchanged limits. Do not weaken the endpoint
+or consume the four remaining batches on repeated permission polling.
+
+No app/helper/controller or watcher was started. Completed Mac physical-input and
+both-target matched-rendering evidence, unrelated policy edits and protected native
+recovery remain intact. Manual 7's perceived smoothness report is still missing.
+Windows and whole-ticket acceptance remain pending. This record is local only;
+no push, issue update, PR, merge or release occurred.
