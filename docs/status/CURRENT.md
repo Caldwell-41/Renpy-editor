@@ -2,31 +2,31 @@
 
 ## L17 move handle native qualification
 
-2026-10-24: Signed Mac package 4 at `68f95c3` retains its passed physical-input,
-source/history and cleanup evidence. The user confirms manual 7 movement and
-resizing both looked smooth. Both-target matched rendering remains accepted.
-Numerical presentation, Windows and whole-ticket acceptance remain pending.
+2026-10-24: Signed Mac package 4 retains manual 7's eight passed physical-input
+stages, source/history restoration, cleanup and the user's smoothness confirmation.
+Both-target matched rendering remains accepted. Mac warm timing, Windows and
+whole-ticket acceptance remain pending.
 
-The user selected 16 additional local batches for Mac timing, with hard cumulative
-ceiling 104 and no added contingency. [Native 8 preparation and correction](../tasks/evidence/canvas-rendering.md#mac-timing-native-8-preparation-and-console-correction-2026-10-24)
-record the public isolated fixture, live signed app and original failed attempts.
-The recorder's first live route exposed an incorrect console dictionary key.
-`c827ec7` fixes that external-tool key only; twelve recorder checks and both
-independent review axes pass. Permission/clock preflight passes without changing
-permissions or the signed app. The corrected binary's reviewed receipt is retained.
+The selected Mac supplement has a hard cumulative ceiling of 104 with no added
+contingency. Current use is local 97/104, seven batches remaining; CI 0/4, Mac
+packages 4/4, native 9/9, SDK 31/36; Windows zero. No further editor launch or package
+rebuild is allocated. Work remains local; publication remains `ccebf3e`.
 
-Capture attempts still stop before output because macOS UserNotificationCenter
-owns the foreground. Computer Use refuses that system app for safety. The user
-was asked to dismiss/describe its dialog and focus isolated Loomlight. Native 8
-is waiting with a 40-minute external launcher bound; no helper or recorder capture
-has started. [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns live recovery.
-The three 100-input series are preselected, but coordinates, independent reference
-captures and numerical results remain pending. No timing pass is claimed.
+[Native 9 capture and startup](../tasks/evidence/canvas-rendering.md#mac-timing-native-9-capture-and-startup-2026-10-24)
+records the native 8 timeout, focused-window recorder correction, twelve passing
+checks and zero findings on both review axes. Approved permissions pass preflight
+outside the shell sandbox. Capture and native pointer input work; SIGINT releases
+the owned pointer and stops capture. First correct helper glyphs appear 1,453.5 ms
+after the initial Screens press. This separate startup observation is not a warm
+series or a timing acceptance result.
 
-Current use is local 93/104, eleven batches remaining with no added contingency;
-CI 0/4, Mac packages 4/4, native 8/9, SDK 30/36; Windows zero. No package rebuild
-is allocated. Work remains local; publication remains `ccebf3e`. Unrelated policy
-edits and protected recovery are intact.
+Native 9 is alive in the isolated public fixture, with its helper running and all
+ten game source/asset hashes unchanged. The reviewed recorder currently refuses
+reference capture because the Computer Use cursor overlay overlaps the target.
+The user has been asked to clear that overlay manually. Four reference attempts
+stop before input; no reference states or warm samples are admitted.
+[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns live recovery. Unrelated
+policy edits and protected recovery remain intact.
 
 ## L17 matched rendering passes on both targets
 

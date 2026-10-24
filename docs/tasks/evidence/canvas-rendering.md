@@ -3628,3 +3628,83 @@ issue update, PR, merge or release occurred.
 Status review: CURRENT is 1269 words and HANDOVER is 2462 words.
 They exceed soft targets to retain earlier phase acceptance, unrelated policy work
 and protected recovery. Only the selected live continuation was replaced.
+
+### Mac timing native 9 capture and startup (2026-10-24)
+
+Native 8's 40-minute bound expired during the system-dialog wait. Its exit is -15,
+not a cooperative pass. The terminal audit finds the editor gone, all ten public
+game source/asset hashes unchanged and no helper/capture. The failed attempt stays
+charged. After the user cleared the ChatGPT prompt, batch 94 reserves native 9 and
+SDK 31 before launching the unchanged signed package in the verified isolated
+ordinary-UI profile. Its external bound is 90 minutes; no new app package is built.
+
+The recorder initially mistook a small owned recording accessory for the main
+window. Native focused-window metadata proves the actual main selection. An initial
+broader windowed candidate still refuses desktop overlays and is preserved as
+`failed-windowed-candidate.swift`; that policy is abandoned. The accepted smaller
+correction `be47ff5` chooses the plan's exact PID/window and requires its bounds to
+match the focused Accessibility window. It shares finite geometry decoding with
+control verification and retains the original full-target overlap refusal.
+Fullscreen removes the desktop overlays for the positive checks.
+
+The accepted recorder's executable SHA-256 is
+`926bf728668e0cb8650c81f0d37b01bb089f61894f709c729255f7b06d3589f7`;
+source SHA-256 is
+`1650ed0e887cd5766bf702aac7e17a3537a7d20512dfe62978b2a095aaf48c03`.
+`recorder-main-window-2026-10-24/reviewed-build-receipt.json` pins both identities.
+The wrong focused-window case refuses before output and the fullscreen capture-only
+case succeeds with one complete frame, idle callbacks and clean stream shutdown.
+All twelve recorder checks pass. No permission or signed-app change occurs.
+A sandboxed preflight reports false permissions, while the same reviewed binary
+outside the shell sandbox reports all three true and a valid clock. Those results
+are retained as distinct execution contexts, not permission changes.
+
+#### Standards
+
+Independent read-only review of `c827ec7...be47ff5`, restricted to the recorder,
+reports zero documented-standard violations and zero actionable smell findings.
+
+#### Spec
+
+Independent read-only review of the same fixed recorder diff reports zero findings.
+It confirms the capture-only result establishes capability, not complete timing.
+
+#### Native input, startup and remaining capture blocker
+
+Batch 97 posts a native pointer down on the verified Story button, then interrupts
+the recorder with SIGINT. The expected interrupted receipt records an owned pointer
+release and completed capture shutdown. This proves that specific interruption
+path; Escape and foreground-loss paths remain pending.
+
+The first native Screens-button press starts the actual helper. The capture keeps
+119 complete callbacks, 526 idle callbacks and four distinct raw crops, with no
+failure and clean shutdown. Its largest callback gap is 26.7 ms. The first correct
+helper glyph crop appears 1,453.530334 ms after the native before-post timestamp.
+`startup-audit.json` maps game crop (344,204,300,78) to the captured crop and compares
+it with the independent pinned-fixture helper PNG. RGB differences are at most two
+from compositing; helper alpha 254 becomes opaque. Raw RGBA hashes and the helper's
+request/result/PNG are retained. This is a separate startup observation, not a warm
+series, percentile or acceptance result.
+
+Actual control bounds establish a 0.5-point/game-pixel Fit scale and one captured
+pixel per game pixel. Interior move/resize crops and a 25-state slow move plan are
+prepared. Four reference attempts refuse before capture/input because a visible
+window overlaps the target. Read-only metadata identifies the Computer Use cursor
+overlay; an owned navigation tooltip also appeared between setup actions. Fullscreen
+keyboard transitions and parking over the plain header have not removed the cursor
+overlap. The user has been asked to clear it manually. The overlap guard remains
+unchanged. No slow reference state, measured warm input or qualification pass exists.
+
+`timing-mac-03/waiting-recovery.json` finds editor 25908 and helper 26652 alive, all
+ten game source/asset hashes matching and about 4,224 seconds left on the launcher's
+bound. There is no pending capture stream or held pointer. App/profile cleanup is
+pending with the live session. The recorder must admit real foreground, bounds and
+overlap checks before continuation. No further editor launch is allocated.
+
+Current cumulative use is local 97/104, seven batches remaining with no added
+contingency; CI 0/4, Mac packages 4/4, native 9/9, SDK 31/36; Windows zero. Manual 7
+and both-target rendering evidence remain intact. No push, issue update, PR, merge
+or release occurred. Unrelated policy edits and protected recovery are preserved.
+
+Final read-only Standards and Spec audits of the batch 97 evidence/recovery records
+report zero findings on each axis. Focused documentation links and whitespace pass.
