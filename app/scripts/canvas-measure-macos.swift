@@ -121,14 +121,16 @@ func elementBounds(_ element: AXUIElement) throws -> CGRect {
                 && rect.width > 0 && rect.height > 0, "Invalid Accessibility bounds")
     return rect
 }
+func controlLabels(_ element: AXUIElement) -> [String] {
+    [kAXDescriptionAttribute, kAXTitleAttribute, kAXHelpAttribute].compactMap {
+        try? attribute(element, $0) as? String
+    }
+}
 func verifyControl(_ focused: AXUIElement, _ expected: Focus, bounds: CGRect) throws {
     try require(try attribute(focused, kAXRoleAttribute) as? String == expected.role,
                 "Focused control role differs from plan")
     try require(try attribute(focused, kAXEnabledAttribute) as? Bool == true, "Focused control disabled")
-    let labels = [kAXDescriptionAttribute, kAXTitleAttribute, kAXHelpAttribute].compactMap {
-        try? attribute(focused, $0) as? String
-    }
-    try require(labels.contains(expected.label), "Focused control label differs from plan")
+    try require(controlLabels(focused).contains(expected.label), "Focused control label differs from plan")
     try require(bounds.contains(try elementBounds(focused)), "Focused control outside owned viewport")
 }
 func verifyFocus(_ pid: pid_t, _ expected: Focus, bounds: CGRect) throws {
@@ -140,7 +142,24 @@ func verifyPointer(_ pid: pid_t, _ point: CGPoint, _ expected: Focus, bounds: CG
     var hit: AXUIElement?
     try require(AXUIElementCopyElementAtPosition(AXUIElementCreateApplication(pid), Float(point.x), Float(point.y), &hit) == .success
                 && hit != nil, "Pointer target unavailable")
-    try verifyControl(hit!, expected, bounds: bounds)
+    var element = hit!
+    // WebKit may return an unnamed text/group child inside the named input.
+    for _ in 0..<8 {
+        var owner: pid_t = 0
+        try require(AXUIElementGetPid(element, &owner) == .success && owner == pid,
+                    "Pointer control belongs to another process")
+        let role = try attribute(element, kAXRoleAttribute) as? String
+        if role == expected.role && controlLabels(element).contains(expected.label) {
+            try verifyControl(element, expected, bounds: bounds)
+            try require(try elementBounds(element).contains(point), "Pointer outside named control")
+            return
+        }
+        if role == kAXWindowRole || role == kAXApplicationRole { break }
+        let parent = try attribute(element, kAXParentAttribute)
+        try require(CFGetTypeID(parent) == AXUIElementGetTypeID(), "Pointer parent unavailable")
+        element = unsafeBitCast(parent, to: AXUIElement.self)
+    }
+    throw RecorderError.refused("Pointer target is not within the named control")
 }
 
 // Pixel/status mutation stays on the serial capture queue; metrics and close follow its drain.
