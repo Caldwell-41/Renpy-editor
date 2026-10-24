@@ -3318,3 +3318,18 @@ for the selected outcome. CI 0/4, Mac packages 4/4, native 7/9 and SDK 29/36 rem
 unchanged; Windows zero. No process, SDK run or watcher remains pending. Repository
 validation and scoped whitespace checks pass. Publication remains `ccebf3e`; recorder
 work is local only. The recorder piece adds no allowance for later qualification.
+
+### Mac timing qualification handoff, 2026-10-24
+
+The user requested a temporary handoff and a prompt for the Mac timing qualification.
+Batch 83 covers readback, the transfer document and recovery/allowance reconciliation.
+Current use is local 83/80, ceiling 88, leaving five existing contingency batches.
+Recorder construction remains complete at 12 of its 15 permitted batches; unused
+recorder capacity is not added to qualification. All expensive-operation counts stay
+unchanged. The next session must recheck recorder permissions and obtain explicit
+approval before permission setup. It must prepare the real private fixture/target/
+crop/action/reference plan, qualify the recorder's positive path and audit actual
+timing within the remaining allowance. No package rebuild remains allocated.
+Preserve completed Mac functional and both-target rendering evidence, original
+failures, unrelated policy work and protected recovery. No execution, recorder
+permission, remote publication or additional allowance is granted by this transfer.

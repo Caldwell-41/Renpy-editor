@@ -32,10 +32,10 @@ alone does not justify repeating the sequence.
 
 The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
 bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
-Announce contingency before batch 81. Current use is local 82, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
+Contingency was announced before batch 81. Current use is local 83, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
 Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
-acceptance remain pending. Recorder construction is selected; no permission change, push, PR, merge or
+acceptance remain pending. Recorder construction is complete; no permission change, push, PR, merge or
 release is selected. Registered historical Windows jobs do not supply the missing
 continuous-input/presentation observation; matched rendering is already accepted.
 
@@ -47,8 +47,10 @@ owns the endpoints, sample series, capability gates and initial operation plan.
 The standalone Mac recorder now compiles, with twelve focused checks, types and all
 229 frontend tests passing. [Its record](../tasks/evidence/canvas-rendering.md#standalone-mac-recorder-selection-2026-10-24)
 owns source/build identity and limitations; [Native evidence](../testing/NATIVE.md#standalone-mac-canvas-recorder)
-owns run instructions. The user allowed 150% of ten remaining nominal batches for
-building it, so this piece ends by cumulative batch 85 within the existing ceiling.
+owns run instructions. Recorder construction used 12 of its 15 permitted batches;
+its unused portion grants no allowance for qualification. The Mac timing handoff
+consumes batch 83, leaving five existing local contingency batches before ceiling 88.
+No real PID/window/crop/action/reference qualification plan is prepared yet.
 Both independent review axes have no remaining actionable findings at `dba3a83`. Live capture, Accessibility hit testing, input delivery
 and capture cadence remain unqualified. Next obtain explicit approval before recorder
 permission setup or remote publication; the Windows adapter remains pending. Use
