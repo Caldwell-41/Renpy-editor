@@ -24,6 +24,7 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
   const calls: CoreOperation[] = [];
   const payloads: {operation:CoreOperation;payload?:Record<string,unknown>}[]=[];
   let canvasAvailable = true;
+  let canvasFrame: Record<string, unknown> = {};
   const workspace = new ScreensWorkspace({ resolution: { width: 1280, height: 720 }, current: () => true,
     coordinate: task => task(), source: target => { sources.push(target); }, preview: () => {}, saved: () => {},
     request: async <T>(operation: CoreOperation, payload?: Record<string, unknown>): Promise<T> => {
@@ -38,16 +39,78 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
       if (operation === "screens.setSize" || operation === "screens.setPosition") return await new Promise<ScreenDocument>((resolve, reject) => { settle = { resolve, reject }; }) as T;
       if (operation === "screens.canvasStatus" && canvas) return {phase:"ready"} as T;
       if (operation === "screens.canvasRender" && canvas) return (canvasAvailable ? { phase:"ready", frameId:"fixture-frame", revision:"before", width:1280, height:720,
-        image:"data:image/png;base64,fixture", geometry:[{start:10,x:0,y:0,width:1280,height:720},{start:30,x:320,y:180,width:640,height:360}] } : {phase:"unavailable",message:"Helper stopped. Drafts retained."}) as T;
+        image:"data:image/png;base64,fixture", geometry:[{start:10,x:0,y:0,width:1280,height:720},{start:30,x:320,y:180,width:640,height:360},
+          ...(sibling ? [{start:100,x:10,y:10,width:100,height:30}] : [])], ...canvasFrame } : {phase:"unavailable",message:"Helper stopped. Drafts retained."}) as T;
       throw new Error(operation);
     } });
   workspace.mount(document.body);
   const click = (text: string) => { const b = [...document.querySelectorAll("button")].find(b => b.textContent === text)!; assert.ok(b, text); b.focus(); b.click(); return b; };
   const field = (name: string) => { const input = [...document.querySelectorAll("input")].find(i => i.ariaLabel === name); assert.ok(input, document.body.innerHTML); return input; };
   return { workspace, click, field, sources, calls, payloads, stopHelper: () => { canvasAvailable = false; }, removePause: () => { documents = documents.filter(d => !d.path.endsWith("pause.rpy")); },
+    setCanvasFrame: (frame: Record<string, unknown>) => { canvasFrame = frame; },
     accept: () => { const accepted = structuredClone(documents.find(d => d.screens.length)!); accepted.revision = "accepted"; accepted.screens[0]!.nodes[0]!.properties[0]!.value = 750; settle!.resolve(accepted); },
     refuse: () => settle!.reject(new Error("Draft conflict")), dispose: () => workspace.dispose() };
 }
+
+test("move reference pixels depend on the installed helper image, including mid-gesture replacement", async () => {
+  const h = harness(false, undefined, true, true);
+  try {
+    await tick(); await tick();
+    const zoom = [...document.querySelectorAll('select')].find(e => e.ariaLabel === 'Canvas zoom')!;
+    zoom.value = "100"; zoom.dispatchEvent(new window.Event("change"));
+    const image = document.querySelector<HTMLImageElement>('.screen-render')!;
+    image.dispatchEvent(new window.Event("load"));
+    document.querySelector<HTMLButtonElement>('.screen-node-frame')!.click();
+    image.dispatchEvent(new window.Event("load"));
+    const handle = document.querySelector<HTMLButtonElement>('.screen-move')!;
+    handle.setPointerCapture = () => {}; handle.hasPointerCapture = () => false;
+    const pointer = (type: string, x: number) => handle.dispatchEvent(new window.PointerEvent(type, {button:0,pointerId:1,clientX:x,clientY:200,bubbles:true}));
+    h.setCanvasFrame({frameId:"generation-1", image:"data:image/png;base64,replacement",
+      geometry:[{start:10,x:0,y:0,width:1280,height:720},{start:30,x:328,y:180,width:640,height:360}]});
+    pointer('pointerdown',400); pointer('pointermove',408);
+    assert.equal(image.src, 'data:image/png;base64,fixture');
+    assert.equal(image.style.transform, 'translate(8px, 0px)');
+    await tick(); await tick();
+    // Happy DOM dispatches load synchronously for data URLs.
+    assert.equal(image.src, 'data:image/png;base64,replacement');
+    assert.equal(image.style.transform, 'translate(0px, 0px)');
+    assert.equal(document.querySelector<HTMLElement>('.screen-game')!.dataset.provisional, 'panel', 'Panel mode alone cannot distinguish settled pixels');
+    pointer('pointermove',416);
+    assert.equal(image.style.transform, 'translate(8px, 0px)', 'The next translation uses the replacement image, not the baseline');
+    assert.equal(document.querySelector<HTMLElement>('.screen-node-frame')!.style.left, '336px');
+  } finally { h.dispose(); }
+});
+
+test("text and resize requests keep stale content until image load, even when guides change", async () => {
+  for (const series of ['text','resize']) {
+    const h = harness(false, undefined, true, true, true);
+    try {
+      await tick(); await tick();
+      const image = document.querySelector<HTMLImageElement>('.screen-render')!;
+      image.dispatchEvent(new window.Event('load'));
+      document.querySelector<HTMLButtonElement>(series === 'text' ? '.screen-node-text' : '.screen-node-frame')!.click();
+      image.dispatchEvent(new window.Event('load'));
+      h.setCanvasFrame({frameId:'new-content',image:'data:image/png;base64,newcontent'});
+      if (series === 'text') {
+        const input = [...document.querySelectorAll('textarea')].find(e => e.ariaLabel === 'Canvas text sample')!;
+        input.value = 'Changed text'; input.dispatchEvent(new window.Event('input'));
+      } else {
+        const handle = document.querySelector<HTMLButtonElement>('.screen-resize')!;
+        handle.setPointerCapture = () => {}; handle.hasPointerCapture = () => false;
+        handle.dispatchEvent(new window.PointerEvent('pointerdown',{button:0,pointerId:1,clientX:100,clientY:100,bubbles:true}));
+        handle.dispatchEvent(new window.PointerEvent('pointermove',{pointerId:1,clientX:116,clientY:116,bubbles:true}));
+      }
+      const canvas = document.querySelector<HTMLElement>('.screen-game')!;
+      assert.equal(image.src, 'data:image/png;base64,fixture');
+      assert.equal(image.style.transform, '');
+      assert.equal(canvas.dataset.stale, 'true');
+      assert.notEqual(canvas.dataset.provisional, 'panel');
+      await tick(); await tick();
+      assert.equal(canvas.dataset.stale, 'false');
+      assert.equal(image.src, 'data:image/png;base64,newcontent');
+    } finally { h.dispose(); }
+  }
+});
 
 test("aligned frame dragging previews game coordinates, cancels and retains a refused move", async () => {
   const h=harness(false,undefined,true,true);

@@ -7,12 +7,50 @@ import re
 from pathlib import Path
 
 
+def validate_content_references(plan):
+    """Check the reference construction contract, not native provenance or coverage."""
+    endpoint = plan.get('endpoint')
+    if endpoint == 'settled-confirmation':
+        raise ValueError('Settled confirmation requires compositor-bound generation evidence; pixel hashes cannot prove it')
+    if endpoint != 'visible-content':
+        return
+    held = False
+    for action in plan['actions']:
+        if action['kind'] == 'down': held = True
+        if action['kind'] == 'up': held = False
+        if not action.get('sample') and (action['kind'] == 'key' or action['kind'] == 'move' and held):
+            raise ValueError('Unsampled content actions leave the helper source generations unreferenced')
+    samples = [a['sample'] for a in plan['actions'] if a.get('sample')]
+    if len({s['series'] for s in samples}) != 1:
+        raise ValueError('Use one interaction series per visible-content reference plan')
+    move = samples[0]['series'] == 'move'
+    if move and plan.get('moveRendering') not in ('isolated-panel', 'guides-only'):
+        raise ValueError('Declare the actual move rendering route')
+    sources = {'baseline'}
+    for sample in samples:
+        if sample['id'] in sources:
+            raise ValueError('Reference source state IDs must be unique and must not use baseline')
+        reference = sample.get('reference', {})
+        if reference.get('settled') != sample['sha256']:
+            raise ValueError('Each input needs its independent settled native content reference')
+        translated = reference.get('translated', {})
+        if move and plan['moveRendering'] == 'isolated-panel':
+            if set(translated) != sources:
+                raise ValueError('Translated route references must cover baseline and every earlier helper source state')
+            if any(sha != sample['sha256'] for sha in translated.values()):
+                raise ValueError('Rendering routes differ: this crop is not invariant; do not reuse settled references')
+        elif translated:
+            raise ValueError('Text, resize and guides-only moves have no translated content response')
+        sources.add(sample['id'])
+
+
 def analyze(plan, events, frames, session):
     samples = [a['sample'] for a in plan['actions'] if a.get('sample')]
     expected = {s['id']: s for s in samples}
     if not samples or len(expected) != len(samples):
         raise ValueError('Unique nonempty sample IDs required')
-    if (plan.get('endpoint') not in ('helper-content', 'editing-guide')
+    validate_content_references(plan)
+    if (plan.get('endpoint') not in ('helper-content', 'settled-reference', 'visible-content', 'editing-guide')
             or any(s['series'] not in ('text', 'move', 'resize')
                    or not re.fullmatch('[a-f0-9]{64}', s['sha256']) for s in samples)):
         raise ValueError('Unknown endpoint, series or pixel digest')
@@ -54,10 +92,14 @@ def analyze(plan, events, frames, session):
                             maximumMs=max(values) if all(math.isfinite(v) for v in values) else None,
                             pass100ms=sum(r['within100ms'] for r in selected) >= .95 * len(values))
     return dict(analysisVersion=2, series=groups, samples=rows,
-                arithmeticPass=plan['endpoint'] == 'helper-content' and all(g['pass100ms'] for g in groups.values()),
+                declaredEndpoint=plan['endpoint'],
+                measurementScope='invariant-content-reference-match' if plan['endpoint'] == 'visible-content' else 'reference-pixel-match',
+                contentTimingQualified=False,
+                arithmeticPass=plan['endpoint'] != 'editing-guide' and all(g['pass100ms'] for g in groups.values()),
                 nativePresentationQualified=False,
-                limitation='Content-transition arithmetic only. Repeated unresolved states are ambiguous. '
-                           'Native route, generation ordering, reference content and capture coverage require audit.')
+                limitation='Exact reference-pixel transition arithmetic only; matching settled pixels does not prove '
+                           'settled confirmation or first visible content. Repeated unresolved states are ambiguous. '
+                           'Native reference provenance, actual route coverage, generation ordering and capture coverage require audit.')
 
 
 def match_transitions(expected, events, frames):

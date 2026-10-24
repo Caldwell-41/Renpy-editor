@@ -35,6 +35,39 @@ class MeasurementTests(unittest.TestCase):
         self.assertEqual(report['series']['text']['within100ms'], 2)
         self.assertFalse(report['nativePresentationQualified'])
 
+    def test_identical_reference_pixels_do_not_prove_the_rendering_route(self):
+        for endpoint in ('helper-content', 'settled-reference'):
+            with self.subTest(endpoint=endpoint):
+                receipt = self.receipt()
+                receipt[0]['endpoint'] = endpoint
+                report = analyze(*receipt)
+                self.assertTrue(report['arithmeticPass'])
+                self.assertEqual(report['series']['text']['within100ms'], 2)
+                self.assertFalse(report['contentTimingQualified'])
+                self.assertEqual(report['measurementScope'], 'reference-pixel-match')
+                self.assertEqual(report['declaredEndpoint'], endpoint)
+
+    def test_reference_hashes_cannot_be_relabelled_as_visible_or_confirmed_content(self):
+        for endpoint in ('visible-content', 'settled-confirmation'):
+            with self.subTest(endpoint=endpoint):
+                receipt = self.receipt()
+                receipt[0]['endpoint'] = endpoint
+                with self.assertRaisesRegex(ValueError, 'reference|generation'):
+                    analyze(*receipt)
+
+    def test_invariant_content_keeps_the_same_transition_arithmetic(self):
+        receipt = self.receipt()
+        legacy = analyze(*receipt)
+        receipt[0]['endpoint'] = 'visible-content'
+        for action in receipt[0]['actions']:
+            action['sample']['reference'] = dict(settled=action['sample']['sha256'])
+        report = analyze(*receipt)
+        self.assertEqual(report['series'], legacy['series'])
+        self.assertEqual(report['samples'], legacy['samples'])
+        self.assertTrue(report['arithmeticPass'])
+        self.assertEqual(report['measurementScope'], 'invariant-content-reference-match')
+        self.assertFalse(report['contentTimingQualified'])
+
     def test_already_visible_pixels_cannot_count_as_a_response(self):
         receipt = self.receipt()
         receipt[2][0]['sha256'] = 'a' * 64
@@ -100,6 +133,24 @@ class MeasurementTests(unittest.TestCase):
                     frames[1].update(displayNs=1_201_000_000, arrivalNs=1_220_000_000)
                 report = analyze(plan, events, frames, session)
                 self.assertFalse(report['arithmeticPass'])
+
+    def test_full_100_input_denominator_still_requires_95_observed_responses(self):
+        for observed in (94, 95):
+            plan, events, frames, session = self.receipt()
+            action, event = plan['actions'][0], events[0]
+            plan['actions'], events, frames = [], [], frames[:1]
+            for i in range(100):
+                a, e = copy.deepcopy(action), copy.deepcopy(event)
+                sha, sample_id, ns = f'{i + 1:064x}', f'text-{i}', 1_000_000_000 + i * 200_000_000
+                a.update(atMs=i * 200, sample=dict(id=sample_id, series='text', sha256=sha))
+                e.update(id=sample_id, scheduledNs=ns, eventNs=ns, beforeNs=ns, afterNs=ns + 100_000)
+                plan['actions'].append(a); events.append(e)
+                if i < observed:
+                    frames.append(dict(displayNs=ns + 50_000_000, arrivalNs=ns + 51_000_000, sha256=sha))
+            report = analyze(plan, events, frames, session)
+            self.assertEqual(report['series']['text']['inputs'], 100)
+            self.assertEqual(report['series']['text']['unmatched'], 100 - observed)
+            self.assertEqual(report['arithmeticPass'], observed == 95)
 
     def test_incomplete_receipt_or_clock_mapping_is_rejected(self):
         for mode in ('clock', 'incomplete', 'error', 'missing-input', 'duplicate-input', 'no-frames', 'frame-clock', 'input-clock'):

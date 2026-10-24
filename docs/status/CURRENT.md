@@ -1,30 +1,27 @@
 # Current status
 
-## L17 move handle native qualification
+## L17 Mac measurement correction
 
-2026-10-24: The [corrected move recording and assessment](../tasks/evidence/canvas-rendering.md#corrected-mac-move-workload-approved-2026-10-24)
-are complete; Mac timing is not qualified. Before measurement, both independent
-axes admit all 101 actual native/helper reference states and the final 100-input
-plan. The corrected 60 Hz path has no repeated positions or ambiguous attribution.
+2026-10-24: The [offline measurement-boundary correction](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24)
+rejects the invalid transfer of slow settled references to fast provisional
+content. Recorder plans now declare the endpoint; visible-content references must
+be exact and invariant across reachable rendering routes and installed helper
+sources. Historical arithmetic and the 95/100 requirement are unchanged.
 
-Exact settled-reference matching yields eight inputs within 100 ms, one at
-193.888 ms and 91 unobserved. All 82 other native appearances match translated
-provisional panel content. Real painted content moves; the 91 missing exact
-matches do not mean 91 editing inputs were late or invisible. Provisional feedback
-and settled helper confirmation remain distinct, with capture/scheduling limits
-retained and no post-hoc pass. Text's earlier bounded 99/100 pass, resize's missing
-content, manual 7 and both-target matched rendering remain unchanged.
+All 24 recorder/analyzer and 16 ScreenUI DOM checks pass. Standards review's omitted
+source-generation finding is fixed; final Standards and Spec reviews have no
+remaining actionable finding. The current real crop remains noninvariant, so no
+native timing workload is admitted. Settled confirmation needs presentation-bound
+generation evidence. The historical process-lookup refusal remains unresolved;
+new diagnostic messages distinguish the missing lookup fields without weakening
+ownership checks.
 
-Native 11 exits normally with code 0 after user Quit. Editor/helper are absent,
-owned scratch is removed, prior evidence remains and all ten public source/asset
-hashes match baseline. No operation is pending. No product/recorder/analyzer change,
-permission change or Computer Use occurs. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns recovery and the endpoint boundary for later work.
-
-Final use is local 114/114, native 11/11 and selected SDK 33/33 (global ceiling 36),
-with no contingency remaining or added. CI is 0/4, Mac packages 4/4, Windows zero.
-No further run is allocated. Work remains local; publication is `ccebf3e`.
-Unrelated policy work and protected recovery remain intact.
+Use is local 122/126, native 11/11 and selected SDK 33/33; four local batches remain,
+with no native/SDK/package/CI extension. No app, capture, input, Computer Use or
+permission change occurred. Native 11 remains closed. Matched rendering, manual 7,
+prior bounded text evidence and protected recovery remain intact. Work is local;
+publication remains `ccebf3e`. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns continuation.
 
 ## L17 matched rendering passes on both targets
 

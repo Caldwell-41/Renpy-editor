@@ -48,7 +48,11 @@ struct Crop: Codable {
                     && width <= 4096 && height <= 4096, "Invalid pixel crop")
     }
 }
-struct Sample: Codable { let id: String, series: String, sha256: String }
+struct ContentReference: Codable { let settled: String, translated: [String: String]? }
+struct Sample: Codable {
+    let id: String, series: String, sha256: String
+    let reference: ContentReference?
+}
 struct Focus: Codable { let role: String, label: String }
 struct Action: Codable {
     let atMs: Double, kind: String
@@ -57,11 +61,16 @@ struct Action: Codable {
 struct Plan: Codable {
     let protocolVersion: Int, pid: Int32, windowID: UInt32, executableSHA256: String
     let endpoint: String, crop: Crop, actions: [Action]
+    let moveRendering: String?
     func validate() throws {
         try crop.validate()
         try require(protocolVersion == 1 && pid > 0 && windowID > 0, "Invalid target identity")
         try require(isHash(executableSHA256), "Executable SHA256 required")
-        try require(["helper-content", "editing-guide", "reference"].contains(endpoint), "Unknown endpoint")
+        try require(endpoint != "helper-content",
+                    "Ambiguous helper-content endpoint: use settled-reference for bounded pixel matching; visible-content needs route-invariant references")
+        try require(endpoint != "settled-confirmation",
+                    "Settled-confirmation endpoint requires compositor-bound generation evidence; pixel hashes cannot prove it")
+        try require(["settled-reference", "visible-content", "editing-guide", "reference"].contains(endpoint), "Unknown endpoint")
         try require((!actions.isEmpty || endpoint == "reference") && actions.count <= 2000, "Use 1 to 2000 actions for measurement")
         var last = -1.0, held = false, samples = Set<String>()
         for action in actions {
@@ -98,6 +107,39 @@ struct Plan: Codable {
         }
         try require(!held && (!samples.isEmpty || endpoint == "reference") && samples.count <= 1000,
                     "Finish every gesture and include measurement samples")
+        try validateContentReferences()
+    }
+    func validateContentReferences() throws {
+        guard endpoint == "visible-content" else { return }
+        var held = false
+        for action in actions {
+            if action.kind == "down" { held = true }
+            if action.kind == "up" { held = false }
+            try require(action.sample != nil || !(action.kind == "key" || action.kind == "move" && held),
+                        "Unsampled content actions leave the helper source generations unreferenced")
+        }
+        let samples = actions.compactMap(\.sample)
+        try require(Set(samples.map(\.series)).count == 1,
+                    "Use one interaction series per visible-content reference plan")
+        let move = samples.first?.series == "move"
+        try require(!move || ["isolated-panel", "guides-only"].contains(moveRendering ?? ""),
+                    "Declare the actual move rendering route")
+        var sources: Set<String> = ["baseline"]
+        for sample in samples {
+            try require(!sources.contains(sample.id), "Reference source state IDs must be unique and must not use baseline")
+            try require(sample.reference?.settled == sample.sha256,
+                        "Each input needs its independent settled native content reference")
+            let translated = sample.reference?.translated ?? [:]
+            if move && moveRendering == "isolated-panel" {
+                try require(Set(translated.keys) == sources,
+                            "Translated route references must cover baseline and every earlier helper source state")
+                try require(translated.values.allSatisfy { $0 == sample.sha256 },
+                            "Rendering routes differ: this crop is not invariant; do not reuse settled references")
+            } else {
+                try require(translated.isEmpty, "Text, resize and guides-only moves have no translated content response")
+            }
+            sources.insert(sample.id)
+        }
     }
 }
 func isHash(_ value: String) -> Bool {
@@ -242,8 +284,12 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate, @unchecked Send
     }
     try require(console["kCGSSessionOnConsoleKey"] as? Bool == true
                 && console["CGSSessionScreenIsLocked"] as? Bool != true, "Unlocked console required")
-    guard let app = NSRunningApplication(processIdentifier: plan.pid),
-          let executable = app.executableURL else { throw RecorderError.refused("Target process unavailable") }
+    guard let app = NSRunningApplication(processIdentifier: plan.pid) else {
+        throw RecorderError.refused("Target process unavailable: NSRunningApplication lookup missing")
+    }
+    guard let executable = app.executableURL else {
+        throw RecorderError.refused("Target process unavailable: executableURL missing")
+    }
     try require(!app.isTerminated && NSWorkspace.shared.frontmostApplication?.processIdentifier == plan.pid,
                 "Target must own the foreground")
     if original == nil {
@@ -452,7 +498,10 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate, @unchecked Send
             try require(args.count == 3 || args.count == 4, "Usage: recorder preflight | validate PLAN | record PLAN NEW_OUTPUT")
             let bytes = try Data(contentsOf: URL(fileURLWithPath: args[2]))
             let plan = try JSONDecoder().decode(Plan.self, from: bytes); try plan.validate()
-            if args[1] == "validate" && args.count == 3 { print("Plan valid; no permissions requested, capture started or input posted."); return }
+            if args[1] == "validate" && args.count == 3 {
+                print("Plan structure valid (endpoint=\(plan.endpoint)). Native reference provenance, actual route coverage and capture coverage still require independent admission. No permissions requested, capture started or input posted.")
+                return
+            }
             try require(args[1] == "record" && args.count == 4, "Unknown command")
             if #available(macOS 14.0, *) { try await record(plan, planBytes: bytes, output: URL(fileURLWithPath: args[3])) }
             else { throw RecorderError.refused("macOS 14 or later required") }

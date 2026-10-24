@@ -467,3 +467,21 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   and both independent review axes pass afterward. Preflight alone does not prove
   the live console/foreground/capture path.
 - **Evidence:** [native 8 preparation and console correction](../tasks/evidence/canvas-rendering.md#mac-timing-native-8-preparation-and-console-correction-2026-10-24).
+
+## H33. Slow settled references do not identify fast provisional content
+
+- **Observed:** Mac timing admission accepted 101 distinct settled references, but
+  the 60 Hz workload displayed translated provisional content. Exact settled matches
+  therefore did not count all visible responses. A helper replacement can also change
+  the source raster during the gesture.
+- **Cause/correction:** reference preparation selected each slow interval's last
+  frame and transferred its hash to a different rendering route without checking
+  equivalence. Future recorder plans declare the endpoint. Visible-content plans
+  require exact invariant references across reachable content routes and source
+  generations; unknown/differing variants refuse. Native provenance remains an
+  independent admission requirement. Settled pixel equality cannot prove confirmation.
+- **Verification:** retained replay changes from accepted to refused at the plan
+  gate; timing arithmetic stays unchanged. Compiled/Python checks cover route transfer,
+  generation rollover and omitted content inputs. Public DOM checks verify the actual
+  move/text/resize routes without claiming native presentation.
+- **Evidence:** [Mac reference-boundary correction](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24).

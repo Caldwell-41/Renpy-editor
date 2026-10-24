@@ -2,63 +2,55 @@
 
 ## Active L17 integration handover
 
-The selected corrected #36 Mac move recording and assessment are complete. Mac
-presentation timing remains unqualified. [The owning evidence](../tasks/evidence/canvas-rendering.md#corrected-mac-move-workload-approved-2026-10-24)
-records actual admission, original failures, endpoint distinctions and terminal state.
-User-approved supplement use is local 114/114, native 11/11 and selected SDK 33/33
-within global ceiling 36, with no contingency. CI remains 0/4, Mac packages 4/4,
-Windows zero. No further run, build or publication is allocated. Later work needs
-a newly selected scope/allowance and predeclared provisional/settled endpoints.
+The selected #36 Mac measurement-boundary correction is implemented and tested
+offline. [The evidence](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24)
+owns reproduction, the first wrong decision, review and limitations;
+[the native runbook](../testing/NATIVE.md#content-endpoint-and-reference-admission)
+owns the corrected protocol. Work stays on `codex/phase3b-screen-designer`, local
+only. Publication remains `ccebf3e`.
 
-The 100-state serpentine move path retains 60 Hz and eight-game-pixel steps, with
-101 distinct positions including baseline. Before timing, both read-only review
-axes independently admit actual references 03 and the final plan. All 101 native
-hashes and actual helper crop hashes differ. Matching request/result IDs, stable
-PNGs, node semantics and expected geometry bind each independent helper state;
-maximum native/helper RGB delta stays two. This is content admission, not a
-fidelity waiver. CLI validation and exact source/native baseline restoration pass.
-The native capture retains the exact admitted plan bytes.
+The old recorder admitted slow settled reference hashes for a fast workload that
+also paints translated provisional content. Retained replay reproduces the exact
+8/100 settled-reference result and 82 diagnostic provisional appearances. The new
+gate refuses that untouched plan. `settled-reference` is a bounded diagnostic;
+`visible-content` requires independently established invariant route references,
+including baseline and earlier helper generations for isolated moves. Unsampled
+content inputs refuse. `settled-confirmation` needs evidence the recorder lacks.
+The matcher, missing/ambiguous-state treatment and 95/100 requirement are unchanged.
 
-Unchanged version 2 analysis finds eight exact settled-reference responses within
-100 ms, one at 193.888 ms and 91 unobserved; ambiguity and already-visible counts
-are zero, full-series p95/maximum null. Independent audits reproduce this. All 82
-other native appearances match translated baseline content within RGB two. The
-application moves a real painted provisional panel while helper confirmation is
-pending; these are not merely guides. Do not call all 91 missing exact references
-late/invisible editing feedback, change scoring or grant a post-hoc pass. Settled
-confirmation and provisional-content feedback remain separately unqualified.
-Capture/scheduling limits and the incomplete-state denominator remain recorded.
+All 24 recorder/analyzer and 16 DOM checks pass; Standards and Spec reviews have no
+remaining actionable finding after the omitted-generation correction. Structural
+validation and synthetic positive cases do not establish native readiness. The
+current actual crop is noninvariant. The next capability step is an independently
+validated invariant real-content crop or a compositor-bound input/generation signal.
+Do not launch another native measurement until that method and its allowance are
+approved. Preserve the earlier result as bounded reference matching; neither an
+identical crop nor the provisional-panel flag proves helper confirmation.
 
-`timing-mac-05/` owns raw receipts. `reference-admission.json`,
-`actual-helper-references/` and `move-measurement-plan.json` are the admitted data.
-The first reference attempt stops after 83 moves at a transient process-lookup
-guard refusal; the editor/helper remain live and cleanup releases the pointer.
-Reference 02's translated-baseline predictor is rejected when settled text rasters
-differ. Reference 03 retains each actual helper PNG instead and passes the unchanged
-content check. All attempts stay preserved. Human Command-Z does not restore the
-accepted gesture; the recorder's exact Undo control does. Source/history and native
-baseline restoration are verified before and after measurement.
+The prior `Target process unavailable` failure cannot be attributed to either lookup
+branch from its retained combined message. New diagnostics distinguish missing
+`NSRunningApplication` from missing `executableURL`; ownership checks still refuse.
+The historical cause is unresolved, and a shorter retry does not resolve it.
 
-`terminal-audit.json` and `exit.json` record native 11 user Quit with editor exit 0,
-no timeout or forced kill, editor/helper absent and owned scratch removed. All ten
-public source/asset hashes match baseline; no generated project bytecode, saves or
-cache remain. Older evidence scratch/profile are retained. The ordinary UI route
-has no separate helper exit-code/acknowledgment receipt; manual 7 retains the full
-cooperative lifecycle proof. No editor/helper, recorder stream, owned pointer,
-launcher or watcher is pending. Never replay a consumed launcher. `fixture.json`,
-`process.json` and `helper-binding.json` own private paths and old identities.
+The approved supplement adds twelve local batches with no contingency. Batches
+115-122 use eight; cumulative local use is 122/126, leaving four. Mac native remains
+11/11, selected SDK 33/33 within global ceiling 36, Mac packages 4/4, CI 0/4 and
+Windows zero. No additional runtime operation is allocated. New ignored
+`timing-method-correction/` receipts retain the entry diff/ledger, red reproduction,
+reviewed verification and isolated recorder binaries. The permission-approved
+recorder SHA-256 `8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`
+and signed package 4 remain unchanged; the newly built test binary is not a silently
+installed replacement or permission-approved native recorder.
 
-Signed package 4 and reviewed recorder SHA-256
-`8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`
-remain unchanged. No permission changes or Computer Use occur. Preserve that
-boundary and existing guards. Preserve text's bounded 99/100 compositor result,
-prior corrected move/resize reports, manual 7 physical-input/history/cleanup/user
-smoothness and accepted both-target matched rendering. Full Mac/Windows,
-supported-subset and whole-ticket acceptance remain separate. No performance fix
-or criterion change is selected. Preserve unrelated policy hunks and protected
-recovery below. Preview 5174 stays separate; reference server 5175 is stopped.
-No CI watcher is pending; publication remains `ccebf3e`. Final record reviews and
-selective local commit close this supplement; nothing is published.
+Native 11 remains closed. Its [terminal closeout](../tasks/evidence/canvas-rendering.md#corrected-move-terminal-audit-and-closeout)
+retains normal editor exit 0, absent owned helper, removed owned scratch, all ten
+public source/asset hashes and prior evidence. No launcher, capture, held pointer,
+helper watcher or runtime operation is pending. Never reuse old PIDs or consumed
+launchers. Private `fixture.json`, `process.json` and `helper-binding.json` retain
+exact identities. Manual UI only; no Computer Use or permission change. Preserve
+manual 7, matched rendering, bounded text and every original failure. Unrelated
+policy work and protected recovery below are unchanged. No tracker write, push,
+PR, merge or release is selected.
 
 ## Earlier canvas decision closeout
 

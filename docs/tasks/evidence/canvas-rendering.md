@@ -4176,3 +4176,122 @@ preselect the provisional-content and settled-confirmation endpoints and validat
 them separately within a newly selected scope and allowance. No performance fix,
 permission change, Computer Use, publication, PR, merge or release occurs. Prior
 evidence, unrelated changes and protected recovery remain preserved.
+
+### Mac measurement reference-boundary correction (2026-10-24)
+
+The user selects root-cause correction of #36's Mac timing method and an independent
+review of the previous tests. The approved extension adds twelve hard local batches,
+raising the cumulative ceiling from 114 to 126 without contingency. It adds zero
+native, SDK, app-package, CI or publication operations. Batches 115-122 consume eight;
+local use is 122/126, Mac native 11/11 and selected SDK 33/33 within global ceiling
+36. Four local batches remain. Mac packages stay 4/4, CI 0/4 and Windows zero.
+Manual UI and no Computer Use remain binding. `usage.json` retains all earlier use.
+
+#### Reproduction and first wrong decision
+
+New ignored `timing-method-correction/` artifacts preserve the entry diff/ledger,
+`reproduce.py`, `reproduction.json`, original red tests, corrected verification and
+reviewed checks. The replay checks retained native raw hashes and the exact saved
+plan, reproduces unchanged 8/100 settled-reference arithmetic and all 82 diagnostic
+provisional fits, then fails because the old reviewed recorder still accepts that
+plan. An initial command used the runbook's example binary path, which does not
+exist here; the retained reviewed binary at its actual path supplies the red result.
+The corrected recorder refuses the same untouched plan before any native operation.
+No diagnostic fit becomes an expected hash or a timing credit.
+
+The first incorrect decision is in retained `timing-mac-05/admit-references.py`:
+it chooses the last captured frame in each slow interval, proves that settled crop
+against its helper PNG, then assigns those hashes to the 60 Hz plan under the
+ambiguous `helper-content` endpoint. Distinct states and valid settled pixels do
+not establish equivalence with the fast workload's rendering route. This is a
+measurement-contract defect, not evidence of a product performance defect.
+
+Source tracing and existing public DOM seams establish the route difference.
+`showMovement` translates the installed `this.frame` for isolated content;
+`showFrame` replaces that image on load. A delivery during the drag changes the
+source raster for later translations. A baseline-only predictor therefore misses
+reachable variants. Text/resize retain dimmed stale pixels while awaiting helper
+content; moved selection guides are not content responses. A zero-offset settled
+image can still have the provisional-panel flag. Neither that flag nor an identical
+crop proves which helper generation the compositor presented.
+
+Earlier arithmetic tests supplied arbitrary hashes and timelines. They covered
+response windows and attribution, but never exercised slow-reference construction
+against these rendering routes. The earlier independent reviews established
+reference fidelity and uniqueness; their admission contract omitted route coverage.
+The requested read-only method reviewer independently identifies the same failure
+and recommends explicit endpoints, route evidence and conservative refusal.
+
+#### Correction and focused verification
+
+The existing recorder now rejects `helper-content` plans before capture/input.
+`settled-reference` names the bounded pixel-comparison diagnostic. `visible-content`
+requires independent settled reference declarations and, for isolated moves,
+translated references from baseline and every earlier sampled helper state. Every
+reachable variant must equal the same exact expected hash. Missing sources or
+noninvariant crops refuse; text, resize and guides-only moves reject translated
+content references. Unsampled keys and held-pointer moves also refuse because they
+can create unreferenced helper states. The [native runbook](../../testing/NATIVE.md#content-endpoint-and-reference-admission)
+owns the schema, independent provenance audit and route requirements. Structural
+validation is explicitly not native admission; copying hashes into declarations
+cannot establish the required evidence.
+
+This bounded invariant-crop method keeps the matcher unchanged. The existing
+full-response window, exact hashes, one-transition attribution, repeated-state
+ambiguity, missing states and 95/100 denominator remain intact. Old receipts remain
+readable. Reports expose their declared endpoint and reference-match scope and
+keep both qualification flags false. `settled-confirmation` refuses because this
+recorder lacks compositor-bound generation evidence. No retrospective result is
+upgraded, including the prior bounded text result.
+
+All 24 Python/compiled-recorder checks pass, including the old-window/ambiguity
+regressions, the actual 100-input reference-transfer pattern across text/move/resize,
+a positive invariant-reference case, missing/changed installed generations, unsampled
+content inputs and the 94/100 versus 95/100 boundary. All 16 ScreenUI DOM tests pass
+and TypeScript test compilation passes. The new DOM checks cover helper replacement,
+zero-offset panel mode and stale text/resize content. Initial new DOM tests used
+ARIA attribute selectors unsupported by this fixture and assumed delayed data-URL
+load; Happy DOM loads data URLs synchronously. The tests were corrected to use its
+existing property lookup and actual load behavior. They claim controller behavior,
+not compositor timing or real pixel equivalence.
+
+The recorder is compiled only to new ignored correction paths. The installed app
+and previously permission-approved recorder are unchanged. No app launch, SDK run,
+capture, posted input, permission request/change or Computer Use occurs. The compiled
+CLI refusal check uses an impossible PID and verifies no output directory is created.
+Original receipts, reference PNGs and timing scores remain untouched.
+
+Independent Standards review finds one omitted-source-generation case, corrected
+by refusing unsampled content inputs; follow-up review confirms resolution.
+Independent Spec review has no actionable finding. Both reviews keep native method
+readiness distinct from offline contract validation. Repository validation and
+scoped whitespace/privacy checks pass at closeout. All work remains local.
+
+#### Remaining capability and recovery
+
+The current real move crop is not invariant. This correction validates the admission
+boundary and rejects its misuse; it does not provide an admitted native workload.
+Before another measurement, independently validate an invariant real-content crop
+across reachable routes, or implement a compositor-bound input/generation signal.
+A helper-file watcher or renderer log alone cannot prove presentation. Any new
+signal must bind input state, desired generation, installed frame, transform and
+opacity to captured content; a marker alone cannot satisfy the content endpoint.
+Native evidence and any needed package allocation require a later user approval.
+
+The interrupted slow reference run still has an unresolved process-lookup refusal.
+Its retained error combines a missing `NSRunningApplication` and a missing
+`executableURL`, so the exact branch cannot be reconstructed. The recorder now
+reports these separately while preserving every ownership check and refusal.
+This is diagnostic instrumentation, not a claimed root-cause fix or permission to
+retry. A future occurrence needs the distinct error and contemporaneous ownership
+state before deciding whether the state is legitimate.
+
+Native 11 remains closed with its original normal-exit, helper/scratch cleanup and
+source-preservation receipts. No runtime operation is pending. Accepted matched
+rendering, manual 7 and prior bounded text evidence remain intact. The protected
+recovery and unrelated policy edits are preserved. This scope authorizes no push,
+tracker write, PR, merge or release.
+
+Status maintenance leaves CURRENT at 1,197 words and HANDOVER at 2,228 words.
+They exceed the workflow review targets because this correction preserves unrelated
+policy sections and protected recovery; no broad status reorganization is selected.

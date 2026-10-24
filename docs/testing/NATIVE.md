@@ -163,7 +163,7 @@ crop and reference values before validation:
   "pid": 2147483647,
   "windowID": 1,
   "executableSHA256": "<64 lowercase hex digits>",
-  "endpoint": "helper-content",
+  "endpoint": "settled-reference",
   "crop": { "x": 0, "y": 0, "width": 100, "height": 100 },
   "actions": [
     { "atMs": 0, "kind": "key", "keyCode": 0, "modifiers": ["command"],
@@ -176,6 +176,10 @@ crop and reference values before validation:
 ```
 
 Use `validate PLAN.json` to check the plan without permissions or a running target.
+This checks structure and the declared reference contract, not native provenance,
+actual rendering routes or capture coverage. Both `validate` and `record` reject
+the former ambiguous `helper-content` endpoint. Historical receipts remain
+readable by the offline analyzer.
 The plan selects an existing public-fixture process by PID, window ID and executable
 hash; the recorder never launches or closes the app. Actions are strictly ordered
 millisecond offsets, bounded at 110 seconds. `key` sends a key press/release using
@@ -205,6 +209,74 @@ Keep those receipts separate and audit the selected raw crops before using their
 hashes. The analyzer refuses reference sessions as timing measurements. A guide series
 uses endpoint `editing-guide`, which cannot pass the content endpoint. The selected
 #36 plan still requires 100 text, 100 move and 100 resize samples per target.
+
+### Content endpoint and reference admission
+
+Declare the event being measured before constructing references:
+
+- `settled-reference` measures a transition to pixels matching an independently
+  settled reference. This is a bounded diagnostic. It does not prove the first
+  content response or a helper confirmation, even if its arithmetic passes.
+- `visible-content` uses an invariant content crop. Every reachable route that
+  paints the input's updated content must produce the same exact expected native
+  hash. The recorder checks the reference declarations before capture or input;
+  an independent audit must establish their provenance and route coverage.
+- `settled-confirmation` is refused. Matching pixels can also come from a
+  provisional image. Confirmation needs compositor-bound generation evidence
+  that this recorder does not collect.
+
+The actual renderer has different routes. Text and resize retain dimmed old
+content until a new helper image loads; changed guides are not content responses.
+An isolated move translates the installed helper image immediately at full
+opacity. A helper delivery can replace that image during the gesture. A clipped
+or nonisolated move changes only guides while the old content remains stale.
+Audit the fixture against `showMovement`, `renderCanvas`, `showFrame` and the
+stale/provisional opacity rules. Never infer the route from cadence alone.
+
+For `visible-content`, use one series per plan. Each sample includes a `reference`
+object with `settled` equal to its independently captured settled native hash.
+For move, declare `moveRendering` as `isolated-panel` or `guides-only`, matching
+the actual workload. Isolated moves also require `reference.translated`: a map
+from `baseline` and every earlier sample ID to the independently established
+native crop for moving that source image to this input's target position. The
+current helper's zero-offset image is covered by `settled`. For example, the
+second move needs both earlier sources:
+
+```json
+{
+  "id": "move-002", "series": "move", "sha256": "<expected native crop hash>",
+  "reference": {
+    "settled": "<settled native crop hash>",
+    "translated": {
+      "baseline": "<native crop after translating the baseline image>",
+      "move-001": "<native crop after translating the first helper image>"
+    }
+  }
+}
+```
+
+All those hashes must equal the sample's expected hash. Missing sources or differing
+variants refuse the plan. Text, resize and guides-only moves must not supply
+translated content references. These declarations do not replace evidence: retain
+the exact plan/build, crop/scale, source request/result/PNG identities, native raw
+pixels and route observations that justify every entry. Copying the expected hash
+into the map establishes nothing. Visible-content plans reject unsampled keys and
+held-pointer moves because they can introduce unreferenced helper states. Other
+possible source generations invalidate this bounded construction and require a
+new admission design. Include guide exclusion, stale opacity, helper replacement
+and input attribution in the independent audit. Reject unknown route coverage.
+
+If the crop is not invariant, choose and independently validate a real content
+crop that is, or add presentation-bound state/generation evidence under a separate
+capability allocation. Do not loosen matching, derive expected hashes from the
+timed result, or add a post-hoc list of accepted variants. The retained Mac move
+crop is not invariant and remains inadmissible for overall feedback timing.
+Renderer logs or helper-file watchers alone cannot prove compositor presentation.
+A future signal must associate input state, desired generation, installed helper
+frame, provisional transform and opacity with captured content; a marker alone
+cannot count as the content response.
+
+### Recording and interpretation
 
 After explicit permission approval and the owning task's native/SDK reservations,
 use the existing signed package and disposable isolated fixture:
@@ -239,7 +311,9 @@ not automatically accepted. Generation ordering still requires an external audit
 It writes a new `analysis.json` with separate per-series
 nearest-rank p95, maximum and within-100-ms counts. Exit 0 means its arithmetic
 target passed; it always retains `nativePresentationQualified: false` until an
-external native/reference/coverage audit. Preserve earlier analyses rather than
+external native/reference/coverage audit. Reports also retain `declaredEndpoint`,
+`measurementScope` and `contentTimingQualified: false`; structural validation
+and arithmetic do not establish the endpoint's provenance. Preserve earlier analyses rather than
 overwriting them, including analyses from the earlier next-action matching policy.
 That earlier policy does not establish the agreed 100 ms result. Captured compositor
 timestamps do not establish panel scanout,
