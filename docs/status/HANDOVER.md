@@ -1,5 +1,15 @@
 # Current outcome handover
 
+## Automatic code checks closeout
+
+The selected retrospective maintenance is implemented locally on
+`codex/automatic-code-checks`, based on `23e27b4`. Commit `e8039df` separates the
+Rust formatting baseline; the maintenance commit contains test selection, automatic
+PR/main checks and runbook changes. [The task](../tasks/active/automatic-code-checks.md)
+owns verification, review limits and final allowance use. No operation is pending.
+Publication or integration needs a later user selection. No further implementation
+is selected. The previous L17 acceptance and protected recovery below remain intact.
+
 <a id="active-l17-integration-handover"></a>
 
 ## L17 closeout

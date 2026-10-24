@@ -1,4 +1,7 @@
-"""Compiled CLI checks. No test captures a window, posts input or requests access."""
+"""Explicit compiled CLI checks; excluded from ordinary test_*.py discovery.
+
+No test captures a window, posts input or requests access.
+"""
 import copy
 import json
 import os
@@ -9,10 +12,15 @@ import unittest
 
 from canvas_measurement import validate_content_references
 
-@unittest.skipUnless(os.environ.get('CANVAS_RECORDER_BINARY'), 'Set CANVAS_RECORDER_BINARY to the compiled Mac recorder')
 class NativeRecorderTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        binary = os.environ.get('CANVAS_RECORDER_BINARY')
+        if not binary:
+            raise RuntimeError('Set CANVAS_RECORDER_BINARY to the compiled Mac recorder')
+        cls.binary = Path(binary).resolve()
+
     def setUp(self):
-        self.binary = Path(os.environ['CANVAS_RECORDER_BINARY']).resolve()
         self.plan = dict(protocolVersion=1, pid=2147483647, windowID=1, executableSHA256='0' * 64,
                          endpoint='settled-reference', crop=dict(x=0, y=0, width=2, height=2), actions=[
                              dict(atMs=0, kind='key', keyCode=0,

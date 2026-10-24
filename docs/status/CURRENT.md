@@ -1,5 +1,14 @@
 # Current status
 
+## Automatic code checks implemented locally
+
+2026-10-25: Retrospective items 2 and 3 are implemented on
+`codex/automatic-code-checks`. Ordinary discovery excludes the compiled Mac recorder
+checks; PR/main CI now selects frontend checks and Rust formatting. Local checks
+pass. [The maintenance task](../tasks/active/automatic-code-checks.md) owns results,
+the formatting baseline, allowance and review limits. Work is local; no remote CI,
+publication or integration is claimed. Existing #36 acceptance remains unchanged.
+
 ## L17 bounded Help proof accepted
 
 2026-10-24: [#36](https://github.com/Caldwell-41/Renpy-editor/issues/36)'s remaining

@@ -485,3 +485,14 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   generation rollover and omitted content inputs. Public DOM checks verify the actual
   move/text/resize routes without claiming native presentation.
 - **Evidence:** [Mac reference-boundary correction](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24).
+
+## H34. Optional compiled-recorder tests break ordinary discovery
+
+- **Observed:** ordinary `test_*.py` discovery selected nine recorder checks without
+  their binary. Their skips violated the shared Python gate's exact host exclusions.
+- **Correction:** keep offline tests in ordinary discovery and select compiled
+  checks explicitly under a different module name. Missing explicit setup fails;
+  the shared skip gate remains strict.
+- **Verification:** actual discovery regression fails before the change and passes
+  afterward; the general Mac runner passes all four groups without a recorder.
+- **Evidence:** [Automatic code checks](../tasks/active/automatic-code-checks.md#verification-and-review).
