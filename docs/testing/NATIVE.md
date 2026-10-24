@@ -131,3 +131,107 @@ reused interaction against code/test/workflow/dependency deltas and repeat only 
 or affected cases. This narrow human-evidence rule is not a cross-SHA automated package
 waiver. Record exact candidate, hashes, OS, cases, results and limitations. Historical
 acceptance stays historical; do not automatically reopen the whole session.
+
+## Standalone Mac canvas recorder
+
+`app/scripts/canvas-measure-macos.swift` is an external qualification tool for
+macOS 14 or later. It does not change the signed app. Build it from the repository
+root into ignored storage:
+
+```bash
+mkdir -p .toolchains/canvas-recorder
+xcrun swiftc -swift-version 5 -parse-as-library -O \
+  -module-cache-path /tmp/loomlight-recorder-module-cache \
+  app/scripts/canvas-measure-macos.swift \
+  -o .toolchains/canvas-recorder/recorder
+.toolchains/canvas-recorder/recorder preflight
+```
+
+Preflight requests no permissions, captures no window and posts no input. It compares
+converted Mach ticks with CoreMedia's host clock and reports capture, event-posting
+and Accessibility access. Exit 3 means a required capability is unavailable. A
+newly created CGEvent has no usable timestamp until set; it is not a clock oracle.
+Permission setup remains a separate user decision. Keep the exact compiled binary
+and its hash for that decision; rebuilding can change the permission identity.
+
+Prepare an ignored JSON plan. This abbreviated text example needs real identity,
+crop and reference values before validation:
+
+```json
+{
+  "protocolVersion": 1,
+  "pid": 2147483647,
+  "windowID": 1,
+  "executableSHA256": "<64 lowercase hex digits>",
+  "endpoint": "helper-content",
+  "crop": { "x": 0, "y": 0, "width": 100, "height": 100 },
+  "actions": [
+    { "atMs": 0, "kind": "key", "keyCode": 0, "modifiers": ["command"],
+      "focus": { "role": "AXTextArea", "label": "Canvas text sample" } },
+    { "atMs": 200, "kind": "key", "keyCode": 0,
+      "focus": { "role": "AXTextArea", "label": "Canvas text sample" },
+      "sample": { "id": "text-001", "series": "text", "sha256": "<expected raw crop SHA256>" } }
+  ]
+}
+```
+
+Use `validate PLAN.json` to check the plan without permissions or a running target.
+The plan selects an existing public-fixture process by PID, window ID and executable
+hash; the recorder never launches or closes the app. Actions are strictly ordered
+millisecond offsets, bounded at 110 seconds. `key` sends a key press/release using
+the active keyboard layout. `down`, `move` and `up` use logical coordinates relative
+to the target window's top-left. Every key and pointer-down action needs the exact
+expected Accessibility role and label. The recorder checks enabled controls and
+their viewport bounds, current key focus or pointer hit target, the unlocked console,
+foreground ownership and unchanged window bounds before input. Gesture samples
+require a held left button and use series `move` or `resize`; text samples use
+series `text`. Complete every down/up pair. Escape, SIGINT, SIGTERM, stream errors
+or lost ownership stop the sequence and release any button held by this tool.
+
+The crop uses physical pixels of the shadow-free captured window. Keep it inside
+helper-rendered content, clear of selection guides and other changing controls.
+Expected hashes identify the complete crop as tightly packed, top-down,
+premultiplied RGBA8 bytes in sRGB. Prepare references separately for the exact
+resolution, zoom, scale and expected input state. Audit their content and mappings;
+a hash alone does not prove that a reference is correct. To prepare references,
+use endpoint `reference` with no sample IDs. An empty action list captures without
+posting input; optional setup actions can establish the known reference state.
+Keep those receipts separate and audit the selected raw crops before using their
+hashes. The analyzer refuses reference sessions as timing measurements. A guide series
+uses endpoint `editing-guide`, which cannot pass the content endpoint. The selected
+#36 plan still requires 100 text, 100 move and 100 resize samples per target.
+
+After explicit permission approval and the owning task's native/SDK reservations,
+use the existing signed package and disposable isolated fixture:
+
+```bash
+.toolchains/canvas-recorder/recorder record PLAN.json NEW_IGNORED_OUTPUT
+python3 app/scripts/canvas_measurement.py NEW_IGNORED_OUTPUT
+```
+
+Use Python 3.11 or later. Output must be new. Receipts retain every posted action,
+frame display/arrival timestamps and deduplicated raw pixel files, with a one-GiB
+pixel limit and 20,000 complete-frame limit. Capture requests 60 Hz for this window
+only, excludes cursor/audio and observes one second after the final action. Session
+metadata retains clock calibration, input scheduling, observed frame statuses,
+callback gaps, window scale, display mode and WebKit version. Unknown refresh rates
+remain null. These facts need audit for coverage and scheduling; requested 60 Hz
+does not establish delivered capture cadence. Startup measurement remains separate.
+
+The analyzer verifies retained pixel hashes, exact action receipts and clock order.
+It rejects pixels already visible before the input and counts superseded/unmatched
+inputs as misses. It writes a new `analysis.json` with separate per-series
+nearest-rank p95, maximum and within-100-ms counts. Exit 0 means its arithmetic
+target passed; it always retains `nativePresentationQualified: false` until an
+external native/reference/coverage audit. Preserve earlier analyses rather than
+overwriting them. Captured compositor timestamps do not establish panel scanout,
+human input or perceived smoothness. This tool prepares the later qualification;
+it has no permission-request or publication command.
+
+Run focused offline and compiled-CLI checks with the build above. These checks
+never capture a screen, post input or open Loomlight:
+
+```bash
+CANVAS_RECORDER_BINARY="$PWD/.toolchains/canvas-recorder/recorder" \
+  python3 -m unittest discover -s app/scripts -p 'test_canvas_measurement*.py' -v
+```

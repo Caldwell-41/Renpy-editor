@@ -16,13 +16,17 @@ smoothness report, numerical presentation, Windows and whole-ticket acceptance
 remain pending. Original failed attempts remain recorded. Read-only continuation
 preflight confirms the Mac measurement process lacks capture/input permissions.
 A [proposed measurement run](../tasks/evidence/canvas-rendering.md#presentation-capability-and-proposed-run-2026-10-24)
-is prepared; no new native run or permission change occurred. Windows needs a
-focused input/capture adapter before qualification, not a historical-job replay.
+is prepared. The standalone Mac recorder now compiles; ten focused checks,
+typechecking and all 229 frontend tests pass. Its actual capture/input path awaits
+permission approval and native qualification. Windows still needs an input/capture
+adapter. No new native app run or permission change occurred.
 
 [Evidence](../tasks/evidence/canvas-rendering.md#manual-7-physical-input-pass-2026-10-24)
 owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
 recovery. The user added 10 local batches for continuation, preserving the existing
-8 contingency batches. Cumulative use is local 70/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
+8 contingency batches. Recorder construction is selected for at most 15 of the
+remaining batches, ending by cumulative 85 without adding contingency. Current
+use is local 78/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
 Windows zero. No process or watcher remains pending. Code is local only; publication
 remains `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
 

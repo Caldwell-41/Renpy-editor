@@ -3204,3 +3204,69 @@ Repository validation passes for 905 files and scoped whitespace checks pass. No
 executable code changed, so the accepted 229-test result is reused within its
 existing scope. Unrelated policy changes remain unstaged. The recorder permission
 request is pending; no permission-dependent work has started.
+
+### Standalone Mac recorder selection, 2026-10-24
+
+The user selected building the standalone Mac measurement recorder and allowed
+150% of the remaining allowance. Use the narrower basis of ten remaining nominal
+local batches: at most 15 batches for this piece, starting after cumulative batch
+70 and ending by 85. This uses the existing contingency; it adds none and preserves
+the overall ceiling of 88. Announce contingency before cumulative batch 81.
+Existing package/native/SDK/CI limits are unchanged. The selected result is a
+compiled external recorder and native-input driver, focused validation, review,
+run instructions and local commits. Permission changes, capture of the test app,
+actual timing qualification and Windows implementation remain separate. The agreed
+test boundary covers timestamp conversion, input/frame matching and rejection of
+missing, incorrect or delayed results. Entry inspection consumes batch 71.
+
+The recorder now compiles as a standalone ARM64 executable using Swift 6.3.2 in
+Swift 5 language mode. Source is `app/scripts/canvas-measure-macos.swift`; offline
+receipt analysis is `app/scripts/canvas_measurement.py`. Build, plan and run
+instructions live in [Native evidence](../../testing/NATIVE.md#standalone-mac-canvas-recorder).
+The compiled tool and private receipts remain under ignored
+`recorder-2026-10-24` in the existing native-feedback evidence root. No Tauri app,
+package, SDK, signing identity or credential namespace changed.
+
+The coherent compiled candidate's executable SHA-256 is
+`afc95409af23051d5fe92f5d0b080e903c8718e7e3390049aaf4052edc5ea5de`;
+its Swift source SHA-256 is
+`c6a34735d7de4b2537758c3c86867db2fed0477c5ea8321d9f5c8778d87b4fdb`.
+The ignored `build-receipt.json` pins both and the read-only preflight result.
+
+The first compilation exposed a CoreFoundation downcast and a non-exhaustive Swift
+getter; both are corrected. The initial clock oracle also failed outside the
+sandbox: an unposted CGEvent's timestamp was zero. Corrected preflight compares
+Mach-tick conversion against CoreMedia's host clock. The retained terminal bracket
+is 2033585148683083 through 2033585148692708 ns, with host clock
+2033585148691916 ns and Mach ratio 125/3. The compiled preflight validates that
+conversion, reports all three permissions unavailable, exits 3, and records no
+capture, posted input or permission request. Original failed preflights remain.
+Incident H31 records the clock-oracle correction.
+
+The recorder validates typed input plans without a target, and requires permissions,
+an unlocked console, an exact foreground executable/window, enabled visible controls
+and matching key focus or pointer hit target before input. It retains every posted
+action, cropped raw pixels and independent display/arrival timestamps, and releases
+its held mouse button on failure or interruption. Capture/reference mapping,
+positive Accessibility hit testing, live capture cadence and actual input delivery
+remain unqualified until the separately authorized native run. The tool always
+retains false native-presentation qualification flags; arithmetic alone grants no
+acceptance. It has no permission-request or upload command.
+
+Ten focused offline/compiled-CLI tests pass with the supported Python runtime.
+They cover display-time arithmetic, stale pixels, slow/wrong/missing/superseded
+results, invalid clocks and incomplete receipts, changed retained pixels, plan
+validation, real host-clock preflight and refusal before capture. The latter uses
+an impossible target PID and verifies that no output directory is created. Initial
+TDD failures for the missing analyzer and stale-pixel false positive are retained
+in the session record. Typechecking and all 229 frontend tests pass with zero
+skips. Repository validation passes for 909 files; scoped whitespace checks pass.
+Independent review remains pending at this candidate checkpoint.
+
+Cumulative use is local 78/80, absolute ceiling 88; eight batches of the recorder's
+15-batch maximum have been used. CI remains 0/4; Mac packages 4/4, editor launches
+7/9 and SDK launches 29/36; Windows zero. Recorder compilation and read-only CLI
+checks are not editor or SDK launches. No runtime operation or watcher remains
+pending. Actual permission setup, native measurement, Windows and whole-ticket
+acceptance remain separate. All work remains local; unrelated policy edits and
+protected recovery are preserved.

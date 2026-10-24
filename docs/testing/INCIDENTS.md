@@ -441,3 +441,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   a one-pixel difference, changed dimensions/comments/whitespace, integer alignment,
   expressions and extra lines. This change grants no image-pixel tolerance.
 - **Evidence:** [Signed Mac qualification](../tasks/evidence/canvas-rendering.md#signed-mac-handle-qualification-2026-10-24).
+
+## H31. Unposted macOS events have no clock timestamp
+
+- **Class/search:** recorder harness; CGEvent timestamp zero, Mach ticks,
+  CoreMedia host clock, `clockValidated`.
+- **Cause/correction:** a newly created keyboard event reports timestamp zero.
+  Compare converted Mach time against CoreMedia's host clock in a measured bracket
+  instead. Stamp each injected event explicitly and retain times before/after posting.
+- **Verification:** the compiled preflight checks clock agreement without capture,
+  posted input or permission requests. Offline receipts reject unvalidated clocks,
+  wrong ordering, stale pixels and delayed/missing results. Live capture remains
+  pending separate permission and qualification.
+- **Evidence:** [Recorder selection and results](../tasks/evidence/canvas-rendering.md#standalone-mac-recorder-selection-2026-10-24).
