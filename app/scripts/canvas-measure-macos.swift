@@ -216,7 +216,7 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate, @unchecked Send
     guard let console = CGSessionCopyCurrentDictionary() as? [String: Any] else {
         throw RecorderError.refused("Console session unavailable")
     }
-    try require(console["kCGSessionOnConsoleKey"] as? Bool == true
+    try require(console["kCGSSessionOnConsoleKey"] as? Bool == true
                 && console["CGSSessionScreenIsLocked"] as? Bool != true, "Unlocked console required")
     guard let app = NSRunningApplication(processIdentifier: plan.pid),
           let executable = app.executableURL else { throw RecorderError.refused("Target process unavailable") }
