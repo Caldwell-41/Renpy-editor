@@ -5,9 +5,10 @@ allowance and remaining acceptance. [ADR 0021](../../adr/0021-separate-renpy-can
 owns the accepted design and gates. This record supports one bounded Help proof.
 It does not qualify the full Screens subset or close B07/B08.
 
-Current Mac timing disposition: [closed by user acceptance for this release](#mac-timing-qualification-closed-by-user-acceptance-2026-10-24),
-with the numerical target unverified and waived as an acceptance gate. That decision
-supersedes earlier testing, instrumentation and allowance next steps in this history.
+Current disposition: [Windows functional and smoothness checks selected](#windows-functional-and-smoothness-selection-2026-10-24).
+Numerical timing remains unverified and is waived as a release gate on both targets.
+The [Mac acceptance](#mac-timing-qualification-closed-by-user-acceptance-2026-10-24)
+stands. These decisions supersede earlier timing/instrumentation next steps.
 
 ## Implemented connection
 
@@ -4323,3 +4324,75 @@ entry state and the decision. No code, runtime test, app launch, capture, posted
 input, permission change or Computer Use occurs. Native 11 remains closed and no
 timing operation or watcher is pending. GitHub and remote publication are unchanged.
 Unrelated edits and protected recovery remain intact.
+
+
+### Windows functional and smoothness selection (2026-10-24)
+
+The user selects the Windows functional and smoothness checks, asks to keep the
+remaining work bounded so #36 can close, waives numerical timing as a Windows
+release gate too, and authorizes the ticket update, local commit and remote push.
+
+The numerical 95/100-within-100-ms target remains unverified on Windows and is
+waived as an acceptance gate for this release. This closes numerical timing
+qualification on both supported targets for this release. Do not schedule further
+timing testing, request timing allowance, or repeat missing numerical proof as a
+blocker or reminder. Reopen only at the user's explicit request or following a
+newly observed, concrete performance regression. Existing unverified measurements
+alone are not grounds to reopen. Windows functional and observed-smoothness
+acceptance remains pending; the waiver does not turn any measurement into a pass.
+The prior Mac acceptance and its exact decision remain intact.
+
+Remaining acceptance is one bounded Windows x64 session on the existing public
+Help composition. Use the eight-stage `canvas-input` probe for physical typing,
+Escape, Enter, keyboard Undo, one-pixel resize/move, move-handle dragging and
+anchored resizing. Require its source/history restoration, fresh helper geometry
+and normal cleanup evidence plus an external audit of the user's physical-input
+route. Obtain the user's move/resize smoothness judgement, including sticking,
+jumps and lost focus. Keep raw `nativeInputQualified`, `warmPresentationProof` and
+`perceivedSmoothnessProof` flags unchanged; the external audit supplies human/native
+facts. The existing functional gates and missing/ambiguous-result handling stay intact.
+
+Use an interactive Windows desktop because hosted automation cannot supply the
+user's physical keyboard input and smoothness judgement. The user will handle UI;
+no Computer Use. The receiving Windows chat owns this assignment when the user
+starts the handoff. First safely fetch/fast-forward the branch and check repository
+pins, locked dependencies, MSVC/Windows SDK, WebView2 and the verified pinned Ren'Py
+SDK. Current pins are defined in app/package.json and app/rust-toolchain.toml;
+Python 3.11+ is required by app/README.md. Environment readiness does not itself
+claim a Windows test pass. [HANDOVER](../../status/HANDOVER.md#windows-entry-prompt)
+contains the entry prompt and completion conditions.
+
+This is a bounded continuation of the same #36 native interaction problem, not an
+allowance reset. Add 16 work batches to historical actual use 123, giving an absolute
+cumulative ceiling of 139 with no added contingency. The earlier three unused
+batches remain closed. Windows caps for this continuation are two package builds,
+three native editor sessions and four SDK launches, within the earlier unused
+Windows limits; no CI dispatch or Mac operation is selected. Basis: readiness and
+probe preparation, one packaged guided pass, a focused correction/retry if required,
+then evidence review and closeout. Failed, cancelled and uncertain attempts count.
+Two unsuccessful corrections of one hypothesis require reassessment; stop at any
+cap or material scope decision. No instrumentation or broad renderer campaign.
+
+Preparation, records and publication consume three batches, bringing cumulative use
+to 126/139 with 13 remaining. Windows builds/editor/SDK use is 0/2, 0/3 and 0/4.
+Historical Mac use remains native 11/11, selected SDK 33/33 within global ceiling
+36, packages 4/4 and CI 0/4. No runtime or watcher is pending. #36 is the live
+allowance owner after handoff; ignored Mac receipts need not transfer to Windows.
+
+Reuse completed ADR/architecture, both-target matched rendering and lifecycle
+results with their recorded candidates and scope. Mac manual 7 at `68f95c3`
+(product `8527998`) and the user's later smoothness confirmation remain accepted.
+The later `9875512` correction changes offline Mac measurement only. Review the
+Windows-relevant changes since its earlier qualification before selecting focused
+checks. L18-L20, the full supported subset and aggregate phase acceptance remain
+separate. Close #36 only after the remaining Windows functional, human smoothness
+and cleanup results are accepted and mapped to evidence. The numerical waiver adds
+no replacement performance threshold.
+
+Publication includes the already committed #36 work through `39faa34` plus this
+handoff on `codex/phase3b-screen-designer`. It excludes unrelated unstaged policy
+changes and all ignored raw receipts, captures, packages and SDKs. This update is
+documentation-only; repository validation, whitespace, publication/privacy review
+and remote/issue readback are the applicable checks. CURRENT/HANDOVER exceed soft
+word targets to preserve separate phase acceptance, unrelated policy work and unique
+protected recovery. No PR, merge or release is selected.

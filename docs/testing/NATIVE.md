@@ -132,6 +132,19 @@ or affected cases. This narrow human-evidence rule is not a cross-SHA automated 
 waiver. Record exact candidate, hashes, OS, cases, results and limitations. Historical
 acceptance stays historical; do not automatically reopen the whole session.
 
+## L17 current-release timing waiver
+
+For #36's bounded Help proof, the user [waived numerical timing as a release gate
+on both targets](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24).
+The 95/100-within-100-ms target remains unverified; no timing pass is claimed.
+Mac functional performance and observed smoothness are accepted. Windows physical
+input and the user's move/resize smoothness judgement remain required. Use the
+existing `canvas-input` functional case and external native/human audit, preserving
+source/history and cleanup checks. Missing numerical proof is not a blocker or
+reminder and does not authorize a recorder or timing campaign. Reopen numerical
+qualification only under the recorded condition. This exception is scoped to #36
+for this release, not other features' performance contracts.
+
 ## Standalone Mac canvas recorder
 
 The #36 Mac timing effort is [closed by user acceptance for this release](../tasks/evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24).

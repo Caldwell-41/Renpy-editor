@@ -2,46 +2,81 @@
 
 ## Active L17 integration handover
 
-Mac timing qualification is closed by user acceptance for this release. The user
-accepts current interaction performance based on functional testing and observed
-smoothness. The numerical 95/100-within-100-ms target remains unverified and is waived
-as an acceptance gate. The [decision record](../tasks/evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24)
-owns the exact wording and supersedes the earlier instrumentation next steps.
+The user selected Windows functional input and observed move/resize smoothness as
+#36's remaining bounded work, waived numerical timing on Windows for this release,
+and authorized commit, push and ticket update. [The decision and allowance](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
+own the scope. Mac performance is accepted; Windows functional/smoothness acceptance
+is pending. Numerical timing remains unverified on both targets and is no longer a
+release gate. No timing instrumentation, tests, allowance requests or reminders are
+next steps. Reopen only on explicit user request or a newly observed, concrete
+performance regression; existing unverified measurements alone are insufficient.
 
-There is no next timing action. Do not schedule further testing, request allowance,
-or repeat this work as a blocker or reminder. Reopen only at the user's explicit
-request or following a newly observed, concrete Mac performance regression.
-Existing unverified measurements alone are not grounds to reopen. The retained
-instrumentation limitations and unresolved historical recorder refusal are evidence,
-not active follow-up work. Other #36 criteria and Windows acceptance are unchanged.
+Branch: `codex/phase3b-screen-designer`. Publication includes local work through
+`39faa34` and this documentation checkpoint. Product code remains `8527998`, the
+functional probe correction is `68f95c3`, and offline Mac measurement correction
+`9875512` does not change the app. Build Windows from the fetched branch candidate
+and record its exact SHA and executable hash. Earlier both-target rendering and
+lifecycle proof retains its candidate-specific scope; assess subsequent deltas for
+the missing Windows interaction cases rather than rerunning the comparison matrix.
 
-The [offline correction](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24)
-at `9875512` retains its 24 recorder/analyzer and 16 DOM checks. Original measurements,
-failed attempts, matched rendering, manual 7 and bounded text evidence remain intact;
-no numerical result is upgraded. The protocol remains available as historical
-reference if work is legitimately reopened. No code or runtime operation occurs for
-this documentation closure.
+The Mac preparation/publication uses three of 16 additional work batches.
+Cumulative use is 126/139, leaving 13 across Windows preparation, checks, focused
+correction and closeout. Windows use is zero against caps of two builds, three
+editor sessions and four SDK launches. No added contingency, Mac run or CI dispatch.
+All failed or uncertain attempts count. Historical 123/126 and its three unused
+batches remain closed. #36 owns the live cumulative count after transfer.
 
-Final cumulative use is local 123/126. Batch 123 records this user-directed closure;
-the three unused local batches are closed, not available for continued testing.
-Mac native remains 11/11, selected SDK 33/33 within global ceiling 36, Mac packages
-4/4, CI 0/4 and Windows zero. No watcher, capture, held pointer, launcher or runtime
-operation is pending. The ignored `timing-qualification-closure/` record preserves
-the decision and entry state beside `usage.json`.
+No process, job, watcher or consumed launcher is pending. Native 11's
+[terminal closeout](../tasks/evidence/canvas-rendering.md#corrected-move-terminal-audit-and-closeout)
+retains normal exit, removed owned scratch and preserved source/assets. Do not copy
+Mac binaries, private capture files, PIDs or consumed launchers to Windows. Earlier
+Mac failures and recorder limits remain historical evidence. Unrelated policy work
+and protected recovery below remain untouched. No PR, merge or release is selected.
 
-Native 11's [terminal closeout](../tasks/evidence/canvas-rendering.md#corrected-move-terminal-audit-and-closeout)
-retains normal editor exit 0, absent owned helper, removed owned scratch and all ten
-public source/asset hashes. Private fixture/process/helper receipts retain exact
-identities; never reuse old PIDs or consumed launchers. Signed package 4 and the
-permission-approved recorder SHA-256
-`8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`
-remain unchanged. The correction's isolated test binary was not installed as a
-permission-approved replacement. Manual UI only; no Computer Use or permission
-change. Unrelated policy work and protected recovery below are unchanged.
+### Windows entry prompt
 
-Work remains local on `codex/phase3b-screen-designer`; publication remains `ccebf3e`.
-No GitHub issue state or content is changed, and this closes only the Mac timing
-qualification effort, not all of #36. No push, PR, merge or release is selected.
+Continue Loomlight #36 on this Windows x64 machine. Inspect local changes and the
+remote before updating; preserve unrelated work. Fetch `origin`, switch safely to
+`codex/phase3b-screen-designer`, and fast-forward from its remote branch. If the
+checkout diverges, report the exact divergence before merging or resetting. Record
+the fetched SHA. Read AGENTS.md, CURRENT, this HANDOVER, live #36 and its linked
+Windows selection record. This Windows chat takes sole ownership of this bounded
+assignment when I start it; the Mac chat has handed it off.
+
+First verify build readiness against repository pins: Node/npm in app/package.json,
+Rust and rustfmt in app/rust-toolchain.toml, Python 3.11+ from app/README.md, Windows
+MSVC C++ build tools and SDK, WebView2, and official pinned Ren'Py 8.5.3 with its
+published checksum verified. Check actual resolved versions and executable paths.
+Refresh project-local locked dependencies as needed; do not upgrade lockfiles or
+replace pins with latest versions. Report any system prerequisite that needs
+installation before changing the machine. Finish with a concise readiness result
+and the exact missing prerequisite if blocked.
+
+Prepare the existing `canvas-input` packaged probe for a disposable public Help
+fixture and isolated profile. Read app/README.md and docs/testing/NATIVE.md for the
+build and native evidence rules, and app/scripts/run-runtime-ui-probes.py plus
+app/scripts/canvas_input_evidence.py for the guided case and admission checks.
+Use a fresh output directory and verified SDK archive, with an explicit
+`canvas-input` selector. Preserve the existing conservative checks. Build one
+Windows candidate after readiness passes; do not run a package matrix. Wait for my
+availability before starting the editor session. I will handle all UI; no Computer Use.
+
+Run the eight guided physical-input stages: width draft, Escape, Enter, keyboard
+Undo, one-pixel resize, one-pixel movement, move-handle drag and anchored resize.
+Audit exact source/history restoration, fresh helper geometry, normal exit and
+owned-process/fixture cleanup. Record my separate observation of whether moving
+and resizing were smooth without sticking, jumps or lost focus. Renderer trusted
+events alone are not proof of physical input; retain the external human/native audit
+without rewriting raw receipt flags. Numerical timing is waived on both targets for
+this release and remains unverified. Do not build a recorder or run timing series.
+
+Stay within #36's remaining allowance. Diagnose any real functional failure at its
+first incorrect boundary; repeat only the affected case after a focused correction.
+Preserve earlier evidence and unrelated work. Once the Windows functional checks,
+my smoothness acceptance and cleanup pass, record the criterion-to-evidence result
+with candidate identities, commit/push the in-scope closeout and update/close #36.
+Full supported-subset and phase acceptance stay separate. If a required result is
+missing, report that named result without expanding into another test campaign.
 
 ## Earlier canvas decision closeout
 

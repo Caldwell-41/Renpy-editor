@@ -1,23 +1,28 @@
 # Current status
 
-## L17 Mac performance accepted; timing qualification closed
+## L17 Windows functional and smoothness checks selected
 
-2026-10-24: The user accepts current Mac interaction performance based on functional
-testing and observed smoothness. The numerical 95/100-within-100-ms target remains
-unverified and is waived as an acceptance gate for this release. The
-[recorded decision](../tasks/evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24)
-closes the timing effort. Do not schedule further testing, request allowance, or
-repeat it as a blocker or reminder. Reopen only at the user's explicit request or
-following a newly observed, concrete Mac performance regression. Existing unverified
-measurements alone are not grounds to reopen.
+2026-10-24: The user selected the remaining Windows functional input and observed
+smoothness checks for [#36](https://github.com/Caldwell-41/Renpy-editor/issues/36),
+waived numerical timing as a release gate on Windows too, and authorized commit,
+push and ticket update. The numerical 95/100-within-100-ms target remains unverified
+on both targets. Mac performance is accepted; Windows functional and smoothness
+acceptance is still pending. Timing qualification is closed for this release.
+Do not schedule timing tests, request timing allowance or repeat missing numerical
+proof as a blocker or reminder. Reopen only on explicit user request or a newly
+observed, concrete performance regression.
 
-This is user acceptance, not a measured pass. The numerical target, historical
-measurements and corrections remain preserved. Other #36 criteria and Windows
-acceptance are unchanged. Native 11 remains closed with no operation pending.
-Final local use is 123/126; the three unused local batches are closed. Native use
-remains 11/11 and selected SDK use 33/33. This closure changes only local records;
-GitHub and publication remain unchanged. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns recovery.
+The [bounded Windows continuation](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
+owns the decision, reused evidence and finite limits. It adds 16 work batches to
+historical use 123, with absolute cumulative ceiling 139 and no added contingency.
+Preparation/publication uses three batches: cumulative 126/139, 13 remaining.
+Windows caps are two builds, three editor sessions and four SDK launches; use is
+zero. No Mac run or CI dispatch is selected. Earlier unused headroom stays closed.
+
+[HANDOVER](HANDOVER.md#active-l17-integration-handover) provides the Windows entry
+prompt. Publish this checkpoint on `codex/phase3b-screen-designer`; no Windows test
+has run and #36 stays open until its remaining evidence and acceptance are complete.
+Unrelated policy edits remain local. No PR, merge or release is selected.
 
 ## L17 matched rendering passes on both targets
 
@@ -40,7 +45,7 @@ Final comparison use is local 22/24, CI 2/2, Mac SDK 3/6 and Windows SDK 2/6;
 no contingency was used and this allowance is closed. Earlier integration/shutdown
 qualification remains intact. This comparison alone did not establish physical
 keyboard, native presentation timing, smooth manipulation or whole-ticket acceptance.
-The current Mac timing disposition above supersedes that gate for this release.
+The current both-target timing waiver above supersedes that gate for this release.
 The full supported subset remains separate. Unrelated policy edits are local and uncommitted. No PR, merge or
 release is selected.
 

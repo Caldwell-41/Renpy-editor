@@ -142,8 +142,11 @@ For the current release, the [2026-10-24 user acceptance decision](../evidence/c
 accepts current Mac interaction performance based on functional testing and observed
 smoothness. The numerical 95/100-within-100-ms target remains unverified and is waived
 as an acceptance gate for this release. Mac timing qualification is closed under
-that decision's reopening condition. This exception does not change Windows or
-other acceptance criteria.
+that decision's reopening condition. The [subsequent Windows decision](../evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
+waives the same numerical release gate on Windows, where the target also remains
+unverified. Windows functional input and observed-smoothness acceptance remain
+required for #36. Numerical timing work is closed on both targets under the recorded
+reopening conditions. Other acceptance criteria are unchanged.
 
 <a id="properties-assets-reuse-and-actions"></a>
 
