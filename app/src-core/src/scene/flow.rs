@@ -46,7 +46,7 @@ pub enum FlowDestination {
         location: Option<FlowLocation>,
     },
     Terminal,
-Body {
+    Body {
         scene_id: String,
         beat_id: Option<String>,
         owner: Option<crate::metadata::BeatOwner>,

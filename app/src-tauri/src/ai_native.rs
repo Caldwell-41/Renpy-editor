@@ -46,6 +46,7 @@ pub fn secrets(_: &std::path::Path) -> Result<impl Secrets> {
 }
 
 #[cfg(target_os = "windows")]
+#[path = "ai_native/windows.rs"]
 mod windows;
 #[cfg(target_os = "windows")]
 pub use windows::enter_owned;
@@ -72,23 +73,34 @@ impl Secrets for NativeSecrets {
 pub fn enter(
     save: impl FnMut(&str) -> Result<loomlight_core::ai_credentials::SaveOutcome>,
 ) -> Result<Option<loomlight_core::ai_credentials::SaveOutcome>> {
-    enter_mode(false,save)
+    enter_mode(false, save)
 }
 #[cfg(target_os = "macos")]
 pub fn enter_mode(
-    draft: bool, mut save: impl FnMut(&str) -> Result<loomlight_core::ai_credentials::SaveOutcome>,
+    draft: bool,
+    mut save: impl FnMut(&str) -> Result<loomlight_core::ai_credentials::SaveOutcome>,
 ) -> Result<Option<loomlight_core::ai_credentials::SaveOutcome>> {
     use objc2::{MainThreadMarker, MainThreadOnly};
     use objc2_app_kit::{NSAlert, NSSecureTextField};
     use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
     let mtm = MainThreadMarker::new().ok_or("Secure entry requires the main thread.")?;
     let alert = NSAlert::new(mtm);
-    alert.setMessageText(&NSString::from_str(
-        if draft {"Use API key for this connection draft"}else{"Remember Studio API key on this computer"},
-    ));
-    let disclosure = if draft {"The key stays in native memory while you connect and choose a model. Save profile stores it on this computer. Cancel or leave Settings to discard the draft key. The web view never receives it."} else {"Temporary Mac development storage uses encrypted local files and a saved unencrypted unlock key. Software under the same login may decrypt it. The web view never receives your key. Local removal does not revoke it at Studio."};
+    alert.setMessageText(&NSString::from_str(if draft {
+        "Use API key for this connection draft"
+    } else {
+        "Remember Studio API key on this computer"
+    }));
+    let disclosure = if draft {
+        "The key stays in native memory while you connect and choose a model. Save profile stores it on this computer. Cancel or leave Settings to discard the draft key. The web view never receives it."
+    } else {
+        "Temporary Mac development storage uses encrypted local files and a saved unencrypted unlock key. Software under the same login may decrypt it. The web view never receives your key. Local removal does not revoke it at Studio."
+    };
     alert.setInformativeText(&NSString::from_str(disclosure));
-    let remember = alert.addButtonWithTitle(&NSString::from_str(if draft {"Use for connection"}else{"Remember"}));
+    let remember = alert.addButtonWithTitle(&NSString::from_str(if draft {
+        "Use for connection"
+    } else {
+        "Remember"
+    }));
     alert.addButtonWithTitle(&NSString::from_str("Cancel"));
     let field = NSSecureTextField::initWithFrame(
         NSSecureTextField::alloc(mtm),

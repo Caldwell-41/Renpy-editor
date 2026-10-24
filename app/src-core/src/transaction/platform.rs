@@ -608,7 +608,8 @@ fn replace_file_at(
     };
     use windows_sys::Win32::Storage::FileSystem::{
         FileRenameInfoEx, SetFileInformationByHandle, DELETE, FILE_FLAG_OPEN_REPARSE_POINT,
-        FILE_READ_ATTRIBUTES, FILE_RENAME_INFO, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
+        FILE_READ_ATTRIBUTES, FILE_RENAME_INFO, FILE_SHARE_DELETE, FILE_SHARE_READ,
+        FILE_SHARE_WRITE,
     };
     let source = OpenOptions::new()
         .access_mode(DELETE | FILE_READ_ATTRIBUTES)
@@ -623,8 +624,7 @@ fn replace_file_at(
     let name_bytes = u32::try_from(name.len() * size_of::<u16>())
         .map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
     let size = size_of::<FILE_RENAME_INFO>() + name_bytes as usize;
-    let size_u32 = u32::try_from(size)
-        .map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
+    let size_u32 = u32::try_from(size).map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
     // Pointer-sized storage provides the ABI alignment and room for the trailing
     // UTF-16 name. POSIX replacement keeps readers of the old file valid.
     let mut storage = vec![0usize; size.div_ceil(size_of::<usize>())];

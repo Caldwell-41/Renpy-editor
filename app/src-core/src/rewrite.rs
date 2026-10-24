@@ -47,8 +47,11 @@ pub struct AcceptRequest {
     pub selected_ids: Vec<String>,
 }
 #[derive(Deserialize)]
-#[serde(rename_all="camelCase",deny_unknown_fields)]
-pub struct SelectionRequest { pub proposal_id: String, pub selected_ids: Vec<String> }
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SelectionRequest {
+    pub proposal_id: String,
+    pub selected_ids: Vec<String>,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Response {
@@ -148,36 +151,70 @@ fn draft_schema(chapter: &str, title: &str, characters: Vec<&str>) -> Value {
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct CardResponse { schema_version: u32, action: String, target: CardTarget, fields: CardFields }
+struct CardResponse {
+    schema_version: u32,
+    action: String,
+    target: CardTarget,
+    fields: CardFields,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct CardTarget { record_id: Option<String>, title: String }
-#[derive(Deserialize, serde::Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct CardFields {
-    aliases: Vec<String>, description: String, appearance_notes: String,
-    personality: String, motivations: String, background: String,
-    speaking_style: String, example_dialogue: String,
+struct CardTarget {
+    record_id: Option<String>,
+    title: String,
 }
 #[derive(Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct LoreFields { text: String, category: String, subject: String, tags: Vec<String>, knowledge_notes: String }
+struct CardFields {
+    aliases: Vec<String>,
+    description: String,
+    appearance_notes: String,
+    personality: String,
+    motivations: String,
+    background: String,
+    speaking_style: String,
+    example_dialogue: String,
+}
+#[derive(Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LoreFields {
+    text: String,
+    category: String,
+    subject: String,
+    tags: Vec<String>,
+    knowledge_notes: String,
+}
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct LoreResponse { schema_version: u32, action: String, target: CardTarget, fields: LoreFields }
+struct LoreResponse {
+    schema_version: u32,
+    action: String,
+    target: CardTarget,
+    fields: LoreFields,
+}
 fn lore_schema(record: &str, title: &str) -> Value {
-    let mut schema = card_schema(record,title);
+    let mut schema = card_schema(record, title);
     schema["properties"]["action"] = json!({"type":"string","enum":[prompts::LORE]});
     let mut properties = serde_json::Map::new();
-    for key in ["text","category","subject","knowledgeNotes"] { properties.insert(key.into(),json!({"type":"string","maxLength":if key=="category"||key=="subject" {160}else{10000}})); }
+    for key in ["text", "category", "subject", "knowledgeNotes"] {
+        properties.insert(key.into(),json!({"type":"string","maxLength":if key=="category"||key=="subject" {160}else{10000}}));
+    }
     properties.insert("tags".into(),json!({"type":"array","maxItems":32,"uniqueItems":true,"items":{"type":"string","maxLength":160,"minLength":1}}));
     schema["properties"]["fields"] = json!({"type":"object","additionalProperties":false,"required":properties.keys().collect::<Vec<_>>(),"properties":properties});
     schema
 }
 fn card_schema(record: &str, title: &str) -> Value {
     let mut properties = serde_json::Map::new();
-    for key in ["description","appearanceNotes","personality","motivations","background","speakingStyle","exampleDialogue"] {
-        properties.insert(key.into(),json!({"type":"string","maxLength":10000}));
+    for key in [
+        "description",
+        "appearanceNotes",
+        "personality",
+        "motivations",
+        "background",
+        "speakingStyle",
+        "exampleDialogue",
+    ] {
+        properties.insert(key.into(), json!({"type":"string","maxLength":10000}));
     }
     properties.insert("aliases".into(),json!({"type":"array","maxItems":32,"uniqueItems":true,"items":{"type":"string","maxLength":160,"minLength":1}}));
     json!({"type":"object","additionalProperties":false,"required":["schemaVersion","action","target","fields"],"properties":{
@@ -255,11 +292,15 @@ impl AuthoringService {
         store: &crate::ai_profiles::ProfileStore,
         request: PrepareRequest,
     ) -> Result<Value, RewriteError> {
-        self.rewrite_prepare_bound(project,project_id,session,store,request,None)
+        self.rewrite_prepare_bound(project, project_id, session, store, request, None)
     }
     pub fn rewrite_prepare_bound(
-        &self, project: &ProjectId, project_id: &str, session: &str,
-        store: &crate::ai_profiles::ProfileStore, request: PrepareRequest,
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        session: &str,
+        store: &crate::ai_profiles::ProfileStore,
+        request: PrepareRequest,
         reviewed: Option<crate::ai_request::Destination>,
     ) -> Result<Value, RewriteError> {
         if ai_credentials::token(store) != request.expected_profile_token
@@ -281,14 +322,29 @@ impl AuthoringService {
             return Err(RewriteError::Unsupported);
         }
         crate::ai_request::destination(&profile.settings).map_err(|_| RewriteError::Unsupported)?;
-        if !profile.compatibility_ready() { return Err(RewriteError::Unavailable); }
-        let destination=if let Some(value)=reviewed { value } else {
+        if !profile.compatibility_ready() {
+            return Err(RewriteError::Unavailable);
+        }
+        let destination = if let Some(value) = reviewed {
+            value
+        } else {
             // Core-only callers are static: DNS is owned by desktop preparation outside its project lock.
-            let uri: ureq::http::Uri=profile.settings.endpoint.parse().map_err(|_|RewriteError::Unsupported)?;
-            uri.host().unwrap_or("").trim_matches(['[',']']).parse::<std::net::IpAddr>().map_err(|_|RewriteError::Unsupported)?;
-            crate::ai_request::resolve_destination(&profile.settings).map_err(|_|RewriteError::Unsupported)?
+            let uri: ureq::http::Uri = profile
+                .settings
+                .endpoint
+                .parse()
+                .map_err(|_| RewriteError::Unsupported)?;
+            uri.host()
+                .unwrap_or("")
+                .trim_matches(['[', ']'])
+                .parse::<std::net::IpAddr>()
+                .map_err(|_| RewriteError::Unsupported)?;
+            crate::ai_request::resolve_destination(&profile.settings)
+                .map_err(|_| RewriteError::Unsupported)?
         };
-        if destination.addresses.is_empty(){return Err(RewriteError::Unsupported);}
+        if destination.addresses.is_empty() {
+            return Err(RewriteError::Unsupported);
+        }
         let connection_location = if profile.settings.endpoint.starts_with("https://") {
             "Verified HTTPS; certificate and hostname checked before sending; inference locality unknown"
         } else if crate::ai_profiles::http_address_allowed(destination.addresses[0].ip(), false) {
@@ -332,7 +388,15 @@ impl AuthoringService {
             .map_err(|_| RewriteError::Unsupported)?
         };
         let response_schema = if batch {
-            batch::schema(request.context.batch.as_ref().ok_or(RewriteError::Invalid)?, &request.context.scene_id, &user["story"]["batch"]["targets"])
+            batch::schema(
+                request
+                    .context
+                    .batch
+                    .as_ref()
+                    .ok_or(RewriteError::Invalid)?,
+                &request.context.scene_id,
+                &user["story"]["batch"]["targets"],
+            )
         } else if lore {
             lore_schema(&request.context.lore_id, &request.context.display_name)
         } else if card {
@@ -552,49 +616,139 @@ impl AuthoringService {
         let parsed = crate::ai_discovery::strict_json(completion.text.as_bytes())
             .map_err(|_| RewriteError::Invalid)?;
         if t.context.action == batch::ACTION {
-            let candidate = batch::Candidate::parse(parsed,t)?;
+            let candidate = batch::Candidate::parse(parsed, t)?;
             let selected = candidate.ids();
-            let (proposal,semantic) = candidate.prepare(self,project,project_id,t,&selected)?;
-            let review = selection_review(t,proposal.as_ref(),semantic);
-            self.rewrite_validate(project,project_id,session,profile_token,t)?;
-            t.batch=Some(candidate); t.proposal=proposal; t.review=Some(review.clone()); t.phase=Phase::Review;
+            let (proposal, semantic) =
+                candidate.prepare(self, project, project_id, t, &selected)?;
+            let review = selection_review(t, proposal.as_ref(), semantic);
+            self.rewrite_validate(project, project_id, session, profile_token, t)?;
+            t.batch = Some(candidate);
+            t.proposal = proposal;
+            t.review = Some(review.clone());
+            t.phase = Phase::Review;
             return Ok(review);
         }
         let (proposal, semantic) = if t.context.action == prompts::LORE {
-            if parsed["target"].get("recordId").is_none() { return Err(RewriteError::Invalid); }
-            let response: LoreResponse = serde_json::from_value(parsed).map_err(|_|RewriteError::Invalid)?;
-            if response.schema_version != 1 || response.action != prompts::LORE
-                || response.target.record_id.as_deref() != if t.context.lore_id.is_empty(){None}else{Some(t.context.lore_id.as_str())}
-                || response.target.title != t.context.display_name { return Err(RewriteError::Invalid); }
-            let mut fields = serde_json::to_value(response.fields).map_err(|_|RewriteError::Invalid)?;
-            if serde_json::to_vec(&fields).map_err(|_|RewriteError::Invalid)?.len()>10000 { return Err(RewriteError::Invalid); }
+            if parsed["target"].get("recordId").is_none() {
+                return Err(RewriteError::Invalid);
+            }
+            let response: LoreResponse =
+                serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
+            if response.schema_version != 1
+                || response.action != prompts::LORE
+                || response.target.record_id.as_deref()
+                    != if t.context.lore_id.is_empty() {
+                        None
+                    } else {
+                        Some(t.context.lore_id.as_str())
+                    }
+                || response.target.title != t.context.display_name
+            {
+                return Err(RewriteError::Invalid);
+            }
+            let mut fields =
+                serde_json::to_value(response.fields).map_err(|_| RewriteError::Invalid)?;
+            if serde_json::to_vec(&fields)
+                .map_err(|_| RewriteError::Invalid)?
+                .len()
+                > 10000
+            {
+                return Err(RewriteError::Invalid);
+            }
             fields["title"] = json!(t.context.display_name);
             fields["scope"] = t.context.lore_scope.clone().ok_or(RewriteError::Invalid)?;
-            let user: Value = serde_json::from_str(t.preview["payload"]["messages"][1]["content"].as_str().ok_or(RewriteError::Invalid)?).map_err(|_|RewriteError::Invalid)?;
-            let mut citations = vec![json!({"target":{"type":"scene","id":t.context.scene_id},"revision":t.context.expected_source_revision,"notes":"Selected saved Beat; runtime state unknown."})];
-            for selection in &t.context.references { if !(selection.kind=="lore" && selection.record_id==t.context.lore_id) { citations.push(json!({"target":{"type":selection.kind,"id":selection.record_id},"revision":selection.revision_id,"notes":"Explicitly included approved reference."})); } }
+            let user: Value = serde_json::from_str(
+                t.preview["payload"]["messages"][1]["content"]
+                    .as_str()
+                    .ok_or(RewriteError::Invalid)?,
+            )
+            .map_err(|_| RewriteError::Invalid)?;
+            let mut citations = vec![
+                json!({"target":{"type":"scene","id":t.context.scene_id},"revision":t.context.expected_source_revision,"notes":"Selected saved Beat; runtime state unknown."}),
+            ];
+            for selection in &t.context.references {
+                if !(selection.kind == "lore" && selection.record_id == t.context.lore_id) {
+                    citations.push(json!({"target":{"type":selection.kind,"id":selection.record_id},"revision":selection.revision_id,"notes":"Explicitly included approved reference."}));
+                }
+            }
             let provenance = json!({"kind":"inferred","notes":format!("Generated with Unsloth Studio / {}. Prompt digest {}; reviewed request digest {}. Saved story and selected references support an interpretation requiring explicit approval.",t.profile.settings.model,t.preview["promptDigest"].as_str().unwrap_or(""),content_digest(&t.body))});
-            let (proposal, lore) = self.prepare_generated_reference(project,project_id,crate::references::Kind::Lore,response.target.record_id.as_deref(),fields,json!(citations),provenance,t.preview["supportingReadSet"].clone()).map_err(|_|RewriteError::Invalid)?;
-            (proposal,json!({"action":prompts::LORE,"lore":lore,"supportingStory":user["story"]}))
+            let (proposal, lore) = self
+                .prepare_generated_reference(
+                    project,
+                    project_id,
+                    crate::references::Kind::Lore,
+                    response.target.record_id.as_deref(),
+                    fields,
+                    json!(citations),
+                    provenance,
+                    t.preview["supportingReadSet"].clone(),
+                )
+                .map_err(|_| RewriteError::Invalid)?;
+            (
+                proposal,
+                json!({"action":prompts::LORE,"lore":lore,"supportingStory":user["story"]}),
+            )
         } else if t.context.action == prompts::CARD {
-            if parsed["target"].get("recordId").is_none() { return Err(RewriteError::Invalid); }
-            let response: CardResponse = serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
-            if response.schema_version != 1 || response.action != prompts::CARD
-                || response.target.record_id.as_deref() != if t.context.card_id.is_empty(){None}else{Some(t.context.card_id.as_str())}
-                || response.target.title != t.context.display_name { return Err(RewriteError::Invalid); }
-            let mut fields = serde_json::to_value(response.fields).map_err(|_| RewriteError::Invalid)?;
-            if serde_json::to_vec(&fields).map_err(|_|RewriteError::Invalid)?.len() > 10000 { return Err(RewriteError::Invalid); }
+            if parsed["target"].get("recordId").is_none() {
+                return Err(RewriteError::Invalid);
+            }
+            let response: CardResponse =
+                serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
+            if response.schema_version != 1
+                || response.action != prompts::CARD
+                || response.target.record_id.as_deref()
+                    != if t.context.card_id.is_empty() {
+                        None
+                    } else {
+                        Some(t.context.card_id.as_str())
+                    }
+                || response.target.title != t.context.display_name
+            {
+                return Err(RewriteError::Invalid);
+            }
+            let mut fields =
+                serde_json::to_value(response.fields).map_err(|_| RewriteError::Invalid)?;
+            if serde_json::to_vec(&fields)
+                .map_err(|_| RewriteError::Invalid)?
+                .len()
+                > 10000
+            {
+                return Err(RewriteError::Invalid);
+            }
             fields["title"] = json!(t.context.display_name);
-            let user: Value = serde_json::from_str(t.preview["payload"]["messages"][1]["content"].as_str().ok_or(RewriteError::Invalid)?).map_err(|_| RewriteError::Invalid)?;
-            let mut citations = vec![json!({"target":{"type":"scene","id":t.context.scene_id},"revision":t.context.expected_source_revision,"notes":"Selected saved Beat; runtime state unknown."})];
+            let user: Value = serde_json::from_str(
+                t.preview["payload"]["messages"][1]["content"]
+                    .as_str()
+                    .ok_or(RewriteError::Invalid)?,
+            )
+            .map_err(|_| RewriteError::Invalid)?;
+            let mut citations = vec![
+                json!({"target":{"type":"scene","id":t.context.scene_id},"revision":t.context.expected_source_revision,"notes":"Selected saved Beat; runtime state unknown."}),
+            ];
             for selection in &t.context.references {
                 citations.push(json!({"target":{"type":selection.kind,"id":selection.record_id},"revision":selection.revision_id,"notes":"Explicitly included approved reference."}));
             }
             // Do not cite this card's own soon-to-be-superseded approved revision.
-            citations.retain(|c| !(c["target"]["type"]=="card" && c["target"]["id"]==t.context.card_id));
+            citations.retain(|c| {
+                !(c["target"]["type"] == "card" && c["target"]["id"] == t.context.card_id)
+            });
             let provenance = json!({"kind":"inferred","notes":format!("Generated with Unsloth Studio / {}. Prompt digest {}; reviewed request digest {}. Saved story and selected references are supporting material; generated interpretation requires explicit approval.",t.profile.settings.model,t.preview["promptDigest"].as_str().unwrap_or(""),content_digest(&t.body))});
-            let (proposal, card) = self.prepare_generated_reference(project, project_id, crate::references::Kind::Card, response.target.record_id.as_deref(), fields, json!(citations), provenance, t.preview["supportingReadSet"].clone()).map_err(|_| RewriteError::Invalid)?;
-            (proposal, json!({"action":prompts::CARD,"card":card,"supportingStory":user["story"]}))
+            let (proposal, card) = self
+                .prepare_generated_reference(
+                    project,
+                    project_id,
+                    crate::references::Kind::Card,
+                    response.target.record_id.as_deref(),
+                    fields,
+                    json!(citations),
+                    provenance,
+                    t.preview["supportingReadSet"].clone(),
+                )
+                .map_err(|_| RewriteError::Invalid)?;
+            (
+                proposal,
+                json!({"action":prompts::CARD,"card":card,"supportingStory":user["story"]}),
+            )
         } else if t.context.action == prompts::DRAFT {
             let response: DraftResponse =
                 serde_json::from_value(parsed).map_err(|_| RewriteError::Invalid)?;
@@ -801,7 +955,13 @@ impl AuthoringService {
         review["previewDigest"] = json!(preview_digest);
         review["target"] = json!({"sceneId":t.context.scene_id,"beatId":t.context.beat_id});
         review["patches"] = json!(patches);
-        review["uncertainty"] = json!(if t.context.action==prompts::CARD || t.context.action==prompts::LORE { "Editor-only proposed notes. Approval is separate. Runtime knowledge is unknown; no project code execution." } else { "Static literal prose only. Runtime state is unknown; no SDK validation or project code execution." });
+        review["uncertainty"] = json!(if t.context.action == prompts::CARD
+            || t.context.action == prompts::LORE
+        {
+            "Editor-only proposed notes. Approval is separate. Runtime knowledge is unknown; no project code execution."
+        } else {
+            "Static literal prose only. Runtime state is unknown; no SDK validation or project code execution."
+        });
         review["usage"] = json!(completion.usage);
         self.rewrite_validate(project, project_id, session, profile_token, t)?;
         t.phase = Phase::Review;
@@ -809,18 +969,32 @@ impl AuthoringService {
         t.proposal = Some(proposal);
         Ok(review)
     }
-    pub fn rewrite_select(&self, project: &ProjectId, project_id: &str, session: &str,
-        profile_token: &str, request: SelectionRequest) -> Result<Value, RewriteError> {
-        let mut states=self.rewrites.lock().map_err(|_|RewriteError::Unavailable)?;
-        let t=states.get_mut(project).filter(|t|t.token==request.proposal_id && t.phase==Phase::Review).ok_or(RewriteError::Stale)?;
+    pub fn rewrite_select(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        session: &str,
+        profile_token: &str,
+        request: SelectionRequest,
+    ) -> Result<Value, RewriteError> {
+        let mut states = self
+            .rewrites
+            .lock()
+            .map_err(|_| RewriteError::Unavailable)?;
+        let t = states
+            .get_mut(project)
+            .filter(|t| t.token == request.proposal_id && t.phase == Phase::Review)
+            .ok_or(RewriteError::Stale)?;
         // Clear the old candidate even on refusal; no stale selection can be saved.
-        t.proposal=None;
-        self.rewrite_validate(project,project_id,session,profile_token,t)?;
-        let candidate=t.batch.as_ref().ok_or(RewriteError::Invalid)?;
-        let (proposal,semantic)=candidate.prepare(self,project,project_id,t,&request.selected_ids)?;
-        let review=selection_review(t,proposal.as_ref(),semantic);
-        self.rewrite_validate(project,project_id,session,profile_token,t)?;
-        t.proposal=proposal;t.review=Some(review.clone());
+        t.proposal = None;
+        self.rewrite_validate(project, project_id, session, profile_token, t)?;
+        let candidate = t.batch.as_ref().ok_or(RewriteError::Invalid)?;
+        let (proposal, semantic) =
+            candidate.prepare(self, project, project_id, t, &request.selected_ids)?;
+        let review = selection_review(t, proposal.as_ref(), semantic);
+        self.rewrite_validate(project, project_id, session, profile_token, t)?;
+        t.proposal = proposal;
+        t.review = Some(review.clone());
         Ok(review)
     }
     pub fn rewrite_accept(
@@ -846,8 +1020,14 @@ impl AuthoringService {
             return Err(RewriteError::Stale);
         }
         if t.batch.is_some() {
-            if t.review.as_ref().is_none_or(|r| r["valid"] != true || r["selectedIds"] != json!(request.selected_ids)) { return Err(RewriteError::Invalid); }
-        } else if !request.selected_ids.is_empty() { return Err(RewriteError::Invalid); }
+            if t.review.as_ref().is_none_or(|r| {
+                r["valid"] != true || r["selectedIds"] != json!(request.selected_ids)
+            }) {
+                return Err(RewriteError::Invalid);
+            }
+        } else if !request.selected_ids.is_empty() {
+            return Err(RewriteError::Invalid);
+        }
         self.rewrite_validate(project, project_id, session, profile_token, t)?;
         let proposal = t.proposal.take().ok_or(RewriteError::Stale)?;
         t.phase = Phase::Consumed; // Commit ambiguity is handled by ordinary recovery, not redispatch.
@@ -886,12 +1066,21 @@ impl AuthoringService {
     }
 }
 
-fn selection_review(t: &Transient, proposal: Option<&TransactionProposal>, mut semantic: Value) -> Value {
+fn selection_review(
+    t: &Transient,
+    proposal: Option<&TransactionProposal>,
+    mut semantic: Value,
+) -> Value {
     let patches:Vec<_>=proposal.into_iter().flat_map(|p| &p.mutations).map(|m|json!({"path":m.path.as_str(),"before":String::from_utf8_lossy(&m.expected_bytes),"after":String::from_utf8_lossy(&m.proposed)})).collect();
-    let digest=content_digest(&serde_json::to_vec(&json!({"semantic":semantic,"patches":patches})).unwrap());
-    semantic["proposalId"]=json!(t.token);semantic["previewDigest"]=json!(digest);
-    semantic["target"]=json!({"sceneId":t.context.scene_id,"beatId":t.context.beat_id});
-    semantic["patches"]=json!(patches);semantic["uncertainty"]=json!("Static preview only. Runtime state unknown; the project has not been executed.");
+    let digest = content_digest(
+        &serde_json::to_vec(&json!({"semantic":semantic,"patches":patches})).unwrap(),
+    );
+    semantic["proposalId"] = json!(t.token);
+    semantic["previewDigest"] = json!(digest);
+    semantic["target"] = json!({"sceneId":t.context.scene_id,"beatId":t.context.beat_id});
+    semantic["patches"] = json!(patches);
+    semantic["uncertainty"] =
+        json!("Static preview only. Runtime state unknown; the project has not been executed.");
     semantic
 }
 

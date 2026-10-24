@@ -53,7 +53,9 @@ struct Args {
 }
 fn args() -> Result<Args, &'static str> {
     let mut values = std::env::args().skip(1);
-    let mode = values.next().ok_or("Expected inspect, diagnose or run mode.")?;
+    let mode = values
+        .next()
+        .ok_or("Expected inspect, diagnose or run mode.")?;
     if !matches!(mode.as_str(), "inspect" | "diagnose" | "run") {
         return Err("Expected inspect, diagnose or run mode.");
     }
@@ -121,7 +123,9 @@ fn args() -> Result<Args, &'static str> {
             return Err("Diagnostics require the debug qualification driver.");
         }
         if result.profile.as_deref().is_none_or(str::is_empty)
-            || seen.iter().any(|s| !matches!(s.as_str(), "--root" | "--profile"))
+            || seen
+                .iter()
+                .any(|s| !matches!(s.as_str(), "--root" | "--profile"))
         {
             return Err("Diagnose accepts only --root and an explicit --profile.");
         }
@@ -387,7 +391,10 @@ fn run() -> Result<(), &'static str> {
     let destination = ai_request::resolve_destination(&profile.settings)
         .map_err(|_| "Selected destination unavailable or unsupported.")?;
     let (case, preview) = if input.diagnose {
-        (None, json!({"readOnly":true,"routes":["GET /api/inference/status","GET /version"],"totalDeadlineSeconds":15}))
+        (
+            None,
+            json!({"readOnly":true,"routes":["GET /api/inference/status","GET /version"],"totalDeadlineSeconds":15}),
+        )
     } else {
         let (case, preview) = prepare_case(&input, &store, profile, destination.clone())?;
         (Some(case), preview)
@@ -416,7 +423,12 @@ fn run() -> Result<(), &'static str> {
     let capture = match &case {
         Some(case) => case.take(cancel.clone())?,
         // Diagnostic helper ignores the body; profile/secret/destination validation stays native.
-        None => SendCapture { profile:profile.clone(), body:Vec::new(), timeout_seconds:30, destination },
+        None => SendCapture {
+            profile: profile.clone(),
+            body: Vec::new(),
+            timeout_seconds: 30,
+            destination,
+        },
     };
     // Exactly one production adapter read. No status probe, key copy, export, print or fallback.
     let secret = ai_native::secrets(records.ai_data_root())
@@ -450,9 +462,17 @@ fn run() -> Result<(), &'static str> {
     if input.diagnose {
         emit(json!({"driver":"redesign-owner-driver","state":"dispatching","readOnly":true}))?;
         let diagnostic = ai_request::diagnose_model_interface(prepared, &cancel);
-        let unchanged = records.read_ai_profiles().is_ok_and(|s|ai_credentials::token(&s)==token);
-        emit(json!({"state":"diagnosed","diagnostic":diagnostic,"profileUnchanged":unchanged,"generationDispatched":false,"loadDispatched":false}))?;
-        return if unchanged { Ok(()) } else { Err("Saved profiles changed during diagnosis; no automatic retry.") };
+        let unchanged = records
+            .read_ai_profiles()
+            .is_ok_and(|s| ai_credentials::token(&s) == token);
+        emit(
+            json!({"state":"diagnosed","diagnostic":diagnostic,"profileUnchanged":unchanged,"generationDispatched":false,"loadDispatched":false}),
+        )?;
+        return if unchanged {
+            Ok(())
+        } else {
+            Err("Saved profiles changed during diagnosis; no automatic retry.")
+        };
     }
     emit(
         json!({"driver":"redesign-owner-driver","state":"dispatching","maximumResponse":input.output,"fixture":input.fixture}),
@@ -543,9 +563,18 @@ mod preparation_tests {
                     let captured = case.take(Cancel::default()).unwrap();
                     assert_eq!(body.as_bytes(), captured.body);
                     assert_eq!(captured.profile.settings.maximum_response, 2048);
-                    assert_eq!(captured.profile.settings.context_budget, context_length.unwrap_or(profile.settings.context_budget));
-                    assert_eq!(captured.profile.settings.context_ceiling, context_length.unwrap_or(profile.settings.context_ceiling));
-                    assert_eq!(preview["requestedContext"], captured.profile.settings.context_budget);
+                    assert_eq!(
+                        captured.profile.settings.context_budget,
+                        context_length.unwrap_or(profile.settings.context_budget)
+                    );
+                    assert_eq!(
+                        captured.profile.settings.context_ceiling,
+                        context_length.unwrap_or(profile.settings.context_ceiling)
+                    );
+                    assert_eq!(
+                        preview["requestedContext"],
+                        captured.profile.settings.context_budget
+                    );
                     let parsed: Value = serde_json::from_slice(&captured.body).unwrap();
                     assert_eq!(parsed["max_tokens"], 2048);
                     assert_eq!(parsed["enable_tools"], false);

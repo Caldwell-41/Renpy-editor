@@ -244,10 +244,21 @@ impl AuthoringService {
         let mut positioned = HashSet::new();
         for draft in request.positions {
             if !positioned.insert(draft.node_start)
-                || ![draft.xalign, draft.yalign].iter().all(|v| v.is_finite() && (0.0..=1.0).contains(v))
-                || !screen.nodes.iter().any(|n| n.span.start == draft.node_start && n.position.is_some())
-            { return Err(SceneError::InvalidPayload); }
-            let node = plan.nodes.iter_mut().find(|n| n.start == draft.node_start).ok_or(SceneError::InvalidPayload)?;
+                || ![draft.xalign, draft.yalign]
+                    .iter()
+                    .all(|v| v.is_finite() && (0.0..=1.0).contains(v))
+                || !screen
+                    .nodes
+                    .iter()
+                    .any(|n| n.span.start == draft.node_start && n.position.is_some())
+            {
+                return Err(SceneError::InvalidPayload);
+            }
+            let node = plan
+                .nodes
+                .iter_mut()
+                .find(|n| n.start == draft.node_start)
+                .ok_or(SceneError::InvalidPayload)?;
             node.properties.insert("xalign".into(), draft.xalign.into());
             node.properties.insert("yalign".into(), draft.yalign.into());
         }

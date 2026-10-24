@@ -6,8 +6,8 @@
 //! and request/response schema. Runtime version is diagnostic, never admission.
 use crate::{
     ai_discovery::strict_json,
-    ai_request::{Cancel, Failure, Result},
     ai_profiles::StudioSettings,
+    ai_request::{Cancel, Failure, Result},
     studio_config::{self, Known, Requested},
 };
 use serde::Serialize;
@@ -122,8 +122,14 @@ impl Status {
         let serving = match (value.get("serving"), value.get("serving_checkpoints")) {
             (None, None) => None,
             (Some(names), Some(checkpoints)) => {
-                let names = strings(names)?.into_iter().map(str::to_owned).collect::<Vec<_>>();
-                let checkpoints = strings(checkpoints)?.into_iter().map(str::to_owned).collect::<Vec<_>>();
+                let names = strings(names)?
+                    .into_iter()
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>();
+                let checkpoints = strings(checkpoints)?
+                    .into_iter()
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>();
                 if names.len() != checkpoints.len() {
                     return Err(Failure::ModelUnsupported);
                 }
@@ -142,40 +148,88 @@ impl Status {
             context: capacity(&value["context_length"])?,
             yours,
             effective: studio_config::known_effective(value),
-            quant: value.get("gguf_variant").and_then(Value::as_str).map(str::to_owned),
+            quant: value
+                .get("gguf_variant")
+                .and_then(Value::as_str)
+                .map(str::to_owned),
             serving,
         })
     }
     fn identity(&self, model: &str, path: Option<&str>) -> Result<bool> {
-        if self.yours == Some(false) { return Err(Failure::ModelConflict); }
-        if self.loading { return Err(Failure::ModelNotReady); }
-        let pin = model.rsplit_once(':').filter(|(_,quant)|self.quant.as_deref().is_some_and(|actual|actual.eq_ignore_ascii_case(quant)));
-        let matches = |id: &str| id == model || path == Some(id) || pin.is_some_and(|(repo,_)|id==repo);
-        let active = self.active.as_deref().is_some_and(matches) || self.identifier.as_deref().is_some_and(matches);
+        if self.yours == Some(false) {
+            return Err(Failure::ModelConflict);
+        }
+        if self.loading {
+            return Err(Failure::ModelNotReady);
+        }
+        let pin = model.rsplit_once(':').filter(|(_, quant)| {
+            self.quant
+                .as_deref()
+                .is_some_and(|actual| actual.eq_ignore_ascii_case(quant))
+        });
+        let matches =
+            |id: &str| id == model || path == Some(id) || pin.is_some_and(|(repo, _)| id == repo);
+        let active = self.active.as_deref().is_some_and(matches)
+            || self.identifier.as_deref().is_some_and(matches);
         if active {
             if let Some((names, checkpoints)) = &self.serving {
-                if names.len() != 1 || names.first().map(String::as_str) != self.active.as_deref()
-                    || checkpoints.first().map(String::as_str) != self.identifier.as_deref().or(self.active.as_deref()) {
+                if names.len() != 1
+                    || names.first().map(String::as_str) != self.active.as_deref()
+                    || checkpoints.first().map(String::as_str)
+                        != self.identifier.as_deref().or(self.active.as_deref())
+                {
                     return Err(Failure::ModelConflict);
                 }
             }
-            if !self.loaded.iter().any(|id| matches(id) || self.active.as_deref()==Some(id) || self.identifier.as_deref()==Some(id)) {return Err(Failure::ModelNotReady);}
+            if !self.loaded.iter().any(|id| {
+                matches(id)
+                    || self.active.as_deref() == Some(id)
+                    || self.identifier.as_deref() == Some(id)
+            }) {
+                return Err(Failure::ModelNotReady);
+            }
             return Ok(true);
         }
-        if self.active.is_some() || self.identifier.is_some() || !self.loaded.is_empty()
-            || self.serving.as_ref().is_some_and(|(names,_)|!names.is_empty()) {return Err(Failure::ModelConflict);}
+        if self.active.is_some()
+            || self.identifier.is_some()
+            || !self.loaded.is_empty()
+            || self
+                .serving
+                .as_ref()
+                .is_some_and(|(names, _)| !names.is_empty())
+        {
+            return Err(Failure::ModelConflict);
+        }
         Ok(false)
     }
-    fn ready(&self, model: &str, path: Option<&str>, requested:u32, loaded_for_request:bool) -> Result<Option<Readiness>> {
-        if !self.identity(model,path)? {return Ok(None);}
-        let actual=self.context.ok_or(Failure::ModelCapacity)?;
-        Ok(Some(Readiness {requested_context:requested,actual_context:actual,loaded_for_request,effective:self.effective.clone(),warnings:if actual!=requested {vec!["Effective context length differs from requested; the actual request must fit the loaded capacity.".into()]} else {Vec::new()}}))
+    fn ready(
+        &self,
+        model: &str,
+        path: Option<&str>,
+        requested: u32,
+        loaded_for_request: bool,
+    ) -> Result<Option<Readiness>> {
+        if !self.identity(model, path)? {
+            return Ok(None);
+        }
+        let actual = self.context.ok_or(Failure::ModelCapacity)?;
+        Ok(Some(Readiness {
+            requested_context: requested,
+            actual_context: actual,
+            loaded_for_request,
+            effective: self.effective.clone(),
+            warnings: if actual != requested {
+                vec!["Effective context length differs from requested; the actual request must fit the loaded capacity.".into()]
+            } else {
+                Vec::new()
+            },
+        }))
     }
 }
 
 pub(crate) fn configuration_status(value: &Value, model: &str) -> Result<(bool, Option<Known>)> {
     let status = Status::parse(value)?;
-    let selected = status.identity(model,None).unwrap_or(false);
+    let selected = status.identity(model, None).unwrap_or(false);
     Ok((status.loading, selected.then_some(status.effective)))
 }
 pub(crate) fn repo_id(id: &str) -> bool {
@@ -215,7 +269,11 @@ fn local_gguf(value: &Value) -> Result<String> {
     }
     Ok(path.into())
 }
-pub(crate) fn cached_path(model: &str, quant: &str, mut exchange: impl FnMut(&str, Option<&Value>) -> Result<Value>) -> Result<String> {
+pub(crate) fn cached_path(
+    model: &str,
+    quant: &str,
+    mut exchange: impl FnMut(&str, Option<&Value>) -> Result<Value>,
+) -> Result<String> {
     let cached = exchange("/api/models/cached-gguf", None)?;
     let rows = cached["cached"]
         .as_array()
@@ -253,7 +311,11 @@ pub fn ensure_ready(
     let requested = settings.context_budget;
     let add_warnings = |mut ready: Readiness| -> Readiness {
         if settings.model_load.is_some() {
-            ready.warnings.extend(studio_config::warnings(&Requested::from_settings(settings), &ready.effective, "Effective"));
+            ready.warnings.extend(studio_config::warnings(
+                &Requested::from_settings(settings),
+                &ready.effective,
+                "Effective",
+            ));
             ready.warnings.push(studio_config::FIT_WARNING.into());
         }
         ready
@@ -283,14 +345,20 @@ pub fn ensure_ready(
         return Err(Failure::ModelConflict);
     }
     let target = studio_config::target(model, &catalog)?;
-    let path = cached_path(&target.repo, &target.quant, |path, body|checked(exchange(path, body)?))?;
+    let path = cached_path(&target.repo, &target.quant, |path, body| {
+        checked(exchange(path, body)?)
+    })?;
     let (saved, legacy_unverified) = match exchange(&studio_config::query(&target, &path), None) {
-        Ok(value) => (studio_config::resolved_in_scope(&checked(value)?, &target, &path)?.row, false),
+        Ok(value) => (
+            studio_config::resolved_in_scope(&checked(value)?, &target, &path)?.row,
+            false,
+        ),
         Err(Failure::ModelUnsupported) if settings.model_load.is_none() => (None, true),
         Err(Failure::ModelUnsupported) => return Err(Failure::ModelSettingsUnsupported),
         Err(error) => return Err(error),
     };
-    let load_options = studio_config::load_args(saved.as_ref(), requested, settings.model_load.as_ref())?;
+    let load_options =
+        studio_config::load_args(saved.as_ref(), requested, settings.model_load.as_ref())?;
     // Recheck immediately before mutation. Unsloth Studio has no expected-empty CAS;
     // an idle external load racing this final observation cannot be made atomic here.
     let current = Status::parse(&checked(exchange("/api/inference/status", None)?)?)?;
@@ -302,10 +370,14 @@ pub fn ensure_ready(
     }
     stage("loading_model");
     let mut body = json!({"model_path":path,"gguf_variant":target.quant,"max_seq_length":requested,"disable_vision":true,"speculative_type":"off","force_reload":false,"force_cancel_active":false,"trust_remote_code":false,"engine":"auto","alongside":false,"force_alongside":false});
-    for (key,value) in load_options { body[&key] = value; }
+    for (key, value) in load_options {
+        body[&key] = value;
+    }
     let loaded = checked(exchange("/api/inference/load", Some(&body))?)?;
     if loaded.get("_deferred_error").is_some()
-        || loaded.get("evicted").is_some_and(|v| v.as_array().is_none_or(|a| !a.is_empty()))
+        || loaded
+            .get("evicted")
+            .is_some_and(|v| v.as_array().is_none_or(|a| !a.is_empty()))
         || !matches!(loaded["status"].as_str(), Some("loaded" | "already_loaded"))
         || loaded["is_gguf"] != true
         || loaded["is_local_model"] != true
@@ -314,7 +386,13 @@ pub fn ensure_ready(
     }
     stage("checking_model");
     let status = Status::parse(&checked(exchange("/api/inference/status", None)?)?)?;
-    let mut ready = add_warnings(status.ready(model, Some(&path), requested, true)?.ok_or(Failure::ModelNotReady)?);
-    if legacy_unverified { ready.warnings.push("Saved load settings could not be read; the legacy cached-load path was used without adding model-load defaults.".into()); }
+    let mut ready = add_warnings(
+        status
+            .ready(model, Some(&path), requested, true)?
+            .ok_or(Failure::ModelNotReady)?,
+    );
+    if legacy_unverified {
+        ready.warnings.push("Saved load settings could not be read; the legacy cached-load path was used without adding model-load defaults.".into());
+    }
     Ok(ready)
 }

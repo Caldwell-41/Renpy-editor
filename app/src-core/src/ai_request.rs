@@ -311,15 +311,35 @@ pub fn resolve_destination(settings: &crate::ai_profiles::StudioSettings) -> Res
 
 /// Authenticated discovery for a native-owned connection draft. GET only, with
 /// the same destination/TLS/cancellation guards as ordinary Studio operations.
-pub fn discover_connection(profile: StudioProfile, key: Secret, cancel: &Cancel) -> Result<crate::ai_discovery::Discovery> {
-    let destination=resolve_destination(&profile.settings)?;
-    let prepared=prepare_reviewed_bound(profile,key,30,Vec::new(),destination.clone())?;
-    let value=model_exchange(&prepared,cancel,Instant::now()+Duration::from_secs(15),"/v1/models",None,ureq::tls::TlsConfig::default())?;
-    let bytes=serde_json::to_vec(&value).map_err(|_|Failure::Malformed)?;
-    if bytes.len()>128*1024 {return Err(Failure::Oversized);}
-    let models=crate::ai_discovery::parse_models(&bytes).map_err(|_|Failure::Malformed)?;
-    if models.iter().any(|model|model.contains(&*prepared.key)) {return Err(Failure::UnsupportedResponse);}
-    Ok(crate::ai_discovery::Discovery {models,inventory:crate::studio_models::parse_inventory(&bytes)?,selected_available:false,addresses:destination.addresses})
+pub fn discover_connection(
+    profile: StudioProfile,
+    key: Secret,
+    cancel: &Cancel,
+) -> Result<crate::ai_discovery::Discovery> {
+    let destination = resolve_destination(&profile.settings)?;
+    let prepared = prepare_reviewed_bound(profile, key, 30, Vec::new(), destination.clone())?;
+    let value = model_exchange(
+        &prepared,
+        cancel,
+        Instant::now() + Duration::from_secs(15),
+        "/v1/models",
+        None,
+        ureq::tls::TlsConfig::default(),
+    )?;
+    let bytes = serde_json::to_vec(&value).map_err(|_| Failure::Malformed)?;
+    if bytes.len() > 128 * 1024 {
+        return Err(Failure::Oversized);
+    }
+    let models = crate::ai_discovery::parse_models(&bytes).map_err(|_| Failure::Malformed)?;
+    if models.iter().any(|model| model.contains(&*prepared.key)) {
+        return Err(Failure::UnsupportedResponse);
+    }
+    Ok(crate::ai_discovery::Discovery {
+        models,
+        inventory: crate::studio_models::parse_inventory(&bytes)?,
+        selected_available: false,
+        addresses: destination.addresses,
+    })
 }
 
 fn remaining(deadline: Instant) -> Result<Duration> {
@@ -765,10 +785,15 @@ fn execute_inner(
                 &stage,
                 |path, body| model_exchange(&prepared, cancel, deadline, path, body, tls.clone()),
             )?;
-            let required = u64::from(prepared.estimated_input) + u64::from(prepared.margin)
+            let required = u64::from(prepared.estimated_input)
+                + u64::from(prepared.margin)
                 + u64::from(prepared.profile.settings.maximum_response);
             if required > u64::from(observation.actual_context) {
-                return Err(if observation.loaded_for_request {Failure::ModelLoadContext} else {Failure::ModelContext});
+                return Err(if observation.loaded_for_request {
+                    Failure::ModelLoadContext
+                } else {
+                    Failure::ModelContext
+                });
             }
             context_limit = context_limit.min(observation.actual_context);
             ready(&observation);
@@ -889,7 +914,12 @@ fn model_exchange(
     tls: ureq::tls::TlsConfig,
 ) -> Result<Value> {
     model_exchange_observed(
-        prepared, cancel, deadline, path, body, tls,
+        prepared,
+        cancel,
+        deadline,
+        path,
+        body,
+        tls,
         #[cfg(any(test, debug_assertions))]
         None,
     )
@@ -903,7 +933,14 @@ fn model_exchange_observed(
     tls: ureq::tls::TlsConfig,
     #[cfg(any(test, debug_assertions))] observed_http: Option<&mut Option<u16>>,
 ) -> Result<Value> {
-    model_exchange_method(prepared, cancel, deadline, path, body, tls, false,
+    model_exchange_method(
+        prepared,
+        cancel,
+        deadline,
+        path,
+        body,
+        tls,
+        false,
         #[cfg(any(test, debug_assertions))]
         observed_http,
         #[cfg(not(any(test, debug_assertions)))]
@@ -911,8 +948,13 @@ fn model_exchange_observed(
     )
 }
 fn model_exchange_method(
-    prepared: &Prepared, cancel: &Cancel, deadline: Instant, path: &str,
-    body: Option<&Value>, tls: ureq::tls::TlsConfig, put: bool,
+    prepared: &Prepared,
+    cancel: &Cancel,
+    deadline: Instant,
+    path: &str,
+    body: Option<&Value>,
+    tls: ureq::tls::TlsConfig,
+    put: bool,
     observed_http: Option<&mut Option<u16>>,
 ) -> Result<Value> {
     if cancel.cancelled() {
@@ -993,7 +1035,11 @@ fn model_exchange_method(
     let bytes = response
         .body_mut()
         .with_config()
-        .limit(if path=="/v1/models" {128*1024}else{crate::studio_models::MAX_MODEL_RESPONSE as u64})
+        .limit(if path == "/v1/models" {
+            128 * 1024
+        } else {
+            crate::studio_models::MAX_MODEL_RESPONSE as u64
+        })
         .read_to_vec()
         .map_err(map_error)?;
     cancel.close_socket();
@@ -1004,94 +1050,187 @@ fn model_exchange_method(
     crate::ai_discovery::strict_json(&bytes).map_err(|_| Failure::Malformed)
 }
 
-
-
 /// Explicit per-model management through the same captured native credential,
 /// destination, TLS, cancellation and absolute deadline as normal Studio requests.
 /// This never changes global auto-switch, unloads/reloads a model, or sends chat.
 pub fn model_load_settings(
-    prepared: Prepared, apply: bool, cancel: &Cancel, before_write: impl Fn() -> bool,
+    prepared: Prepared,
+    apply: bool,
+    cancel: &Cancel,
+    before_write: impl Fn() -> bool,
 ) -> Result<crate::studio_config::Report> {
     use crate::studio_config::{self as config, Report, Requested};
-    if apply && prepared.profile.settings.model_load.is_none() {return Err(Failure::Configuration);}
-    let deadline=Instant::now()+prepared.timeout;
-    let exchange=|path:&str,body:Option<&Value>,put:bool,http:Option<&mut Option<u16>>| {
-        let result=model_exchange_method(&prepared,cancel,deadline,path,body,ureq::tls::TlsConfig::default(),put,http);
+    if apply && prepared.profile.settings.model_load.is_none() {
+        return Err(Failure::Configuration);
+    }
+    let deadline = Instant::now() + prepared.timeout;
+    let exchange = |path: &str, body: Option<&Value>, put: bool, http: Option<&mut Option<u16>>| {
+        let result = model_exchange_method(
+            &prepared,
+            cancel,
+            deadline,
+            path,
+            body,
+            ureq::tls::TlsConfig::default(),
+            put,
+            http,
+        );
         cancel.close_socket();
-        result.map_err(|e|if e==Failure::ModelUnsupported {Failure::ModelSettingsUnsupported}else{e})
+        result.map_err(|e| {
+            if e == Failure::ModelUnsupported {
+                Failure::ModelSettingsUnsupported
+            } else {
+                e
+            }
+        })
     };
-    let result=(|| {
-        let requested=Requested::from_settings(&prepared.profile.settings);
-        let status=exchange("/api/inference/status",None,false,None)?;
-        let (loading,effective)=crate::studio_models::configuration_status(&status,&prepared.profile.settings.model)?;
-        if apply && loading {return Err(Failure::Busy);}
-        let catalog=exchange("/v1/models",None,false,None)?;
-        let target=config::target(&prepared.profile.settings.model,&catalog)?;
-        let path=crate::studio_models::cached_path(&target.repo,&target.quant,|path,body|exchange(path,body,false,None))?;
-        let query=config::query(&target,&path);
-        let mut resolved=config::resolved_in_scope(&exchange(&query,None,false,None)?,&target,&path)?;
-        let mut warnings=vec![config::FIT_WARNING.into()];
-        if prepared.profile.settings.model_load.is_none() {warnings.push("Load options shown are suggested defaults; the legacy profile has not saved them.".into());}
-        let mut http=None;
-        let auto_switch_enabled=match exchange("/api/settings/openai-auto-switch",None,false,Some(&mut http)) {
-            Ok(value)=>value["enabled"].as_bool(),
-            Err(Failure::Authentication) if http==Some(403)=>None,
-            Err(Failure::ModelSettingsUnsupported)=>None,
-            Err(error)=>return Err(error),
+    let result = (|| {
+        let requested = Requested::from_settings(&prepared.profile.settings);
+        let status = exchange("/api/inference/status", None, false, None)?;
+        let (loading, effective) =
+            crate::studio_models::configuration_status(&status, &prepared.profile.settings.model)?;
+        if apply && loading {
+            return Err(Failure::Busy);
+        }
+        let catalog = exchange("/v1/models", None, false, None)?;
+        let target = config::target(&prepared.profile.settings.model, &catalog)?;
+        let path = crate::studio_models::cached_path(&target.repo, &target.quant, |path, body| {
+            exchange(path, body, false, None)
+        })?;
+        let query = config::query(&target, &path);
+        let mut resolved =
+            config::resolved_in_scope(&exchange(&query, None, false, None)?, &target, &path)?;
+        let mut warnings = vec![config::FIT_WARNING.into()];
+        if prepared.profile.settings.model_load.is_none() {
+            warnings.push(
+                "Load options shown are suggested defaults; the legacy profile has not saved them."
+                    .into(),
+            );
+        }
+        let mut http = None;
+        let auto_switch_enabled = match exchange(
+            "/api/settings/openai-auto-switch",
+            None,
+            false,
+            Some(&mut http),
+        ) {
+            Ok(value) => value["enabled"].as_bool(),
+            Err(Failure::Authentication) if http == Some(403) => None,
+            Err(Failure::ModelSettingsUnsupported) => None,
+            Err(error) => return Err(error),
         };
         match auto_switch_enabled {
             Some(false)=>warnings.push("Automatic model switching is disabled. Saved settings alone do not enable API auto-loading; Loomlight can explicitly load an available cached model.".into()),
             None=>warnings.push("Automatic model switching could not be verified; no global setting was changed.".into()),
             _=>(),
         }
-        let mut applied=false;
+        let mut applied = false;
         if apply {
             // Refresh the merge base and loading observation immediately before PUT.
             // Studio offers no compare-and-swap: external edits can still race this write.
-            resolved=config::resolved_in_scope(&exchange(&query,None,false,None)?,&target,&path)?;
-            let merged=config::merge(resolved.row.as_ref(),&requested)?;
-            let current=exchange("/api/inference/status",None,false,None)?;
-            if crate::studio_models::configuration_status(&current,&prepared.profile.settings.model)?.0 {return Err(Failure::Busy);}
-            let mut body=Value::Object(merged.clone());
-            body["model_id"]=json!(target.key);
-            if cancel.cancelled() {return Err(Failure::Cancelled);}
-            if !before_write() {return Err(Failure::ModelSettingsChanged);}
-            exchange(config::ROUTE,Some(&body),true,None)?;
-            let readback=exchange(&query,None,false,None)?;
-            resolved=match config::resolved_in_scope(&readback,&target,&path) {
-                Ok(resolved)=>resolved,
-                Err(Failure::ModelSettingsUnsafe)=>{
+            resolved =
+                config::resolved_in_scope(&exchange(&query, None, false, None)?, &target, &path)?;
+            let merged = config::merge(resolved.row.as_ref(), &requested)?;
+            let current = exchange("/api/inference/status", None, false, None)?;
+            if crate::studio_models::configuration_status(
+                &current,
+                &prepared.profile.settings.model,
+            )?
+            .0
+            {
+                return Err(Failure::Busy);
+            }
+            let mut body = Value::Object(merged.clone());
+            body["model_id"] = json!(target.key);
+            if cancel.cancelled() {
+                return Err(Failure::Cancelled);
+            }
+            if !before_write() {
+                return Err(Failure::ModelSettingsChanged);
+            }
+            exchange(config::ROUTE, Some(&body), true, None)?;
+            let readback = exchange(&query, None, false, None)?;
+            resolved = match config::resolved_in_scope(&readback, &target, &path) {
+                Ok(resolved) => resolved,
+                Err(Failure::ModelSettingsUnsafe) => {
                     warnings.push("The write completed, but read-back resolved outside the selected model. The outcome is unverified; unrelated saved values were discarded and no retry occurred.".into());
-                    config::Resolved {key:None,row:None}
+                    config::Resolved {
+                        key: None,
+                        row: None,
+                    }
                 }
-                Err(error)=>return Err(error),
+                Err(error) => return Err(error),
             };
-            let verified=resolved.row.as_ref().map(config::known_saved);
-            applied=resolved.key.as_deref().is_some_and(|key|key.eq_ignore_ascii_case(&target.key))
-                && resolved.row.as_ref().is_some_and(|row|row.get("max_seq_length").and_then(Value::as_u64)==Some(requested.context_length.into()) && row.get("custom_context_length").and_then(Value::as_u64)==Some(requested.context_length.into()))
-                && verified.as_ref().is_some_and(|saved|
-                saved.context_length==Some(requested.context_length) && saved.parallel==Some(requested.parallel)
-                && (saved.gpu_memory_mode==Some(requested.gpu_memory_mode)
-                    || (requested.gpu_memory_mode==crate::ai_profiles::GpuMemoryMode::Auto && resolved.row.as_ref().is_some_and(|r|!r.contains_key("gpu_memory_mode"))))
-                && saved.fit==Some(requested.fit));
-            if !applied {warnings.push("The write completed, but the loader-resolved target or requested values differ on read-back. Saved configuration is not confirmed; no retry or reload occurred.".into());}
-            if let Some(row)=&resolved.row {
-                let mut unrelated=merged.iter().filter(|(key,_)|!matches!(key.as_str(),"max_seq_length"|"custom_context_length"|"n_parallel"|"gpu_memory_mode"|"llama_extra_args"));
-                if unrelated.any(|(key,value)|row.get(key)!=Some(value)) || row.get("llama_extra_args")!=merged.get("llama_extra_args") {
-                    applied=false;warnings.push("Some existing model options differ on read-back; preservation is not confirmed.".into());
+            let verified = resolved.row.as_ref().map(config::known_saved);
+            applied = resolved
+                .key
+                .as_deref()
+                .is_some_and(|key| key.eq_ignore_ascii_case(&target.key))
+                && resolved.row.as_ref().is_some_and(|row| {
+                    row.get("max_seq_length").and_then(Value::as_u64)
+                        == Some(requested.context_length.into())
+                        && row.get("custom_context_length").and_then(Value::as_u64)
+                            == Some(requested.context_length.into())
+                })
+                && verified.as_ref().is_some_and(|saved| {
+                    saved.context_length == Some(requested.context_length)
+                        && saved.parallel == Some(requested.parallel)
+                        && (saved.gpu_memory_mode == Some(requested.gpu_memory_mode)
+                            || (requested.gpu_memory_mode
+                                == crate::ai_profiles::GpuMemoryMode::Auto
+                                && resolved
+                                    .row
+                                    .as_ref()
+                                    .is_some_and(|r| !r.contains_key("gpu_memory_mode"))))
+                        && saved.fit == Some(requested.fit)
+                });
+            if !applied {
+                warnings.push("The write completed, but the loader-resolved target or requested values differ on read-back. Saved configuration is not confirmed; no retry or reload occurred.".into());
+            }
+            if let Some(row) = &resolved.row {
+                let mut unrelated = merged.iter().filter(|(key, _)| {
+                    !matches!(
+                        key.as_str(),
+                        "max_seq_length"
+                            | "custom_context_length"
+                            | "n_parallel"
+                            | "gpu_memory_mode"
+                            | "llama_extra_args"
+                    )
+                });
+                if unrelated.any(|(key, value)| row.get(key) != Some(value))
+                    || row.get("llama_extra_args") != merged.get("llama_extra_args")
+                {
+                    applied = false;
+                    warnings.push("Some existing model options differ on read-back; preservation is not confirmed.".into());
                 }
             }
-        } else if resolved.row.as_ref().is_some_and(|row|config::validate(row).is_err()) {
+        } else if resolved
+            .row
+            .as_ref()
+            .is_some_and(|row| config::validate(row).is_err())
+        {
             warnings.push("Existing options include unverified fields or flags. Applying settings will require a safe, supported merge.".into());
         }
-        let saved=resolved.row.as_ref().map(config::known_saved);
-        if let Some(saved)=&saved {warnings.extend(config::warnings(&requested,saved,"Saved"));}
-        if let Some(effective)=&effective {warnings.extend(config::warnings(&requested,effective,"Effective"));} else {warnings.push("Loaded values could not be verified for the selected model; no effective configuration is claimed.".into());}
-        warnings.sort();warnings.dedup();
+        let saved = resolved.row.as_ref().map(config::known_saved);
+        if let Some(saved) = &saved {
+            warnings.extend(config::warnings(&requested, saved, "Saved"));
+        }
+        if let Some(effective) = &effective {
+            warnings.extend(config::warnings(&requested, effective, "Effective"));
+        } else {
+            warnings.push("Loaded values could not be verified for the selected model; no effective configuration is claimed.".into());
+        }
+        warnings.sort();
+        warnings.dedup();
         Ok(Report {model_id:prepared.profile.settings.model.clone(),resolved_model_id:resolved.key.filter(|key|key.eq_ignore_ascii_case(&target.key)),requested,saved,effective,auto_switch_enabled,applied,warnings,message:if apply {"Settings were written for the next model load. The current model was not reloaded; inspect read-back and warnings for confirmation."} else {"Observed saved settings and known loaded values. No settings were changed."}.into()})
     })();
     cancel.close_socket();
-    if cancel.cancelled() {Err(Failure::Cancelled)}else{result}
+    if cancel.cancelled() {
+        Err(Failure::Cancelled)
+    } else {
+        result
+    }
 }
 
 /// Debug/test-only, read-only qualification. Fixed routes, one shared 15-second deadline,
@@ -1118,22 +1257,40 @@ pub fn diagnose_model_interface(prepared: Prepared, cancel: &Cancel) -> Value {
     }
     fn public_version(value: &Value, key: &str) -> Option<String> {
         let value = value.get("version")?.as_str()?;
-        if value.len() > 64 || value.contains(key) { return None; }
-        if value == "dev" { return Some(value.into()); }
+        if value.len() > 64 || value.contains(key) {
+            return None;
+        }
+        if value == "dev" {
+            return Some(value.into());
+        }
         let version = value.strip_prefix('v').unwrap_or(value);
         let (numbers, suffix) = version.split_once('-').unwrap_or((version, ""));
         let parts: Vec<_> = numbers.split('.').collect();
-        if parts.len() != 3 || parts.iter().any(|s|s.is_empty() || !s.bytes().all(|b|b.is_ascii_digit()))
-            || !suffix.bytes().all(|b|b.is_ascii_alphanumeric() || matches!(b,b'.'|b'-'))
-        { return None; }
+        if parts.len() != 3
+            || parts
+                .iter()
+                .any(|s| s.is_empty() || !s.bytes().all(|b| b.is_ascii_digit()))
+            || !suffix
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'-'))
+        {
+            return None;
+        }
         Some(value.into())
     }
     let deadline = Instant::now() + prepared.timeout.min(Duration::from_secs(15));
     let mut routes = Vec::with_capacity(2);
     for (route, path) in [("status", "/api/inference/status"), ("version", "/version")] {
         let mut http = None;
-        let result = model_exchange_observed(&prepared, cancel, deadline, path, None,
-            ureq::tls::TlsConfig::default(), Some(&mut http));
+        let result = model_exchange_observed(
+            &prepared,
+            cancel,
+            deadline,
+            path,
+            None,
+            ureq::tls::TlsConfig::default(),
+            Some(&mut http),
+        );
         // Also close the owned socket on HTTP/shape errors; never touch Studio model state.
         cancel.close_socket();
         let receipt = match result {
@@ -1165,7 +1322,11 @@ pub fn diagnose_model_interface(prepared: Prepared, cancel: &Cancel) -> Value {
 #[cfg(test)]
 mod model_diagnostic_tests {
     use super::*;
-    use std::{io::{Read, Write}, net::TcpListener, thread};
+    use std::{
+        io::{Read, Write},
+        net::TcpListener,
+        thread,
+    };
 
     #[test]
     fn fixed_status_and_version_gets_are_sanitized_without_post_or_secret() {
@@ -1179,57 +1340,95 @@ mod model_diagnostic_tests {
             let server = thread::spawn(move || {
                 let deadline = Instant::now() + Duration::from_secs(5);
                 for (route, code, value) in [
-                    ("GET /api/inference/status ", status_code, json!({"yours":false,"active_model":PRIVATE,"model_identifier":KEY,"loaded":["synthetic-model",PRIVATE],"loading":[],"context_length":32768,"llama_cpp_installed_tag":KEY,"untrusted":KEY})),
-                    ("GET /version ", 200, json!({"version":if status_code==200 {"v1.2.3-diagnostic-private-fixture"} else {"v0.1.902-beta"},"untrusted":PRIVATE})),
+                    (
+                        "GET /api/inference/status ",
+                        status_code,
+                        json!({"yours":false,"active_model":PRIVATE,"model_identifier":KEY,"loaded":["synthetic-model",PRIVATE],"loading":[],"context_length":32768,"llama_cpp_installed_tag":KEY,"untrusted":KEY}),
+                    ),
+                    (
+                        "GET /version ",
+                        200,
+                        json!({"version":if status_code==200 {"v1.2.3-diagnostic-private-fixture"} else {"v0.1.902-beta"},"untrusted":PRIVATE}),
+                    ),
                 ] {
                     let mut socket = loop {
                         match listener.accept() {
                             Ok((socket, _)) => break socket,
-                            Err(e) if e.kind()==std::io::ErrorKind::WouldBlock => {
-                                assert!(Instant::now()<deadline,"Expected fixed diagnostic GET missing");
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                                assert!(
+                                    Instant::now() < deadline,
+                                    "Expected fixed diagnostic GET missing"
+                                );
                                 thread::yield_now();
                             }
                             Err(_) => panic!("Fixture accept failed"),
                         }
                     };
                     socket.set_nonblocking(false).unwrap();
-                    socket.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+                    socket
+                        .set_read_timeout(Some(Duration::from_secs(5)))
+                        .unwrap();
                     let mut bytes = Vec::new();
                     while !bytes.ends_with(b"\r\n\r\n") {
                         let mut byte = [0];
-                        assert_eq!(socket.read(&mut byte).unwrap(),1);
+                        assert_eq!(socket.read(&mut byte).unwrap(), 1);
                         bytes.push(byte[0]);
-                        assert!(bytes.len()<8192);
+                        assert!(bytes.len() < 8192);
                     }
                     let headers = String::from_utf8(bytes).unwrap();
-                    assert!(headers.starts_with(route),"Unexpected request method or route");
-                    assert!(headers.to_ascii_lowercase().contains(&format!("authorization: bearer {KEY}")),"Native-bound credential missing");
+                    assert!(
+                        headers.starts_with(route),
+                        "Unexpected request method or route"
+                    );
+                    assert!(
+                        headers
+                            .to_ascii_lowercase()
+                            .contains(&format!("authorization: bearer {KEY}")),
+                        "Native-bound credential missing"
+                    );
                     let body = serde_json::to_vec(&value).unwrap();
                     let mut response = format!("HTTP/1.1 {code} Fixture\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).into_bytes();
                     response.extend(body);
                     socket.write_all(&response).unwrap();
                 }
                 finished_rx.recv_timeout(Duration::from_secs(5)).unwrap();
-                assert!(matches!(listener.accept(),Err(e) if e.kind()==std::io::ErrorKind::WouldBlock),"Unexpected extra request");
+                assert!(
+                    matches!(listener.accept(),Err(e) if e.kind()==std::io::ErrorKind::WouldBlock),
+                    "Unexpected extra request"
+                );
             });
-            let prepared = prepare(super::tests::profile(port),Secret::new(KEY.into()),30).unwrap();
-            let diagnostic = diagnose_model_interface(prepared,&Cancel::default());
+            let prepared =
+                prepare(super::tests::profile(port), Secret::new(KEY.into()), 30).unwrap();
+            let diagnostic = diagnose_model_interface(prepared, &Cancel::default());
             finished_tx.send(()).unwrap();
             server.join().unwrap();
-            assert_eq!(diagnostic["routes"].as_array().unwrap().len(),2);
-            assert_eq!(diagnostic["routes"][0]["httpStatus"],status_code);
-            assert_eq!(diagnostic["routes"][1]["httpStatus"],200);
-            if status_code==200 {
-                assert_eq!(diagnostic["routes"][0]["facts"]["contextLength"]["capacity"],32768); assert_eq!(diagnostic["routes"][0]["facts"]["yours"],false);
-                assert_eq!(diagnostic["routes"][0]["facts"]["loaded"]["selectedCount"],1);
+            assert_eq!(diagnostic["routes"].as_array().unwrap().len(), 2);
+            assert_eq!(diagnostic["routes"][0]["httpStatus"], status_code);
+            assert_eq!(diagnostic["routes"][1]["httpStatus"], 200);
+            if status_code == 200 {
+                assert_eq!(
+                    diagnostic["routes"][0]["facts"]["contextLength"]["capacity"],
+                    32768
+                );
+                assert_eq!(diagnostic["routes"][0]["facts"]["yours"], false);
+                assert_eq!(
+                    diagnostic["routes"][0]["facts"]["loaded"]["selectedCount"],
+                    1
+                );
                 assert!(diagnostic["routes"][1]["facts"]["version"].is_null());
             } else {
-                assert_eq!(diagnostic["routes"][0]["failure"],Failure::ModelUnsupported.code());
-                assert_eq!(diagnostic["routes"][1]["facts"]["version"],"v0.1.902-beta");
+                assert_eq!(
+                    diagnostic["routes"][0]["failure"],
+                    Failure::ModelUnsupported.code()
+                );
+                assert_eq!(diagnostic["routes"][1]["facts"]["version"], "v0.1.902-beta");
             }
             let serialized = serde_json::to_string(&diagnostic).unwrap();
-            for forbidden in [KEY,PRIVATE,"untrusted","synthetic-model"] {
-                assert!(!serialized.contains(forbidden),"Diagnostic leaked an unallowlisted value");
+            for forbidden in [KEY, PRIVATE, "untrusted", "synthetic-model"] {
+                assert!(
+                    !serialized.contains(forbidden),
+                    "Diagnostic leaked an unallowlisted value"
+                );
             }
         }
     }
@@ -1257,11 +1456,18 @@ mod tests {
         original.settings.model = "changed".into();
         assert_eq!(p.profile.settings.model, "synthetic-model");
         let body: Value = serde_json::from_slice(&p.body).unwrap();
-        let fixture: Value = serde_json::from_str(include_str!("../../tests/fixtures/studio-request/bodies.json")).unwrap();
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../tests/fixtures/studio-request/bodies.json"
+        ))
+        .unwrap();
         assert_eq!(body, fixture["thinkingOn"]);
-        let mut off = profile(8888); off.settings.thinking = Some(false);
+        let mut off = profile(8888);
+        off.settings.thinking = Some(false);
         let off = prepare(off, Secret::new("public-fixture".into()), 600).unwrap();
-        assert_eq!(serde_json::from_slice::<Value>(&off.body).unwrap(), fixture["thinkingOff"]);
+        assert_eq!(
+            serde_json::from_slice::<Value>(&off.body).unwrap(),
+            fixture["thinkingOff"]
+        );
         assert_eq!(body["stream"], false);
         assert_eq!(body["max_tokens"], 1024);
         assert_eq!(body["temperature"], 1.0);
@@ -1664,7 +1870,10 @@ mod tests {
             // Closing a socket with unread response bytes can deliver EOF or a
             // connection reset to the peer. Both prove closure; timeouts and any
             // other error remain failures, alongside the owned-shutdown checks.
-            assert!(matches!(eof, Ok(0) | Err((std::io::ErrorKind::ConnectionReset, _))), "{diagnostic}");
+            assert!(
+                matches!(eof, Ok(0) | Err((std::io::ErrorKind::ConnectionReset, _))),
+                "{diagnostic}"
+            );
             assert!(eof_elapsed < Duration::from_secs(2), "{diagnostic}");
         }
     }
@@ -1830,17 +2039,38 @@ mod model_readiness_tests {
     ) {
         run_options(plan, None)
     }
-    fn run_options(plan: Vec<(&'static str, Value)>, model_load: Option<crate::ai_profiles::ModelLoadSettings>) -> (Result<Completion>,Vec<String>,Option<crate::studio_models::Readiness>) {
-        run_case(plan,model_load,false)
+    fn run_options(
+        plan: Vec<(&'static str, Value)>,
+        model_load: Option<crate::ai_profiles::ModelLoadSettings>,
+    ) -> (
+        Result<Completion>,
+        Vec<String>,
+        Option<crate::studio_models::Readiness>,
+    ) {
+        run_case(plan, model_load, false)
     }
-    fn run_response_failure(plan: Vec<(&'static str, Value)>) -> (Result<Completion>,Vec<String>,Option<crate::studio_models::Readiness>) {
-        run_case(plan,None,true)
+    fn run_response_failure(
+        plan: Vec<(&'static str, Value)>,
+    ) -> (
+        Result<Completion>,
+        Vec<String>,
+        Option<crate::studio_models::Readiness>,
+    ) {
+        run_case(plan, None, true)
     }
-    fn run_case(plan: Vec<(&'static str, Value)>, model_load: Option<crate::ai_profiles::ModelLoadSettings>, response_failure:bool) -> (Result<Completion>,Vec<String>,Option<crate::studio_models::Readiness>) {
+    fn run_case(
+        plan: Vec<(&'static str, Value)>,
+        model_load: Option<crate::ai_profiles::ModelLoadSettings>,
+        response_failure: bool,
+    ) -> (
+        Result<Completion>,
+        Vec<String>,
+        Option<crate::studio_models::Readiness>,
+    ) {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let port = listener.local_addr().unwrap().port();
         let (finished, finish) = mpsc::channel();
-        let expected_options=model_load.clone();
+        let expected_options = model_load.clone();
         let server = thread::spawn(move || {
             let mut observed = Vec::new();
             for (route, response) in plan {
@@ -1855,16 +2085,31 @@ mod model_readiness_tests {
                         body["model_path"],
                         "C:\\synthetic-cache\\fixture.Q4_K_M.gguf"
                     );
-                    for field in ["force_reload", "force_cancel_active", "trust_remote_code", "alongside", "force_alongside"] {
+                    for field in [
+                        "force_reload",
+                        "force_cancel_active",
+                        "trust_remote_code",
+                        "alongside",
+                        "force_alongside",
+                    ] {
                         assert_eq!(body[field], false);
                     }
                     assert_eq!(body["engine"], "auto");
                     assert_eq!(body["disable_vision"], true);
                     assert_eq!(body["speculative_type"], "off");
-                    if let Some(options)=&expected_options {
-                        assert_eq!(body["n_parallel"],options.parallel);
-                        assert_eq!(body["gpu_memory_mode"],json!(options.gpu_memory_mode));
-                        assert_eq!(body["llama_extra_args"],json!(["--fit",match options.fit {crate::ai_profiles::Fit::On=>"on",crate::ai_profiles::Fit::Off=>"off"}]));
+                    if let Some(options) = &expected_options {
+                        assert_eq!(body["n_parallel"], options.parallel);
+                        assert_eq!(body["gpu_memory_mode"], json!(options.gpu_memory_mode));
+                        assert_eq!(
+                            body["llama_extra_args"],
+                            json!([
+                                "--fit",
+                                match options.fit {
+                                    crate::ai_profiles::Fit::On => "on",
+                                    crate::ai_profiles::Fit::Off => "off",
+                                }
+                            ])
+                        );
                     } else {
                         assert_eq!(body["llama_extra_args"], json!([]));
                         assert!(body.get("n_parallel").is_none());
@@ -1872,7 +2117,10 @@ mod model_readiness_tests {
                     }
                 }
                 let bytes = serde_json::to_vec(&response).unwrap();
-                let code=response.get("_fixture_http_status").and_then(Value::as_u64).unwrap_or(200);
+                let code = response
+                    .get("_fixture_http_status")
+                    .and_then(Value::as_u64)
+                    .unwrap_or(200);
                 write!(socket,"HTTP/1.1 {code} Fixture\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",bytes.len()).unwrap();
                 socket.write_all(&bytes).unwrap();
             }
@@ -1886,7 +2134,7 @@ mod model_readiness_tests {
         });
         let mut profile = super::tests::profile(port);
         profile.settings.model = "fixture/model-GGUF".into();
-        profile.settings.model_load=model_load;
+        profile.settings.model_load = model_load;
         let p = prepare(profile, Secret::new("public-fixture".into()), 30).unwrap();
         let stages = Mutex::new(Vec::new());
         let readiness = Mutex::new(None);
@@ -1902,9 +2150,9 @@ mod model_readiness_tests {
         let routes = server.join().unwrap();
         if result.is_err() {
             if response_failure {
-                assert!(routes.iter().any(|r|r.contains("chat/completions")));
+                assert!(routes.iter().any(|r| r.contains("chat/completions")));
                 assert!(readiness.lock().unwrap().is_some());
-                assert_eq!(http,Some(200));
+                assert_eq!(http, Some(200));
             } else {
                 assert!(!routes.iter().any(|r| r.contains("chat/completions")));
                 assert!(readiness.lock().unwrap().is_none());
@@ -1939,17 +2187,32 @@ mod model_readiness_tests {
     }
     #[test]
     fn lower_effective_context_warns_and_generates_when_actual_request_fits() {
-        let (result, _, ready) = run(vec![("GET /api/inference/status ",loaded(json!(2048),"fixture/model-GGUF")),("POST /v1/chat/completions ",completion())]);
+        let (result, _, ready) = run(vec![
+            (
+                "GET /api/inference/status ",
+                loaded(json!(2048), "fixture/model-GGUF"),
+            ),
+            ("POST /v1/chat/completions ", completion()),
+        ]);
         assert!(result.is_ok());
-        let ready=ready.unwrap();
-        assert_eq!(ready.actual_context,2048);
+        let ready = ready.unwrap();
+        assert_eq!(ready.actual_context, 2048);
         assert!(!ready.warnings.is_empty());
     }
     #[test]
     fn reported_usage_above_observed_context_is_rejected_after_generation() {
-        let mut completion=completion();completion["usage"]=json!({"prompt_tokens":3000,"completion_tokens":1,"total_tokens":3001});
-        let (result,_,ready)=run_response_failure(vec![("GET /api/inference/status ",loaded(json!(2048),"fixture/model-GGUF")),("POST /v1/chat/completions ",completion)]);
-        assert_eq!(result,Err(Failure::Oversized));assert_eq!(ready.unwrap().actual_context,2048);
+        let mut completion = completion();
+        completion["usage"] =
+            json!({"prompt_tokens":3000,"completion_tokens":1,"total_tokens":3001});
+        let (result, _, ready) = run_response_failure(vec![
+            (
+                "GET /api/inference/status ",
+                loaded(json!(2048), "fixture/model-GGUF"),
+            ),
+            ("POST /v1/chat/completions ", completion),
+        ]);
+        assert_eq!(result, Err(Failure::Oversized));
+        assert_eq!(ready.unwrap().actual_context, 2048);
     }
     #[test]
     fn sufficient_loaded_model_reused_without_version_inventory_load_or_reload() {
@@ -2021,12 +2284,17 @@ mod model_readiness_tests {
         narrow[7].1 = loaded(json!(512), "C:\\synthetic-cache\\fixture.Q4_K_M.gguf");
         narrow.truncate(8);
         assert_eq!(run(narrow).0, Err(Failure::ModelLoadContext));
-        assert!(Failure::ModelLoadContext.message().contains("completed a local model load"));
-        assert!(Failure::ModelLoadContext.message().contains("no generation was sent"));
+        assert!(Failure::ModelLoadContext
+            .message()
+            .contains("completed a local model load"));
+        assert!(Failure::ModelLoadContext
+            .message()
+            .contains("no generation was sent"));
     }
 
     #[test]
-    fn optional_serving_contract_allows_idle_load_and_single_primary_reuse_without_version_or_tag() {
+    fn optional_serving_contract_allows_idle_load_and_single_primary_reuse_without_version_or_tag()
+    {
         let mut extended = plan();
         for index in [0, 5] {
             extended[index].1["serving"] = json!([]);
@@ -2046,32 +2314,59 @@ mod model_readiness_tests {
         // The serving name may differ from the selected identifier, but must be
         // exactly the observed primary name/checkpoint pair, with no other slot.
         let status = json!({"active_model":"Synthetic primary name","model_identifier":"fixture/model-GGUF","loaded":["Synthetic primary name"],"loading":[],"context_length":8192,"serving":["Synthetic primary name"],"serving_checkpoints":["fixture/model-GGUF"],"yours":true});
-        let (result, _, ready) = run(vec![("GET /api/inference/status ",status),("POST /v1/chat/completions ",completion())]);
+        let (result, _, ready) = run(vec![
+            ("GET /api/inference/status ", status),
+            ("POST /v1/chat/completions ", completion()),
+        ]);
         assert!(result.is_ok());
         assert!(!ready.unwrap().loaded_for_request);
     }
     #[test]
     fn hidden_or_ambiguous_serving_and_reported_eviction_never_generate() {
         let mut statuses = Vec::new();
-        statuses.push((json!({"loaded":[],"loading":[],"yours":false}),Failure::ModelConflict));
-        statuses.push((json!({"loaded":[],"loading":[],"yours":"unknown"}),Failure::ModelUnsupported));
-        statuses.push((json!({"loaded":[],"loading":[],"serving":["other"],"serving_checkpoints":["other"]}),Failure::ModelConflict));
-        statuses.push((json!({"loaded":[],"loading":[],"serving":[]}),Failure::ModelUnsupported));
-        statuses.push((json!({"loaded":[],"loading":[],"serving":null,"serving_checkpoints":[]}),Failure::ModelUnsupported));
-        statuses.push((json!({"loaded":[],"loading":[],"serving":["other"],"serving_checkpoints":[]}),Failure::ModelUnsupported));
+        statuses.push((
+            json!({"loaded":[],"loading":[],"yours":false}),
+            Failure::ModelConflict,
+        ));
+        statuses.push((
+            json!({"loaded":[],"loading":[],"yours":"unknown"}),
+            Failure::ModelUnsupported,
+        ));
+        statuses.push((
+            json!({"loaded":[],"loading":[],"serving":["other"],"serving_checkpoints":["other"]}),
+            Failure::ModelConflict,
+        ));
+        statuses.push((
+            json!({"loaded":[],"loading":[],"serving":[]}),
+            Failure::ModelUnsupported,
+        ));
+        statuses.push((
+            json!({"loaded":[],"loading":[],"serving":null,"serving_checkpoints":[]}),
+            Failure::ModelUnsupported,
+        ));
+        statuses.push((
+            json!({"loaded":[],"loading":[],"serving":["other"],"serving_checkpoints":[]}),
+            Failure::ModelUnsupported,
+        ));
         for (names, checkpoints) in [
-            (json!([]),json!([])),
-            (json!(["fixture/model-GGUF","other"]),json!(["fixture/model-GGUF","other"])),
-            (json!(["other"]),json!(["fixture/model-GGUF"])),
-            (json!(["fixture/model-GGUF"]),json!(["other"])),
+            (json!([]), json!([])),
+            (
+                json!(["fixture/model-GGUF", "other"]),
+                json!(["fixture/model-GGUF", "other"]),
+            ),
+            (json!(["other"]), json!(["fixture/model-GGUF"])),
+            (json!(["fixture/model-GGUF"]), json!(["other"])),
         ] {
-            let mut status = loaded(json!(8192),"fixture/model-GGUF");
+            let mut status = loaded(json!(8192), "fixture/model-GGUF");
             status["serving"] = names;
             status["serving_checkpoints"] = checkpoints;
-            statuses.push((status,Failure::ModelConflict));
+            statuses.push((status, Failure::ModelConflict));
         }
         for (status, failure) in statuses {
-            assert_eq!(run(vec![("GET /api/inference/status ",status)]).0,Err(failure));
+            assert_eq!(
+                run(vec![("GET /api/inference/status ", status)]).0,
+                Err(failure)
+            );
         }
         // Rechecking immediately before load must apply the same ownership/slot guard.
         for status in [
@@ -2081,35 +2376,48 @@ mod model_readiness_tests {
             let mut race = plan();
             race[5].1 = status;
             race.truncate(6);
-            assert_eq!(run(race).0,Err(Failure::ModelConflict));
+            assert_eq!(run(race).0, Err(Failure::ModelConflict));
         }
-        for evicted in [json!(["other"]),Value::Null,json!(false)] {
+        for evicted in [json!(["other"]), Value::Null, json!(false)] {
             let mut changed = plan();
             changed[6].1["evicted"] = evicted;
             changed.truncate(7);
-            assert_eq!(run(changed).0,Err(Failure::ModelLoad));
+            assert_eq!(run(changed).0, Err(Failure::ModelLoad));
         }
         let mut changed = plan();
-        changed[7].1["serving"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf","other"]);
-        changed[7].1["serving_checkpoints"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf","other"]);
+        changed[7].1["serving"] = json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf", "other"]);
+        changed[7].1["serving_checkpoints"] =
+            json!(["C:\\synthetic-cache\\fixture.Q4_K_M.gguf", "other"]);
         changed.truncate(8);
-        assert_eq!(run(changed).0,Err(Failure::ModelConflict));
+        assert_eq!(run(changed).0, Err(Failure::ModelConflict));
     }
 
-
     #[test]
-    fn cache_capability_metadata_accepts_chat_and_legacy_rows_but_refuses_media_unknown_or_malformed() {
+    fn cache_capability_metadata_accepts_chat_and_legacy_rows_but_refuses_media_unknown_or_malformed(
+    ) {
         // The normal positive load fixture advertises text-generation, matching
         // the public cache schema. Missing/null fields retain older compatibility.
         for null in [false, true] {
             let mut legacy = plan();
             let row = legacy[2].1["cached"][0].as_object_mut().unwrap();
             for key in ["task", "partial"] {
-                if null { row.insert(key.into(), Value::Null); } else { row.remove(key); }
+                if null {
+                    row.insert(key.into(), Value::Null);
+                } else {
+                    row.remove(key);
+                }
             }
             assert!(run(legacy).0.is_ok());
         }
-        for task in [json!("text-to-image"), json!("text-to-speech"), json!("unknown"), json!(""), json!(false), json!({"status":"complete"}), json!([])] {
+        for task in [
+            json!("text-to-image"),
+            json!("text-to-speech"),
+            json!("unknown"),
+            json!(""),
+            json!(false),
+            json!({"status":"complete"}),
+            json!([]),
+        ] {
             let mut rejected = plan();
             rejected[2].1["cached"][0]["task"] = task;
             rejected.truncate(3);
@@ -2125,19 +2433,52 @@ mod model_readiness_tests {
 
     #[test]
     fn explicit_load_knobs_reach_manual_loader_and_effective_mismatch_only_warns() {
-        let mut p=plan();p[7].1=loaded(json!(2048),"C:\\synthetic-cache\\fixture.Q4_K_M.gguf");p[7].1["parallel_slots"]=json!(1);p[7].1["gpu_memory_mode"]=json!("manual");
-        let options=crate::ai_profiles::ModelLoadSettings {parallel:2,gpu_memory_mode:crate::ai_profiles::GpuMemoryMode::Auto,fit:crate::ai_profiles::Fit::On};
-        let (result,_,ready)=run_options(p,Some(options));assert!(result.is_ok());let ready=ready.unwrap();assert!(ready.loaded_for_request);assert!(ready.warnings.len()>=3);assert_eq!(ready.effective.parallel,Some(1));assert_eq!(ready.effective.fit,None);
-        let (result,_,ready)=run_options(vec![("GET /api/inference/status ",loaded(json!(2048),"fixture/model-GGUF")),("POST /v1/chat/completions ",completion())],Some(crate::ai_profiles::ModelLoadSettings::default()));assert!(result.is_ok());assert!(!ready.unwrap().loaded_for_request);
+        let mut p = plan();
+        p[7].1 = loaded(json!(2048), "C:\\synthetic-cache\\fixture.Q4_K_M.gguf");
+        p[7].1["parallel_slots"] = json!(1);
+        p[7].1["gpu_memory_mode"] = json!("manual");
+        let options = crate::ai_profiles::ModelLoadSettings {
+            parallel: 2,
+            gpu_memory_mode: crate::ai_profiles::GpuMemoryMode::Auto,
+            fit: crate::ai_profiles::Fit::On,
+        };
+        let (result, _, ready) = run_options(p, Some(options));
+        assert!(result.is_ok());
+        let ready = ready.unwrap();
+        assert!(ready.loaded_for_request);
+        assert!(ready.warnings.len() >= 3);
+        assert_eq!(ready.effective.parallel, Some(1));
+        assert_eq!(ready.effective.fit, None);
+        let (result, _, ready) = run_options(
+            vec![
+                (
+                    "GET /api/inference/status ",
+                    loaded(json!(2048), "fixture/model-GGUF"),
+                ),
+                ("POST /v1/chat/completions ", completion()),
+            ],
+            Some(crate::ai_profiles::ModelLoadSettings::default()),
+        );
+        assert!(result.is_ok());
+        assert!(!ready.unwrap().loaded_for_request);
     }
     #[test]
     fn legacy_settings_api_absence_preserves_cached_load_but_explicit_config_refuses_precisely() {
-        let mut p=plan();p[4].1=json!({"_fixture_http_status":404,"detail":"untrusted path"});assert!(run(p.clone()).0.is_ok());p.truncate(5);assert_eq!(run_options(p,Some(crate::ai_profiles::ModelLoadSettings::default())).0,Err(Failure::ModelSettingsUnsupported));
+        let mut p = plan();
+        p[4].1 = json!({"_fixture_http_status":404,"detail":"untrusted path"});
+        assert!(run(p.clone()).0.is_ok());
+        p.truncate(5);
+        assert_eq!(
+            run_options(p, Some(crate::ai_profiles::ModelLoadSettings::default())).0,
+            Err(Failure::ModelSettingsUnsupported)
+        );
     }
     #[test]
     fn resolved_override_for_unrelated_model_refuses_before_local_load_or_generation() {
-        let mut p=plan();p[4].1=json!({"overrides":{"unrelated/model":{"n_parallel":1}},"resolved_key":"unrelated/model","resolved":{"n_parallel":1}});p.truncate(5);
-        assert_eq!(run(p).0,Err(Failure::ModelSettingsUnsafe));
+        let mut p = plan();
+        p[4].1 = json!({"overrides":{"unrelated/model":{"n_parallel":1}},"resolved_key":"unrelated/model","resolved":{"n_parallel":1}});
+        p.truncate(5);
+        assert_eq!(run(p).0, Err(Failure::ModelSettingsUnsafe));
     }
     #[test]
     fn cancellation_owns_and_closes_status_socket_before_any_generation() {
@@ -2173,125 +2514,385 @@ mod model_readiness_tests {
     }
     #[test]
     fn cancellation_during_local_load_closes_only_owned_socket_and_never_generates() {
-        let listener=TcpListener::bind("127.0.0.1:0").unwrap();let port=listener.local_addr().unwrap().port();let cancel=Cancel::default();let c=cancel.clone();
-        let server=thread::spawn(move||{
-            for (route,response) in plan().into_iter().take(7) {
-                let(mut socket,_)=listener.accept().unwrap();let(header,_)=read_request(&mut socket);assert!(header.starts_with(route));
-                if route=="POST /api/inference/load " {c.cancel();let mut b=[0;1];assert_eq!(socket.read(&mut b).unwrap(),0);break;}
-                let bytes=serde_json::to_vec(&response).unwrap();write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",bytes.len()).unwrap();socket.write_all(&bytes).unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let cancel = Cancel::default();
+        let c = cancel.clone();
+        let server = thread::spawn(move || {
+            for (route, response) in plan().into_iter().take(7) {
+                let (mut socket, _) = listener.accept().unwrap();
+                let (header, _) = read_request(&mut socket);
+                assert!(header.starts_with(route));
+                if route == "POST /api/inference/load " {
+                    c.cancel();
+                    let mut b = [0; 1];
+                    assert_eq!(socket.read(&mut b).unwrap(), 0);
+                    break;
+                }
+                let bytes = serde_json::to_vec(&response).unwrap();
+                write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",bytes.len()).unwrap();
+                socket.write_all(&bytes).unwrap();
             }
-            listener.set_nonblocking(true).unwrap();assert!(matches!(listener.accept(),Err(e) if e.kind()==std::io::ErrorKind::WouldBlock));
+            listener.set_nonblocking(true).unwrap();
+            assert!(matches!(listener.accept(),Err(e) if e.kind()==std::io::ErrorKind::WouldBlock));
         });
-        let mut profile=super::tests::profile(port);profile.settings.model="fixture/model-GGUF".into();
-        let p=prepare(profile,Secret::new("public-fixture".into()),30).unwrap();
-        assert_eq!(execute_ready(p,&cancel,|_|{},&mut None,|_|panic!("cancel cannot publish readiness")),Err(Failure::Cancelled));server.join().unwrap();
+        let mut profile = super::tests::profile(port);
+        profile.settings.model = "fixture/model-GGUF".into();
+        let p = prepare(profile, Secret::new("public-fixture".into()), 30).unwrap();
+        assert_eq!(
+            execute_ready(
+                p,
+                &cancel,
+                |_| {},
+                &mut None,
+                |_| panic!("cancel cannot publish readiness")
+            ),
+            Err(Failure::Cancelled)
+        );
+        server.join().unwrap();
     }
-
 }
 
 #[cfg(test)]
 mod model_settings_tests {
     use super::*;
     use crate::{ai_profiles::ModelLoadSettings, studio_config};
-    use std::{io::{Read,Write},net::TcpListener,thread};
+    use std::{
+        io::{Read, Write},
+        net::TcpListener,
+        thread,
+    };
     const QUERY: &str="GET /api/settings/openai-auto-switch/overrides?model_id=C%3A%5Csynthetic-cache%5Cfixture.Q4_K_M.gguf&alias_id=fixture%2Fmodel-GGUF&gguf_variant=Q4_K_M ";
-    fn response(key:&str,row:Value)->Value {
-        let mut rows=serde_json::Map::new();rows.insert(key.into(),row.clone());
+    fn response(key: &str, row: Value) -> Value {
+        let mut rows = serde_json::Map::new();
+        rows.insert(key.into(), row.clone());
         json!({"overrides":rows,"resolved":row,"resolved_key":key})
     }
-    fn initial()->Value {response("fixture/model-GGUF",json!({"kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--flash-attn","on","--no-warmup"]}))}
-    fn saved()->Value {response("fixture/model-GGUF:Q4_K_M",json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--flash-attn","on","--no-warmup","--fit","off"]}))}
-    fn status()->Value {json!({"active_model":"fixture/model-GGUF","model_identifier":"fixture/model-GGUF","loaded":["fixture/model-GGUF"],"loading":[],"context_length":2048,"parallel_slots":2,"gpu_memory_mode":"auto"})}
-    fn plan(apply:bool)->Vec<(&'static str,u16,Value)> {
-        let mut plan=vec![
-            ("GET /api/inference/status ",200,status()),
-            ("GET /v1/models ",200,json!({"data":[{"id":"fixture/model-GGUF","loaded":true,"quant":"Q4_K_M"}]})),
-            ("GET /api/models/cached-gguf ",200,json!({"cached":[{"repo_id":"fixture/model-GGUF","task":"text-generation","partial":false}]})),
-            ("GET /api/models/cached-model-path?repo_id=fixture%2Fmodel-GGUF&variant=Q4_K_M ",200,json!({"path":"C:\\synthetic-cache\\fixture.Q4_K_M.gguf","is_dir":false})),
-            (QUERY,200,initial()),
-            ("GET /api/settings/openai-auto-switch ",200,json!({"enabled":false})),
+    fn initial() -> Value {
+        response(
+            "fixture/model-GGUF",
+            json!({"kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--flash-attn","on","--no-warmup"]}),
+        )
+    }
+    fn saved() -> Value {
+        response(
+            "fixture/model-GGUF:Q4_K_M",
+            json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--flash-attn","on","--no-warmup","--fit","off"]}),
+        )
+    }
+    fn status() -> Value {
+        json!({"active_model":"fixture/model-GGUF","model_identifier":"fixture/model-GGUF","loaded":["fixture/model-GGUF"],"loading":[],"context_length":2048,"parallel_slots":2,"gpu_memory_mode":"auto"})
+    }
+    fn plan(apply: bool) -> Vec<(&'static str, u16, Value)> {
+        let mut plan = vec![
+            ("GET /api/inference/status ", 200, status()),
+            (
+                "GET /v1/models ",
+                200,
+                json!({"data":[{"id":"fixture/model-GGUF","loaded":true,"quant":"Q4_K_M"}]}),
+            ),
+            (
+                "GET /api/models/cached-gguf ",
+                200,
+                json!({"cached":[{"repo_id":"fixture/model-GGUF","task":"text-generation","partial":false}]}),
+            ),
+            (
+                "GET /api/models/cached-model-path?repo_id=fixture%2Fmodel-GGUF&variant=Q4_K_M ",
+                200,
+                json!({"path":"C:\\synthetic-cache\\fixture.Q4_K_M.gguf","is_dir":false}),
+            ),
+            (QUERY, 200, initial()),
+            (
+                "GET /api/settings/openai-auto-switch ",
+                200,
+                json!({"enabled":false}),
+            ),
         ];
-        if apply {plan.extend([(QUERY,200,initial()),("GET /api/inference/status ",200,status()),("PUT /api/settings/openai-auto-switch/overrides ",200,json!({"overrides":{},"resolved":null,"resolved_key":null})),(QUERY,200,saved())]);}
+        if apply {
+            plan.extend([
+                (QUERY, 200, initial()),
+                ("GET /api/inference/status ", 200, status()),
+                (
+                    "PUT /api/settings/openai-auto-switch/overrides ",
+                    200,
+                    json!({"overrides":{},"resolved":null,"resolved_key":null}),
+                ),
+                (QUERY, 200, saved()),
+            ]);
+        }
         plan
     }
-    fn run(plan:Vec<(&'static str,u16,Value)>,apply:bool,legacy:bool,before:impl Fn(&Cancel)->bool)->Result<studio_config::Report> {
-        let listener=TcpListener::bind("127.0.0.1:0").unwrap();listener.set_nonblocking(true).unwrap();let port=listener.local_addr().unwrap().port();
-        let (done_tx,done_rx)=mpsc::channel();
-        let server=thread::spawn(move||{
-            let deadline=Instant::now()+Duration::from_secs(8);
-            for (route,code,value) in plan {
-                let mut socket=loop {match listener.accept(){Ok((socket,_))=>break socket,Err(e)if e.kind()==std::io::ErrorKind::WouldBlock=>{assert!(Instant::now()<deadline,"Expected settings request missing");thread::yield_now();},Err(_)=>panic!("Fixture accept failed")}};
-                socket.set_nonblocking(false).unwrap();socket.set_read_timeout(Some(Duration::from_secs(3))).unwrap();socket.set_write_timeout(Some(Duration::from_secs(3))).unwrap();
-                let mut header=Vec::new();while !header.ends_with(b"\r\n\r\n") {let mut b=[0];assert_eq!(socket.read(&mut b).unwrap(),1);header.push(b[0]);assert!(header.len()<8192);}
-                let header=String::from_utf8(header).unwrap();assert!(header.starts_with(route),"Unexpected method or route");assert!(header.to_ascii_lowercase().contains("authorization: bearer public-fixture"),"Expected bound fixture credential");
-                let length=header.lines().find_map(|line|line.to_ascii_lowercase().strip_prefix("content-length:").map(|n|n.trim().parse::<usize>().unwrap())).unwrap_or(0);assert!(length<16384);let mut bytes=vec![0;length];socket.read_exact(&mut bytes).unwrap();
+    fn run(
+        plan: Vec<(&'static str, u16, Value)>,
+        apply: bool,
+        legacy: bool,
+        before: impl Fn(&Cancel) -> bool,
+    ) -> Result<studio_config::Report> {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let (done_tx, done_rx) = mpsc::channel();
+        let server = thread::spawn(move || {
+            let deadline = Instant::now() + Duration::from_secs(8);
+            for (route, code, value) in plan {
+                let mut socket = loop {
+                    match listener.accept() {
+                        Ok((socket, _)) => break socket,
+                        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                            assert!(
+                                Instant::now() < deadline,
+                                "Expected settings request missing"
+                            );
+                            thread::yield_now();
+                        }
+                        Err(_) => panic!("Fixture accept failed"),
+                    }
+                };
+                socket.set_nonblocking(false).unwrap();
+                socket
+                    .set_read_timeout(Some(Duration::from_secs(3)))
+                    .unwrap();
+                socket
+                    .set_write_timeout(Some(Duration::from_secs(3)))
+                    .unwrap();
+                let mut header = Vec::new();
+                while !header.ends_with(b"\r\n\r\n") {
+                    let mut b = [0];
+                    assert_eq!(socket.read(&mut b).unwrap(), 1);
+                    header.push(b[0]);
+                    assert!(header.len() < 8192);
+                }
+                let header = String::from_utf8(header).unwrap();
+                assert!(header.starts_with(route), "Unexpected method or route");
+                assert!(
+                    header
+                        .to_ascii_lowercase()
+                        .contains("authorization: bearer public-fixture"),
+                    "Expected bound fixture credential"
+                );
+                let length = header
+                    .lines()
+                    .find_map(|line| {
+                        line.to_ascii_lowercase()
+                            .strip_prefix("content-length:")
+                            .map(|n| n.trim().parse::<usize>().unwrap())
+                    })
+                    .unwrap_or(0);
+                assert!(length < 16384);
+                let mut bytes = vec![0; length];
+                socket.read_exact(&mut bytes).unwrap();
                 if route.starts_with("PUT ") {
-                    let body:Value=serde_json::from_slice(&bytes).unwrap();
-                    assert_eq!(body["model_id"],"fixture/model-GGUF:Q4_K_M");assert_eq!(body["max_seq_length"],4096);assert_eq!(body["custom_context_length"],4096);assert_eq!(body["n_parallel"],1);assert_eq!(body["gpu_memory_mode"],"manual");
-                    if value["_fixture_empty_merge"]==true {
-                        assert!(body.get("kv_cache_dtype").is_none());assert_eq!(body["llama_extra_args"],json!(["--fit","off"]));
+                    let body: Value = serde_json::from_slice(&bytes).unwrap();
+                    assert_eq!(body["model_id"], "fixture/model-GGUF:Q4_K_M");
+                    assert_eq!(body["max_seq_length"], 4096);
+                    assert_eq!(body["custom_context_length"], 4096);
+                    assert_eq!(body["n_parallel"], 1);
+                    assert_eq!(body["gpu_memory_mode"], "manual");
+                    if value["_fixture_empty_merge"] == true {
+                        assert!(body.get("kv_cache_dtype").is_none());
+                        assert_eq!(body["llama_extra_args"], json!(["--fit", "off"]));
                     } else {
-                        assert_eq!(body["kv_cache_dtype"],"q8_0");assert_eq!(body["speculative_type"],"ngram");assert_eq!(body["ctx_checkpoints"],4);assert_eq!(body["n_batch"],512);assert_eq!(body["llama_extra_args"],json!(["--flash-attn","on","--no-warmup","--fit","off"]));
+                        assert_eq!(body["kv_cache_dtype"], "q8_0");
+                        assert_eq!(body["speculative_type"], "ngram");
+                        assert_eq!(body["ctx_checkpoints"], 4);
+                        assert_eq!(body["n_batch"], 512);
+                        assert_eq!(
+                            body["llama_extra_args"],
+                            json!(["--flash-attn", "on", "--no-warmup", "--fit", "off"])
+                        );
                     }
                 }
-                let body=serde_json::to_vec(&value).unwrap();let mut reply=format!("HTTP/1.1 {code} Fixture\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).into_bytes();reply.extend(body);socket.write_all(&reply).unwrap();
+                let body = serde_json::to_vec(&value).unwrap();
+                let mut reply=format!("HTTP/1.1 {code} Fixture\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).into_bytes();
+                reply.extend(body);
+                socket.write_all(&reply).unwrap();
             }
-            done_rx.recv_timeout(Duration::from_secs(9)).unwrap();assert!(matches!(listener.accept(),Err(e)if e.kind()==std::io::ErrorKind::WouldBlock),"Unexpected settings, load or generation request");
+            done_rx.recv_timeout(Duration::from_secs(9)).unwrap();
+            assert!(
+                matches!(listener.accept(),Err(e)if e.kind()==std::io::ErrorKind::WouldBlock),
+                "Unexpected settings, load or generation request"
+            );
         });
-        let mut profile=super::tests::profile(port);profile.settings.model="fixture/model-GGUF".into();profile.settings.model_load=(!legacy).then(ModelLoadSettings::default);
-        let prepared=prepare(profile,Secret::new("public-fixture".into()),30).unwrap();let cancel=Cancel::default();
-        let result=model_load_settings(prepared,apply,&cancel,||before(&cancel));done_tx.send(()).unwrap();server.join().unwrap();result
+        let mut profile = super::tests::profile(port);
+        profile.settings.model = "fixture/model-GGUF".into();
+        profile.settings.model_load = (!legacy).then(ModelLoadSettings::default);
+        let prepared = prepare(profile, Secret::new("public-fixture".into()), 30).unwrap();
+        let cancel = Cancel::default();
+        let result = model_load_settings(prepared, apply, &cancel, || before(&cancel));
+        done_tx.send(()).unwrap();
+        server.join().unwrap();
+        result
     }
     #[test]
     fn explicit_apply_preserves_quant_options_verifies_resolved_readback_and_never_reloads() {
-        let report=run(plan(true),true,false,|_|true).unwrap();assert!(report.applied);assert_eq!(report.model_id,"fixture/model-GGUF");assert_eq!(report.resolved_model_id.as_deref(),Some("fixture/model-GGUF:Q4_K_M"));assert_eq!(report.saved.unwrap().context_length,Some(4096));assert_eq!(report.effective.unwrap().context_length,Some(2048));assert_eq!(report.auto_switch_enabled,Some(false));assert!(!report.warnings.is_empty());
+        let report = run(plan(true), true, false, |_| true).unwrap();
+        assert!(report.applied);
+        assert_eq!(report.model_id, "fixture/model-GGUF");
+        assert_eq!(
+            report.resolved_model_id.as_deref(),
+            Some("fixture/model-GGUF:Q4_K_M")
+        );
+        assert_eq!(report.saved.unwrap().context_length, Some(4096));
+        assert_eq!(report.effective.unwrap().context_length, Some(2048));
+        assert_eq!(report.auto_switch_enabled, Some(false));
+        assert!(!report.warnings.is_empty());
     }
     #[test]
     fn first_apply_accepts_source_empty_object_resolution_and_confirms_quant_entry() {
-        let mut p=plan(true);let empty=json!({"overrides":{},"resolved_key":null,"resolved":{}});p[4].2=empty.clone();p[6].2=empty;p[8].2=json!({"overrides":{},"resolved_key":null,"resolved":null,"_fixture_empty_merge":true});p[9].2=response("fixture/model-GGUF:Q4_K_M",json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","llama_extra_args":["--fit","off"]}));assert!(run(p,true,false,|_|true).unwrap().applied);
+        let mut p = plan(true);
+        let empty = json!({"overrides":{},"resolved_key":null,"resolved":{}});
+        p[4].2 = empty.clone();
+        p[6].2 = empty;
+        p[8].2 =
+            json!({"overrides":{},"resolved_key":null,"resolved":null,"_fixture_empty_merge":true});
+        p[9].2 = response(
+            "fixture/model-GGUF:Q4_K_M",
+            json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","llama_extra_args":["--fit","off"]}),
+        );
+        assert!(run(p, true, false, |_| true).unwrap().applied);
     }
     #[test]
     fn legacy_read_and_owner_only_auto_switch_forbidden_remain_read_only_and_sanitized() {
-        let mut p=plan(false);p[5].1=403;p[5].2=json!({"detail":"public-fixture C:\\private\\profile"});
-        let report=run(p,false,true,|_|panic!("Read cannot request a write")).unwrap();assert!(!report.applied);assert_eq!(report.auto_switch_enabled,None);let text=serde_json::to_string(&report).unwrap();assert!(!text.contains("public-fixture"));assert!(!text.contains("synthetic-cache"));assert!(!text.contains("private"));
-        let mut contradictory=plan(false);contradictory[0].2=json!({"active_model":"fixture/model-GGUF","loaded":[],"loading":[],"context_length":2048});let report=run(contradictory,false,true,|_|true).unwrap();assert!(report.effective.is_none());assert!(report.warnings.iter().any(|w|w.contains("no effective configuration")));
+        let mut p = plan(false);
+        p[5].1 = 403;
+        p[5].2 = json!({"detail":"public-fixture C:\\private\\profile"});
+        let report = run(p, false, true, |_| panic!("Read cannot request a write")).unwrap();
+        assert!(!report.applied);
+        assert_eq!(report.auto_switch_enabled, None);
+        let text = serde_json::to_string(&report).unwrap();
+        assert!(!text.contains("public-fixture"));
+        assert!(!text.contains("synthetic-cache"));
+        assert!(!text.contains("private"));
+        let mut contradictory = plan(false);
+        contradictory[0].2 = json!({"active_model":"fixture/model-GGUF","loaded":[],"loading":[],"context_length":2048});
+        let report = run(contradictory, false, true, |_| true).unwrap();
+        assert!(report.effective.is_none());
+        assert!(report
+            .warnings
+            .iter()
+            .any(|w| w.contains("no effective configuration")));
     }
     #[test]
     fn unsafe_fields_busy_changed_profile_and_cancellation_refuse_before_put() {
-        for bad in [json!({"unknown_private_field":1}),json!({"llama_extra_args":["--parallel","1"]})] {
-            let mut p=plan(true);p[6].2=response("fixture/model-GGUF",bad);p.truncate(7);assert!(matches!(run(p,true,false,|_|true),Err(Failure::ModelSettingsUnsafe)));
+        for bad in [
+            json!({"unknown_private_field":1}),
+            json!({"llama_extra_args":["--parallel","1"]}),
+        ] {
+            let mut p = plan(true);
+            p[6].2 = response("fixture/model-GGUF", bad);
+            p.truncate(7);
+            assert!(matches!(
+                run(p, true, false, |_| true),
+                Err(Failure::ModelSettingsUnsafe)
+            ));
         }
-        let mut busy=plan(true);busy[0].2=json!({"loaded":[],"loading":["fixture/model-GGUF"]});busy.truncate(1);assert!(matches!(run(busy,true,false,|_|true),Err(Failure::Busy)));
-        let mut changed=plan(true);changed.truncate(8);assert!(matches!(run(changed.clone(),true,false,|_|false),Err(Failure::ModelSettingsChanged)));assert!(matches!(run(changed,true,false,|cancel|{cancel.cancel();true}),Err(Failure::Cancelled)));
+        let mut busy = plan(true);
+        busy[0].2 = json!({"loaded":[],"loading":["fixture/model-GGUF"]});
+        busy.truncate(1);
+        assert!(matches!(
+            run(busy, true, false, |_| true),
+            Err(Failure::Busy)
+        ));
+        let mut changed = plan(true);
+        changed.truncate(8);
+        assert!(matches!(
+            run(changed.clone(), true, false, |_| false),
+            Err(Failure::ModelSettingsChanged)
+        ));
+        assert!(matches!(
+            run(changed, true, false, |cancel| {
+                cancel.cancel();
+                true
+            }),
+            Err(Failure::Cancelled)
+        ));
     }
     #[test]
     fn resolved_readback_mismatch_warns_without_claiming_success() {
-        let mut p=plan(true);p[9].2=initial();let report=run(p,true,false,|_|true).unwrap();assert!(!report.applied);assert!(report.warnings.iter().any(|w|w.contains("not confirmed")));
-        let mut lost=plan(true);let row=json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--fit","off"]});lost[9].2=response("fixture/model-GGUF:Q4_K_M",row);let report=run(lost,true,false,|_|true).unwrap();assert!(!report.applied);assert!(report.warnings.iter().any(|w|w.contains("preservation is not confirmed")));
+        let mut p = plan(true);
+        p[9].2 = initial();
+        let report = run(p, true, false, |_| true).unwrap();
+        assert!(!report.applied);
+        assert!(report.warnings.iter().any(|w| w.contains("not confirmed")));
+        let mut lost = plan(true);
+        let row = json!({"max_seq_length":4096,"custom_context_length":4096,"n_parallel":1,"gpu_memory_mode":"manual","kv_cache_dtype":"q8_0","speculative_type":"ngram","n_batch":512,"ctx_checkpoints":4,"llama_extra_args":["--fit","off"]});
+        lost[9].2 = response("fixture/model-GGUF:Q4_K_M", row);
+        let report = run(lost, true, false, |_| true).unwrap();
+        assert!(!report.applied);
+        assert!(report
+            .warnings
+            .iter()
+            .any(|w| w.contains("preservation is not confirmed")));
     }
     #[test]
     fn resolved_rows_outside_selected_target_refuse_before_write_and_readback_is_unverified() {
-        let unrelated=response("unrelated/model",json!({"n_parallel":1}));
-        for apply in [false,true] {
-            let mut p=plan(apply);p[4].2=unrelated.clone();p.truncate(5);
-            assert!(matches!(run(p,apply,false,|_|panic!("Unrelated read must not reach write guard")),Err(Failure::ModelSettingsUnsafe)));
+        let unrelated = response("unrelated/model", json!({"n_parallel":1}));
+        for apply in [false, true] {
+            let mut p = plan(apply);
+            p[4].2 = unrelated.clone();
+            p.truncate(5);
+            assert!(matches!(
+                run(p, apply, false, |_| panic!(
+                    "Unrelated read must not reach write guard"
+                )),
+                Err(Failure::ModelSettingsUnsafe)
+            ));
         }
-        let mut p=plan(true);p[6].2=unrelated.clone();p.truncate(7);
-        assert!(matches!(run(p,true,false,|_|panic!("Unrelated merge must not reach write guard")),Err(Failure::ModelSettingsUnsafe)));
-        let mut p=plan(true);p[9].2=unrelated;
-        let report=run(p,true,false,|_|true).unwrap();assert!(!report.applied);assert!(report.saved.is_none());assert!(report.resolved_model_id.is_none());assert!(report.warnings.iter().any(|w|w.contains("outside the selected model")));
+        let mut p = plan(true);
+        p[6].2 = unrelated.clone();
+        p.truncate(7);
+        assert!(matches!(
+            run(p, true, false, |_| panic!(
+                "Unrelated merge must not reach write guard"
+            )),
+            Err(Failure::ModelSettingsUnsafe)
+        ));
+        let mut p = plan(true);
+        p[9].2 = unrelated;
+        let report = run(p, true, false, |_| true).unwrap();
+        assert!(!report.applied);
+        assert!(report.saved.is_none());
+        assert!(report.resolved_model_id.is_none());
+        assert!(report
+            .warnings
+            .iter()
+            .any(|w| w.contains("outside the selected model")));
         // A proved ASCII spelling normalization is still the server's winner.
-        let mut p=plan(true);let row=p[9].2["resolved"].clone();p[9].2=response("FIXTURE/MODEL-GGUF:q4_k_m",row);
-        assert!(run(p,true,false,|_|true).unwrap().applied);
+        let mut p = plan(true);
+        let row = p[9].2["resolved"].clone();
+        p[9].2 = response("FIXTURE/MODEL-GGUF:q4_k_m", row);
+        assert!(run(p, true, false, |_| true).unwrap().applied);
         // Value normalization/deviation is reported, rather than a transport refusal.
-        let mut p=plan(true);let mut row=p[9].2["resolved"].clone();row["n_parallel"]=json!(2);p[9].2=response("fixture/model-GGUF:Q4_K_M",row);
-        let report=run(p,true,false,|_|true).unwrap();assert!(!report.applied);assert_eq!(report.saved.unwrap().parallel,Some(2));
+        let mut p = plan(true);
+        let mut row = p[9].2["resolved"].clone();
+        row["n_parallel"] = json!(2);
+        p[9].2 = response("fixture/model-GGUF:Q4_K_M", row);
+        let report = run(p, true, false, |_| true).unwrap();
+        assert!(!report.applied);
+        assert_eq!(report.saved.unwrap().parallel, Some(2));
     }
     #[test]
     fn missing_management_interface_and_provider_errors_never_expose_raw_responses() {
-        let mut after_write=plan(true);after_write[9].1=500;after_write[9].2=json!({"detail":"public-fixture /private/secret"});assert!(matches!(run(after_write,true,false,|_|true),Err(Failure::Provider)));
-        for (code,failure) in [(404,Failure::ModelSettingsUnsupported),(401,Failure::Authentication),(500,Failure::Provider)] {
-            let mut p=plan(false);p[0].1=code;p[0].2=json!({"detail":"public-fixture /private/secret"});p.truncate(1);let result=run(p,false,false,|_|true);assert!(matches!(result,Err(e)if e==failure));assert!(!failure.message().contains("public-fixture"));assert!(!failure.message().contains("/private"));
+        let mut after_write = plan(true);
+        after_write[9].1 = 500;
+        after_write[9].2 = json!({"detail":"public-fixture /private/secret"});
+        assert!(matches!(
+            run(after_write, true, false, |_| true),
+            Err(Failure::Provider)
+        ));
+        for (code, failure) in [
+            (404, Failure::ModelSettingsUnsupported),
+            (401, Failure::Authentication),
+            (500, Failure::Provider),
+        ] {
+            let mut p = plan(false);
+            p[0].1 = code;
+            p[0].2 = json!({"detail":"public-fixture /private/secret"});
+            p.truncate(1);
+            let result = run(p, false, false, |_| true);
+            assert!(matches!(result,Err(e)if e==failure));
+            assert!(!failure.message().contains("public-fixture"));
+            assert!(!failure.message().contains("/private"));
         }
     }
 }

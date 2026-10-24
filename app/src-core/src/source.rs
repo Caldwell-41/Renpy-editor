@@ -584,15 +584,23 @@ impl AuthoringService {
     }
 
     pub(crate) fn source_draft_versions(
-        &self, project: &ProjectId, paths: &[String],
+        &self,
+        project: &ProjectId,
+        paths: &[String],
     ) -> Result<std::collections::BTreeMap<String, u64>, SourceError> {
         self.ensure_source_paths_clean(project, paths.iter().map(String::as_str))?;
         let sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
-        Ok(paths.iter().map(|path| {
-            let version = sessions.projects.get(project).and_then(|items| items.get(path))
-                .map_or(0, |buffer| buffer.draft_version);
-            (path.clone(), version)
-        }).collect())
+        Ok(paths
+            .iter()
+            .map(|path| {
+                let version = sessions
+                    .projects
+                    .get(project)
+                    .and_then(|items| items.get(path))
+                    .map_or(0, |buffer| buffer.draft_version);
+                (path.clone(), version)
+            })
+            .collect())
     }
 
     pub(crate) fn source_refresh_project(
@@ -1001,7 +1009,8 @@ impl AuthoringService {
                 kind: MutationKind::ReplaceExisting,
                 base: map_revision,
                 expected_bytes: map_bytes,
-                proposed: crate::scene::source_map_bytes(&source_map).map_err(scene_source_error)?,
+                proposed: crate::scene::source_map_bytes(&source_map)
+                    .map_err(scene_source_error)?,
             });
         }
         Ok(TransactionProposal {

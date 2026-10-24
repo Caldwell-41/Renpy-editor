@@ -16,7 +16,6 @@ fn record(anchor: &DirectoryAnchor, name: &str) -> Option<serde_json::Value> {
     serde_json::from_reader(file.take(4096)).ok()
 }
 
-
 pub(crate) struct HelperProcess {
     stop: Arc<AtomicBool>,
     observation: Arc<Mutex<Observation>>,
@@ -50,9 +49,15 @@ impl HelperProcess {
         #[cfg(windows)]
         {
             use std::io::Write;
-            anchor.create_new_file(std::ffi::OsStr::new("canvas-owner.exe"))
-                .and_then(|mut file| file.write_all(include_bytes!(concat!(env!("OUT_DIR"), "/canvas-owner.exe")))
-                    .map_err(|_| crate::transaction::ErrorCode::IoFailure))
+            anchor
+                .create_new_file(std::ffi::OsStr::new("canvas-owner.exe"))
+                .and_then(|mut file| {
+                    file.write_all(include_bytes!(concat!(
+                        env!("OUT_DIR"),
+                        "/canvas-owner.exe"
+                    )))
+                    .map_err(|_| crate::transaction::ErrorCode::IoFailure)
+                })
                 .map_err(|_| RenpyError::ProcessFailed)?;
             argv.insert(0, command_path(&anchor.path().join("canvas-owner.exe")));
         }
@@ -69,10 +74,20 @@ impl HelperProcess {
             .env("RENPY_DISABLE_BACKUPS", "I take responsibility for this.")
             .env("RENPY_SKIP_MAIN_MENU", "1")
             .env("RENPY_SKIP_SPLASHSCREEN", "1");
-        let native_refusal = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-lifecycle")
-            && std::env::var_os("LOOMLIGHT_CANVAS_LIFECYCLE_ROOT").and_then(|p| std::fs::canonicalize(p).ok()).as_deref() == anchor.path().parent()
-            && anchor.path().parent().is_some_and(|root| std::fs::read_to_string(root.join(".owner")).ok().as_deref() == Some("loomlight-canvas-lifecycle-v1\n"));
-        if (cfg!(test) || native_refusal) && std::env::var_os("LOOMLIGHT_CANVAS_REFUSAL_TEST_ROOT").as_deref() == anchor.path().parent().map(Path::as_os_str) {
+        let native_refusal = std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()
+            == Ok("canvas-lifecycle")
+            && std::env::var_os("LOOMLIGHT_CANVAS_LIFECYCLE_ROOT")
+                .and_then(|p| std::fs::canonicalize(p).ok())
+                .as_deref()
+                == anchor.path().parent()
+            && anchor.path().parent().is_some_and(|root| {
+                std::fs::read_to_string(root.join(".owner")).ok().as_deref()
+                    == Some("loomlight-canvas-lifecycle-v1\n")
+            });
+        if (cfg!(test) || native_refusal)
+            && std::env::var_os("LOOMLIGHT_CANVAS_REFUSAL_TEST_ROOT").as_deref()
+                == anchor.path().parent().map(Path::as_os_str)
+        {
             command.env("LOOMLIGHT_CANVAS_REFUSE", "1");
         }
         let observation = Arc::new(Mutex::new(Observation {
@@ -101,7 +116,9 @@ impl HelperProcess {
                     if let Ok(mut s) = state.lock() {
                         s.cleaned = true;
                     }
-                    if let Ok(mut report) = worker_report.lock() { report.cleanup_complete = true; }
+                    if let Ok(mut report) = worker_report.lock() {
+                        report.cleanup_complete = true;
+                    }
                     set_phase(&state, "failed");
                     return;
                 }
@@ -110,7 +127,9 @@ impl HelperProcess {
                     if let Ok(mut s) = state.lock() {
                         s.cleaned = true;
                     }
-                    if let Ok(mut report) = worker_report.lock() { report.cleanup_complete = true; }
+                    if let Ok(mut report) = worker_report.lock() {
+                        report.cleanup_complete = true;
+                    }
                     set_phase(&state, "failed");
                     return;
                 };
@@ -126,11 +145,16 @@ impl HelperProcess {
                 if requested && anchor.create_new_file(std::ffi::OsStr::new("stop")).is_ok() {
                     let start = Instant::now();
                     while start.elapsed() < Duration::from_secs(3) {
-                        if child.drain(&state).is_err() { break; }
+                        if child.drain(&state).is_err() {
+                            break;
+                        }
                         if child.exited().unwrap_or(true) {
-                            let acknowledged = record(&anchor, "stopped.json") == Some(serde_json::json!({"stopped": true}));
+                            let acknowledged = record(&anchor, "stopped.json")
+                                == Some(serde_json::json!({"stopped": true}));
                             #[cfg(windows)]
-                            let acknowledged = acknowledged && record(&anchor, "desktop-closed.json") == Some(serde_json::json!({"closed": true}));
+                            let acknowledged = acknowledged
+                                && record(&anchor, "desktop-closed.json")
+                                    == Some(serde_json::json!({"closed": true}));
                             if acknowledged {
                                 natural = child.finish_without_force(&state).ok();
                             }
@@ -147,7 +171,11 @@ impl HelperProcess {
                 let cleaned = result.is_ok();
                 let exit_code = result.ok().flatten();
                 if let Ok(mut report) = worker_report.lock() {
-                    *report = CanvasShutdown { cleanup_complete: cleaned, cooperative, exit_code };
+                    *report = CanvasShutdown {
+                        cleanup_complete: cleaned,
+                        cooperative,
+                        exit_code,
+                    };
                 }
                 if let Ok(mut observation) = state.lock() {
                     observation.cleaned = cleaned;
@@ -175,7 +203,10 @@ impl HelperProcess {
         self.stop.store(true, Ordering::Release);
     }
     pub(crate) fn shutdown_report(&self) -> CanvasShutdown {
-        self.report.lock().map(|report| report.clone()).unwrap_or_default()
+        self.report
+            .lock()
+            .map(|report| report.clone())
+            .unwrap_or_default()
     }
     pub(crate) fn shutdown(&mut self) -> bool {
         self.stop();

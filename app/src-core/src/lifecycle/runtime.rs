@@ -130,10 +130,21 @@ fn input_error(_: impl std::fmt::Debug) -> LifecycleError {
 impl LifecycleService {
     #[cfg(test)]
     pub(super) fn prepare_canvas_reference_fixture(&mut self) -> std::path::PathBuf {
-        let scratch=self.runtime.preparation.as_mut().expect("explicit prepared preview").scratch.as_mut().expect("screen scratch preview");
-        let root=scratch.anchor().path().to_owned();
-        std::fs::write(root.join("game/canvas_reference.rpy"),include_bytes!("../../../../tests/fixtures/phase-3b-screens/canvas-reference.rpy")).unwrap();
-        scratch.manifest=crate::transaction::execution_manifest(scratch.anchor(),true).unwrap();
+        let scratch = self
+            .runtime
+            .preparation
+            .as_mut()
+            .expect("explicit prepared preview")
+            .scratch
+            .as_mut()
+            .expect("screen scratch preview");
+        let root = scratch.anchor().path().to_owned();
+        std::fs::write(
+            root.join("game/canvas_reference.rpy"),
+            include_bytes!("../../../../tests/fixtures/phase-3b-screens/canvas-reference.rpy"),
+        )
+        .unwrap();
+        scratch.manifest = crate::transaction::execution_manifest(scratch.anchor(), true).unwrap();
         root
     }
     pub(crate) fn runtime_request_capability(
@@ -313,9 +324,20 @@ impl LifecycleService {
             if !trust_current {
                 self.runtime.trust = None;
             }
-            let scratch = request.preview.as_ref().map(|purpose|
-                crate::scratch_preview::ScratchPreview::prepare(&self.authoring, &authority,
-                    &self.data_root, &manifest, purpose).map_err(input_error)).transpose()?;
+            let scratch = request
+                .preview
+                .as_ref()
+                .map(|purpose| {
+                    crate::scratch_preview::ScratchPreview::prepare(
+                        &self.authoring,
+                        &authority,
+                        &self.data_root,
+                        &manifest,
+                        purpose,
+                    )
+                    .map_err(input_error)
+                })
+                .transpose()?;
             let preparation = Preparation {
                 id: uuid::Uuid::new_v4().to_string(),
                 kind: request.kind,

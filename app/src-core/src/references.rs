@@ -42,12 +42,21 @@ const CARD: &[&str] = &[
 const LORE: &[&str] = &["text", "category", "subject", "knowledge"];
 
 pub(crate) fn content_keys(kind: &str) -> Vec<&'static str> {
- COMMON.iter().chain(if kind == "card" { CARD } else { LORE }).copied().collect()
+    COMMON
+        .iter()
+        .chain(if kind == "card" { CARD } else { LORE })
+        .copied()
+        .collect()
 }
 
 pub(crate) fn validate_generated_scope(scope: &Value) -> Result<(), ReferenceError> {
     let keys = object(scope)?;
-    if keys.keys().any(|k| !["type","sceneIds"].contains(&k.as_str())) { return invalid(); }
+    if keys
+        .keys()
+        .any(|k| !["type", "sceneIds"].contains(&k.as_str()))
+    {
+        return invalid();
+    }
     let mut content = json!({"title":"Scope","tags":[],"scope":scope,"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"text":"Scope validation","category":"","subject":"","knowledge":[]});
     // The ordinary validator is authoritative for finite scope shape and bounds.
     validate_content(&mut content, Kind::Lore)
@@ -99,13 +108,42 @@ pub enum Command {
         record_id: String,
         direction: Direction,
     },
-    ReviewLore { record_id: String, revision_id: String, approve: bool },
-    ReviewCard { record_id: String, revision_id: String, approve: bool },
-    LinkCharacter { record_id: Option<String>, character_id: String, expected_source_revision: String },
-    PreviewGameCharacter { record_id: Option<String>, technical_name: String, display_name: String, dialogue_color: String },
-    CreateGameCharacter { record_id: Option<String>, technical_name: String, display_name: String, dialogue_color: String, expected_preview_digest: String },
-    RestoreCard { record_id: String, revision_id: String },
-    SaveProjectContext { world: String, tone: String },
+    ReviewLore {
+        record_id: String,
+        revision_id: String,
+        approve: bool,
+    },
+    ReviewCard {
+        record_id: String,
+        revision_id: String,
+        approve: bool,
+    },
+    LinkCharacter {
+        record_id: Option<String>,
+        character_id: String,
+        expected_source_revision: String,
+    },
+    PreviewGameCharacter {
+        record_id: Option<String>,
+        technical_name: String,
+        display_name: String,
+        dialogue_color: String,
+    },
+    CreateGameCharacter {
+        record_id: Option<String>,
+        technical_name: String,
+        display_name: String,
+        dialogue_color: String,
+        expected_preview_digest: String,
+    },
+    RestoreCard {
+        record_id: String,
+        revision_id: String,
+    },
+    SaveProjectContext {
+        world: String,
+        tone: String,
+    },
     Undo,
     Redo,
 }
@@ -530,34 +568,68 @@ fn new_record() -> Value {
     json!({"id":uuid::Uuid::new_v4().to_string(),"revisionCounter":0,"currentRevisionId":null,"approvedRevisionId":null,"revisions":[]})
 }
 fn current_revision(record: &Value) -> Result<&Value, ReferenceError> {
-    array(&record["revisions"] )?.iter().find(|r| r["id"] == record["currentRevisionId"]).ok_or(ReferenceError::Invalid)
+    array(&record["revisions"])?
+        .iter()
+        .find(|r| r["id"] == record["currentRevisionId"])
+        .ok_or(ReferenceError::Invalid)
 }
 // Used by explicit lifecycle/restore actions; they cannot approve an outstanding proposal.
 fn editable_card<'a>(doc: &'a Value, record_id: &str) -> Result<&'a Value, ReferenceError> {
-    let record = array(&doc["cards"] )?.iter().find(|r| r["id"] == record_id).ok_or(ReferenceError::Invalid)?;
-    if current_revision(record)?["status"] == "proposed" { return invalid(); }
+    let record = array(&doc["cards"])?
+        .iter()
+        .find(|r| r["id"] == record_id)
+        .ok_or(ReferenceError::Invalid)?;
+    if current_revision(record)?["status"] == "proposed" {
+        return invalid();
+    }
     Ok(record)
 }
-fn association_available(doc: &Value, record_id: Option<&str>, character_id: &str) -> Result<(), ReferenceError> {
-    for record in array(&doc["cards"] )? {
-        if record["id"].as_str() == record_id { continue; }
+fn association_available(
+    doc: &Value,
+    record_id: Option<&str>,
+    character_id: &str,
+) -> Result<(), ReferenceError> {
+    for record in array(&doc["cards"])? {
+        if record["id"].as_str() == record_id {
+            continue;
+        }
         // A retained approval remains usable even while the current revision is proposed.
-        for revision in array(&record["revisions"] )?.iter().filter(|r| r["id"] == record["currentRevisionId"] || r["id"] == record["approvedRevisionId"]) {
-            if revision["content"]["linkedCharacterId"] == character_id { return invalid(); }
+        for revision in array(&record["revisions"])?.iter().filter(|r| {
+            r["id"] == record["currentRevisionId"] || r["id"] == record["approvedRevisionId"]
+        }) {
+            if revision["content"]["linkedCharacterId"] == character_id {
+                return invalid();
+            }
         }
     }
     Ok(())
 }
-fn append_approved(record: &mut Value, template: &Value, content: Value, retain_support: bool) -> Result<(), ReferenceError> {
-    let number = record["revisionCounter"].as_u64().unwrap_or(0).checked_add(1).filter(|n| *n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
+fn append_approved(
+    record: &mut Value,
+    template: &Value,
+    content: Value,
+    retain_support: bool,
+) -> Result<(), ReferenceError> {
+    let number = record["revisionCounter"]
+        .as_u64()
+        .unwrap_or(0)
+        .checked_add(1)
+        .filter(|n| *n <= MAX_COUNTER)
+        .ok_or(ReferenceError::Invalid)?;
     let revision_id = uuid::Uuid::new_v4().to_string();
     let record_id = record["id"].clone();
     let prior = record["approvedRevisionId"].clone();
     let current = record["currentRevisionId"].clone();
     let mut next = template.clone();
-    if !retain_support { next.as_object_mut().ok_or(ReferenceError::Invalid)?.remove("supportingReadSet"); }
+    if !retain_support {
+        next.as_object_mut()
+            .ok_or(ReferenceError::Invalid)?
+            .remove("supportingReadSet");
+    }
     for (k,v) in json!({"id":revision_id,"number":number,"status":"approved","createdAt":now(),"reviewedAt":now(),"reviewNote":"","supersedes":if prior.is_null(){Value::Null}else{json!({"recordId":record_id,"revisionId":prior})},"supersededBy":null,"content":content}).as_object().unwrap() { next[k] = v.clone(); }
-    let revisions = record["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+    let revisions = record["revisions"]
+        .as_array_mut()
+        .ok_or(ReferenceError::Invalid)?;
     for r in revisions.iter_mut().filter(|r| r["id"] == prior) {
         r["status"] = json!("superseded");
         r["supersededBy"] = json!({"recordId":record_id,"revisionId":revision_id});
@@ -569,28 +641,47 @@ fn append_approved(record: &mut Value, template: &Value, content: Value, retain_
     record["approvedRevisionId"] = json!(revision_id);
     Ok(())
 }
-fn validate_project_context(context: &Value, ids: &mut HashSet<String>) -> Result<(), ReferenceError> {
+fn validate_project_context(
+    context: &Value,
+    ids: &mut HashSet<String>,
+) -> Result<(), ReferenceError> {
     object(context)?;
-    if !ids.insert(id(&context["id"] )?.into()) { return invalid(); }
-    let counter = context["revisionCounter"].as_u64().filter(|n| *n > 0 && *n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
-    let current = id(&context["currentRevisionId"] )?;
-    let revisions = array(&context["revisions"] )?;
-    if revisions.is_empty() || revisions.len() > 3 { return invalid(); }
+    if !ids.insert(id(&context["id"])?.into()) {
+        return invalid();
+    }
+    let counter = context["revisionCounter"]
+        .as_u64()
+        .filter(|n| *n > 0 && *n <= MAX_COUNTER)
+        .ok_or(ReferenceError::Invalid)?;
+    let current = id(&context["currentRevisionId"])?;
+    let revisions = array(&context["revisions"])?;
+    if revisions.is_empty() || revisions.len() > 3 {
+        return invalid();
+    }
     let mut numbers = HashSet::new();
     let mut has_current = false;
     for revision in revisions {
         object(revision)?;
-        let revision_id = id(&revision["id"] )?;
-        if !ids.insert(revision_id.into()) { return invalid(); }
+        let revision_id = id(&revision["id"])?;
+        if !ids.insert(revision_id.into()) {
+            return invalid();
+        }
         has_current |= revision_id == current;
-        let number = revision["number"].as_u64().filter(|n| *n > 0 && *n <= counter).ok_or(ReferenceError::Invalid)?;
-        if !numbers.insert(number) { return invalid(); }
+        let number = revision["number"]
+            .as_u64()
+            .filter(|n| *n > 0 && *n <= counter)
+            .ok_or(ReferenceError::Invalid)?;
+        if !numbers.insert(number) {
+            return invalid();
+        }
         timestamp(&revision["createdAt"], false)?;
-        object(&revision["content"] )?;
+        object(&revision["content"])?;
         text(&revision["content"]["world"], 10_000, false)?;
         text(&revision["content"]["tone"], 10_000, false)?;
     }
-    if !has_current { return invalid(); }
+    if !has_current {
+        return invalid();
+    }
     Ok(())
 }
 fn authoring_error(error: AuthoringError) -> ReferenceError {
@@ -675,37 +766,99 @@ impl AuthoringService {
             .map(|v| issues(v, &entities))
             .unwrap_or_default();
         if let Some(doc) = document.as_ref() {
-            for record in ["cards","loreEntries"].iter().flat_map(|key|doc[*key].as_array().into_iter().flatten()) {
+            for record in ["cards", "loreEntries"]
+                .iter()
+                .flat_map(|key| doc[*key].as_array().into_iter().flatten())
+            {
                 for revision in record["revisions"].as_array().into_iter().flatten() {
-                    if let Some(set)=revision.get("supportingReadSet") {
-                        let fresh = set.as_object().is_some_and(|set| set.iter().all(|(path, expected)| {
-                            if !path.ends_with(".rpy") && ![".renpy-editor/project.json",".renpy-editor/authoring.json",".renpy-editor/source-map.json",".renpy-editor/ai.json"].contains(&path.as_str()) { return false; }
-                            RelativePath::new(path).ok().and_then(|path|self.transactions.snapshot_optional(project,path).ok())
-                                .map(|snapshot|token(&snapshot.map(|(_,r)|r).unwrap_or_else(Revision::expected_absence)))
-                                .is_some_and(|current|expected.as_str()==Some(&current))
-                        }));
-                        if !fresh { issues.push(Issue {record_id:record["id"].as_str().unwrap_or_default().into(),revision_id:revision["id"].as_str().unwrap_or_default().into(),field:"supportingReadSet",index:0,state:"stale"}); }
+                    if let Some(set) = revision.get("supportingReadSet") {
+                        let fresh = set.as_object().is_some_and(|set| {
+                            set.iter().all(|(path, expected)| {
+                                if !path.ends_with(".rpy")
+                                    && ![
+                                        ".renpy-editor/project.json",
+                                        ".renpy-editor/authoring.json",
+                                        ".renpy-editor/source-map.json",
+                                        ".renpy-editor/ai.json",
+                                    ]
+                                    .contains(&path.as_str())
+                                {
+                                    return false;
+                                }
+                                RelativePath::new(path)
+                                    .ok()
+                                    .and_then(|path| {
+                                        self.transactions.snapshot_optional(project, path).ok()
+                                    })
+                                    .map(|snapshot| {
+                                        token(
+                                            &snapshot
+                                                .map(|(_, r)| r)
+                                                .unwrap_or_else(Revision::expected_absence),
+                                        )
+                                    })
+                                    .is_some_and(|current| expected.as_str() == Some(&current))
+                            })
+                        });
+                        if !fresh {
+                            issues.push(Issue {
+                                record_id: record["id"].as_str().unwrap_or_default().into(),
+                                revision_id: revision["id"].as_str().unwrap_or_default().into(),
+                                field: "supportingReadSet",
+                                index: 0,
+                                state: "stale",
+                            });
+                        }
                     }
                 }
             }
         }
-        if let Some(doc)=document.as_ref() {
+        if let Some(doc) = document.as_ref() {
             // Propagate freshness only across explicit citations; never retrieve or send content.
             // Each iteration adds an issue to a finite saved revision, so cycles terminate.
             loop {
-                let mut added=vec![];
-                for record in ["cards","loreEntries"].iter().flat_map(|key|doc[*key].as_array().into_iter().flatten()) {
+                let mut added = vec![];
+                for record in ["cards", "loreEntries"]
+                    .iter()
+                    .flat_map(|key| doc[*key].as_array().into_iter().flatten())
+                {
                     for revision in record["revisions"].as_array().into_iter().flatten() {
-                        for (index,citation) in revision["content"]["citations"].as_array().into_iter().flatten().enumerate() {
-                            if !["card","lore"].contains(&citation["target"]["type"].as_str().unwrap_or_default()) { continue; }
-                            if issues.iter().any(|i| i.record_id==citation["target"]["id"].as_str().unwrap_or_default() && i.revision_id==citation["revision"].as_str().unwrap_or_default() && (i.field=="citations"||i.field=="supportingReadSet"))
-                                && !issues.iter().chain(added.iter()).any(|i|i.record_id==record["id"].as_str().unwrap_or_default() && i.revision_id==revision["id"].as_str().unwrap_or_default() && i.field=="citations" && i.index==index) {
-                                added.push(Issue {record_id:record["id"].as_str().unwrap_or_default().into(),revision_id:revision["id"].as_str().unwrap_or_default().into(),field:"citations",index,state:"stale"});
+                        for (index, citation) in revision["content"]["citations"]
+                            .as_array()
+                            .into_iter()
+                            .flatten()
+                            .enumerate()
+                        {
+                            if !["card", "lore"]
+                                .contains(&citation["target"]["type"].as_str().unwrap_or_default())
+                            {
+                                continue;
+                            }
+                            if issues.iter().any(|i| {
+                                i.record_id == citation["target"]["id"].as_str().unwrap_or_default()
+                                    && i.revision_id
+                                        == citation["revision"].as_str().unwrap_or_default()
+                                    && (i.field == "citations" || i.field == "supportingReadSet")
+                            }) && !issues.iter().chain(added.iter()).any(|i| {
+                                i.record_id == record["id"].as_str().unwrap_or_default()
+                                    && i.revision_id == revision["id"].as_str().unwrap_or_default()
+                                    && i.field == "citations"
+                                    && i.index == index
+                            }) {
+                                added.push(Issue {
+                                    record_id: record["id"].as_str().unwrap_or_default().into(),
+                                    revision_id: revision["id"].as_str().unwrap_or_default().into(),
+                                    field: "citations",
+                                    index,
+                                    state: "stale",
+                                });
                             }
                         }
                     }
                 }
-                if added.is_empty() { break; }
+                if added.is_empty() {
+                    break;
+                }
                 issues.extend(added);
             }
         }
@@ -783,47 +936,85 @@ impl AuthoringService {
         Ok(out)
     }
     pub(crate) fn prepare_generated_reference(
-        &self, project: &ProjectId, project_id: &str, kind: Kind, record_id: Option<&str>,
-        fields: Value, citations: Value, provenance: Value, supporting_read_set: Value,
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        kind: Kind,
+        record_id: Option<&str>,
+        fields: Value,
+        citations: Value,
+        provenance: Value,
+        supporting_read_set: Value,
     ) -> Result<(TransactionProposal, Value), ReferenceError> {
         let (bytes, revision) = self.reference_snapshot(project)?;
-        let mut doc = if revision == Revision::expected_absence() { empty(project_id) }
-            else { crate::ai_discovery::strict_json(&bytes).map_err(|_| ReferenceError::Invalid)? };
+        let mut doc = if revision == Revision::expected_absence() {
+            empty(project_id)
+        } else {
+            crate::ai_discovery::strict_json(&bytes).map_err(|_| ReferenceError::Invalid)?
+        };
         validate(&doc, project_id)?;
-        let records = doc[kind.collection()].as_array_mut().ok_or(ReferenceError::Invalid)?;
+        let records = doc[kind.collection()]
+            .as_array_mut()
+            .ok_or(ReferenceError::Invalid)?;
         let index = if let Some(id) = record_id {
-            records.iter().position(|r| r["id"] == id).ok_or(ReferenceError::Invalid)?
+            records
+                .iter()
+                .position(|r| r["id"] == id)
+                .ok_or(ReferenceError::Invalid)?
         } else {
             records.push(json!({"id":uuid::Uuid::new_v4().to_string(),"revisionCounter":0,"currentRevisionId":null,"approvedRevisionId":null,"revisions":[]}));
-            records.len()-1
+            records.len() - 1
         };
         let record = &mut records[index];
-        let old = array(&record["revisions"] )?.iter().find(|r| r["id"] == record["currentRevisionId"]);
+        let old = array(&record["revisions"])?
+            .iter()
+            .find(|r| r["id"] == record["currentRevisionId"]);
         let before = old.map(|r| r["content"].clone()).unwrap_or(Value::Null);
         let mut defaults = json!({"title":"","tags":[],"scope":{"type":"project"},"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"linkedCharacterId":null,"aliases":[],"description":"","appearanceNotes":"","personality":"","motivations":"","background":"","relationships":[],"speakingStyle":"","exampleDialogue":"","linkedLoreIds":[]});
-        if kind == Kind::Lore { defaults = json!({"title":"","tags":[],"scope":{"type":"project"},"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"text":"","category":"","subject":"","knowledge":[]}); }
+        if kind == Kind::Lore {
+            defaults = json!({"title":"","tags":[],"scope":{"type":"project"},"knowledgeNotes":"","provenance":{"kind":"inferred","notes":""},"citations":[],"links":[],"text":"","category":"","subject":"","knowledge":[]});
+        }
         let mut content = merge(if before.is_null() { &defaults } else { &before }, &fields);
-        if content["scope"]["type"]=="project" { content["scope"].as_object_mut().ok_or(ReferenceError::Invalid)?.remove("sceneIds"); }
+        if content["scope"]["type"] == "project" {
+            content["scope"]
+                .as_object_mut()
+                .ok_or(ReferenceError::Invalid)?
+                .remove("sceneIds");
+        }
         let mut retained = content["citations"].as_array().cloned().unwrap_or_default();
         for citation in array(&citations)? {
-            if let Some(existing) = retained.iter_mut().find(|c| c["target"]["type"]==citation["target"]["type"] && c["target"]["id"]==citation["target"]["id"]) {
-                *existing = merge(existing,citation);
-            } else { retained.push(citation.clone()); }
+            if let Some(existing) = retained.iter_mut().find(|c| {
+                c["target"]["type"] == citation["target"]["type"]
+                    && c["target"]["id"] == citation["target"]["id"]
+            }) {
+                *existing = merge(existing, citation);
+            } else {
+                retained.push(citation.clone());
+            }
         }
         content["citations"] = json!(retained);
         content["provenance"] = merge(&content["provenance"], &provenance);
         validate_content(&content, kind)?;
-        let number = record["revisionCounter"].as_u64().unwrap_or(0).checked_add(1)
-            .filter(|n| *n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
+        let number = record["revisionCounter"]
+            .as_u64()
+            .unwrap_or(0)
+            .checked_add(1)
+            .filter(|n| *n <= MAX_COUNTER)
+            .ok_or(ReferenceError::Invalid)?;
         let id = uuid::Uuid::new_v4().to_string();
         let rid = record["id"].clone();
         let approved = record["approvedRevisionId"].clone();
         let current = record["currentRevisionId"].clone();
-        let mut next = merge(old.unwrap_or(&Value::Null), &json!({"id":id,"number":number,"status":"proposed","createdAt":now(),"reviewedAt":null,"reviewNote":"","supersedes":if approved.is_null(){Value::Null}else{json!({"recordId":rid,"revisionId":approved})},"supersededBy":null,"content":content}));
+        let mut next = merge(
+            old.unwrap_or(&Value::Null),
+            &json!({"id":id,"number":number,"status":"proposed","createdAt":now(),"reviewedAt":null,"reviewNote":"","supersedes":if approved.is_null(){Value::Null}else{json!({"recordId":rid,"revisionId":approved})},"supersededBy":null,"content":content}),
+        );
         // Content is already fully merged; do not resurrect removed known scope fields.
         next["content"] = content.clone();
         next["supportingReadSet"] = supporting_read_set;
-        let revisions = record["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
+        let revisions = record["revisions"]
+            .as_array_mut()
+            .ok_or(ReferenceError::Invalid)?;
         revisions.retain(|r| r["id"] == approved || r["id"] == current);
         revisions.push(next);
         record["currentRevisionId"] = json!(id);
@@ -831,37 +1022,97 @@ impl AuthoringService {
         validate(&doc, project_id)?;
         let mut proposed = serde_json::to_vec_pretty(&doc).map_err(|_| ReferenceError::Invalid)?;
         proposed.push(b'\n');
-        if proposed.len()>MAX_BYTES { return invalid(); }
-        Ok((TransactionProposal { mutations:vec![FileMutation {
-            path:RelativePath::new(PATH).map_err(|_|ReferenceError::Io)?,
-            kind:if revision==Revision::expected_absence(){MutationKind::CreateNew}else{MutationKind::ReplaceExisting},
-            base:revision, expected_bytes:bytes, proposed,
-        }],intent:TransactionIntent::Edit }, json!({"recordId":rid,"revisionId":id,"before":before,"after":content,"approvedRevisionId":approved,"status":"proposed"})))
+        if proposed.len() > MAX_BYTES {
+            return invalid();
+        }
+        Ok((
+            TransactionProposal {
+                mutations: vec![FileMutation {
+                    path: RelativePath::new(PATH).map_err(|_| ReferenceError::Io)?,
+                    kind: if revision == Revision::expected_absence() {
+                        MutationKind::CreateNew
+                    } else {
+                        MutationKind::ReplaceExisting
+                    },
+                    base: revision,
+                    expected_bytes: bytes,
+                    proposed,
+                }],
+                intent: TransactionIntent::Edit,
+            },
+            json!({"recordId":rid,"revisionId":id,"before":before,"after":content,"approvedRevisionId":approved,"status":"proposed"}),
+        ))
     }
-    fn check_reference_support(&self, project: &ProjectId, project_id: &str, record_id: &str, revision_id: &str) -> Result<(), ReferenceError> {
+    fn check_reference_support(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        record_id: &str,
+        revision_id: &str,
+    ) -> Result<(), ReferenceError> {
         let workspace = self.references(project, project_id)?;
-        if workspace.diagnostic.is_some() || workspace.issues.iter().any(|i|i.record_id == record_id && i.revision_id == revision_id && matches!(i.field,"citations" | "supportingReadSet")) { return Err(ReferenceError::Conflict); }
+        if workspace.diagnostic.is_some()
+            || workspace.issues.iter().any(|i| {
+                i.record_id == record_id
+                    && i.revision_id == revision_id
+                    && matches!(i.field, "citations" | "supportingReadSet")
+            })
+        {
+            return Err(ReferenceError::Conflict);
+        }
         Ok(())
     }
-    fn prepare_reference_character(&self, project: &ProjectId, project_id: &str, doc: &Value, expected_revision: &str, record_id: Option<&str>, request: CreateCharacterRequest) -> Result<(TransactionProposal, CharacterPreview), ReferenceError> {
+    fn prepare_reference_character(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        doc: &Value,
+        expected_revision: &str,
+        record_id: Option<&str>,
+        request: CreateCharacterRequest,
+    ) -> Result<(TransactionProposal, CharacterPreview), ReferenceError> {
         if let Some(record_id) = record_id {
             let record = editable_card(doc, record_id)?;
             let old = current_revision(record)?;
-            if !old["content"]["linkedCharacterId"].is_null() { return invalid(); }
-            self.check_reference_support(project, project_id, record_id, string(&old["id"] )?)?;
+            if !old["content"]["linkedCharacterId"].is_null() {
+                return invalid();
+            }
+            self.check_reference_support(project, project_id, record_id, string(&old["id"])?)?;
         }
         let mut digest = Sha256::new();
         digest.update(serde_json::to_vec(&json!({"expectedRevision":expected_revision,"recordId":record_id,"technicalName":request.technical_name,"displayName":request.display_name,"dialogueColor":request.dialogue_color})).map_err(|_|ReferenceError::Invalid)?);
-        let (proposal, _) = self.prepare_create_character(project, project_id, request, uuid::Uuid::new_v4().to_string(), false).map_err(authoring_error)?;
+        let (proposal, _) = self
+            .prepare_create_character(
+                project,
+                project_id,
+                request,
+                uuid::Uuid::new_v4().to_string(),
+                false,
+            )
+            .map_err(authoring_error)?;
         let mut patches = vec![];
         for mutation in &proposal.mutations {
             // Bind every real source/metadata precondition. Generated UUIDs in new metadata
             // are deliberately not digest input; the complete reviewed source bytes are.
             digest.update(serde_json::to_vec(&json!({"path":mutation.path.as_str(),"base":mutation.base,"before":mutation.expected_bytes})).map_err(|_|ReferenceError::Invalid)?);
-            if mutation.path.as_str().ends_with(".rpy") { digest.update(&mutation.proposed); }
-            patches.push(CharacterPatch {path:mutation.path.as_str().into(),before:String::from_utf8(mutation.expected_bytes.clone()).map_err(|_|ReferenceError::Invalid)?,after:String::from_utf8(mutation.proposed.clone()).map_err(|_|ReferenceError::Invalid)?});
+            if mutation.path.as_str().ends_with(".rpy") {
+                digest.update(&mutation.proposed);
+            }
+            patches.push(CharacterPatch {
+                path: mutation.path.as_str().into(),
+                before: String::from_utf8(mutation.expected_bytes.clone())
+                    .map_err(|_| ReferenceError::Invalid)?,
+                after: String::from_utf8(mutation.proposed.clone())
+                    .map_err(|_| ReferenceError::Invalid)?,
+            });
         }
-        Ok((proposal, CharacterPreview {digest:hex::encode(digest.finalize()),patches}))
+        Ok((
+            proposal,
+            CharacterPreview {
+                digest: hex::encode(digest.finalize()),
+                patches,
+            },
+        ))
     }
     pub fn references_apply(
         &self,
@@ -880,31 +1131,89 @@ impl AuthoringService {
         };
         validate(&doc, project_id)?;
         let mut extra_mutations = vec![];
-        let review_kind = if matches!(&request.command, Command::ReviewLore { .. }) { Kind::Lore } else { Kind::Card };
+        let review_kind = if matches!(&request.command, Command::ReviewLore { .. }) {
+            Kind::Lore
+        } else {
+            Kind::Card
+        };
         match request.command {
-            Command::ReviewCard { record_id, revision_id, approve } | Command::ReviewLore { record_id, revision_id, approve } => {
+            Command::ReviewCard {
+                record_id,
+                revision_id,
+                approve,
+            }
+            | Command::ReviewLore {
+                record_id,
+                revision_id,
+                approve,
+            } => {
                 let workspace = self.references(project, project_id)?;
-                if approve && workspace.issues.iter().any(|i| i.record_id == record_id && i.revision_id == revision_id && (i.field == "citations" || i.field == "supportingReadSet")) {
+                if approve
+                    && workspace.issues.iter().any(|i| {
+                        i.record_id == record_id
+                            && i.revision_id == revision_id
+                            && (i.field == "citations" || i.field == "supportingReadSet")
+                    })
+                {
                     return Err(ReferenceError::Conflict);
                 }
                 if approve {
-                    let next = doc[review_kind.collection()].as_array().ok_or(ReferenceError::Invalid)?.iter()
-                        .find(|r| r["id"] == record_id).and_then(|r| r["revisions"].as_array()?.iter().find(|v| v["id"] == revision_id)).ok_or(ReferenceError::Invalid)?;
+                    let next = doc[review_kind.collection()]
+                        .as_array()
+                        .ok_or(ReferenceError::Invalid)?
+                        .iter()
+                        .find(|r| r["id"] == record_id)
+                        .and_then(|r| {
+                            r["revisions"]
+                                .as_array()?
+                                .iter()
+                                .find(|v| v["id"] == revision_id)
+                        })
+                        .ok_or(ReferenceError::Invalid)?;
                     if let Some(set) = next.get("supportingReadSet") {
                         for (path, expected) in object(set)? {
-                            if !path.ends_with(".rpy") && ![".renpy-editor/project.json",".renpy-editor/authoring.json",".renpy-editor/source-map.json",".renpy-editor/ai.json"].contains(&path.as_str()) { return invalid(); }
-                            let (_, revision) = self.transactions.snapshot_optional(project,RelativePath::new(path).map_err(|_|ReferenceError::Invalid)?)
-                                .map_err(|_|ReferenceError::Conflict)?.unwrap_or((vec![],Revision::expected_absence()));
-                            if expected.as_str()!=Some(&token(&revision)) { return Err(ReferenceError::Conflict); }
+                            if !path.ends_with(".rpy")
+                                && ![
+                                    ".renpy-editor/project.json",
+                                    ".renpy-editor/authoring.json",
+                                    ".renpy-editor/source-map.json",
+                                    ".renpy-editor/ai.json",
+                                ]
+                                .contains(&path.as_str())
+                            {
+                                return invalid();
+                            }
+                            let (_, revision) = self
+                                .transactions
+                                .snapshot_optional(
+                                    project,
+                                    RelativePath::new(path).map_err(|_| ReferenceError::Invalid)?,
+                                )
+                                .map_err(|_| ReferenceError::Conflict)?
+                                .unwrap_or((vec![], Revision::expected_absence()));
+                            if expected.as_str() != Some(&token(&revision)) {
+                                return Err(ReferenceError::Conflict);
+                            }
                         }
                     }
                 }
-                let record = doc[review_kind.collection()].as_array_mut().ok_or(ReferenceError::Invalid)?
-                    .iter_mut().find(|r| r["id"] == record_id).ok_or(ReferenceError::Invalid)?;
-                if record["currentRevisionId"] != revision_id { return invalid(); }
+                let record = doc[review_kind.collection()]
+                    .as_array_mut()
+                    .ok_or(ReferenceError::Invalid)?
+                    .iter_mut()
+                    .find(|r| r["id"] == record_id)
+                    .ok_or(ReferenceError::Invalid)?;
+                if record["currentRevisionId"] != revision_id {
+                    return invalid();
+                }
                 let prior = record["approvedRevisionId"].clone();
-                let revisions = record["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
-                let next = revisions.iter_mut().find(|r| r["id"] == revision_id && r["status"] == "proposed").ok_or(ReferenceError::Invalid)?;
+                let revisions = record["revisions"]
+                    .as_array_mut()
+                    .ok_or(ReferenceError::Invalid)?;
+                let next = revisions
+                    .iter_mut()
+                    .find(|r| r["id"] == revision_id && r["status"] == "proposed")
+                    .ok_or(ReferenceError::Invalid)?;
                 next["status"] = json!(if approve { "approved" } else { "rejected" });
                 next["reviewedAt"] = json!(now());
                 if approve {
@@ -915,66 +1224,182 @@ impl AuthoringService {
                     record["approvedRevisionId"] = json!(revision_id);
                 }
             }
-            Command::LinkCharacter { record_id, character_id, expected_source_revision } => {
+            Command::LinkCharacter {
+                record_id,
+                character_id,
+                expected_source_revision,
+            } => {
                 id(&json!(character_id))?;
                 let workspace = self.references(project, project_id)?;
-                let entity = workspace.entities.iter().find(|e| e.kind == "character" && e.id == character_id).ok_or(ReferenceError::Invalid)?;
-                if entity.revision.as_deref() != Some(expected_source_revision.as_str()) { return Err(ReferenceError::Conflict); }
-                self.ensure_source_paths_clean(project, self.list(project, project_id).map_err(authoring_error)?.characters.iter().filter(|c| c.id == character_id).map(|c| c.source.path.as_str())).map_err(|_|ReferenceError::History(SceneError::DirtySource))?;
+                let entity = workspace
+                    .entities
+                    .iter()
+                    .find(|e| e.kind == "character" && e.id == character_id)
+                    .ok_or(ReferenceError::Invalid)?;
+                if entity.revision.as_deref() != Some(expected_source_revision.as_str()) {
+                    return Err(ReferenceError::Conflict);
+                }
+                self.ensure_source_paths_clean(
+                    project,
+                    self.list(project, project_id)
+                        .map_err(authoring_error)?
+                        .characters
+                        .iter()
+                        .filter(|c| c.id == character_id)
+                        .map(|c| c.source.path.as_str()),
+                )
+                .map_err(|_| ReferenceError::History(SceneError::DirtySource))?;
                 association_available(&doc, record_id.as_deref(), &character_id)?;
                 let (template, content) = if let Some(record_id) = &record_id {
                     let record = editable_card(&doc, record_id)?;
                     let old = current_revision(record)?;
-                    if !old["content"]["linkedCharacterId"].is_null() { return invalid(); }
-                    self.check_reference_support(project, project_id, record_id, string(&old["id"] )?)?;
+                    if !old["content"]["linkedCharacterId"].is_null() {
+                        return invalid();
+                    }
+                    self.check_reference_support(
+                        project,
+                        project_id,
+                        record_id,
+                        string(&old["id"])?,
+                    )?;
                     let mut content = old["content"].clone();
                     content["linkedCharacterId"] = json!(character_id);
                     (old.clone(), content)
-                } else { (json!({}), empty_card(&entity.title, &character_id)) };
+                } else {
+                    (json!({}), empty_card(&entity.title, &character_id))
+                };
                 let records = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?;
-                let index = if let Some(record_id) = &record_id { records.iter().position(|r|r["id"] == *record_id).ok_or(ReferenceError::Invalid)? }
-                    else { records.push(new_record()); records.len()-1 };
+                let index = if let Some(record_id) = &record_id {
+                    records
+                        .iter()
+                        .position(|r| r["id"] == *record_id)
+                        .ok_or(ReferenceError::Invalid)?
+                } else {
+                    records.push(new_record());
+                    records.len() - 1
+                };
                 append_approved(&mut records[index], &template, content, true)?;
             }
-            Command::PreviewGameCharacter { record_id, technical_name, display_name, dialogue_color } => {
-                let (_, preview) = self.prepare_reference_character(project, project_id, &doc, &request.expected_revision, record_id.as_deref(), CreateCharacterRequest {technical_name, display_name, dialogue_color})?;
+            Command::PreviewGameCharacter {
+                record_id,
+                technical_name,
+                display_name,
+                dialogue_color,
+            } => {
+                let (_, preview) = self.prepare_reference_character(
+                    project,
+                    project_id,
+                    &doc,
+                    &request.expected_revision,
+                    record_id.as_deref(),
+                    CreateCharacterRequest {
+                        technical_name,
+                        display_name,
+                        dialogue_color,
+                    },
+                )?;
                 let mut workspace = self.references(project, project_id)?;
                 workspace.character_preview = Some(preview);
                 return Ok(workspace);
             }
-            Command::CreateGameCharacter { record_id, technical_name, display_name, dialogue_color, expected_preview_digest } => {
-                let (mut proposal, preview) = self.prepare_reference_character(project, project_id, &doc, &request.expected_revision, record_id.as_deref(), CreateCharacterRequest {technical_name, display_name, dialogue_color})?;
-                if preview.digest != expected_preview_digest { return Err(ReferenceError::Conflict); }
+            Command::CreateGameCharacter {
+                record_id,
+                technical_name,
+                display_name,
+                dialogue_color,
+                expected_preview_digest,
+            } => {
+                let (mut proposal, preview) = self.prepare_reference_character(
+                    project,
+                    project_id,
+                    &doc,
+                    &request.expected_revision,
+                    record_id.as_deref(),
+                    CreateCharacterRequest {
+                        technical_name,
+                        display_name,
+                        dialogue_color,
+                    },
+                )?;
+                if preview.digest != expected_preview_digest {
+                    return Err(ReferenceError::Conflict);
+                }
                 // The prepared source metadata assigns this exact new stable character ID.
-                let metadata = proposal.mutations.iter().find(|m|m.path.as_str() == ".renpy-editor/authoring.json").ok_or(ReferenceError::Invalid)?;
-                let metadata: Value = serde_json::from_slice(&metadata.proposed).map_err(|_|ReferenceError::Invalid)?;
-                let character = metadata["characters"].as_array().and_then(|a|a.last()).ok_or(ReferenceError::Invalid)?;
-                let character_id = string(&character["id"] )?;
+                let metadata = proposal
+                    .mutations
+                    .iter()
+                    .find(|m| m.path.as_str() == ".renpy-editor/authoring.json")
+                    .ok_or(ReferenceError::Invalid)?;
+                let metadata: Value = serde_json::from_slice(&metadata.proposed)
+                    .map_err(|_| ReferenceError::Invalid)?;
+                let character = metadata["characters"]
+                    .as_array()
+                    .and_then(|a| a.last())
+                    .ok_or(ReferenceError::Invalid)?;
+                let character_id = string(&character["id"])?;
                 let (template, mut content) = if let Some(record_id) = &record_id {
                     let old = current_revision(editable_card(&doc, record_id)?)?;
                     (old.clone(), old["content"].clone())
-                } else { (json!({}), empty_card(string(&character["displayName"] )?, character_id)) };
+                } else {
+                    (
+                        json!({}),
+                        empty_card(string(&character["displayName"])?, character_id),
+                    )
+                };
                 content["linkedCharacterId"] = json!(character_id);
                 let records = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?;
-                let index = if let Some(record_id) = &record_id { records.iter().position(|r|r["id"] == *record_id).ok_or(ReferenceError::Invalid)? }
-                    else { records.push(new_record()); records.len()-1 };
+                let index = if let Some(record_id) = &record_id {
+                    records
+                        .iter()
+                        .position(|r| r["id"] == *record_id)
+                        .ok_or(ReferenceError::Invalid)?
+                } else {
+                    records.push(new_record());
+                    records.len() - 1
+                };
                 append_approved(&mut records[index], &template, content, true)?;
                 extra_mutations.append(&mut proposal.mutations);
             }
-            Command::RestoreCard { record_id, revision_id } => {
+            Command::RestoreCard {
+                record_id,
+                revision_id,
+            } => {
                 let record = editable_card(&doc, &record_id)?;
                 let current = current_revision(record)?;
-                if current["id"] == revision_id { return invalid(); }
-                let snapshot = array(&record["revisions"] )?.iter().find(|r| r["id"] == revision_id && matches!(r["status"].as_str(),Some("approved" | "superseded"))).ok_or(ReferenceError::Invalid)?.clone();
+                if current["id"] == revision_id {
+                    return invalid();
+                }
+                let snapshot = array(&record["revisions"])?
+                    .iter()
+                    .find(|r| {
+                        r["id"] == revision_id
+                            && matches!(r["status"].as_str(), Some("approved" | "superseded"))
+                    })
+                    .ok_or(ReferenceError::Invalid)?
+                    .clone();
                 self.check_reference_support(project, project_id, &record_id, &revision_id)?;
                 if let Some(character_id) = current["content"]["linkedCharacterId"].as_str() {
                     association_available(&doc, Some(&record_id), character_id)?;
-                    if !self.references(project, project_id)?.entities.iter().any(|e|e.kind == "character" && e.id == character_id && e.revision.is_some()) { return Err(ReferenceError::Conflict); }
+                    if !self
+                        .references(project, project_id)?
+                        .entities
+                        .iter()
+                        .any(|e| {
+                            e.kind == "character" && e.id == character_id && e.revision.is_some()
+                        })
+                    {
+                        return Err(ReferenceError::Conflict);
+                    }
                 }
                 let mut content = snapshot["content"].clone();
                 content["linkedCharacterId"] = current["content"]["linkedCharacterId"].clone();
                 validate_content(&content, Kind::Card)?;
-                let record = doc["cards"].as_array_mut().ok_or(ReferenceError::Invalid)?.iter_mut().find(|r|r["id"] == record_id).ok_or(ReferenceError::Invalid)?;
+                let record = doc["cards"]
+                    .as_array_mut()
+                    .ok_or(ReferenceError::Invalid)?
+                    .iter_mut()
+                    .find(|r| r["id"] == record_id)
+                    .ok_or(ReferenceError::Invalid)?;
                 append_approved(record, &snapshot, content, true)?;
             }
             Command::SaveProjectContext { world, tone } => {
@@ -984,14 +1409,37 @@ impl AuthoringService {
                     doc["projectContext"] = json!({"id":uuid::Uuid::new_v4().to_string(),"revisionCounter":0,"currentRevisionId":null,"revisions":[]});
                 }
                 let context = &mut doc["projectContext"];
-                let mut next = context["revisions"].as_array().ok_or(ReferenceError::Invalid)?.iter().find(|r|r["id"] == context["currentRevisionId"]).cloned().unwrap_or_else(||json!({}));
+                let mut next = context["revisions"]
+                    .as_array()
+                    .ok_or(ReferenceError::Invalid)?
+                    .iter()
+                    .find(|r| r["id"] == context["currentRevisionId"])
+                    .cloned()
+                    .unwrap_or_else(|| json!({}));
                 let content = merge(&next["content"], &json!({"world":world,"tone":tone}));
-                if next["content"] == content { return invalid(); }
-                let number = context["revisionCounter"].as_u64().unwrap_or(0).checked_add(1).filter(|n|*n <= MAX_COUNTER).ok_or(ReferenceError::Invalid)?;
+                if next["content"] == content {
+                    return invalid();
+                }
+                let number = context["revisionCounter"]
+                    .as_u64()
+                    .unwrap_or(0)
+                    .checked_add(1)
+                    .filter(|n| *n <= MAX_COUNTER)
+                    .ok_or(ReferenceError::Invalid)?;
                 let revision_id = uuid::Uuid::new_v4().to_string();
-                for (k,v) in json!({"id":revision_id,"number":number,"createdAt":now(),"content":content}).as_object().unwrap() { next[k] = v.clone(); }
-                let revisions = context["revisions"].as_array_mut().ok_or(ReferenceError::Invalid)?;
-                if revisions.len() >= 3 { revisions.remove(0); }
+                for (k, v) in
+                    json!({"id":revision_id,"number":number,"createdAt":now(),"content":content})
+                        .as_object()
+                        .unwrap()
+                {
+                    next[k] = v.clone();
+                }
+                let revisions = context["revisions"]
+                    .as_array_mut()
+                    .ok_or(ReferenceError::Invalid)?;
+                if revisions.len() >= 3 {
+                    revisions.remove(0);
+                }
                 revisions.push(next);
                 context["currentRevisionId"] = json!(revision_id);
                 context["revisionCounter"] = json!(number);
@@ -1035,13 +1483,34 @@ impl AuthoringService {
                     return invalid();
                 }
                 if kind == Kind::Card {
-                    let old = record_id.as_ref().and_then(|record_id| doc["cards"].as_array()?.iter().find(|r|r["id"] == *record_id)).and_then(|r|current_revision(r).ok());
+                    let old = record_id
+                        .as_ref()
+                        .and_then(|record_id| {
+                            doc["cards"]
+                                .as_array()?
+                                .iter()
+                                .find(|r| r["id"] == *record_id)
+                        })
+                        .and_then(|r| current_revision(r).ok());
                     if let Some(linked) = fields.get("linkedCharacterId") {
-                        if old.is_some_and(|r|r["content"]["linkedCharacterId"] != *linked) { return invalid(); }
+                        if old.is_some_and(|r| r["content"]["linkedCharacterId"] != *linked) {
+                            return invalid();
+                        }
                         if old.is_none() && !linked.is_null() {
                             let character_id = id(linked)?;
                             association_available(&doc, None, character_id)?;
-                            if !self.references(project, project_id)?.entities.iter().any(|e|e.kind == "character" && e.id == character_id && e.revision.is_some()) { return invalid(); }
+                            if !self
+                                .references(project, project_id)?
+                                .entities
+                                .iter()
+                                .any(|e| {
+                                    e.kind == "character"
+                                        && e.id == character_id
+                                        && e.revision.is_some()
+                                })
+                            {
+                                return invalid();
+                            }
                         }
                     }
                 }
@@ -1060,7 +1529,11 @@ impl AuthoringService {
                 let old = array(&record["revisions"])?
                     .iter()
                     .find(|r| r["id"] == record["currentRevisionId"]);
-                if old.is_some_and(|r| r["status"] == "proposed" && r.get("supportingReadSet").is_some()) { return invalid(); }
+                if old.is_some_and(|r| {
+                    r["status"] == "proposed" && r.get("supportingReadSet").is_some()
+                }) {
+                    return invalid();
+                }
                 let mut content = merge(
                     old.map(|r| &r["content"]).unwrap_or(&Value::Null),
                     &Value::Object(fields),
@@ -1086,7 +1559,9 @@ impl AuthoringService {
                 let current = record["currentRevisionId"].clone();
                 let mut next = old.cloned().unwrap_or_else(|| json!({}));
                 // Explicit manual replacement is authored intent, not a generated dependency snapshot.
-                next.as_object_mut().ok_or(ReferenceError::Invalid)?.remove("supportingReadSet");
+                next.as_object_mut()
+                    .ok_or(ReferenceError::Invalid)?
+                    .remove("supportingReadSet");
                 for(k,v)in json!({"id":rid,"number":number,"status":"approved","createdAt":now(),"reviewedAt":now(),"reviewNote":"","supersedes":if prior.is_null(){Value::Null}else{json!({"recordId":record_id,"revisionId":prior})},"supersededBy":null,"content":content}).as_object().unwrap(){next[k]=v.clone();}
                 let revisions = record["revisions"]
                     .as_array_mut()
@@ -1114,17 +1589,21 @@ impl AuthoringService {
             .commit_history(
                 project,
                 TransactionProposal {
-                    mutations: { let mut mutations = vec![FileMutation {
-                        path: RelativePath::new(PATH).map_err(|_| ReferenceError::Io)?,
-                        kind: if revision == Revision::expected_absence() {
-                            MutationKind::CreateNew
-                        } else {
-                            MutationKind::ReplaceExisting
-                        },
-                        base: revision,
-                        expected_bytes: bytes,
-                        proposed,
-                    }]; mutations.extend(extra_mutations); mutations },
+                    mutations: {
+                        let mut mutations = vec![FileMutation {
+                            path: RelativePath::new(PATH).map_err(|_| ReferenceError::Io)?,
+                            kind: if revision == Revision::expected_absence() {
+                                MutationKind::CreateNew
+                            } else {
+                                MutationKind::ReplaceExisting
+                            },
+                            base: revision,
+                            expected_bytes: bytes,
+                            proposed,
+                        }];
+                        mutations.extend(extra_mutations);
+                        mutations
+                    },
                     intent: TransactionIntent::Edit,
                 },
             )

@@ -592,7 +592,10 @@ mod tests {
         }
         pub(super) fn reject(&mut self, command: Value) -> Value {
             let w = self.model();
-            let mut paths = w["scenes"].as_array().unwrap().iter()
+            let mut paths = w["scenes"]
+                .as_array()
+                .unwrap()
+                .iter()
                 .map(|scene| self.root.join(scene["sourcePath"].as_str().unwrap()))
                 .collect::<Vec<_>>();
             paths.push(self.root.join(".renpy-editor/source-map.json"));
