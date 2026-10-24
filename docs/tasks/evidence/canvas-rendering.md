@@ -3378,3 +3378,27 @@ both-target matched-rendering evidence, unrelated policy edits and protected nat
 recovery remain intact. Manual 7's perceived smoothness report is still missing.
 Windows and whole-ticket acceptance remain pending. This record is local only;
 no push, issue update, PR, merge or release occurred.
+
+### Approved recorder setup awaits OS authentication, 2026-10-24
+
+The user explicitly approved the named recorder's Screen Recording, Accessibility
+and event-posting permissions in this thread. Batch 85 covers setup and capability
+preparation. System Settings reached Screen & System Audio Recording; Add opened
+an OS authentication sheet requiring Touch ID or the Mac login password before the
+file picker. The user was asked to authenticate locally without sharing a password.
+The approved recorder has not yet been added, and no grant has been verified. This
+is a required OS authentication step, not another approval request.
+
+Package 4's source at `68f95c3` confirms that the selected isolated development
+profile route shows the ordinary UI without injected probe JavaScript. No editor,
+helper, capture or input was started. After local authentication, add only the
+reviewed executable, complete the approved Accessibility/event-posting setup and
+recheck its preflight. Do not grant access to another caller identity without a
+specific decision. The actual fixture/target/crop/action/reference qualification
+manifest remains incomplete; no timing result or acceptance is claimed.
+
+Current use is local 85/80, ceiling 88, leaving three existing contingency batches
+for remaining preparation, execution, audit/review and closeout. Mac packages 4/4,
+native 7/9, SDK 29/36 and CI 0/4 are unchanged; Windows zero. No runtime reservation
+was made. Ignored `timing-mac-01-preparation/preparation.json` records setup state.
+Completed evidence, unrelated policy edits and protected recovery remain intact.

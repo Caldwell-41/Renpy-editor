@@ -25,11 +25,12 @@ adapter. No new native app run or permission change occurred.
 owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
 recovery. The user added 10 local batches for continuation, preserving the existing
 8 contingency batches. Recorder construction used 12 of its 15 permitted batches.
-The Mac timing continuation uses batch 84, leaving four existing contingency batches.
+The Mac timing continuation uses batch 85, leaving three existing contingency batches.
 A fresh read-only recorder preflight still reports all three permissions absent;
-explicit setup approval is pending. [Preparation and the permission gate](../tasks/evidence/canvas-rendering.md#mac-timing-permission-gate-2026-10-24)
+setup is approved, and System Settings requires local Touch ID/password authentication
+before adding the recorder. [Preparation and the permission gate](../tasks/evidence/canvas-rendering.md#mac-timing-permission-gate-2026-10-24)
 record artifact verification and the remaining live-plan requirements. No app,
-SDK, capture or input was started. Current use is local 84/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
+SDK, capture or input was started. Current use is local 85/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
 Windows zero. No process or watcher remains pending. Code is local only; publication
 remains `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
 

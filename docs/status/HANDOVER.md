@@ -32,7 +32,7 @@ alone does not justify repeating the sequence.
 
 The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
 bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
-Contingency was announced before batch 81. Current use is local 84, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
+Contingency was announced before batch 81. Current use is local 85, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
 Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
 acceptance remain pending. Recorder construction is complete; no permission change, push, PR, merge or
@@ -49,16 +49,17 @@ The standalone Mac recorder now compiles, with twelve focused checks, types and 
 owns source/build identity and limitations; [Native evidence](../testing/NATIVE.md#standalone-mac-canvas-recorder)
 owns run instructions. Recorder construction used 12 of its 15 permitted batches;
 its unused portion grants no allowance for qualification. The Mac timing handoff
-consumed batch 83; continuation preparation uses batch 84, leaving four existing
-local contingency batches before ceiling 88. [The fresh permission gate](../tasks/evidence/canvas-rendering.md#mac-timing-permission-gate-2026-10-24)
+consumed batch 83; continuation preparation/setup uses batches 84-85, leaving three
+existing local contingency batches before ceiling 88. [The fresh permission gate](../tasks/evidence/canvas-rendering.md#mac-timing-permission-gate-2026-10-24)
 records matching recorder/app hashes, passing unsandboxed signature/clock checks,
-and all three recorder permissions still absent. Explicit setup approval was requested
-and remains unanswered. Ignored `timing-mac-01-preparation` holds the capture preparation.
+and all three recorder permissions absent at preflight. The user approved setup;
+System Settings now requires local Touch ID/password authentication before the
+recorder can be added. No permission grant has been verified. Ignored `timing-mac-01-preparation` holds the capture preparation.
 The live PID/window/crop/action/reference manifest and startup receipt remain absent;
 no app/SDK reservation, capture, input or permission change occurred.
 Both independent review axes have no remaining actionable findings at `dba3a83`. Live capture, Accessibility hit testing, input delivery
-and capture cadence remain unqualified. Next obtain explicit approval before recorder
-permission setup or remote publication; the Windows adapter remains pending. Use
+and capture cadence remain unqualified. Next complete OS authentication and approved recorder setup;
+remote publication still requires approval; the Windows adapter remains pending. Use
 existing package 4 on Mac. Do not consume a native
 launch until capture/input capability and clock mapping work. A Windows host handoff
 is only a fallback for a named failed CI capability and needs user authorization.
