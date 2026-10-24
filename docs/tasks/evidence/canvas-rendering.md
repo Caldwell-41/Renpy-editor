@@ -3487,3 +3487,30 @@ batches require an explicit allowance decision. Mac packages 4/4, native 7/9,
 SDK 29/36, CI 0/4 and Windows zero are unchanged. Completed functional, rendering
 and Mac perceived-smoothness evidence, unrelated edits and protected recovery remain
 intact. No executable code changed or remote publication occurred.
+
+### Final Mac recorder capability check, 2026-10-24
+
+After the user authenticated ChatGPT Accessibility and selected finishing the final
+capability check within batch 88, the exact reviewed recorder exits 0. Screen
+Recording, Accessibility and event posting all report true. The independent
+CoreMedia host clock is 2054774041125250 ns, inside the converted Mach bracket
+2054774041116125 through 2054774041125833 ns; Mach ratio is 125/3. Recorder and
+source hashes still match the reviewed build receipt. The complete result is
+retained in ignored `timing-mac-01-preparation/final-capability-preflight.json`.
+
+This passes permission availability and clock preflight through the current shell
+launch route. It requests no permissions, captures no window and posts no input.
+It does not qualify positive capture, Accessibility hit testing, native input or
+monitor delivery, interruption cleanup, frame coverage or numerical presentation.
+No real fixture/target/crop/action/reference manifest or startup measurement exists.
+No editor/helper attempt was reserved or launched. Completed manual 7 functional
+and perceived-smoothness results and both-target matched rendering remain intact.
+
+Batch 88 is complete; final cumulative local use is 88/80, absolute ceiling 88.
+The local allowance is exhausted. Mac packages 4/4, native 7/9, SDK 29/36, CI 0/4
+and Windows zero are unchanged. Remaining discrete attempt headroom does not renew
+the exhausted local allowance. Further preparation, measurement, audit or correction
+work needs an explicit allowance supplement before execution. Numerical Mac timing,
+Windows and whole-ticket acceptance remain pending. No process, job or watcher is
+pending. Unrelated policy edits and protected recovery remain unchanged. No code
+changed or remote publication occurred; closeout is local only.

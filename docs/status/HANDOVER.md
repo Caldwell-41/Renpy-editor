@@ -34,18 +34,19 @@ alone does not justify repeating the sequence.
 
 The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
 bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
-Contingency was announced before batch 81. Current use is local 88, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
-work stays within these cumulative limits. No package build remains allocated.
+Contingency was announced before batch 81. Final use is local 88, CI 0; Mac packages
+4/4, native 7/9, SDK 29/36; Windows zero. The local allowance is exhausted; no further
+work batch is authorized. Remaining discrete attempts do not renew it. No package
+build remains allocated.
 Independent input-to-visible p95 <=100 ms, Windows and whole-ticket
 acceptance remain pending. Recorder-only permission setup is approved and its Settings
-entries are enabled; the parent-app grant is approved and Accessibility setup awaits OS authentication. No push, PR, merge
-or release is selected. Registered historical Windows jobs do not supply the missing
+entries are enabled; the approved parent-app permissions now pass preflight after
+user authentication. No push, PR, merge or release is selected. Registered historical Windows jobs do not supply the missing
 continuous-input/presentation observation; matched rendering is already accepted.
 
-Continuation preflight confirms an unlocked console outside the sandbox, but the
-shell measurement process now has screen-capture access but still lacks event-posting
-and Accessibility access.
-No capture or input occurred. The
+The final shell preflight passes Screen Recording, event posting, Accessibility
+and independent host-clock conversion after user authentication. No capture or
+input occurred. The
 [proposed measurement run](../tasks/evidence/canvas-rendering.md#presentation-capability-and-proposed-run-2026-10-24)
 owns the endpoints, sample series, capability gates and initial operation plan.
 The standalone Mac recorder now compiles, with twelve focused checks, types and all
@@ -53,22 +54,21 @@ The standalone Mac recorder now compiles, with twelve focused checks, types and 
 owns source/build identity and limitations; [Native evidence](../testing/NATIVE.md#standalone-mac-canvas-recorder)
 owns run instructions. Recorder construction used 12 of its 15 permitted batches;
 its unused portion grants no allowance for qualification. The Mac timing handoff
-consumed batch 83; continuation is now in its final batch 88 at the absolute local
-ceiling. [The partial parent-app result](../tasks/evidence/canvas-rendering.md#parent-capture-available-accessibility-authentication-pending-2026-10-24)
-records Screen Recording true, Accessibility/postEvent false and a passing clock.
-The user approved/granted ChatGPT permissions; its Accessibility entry still showed
-off. The approved toggle now awaits local Touch ID/password authentication. After
-authentication, finish the pending capability check and terminal record within this
-final batch; new preparation/correction/execution batches require an explicit
-allowance decision. Ignored `timing-mac-01-preparation` retains all setup receipts.
-The live PID/window/crop/action/reference manifest and startup receipt remain absent;
-no app/SDK attempt was reserved. No capture or input has occurred.
+consumed batch 83; continuation ends with completed batch 88 at the absolute local
+ceiling. [The final capability check](../tasks/evidence/canvas-rendering.md#final-mac-recorder-capability-check-2026-10-24)
+records exit 0 with all three permissions and clock validation true. The reviewed
+recorder/source hashes are unchanged. Ignored `timing-mac-01-preparation` retains
+all earlier refusals, partial grants and the final preflight receipt. The actual
+fixture/PID/window/crop/action/reference manifest and startup receipt remain absent;
+no app/SDK attempt was reserved. No capture or input has occurred. Any further
+preparation, measurement, audit or correction requires an explicit allowance
+supplement before execution.
 Both independent review axes have no remaining actionable findings at `dba3a83`. Live capture, Accessibility hit testing, input delivery
-and capture cadence remain unqualified. Next complete local OS authentication and
-the pending final capability check;
-remote publication still requires approval; the Windows adapter remains pending. Use
-existing package 4 on Mac. Do not consume a native
-launch until capture/input capability and clock mapping work. A Windows host handoff
+and capture cadence remain unqualified. Permission setup and the final capability
+check are complete; numerical timing remains pending. Obtain an allowance supplement
+before preparing or executing the remaining qualification. Remote publication still
+requires approval; the Windows adapter remains pending. Preserve existing package 4
+on Mac and reserve any later attempt immediately before execution. A Windows host handoff
 is only a fallback for a named failed CI capability and needs user authorization.
 
 Ignored receipts and `usage.json` remain in
