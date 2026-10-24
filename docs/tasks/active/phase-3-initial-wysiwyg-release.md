@@ -38,7 +38,9 @@ execution selection, bounded functional approval and exhausted allowance. Its
 evidence remains current for that recorded scope. Remaining editor visual work
 belongs to [B06](https://github.com/Caldwell-41/Renpy-editor/issues/28), canvas agreement to [B08](https://github.com/Caldwell-41/Renpy-editor/issues/30), and integrated 3B
 acceptance to [B11](https://github.com/Caldwell-41/Renpy-editor/issues/33). Phase 2/3A human acceptance remains pending.
-Mac remains sole writer. Preserve unrelated documentation and workflow maintenance.
+Mac remains the coordinating development host. Newly selected assignments may use
+[parallel worktrees](../../WORKFLOW.md#parallel-agents-and-worktrees).
+Preserve unrelated documentation and workflow maintenance.
 
 ## Acceptance and continuation
 

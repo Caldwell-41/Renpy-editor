@@ -1,6 +1,6 @@
 # Shared Phase 2 and Phase 3 delivery
 
-Read this reference when selecting dependent Phase 2/3 outcomes, assigning independent work, integrating shared services or preparing a continuation prompt. It owns the selected cross-phase sequence and bounded-delivery approach. [WORKFLOW](../../WORKFLOW.md) owns general budgets, host routing, waiting and status maintenance. The current task and user direction choose actual work, host, model settings and authorization. Earlier prompt templates and team defaults here grant no new execution or allowance. Each phase retains its own requirement/acceptance owner.
+Read this reference when selecting dependent Phase 2/3 outcomes, assigning independent work, integrating shared services or preparing a continuation prompt. It owns the selected cross-phase sequence and bounded-delivery approach. [WORKFLOW](../../WORKFLOW.md) owns general budgets, parallel worktrees, host routing, waiting and status maintenance. The current task and user direction choose actual work, host, model settings and authorization. Earlier prompt templates and team defaults here grant no new execution or allowance. Each phase retains its own requirement/acceptance owner.
 
 <a id="19-selected-shared-foundations-and-two-lane-delivery"></a>
 
@@ -112,7 +112,8 @@ migration work remain serial; the owner can implement them directly.
   The owner coordinates shared-core ownership instead of becoming an unplanned third
   independent feature lane. Implementation agents build the assigned foundations too.
 - Each implementation lane uses an isolated worktree with a bounded assignment and
-  declared source files/interfaces. Assign one writer for each shared model, migration,
+  declared source files/interfaces under [parallel worktrees](../../WORKFLOW.md#parallel-agents-and-worktrees).
+  Assign one writer for each shared model, migration,
   dispatch/transaction seam and fixture; dependent lanes consume its reviewed checkpoint.
   Keep UI fixtures/types synchronized with actual core contracts.
 - Integrate at each real operation/completion point above rather than accumulating
@@ -121,7 +122,8 @@ migration work remain serial; the owner can implement them directly.
 - The owner selects combined changed-scope checks and records evidence against the
   integrated candidate. Lanes run focused checks for their work; use shared fixtures
   without duplicating expensive native/package matrices for unchanged inputs.
-  WORKFLOW/TESTING allowances, target requirements and manual waiting still apply.
+  WORKFLOW/TESTING allowances, target requirements and
+  [ci-watch/manual fallback](../../WORKFLOW.md#waiting-without-model-polling) still apply.
 - Owner review covers integration. Any independently required checkpoint review remains
   a separate pass. This team plan creates no new reviewer mandate or CI allowance and
   does not authorize merges, service installation, spending or provider requests.
@@ -212,7 +214,9 @@ Complete implementation, review and required automated platform qualification fr
 the current development session, using [CI-first routing](../../WORKFLOW.md#test-host-routing-and-ownership)
 where suitable. Transfer to another local platform only for an identified remaining
 native capability, carrying completed evidence and the unchanged outcome/budget.
-Keep one active writer and all selected both-target acceptance gates.
+Transfer writer ownership for the handed-off assignment under
+[parallel worktrees](../../WORKFLOW.md#parallel-agents-and-worktrees); independent
+assignments may continue. Keep all selected both-target acceptance gates.
 
 Related deliverables may be selected together with one cumulative allowance and a
 shared qualification point. Internal checkpoints do not automatically require a

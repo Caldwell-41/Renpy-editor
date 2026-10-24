@@ -55,6 +55,16 @@ The current both-target timing waiver above supersedes that gate for this releas
 The full supported subset remains separate. Unrelated policy edits are local and uncommitted. No PR, merge or
 release is selected.
 
+## Parallel worktree policy update
+
+2026-10-22: The user selected parallel agents in separate worktrees, including while
+another assigned worktree awaits CI. [WORKFLOW](../WORKFLOW.md#parallel-agents-and-worktrees)
+owns coordination, integration and commit-specific evidence; the watching chat still
+yields under ci-watch. [The documentation task](../tasks/active/parallel-agent-worktrees.md)
+records completed validation and the unchanged recovery state. The live P3B parent
+is reconciled. On 2026-10-24 the user authorized committing and pushing the repository
+policy edits on the current branch. This selects no product work or new runtime allowance.
+
 ## Earlier canvas decision closeout
 
 2026-10-22: The user confirmed the decision portion of

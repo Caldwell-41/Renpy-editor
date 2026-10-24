@@ -4,6 +4,7 @@
 **CI routing and qualification cadence amended:** 2026-10-10, user approved.
 **Host-neutral clarification and harness prevention:** 2026-10-16, user approved.
 **Standing 3B scheduling exception and delivery allowances:** 2026-10-22, user directed.
+**Parallel agents in separate worktrees:** 2026-10-22, user directed.
 Applies to future project and maintenance tasks.
 
 ## Authority and document ownership
@@ -141,13 +142,15 @@ the active execution brief, then read only the applicable product contracts and 
 Within the same thread, retain the established plan and decisions. After a pause,
 check the pending operation, fresh refs/relevant diff, local edits and ownership.
 Reread instructions that changed or context that is missing; do not repeat the full
-startup audit merely because CI finished. Conflicting/new work requires reconciliation,
-not a reset or second writer. A new timestamp is not evidence of integration.
+startup audit merely because CI finished. Reconcile conflicting/new work with the
+assigned worktree owner; preserve local changes. A new timestamp is not
+evidence of integration.
 
 The recorded working branch remains authoritative for unfinished work; main is the
 integration baseline. If main moved, assess its relevant delta without force-pushing
-or discarding work. Create a branch only when HANDOVER calls for one and fresh refs/PRs
-show no matching work. Record the outcome/branch/PR early in the current task brief.
+or discarding work. Create an outcome or agent branch when the selected assignment
+requires one and fresh refs/PRs/worktrees show no suitable existing work. Record its
+owner, base and integration destination in the owning task.
 
 <a id="one-checkpoint-one-chat"></a>
 
@@ -344,9 +347,46 @@ and one next action. Link detailed evidence instead of copying the historical le
 Preserve historical failures; label superseded directions
 rather than rewriting results or turning past exclusions into passes.
 
+## Parallel agents and worktrees
+
+Parallel implementation agents may work on authorised, dependency-ready assignments
+in separate worktrees and branches. One coordinator owns assignments, shared status
+and allowance records, integration and the combined acceptance evidence. Use one
+writer per worktree and branch at a time, including the integration branch. A merger
+agent may take integration ownership through a recorded handoff.
+
+Record each assignment's ticket or task, worktree/branch, base commit, file/interface
+scope and integration destination. Include the current approved contracts in its
+base; transfer needed uncommitted changes through a reviewed checkpoint. Declare
+overlapping changes, give shared contracts/migrations one owner, and start dependent
+work from that owner's reviewed checkpoint. Isolate mutable fixtures, profiles and
+build outputs; sequence operations that need the same native app or other shared
+mutable resource.
+
+The coordinator reviews and integrates completed assignments in sequence, resolves
+overlap and verifies the combined candidate at the authorised integration checkpoint.
+Worker checks establish their own candidate's results. Select affected integration
+checks after combining changes; reuse earlier evidence only with an explicit scope
+and candidate basis. Retain worktrees with unique work until integration or safe
+retirement is proved under [branch cleanup](#integration-and-branch-cleanup).
+
+Pending CI does not reserve the whole repository or stop other assigned worktrees.
+Bind each result to its recorded run, attempt, full SHA and material inputs; later
+commits or merges do not inherit a pass automatically. The chat registering
+`ci-watch` still yields immediately under [the waiting policy](#waiting-without-model-polling).
+Other assigned agents may continue in their own worktrees during that wait. On
+resume, reconcile current ownership and changes before applying fixes or integrating.
+
+Parallelism stays within selected scope, actual dependencies, required review and
+the same cumulative allowances. Existing task-specific model/team limits and
+protected recovery still apply. This policy permits agent worktrees within an
+authorised outcome; selecting product work, publication, host access or a release
+retains its existing approval boundary.
+
 ## Test host routing and ownership
 
-Keep one implementation owner on the user's preferred development machine. Use GitHub
+Keep one coordinating owner on the user's preferred development machine; assign
+implementation work under [parallel worktrees](#parallel-agents-and-worktrees). Use GitHub
 Actions by default for required automated Windows x64 and macOS ARM64 checks. Running
 checks on another operating system does not require transferring the development session.
 
@@ -370,8 +410,8 @@ The rule is the same in both directions; capabilities need not be identical. A M
 runner without the approved signing identity, or a runner without the required native
 input/observation surface, leaves that named case pending. Mocked contracts and passing
 local tests do not establish the other platform's behavior. Waiting and resumption
-follow [the waiting policy](#waiting-without-model-polling).
-Keep one implementation writer while CI is pending.
+follow [the waiting policy](#waiting-without-model-polling). Other assigned worktrees
+may continue while CI is pending under the parallel-worktree policy.
 
 Within the selected outcome, the agent may prepare, dispatch, monitor and review focused
 CI checks, including necessary workflow adjustments. Verify runner capabilities and retain
@@ -385,9 +425,10 @@ Publication remains within the selected outcome's actual authorization.
 Request a local platform handoff only for a named required case that CI cannot reliably
 establish. Explain the missing capability and transfer only the remaining work, with
 completed evidence, the verified branch checkpoint and unchanged remaining allowance.
-Preserve one active writer. Access to the user's other computer, remote infrastructure
-installation and signing or credential provisioning require their own authorization;
-do not install infrastructure or start a second writer to work around missing capability.
+Transfer the named assignment's writer ownership before the receiving agent edits
+it; independent worktrees may continue. Access to the user's other computer, remote
+infrastructure installation and signing or credential provisioning require their own authorization;
+use the selected handoff rather than duplicate writers for the same assignment.
 Both-platform evidence remains required where selected; missing access does not block
 unrelated already authorized portable work or turn pending proof into acceptance.
 
@@ -507,6 +548,8 @@ For a confirmed GitHub Actions run, use the installed `ci-watch` skill.
 If the skill is absent or cannot register a working watch, use manual same-thread
 resume. Other external waits use manual resume.
 A wait preserves the current outcome, chat, remaining audit and cumulative allowance.
+Its chat yields; other agents' assigned worktrees may continue under
+[parallel worktrees](#parallel-agents-and-worktrees).
 
 1. **Start and record.** Check existing operations, candidate and allowance; dispatch
    only the authorised workflow. Capture workflow/run ID, attempt, exact head SHA,
@@ -551,8 +594,9 @@ A wait preserves the current outcome, chat, remaining audit and cumulative allow
 
 Resume never grants a retry, new dispatch, extra build, broader correction or merge.
 Bounded fixes continue only when already covered by the outcome and remaining allowance;
-otherwise name the decision needed. Do not re-audit unrelated history, rewrite unchanged
-wait records or start a second executor just because CI is slow. Respect one writer.
+otherwise name the decision needed. Preserve the existing audit owner and wait record;
+reconcile any assignment handoff before another agent handles that result. Continue
+independent assigned work under the parallel-worktree policy.
 
 The model does not poll or run keep-alive loops. Background polling and automatic
 same-thread continuation are permitted through the installed `ci-watch` skill under

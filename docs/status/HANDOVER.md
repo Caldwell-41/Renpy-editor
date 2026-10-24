@@ -82,6 +82,19 @@ with candidate identities, commit/push the in-scope closeout and update/close #3
 Full supported-subset and phase acceptance stay separate. If a required result is
 missing, report that named result without expanding into another test campaign.
 
+## Parallel worktree policy update
+
+The user selected this documentation-only policy change on 2026-10-22. Development
+remains on Mac ARM64, `codex/phase3b-screen-designer`, from `7e1e7b3`. Separate agent
+worktrees may proceed concurrently under [WORKFLOW](../WORKFLOW.md#parallel-agents-and-worktrees),
+with one coordinator, one writer per worktree/branch and CI evidence tied to its tested
+commit. The watching chat still yields under ci-watch; other assigned worktrees may
+continue. [The owning task](../tasks/active/parallel-agent-worktrees.md) records the
+completed review, validation and final allowance use. P3B policy is updated and its
+read-back verified. On 2026-10-24 the user authorized committing and pushing these
+documentation edits on the current branch. No product execution is selected. Canvas proof, earlier
+acceptance and protected recovery below retain their prior state.
+
 ## Earlier canvas decision closeout
 
 The user confirmed the full [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36)
