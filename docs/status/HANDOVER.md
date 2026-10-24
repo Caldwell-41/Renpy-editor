@@ -2,6 +2,29 @@
 
 ## Active L17 integration handover
 
+Windows preparation is complete; wait for the user's availability before launching
+the editor. The receiving Windows chat owns #36. Fetched source is exactly
+`8dae4e33427e79fc82b3a4bed046402c7610ae8c`, with no branch divergence. The previous
+`feature/phase-1g-branches-runtime` checkout's unrelated one-line HANDOVER edit is
+preserved in named stash `5dfd4b9ad9c0c7ac12a999685f098ff084f416a4`; do not apply it
+to this branch. Other worktrees are untouched.
+
+Readiness, locked refresh and typechecking/231 frontend tests pass. No system
+installation or pin/lockfile change was needed. Package attempts 1 and 2 compiled
+but failed downloading installer tools inside the restricted sandbox. Attempt 3
+successfully bundled the same executable with existing NSIS outside the sandbox.
+[The preparation record](../tasks/evidence/canvas-rendering.md#windows-readiness-and-packaged-candidate-2026-10-24)
+retains exact tool versions, commands, failures and candidate hashes.
+
+Ignored Windows evidence is under `.toolchains/reports/l17-windows-functional-01/`.
+`package.json` and `build-inputs.json` bind the source, executable/installer and 531
+unchanged application/fixture inputs. `GUIDE.md` gives the eight steps;
+`launch-guided.ps1` invokes the existing explicit `canvas-input` runner, reserves
+one editor/SDK attempt and retains a read-only process/window audit. Execute it
+outside the restricted sandbox only after the user is available. The user supplies
+all physical input and judges moving/resizing for sticking, jumps and lost focus.
+Do not run the installer. No editor, SDK, job or watcher is pending.
+
 The user selected Windows functional input and observed move/resize smoothness as
 #36's remaining bounded work, waived numerical timing on Windows for this release,
 and authorized commit, push and ticket update. [The decision and allowance](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
@@ -14,15 +37,16 @@ performance regression; existing unverified measurements alone are insufficient.
 Branch: `codex/phase3b-screen-designer`. Publication includes local work through
 `39faa34` and this documentation checkpoint. Product code remains `8527998`, the
 functional probe correction is `68f95c3`, and offline Mac measurement correction
-`9875512` does not change the app. Build Windows from the fetched branch candidate
-and record its exact SHA and executable hash. Earlier both-target rendering and
+`9875512` does not change the app. The Windows package is now prepared from that
+fetched branch candidate. Earlier both-target rendering and
 lifecycle proof retains its candidate-specific scope; assess subsequent deltas for
 the missing Windows interaction cases rather than rerunning the comparison matrix.
 
-The Mac preparation/publication uses three of 16 additional work batches.
-Cumulative use is 126/139, leaving 13 across Windows preparation, checks, focused
-correction and closeout. Windows use is zero against caps of two builds, three
-editor sessions and four SDK launches. No added contingency, Mac run or CI dispatch.
+The Mac preparation/publication used three of 16 additional work batches; Windows
+entry, locked dependencies/checks, failed packaging, corrected bundling and records
+used five. Cumulative use is 131/139, leaving eight. The user increased the Windows
+package cap to four in this chat. Use is 3/4 package attempts, 0/3 editor sessions
+and 0/4 SDK launches. No added contingency, Mac run or CI dispatch.
 All failed or uncertain attempts count. Historical 123/126 and its three unused
 batches remain closed. #36 owns the live cumulative count after transfer.
 

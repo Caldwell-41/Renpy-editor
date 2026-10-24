@@ -4396,3 +4396,71 @@ documentation-only; repository validation, whitespace, publication/privacy revie
 and remote/issue readback are the applicable checks. CURRENT/HANDOVER exceed soft
 word targets to preserve separate phase acceptance, unrelated policy work and unique
 protected recovery. No PR, merge or release is selected.
+
+### Windows readiness and packaged candidate (2026-10-24)
+
+The receiving Windows chat takes sole ownership of #36's selected functional and
+smoothness check. Fetch found the published branch exactly at
+`8dae4e33427e79fc82b3a4bed046402c7610ae8c`; no local target branch or divergence
+existed. The prior branch's unrelated one-line HANDOVER edit was inspected and
+preserved in named stash `5dfd4b9ad9c0c7ac12a999685f098ff084f416a4` before switching
+and the fast-forward check. Other worktrees are untouched.
+
+Actual resolved tools on Windows 11 x64, build 26200:
+
+| Prerequisite | Result |
+| --- | --- |
+| Node/npm pins | Node 24.19.0; npm 11.9.0. The extracted npm CLI required a local ignored Windows launcher because its supplied launcher expected an installed directory layout. The actual npm-to-Tauri command route passes. |
+| Rust/components | rustc/Cargo 1.90.0, target `x86_64-pc-windows-msvc`, rustfmt 1.8.0-stable from the pinned toolchain. |
+| Harness Python | Python 3.13.15, above the documented 3.11 minimum. |
+| Windows native tools | Visual Studio Build Tools 2026, MSVC 14.50.35717 / compiler 19.50.35726; Windows SDK 10.0.26100.0. |
+| WebView2 | Tauri resolves installed runtime 156.0.4314.42. |
+| Ren'Py | Official 8.5.3 archive hash `eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45` matches the repository pin and [published checksum](https://www.renpy.org/dl/8.5.3/checksums.txt). No SDK process was started. |
+
+`npm ci --ignore-scripts --no-audit --no-fund` refreshed the locked local tree.
+`npm run check` passed typechecking and all 231 tests, with zero skips/failures.
+`npm exec -- tauri info` confirmed the resolved environment and pinned CLI route.
+Both lockfiles and all pins are unchanged. No system prerequisite needed installation.
+
+Package attempt 1 compiled release successfully, then default bundling failed DNS
+lookup while fetching WiX for MSI. Attempt 2 followed the existing Windows NSIS
+route, `npm exec -- tauri build --bundles nsis -- --locked --offline`; compilation
+passed, then the sandbox's NSIS download failed with the same DNS error. Its direct
+NSIS version preflight also failed loading a system DLL inside the sandbox; the
+same existing executable returned `v3.11` outside it. The second package attempt
+should have waited for that execution-context diagnosis. Both failures count and
+retain their logs, exit receipts and binaries.
+
+The user then increased the package/build cap from two to four. Attempt 3 used
+`npm exec -- tauri bundle --bundles nsis --ci` outside the sandbox and completed
+with existing NSIS, without recompilation or installation. Tauri warned that its
+one-time bundle marker was absent after attempt 2 had patched it for NSIS. The
+executable hash before and after attempt 3 is identical. All 531 recorded tracked
+application/fixture input hashes still match the source candidate.
+
+| Retained candidate artifact | SHA256 | Bytes |
+| --- | --- | --- |
+| Windows x64 `loomlight.exe` | `b896066a534073f86fb20898150f15dc93f3671e7719b85cf514fcc2a9cb8810` | 19,226,112 |
+| `Loomlight_0.1.0_x64-setup.exe` | `60080ae7f2cfcbf7fc5524b5facef782978d539c3bfb7fea39d4c9582fca5f94` | 4,681,062 |
+
+The Windows-relevant delta since `d1d3d99` is the guided input probe, readback
+corrections, move handle, retained focus/pointer capture and provisional movement.
+The eight-stage input check covers these changes. The prior matched rendering,
+architecture and Mac evidence retain their recorded candidates and scope.
+
+Ignored `.toolchains/reports/l17-windows-functional-01/` retains tool paths/versions,
+the input manifest, package receipt/copies, all three attempt logs, usage and the
+prepared guide/launcher. The launcher calls the unchanged existing runner with
+only `canvas-input`, a fresh output/profile and the verified archive. Its process
+audit reads ownership/window metadata and sends no input. The user handles all UI.
+It has only been syntax-checked, not executed; live launch/audit operation is pending.
+Raw native/smoothness flags and conservative admission checks remain unchanged.
+
+Windows preparation uses five further work batches, including both failures and
+this publication, taking cumulative use from 126 to 131/139 with eight remaining.
+Current Windows use is 3/4 package attempts, 0/3 editor sessions and 0/4 SDK launches.
+Only the package cap changed; there is no added contingency, CI dispatch or Mac run.
+No editor/helper, watcher or test is running. Wait for the user's availability,
+then obtain the guided functional result, physical-input/smoothness confirmation
+and normal-exit/owned-cleanup audit before #36 closeout. No acceptance is inferred
+from preparation; #36 remains open. No PR, merge or release is selected.

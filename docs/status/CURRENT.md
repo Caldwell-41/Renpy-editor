@@ -2,6 +2,16 @@
 
 ## L17 Windows functional and smoothness checks selected
 
+Windows preparation is complete at source `8dae4e3`. The NSIS package and retained
+x64 executable are ready; the editor has not been launched. Node/npm, Rust/rustfmt,
+Python, MSVC/Windows SDK, WebView2 and the official pinned SDK pass readiness.
+Locked dependencies were refreshed without changing pins or lockfiles; typechecking
+and all 231 frontend tests pass. Two sandbox bundling failures are retained; the
+third attempt completed outside the sandbox using the unchanged compiled executable.
+The [preparation evidence](../tasks/evidence/canvas-rendering.md#windows-readiness-and-packaged-candidate-2026-10-24)
+owns hashes, commands and limits. Wait for the user's availability before the guided
+physical-input session. #36 remains open for that check, smoothness acceptance and cleanup.
+
 2026-10-24: The user selected the remaining Windows functional input and observed
 smoothness checks for [#36](https://github.com/Caldwell-41/Renpy-editor/issues/36),
 waived numerical timing as a release gate on Windows too, and authorized commit,
@@ -15,12 +25,14 @@ observed, concrete performance regression.
 The [bounded Windows continuation](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
 owns the decision, reused evidence and finite limits. It adds 16 work batches to
 historical use 123, with absolute cumulative ceiling 139 and no added contingency.
-Preparation/publication uses three batches: cumulative 126/139, 13 remaining.
-Windows caps are two builds, three editor sessions and four SDK launches; use is
-zero. No Mac run or CI dispatch is selected. Earlier unused headroom stays closed.
+Mac preparation/publication used three batches; Windows readiness, package attempts
+and preparation records use five more. Cumulative use is 131/139, eight remaining.
+The user increased the Windows package cap from two to four in the receiving chat.
+Use is 3/4 package attempts, 0/3 editor sessions and 0/4 SDK launches. No Mac run or
+CI dispatch is selected. Earlier unused headroom stays closed.
 
 [HANDOVER](HANDOVER.md#active-l17-integration-handover) provides the Windows entry
-prompt. Publish this checkpoint on `codex/phase3b-screen-designer`; no Windows test
+prompt. Continue on `codex/phase3b-screen-designer`; no Windows native input test
 has run and #36 stays open until its remaining evidence and acceptance are complete.
 Unrelated policy edits remain local. No PR, merge or release is selected.
 
