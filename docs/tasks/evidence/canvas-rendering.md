@@ -3402,3 +3402,26 @@ for remaining preparation, execution, audit/review and closeout. Mac packages 4/
 native 7/9, SDK 29/36 and CI 0/4 are unchanged; Windows zero. No runtime reservation
 was made. Ignored `timing-mac-01-preparation/preparation.json` records setup state.
 Completed evidence, unrelated policy edits and protected recovery remain intact.
+
+### Manual 7 late smoothness confirmation, 2026-10-24
+
+The user asked the original chat to forward their late manual 7 response for
+reconciliation. For the completed signed Mac package 4 retry, the question was:
+"In this completed retry, did both moving and resizing look smooth, without
+sticking, jumps, or lost focus?" The user answered "Both looked smooth".
+`manual-07/user-observation.json` retains the question, exact answer and bounded
+scope. This supplies the missing Mac perceived-smoothness observation for both
+movement and resizing. No repeat manual run is needed for that observation.
+
+Keep the raw renderer report and completed external functional audit unchanged.
+The later user observation supplements them; it does not establish numerical
+input-to-visible presentation latency, physical display scanout, Windows results,
+full supported-subset or whole-ticket acceptance. Earlier failure evidence remains.
+Recorder setup approval is already recorded, while OS authentication and verified
+permissions remain outstanding at the last observed setup state.
+
+Batch 86 covers this evidence/status reconciliation, documentation verification
+and local commit. Current use is local 86/80, absolute ceiling 88, leaving two
+existing contingency batches. Mac packages 4/4, native 7/9, SDK 29/36, CI 0/4 and
+Windows zero are unchanged. No app/helper launch, capture, input or permission
+change occurred. Unrelated policy work and protected recovery remain intact.

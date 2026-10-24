@@ -24,17 +24,19 @@ all three cleanup owners pass, with no fallback or process/disk leftovers. The r
 renderer report retains its false native/presentation/smoothness qualification flags;
 `manual-07/external-audit.json` separately records the verified signed native app and
 physical-user route. [Manual 7 evidence](../tasks/evidence/canvas-rendering.md#manual-7-physical-input-pass-2026-10-24)
-owns that distinction. The user reports manual 6's first move followed smoothly;
-the retry's perceived-smoothness report is pending. Its one-use launcher is consumed.
+owns that distinction. The user's [late reply](../tasks/evidence/canvas-rendering.md#manual-7-late-smoothness-confirmation-2026-10-24)
+confirms that both movement and resizing looked smooth in manual 7;
+`manual-07/user-observation.json` retains the exact question and answer. Its one-use
+launcher is consumed. No repeat is needed for this observation.
 Preserve original failures and never replay earlier launchers. A later native run
 needs its own fresh reservation and a named unresolved case; this functional pass
 alone does not justify repeating the sequence.
 
 The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
 bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
-Contingency was announced before batch 81. Current use is local 85, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
+Contingency was announced before batch 81. Current use is local 86, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
-Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
+Independent input-to-visible p95 <=100 ms, Windows and whole-ticket
 acceptance remain pending. Recorder construction is complete; no permission change, push, PR, merge or
 release is selected. Registered historical Windows jobs do not supply the missing
 continuous-input/presentation observation; matched rendering is already accepted.
@@ -49,8 +51,8 @@ The standalone Mac recorder now compiles, with twelve focused checks, types and 
 owns source/build identity and limitations; [Native evidence](../testing/NATIVE.md#standalone-mac-canvas-recorder)
 owns run instructions. Recorder construction used 12 of its 15 permitted batches;
 its unused portion grants no allowance for qualification. The Mac timing handoff
-consumed batch 83; continuation preparation/setup uses batches 84-85, leaving three
-existing local contingency batches before ceiling 88. [The fresh permission gate](../tasks/evidence/canvas-rendering.md#mac-timing-permission-gate-2026-10-24)
+consumed batch 83; preparation/setup and late-observation reconciliation use batches
+84-86, leaving two existing local contingency batches before ceiling 88. [The fresh permission gate](../tasks/evidence/canvas-rendering.md#mac-timing-permission-gate-2026-10-24)
 records matching recorder/app hashes, passing unsandboxed signature/clock checks,
 and all three recorder permissions absent at preflight. The user approved setup;
 System Settings now requires local Touch ID/password authentication before the
