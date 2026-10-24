@@ -3461,3 +3461,29 @@ unchanged. No app/helper attempt was reserved. The live fixture/target/crop/refe
 manifest, positive capture/input path and numerical timing remain unproved. Manual
 7's functional and perceived-smoothness results and both-target matched rendering
 remain intact. No code changed, publication occurred or unrelated work was staged.
+
+### Parent capture available; Accessibility authentication pending, 2026-10-24
+
+The user reports granting ChatGPT permissions, completing the requested parent-app
+permission decision. The unchanged reviewed recorder's preflight now reports
+Screen Recording true, with Accessibility and event posting false. Its host-clock
+check passes; it exits 3 without capture, input or a permission request. The raw
+values and clock bracket are retained in ignored
+`timing-mac-01-preparation/parent-grant-partial-preflight.json`.
+
+System Settings shows ChatGPT Accessibility off while the recorder's entry is on.
+Clicking ChatGPT's switch under the existing approval opens another macOS Touch ID/
+password sheet. The user was asked to authenticate locally; the sheet remains open
+at the last observation. No grant to a different recipient was made. Screen capture
+is now available, but the recorder still cannot perform the required native input
+and Accessibility checks. No app/helper attempt was reserved and no measurement
+manifest, positive capture path or timing sample exists.
+
+Final batch 88 is in progress at cumulative local 88/80, absolute ceiling 88. It
+covers this capability attempt and its terminal record; no additional work batch is
+authorized. After local authentication, finish the pending capability check and
+record its outcome within the final batch. New preparation, correction or execution
+batches require an explicit allowance decision. Mac packages 4/4, native 7/9,
+SDK 29/36, CI 0/4 and Windows zero are unchanged. Completed functional, rendering
+and Mac perceived-smoothness evidence, unrelated edits and protected recovery remain
+intact. No executable code changed or remote publication occurred.

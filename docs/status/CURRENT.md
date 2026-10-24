@@ -16,23 +16,24 @@ user confirms that both moving and resizing looked smooth in manual 7. The
 supplies Mac perceived-smoothness evidence. Numerical presentation, Windows and
 whole-ticket acceptance remain pending. Original failed attempts remain recorded.
 The recorder has enabled Settings entries, but its shell preflight still lacks
-capture/input capability.
+input/Accessibility capability; screen capture now passes.
 A [proposed measurement run](../tasks/evidence/canvas-rendering.md#presentation-capability-and-proposed-run-2026-10-24)
 is prepared. The standalone Mac recorder is built and reviewed; twelve focused checks,
 typechecking and all 229 frontend tests pass. Its actual capture/input path awaits
 a usable launch/permission identity and native qualification. Windows still needs an input/capture
-adapter. Recorder-only permissions are enabled; no new native app run occurred.
+adapter. Recorder-only permissions are enabled; the parent-app grant is approved,
+and no new native app run occurred.
 
 [Evidence](../tasks/evidence/canvas-rendering.md#manual-7-physical-input-pass-2026-10-24)
 owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
 recovery. The user added 10 local batches for continuation, preserving the existing
 8 contingency batches. Recorder construction used 12 of its 15 permitted batches.
-The Mac timing continuation uses batch 87, leaving one existing contingency batch.
-[The launch-identity blocker](../tasks/evidence/canvas-rendering.md#recorder-grants-and-launch-identity-blocker-2026-10-24)
-records enabled recorder entries, failed shell capability checks and an inconclusive
-removed direct-launch job. Broader ChatGPT parent-app access awaits a separate
-permission decision. No app, SDK, capture or input was started. Current use is local
-87/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
+The final Mac timing batch 88 is in progress at the absolute local ceiling.
+[The partial parent-app result](../tasks/evidence/canvas-rendering.md#parent-capture-available-accessibility-authentication-pending-2026-10-24)
+records screen capture available, Accessibility/event posting unavailable, and the
+approved ChatGPT Accessibility toggle awaiting local OS authentication. No app,
+SDK, capture or input was started. No additional batch is authorized. Current use is
+local 88/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
 Windows zero. No process or watcher remains pending. Code is local only; publication
 remains `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
 
