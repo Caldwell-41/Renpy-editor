@@ -21,11 +21,12 @@ package copies, 531 input hashes, process/terminal audits, human acceptance and
 profile, job or watcher remains. The installer was not run. The first attempt's
 changed accepted-source copy is retained as failure evidence, not a restored-source pass.
 
-Current cumulative use is 135/139 work batches. Two review batches and one publication
-batch are reserved within that ceiling. Windows use is 3/4 package attempts, 2/3
+Final cumulative use is 138/139 work batches, including both reviews and final
+publication; the one unused batch is closed with this outcome. Windows use is 3/4 package attempts, 2/3
 editor sessions and 2/4 SDK launches; the user raised only the package cap to four.
 No CI, Mac run or added contingency occurred. Earlier unused allowances stay closed.
-Finish the read-only reviews, publish the in-scope closeout and update/close #36.
+Standards and Spec reviews both pass with zero findings. This record supplies
+#36's final bounded acceptance; the issue owns publication/closure reconciliation.
 No successor task, PR, merge or release is selected. The recorded release timing
 decision and separate full supported-subset/editor/phase acceptance remain unchanged.
 

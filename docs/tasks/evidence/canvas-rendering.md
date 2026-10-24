@@ -4528,9 +4528,19 @@ completes #36's bounded Help acceptance. L18-L20, full supported-subset, editor
 layout and aggregate phase acceptance remain separate. No successor, PR, merge or
 release is selected. Local work and protected recovery are preserved.
 
-Current cumulative use is 135/139 work batches, including native attempt 1,
-diagnosis, native attempt 2 and terminal/human audit/records. Two final review
-batches and one publication batch are reserved within the ceiling. Windows use
+Final cumulative use is 138/139 work batches, including native attempt 1,
+diagnosis, native attempt 2, terminal/human audit/records, both independent reviews
+and final closeout/publication. The one unused batch closes with this outcome. Windows use
 is 3/4 package attempts, 2/3 editor sessions and 2/4 SDK launches. The original
 failed attempts count. There is no added contingency, Mac run or CI dispatch.
 No process, job, watcher or fixture remains pending.
+
+Terminal Standards and Spec reviews of `8dae4e3...5222fd2` both pass with zero
+findings. The Spec review independently verified all eleven evidence hashes,
+all 531 input hashes, package identity, physical/human acceptance, exact restored
+source and normal cleanup. The Standards review verified privacy, failed-evidence
+preservation, cumulative allowance, protected recovery and separate scope boundaries.
+The final documentation edits only record those review results and settled counts.
+No further tests, package, editor or SDK launch was needed. The unchanged application
+retains the passing typecheck/231-test result, and final repository/whitespace checks
+apply to these closeout records. #36 is ready for final publication and tracker closure.

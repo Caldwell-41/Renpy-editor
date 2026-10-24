@@ -18,13 +18,14 @@ Earlier ADR, both-target/two-aspect matched rendering, Mac physical input and Ma
 smoothness retain their accepted scope. The recorded release timing decision is
 unchanged. Full supported-subset, editor layout and phase acceptance remain separate.
 
-Current cumulative use is 135/139 work batches, with two final review batches and
-one publication batch reserved within the ceiling. Windows use is 3/4 package
+Final cumulative use is 138/139 work batches, including both final reviews and
+closeout/publication. The one unused batch is closed with this outcome. Windows use is 3/4 package
 attempts, 2/3 editor sessions and 2/4 SDK launches. The user increased only the
 package cap from two to four. No CI dispatch, Mac run or added contingency occurred.
 Historical unused allowances remain closed.
 
-Continue on `codex/phase3b-screen-designer` for review/publication and #36 closeout.
+Standards and Spec reviews both pass with zero findings. The closeout is on
+`codex/phase3b-screen-designer`; #36 owns its final tracker reconciliation.
 No process, job or watcher remains. No successor task, PR, merge or release is
 selected. [HANDOVER](HANDOVER.md#l17-closeout) preserves recovery and local evidence;
 the prior Windows checkout's unrelated edit remains safely stashed.
