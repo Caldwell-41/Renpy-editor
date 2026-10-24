@@ -109,6 +109,18 @@ func attribute(_ element: AXUIElement, _ key: String) throws -> CFTypeRef {
                 "Required Accessibility attribute unavailable: \(key)")
     return value!
 }
+func elementBounds(_ element: AXUIElement) throws -> CGRect {
+    let position = try attribute(element, kAXPositionAttribute), size = try attribute(element, kAXSizeAttribute)
+    try require(CFGetTypeID(position) == AXValueGetTypeID() && CFGetTypeID(size) == AXValueGetTypeID(),
+                "Accessibility geometry unavailable")
+    var origin = CGPoint.zero, extent = CGSize.zero
+    try require(AXValueGetValue(unsafeBitCast(position, to: AXValue.self), .cgPoint, &origin)
+                && AXValueGetValue(unsafeBitCast(size, to: AXValue.self), .cgSize, &extent), "Invalid Accessibility geometry")
+    let rect = CGRect(origin: origin, size: extent)
+    try require([rect.minX, rect.minY, rect.width, rect.height].allSatisfy { $0.isFinite }
+                && rect.width > 0 && rect.height > 0, "Invalid Accessibility bounds")
+    return rect
+}
 func verifyControl(_ focused: AXUIElement, _ expected: Focus, bounds: CGRect) throws {
     try require(try attribute(focused, kAXRoleAttribute) as? String == expected.role,
                 "Focused control role differs from plan")
@@ -117,14 +129,7 @@ func verifyControl(_ focused: AXUIElement, _ expected: Focus, bounds: CGRect) th
         try? attribute(focused, $0) as? String
     }
     try require(labels.contains(expected.label), "Focused control label differs from plan")
-    let position = try attribute(focused, kAXPositionAttribute), size = try attribute(focused, kAXSizeAttribute)
-    try require(CFGetTypeID(position) == AXValueGetTypeID() && CFGetTypeID(size) == AXValueGetTypeID(),
-                "Focused control geometry unavailable")
-    var origin = CGPoint.zero, extent = CGSize.zero
-    try require(AXValueGetValue(unsafeBitCast(position, to: AXValue.self), .cgPoint, &origin)
-                && AXValueGetValue(unsafeBitCast(size, to: AXValue.self), .cgSize, &extent), "Invalid focus geometry")
-    let rect = CGRect(origin: origin, size: extent)
-    try require(rect.width > 0 && rect.height > 0 && bounds.contains(rect), "Focused control outside owned viewport")
+    try require(bounds.contains(try elementBounds(focused)), "Focused control outside owned viewport")
 }
 func verifyFocus(_ pid: pid_t, _ expected: Focus, bounds: CGRect) throws {
     let raw = try attribute(AXUIElementCreateApplication(pid), kAXFocusedUIElementAttribute)
@@ -227,12 +232,16 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate, @unchecked Send
     }
     guard let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]],
           let front = windows.first(where: { ($0[kCGWindowLayer as String] as? Int) == 0
-              && ($0[kCGWindowAlpha as String] as? Double ?? 0) > 0 }),
-          front[kCGWindowOwnerPID as String] as? Int32 == plan.pid,
-          front[kCGWindowNumber as String] as? UInt32 == plan.windowID,
+              && ($0[kCGWindowAlpha as String] as? Double ?? 0) > 0
+              && $0[kCGWindowOwnerPID as String] as? Int32 == plan.pid
+              && $0[kCGWindowNumber as String] as? UInt32 == plan.windowID }),
           let bounds = front[kCGWindowBounds as String] as? [String: Any],
           let rect = CGRect(dictionaryRepresentation: bounds as CFDictionary) else { throw RecorderError.refused("Owned window must be frontmost and on screen") }
     if let original { try require(rect == original, "Target window moved or resized during measurement") }
+    let raw = try attribute(AXUIElementCreateApplication(plan.pid), kAXFocusedWindowAttribute)
+    try require(CFGetTypeID(raw) == AXUIElementGetTypeID(), "No focused app window")
+    try require(try elementBounds(unsafeBitCast(raw, to: AXUIElement.self)) == rect,
+                "Target must be the focused app window")
     for above in windows.prefix(while: { $0[kCGWindowNumber as String] as? UInt32 != plan.windowID }) {
         if (above[kCGWindowAlpha as String] as? Double ?? 0) > 0,
            let raw = above[kCGWindowBounds as String] as? [String: Any],
