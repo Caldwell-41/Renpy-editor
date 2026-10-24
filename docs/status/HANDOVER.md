@@ -2,67 +2,63 @@
 
 ## Active L17 integration handover
 
-Selected #36 Mac timing measurement and assessment are complete with an overall
-nonqualifying result. Signed package 4, reviewed recorder and product remain
-unchanged. The [final audit](../tasks/evidence/canvas-rendering.md#mac-timing-manual-text-measurement-and-final-audit-2026-10-24)
-admits 99/100 text inputs within 100 ms, p95 83.823 ms and maximum 155.118 ms for
-the injected a/b compositor series. Both axes reproduce the exact content mapping,
-causality and arithmetic. All 100 transitions are observed; sparse capture's
-largest complete-frame gap follows the final response. Raw qualification flags
-stay false. This is not panel scanout or a universal typing-performance claim.
+The selected corrected #36 Mac move recording and assessment are complete. Mac
+presentation timing remains unqualified. [The owning evidence](../tasks/evidence/canvas-rendering.md#corrected-mac-move-workload-approved-2026-10-24)
+records actual admission, original failures, endpoint distinctions and terminal state.
+User-approved supplement use is local 114/114, native 11/11 and selected SDK 33/33
+within global ceiling 36, with no contingency. CI remains 0/4, Mac packages 4/4,
+Windows zero. No further run, build or publication is allocated. Later work needs
+a newly selected scope/allowance and predeclared provisional/settled endpoints.
 
-Version 2 move has 92 clear responses, six ambiguous and two already visible;
-resize has two ambiguous and 98 unobserved states, showing baseline/stale content
-rather than expected resized references. Neither establishes 95/100. Preserve old
-analyses and corrected `timing-mac-03/reanalysis-full100ms/` reports. Missing states
-are not all measured delays over 100 ms. Preserve manual 7's physical-input/history/
-cleanup/user smoothness and both-target matched rendering. Full Mac, Windows, full
-supported subset and whole-ticket acceptance remain separate. No performance fix,
-criterion change or publication is selected.
+The 100-state serpentine move path retains 60 Hz and eight-game-pixel steps, with
+101 distinct positions including baseline. Before timing, both read-only review
+axes independently admit actual references 03 and the final plan. All 101 native
+hashes and actual helper crop hashes differ. Matching request/result IDs, stable
+PNGs, node semantics and expected geometry bind each independent helper state;
+maximum native/helper RGB delta stays two. This is content admission, not a
+fidelity waiver. CLI validation and exact source/native baseline restoration pass.
+The native capture retains the exact admitted plan bytes.
 
-Final use is local 108/108, no remaining local batches or added contingency;
-CI 0/4, Mac packages 4/4, native 10/10, SDK 32/36; Windows zero. The user's four-batch,
-one-native manual finish is exhausted. No further launch or build is allocated.
-A side-chat request led to a prepared distinguishable move workload under
-`move-identifiable-proposal/`: 100 unique serpentine positions at 60 Hz, uniform
-8-game-pixel steps, fixed 180×80 game crop with 28-pixel guide clearance. Predicted
-helper hashes are 101 unique including baseline. They are not native references.
-The gate rejects original 26-state hashes and missing actual native references.
-Require 101 unique independently content-audited native references and validate the
-actual final plan before any rerun. Analyzer/scoring and 95/100 remain unchanged.
-This fixes a missing actual-workload admission check that analyzer TDD did not cover.
-Proposed follow-on is six hard local batches to 114, one native session to 11 and
-SDK 33 within 36, no contingency/build/CI/Windows/permission/publication. It remains
-unapproved. Do not execute at current exhausted ceilings. Preserve
-unrelated policy hunks during the scoped local commit. No push or tracker write.
+Unchanged version 2 analysis finds eight exact settled-reference responses within
+100 ms, one at 193.888 ms and 91 unobserved; ambiguity and already-visible counts
+are zero, full-series p95/maximum null. Independent audits reproduce this. All 82
+other native appearances match translated baseline content within RGB two. The
+application moves a real painted provisional panel while helper confirmation is
+pending; these are not merely guides. Do not call all 91 missing exact references
+late/invisible editing feedback, change scoring or grant a post-hoc pass. Settled
+confirmation and provisional-content feedback remain separately unqualified.
+Capture/scheduling limits and the incomplete-state denominator remain recorded.
 
-`timing-mac-04/terminal-audit.json` and `exit.json` own terminal state. User Quit
-exits editor PID 31126 with code 0, no timeout or forced kill. Helper PID 31139 is
-absent and its owned scratch removed. Older native 9 evidence scratch/profile stay
-retained. All ten game source/asset hashes match baseline; no generated project
-bytecode, saves or cache remain. Helper request/result/log were copied before quit.
-This ordinary-UI route has no separate helper exit-code/ack receipt; accepted
-manual 7 retains the full cooperative lifecycle proof. Native 9's timeout and
-verified forced helper stop remain a separate failure. No editor/helper, recorder
-stream, held pointer or launcher remains pending for this attempt. Never replay
-the consumed launcher. `process.json`/`fixture.json` retain exact private paths.
+`timing-mac-05/` owns raw receipts. `reference-admission.json`,
+`actual-helper-references/` and `move-measurement-plan.json` are the admitted data.
+The first reference attempt stops after 83 moves at a transient process-lookup
+guard refusal; the editor/helper remain live and cleanup releases the pointer.
+Reference 02's translated-baseline predictor is rejected when settled text rasters
+differ. Reference 03 retains each actual helper PNG instead and passes the unchanged
+content check. All attempts stay preserved. Human Command-Z does not restore the
+accepted gesture; the recorder's exact Undo control does. Source/history and native
+baseline restoration are verified before and after measurement.
 
-`foreground-loss` proves the activation-observer stop. Injected `escape-stop`
-stops by focused-window guard, so remains excluded as Escape proof. The physical
-`physical-escape` attempt receives "Escape requested recorder stop", posts zero
-inputs and stops the stream cleanly after native readiness verification and the
-user's physical action. This proves operator Escape without separating monitor
-and key-state mechanisms. Native 9's `signal-cleanup` retains held-pointer release
-and clean stream stop on SIGINT. Original failures and all raw receipts remain.
+`terminal-audit.json` and `exit.json` record native 11 user Quit with editor exit 0,
+no timeout or forced kill, editor/helper absent and owned scratch removed. All ten
+public source/asset hashes match baseline; no generated project bytecode, saves or
+cache remain. Older evidence scratch/profile are retained. The ordinary UI route
+has no separate helper exit-code/acknowledgment receipt; manual 7 retains the full
+cooperative lifecycle proof. No editor/helper, recorder stream, owned pointer,
+launcher or watcher is pending. Never replay a consumed launcher. `fixture.json`,
+`process.json` and `helper-binding.json` own private paths and old identities.
 
-The supplement uses reviewed `recorder-text-hit-2026-10-24/canvas-measure-macos`,
-SHA-256 `8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`.
-Source/receipt and all three existing permissions pass. No permission change or
-Computer Use occurs; preserve that boundary for any later work. No product,
-recorder or analyzer code changes occur after `f75c3d6`; existing verification
-remains applicable. Final two-axis record review and scoped local commit close
-this supplement. Preserve protected recovery below. Preview 5174 stays separate;
-reference server 5175 is stopped, no CI/watcher is pending. Publication is `ccebf3e`.
+Signed package 4 and reviewed recorder SHA-256
+`8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`
+remain unchanged. No permission changes or Computer Use occur. Preserve that
+boundary and existing guards. Preserve text's bounded 99/100 compositor result,
+prior corrected move/resize reports, manual 7 physical-input/history/cleanup/user
+smoothness and accepted both-target matched rendering. Full Mac/Windows,
+supported-subset and whole-ticket acceptance remain separate. No performance fix
+or criterion change is selected. Preserve unrelated policy hunks and protected
+recovery below. Preview 5174 stays separate; reference server 5175 is stopped.
+No CI watcher is pending; publication remains `ccebf3e`. Final record reviews and
+selective local commit close this supplement; nothing is published.
 
 ## Earlier canvas decision closeout
 

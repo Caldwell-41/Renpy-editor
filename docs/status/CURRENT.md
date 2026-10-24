@@ -2,27 +2,29 @@
 
 ## L17 move handle native qualification
 
-2026-10-24: The selected [Mac timing measurement and assessment](../tasks/evidence/canvas-rendering.md#mac-timing-manual-text-measurement-and-final-audit-2026-10-24)
-is complete with an overall nonqualifying result. Text has 99/100 inputs within
-100 ms, p95 83.823 ms and maximum 155.118 ms. Both independent audits reproduce this
-bounded injected a/b compositor result. Move has 92/100 clear responses, six
-ambiguous and two already visible. Resize has two ambiguous and 98 unobserved
-states, showing baseline/stale content rather than expected resized references.
-Missing states are not all measured delays over 100 ms. The old next-action
-analysis is superseded; no coalescing waiver or relaxed target is adopted.
+2026-10-24: The [corrected move recording and assessment](../tasks/evidence/canvas-rendering.md#corrected-mac-move-workload-approved-2026-10-24)
+are complete; Mac timing is not qualified. Before measurement, both independent
+axes admit all 101 actual native/helper reference states and the final 100-input
+plan. The corrected 60 Hz path has no repeated positions or ambiguous attribution.
 
-Physical Escape and foreground-loss checks stop capture cleanly. User Quit exits
-native 10 with code 0; editor/helper are gone, owned scratch is removed and all ten
-public source/asset hashes match baseline. No Computer Use or permission change
-occurs. No operation remains pending for this attempt. Manual 7 and both-target
-matched rendering remain accepted; full Mac, Windows and whole-ticket acceptance
-remain separate. [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns recovery.
+Exact settled-reference matching yields eight inputs within 100 ms, one at
+193.888 ms and 91 unobserved. All 82 other native appearances match translated
+provisional panel content. Real painted content moves; the 91 missing exact
+matches do not mean 91 editing inputs were late or invisible. Provisional feedback
+and settled helper confirmation remain distinct, with capture/scheduling limits
+retained and no post-hoc pass. Text's earlier bounded 99/100 pass, resize's missing
+content, manual 7 and both-target matched rendering remain unchanged.
 
-Final use is local 108/108, no remaining batches or added contingency; CI 0/4,
-Mac packages 4/4, native 10/10, SDK 32/36; Windows zero. A distinguishable 100-state move plan is prepared after the side-chat audit, with
-actual native-reference admission still required. Its proposed six local batches
-and one native session are unapproved; the current ceilings remain exhausted. Work remains local;
-publication is `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
+Native 11 exits normally with code 0 after user Quit. Editor/helper are absent,
+owned scratch is removed, prior evidence remains and all ten public source/asset
+hashes match baseline. No operation is pending. No product/recorder/analyzer change,
+permission change or Computer Use occurs. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns recovery and the endpoint boundary for later work.
+
+Final use is local 114/114, native 11/11 and selected SDK 33/33 (global ceiling 36),
+with no contingency remaining or added. CI is 0/4, Mac packages 4/4, Windows zero.
+No further run is allocated. Work remains local; publication is `ccebf3e`.
+Unrelated policy work and protected recovery remain intact.
 
 ## L17 matched rendering passes on both targets
 

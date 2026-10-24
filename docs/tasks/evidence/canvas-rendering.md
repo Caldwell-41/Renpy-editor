@@ -4036,3 +4036,143 @@ native 11 and SDK use 33 within its existing ceiling 36. It adds no contingency,
 app package, CI, Windows, permission change or publication. Basis is manual setup,
 independent 101-state reference admission, one 100-input move rerun, source/history/
 cleanup audit, two-axis review and records. This is a concrete proposal, not approval.
+
+### Corrected Mac move workload approved (2026-10-24)
+
+The user approves the prepared distinguishable-state rerun with six additional
+hard local batches, one Mac native session and one SDK use. Cumulative ceilings
+are local 114 and native 11; this selection permits SDK use 33 within the existing
+global ceiling 36. No contingency, package, CI, Windows, permission change or
+publication is added. Manual UI only; no Computer Use. Original move/resize/text,
+matched-rendering and cleanup evidence remain intact.
+
+Batch 109 prepares `timing-mac-05/` and checks that native 10 is closed, all ten
+public game source/asset hashes still match baseline, and all three existing
+recorder permissions remain available without a prompt. The same signed app and
+reviewed recorder will be used. This preparation has not started a capture or
+reserved native 11. Actual native references and the final timed plan must pass
+identifiability/content admission before measurement; predicted hashes alone do
+not permit execution. The six batches cover setup, references, admission, timed
+capture, audit/review and local records.
+
+Native 11 starts as editor PID 33700, helper PID 33735 and window 34661. Human
+setup and fresh native metadata establish the same fullscreen/Fit mapping. The
+fixed 180×80 crop maps to captured window `(1190,760)`; it has 28 game pixels of
+frame-boundary clearance throughout the serpentine path. The fresh independent
+baseline helper PNG predicts the same 101 distinct crop hashes as the proposal.
+
+The first slow reference attempt stops after 83 moves with "Target process
+unavailable". Its cleanup releases the held pointer and stops capture. The same
+editor/helper are immediately verified live; this identifies a transient guard
+lookup refusal, with the exact cause unresolved. The guard reports either a
+missing NSRunningApplication or missing executable URL without distinguishing them.
+No recorder change, permission change or guard weakening is made. This incomplete
+capture is retained and excluded from admission. Human Undo and pointer parking
+are requested before an in-session reference retry at 500 ms state intervals.
+No timed measurement has run. Batch 111 owns the retry and actual admission.
+
+#### Actual reference admission and corrected recording
+
+Human Command-Z leaves the interrupted drag's accepted source unchanged. The
+reviewed recorder clicks the exact native Undo button; all ten public source/asset
+hashes and the captured baseline are restored before the retry. No Computer Use
+is used. Reference attempt 02 completes at 500 ms state intervals, but its last
+settled frames do not reproduce simple baseline-image translations. Differences
+start at RGB four and reach 209 for some vertical positions. The final state's
+own helper PNG agrees with native capture within RGB two, showing that translated
+baseline pixels are an unsuitable predictor of every settled text raster. This
+attempt is not admitted. The original gate failure is preserved; its limit is not
+increased.
+
+Reference attempt 03 runs the same slow path with a read-only watcher of the
+already-owned helper files. It retains all 101 independent request/result/PNG
+triples, including baseline. Matching frame IDs, stable metadata around each PNG
+read, PNG hashes, unchanged node semantics and expected frame geometry bind each
+snapshot. All 101 native crop hashes and all 101 actual helper crop hashes are
+distinct. Each native crop matches its own helper PNG within the unchanged maximum
+RGB difference of two. This is content admission, not a new fidelity tolerance.
+Failed/incomplete attempts and the translated-baseline predictor remain excluded.
+
+`reference-admission.json` supplies actual native hashes to the final plan. Both
+independent Standards and Spec reviews inspect all actual state content, identities,
+geometry and final actions before measurement and report zero findings. The reviewed
+recorder's CLI also validates the generated plan. An initial validator command used
+an incorrect artifact-root date and did not execute; the corrected command passes.
+Undo restores exact source and native baseline again. The admitted plan SHA-256 is
+`6121a38440b7ac4b0b98460eeb58fdea817993c342dbb514ae83fd1af641fceb`;
+admission SHA-256 is
+`325b2084e117db8037fc958f0b5793f9d2001c55835f058d8dc50dfc726b651e`.
+The final capture retains those exact plan bytes.
+
+Batch 112 records 100 distinct move inputs at nominal 60 Hz with unchanged
+8-game-pixel steps, plus pointer down/up and a separate header park. All 103 actions
+are received; capture completes with no failure and a clean stream stop. There are
+97 complete frames, 22 idle callbacks and 92 distinct native pixel states. Actual
+sample intervals are 4.226–33.070 ms, median 16.794 ms. Action scheduling lag has
+median 3.558 ms and maximum 22.597 ms; maximum capture callback gap is 86.017 ms.
+Requested cadence does not prove that every intermediate state was captured.
+
+Version 2's unchanged exact matching against the separately settled helper-content
+references produces eight inputs within 100 ms, one observed at 193.888 ms and 91
+without an exact reference observation. Ambiguous and already-visible counts are
+both zero. P95 and maximum across the full series remain null. The corrected path
+removes the repeated-position attribution defect. This arithmetic does not establish
+a 95/100 pass and does not mean 91 inputs had no visible feedback or exceeded 100 ms.
+
+The content audit explains that limitation. Every one of the 82 other native pixel
+appearances matches the baseline helper image translated to its expected provisional
+position within RGB two, rather than the separately rerendered settled reference.
+`screen-ui.ts` translates the isolated composite panel while confirmation is pending
+and replaces it on helper delivery. These pixels contain real panel content, not
+only guides. `timed-content-diagnostic.json` preserves each appearance and its
+mapping; it changes no score or criterion. Settled helper-raster confirmation and
+provisional content movement are therefore distinct observations. Do not use the
+8/100 figure as a universal input-to-visible-response count or label all missing
+exact states product stalls. Capture uncertainty and the endpoint distinction leave
+95/100 overall move qualification unestablished. No post-hoc pass is granted.
+
+The recorded assessment is complete, with no Mac timing acceptance. Text's earlier
+bounded pass, resize's missing-content finding, manual 7 and both-target rendering
+evidence remain unchanged. No product, recorder or analyzer source is modified.
+The actual-plan/reference gate now covers the foreseeable repeated-state problem;
+slow-reference admission alone cannot equate provisional pixels with settled
+rerasterization. Any later qualification must preselect and validate those endpoints
+separately. No further native measurement is selected in this supplement.
+
+#### Corrected move terminal audit and closeout
+
+User Quit exits native 11 with code 0, no timeout or forced editor kill. Editor
+33700 and helper 33735 are absent; this session's owned helper scratch is removed,
+while older evidence scratch and profile remain retained. All ten public source/
+asset hashes match baseline after recorder Undo and again after Quit. The captured
+baseline is restored exactly; the public project has no generated bytecode, saves
+or cache. No recorder stream, held pointer or launcher remains pending. As before,
+ordinary UI supplies no separate helper exit-code/acknowledgment receipt, so manual
+7 retains the full cooperative lifecycle proof. `terminal-audit.json` records these
+bounded findings.
+
+The full recording's largest complete-frame display gap is 180.044 ms, from
+113.151 ms before input start to 66.892 ms after it. This precedes the first sampled
+move, planned at 200 ms and posted at 204.219 ms; retain it with its location rather than treating it as a sampled
+response delay. The 86.017 ms callback gap and 4.226–33.070 ms actual input intervals
+remain separate capture/scheduling limits.
+
+Independent actual-data audits reproduce all settled-reference arithmetic and all
+82 provisional-content mappings, with zero integrity findings on either axis.
+Final terminal/status review reports zero Standards findings and zero Spec
+findings before commit. No altered
+matching policy or post-hoc pass is introduced. Product, recorder and analyzer
+sources stay unchanged, so their prior focused checks remain applicable; actual
+native-reference, plan, capture, source/history and terminal audits are the changed
+verification. No package/test matrix is rerun for documentation alone.
+
+Final cumulative use is local 114/114 and native 11/11. This supplement consumes its
+single SDK use, reaching selected use 33/33 within global ceiling 36. CI remains
+0/4, Mac packages 4/4, Windows zero. All six added local batches and the one native/
+SDK reservation are consumed, with no contingency. No further launch or measurement
+is allocated. The selected corrected move recording and assessment are complete;
+Mac timing and whole-ticket acceptance remain unqualified. Any later work must
+preselect the provisional-content and settled-confirmation endpoints and validate
+them separately within a newly selected scope and allowance. No performance fix,
+permission change, Computer Use, publication, PR, merge or release occurs. Prior
+evidence, unrelated changes and protected recovery remain preserved.
