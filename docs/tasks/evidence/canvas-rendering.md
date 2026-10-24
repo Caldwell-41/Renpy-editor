@@ -3227,7 +3227,7 @@ The compiled tool and private receipts remain under ignored
 `recorder-2026-10-24` in the existing native-feedback evidence root. No Tauri app,
 package, SDK, signing identity or credential namespace changed.
 
-The coherent compiled candidate's executable SHA-256 is
+The initial coherent candidate's executable SHA-256 is
 `afc95409af23051d5fe92f5d0b080e903c8718e7e3390049aaf4052edc5ea5de`;
 its Swift source SHA-256 is
 `c6a34735d7de4b2537758c3c86867db2fed0477c5ea8321d9f5c8778d87b4fdb`.
@@ -3270,3 +3270,35 @@ checks are not editor or SDK launches. No runtime operation or watcher remains
 pending. Actual permission setup, native measurement, Windows and whole-ticket
 acceptance remain separate. All work remains local; unrelated policy edits and
 protected recovery are preserved.
+
+Independent review of `4b9040d...2a8c72f` found three P2 issues. Standards found
+that operation, stream-stop and drain errors could overwrite one another. Spec
+found that action IDs alone did not bind receipts to actual input parameters and
+schedules, and that Escape/ownership checks did not cover waits between actions.
+These original findings remain recorded; no live capture was used to investigate.
+
+The correction retains independent named operation/cleanup failures and preserves
+the primary error. Input receipts now read actual native event type, key/modifier
+or pointer fields and event timestamp, alongside scheduled/before/after times.
+The analyzer compares these against every planned action, the recorded start and
+window bounds. A six-case red reproduction admitted changed kinds, keys, modifiers,
+schedules, stamps and hidden cleanup failures before the correction. All now reject;
+a separate gesture case checks exact global coordinates. Escape and application
+activation monitors latch stop requests, with run-loop servicing and ownership
+checks throughout every wait and final observation. The observer only checks the
+Escape key code. Live observer delivery and interruption cleanup remain unqualified.
+
+The corrected recorder compiles without warnings and passes twelve focused
+offline/compiled-CLI tests. The unchanged frontend retains its passing 229-test
+and typecheck result. Read-only preflight still validates the host clock and
+refuses capture/input permissions without requesting them. Corrected executable
+SHA-256 is `67bb46e88af09839eba68f5d9c8fbac98df6c2e9b4684e44a5d5c3f83533a695`;
+Swift source SHA-256 is
+`18d21af30e7044caf17aed103e550b6afe5dcf322a22444cb1276786c02a4863`.
+`reviewed-build-receipt.json` pins these; earlier candidate receipts are retained.
+Independent follow-up review is pending.
+
+Contingency was announced before batch 81. Current use is local 81/80, global
+ceiling 88 and recorder maximum 85. Eleven of the recorder's fifteen permitted
+batches have been used. Package/native/SDK/CI counts are unchanged. No app launch,
+capture, input posting, permission setup or publication occurred.

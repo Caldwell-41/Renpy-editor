@@ -187,6 +187,11 @@ foreground ownership and unchanged window bounds before input. Gesture samples
 require a held left button and use series `move` or `resize`; text samples use
 series `text`. Complete every down/up pair. Escape, SIGINT, SIGTERM, stream errors
 or lost ownership stop the sequence and release any button held by this tool.
+An [AppKit event monitor](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/MonitoringEvents/MonitoringEvents.html)
+latches Escape, and an application-activation observer latches foreground loss.
+The CLI services the run loop and rechecks ownership throughout scheduled waits
+and final observation. It retains no keyboard text from the Escape monitor. Live
+monitor delivery and interruption cleanup still need the native qualification.
 
 The crop uses physical pixels of the shadow-free captured window. Keep it inside
 helper-rendered content, clear of selection guides and other changing controls.
@@ -219,6 +224,11 @@ remain null. These facts need audit for coverage and scheduling; requested 60 Hz
 does not establish delivered capture cadence. Startup measurement remains separate.
 
 The analyzer verifies retained pixel hashes, exact action receipts and clock order.
+Action receipts include actual native type, key code/modifier flags or global
+pointer coordinates, stamped input time and scheduled time relative to the recorded
+start. The analyzer compares these with the saved plan and window bounds. Operation,
+stream-stop, pointer-release and log-close errors remain separate in session cleanup
+receipts; one failure cannot overwrite another.
 It rejects pixels already visible before the input and counts superseded/unmatched
 inputs as misses. It writes a new `analysis.json` with separate per-series
 nearest-rank p95, maximum and within-100-ms counts. Exit 0 means its arithmetic

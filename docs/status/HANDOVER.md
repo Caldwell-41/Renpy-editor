@@ -32,7 +32,7 @@ alone does not justify repeating the sequence.
 
 The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
 bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
-Announce contingency before batch 81. Current use is local 78, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
+Announce contingency before batch 81. Current use is local 81, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
 Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
 acceptance remain pending. Recorder construction is selected; no permission change, push, PR, merge or
@@ -44,7 +44,7 @@ shell measurement process lacks screen-capture, event-posting and Accessibility
 permissions. No permission request, capture or input occurred. The
 [proposed measurement run](../tasks/evidence/canvas-rendering.md#presentation-capability-and-proposed-run-2026-10-24)
 owns the endpoints, sample series, capability gates and initial operation plan.
-The standalone Mac recorder now compiles, with ten focused checks, types and all
+The standalone Mac recorder now compiles, with twelve focused checks, types and all
 229 frontend tests passing. [Its record](../tasks/evidence/canvas-rendering.md#standalone-mac-recorder-selection-2026-10-24)
 owns source/build identity and limitations; [Native evidence](../testing/NATIVE.md#standalone-mac-canvas-recorder)
 owns run instructions. The user allowed 150% of ten remaining nominal batches for

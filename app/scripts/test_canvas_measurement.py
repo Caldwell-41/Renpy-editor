@@ -16,12 +16,16 @@ class MeasurementTests(unittest.TestCase):
         plan = dict(endpoint='helper-content', actions=[
             dict(sample=dict(id='text-1', series='text', sha256='a' * 64)),
             dict(sample=dict(id='text-2', series='text', sha256='b' * 64))])
-        session = dict(protocol=1, complete=True, clockValidated=True, failure=None)
+        session = dict(protocol=1, complete=True, clockValidated=True, failure=None, inputStartNs=1_000_000_000)
         events = [dict(id='text-1', beforeNs=1_000_000_000, afterNs=1_000_100_000),
                   dict(id='text-2', beforeNs=1_200_000_000, afterNs=1_200_100_000)]
         frames = [dict(displayNs=999_000_000, arrivalNs=1_000_000_000, sha256='0' * 64),
                   dict(displayNs=1_050_000_000, arrivalNs=1_080_000_000, sha256='a' * 64),
                   dict(displayNs=1_299_000_000, arrivalNs=1_350_000_000, sha256='b' * 64)]
+        for i, (action, event) in enumerate(zip(plan['actions'], events)):
+            action.update(kind='key', keyCode=0, atMs=i * 200)
+            event.update(kind='key', keyCode=0, modifiers=0, nativeType=10,
+                         scheduledNs=event['beforeNs'], eventNs=event['beforeNs'])
         return plan, events, frames, session
 
     def test_uses_display_time_and_nearest_rank_per_series(self):
@@ -67,6 +71,25 @@ class MeasurementTests(unittest.TestCase):
                 elif mode == 'input-clock': events[0]['afterNs'] = 0
                 with self.assertRaises(ValueError): analyze(plan, events, frames, session)
 
+    def test_gesture_receipts_use_the_owned_window_coordinates(self):
+        plan = dict(endpoint='helper-content', actions=[
+            dict(atMs=0, kind='down', x=10, y=10),
+            dict(atMs=100, kind='move', x=20, y=20, sample=dict(id='move-1', series='move', sha256='b' * 64)),
+            dict(atMs=200, kind='up', x=20, y=20)])
+        session = dict(protocol=1, complete=True, clockValidated=True, inputStartNs=1_000_000_000,
+                       windowBounds=[100, 200, 500, 500])
+        events = [dict(id=None, kind='down', nativeType=1, pointX=110, pointY=210, modifiers=0,
+                       scheduledNs=1_000_000_000, beforeNs=1_000_000_000, afterNs=1_000_100_000, eventNs=1_000_000_000),
+                  dict(id='move-1', kind='move', nativeType=6, pointX=120, pointY=220, modifiers=0,
+                       scheduledNs=1_100_000_000, beforeNs=1_100_000_000, afterNs=1_100_100_000, eventNs=1_100_000_000),
+                  dict(id=None, kind='up', nativeType=2, pointX=120, pointY=220, modifiers=0,
+                       scheduledNs=1_200_000_000, beforeNs=1_200_000_000, afterNs=1_200_100_000, eventNs=1_200_000_000)]
+        frames = [dict(displayNs=999_000_000, arrivalNs=999_500_000, sha256='0' * 64),
+                  dict(displayNs=1_150_000_000, arrivalNs=1_160_000_000, sha256='b' * 64)]
+        self.assertEqual(analyze(plan, events, frames, session)['series']['move']['p95Ms'], 50)
+        events[1]['pointY'] = 221
+        with self.assertRaises(ValueError): analyze(plan, events, frames, session)
+
     def test_cli_checks_retained_pixels_before_writing_a_report(self):
         for corrupt in (False, True):
             with self.subTest(corrupt=corrupt), tempfile.TemporaryDirectory() as directory:
@@ -88,6 +111,18 @@ class MeasurementTests(unittest.TestCase):
                                         capture_output=True, text=True, timeout=10)
                 self.assertEqual(result.returncode == 0, not corrupt, result.stderr)
                 self.assertEqual((root / 'analysis.json').exists(), not corrupt)
+
+    def test_wrong_posted_action_schedule_or_cleanup_receipt_is_rejected(self):
+        for mode in ('kind', 'key', 'modifiers', 'schedule', 'stamp', 'cleanup'):
+            with self.subTest(mode=mode):
+                plan, events, frames, session = self.receipt()
+                if mode == 'kind': events[0]['kind'] = 'up'
+                elif mode == 'key': events[0]['keyCode'] = 12
+                elif mode == 'modifiers': events[0]['modifiers'] = 1 << 20
+                elif mode == 'schedule': events[1]['scheduledNs'] = 0
+                elif mode == 'stamp': events[0]['eventNs'] = 0
+                else: session['failures'] = dict(captureStop='stop failed')
+                with self.assertRaises(ValueError): analyze(plan, events, frames, session)
 
 
 if __name__ == '__main__':

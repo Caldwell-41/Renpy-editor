@@ -17,10 +17,11 @@ def analyze(plan, events, frames, session):
                    or not re.fullmatch('[a-f0-9]{64}', s['sha256']) for s in samples)):
         raise ValueError('Unknown endpoint, series or pixel digest')
     if (session.get('protocol') != 1 or session.get('complete') is not True
-            or session.get('clockValidated') is not True or session.get('failure')):
+            or session.get('clockValidated') is not True or session.get('failure') or session.get('failures')):
         raise ValueError('Incomplete session or unvalidated clock')
     if [e.get('id') for e in events] != [(a.get('sample') or {}).get('id') for a in plan['actions']]:
         raise ValueError('Every scheduled action must have exactly one input receipt')
+    verify_actions(plan, events, session)
     if not frames:
         raise ValueError('Captured frames required')
     for i, frame in enumerate(frames):
@@ -72,6 +73,48 @@ def analyze(plan, events, frames, session):
 def require_timestamp(value):
     if type(value) is not int or not 0 <= value <= 2**64 - 1:
         raise ValueError('Unsigned integer nanosecond timestamp required')
+
+
+def verify_actions(plan, events, session):
+    start = session.get('inputStartNs')
+    require_timestamp(start)
+    held = False
+    flags = dict(shift=1 << 17, control=1 << 18, option=1 << 19, command=1 << 20)
+    for action, event in zip(plan['actions'], events):
+        for field in ('scheduledNs', 'eventNs', 'beforeNs'):
+            require_timestamp(event.get(field))
+        if (event.get('kind') != action['kind'] or event['eventNs'] != event['beforeNs']
+                or event['scheduledNs'] != start + int(action['atMs'] * 1_000_000)
+                or event['beforeNs'] < event['scheduledNs']):
+            raise ValueError('Posted action identity, stamp or schedule differs from plan')
+        expected_flags = sum(flags[m] for m in set(action.get('modifiers', [])))
+        if (type(event.get('modifiers')) is not int
+                or event['modifiers'] & sum(flags.values()) != expected_flags):
+            raise ValueError('Posted modifiers differ from plan')
+        if action['kind'] == 'key':
+            if event.get('keyCode') != action['keyCode'] or event.get('nativeType') != 10:
+                raise ValueError('Posted key or modifier differs from plan')
+        else:
+            kind = action['kind']
+            # CoreGraphics CGEventType values, checked independently of the logical kind.
+            expected_type = {'down': 1, 'up': 2, 'move': 6 if held else 5}.get(kind)
+            bounds = session.get('windowBounds', [])
+            if (len(bounds) != 4 or event.get('nativeType') != expected_type
+                    or event.get('pointX') != bounds[0] + action['x']
+                    or event.get('pointY') != bounds[1] + action['y']):
+                raise ValueError('Posted pointer differs from planned window coordinates')
+            if kind == 'down':
+                if held: raise ValueError('Duplicate pointer down')
+                held = True
+            elif kind == 'up':
+                if not held: raise ValueError('Pointer up without down')
+                held = False
+        sample = action.get('sample')
+        if sample and not (sample['series'] == 'text' and action['kind'] == 'key'
+                           or sample['series'] in ('move', 'resize') and action['kind'] == 'move' and held):
+            raise ValueError('Sample series does not describe the posted interaction')
+    if held:
+        raise ValueError('Unreleased pointer in planned sequence')
 
 
 def main():

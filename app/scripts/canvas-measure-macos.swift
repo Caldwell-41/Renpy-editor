@@ -77,10 +77,12 @@ struct Plan: Codable {
                 try require((action.modifiers ?? []).allSatisfy { ["command", "shift", "option", "control"].contains($0) },
                             "Unknown key modifier")
             } else {
+                try require(action.modifiers?.isEmpty != false, "Pointer modifiers are unsupported")
                 try require(action.x != nil && action.y != nil && action.x!.isFinite && action.y!.isFinite,
                             "Finite window-relative pointer coordinates required")
                 if action.kind == "down" {
-                    try require(!held && action.focus != nil, "Pointer down requires an expected control and no held button")
+                    try require(!held && action.focus?.role.isEmpty == false && action.focus?.label.isEmpty == false,
+                                "Pointer down requires a named control and no held button")
                     held = true
                 }
                 if action.kind == "up" { try require(held, "Pointer up without down"); held = false }
@@ -136,8 +138,9 @@ func verifyPointer(_ pid: pid_t, _ point: CGPoint, _ expected: Focus, bounds: CG
     try verifyControl(hit!, expected, bounds: bounds)
 }
 
-// Serial capture queue plus a lock for the main driver's error/readiness checks.
-final class Capture: NSObject, SCStreamOutput, SCStreamDelegate {
+// Pixel/status mutation stays on the serial capture queue; metrics and close follow its drain.
+// Cross-thread observers use only fail/check, whose shared state is protected by the lock.
+final class Capture: NSObject, SCStreamOutput, SCStreamDelegate, @unchecked Sendable {
     let root: URL, crop: Crop, log: FileHandle
     private let lock = NSLock()
     private var error: String?, completeFrames = 0, totalBytes = 0
@@ -254,7 +257,6 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate {
     let inputURL = output.appendingPathComponent("inputs.jsonl")
     manager.createFile(atPath: inputURL.path, contents: nil, attributes: [.posixPermissions: 0o600])
     let inputs = try FileHandle(forWritingTo: inputURL)
-    defer { try? inputs.close() }
     var session: [String: Any] = ["protocol": 1, "complete": false, "clockValidated": true, "clock": clock,
         "pid": plan.pid, "windowID": plan.windowID, "executableSHA256": plan.executableSHA256,
         "recorderSHA256": digest(try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[0]))),
@@ -263,7 +265,8 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate {
         "webViewRuntime": Bundle(path: "/System/Library/Frameworks/WebKit.framework")?.object(forInfoDictionaryKey: "CFBundleVersion") as Any? ?? NSNull(),
         "frameRateRequested": 60, "pixelFormat": "RGBA8-premultiplied", "permissionsRequested": false,
         "nativePresentationQualified": false]
-    var stream: SCStream?, heldPoint: CGPoint?
+    var stream: SCStream?, heldPoint: CGPoint?, keyMonitor: Any?, activationObserver: NSObjectProtocol?
+    var failures = [String: String]()
     let queue = DispatchQueue(label: "loomlight.measurement.capture")
     let capture = try Capture(root: output, crop: plan.crop)
     let signals = [SIGINT, SIGTERM].map { number -> DispatchSourceSignal in
@@ -272,6 +275,25 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate {
         source.setEventHandler { capture.fail("Recorder interrupted") }; source.resume(); return source
     }
     defer { signals.forEach { $0.cancel() }; signal(SIGINT, SIG_DFL); signal(SIGTERM, SIG_DFL) }
+    defer {
+        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
+        if let activationObserver { NSWorkspace.shared.notificationCenter.removeObserver(activationObserver) }
+    }
+    @MainActor func checkRun() throws {
+        // A CLI has no NSApplication.run loop. Service AppKit's asynchronous monitors here.
+        CFRunLoopRunInMode(.defaultMode, 0.0005, true)
+        _ = try capture.check(); _ = try target(plan, original: bounds)
+        if CGEventSource.keyState(.combinedSessionState, key: 53) { capture.fail("Escape requested recorder stop") }
+        _ = try capture.check()
+    }
+    @MainActor func waitUntil(_ deadline: UInt64) async throws {
+        while true {
+            try checkRun()
+            let current = try now()
+            if current >= deadline { return }
+            try await Task.sleep(nanoseconds: min(5_000_000, deadline - current))
+        }
+    }
     do {
         let displays = NSScreen.screens.compactMap { screen -> [String: Any]? in
             guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? UInt32,
@@ -282,6 +304,16 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate {
         }
         try require(displays.count == 1, "Keep the target window on one measured display")
         session["display"] = displays[0]
+        _ = NSApplication.shared.setActivationPolicy(.prohibited)
+        keyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { event in
+            if event.keyCode == 53 { capture.fail("Escape requested recorder stop") }
+        }
+        try require(keyMonitor != nil, "Escape monitor unavailable")
+        activationObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { notification in
+                if let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                   app.processIdentifier != plan.pid { capture.fail("Target lost foreground ownership") }
+            }
         let content = try await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true)
         guard let window = content.windows.first(where: { $0.windowID == plan.windowID && $0.owningApplication?.processID == plan.pid }) else {
             throw RecorderError.refused("Target not in shareable window inventory")
@@ -301,19 +333,15 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate {
         try await active.startCapture()
         let deadline = try now() + 5_000_000_000
         while try capture.check() == 0 {
+            try checkRun()
             try require(try now() < deadline, "No initial captured frame within five seconds")
             try await Task.sleep(nanoseconds: 5_000_000)
         }
         let start = try now() + 100_000_000
+        session["inputStartNs"] = start
         for action in plan.actions {
             let scheduled = start + UInt64(action.atMs * 1_000_000)
-            while try now() < scheduled {
-                _ = try capture.check()
-                let current = try now()
-                if current < scheduled { try await Task.sleep(nanoseconds: min(5_000_000, scheduled - current)) }
-            }
-            _ = try capture.check(); _ = try target(plan, original: bounds)
-            try require(!CGEventSource.keyState(.combinedSessionState, key: 53), "Escape requested recorder stop")
+            try await waitUntil(scheduled)
             let event: CGEvent, release: CGEvent?, pointerPoint: CGPoint?
             if action.kind == "key" {
                 try verifyFocus(plan.pid, action.focus!, bounds: bounds)
@@ -335,32 +363,48 @@ final class Capture: NSObject, SCStreamOutput, SCStreamDelegate {
                 guard let mouse = CGEvent(mouseEventSource: nil, mouseType: kind, mouseCursorPosition: point, mouseButton: .left) else {
                     throw RecorderError.refused("Cannot create pointer input")
                 }
-                event = mouse; release = nil; pointerPoint = point
+                mouse.flags = []; event = mouse; release = nil; pointerPoint = point
             }
+            try checkRun()
             let before = try now(); event.timestamp = before; event.post(tap: .cghidEventTap)
+            release?.timestamp = before
             release?.post(tap: .cghidEventTap)
             let after = try now()
             if let point = pointerPoint, action.kind == "down" || heldPoint != nil {
                 heldPoint = action.kind == "up" ? nil : point
             }
-            try inputs.write(contentsOf: json(["id": action.sample?.id as Any? ?? NSNull(), "kind": action.kind,
-                "scheduledNs": scheduled, "beforeNs": before, "afterNs": after]) + Data([10]))
+            var row: [String: Any] = ["id": action.sample?.id as Any? ?? NSNull(), "kind": action.kind,
+                "nativeType": event.type.rawValue, "eventNs": event.timestamp,
+                "modifiers": event.flags.rawValue,
+                "scheduledNs": scheduled, "beforeNs": before, "afterNs": after]
+            if action.kind == "key" {
+                row["keyCode"] = event.getIntegerValueField(.keyboardEventKeycode)
+            } else { row["pointX"] = event.location.x; row["pointY"] = event.location.y }
+            try inputs.write(contentsOf: json(row) + Data([10]))
         }
-        try await Task.sleep(nanoseconds: 1_000_000_000)
-        _ = try target(plan, original: bounds); _ = try capture.check()
+        try await waitUntil(try now() + 1_000_000_000)
         session["complete"] = true
-    } catch { session["failure"] = String(describing: error) }
+    } catch { failures["operation"] = String(describing: error) }
+    var cleanup: [String: Any] = ["pointerReleaseRequired": heldPoint != nil, "pointerReleasePosted": false,
+                                  "streamStopAttempted": stream != nil, "streamStopComplete": stream == nil]
     if let point = heldPoint {
         // Release only the button this tool pressed, even if focus was lost.
-        CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: point, mouseButton: .left)?.post(tap: .cghidEventTap)
+        if let release = CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: point, mouseButton: .left) {
+            release.post(tap: .cghidEventTap); cleanup["pointerReleasePosted"] = true
+        } else { failures["pointerRelease"] = "Cannot create owned mouse release" }
     }
     if let stream {
-        do { try await stream.stopCapture() } catch { session["complete"] = false; session["failure"] = "Capture stop failed: \(error)" }
+        do { try await stream.stopCapture(); cleanup["streamStopComplete"] = true }
+        catch { failures["captureStop"] = String(describing: error) }
     }
     queue.sync {} // Drain all pixel writes before closing the receipt.
     session["capture"] = capture.metrics()
-    do { _ = try capture.check() } catch { session["complete"] = false; session["failure"] = String(describing: error) }
-    try capture.log.close()
+    do { _ = try capture.check() } catch { failures["captureDrain"] = String(describing: error) }
+    do { try capture.log.close() } catch { failures["captureLogClose"] = String(describing: error) }
+    do { try inputs.close() } catch { failures["inputLogClose"] = String(describing: error) }
+    session["cleanup"] = cleanup; session["failures"] = failures
+    session["complete"] = session["complete"] as? Bool == true && failures.isEmpty
+    session["failure"] = failures["operation"] ?? failures.keys.sorted().first.flatMap { failures[$0] }
     try json(session).write(to: output.appendingPathComponent("session.json"), options: .atomic)
     try require(session["complete"] as? Bool == true, session["failure"] as? String ?? "Incomplete recording")
 }
