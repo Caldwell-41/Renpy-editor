@@ -3875,3 +3875,164 @@ remain charged and preserved. No push, issue update, PR, merge or release occurr
 Final Standards and Spec reviews of the batch 104 closeout report zero findings
 on each axis. Scoped links, private-path exclusion and whitespace checks pass;
 protected recovery is byte-for-byte preserved.
+
+### Mac timing manual finish approved and native 10 launched (2026-10-24)
+
+The user explicitly approves four additional local batches and one replacement
+native session, with human UI setup and no Computer Use. The hard cumulative limits
+are local 108 and Mac native 10; no contingency, build, CI, Windows or publication
+is added. SDK use 32 remains within 36. Batch 105 prepares the fresh one-use attempt
+and verifies every public game source/asset hash, unchanged signed app, reviewed
+recorder and existing permissions/clock before launch. No permission is requested
+or changed.
+
+`timing-mac-04/reservation.json` charges native 10 and SDK 32 before launching the
+same signed package in the same isolated ordinary-UI profile. No JavaScript or
+input script is injected. Editor PID 31126 is running under a one-use external
+launcher with a 3,600-second bound; its terminal receipt will be `exit.json`.
+`process.json` and `fixture.json` retain exact private paths. Only the public Help
+fixture appears in this profile's Recent Projects. The user opens that entry and
+handles fullscreen, Screens Design, Fit/project resolution, text selection and
+sample focus. The agent makes no Computer Use calls and waits for the ready reply
+before native binding/capture. No text reference, measurement or cleanup result is
+claimed by this launch.
+
+Current use is local 105/108, three batches remaining; CI 0/4, Mac packages 4/4,
+native 10/10, SDK 32/36; Windows zero. Prior failures, original analyses, corrected
+full-window reports and completed evidence remain preserved. No further native
+retry or app package is allocated. The active outcome remains incomplete.
+
+### Mac timing manual text measurement and final audit (2026-10-24)
+
+Batches 106–108 complete the approved manual-UI measurement and assessment with
+no Computer Use, permission change, new package or product change. Native 10 uses
+the same signed app and reviewed recorder. Fresh native metadata binds editor PID
+31126, helper PID 31139, window 34361 and fullscreen bounds `(0,33,1512,949)`.
+The 3024×1898 captured window has two backing pixels per logical point. The
+1280×720 game occupies 640×360 logical points, so the measured crop has one native
+pixel per game pixel. `timing-mac-04/target-binding.json` owns the conversion.
+
+Separate `reference-a` and `reference-b` recordings establish the 6×10 glyph crop
+at native `(1108,694)`, game `(348,214)`. Each independent helper result/PNG confirms
+the literal letter and source geometry. The crop is at least four game pixels
+inside the glyph bounds, clear of guides. Native/helper RGB differences are at
+most two; this admits content identity only, with no new rendering tolerance.
+Measurement uses exact native hashes `130573b4…b981` and `d4597633…7009`.
+`content-audit.json` files retain the full values and mapping. Native pointer hit
+and key-focus checks pass for Canvas text sample. Moving the caret avoids the
+suggestion popup without changing settings.
+
+`text-measurement` contains 100 alternating a/b replacements at nominal 200 ms
+intervals, with selection and caret actions recorded separately. Every sampled
+letter produces exactly one expected content transition before the next sampled
+letter. No earlier unresolved duplicate is credited. Analysis version 2 reproduces
+from the retained plans, input receipts, timestamps and exact raw pixels.
+
+| Series | Inputs | Within 100 ms | Ambiguous | Already visible | Not observed | P95 | Maximum |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Text | 100 | 99 | 0 | 0 | 0 | 83.823 ms | 155.118 ms |
+| Move, corrected native 9 | 100 | 92 | 6 | 2 | 0 | Unresolved | Unresolved |
+| Resize, corrected native 9 | 100 | 0 | 2 | 0 | 98 | Unresolved | Unresolved |
+
+The text capture completes with no failures and a clean stream stop. It retains
+372 complete frames, 738 idle callbacks and four distinct 6×10 pixel states.
+All action scheduling lag has median 4.202 ms and maximum 25.041 ms; sampled
+letter intervals have median 199.946 ms and minimum 180.234 ms. Maximum callback
+gap is 237.421 ms. Maximum complete-frame gap is 511.908 ms after the final matching
+text response. Sparse capture does not hide an unmatched text result: all 100
+expected transitions are observed, including the first response at 155.118 ms.
+`text-audit.json` and both independent review axes reproduce these facts. This is
+one injected-input compositor-timing series with selection/caret setup, not panel
+scanout, physical typing or a universal text-performance claim. Raw recorder and
+analyzer qualification flags remain false; the external audit admits this bounded
+text result only.
+
+The overall Mac timing target is not qualified. Move does not establish 95/100;
+resize shows baseline/stale content rather than the expected resized references.
+Missing resize states are not all assigned measured latencies over 100 ms. The
+accepted matched-rendering, manual 7 functional/history/cleanup and user smoothness
+evidence remain intact. Startup remains the separate native 9 observation.
+
+`foreground-loss` posts Command-H while the named field is focused, receives
+"Target lost foreground ownership" and stops its stream cleanly. This proves the
+activation observer path. `escape-stop` posts Escape, but records "Target must be
+the focused app window" as macOS exits fullscreen. It stops cleanly and proves the
+window guard, not the Escape latch. Both attempts remain intact.
+
+The separately prepared `physical-escape` recording verifies the native focused
+window after the user's ready reply and ten-second return interval. It arms a
+90-second wait with no earlier planned input. The user's physical Escape produces
+"Escape requested recorder stop", zero posted input receipts and a completed
+stream stop. This proves operator Escape stop without distinguishing the global
+monitor from the key-state check. The earlier native 9 `signal-cleanup` separately
+proves SIGINT stop with release of the recorder's held pointer and clean stream
+stop. Its recorder predates the named-control ancestor fix; that fix does not
+change interruption or cleanup code. No forced-interruption result is a completed
+measurement pass.
+
+After the user's Command-Q, native 10 exits 0 without timeout or forced editor
+kill. Editor/helper processes are absent and native 10's owned helper scratch is
+removed. Older native 9 evidence scratch remains retained. Pre/post-quit audits
+verify all ten public source/asset hashes and no generated bytecode, saves or cache
+in the public project. Current helper request, result and log were copied before
+quit. This ordinary-UI route supplies no separate helper exit-code/acknowledgment
+receipt; do not upgrade these observations into a new complete cooperative
+lifecycle proof. Accepted manual 7 owns that proof and source/history exercise.
+`terminal-audit.json` records the bounded cleanup findings. No stream, held pointer,
+editor, helper or launcher remains pending for this attempt.
+
+The selected Mac measurement and assessment are complete with an overall
+nonqualifying result. No performance fix or relaxed criterion is selected. Final
+use is local 108/108 with no remaining local batches or added contingency; CI 0/4,
+Mac packages 4/4, native 10/10, SDK 32/36; Windows zero. Further diagnosis or native
+qualification needs a new selected scope and allowance; do not replay launchers.
+Both independent review axes report zero findings for the admitted text evidence;
+final follow-up reviews also report zero Standards and zero Spec findings for the
+terminal records and distinguishable-state proposal.
+Product/recorder/analyzer sources are unchanged in this supplement, so previous
+focused checks remain applicable and no package/test matrix is rerun for records.
+Protected recovery and unrelated work remain intact. No push, tracker update,
+PR, merge or release is selected.
+
+#### Distinguishable move workload prepared after side-chat audit
+
+A user-requested side-chat handoff identifies the foreseeable workload ambiguity:
+the original 100 moves use only 26 expected native crop hashes. Unresolved pairs
+21/29, 49/51 and 61/89 expect identical pixels, so one transition cannot identify
+which input produced it. The conservative analyzer correctly refuses double credit.
+This limits the measurement plan; changing scoring would not repair attribution.
+The original 92/100 result and all missing-state evidence remain unchanged.
+
+`move-identifiable-proposal/prepare.py`, `manifest.json` and `validation.json`
+prepare a replacement without starting a native session. The 100 states follow a
+10×10 serpentine grid at the same nominal 60 Hz and eight game pixels per adjacent
+move. Row turns preserve that distance. Positions stay within the frame's legal
+range, with no repeated geometry. The fixed game crop `(430,280,180,80)` has at
+least 28 game pixels of clearance from every frame boundary. Translated pinned
+helper pixels predict 101 distinct hashes including baseline. The offline admission
+check rejects the old repeated-state workload and missing native references.
+
+These are predicted helper hashes, not admitted compositor references. Before any
+rerun, obtain baseline plus 100 independent slow native references at fresh live
+bindings, compare actual content against the planned helper translations, and
+require all 101 actual native hashes to differ. Generate and validate the actual
+final measurement plan against those admitted references before posting a timed
+input. Retain 100 inputs at 60 Hz, the same step distance, the 95/100 criterion,
+all misses and the existing conservative analyzer. No sample may be excluded or
+one transition credited twice. No claim is made that this repair will pass timing;
+it removes the known attribution defect. Resize's separate missing-content finding
+remains intact.
+
+TDD covered receipt integrity and analyzer behavior, including delayed transitions,
+repeated unresolved states and conservative ambiguity. It did not validate the
+actual workload/reference manifest before native execution. That missing admission
+check allowed a predictable repeated-state problem into the test. The next run
+requires both levels: analyzer tests and actual-plan/reference identifiability.
+
+Native 10 is already closed and local 108/native 10 are exhausted. The prepared
+replacement is therefore blocked from execution. A proposed bounded follow-on is
+six hard local batches, one Mac native session and one SDK use: local ceiling 114,
+native 11 and SDK use 33 within its existing ceiling 36. It adds no contingency,
+app package, CI, Windows, permission change or publication. Basis is manual setup,
+independent 101-state reference admission, one 100-input move rerun, source/history/
+cleanup audit, two-axis review and records. This is a concrete proposal, not approval.

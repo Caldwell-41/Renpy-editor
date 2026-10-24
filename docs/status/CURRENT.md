@@ -2,29 +2,27 @@
 
 ## L17 move handle native qualification
 
-2026-10-24: Mac timing is incomplete. The [full-response-window correction](../tasks/evidence/canvas-rendering.md#mac-timing-full-response-window-correction-and-manual-setup-handoff-2026-10-24)
-supersedes the earlier move 2/100 and resize 0/100 interpretation. The analyzer had
-mistakenly cut response windows at the next input, usually about 16.7 ms rather than
-the agreed 100 ms. Version 2 retains delayed transitions and repeated-state ambiguity.
-Sixteen focused checks and both review axes pass; original receipts remain intact.
+2026-10-24: The selected [Mac timing measurement and assessment](../tasks/evidence/canvas-rendering.md#mac-timing-manual-text-measurement-and-final-audit-2026-10-24)
+is complete with an overall nonqualifying result. Text has 99/100 inputs within
+100 ms, p95 83.823 ms and maximum 155.118 ms. Both independent audits reproduce this
+bounded injected a/b compositor result. Move has 92/100 clear responses, six
+ambiguous and two already visible. Resize has two ambiguous and 98 unobserved
+states, showing baseline/stale content rather than expected resized references.
+Missing states are not all measured delays over 100 ms. The old next-action
+analysis is superseded; no coalescing waiver or relaxed target is adopted.
 
-Revised arithmetic has 92/100 clear move responses within 100 ms, six ambiguous and
-two already visible. Resize has zero, two ambiguous and 98 unobserved states. Its
-captured content is baseline or dimmed stale baseline; this does not assign a latency
-to every missing state. Neither result establishes a 95/100 pass. Text remains
-unmeasured. Manual 7 and both-target matched rendering evidence remain accepted.
+Physical Escape and foreground-loss checks stop capture cleanly. User Quit exits
+native 10 with code 0; editor/helper are gone, owned scratch is removed and all ten
+public source/asset hashes match baseline. No Computer Use or permission change
+occurs. No operation remains pending for this attempt. Manual 7 and both-target
+matched rendering remain accepted; full Mac, Windows and whole-ticket acceptance
+remain separate. [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns recovery.
 
-The old test session timed out. Its orphan helper required verified force-stop;
-all ten game source/assets match baseline and evidence/profile remain retained.
-No app, helper, stream or held pointer is pending. The user selected human UI setup
-with no Computer Use, but no replacement session has launched.
-
-Use is local 104/104, zero remaining; CI 0/4, Mac packages 4/4, native 9/9, SDK 31/36;
-Windows zero. The proposed manual finish adds four local batches and one native
-session, without contingency, builds or publication; it awaits explicit approval
-before exceeding the ceilings. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns that proposal and checklist. Work is local; publication remains `ccebf3e`.
-Unrelated policy edits and protected recovery remain intact.
+Final use is local 108/108, no remaining batches or added contingency; CI 0/4,
+Mac packages 4/4, native 10/10, SDK 32/36; Windows zero. A distinguishable 100-state move plan is prepared after the side-chat audit, with
+actual native-reference admission still required. Its proposed six local batches
+and one native session are unapproved; the current ceilings remain exhausted. Work remains local;
+publication is `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
 
 ## L17 matched rendering passes on both targets
 

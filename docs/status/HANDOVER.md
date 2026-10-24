@@ -2,78 +2,67 @@
 
 ## Active L17 integration handover
 
-Selected work is #36 Mac timing on `codex/phase3b-screen-designer`. Signed package 4
-and product behavior remain unchanged. Preserve manual 7's physical-input/history/
-cleanup/user smoothness evidence and accepted both-target matched rendering. Text,
-remaining interruption paths and full Mac qualification are incomplete. Windows,
-full supported-subset and whole-ticket acceptance remain separate. No publication
-is selected. [Full-response-window correction and manual setup](../tasks/evidence/canvas-rendering.md#mac-timing-full-response-window-correction-and-manual-setup-handoff-2026-10-24)
-own the latest result and proposal.
+Selected #36 Mac timing measurement and assessment are complete with an overall
+nonqualifying result. Signed package 4, reviewed recorder and product remain
+unchanged. The [final audit](../tasks/evidence/canvas-rendering.md#mac-timing-manual-text-measurement-and-final-audit-2026-10-24)
+admits 99/100 text inputs within 100 ms, p95 83.823 ms and maximum 155.118 ms for
+the injected a/b compositor series. Both axes reproduce the exact content mapping,
+causality and arithmetic. All 100 transitions are observed; sparse capture's
+largest complete-frame gap follows the final response. Raw qualification flags
+stay false. This is not panel scanout or a universal typing-performance claim.
 
-The allowance is exhausted at local 104/104; CI 0/4, Mac packages 4/4, native 9/9,
-SDK 31/36; Windows zero. Stop before further execution. Proposed, not approved: four
-additional hard-limit local batches and one native session, no added contingency,
-build, CI, Windows or publication. That would raise local to 108 and native to 10;
-its SDK use would be 32 within the existing 36. The four batches cover fresh manual
-setup/bindings, text/remaining native checks, complete audit, and review/evidence
-closeout. Await explicit user approval before exceeding either reached ceiling.
+Version 2 move has 92 clear responses, six ambiguous and two already visible;
+resize has two ambiguous and 98 unobserved states, showing baseline/stale content
+rather than expected resized references. Neither establishes 95/100. Preserve old
+analyses and corrected `timing-mac-03/reanalysis-full100ms/` reports. Missing states
+are not all measured delays over 100 ms. Preserve manual 7's physical-input/history/
+cleanup/user smoothness and both-target matched rendering. Full Mac, Windows, full
+supported subset and whole-ticket acceptance remain separate. No performance fix,
+criterion change or publication is selected.
 
-Native 9 expired at its 5,400-second bound; `timing-mac-03/exit.json` records -15.
-The orphan helper PID/executable was verified against the isolated SDK before
-SIGTERM, then SIGKILL after it stayed live for five seconds. No editor/helper is
-left live; no recorder stream or owned pointer is pending. All ten public game
-source/asset hashes match baseline. `terminal-timeout-audit.json` records the forced
-cleanup, not a cooperative lifecycle pass. Keep the profile, scratch and all
-receipts. `fixture.json` owns exact private paths; no real project is selected.
-Do not replay any old launcher. Native 10 has not been authorized or launched.
+Final use is local 108/108, no remaining local batches or added contingency;
+CI 0/4, Mac packages 4/4, native 10/10, SDK 32/36; Windows zero. The user's four-batch,
+one-native manual finish is exhausted. No further launch or build is allocated.
+A side-chat request led to a prepared distinguishable move workload under
+`move-identifiable-proposal/`: 100 unique serpentine positions at 60 Hz, uniform
+8-game-pixel steps, fixed 180×80 game crop with 28-pixel guide clearance. Predicted
+helper hashes are 101 unique including baseline. They are not native references.
+The gate rejects original 26-state hashes and missing actual native references.
+Require 101 unique independently content-audited native references and validate the
+actual final plan before any rerun. Analyzer/scoring and 95/100 remain unchanged.
+This fixes a missing actual-workload admission check that analyzer TDD did not cover.
+Proposed follow-on is six hard local batches to 114, one native session to 11 and
+SDK 33 within 36, no contingency/build/CI/Windows/permission/publication. It remains
+unapproved. Do not execute at current exhausted ceilings. Preserve
+unrelated policy hunks during the scoped local commit. No push or tracker write.
 
-A user-authorized side-chat relay identified the analyzer's next-action cutoff as
-a test-validity error. ADR 0021's target is 95% of editing inputs visible within
-100 ms; the 60 Hz input workload is not a 16.7 ms response deadline. Earlier 2/100
-move and 0/100 resize figures are obsolete for that target. Preserve them as old
-analysis, not current acceptance evidence. No skipped/coalesced-state waiver exists.
+`timing-mac-04/terminal-audit.json` and `exit.json` own terminal state. User Quit
+exits editor PID 31126 with code 0, no timeout or forced kill. Helper PID 31139 is
+absent and its owned scratch removed. Older native 9 evidence scratch/profile stay
+retained. All ten game source/asset hashes match baseline; no generated project
+bytecode, saves or cache remain. Helper request/result/log were copied before quit.
+This ordinary-UI route has no separate helper exit-code/ack receipt; accepted
+manual 7 retains the full cooperative lifecycle proof. Native 9's timeout and
+verified forced helper stop remain a separate failure. No editor/helper, recorder
+stream, held pointer or launcher remains pending for this attempt. Never replay
+the consumed launcher. `process.json`/`fixture.json` retain exact private paths.
 
-`03182c7` fixes offline analysis at the existing seam. Version 2 follows new content
-transitions across subsequent inputs, retains observations beyond 100 ms and keeps
-unresolved repeated states ambiguous rather than crediting a later revisit. Already
-visible, ambiguous and unobserved states remain misses in the full denominator.
-Sixteen focused checks pass; both fixed-point review axes report zero findings.
-Copied receipts and new reports live under `timing-mac-03/reanalysis-full100ms/`,
-with original analyzer/hash and provenance. Original recordings/reports stay intact.
-Revised move arithmetic is 92 within 100 ms, six ambiguous, two already visible.
-Resize is zero within 100 ms, two ambiguous and 98 unobserved. Neither establishes
-95/100. Generation order, reference content and coverage require external audit.
-The resize alternate crop fits dimmed unchanged baseline content, consistent with
-the stale-opacity rule; do not call all absent states measured delays over 100 ms.
+`foreground-loss` proves the activation-observer stop. Injected `escape-stop`
+stops by focused-window guard, so remains excluded as Escape proof. The physical
+`physical-escape` attempt receives "Escape requested recorder stop", posts zero
+inputs and stops the stream cleanly after native readiness verification and the
+user's physical action. This proves operator Escape without separating monitor
+and key-state mechanisms. Native 9's `signal-cleanup` retains held-pointer release
+and clean stream stop on SIGINT. Original failures and all raw receipts remain.
 
-Use reviewed native recorder `recorder-text-hit-2026-10-24/canvas-measure-macos`,
+The supplement uses reviewed `recorder-text-hit-2026-10-24/canvas-measure-macos`,
 SHA-256 `8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`.
-`55d5e6f` verifies unnamed WebKit children through at most eight same-PID ancestors
-inside the exact named control. Tests/reviews pass; positive live text binding is
-still unproved. The console-key/focused-window corrections and original tools are
-retained. Permission, foreground, window and overlap guards stay intact. Parent
-grants were available outside the shell sandbox; approve any actual access change.
-No Computer Use calls are allowed under the user's selected manual workflow.
-
-Text attempt 02 is interrupted by a native suggestion popup and its 18x18 crop
-includes a guide edge. Its map, unused plan and audit are excluded. Prepared
-`text-reference-interior-plan.json` uses a 6x10 glyph interior, native ancestor-checked
-focus, pointer parking and caret moves to avoid suggestions without settings changes.
-Its expired PID/window/crop must be rebound from the replacement session's native
-metadata. Admit complete references before hashes supply a 100-key series. Keep
-unknowns and misses; final analysis alone never sets native qualification true.
-
-Manual checklist after approval and isolated app launch: use the public Help timing
-fixture, fullscreen on the measured display, Screens then 2 Design, project 1280x720
-and Fit, select the Help paragraph, then click Canvas text sample without typing.
-Dismiss ordinary popups; stop on any new access prompt. Reply ready, immediately
-return to Loomlight and leave the field focused with the pointer parked at the far
-top-right. The agent waits ten seconds before native metadata/preflight checks,
-then runs only the reviewed recorder. It must not use Computer Use to help setup.
-
-Preserve unrelated policy hunks and protected recovery below. Source/history/cleanup
-claims stay bounded to their actual receipts. Preview 5174 remains separate,
-reference server 5175 is stopped, no CI/watcher is pending, publication is `ccebf3e`.
+Source/receipt and all three existing permissions pass. No permission change or
+Computer Use occurs; preserve that boundary for any later work. No product,
+recorder or analyzer code changes occur after `f75c3d6`; existing verification
+remains applicable. Final two-axis record review and scoped local commit close
+this supplement. Preserve protected recovery below. Preview 5174 stays separate;
+reference server 5175 is stopped, no CI/watcher is pending. Publication is `ccebf3e`.
 
 ## Earlier canvas decision closeout
 
