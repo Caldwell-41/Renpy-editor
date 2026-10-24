@@ -32,7 +32,6 @@ def analyze(plan, events, frames, session):
         if (frame['displayNs'] > frame['arrivalNs'] or frame['displayNs'] < 0
                 or (i and frame['displayNs'] <= frames[i - 1]['displayNs'])):
             raise ValueError('Invalid frame clock or order')
-    rows = []
     for i, event in enumerate(events):
         for field in ('beforeNs', 'afterNs'):
             require_timestamp(event[field])
@@ -40,34 +39,57 @@ def analyze(plan, events, frames, session):
         if (event['afterNs'] < start or start < 0
                 or (i and start <= events[i - 1]['beforeNs'])):
             raise ValueError('Invalid input clock or order')
-        if event.get('id') is None:
-            continue
-        # Superseded input is never credited to a later, visually identical state.
-        end = events[i + 1]['beforeNs'] if i + 1 < len(events) else frames[-1]['displayNs'] + 1
-        prior = [f for f in frames if f['displayNs'] < start]
-        if not prior:
-            raise ValueError('A captured baseline before each input is required')
-        match = next((f for f in frames if start <= f['displayNs'] < end
-                      and f['sha256'] == expected[event['id']]['sha256']), None)
-        if prior[-1]['sha256'] == expected[event['id']]['sha256']:
-            match = None
-        latency = (match['displayNs'] - start) / 1_000_000 if match else None
-        rows.append(dict(id=event['id'], series=expected[event['id']]['series'],
-                         latencyMs=latency, within100ms=latency is not None and latency <= 100))
+    rows = match_transitions(expected, events, frames)
     groups = {}
     for name in sorted({r['series'] for r in rows}):
         selected = [r for r in rows if r['series'] == name]
         values = sorted(r['latencyMs'] if r['latencyMs'] is not None else math.inf for r in selected)
         p95 = values[math.ceil(.95 * len(values)) - 1]
         groups[name] = dict(inputs=len(values), unmatched=sum(math.isinf(v) for v in values),
+                            ambiguous=sum(r['status'] == 'ambiguous-repeated-state' for r in selected),
+                            alreadyVisible=sum(r['status'] == 'already-visible' for r in selected),
+                            notObserved=sum(r['status'] == 'not-observed' for r in selected),
                             within100ms=sum(r['within100ms'] for r in selected),
                             p95Ms=p95 if math.isfinite(p95) else None,
                             maximumMs=max(values) if all(math.isfinite(v) for v in values) else None,
                             pass100ms=sum(r['within100ms'] for r in selected) >= .95 * len(values))
-    return dict(series=groups, samples=rows,
+    return dict(analysisVersion=2, series=groups, samples=rows,
                 arithmeticPass=plan['endpoint'] == 'helper-content' and all(g['pass100ms'] for g in groups.values()),
                 nativePresentationQualified=False,
-                limitation='Arithmetic only. Native route, reference content and capture coverage require audit.')
+                limitation='Content-transition arithmetic only. Repeated unresolved states are ambiguous. '
+                           'Native route, generation ordering, reference content and capture coverage require audit.')
+
+
+def match_transitions(expected, events, frames):
+    # A later input is workload, not a response deadline. Keep delayed transitions,
+    # but never credit one transition to multiple unresolved inputs for the same pixels.
+    timeline = [(e['beforeNs'], 0, e) for e in events if e.get('id') is not None]
+    timeline += [(f['displayNs'], 1, f) for f in frames]
+    timeline.sort(key=lambda item: (item[0], item[1]))
+    rows, pending, visible = [], {}, None
+    for timestamp, kind, item in timeline:
+        if kind == 0:
+            if visible is None:
+                raise ValueError('A captured baseline before each input is required')
+            sample = expected[item['id']]
+            row = dict(id=item['id'], series=sample['series'], latencyMs=None,
+                       within100ms=False, status='not-observed')
+            rows.append(row)
+            if visible == sample['sha256']:
+                row['status'] = 'already-visible'
+            else:
+                pending.setdefault(sample['sha256'], []).append((timestamp, row))
+        elif item['sha256'] != visible:
+            visible = item['sha256']
+            candidates = pending.pop(visible, [])
+            if len(candidates) == 1:
+                start, row = candidates[0]
+                latency = (timestamp - start) / 1_000_000
+                row.update(latencyMs=latency, within100ms=latency <= 100, status='observed')
+            else:
+                for _, row in candidates:
+                    row['status'] = 'ambiguous-repeated-state'
+    return rows
 
 
 def require_timestamp(value):

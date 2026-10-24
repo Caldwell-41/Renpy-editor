@@ -42,6 +42,50 @@ class MeasurementTests(unittest.TestCase):
         self.assertFalse(report['arithmeticPass'])
         self.assertIsNone(report['samples'][0]['latencyMs'])
 
+    def test_later_input_does_not_shorten_the_100ms_response_target(self):
+        plan, events, frames, session = self.receipt()
+        plan['actions'][1]['atMs'] = 16.7
+        events[1].update(beforeNs=1_016_700_000, afterNs=1_016_800_000,
+                         eventNs=1_016_700_000, scheduledNs=1_016_700_000)
+        frames[1].update(displayNs=1_040_000_000, arrivalNs=1_041_000_000)
+        frames[2].update(displayNs=1_060_000_000, arrivalNs=1_061_000_000)
+        report = analyze(plan, events, frames, session)
+        self.assertEqual(report['samples'][0]['latencyMs'], 40)
+        self.assertTrue(report['arithmeticPass'])
+
+    def test_unsampled_caret_action_does_not_clip_a_response(self):
+        plan, events, frames, session = self.receipt()
+        plan['actions'].insert(1, dict(atMs=10, kind='key', keyCode=123))
+        events.insert(1, dict(id=None, kind='key', keyCode=123, modifiers=0,
+                             nativeType=10, scheduledNs=1_010_000_000,
+                             beforeNs=1_010_000_000, afterNs=1_010_100_000,
+                             eventNs=1_010_000_000))
+        report = analyze(plan, events, frames, session)
+        self.assertEqual(report['samples'][0]['latencyMs'], 50)
+        self.assertTrue(report['arithmeticPass'])
+
+    def test_unresolved_repeated_state_is_ambiguous_not_a_later_success(self):
+        plan, events, frames, session = self.receipt()
+        plan['actions'][1]['sample']['sha256'] = 'a' * 64
+        frames = [frames[0], dict(displayNs=1_250_000_000,
+                                 arrivalNs=1_251_000_000, sha256='a' * 64)]
+        report = analyze(plan, events, frames, session)
+        self.assertEqual(report['series']['text']['ambiguous'], 2)
+        self.assertTrue(all(row['latencyMs'] is None for row in report['samples']))
+        self.assertFalse(report['arithmeticPass'])
+
+    def test_revisit_after_observed_states_can_have_a_new_response(self):
+        plan, events, frames, session = self.receipt()
+        plan['actions'].append(dict(atMs=400, kind='key', keyCode=0,
+                                    sample=dict(id='text-3', series='text', sha256='a' * 64)))
+        events.append(dict(id='text-3', kind='key', keyCode=0, modifiers=0, nativeType=10,
+                           beforeNs=1_400_000_000, afterNs=1_400_100_000,
+                           scheduledNs=1_400_000_000, eventNs=1_400_000_000))
+        frames.append(dict(displayNs=1_450_000_000, arrivalNs=1_451_000_000, sha256='a' * 64))
+        report = analyze(plan, events, frames, session)
+        self.assertTrue(report['arithmeticPass'])
+        self.assertEqual(report['samples'][2]['latencyMs'], 50)
+
     def test_slow_wrong_and_missing_results_do_not_pass(self):
         for mode in ('slow', 'wrong', 'missing', 'superseded'):
             with self.subTest(mode=mode):

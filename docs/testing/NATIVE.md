@@ -229,12 +229,20 @@ pointer coordinates, stamped input time and scheduled time relative to the recor
 start. The analyzer compares these with the saved plan and window bounds. Operation,
 stream-stop, pointer-release and log-close errors remain separate in session cleanup
 receipts; one failure cannot overwrite another.
-It rejects pixels already visible before the input and counts superseded/unmatched
-inputs as misses. It writes a new `analysis.json` with separate per-series
+Analysis version 2 follows new content transitions without ending a response window
+at the next input or unsampled action. It retains observations beyond 100 ms as
+delayed results. Pixels already visible before an input cannot prove its response.
+If multiple unresolved inputs expect identical pixels, a matching transition is
+ambiguous and cannot be credited to a later revisit. Ambiguous, already-visible and
+unobserved inputs remain in the denominator as misses; skipped/coalesced states are
+not automatically accepted. Generation ordering still requires an external audit.
+It writes a new `analysis.json` with separate per-series
 nearest-rank p95, maximum and within-100-ms counts. Exit 0 means its arithmetic
 target passed; it always retains `nativePresentationQualified: false` until an
 external native/reference/coverage audit. Preserve earlier analyses rather than
-overwriting them. Captured compositor timestamps do not establish panel scanout,
+overwriting them, including analyses from the earlier next-action matching policy.
+That earlier policy does not establish the agreed 100 ms result. Captured compositor
+timestamps do not establish panel scanout,
 human input or perceived smoothness. This tool prepares the later qualification;
 it has no permission-request or publication command.
 
