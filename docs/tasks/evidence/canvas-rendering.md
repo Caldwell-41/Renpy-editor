@@ -3514,3 +3514,117 @@ work needs an explicit allowance supplement before execution. Numerical Mac timi
 Windows and whole-ticket acceptance remain pending. No process, job or watcher is
 pending. Unrelated policy edits and protected recovery remain unchanged. No code
 changed or remote publication occurred; closeout is local only.
+
+### Mac timing execution supplement, 2026-10-24
+
+The user instructed the agent to decide an allowance and continue. Allocate 16
+additional local batches with no added contingency, from cumulative 88 through
+hard ceiling 104. This covers real fixture/target/crop/reference preparation, live
+recorder calibration, three 100-input series, focused corrections, audit/review and
+closeout. Package/native/SDK/CI ceilings remain unchanged; no app rebuild or Windows
+work is selected. Batch 89 starts preparation. The signed package and reviewed
+recorder remain pinned, and the completed permission/clock result is reused. A
+fresh isolated public fixture is prepared under ignored `timing-mac-02`; no runtime
+attempt has yet been reserved. Preserve earlier evidence and unrelated work.
+
+### Mac timing native 8 preparation and console correction, 2026-10-24
+
+The selected supplement starts at `9eb64bc`. Batch 89 prepares a fresh public Help
+fixture and isolated profile using the existing metadata formats. Source, booth
+image and SDK font hashes match the accepted comparison inputs. The ordinary
+`studio-settings` development profile route opens the signed app without injected
+JavaScript, a guided input script or a watchdog inside the app. Only that public
+project is opened; no credentials, real game data or LLM operation is selected.
+
+Native 8 and SDK 30 are reserved before launch in batch 90. Signed package 4 passes
+signature/hash checks and the reviewed recorder passes permission/clock preflight.
+The external one-use launcher records PID 24644 and a 2,400-second safety timeout;
+it writes `exit.json` on exit. Public setup uses the ordinary UI and selects dark
+mode in this isolated profile. The main window is 1100x720 logical points, CG ID
+33750. Read-only owned-window metadata and a capture-only canvas crop plan are
+retained under ignored `timing-mac-02`.
+
+The canvas requires a managed SDK rather than a manually registered external SDK.
+The existing verified fixture driver installs the pinned official archive into a
+fresh temporary root without any render commands. Moving its complete managed SDK
+directory into the isolated profile preserves its volume/inode provenance. The
+driver exits 0 and removes its seed root. The archive and driver hashes and the
+preserved identity are retained in `managed-sdk-preparation.json`. No helper has
+started; SDK 30 remains charged as reserved. This changes no production code.
+
+The first capture-only attempt validates its real plan, then refuses `Unlocked
+console required` before creating output. The independent native preflight reports
+both unlocked and console true. Installed `CGSession.h` defines the public macro
+`kCGSessionOnConsoleKey` as `CFSTR("kCGSSessionOnConsoleKey")`; the recorder had used
+the macro name as the dictionary key. Its existing impossible-target CLI test now
+reproduces this specific failure with permissions available. Batch 91 retains the
+original refusal and red test; `c827ec7` corrects only that key. Lock, foreground,
+executable, window and overlap checks are unchanged.
+
+The corrected external recorder compiles and passes all twelve focused recorder
+checks. Its preflight reports all three permissions and the clock valid, without
+requesting access. Executable SHA-256 is
+`bf2166c660e9cec83d50a5b533116e70cd32d08374aa87d372e7acf2027b276c`;
+source SHA-256 is
+`74cf19b69e150cf75773e92f36afc793da29cba2d0a9bd750e2b237f08dd610d`.
+`recorder-console-fix-2026-10-24/reviewed-build-receipt.json` pins the correction.
+The original binary, receipts and failed attempts remain intact. Existing approved
+ChatGPT parent permissions cover the correction's preflight; no permission or app
+signing change occurred. Frontend/types retain their unchanged qualified result.
+
+#### Standards
+
+Independent read-only review of `9eb64bc...c827ec7` reports zero findings. The key
+matches the installed SDK and preserves the documented unlocked-console gate.
+
+#### Spec
+
+Independent read-only review of the same fixed diff reports zero findings. It
+restores the intended gate without weakening safety or claiming native timing.
+Positive capture/input, interruption cleanup and all measured series remain pending.
+
+#### Foreground blocker and recovery
+
+After the correction, attempts 02 and 03 refuse `Target must own the foreground`
+before output creation. The second follows a CUA Raise and native coordinate focus
+attempt. A native workspace query identifies `com.apple.UserNotificationCenter`,
+PID 1808, as foreground; the isolated editor remains alive but inactive. CUA refuses
+to inspect that system app for safety. No attempt is made to bypass that restriction
+or weaken the recorder guard. The user was asked to dismiss or describe the system
+dialog and focus the isolated Loomlight window. A final read-only query confirms
+that the blocker remains. This is an environment/capability blocker, not a measured
+product timing failure.
+
+`timing-mac-02/series-design.json` preselects each complete series. Text alternates
+100 single-character a/b replacements at 200 ms intervals. Move and resize each use
+100 updates at 60 Hz over four 25-update horizontal legs, with three reversals and
+a different expected snapped geometry at every update. Separately captured slow
+references cover the 26 unique states; none has been collected yet. Interior crops
+must intersect helper glyphs while excluding all moving guides. Startup will be
+recorded separately before the first helper request. The design still needs actual
+control coordinates, audited reference hashes and admitted physical crops before
+measurement. No measurement manifest or numerical result is claimed.
+
+At this pause, native 8 is alive and its external launcher remains pending. It will
+exit on ordinary app quit or terminate after its 40-minute bound; read `exit.json`
+and process liveness before continuation. Do not replay the one-use launcher. The
+profile/project route and exact process are in `fixture.json` and `process.json`;
+`waiting-recovery.json` records liveness, source/assets and the remaining bound.
+A first recovery-time calculation used system Python 3.9's different monotonic
+origin; the supported Python 3.12 read corrects it and retains the original receipt.
+Use the supported runtime for timing arithmetic. All ten game source/asset baseline
+hashes match, there is no helper directory and no recorder capture output exists.
+UI setup snapshots supply no numerical presentation evidence. App/fixture cleanup
+is pending with this live session; it is not claimed complete.
+
+Batch 92 covers the correction's checks, both review axes and guarded retry; batch
+93 covers foreground diagnosis, series design and this recovery record. Current
+use is local 93/104, with eleven hard-limit batches remaining and no added
+contingency. Mac packages 4/4, native 8/9, SDK 30/36, CI 0/4; Windows zero. Preserve
+completed manual 7 functional/smoothness and both-target rendering evidence. The
+original protected recovery and unrelated policy edits remain unchanged. No push,
+issue update, PR, merge or release occurred.
+
+Status review: CURRENT is 1269 words and HANDOVER is 2462 words.
+They exceed soft targets to retain earlier phase acceptance, unrelated policy work
+and protected recovery. Only the selected live continuation was replaced.

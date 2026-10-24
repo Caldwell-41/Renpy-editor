@@ -454,3 +454,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   wrong ordering, stale pixels and delayed/missing results. Live capture remains
   pending separate permission and qualification.
 - **Evidence:** [Recorder selection and results](../tasks/evidence/canvas-rendering.md#standalone-mac-recorder-selection-2026-10-24).
+
+## H32. Mac recorder rejects an unlocked console
+
+- **Observed:** first live capture-only plan refuses `Unlocked console required`
+  despite the existing independent native check reporting console/unlocked true.
+- **Cause/correction:** CGSession.h defines `kCGSessionOnConsoleKey` as the wire key
+  `kCGSSessionOnConsoleKey`. The recorder used the macro name as a literal lookup.
+  `c827ec7` corrects only that key and preserves all safety checks.
+- **Verification:** with permissions available, the existing impossible-target CLI
+  test reproduces the false refusal before correction; all twelve recorder checks
+  and both independent review axes pass afterward. Preflight alone does not prove
+  the live console/foreground/capture path.
+- **Evidence:** [native 8 preparation and console correction](../tasks/evidence/canvas-rendering.md#mac-timing-native-8-preparation-and-console-correction-2026-10-24).

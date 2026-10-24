@@ -2,38 +2,31 @@
 
 ## L17 move handle native qualification
 
-2026-10-24: Approved `handle-v2` remains integrated through `8527998`. Qualification
-continues at `68f95c3`, which corrects only the native probe's float-roundoff oracle.
-Signed Mac package 4 passes signature and installer-content verification. Types,
-229 frontend tests and the corrected SDK 28 controller rehearsal pass. Both
-independent review axes report zero actionable findings.
+2026-10-24: Signed Mac package 4 at `68f95c3` retains its passed physical-input,
+source/history and cleanup evidence. The user confirms manual 7 movement and
+resizing both looked smooth. Both-target matched rendering remains accepted.
+Numerical presentation, Windows and whole-ticket acceptance remain pending.
 
-Manual 7 passes all eight physical-input stages in signed Mac package 4, including
-move-handle dragging and anchor-aware resizing. Exact source restoration, admitted
-source/helper geometry, cooperative helper exit and all cleanup owners pass. The
-user confirms that both moving and resizing looked smooth in manual 7. The
-[late observation](../tasks/evidence/canvas-rendering.md#manual-7-late-smoothness-confirmation-2026-10-24)
-supplies Mac perceived-smoothness evidence. Numerical presentation, Windows and
-whole-ticket acceptance remain pending. Original failed attempts remain recorded.
-The reviewed recorder now passes its shell permission and clock preflight.
-Screen capture, Accessibility and event posting are all available.
-A [proposed measurement run](../tasks/evidence/canvas-rendering.md#presentation-capability-and-proposed-run-2026-10-24)
-is prepared. The standalone Mac recorder is built and reviewed; twelve focused checks,
-typechecking and all 229 frontend tests pass. Actual capture/input and timing remain
-unqualified. Windows still needs an input/capture adapter. Recorder and parent-app
-permissions are approved; no new native app run occurred.
+The user selected 16 additional local batches for Mac timing, with hard cumulative
+ceiling 104 and no added contingency. [Native 8 preparation and correction](../tasks/evidence/canvas-rendering.md#mac-timing-native-8-preparation-and-console-correction-2026-10-24)
+record the public isolated fixture, live signed app and original failed attempts.
+The recorder's first live route exposed an incorrect console dictionary key.
+`c827ec7` fixes that external-tool key only; twelve recorder checks and both
+independent review axes pass. Permission/clock preflight passes without changing
+permissions or the signed app. The corrected binary's reviewed receipt is retained.
 
-[Evidence](../tasks/evidence/canvas-rendering.md#manual-7-physical-input-pass-2026-10-24)
-owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
-recovery. The user added 10 local batches for continuation, preserving the existing
-8 contingency batches. Recorder construction used 12 of its 15 permitted batches.
-The [final capability check](../tasks/evidence/canvas-rendering.md#final-mac-recorder-capability-check-2026-10-24)
-passes after user authentication. Batch 88 is complete and the local allowance is
-exhausted. No app, SDK, capture or input was started. Further preparation or timing
-execution requires an explicit allowance supplement. Final use is local 88/80,
-absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
-Windows zero. No process or watcher remains pending. Code is local only; publication
-remains `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
+Capture attempts still stop before output because macOS UserNotificationCenter
+owns the foreground. Computer Use refuses that system app for safety. The user
+was asked to dismiss/describe its dialog and focus isolated Loomlight. Native 8
+is waiting with a 40-minute external launcher bound; no helper or recorder capture
+has started. [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns live recovery.
+The three 100-input series are preselected, but coordinates, independent reference
+captures and numerical results remain pending. No timing pass is claimed.
+
+Current use is local 93/104, eleven batches remaining with no added contingency;
+CI 0/4, Mac packages 4/4, native 8/9, SDK 30/36; Windows zero. No package rebuild
+is allocated. Work remains local; publication remains `ccebf3e`. Unrelated policy
+edits and protected recovery are intact.
 
 ## L17 matched rendering passes on both targets
 
