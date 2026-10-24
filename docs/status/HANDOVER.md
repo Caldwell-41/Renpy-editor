@@ -2,73 +2,73 @@
 
 ## Active L17 integration handover
 
-Continue #36 Mac timing on `codex/phase3b-screen-designer`. Product code remains
-`8527998`; `68f95c3` corrects only the probe oracle. Signed package 4 is unchanged.
-Manual 7's eight physical-input stages, source/history restoration and cleanup pass;
-the user confirms both movement and resize looked smooth. Both-target matched
-rendering remains accepted. Warm numerical timing, Windows, full supported-subset
-and whole-ticket acceptance remain pending. No publication is selected.
+Continue #36 Mac timing on `codex/phase3b-screen-designer`. Signed package 4 and
+product code are unchanged. Preserve manual 7's physical-input/source/history/cleanup
+and user smoothness evidence, plus accepted both-target matched rendering. Windows,
+full supported-subset and whole-ticket acceptance remain pending. No publication
+is selected. [Gesture measurements and text preparation](../tasks/evidence/canvas-rendering.md#mac-timing-gesture-measurements-and-text-preparation-2026-10-24)
+own this continuation's latest results and recorder identity.
 
-The user-authorized supplement ends at local 104 with no added contingency. Use is
-local 97/104, seven batches remaining; CI 0/4; Mac packages 4/4, native 9/9, SDK 31/36;
-Windows zero. No further editor launch or app rebuild is allocated. Preserve all
-failed attempts. [Native 9 capture and startup](../tasks/evidence/canvas-rendering.md#mac-timing-native-9-capture-and-startup-2026-10-24)
-owns this continuation's results and recorder identity.
+Use is local 101/104, three batches remaining, no added contingency; CI 0/4, Mac
+packages 4/4, native 9/9, SDK 31/36; Windows zero. No further editor launch or app
+rebuild is allocated. Preserve all failed attempts and charge before execution.
 
-Native 8 timed out before helper/capture; `timing-mac-02/terminal-audit.json` retains
-its unchanged public source/assets and terminal result. Native 9 uses the same
-verified isolated ordinary-UI profile and managed SDK. Live editor PID 25908, window
-33836, is fullscreen in Screens Design with Help frame selected at baseline geometry.
-Helper PID 26652 is running. All ten game source/asset hashes match. The one-use
-launcher has a 5,400-second bound and writes `timing-mac-03/exit.json` on exit. Read
-that receipt and liveness before proceeding; do not replay the launcher. At the
-batch 97 audit, about 4,224 seconds remain. `process.json`, `fixture.json` and
-`waiting-recovery.json` own exact private paths and state. App/profile cleanup is
-pending; no recorder stream or owned pointer is pending. Use supported Python 3.12
-for monotonic arithmetic.
+Native 8 timed out without helper/capture and stays charged. Native 9 remains the
+same isolated ordinary-UI public fixture. Editor PID 25908, main window 33836, bounds
+(0,33,1512,949), scale two, fullscreen Screens Design with Text selected. Helper
+26652 is alive. All ten game source/asset hashes match baseline; the sample text is
+transient. The one-use launcher writes `timing-mac-03/exit.json` on exit and has a
+5,400-second bound; about 2,207 seconds remain at the latest audit. Check receipt and
+liveness before continuing; do not replay its launcher. Exact private paths are in
+`fixture.json` and `process.json`; `waiting-recovery.json` owns the current state.
+No recorder stream or held pointer is pending. App/profile cleanup remains pending.
+Use supported Python 3.12 for monotonic arithmetic. Keep protected recovery intact.
 
-Use ignored `recorder-main-window-2026-10-24/canvas-measure-macos`, whose reviewed
-receipt pins SHA-256 `926bf728668e0cb8650c81f0d37b01bb089f61894f709c729255f7b06d3589f7`.
-`c827ec7` fixes the console wire key. `be47ff5` selects the planned window and requires
-its geometry to match the focused Accessibility window; the original full-window
-overlap refusal remains unchanged. Twelve tests and both read-only review axes
-pass. The abandoned broader windowed candidate remains as failure evidence.
-Preflight must run outside the shell sandbox, where the approved parent grants
-cover all three permissions. Sandboxed false results do not justify permission
-changes. Ask before any actual change to access.
+Use reviewed `recorder-text-hit-2026-10-24/canvas-measure-macos`, SHA-256
+`8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`.
+`55d5e6f` fixes direct text hits through unnamed WebKit children with a bounded,
+same-PID named-ancestor check. All twelve tests and both review axes pass. Live
+positive text retry remains pending. Earlier console-key/focused-window corrections
+and original artifacts remain preserved. Window, foreground, overlap and permission
+guards remain intact. Approved parent grants pass outside the shell sandbox; ask
+before any access change. Sandboxed false preflight results require no access fix.
 
-Fullscreen capture-only and native Story-button input pass. SIGINT after pointer
-down stops capture and posts the owned release. The initial Screens press starts
-the real helper; `startup/` retains native input and raw cropped frames.
-`startup-audit.json` finds the first correct helper glyphs after 1,453.5 ms against
-the pinned fixture's independent helper output, with RGB compositor delta at most
-two. This is a separate startup observation, not a warm-series acceptance result.
-Escape/foreground interruption and the complete numerical audit remain pending.
+Move and resize each have 26 independently captured reference states. Their complete
+100-update series fail the preselected exact-state test: move 2/100 within 100 ms,
+98 unmatched; resize 0/100, 99 unmatched and one 101.494 ms match. P95/max stay null
+with misses included. Both independent numerical audits reproduce the results,
+verify pixels/inputs and confirm capture/cleanup. Keep resize's raster limitation
+explicit; its initial strict RGB comparison fails odd states at delta nine, while
+alignment verifies the expected shift. Measurement matches exact native hashes.
+Do not attribute all misses solely to product latency. Source is baseline after a
+recorded resize Undo; earlier move restoration is unattributed, not a history pass.
+Startup is separately 1,453.5 ms; SIGINT owned-release/stream-stop proof is retained.
 
-The next reference capture refuses before input because the Computer Use cursor
-overlay intersects the target. Four reference attempts are retained; a transient
-owned navigation tooltip was also observed. Keyboard fullscreen transitions and
-parking the pointer over the plain header have not cleared the overlap. The user
-was asked to move the pointer, click Loomlight and clear the cursor glow manually.
-Use read-only `overlap-meta.py` before another retry. Keep the guard intact. Avoid
-new CUA pointer actions after clearance; use the reviewed recorder for bounded
-native setup/input where possible. CUA indexes/coordinates cannot be copied into
-recorder plans without native bounds verification.
+Text setup is incomplete. A direct pointer hit initially refuses on an unnamed
+child; keyboard-focused reference attempt 02 is interrupted by a native suggestion
+popup and its 18x18 crop catches a guide edge. Its map/unused measurement plan and
+`text-reference-audit/` are excluded. The corrected prepared
+`text-reference-interior-plan.json` uses a 6x10 glyph-only crop, same-PID ancestor
+focus, pointer parking and caret moves to avoid suggestions without settings changes.
+Attempts 03/04 refuse before output on the Computer Use cursor overlay. No admitted
+text reference or measured sample exists. Recheck complete reference sessions before
+mapping hashes; failed attempt 02 must never supply measurement references.
 
-`timing-mac-03/pending-capture-plan.json`, `design-controls.json` and
-`move-reference-plan.json` bind the current geometry. Canvas game origin is window
-point (380,240), scale 0.5 points/game pixel and one captured pixel/game pixel.
-Move crop is physical (1290,686,300,78); resize crop (1110,686,200,78), both inside
-helper glyph content and away from guides. Record independent slow references
-before the 100 text, 100 move and 100 resize series preselected in
-`timing-mac-02/series-design.json`. Audit reference geometry/content, exact schedules,
-all inputs, stale/superseded/unmatched results, source/history and cleanup. No slow
-reference states or warm samples exist yet. All qualification flags remain false.
+Read-only `overlap-meta.py` identifies the separate Computer Use cursor window at
+the sample field. Movement alone has not removed it. The latest user request is to
+click the plain header beside the public project title once, then move to the far
+top-right and reply ready. This cleared an earlier overlay. After clearance, use the
+reviewed recorder for prepared native setup; further CUA pointer actions recreate
+the overlay. Confirm native window/overlap metadata before retrying and retain all
+refusals. Keep full-window overlap refusal intact.
 
-Ignored receipts and `usage.json` are under
-`.toolchains/canvas-proof/native-feedback-2026-10-23/`. Preserve completed evidence,
-unrelated policy hunks, preview 5174 and protected recovery below. Reference server
-5175 is stopped. No CI/watcher is pending. Publication remains `ccebf3e`.
+Remaining work within three batches: positive text reference and 100-key series,
+Escape/foreground interruption checks, complete native-route/reference/coverage audit,
+ordinary app shutdown and isolated cleanup audit, evidence/recovery review and local
+commit. Failure remains a valid measured outcome; incomplete checks remain pending.
+Existing fixture source and unrelated work must be preserved. No package matrix is
+needed for evidence-only edits. Preview 5174 remains separate, reference server 5175
+is stopped, no CI/watcher is pending, publication remains `ccebf3e`.
 
 ## Earlier canvas decision closeout
 

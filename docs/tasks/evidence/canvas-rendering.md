@@ -3708,3 +3708,78 @@ or release occurred. Unrelated policy edits and protected recovery are preserved
 
 Final read-only Standards and Spec audits of the batch 97 evidence/recovery records
 report zero findings on each axis. Focused documentation links and whitespace pass.
+
+### Mac timing gesture measurements and text preparation (2026-10-24)
+
+The user's manual click clears the cursor overlay in batch 98. Native focus,
+permissions and clock pass without access changes. The slow move run records 26
+distinct native states. Each maps to the expected eight-game-pixel translation of
+the pinned helper glyphs, with RGB compositor differences at most two. Its saved
+source ends at xalign 0.8125. A later read finds exact baseline again; no recorder
+Undo was admitted, so that restoration is retained without an attributed history
+pass. A hover tooltip after release blocks two Undo setup attempts before input.
+Subsequent plans park the pointer over the plain header immediately after release.
+
+The slow resize run records 26 distinct states and saves width 840 at anchor 0.5.
+Its expected four-pixel glyph shift is the best alignment for every state against
+the pinned helper image. The initial strict content audit fails alternating states
+at maximum RGB delta nine; the separate alignment audit retains that limitation,
+with maximum mean RGB error 0.745. Measurement still uses exact independently
+captured native hashes. No tolerant match or fidelity pass is substituted. A
+recorded native Undo restores the exact baseline source.
+
+Batch 99 records both preselected 100-update, four-leg gesture series. Every input,
+superseded state and captured pixel is retained. Both sessions complete with no
+recorded failures and clean stream shutdown. The results are:
+
+| Series | Inputs | Within 100 ms | Unmatched | Matched latencies |
+| --- | ---: | ---: | ---: | --- |
+| Move | 100 | 2 | 98 | 6.037542 and 46.001250 ms |
+| Resize | 100 | 0 | 99 | 101.494042 ms |
+
+Both fail the recorded exact-state criterion. P95 and maximum remain null because
+unmatched samples count as unbounded misses; none is removed from the denominator.
+Actual median input intervals are 16.702 and 16.705 ms, with maximum schedule lag
+8.827 and 9.623 ms. Maximum callback gaps are 23.46 and 23.79 ms, with only complete
+or idle statuses. Independent Standards and Spec audits reproduce both analyses,
+verify every retained pixel hash and input receipt, and find no discrepancies.
+These results do not attribute every unmatched state to product latency alone;
+superseded outputs and capture/raster differences remain part of interpretation.
+`gesture-series-audit.json` owns the numerical details and baseline hash checks.
+
+Batch 100 binds the public Canvas text sample through native metadata. Direct
+pointer verification refuses before input because WebKit returns an unnamed child
+inside the named text area, including at its border. Keyboard navigation can focus
+the field, but a subsequent reference run is interrupted by a native suggestion
+popup. Its proposed 18x18 crop also includes a selection-guide edge after the text
+shrinks to one glyph. That entire attempt, derived map and unused measurement plan
+are explicitly excluded. The replacement crop is a 6x10 glyph interior; caret
+movement is planned to dismiss suggestions without changing app or system settings.
+No admitted text reference or text measurement exists yet.
+
+Batch 101 corrects only the recorder's pointer binding in `55d5e6f`. It walks at
+most eight ancestors from the hit child, requires the planned PID at each step,
+stops at window/application boundaries and requires the exact named control's
+role, label, enabled state, viewport bounds and containment of the clicked point.
+Keyboard focus, window, overlap and permission guards are unchanged. All twelve
+compiled-recorder tests pass. Independent Standards and Spec reviews of
+`14e79a1...55d5e6f` report zero findings on each axis. The reviewed binary SHA-256 is
+`8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`;
+source SHA-256 is
+`e7a5297366e6bb07460a4516c379325467669f3018b97fd3cb0024eb3932ce8e`.
+`recorder-text-hit-2026-10-24/reviewed-build-receipt.json` pins the build. Its positive
+live text binding/reference retry is pending; the twelve checks alone do not prove it.
+
+Computer Use recreated its separate cursor overlay during field setup. Movement
+alone leaves that window at the field; read-only metadata proves it still overlaps.
+The user is asked to click the plain header once, then move away. No more CUA setup
+is planned after clearance; `text-reference-interior-plan.json` includes native
+field focus, pointer parking and caret movement. Refusals remain intact.
+
+Current use is local 101/104, three batches remaining; Mac packages 4/4, native 9/9,
+SDK 31/36, CI 0/4; Windows zero. The editor/helper remain alive with about 2,207 seconds
+left at the latest recovery audit. All ten game source/asset hashes match baseline;
+the public text sample is transient. No stream or owned pointer is pending. Text,
+Escape/foreground interruption, final audit and app/profile cleanup remain pending.
+No full Mac timing pass or publication is claimed. Completed evidence, unrelated
+work and protected recovery remain preserved.

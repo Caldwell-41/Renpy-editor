@@ -2,30 +2,29 @@
 
 ## L17 move handle native qualification
 
-2026-10-24: Signed Mac package 4 retains manual 7's eight passed physical-input
-stages, source/history restoration, cleanup and the user's smoothness confirmation.
-Both-target matched rendering remains accepted. Mac warm timing, Windows and
-whole-ticket acceptance remain pending.
+2026-10-24: Signed Mac package 4 retains manual 7's physical-input, source/history,
+cleanup and user smoothness evidence. Both-target matched rendering remains accepted.
 
-The selected Mac supplement has a hard cumulative ceiling of 104 with no added
-contingency. Current use is local 97/104, seven batches remaining; CI 0/4, Mac
-packages 4/4, native 9/9, SDK 31/36; Windows zero. No further editor launch or package
-rebuild is allocated. Work remains local; publication remains `ccebf3e`.
+[Gesture timing measurements](../tasks/evidence/canvas-rendering.md#mac-timing-gesture-measurements-and-text-preparation-2026-10-24)
+complete both 100-update native series. Move has 2/100 within 100 ms and 98 unmatched;
+resize has 0/100 and 99 unmatched, with one match at 101.494 ms. Both fail the
+preselected exact-state test. Independent audits reproduce the arithmetic and verify
+all pixels/inputs. This does not attribute every miss to product latency alone.
+Startup remains a separate 1,453.5 ms observation. Full Mac timing remains incomplete.
 
-[Native 9 capture and startup](../tasks/evidence/canvas-rendering.md#mac-timing-native-9-capture-and-startup-2026-10-24)
-records the native 8 timeout, focused-window recorder correction, twelve passing
-checks and zero findings on both review axes. Approved permissions pass preflight
-outside the shell sandbox. Capture and native pointer input work; SIGINT releases
-the owned pointer and stops capture. First correct helper glyphs appear 1,453.5 ms
-after the initial Screens press. This separate startup observation is not a warm
-series or a timing acceptance result.
+The reviewed external recorder correction `55d5e6f` handles unnamed WebKit children
+inside a named text input while preserving process, focus, window and overlap
+guards. Twelve checks and both review axes pass; positive live text retry is pending.
+Text references and measurements are not admitted. The Computer Use cursor window
+still overlaps after movement alone; the user is asked to click the plain header
+once and move away. [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns the
+current native session and prepared text plan.
 
-Native 9 is alive in the isolated public fixture, with its helper running and all
-ten game source/asset hashes unchanged. The reviewed recorder currently refuses
-reference capture because the Computer Use cursor overlay overlaps the target.
-The user has been asked to clear that overlay manually. Four reference attempts
-stop before input; no reference states or warm samples are admitted.
-[HANDOVER](HANDOVER.md#active-l17-integration-handover) owns live recovery. Unrelated
+Use is local 101/104, three batches remaining with no added contingency; CI 0/4,
+Mac packages 4/4, native 9/9, SDK 31/36; Windows zero. The editor/helper are alive,
+all game source/assets match baseline, and no stream or held pointer is pending.
+No further editor launch or app rebuild is allocated. Windows and whole-ticket
+acceptance remain pending. Work is local; publication remains `ccebf3e`. Unrelated
 policy edits and protected recovery remain intact.
 
 ## L17 matched rendering passes on both targets
