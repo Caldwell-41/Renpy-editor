@@ -7,6 +7,10 @@ test discovery and run the existing cheap code checks automatically on PRs.
 This chat owns `codex/automatic-code-checks`, based on `23e27b4` from
 `codex/phase3b-screen-designer`. Integration is a later user decision.
 
+The user subsequently approved pushing the branch, opening a draft PR and auditing
+CI, including fixes caused by this change. The PR targets
+`codex/phase3b-screen-designer`, the verified base of the two implementation commits.
+
 ## Scope and acceptance
 
 - Ordinary Python discovery includes offline canvas measurement tests and excludes
@@ -19,7 +23,7 @@ This chat owns `codex/automatic-code-checks`, based on `23e27b4` from
   code-check commands pass, or retain a concrete failure and its limits.
 
 This maintenance selects no SDK, application/package build, native input, capture,
-timing qualification, tracker publication, PR or merge. Existing #36 acceptance and
+timing qualification, issue updates or merge. Existing #36 acceptance and
 protected recovery remain unchanged.
 
 ## Verification and review
@@ -56,8 +60,15 @@ implementation, focused verification, review and closeout. Contingency is four
 batches; the absolute ceiling is twelve. CI dispatches, packages and native/SDK
 launches are zero. Historical #36 allowances stay closed.
 
-Final use is 7/8 original batches, 7/12 absolute. Batches cover entry, reproduction,
+Implementation use is 7/8 original batches, 7/12 absolute. Batches cover entry, reproduction,
 test/CI implementation, formatting correction, verification, review/records and
 local commit/closeout. No contingency or expensive operation was used. Unused
-allowance closes with this outcome. Work remains on the local branch; publication
-and integration await user selection. No further implementation is pending.
+allowance closes with that implementation outcome.
+
+The newly selected publication continuation adds six hard local batches to actual
+use seven, giving a cumulative ceiling of thirteen, without new contingency. It
+covers publication, CI audit, focused corrections and closeout, with at most three
+automatic PR workflow runs. Manual dispatches, packages and native/SDK operations
+remain zero. Historical unused allowances stay closed. Current use is 8/13 for
+fresh state, base verification and publication preparation. Push, draft creation
+and the exact CI run audit are next; merge remains unselected.
