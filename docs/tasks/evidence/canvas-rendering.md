@@ -3425,3 +3425,39 @@ and local commit. Current use is local 86/80, absolute ceiling 88, leaving two
 existing contingency batches. Mac packages 4/4, native 7/9, SDK 29/36, CI 0/4 and
 Windows zero are unchanged. No app/helper launch, capture, input or permission
 change occurred. Unrelated policy work and protected recovery remain intact.
+
+### Recorder grants and launch-identity blocker, 2026-10-24
+
+After the user authenticated in System Settings, the exact reviewed recorder was
+selected by its full path in both Screen & System Audio Recording and Accessibility.
+Refreshing each panel confirms a `canvas-measure-macos` entry enabled in each. The
+initial panel read immediately after Add was stale; refreshed inventories establish
+the grants. Existing ChatGPT entries remain off and all unrelated entries remain
+unchanged. The recorder binary still hashes to the reviewed
+`67bb46e88af09839eba68f5d9c8fbac98df6c2e9b4684e44a5d5c3f83533a695`.
+
+Both post-setup shell preflights exit 3 with Screen Recording, Accessibility and
+event-posting capabilities false; their host-clock checks pass. No capture, input
+or permission request occurs. The final observation is retained in ignored
+`timing-mac-01-preparation/post-setup-preflight.json`. One bounded temporary direct
+macOS job runs the same binary's read-only preflight as a launch-route check. It
+produces no output within ten seconds, so supplies no capability proof. Submission
+and removal succeed; its receipt and empty output/error files are preserved under
+`timing-mac-01-preparation/direct-preflight`. No temporary job remains registered.
+
+The shell's executable ancestry is Python, CodexCLI and ChatGPT.app. ChatGPT's
+permission entries remain disabled. Parent-app permission attribution is a possible
+cause of the mismatch, not a proved explanation. Approval was requested for a
+bounded retry with Screen Recording and Accessibility enabled for ChatGPT.app,
+with the broader screen/control access explained. That changes the permission
+recipient beyond the recorder-only approval and has not been performed. Continue
+only after that decision, or select a different reviewed launch identity. Do not
+change signing, wrap/rebuild the recorder or grant another app access implicitly.
+
+Batch 87 covers setup, bounded capability/launch-route checks and this blocker
+record. Current use is local 87/80, ceiling 88, leaving one existing contingency
+batch. Mac packages 4/4, native 7/9, SDK 29/36, CI 0/4 and Windows zero remain
+unchanged. No app/helper attempt was reserved. The live fixture/target/crop/reference
+manifest, positive capture/input path and numerical timing remain unproved. Manual
+7's functional and perceived-smoothness results and both-target matched rendering
+remain intact. No code changed, publication occurred or unrelated work was staged.

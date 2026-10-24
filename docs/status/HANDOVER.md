@@ -34,16 +34,18 @@ alone does not justify repeating the sequence.
 
 The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
 bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
-Contingency was announced before batch 81. Current use is local 86, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
+Contingency was announced before batch 81. Current use is local 87, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
 Independent input-to-visible p95 <=100 ms, Windows and whole-ticket
-acceptance remain pending. Recorder construction is complete; no permission change, push, PR, merge or
-release is selected. Registered historical Windows jobs do not supply the missing
+acceptance remain pending. Recorder-only permission setup is approved and its Settings
+entries are enabled; broader parent-app access awaits a decision. No push, PR, merge
+or release is selected. Registered historical Windows jobs do not supply the missing
 continuous-input/presentation observation; matched rendering is already accepted.
 
 Continuation preflight confirms an unlocked console outside the sandbox, but the
 shell measurement process lacks screen-capture, event-posting and Accessibility
-permissions. No permission request, capture or input occurred. The
+permissions through the shell route, despite enabled recorder Settings entries.
+No capture or input occurred. The
 [proposed measurement run](../tasks/evidence/canvas-rendering.md#presentation-capability-and-proposed-run-2026-10-24)
 owns the endpoints, sample series, capability gates and initial operation plan.
 The standalone Mac recorder now compiles, with twelve focused checks, types and all
@@ -51,16 +53,18 @@ The standalone Mac recorder now compiles, with twelve focused checks, types and 
 owns source/build identity and limitations; [Native evidence](../testing/NATIVE.md#standalone-mac-canvas-recorder)
 owns run instructions. Recorder construction used 12 of its 15 permitted batches;
 its unused portion grants no allowance for qualification. The Mac timing handoff
-consumed batch 83; preparation/setup and late-observation reconciliation use batches
-84-86, leaving two existing local contingency batches before ceiling 88. [The fresh permission gate](../tasks/evidence/canvas-rendering.md#mac-timing-permission-gate-2026-10-24)
-records matching recorder/app hashes, passing unsandboxed signature/clock checks,
-and all three recorder permissions absent at preflight. The user approved setup;
-System Settings now requires local Touch ID/password authentication before the
-recorder can be added. No permission grant has been verified. Ignored `timing-mac-01-preparation` holds the capture preparation.
-The live PID/window/crop/action/reference manifest and startup receipt remain absent;
-no app/SDK reservation, capture, input or permission change occurred.
+consumed batch 83; continuation work uses batches 84-87, leaving one existing local
+contingency batch before ceiling 88. [The launch-identity blocker](../tasks/evidence/canvas-rendering.md#recorder-grants-and-launch-identity-blocker-2026-10-24)
+records the approved recorder's enabled Screen Recording and Accessibility entries,
+still-false shell preflight capabilities, and an inconclusive direct macOS job that
+was removed after ten seconds without a receipt. Shell ancestry reaches ChatGPT.app;
+its own permission entries remain off. A broader parent-app permission decision is
+pending. No other identity was granted access. Ignored `timing-mac-01-preparation`
+holds preparation and retained capability receipts. The live PID/window/crop/action/
+reference manifest and startup receipt remain absent; no app/SDK attempt was reserved.
 Both independent review axes have no remaining actionable findings at `dba3a83`. Live capture, Accessibility hit testing, input delivery
-and capture cadence remain unqualified. Next complete OS authentication and approved recorder setup;
+and capture cadence remain unqualified. Next resolve the broader parent-app permission
+decision before any further launch-identity change;
 remote publication still requires approval; the Windows adapter remains pending. Use
 existing package 4 on Mac. Do not consume a native
 launch until capture/input capability and clock mapping work. A Windows host handoff

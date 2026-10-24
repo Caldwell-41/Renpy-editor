@@ -14,24 +14,25 @@ source/helper geometry, cooperative helper exit and all cleanup owners pass. The
 user confirms that both moving and resizing looked smooth in manual 7. The
 [late observation](../tasks/evidence/canvas-rendering.md#manual-7-late-smoothness-confirmation-2026-10-24)
 supplies Mac perceived-smoothness evidence. Numerical presentation, Windows and
-whole-ticket acceptance remain pending. Original failed attempts remain recorded. Read-only continuation
-preflight confirms the Mac measurement process lacks capture/input permissions.
+whole-ticket acceptance remain pending. Original failed attempts remain recorded.
+The recorder has enabled Settings entries, but its shell preflight still lacks
+capture/input capability.
 A [proposed measurement run](../tasks/evidence/canvas-rendering.md#presentation-capability-and-proposed-run-2026-10-24)
 is prepared. The standalone Mac recorder is built and reviewed; twelve focused checks,
 typechecking and all 229 frontend tests pass. Its actual capture/input path awaits
-approved permission setup and native qualification. Windows still needs an input/capture
-adapter. No new native app run or permission change occurred.
+a usable launch/permission identity and native qualification. Windows still needs an input/capture
+adapter. Recorder-only permissions are enabled; no new native app run occurred.
 
 [Evidence](../tasks/evidence/canvas-rendering.md#manual-7-physical-input-pass-2026-10-24)
 owns attempts and limits; [HANDOVER](HANDOVER.md#active-l17-integration-handover) owns
 recovery. The user added 10 local batches for continuation, preserving the existing
 8 contingency batches. Recorder construction used 12 of its 15 permitted batches.
-The Mac timing continuation uses batch 86, leaving two existing contingency batches.
-A fresh read-only recorder preflight still reports all three permissions absent;
-setup is approved, and System Settings requires local Touch ID/password authentication
-before adding the recorder. [Preparation and the permission gate](../tasks/evidence/canvas-rendering.md#mac-timing-permission-gate-2026-10-24)
-record artifact verification and the remaining live-plan requirements. No app,
-SDK, capture or input was started. Current use is local 86/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
+The Mac timing continuation uses batch 87, leaving one existing contingency batch.
+[The launch-identity blocker](../tasks/evidence/canvas-rendering.md#recorder-grants-and-launch-identity-blocker-2026-10-24)
+records enabled recorder entries, failed shell capability checks and an inconclusive
+removed direct-launch job. Broader ChatGPT parent-app access awaits a separate
+permission decision. No app, SDK, capture or input was started. Current use is local
+87/80, absolute ceiling 88; CI 0/4; Mac packages 4/4, native 7/9, SDK 29/36;
 Windows zero. No process or watcher remains pending. Code is local only; publication
 remains `ccebf3e`. Unrelated policy edits and protected recovery remain intact.
 
