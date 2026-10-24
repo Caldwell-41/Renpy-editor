@@ -1,5 +1,20 @@
 # Current outcome handover
 
+## Automatic code checks reviewed
+
+The selected retrospective maintenance is published on
+`codex/automatic-code-checks`, based on `23e27b4`. Commit `e8039df` separates the
+Rust formatting baseline; the maintenance commit contains test selection, automatic
+PR/main checks and runbook changes. [Draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61)
+targets the existing Screens branch. [The task](../tasks/active/automatic-code-checks.md#ci-audit)
+owns the successful audit of run 40131940297, attempt 1, published implementation
+candidate `248c8fc`. Both automatic jobs and all 231 frontend tests pass; no fix was
+needed. The watcher event is acknowledged. Charged use is 11/13 including final
+documentation publication and its automatic check audit. Exact head check status
+is available on the PR; documentation successors do not redefine the tested
+implementation candidate. Merge remains unselected. The previous L17 acceptance
+and protected recovery below remain intact.
+
 <a id="active-l17-integration-handover"></a>
 
 ## L17 closeout

@@ -1,17 +1,17 @@
+mod ai_connection;
 mod ai_native;
-mod canvas_lifecycle_probe;
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 mod ai_reload_fixture;
 mod ai_requests;
 mod ai_settings;
-mod ai_connection;
+mod canvas_lifecycle_probe;
 #[cfg(test)]
 #[path = "../identity_policy.rs"]
 mod identity_policy;
 #[cfg(target_os = "macos")]
 mod identity_probe;
-mod request_probe;
 mod prompt_probe;
+mod request_probe;
 mod rewrite_probe;
 #[cfg(any(target_os = "windows", test))]
 mod windows_studio_probe;
@@ -166,9 +166,21 @@ fn core_request(
         return Err("Command is not authorised for this window.");
     }
     if request.get("operation").and_then(Value::as_str) == Some("probe.canvasLifecycle") {
-        let host = state.0.lock().map_err(|_| "Probe host unavailable")?.clone().ok_or("Probe host unavailable")?;
-        let value = canvas_lifecycle_probe::step(&host, request.get("payload").cloned().unwrap_or(Value::Null)).map_err(|error| {
-            println!("{}", json!({"evidence":"canvas-lifecycle-error","error":error}));
+        let host = state
+            .0
+            .lock()
+            .map_err(|_| "Probe host unavailable")?
+            .clone()
+            .ok_or("Probe host unavailable")?;
+        let value = canvas_lifecycle_probe::step(
+            &host,
+            request.get("payload").cloned().unwrap_or(Value::Null),
+        )
+        .map_err(|error| {
+            println!(
+                "{}",
+                json!({"evidence":"canvas-lifecycle-error","error":error})
+            );
             let _ = std::io::stdout().flush();
             error
         })?;
@@ -268,76 +280,200 @@ fn core_request(
             ));
         }
     }
-    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("prompt-context") && request["operation"]=="probe.promptStage" {
-        let stage=request["payload"]["stage"].as_str().ok_or("Prompt stage required")?;
-        if !["manual-save","external-prompt","observe-light","observe-dark","observe-narrow"].contains(&stage){return Err("Prompt stage refused");}
-        let root=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_PROMPT_PROBE_ROOT").ok_or("Prompt root required")?);
-        let done=root.join(format!("{stage}.done")).is_file();
-        if request["payload"]["announce"]==true {
-            if stage.starts_with("observe-"){let size=if stage=="observe-narrow"{tauri::LogicalSize::new(720.0,780.0)}else{tauri::LogicalSize::new(1280.0,900.0)};window.set_size(size).map_err(|_|"Prompt resize failed")?;}
-            println!("{}",json!({"evidence":"prompt-stage","stage":stage,"ready":true}));let _=std::io::stdout().flush();
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("prompt-context")
+        && request["operation"] == "probe.promptStage"
+    {
+        let stage = request["payload"]["stage"]
+            .as_str()
+            .ok_or("Prompt stage required")?;
+        if ![
+            "manual-save",
+            "external-prompt",
+            "observe-light",
+            "observe-dark",
+            "observe-narrow",
+        ]
+        .contains(&stage)
+        {
+            return Err("Prompt stage refused");
         }
-        return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),json!({"done":done})));
+        let root = std::path::PathBuf::from(
+            std::env::var_os("LOOMLIGHT_PROMPT_PROBE_ROOT").ok_or("Prompt root required")?,
+        );
+        let done = root.join(format!("{stage}.done")).is_file();
+        if request["payload"]["announce"] == true {
+            if stage.starts_with("observe-") {
+                let size = if stage == "observe-narrow" {
+                    tauri::LogicalSize::new(720.0, 780.0)
+                } else {
+                    tauri::LogicalSize::new(1280.0, 900.0)
+                };
+                window.set_size(size).map_err(|_| "Prompt resize failed")?;
+            }
+            println!(
+                "{}",
+                json!({"evidence":"prompt-stage","stage":stage,"ready":true})
+            );
+            let _ = std::io::stdout().flush();
+        }
+        return Ok(CoreResponse::success(
+            request["requestId"].as_str().unwrap_or_default().into(),
+            json!({"done":done}),
+        ));
     }
-    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("reference-library") && request["operation"]=="probe.referenceStage" {
-        let stage=request["payload"]["stage"].as_str().ok_or("Probe stage required")?;
-        if !["manual-save","external-edit","malformed","newer","restore","observe-light","observe-dark","observe-narrow"].contains(&stage){return Err("Probe stage refused");}
-        let root=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REFERENCE_PROBE_ROOT").ok_or("Probe root required")?);
-        let done=root.join(format!("{stage}.done")).is_file();
-        if request["payload"]["announce"]==true {
-            if stage.starts_with("observe-"){let main=window.as_ref();let size=if stage=="observe-narrow"{tauri::LogicalSize::new(720.0,780.0)}else{tauri::LogicalSize::new(1280.0,900.0)};main.set_size(size).map_err(|_|"Probe resize failed")?;}
-            println!("{}",json!({"evidence":"reference-stage","stage":stage,"ready":true}));let _=std::io::stdout().flush();
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("reference-library")
+        && request["operation"] == "probe.referenceStage"
+    {
+        let stage = request["payload"]["stage"]
+            .as_str()
+            .ok_or("Probe stage required")?;
+        if ![
+            "manual-save",
+            "external-edit",
+            "malformed",
+            "newer",
+            "restore",
+            "observe-light",
+            "observe-dark",
+            "observe-narrow",
+        ]
+        .contains(&stage)
+        {
+            return Err("Probe stage refused");
         }
-        return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),json!({"done":done})));
+        let root = std::path::PathBuf::from(
+            std::env::var_os("LOOMLIGHT_REFERENCE_PROBE_ROOT").ok_or("Probe root required")?,
+        );
+        let done = root.join(format!("{stage}.done")).is_file();
+        if request["payload"]["announce"] == true {
+            if stage.starts_with("observe-") {
+                let main = window.as_ref();
+                let size = if stage == "observe-narrow" {
+                    tauri::LogicalSize::new(720.0, 780.0)
+                } else {
+                    tauri::LogicalSize::new(1280.0, 900.0)
+                };
+                main.set_size(size).map_err(|_| "Probe resize failed")?;
+            }
+            println!(
+                "{}",
+                json!({"evidence":"reference-stage","stage":stage,"ready":true})
+            );
+            let _ = std::io::stdout().flush();
+        }
+        return Ok(CoreResponse::success(
+            request["requestId"].as_str().unwrap_or_default().into(),
+            json!({"done":done}),
+        ));
     }
-    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && request["operation"]=="probe.rewriteStage" {
-        let stage=request["payload"]["stage"].as_str().ok_or("Rewrite stage required")?;
-        if !["snapshot","physical-send","physical-select","physical-accept","physical-close","physical-approve","observe-light","observe-dark","observe-narrow","external-source","restore-source","server-delay"].contains(&stage){return Err("Rewrite stage refused");}
-        let root=std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_REWRITE_PROBE_ROOT").ok_or("Rewrite root required")?);
-        let done=root.join(format!("{stage}.done")).is_file();
-        if stage=="snapshot" {
-            let host=state.0.lock().map_err(|_|"probe state")?.clone().ok_or("probe host")?;
-            return rewrite_probe::snapshot_response(&host,&root,request["requestId"].as_str().unwrap_or_default().into());
+    if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("dialogue-rewrite")
+        && request["operation"] == "probe.rewriteStage"
+    {
+        let stage = request["payload"]["stage"]
+            .as_str()
+            .ok_or("Rewrite stage required")?;
+        if ![
+            "snapshot",
+            "physical-send",
+            "physical-select",
+            "physical-accept",
+            "physical-close",
+            "physical-approve",
+            "observe-light",
+            "observe-dark",
+            "observe-narrow",
+            "external-source",
+            "restore-source",
+            "server-delay",
+        ]
+        .contains(&stage)
+        {
+            return Err("Rewrite stage refused");
         }
-        if request["payload"]["announce"]==true {
-            if stage.starts_with("observe-"){let size=if stage=="observe-narrow"{tauri::LogicalSize::new(720.0,780.0)}else{tauri::LogicalSize::new(1280.0,900.0)};window.set_size(size).map_err(|_|"Rewrite resize failed")?;}
-            println!("{}",json!({"evidence":"rewrite-stage","stage":stage,"ready":true}));let _=std::io::stdout().flush();
+        let root = std::path::PathBuf::from(
+            std::env::var_os("LOOMLIGHT_REWRITE_PROBE_ROOT").ok_or("Rewrite root required")?,
+        );
+        let done = root.join(format!("{stage}.done")).is_file();
+        if stage == "snapshot" {
+            let host = state
+                .0
+                .lock()
+                .map_err(|_| "probe state")?
+                .clone()
+                .ok_or("probe host")?;
+            return rewrite_probe::snapshot_response(
+                &host,
+                &root,
+                request["requestId"].as_str().unwrap_or_default().into(),
+            );
         }
-        return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),json!({"done":done})));
+        if request["payload"]["announce"] == true {
+            if stage.starts_with("observe-") {
+                let size = if stage == "observe-narrow" {
+                    tauri::LogicalSize::new(720.0, 780.0)
+                } else {
+                    tauri::LogicalSize::new(1280.0, 900.0)
+                };
+                window.set_size(size).map_err(|_| "Rewrite resize failed")?;
+            }
+            println!(
+                "{}",
+                json!({"evidence":"rewrite-stage","stage":stage,"ready":true})
+            );
+            let _ = std::io::stdout().flush();
+        }
+        return Ok(CoreResponse::success(
+            request["requestId"].as_str().unwrap_or_default().into(),
+            json!({"done":done}),
+        ));
     }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-input")
-        && request["operation"] == "probe.canvasInputStage" {
+        && request["operation"] == "probe.canvasInputStage"
+    {
         let payload = &request["payload"];
         if payload.to_string().len() > 8192 || !payload["stage"].is_string() {
             return Err("Invalid native input checkpoint");
         }
-        println!("{}", json!({"evidence":"canvas-input-stage","details":payload}));
+        println!(
+            "{}",
+            json!({"evidence":"canvas-input-stage","details":payload})
+        );
         let _ = std::io::stdout().flush();
-        return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(), json!({})));
+        return Ok(CoreResponse::success(
+            request["requestId"].as_str().unwrap_or_default().into(),
+            json!({}),
+        ));
     }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper")
-        && request["operation"] == "probe.canvasObservation" {
-        let root = std::path::PathBuf::from(std::env::var_os("LOOMLIGHT_CANVAS_OBSERVER_ROOT").ok_or("Canvas observer root required")?);
+        && request["operation"] == "probe.canvasObservation"
+    {
+        let root = std::path::PathBuf::from(
+            std::env::var_os("LOOMLIGHT_CANVAS_OBSERVER_ROOT")
+                .ok_or("Canvas observer root required")?,
+        );
         if request["payload"]["announce"] == true {
             println!("{}", json!({"evidence":"canvas-observer-ready"}));
             let _ = std::io::stdout().flush();
         }
-        return Ok(CoreResponse::success(request["requestId"].as_str().unwrap_or_default().into(),
-            json!({"ready":root.join("canvas-observation.json.ready").is_file()})));
+        return Ok(CoreResponse::success(
+            request["requestId"].as_str().unwrap_or_default().into(),
+            json!({"ready":root.join("canvas-observation.json.ready").is_file()}),
+        ));
     }
     if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").is_ok()
         && request.get("operation").and_then(Value::as_str) == Some("probe.runtimeUiReport")
     {
         let mut payload = request.get("payload").cloned().unwrap_or(Value::Null);
-        let report_limit = if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper") {
-            256 * 1024
-        } else if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()
-            == Ok("branches-performance")
-        {
-            128 * 1024
-        } else {
-            32 * 1024
-        };
+        let report_limit =
+            if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("canvas-helper") {
+                256 * 1024
+            } else if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()
+                == Ok("branches-performance")
+            {
+                128 * 1024
+            } else {
+                32 * 1024
+            };
         if !payload.is_object() || payload.to_string().len() > report_limit {
             return Err("Invalid bounded probe report.");
         }
@@ -351,14 +487,34 @@ fn core_request(
         #[cfg(target_os = "windows")]
         if std::env::var("LOOMLIGHT_STUDIO_WINDOWS_CONTRACT").as_deref() == Ok("2")
             && std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("studio-settings")
-        { ai_connection::service().shutdown(); }
-        if matches!(std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref(), Ok("canvas-helper" | "canvas-input")) {
-            payload["targetOs"] = json!(std::env::consts::OS);
-            payload["canvasShutdown"] = host.with_service(|service| serde_json::to_value(service.canvas_shutdown_report()).unwrap_or(Value::Null)).unwrap_or(Value::Null);
+        {
+            ai_connection::service().shutdown();
         }
-        let owners=rewrite_probe::cleanup_owners(||ai_requests::service().shutdown(),||if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref()==Ok("dialogue-rewrite") && (!passed || std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref()==Ok("2")) {
-            rewrite_probe::cleanup_when_idle(&host)
-        } else {true},||host.shutdown());
+        if matches!(
+            std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref(),
+            Ok("canvas-helper" | "canvas-input")
+        ) {
+            payload["targetOs"] = json!(std::env::consts::OS);
+            payload["canvasShutdown"] = host
+                .with_service(|service| {
+                    serde_json::to_value(service.canvas_shutdown_report()).unwrap_or(Value::Null)
+                })
+                .unwrap_or(Value::Null);
+        }
+        let owners = rewrite_probe::cleanup_owners(
+            || ai_requests::service().shutdown(),
+            || {
+                if std::env::var("LOOMLIGHT_RUNTIME_UI_PROBE").as_deref() == Ok("dialogue-rewrite")
+                    && (!passed
+                        || std::env::var("LOOMLIGHT_REWRITE_PROBE_PHASE").as_deref() == Ok("2"))
+                {
+                    rewrite_probe::cleanup_when_idle(&host)
+                } else {
+                    true
+                }
+            },
+            || host.shutdown(),
+        );
         let cleaned = owners.complete();
         println!(
             "{}",
@@ -488,12 +644,34 @@ fn core_request(
             .as_ref()
             .cloned()
             .ok_or("Desktop lifecycle state is unavailable.")?;
-        if matches!(operation.as_str(), "ai.beginConnection"|"ai.enterConnectionKey"|"ai.connect"|"ai.connectionStatus"|"ai.cancelConnection"|"ai.discardConnection"|"ai.saveConnection") {
-            return Ok(ai_connection::dispatch(&app,&host,request_id,&operation,Value::Object(validated.payload.clone())));
+        if matches!(
+            operation.as_str(),
+            "ai.beginConnection"
+                | "ai.enterConnectionKey"
+                | "ai.connect"
+                | "ai.connectionStatus"
+                | "ai.cancelConnection"
+                | "ai.discardConnection"
+                | "ai.saveConnection"
+        ) {
+            return Ok(ai_connection::dispatch(
+                &app,
+                &host,
+                request_id,
+                &operation,
+                Value::Object(validated.payload.clone()),
+            ));
         }
         if matches!(
             operation.as_str(),
-            "ai.sendSynthetic" | "ai.testCompatibility" | "ai.requestStatus" | "ai.cancelRequest" | "ai.readModelLoadSettings" | "ai.applyModelLoadSettings" | "rewrite.send" | "rewrite.prepare"
+            "ai.sendSynthetic"
+                | "ai.testCompatibility"
+                | "ai.requestStatus"
+                | "ai.cancelRequest"
+                | "ai.readModelLoadSettings"
+                | "ai.applyModelLoadSettings"
+                | "rewrite.send"
+                | "rewrite.prepare"
         ) {
             return Ok(ai_requests::service().dispatch(
                 &host,

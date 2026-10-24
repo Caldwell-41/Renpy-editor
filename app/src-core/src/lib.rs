@@ -1,8 +1,6 @@
 pub mod ai_compatibility;
 pub mod ai_credentials;
 pub mod ai_discovery;
-pub mod studio_models;
-pub mod studio_config;
 pub mod ai_file_secrets;
 pub mod ai_profiles;
 pub mod authoring;
@@ -14,14 +12,16 @@ pub mod metadata;
 pub mod ports;
 pub mod preferences;
 pub mod progress;
-pub mod references;
 pub mod prompts;
+pub mod references;
 pub mod renpy;
 mod runtime_work;
 pub mod scene;
 mod scratch_preview;
 pub mod screens;
 pub mod source;
+pub mod studio_config;
+pub mod studio_models;
 pub mod transaction;
 
 use authoring::{
@@ -40,8 +40,8 @@ use source::{
 
 pub const PROTOCOL_VERSION: u64 = 1;
 pub mod ai_request;
-pub mod rewrite_text;
 pub mod rewrite;
+pub mod rewrite_text;
 pub const OPERATIONS: &[&str] = &[
     "system.health",
     "system.version",
@@ -184,7 +184,10 @@ impl CoreResponse {
             request_id,
             ok: false,
             value: None,
-            error: Some(CoreError { code, message:message.into() }),
+            error: Some(CoreError {
+                code,
+                message: message.into(),
+            }),
         }
     }
 
@@ -535,50 +538,85 @@ pub fn handle_application_request(
             .and_then(to_value),
         "screens.list" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| if payload.is_empty() { lifecycle.screens_list() } else { Err(LifecycleError::Scene(scene::SceneError::InvalidPayload)) }).and_then(to_value),
+            .and_then(|payload| {
+                if payload.is_empty() {
+                    lifecycle.screens_list()
+                } else {
+                    Err(LifecycleError::Scene(scene::SceneError::InvalidPayload))
+                }
+            })
+            .and_then(to_value),
         "screens.create" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| serde_json::from_value::<screens::CreateRequest>(Value::Object(payload))
-                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
-            .and_then(|request| lifecycle.screens_create(request)).and_then(to_value),
+            .and_then(|payload| {
+                serde_json::from_value::<screens::CreateRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_create(request))
+            .and_then(to_value),
         "screens.inspect" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| serde_json::from_value::<screens::InspectRequest>(Value::Object(payload))
-                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
-            .and_then(|request| lifecycle.screens_inspect(request)).and_then(to_value),
+            .and_then(|payload| {
+                serde_json::from_value::<screens::InspectRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_inspect(request))
+            .and_then(to_value),
         "screens.canvasPlan" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| serde_json::from_value::<screens::canvas::Request>(Value::Object(payload))
-                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
-            .and_then(|request| lifecycle.screens_canvas_plan(request)).and_then(to_value),
+            .and_then(|payload| {
+                serde_json::from_value::<screens::canvas::Request>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_canvas_plan(request))
+            .and_then(to_value),
         "screens.canvasRender" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| serde_json::from_value::<screens::canvas::Request>(Value::Object(payload))
-                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::canvas::Request>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
             .and_then(|request| lifecycle.screens_canvas_render(request)),
         "screens.canvasStatus" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| {
                 #[derive(serde::Deserialize)]
-                #[serde(rename_all="camelCase",deny_unknown_fields)]
-                struct Request { frame_id: String, include_image: Option<bool> }
-                serde_json::from_value::<Request>(Value::Object(payload)).map_err(|_|LifecycleError::Scene(scene::SceneError::InvalidPayload))
-            }).and_then(|request|lifecycle.screens_canvas_status(request.frame_id,request.include_image.unwrap_or(true))),
+                #[serde(rename_all = "camelCase", deny_unknown_fields)]
+                struct Request {
+                    frame_id: String,
+                    include_image: Option<bool>,
+                }
+                serde_json::from_value::<Request>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| {
+                lifecycle
+                    .screens_canvas_status(request.frame_id, request.include_image.unwrap_or(true))
+            }),
         "screens.setPixelProperty" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| serde_json::from_value::<screens::SetPixelRequest>(Value::Object(payload))
-                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
-            .and_then(|request| lifecycle.screens_set_pixel(request)).and_then(to_value),
+            .and_then(|payload| {
+                serde_json::from_value::<screens::SetPixelRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_set_pixel(request))
+            .and_then(to_value),
         "screens.setSize" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| serde_json::from_value::<screens::SetSizeRequest>(Value::Object(payload))
-                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
-            .and_then(|request| lifecycle.screens_set_size(request)).and_then(to_value),
+            .and_then(|payload| {
+                serde_json::from_value::<screens::SetSizeRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_set_size(request))
+            .and_then(to_value),
         "screens.setPosition" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| serde_json::from_value::<screens::SetPositionRequest>(Value::Object(payload))
-                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload)))
-            .and_then(|request| lifecycle.screens_set_position(request)).and_then(to_value),
+            .and_then(|payload| {
+                serde_json::from_value::<screens::SetPositionRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_set_position(request))
+            .and_then(to_value),
         "flow.list" => {
             #[derive(serde::Deserialize)]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -600,36 +638,74 @@ pub fn handle_application_request(
                 .and_then(to_value)
         }
         "prompts.list" | "context.options" if has_exact_keys(validated.payload, &["sessionId"]) => {
-            session_only(validated.payload).and_then(|session| lifecycle.require_session(&session))
-                .and_then(|_| if validated.operation == "prompts.list" { lifecycle.prompts().and_then(to_value) } else { lifecycle.context_options() })
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| {
+                    if validated.operation == "prompts.list" {
+                        lifecycle.prompts().and_then(to_value)
+                    } else {
+                        lifecycle.context_options()
+                    }
+                })
         }
         "prompts.apply" => session_payload(validated.payload)
-            .and_then(|(session,payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload|serde_json::from_value::<prompts::PromptRequest>(Value::Object(payload)).map_err(|_|LifecycleError::Prompt(prompts::PromptError::Invalid)))
-            .and_then(|request| lifecycle.prompts_apply(request)).and_then(to_value),
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<prompts::PromptRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Prompt(prompts::PromptError::Invalid))
+            })
+            .and_then(|request| lifecycle.prompts_apply(request))
+            .and_then(to_value),
         "rewrite.prepare" => session_payload(validated.payload)
-            .and_then(|(session,payload)|serde_json::from_value::<rewrite::PrepareRequest>(Value::Object(payload)).map(|r|(session,r)).map_err(|_|LifecycleError::Rewrite(rewrite::RewriteError::Invalid)))
-            .and_then(|(session,r)|lifecycle.rewrite_prepare(&session,r)),
+            .and_then(|(session, payload)| {
+                serde_json::from_value::<rewrite::PrepareRequest>(Value::Object(payload))
+                    .map(|r| (session, r))
+                    .map_err(|_| LifecycleError::Rewrite(rewrite::RewriteError::Invalid))
+            })
+            .and_then(|(session, r)| lifecycle.rewrite_prepare(&session, r)),
         "rewrite.select" => session_payload(validated.payload)
-            .and_then(|(session,payload)|serde_json::from_value::<rewrite::SelectionRequest>(Value::Object(payload)).map(|r|(session,r)).map_err(|_|LifecycleError::Rewrite(rewrite::RewriteError::Invalid)))
-            .and_then(|(session,r)|lifecycle.rewrite_select(&session,r)),
+            .and_then(|(session, payload)| {
+                serde_json::from_value::<rewrite::SelectionRequest>(Value::Object(payload))
+                    .map(|r| (session, r))
+                    .map_err(|_| LifecycleError::Rewrite(rewrite::RewriteError::Invalid))
+            })
+            .and_then(|(session, r)| lifecycle.rewrite_select(&session, r)),
         "rewrite.accept" => session_payload(validated.payload)
-            .and_then(|(session,payload)|serde_json::from_value::<rewrite::AcceptRequest>(Value::Object(payload)).map(|r|(session,r)).map_err(|_|LifecycleError::Rewrite(rewrite::RewriteError::Invalid)))
-            .and_then(|(session,r)|lifecycle.rewrite_accept(&session,r)),
-        "rewrite.discard" if has_exact_keys(validated.payload, &["sessionId"]) => session_only(validated.payload).and_then(|session|lifecycle.rewrite_discard(&session)),
+            .and_then(|(session, payload)| {
+                serde_json::from_value::<rewrite::AcceptRequest>(Value::Object(payload))
+                    .map(|r| (session, r))
+                    .map_err(|_| LifecycleError::Rewrite(rewrite::RewriteError::Invalid))
+            })
+            .and_then(|(session, r)| lifecycle.rewrite_accept(&session, r)),
+        "rewrite.discard" if has_exact_keys(validated.payload, &["sessionId"]) => {
+            session_only(validated.payload).and_then(|session| lifecycle.rewrite_discard(&session))
+        }
         "context.preview" => session_payload(validated.payload)
-            .and_then(|(session,payload)| lifecycle.require_session(&session).map(|_| (session,payload)))
-            .and_then(|(session,payload)|serde_json::from_value::<prompts::PreviewRequest>(Value::Object(payload)).map(|request|(session,request)).map_err(|_|LifecycleError::Prompt(prompts::PromptError::Invalid)))
-            .and_then(|(session,request)| lifecycle.context_preview(&session,request)),
+            .and_then(|(session, payload)| {
+                lifecycle
+                    .require_session(&session)
+                    .map(|_| (session, payload))
+            })
+            .and_then(|(session, payload)| {
+                serde_json::from_value::<prompts::PreviewRequest>(Value::Object(payload))
+                    .map(|request| (session, request))
+                    .map_err(|_| LifecycleError::Prompt(prompts::PromptError::Invalid))
+            })
+            .and_then(|(session, request)| lifecycle.context_preview(&session, request)),
         "references.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
-            session_only(validated.payload).and_then(|session| lifecycle.require_session(&session))
-                .and_then(|_| lifecycle.references()).and_then(to_value)
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| lifecycle.references())
+                .and_then(to_value)
         }
         "references.apply" => session_payload(validated.payload)
-            .and_then(|(session,payload)| lifecycle.require_session(&session).map(|_|payload))
-            .and_then(|payload|serde_json::from_value::<references::ReferenceRequest>(Value::Object(payload))
-                .map_err(|_|LifecycleError::Reference(references::ReferenceError::Invalid)))
-            .and_then(|request|lifecycle.references_apply(request)).and_then(to_value),
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<references::ReferenceRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Reference(references::ReferenceError::Invalid))
+            })
+            .and_then(|request| lifecycle.references_apply(request))
+            .and_then(to_value),
         "scene.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)
                 .and_then(|session| lifecycle.require_session(&session))

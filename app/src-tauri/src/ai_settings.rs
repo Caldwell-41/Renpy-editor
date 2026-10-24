@@ -68,7 +68,7 @@ fn credential_view(
 #[cfg(test)]
 mod tests {
     use super::*;
-    static TEST_SERIAL:Mutex<()>=Mutex::new(());
+    static TEST_SERIAL: Mutex<()> = Mutex::new(());
     struct Refused(std::cell::Cell<usize>);
     impl Secrets for Refused {
         fn read(
@@ -97,7 +97,7 @@ mod tests {
     }
     #[test]
     fn status_preserves_access_error_with_one_read_and_no_mutation() {
-        let _serial=TEST_SERIAL.lock().unwrap();
+        let _serial = TEST_SERIAL.lock().unwrap();
         let profile: StudioProfile = serde_json::from_value(json!({
             "profileId":"fixture", "revision":1, "disabled":false,
             "settings":{"label":"Studio","endpoint":"http://127.0.0.1:8888/v1","model":"fixture","privateHttp":false,"contextCeiling":8192,"contextBudget":4096,"maximumResponse":1024},
@@ -113,7 +113,7 @@ mod tests {
     }
     #[test]
     fn confirmed_save_reload_failure_keeps_cleanup_pending_visible() {
-        let _serial=TEST_SERIAL.lock().unwrap();
+        let _serial = TEST_SERIAL.lock().unwrap();
         let regression: Value = serde_json::from_str(include_str!(
             "../../tests/fixtures/macos-development-credential-reload-failure.json"
         ))
@@ -188,7 +188,7 @@ mod tests {
     #[cfg(target_os = "macos")]
     #[test]
     fn one_shot_reload_fixture_runs_through_confirmed_entry_dispatch_and_read_only_retry() {
-        let _serial=TEST_SERIAL.lock().unwrap();
+        let _serial = TEST_SERIAL.lock().unwrap();
         use crate::ai_reload_fixture::{PROFILE, SELECTOR};
         let regression: Value = serde_json::from_str(include_str!(
             "../../tests/fixtures/macos-development-credential-reload-failure.json"
@@ -398,7 +398,7 @@ mod tests {
     }
     #[test]
     fn native_event_retry_and_cancel_keep_service_available_and_never_retarget() {
-        let _serial=TEST_SERIAL.lock().unwrap();
+        let _serial = TEST_SERIAL.lock().unwrap();
         use loomlight_core::{
             ai_credentials::Secret, ai_file_secrets::FileSecrets, lifecycle::LifecycleService,
         };
@@ -470,7 +470,7 @@ mod tests {
                     thinking: None,
                     temperature: None,
                     top_p: None,
-                model_load: None,
+                    model_load: None,
                 },
             )
             .unwrap();
@@ -746,7 +746,7 @@ mod tests {
     #[cfg(target_os = "macos")]
     #[test]
     fn settings_dispatch_routes_fixture_recovery_pending_cleanup_and_secret_free_refusals() {
-        let _serial=TEST_SERIAL.lock().unwrap();
+        let _serial = TEST_SERIAL.lock().unwrap();
         let fixture: Value = serde_json::from_str(include_str!(
             "../../tests/fixtures/macos-development-credentials.json"
         ))
@@ -884,31 +884,63 @@ mod tests {
         );
     }
 }
-fn discovery_invalidates(previous: Option<&loomlight_core::ai_discovery::Discovery>, current:&loomlight_core::ai_discovery::Discovery)->bool {
-    !current.selected_available || previous.is_some_and(|old|{
-        let mut a=old.models.clone();let mut b=current.models.clone();a.sort();b.sort();a!=b || old.selected_available!=current.selected_available
-    })
+fn discovery_invalidates(
+    previous: Option<&loomlight_core::ai_discovery::Discovery>,
+    current: &loomlight_core::ai_discovery::Discovery,
+) -> bool {
+    !current.selected_available
+        || previous.is_some_and(|old| {
+            let mut a = old.models.clone();
+            let mut b = current.models.clone();
+            a.sort();
+            b.sort();
+            a != b || old.selected_available != current.selected_available
+        })
 }
-fn discovery_status(d:&loomlight_core::ai_discovery::Discovery, credential_status:&str)->&'static str {
-    if d.models.is_empty(){"No models returned by Studio; loaded state unknown"}
-    else if d.selected_available&&credential_status=="configured"{"model available; discovery only"}
-    else{"selected model unavailable"}
+fn discovery_status(
+    d: &loomlight_core::ai_discovery::Discovery,
+    credential_status: &str,
+) -> &'static str {
+    if d.models.is_empty() {
+        "No models returned by Studio; loaded state unknown"
+    } else if d.selected_available && credential_status == "configured" {
+        "model available; discovery only"
+    } else {
+        "selected model unavailable"
+    }
 }
 #[cfg(test)]
 mod readiness_tests {
     use super::*;
     #[test]
     fn compatibility_discovery_unavailable_changed_and_ordered_availability_disposition() {
-        let value=|models:Vec<&str>,available|loomlight_core::ai_discovery::Discovery{models:models.into_iter().map(str::to_owned).collect(),selected_available:available,inventory:vec![],addresses:vec![]};
-        let old=value(vec!["a","b"],true);
-        assert!(!discovery_invalidates(None,&old));
-        assert!(!discovery_invalidates(Some(&old),&value(vec!["b","a"],true)));
-        assert!(discovery_invalidates(Some(&old),&value(vec!["a"],true)));
-        assert!(discovery_invalidates(Some(&old),&value(vec![],false)));
-        assert!(discovery_invalidates(None,&value(vec![],false)));
-        assert_eq!(discovery_status(&value(vec![],false),"configured"),"No models returned by Studio; loaded state unknown");
-        assert_eq!(discovery_status(&value(vec!["other"],false),"configured"),"selected model unavailable");
-        assert_eq!(discovery_status(&old,"configured"),"model available; discovery only");
+        let value = |models: Vec<&str>, available| loomlight_core::ai_discovery::Discovery {
+            models: models.into_iter().map(str::to_owned).collect(),
+            selected_available: available,
+            inventory: vec![],
+            addresses: vec![],
+        };
+        let old = value(vec!["a", "b"], true);
+        assert!(!discovery_invalidates(None, &old));
+        assert!(!discovery_invalidates(
+            Some(&old),
+            &value(vec!["b", "a"], true)
+        ));
+        assert!(discovery_invalidates(Some(&old), &value(vec!["a"], true)));
+        assert!(discovery_invalidates(Some(&old), &value(vec![], false)));
+        assert!(discovery_invalidates(None, &value(vec![], false)));
+        assert_eq!(
+            discovery_status(&value(vec![], false), "configured"),
+            "No models returned by Studio; loaded state unknown"
+        );
+        assert_eq!(
+            discovery_status(&value(vec!["other"], false), "configured"),
+            "selected model unavailable"
+        );
+        assert_eq!(
+            discovery_status(&old, "configured"),
+            "model available; discovery only"
+        );
     }
 }
 fn view(host: &ApplicationHost) -> credentials::Result<Value> {
@@ -941,10 +973,19 @@ pub fn dispatch(
         use tauri::Manager;
         if let Some(state) = app.try_state::<crate::ai_reload_fixture::ConnectionState>() {
             let result = (|| -> credentials::Result<Value> {
-                let _active = ACTIVE.try_lock().map_err(|_| "Another AI settings operation is in progress.")?;
-                if payload != json!({}) { return Err("Invalid AI settings payload."); }
-                let mut fixture = state.0.try_lock().map_err(|_| "Current reload fixture busy")?;
-                let store = host.with_service(|s| fixture.read(s)).map_err(|_| "Current reload host busy")??;
+                let _active = ACTIVE
+                    .try_lock()
+                    .map_err(|_| "Another AI settings operation is in progress.")?;
+                if payload != json!({}) {
+                    return Err("Invalid AI settings payload.");
+                }
+                let mut fixture = state
+                    .0
+                    .try_lock()
+                    .map_err(|_| "Current reload fixture busy")?;
+                let store = host
+                    .with_service(|s| fixture.read(s))
+                    .map_err(|_| "Current reload host busy")??;
                 view_store(host, store)
             })();
             return match result {
@@ -1110,13 +1151,20 @@ fn dispatch_settings_with_fixture(
             let key = secrets
                 .read(&p.profile_id, profile.credential.as_ref().unwrap())?
                 .ok_or("Credential missing.")?;
-            let discovered = loomlight_core::ai_discovery::discover(profile, &key, previous.as_ref().map(|d|d.addresses.clone()));
-            let discovered=match discovered {
-                Ok(value)=>value,
-                Err(error)=>{
-                    if snapshot(host)?==before {
-                        let _changing=crate::ai_requests::service().change();
-                        host.with_service(|s|credentials::clear_compatibility(s,&p.token,&p.profile_id)).map_err(|_|"Settings unavailable.")??;
+            let discovered = loomlight_core::ai_discovery::discover(
+                profile,
+                &key,
+                previous.as_ref().map(|d| d.addresses.clone()),
+            );
+            let discovered = match discovered {
+                Ok(value) => value,
+                Err(error) => {
+                    if snapshot(host)? == before {
+                        let _changing = crate::ai_requests::service().change();
+                        host.with_service(|s| {
+                            credentials::clear_compatibility(s, &p.token, &p.profile_id)
+                        })
+                        .map_err(|_| "Settings unavailable.")??;
                     }
                     return Err(error);
                 }
@@ -1124,12 +1172,16 @@ fn dispatch_settings_with_fixture(
             if snapshot(host)? != before {
                 return Err("Settings changed during discovery; result discarded.");
             }
-            let changed=discovery_invalidates(previous.as_ref(),&discovered);
-            let current_token=if changed {
-                let _changing=crate::ai_requests::service().change();
-                let store=host.with_service(|s|credentials::clear_compatibility(s,&p.token,&p.profile_id)).map_err(|_|"Settings unavailable.")??;
+            let changed = discovery_invalidates(previous.as_ref(), &discovered);
+            let current_token = if changed {
+                let _changing = crate::ai_requests::service().change();
+                let store = host
+                    .with_service(|s| credentials::clear_compatibility(s, &p.token, &p.profile_id))
+                    .map_err(|_| "Settings unavailable.")??;
                 credentials::token(&store)
-            }else{p.token};
+            } else {
+                p.token
+            };
             evidence()
                 .lock()
                 .map_err(|_| "Discovery status unavailable.")?
@@ -1183,11 +1235,15 @@ fn native_save(
     secrets: &impl Secrets,
     entry: &mut credentials::CredentialEntry,
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
-    native_entry(app, false, |key| host.with_service(|s|entry.save(s,secrets,key)).map_err(|_|"Another request is in progress; input retained for retry.")?)
+    native_entry(app, false, |key| {
+        host.with_service(|s| entry.save(s, secrets, key))
+            .map_err(|_| "Another request is in progress; input retained for retry.")?
+    })
 }
 pub(crate) fn native_entry(
-    app: &tauri::AppHandle, draft: bool,
-    mut save_key: impl FnMut(&str)->credentials::Result<credentials::SaveOutcome>,
+    app: &tauri::AppHandle,
+    draft: bool,
+    mut save_key: impl FnMut(&str) -> credentials::Result<credentials::SaveOutcome>,
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
     #[cfg(target_os = "windows")]
     let owner = {
@@ -1214,17 +1270,21 @@ pub(crate) fn native_entry(
         let _ = events.send(EntryEvent::Finished(result));
     })
     .map_err(|_| "Secure entry unavailable.")?;
-    drive_native_entry(receive,results,&mut save_key)
+    drive_native_entry(receive, results, &mut save_key)
 }
 fn drive_native_entry(
-    receive:std::sync::mpsc::Receiver<EntryEvent>,
-    results:std::sync::mpsc::SyncSender<credentials::Result<credentials::SaveOutcome>>,
-    mut save_key:impl FnMut(&str)->credentials::Result<credentials::SaveOutcome>,
+    receive: std::sync::mpsc::Receiver<EntryEvent>,
+    results: std::sync::mpsc::SyncSender<credentials::Result<credentials::SaveOutcome>>,
+    mut save_key: impl FnMut(&str) -> credentials::Result<credentials::SaveOutcome>,
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
     loop {
-        match receive.recv().map_err(|_|"Secure entry unavailable.")? {
-            EntryEvent::Save(key)=>{results.send(save_key(&key)).map_err(|_|"Secure entry unavailable.")?;}
-            EntryEvent::Finished(result)=>return result,
+        match receive.recv().map_err(|_| "Secure entry unavailable.")? {
+            EntryEvent::Save(key) => {
+                results
+                    .send(save_key(&key))
+                    .map_err(|_| "Secure entry unavailable.")?;
+            }
+            EntryEvent::Finished(result) => return result,
         }
     }
 }
@@ -1235,5 +1295,8 @@ fn drive_entry(
     receive: std::sync::mpsc::Receiver<EntryEvent>,
     results: std::sync::mpsc::SyncSender<credentials::Result<credentials::SaveOutcome>>,
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
-    drive_native_entry(receive,results,|key|host.with_service(|s|entry.save(s,secrets,key)).map_err(|_|"Another request is in progress; input retained for retry.")?)
+    drive_native_entry(receive, results, |key| {
+        host.with_service(|s| entry.save(s, secrets, key))
+            .map_err(|_| "Another request is in progress; input retained for retry.")?
+    })
 }

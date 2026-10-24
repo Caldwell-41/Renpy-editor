@@ -14,20 +14,48 @@ const MAX_NODES: usize = 4096;
 const MAX_DEPTH: usize = 32;
 const MAX_PIXELS: u32 = 16384;
 
-mod ownership;
 pub mod canvas;
 pub(crate) mod canvas_session;
+mod ownership;
 pub use ownership::{Catalog, CreateRequest};
 
 pub(crate) fn valid_name(name: &str) -> bool {
-    identifier(name) && name.len() <= 64 && !name.starts_with("__") && !name.starts_with("_m1_")
-        && !matches!(name.to_ascii_uppercase().as_str(), "CON" | "PRN" | "AUX" | "NUL"
-            | "COM1" | "COM2" | "COM3" | "COM4" | "COM5" | "COM6" | "COM7" | "COM8" | "COM9"
-            | "LPT1" | "LPT2" | "LPT3" | "LPT4" | "LPT5" | "LPT6" | "LPT7" | "LPT8" | "LPT9")
-        && !["False", "None", "True", "and", "as", "assert", "async", "await", "break", "class",
+    identifier(name)
+        && name.len() <= 64
+        && !name.starts_with("__")
+        && !name.starts_with("_m1_")
+        && !matches!(
+            name.to_ascii_uppercase().as_str(),
+            "CON"
+                | "PRN"
+                | "AUX"
+                | "NUL"
+                | "COM1"
+                | "COM2"
+                | "COM3"
+                | "COM4"
+                | "COM5"
+                | "COM6"
+                | "COM7"
+                | "COM8"
+                | "COM9"
+                | "LPT1"
+                | "LPT2"
+                | "LPT3"
+                | "LPT4"
+                | "LPT5"
+                | "LPT6"
+                | "LPT7"
+                | "LPT8"
+                | "LPT9"
+        )
+        && ![
+            "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class",
             "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global",
-            "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return",
-            "try", "while", "with", "yield", "screen", "default", "python"].contains(&name)
+            "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
+            "return", "try", "while", "with", "yield", "screen", "default", "python",
+        ]
+        .contains(&name)
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -251,8 +279,10 @@ fn parse_body(
             kind(line).unwrap()
         }
         .into(),
-        literal: line.code.split_once(' ').and_then(|(_, raw)|
-            serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()),
+        literal: line
+            .code
+            .split_once(' ')
+            .and_then(|(_, raw)| serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()),
         layout: Default::default(),
         position: None,
         span: Span {
@@ -271,7 +301,11 @@ fn parse_body(
         let child = &lines[next];
         let after = after_block(lines, next, limit);
         let mut recognized = false;
-        if child.single && child.indent == line.indent + 4 && child.code == "pass" && after == next + 1 {
+        if child.single
+            && child.indent == line.indent + 4
+            && child.code == "pass"
+            && after == next + 1
+        {
             recognized = true;
         }
         if child.indent == line.indent + 4 {
@@ -279,11 +313,35 @@ fn parse_body(
             if matches!(key, "xalign" | "yalign") {
                 let axis = usize::from(key == "yalign");
                 let raw = child.code[key.len()..].trim();
-                let value = raw.parse::<f64>().ok().filter(|v| raw.contains(['.', 'e', 'E']) && v.is_finite() && (0.0..=1.0).contains(v));
+                let value = raw.parse::<f64>().ok().filter(|v| {
+                    raw.contains(['.', 'e', 'E']) && v.is_finite() && (0.0..=1.0).contains(v)
+                });
                 let start = child.start + child.indent + child.code.len() - raw.len();
-                alignment[axis].push((value.filter(|_| child.single && after == next + 1), Span { start, end: start + raw.len() }));
+                alignment[axis].push((
+                    value.filter(|_| child.single && after == next + 1),
+                    Span {
+                        start,
+                        end: start + raw.len(),
+                    },
+                ));
             }
-            other_placement |= matches!(key, "xpos" | "ypos" | "pos" | "xanchor" | "yanchor" | "anchor" | "align" | "xcenter" | "ycenter" | "xycenter" | "xoffset" | "yoffset" | "offset" | "at");
+            other_placement |= matches!(
+                key,
+                "xpos"
+                    | "ypos"
+                    | "pos"
+                    | "xanchor"
+                    | "yanchor"
+                    | "anchor"
+                    | "align"
+                    | "xcenter"
+                    | "ycenter"
+                    | "xycenter"
+                    | "xoffset"
+                    | "yoffset"
+                    | "offset"
+                    | "at"
+            );
             for (slot, property) in [PixelProperty::Xsize, PixelProperty::Ysize]
                 .into_iter()
                 .enumerate()
@@ -377,11 +435,22 @@ fn parse_body(
             nodes[slot].protected.push(property.span);
         }
     }
-    if nodes[slot].kind == "frame" && !other_placement
-        && parent.is_some_and(|start| nodes.iter().any(|n| n.span.start == start && n.kind == "fixed"))
-        && alignment.iter().all(|axis| axis.len() == 1 && axis[0].0.is_some())
+    if nodes[slot].kind == "frame"
+        && !other_placement
+        && parent.is_some_and(|start| {
+            nodes
+                .iter()
+                .any(|n| n.span.start == start && n.kind == "fixed")
+        })
+        && alignment
+            .iter()
+            .all(|axis| axis.len() == 1 && axis[0].0.is_some())
     {
-        nodes[slot].position = Some(Position { xalign: alignment[0][0].0.unwrap(), yalign: alignment[1][0].0.unwrap(), spans: alignment.iter().map(|axis| axis[0].1.clone()).collect() });
+        nodes[slot].position = Some(Position {
+            xalign: alignment[0][0].0.unwrap(),
+            yalign: alignment[1][0].0.unwrap(),
+            spans: alignment.iter().map(|axis| axis[0].1.clone()).collect(),
+        });
     }
     Ok(())
 }
@@ -498,78 +567,166 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetPixelRequest,
     ) -> Result<Document, SceneError> {
-        self.screens_set_properties(project, request.path, request.expected_revision,
-            request.screen_name, request.node_start, &[(request.property, request.value)])
+        self.screens_set_properties(
+            project,
+            request.path,
+            request.expected_revision,
+            request.screen_name,
+            request.node_start,
+            &[(request.property, request.value)],
+        )
     }
 
-    pub fn screens_set_size(&self, project: &ProjectId, request: SetSizeRequest) -> Result<Document, SceneError> {
-        self.screens_set_properties(project, request.path, request.expected_revision,
-            request.screen_name, request.node_start,
-            &[(PixelProperty::Xsize, request.width), (PixelProperty::Ysize, request.height)])
+    pub fn screens_set_size(
+        &self,
+        project: &ProjectId,
+        request: SetSizeRequest,
+    ) -> Result<Document, SceneError> {
+        self.screens_set_properties(
+            project,
+            request.path,
+            request.expected_revision,
+            request.screen_name,
+            request.node_start,
+            &[
+                (PixelProperty::Xsize, request.width),
+                (PixelProperty::Ysize, request.height),
+            ],
+        )
     }
 
-    pub fn screens_set_position(&self, project: &ProjectId, request: SetPositionRequest) -> Result<Document, SceneError> {
-        if ![request.xalign, request.yalign].iter().all(|v| v.is_finite() && (0.0..=1.0).contains(v)) {
+    pub fn screens_set_position(
+        &self,
+        project: &ProjectId,
+        request: SetPositionRequest,
+    ) -> Result<Document, SceneError> {
+        if ![request.xalign, request.yalign]
+            .iter()
+            .all(|v| v.is_finite() && (0.0..=1.0).contains(v))
+        {
             return Err(SceneError::InvalidPayload);
         }
         let source_path = request.path;
         let path = path(&source_path)?;
-        self.ensure_source_paths_clean(project, [source_path.as_str()]).map_err(|_| SceneError::DirtySource)?;
-        let (bytes, revision) = self.transactions.snapshot(project, path.clone()).map_err(|_| SceneError::SourceConflict)?;
-        if revision.sha256 != request.expected_revision { return Err(SceneError::SourceConflict); }
+        self.ensure_source_paths_clean(project, [source_path.as_str()])
+            .map_err(|_| SceneError::DirtySource)?;
+        let (bytes, revision) = self
+            .transactions
+            .snapshot(project, path.clone())
+            .map_err(|_| SceneError::SourceConflict)?;
+        if revision.sha256 != request.expected_revision {
+            return Err(SceneError::SourceConflict);
+        }
         let document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
-        let position = document.screens.iter().find(|s| s.name == request.screen_name)
+        let position = document
+            .screens
+            .iter()
+            .find(|s| s.name == request.screen_name)
             .and_then(|s| s.nodes.iter().find(|n| n.span.start == request.node_start))
-            .and_then(|n| n.position.as_ref()).ok_or(SceneError::OpaqueBoundary)?;
+            .and_then(|n| n.position.as_ref())
+            .ok_or(SceneError::OpaqueBoundary)?;
         let mut proposed = bytes.clone();
-        let mut patches = position.spans.iter().zip([position.xalign, position.yalign]).zip([request.xalign, request.yalign]).collect::<Vec<_>>();
+        let mut patches = position
+            .spans
+            .iter()
+            .zip([position.xalign, position.yalign])
+            .zip([request.xalign, request.yalign])
+            .collect::<Vec<_>>();
         patches.sort_by_key(|((span, _), _)| std::cmp::Reverse(span.start));
         for ((span, before), value) in patches {
-            if before != value { proposed.splice(span.start..span.end, format!("{value:?}").bytes()); }
+            if before != value {
+                proposed.splice(span.start..span.end, format!("{value:?}").bytes());
+            }
         }
-        if proposed == bytes { return Ok(document); }
+        if proposed == bytes {
+            return Ok(document);
+        }
         inspect(&proposed, source_path.clone(), String::new())?;
-        self.commit_history(project, TransactionProposal {
-            mutations: vec![FileMutation { path, kind: MutationKind::ReplaceExisting, base: revision, expected_bytes: bytes, proposed }],
-            intent: TransactionIntent::Edit,
-        })?;
+        self.commit_history(
+            project,
+            TransactionProposal {
+                mutations: vec![FileMutation {
+                    path,
+                    kind: MutationKind::ReplaceExisting,
+                    base: revision,
+                    expected_bytes: bytes,
+                    proposed,
+                }],
+                intent: TransactionIntent::Edit,
+            },
+        )?;
         self.screens_inspect(project, InspectRequest { path: source_path })
     }
 
-    fn screens_set_properties(&self, project: &ProjectId, source_path: String, expected_revision: String,
-        screen_name: String, node_start: usize, values: &[(PixelProperty, u32)]) -> Result<Document, SceneError> {
+    fn screens_set_properties(
+        &self,
+        project: &ProjectId,
+        source_path: String,
+        expected_revision: String,
+        screen_name: String,
+        node_start: usize,
+        values: &[(PixelProperty, u32)],
+    ) -> Result<Document, SceneError> {
         let path = path(&source_path)?;
-        if values.iter().any(|(_, value)| *value == 0 || *value > MAX_PIXELS) {
+        if values
+            .iter()
+            .any(|(_, value)| *value == 0 || *value > MAX_PIXELS)
+        {
             return Err(SceneError::InvalidPayload);
         }
         self.ensure_source_paths_clean(project, [source_path.as_str()])
             .map_err(|_| SceneError::DirtySource)?;
-        let (bytes, revision) = self.transactions.snapshot(project, path.clone())
+        let (bytes, revision) = self
+            .transactions
+            .snapshot(project, path.clone())
             .map_err(|_| SceneError::SourceConflict)?;
-        if revision.sha256 != expected_revision { return Err(SceneError::SourceConflict); }
+        if revision.sha256 != expected_revision {
+            return Err(SceneError::SourceConflict);
+        }
         let document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
-        let node = document.screens.iter().find(|s| s.name == screen_name)
+        let node = document
+            .screens
+            .iter()
+            .find(|s| s.name == screen_name)
             .and_then(|s| s.nodes.iter().find(|n| n.span.start == node_start))
             .ok_or(SceneError::UnknownEntity)?;
         let mut patches = vec![];
         for (key, value) in values {
-            let properties = node.properties.iter().filter(|p| p.property == *key).collect::<Vec<_>>();
-            if properties.len() != 1 { return Err(SceneError::OpaqueBoundary); }
+            let properties = node
+                .properties
+                .iter()
+                .filter(|p| p.property == *key)
+                .collect::<Vec<_>>();
+            if properties.len() != 1 {
+                return Err(SceneError::OpaqueBoundary);
+            }
             let property = properties[0];
-            if property.value != *value { patches.push((property.span.clone(), *value)); }
+            if property.value != *value {
+                patches.push((property.span.clone(), *value));
+            }
         }
-        if patches.is_empty() { return Ok(document); }
+        if patches.is_empty() {
+            return Ok(document);
+        }
         patches.sort_by_key(|(span, _)| std::cmp::Reverse(span.start));
         let mut proposed = bytes.clone();
         for (span, value) in patches {
             proposed.splice(span.start..span.end, value.to_string().bytes());
         }
         inspect(&proposed, source_path.clone(), String::new())?;
-        self.commit_history(project, TransactionProposal {
-            mutations: vec![FileMutation { path, kind: MutationKind::ReplaceExisting,
-                base: revision, expected_bytes: bytes, proposed }],
-            intent: TransactionIntent::Edit,
-        })?;
+        self.commit_history(
+            project,
+            TransactionProposal {
+                mutations: vec![FileMutation {
+                    path,
+                    kind: MutationKind::ReplaceExisting,
+                    base: revision,
+                    expected_bytes: bytes,
+                    proposed,
+                }],
+                intent: TransactionIntent::Edit,
+            },
+        )?;
         self.screens_inspect(project, InspectRequest { path: source_path })
     }
 }

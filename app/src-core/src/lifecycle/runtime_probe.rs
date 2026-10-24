@@ -4,17 +4,31 @@ use serde_json::json;
 
 impl LifecycleService {
     /// Disposable representative canvas composition with public SDK font/image assets.
-    pub fn prepare_canvas_screen_probe(data: PathBuf, archive: &Path) -> Result<Self,String> {
+    pub fn prepare_canvas_screen_probe(data: PathBuf, archive: &Path) -> Result<Self, String> {
         let mut service = Self::prepare_source_foundation_probe(data)?;
         let root = service.data_root.join("synthetic-project");
-        let sdk = crate::renpy::install_supported_sdk_from_archive(&service.data_root,archive).map_err(|e|format!("Canvas SDK: {e:?}"))?;
-        fs::create_dir_all(root.join("game/ui")).map_err(|e|e.to_string())?;
-        fs::create_dir_all(root.join("game/assets")).map_err(|e|e.to_string())?;
-        fs::copy(sdk.root.join("renpy/common/DejaVuSans.ttf"),root.join("game/assets/canvas.ttf")).map_err(|e|e.to_string())?;
-        fs::write(root.join("game/assets/help.png"),include_bytes!("../../../../tests/fixtures/phase-1h/assets/booth.png")).map_err(|e|e.to_string())?;
-        fs::write(root.join("game/ui/help.rpy"),include_bytes!("../../../../tests/fixtures/phase-3b-screens/canvas-help.rpy")).map_err(|e|e.to_string())?;
-        fs::write(root.join("game/options.rpy"),help_probe_options(1280,720)).map_err(|e|e.to_string())?;
-        service.remember_sdk(sdk,"verified-canvas-fixture");
+        let sdk = crate::renpy::install_supported_sdk_from_archive(&service.data_root, archive)
+            .map_err(|e| format!("Canvas SDK: {e:?}"))?;
+        fs::create_dir_all(root.join("game/ui")).map_err(|e| e.to_string())?;
+        fs::create_dir_all(root.join("game/assets")).map_err(|e| e.to_string())?;
+        fs::copy(
+            sdk.root.join("renpy/common/DejaVuSans.ttf"),
+            root.join("game/assets/canvas.ttf"),
+        )
+        .map_err(|e| e.to_string())?;
+        fs::write(
+            root.join("game/assets/help.png"),
+            include_bytes!("../../../../tests/fixtures/phase-1h/assets/booth.png"),
+        )
+        .map_err(|e| e.to_string())?;
+        fs::write(
+            root.join("game/ui/help.rpy"),
+            include_bytes!("../../../../tests/fixtures/phase-3b-screens/canvas-help.rpy"),
+        )
+        .map_err(|e| e.to_string())?;
+        fs::write(root.join("game/options.rpy"), help_probe_options(1280, 720))
+            .map_err(|e| e.to_string())?;
+        service.remember_sdk(sdk, "verified-canvas-fixture");
         Ok(service)
     }
     /// Explicit disposable Help case. Only the packaged probe can seed this fixture.
@@ -22,12 +36,31 @@ impl LifecycleService {
         let mut service = Self::prepare_source_foundation_probe(data)?;
         let root = service.data_root.join("synthetic-project");
         fs::create_dir(root.join("game/ui")).map_err(|e| e.to_string())?;
-        fs::write(root.join("game/ui/a_styles.rpy"), "style help_label:\n    color \"#ffffff\"\n").map_err(|e| e.to_string())?;
-        fs::write(root.join("game/ui/help.rpy"), format!("\u{feff}{}", include_str!("../../../../tests/fixtures/phase-3b-screens/help.rpy").replace('\n', "\r\n"))).map_err(|e| e.to_string())?;
-        fs::write(root.join("game/help.png"), include_bytes!("../../../../tests/fixtures/phase-1h/assets/booth.png")).map_err(|e| e.to_string())?;
-        fs::write(root.join("game/options.rpy"), help_probe_options(1280, 720)).map_err(|e| e.to_string())?;
-        fs::write(root.join("game/geometry_probe.rpy"), HELP_GEOMETRY_PROBE).map_err(|e| e.to_string())?;
-        let sdk = crate::renpy::install_supported_sdk_from_archive(&service.data_root, archive).map_err(|e| format!("Help probe SDK: {e:?}"))?;
+        fs::write(
+            root.join("game/ui/a_styles.rpy"),
+            "style help_label:\n    color \"#ffffff\"\n",
+        )
+        .map_err(|e| e.to_string())?;
+        fs::write(
+            root.join("game/ui/help.rpy"),
+            format!(
+                "\u{feff}{}",
+                include_str!("../../../../tests/fixtures/phase-3b-screens/help.rpy")
+                    .replace('\n', "\r\n")
+            ),
+        )
+        .map_err(|e| e.to_string())?;
+        fs::write(
+            root.join("game/help.png"),
+            include_bytes!("../../../../tests/fixtures/phase-1h/assets/booth.png"),
+        )
+        .map_err(|e| e.to_string())?;
+        fs::write(root.join("game/options.rpy"), help_probe_options(1280, 720))
+            .map_err(|e| e.to_string())?;
+        fs::write(root.join("game/geometry_probe.rpy"), HELP_GEOMETRY_PROBE)
+            .map_err(|e| e.to_string())?;
+        let sdk = crate::renpy::install_supported_sdk_from_archive(&service.data_root, archive)
+            .map_err(|e| format!("Help probe SDK: {e:?}"))?;
         service.remember_sdk(sdk, "verified-official-help-fixture");
         Ok(service)
     }
@@ -133,24 +166,48 @@ impl LifecycleService {
         Ok(service)
     }
     /// Native-only fresh disposable first-rewrite fixture. No network or credentials.
-    pub fn prepare_dialogue_rewrite_probe(data: PathBuf) -> Result<Self,String> {
-        let mut service=Self::prepare_source_foundation_probe(data.clone())?;
-        let root=data.join("synthetic-project");
-        let project=service.open_path(&root).map_err(|_|"Rewrite fixture open failed")?;
-        let ws=service.scene_workspace().map_err(|_|"Rewrite fixture projection failed")?;
-        let scene=&ws.scenes[0];
-        let beat=scene.beats.iter().find(|b|matches!(b.payload,crate::scene::BeatPayload::Narration{..})).ok_or("Rewrite fixture target missing")?;
+    pub fn prepare_dialogue_rewrite_probe(data: PathBuf) -> Result<Self, String> {
+        let mut service = Self::prepare_source_foundation_probe(data.clone())?;
+        let root = data.join("synthetic-project");
+        let project = service
+            .open_path(&root)
+            .map_err(|_| "Rewrite fixture open failed")?;
+        let ws = service
+            .scene_workspace()
+            .map_err(|_| "Rewrite fixture projection failed")?;
+        let scene = &ws.scenes[0];
+        let beat = scene
+            .beats
+            .iter()
+            .find(|b| matches!(b.payload, crate::scene::BeatPayload::Narration { .. }))
+            .ok_or("Rewrite fixture target missing")?;
         let request=serde_json::from_value(json!({"expectedProjectRevision":ws.project_revision,"expectedSourceMapRevision":ws.source_map_revision,"command":{"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"narration","text":"Hello [flag] {b}friend{/b} [[literal] {{brace}"}}})).map_err(|_|"Rewrite fixture request failed")?;
-        service.scene_apply(request).map_err(|_|"Rewrite fixture text failed")?;
+        service
+            .scene_apply(request)
+            .map_err(|_| "Rewrite fixture text failed")?;
         use sha2::Digest;
-        let baseline_digest=hex::encode(sha2::Sha256::digest(crate::prompts::BASELINE.as_bytes()));
-        let editor=root.join(".renpy-editor");
-        let mut refs:Value=serde_json::from_str(include_str!("../../../tests/fixtures/reference-library/manual-save.json")).map_err(|_|"Rewrite references failed")?;
-        refs["projectId"]=json!(project.project_id);
-        let lore=&mut refs["loreEntries"][0];lore["approvedRevisionId"]=lore["currentRevisionId"].clone();lore["revisions"][0]["status"]=json!("approved");lore["revisions"][0]["reviewedAt"]=json!("2026-10-10T00:00:00Z");lore["revisions"][0]["content"]["citations"]=json!([]);
-        fs::write(editor.join("references.json"),serde_json::to_vec_pretty(&refs).unwrap()).map_err(|_|"Rewrite references write failed")?;
+        let baseline_digest =
+            hex::encode(sha2::Sha256::digest(crate::prompts::BASELINE.as_bytes()));
+        let editor = root.join(".renpy-editor");
+        let mut refs: Value = serde_json::from_str(include_str!(
+            "../../../tests/fixtures/reference-library/manual-save.json"
+        ))
+        .map_err(|_| "Rewrite references failed")?;
+        refs["projectId"] = json!(project.project_id);
+        let lore = &mut refs["loreEntries"][0];
+        lore["approvedRevisionId"] = lore["currentRevisionId"].clone();
+        lore["revisions"][0]["status"] = json!("approved");
+        lore["revisions"][0]["reviewedAt"] = json!("2026-10-10T00:00:00Z");
+        lore["revisions"][0]["content"]["citations"] = json!([]);
+        fs::write(
+            editor.join("references.json"),
+            serde_json::to_vec_pretty(&refs).unwrap(),
+        )
+        .map_err(|_| "Rewrite references write failed")?;
         fs::write(editor.join("ai.json"),serde_json::to_vec_pretty(&json!({"schemaVersion":1,"projectId":project.project_id,"prompts":{"rewriteDialogue":{"text":"Rewrite only the selected prose; follow the response contract.","baselineVersion":crate::prompts::BASELINE_VERSION,"baselineDigest":baseline_digest},"continueScene":{"text":"Continue only at the saved anchor; follow the response contract.","baselineVersion":crate::prompts::BASELINE_VERSION,"baselineDigest":hex::encode(sha2::Sha256::digest(crate::prompts::CONTINUE_BASELINE.as_bytes()))},"draftScene":{"text":"Draft only the reviewed Scene; follow the response contract.","baselineVersion":crate::prompts::BASELINE_VERSION,"baselineDigest":hex::encode(sha2::Sha256::digest(crate::prompts::DRAFT_BASELINE.as_bytes()))},"generateCard":{"text":"Draft only the reviewed card; follow the response contract.","baselineVersion":crate::prompts::BASELINE_VERSION,"baselineDigest":hex::encode(sha2::Sha256::digest(crate::prompts::CARD_BASELINE.as_bytes()))},"generateLore":{"text":"Draft only the reviewed lore entry; follow the response contract.","baselineVersion":crate::prompts::BASELINE_VERSION,"baselineDigest":hex::encode(sha2::Sha256::digest(crate::prompts::LORE_BASELINE.as_bytes()))},"futureAction":{"text":"Retained"}},"styleNotes":"Synthetic author style.","futureSettings":{"retained":true}})).unwrap()).map_err(|_|"Rewrite prompt write failed")?;
-        service.close().map_err(|_|"Rewrite fixture close failed")?;
+        service
+            .close()
+            .map_err(|_| "Rewrite fixture close failed")?;
         Ok(service)
     }
     /// Inspection-only full workload. No SDK installation or project execution.
@@ -857,22 +914,57 @@ mod branches_tests {
             let result = service.scene_workspace().unwrap();
             // Phase 3A refines supported boolean combinations and nested groups;
             // opaque expressions/statements remain protected exact source ranges.
-            let first = result.scenes[0].beats.iter().find_map(|b| b.conditional_branch.as_ref()).unwrap();
+            let first = result.scenes[0]
+                .beats
+                .iter()
+                .find_map(|b| b.conditional_branch.as_ref())
+                .unwrap();
             if condition == "missing" {
-                assert!(matches!(first.condition, Some(crate::conditions::Condition::Unknown { .. })));
+                assert!(matches!(
+                    first.condition,
+                    Some(crate::conditions::Condition::Unknown { .. })
+                ));
             } else {
-                assert!(matches!(first.condition, Some(crate::conditions::Condition::Supported { .. })));
+                assert!(matches!(
+                    first.condition,
+                    Some(crate::conditions::Condition::Supported { .. })
+                ));
             }
             if body.starts_with("$ unknown") {
                 assert!(result.scenes[0].beats.iter().any(|b| b.protected && matches!(&b.payload, crate::scene::BeatPayload::CustomCode { source, .. } if source.trim() == body)));
             }
-            assert!(result.scenes[0].beats.iter().filter(|b| matches!(b.payload, crate::scene::BeatPayload::CustomCode { .. })).all(|b| b.protected));
-            assert_eq!(result.scenes[0].beats.iter().filter(|b| b.conditional_branch.is_some()).count(), if body.starts_with("if flag:") { 3 } else { 2 });
-            let dialogue_children = result.scenes[0].beats.iter().filter(|b| matches!(b.payload, crate::scene::BeatPayload::Dialogue { .. })).collect::<Vec<_>>();
-            assert_eq!(dialogue_children.len(), if body.starts_with("$ unknown") { 1 } else { 2 });
+            assert!(result.scenes[0]
+                .beats
+                .iter()
+                .filter(|b| matches!(b.payload, crate::scene::BeatPayload::CustomCode { .. }))
+                .all(|b| b.protected));
+            assert_eq!(
+                result.scenes[0]
+                    .beats
+                    .iter()
+                    .filter(|b| b.conditional_branch.is_some())
+                    .count(),
+                if body.starts_with("if flag:") { 3 } else { 2 }
+            );
+            let dialogue_children = result.scenes[0]
+                .beats
+                .iter()
+                .filter(|b| matches!(b.payload, crate::scene::BeatPayload::Dialogue { .. }))
+                .collect::<Vec<_>>();
+            assert_eq!(
+                dialogue_children.len(),
+                if body.starts_with("$ unknown") { 1 } else { 2 }
+            );
             assert!(dialogue_children.iter().all(|b| b.owner.is_some()));
-            let prefix: &[u8] = if opened["hasBom"] == true { b"\xef\xbb\xbf" } else { b"" };
-            assert_eq!(fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap(), [prefix, source.as_bytes()].concat());
+            let prefix: &[u8] = if opened["hasBom"] == true {
+                b"\xef\xbb\xbf"
+            } else {
+                b""
+            };
+            assert_eq!(
+                fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
+                [prefix, source.as_bytes()].concat()
+            );
             assert!(result.scenes[0].partial);
             service.close().unwrap();
         }

@@ -42,22 +42,36 @@ pub fn phase(root: &Path) -> Result<Option<u8>, &'static str> {
 /// Current connection Save publishes settings and the Windows adapter's owned key.
 /// Exact fixture comparisons remain separate from historical credential entry.
 pub(crate) fn validate_current(store: &ProfileStore, phase: u8) -> Result<(), &'static str> {
-    let mut expected: ProfileStore = serde_json::from_str(FIXTURE).map_err(|_| "Windows fixture invalid")?;
+    let mut expected: ProfileStore =
+        serde_json::from_str(FIXTURE).map_err(|_| "Windows fixture invalid")?;
     if phase == 2 {
         expected.revision = 5;
         for (profile, actual) in expected.profiles.iter_mut().zip(&store.profiles) {
-            let credential = actual.credential.as_ref().ok_or("Current native credential missing")?;
+            let credential = actual
+                .credential
+                .as_ref()
+                .ok_or("Current native credential missing")?;
             if credential.service != loomlight_core::ai_profiles::CredentialService::Legacy
-                || !credential.storage.is_native() || credential.revision != 1
+                || !credential.storage.is_native()
+                || credential.revision != 1
                 || credential.origin != "http://127.0.0.1:46082"
-            { return Err("Current native credential ownership refused"); }
-            profile.credential = Some(credential.clone()); profile.revision = 2;
+            {
+                return Err("Current native credential ownership refused");
+            }
+            profile.credential = Some(credential.clone());
+            profile.revision = 2;
             profile.settings.context_ceiling = profile.settings.context_budget;
-            profile.settings.thinking = Some(true); profile.settings.temperature = Some(1.0);
-            profile.settings.top_p = Some(0.95); profile.settings.model_load = Some(Default::default());
+            profile.settings.thinking = Some(true);
+            profile.settings.temperature = Some(1.0);
+            profile.settings.top_p = Some(0.95);
+            profile.settings.model_load = Some(Default::default());
         }
-    } else if phase != 1 { return Err("Current Windows phase refused"); }
-    if !store.valid() || *store != expected { return Err("Current Windows complete fixture state refused"); }
+    } else if phase != 1 {
+        return Err("Current Windows phase refused");
+    }
+    if !store.valid() || *store != expected {
+        return Err("Current Windows complete fixture state refused");
+    }
     Ok(())
 }
 pub(crate) fn validate(store: &ProfileStore, phase: u8) -> Result<(), &'static str> {
@@ -105,31 +119,47 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
         .and_then(Value::as_str)
         .ok_or("Windows fixture step missing")?;
     let evidence = std::env::var("LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE").as_deref() == Ok("1");
-    let observation = step.strip_suffix("-observed").filter(|name| matches!(*name,
-        "preflight-cancelled" | "alpha-saved" | "gamma-saved" | "cancelled" | "beta-reloaded" |
-        "get-1-complete" | "get-2-complete" | "reopened" | "removed" | "complete"));
-    if observation.is_some() && !evidence { return Err("Windows capture holds disabled"); }
-    if observation.is_none() && !matches!(
-        step,
-        "preflight-cancel"
-            | "preflight-cancelled"
-            | "alpha-entry"
-            | "alpha-saved"
-            | "gamma-entry"
-            | "gamma-saved"
-            | "cancel-entry"
-            | "cancelled"
-            | "reopened"
-            | "beta-entry"
-            | "beta-saved"
-            | "beta-reload-required"
-            | "beta-reloaded"
-            | "beta-reload-observed"
-            | "removed"
-            | "complete"
-            | "get-1-complete"
-            | "get-2-complete"
-    ) {
+    let observation = step.strip_suffix("-observed").filter(|name| {
+        matches!(
+            *name,
+            "preflight-cancelled"
+                | "alpha-saved"
+                | "gamma-saved"
+                | "cancelled"
+                | "beta-reloaded"
+                | "get-1-complete"
+                | "get-2-complete"
+                | "reopened"
+                | "removed"
+                | "complete"
+        )
+    });
+    if observation.is_some() && !evidence {
+        return Err("Windows capture holds disabled");
+    }
+    if observation.is_none()
+        && !matches!(
+            step,
+            "preflight-cancel"
+                | "preflight-cancelled"
+                | "alpha-entry"
+                | "alpha-saved"
+                | "gamma-entry"
+                | "gamma-saved"
+                | "cancel-entry"
+                | "cancelled"
+                | "reopened"
+                | "beta-entry"
+                | "beta-saved"
+                | "beta-reload-required"
+                | "beta-reloaded"
+                | "beta-reload-observed"
+                | "removed"
+                | "complete"
+                | "get-1-complete"
+                | "get-2-complete"
+        )
+    {
         return Err("Windows fixture step refused");
     }
     let phase =

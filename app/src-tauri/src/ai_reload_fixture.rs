@@ -15,37 +15,89 @@ pub struct State(pub Mutex<ReloadFixture>);
 #[cfg(target_os = "windows")]
 pub struct ConnectionState(pub Mutex<ConnectionReload>);
 #[cfg(any(target_os = "windows", test))]
-pub struct ConnectionReload { root: PathBuf, original: ProfileStore, confirmed: bool, refused: bool }
+pub struct ConnectionReload {
+    root: PathBuf,
+    original: ProfileStore,
+    confirmed: bool,
+    refused: bool,
+}
 #[cfg(any(target_os = "windows", test))]
 impl ConnectionReload {
     pub fn arm(service: &LifecycleService) -> credentials::Result<Self> {
         let root = service.ai_data_root();
-        if root.parent() != Some(std::env::temp_dir().canonicalize().map_err(|_| "Temporary root unavailable")?.as_path())
-            || !root.file_name().is_some_and(|n| n.to_string_lossy().starts_with("loomlight-studio-windows-connection-"))
-            || root.symlink_metadata().map_err(|_| "Connection root missing")?.file_type().is_symlink()
-        { return Err("Isolated current connection root refused"); }
+        if root.parent()
+            != Some(
+                std::env::temp_dir()
+                    .canonicalize()
+                    .map_err(|_| "Temporary root unavailable")?
+                    .as_path(),
+            )
+            || !root.file_name().is_some_and(|n| {
+                n.to_string_lossy()
+                    .starts_with("loomlight-studio-windows-connection-")
+            })
+            || root
+                .symlink_metadata()
+                .map_err(|_| "Connection root missing")?
+                .file_type()
+                .is_symlink()
+        {
+            return Err("Isolated current connection root refused");
+        }
         let original = service.read()?;
         crate::windows_studio_probe::validate_current(&original, 2)?;
-        Ok(Self { root:root.to_owned(), original, confirmed:false, refused:false })
+        Ok(Self {
+            root: root.to_owned(),
+            original,
+            confirmed: false,
+            refused: false,
+        })
     }
-    pub fn confirm(&mut self, service: &LifecycleService, id: &str, pending: bool) -> credentials::Result<()> {
-        if self.confirmed || service.ai_data_root() != self.root || id != WINDOWS_PROFILE || !pending {
+    pub fn confirm(
+        &mut self,
+        service: &LifecycleService,
+        id: &str,
+        pending: bool,
+    ) -> credentials::Result<()> {
+        if self.confirmed
+            || service.ai_data_root() != self.root
+            || id != WINDOWS_PROFILE
+            || !pending
+        {
             return Err("Current connection confirmation refused");
         }
         let actual = service.read()?;
-        let credential = actual.profiles.first().and_then(|p|p.credential.as_ref()).ok_or("Published key missing")?;
-        let prior = self.original.profiles[0].credential.as_ref().ok_or("Prior key missing")?;
-        if credential.service != CredentialService::Legacy || !credential.storage.is_native()
-            || credential.revision != 2 || credential.origin != prior.origin || credential.credential_id == prior.credential_id
-        { return Err("Current replacement ownership refused"); }
+        let credential = actual
+            .profiles
+            .first()
+            .and_then(|p| p.credential.as_ref())
+            .ok_or("Published key missing")?;
+        let prior = self.original.profiles[0]
+            .credential
+            .as_ref()
+            .ok_or("Prior key missing")?;
+        if credential.service != CredentialService::Legacy
+            || !credential.storage.is_native()
+            || credential.revision != 2
+            || credential.origin != prior.origin
+            || credential.credential_id == prior.credential_id
+        {
+            return Err("Current replacement ownership refused");
+        }
         let mut expected = self.original.clone();
-        expected.revision += 3; expected.profiles[0].revision += 1;
+        expected.revision += 3;
+        expected.profiles[0].revision += 1;
         expected.profiles[0].credential = Some(credential.clone());
-        if actual != expected { return Err("Current complete replacement snapshot refused"); }
-        self.confirmed = true; Ok(())
+        if actual != expected {
+            return Err("Current complete replacement snapshot refused");
+        }
+        self.confirmed = true;
+        Ok(())
     }
     pub fn read(&mut self, service: &LifecycleService) -> credentials::Result<ProfileStore> {
-        if service.ai_data_root() != self.root { return Err("Current reload root changed"); }
+        if service.ai_data_root() != self.root {
+            return Err("Current reload root changed");
+        }
         if self.confirmed && !self.refused {
             self.refused = true;
             return Err("Qualification fixture refused one confirmed connection snapshot read");

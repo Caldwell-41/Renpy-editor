@@ -353,8 +353,10 @@ impl SourceMapMetadata {
         let mut owned_names = HashSet::new();
         for screen in &self.owned_screens {
             if self.schema_version < 6
-                || !valid_id(&screen.id) || !valid_id(&screen.root_id)
-                || !owned_ids.insert(&screen.id) || !owned_ids.insert(&screen.root_id)
+                || !valid_id(&screen.id)
+                || !valid_id(&screen.root_id)
+                || !owned_ids.insert(&screen.id)
+                || !owned_ids.insert(&screen.root_id)
                 || !crate::screens::valid_name(&screen.name)
                 || screen.path != format!("game/ui/{}.rpy", screen.name)
                 || !owned_paths.insert(screen.path.to_ascii_lowercase())
@@ -380,7 +382,8 @@ impl SourceMapMetadata {
             let mut groups = HashSet::new();
             let mut active_branch: Option<(&str, &str)> = None;
             let mut active = Vec::<(&str, &str)>::new();
-            let mut rich_groups = std::collections::HashMap::<&str, (Option<BeatOwner>, u32, bool)>::new();
+            let mut rich_groups =
+                std::collections::HashMap::<&str, (Option<BeatOwner>, u32, bool)>::new();
             for beat in &scene.beats {
                 if !valid_id(&beat.id)
                     || !beat_ids.insert(beat.id.clone())
@@ -400,52 +403,80 @@ impl SourceMapMetadata {
                     return Err(MetadataError::InvalidStructure);
                 }
                 if self.schema_version < 4 {
-                if let Some(branch) = &beat.conditional_branch {
-                    if beat.owner.is_some()
-                        || beat.kind != "customCode"
-                        || !valid_id(&branch.group_id)
-                        || branch.variable_id.as_deref().is_none_or(|id| !valid_id(id))
-                        || beat_ids.contains(&branch.group_id)
-                        || if branch.otherwise {
-                            active_branch.is_none_or(|(group, _)| group != branch.group_id)
-                        } else {
-                            !groups.insert(branch.group_id.as_str())
+                    if let Some(branch) = &beat.conditional_branch {
+                        if beat.owner.is_some()
+                            || beat.kind != "customCode"
+                            || !valid_id(&branch.group_id)
+                            || branch.variable_id.as_deref().is_none_or(|id| !valid_id(id))
+                            || beat_ids.contains(&branch.group_id)
+                            || if branch.otherwise {
+                                active_branch.is_none_or(|(group, _)| group != branch.group_id)
+                            } else {
+                                !groups.insert(branch.group_id.as_str())
+                            }
+                        {
+                            return Err(MetadataError::InvalidStructure);
                         }
-                    {
-                        return Err(MetadataError::InvalidStructure);
+                        active_branch = Some((&branch.group_id, &beat.id));
                     }
-                    active_branch = Some((&branch.group_id, &beat.id));
-                }
-                if let Some(owner) = &beat.owner {
-                    if beat.kind != "dialogue"
-                        || active_branch
-                            != Some((owner.group_id.as_str(), owner.branch_id.as_str()))
-                    {
-                        return Err(MetadataError::InvalidStructure);
+                    if let Some(owner) = &beat.owner {
+                        if beat.kind != "dialogue"
+                            || active_branch
+                                != Some((owner.group_id.as_str(), owner.branch_id.as_str()))
+                        {
+                            return Err(MetadataError::InvalidStructure);
+                        }
                     }
-                }
                 } else {
                     if let Some(owner) = &beat.owner {
-                        let position = active.iter().position(|pair| *pair == (owner.group_id.as_str(), owner.branch_id.as_str())).ok_or(MetadataError::InvalidStructure)?;
+                        let position = active
+                            .iter()
+                            .position(|pair| {
+                                *pair == (owner.group_id.as_str(), owner.branch_id.as_str())
+                            })
+                            .ok_or(MetadataError::InvalidStructure)?;
                         active.truncate(position + 1);
-                    } else if beat.kind != "customCode" || beat.conditional_branch.is_some() { active.clear(); }
+                    } else if beat.kind != "customCode" || beat.conditional_branch.is_some() {
+                        active.clear();
+                    }
                     if let Some(branch) = &beat.conditional_branch {
-                        if beat.kind != "customCode" || !valid_id(&branch.group_id) || beat_ids.contains(&branch.group_id)
-                            || branch.variable_id.as_deref().is_some_and(|id| !valid_id(id))
+                        if beat.kind != "customCode"
+                            || !valid_id(&branch.group_id)
+                            || beat_ids.contains(&branch.group_id)
+                            || branch
+                                .variable_id
+                                .as_deref()
+                                .is_some_and(|id| !valid_id(id))
                             || branch.otherwise && branch.condition.is_some()
-                            || !branch.otherwise && branch.condition.is_none() && branch.variable_id.is_none()
-                        { return Err(MetadataError::InvalidStructure); }
-                        if let Some(crate::conditions::Condition::Supported { expression }) = &branch.condition {
-                            crate::conditions::validate_expression(expression).map_err(|_| MetadataError::InvalidStructure)?;
+                            || !branch.otherwise
+                                && branch.condition.is_none()
+                                && branch.variable_id.is_none()
+                        {
+                            return Err(MetadataError::InvalidStructure);
+                        }
+                        if let Some(crate::conditions::Condition::Supported { expression }) =
+                            &branch.condition
+                        {
+                            crate::conditions::validate_expression(expression)
+                                .map_err(|_| MetadataError::InvalidStructure)?;
                         }
                         match rich_groups.get_mut(branch.group_id.as_str()) {
                             Some((parent, ordinal, closed)) => {
-                                if *closed || parent != &beat.owner || branch.ordinal != *ordinal + 1 { return Err(MetadataError::InvalidStructure); }
-                                *ordinal = branch.ordinal; *closed = branch.otherwise;
+                                if *closed
+                                    || parent != &beat.owner
+                                    || branch.ordinal != *ordinal + 1
+                                {
+                                    return Err(MetadataError::InvalidStructure);
+                                }
+                                *ordinal = branch.ordinal;
+                                *closed = branch.otherwise;
                             }
                             None => {
-                                if branch.ordinal != 0 || branch.otherwise { return Err(MetadataError::InvalidStructure); }
-                                rich_groups.insert(&branch.group_id, (beat.owner.clone(), 0, false));
+                                if branch.ordinal != 0 || branch.otherwise {
+                                    return Err(MetadataError::InvalidStructure);
+                                }
+                                rich_groups
+                                    .insert(&branch.group_id, (beat.owner.clone(), 0, false));
                             }
                         }
                         active.push((&branch.group_id, &beat.id));

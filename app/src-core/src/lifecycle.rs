@@ -444,7 +444,9 @@ impl LifecycleService {
         {
             return Err(LifecycleError::Source(SourceError::DirtySource));
         }
-        if !self.canvas_shutdown() { return Err(LifecycleError::Io); }
+        if !self.canvas_shutdown() {
+            return Err(LifecycleError::Io);
+        }
         self.runtime = runtime::RuntimeState::default();
         self.canvas = None;
         if let Some((_, _, authority)) = self.current.take() {
@@ -470,7 +472,9 @@ impl LifecycleService {
         {
             return Err(LifecycleError::Source(SourceError::DirtySource));
         }
-        if !self.canvas_shutdown() { return Err(LifecycleError::Io); }
+        if !self.canvas_shutdown() {
+            return Err(LifecycleError::Io);
+        }
         let authority = self
             .authoring
             .register_inspected_project(inspected.root.clone(), inspected.anchor)
@@ -668,66 +672,174 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
-    pub fn prompts(&self) -> Result<crate::prompts::PromptWorkspace,LifecycleError> {
-        let (authority,id)=self.authoring_context()?;self.authoring.prompts(&authority,&id).map_err(LifecycleError::Prompt)
+    pub fn prompts(&self) -> Result<crate::prompts::PromptWorkspace, LifecycleError> {
+        let (authority, id) = self.authoring_context()?;
+        self.authoring
+            .prompts(&authority, &id)
+            .map_err(LifecycleError::Prompt)
     }
-    pub fn prompts_apply(&self,request:crate::prompts::PromptRequest)->Result<crate::prompts::PromptWorkspace,LifecycleError>{
-        let(authority,id)=self.authoring_context()?;self.authoring.prompts_apply(&authority,&id,request).map_err(LifecycleError::Prompt)
+    pub fn prompts_apply(
+        &self,
+        request: crate::prompts::PromptRequest,
+    ) -> Result<crate::prompts::PromptWorkspace, LifecycleError> {
+        let (authority, id) = self.authoring_context()?;
+        self.authoring
+            .prompts_apply(&authority, &id, request)
+            .map_err(LifecycleError::Prompt)
     }
-    pub fn context_options(&self)->Result<Value,LifecycleError>{
-        let(authority,id)=self.authoring_context()?;self.authoring.context_options(&authority,&id).map_err(LifecycleError::Prompt)
+    pub fn context_options(&self) -> Result<Value, LifecycleError> {
+        let (authority, id) = self.authoring_context()?;
+        self.authoring
+            .context_options(&authority, &id)
+            .map_err(LifecycleError::Prompt)
     }
-    pub fn rewrite_prepare(&self, session: &str, request: crate::rewrite::PrepareRequest) -> Result<Value, LifecycleError> {
+    pub fn rewrite_prepare(
+        &self,
+        session: &str,
+        request: crate::rewrite::PrepareRequest,
+    ) -> Result<Value, LifecycleError> {
         self.require_session(session)?;
-        let (authority,id)=self.authoring_context()?;
-        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
-        self.authoring.rewrite_prepare(&authority,&id,session,&store,request).map_err(LifecycleError::Rewrite)
+        let (authority, id) = self.authoring_context()?;
+        let store = self
+            .read()
+            .map_err(|_| LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring
+            .rewrite_prepare(&authority, &id, session, &store, request)
+            .map_err(LifecycleError::Rewrite)
     }
-    pub fn rewrite_prepare_bound(&self, session: &str, request: crate::rewrite::PrepareRequest, destination: crate::ai_request::Destination) -> Result<Value,LifecycleError> {
-        self.require_session(session)?;let(authority,id)=self.authoring_context()?;
-        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
-        self.authoring.rewrite_prepare_bound(&authority,&id,session,&store,request,Some(destination)).map_err(LifecycleError::Rewrite)
-    }
-    pub fn rewrite_take_send(&self, session: &str, token: &str, digest: &str, cancel: crate::ai_request::Cancel) -> Result<crate::rewrite::SendCapture,LifecycleError> {
+    pub fn rewrite_prepare_bound(
+        &self,
+        session: &str,
+        request: crate::rewrite::PrepareRequest,
+        destination: crate::ai_request::Destination,
+    ) -> Result<Value, LifecycleError> {
         self.require_session(session)?;
-        let (authority,id)=self.authoring_context()?;
-        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
-        self.authoring.rewrite_take_send(&authority,&id,session,&crate::ai_credentials::token(&store),token,digest,cancel).map_err(LifecycleError::Rewrite)
+        let (authority, id) = self.authoring_context()?;
+        let store = self
+            .read()
+            .map_err(|_| LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring
+            .rewrite_prepare_bound(&authority, &id, session, &store, request, Some(destination))
+            .map_err(LifecycleError::Rewrite)
     }
-    pub fn rewrite_complete(&self, session: &str, token: &str, completion: &crate::ai_request::Completion) -> Result<Value,LifecycleError> {
+    pub fn rewrite_take_send(
+        &self,
+        session: &str,
+        token: &str,
+        digest: &str,
+        cancel: crate::ai_request::Cancel,
+    ) -> Result<crate::rewrite::SendCapture, LifecycleError> {
         self.require_session(session)?;
-        let (authority,id)=self.authoring_context()?;
-        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
-        self.authoring.rewrite_complete(&authority,&id,session,&crate::ai_credentials::token(&store),token,completion).map_err(LifecycleError::Rewrite)
+        let (authority, id) = self.authoring_context()?;
+        let store = self
+            .read()
+            .map_err(|_| LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring
+            .rewrite_take_send(
+                &authority,
+                &id,
+                session,
+                &crate::ai_credentials::token(&store),
+                token,
+                digest,
+                cancel,
+            )
+            .map_err(LifecycleError::Rewrite)
     }
-    pub fn rewrite_select(&self, session: &str, request: crate::rewrite::SelectionRequest) -> Result<Value,LifecycleError> {
+    pub fn rewrite_complete(
+        &self,
+        session: &str,
+        token: &str,
+        completion: &crate::ai_request::Completion,
+    ) -> Result<Value, LifecycleError> {
         self.require_session(session)?;
-        let (authority,id)=self.authoring_context()?;
-        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
-        self.authoring.rewrite_select(&authority,&id,session,&crate::ai_credentials::token(&store),request).map_err(LifecycleError::Rewrite)
+        let (authority, id) = self.authoring_context()?;
+        let store = self
+            .read()
+            .map_err(|_| LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring
+            .rewrite_complete(
+                &authority,
+                &id,
+                session,
+                &crate::ai_credentials::token(&store),
+                token,
+                completion,
+            )
+            .map_err(LifecycleError::Rewrite)
     }
-    pub fn rewrite_accept(&self, session: &str, request: crate::rewrite::AcceptRequest) -> Result<Value,LifecycleError> {
+    pub fn rewrite_select(
+        &self,
+        session: &str,
+        request: crate::rewrite::SelectionRequest,
+    ) -> Result<Value, LifecycleError> {
         self.require_session(session)?;
-        let (authority,id)=self.authoring_context()?;
-        let store=self.read().map_err(|_|LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
-        self.authoring.rewrite_accept(&authority,&id,session,&crate::ai_credentials::token(&store),request).map_err(LifecycleError::Rewrite)
+        let (authority, id) = self.authoring_context()?;
+        let store = self
+            .read()
+            .map_err(|_| LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring
+            .rewrite_select(
+                &authority,
+                &id,
+                session,
+                &crate::ai_credentials::token(&store),
+                request,
+            )
+            .map_err(LifecycleError::Rewrite)
     }
-    pub fn rewrite_discard(&self, session: &str) -> Result<Value,LifecycleError> {
+    pub fn rewrite_accept(
+        &self,
+        session: &str,
+        request: crate::rewrite::AcceptRequest,
+    ) -> Result<Value, LifecycleError> {
         self.require_session(session)?;
-        let (authority,_)=self.authoring_context()?;
-        self.authoring.rewrite_discard(&authority).map_err(LifecycleError::Rewrite)?;
+        let (authority, id) = self.authoring_context()?;
+        let store = self
+            .read()
+            .map_err(|_| LifecycleError::Rewrite(crate::rewrite::RewriteError::Unavailable))?;
+        self.authoring
+            .rewrite_accept(
+                &authority,
+                &id,
+                session,
+                &crate::ai_credentials::token(&store),
+                request,
+            )
+            .map_err(LifecycleError::Rewrite)
+    }
+    pub fn rewrite_discard(&self, session: &str) -> Result<Value, LifecycleError> {
+        self.require_session(session)?;
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .rewrite_discard(&authority)
+            .map_err(LifecycleError::Rewrite)?;
         Ok(serde_json::json!({"discarded":true}))
     }
-    pub fn context_preview(&self,session:&str,request:crate::prompts::PreviewRequest)->Result<Value,LifecycleError>{
-        let(authority,id)=self.authoring_context()?;self.authoring.context_preview(&authority,&id,session,request).map_err(LifecycleError::Prompt)
+    pub fn context_preview(
+        &self,
+        session: &str,
+        request: crate::prompts::PreviewRequest,
+    ) -> Result<Value, LifecycleError> {
+        let (authority, id) = self.authoring_context()?;
+        self.authoring
+            .context_preview(&authority, &id, session, request)
+            .map_err(LifecycleError::Prompt)
     }
-    pub fn references(&self) -> Result<crate::references::Workspace,LifecycleError> {
-        let (authority,project_id)=self.authoring_context()?;
-        self.authoring.references(&authority,&project_id).map_err(LifecycleError::Reference)
+    pub fn references(&self) -> Result<crate::references::Workspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .references(&authority, &project_id)
+            .map_err(LifecycleError::Reference)
     }
-    pub fn references_apply(&self,request:crate::references::ReferenceRequest) -> Result<crate::references::Workspace,LifecycleError> {
-        let (authority,project_id)=self.authoring_context()?;
-        self.authoring.references_apply(&authority,&project_id,request).map_err(LifecycleError::Reference)
+    pub fn references_apply(
+        &self,
+        request: crate::references::ReferenceRequest,
+    ) -> Result<crate::references::Workspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .references_apply(&authority, &project_id, request)
+            .map_err(LifecycleError::Reference)
     }
 
     pub fn scene_apply(
@@ -742,44 +854,94 @@ impl LifecycleService {
 
     pub fn screens_list(&self) -> Result<crate::screens::Catalog, LifecycleError> {
         let (authority, project_id) = self.authoring_context()?;
-        self.authoring.screens_list(&authority, &project_id).map_err(LifecycleError::Scene)
+        self.authoring
+            .screens_list(&authority, &project_id)
+            .map_err(LifecycleError::Scene)
     }
 
-    pub fn screens_create(&self, request: crate::screens::CreateRequest) -> Result<crate::screens::Catalog, LifecycleError> {
+    pub fn screens_create(
+        &self,
+        request: crate::screens::CreateRequest,
+    ) -> Result<crate::screens::Catalog, LifecycleError> {
         let (authority, project_id) = self.authoring_context()?;
-        self.authoring.screens_create(&authority, &project_id, request).map_err(LifecycleError::Scene)
+        self.authoring
+            .screens_create(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
     }
 
-    pub fn screens_inspect(&self, request: crate::screens::InspectRequest) -> Result<crate::screens::Document, LifecycleError> {
+    pub fn screens_inspect(
+        &self,
+        request: crate::screens::InspectRequest,
+    ) -> Result<crate::screens::Document, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
-        self.authoring.screens_inspect(&authority, request).map_err(LifecycleError::Scene)
+        self.authoring
+            .screens_inspect(&authority, request)
+            .map_err(LifecycleError::Scene)
     }
 
-    pub fn screens_canvas_plan(&self, request: crate::screens::canvas::Request) -> Result<crate::screens::canvas::Plan, LifecycleError> {
+    pub fn screens_canvas_plan(
+        &self,
+        request: crate::screens::canvas::Request,
+    ) -> Result<crate::screens::canvas::Plan, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
-        self.authoring.screens_canvas_plan(&authority, request).map_err(LifecycleError::Scene)
+        self.authoring
+            .screens_canvas_plan(&authority, request)
+            .map_err(LifecycleError::Scene)
     }
 
-    pub fn screens_canvas_render(&mut self, request: crate::screens::canvas::Request) -> Result<serde_json::Value, LifecycleError> {
+    pub fn screens_canvas_render(
+        &mut self,
+        request: crate::screens::canvas::Request,
+    ) -> Result<serde_json::Value, LifecycleError> {
         let source = request.path.clone();
         let plan = self.screens_canvas_plan(request)?;
-        if !plan.available { return Ok(serde_json::json!({"phase":"unavailable","revision":plan.revision,"limits":plan.limits,
-            "message":"This composition has unresolved source dependencies."})); }
-        if self.canvas.is_none() {
-            let Some(sdk) = discover_managed_sdk(&self.data_root).map_err(|_|LifecycleError::UnsupportedSdk)? else {
-                return Ok(serde_json::json!({"phase":"unavailable","message":"The verified project SDK is unavailable."}));
-            };
-            if self.current.as_ref().is_none_or(|(_,p,_)|p.sdk_version != sdk.version) { return Err(LifecycleError::UnsupportedSdk); }
-            self.canvas = Some(crate::screens::canvas_session::Session::new(&self.data_root,sdk).map_err(LifecycleError::Scene)?);
+        if !plan.available {
+            return Ok(
+                serde_json::json!({"phase":"unavailable","revision":plan.revision,"limits":plan.limits,
+            "message":"This composition has unresolved source dependencies."}),
+            );
         }
-        let (authority,_) = self.authoring_context()?;
-        self.canvas.as_mut().unwrap().submit(plan,source,&self.authoring,&authority).map_err(LifecycleError::Scene)
+        if self.canvas.is_none() {
+            let Some(sdk) = discover_managed_sdk(&self.data_root)
+                .map_err(|_| LifecycleError::UnsupportedSdk)?
+            else {
+                return Ok(
+                    serde_json::json!({"phase":"unavailable","message":"The verified project SDK is unavailable."}),
+                );
+            };
+            if self
+                .current
+                .as_ref()
+                .is_none_or(|(_, p, _)| p.sdk_version != sdk.version)
+            {
+                return Err(LifecycleError::UnsupportedSdk);
+            }
+            self.canvas = Some(
+                crate::screens::canvas_session::Session::new(&self.data_root, sdk)
+                    .map_err(LifecycleError::Scene)?,
+            );
+        }
+        let (authority, _) = self.authoring_context()?;
+        self.canvas
+            .as_mut()
+            .unwrap()
+            .submit(plan, source, &self.authoring, &authority)
+            .map_err(LifecycleError::Scene)
     }
-    pub fn screens_canvas_status(&self, frame: String, include_image: bool) -> Result<serde_json::Value, LifecycleError> {
-        if frame.len() != 36 { return Err(LifecycleError::Scene(SceneError::InvalidPayload)); }
-        let (authority,_) = self.authoring_context()?;
-        self.canvas.as_ref().ok_or(LifecycleError::Scene(SceneError::SourceConflict))?
-            .status(&frame,include_image,&self.authoring,&authority).map_err(LifecycleError::Scene)
+    pub fn screens_canvas_status(
+        &self,
+        frame: String,
+        include_image: bool,
+    ) -> Result<serde_json::Value, LifecycleError> {
+        if frame.len() != 36 {
+            return Err(LifecycleError::Scene(SceneError::InvalidPayload));
+        }
+        let (authority, _) = self.authoring_context()?;
+        self.canvas
+            .as_ref()
+            .ok_or(LifecycleError::Scene(SceneError::SourceConflict))?
+            .status(&frame, include_image, &self.authoring, &authority)
+            .map_err(LifecycleError::Scene)
     }
     pub fn canvas_shutdown_report(&self) -> Option<&CanvasShutdown> {
         self.last_canvas_shutdown.as_ref()
@@ -788,24 +950,41 @@ impl LifecycleService {
         if let Some(canvas) = self.canvas.as_mut() {
             let clean = canvas.shutdown();
             self.last_canvas_shutdown = Some(canvas.shutdown_report());
-            if !clean { return false; }
+            if !clean {
+                return false;
+            }
         }
-        self.canvas = None; true
+        self.canvas = None;
+        true
     }
 
-    pub fn screens_set_pixel(&self, request: crate::screens::SetPixelRequest) -> Result<crate::screens::Document, LifecycleError> {
+    pub fn screens_set_pixel(
+        &self,
+        request: crate::screens::SetPixelRequest,
+    ) -> Result<crate::screens::Document, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
-        self.authoring.screens_set_pixel(&authority, request).map_err(LifecycleError::Scene)
+        self.authoring
+            .screens_set_pixel(&authority, request)
+            .map_err(LifecycleError::Scene)
     }
-    pub fn screens_set_size(&self, request: crate::screens::SetSizeRequest) -> Result<crate::screens::Document, LifecycleError> {
+    pub fn screens_set_size(
+        &self,
+        request: crate::screens::SetSizeRequest,
+    ) -> Result<crate::screens::Document, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
-        self.authoring.screens_set_size(&authority, request).map_err(LifecycleError::Scene)
+        self.authoring
+            .screens_set_size(&authority, request)
+            .map_err(LifecycleError::Scene)
     }
-    pub fn screens_set_position(&self, request: crate::screens::SetPositionRequest) -> Result<crate::screens::Document, LifecycleError> {
+    pub fn screens_set_position(
+        &self,
+        request: crate::screens::SetPositionRequest,
+    ) -> Result<crate::screens::Document, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
-        self.authoring.screens_set_position(&authority, request).map_err(LifecycleError::Scene)
+        self.authoring
+            .screens_set_position(&authority, request)
+            .map_err(LifecycleError::Scene)
     }
-
 
     pub fn scene_recovery(&self) -> Result<crate::transaction::RecoveryReport, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
@@ -1372,7 +1551,7 @@ fn build_overlay_model(
             "game/chapters/chapter_01/scene_001.rpy".into(),
         ],
         scene_mappings: Vec::new(),
-                owned_screens: Vec::new(),
+        owned_screens: Vec::new(),
         extra: Map::new(),
     };
     (metadata, source_map, script, scene_source)

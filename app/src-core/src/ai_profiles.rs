@@ -64,7 +64,11 @@ pub struct StudioSettings {
     pub context_ceiling: u32,
     pub context_budget: u32,
     pub maximum_response: u32,
-    #[serde(default, deserialize_with = "thinking_value", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        deserialize_with = "thinking_value",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub thinking: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub model_load: Option<ModelLoadSettings>,
@@ -84,10 +88,16 @@ pub struct StudioSettings {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum GpuMemoryMode { Auto, Manual }
+pub enum GpuMemoryMode {
+    Auto,
+    Manual,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum Fit { On, Off }
+pub enum Fit {
+    On,
+    Off,
+}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ModelLoadSettings {
@@ -96,10 +106,18 @@ pub struct ModelLoadSettings {
     pub fit: Fit,
 }
 impl Default for ModelLoadSettings {
-    fn default() -> Self { Self { parallel: 1, gpu_memory_mode: GpuMemoryMode::Manual, fit: Fit::Off } }
+    fn default() -> Self {
+        Self {
+            parallel: 1,
+            gpu_memory_mode: GpuMemoryMode::Manual,
+            fit: Fit::Off,
+        }
+    }
 }
 impl ModelLoadSettings {
-    pub fn valid(&self) -> bool { (1..=64).contains(&self.parallel) }
+    pub fn valid(&self) -> bool {
+        (1..=64).contains(&self.parallel)
+    }
 }
 fn sampling_value<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
@@ -107,7 +125,9 @@ fn sampling_value<'de, D: serde::Deserializer<'de>>(
     // Missing is supported; explicit null/string/bool is not a sampling setting.
     f64::deserialize(deserializer).map(Some)
 }
-fn thinking_value<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<bool>, D::Error> {
+fn thinking_value<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<bool>, D::Error> {
     bool::deserialize(deserializer).map(Some)
 }
 
@@ -299,7 +319,9 @@ pub fn http_address_allowed(ip: IpAddr, private_http: bool) -> bool {
 }
 
 impl StudioSettings {
-    pub fn thinking(&self) -> bool { self.thinking.unwrap_or(true) }
+    pub fn thinking(&self) -> bool {
+        self.thinking.unwrap_or(true)
+    }
     pub fn temperature(&self) -> f64 {
         self.temperature.unwrap_or(1.0)
     }
@@ -316,7 +338,10 @@ impl StudioSettings {
             && (256..=2_000_000).contains(&self.context_ceiling)
             && (256..=self.context_ceiling).contains(&self.context_budget)
             && self.maximum_response > 0
-            && self.model_load.as_ref().is_none_or(ModelLoadSettings::valid)
+            && self
+                .model_load
+                .as_ref()
+                .is_none_or(ModelLoadSettings::valid)
             && self
                 .maximum_response
                 .checked_add(128)
@@ -333,11 +358,21 @@ impl StudioSettings {
 impl StudioProfile {
     pub fn compatibility_digest(&self) -> String {
         use sha2::{Digest, Sha256};
-        let bytes=serde_json::to_vec(&("studio-json-preflight-v2", &self.profile_id, &self.settings, &self.credential, self.disabled)).unwrap();
+        let bytes = serde_json::to_vec(&(
+            "studio-json-preflight-v2",
+            &self.profile_id,
+            &self.settings,
+            &self.credential,
+            self.disabled,
+        ))
+        .unwrap();
         format!("{:x}", Sha256::digest(bytes))
     }
     pub fn compatibility_ready(&self) -> bool {
-        self.credential_bound() && self.compatibility.as_ref().is_some_and(|c| c.schema_version==1 && c.configuration_digest==self.compatibility_digest())
+        self.credential_bound()
+            && self.compatibility.as_ref().is_some_and(|c| {
+                c.schema_version == 1 && c.configuration_digest == self.compatibility_digest()
+            })
     }
     pub fn credential_bound(&self) -> bool {
         !self.disabled
@@ -386,7 +421,14 @@ impl ProfileStore {
                 && profiles.insert(&p.profile_id)
                 && p.revision > 0
                 && p.settings.valid()
-                && p.compatibility.as_ref().is_none_or(|c| c.schema_version==1 && c.checked_at_unix_seconds>0 && c.configuration_digest.len()==64 && c.configuration_digest.bytes().all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase()))
+                && p.compatibility.as_ref().is_none_or(|c| {
+                    c.schema_version == 1
+                        && c.checked_at_unix_seconds > 0
+                        && c.configuration_digest.len() == 64
+                        && c.configuration_digest
+                            .bytes()
+                            .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+                })
                 && p.credential
                     .as_ref()
                     .is_none_or(|c| valid_credential(c) && entries.insert(&c.credential_id))
@@ -468,17 +510,38 @@ mod tests {
         assert!(reopened.profiles[0].settings.thinking());
         assert_eq!(serde_json::to_vec(&reopened).unwrap(), bytes);
         let p = &mut reopened.profiles[0];
-        let old_digest = format!("{:x}", Sha256::digest(serde_json::to_vec(
-            &("studio-json-preflight-v1", &p.profile_id, &p.settings, &p.credential, p.disabled)
-        ).unwrap()));
-        p.compatibility = Some(CompatibilityEvidence {schema_version:1, configuration_digest:old_digest, checked_at_unix_seconds:1});
-        assert!(!p.compatibility_ready(), "off-only preflight cannot qualify the new default");
+        let old_digest = format!(
+            "{:x}",
+            Sha256::digest(
+                serde_json::to_vec(&(
+                    "studio-json-preflight-v1",
+                    &p.profile_id,
+                    &p.settings,
+                    &p.credential,
+                    p.disabled
+                ))
+                .unwrap()
+            )
+        );
+        p.compatibility = Some(CompatibilityEvidence {
+            schema_version: 1,
+            configuration_digest: old_digest,
+            checked_at_unix_seconds: 1,
+        });
+        assert!(
+            !p.compatibility_ready(),
+            "off-only preflight cannot qualify the new default"
+        );
         for enabled in [false, true] {
             let mut value = serde_json::to_value(&old).unwrap();
             value["profiles"][0]["settings"]["thinking"] = json!(enabled);
             let saved: ProfileStore = serde_json::from_value(value).unwrap();
             assert_eq!(saved.profiles[0].settings.thinking(), enabled);
-            assert_eq!(serde_json::from_slice::<ProfileStore>(&serde_json::to_vec(&saved).unwrap()).unwrap(), saved);
+            assert_eq!(
+                serde_json::from_slice::<ProfileStore>(&serde_json::to_vec(&saved).unwrap())
+                    .unwrap(),
+                saved
+            );
         }
         for invalid in [serde_json::Value::Null, json!("true"), json!(1), json!([])] {
             let mut value = serde_json::to_value(&old).unwrap();
@@ -526,17 +589,38 @@ mod tests {
 
     #[test]
     fn model_load_legacy_roundtrip_explicit_settings_and_bounds() {
-        let legacy=fixture();
-        let bytes=serde_json::to_vec(&legacy).unwrap();
-        assert_eq!(serde_json::to_vec(&decode(&bytes).unwrap()).unwrap(),bytes);
+        let legacy = fixture();
+        let bytes = serde_json::to_vec(&legacy).unwrap();
+        assert_eq!(serde_json::to_vec(&decode(&bytes).unwrap()).unwrap(), bytes);
         assert!(!String::from_utf8(bytes).unwrap().contains("modelLoad"));
-        let mut saved=legacy.clone();
-        saved.profiles[0].settings.model_load=Some(ModelLoadSettings::default());
-        assert_eq!(decode(&serde_json::to_vec(&saved).unwrap()).unwrap(),saved);
-        for parallel in [1,64] {saved.profiles[0].settings.model_load.as_mut().unwrap().parallel=parallel;assert!(saved.valid());}
-        for parallel in [0,65] {saved.profiles[0].settings.model_load.as_mut().unwrap().parallel=parallel;assert!(!saved.valid());}
-        for value in [serde_json::json!({"parallel":1,"gpuMemoryMode":"manual","fit":"unknown"}),serde_json::json!({"parallel":true,"gpuMemoryMode":"manual","fit":"off"}),serde_json::json!({"parallel":1,"gpuMemoryMode":"manual","fit":"off","threads":4})] {
-            let mut data=serde_json::to_value(&legacy).unwrap();data["profiles"][0]["settings"]["modelLoad"]=value;
+        let mut saved = legacy.clone();
+        saved.profiles[0].settings.model_load = Some(ModelLoadSettings::default());
+        assert_eq!(decode(&serde_json::to_vec(&saved).unwrap()).unwrap(), saved);
+        for parallel in [1, 64] {
+            saved.profiles[0]
+                .settings
+                .model_load
+                .as_mut()
+                .unwrap()
+                .parallel = parallel;
+            assert!(saved.valid());
+        }
+        for parallel in [0, 65] {
+            saved.profiles[0]
+                .settings
+                .model_load
+                .as_mut()
+                .unwrap()
+                .parallel = parallel;
+            assert!(!saved.valid());
+        }
+        for value in [
+            serde_json::json!({"parallel":1,"gpuMemoryMode":"manual","fit":"unknown"}),
+            serde_json::json!({"parallel":true,"gpuMemoryMode":"manual","fit":"off"}),
+            serde_json::json!({"parallel":1,"gpuMemoryMode":"manual","fit":"off","threads":4}),
+        ] {
+            let mut data = serde_json::to_value(&legacy).unwrap();
+            data["profiles"][0]["settings"]["modelLoad"] = value;
             assert!(decode(&serde_json::to_vec(&data).unwrap()).is_err());
         }
     }

@@ -149,10 +149,7 @@ pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
 }
 
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
-    matches!(
-        payload,
-        BeatPayload::Jump { .. } | BeatPayload::Return
-    )
+    matches!(payload, BeatPayload::Jump { .. } | BeatPayload::Return)
         || matches!(payload, BeatPayload::Choice { options } if !logic::choice_may_continue(options))
 }
 
@@ -340,35 +337,56 @@ pub enum SceneCommand {
         beat: BeatPayload,
     },
     InsertCondition {
-        scene_id: String, expected_source_revision: String,
-        body: BodyRef, position: Position,
-        condition: crate::conditions::Condition, otherwise: bool,
+        scene_id: String,
+        expected_source_revision: String,
+        body: BodyRef,
+        position: Position,
+        condition: crate::conditions::Condition,
+        otherwise: bool,
     },
     UpdateConditionBranch {
-        scene_id: String, expected_source_revision: String,
-        group_id: String, branch_id: String, expected_body: BodyRef,
+        scene_id: String,
+        expected_source_revision: String,
+        group_id: String,
+        branch_id: String,
+        expected_body: BodyRef,
         condition: crate::conditions::Condition,
     },
     AddConditionBranch {
-        scene_id: String, expected_source_revision: String,
-        group_id: String, expected_body: BodyRef,
-        before_branch_id: Option<String>, condition: Option<crate::conditions::Condition>,
+        scene_id: String,
+        expected_source_revision: String,
+        group_id: String,
+        expected_body: BodyRef,
+        before_branch_id: Option<String>,
+        condition: Option<crate::conditions::Condition>,
     },
     RemoveConditionBranch {
-        scene_id: String, expected_source_revision: String,
-        group_id: String, branch_id: String, expected_body: BodyRef,
+        scene_id: String,
+        expected_source_revision: String,
+        group_id: String,
+        branch_id: String,
+        expected_body: BodyRef,
     },
     MoveStoryNode {
-        scene_id: String, expected_source_revision: String,
-        node: NodeRef, expected_body: BodyRef, body: BodyRef, position: Position,
+        scene_id: String,
+        expected_source_revision: String,
+        node: NodeRef,
+        expected_body: BodyRef,
+        body: BodyRef,
+        position: Position,
     },
     RemoveStoryNode {
-        scene_id: String, expected_source_revision: String,
-        node: NodeRef, expected_body: BodyRef,
+        scene_id: String,
+        expected_source_revision: String,
+        node: NodeRef,
+        expected_body: BodyRef,
     },
     UnwrapCondition {
-        scene_id: String, expected_source_revision: String,
-        group_id: String, branch_id: String, expected_body: BodyRef,
+        scene_id: String,
+        expected_source_revision: String,
+        group_id: String,
+        branch_id: String,
+        expected_body: BodyRef,
     },
     UpdateChildDialogue {
         scene_id: String,
@@ -527,7 +545,12 @@ impl AuthoringService {
             if let Some(old) = legacy.as_mut() {
                 // Migration may refine an old opaque child, never rewrite source.
                 // Reuse IDs only for exactly matching source ranges and bytes.
-                let (_, _, parsed) = parse_scene_mode(scene, &bytes, Some((&metadata, &authoring)), previous_schema )?;
+                let (_, _, parsed) = parse_scene_mode(
+                    scene,
+                    &bytes,
+                    Some((&metadata, &authoring)),
+                    previous_schema,
+                )?;
                 if old.source_revision != revision.sha256 {
                     return Err(SceneError::SourceConflict);
                 }
@@ -545,8 +568,8 @@ impl AuthoringService {
                     return Err(SceneError::InvalidMetadata);
                 }
                 let (_, _, parsed) = parse_scene(scene, &bytes, Some((&metadata, &authoring)))?;
-                forced = logic::refine_legacy_ids(old, &parsed , &bytes)?;
-                    old.source_revision.clear();
+                forced = logic::refine_legacy_ids(old, &parsed, &bytes)?;
+                old.source_revision.clear();
             }
             let (mapping, _) = build_mapping(
                 scene,
@@ -735,8 +758,12 @@ impl AuthoringService {
     /// patches so later targets use their stable IDs rather than stale byte offsets.
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn prepare_selected_edits(
-        &self, project: &ProjectId, project_id: &str, scene_id: &str,
-        expected: &str, replacements: Vec<(String, String)>,
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        scene_id: &str,
+        expected: &str,
+        replacements: Vec<(String, String)>,
         insertion: Option<(String, Vec<(Option<String>, String)>, Vec<String>)>,
         character: Option<(TransactionProposal, AuthoringMetadata)>,
     ) -> Result<TransactionProposal, SceneError> {
@@ -748,53 +775,111 @@ impl AuthoringService {
             // other Scenes or a Character-only selection. Guard every saved mapping
             // under the candidate authoring metadata before any durable write.
             for scene in &loaded.project.scenes {
-                let (bytes,revision)=self.scene_snapshot(project,&scene.source_path)?;
-                let mapping=loaded.source_map.scene_mappings.iter().find(|m|m.scene_id==scene.id).ok_or(SceneError::InvalidMetadata)?;
-                require_revision(&revision,&mapping.source_revision)?;
-                build_mapping(scene,&bytes,&revision.sha256,Some(mapping),&[],Some((&loaded.project,&loaded.authoring)))?;
+                let (bytes, revision) = self.scene_snapshot(project, &scene.source_path)?;
+                let mapping = loaded
+                    .source_map
+                    .scene_mappings
+                    .iter()
+                    .find(|m| m.scene_id == scene.id)
+                    .ok_or(SceneError::InvalidMetadata)?;
+                require_revision(&revision, &mapping.source_revision)?;
+                build_mapping(
+                    scene,
+                    &bytes,
+                    &revision.sha256,
+                    Some(mapping),
+                    &[],
+                    Some((&loaded.project, &loaded.authoring)),
+                )?;
             }
             mutations = proposal.mutations;
         }
         if !replacements.is_empty() || insertion.is_some() {
-            let scene = loaded.project.scenes.iter().find(|s| s.id == scene_id)
-                .cloned().ok_or(SceneError::UnknownEntity)?;
+            let scene = loaded
+                .project
+                .scenes
+                .iter()
+                .find(|s| s.id == scene_id)
+                .cloned()
+                .ok_or(SceneError::UnknownEntity)?;
             self.ensure_source_paths_clean(project, [scene.source_path.as_str()])
                 .map_err(|_| SceneError::DirtySource)?;
             let (original, revision) = self.scene_snapshot(project, &scene.source_path)?;
             require_revision(&revision, expected)?;
-            let mut mapping = loaded.source_map.scene_mappings.iter().find(|m| m.scene_id == scene_id)
-                .cloned().ok_or(SceneError::InvalidMetadata)?;
-            if mapping.source_revision != expected { return Err(SceneError::SourceConflict); }
+            let mut mapping = loaded
+                .source_map
+                .scene_mappings
+                .iter()
+                .find(|m| m.scene_id == scene_id)
+                .cloned()
+                .ok_or(SceneError::InvalidMetadata)?;
+            if mapping.source_revision != expected {
+                return Err(SceneError::SourceConflict);
+            }
             let mut bytes = original.clone();
-            let mut edits: Vec<_> = replacements.into_iter().map(|(id, encoded)|
-                (BeatEdit::PreparedDialogue { id, encoded }, None)).collect();
+            let mut edits: Vec<_> = replacements
+                .into_iter()
+                .map(|(id, encoded)| (BeatEdit::PreparedDialogue { id, encoded }, None))
+                .collect();
             if let Some((before, entries, ids)) = insertion {
                 edits.push((BeatEdit::PreparedInsertion { before, entries }, Some(ids)));
             }
             for (edit, assigned) in edits {
-                let (_, beats) = build_mapping(&scene, &bytes, &sha256(&bytes), Some(&mapping), &[],
-                    Some((&loaded.project, &loaded.authoring)))?;
+                let (_, beats) = build_mapping(
+                    &scene,
+                    &bytes,
+                    &sha256(&bytes),
+                    Some(&mapping),
+                    &[],
+                    Some((&loaded.project, &loaded.authoring)),
+                )?;
                 let (next, mut forced) = apply_beat_edit(&bytes, &beats, edit, &loaded)?;
                 if let Some(ids) = assigned {
-                    if ids.len() != forced.len() { return Err(SceneError::InvalidPayload); }
-                    for (forced, id) in forced.iter_mut().zip(ids) { forced.2 = id; }
+                    if ids.len() != forced.len() {
+                        return Err(SceneError::InvalidPayload);
+                    }
+                    for (forced, id) in forced.iter_mut().zip(ids) {
+                        forced.2 = id;
+                    }
                 }
-                let (next_map, _) = build_mapping(&scene, &next, &sha256(&next), Some(&mapping), &forced,
-                    Some((&loaded.project, &loaded.authoring)))?;
+                let (next_map, _) = build_mapping(
+                    &scene,
+                    &next,
+                    &sha256(&next),
+                    Some(&mapping),
+                    &forced,
+                    Some((&loaded.project, &loaded.authoring)),
+                )?;
                 bytes = next;
                 mapping = next_map;
             }
-            *loaded.source_map.scene_mappings.iter_mut().find(|m| m.scene_id == scene_id)
+            *loaded
+                .source_map
+                .scene_mappings
+                .iter_mut()
+                .find(|m| m.scene_id == scene_id)
                 .ok_or(SceneError::InvalidMetadata)? = mapping;
-            mutations.push(replace_mutation(&scene.source_path, original, revision, bytes)?);
-            mutations.push(replace_mutation(SOURCE_MAP_PATH, loaded.source_map_bytes,
-                loaded.source_map_revision, source_map_bytes(&loaded.source_map)?)?);
+            mutations.push(replace_mutation(
+                &scene.source_path,
+                original,
+                revision,
+                bytes,
+            )?);
+            mutations.push(replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                source_map_bytes(&loaded.source_map)?,
+            )?);
         }
         let mut paths = std::collections::BTreeSet::new();
         if mutations.is_empty() || mutations.iter().any(|m| !paths.insert(m.path.as_str())) {
             return Err(SceneError::InvalidPayload);
         }
-        Ok(TransactionProposal { mutations, intent: TransactionIntent::Edit })
+        Ok(TransactionProposal {
+            mutations,
+            intent: TransactionIntent::Edit,
+        })
     }
 
     /// Static creation candidate: no directory/source/metadata writes during review.
@@ -1066,38 +1151,164 @@ impl AuthoringService {
                 },
             ),
             SceneCommand::InsertBodyBeat {
-                scene_id, expected_source_revision, body, position, beat,
+                scene_id,
+                expected_source_revision,
+                body,
+                position,
+                beat,
             } => self.body_beat_proposal(
-                project, loaded, &scene_id, &expected_source_revision,
-                structure::BodyEdit::Insert { body, position, payload: beat },
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Insert {
+                    body,
+                    position,
+                    payload: beat,
+                },
             ),
             SceneCommand::UpdateBodyBeat {
-                scene_id, expected_source_revision, beat_id, expected_body, beat,
+                scene_id,
+                expected_source_revision,
+                beat_id,
+                expected_body,
+                beat,
             } => self.body_beat_proposal(
-                project, loaded, &scene_id, &expected_source_revision,
-                structure::BodyEdit::Update { id: beat_id, body: expected_body, payload: beat },
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Update {
+                    id: beat_id,
+                    body: expected_body,
+                    payload: beat,
+                },
             ),
-            SceneCommand::InsertCondition { scene_id, expected_source_revision, body, position, condition, otherwise } =>
-                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
-                    structure::BodyEdit::Structural(structure::StructuralEdit::InsertCondition { body, position, condition, otherwise })),
-            SceneCommand::UpdateConditionBranch { scene_id, expected_source_revision, group_id, branch_id, expected_body, condition } =>
-                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
-                    structure::BodyEdit::Structural(structure::StructuralEdit::UpdateBranch { group_id, branch_id, expected_body, condition })),
-            SceneCommand::AddConditionBranch { scene_id, expected_source_revision, group_id, expected_body, before_branch_id, condition } =>
-                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
-                    structure::BodyEdit::Structural(structure::StructuralEdit::AddBranch { group_id, expected_body, before_branch_id, condition })),
-            SceneCommand::RemoveConditionBranch { scene_id, expected_source_revision, group_id, branch_id, expected_body } =>
-                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
-                    structure::BodyEdit::Structural(structure::StructuralEdit::RemoveBranch { group_id, branch_id, expected_body })),
-            SceneCommand::MoveStoryNode { scene_id, expected_source_revision, node, expected_body, body, position } =>
-                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
-                    structure::BodyEdit::Structural(structure::StructuralEdit::Move { node, expected_body, body, position })),
-            SceneCommand::RemoveStoryNode { scene_id, expected_source_revision, node, expected_body } =>
-                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
-                    structure::BodyEdit::Structural(structure::StructuralEdit::Remove { node, expected_body })),
-            SceneCommand::UnwrapCondition { scene_id, expected_source_revision, group_id, branch_id, expected_body } =>
-                self.body_beat_proposal(project, loaded, &scene_id, &expected_source_revision,
-                    structure::BodyEdit::Structural(structure::StructuralEdit::Unwrap { group_id, branch_id, expected_body })),
+            SceneCommand::InsertCondition {
+                scene_id,
+                expected_source_revision,
+                body,
+                position,
+                condition,
+                otherwise,
+            } => self.body_beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Structural(structure::StructuralEdit::InsertCondition {
+                    body,
+                    position,
+                    condition,
+                    otherwise,
+                }),
+            ),
+            SceneCommand::UpdateConditionBranch {
+                scene_id,
+                expected_source_revision,
+                group_id,
+                branch_id,
+                expected_body,
+                condition,
+            } => self.body_beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Structural(structure::StructuralEdit::UpdateBranch {
+                    group_id,
+                    branch_id,
+                    expected_body,
+                    condition,
+                }),
+            ),
+            SceneCommand::AddConditionBranch {
+                scene_id,
+                expected_source_revision,
+                group_id,
+                expected_body,
+                before_branch_id,
+                condition,
+            } => self.body_beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Structural(structure::StructuralEdit::AddBranch {
+                    group_id,
+                    expected_body,
+                    before_branch_id,
+                    condition,
+                }),
+            ),
+            SceneCommand::RemoveConditionBranch {
+                scene_id,
+                expected_source_revision,
+                group_id,
+                branch_id,
+                expected_body,
+            } => self.body_beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Structural(structure::StructuralEdit::RemoveBranch {
+                    group_id,
+                    branch_id,
+                    expected_body,
+                }),
+            ),
+            SceneCommand::MoveStoryNode {
+                scene_id,
+                expected_source_revision,
+                node,
+                expected_body,
+                body,
+                position,
+            } => self.body_beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Structural(structure::StructuralEdit::Move {
+                    node,
+                    expected_body,
+                    body,
+                    position,
+                }),
+            ),
+            SceneCommand::RemoveStoryNode {
+                scene_id,
+                expected_source_revision,
+                node,
+                expected_body,
+            } => self.body_beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Structural(structure::StructuralEdit::Remove {
+                    node,
+                    expected_body,
+                }),
+            ),
+            SceneCommand::UnwrapCondition {
+                scene_id,
+                expected_source_revision,
+                group_id,
+                branch_id,
+                expected_body,
+            } => self.body_beat_proposal(
+                project,
+                loaded,
+                &scene_id,
+                &expected_source_revision,
+                structure::BodyEdit::Structural(structure::StructuralEdit::Unwrap {
+                    group_id,
+                    branch_id,
+                    expected_body,
+                }),
+            ),
             SceneCommand::UpdateChildDialogue {
                 scene_id,
                 expected_source_revision,
@@ -1351,9 +1562,12 @@ impl AuthoringService {
             &loaded,
         )?;
         self.validate_candidate_transfers(
-            project, &loaded,
-            &[(source_scene_id, proposed_source.as_slice()),
-              (destination.id.as_str(), destination_bytes.as_slice())],
+            project,
+            &loaded,
+            &[
+                (source_scene_id, proposed_source.as_slice()),
+                (destination.id.as_str(), destination_bytes.as_slice()),
+            ],
         )?;
         let proposed_source_revision = sha256(&proposed_source);
         let (source_mapping, _) = build_mapping(
@@ -1659,7 +1873,9 @@ impl AuthoringService {
         logic::validate_conditional_completion(&proposed_source, &scene, &loaded)?;
         if transfer_edit {
             self.validate_candidate_transfers(
-                project, &loaded, &[(scene_id, proposed_source.as_slice())],
+                project,
+                &loaded,
+                &[(scene_id, proposed_source.as_slice())],
             )?;
         }
         let proposed_revision = sha256(&proposed_source);
@@ -2031,7 +2247,11 @@ fn apply_beat_edit(
     if beats
         .iter()
         .take(beats.len().saturating_sub(1))
-        .any(|beat| is_terminal_payload(&beat.payload) && beat.owner.is_none() && beat.conditional_branch.is_none())
+        .any(|beat| {
+            is_terminal_payload(&beat.payload)
+                && beat.owner.is_none()
+                && beat.conditional_branch.is_none()
+        })
     {
         return Err(SceneError::InvariantBlocked);
     }
@@ -2820,41 +3040,74 @@ fn condition_header(body: &str, indent: usize, keyword: &str) -> Option<String> 
     let mut escaped = false;
     let mut end = rest.len();
     for (offset, ch) in rest.char_indices() {
-        if escaped { escaped = false; continue; }
-        if ch == '\\' && quoted.is_some() { escaped = true; continue; }
-        if quoted == Some(ch) { quoted = None; }
-        else if quoted.is_none() && (ch == '\'' || ch == '"') { quoted = Some(ch); }
-        else if quoted.is_none() && ch == '#' { end = offset; break; }
+        if escaped {
+            escaped = false;
+            continue;
+        }
+        if ch == '\\' && quoted.is_some() {
+            escaped = true;
+            continue;
+        }
+        if quoted == Some(ch) {
+            quoted = None;
+        } else if quoted.is_none() && (ch == '\'' || ch == '"') {
+            quoted = Some(ch);
+        } else if quoted.is_none() && ch == '#' {
+            end = offset;
+            break;
+        }
     }
     let expression = rest[..end].trim_end().strip_suffix(':')?.trim();
     (!expression.is_empty() || keyword == "else").then(|| expression.into())
 }
-fn indentation(body: &str) -> usize { body.bytes().take_while(|b| *b == b' ').count() }
+fn indentation(body: &str) -> usize {
+    body.bytes().take_while(|b| *b == b' ').count()
+}
 fn parse_condition_group(
-    lines: &[(usize, usize, &str)], index: usize,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>, indent: usize,
-    parent: Option<(usize, usize)>, depth: usize, lexical: &HashSet<usize>,
-rich_logic: bool,
+    lines: &[(usize, usize, &str)],
+    index: usize,
+    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    indent: usize,
+    parent: Option<(usize, usize)>,
+    depth: usize,
+    lexical: &HashSet<usize>,
+    rich_logic: bool,
 ) -> Option<(usize, Vec<ParsedBeat>)> {
-    if depth >= MAX_CONDITION_NESTING || !lexical.contains(&lines[index].0) { return None; }
+    if depth >= MAX_CONDITION_NESTING || !lexical.contains(&lines[index].0) {
+        return None;
+    }
     let first = condition_header(lines[index].2, indent, "if ")?;
     let authoring = loaded?.1;
     let group_start = lines[index].0;
-    let legacy_variable = authoring.variables.iter().find(|v| v.technical_name == first && v.variable_type == VariableType::Bool).map(|v| v.id.clone()).unwrap_or_default();
+    let legacy_variable = authoring
+        .variables
+        .iter()
+        .find(|v| v.technical_name == first && v.variable_type == VariableType::Bool)
+        .map(|v| v.id.clone())
+        .unwrap_or_default();
     let mut next = index;
     let mut result = Vec::new();
     let mut ordinal = 0;
     loop {
         let (start, end, body) = lines[next];
-        let (otherwise, expression) = if next == index { (false, first.clone()) }
-            else if let Some(expression) = condition_header(body, indent, "elif ") { (false, expression) }
-            else if condition_header(body, indent, "else").as_deref() == Some("") { (true, String::new()) }
-            else { break; };
+        let (otherwise, expression) = if next == index {
+            (false, first.clone())
+        } else if let Some(expression) = condition_header(body, indent, "elif ") {
+            (false, expression)
+        } else if condition_header(body, indent, "else").as_deref() == Some("") {
+            (true, String::new())
+        } else {
+            break;
+        };
         let branch_start = start;
         let mut header = custom(start, end, body);
         header.nesting = Some(ParsedNesting::Branch {
-            group_start, variable_id: legacy_variable.clone(), otherwise, ordinal,
-            condition: (!otherwise).then(|| crate::conditions::parse(&expression, authoring)), parent,
+            group_start,
+            variable_id: legacy_variable.clone(),
+            otherwise,
+            ordinal,
+            condition: (!otherwise).then(|| crate::conditions::parse(&expression, authoring)),
+            parent,
         });
         result.push(header);
         next += 1;
@@ -2863,14 +3116,30 @@ rich_logic: bool,
             let (start, end, body) = lines[next];
             if body.trim().is_empty() || body.trim_start().starts_with('#') {
                 let trivia = custom(start, end, body);
-                result.push(trivia); next += 1; continue;
+                result.push(trivia);
+                next += 1;
+                continue;
             }
-            if indentation(body) <= indent { break; }
-            if indentation(body) != indent + 4 || body.starts_with('\t') { return None; }
-            if let Some((after, nested)) = parse_condition_group(lines, next, loaded, indent + 4, Some((group_start, branch_start)), depth + 1, lexical,
+            if indentation(body) <= indent {
+                break;
+            }
+            if indentation(body) != indent + 4 || body.starts_with('\t') {
+                return None;
+            }
+            if let Some((after, nested)) = parse_condition_group(
+                lines,
+                next,
+                loaded,
+                indent + 4,
+                Some((group_start, branch_start)),
+                depth + 1,
+                lexical,
                 rich_logic,
             ) {
-                result.extend(nested); next = after; statements += 1; continue;
+                result.extend(nested);
+                next = after;
+                statements += 1;
+                continue;
             }
             if rich_logic {
                 if let Some((after, mut menu)) =
@@ -2887,28 +3156,60 @@ rich_logic: bool,
                 }
             }
             let normalized = format!("    {}", &body[indent + 4..]);
-            let payload = if !lexical.contains(&start) { None } else if let Some((_, quote_end)) = dialogue_quotes(&normalized) {
+            let payload = if !lexical.contains(&start) {
+                None
+            } else if let Some((_, quote_end)) = dialogue_quotes(&normalized) {
                 let suffix = normalized[quote_end + 1..].trim();
-                if suffix.is_empty() || suffix.starts_with('#') { parse_line_version(&normalized[..quote_end + 1], loaded, rich_logic) } else { None }
-            } else { parse_line_version(&normalized, loaded, rich_logic) };
-            let payload = payload.unwrap_or_else(|| BeatPayload::CustomCode { source: body.into(), reason: "Unsupported or runtime-dependent Ren'Py source".into() });
+                if suffix.is_empty() || suffix.starts_with('#') {
+                    parse_line_version(&normalized[..quote_end + 1], loaded, rich_logic)
+                } else {
+                    None
+                }
+            } else {
+                parse_line_version(&normalized, loaded, rich_logic)
+            };
+            let payload = payload.unwrap_or_else(|| BeatPayload::CustomCode {
+                source: body.into(),
+                reason: "Unsupported or runtime-dependent Ren'Py source".into(),
+            });
             // Unsupported indented blocks are opaque as a unit. In particular, Python
             // internals must never become editable dialogue or conditional children.
             let mut after = next + 1;
             if matches!(payload, BeatPayload::CustomCode { .. }) {
-                while after < lines.len() && (!lexical.contains(&lines[after].0) || indentation(lines[after].2) > indent + 4) { after += 1; }
+                while after < lines.len()
+                    && (!lexical.contains(&lines[after].0)
+                        || indentation(lines[after].2) > indent + 4)
+                {
+                    after += 1;
+                }
             }
-            result.push(ParsedBeat { start, end, payload, nesting: Some(ParsedNesting::Child { group_start, branch_start }) });
+            result.push(ParsedBeat {
+                start,
+                end,
+                payload,
+                nesting: Some(ParsedNesting::Child {
+                    group_start,
+                    branch_start,
+                }),
+            });
             for (start, end, body) in &lines[next + 1..after] {
                 let mut opaque = custom(*start, *end, body);
-                opaque.nesting = Some(ParsedNesting::Child { group_start, branch_start });
+                opaque.nesting = Some(ParsedNesting::Child {
+                    group_start,
+                    branch_start,
+                });
                 result.push(opaque);
             }
-            next = after; statements += 1;
+            next = after;
+            statements += 1;
         }
-        if statements == 0 { return None; }
+        if statements == 0 {
+            return None;
+        }
         ordinal += 1;
-        if otherwise || next >= lines.len() { break; }
+        if otherwise || next >= lines.len() {
+            break;
+        }
     }
     Some((next, result))
 }
@@ -2935,8 +3236,14 @@ fn parse_scene_mode(
         .into_iter()
         .map(|(start, end, body)| (start + bom, end + bom, body))
         .collect::<Vec<_>>();
-    let lexical: HashSet<usize> = if legacy { HashSet::new() } else {
-        crate::authoring::lexical_lines(&bytes[bom..], false).map_err(|_| SceneError::UnsupportedSource)?.into_iter().map(|(start, _)| start + bom).collect()
+    let lexical: HashSet<usize> = if legacy {
+        HashSet::new()
+    } else {
+        crate::authoring::lexical_lines(&bytes[bom..], false)
+            .map_err(|_| SceneError::UnsupportedSource)?
+            .into_iter()
+            .map(|(start, _)| start + bom)
+            .collect()
     };
     let wanted = format!("label {}:", scene.technical_label);
     let labels: Vec<_> = lines
@@ -2965,7 +3272,11 @@ fn parse_scene_mode(
         if body.starts_with("label ") && body.ends_with(':') {
             return Err(SceneError::UnsupportedSource);
         }
-        if let Some((next, nested)) = if legacy { parse_bool_group(&lines, index, loaded) } else { parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical, rich_logic) } {
+        if let Some((next, nested)) = if legacy {
+            parse_bool_group(&lines, index, loaded)
+        } else {
+            parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical, rich_logic)
+        } {
             beats.extend(nested);
             index = next;
             continue;
@@ -2985,7 +3296,12 @@ fn parse_scene_mode(
             while index + 1 < lines.len() {
                 let (_, option_end, option_line) = lines[index];
                 let (_, jump_end, jump_line) = lines[index + 1];
-                if !legacy && (!lexical.contains(&lines[index].0) || !lexical.contains(&lines[index + 1].0)) { break; }
+                if !legacy
+                    && (!lexical.contains(&lines[index].0)
+                        || !lexical.contains(&lines[index + 1].0))
+                {
+                    break;
+                }
                 let Some(option_text) = choice_option_text(option_line) else {
                     break;
                 };
@@ -3006,7 +3322,7 @@ fn parse_scene_mode(
                 options.push(ChoiceOption {
                     text: option_text,
                     destination_scene_id,
-                condition: None,
+                    condition: None,
                 });
                 menu_end = jump_end.max(option_end);
                 index += 2;
@@ -3023,7 +3339,12 @@ fn parse_scene_mode(
             beats.push(custom(start, end, body));
             continue;
         }
-        let payload = (if legacy || lexical.contains(&start) { parse_line_version(body, loaded, rich_logic) } else { None }).unwrap_or_else(|| BeatPayload::CustomCode {
+        let payload = (if legacy || lexical.contains(&start) {
+            parse_line_version(body, loaded, rich_logic)
+        } else {
+            None
+        })
+        .unwrap_or_else(|| BeatPayload::CustomCode {
             source: body.into(),
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         });
@@ -3331,12 +3652,10 @@ pub(crate) fn build_mapping(
         .collect();
     let mut groups = HashMap::new();
     for (start, nested) in &nesting {
-        if let Some(ParsedNesting::Branch {
-            group_start,
-            ..
-        }) = nested
-        {
-            if group_start != start { continue; }
+        if let Some(ParsedNesting::Branch { group_start, .. }) = nested {
+            if group_start != start {
+                continue;
+            }
             let header_id = &ids_by_start[start];
             let group_id = previous
                 .and_then(|p| p.beats.iter().find(|m| &m.id == header_id))
@@ -3360,7 +3679,10 @@ pub(crate) fn build_mapping(
                 parent,
             }) => {
                 if let Some((group, branch)) = parent {
-                    let owner = crate::metadata::BeatOwner { group_id: groups[&group].clone(), branch_id: ids_by_start[&branch].clone() };
+                    let owner = crate::metadata::BeatOwner {
+                        group_id: groups[&group].clone(),
+                        branch_id: ids_by_start[&branch].clone(),
+                    };
                     mapped.owner = Some(owner.clone());
                     beat.owner = Some(owner);
                 }
@@ -3843,7 +4165,10 @@ pub(crate) fn continue_anchor(beats: &[SceneBeat], before: &str) -> Result<usize
         return Err(SceneError::InvariantBlocked);
     }
     for b in beats[index.saturating_sub(1)..=index].iter() {
-        if b.protected || b.owner.is_some() || b.conditional_branch.is_some() || logic_boundary(&b.payload)
+        if b.protected
+            || b.owner.is_some()
+            || b.conditional_branch.is_some()
+            || logic_boundary(&b.payload)
         {
             return Err(SceneError::OpaqueBoundary);
         }
@@ -3866,24 +4191,36 @@ fn conditional_extents(beats: &[SceneBeat]) -> HashMap<&str, (usize, usize)> {
     for beat in beats {
         if let Some(branch) = &beat.conditional_branch {
             if branch.ordinal == 0 {
-                groups.insert(&branch.group_id, (beat.byte_start as usize, beat.byte_end as usize));
+                groups.insert(
+                    &branch.group_id,
+                    (beat.byte_start as usize, beat.byte_end as usize),
+                );
             }
         }
     }
     for beat in beats {
         if let Some(branch) = &beat.conditional_branch {
-            if let Some((_, end)) = groups.get_mut(branch.group_id.as_str()) { *end = (*end).max(beat.byte_end as usize); }
+            if let Some((_, end)) = groups.get_mut(branch.group_id.as_str()) {
+                *end = (*end).max(beat.byte_end as usize);
+            }
         }
         // A nested group's descendants also belong to every ancestor's source
         // interval, even when its last child belongs to a deeper immediate owner.
         let mut owner = beat.owner.as_ref();
         for _ in 0..MAX_CONDITION_NESTING {
-            let Some(parent) = owner else { break; };
-            if let Some((_, end)) = groups.get_mut(parent.group_id.as_str()) { *end = (*end).max(beat.byte_end as usize); }
-            owner = by_id.get(parent.branch_id.as_str()).and_then(|header| header.owner.as_ref());
+            let Some(parent) = owner else {
+                break;
+            };
+            if let Some((_, end)) = groups.get_mut(parent.group_id.as_str()) {
+                *end = (*end).max(beat.byte_end as usize);
+            }
+            owner = by_id
+                .get(parent.branch_id.as_str())
+                .and_then(|header| header.owner.as_ref());
         }
     }
-    groups}
+    groups
+}
 
 fn boundary_is_opaque(beats: &[SceneBeat], insertion: usize) -> bool {
     beats.iter().any(|beat| {

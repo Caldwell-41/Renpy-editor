@@ -170,22 +170,47 @@ pub fn replace_tracked(
 /// Publish a completed draft's settings and verified key together. Durable cleanup
 /// ownership precedes native storage; existing profiles stay intact until publication.
 pub fn save_connection(
-    records: &impl Records, secrets: &impl Secrets, expected: &str,
-    id: Option<&str>, mut settings: StudioSettings, key: &str,
+    records: &impl Records,
+    secrets: &impl Secrets,
+    expected: &str,
+    id: Option<&str>,
+    mut settings: StudioSettings,
+    key: &str,
 ) -> Result<(String, SaveOutcome)> {
     settings.endpoint = canonical_endpoint(&settings.endpoint, settings.private_http)?.0;
-    if !settings.valid() { return Err("Invalid Studio settings or token limits."); }
+    if !settings.valid() {
+        return Err("Invalid Studio settings or token limits.");
+    }
     let old = checked(records, expected)?;
-    if id.is_some_and(|id| !old.profiles.iter().any(|p|p.profile_id==id)) { return Err("Profile missing."); }
-    if id.is_none() && old.profiles.len()>=32 { return Err("Too many profiles."); }
-    let id=id.map(str::to_owned).unwrap_or_else(||uuid::Uuid::new_v4().to_string());
-    let outcome=replace_connection_tracked(records,secrets,expected,&id,key,&mut None,Some(settings))?;
-    Ok((id,outcome))
+    if id.is_some_and(|id| !old.profiles.iter().any(|p| p.profile_id == id)) {
+        return Err("Profile missing.");
+    }
+    if id.is_none() && old.profiles.len() >= 32 {
+        return Err("Too many profiles.");
+    }
+    let id = id
+        .map(str::to_owned)
+        .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+    let outcome = replace_connection_tracked(
+        records,
+        secrets,
+        expected,
+        &id,
+        key,
+        &mut None,
+        Some(settings),
+    )?;
+    Ok((id, outcome))
 }
 
 fn replace_connection_tracked(
-    records: &impl Records, secrets: &impl Secrets, expected: &str, id: &str,
-    key: &str, candidate: &mut Option<OwnedCredential>, settings: Option<StudioSettings>,
+    records: &impl Records,
+    secrets: &impl Secrets,
+    expected: &str,
+    id: &str,
+    key: &str,
+    candidate: &mut Option<OwnedCredential>,
+    settings: Option<StudioSettings>,
 ) -> Result<SaveOutcome> {
     if !valid_key(key) {
         return Err("Credential must be 1–4096 printable non-space ASCII characters.");
@@ -196,10 +221,22 @@ fn replace_connection_tracked(
         .iter()
         .find(|p| p.profile_id == id)
         .cloned()
-        .or_else(||settings.as_ref().map(|s|StudioProfile {profile_id:id.into(),revision:0,settings:s.clone(),credential:None,disabled:false,compatibility:None}))
+        .or_else(|| {
+            settings.as_ref().map(|s| StudioProfile {
+                profile_id: id.into(),
+                revision: 0,
+                settings: s.clone(),
+                credential: None,
+                disabled: false,
+                compatibility: None,
+            })
+        })
         .ok_or("Profile missing.")?;
-    if let Some(settings)=settings {profile.settings=settings;profile.compatibility=None;}
-    let p=&profile;
+    if let Some(settings) = settings {
+        profile.settings = settings;
+        profile.compatibility = None;
+    }
+    let p = &profile;
     let credential = OwnedCredential {
         credential_id: uuid::Uuid::new_v4().to_string(),
         service: secrets.service(),
@@ -261,7 +298,11 @@ fn replace_connection_tracked(
     }
     profile.disabled = false;
     bump(&mut profile)?;
-    if let Some(existing)=next.profiles.iter_mut().find(|p|p.profile_id==id) {*existing=profile;} else {next.profiles.push(profile);}
+    if let Some(existing) = next.profiles.iter_mut().find(|p| p.profile_id == id) {
+        *existing = profile;
+    } else {
+        next.profiles.push(profile);
+    }
     advance(&mut next)?;
     if let Err(error) = publish(records, &next, &stage) {
         // Re-read and cleanup only a still-staged, inactive identity. Read failure
@@ -423,15 +464,48 @@ impl CredentialEntry {
 mod tests;
 
 /// Native verified preflight publication. Renderer cannot supply an evidence record.
-pub fn clear_compatibility(records: &impl Records, expected: &str, id: &str) -> Result<ProfileStore> {
-    let old=checked(records,expected)?;let mut next=old.clone();
-    let p=next.profiles.iter_mut().find(|p|p.profile_id==id).ok_or("Profile missing.")?;
-    if p.compatibility.take().is_some(){bump(p)?;advance(&mut next)?;publish(records,&next,&old)?;}
+pub fn clear_compatibility(
+    records: &impl Records,
+    expected: &str,
+    id: &str,
+) -> Result<ProfileStore> {
+    let old = checked(records, expected)?;
+    let mut next = old.clone();
+    let p = next
+        .profiles
+        .iter_mut()
+        .find(|p| p.profile_id == id)
+        .ok_or("Profile missing.")?;
+    if p.compatibility.take().is_some() {
+        bump(p)?;
+        advance(&mut next)?;
+        publish(records, &next, &old)?;
+    }
     Ok(next)
 }
-pub fn record_compatibility(records: &impl Records, expected: &str, id: &str) -> Result<ProfileStore> {
-    let old=checked(records,expected)?;let mut next=old.clone();
-    let p=next.profiles.iter_mut().find(|p|p.profile_id==id).filter(|p|p.credential_bound()).ok_or("Profile unavailable.")?;
-    p.compatibility=Some(CompatibilityEvidence {schema_version:1,configuration_digest:p.compatibility_digest(),checked_at_unix_seconds:std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|_|"Clock unavailable.")?.as_secs()});
-    bump(p)?;advance(&mut next)?;publish(records,&next,&old)?;Ok(next)
+pub fn record_compatibility(
+    records: &impl Records,
+    expected: &str,
+    id: &str,
+) -> Result<ProfileStore> {
+    let old = checked(records, expected)?;
+    let mut next = old.clone();
+    let p = next
+        .profiles
+        .iter_mut()
+        .find(|p| p.profile_id == id)
+        .filter(|p| p.credential_bound())
+        .ok_or("Profile unavailable.")?;
+    p.compatibility = Some(CompatibilityEvidence {
+        schema_version: 1,
+        configuration_digest: p.compatibility_digest(),
+        checked_at_unix_seconds: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|_| "Clock unavailable.")?
+            .as_secs(),
+    });
+    bump(p)?;
+    advance(&mut next)?;
+    publish(records, &next, &old)?;
+    Ok(next)
 }

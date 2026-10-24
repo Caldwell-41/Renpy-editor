@@ -5,21 +5,57 @@ use crate::transaction::TransactionService;
 fn runtime_preview_inputs_release_context_before_scratch_cleanup() {
     let temp = tempfile::tempdir().unwrap();
     let root = fs::canonicalize(temp.path()).unwrap();
-    let source = root.join("source"); let data = root.join("profile");
-    fs::create_dir_all(source.join("game/ui")).unwrap(); fs::create_dir(&data).unwrap();
-    fs::write(source.join("game/ui/help.rpy"), include_bytes!("../../../../../tests/fixtures/phase-3b-screens/help.rpy")).unwrap();
+    let source = root.join("source");
+    let data = root.join("profile");
+    fs::create_dir_all(source.join("game/ui")).unwrap();
+    fs::create_dir(&data).unwrap();
+    fs::write(
+        source.join("game/ui/help.rpy"),
+        include_bytes!("../../../../../tests/fixtures/phase-3b-screens/help.rpy"),
+    )
+    .unwrap();
     let authoring = crate::authoring::AuthoringService::default();
-    let project = authoring.transactions.register_trusted_project(&source).unwrap();
+    let project = authoring
+        .transactions
+        .register_trusted_project(&source)
+        .unwrap();
     let (_, manifest) = authoring.transactions.execution_snapshot(&project).unwrap();
-    let document = authoring.screens_inspect(&project, crate::screens::InspectRequest { path: "game/ui/help.rpy".into() }).unwrap();
-    let purpose = crate::scratch_preview::PreviewPurpose::Screen { path: document.path, screen_name: "loomlight_help".into(), expected_revision: document.revision };
-    let scratch = crate::scratch_preview::ScratchPreview::prepare(&authoring, &project, &data, &manifest, &purpose).unwrap();
-    let anchor = scratch.anchor().clone(); let path = anchor.path().to_path_buf();
+    let document = authoring
+        .screens_inspect(
+            &project,
+            crate::screens::InspectRequest {
+                path: "game/ui/help.rpy".into(),
+            },
+        )
+        .unwrap();
+    let purpose = crate::scratch_preview::PreviewPurpose::Screen {
+        path: document.path,
+        screen_name: "loomlight_help".into(),
+        expected_revision: document.revision,
+    };
+    let scratch = crate::scratch_preview::ScratchPreview::prepare(
+        &authoring, &project, &data, &manifest, &purpose,
+    )
+    .unwrap();
+    let anchor = scratch.anchor().clone();
+    let path = anchor.path().to_path_buf();
     // This value is only dropped. No SDK inspection, process or test double executes.
-    let sdk = ValidatedSdk { root, version: "unused".into(), identity: crate::renpy::SdkFileIdentity { a: 0, b: 0 }, launcher_fingerprint: String::new(), template_fingerprint: String::new() };
-    let inputs = RuntimeInputs { context: Some((sdk, anchor, Default::default())), scratch: Some(scratch) };
+    let sdk = ValidatedSdk {
+        root,
+        version: "unused".into(),
+        identity: crate::renpy::SdkFileIdentity { a: 0, b: 0 },
+        launcher_fingerprint: String::new(),
+        template_fingerprint: String::new(),
+    };
+    let inputs = RuntimeInputs {
+        context: Some((sdk, anchor, Default::default())),
+        scratch: Some(scratch),
+    };
     drop(inputs);
-    assert!(!path.exists(), "context and job handles must close before owned removal");
+    assert!(
+        !path.exists(),
+        "context and job handles must close before owned removal"
+    );
     assert_eq!(fs::read_dir(data).unwrap().count(), 0);
 }
 

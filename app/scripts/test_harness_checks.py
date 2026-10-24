@@ -13,6 +13,23 @@ spec.loader.exec_module(module)
 
 
 class HarnessChecks(unittest.TestCase):
+    def test_default_discovery_keeps_offline_checks_without_extra_optional_skips(self):
+        def cases(suite):
+            for item in suite:
+                if isinstance(item, unittest.TestSuite):
+                    yield from cases(item)
+                else:
+                    yield item
+
+        selected = list(cases(unittest.defaultTestLoader.discover(
+            str(module.APP / 'scripts'), pattern='test_*.py')))
+        self.assertTrue(any(case.__class__.__module__ == 'test_canvas_measurement' for case in selected))
+        skipped = {case.id() for case in selected
+                   if getattr(case.__class__, '__unittest_skip__', False)
+                   or getattr(getattr(case, case._testMethodName), '__unittest_skip__', False)}
+        allowed = module.gate.MAC_SNAPSHOT_TESTS | module.gate.WINDOWS_NATIVE_TESTS
+        self.assertEqual(skipped - allowed, set())
+
     def test_failure_timeout_and_spawn_failure_keep_logs_and_do_not_hide_later_results(self):
         responses = iter((subprocess.CompletedProcess([], 1, 'public failed assertion\n', ''),
                           subprocess.TimeoutExpired([], 180, output=b'partial output', stderr=b'partial error'),
