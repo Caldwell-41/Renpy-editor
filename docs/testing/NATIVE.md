@@ -134,6 +134,12 @@ acceptance stays historical; do not automatically reopen the whole session.
 
 ## Standalone Mac canvas recorder
 
+The #36 Mac timing effort is [closed by user acceptance for this release](../tasks/evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24).
+Its numerical target remains unverified and is waived as an acceptance gate.
+The procedure below is retained reference, not scheduled work or a release blocker.
+Use it only after reopening under the recorded condition; missing numerical proof
+alone does not trigger testing, allowance requests or reminders.
+
 `app/scripts/canvas-measure-macos.swift` is an external qualification tool for
 macOS 14 or later. It does not change the signed app. Build it from the repository
 root into ignored storage:

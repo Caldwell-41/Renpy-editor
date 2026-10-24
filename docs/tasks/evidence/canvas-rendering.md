@@ -5,6 +5,10 @@ allowance and remaining acceptance. [ADR 0021](../../adr/0021-separate-renpy-can
 owns the accepted design and gates. This record supports one bounded Help proof.
 It does not qualify the full Screens subset or close B07/B08.
 
+Current Mac timing disposition: [closed by user acceptance for this release](#mac-timing-qualification-closed-by-user-acceptance-2026-10-24),
+with the numerical target unverified and waived as an acceptance gate. That decision
+supersedes earlier testing, instrumentation and allowance next steps in this history.
+
 ## Implemented connection
 
 The production Screens UI requests a revision-bound data plan through the core.
@@ -4295,3 +4299,27 @@ tracker write, PR, merge or release.
 Status maintenance leaves CURRENT at 1,197 words and HANDOVER at 2,228 words.
 They exceed the workflow review targets because this correction preserves unrelated
 policy sections and protected recovery; no broad status reorganization is selected.
+
+### Mac timing qualification closed by user acceptance (2026-10-24)
+
+The user explicitly approves the following decision and requests local record closure:
+
+> The user accepts the current Mac interaction performance based on functional testing and observed smoothness. The numerical 95/100-within-100-ms target remains unverified and is waived as an acceptance gate for this release. This decision closes the timing qualification work. Do not schedule further testing, request allowance, or repeat it as a blocker or reminder. Reopen only at the user's explicit request or following a newly observed, concrete Mac performance regression. Existing unverified measurements alone are not grounds to reopen.
+
+This is a release-specific Mac acceptance exception. The numerical target remains
+recorded; no measurement becomes a pass. The decision supersedes earlier next steps
+for instrumentation, reference crops, recorder diagnosis and further timing runs.
+Historical results, failures, the corrected measurement code and its validation stay
+preserved. The accepted functional and smoothness evidence remains the basis for
+current interaction performance acceptance. Other #36 criteria, Windows acceptance
+and broader supported-subset acceptance are unchanged.
+
+Batch 123 covers this local documentation closure and document validation only.
+Final cumulative local use is 123/126; three unused local batches are closed.
+Mac native 11/11, selected SDK 33/33 within global ceiling 36, packages 4/4, CI 0/4
+and Windows zero are unchanged. `usage.json` records the closed status and exact
+reopening condition. The ignored `timing-qualification-closure/` record preserves
+entry state and the decision. No code, runtime test, app launch, capture, posted
+input, permission change or Computer Use occurs. Native 11 remains closed and no
+timing operation or watcher is pending. GitHub and remote publication are unchanged.
+Unrelated edits and protected recovery remain intact.

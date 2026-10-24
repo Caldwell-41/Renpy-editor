@@ -2,55 +2,46 @@
 
 ## Active L17 integration handover
 
-The selected #36 Mac measurement-boundary correction is implemented and tested
-offline. [The evidence](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24)
-owns reproduction, the first wrong decision, review and limitations;
-[the native runbook](../testing/NATIVE.md#content-endpoint-and-reference-admission)
-owns the corrected protocol. Work stays on `codex/phase3b-screen-designer`, local
-only. Publication remains `ccebf3e`.
+Mac timing qualification is closed by user acceptance for this release. The user
+accepts current interaction performance based on functional testing and observed
+smoothness. The numerical 95/100-within-100-ms target remains unverified and is waived
+as an acceptance gate. The [decision record](../tasks/evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24)
+owns the exact wording and supersedes the earlier instrumentation next steps.
 
-The old recorder admitted slow settled reference hashes for a fast workload that
-also paints translated provisional content. Retained replay reproduces the exact
-8/100 settled-reference result and 82 diagnostic provisional appearances. The new
-gate refuses that untouched plan. `settled-reference` is a bounded diagnostic;
-`visible-content` requires independently established invariant route references,
-including baseline and earlier helper generations for isolated moves. Unsampled
-content inputs refuse. `settled-confirmation` needs evidence the recorder lacks.
-The matcher, missing/ambiguous-state treatment and 95/100 requirement are unchanged.
+There is no next timing action. Do not schedule further testing, request allowance,
+or repeat this work as a blocker or reminder. Reopen only at the user's explicit
+request or following a newly observed, concrete Mac performance regression.
+Existing unverified measurements alone are not grounds to reopen. The retained
+instrumentation limitations and unresolved historical recorder refusal are evidence,
+not active follow-up work. Other #36 criteria and Windows acceptance are unchanged.
 
-All 24 recorder/analyzer and 16 DOM checks pass; Standards and Spec reviews have no
-remaining actionable finding after the omitted-generation correction. Structural
-validation and synthetic positive cases do not establish native readiness. The
-current actual crop is noninvariant. The next capability step is an independently
-validated invariant real-content crop or a compositor-bound input/generation signal.
-Do not launch another native measurement until that method and its allowance are
-approved. Preserve the earlier result as bounded reference matching; neither an
-identical crop nor the provisional-panel flag proves helper confirmation.
+The [offline correction](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24)
+at `9875512` retains its 24 recorder/analyzer and 16 DOM checks. Original measurements,
+failed attempts, matched rendering, manual 7 and bounded text evidence remain intact;
+no numerical result is upgraded. The protocol remains available as historical
+reference if work is legitimately reopened. No code or runtime operation occurs for
+this documentation closure.
 
-The prior `Target process unavailable` failure cannot be attributed to either lookup
-branch from its retained combined message. New diagnostics distinguish missing
-`NSRunningApplication` from missing `executableURL`; ownership checks still refuse.
-The historical cause is unresolved, and a shorter retry does not resolve it.
+Final cumulative use is local 123/126. Batch 123 records this user-directed closure;
+the three unused local batches are closed, not available for continued testing.
+Mac native remains 11/11, selected SDK 33/33 within global ceiling 36, Mac packages
+4/4, CI 0/4 and Windows zero. No watcher, capture, held pointer, launcher or runtime
+operation is pending. The ignored `timing-qualification-closure/` record preserves
+the decision and entry state beside `usage.json`.
 
-The approved supplement adds twelve local batches with no contingency. Batches
-115-122 use eight; cumulative local use is 122/126, leaving four. Mac native remains
-11/11, selected SDK 33/33 within global ceiling 36, Mac packages 4/4, CI 0/4 and
-Windows zero. No additional runtime operation is allocated. New ignored
-`timing-method-correction/` receipts retain the entry diff/ledger, red reproduction,
-reviewed verification and isolated recorder binaries. The permission-approved
-recorder SHA-256 `8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`
-and signed package 4 remain unchanged; the newly built test binary is not a silently
-installed replacement or permission-approved native recorder.
+Native 11's [terminal closeout](../tasks/evidence/canvas-rendering.md#corrected-move-terminal-audit-and-closeout)
+retains normal editor exit 0, absent owned helper, removed owned scratch and all ten
+public source/asset hashes. Private fixture/process/helper receipts retain exact
+identities; never reuse old PIDs or consumed launchers. Signed package 4 and the
+permission-approved recorder SHA-256
+`8cd4b876eac2df04f6c77b9fa745667c2910344e0d54f195163c6a0d2274a6c5`
+remain unchanged. The correction's isolated test binary was not installed as a
+permission-approved replacement. Manual UI only; no Computer Use or permission
+change. Unrelated policy work and protected recovery below are unchanged.
 
-Native 11 remains closed. Its [terminal closeout](../tasks/evidence/canvas-rendering.md#corrected-move-terminal-audit-and-closeout)
-retains normal editor exit 0, absent owned helper, removed owned scratch, all ten
-public source/asset hashes and prior evidence. No launcher, capture, held pointer,
-helper watcher or runtime operation is pending. Never reuse old PIDs or consumed
-launchers. Private `fixture.json`, `process.json` and `helper-binding.json` retain
-exact identities. Manual UI only; no Computer Use or permission change. Preserve
-manual 7, matched rendering, bounded text and every original failure. Unrelated
-policy work and protected recovery below are unchanged. No tracker write, push,
-PR, merge or release is selected.
+Work remains local on `codex/phase3b-screen-designer`; publication remains `ccebf3e`.
+No GitHub issue state or content is changed, and this closes only the Mac timing
+qualification effort, not all of #36. No push, PR, merge or release is selected.
 
 ## Earlier canvas decision closeout
 

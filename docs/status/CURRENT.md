@@ -1,27 +1,23 @@
 # Current status
 
-## L17 Mac measurement correction
+## L17 Mac performance accepted; timing qualification closed
 
-2026-10-24: The [offline measurement-boundary correction](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24)
-rejects the invalid transfer of slow settled references to fast provisional
-content. Recorder plans now declare the endpoint; visible-content references must
-be exact and invariant across reachable rendering routes and installed helper
-sources. Historical arithmetic and the 95/100 requirement are unchanged.
+2026-10-24: The user accepts current Mac interaction performance based on functional
+testing and observed smoothness. The numerical 95/100-within-100-ms target remains
+unverified and is waived as an acceptance gate for this release. The
+[recorded decision](../tasks/evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24)
+closes the timing effort. Do not schedule further testing, request allowance, or
+repeat it as a blocker or reminder. Reopen only at the user's explicit request or
+following a newly observed, concrete Mac performance regression. Existing unverified
+measurements alone are not grounds to reopen.
 
-All 24 recorder/analyzer and 16 ScreenUI DOM checks pass. Standards review's omitted
-source-generation finding is fixed; final Standards and Spec reviews have no
-remaining actionable finding. The current real crop remains noninvariant, so no
-native timing workload is admitted. Settled confirmation needs presentation-bound
-generation evidence. The historical process-lookup refusal remains unresolved;
-new diagnostic messages distinguish the missing lookup fields without weakening
-ownership checks.
-
-Use is local 122/126, native 11/11 and selected SDK 33/33; four local batches remain,
-with no native/SDK/package/CI extension. No app, capture, input, Computer Use or
-permission change occurred. Native 11 remains closed. Matched rendering, manual 7,
-prior bounded text evidence and protected recovery remain intact. Work is local;
-publication remains `ccebf3e`. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
-owns continuation.
+This is user acceptance, not a measured pass. The numerical target, historical
+measurements and corrections remain preserved. Other #36 criteria and Windows
+acceptance are unchanged. Native 11 remains closed with no operation pending.
+Final local use is 123/126; the three unused local batches are closed. Native use
+remains 11/11 and selected SDK use 33/33. This closure changes only local records;
+GitHub and publication remain unchanged. [HANDOVER](HANDOVER.md#active-l17-integration-handover)
+owns recovery.
 
 ## L17 matched rendering passes on both targets
 
@@ -42,9 +38,10 @@ No operation or watcher remains pending.
 
 Final comparison use is local 22/24, CI 2/2, Mac SDK 3/6 and Windows SDK 2/6;
 no contingency was used and this allowance is closed. Earlier integration/shutdown
-qualification remains intact. #36 stays open for physical keyboard, native presentation
-timing, smooth manipulation and whole-ticket acceptance. The full supported subset
-remains separate. Unrelated policy edits are local and uncommitted. No PR, merge or
+qualification remains intact. This comparison alone did not establish physical
+keyboard, native presentation timing, smooth manipulation or whole-ticket acceptance.
+The current Mac timing disposition above supersedes that gate for this release.
+The full supported subset remains separate. Unrelated policy edits are local and uncommitted. No PR, merge or
 release is selected.
 
 ## Earlier canvas decision closeout

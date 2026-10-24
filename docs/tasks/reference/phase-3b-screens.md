@@ -138,6 +138,13 @@ owns delivery, the current allowance and remaining acceptance. The
 qualifies that bounded composition on both targets without a pixel tolerance.
 Broader subset, physical input and native feedback acceptance remain separate.
 
+For the current release, the [2026-10-24 user acceptance decision](../evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24)
+accepts current Mac interaction performance based on functional testing and observed
+smoothness. The numerical 95/100-within-100-ms target remains unverified and is waived
+as an acceptance gate for this release. Mac timing qualification is closed under
+that decision's reopening condition. This exception does not change Windows or
+other acceptance criteria.
+
 <a id="properties-assets-reuse-and-actions"></a>
 
 #### Properties, assets, reuse and actions
