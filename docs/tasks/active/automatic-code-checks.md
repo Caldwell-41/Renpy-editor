@@ -28,8 +28,9 @@ protected recovery remain unchanged.
 
 ## Verification and review
 
-State is `review_ready`. The local implementation is complete; no remote CI result
-is claimed. The new discovery regression first failed on the nine unexpected
+State is `review_ready`. The implementation is published in
+[draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61), with the exact
+implementation candidate's CI audit below. The new discovery regression first failed on the nine unexpected
 compiled-recorder skips, then passed after separating that module. Ordinary offline
 measurement tests remain selected. Explicit compiled selection without a binary
 returns nonzero with the required setup instruction; no recorder ran.
@@ -37,8 +38,8 @@ returns nonzero with the required setup instruction; no recorder ran.
 The general Mac ARM64 runner passes all four groups. Its Python group runs 237
 tests with only the three existing Windows exclusions; the ten retention tests
 pass. Frontend typechecking and all 231 tests pass without skips. Workflow actionlint,
-repository validation and whitespace checks pass. Validation covers local commands
-and workflow structure, not an executed Ubuntu job or a Windows native run.
+repository validation and whitespace checks pass. The Ubuntu PR results are below;
+no Windows native run is selected by this maintenance.
 
 The original Rust formatting check exposed existing drift and a module lookup
 failure in an example's path import. Commit `e8039df` formats 53 Rust files and
@@ -69,6 +70,28 @@ The newly selected publication continuation adds six hard local batches to actua
 use seven, giving a cumulative ceiling of thirteen, without new contingency. It
 covers publication, CI audit, focused corrections and closeout, with at most three
 automatic PR workflow runs. Manual dispatches, packages and native/SDK operations
-remain zero. Historical unused allowances stay closed. Current use is 8/13 for
-fresh state, base verification and publication preparation. Push, draft creation
-and the exact CI run audit are next; merge remains unselected.
+remain zero. Historical unused allowances stay closed. Charged use is 11/13,
+including publication, the implementation CI audit and final documentation
+closeout with its automatic check audit. No implementation correction or manual
+dispatch was needed. The automatic-run ceiling remains three; the implementation
+run below passes, and publishing this closeout triggers one ordinary PR run.
+Unused allowance closes with this publication outcome. Merge remains unselected.
+
+## CI audit
+
+[Repository quality run 40131940297](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40131940297),
+attempt 1, tests published head `248c8fc74bd5b25ea0894ff5e88d3740beb0e35a`.
+PR #61 targets base `23e27b4ca66bfe1a66642c2fdc6a7379d67e2eb9` on
+`codex/phase3b-screen-designer`. The run completed successfully at 2026-10-25
+06:56 AEST. The watcher delivery matched this chat and its receipt was acknowledged.
+Both required jobs and every selected step pass. Ubuntu frontend typechecking and
+all 231 tests pass with zero failures, cancellations or skips. Pinned Rust 1.90.0
+workspace formatting passes. Repository validation covers 905 clean-checkout files;
+all thirteen validator tests and the Q1 rejection/source audits pass. The nine
+manual qualification jobs have no executed steps and remain outside this selection.
+
+Ignored `automatic-code-checks/ci-01.json`, `ci-01.log` and `ci-01-audit.json` retain
+the actual run metadata, logs and audit under `.toolchains/`. The draft PR still
+targets the verified base and published head above. No product fix was required.
+Documentation-only successors retain this tested implementation candidate; their
+own automatic results remain visible on the PR and are audited in this chat.
