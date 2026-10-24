@@ -32,7 +32,7 @@ alone does not justify repeating the sequence.
 
 The user added 10 local batches when requesting a new-agent handoff. Nominal cumulative
 bound is now 80, absolute ceiling 88; the existing 8 contingency batches are unchanged.
-Announce contingency before batch 81. Current use is local 81, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
+Announce contingency before batch 81. Current use is local 82, CI 0; Mac packages 4/4, native 7/9, SDK 29/36; Windows zero. Remaining
 work stays within these cumulative limits. No package build remains allocated.
 Independent input-to-visible p95 <=100 ms, perceived smoothness, Windows and whole-ticket
 acceptance remain pending. Recorder construction is selected; no permission change, push, PR, merge or
@@ -49,7 +49,7 @@ The standalone Mac recorder now compiles, with twelve focused checks, types and 
 owns source/build identity and limitations; [Native evidence](../testing/NATIVE.md#standalone-mac-canvas-recorder)
 owns run instructions. The user allowed 150% of ten remaining nominal batches for
 building it, so this piece ends by cumulative batch 85 within the existing ceiling.
-Independent review is pending. Live capture, Accessibility hit testing, input delivery
+Both independent review axes have no remaining actionable findings at `dba3a83`. Live capture, Accessibility hit testing, input delivery
 and capture cadence remain unqualified. Next obtain explicit approval before recorder
 permission setup or remote publication; the Windows adapter remains pending. Use
 existing package 4 on Mac. Do not consume a native

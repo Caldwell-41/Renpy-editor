@@ -3302,3 +3302,19 @@ Contingency was announced before batch 81. Current use is local 81/80, global
 ceiling 88 and recorder maximum 85. Eleven of the recorder's fifteen permitted
 batches have been used. Package/native/SDK/CI counts are unchanged. No app launch,
 capture, input posting, permission setup or publication occurred.
+
+Both independent follow-up reviews close all three findings at `dba3a83` and report
+zero remaining actionable Standards or Spec findings. The selected recorder piece
+is complete for building, compilation, offline validation, permission refusal and
+review. The permission-dependent capture/input/monitor/cleanup path remains unproved;
+this completion does not accept #36 or authorize recording. The final executable
+and source hashes above remain current. The existing signed app's hash and protected
+native recovery text are unchanged. Unrelated policy edits remain unstaged.
+
+Batch 82 covers final review readback, evidence/status reconciliation and the scoped
+local closeout. Final recorder use is 12 of its 15 permitted local batches. Cumulative
+use is local 82/80 with global ceiling 88; six existing contingency batches remain
+for the selected outcome. CI 0/4, Mac packages 4/4, native 7/9 and SDK 29/36 remain
+unchanged; Windows zero. No process, SDK run or watcher remains pending. Repository
+validation and scoped whitespace checks pass. Publication remains `ccebf3e`; recorder
+work is local only. The recorder piece adds no allowance for later qualification.
