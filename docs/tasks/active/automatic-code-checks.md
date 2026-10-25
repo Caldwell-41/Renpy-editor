@@ -28,7 +28,7 @@ protected recovery remain unchanged.
 
 ## Verification and review
 
-State is `in_progress` for the policy amendment below. The code-check implementation is published in
+State is `review_ready`, with final automatic CI audit pending for the policy amendment below. The code-check implementation is published in
 [draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61), with the exact
 implementation candidate's CI audit below. The new discovery regression first failed on the nine unexpected
 compiled-recorder skips, then passed after separating that module. Ordinary offline
@@ -54,7 +54,10 @@ unchanged strict skip validation, retained offline/explicit test selections and
 the runbook commands. The existing checks cover the failure without an added
 package matrix or application behavior change.
 
-## Allowance and closeout
+## Historical delivery accounting
+
+This section records the completed code-check delivery under its former policy.
+Its closed limits do not allocate work to the later documentation amendment.
 
 Original allowance: eight local work batches covering preparation, reproduction,
 implementation, focused verification, review and closeout. Contingency is four
@@ -108,11 +111,24 @@ Earlier selected limits and recorded consumption above remain historical and clo
 Conflict review found the old defaults in AGENTS, WORKFLOW, tracker/triage guidance,
 the task template, the live delivery reference and those 26 issues. The new policy
 has one repository owner, with an old section anchor retained for existing links.
-The issues will link to a published policy commit. Existing task-specific limits,
+The issues link to a published policy commit. Existing task-specific limits,
 acceptance, source/security/signing rules, dependencies and publication permissions
 retain their scope. The selected GitHub updates change body text only.
 
-Next action: publish the policy, reconcile the exact 26 issue bodies against fresh
-snapshots, read them back and update PR #61. Validate links/privacy and whitespace,
-review the changed instructions and audit the final automatic PR run. No new
-product work, package matrix, native check, issue creation or merge is selected.
+Policy commit `7ce51a997f97bc56cb79176c68bc93ee987b8562` is published. All 26 approved
+body-only updates link to its immutable WORKFLOW section. Fresh pre-write checks,
+response verification and an independent bulk read-back pass. Titles, states,
+labels, assignees, milestones and native parent/dependency summaries remain equal
+to their pre-write values. Every leaf retains byte-identical acceptance and blocker
+sections. Parent history and all material outside the shared budget text are retained.
+
+Ignored `operation-policy/` under `.toolchains/automatic-code-checks/` retains the
+before/planned/after bodies, per-issue diffs, mutation responses and final read-back
+summary. Local repository validation, all thirteen existing link-validator tests,
+whitespace and policy-consistency review pass. The repository's old budget anchor
+still resolves. No unresolved instruction conflict remains in the changed live
+directions; existing explicit limits retain their scope.
+
+PR #61 includes this policy amendment alongside the verified local/CI code-check
+work. Audit the final ordinary automatic PR run after publishing this closeout.
+No new product work, package matrix, native check, issue creation or merge is selected.

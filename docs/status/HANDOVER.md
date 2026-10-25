@@ -5,11 +5,12 @@
 The user approved the repo policy and shared budget-text updates in 26 open 3B
 issues. [The task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
 owns scope and verification on `codex/automatic-code-checks`, draft PR #61.
-Publish the prepared policy, then update only the approved shared issue text and
-verify body and metadata preservation. Fresh snapshots are ignored under
-`.toolchains/automatic-code-checks/operation-policy/`. No operation is pending yet.
-This ordinary documentation amendment needs no numerical work allowance. Prior
-limits remain historical; product work and merge remain unselected.
+Policy `7ce51a9` is published. All 26 issue bodies point to that immutable policy
+and pass independent read-back; acceptance, blockers and metadata remain unchanged.
+Snapshots and verification are ignored under
+`.toolchains/automatic-code-checks/operation-policy/`. Audit the final automatic PR
+run after this documentation closeout. This amendment needs no numerical work
+allowance. Prior limits remain historical; product work and merge remain unselected.
 
 ## Automatic code checks reviewed
 

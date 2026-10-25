@@ -5,9 +5,10 @@
 2026-10-25: The user approved replacing routine-work budgets with limits for
 costly operations, adding root-cause debugging guidance and reconciling shared text
 in 26 open 3B issues. [The maintenance task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
-owns this documentation amendment on PR #61. Repository edits are prepared;
-publication, issue read-back and CI audit are next. Existing acceptance and explicit
-task limits remain unchanged.
+owns this documentation amendment on PR #61. Policy `7ce51a9` is published; all 26
+issue bodies pass read-back with acceptance, blockers and metadata preserved.
+Final automatic PR CI audit follows the documentation closeout. Existing acceptance
+and explicit task limits remain unchanged.
 
 ## Automatic code checks pass CI
 
