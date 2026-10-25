@@ -4,6 +4,14 @@
 owns selection, budgets, host routing and waiting. Commands below are references,
 not a run-all instruction. Run from `app/` unless stated otherwise.
 
+## Automatic PR and main checks
+
+`Repository quality` runs `npm run check` and `cargo +1.90.0 fmt --check --all`
+on pull requests and main pushes in one Ubuntu job. It uses the repository's
+Node/npm versions and checks for Python 3.11 or later. Rust formatting still runs
+if a frontend step fails. This job builds no native application or package and
+starts no SDK. Manual qualification selectors keep their existing scope.
+
 ## Inexpensive harness checks
 
 Use Python 3.11 or later and the repository's Node version. On Windows use the
@@ -32,6 +40,11 @@ are excluded on Mac. Retention permits only its named POSIX tar-symlink case on
 Windows. Shared path/policy/process/receipt tests remain selected on both hosts.
 Portable cleanup fixtures inject process absence and reject live/unknown state;
 receipt fixtures use controlled clocks. These are logic tests, not native OS proof.
+
+Offline canvas measurement tests belong to ordinary discovery. The compiled Mac
+recorder checks use a separate explicit selection in
+[the native runbook](NATIVE.md#standalone-mac-canvas-recorder); they require a binary
+and fail if it is missing.
 
 `Repository quality` → `harness_regressions=true` runs only these checks on
 Windows x64 and macOS ARM64, with every other boolean selector false. This is an

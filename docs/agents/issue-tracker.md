@@ -7,16 +7,16 @@ Existing records keep their ownership under docs/WORKFLOW.md, except for the
 approved [remaining Phase 3B delivery migration](../WORKFLOW.md#phase-3b-github-task-ownership).
 After the published cutover receipt, read P3B, the relevant B group and selected
 L work ticket for 3B execution. The leaf owns bounded acceptance, start dependencies
-and the current allowance; its B group owns aggregate acceptance.
+and applicable operation limits; its B group owns aggregate acceptance.
 Approved product decisions and detailed evidence remain in their repository owners.
 Link those records from the issue. Creating, assigning or labelling an issue does
-not authorize implementation, publication or renew an allowance.
+not authorize implementation, publication or additional attempts.
 
 For remaining 3B entry, apply [the standing scheduling exception](../tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
 and preserve actual ticket blockers and pending acceptance. Once the user selects
-a work ticket, determine, record and state its allowance and basis under
-[WORKFLOW's budget policy](../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name),
-then proceed without separate budget approval. Canvas remains deferred until
+a work ticket, apply [WORKFLOW's operation-limit policy](../WORKFLOW.md#5-operation-limits-and-reassessment).
+The selected ticket owns any applicable limits; routine work needs no numerical
+allowance. Canvas remains deferred until
 explicitly selected; exhausted historical allowances remain closed.
 
 ## Operations

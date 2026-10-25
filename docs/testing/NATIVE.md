@@ -339,10 +339,18 @@ timestamps do not establish panel scanout,
 human input or perceived smoothness. This tool prepares the later qualification;
 it has no permission-request or publication command.
 
-Run focused offline and compiled-CLI checks with the build above. These checks
-never capture a screen, post input or open Loomlight:
+Offline checks also run in ordinary Python discovery. Run only those checks from
+the repository root with:
+
+```bash
+python3 -m unittest discover -s app/scripts -p 'test_canvas_measurement.py' -v
+```
+
+After building the recorder above, select its compiled-CLI checks explicitly.
+A missing binary fails the check instead of skipping it. These checks never
+capture a screen, post input or open Loomlight:
 
 ```bash
 CANVAS_RECORDER_BINARY="$PWD/.toolchains/canvas-recorder/recorder" \
-  python3 -m unittest discover -s app/scripts -p 'test_canvas_measurement*.py' -v
+  python3 -m unittest discover -s app/scripts -p 'canvas_measurement_native_checks.py' -v
 ```

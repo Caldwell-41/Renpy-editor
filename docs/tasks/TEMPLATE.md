@@ -31,8 +31,9 @@ condition. Use actual repository paths and fragments; omit links until targets e
 
 ## Limits, blockers and next action
 
-Record applicable cumulative allowances, consumption and protected state needed to
-continue. State material limitations and unresolved decisions with supporting evidence;
+Record any applicable operation limits, their consumption and protected state needed
+to continue. Routine work needs no numerical allowance. State material limitations
+and unresolved decisions with supporting evidence;
 distinguish defects, harness failures and missing capability or proof. Give the next
 concrete action and any required user decision. Replace superseded continuation text
 when the state changes, preserving its useful history in the evidence record.

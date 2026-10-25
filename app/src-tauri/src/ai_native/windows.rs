@@ -269,10 +269,28 @@ fn template(draft: bool) -> Vec<u32> {
     );
     dword(&mut words, 0);
     words.extend([5, 0, 0, 350, 172, 0, 0]); // count, x/y/cx/cy, menu, class
-    string(&mut words, if draft {"Use API key for this connection draft"} else {"Remember Studio API key on this computer"});
+    string(
+        &mut words,
+        if draft {
+            "Use API key for this connection draft"
+        } else {
+            "Remember Studio API key on this computer"
+        },
+    );
     words.push(9);
     string(&mut words, "Segoe UI");
-    control(&mut words, 101, 0x82, 0, [12, 10, 326, 42], if draft {"The key stays in native memory while you connect and choose a model. Save profile stores it for this login. Leaving Settings discards the draft key. The web view never receives it."}else{"Windows Credential Manager saves the key for this Windows login. The web view never receives it. Local removal does not revoke it at Studio."});
+    control(
+        &mut words,
+        101,
+        0x82,
+        0,
+        [12, 10, 326, 42],
+        if draft {
+            "The key stays in native memory while you connect and choose a model. Save profile stores it for this login. Leaving Settings discards the draft key. The web view never receives it."
+        } else {
+            "Windows Credential Manager saves the key for this Windows login. The web view never receives it. Local removal does not revoke it at Studio."
+        },
+    );
     control(
         &mut words,
         FIELD as u16,
@@ -295,7 +313,7 @@ fn template(draft: bool) -> Vec<u32> {
         0x80,
         WS_TABSTOP | BS_DEFPUSHBUTTON as u32,
         [194, 144, 70, 18],
-        if draft {"Use key"}else{"Remember"},
+        if draft { "Use key" } else { "Remember" },
     );
     control(
         &mut words,
@@ -317,10 +335,12 @@ pub fn enter_owned(
     owner: usize,
     save: impl FnMut(&str) -> Result<SaveOutcome>,
 ) -> Result<Option<SaveOutcome>> {
-    enter_owned_mode(owner,false,save)
+    enter_owned_mode(owner, false, save)
 }
 pub fn enter_owned_mode(
-    owner: usize, draft: bool, mut save: impl FnMut(&str) -> Result<SaveOutcome>,
+    owner: usize,
+    draft: bool,
+    mut save: impl FnMut(&str) -> Result<SaveOutcome>,
 ) -> Result<Option<SaveOutcome>> {
     let owner = owner as HWND;
     if owner.is_null() || unsafe { IsWindow(owner) } == 0 {

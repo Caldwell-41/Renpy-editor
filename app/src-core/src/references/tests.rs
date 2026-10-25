@@ -502,32 +502,56 @@ fn create_reviewed(f: &mut Fixture, workspace: &Value, record_id: Value) -> Valu
 #[test]
 fn game_only_reads_are_virtual_and_explicit_link_is_stable_and_undoable() {
     let mut f = Fixture::new();
-    let created = f.request("character.create", json!({"technicalName":"same_name","displayName":"Mara","dialogueColor":"#aabbcc"}));
+    let created = f.request(
+        "character.create",
+        json!({"technicalName":"same_name","displayName":"Mara","dialogueColor":"#aabbcc"}),
+    );
     assert_eq!(created["ok"], true, "{created}");
     let before = f.list();
     assert!(!f.root.join(PATH).exists());
     assert_eq!(before["document"]["cards"], json!([]));
-    let entity = before["entities"].as_array().unwrap().iter().find(|e|e["kind"] == "character" && e["title"] == "Mara").unwrap();
+    let entity = before["entities"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["kind"] == "character" && e["title"] == "Mara")
+        .unwrap();
     let character_id = entity["id"].clone();
     let source_revision = entity["revision"].clone();
     let source = fs::read(f.root.join("game/definitions/characters.rpy")).unwrap();
     let linked = f.apply(&before["revision"], json!({"type":"linkCharacter","recordId":null,"characterId":character_id,"expectedSourceRevision":source_revision}));
     assert_eq!(linked["ok"], true, "{linked}");
-    let content = &current(&linked["value"]["document"],Kind::Card)["content"];
-    assert_eq!(content["linkedCharacterId"],character_id);
-    for key in ["description","personality","knowledgeNotes","speakingStyle","appearanceNotes","background","motivations","exampleDialogue"] { assert_eq!(content[key], ""); }
-    assert_eq!(fs::read(f.root.join("game/definitions/characters.rpy")).unwrap(), source);
+    let content = &current(&linked["value"]["document"], Kind::Card)["content"];
+    assert_eq!(content["linkedCharacterId"], character_id);
+    for key in [
+        "description",
+        "personality",
+        "knowledgeNotes",
+        "speakingStyle",
+        "appearanceNotes",
+        "background",
+        "motivations",
+        "exampleDialogue",
+    ] {
+        assert_eq!(content[key], "");
+    }
+    assert_eq!(
+        fs::read(f.root.join("game/definitions/characters.rpy")).unwrap(),
+        source
+    );
     let exact = fs::read(f.root.join(PATH)).unwrap();
     let duplicate = f.apply(&linked["value"]["revision"], json!({"type":"linkCharacter","recordId":null,"characterId":character_id,"expectedSourceRevision":source_revision}));
     assert_eq!(duplicate["ok"], false);
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), exact);
-    let undo = f.apply(&linked["value"]["revision"],json!({"type":"undo"}));
-    assert_eq!(undo["ok"],true,"{undo}");
+    let undo = f.apply(&linked["value"]["revision"], json!({"type":"undo"}));
+    assert_eq!(undo["ok"], true, "{undo}");
     assert!(!f.root.join(PATH).exists());
-    let redo = f.apply(&undo["value"]["revision"],json!({"type":"redo"}));
-    assert_eq!(redo["ok"],true,"{redo}");
+    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    assert_eq!(redo["ok"], true, "{redo}");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), exact);
-    f.service.close().unwrap(); let opened = f.service.open_path(&f.root).unwrap(); f.session = opened.session_id;
+    f.service.close().unwrap();
+    let opened = f.service.open_path(&f.root).unwrap();
+    f.session = opened.session_id;
     assert_eq!(f.list()["document"], linked["value"]["document"]);
 }
 
@@ -538,59 +562,90 @@ fn reviewed_game_creation_is_atomic_preserves_source_and_refuses_changed_review(
     // Install custom fixture bytes without removing the foundation's mapped Bec.
     // Canonical Character files intentionally refuse direct Source Save.
     let mut source = fs::read(&source_path).unwrap();
-    source.extend_from_slice("# custom preface\r\ninit python:\r\n    preserved = 'snow 雪'\r\n".as_bytes());
-    fs::write(&source_path,&source).unwrap();
+    source.extend_from_slice(
+        "# custom preface\r\ninit python:\r\n    preserved = 'snow 雪'\r\n".as_bytes(),
+    );
+    fs::write(&source_path, &source).unwrap();
     let before = f.list();
     let metadata = fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap();
     let preview = f.apply(&before["revision"], create_input(Value::Null));
-    assert_eq!(preview["ok"],true,"{preview}");
+    assert_eq!(preview["ok"], true, "{preview}");
     assert!(!f.root.join(PATH).exists());
-    assert_eq!(fs::read(&source_path).unwrap(),source);
-    assert_eq!(fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap(),metadata);
-    let patch = preview["value"]["characterPreview"]["patches"].as_array().unwrap().iter().find(|p|p["path"] == "game/definitions/characters.rpy").unwrap();
-    assert_eq!(patch["before"].as_str().unwrap().as_bytes(),source);
-    assert!(patch["after"].as_str().unwrap().as_bytes().starts_with(&source));
-    let mut command = create_input(Value::Null); command["type"] = json!("createGameCharacter"); command["expectedPreviewDigest"] = preview["value"]["characterPreview"]["digest"].clone();
+    assert_eq!(fs::read(&source_path).unwrap(), source);
+    assert_eq!(
+        fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap(),
+        metadata
+    );
+    let patch = preview["value"]["characterPreview"]["patches"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|p| p["path"] == "game/definitions/characters.rpy")
+        .unwrap();
+    assert_eq!(patch["before"].as_str().unwrap().as_bytes(), source);
+    assert!(patch["after"]
+        .as_str()
+        .unwrap()
+        .as_bytes()
+        .starts_with(&source));
+    let mut command = create_input(Value::Null);
+    command["type"] = json!("createGameCharacter");
+    command["expectedPreviewDigest"] = preview["value"]["characterPreview"]["digest"].clone();
     command["displayName"] = json!("Changed after review");
     let refused = f.apply(&before["revision"], command.clone());
-    assert_eq!(refused["error"]["code"],"REFERENCE_CONFLICT");
-    assert_eq!(fs::read(&source_path).unwrap(),source);
+    assert_eq!(refused["error"]["code"], "REFERENCE_CONFLICT");
+    assert_eq!(fs::read(&source_path).unwrap(), source);
     assert!(!f.root.join(PATH).exists());
     command["displayName"] = json!("New character");
     let created = f.apply(&before["revision"], command);
-    assert_eq!(created["ok"],true,"{created}");
+    assert_eq!(created["ok"], true, "{created}");
     let after_source = fs::read(&source_path).unwrap();
     let after_metadata = fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap();
     let after_reference = fs::read(f.root.join(PATH)).unwrap();
     assert!(after_source.starts_with(&source));
     let doc = &created["value"]["document"];
-    assert_eq!(doc["cards"].as_array().unwrap().len(),1);
-    let content = &current(doc,Kind::Card)["content"];
-    assert_eq!(content["description"],"");
+    assert_eq!(doc["cards"].as_array().unwrap().len(), 1);
+    let content = &current(doc, Kind::Card)["content"];
+    assert_eq!(content["description"], "");
     let authoring: Value = serde_json::from_slice(&after_metadata).unwrap();
-    let created_character = authoring["characters"].as_array().unwrap().iter().find(|c|c["technicalName"] == "new_character").unwrap();
-    assert_eq!(content["linkedCharacterId"],created_character["id"]);
-    let undo = f.apply(&created["value"]["revision"],json!({"type":"undo"}));
-    assert_eq!(undo["ok"],true,"{undo}");
-    assert_eq!(fs::read(&source_path).unwrap(),source);
-    assert_eq!(fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap(),metadata);
+    let created_character = authoring["characters"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["technicalName"] == "new_character")
+        .unwrap();
+    assert_eq!(content["linkedCharacterId"], created_character["id"]);
+    let undo = f.apply(&created["value"]["revision"], json!({"type":"undo"}));
+    assert_eq!(undo["ok"], true, "{undo}");
+    assert_eq!(fs::read(&source_path).unwrap(), source);
+    assert_eq!(
+        fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap(),
+        metadata
+    );
     assert!(!f.root.join(PATH).exists());
-    let redo = f.apply(&undo["value"]["revision"],json!({"type":"redo"}));
-    assert_eq!(redo["ok"],true,"{redo}");
-    assert_eq!(fs::read(&source_path).unwrap(),after_source);
-    assert_eq!(fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap(),after_metadata);
-    assert_eq!(fs::read(f.root.join(PATH)).unwrap(),after_reference);
-    let duplicate = f.apply(&redo["value"]["revision"],create_input(Value::Null));
-    assert_eq!(duplicate["ok"],false);
+    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    assert_eq!(redo["ok"], true, "{redo}");
+    assert_eq!(fs::read(&source_path).unwrap(), after_source);
+    assert_eq!(
+        fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap(),
+        after_metadata
+    );
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), after_reference);
+    let duplicate = f.apply(&redo["value"]["revision"], create_input(Value::Null));
+    assert_eq!(duplicate["ok"], false);
 }
 
 #[test]
 fn planning_creation_and_restore_preserve_ids_extensions_and_current_game_link() {
     let mut f = Fixture::new();
     let before = f.list();
-    let mut writing = fields(Kind::Card); writing["linkedCharacterId"] = Value::Null;
-    let saved = f.apply(&before["revision"],json!({"type":"save","kind":"card","recordId":null,"fields":writing}));
-    assert_eq!(saved["ok"],true,"{saved}");
+    let mut writing = fields(Kind::Card);
+    writing["linkedCharacterId"] = Value::Null;
+    let saved = f.apply(
+        &before["revision"],
+        json!({"type":"save","kind":"card","recordId":null,"fields":writing}),
+    );
+    assert_eq!(saved["ok"], true, "{saved}");
     let mut extended = saved["value"]["document"].clone();
     extended["futureLibrary"] = json!({"keep":true});
     extended["cards"][0]["futureRecord"] = json!("record");
@@ -600,32 +655,52 @@ fn planning_creation_and_restore_preserve_ids_extensions_and_current_game_link()
     let before = f.list();
     let record_id = extended["cards"][0]["id"].clone();
     let previous_id = extended["cards"][0]["currentRevisionId"].clone();
-    let created = create_reviewed(&mut f,&before,record_id.clone());
-    assert_eq!(created["ok"],true,"{created}");
-    assert_eq!(created["value"]["document"]["cards"].as_array().unwrap().len(),1);
-    let linked = current(&created["value"]["document"],Kind::Card)["content"]["linkedCharacterId"].clone();
+    let created = create_reviewed(&mut f, &before, record_id.clone());
+    assert_eq!(created["ok"], true, "{created}");
+    assert_eq!(
+        created["value"]["document"]["cards"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+    let linked =
+        current(&created["value"]["document"], Kind::Card)["content"]["linkedCharacterId"].clone();
     let bytes = fs::read(f.root.join(PATH)).unwrap();
-    let restored = f.apply(&created["value"]["revision"],json!({"type":"restoreCard","recordId":record_id,"revisionId":previous_id}));
-    assert_eq!(restored["ok"],true,"{restored}");
+    let restored = f.apply(
+        &created["value"]["revision"],
+        json!({"type":"restoreCard","recordId":record_id,"revisionId":previous_id}),
+    );
+    assert_eq!(restored["ok"], true, "{restored}");
     let doc = &restored["value"]["document"];
-    assert_eq!(doc["cards"][0]["id"],record_id);
-    assert_eq!(doc["cards"][0]["revisionCounter"],3);
-    assert_ne!(doc["cards"][0]["currentRevisionId"],previous_id);
-    let revision = current(doc,Kind::Card);
-    assert_eq!(revision["status"],"approved");
-    assert_eq!(revision["content"]["linkedCharacterId"],linked);
-    assert_eq!(revision["futureRevision"],"snapshot");
-    assert_eq!(revision["content"]["futureContent"],extended["cards"][0]["revisions"][0]["content"]["futureContent"]);
-    assert_eq!(doc["futureLibrary"],extended["futureLibrary"]);
-    assert_eq!(doc["cards"][0]["futureRecord"],extended["cards"][0]["futureRecord"]);
+    assert_eq!(doc["cards"][0]["id"], record_id);
+    assert_eq!(doc["cards"][0]["revisionCounter"], 3);
+    assert_ne!(doc["cards"][0]["currentRevisionId"], previous_id);
+    let revision = current(doc, Kind::Card);
+    assert_eq!(revision["status"], "approved");
+    assert_eq!(revision["content"]["linkedCharacterId"], linked);
+    assert_eq!(revision["futureRevision"], "snapshot");
+    assert_eq!(
+        revision["content"]["futureContent"],
+        extended["cards"][0]["revisions"][0]["content"]["futureContent"]
+    );
+    assert_eq!(doc["futureLibrary"], extended["futureLibrary"]);
+    assert_eq!(
+        doc["cards"][0]["futureRecord"],
+        extended["cards"][0]["futureRecord"]
+    );
     assert!(doc["cards"][0]["revisions"].as_array().unwrap().len() <= 3);
     let restored_bytes = fs::read(f.root.join(PATH)).unwrap();
-    let undo = f.apply(&restored["value"]["revision"],json!({"type":"undo"}));
-    assert_eq!(undo["ok"],true,"{undo}"); assert_eq!(fs::read(f.root.join(PATH)).unwrap(),bytes);
-    let redo = f.apply(&undo["value"]["revision"],json!({"type":"redo"}));
-    assert_eq!(redo["ok"],true,"{redo}"); assert_eq!(fs::read(f.root.join(PATH)).unwrap(),restored_bytes);
-    f.service.close().unwrap();let opened=f.service.open_path(&f.root).unwrap();f.session=opened.session_id;
-    assert_eq!(f.list()["document"],*doc);
+    let undo = f.apply(&restored["value"]["revision"], json!({"type":"undo"}));
+    assert_eq!(undo["ok"], true, "{undo}");
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), bytes);
+    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    assert_eq!(redo["ok"], true, "{redo}");
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), restored_bytes);
+    f.service.close().unwrap();
+    let opened = f.service.open_path(&f.root).unwrap();
+    f.session = opened.session_id;
+    assert_eq!(f.list()["document"], *doc);
 }
 
 #[test]
@@ -636,87 +711,209 @@ fn restore_refuses_proposals_missing_stale_support_and_stale_library_without_wri
     let state = f.list();
     for revision in &doc["cards"][0]["revisions"].as_array().unwrap().clone() {
         let result=f.apply(&state["revision"],json!({"type":"restoreCard","recordId":doc["cards"][0]["id"],"revisionId":revision["id"]}));
-        assert_eq!(result["ok"],false,"{result}");
+        assert_eq!(result["ok"], false, "{result}");
     }
-    doc["cards"][0]["revisions"][1]["status"]=json!("rejected");
-    doc["cards"][0]["revisions"][1]["reviewedAt"]=json!("2026-10-15T00:00:00Z");
-    doc["cards"][0]["revisions"][1]["content"]["linkedCharacterId"]=Value::Null;
-    doc["cards"][0]["revisions"][0]["supportingReadSet"]=json!({"game/script.rpy":"a".repeat(64)});
+    doc["cards"][0]["revisions"][1]["status"] = json!("rejected");
+    doc["cards"][0]["revisions"][1]["reviewedAt"] = json!("2026-10-15T00:00:00Z");
+    doc["cards"][0]["revisions"][1]["content"]["linkedCharacterId"] = Value::Null;
+    doc["cards"][0]["revisions"][0]["supportingReadSet"] =
+        json!({"game/script.rpy":"a".repeat(64)});
     f.install(&serde_json::to_vec(&doc).unwrap());
-    let baseline=fs::read(f.root.join(PATH)).unwrap();
-    let state=f.list();
-    let command=json!({"type":"restoreCard","recordId":doc["cards"][0]["id"],"revisionId":doc["cards"][0]["revisions"][0]["id"]});
-    let result=f.apply(&state["revision"],command.clone()); assert_eq!(result["error"]["code"],"REFERENCE_CONFLICT","{result}");
-    assert_eq!(fs::read(f.root.join(PATH)).unwrap(),baseline);
-    let result=f.apply(&json!("old revision"),command);assert_eq!(result["error"]["code"],"REFERENCE_CONFLICT");
-    assert_eq!(fs::read(f.root.join(PATH)).unwrap(),baseline);
+    let baseline = fs::read(f.root.join(PATH)).unwrap();
+    let state = f.list();
+    let command = json!({"type":"restoreCard","recordId":doc["cards"][0]["id"],"revisionId":doc["cards"][0]["revisions"][0]["id"]});
+    let result = f.apply(&state["revision"], command.clone());
+    assert_eq!(result["error"]["code"], "REFERENCE_CONFLICT", "{result}");
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), baseline);
+    let result = f.apply(&json!("old revision"), command);
+    assert_eq!(result["error"]["code"], "REFERENCE_CONFLICT");
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), baseline);
 }
 
 #[test]
 fn project_context_save_history_bounds_and_extensions_leave_legacy_lore_exact() {
     let mut f = Fixture::new();
-    let before=f.list(); assert!(before["document"].get("projectContext").is_none()); assert!(!f.root.join(PATH).exists());
-    let legacy=f.fixture(); f.install(&serde_json::to_vec(&legacy).unwrap());
-    let state=f.list();
+    let before = f.list();
+    assert!(before["document"].get("projectContext").is_none());
+    assert!(!f.root.join(PATH).exists());
+    let legacy = f.fixture();
+    f.install(&serde_json::to_vec(&legacy).unwrap());
+    let state = f.list();
     let first=f.apply(&state["revision"],json!({"type":"saveProjectContext","world":"Café 雪\r\n  start  ","tone":"Quiet, observant."}));
-    assert_eq!(first["ok"],true,"{first}");
-    let mut doc=first["value"]["document"].clone();
-    assert_eq!(doc["cards"],legacy["cards"]);assert_eq!(doc["loreEntries"],legacy["loreEntries"]);
-    assert_eq!(doc["futureLibrary"],legacy["futureLibrary"]);
-    doc["projectContext"]["futureRecord"]=json!({"keep":true});
-    doc["projectContext"]["revisions"][0]["futureRevision"]=json!("retained");
-    doc["projectContext"]["revisions"][0]["content"]["futureContent"]=json!([1,2]);
-    f.install(&serde_json::to_vec(&doc).unwrap());let state=f.list();let old_bytes=fs::read(f.root.join(PATH)).unwrap();
-    let second=f.apply(&state["revision"],json!({"type":"saveProjectContext","world":"New world","tone":""}));
-    assert_eq!(second["ok"],true,"{second}");
-    let new_bytes=fs::read(f.root.join(PATH)).unwrap();
-    let context=&second["value"]["document"]["projectContext"];
-    assert_eq!(context["id"],doc["projectContext"]["id"]);assert_eq!(context["revisionCounter"],2);
-    assert_eq!(context["futureRecord"],doc["projectContext"]["futureRecord"]);
-    assert_eq!(context["revisions"][1]["futureRevision"],"retained");
-    assert_eq!(context["revisions"][1]["content"]["futureContent"],json!([1,2]));
-    let undo=f.apply(&second["value"]["revision"],json!({"type":"undo"}));assert_eq!(undo["ok"],true,"{undo}");assert_eq!(fs::read(f.root.join(PATH)).unwrap(),old_bytes);
-    let redo=f.apply(&undo["value"]["revision"],json!({"type":"redo"}));assert_eq!(redo["ok"],true,"{redo}");assert_eq!(fs::read(f.root.join(PATH)).unwrap(),new_bytes);
-    let refused=f.apply(&redo["value"]["revision"],json!({"type":"saveProjectContext","world":"雪".repeat(3334),"tone":""}));assert_eq!(refused["ok"],false);assert_eq!(fs::read(f.root.join(PATH)).unwrap(),new_bytes);
-    let mut latest=redo["value"].clone();
-    for i in 0..4 { let saved=f.apply(&latest["revision"],json!({"type":"saveProjectContext","world":format!("World {i}"),"tone":""}));assert_eq!(saved["ok"],true,"{saved}");latest=saved["value"].clone();assert!(latest["document"]["projectContext"]["revisions"].as_array().unwrap().len()<=3); }
-    assert_eq!(latest["document"]["cards"],legacy["cards"]);assert_eq!(latest["document"]["loreEntries"],legacy["loreEntries"]);
-    f.service.close().unwrap();let opened=f.service.open_path(&f.root).unwrap();f.session=opened.session_id;assert_eq!(f.list()["document"],latest["document"]);
+    assert_eq!(first["ok"], true, "{first}");
+    let mut doc = first["value"]["document"].clone();
+    assert_eq!(doc["cards"], legacy["cards"]);
+    assert_eq!(doc["loreEntries"], legacy["loreEntries"]);
+    assert_eq!(doc["futureLibrary"], legacy["futureLibrary"]);
+    doc["projectContext"]["futureRecord"] = json!({"keep":true});
+    doc["projectContext"]["revisions"][0]["futureRevision"] = json!("retained");
+    doc["projectContext"]["revisions"][0]["content"]["futureContent"] = json!([1, 2]);
+    f.install(&serde_json::to_vec(&doc).unwrap());
+    let state = f.list();
+    let old_bytes = fs::read(f.root.join(PATH)).unwrap();
+    let second = f.apply(
+        &state["revision"],
+        json!({"type":"saveProjectContext","world":"New world","tone":""}),
+    );
+    assert_eq!(second["ok"], true, "{second}");
+    let new_bytes = fs::read(f.root.join(PATH)).unwrap();
+    let context = &second["value"]["document"]["projectContext"];
+    assert_eq!(context["id"], doc["projectContext"]["id"]);
+    assert_eq!(context["revisionCounter"], 2);
+    assert_eq!(
+        context["futureRecord"],
+        doc["projectContext"]["futureRecord"]
+    );
+    assert_eq!(context["revisions"][1]["futureRevision"], "retained");
+    assert_eq!(
+        context["revisions"][1]["content"]["futureContent"],
+        json!([1, 2])
+    );
+    let undo = f.apply(&second["value"]["revision"], json!({"type":"undo"}));
+    assert_eq!(undo["ok"], true, "{undo}");
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), old_bytes);
+    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    assert_eq!(redo["ok"], true, "{redo}");
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), new_bytes);
+    let refused = f.apply(
+        &redo["value"]["revision"],
+        json!({"type":"saveProjectContext","world":"雪".repeat(3334),"tone":""}),
+    );
+    assert_eq!(refused["ok"], false);
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), new_bytes);
+    let mut latest = redo["value"].clone();
+    for i in 0..4 {
+        let saved = f.apply(
+            &latest["revision"],
+            json!({"type":"saveProjectContext","world":format!("World {i}"),"tone":""}),
+        );
+        assert_eq!(saved["ok"], true, "{saved}");
+        latest = saved["value"].clone();
+        assert!(
+            latest["document"]["projectContext"]["revisions"]
+                .as_array()
+                .unwrap()
+                .len()
+                <= 3
+        );
+    }
+    assert_eq!(latest["document"]["cards"], legacy["cards"]);
+    assert_eq!(latest["document"]["loreEntries"], legacy["loreEntries"]);
+    f.service.close().unwrap();
+    let opened = f.service.open_path(&f.root).unwrap();
+    f.session = opened.session_id;
+    assert_eq!(f.list()["document"], latest["document"]);
 }
 
 #[test]
 fn virtual_writing_save_uses_stable_ids_and_refuses_duplicate_or_changed_association() {
-    let mut f=Fixture::new();
-    for name in ["first","second"] {
-        let result=f.request("character.create",json!({"technicalName":name,"displayName":"Same display","dialogueColor":"#aabbcc"}));
-        assert_eq!(result["ok"],true,"{result}");
+    let mut f = Fixture::new();
+    for name in ["first", "second"] {
+        let result = f.request(
+            "character.create",
+            json!({"technicalName":name,"displayName":"Same display","dialogueColor":"#aabbcc"}),
+        );
+        assert_eq!(result["ok"], true, "{result}");
     }
-    let listed=f.list();assert_eq!(listed["document"]["cards"],json!([]));assert!(!f.root.join(PATH).exists());
-    let characters=listed["entities"].as_array().unwrap().iter().filter(|e|e["kind"]=="character" && e["title"]=="Same display").cloned().collect::<Vec<_>>();
-    assert_eq!(characters.len(),2);
-    let mut writing=fields(Kind::Card);writing["linkedCharacterId"]=characters[0]["id"].clone();writing["description"]=json!("My authored writing");
-    let first=f.apply(&listed["revision"],json!({"type":"save","kind":"card","recordId":null,"fields":writing}));assert_eq!(first["ok"],true,"{first}");
-    let baseline=fs::read(f.root.join(PATH)).unwrap();
-    let duplicate=f.apply(&first["value"]["revision"],json!({"type":"save","kind":"card","recordId":null,"fields":writing}));assert_eq!(duplicate["ok"],false);assert_eq!(fs::read(f.root.join(PATH)).unwrap(),baseline);
-    let changed=f.apply(&first["value"]["revision"],json!({"type":"save","kind":"card","recordId":first["value"]["document"]["cards"][0]["id"],"fields":{"linkedCharacterId":characters[1]["id"]}}));assert_eq!(changed["ok"],false);assert_eq!(fs::read(f.root.join(PATH)).unwrap(),baseline);
-    writing["linkedCharacterId"]=characters[1]["id"].clone();
-    let second=f.apply(&first["value"]["revision"],json!({"type":"save","kind":"card","recordId":null,"fields":writing}));assert_eq!(second["ok"],true,"{second}");assert_eq!(second["value"]["document"]["cards"].as_array().unwrap().len(),2);
-    assert_ne!(second["value"]["document"]["cards"][0]["id"],second["value"]["document"]["cards"][1]["id"]);
+    let listed = f.list();
+    assert_eq!(listed["document"]["cards"], json!([]));
+    assert!(!f.root.join(PATH).exists());
+    let characters = listed["entities"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|e| e["kind"] == "character" && e["title"] == "Same display")
+        .cloned()
+        .collect::<Vec<_>>();
+    assert_eq!(characters.len(), 2);
+    let mut writing = fields(Kind::Card);
+    writing["linkedCharacterId"] = characters[0]["id"].clone();
+    writing["description"] = json!("My authored writing");
+    let first = f.apply(
+        &listed["revision"],
+        json!({"type":"save","kind":"card","recordId":null,"fields":writing}),
+    );
+    assert_eq!(first["ok"], true, "{first}");
+    let baseline = fs::read(f.root.join(PATH)).unwrap();
+    let duplicate = f.apply(
+        &first["value"]["revision"],
+        json!({"type":"save","kind":"card","recordId":null,"fields":writing}),
+    );
+    assert_eq!(duplicate["ok"], false);
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), baseline);
+    let changed=f.apply(&first["value"]["revision"],json!({"type":"save","kind":"card","recordId":first["value"]["document"]["cards"][0]["id"],"fields":{"linkedCharacterId":characters[1]["id"]}}));
+    assert_eq!(changed["ok"], false);
+    assert_eq!(fs::read(f.root.join(PATH)).unwrap(), baseline);
+    writing["linkedCharacterId"] = characters[1]["id"].clone();
+    let second = f.apply(
+        &first["value"]["revision"],
+        json!({"type":"save","kind":"card","recordId":null,"fields":writing}),
+    );
+    assert_eq!(second["ok"], true, "{second}");
+    assert_eq!(
+        second["value"]["document"]["cards"]
+            .as_array()
+            .unwrap()
+            .len(),
+        2
+    );
+    assert_ne!(
+        second["value"]["document"]["cards"][0]["id"],
+        second["value"]["document"]["cards"][1]["id"]
+    );
 }
 
 #[test]
 fn character_preview_refuses_dirty_source_and_changed_metadata_review_without_writes() {
-    let mut f=Fixture::new();let listed=f.list();
-    let preview=f.apply(&listed["revision"],create_input(Value::Null));assert_eq!(preview["ok"],true,"{preview}");
-    let source=fs::read(f.root.join("game/definitions/characters.rpy")).unwrap();
-    let opened=f.request("source.open",json!({"path":"game/definitions/characters.rpy"}));assert_eq!(opened["ok"],true,"{opened}");
-    let draft=f.request("source.updateDraft",json!({"path":"game/definitions/characters.rpy","expectedBaseRevision":opened["value"]["baseRevision"],"text":"# Unsaved source draft\n","selectionStart":0,"selectionEnd":0}));assert_eq!(draft["ok"],true,"{draft}");
-    let refused=f.apply(&listed["revision"],create_input(Value::Null));assert_eq!(refused["error"]["code"],"DIRTY_SOURCE","{refused}");assert!(!f.root.join(PATH).exists());assert_eq!(fs::read(f.root.join("game/definitions/characters.rpy")).unwrap(),source);
-    let discarded=f.request("source.discard",json!({"path":"game/definitions/characters.rpy"}));assert_eq!(discarded["ok"],true,"{discarded}");
-    f.service.close().unwrap();let opened=f.service.open_path(&f.root).unwrap();f.session=opened.session_id;
-    let listed=f.list();let preview=f.apply(&listed["revision"],create_input(Value::Null));assert_eq!(preview["ok"],true,"{preview}");
-    let added=f.request("character.create",json!({"technicalName":"other","displayName":"Other","dialogueColor":"#aabbcc"}));assert_eq!(added["ok"],true,"{added}");
-    let source=fs::read(f.root.join("game/definitions/characters.rpy")).unwrap();let metadata=fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap();
-    let mut command=create_input(Value::Null);command["type"]=json!("createGameCharacter");command["expectedPreviewDigest"]=preview["value"]["characterPreview"]["digest"].clone();
-    let refused=f.apply(&listed["revision"],command);assert_eq!(refused["error"]["code"],"REFERENCE_CONFLICT","{refused}");assert!(!f.root.join(PATH).exists());assert_eq!(fs::read(f.root.join("game/definitions/characters.rpy")).unwrap(),source);assert_eq!(fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap(),metadata);
+    let mut f = Fixture::new();
+    let listed = f.list();
+    let preview = f.apply(&listed["revision"], create_input(Value::Null));
+    assert_eq!(preview["ok"], true, "{preview}");
+    let source = fs::read(f.root.join("game/definitions/characters.rpy")).unwrap();
+    let opened = f.request(
+        "source.open",
+        json!({"path":"game/definitions/characters.rpy"}),
+    );
+    assert_eq!(opened["ok"], true, "{opened}");
+    let draft=f.request("source.updateDraft",json!({"path":"game/definitions/characters.rpy","expectedBaseRevision":opened["value"]["baseRevision"],"text":"# Unsaved source draft\n","selectionStart":0,"selectionEnd":0}));
+    assert_eq!(draft["ok"], true, "{draft}");
+    let refused = f.apply(&listed["revision"], create_input(Value::Null));
+    assert_eq!(refused["error"]["code"], "DIRTY_SOURCE", "{refused}");
+    assert!(!f.root.join(PATH).exists());
+    assert_eq!(
+        fs::read(f.root.join("game/definitions/characters.rpy")).unwrap(),
+        source
+    );
+    let discarded = f.request(
+        "source.discard",
+        json!({"path":"game/definitions/characters.rpy"}),
+    );
+    assert_eq!(discarded["ok"], true, "{discarded}");
+    f.service.close().unwrap();
+    let opened = f.service.open_path(&f.root).unwrap();
+    f.session = opened.session_id;
+    let listed = f.list();
+    let preview = f.apply(&listed["revision"], create_input(Value::Null));
+    assert_eq!(preview["ok"], true, "{preview}");
+    let added = f.request(
+        "character.create",
+        json!({"technicalName":"other","displayName":"Other","dialogueColor":"#aabbcc"}),
+    );
+    assert_eq!(added["ok"], true, "{added}");
+    let source = fs::read(f.root.join("game/definitions/characters.rpy")).unwrap();
+    let metadata = fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap();
+    let mut command = create_input(Value::Null);
+    command["type"] = json!("createGameCharacter");
+    command["expectedPreviewDigest"] = preview["value"]["characterPreview"]["digest"].clone();
+    let refused = f.apply(&listed["revision"], command);
+    assert_eq!(refused["error"]["code"], "REFERENCE_CONFLICT", "{refused}");
+    assert!(!f.root.join(PATH).exists());
+    assert_eq!(
+        fs::read(f.root.join("game/definitions/characters.rpy")).unwrap(),
+        source
+    );
+    assert_eq!(
+        fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap(),
+        metadata
+    );
 }

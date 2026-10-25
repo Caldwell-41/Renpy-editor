@@ -71,8 +71,14 @@ impl Preferences {
                         .chars()
                         .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | ':' | '_'))
                     && layout.tree_width.is_none_or(|v| (160..=400).contains(&v))
-                    && layout.reference_selection.as_ref().is_none_or(|v| v.len() <= 160 && !v.chars().any(char::is_control))
-                    && layout.reference_topic.as_ref().is_none_or(|v| v.len() <= 64 && !v.chars().any(char::is_control))
+                    && layout
+                        .reference_selection
+                        .as_ref()
+                        .is_none_or(|v| v.len() <= 160 && !v.chars().any(char::is_control))
+                    && layout
+                        .reference_topic
+                        .as_ref()
+                        .is_none_or(|v| v.len() <= 64 && !v.chars().any(char::is_control))
                     && layout.graph.as_ref().is_none_or(|g| {
                         g.zoom.is_finite()
                             && (0.05..=2.0).contains(&g.zoom)

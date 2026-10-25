@@ -48,12 +48,10 @@ unrelated work; never reset to a historical SHA from an old prompt.
 ## Deliver the selected outcome
 
 Carry an authorised implementation outcome through preparation, implementation,
-focused verification, review and in-scope fixes within its cumulative allowance.
+focused verification, review and in-scope fixes.
 Checkpoints are internal progress, not automatic stops. Preserve review-only scope
-and explicit user limits. For a newly selected work ticket, determine, record and
-state its finite allowance and basis before execution without separate budget approval.
-The [budget policy](docs/WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
-owns the 50% contingency ceiling, cumulative accounting and reassessment. Report a
+and explicit user limits. Follow [operation limits and reassessment](docs/WORKFLOW.md#5-operation-limits-and-reassessment)
+when selecting costly operations or revisiting failed corrections. Report a
 concrete blocker when continuation needs a real decision or unavailable capability.
 
 For test-host selection, qualification cadence or a capability handoff, follow

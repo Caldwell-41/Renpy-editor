@@ -1,5 +1,27 @@
 # Current status
 
+## Agent operation-limit policy amendment
+
+2026-10-25: The user approved replacing routine-work budgets with limits for
+costly operations, adding root-cause debugging guidance and reconciling shared text
+in 26 open 3B issues. [The maintenance task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
+owns this documentation amendment on PR #61. Policy `7ce51a9` is published; all 26
+issue bodies pass read-back with acceptance, blockers and metadata preserved.
+Final automatic PR CI audit follows the documentation closeout. Existing acceptance
+and explicit task limits remain unchanged.
+
+## Automatic code checks pass CI
+
+2026-10-25: Retrospective items 2 and 3 are implemented on
+`codex/automatic-code-checks`. Ordinary discovery excludes the compiled Mac recorder
+checks; PR/main CI now selects frontend checks and Rust formatting. Local checks
+pass. [Draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61) is published
+against the existing Screens branch. Its implementation candidate passes both
+automatic Ubuntu jobs, including all 231 frontend tests and Rust formatting.
+[The maintenance task](../tasks/active/automatic-code-checks.md#ci-audit) owns the
+exact run, audit and allowance. No fix was needed. Merge remains unselected.
+Existing #36 acceptance remains unchanged.
+
 ## L17 bounded Help proof accepted
 
 2026-10-24: [#36](https://github.com/Caldwell-41/Renpy-editor/issues/36)'s remaining

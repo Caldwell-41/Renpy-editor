@@ -1,6 +1,6 @@
 # Shared Phase 2 and Phase 3 delivery
 
-Read this reference when selecting dependent Phase 2/3 outcomes, assigning independent work, integrating shared services or preparing a continuation prompt. It owns the selected cross-phase sequence and bounded-delivery approach. [WORKFLOW](../../WORKFLOW.md) owns general budgets, parallel worktrees, host routing, waiting and status maintenance. The current task and user direction choose actual work, host, model settings and authorization. Earlier prompt templates and team defaults here grant no new execution or allowance. Each phase retains its own requirement/acceptance owner.
+Read this reference when selecting dependent Phase 2/3 outcomes, assigning independent work, integrating shared services or preparing a continuation prompt. It owns the selected cross-phase sequence and bounded-delivery approach. [WORKFLOW](../../WORKFLOW.md) owns operation limits, parallel worktrees, host routing, waiting and status maintenance. The current task and user direction choose actual work, host, model settings and authorization. Earlier prompt templates and team defaults here grant no new execution or allowance. Each phase retains its own requirement/acceptance owner.
 
 <a id="19-selected-shared-foundations-and-two-lane-delivery"></a>
 
@@ -35,10 +35,10 @@ This exception changes scheduling only; it grants no acceptance, renews no exhau
 allowance and changes no other phase's entry gate. Canvas work, including its design
 session and rendering proof, stays deferred until explicitly selected by the user.
 
-After a work ticket is selected, the agent records and states a finite delivery
-allowance and its basis, then proceeds under [WORKFLOW's budget policy](../../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
-without separate budget approval. That policy owns contingency, cumulative charging
-and intervention boundaries. No product work ticket is selected by this amendment.
+After a work ticket is selected, apply [WORKFLOW's operation-limit policy](../../WORKFLOW.md#5-operation-limits-and-reassessment).
+Record any applicable limits in the selected ticket; routine work needs no numerical
+allowance. That policy owns cumulative consumption and intervention boundaries.
+No product work ticket is selected by this amendment.
 
 <a id="build-shared-capabilities-once-when-first-needed"></a>
 
@@ -122,7 +122,7 @@ migration work remain serial; the owner can implement them directly.
 - The owner selects combined changed-scope checks and records evidence against the
   integrated candidate. Lanes run focused checks for their work; use shared fixtures
   without duplicating expensive native/package matrices for unchanged inputs.
-  WORKFLOW/TESTING allowances, target requirements and
+  WORKFLOW/TESTING operation limits, target requirements and
   [ci-watch/manual fallback](../../WORKFLOW.md#waiting-without-model-polling) still apply.
 - Owner review covers integration. Any independently required checkpoint review remains
   a separate pass. This team plan creates no new reviewer mandate or CI allowance and
@@ -158,7 +158,7 @@ five stages are a scheduling/dependency map, not five phase-sized agent goals.
 The targets below are planning selections for future briefs, not extra requirement
 IDs or execution approval. Existing 2A–2C and 3A–3D/3F gates retain authority. Before
 starting each target, fix its concrete allowed operations, affected test hosts,
-finite expensive-run allowance and dependencies against the then-current baseline.
+any applicable costly-operation limits and dependencies against the then-current baseline.
 Split a target further when it cannot be proved as one coherent bounded result;
 do not silently turn it into delivery of the remaining phase.
 
@@ -213,19 +213,19 @@ not a requirement to serialize every row of this table.
 Complete implementation, review and required automated platform qualification from
 the current development session, using [CI-first routing](../../WORKFLOW.md#test-host-routing-and-ownership)
 where suitable. Transfer to another local platform only for an identified remaining
-native capability, carrying completed evidence and the unchanged outcome/budget.
+native capability, carrying completed evidence and the unchanged outcome and operation limits.
 Transfer writer ownership for the handed-off assignment under
 [parallel worktrees](../../WORKFLOW.md#parallel-agents-and-worktrees); independent
 assignments may continue. Keep all selected both-target acceptance gates.
 
-Related deliverables may be selected together with one cumulative allowance and a
+Related deliverables may be selected together with shared applicable operation limits and a
 shared qualification point. Internal checkpoints do not automatically require a
 machine switch. Record each deliverable's evidence separately; incomplete platform
 qualification remains pending and is not reported as accepted. This scheduling option
 does not select another feature or waive a dependency's required acceptance.
 
 1. **Select one result.** Record the target, user-visible outcome, exclusions, branch/
-   baseline, required dependencies, affected test hosts and finite execution allowance.
+   baseline, required dependencies, affected test hosts and any applicable operation limits.
 2. **Assign bounded work.** Use the selected GPT-6.1 Sol High owner and zero to two
    GPT-6.1 Sol High implementation agents on independent declared files/contracts.
    Use one writer for shared mutable code; sequence dependent work. A short serial
@@ -235,7 +235,7 @@ does not select another feature or waive a dependency's required acceptance.
 4. **Check and fix.** Run relevant cheap checks and required actual-path/native proof;
    self-review the integrated diff and real UI where changed. Correct in-scope findings
    and rerun affected checks. Preserve independent review where already required.
-   Existing cumulative budgets and two-correction reassessment rules remain.
+   Shared operation limits and two-correction reassessment rules remain.
 5. **Close the record.** Update canonical behavioral docs/ADRs as needed, the current
    brief, linked evidence and live HANDOVER/CURRENT with exact refs, failures/skips,
    remaining limitations and any pending operation. Commit and publish only within
@@ -273,10 +273,10 @@ Use one GPT-6.1 Sol High owner and zero to two GPT-6.1 Sol High implementation a
 only for useful independent assignments with declared file/contract ownership.
 Scope: <included operations and explicit exclusions>.
 Prove: <decisive user-action/source/persistence checks and required native evidence>.
-Allowance: <finite builds/dispatches plus existing problem budget, not a fresh reset>.
+Operation limits: <applicable costly operations and existing consumption, or none>.
 Complete implementation, focused checks, review and in-scope fixes; update canonical
 docs, the current brief, linked evidence and HANDOVER. Publish within the recorded authorization.
-Prepare and dispatch focused CI within scope/allowance; follow WORKFLOW's waiting
+Prepare and dispatch focused CI within scope and applicable limits; follow WORKFLOW's waiting
 policy and audit case/artifact evidence. Do not transfer merely to run automated checks.
 Return the result and a prompt for the next distinct deliverable; do not start it.
 Resume this same target/chat after any workflow wait. <Specific review/publish limits>.

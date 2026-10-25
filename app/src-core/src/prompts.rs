@@ -120,7 +120,9 @@ pub struct PreviewRequest {
     pub maximum_response: usize,
     pub context_ceiling: usize,
 }
-fn include_project_context() -> bool { true }
+fn include_project_context() -> bool {
+    true
+}
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PromptWorkspace {
@@ -149,7 +151,14 @@ fn validate(doc: &Value, project: &str) -> Result<(), PromptError> {
     {
         return Err(PromptError::Unavailable);
     }
-    for action in [ACTION, CONTINUE, DRAFT, CARD, LORE, crate::rewrite::batch::ACTION] {
+    for action in [
+        ACTION,
+        CONTINUE,
+        DRAFT,
+        CARD,
+        LORE,
+        crate::rewrite::batch::ACTION,
+    ] {
         if let Some(p) = doc["prompts"].get(action) {
             if !p.is_object()
                 || p["text"]
@@ -377,7 +386,8 @@ impl AuthoringService {
                                 .filter(|i| {
                                     i.record_id == r["id"].as_str().unwrap()
                                         && i.revision_id == rev["id"].as_str().unwrap()
-                                        && (i.field == "citations" || i.field == "supportingReadSet")
+                                        && (i.field == "citations"
+                                            || i.field == "supportingReadSet")
                                 })
                                 .map(|i| i.state)
                                 .collect();
@@ -411,13 +421,19 @@ impl AuthoringService {
         }
         let prompt = self.prompts_for(project, project_id, &r.action)?;
         let batch = r.action == crate::rewrite::batch::ACTION;
-        if batch != r.batch.is_some() { return Err(PromptError::Invalid); }
+        if batch != r.batch.is_some() {
+            return Err(PromptError::Invalid);
+        }
         let drafting = r.action == DRAFT;
         let continuing = r.action == CONTINUE;
         let card = r.action == CARD;
         let lore = r.action == LORE;
-        if !lore && (!r.lore_id.is_empty() || r.lore_scope.is_some()) { return Err(PromptError::Invalid); }
-        if !card && !r.card_id.is_empty() { return Err(PromptError::Invalid); }
+        if !lore && (!r.lore_id.is_empty() || r.lore_scope.is_some()) {
+            return Err(PromptError::Invalid);
+        }
+        if !card && !r.card_id.is_empty() {
+            return Err(PromptError::Invalid);
+        }
         if drafting {
             crate::scene::validate_display(&r.display_name).map_err(PromptError::History)?;
             if !r.scene_id.is_empty()
@@ -659,7 +675,9 @@ impl AuthoringService {
             included.push(json!({"kind":s.kind,"recordId":s.record_id,"revisionId":s.revision_id,"content":content}));
         }
         let mut supporting_paths = BTreeSet::new();
-        if let Some(scene)=scene { supporting_paths.insert(scene.source_path.clone()); }
+        if let Some(scene) = scene {
+            supporting_paths.insert(scene.source_path.clone());
+        }
         let mut definitions = vec![];
         for c in &ws.authoring.characters {
             if continuing || drafting || (batch && (r.batch.as_ref().unwrap().speaker_ids.contains(&c.id) || matches!(&r.batch.as_ref().unwrap().character,Some(crate::rewrite::batch::CharacterPermission::Update{character_id}) if character_id==&c.id) || scene.unwrap().beats.iter().any(|b|r.batch.as_ref().unwrap().replacement_ids.contains(&b.id) && matches!(&b.payload,BeatPayload::Dialogue{character_id,..} if character_id==&c.id)))) || Some(c.id.as_str()) == character {
@@ -743,47 +761,90 @@ impl AuthoringService {
             story["sceneBeats"] = json!(scene
                 .beats
                 .iter()
-                .map(
-                    |b| if b.protected || b.owner.is_some() || b.conditional_branch.is_some()
-                        || crate::scene::logic_boundary(&b.payload) {
+                .map(|b| {
+                    if b.protected
+                        || b.owner.is_some()
+                        || b.conditional_branch.is_some()
+                        || crate::scene::logic_boundary(&b.payload)
+                    {
                         json!({"id":b.id,"excluded":"Custom/nested source; runtime unknown"})
                     } else {
                         json!({"id":b.id,"payload":b.payload})
                     }
-                )
+                })
                 .collect::<Vec<_>>());
         }
         if batch {
-            story["batch"] = self.batch_context(project,project_id,&r.scene_id,&r.expected_source_revision,r.batch.as_ref().unwrap()).map_err(|_|PromptError::Invalid)?;
+            story["batch"] = self
+                .batch_context(
+                    project,
+                    project_id,
+                    &r.scene_id,
+                    &r.expected_source_revision,
+                    r.batch.as_ref().unwrap(),
+                )
+                .map_err(|_| PromptError::Invalid)?;
             // The selected saved Beat provides context only; permissions bind every mutation.
             story["source"] = Value::Null;
         }
         let contract = json!({"version":1,"action":r.action,"target":{"sceneId":r.scene_id,"beatId":r.beat_id},"authority":"Preview only; no operation may be executed or applied","runtimeState":"Unknown; defaults and conditional ownership are not observed runtime facts"});
         if card {
             crate::scene::validate_display(&r.display_name).map_err(PromptError::History)?;
-            let record = if r.card_id.is_empty() { None } else {
-                Some(doc["cards"].as_array().unwrap().iter().find(|x| x["id"] == r.card_id).ok_or(PromptError::Stale)?)
+            let record = if r.card_id.is_empty() {
+                None
+            } else {
+                Some(
+                    doc["cards"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .find(|x| x["id"] == r.card_id)
+                        .ok_or(PromptError::Stale)?,
+                )
             };
-            let current = record.and_then(|x| x["revisions"].as_array()?.iter().find(|v| v["id"] == x["currentRevisionId"]));
+            let current = record.and_then(|x| {
+                x["revisions"]
+                    .as_array()?
+                    .iter()
+                    .find(|v| v["id"] == x["currentRevisionId"])
+            });
             story["cardTarget"] = json!({"recordId":if r.card_id.is_empty(){Value::Null}else{json!(r.card_id)},"title":r.display_name,"currentRevisionId":record.map(|r| &r["currentRevisionId"]),"approvedRevisionId":record.map(|r| &r["approvedRevisionId"]),"content":current.map(|v| known_content(&v["content"],"card"))});
         }
         if lore {
             crate::scene::validate_display(&r.display_name).map_err(PromptError::History)?;
-            let record = if r.lore_id.is_empty() { None } else {
-                Some(doc["loreEntries"].as_array().unwrap().iter().find(|x| x["id"] == r.lore_id).ok_or(PromptError::Stale)?)
+            let record = if r.lore_id.is_empty() {
+                None
+            } else {
+                Some(
+                    doc["loreEntries"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .find(|x| x["id"] == r.lore_id)
+                        .ok_or(PromptError::Stale)?,
+                )
             };
-            let current = record.and_then(|x| x["revisions"].as_array()?.iter().find(|v| v["id"] == x["currentRevisionId"]));
+            let current = record.and_then(|x| {
+                x["revisions"]
+                    .as_array()?
+                    .iter()
+                    .find(|v| v["id"] == x["currentRevisionId"])
+            });
             let scope = r.lore_scope.as_ref().ok_or(PromptError::Invalid)?;
-            references::validate_generated_scope(scope).map_err(|_|PromptError::Invalid)?;
+            references::validate_generated_scope(scope).map_err(|_| PromptError::Invalid)?;
             story["loreTarget"] = json!({"recordId":if r.lore_id.is_empty(){Value::Null}else{json!(r.lore_id)},"title":r.display_name,"scope":scope,"currentRevisionId":record.map(|r| &r["currentRevisionId"]),"approvedRevisionId":record.map(|r| &r["approvedRevisionId"]),"content":current.map(|v| known_content(&v["content"],"lore"))});
         }
         // Only the project's two authored fields enter shared writing context.
         // Legacy styleNotes remain stored/readable, but never compete as hidden tone.
         let project_context = doc.get("projectContext").and_then(|record| {
-            record["revisions"].as_array()?.iter()
+            record["revisions"]
+                .as_array()?
+                .iter()
                 .find(|revision| revision["id"] == record["currentRevisionId"])
-                .map(|revision| json!({"recordId":record["id"],"revisionId":revision["id"],
-                    "world":revision["content"]["world"],"tone":revision["content"]["tone"]}))
+                .map(|revision| {
+                    json!({"recordId":record["id"],"revisionId":revision["id"],
+                    "world":revision["content"]["world"],"tone":revision["content"]["tone"]})
+                })
         });
         let mut user = json!({"task":r.task,"story":story,"definitions":definitions,"references":included,"responseContract":contract});
         if r.include_project_context {
@@ -801,7 +862,12 @@ impl AuthoringService {
         let component_bytes: BTreeMap<&str, usize> = [
             ("instructions", prompt.effective_text.len()),
             ("task", r.task.len()),
-            ("projectContext", user.get("projectContext").map(|v| serde_json::to_vec(v).unwrap().len()).unwrap_or(0)),
+            (
+                "projectContext",
+                user.get("projectContext")
+                    .map(|v| serde_json::to_vec(v).unwrap().len())
+                    .unwrap_or(0),
+            ),
             ("story", serde_json::to_vec(&story).unwrap().len()),
             (
                 "definitions",

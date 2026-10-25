@@ -3,21 +3,74 @@ use std::cell::{Cell, RefCell};
 
 #[test]
 fn connection_save_publishes_settings_with_verified_key_and_failure_preserves_saved_profiles() {
-    let f=Fixture::new();let original=f.init();f.replace(&original,"public-old-key").unwrap();
-    let before=f.read().unwrap();let mut settings=before.profiles[0].settings.clone();settings.label="Connected draft".into();
-    let(id,_)=save_connection(&f,&f,&token(&before),None,settings.clone(),"public-new-key").unwrap();
-    let saved=f.read().unwrap();assert_ne!(id,original);assert_eq!(saved.profiles.len(),2);
-    assert_eq!(saved.profiles[0],before.profiles[0]);let profile=&saved.profiles[1];
-    assert_eq!(profile.settings,settings);assert_eq!(&*Secrets::read(&f,&id,profile.credential.as_ref().unwrap()).unwrap().unwrap(),"public-new-key");
-    let mut changed=settings;changed.label="Must not publish on failure".into();
+    let f = Fixture::new();
+    let original = f.init();
+    f.replace(&original, "public-old-key").unwrap();
+    let before = f.read().unwrap();
+    let mut settings = before.profiles[0].settings.clone();
+    settings.label = "Connected draft".into();
+    let (id, _) = save_connection(
+        &f,
+        &f,
+        &token(&before),
+        None,
+        settings.clone(),
+        "public-new-key",
+    )
+    .unwrap();
+    let saved = f.read().unwrap();
+    assert_ne!(id, original);
+    assert_eq!(saved.profiles.len(), 2);
+    assert_eq!(saved.profiles[0], before.profiles[0]);
+    let profile = &saved.profiles[1];
+    assert_eq!(profile.settings, settings);
+    assert_eq!(
+        &*Secrets::read(&f, &id, profile.credential.as_ref().unwrap())
+            .unwrap()
+            .unwrap(),
+        "public-new-key"
+    );
+    let mut changed = settings;
+    changed.label = "Must not publish on failure".into();
     f.native_unavailable.set(true);
-    assert!(save_connection(&f,&f,&token(&saved),Some(&id),changed.clone(),"public-failed-key").is_err());
-    assert_eq!(f.read().unwrap().profiles,saved.profiles);f.native_unavailable.set(false);
-    let before=f.read().unwrap();f.fail_write.set(f.writes.get()+2);
-    assert!(save_connection(&f,&f,&token(&before),Some(&id),changed,"public-failed-publication").is_err());
-    assert_eq!(f.read().unwrap().profiles,saved.profiles);
-    assert_eq!(&*Secrets::read(&f,&id,profile.credential.as_ref().unwrap()).unwrap().unwrap(),"public-new-key");
-    assert!(save_connection(&f,&f,"stale",None,profile.settings.clone(),"public-key").is_err());
+    assert!(save_connection(
+        &f,
+        &f,
+        &token(&saved),
+        Some(&id),
+        changed.clone(),
+        "public-failed-key"
+    )
+    .is_err());
+    assert_eq!(f.read().unwrap().profiles, saved.profiles);
+    f.native_unavailable.set(false);
+    let before = f.read().unwrap();
+    f.fail_write.set(f.writes.get() + 2);
+    assert!(save_connection(
+        &f,
+        &f,
+        &token(&before),
+        Some(&id),
+        changed,
+        "public-failed-publication"
+    )
+    .is_err());
+    assert_eq!(f.read().unwrap().profiles, saved.profiles);
+    assert_eq!(
+        &*Secrets::read(&f, &id, profile.credential.as_ref().unwrap())
+            .unwrap()
+            .unwrap(),
+        "public-new-key"
+    );
+    assert!(save_connection(
+        &f,
+        &f,
+        "stale",
+        None,
+        profile.settings.clone(),
+        "public-key"
+    )
+    .is_err());
 }
 struct Fixture {
     records: RefCell<ProfileStore>,
@@ -344,18 +397,32 @@ fn retained_entry_retry_rechecks_origin_and_settings_and_cancel_does_not_write()
 
 #[test]
 fn compatibility_saved_configuration_reopen_rotation_controls_and_clear_are_bound() {
-    let f=Fixture::new();let id=f.init();f.replace(&id,"public-synthetic-alpha").unwrap();
-    let before=f.read().unwrap();let credential=before.profiles[0].credential.clone();
+    let f = Fixture::new();
+    let id = f.init();
+    f.replace(&id, "public-synthetic-alpha").unwrap();
+    let before = f.read().unwrap();
+    let credential = before.profiles[0].credential.clone();
     assert!(!before.profiles[0].compatibility_ready());
-    let checked=record_compatibility(&f,&token(&before),&id).unwrap();
-    assert!(checked.profiles[0].compatibility_ready());assert_eq!(checked.profiles[0].credential,credential);
-    let reopened=crate::ai_profiles::decode(&serde_json::to_vec(&checked).unwrap()).unwrap();assert!(reopened.profiles[0].compatibility_ready());
-    let mut changed=checked.profiles[0].settings.clone();changed.temperature=Some(0.8);
-    save(&f,&token(&checked),Some(&id),changed).unwrap();let changed=f.read().unwrap();assert!(!changed.profiles[0].compatibility_ready());
-    assert!(record_compatibility(&f,&token(&checked),&id).is_err());assert_eq!(f.read().unwrap(),changed);
-    let checked=record_compatibility(&f,&token(&changed),&id).unwrap();assert!(checked.profiles[0].compatibility_ready());
-    f.replace(&id,"public-synthetic-beta").unwrap();assert!(!f.read().unwrap().profiles[0].compatibility_ready());
-    let before=f.read().unwrap();let checked=record_compatibility(&f,&token(&before),&id).unwrap();assert!(checked.profiles[0].compatibility_ready());
-    let cleared=clear_compatibility(&f,&token(&checked),&id).unwrap();assert!(!cleared.profiles[0].compatibility_ready());
-    assert_eq!(f.keys.borrow().len(),1);
+    let checked = record_compatibility(&f, &token(&before), &id).unwrap();
+    assert!(checked.profiles[0].compatibility_ready());
+    assert_eq!(checked.profiles[0].credential, credential);
+    let reopened = crate::ai_profiles::decode(&serde_json::to_vec(&checked).unwrap()).unwrap();
+    assert!(reopened.profiles[0].compatibility_ready());
+    let mut changed = checked.profiles[0].settings.clone();
+    changed.temperature = Some(0.8);
+    save(&f, &token(&checked), Some(&id), changed).unwrap();
+    let changed = f.read().unwrap();
+    assert!(!changed.profiles[0].compatibility_ready());
+    assert!(record_compatibility(&f, &token(&checked), &id).is_err());
+    assert_eq!(f.read().unwrap(), changed);
+    let checked = record_compatibility(&f, &token(&changed), &id).unwrap();
+    assert!(checked.profiles[0].compatibility_ready());
+    f.replace(&id, "public-synthetic-beta").unwrap();
+    assert!(!f.read().unwrap().profiles[0].compatibility_ready());
+    let before = f.read().unwrap();
+    let checked = record_compatibility(&f, &token(&before), &id).unwrap();
+    assert!(checked.profiles[0].compatibility_ready());
+    let cleared = clear_compatibility(&f, &token(&checked), &id).unwrap();
+    assert!(!cleared.profiles[0].compatibility_ready());
+    assert_eq!(f.keys.borrow().len(), 1);
 }

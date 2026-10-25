@@ -137,14 +137,18 @@ pub(super) fn project(
         .map(|(start, _)| start + bom)
         .collect::<HashSet<_>>();
     for beat in beats {
-        if beat.structural_placeholder { continue; }
+        if beat.structural_placeholder {
+            continue;
+        }
         let path = guards(beat, beats);
         if let Some(branch) = &beat.conditional_branch {
             let owner = crate::metadata::BeatOwner {
                 group_id: branch.group_id.clone(),
                 branch_id: beat.id.clone(),
             };
-            let child = beats.iter().find(|b| b.owner.as_ref() == Some(&owner) && !b.structural_placeholder);
+            let child = beats
+                .iter()
+                .find(|b| b.owner.as_ref() == Some(&owner) && !b.structural_placeholder);
             let mut guard_path = path.clone();
             guard_path.push(FlowGuard {
                 branch_id: beat.id.clone(),

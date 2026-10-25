@@ -1,5 +1,32 @@
 # Current outcome handover
 
+## Agent operation-limit policy amendment
+
+The user approved the repo policy and shared budget-text updates in 26 open 3B
+issues. [The task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
+owns scope and verification on `codex/automatic-code-checks`, draft PR #61.
+Policy `7ce51a9` is published. All 26 issue bodies point to that immutable policy
+and pass independent read-back; acceptance, blockers and metadata remain unchanged.
+Snapshots and verification are ignored under
+`.toolchains/automatic-code-checks/operation-policy/`. Audit the final automatic PR
+run after this documentation closeout. This amendment needs no numerical work
+allowance. Prior limits remain historical; product work and merge remain unselected.
+
+## Automatic code checks reviewed
+
+The selected retrospective maintenance is published on
+`codex/automatic-code-checks`, based on `23e27b4`. Commit `e8039df` separates the
+Rust formatting baseline; the maintenance commit contains test selection, automatic
+PR/main checks and runbook changes. [Draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61)
+targets the existing Screens branch. [The task](../tasks/active/automatic-code-checks.md#ci-audit)
+owns the successful audit of run 40131940297, attempt 1, published implementation
+candidate `248c8fc`. Both automatic jobs and all 231 frontend tests pass; no fix was
+needed. The watcher event is acknowledged. Charged use is 11/13 including final
+documentation publication and its automatic check audit. Exact head check status
+is available on the PR; documentation successors do not redefine the tested
+implementation candidate. Merge remains unselected. The previous L17 acceptance
+and protected recovery below remain intact.
+
 <a id="active-l17-integration-handover"></a>
 
 ## L17 closeout

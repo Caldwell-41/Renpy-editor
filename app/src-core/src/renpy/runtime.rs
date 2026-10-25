@@ -5,9 +5,9 @@ use crate::transaction::{DirectoryAnchor, ExecutionGate};
 use serde::Deserialize;
 use std::process::{ChildStderr, ChildStdout};
 
+pub(crate) mod canvas;
 pub(crate) mod diagnostics;
 mod platform;
-pub(crate) mod canvas;
 
 const READY_MARKER: &[u8] = b"LOOMLIGHT_RUNTIME_READY_V1";
 const RETAINED_OUTPUT: usize = 2 * 1024 * 1024;
@@ -73,21 +73,32 @@ pub(crate) struct RuntimeProcess {
 // Release runtime context handles before a scratch job's destructor can remove its
 // directory, including pre-spawn errors and a failed worker-thread creation.
 struct RuntimeInputs {
-    context: Option<(ValidatedSdk, DirectoryAnchor, crate::transaction::ExecutionManifest)>,
+    context: Option<(
+        ValidatedSdk,
+        DirectoryAnchor,
+        crate::transaction::ExecutionManifest,
+    )>,
     scratch: Option<crate::scratch_preview::ScratchPreview>,
 }
 impl Drop for RuntimeInputs {
-    fn drop(&mut self) { self.context.take(); }
+    fn drop(&mut self) {
+        self.context.take();
+    }
 }
 
 impl RuntimeProcess {
     pub(crate) fn start_preview(
-        sdk: ValidatedSdk, anchor: DirectoryAnchor, kind: RuntimeKind,
-        gate: Arc<ExecutionGate>, manifest: crate::transaction::ExecutionManifest,
+        sdk: ValidatedSdk,
+        anchor: DirectoryAnchor,
+        kind: RuntimeKind,
+        gate: Arc<ExecutionGate>,
+        manifest: crate::transaction::ExecutionManifest,
         scratch: Option<crate::scratch_preview::ScratchPreview>,
     ) -> Result<Self, RenpyError> {
         let source_manifest = manifest;
-        let (anchor, manifest) = scratch.as_ref().map(|s| (s.anchor().clone(), s.manifest.clone()))
+        let (anchor, manifest) = scratch
+            .as_ref()
+            .map(|s| (s.anchor().clone(), s.manifest.clone()))
             .unwrap_or((anchor, source_manifest.clone()));
         sdk.revalidate(false)?;
         anchor
@@ -123,7 +134,9 @@ impl RuntimeProcess {
                 command.args(&argv[1..]).current_dir(anchor.path());
                 #[cfg(test)]
                 {
-                    if scratch.is_none() { command.env("RENPY_SKIP_MAIN_MENU", "1"); }
+                    if scratch.is_none() {
+                        command.env("RENPY_SKIP_MAIN_MENU", "1");
+                    }
                     command.env("RENPY_DISABLE_SOUND", "1");
                     if std::env::var("LOOMLIGHT_RUNTIME_TEST_HEADLESS").as_deref() == Ok("1") {
                         command
@@ -134,7 +147,9 @@ impl RuntimeProcess {
                 }
                 if scratch.is_some() {
                     // Enter the ordinary game context before the generated start helper.
-                    command.env("RENPY_SKIP_MAIN_MENU", "1").env("RENPY_SKIP_SPLASHSCREEN", "1");
+                    command
+                        .env("RENPY_SKIP_MAIN_MENU", "1")
+                        .env("RENPY_SKIP_SPLASHSCREEN", "1");
                 }
                 // Only the exact reviewed project helper uses this; it is not an SDK flag.
                 if kind == RuntimeKind::Run {
@@ -153,7 +168,10 @@ impl RuntimeProcess {
             scratch,
         )?;
         process.manifest = Arc::new(source_manifest.clone());
-        process.launch_revision = Some(format!("{:x}", Sha256::digest(serde_json::to_vec(&source_manifest).unwrap_or_default())));
+        process.launch_revision = Some(format!(
+            "{:x}",
+            Sha256::digest(serde_json::to_vec(&source_manifest).unwrap_or_default())
+        ));
         Ok(process)
     }
 
@@ -170,16 +188,32 @@ impl RuntimeProcess {
         validation_deadline: Duration,
         readiness_required: bool,
     ) -> Result<Self, RenpyError> {
-        Self::spawn_commands_owned(commands, context, kind, gate, validation_deadline, readiness_required, None)
+        Self::spawn_commands_owned(
+            commands,
+            context,
+            kind,
+            gate,
+            validation_deadline,
+            readiness_required,
+            None,
+        )
     }
     fn spawn_commands_owned(
         commands: Vec<Command>,
-        context: Option<(ValidatedSdk, DirectoryAnchor, crate::transaction::ExecutionManifest)>,
-        kind: RuntimeKind, gate: Arc<ExecutionGate>, validation_deadline: Duration,
-        readiness_required: bool, scratch: Option<crate::scratch_preview::ScratchPreview>,
+        context: Option<(
+            ValidatedSdk,
+            DirectoryAnchor,
+            crate::transaction::ExecutionManifest,
+        )>,
+        kind: RuntimeKind,
+        gate: Arc<ExecutionGate>,
+        validation_deadline: Duration,
+        readiness_required: bool,
+        scratch: Option<crate::scratch_preview::ScratchPreview>,
     ) -> Result<Self, RenpyError> {
         let mut inputs = RuntimeInputs { context, scratch };
-        let manifest = inputs.context
+        let manifest = inputs
+            .context
             .as_ref()
             .map(|(_, _, manifest)| manifest.clone())
             .unwrap_or_default();
@@ -252,13 +286,14 @@ impl RuntimeProcess {
                         }
                         #[cfg(test)]
                         worker_cancel.record_spawn();
-                        let mut child = match platform::OwnedChild::spawn(&mut command, anchor, false) {
-                            Ok(value) => value,
-                            Err(_) => {
-                                outcome = "spawnFailed";
-                                break;
-                            }
-                        };
+                        let mut child =
+                            match platform::OwnedChild::spawn(&mut command, anchor, false) {
+                                Ok(value) => value,
+                                Err(_) => {
+                                    outcome = "spawnFailed";
+                                    break;
+                                }
+                            };
                         set_phase(
                             &worker_observation,
                             if kind == RuntimeKind::Run {
@@ -339,12 +374,18 @@ impl RuntimeProcess {
                     let stale = inputs.context.as_ref().map(|_| true);
                     if cleanup_ok {
                         inputs.context.take();
-                        if let Some(scratch) = inputs.scratch.as_mut() { cleanup_ok = scratch.cleanup(); }
-                        if !cleanup_ok { outcome = "cleanupFailed"; }
+                        if let Some(scratch) = inputs.scratch.as_mut() {
+                            cleanup_ok = scratch.cleanup();
+                        }
+                        if !cleanup_ok {
+                            outcome = "cleanupFailed";
+                        }
                     }
                     if !cleanup_ok {
                         // A child may still own these files. Retain the job for recovery.
-                        if let Some(scratch) = inputs.scratch.take() { std::mem::forget(scratch); }
+                        if let Some(scratch) = inputs.scratch.take() {
+                            std::mem::forget(scratch);
+                        }
                     }
                     if let Ok(mut state) = worker_observation.lock() {
                         state.stale = stale;
