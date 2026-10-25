@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "help-composition",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "inline-v1", "variantId": "inline", "approval": null },
+    { "id": "context-v1", "variantId": "context", "approval": null },
+    { "id": "focused-v1", "variantId": "focused", "approval": null }
+  ]
+}

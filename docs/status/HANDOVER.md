@@ -1,31 +1,47 @@
 # Current outcome handover
 
-## Agent operation-limit policy amendment
+## L02 design selection pending
 
-The user approved the repo policy and shared budget-text updates in 26 open 3B
-issues. [The task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
-owns scope and verification on `codex/automatic-code-checks`, draft PR #61.
-Policy `7ce51a9` is published. All 26 issue bodies point to that immutable policy
-and pass independent read-back; acceptance, blockers and metadata remain unchanged.
-Snapshots and verification are ignored under
-`.toolchains/automatic-code-checks/operation-policy/`. Audit the final automatic PR
-run after this documentation closeout. This amendment needs no numerical work
-allowance. Prior limits remain historical; product work and merge remain unselected.
+The user selected implementing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
+on a new branch through the implement skill. The coordinating agent owns local branch
+`codex/37-compose-help-layout`, based on fetched `8f7f9e7191f3b9c27343c7f4d4f5fdc65b2135f4`,
+with `codex/phase3b-screen-designer` as the intended integration destination. Development
+is on Mac ARM64. The worktree was clean at entry; unrelated worktrees and protected
+recovery remain untouched.
 
-## Automatic code checks reviewed
+Three independent draft revisions under `app/design-lab/screens/help-composition/`
+compare inline, contextual and focused add forms within the approved flow-v1 workflow.
+The recommendation is `focused-v1`. Production components have not changed. All
+drafts use fictional browser-memory data. [The evidence](../tasks/evidence/simple-help-layout.md)
+owns review routes, simulation limits, checks and the proposed TDD boundaries.
+The existing screen runner passes 36 rendering cases. The first frontend run's
+Python-version failure, corrected eight-test result and supported-interpreter full
+run (231/231 passing) are retained there.
 
-The selected retrospective maintenance is published on
-`codex/automatic-code-checks`, based on `23e27b4`. Commit `e8039df` separates the
-Rust formatting baseline; the maintenance commit contains test selection, automatic
-PR/main checks and runbook changes. [Draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61)
-targets the existing Screens branch. [The task](../tasks/active/automatic-code-checks.md#ci-audit)
-owns the successful audit of run 40131940297, attempt 1, published implementation
-candidate `248c8fc`. Both automatic jobs and all 231 frontend tests pass; no fix was
-needed. The watcher event is acknowledged. Charged use is 11/13 including final
-documentation publication and its automatic check audit. Exact head check status
-is available on the PR; documentation successors do not redefine the tested
-implementation candidate. Merge remains unselected. The previous L17 acceptance
-and protected recovery below remain intact.
+Next action is the user's design choice and confirmation of the proposed core,
+ScreensWorkspace DOM and real UI-to-core/runtime test boundaries. Root AGENTS.md
+requires design approval before non-trivial production UI edits; the tdd skill
+requires agreement on test boundaries before adding tests. Continue in this thread.
+Once approved, pin the selected revision through Design Lab's integration procedure,
+then implement and qualify #37. The implement skill's final independent Standards/Spec
+reviews and implementation commit remain due. Actual minimal writes, identity/history,
+reopen and deliberate nested-screen preview are required before ticket acceptance.
+
+The local Design Lab server listens on `127.0.0.1:5174` for review. No native editor,
+SDK qualification, costly CI operation or watcher has started for #37. Apply
+WORKFLOW's operation-limit policy before a costly operation; routine preparation
+needs no numerical limit. The branch and draft source are local-only. No push, PR,
+merge or release has been selected. The long retained recovery record below preserves
+unique prior evidence and protected native state; it is not a continuation instruction
+for those closed selections.
+
+## Prior automatic checks and policy maintenance
+
+PR #61 is merged into the selected base `8f7f9e7`.
+[Its task](../tasks/active/automatic-code-checks.md) retains the implementation/CI
+audit and operation-policy reconciliation. Ignored policy snapshots remain under
+`.toolchains/automatic-code-checks/operation-policy/`. Previous L17 acceptance and
+protected recovery below remain intact.
 
 <a id="active-l17-integration-handover"></a>
 

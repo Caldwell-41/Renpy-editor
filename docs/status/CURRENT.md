@@ -1,26 +1,28 @@
 # Current status
 
-## Agent operation-limit policy amendment
+## L02 Help composition in design review
 
-2026-10-25: The user approved replacing routine-work budgets with limits for
-costly operations, adding root-cause debugging guidance and reconciling shared text
-in 26 open 3B issues. [The maintenance task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
-owns this documentation amendment on PR #61. Policy `7ce51a9` is published; all 26
-issue bodies pass read-back with acceptance, blockers and metadata preserved.
-Final automatic PR CI audit follows the documentation closeout. Existing acceptance
-and explicit task limits remain unchanged.
+2026-10-25: The user selected [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37),
+"Compose and reorder a simple Help layout", on a new branch. Preparation is local
+on `codex/37-compose-help-layout`, based on the current Screens branch at `8f7f9e7`.
+Three isolated Design Lab drafts compare add controls within Choose/Design/Connect.
+Root AGENTS.md requires a design choice before production UI edits.
+[The evidence](../tasks/evidence/simple-help-layout.md) records the drafts, browser
+checks, interpreter diagnosis and proposed implementation checks.
 
-## Automatic code checks pass CI
+| Capability | Implementation | Evidence and acceptance |
+| --- | --- | --- |
+| Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
+| Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
+| Add/edit/reorder (#37) | Three browser mocks; production pending | 36 rendering cases pass; user design selection and real source/runtime proof pending. |
 
-2026-10-25: Retrospective items 2 and 3 are implemented on
-`codex/automatic-code-checks`. Ordinary discovery excludes the compiled Mac recorder
-checks; PR/main CI now selects frontend checks and Rust formatting. Local checks
-pass. [Draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61) is published
-against the existing Screens branch. Its implementation candidate passes both
-automatic Ubuntu jobs, including all 231 frontend tests and Rust formatting.
-[The maintenance task](../tasks/active/automatic-code-checks.md#ci-audit) owns the
-exact run, audit and allowance. No fix was needed. Merge remains unselected.
-Existing #36 acceptance remains unchanged.
+## Automatic checks and operation-limit policy
+
+[PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61) is merged into the
+Screens base at `8f7f9e7`. Automatic frontend/Rust-format checks and the operation-limit
+policy are included. [The maintenance task](../tasks/active/automatic-code-checks.md)
+retains its CI audit and the verified policy reconciliation in 26 open 3B issues.
+Existing acceptance and explicit limits retain their scope.
 
 ## L17 bounded Help proof accepted
 
