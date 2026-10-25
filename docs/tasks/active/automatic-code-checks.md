@@ -1,4 +1,4 @@
-# Automatic code checks and recorder test selection
+# Automatic code checks and agent operation limits
 
 ## Outcome and authorization
 
@@ -23,12 +23,12 @@ CI, including fixes caused by this change. The PR targets
   code-check commands pass, or retain a concrete failure and its limits.
 
 This maintenance selects no SDK, application/package build, native input, capture,
-timing qualification, issue updates or merge. Existing #36 acceptance and
+timing qualification or merge. Existing #36 acceptance and
 protected recovery remain unchanged.
 
 ## Verification and review
 
-State is `review_ready`. The implementation is published in
+State is `in_progress` for the policy amendment below. The code-check implementation is published in
 [draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61), with the exact
 implementation candidate's CI audit below. The new discovery regression first failed on the nine unexpected
 compiled-recorder skips, then passed after separating that module. Ordinary offline
@@ -95,3 +95,24 @@ the actual run metadata, logs and audit under `.toolchains/`. The draft PR still
 targets the verified base and published head above. No product fix was required.
 Documentation-only successors retain this tested implementation candidate; their
 own automatic results remain visible on the PR and are audited in this chat.
+
+## Operation-limit policy amendment, 2026-10-25
+
+The user approved removing ordinary-work batch budgets and percentage contingency,
+retaining single caps for costly or disruptive operations, and requiring the
+`principle-fix-root-causes` skill when debugging. They also approved reconciling
+the shared policy text in P3B #22 and the 25 open work tickets that repeat the old
+rules. This amendment is ordinary documentation work with no numerical allowance.
+Earlier selected limits and recorded consumption above remain historical and closed.
+
+Conflict review found the old defaults in AGENTS, WORKFLOW, tracker/triage guidance,
+the task template, the live delivery reference and those 26 issues. The new policy
+has one repository owner, with an old section anchor retained for existing links.
+The issues will link to a published policy commit. Existing task-specific limits,
+acceptance, source/security/signing rules, dependencies and publication permissions
+retain their scope. The selected GitHub updates change body text only.
+
+Next action: publish the policy, reconcile the exact 26 issue bodies against fresh
+snapshots, read them back and update PR #61. Validate links/privacy and whitespace,
+review the changed instructions and audit the final automatic PR run. No new
+product work, package matrix, native check, issue creation or merge is selected.

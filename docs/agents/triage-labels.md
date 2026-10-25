@@ -11,4 +11,4 @@ Use these labels when an engineering skill names a triage role.
 | wontfix | wontfix | Will not be implemented |
 
 A readiness label does not replace the selected task, authorization or
-execution allowance required by AGENTS.md and docs/WORKFLOW.md.
+any applicable operation limits under AGENTS.md and docs/WORKFLOW.md.

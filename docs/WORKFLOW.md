@@ -5,6 +5,7 @@
 **Host-neutral clarification and harness prevention:** 2026-10-16, user approved.
 **Standing 3B scheduling exception and delivery allowances:** 2026-10-22, user directed.
 **Parallel agents in separate worktrees:** 2026-10-22, user directed.
+**Operation limits and root-cause debugging:** 2026-10-25, user approved.
 Applies to future project and maintenance tasks.
 
 ## Authority and document ownership
@@ -21,7 +22,7 @@ instructions take precedence and must be recorded before conflicting work contin
 | `docs/tasks/active/` | Current outcome briefs, scope, acceptance, applicable limits and remaining work. |
 | `docs/tasks/reference/` | Substantial requirements disclosed by task branch; each requirement has one current owner. |
 | `docs/tasks/evidence/` | Linked execution history, detailed validation receipts, failures and historical directions. |
-| [WORKFLOW.md](WORKFLOW.md) / [TESTING.md](TESTING.md) | Workflow owns test selection, investigation budgets and host routing; TESTING owns technical gates and evidence details. |
+| [WORKFLOW.md](WORKFLOW.md) / [TESTING.md](TESTING.md) | Workflow owns test selection, operation limits and host routing; TESTING owns technical gates and evidence details. |
 | `docs/testing/` | Focused current technical runbooks; INCIDENTS is a compact lookup index linking to original task evidence. |
 | Canonical technical docs / `docs/adr/` | Durable behavior, decisions, lessons and operational contracts. |
 | `docs/tasks/archive/` | Completed task evidence and historical decisions, not current instructions. |
@@ -43,7 +44,7 @@ For a new substantial outcome, adapt the optional [task brief template](tasks/TE
 Small changes may use a short complete record in their owning task.
 
 A brief contains the selected outcome and authorization, current scope, acceptance
-criteria, applicable constraints and allowance, unresolved decisions and next action.
+criteria, applicable constraints and operation limits, unresolved decisions and next action.
 Replace obsolete live instructions when state changes. Keep a compact acceptance
 map linking each criterion or coherent group to its result and supporting evidence;
 failed, missing and pending proof stays visible alongside passing results.
@@ -81,7 +82,7 @@ After all issues/dependencies verify, the reviewed ownership commit is published
 and the parent records its cutover receipt, [the 3B parent](https://github.com/Caldwell-41/Renpy-editor/issues/22) owns remaining Phase 3B
 delivery coverage, dependencies and aggregate acceptance. Its 11 B groups own
 aggregate requirement acceptance. The selected L work ticket owns bounded scope,
-acceptance, current blocker, selected authorization and the current allowance. Read
+acceptance, current blocker, selected authorization and applicable operation limits. Read
 P3B, the relevant group and selected leaf for 3B entry, review or continuation.
 Follow [the tracker convention](agents/issue-tracker.md).
 The [standing 3B scheduling exception](tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
@@ -103,12 +104,10 @@ reassignment updates the parent; a product requirement change updates its reposi
 contract and the parent map. Do not create a
 second 3B execution brief or copy a full backlog into status files.
 
-After the user selects a new outcome, determine and record its finite original
-allowance, basis, contingency and absolute ceiling under [the budget policy](#5-budget-the-problem-not-the-checkpoint-name).
-State the allowance and basis before execution; proceed without separate budget
-approval. Keep one allowance record for the problem; if the authorized
-outcome spans leaves, link that record instead of duplicating or resetting counts.
-Preserve cumulative use across continuations; failed/cancelled attempts stay charged.
+After the user selects a new outcome, apply [operation limits and reassessment](#5-operation-limits-and-reassessment).
+The selected leaf owns any applicable limits and their consumption. If an outcome
+spans leaves, link that record instead of duplicating it. Routine work needs no
+numerical allowance. Preserve explicit existing limits and historical results.
 Closed proof/design/Help selections stay closed. No issue state,
 label or assignment grants execution, retry or publication authority. Keep the
 existing not_started/in_progress/awaiting_ci/blocked/review_ready/accepted meanings;
@@ -164,13 +163,13 @@ review remains independent; it is not replaced by self-review.
 
 A checkpoint can be a commit, a test result or a short decision record. Continue to the
 next related checkpoint when it remains within the approved outcome, available host/tool
-capabilities and cumulative budget. Do not require the user to select routine verification
+capabilities and applicable operation limits. Do not require the user to select routine verification
 again. Allow focused compilation/execution of changed tests in implementation goals;
 select expensive package/native gates explicitly. Broader completion scope is not a
 larger test matrix. Run cheap applicable checks first and retain exact skips/failures.
 
 Pause for an external operation, a material decision/approval, missing capability,
-a reached allowance ceiling or a user interruption. State the concrete reason and
+a reached operation limit that blocks remaining work, or a user interruption. State the concrete reason and
 next action. A new plan heading, commit or completed preparatory step is not by itself
 a reason to stop. On an unresolved hypothesis, the two-correction reassessment rule
 below still applies; a pause or continuation does not reset totals.
@@ -178,7 +177,7 @@ below still applies; a pause or continuation does not reset totals.
 Default to the same chat for the same outcome. Use a new chat only for a genuinely
 different outcome, deliberate independent review, unavailable/unusable context, a
 host-transfer limitation or explicit user choice. Preserve a compact handover for any
-transfer; keep the same problem identity and budget. Do not keep an entire project in
+transfer; keep the same problem identity and applicable limits. Do not keep an entire project in
 one growing thread. Detailed runbooks may guide methods without mandating every step;
 shared invariants and acceptance criteria remain mandatory across models.
 
@@ -249,6 +248,7 @@ including SDK heap-buffer and receipt-cancellation fixes, when reorganising test
 
 ### 4. Classify failures before fixing
 
+When debugging, use the installed `principle-fix-root-causes` skill.
 Record the observed failure as product defect, harness defect, environment limitation,
 missing evidence or requirement mismatch; multiple/provisional classifications are
 allowed. State evidence, uncertainty and the smallest discriminating experiment.
@@ -265,53 +265,55 @@ failures under TESTING. Hosted browser timing alone does not establish a native
 renderer defect. Conversely, an environment explanation does not waive missing native
 qualification. Keep failed statuses and all relevant measurements on their real inputs.
 
-### 5. Budget the problem, not the checkpoint name
+After two unsuccessful corrections of the same hypothesis, reassess the diagnosis,
+requirement, test validity and implementation layer before another attempt. Record
+what the evidence rules out and the next experiment that could distinguish the
+remaining causes. Proceed within the selected scope and applicable operation limits.
+If no useful experiment is available, bring the unresolved decision to the user.
+Repeat checks only for changed inputs, a correction or unresolved evidence. Reopen
+a closed finding only after a relevant change or new evidence.
 
-For newly user-selected work outcomes, the agent determines a reasonable finite
-original delivery allowance without requesting budget approval. Record it in the
-owning task and state the allowance and its basis to the user before execution.
-Cover preparation, implementation, verification, review and in-scope corrections,
-including failed attempts and justified retries. Base the limits on the bounded
-scope, implementation risk, required hosts/checks and expected correction work.
-Name measurable units and numerical limits appropriate to the outcome, including
-expensive operations, and retain cumulative usage and the remaining allowance.
+<a id="5-budget-the-problem-not-the-checkpoint-name"></a>
 
-The agent may consume contingency of up to 50% above the original allowance without
-further approval. Record the contingency and absolute ceiling at selection. For a
-discrete operation limit A, contingency is floor(A / 2) and the ceiling is
-A + floor(A / 2). Apply that calculation separately to each limit; for example,
-3 dispatches permit 1 contingency dispatch, for a total of 4. Report entry into
-contingency before consuming it and update the owning record. Ask for intervention
-before exceeding any ceiling, expanding scope or making an unresolved product decision.
-Additional spending or paid services require separate authorization.
+### 5. Operation limits and reassessment
 
-All preparation, failed/cancelled attempts, uncertain attempts and retries stay
-charged to the same problem. Sessions, hosts, branches, checkpoints, subagents and
-successor tickets share its original limits and cumulative consumption. Never reset
-or compound the allowance or calculate new contingency from an increased ceiling.
-Apply this policy to newly selected outcomes; exhausted historical allowances and
-closed no-retry selections remain closed. A successor ticket does not make the same
-exhausted problem a new outcome.
+Set numerical limits only for operations with meaningful cost or disruption, such
+as package builds, native application launches, SDK qualification campaigns or
+expensive CI matrices.
 
-Routine steps within those limits need no separate approval.
-Keep necessary cost, credential, external-effect and recovery boundaries explicit;
-avoid per-step permission gates for ordinary disposable-fixture work. New attempt
-identities preserve evidence without resetting consumption.
+Routine work does not need numerical limits. Examples include reading files,
+editing code, typechecking, formatting, local compilation, unit and component tests,
+code review, documentation, Git commits and cheap automatic PR checks. Existing
+user restrictions still apply.
 
-Keep one compact current record: outcome, failure classification/hypothesis, decisive
-evidence, cumulative usage, remaining allowance and next action. Retain detailed past
-attempts in linked history. After two unsuccessful corrections of the same hypothesis,
-reassess the requirement, test validity and implementation layer before continuing.
-A changed approach needs evidence and must fit the same scope and allowance. Repeat
-checks only for changed inputs, a correction or unresolved evidence. Do not reopen a
-closed finding without a relevant change or new evidence.
+Before a capped operation starts, choose a reasonable limit, state its basis and
+record what counts as an attempt in the owning task. Include expected failures and
+corrections in that single ceiling; no percentage contingency or separate budget
+approval is needed within the selected scope. Count attempts that actually start,
+including failed or cancelled attempts. A preflight refusal before the operation
+starts does not consume an attempt. Resolve uncertain execution before another
+attempt, reserving its place in the limit until the evidence establishes what ran.
 
-Stop at the absolute ceiling, for unavailable capability or a material scope/safety
-decision. Existing explicit user restrictions remain binding until superseded;
-this policy does not renew old no-retry selections or permit ambiguous redispatch.
-Reconcile conflicting task limits once when selecting an outcome. Chat, host, branch
-or checkpoint changes never reset totals; missing proof remains missing. Use the
-existing task record, not another approval or tracking system.
+Keep consumption cumulative across sessions, hosts, branches, handoffs, subagents
+and successor tickets for the same operation and problem. Ask before exceeding a
+stated limit. Stop that operation while continuing other authorized work that does
+not depend on it. Preserve historical counts, exhausted allowances and closed
+no-retry selections. Specific limits already selected for an active task remain
+binding until the user changes them. This policy replaces generic finite-allowance
+and contingency instructions in older task templates and issue boilerplate.
+
+Keep one short record in the owning task: outcome, relevant evidence, any operation
+limits and their consumption, and next action. Handoffs link to that record and
+preserve pending process identities and recovery details. They do not create a new
+budget or copy the accounting into several live records.
+
+Ask when the work requires a real decision: a scope or acceptance change, an
+operation beyond its stated limit, new spending, or access that is not authorized.
+Stop dependent work when a required capability is unavailable. Existing publication,
+credential and recovery permissions remain binding. Once publication is authorized,
+its ordinary automatic checks and audit need no additional budget approval. Routine
+steps within the selected scope need no separate permission. Use the
+[diagnosis and reassessment rule](#4-classify-failures-before-fixing) when corrections fail.
 
 ### 6. Make policy and executable gates agree
 
@@ -351,7 +353,7 @@ rather than rewriting results or turning past exclusions into passes.
 
 Parallel implementation agents may work on authorised, dependency-ready assignments
 in separate worktrees and branches. One coordinator owns assignments, shared status
-and allowance records, integration and the combined acceptance evidence. Use one
+and applicable operation-limit records, integration and the combined acceptance evidence. Use one
 writer per worktree and branch at a time, including the integration branch. A merger
 agent may take integration ownership through a recorded handoff.
 
@@ -378,7 +380,7 @@ Other assigned agents may continue in their own worktrees during that wait. On
 resume, reconcile current ownership and changes before applying fixes or integrating.
 
 Parallelism stays within selected scope, actual dependencies, required review and
-the same cumulative allowances. Existing task-specific model/team limits and
+the same applicable operation limits. Existing task-specific model/team limits and
 protected recovery still apply. This policy permits agent worktrees within an
 authorised outcome; selecting product work, publication, host access or a release
 retains its existing approval boundary.
@@ -404,7 +406,8 @@ selected qualification run; do not require a separate harness dispatch for every
 or commit. The optional harness-only selector is for the smallest necessary focused
 platform proof. Qualify a coherent candidate at the selected milestone, then repeat
 only affected or unresolved checks after a diagnosed correction. Ordinary implementation
-steps do not require repeated user test-selection approval within the existing allowance.
+steps do not require repeated user test-selection approval within the selected scope
+and applicable operation limits.
 
 The rule is the same in both directions; capabilities need not be identical. A Mac
 runner without the approved signing identity, or a runner without the required native
@@ -416,7 +419,7 @@ may continue while CI is pending under the parallel-worktree policy.
 Within the selected outcome, the agent may prepare, dispatch, monitor and review focused
 CI checks, including necessary workflow adjustments. Verify runner capabilities and retain
 candidate identity, package hashes, case results and cleanup evidence. CI builds, launches
-and retries consume the same applicable cumulative allowances as local runs, including
+and retries consume the same applicable operation limits as local runs, including
 failed/cancelled attempts and implicit launches. Select only required jobs and cases;
 this routing policy does not authorize an otherwise excluded full matrix or specialist
 experiment. Monitoring follows [the waiting policy](#waiting-without-model-polling).
@@ -424,7 +427,7 @@ Publication remains within the selected outcome's actual authorization.
 
 Request a local platform handoff only for a named required case that CI cannot reliably
 establish. Explain the missing capability and transfer only the remaining work, with
-completed evidence, the verified branch checkpoint and unchanged remaining allowance.
+completed evidence, the verified branch checkpoint and unchanged applicable operation limits.
 Transfer the named assignment's writer ownership before the receiving agent edits
 it; independent worktrees may continue. Access to the user's other computer, remote
 infrastructure installation and signing or credential provisioning require their own authorization;
@@ -467,7 +470,7 @@ CURRENT/HANDOVER must agree about the live outcome and distinguish evidence from
 CURRENT is the project overview: accepted baseline, capability/acceptance state,
 active workstreams and links. HANDOVER is the selected outcome's recovery record:
 continuation location and candidate, key acceptance limits, pending operation/ownership,
-material recovery state, cumulative budget reference and next action. Detailed procedures,
+material recovery state, applicable operation-limit reference and next action. Detailed procedures,
 attempts, measurements and receipts belong in linked task evidence; lasting behavior
 and decisions belong in canonical technical docs/ADRs.
 
@@ -490,7 +493,7 @@ retains previous live wording. No new size validator is required.
 | Continuation location | Branch/PR, candidate and available ownership/local-only state. |
 | Evidence | Key result and candidate; direct section links to detailed workflow/run/attempt, commands, counts, artifacts and receipts in task evidence. |
 | Pending operation | Last observed status, observation time, unresolved identity/access and artifact expiry. |
-| Remaining work | Next action, relevant paths, blockers, approval boundary and cumulative budget reference. |
+| Remaining work | Next action, relevant paths, blockers, approval boundary and a link to applicable operation limits. |
 | Resume route | Same thread by default; actual client control or user action needed, not an invented helper. |
 | Machine and tests | Required/recommended/no specific Codex OS, separate evidence hosts and missing capabilities. |
 | Publication | Committed/published versus local-only work; limitations and safe recovery. |
@@ -540,21 +543,21 @@ ordinary `Resume the existing goal and audit the recorded workflow run` message
 need not repeat those fields or the plan. This message is steering, not a replacement
 for a client's actual Goal Resume control. At completion, give a next-outcome prompt
 when useful/requested, with any pending approval explicit. For a real transfer, include
-branch, task, handover, pending operation and unchanged budget in the recovery prompt.
+branch, task, handover, pending operation and unchanged applicable limits in the recovery prompt.
 
 ## Waiting without model polling
 
 For a confirmed GitHub Actions run, use the installed `ci-watch` skill.
 If the skill is absent or cannot register a working watch, use manual same-thread
 resume. Other external waits use manual resume.
-A wait preserves the current outcome, chat, remaining audit and cumulative allowance.
+A wait preserves the current outcome, chat, remaining audit and applicable operation limits.
 Its chat yields; other agents' assigned worktrees may continue under
 [parallel worktrees](#parallel-agents-and-worktrees).
 
-1. **Start and record.** Check existing operations, candidate and allowance; dispatch
+1. **Start and record.** Check existing operations, candidate and applicable limits; dispatch
    only the authorised workflow. Capture workflow/run ID, attempt, exact head SHA,
    branch, material inputs and last observed status/time. Record the remaining audit
-   and applicable budgets in task evidence; link the pending operation from HANDOVER.
+   and applicable limits in task evidence; link the pending operation from HANDOVER.
    A successful request without a confirmed run identity is not a confirmed run;
    a rejected request is not pending CI. Preserve ambiguous dispatch state and resolve
    it without duplicate dispatch.
@@ -593,7 +596,7 @@ Its chat yields; other agents' assigned worktrees may continue under
    Changed refs or a newer attempt do not silently replace the recorded candidate.
 
 Resume never grants a retry, new dispatch, extra build, broader correction or merge.
-Bounded fixes continue only when already covered by the outcome and remaining allowance;
+Bounded fixes continue only when covered by the selected outcome and applicable operation limits;
 otherwise name the decision needed. Preserve the existing audit owner and wait record;
 reconcile any assignment handoff before another agent handles that result. Continue
 independent assigned work under the parallel-worktree policy.

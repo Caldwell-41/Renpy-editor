@@ -1,5 +1,16 @@
 # Current outcome handover
 
+## Agent operation-limit policy amendment
+
+The user approved the repo policy and shared budget-text updates in 26 open 3B
+issues. [The task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
+owns scope and verification on `codex/automatic-code-checks`, draft PR #61.
+Publish the prepared policy, then update only the approved shared issue text and
+verify body and metadata preservation. Fresh snapshots are ignored under
+`.toolchains/automatic-code-checks/operation-policy/`. No operation is pending yet.
+This ordinary documentation amendment needs no numerical work allowance. Prior
+limits remain historical; product work and merge remain unselected.
+
 ## Automatic code checks reviewed
 
 The selected retrospective maintenance is published on

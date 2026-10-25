@@ -1,5 +1,14 @@
 # Current status
 
+## Agent operation-limit policy amendment
+
+2026-10-25: The user approved replacing routine-work budgets with limits for
+costly operations, adding root-cause debugging guidance and reconciling shared text
+in 26 open 3B issues. [The maintenance task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
+owns this documentation amendment on PR #61. Repository edits are prepared;
+publication, issue read-back and CI audit are next. Existing acceptance and explicit
+task limits remain unchanged.
+
 ## Automatic code checks pass CI
 
 2026-10-25: Retrospective items 2 and 3 are implemented on
