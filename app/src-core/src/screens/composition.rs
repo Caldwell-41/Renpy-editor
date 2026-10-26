@@ -212,6 +212,7 @@ impl AuthoringService {
                         .iter()
                         .any(|p| p.start < end && p.end > start)
                     || bytes[node.source_end - 1] != b'\n'
+                    || (after && bytes[target.source_end - 1] != b'\n')
                 {
                     return Err(SceneError::OpaqueBoundary);
                 }
@@ -262,11 +263,14 @@ impl AuthoringService {
                     .or_else(|| index.checked_sub(1).and_then(|i| siblings.get(i)))
                     .copied()
                     .unwrap_or(parent);
-                let selected = fallback
-                    .id
-                    .clone()
-                    .or_else(|| parent.id.clone())
-                    .ok_or(SceneError::OpaqueBoundary)?;
+                let selected = fallback.id.clone().unwrap_or_else(|| {
+                    let start = if fallback.span.start >= node.source_end {
+                        fallback.span.start - (node.source_end - node.span.start)
+                    } else {
+                        fallback.span.start
+                    };
+                    format!("source-at-{start}")
+                });
                 proposed.drain(node.span.start..node.source_end);
                 let remaining = inspect(&proposed, source_path.clone(), String::new())?;
                 let empty_parent = remaining

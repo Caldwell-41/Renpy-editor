@@ -408,6 +408,7 @@ jobs:
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_owned_screen_evidence.py' -v
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_owned_screen_runner.py' -v
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_help_screen_evidence.py' -v
+          "$HARNESS_PYTHON" -m unittest discover -s scripts -p 'test_composition_sdk_evidence.py' -v
           npm run check
       - name: Shared composition, source protection and desktop gates
         run: |
@@ -465,7 +466,11 @@ jobs:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
           LOOMLIGHT_OWNED_SCREEN_ACCEPTED: ${{ runner.temp }}/help-composition/helper/accepted.rpy
           LOOMLIGHT_OWNED_SCREEN_SDK_EVIDENCE: ${{ runner.temp }}/help-composition/sdk
-        run: cargo test -p loomlight-core --release --locked --lib lifecycle::runtime_tests::owned_composition_sdk_preview_and_cleanup -- --exact --ignored --nocapture
+        run: |
+          set -o pipefail
+          test ! -e "$RUNNER_TEMP/help-composition/sdk"
+          cargo test -p loomlight-core --release --locked --lib lifecycle::runtime_tests::owned_composition_sdk_preview_and_cleanup -- --exact --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/help-composition/sdk.log"
+          "$HARNESS_PYTHON" scripts/composition_sdk_evidence.py "$RUNNER_TEMP/help-composition/sdk.log" "$RUNNER_TEMP/help-composition/sdk" "$RUNNER_TEMP/help-composition/helper/accepted.rpy" windows
       - name: Windows package and real WebView composition path
         if: runner.os == 'Windows'
         run: |

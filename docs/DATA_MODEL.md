@@ -499,8 +499,9 @@ Source-map schema remains v6.
 Composition requests capture screen UUID and exact file revision. Add supports
 fixed/frame/vbox and literal text/textbutton nodes; a frame accepts one child.
 Text edits replace only a qualified literal token. Reorder moves an exact ordinary
-subtree within its parent and refuses protected crossings or an unterminated moved
-statement. Removal refuses the screen root, protected nodes and containing groups.
+subtree within its parent and refuses protected crossings, an unterminated moved
+statement or insertion after an unterminated destination. Removal refuses the
+screen root, protected nodes and containing groups.
 It deletes the qualified subtree range, preserving surrounding source, and inserts
 `pass` only when the remaining parent body would otherwise be empty. One accepted
 change uses one existing source transaction/history entry; no-op commands add none.
@@ -510,7 +511,10 @@ Protected structural statements appear as read-only hierarchy rows with derived
 `source-<SHA-256>` identities. These identify the current inspected region; they do
 not grant ownership or the durable UUID guarantees of ordinary owned elements.
 After removal the UI selects next sibling, otherwise previous sibling, otherwise
-parent. Its shared-history integration restores the removed target on Undo and the
+parent. An unmarked sibling uses its source offset in the accepted revision as a
+selection key. Device preferences restore that key only against the same source
+revision on reopen; this grants no editing authority and is not a durable identity.
+Its shared-history integration restores the removed target on Undo and the
 fallback on Redo. Other history preserves a surviving selection. Device preferences
 optionally remember screen/element selection by project UUID; history itself remains
 session-local. Text/addition drafts retain their original source revision. If Source

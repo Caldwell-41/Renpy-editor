@@ -178,8 +178,10 @@ export class ScreensWorkspace {
   private key(): string { return JSON.stringify([this.doc?.path, this.screen, this.nodes()[this.selected]?.id ?? this.selected]); }
   private preferenceKey(): string { return `screen-${this.actions.projectId ?? "workspace"}`; }
   private rememberSelection(): void {
-    const id = this.nodes()[this.selected]?.id;
-    if (this.owned && id) saveLayout(this.preferenceKey(), { screenSelection: { screenId: this.owned.id, elementId: id } });
+    const node = this.nodes()[this.selected];
+    if (this.owned && node && this.doc) saveLayout(this.preferenceKey(), { screenSelection: {
+      screenId: this.owned.id, elementId: screenNodeKey(node), ...(!node.id ? { sourceRevision: this.doc.revision } : {}),
+    } });
   }
   private draft(): Draft | undefined { return this.drafts.get(this.key()); }
   private note(text: string, error = false): void {
@@ -220,8 +222,8 @@ export class ScreensWorkspace {
       if (this.owned) this.screen = this.owned.name;
       if (!this.owned && !this.doc?.screens.some(s => s.name === this.screen)) this.screen = this.doc?.screens[0]?.name ?? "";
       const remembered = layoutFor(this.preferenceKey()).screenSelection;
-      const preferred = selectedId ?? (remembered?.screenId === this.owned?.id ? remembered?.elementId : undefined);
-      this.selected = preferred ? Math.max(0, this.nodes().findIndex(n => n.id === preferred)) : Math.min(this.selected, Math.max(0, this.nodes().length - 1));
+      const preferred = selectedId ?? (remembered?.screenId === this.owned?.id && (!remembered?.sourceRevision || remembered.sourceRevision === this.doc?.revision) ? remembered?.elementId : undefined);
+      this.selected = preferred ? Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === preferred)) : Math.min(this.selected, Math.max(0, this.nodes().length - 1));
       this.selection.replaceChildren();
       const owned = [...catalog.owned];
       if (this.owned && !owned.some(s => s.id === this.owned!.id)) owned.push(this.owned);
@@ -424,7 +426,7 @@ export class ScreensWorkspace {
       }
       this.documents = this.documents.map(d => d.path === result.document.path ? result.document : d);
       this.doc = result.document; owner.sourceRevision = result.document.revision;
-      this.selected = Math.max(0, this.nodes().findIndex(n => n.id === result.selectedId));
+      this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === result.selectedId));
       this.composer.clearNotice();
       this.rememberSelection();
       this.renderCanvas(); this.actions.saved(); return result;
@@ -447,9 +449,9 @@ export class ScreensWorkspace {
         const entry = [...this.compositionHistory].reverse().find(item => item.path === before?.path && item.path === this.doc?.path
           && (type === "undo" ? item.after === before?.revision && item.before === this.doc?.revision : item.before === before?.revision && item.after === this.doc?.revision));
         const preferred = entry?.removal ? type === "undo" ? entry.beforeId : entry.afterId : selectedId;
-        const index = this.nodes().findIndex(n => n.id === preferred);
+        const index = this.nodes().findIndex(n => screenNodeKey(n) === preferred);
         if (index >= 0) this.selected = index;
-        else if (entry) { const fallback = type === "undo" ? entry.beforeId : entry.afterId; this.selected = Math.max(0, this.nodes().findIndex(n => n.id === fallback)); }
+        else if (entry) { const fallback = type === "undo" ? entry.beforeId : entry.afterId; this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === fallback)); }
         this.rememberSelection(); this.composer.clearNotice();
       }
       this.busy = false;

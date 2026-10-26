@@ -1,5 +1,5 @@
 import { requestCore } from "./bridge.ts";
-export interface Layout { navigationCollapsed: boolean; treeCollapsed: boolean; inspectorOpen: boolean; previewPercent?: number; treeWidth?:number; referenceSelection?:string; referenceTopic?:string; graph?: { zoom:number; x:number; y:number }; screenSelection?: {screenId:string; elementId:string} }
+export interface Layout { navigationCollapsed: boolean; treeCollapsed: boolean; inspectorOpen: boolean; previewPercent?: number; treeWidth?:number; referenceSelection?:string; referenceTopic?:string; graph?: { zoom:number; x:number; y:number }; screenSelection?: {screenId:string; elementId:string; sourceRevision?:string} }
 export interface Preferences { schemaVersion: 1; theme: "system" | "light" | "dark"; density: "small" | "default" | "large"; sourceFontSize: number; rememberLayout: boolean; layouts: Record<string, Layout> }
 let preferences: Preferences = { schemaVersion: 1, theme: "system", density: "default", sourceFontSize: 14, rememberLayout: true, layouts: {} };
 let writer: Promise<void> = Promise.resolve();

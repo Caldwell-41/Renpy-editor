@@ -133,6 +133,22 @@ fn composition_history(service: &mut LifecycleService, kind: &str) {
     );
 }
 
+fn save_composition_source(service: &mut LifecycleService, owner: &Value, text: &str) {
+    let source = ipc(service, "source.open", json!({"path":owner["path"]}));
+    let draft = ipc(
+        service,
+        "source.updateDraft",
+        json!({"path":owner["path"],
+        "expectedBaseRevision":source["baseRevision"], "text":text,"selectionStart":0,"selectionEnd":0}),
+    );
+    ipc(
+        service,
+        "source.save",
+        json!({"path":owner["path"],
+        "expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
+    );
+}
+
 #[test]
 fn owned_composition_text_changes_only_the_literal_preserving_identity_comments_and_noop_history() {
     let (_temporary, mut service, root, owner) = composition_project();
@@ -242,6 +258,93 @@ fn owned_composition_reorders_whole_groups_without_changing_their_children_or_id
         json!({"path":owner["path"]}),
     );
     assert_eq!(reopened["screens"], after["document"]["screens"]);
+}
+
+#[test]
+fn owned_composition_refuses_reorder_after_an_unterminated_final_sibling_without_writing() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let a = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"A"}),
+    )["selectedId"]
+        .clone();
+    let b = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"B"}),
+    )["selectedId"]
+        .clone();
+    let path = root.join(owner["path"].as_str().unwrap());
+    let terminated = fs::read_to_string(&path).unwrap();
+    let before = terminated.trim_end_matches('\n');
+    save_composition_source(&mut service, &owner, before);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":doc["revision"],
+        "command":{"type":"reorder","nodeId":a,"targetId":b,"after":true}}),
+    );
+    assert_eq!(fs::read_to_string(&path).unwrap(), before);
+    let unchanged = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(unchanged, doc);
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read_to_string(&path).unwrap(),
+        terminated,
+        "Refusal adds no history entry"
+    );
+}
+
+#[test]
+fn owned_composition_removal_selects_an_unmarked_next_sibling_without_granting_edit_authority() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Owned"}),
+    );
+    let path = root.join(owner["path"].as_str().unwrap());
+    let owned_source = fs::read_to_string(&path).unwrap();
+    save_composition_source(
+        &mut service,
+        &owner,
+        &format!("{owned_source}    text \"Source authored\"\n"),
+    );
+    let before = fs::read_to_string(&path).unwrap();
+    let removed = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"remove","nodeId":added["selectedId"]}),
+    );
+    let sibling = &removed["document"]["screens"][0]["nodes"][1];
+    assert_eq!(sibling["literal"], "Source authored");
+    assert!(sibling["id"].is_null());
+    assert_eq!(
+        removed["selectedId"],
+        format!("source-at-{}", sibling["span"]["start"])
+    );
+    let after = fs::read_to_string(&path).unwrap();
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":removed["document"]["revision"],
+        "command":{"type":"remove","nodeId":removed["selectedId"]}}),
+    );
+    assert_eq!(fs::read_to_string(&path).unwrap(), after);
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read_to_string(&path).unwrap(), before);
+    composition_history(&mut service, "redo");
+    assert_eq!(fs::read_to_string(&path).unwrap(), after);
 }
 
 #[test]

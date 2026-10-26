@@ -6,13 +6,13 @@ import type { CoreOperation } from "../src/protocol.js";
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
-function interactiveFixture() {
+function interactiveFixture(initial?: ScreenDocument) {
   const browser = new Window();
   Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, ResizeObserver: browser.ResizeObserver });
   const node = (id: string, kind: string, start: number, end: number, parentStart: number | null, literal: string | null = null): ScreenNode => ({
     id, kind, literal, span: { start, end }, parentStart, layout: {}, properties: [], protected: [],
   });
-  let doc: ScreenDocument = { path: "game/ui/notes.rpy", revision: "before", partial: true, screens: [{ name: "notes", nodes: [
+  let doc: ScreenDocument = initial ?? { path: "game/ui/notes.rpy", revision: "before", partial: true, screens: [{ name: "notes", nodes: [
     node("root-id", "screen", 0, 250, null), node("box-id", "vbox", 30, 200, 0),
     node("title-id", "text", 60, 100, 30, "Title"), node("body-id", "text", 110, 140, 30, "Directions"),
     { ...node("custom-id", "custom", 210, 240, 0, "use custom_footer()"), protected: [{ start: 210, end: 240 }] },
@@ -200,6 +200,38 @@ test("addition history keeps a surviving parent selection on Redo", async () => 
     h.respond(added, "added-id"); h.click("Add text"); await tick(); await tick();
     h.respondHistory(h.original); h.click("Undo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
     h.respondHistory(added); h.click("Redo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
+  } finally { h.workspace.dispose(); }
+});
+
+test("removal and its history select an unmarked next sibling by its accepted source position", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick();
+    const before = structuredClone(h.original); before.screens[0]!.nodes[3]!.id = null;
+    h.replaceDocument(before); await h.workspace.load();
+    h.row("title-id").click(); h.click("Remove element");
+    const removed = structuredClone(before); removed.revision = "removed"; removed.screens[0]!.nodes.splice(2, 1);
+    removed.screens[0]!.nodes[2]!.span = { start: 70, end: 100 };
+    h.respond(removed, "source-at-70"); h.click("Remove text"); await tick(); await tick();
+    assert.equal(h.row("source-at-70").ariaSelected, "true");
+    assert.equal(document.activeElement, h.row("source-at-70"));
+    h.respondHistory(before); h.click("Undo"); await tick(); await tick();
+    assert.equal(h.row("title-id").ariaSelected, "true");
+    h.respondHistory(removed); h.click("Redo"); await tick(); await tick();
+    assert.equal(h.row("source-at-70").ariaSelected, "true");
+    assert.equal(document.activeElement, h.row("source-at-70"));
+    h.workspace.dispose();
+    const reopened = interactiveFixture(removed);
+    try {
+      await tick(); await tick();
+      assert.equal(reopened.row("source-at-70").ariaSelected, "true");
+    } finally { reopened.workspace.dispose(); }
+    const changed = structuredClone(removed); changed.revision = "changed-externally";
+    const stale = interactiveFixture(changed);
+    try {
+      await tick(); await tick();
+      assert.equal(stale.row("root-id").ariaSelected, "true", "An offset never selects against another revision");
+    } finally { stale.workspace.dispose(); }
   } finally { h.workspace.dispose(); }
 });
 

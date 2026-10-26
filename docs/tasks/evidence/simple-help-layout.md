@@ -461,15 +461,54 @@ denied loopback binding by the sandbox; two source-only inspection fixtures expo
 a real metadata assumption. Raw source inspection is again independent of ownership
 metadata, while managed IPC and mutation responses retain ownership annotation.
 Those two existing fixtures pass after correction. A process fixture also failed;
-the normal-capability rerun is still pending. No failure or ignored SDK case counts
-as a pass. The latest full frontend run passes TypeScript and all 239 tests, without
-skips. The harness's four independent groups pass before the latest workflow change;
-its affected rerun is pending.
+the normal-capability rerun passes all 414 ordinary core cases, with 48 intentionally
+ignored specialist/SDK cases and three documented exclusions. Its retained log is
+`.toolchains/screen-composition/core-final-02.log`. No ignored case counts as a pass.
+The four harness groups pass in `harness-final-02/`. The repository validator passes.
+
+SDK campaign 2 passes its exact named nested-screen case. It compiles/lints the
+renderer-accepted source, deliberately renders the nested composition and protected
+neighbor, then stops and cleans up. Both terminal receipts report exit 0 and complete
+cleanup; accepted source is unchanged, without generated project bytecode, saves or
+scratch residue. `sdk-preview-01/` retains the render and receipts. Accepted source
+SHA-256 is `ef20aa1105fec5594224141a36a5d3a789cb2825a97d4600857eda34db8f881e`.
+This establishes runtime behavior, not native WebView or canvas-fidelity acceptance.
+
+### Independent review and focused corrections
+
+Standards and Spec independently reviewed the full diff from `8f7f9e7` to `1bec29d`.
+They found one shared P1 source-preservation defect and two distinct P2 defects.
+Each source defect reproduced through the public dispatcher before correction.
+
+- Reordering after a final sibling without a newline could put the moved statement
+  inside that sibling's inline UUID comment. The transaction now refuses this unsafe
+  destination, preserves every byte and creates no history entry.
+- Removal skipped an unmarked supported sibling because it had no owned UUID.
+  The accepted result now returns a source-offset selection key for that sibling.
+  The UI resolves it through history and stores its source revision for reopen.
+  A different revision cannot restore that offset, and the key grants no write authority.
+  The component check reproduced immediate/history selection and the separate reopen
+  omission before their fixes. Spec's correction review found no remaining defect.
+- The Windows SDK command could return exit 0 for an unmatched exact test selector.
+  Its gate now requires the positive named case, a one-pass summary, matching accepted
+  source hash, both runtime cleanup receipts and the retained PNG. Focused admission
+  tests reject zero/ignored/missing cases and incomplete evidence. The actual Mac
+  SDK receipts pass this same verifier without another runtime start.
+
+After these corrections, all 25 ordinary Screens core cases pass; its separate
+four-helper SDK case remains intentionally ignored. Both preference cases pass.
+TypeScript and all 240 frontend cases pass with supported Python 3.12. A prior rerun
+with system Python 3.9 failed only the existing `tomllib` consumer; it remains a failed
+environment diagnostic. Browser run 11 passes all six production UI-to-core groups,
+pointer reorder, compact/wide stationary confirmations and stale-removal refusal.
+Workflow actionlint and whitespace checks pass. The new SDK verifier's three cases
+pass. These changes do not alter the already-qualified inert helper plan, SDK adapter,
+runtime path or renderer-accepted nested source. Their SDK evidence is reused for
+that unchanged scope; the unsafe-EOF case has separate dispatch proof.
 
 At this checkpoint Mac use is one package build and one failed native editor session.
-SDK campaign 1 passes with one helper start; campaign 2 is running its selected
-validation/preview. Windows package/editor/SDK use and focused CI dispatches remain
-zero. The new explicit `compose_help` workflow selector preserves closed L01/L17
-guards and prepares the required Windows SDK/native route plus portable Mac checks.
-It has not been published or dispatched. Final independent review and the corrected
-Mac package/session remain due.
+Both SDK campaigns pass, with three of four allowed SDK starts used. Windows
+package/editor/SDK use and focused CI dispatches remain zero. The explicit
+`compose_help` workflow selector preserves closed L01/L17 guards and prepares the
+required Windows SDK/native route plus portable Mac checks. It has not been published
+or dispatched. The corrected Mac package/session remain due.

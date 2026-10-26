@@ -47,6 +47,8 @@ pub struct Layout {
 pub struct ScreenSelection {
     pub screen_id: String,
     pub element_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_revision: Option<String>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -100,10 +102,22 @@ impl Preferences {
                         .is_none_or(|v| (20..=70).contains(&v))
                     && layout.screen_selection.as_ref().is_none_or(|s| {
                         uuid::Uuid::parse_str(&s.screen_id).is_ok()
+                            && s.source_revision.as_ref().is_none_or(|revision| {
+                                revision.len() == 64
+                                    && revision.bytes().all(|b| b.is_ascii_hexdigit())
+                            })
                             && (uuid::Uuid::parse_str(&s.element_id).is_ok()
                                 || s.element_id.strip_prefix("source-").is_some_and(|id| {
                                     id.len() == 64 && id.bytes().all(|b| b.is_ascii_hexdigit())
-                                }))
+                                })
+                                || s.element_id
+                                    .strip_prefix("source-at-")
+                                    .is_some_and(|offset| {
+                                        s.source_revision.is_some()
+                                            && offset
+                                                .parse::<usize>()
+                                                .is_ok_and(|n| n <= 16 * 1024 * 1024)
+                                    }))
                     })
             })
     }
@@ -131,5 +145,32 @@ mod tests {
         p.schema_version = 2;
         assert!(!p.valid());
         assert!(serde_json::from_str::<Preferences>(r#"{"theme":"unknown"}"#).is_err());
+    }
+
+    #[test]
+    fn source_offset_selection_roundtrips_only_with_a_bounded_revision() {
+        let mut preferences = Preferences::default();
+        let selection = serde_json::json!({"screenId":"c77b865e-a6cf-434a-8ecb-02e1c4582de4",
+            "elementId":"source-at-82", "sourceRevision":"a".repeat(64)});
+        preferences.layouts.insert(
+            "screen-fixture".into(),
+            Layout {
+                screen_selection: Some(serde_json::from_value(selection.clone()).unwrap()),
+                ..Layout::default()
+            },
+        );
+        assert!(preferences.valid());
+        let decoded: Preferences =
+            serde_json::from_slice(&serde_json::to_vec(&preferences).unwrap()).unwrap();
+        assert!(decoded.valid());
+        let selected = preferences
+            .layouts
+            .get_mut("screen-fixture")
+            .unwrap()
+            .screen_selection
+            .as_mut()
+            .unwrap();
+        selected.source_revision = None;
+        assert!(!preferences.valid());
     }
 }
