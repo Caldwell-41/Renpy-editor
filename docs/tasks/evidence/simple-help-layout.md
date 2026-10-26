@@ -1231,7 +1231,27 @@ reports head SHA `ab176ed608752d2172028b958535319a84746a6d` for the PR event.
 At 2026-10-26 23:12 UTC, repository validation passed; frontend tests and Rust
 formatting were still in progress. Dispatch-only qualification jobs were skipped
 by the workflow and supply no new evidence. No manual workflow was dispatched.
-The leaf is `awaiting_ci` pending the automatic run audit. Its live issue owns
-any newer run caused by this documentation receipt and the watcher registration.
-Resume in this chat to verify the exact run/attempt, candidate and required job
-results, then restore `review_ready`. Existing costly-operation counts are unchanged.
+At publication the leaf entered `awaiting_ci`; the terminal audit below supersedes
+that wait. Existing costly-operation counts are unchanged.
+
+### PR automatic-check audit, 2026-10-27
+
+The ci-watch event for
+[40418300606, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40418300606/attempts/1)
+was matched to this chat and acknowledged. GitHub independently confirms
+`completed/success`, PR head `ab8ae3edaf866a65ba8a0cebf56130ce3da79b8a`, the selected
+branch and open PR #62 into `codex/phase3b-screen-designer`. The PR reports `CLEAN`.
+
+Both required jobs and every executed step pass. Downloaded logs verify TypeScript
+checks and **243 frontend passes, zero failures/skips/cancellations**; Rust 1.90.0
+formatting; validation of 954 repository files; 13 section-link tests;
+Q1 rejection controls/source-selector audit; and ten retention tests.
+Dispatch-only jobs were skipped as configured and provide no new qualification.
+Raw job logs, run/PR snapshots and the audit record remain under the ignored
+`.toolchains/screen-composition/final-review/` directory. No fix or retry is needed.
+
+Functional review remains complete. #37 owns any automatic check triggered by this
+documentation-only audit commit and its terminal result. Continue that audit in this
+same chat, update the issue, then restore `review_ready` without another receipt-only
+commit. The tested product/native/SDK identities and operation counts are unchanged.
+Formal acceptance, issue closure, merge and release remain unselected.

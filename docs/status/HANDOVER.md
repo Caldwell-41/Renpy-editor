@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## L02 PR open, automatic checks pending
+## L02 PR open, required checks audited
 
 Kris selected continuing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
 with the implement skill. This chat remains sole checkout/server writer on
@@ -10,17 +10,20 @@ is `73ffb7f`. Kris explicitly approved creating the PR into
 is open, with base `8f7f9e7` and initial head `ab176ed`. Branch publication and PR
 creation are complete. Formal acceptance, merge and release remain unselected.
 
-All seven bounded criteria have verified evidence. Functional review is complete;
-the leaf stays open at `awaiting_ci` for the PR's automatic checks.
+All seven bounded criteria have verified evidence. Functional review and the
+required CI audit are complete; the leaf stays open for formal acceptance.
 [The final acceptance map](../tasks/evidence/simple-help-layout.md#final-acceptance-review-2026-10-27)
 owns results and reuse boundaries. The published title is "Compose Help layouts with
-safe ordering and confirmed removal". Initial Repository quality run
-[40418047591, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40418047591/attempts/1)
-on `ab176ed608752d2172028b958535319a84746a6d` was in progress at
-2026-10-26 23:12 UTC; repository validation passed and frontend/Rust checks remained
-pending. The PR receipt's documentation push may supersede that run. #37 owns the
-latest run identity and watch registration. Audit its exact candidate and required
-jobs in this same chat, then return the leaf to `review_ready`. No additional
+safe ordering and confirmed removal". Repository quality
+[40418300606, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40418300606/attempts/1)
+passes on `ab8ae3edaf866a65ba8a0cebf56130ce3da79b8a`. Its required steps and logs
+were audited against the unchanged PR head: 243 frontend passes, Rust formatting,
+repository validation, 13 link tests, Q1 controls and ten retention tests.
+The watcher event was acknowledged in this chat and its worker is done.
+[#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
+owns the terminal audit and any automatic checks caused by this final documentation
+successor. Audit those in this same chat and update the issue without another
+receipt-only commit. Return the leaf to `review_ready` once they pass. No additional
 package, native session, SDK process or manual CI dispatch is selected.
 
 Independent Standards and Spec reviews of the full diff, correction diff and final

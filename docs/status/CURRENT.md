@@ -3,12 +3,13 @@
 ## L02 Help composition PR open
 
 2026-10-27: [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) is
-`awaiting_ci` on `codex/37-compose-help-layout`. All seven bounded criteria have
-verified evidence and functional review is complete. Product/probe candidate
+functionally `review_ready` on `codex/37-compose-help-layout`. All seven bounded
+criteria have verified evidence and functional review is complete. Product/probe candidate
 `73ffb7f` implements the approved
 C5 add, select, literal edit, sibling reorder and confirmed removal workflow.
 Kris approved PR creation on 2026-10-27. [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
-is open into `codex/phase3b-screen-designer`; automatic checks are pending.
+is open into `codex/phase3b-screen-designer`. Automatic run 40418300606 on `ab8ae3e`
+passes its audited required jobs. #37 records automatic checks for later documentation.
 Formal acceptance, merge and release remain unselected.
 
 Final independent Standards/Spec reviews have zero remaining findings or required
@@ -36,7 +37,7 @@ pattern. Canvas fidelity and broader phase acceptance remain separate.
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Help composition (#37) | Implemented and independently reviewed; PR #62 open | All seven leaf criteria verified. Automatic checks pending; formal acceptance remains separate. |
+| Help composition (#37) | Implemented and independently reviewed; PR #62 open | All seven leaf criteria verified; required CI audited. Formal acceptance remains separate. |
 
 ## Automatic checks and operation-limit policy
 
