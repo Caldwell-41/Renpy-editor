@@ -1119,3 +1119,96 @@ reason suffixes. Its first diagnostic parser omitted those suffixes and was
 corrected without another core run. `final-review/core-audit.json` retains the
 input hashes and unchanged core tree. No ignored case supplies a pass. No SDK
 process started during these ordinary suites.
+
+### Final review native qualification, 2026-10-27
+
+Correction candidate `73ffb7f` includes both resolved review findings and the
+required seven-group composition probe. Package 4 passes strict signature and
+installer-content checks on the unchanged approved Mac identity. Executable SHA-256
+is `b118a214b1280489e2e2c6b60ae3df5dd10f17dea18ee8701c4e34d26a4fc8c1`;
+installer SHA-256 is
+`228c9c42700d6eea35dc0a2a58f563fc7ea656f1ad0174f3ece1ae4bc1656b96`.
+Its candidate/identity receipts and installer remain in
+`.toolchains/releases/l02-composition-04/`. Actual package consumption is now 4/7.
+
+Live preflight finds the console unlocked and logged in, the display active/awake,
+and no existing Loomlight process. Select native session 5 against this exact
+package with fresh `final-review/native-mac-05/` output. No SDK or game is started.
+The pre-existing separate `caffeinate -di` process remains untouched, so this run
+will establish native functional/focus behavior, not isolated sleep-prevention
+performance. Both review axes report no remaining code finding; the Spec axis's
+current-renderer native focus result is the remaining required proof.
+
+Native session 5 passes on this exact signed candidate in **9.425 seconds**, exit 0
+without timeout. The current admission gate accepts all seven groups, including
+`text-validation-passed`. Both invalid submissions retain the same focused field,
+associated error and unchanged source. The original composition, literal history,
+reorder, confirmed removal, protected Source and reopen groups all pass. Accepted
+source and metadata match disk; seven owned identities and selected-node reopen
+persist. No bytecode, saves or scratch jobs remain. Host/request/credential and
+fixture cleanup pass. Desktop admission/exit are unlocked and awake; both owned
+power assertions are released. No owned app or power assertion remains.
+
+`final-review/native-mac-05/audit.json` retains source/artifact hashes and current
+gate checks. Accepted source SHA-256 is
+`4345f766cdc9e2fd4997b8ed64879469ca366cc97a9ec5965bc7009862f348ce`.
+The Spec reviewer independently read the native/desktop receipts and matched the
+retained executable and installer to package 4. Its current-renderer focus evidence
+gap is resolved. Cumulative consumption is Mac packages **4/7**, native sessions
+**5/5**; Windows packages **1/2**, native sessions **1/2**; SDK campaigns **2/2** and
+physical SDK starts **4/4** on each host; CI dispatches **1/2**. No further costly
+operation is selected. The separate external display-awake assertion remains
+untouched; no isolated performance result is claimed.
+
+### Final acceptance review, 2026-10-27
+
+All seven #37 criteria have verified evidence. The leaf is `review_ready`; its
+formal acceptance and PR creation remain separate decisions. Earlier failed
+attempts, six-group contracts and candidate identities retain their recorded scope.
+
+| #37 criterion | Evidence and reuse basis | Result |
+| --- | --- | --- |
+| Minimal add/edit/reorder/remove, groups and stable selection/history/reopen | Public dispatcher composition cases; current seven-group renderer/core and signed Mac candidate `73ffb7f`; audited Windows six-group candidate `d80c323` for unchanged successful source operations. | Verified. |
+| Pointer/keyboard hierarchy and canvas selection, Design entry and type/depth help | Component/controller checks; actual inert helper selection/double-click and draft proof retained from both-target qualification; current pointer/keyboard/tree checks. Helper plan and supported source model are unchanged. | Verified for functional selection; no new canvas-fidelity claim. |
+| Parent/protected constraints, retained input and minimal source preservation | Dispatcher refusal/dirty/stale cases; component draft recovery; actual Source reconciliation; current invalid-field focus/no-write group and browser stale-removal refusal. | Verified. |
+| Exact leaf/group removal, named descendants and unchanged Cancel | Exact-subtree core cases; stationary compact/wide browser confirmation; native cancellation/removal/history. Current source/transaction code is unchanged from qualified core. | Verified. |
+| Protected/root/containing-group refusal and stale/conflicted retention | Protected-neighbor/root dispatch cases, retained field drafts, real external edit during confirmation and native protected Source group. | Verified. |
+| One history entry, exact grouped restoration, next/previous/parent fallback, focus and reopen | Core removal/fallback/history cases; revision-bound unmarked selection and reopen component cases; current native history/source/owned identity checks. | Verified. |
+| Nested example and protected neighbor in deliberate Ren'Py | Retained Mac SDK preview and audited Windows exact named compile/lint/render/Stop/cleanup. Core source generation, SDK adapter, inert helper plan and runtime code are unchanged; no new SDK result is claimed. | Verified for the selected nested example. |
+
+The final ordinary core tree is unchanged from `602613d`:
+`45b2674cc283b170df00a8252be70f06462b8202`. New code affects field validation,
+probe admission and native failure cleanup, not source generation or SDK execution.
+Their changed boundaries have current rejecting/positive tests and signed Mac proof.
+Retained Windows/SDK results do not become current-candidate runs. Full WebKit
+diagnostics remain failed on their recorded ResizeObserver notification; the current
+packaged Mac WebView passes the required functional path. No physical-input,
+canvas-fidelity, full-editor or full-3B acceptance is inferred.
+
+#### Standards
+
+Two P2 findings were corrected with red/green checks: associated completion errors
+and focus on invalid text, and independent cleanup/reporting after a desktop error.
+The correction review and final probe/admission review report zero remaining
+documented-standard violations or meaningful code-smell findings.
+
+#### Spec
+
+No implementation mismatch or scope creep remains. The reviewer identified the
+new invalid-field native focus evidence gap, then independently resolved it against
+package 4/native session 5. Zero remaining Spec findings or required evidence gaps
+within #37's selected functional scope.
+
+Visual fidelity remains the approved C5 `workflow-popup-v1` composition mapped in
+the earlier C5 controls section, with its recorded shell/naming and source-only
+canvas differences. The correction changes no normal layout or CSS. Its invalid
+state uses the existing authoring field-error pattern; the new captures and current
+native checks verify that state without claiming it was an approved C5 capture.
+All mapped functional actions are verified within the table's scope.
+
+Final review totals are Standards **0 remaining findings**, Spec **0 remaining
+findings**. No code, qualification, CI or watcher work remains pending. The prepared
+PR targets `codex/phase3b-screen-designer` from the selected branch. Its title/body
+are local review artifacts under `.toolchains/screen-composition/final-review/`;
+PR creation needs the explicit approval preserved in #37. Merge and release remain
+unselected. Keep the issue open for that acceptance/publication decision.

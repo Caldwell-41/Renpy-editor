@@ -1,46 +1,39 @@
 # Current status
 
-## L02 Help composition implementation
+## L02 Help composition ready for review
 
-2026-10-26: Kris requested continuing implementation of
-[#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) under the existing C5 and
-test approvals. The duplicate prototype chat is idle and made no changes. The approved
-`workflow-popup-v1` covers add, select, edit, reorder and confirmed removal of
-ordinary owned elements. Every removal uses a stationary modal; protected source,
-containing groups and the screen root remain protected. Luna research and independent
-Experience First reviews informed the prototype.
+2026-10-27: [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) is
+`review_ready` on `codex/37-compose-help-layout`. All seven bounded criteria have
+verified evidence. Current product/probe candidate `73ffb7f` implements the approved
+C5 add, select, literal edit, sibling reorder and confirmed removal workflow.
+Formal acceptance and PR creation remain unselected; the PR description is prepared.
 
-The C5 source is pinned locally at `94c78e7`. Reviewed product candidate `602613d`
-is on `codex/37-compose-help-layout`; formal acceptance and PR preparation remain
-pending. [The Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27)
-is complete. Host display sleep caused macOS to suspend the WKWebView renderer for
-246.297 seconds. The earlier CUA inspection woke the display and resumed it.
-Kris then selected implementing and testing the runner correction. The shared
-runner now checks the unlocked/awake desktop and holds IOKit power assertions.
-Its ten new lifecycle tests, strict Python discovery and actual Mac locked-host
-refusal/power-API checks pass. [The signed-app rerun](../tasks/evidence/simple-help-layout.md#corrected-mac-runner-native-verification-2026-10-27)
-also passes all six groups and cleanup in 9.594 seconds. The historical gap is
-649 ms in this run. A separate display-awake assertion was also active; this is
-functional proof, not an isolated sleep-prevention timing experiment.
-Production app behavior remains unchanged.
-[The approval record](../design/design-lab-help-composition/approval.json) owns the
-source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
-owns the completed Standards/Spec corrections and qualification results.
-The user requested a fresh-agent handoff on 2026-10-27, then explicitly approved
-branch push and the prepared Windows CI. The original chat completed publication and
-the CI audit. The GPT-6.1 Sol xhigh diagnostic chat took writer ownership and
-established the cause from the original session's OS logs. It needed no new app
-build, native session, SDK process or CI dispatch. Historical consumption remains
-recorded.
-The user approved
-the GitHub status update and five additional Mac builds, raising its package ceiling
-to seven total. Existing design/test approvals remain effective.
+Final independent Standards/Spec reviews have zero remaining findings or required
+evidence gaps. Their two P2 corrections preserve invalid-field focus and accessible
+errors, and complete native fixture cleanup/reporting after a desktop error.
+[The acceptance map](../tasks/evidence/simple-help-layout.md#final-acceptance-review-2026-10-27)
+owns criteria, candidate/reuse boundaries and earlier failures.
+
+Final checks pass 243 frontend cases; 417 ordinary core cases with 48 intentional
+ignores and three documented exclusions; and 249 Python cases with three exact
+Windows-only exclusions. All four harness groups, formatting and workflow checks
+pass. Chrome/core and signed Mac package 4/native session 5 pass seven groups,
+including the new validation-focus checkpoint, source/history/reopen and cleanup.
+Native elapsed time is 9.425 seconds. A separate display-awake assertion was active;
+no isolated performance claim follows. Full headless WebKit diagnostics retain
+their known ResizeObserver notification failure and supply no pass.
+
+Audited Windows CI 40396855757 on `d80c323` retains its unchanged source/helper/SDK
+and successful native workflow scope. The core source tree and runtime/SDK code
+are unchanged. C5 source `94c78e7` and its [approval record](../design/design-lab-help-composition/approval.json)
+remain authoritative; current invalid-state captures use the existing field-error
+pattern. Canvas fidelity and broader phase acceptance remain separate.
 
 | Capability | Implementation | Evidence and acceptance |
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | Both-target functional proof retained. Mac pause diagnosed and runner correction verified by automated, OS-boundary and signed-app checks. Acceptance and PR preparation remain; PR creation is unselected. |
+| Help composition (#37) | Implemented and independently reviewed | All seven leaf criteria verified. Ready for acceptance and separate PR creation approval. |
 
 ## Automatic checks and operation-limit policy
 

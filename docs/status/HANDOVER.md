@@ -1,94 +1,74 @@
 # Current outcome handover
 
-## L02 runner correction verified; acceptance remains
+## L02 ready for acceptance and PR approval
 
-The diagnostic chat completed the user-selected Mac-pause investigation on
-2026-10-27 after checking `e989b72` and taking sole checkout/server writer ownership.
-The original chat, "Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`),
-completed the CI audit and stopped editing. Both prototype chats are idle. Continue on
-`codex/37-compose-help-layout`, based on `8f7f9e7`,
-with reviewed product `602613d`. Intended PR base is `codex/phase3b-screen-designer`.
-Branch push is approved; PR creation, merge and release remain unselected.
+Kris selected continuing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
+with the implement skill. This chat remains sole checkout/server writer on
+`codex/37-compose-help-layout`, based on `8f7f9e7`. Current product/probe candidate
+is `73ffb7f`. The intended PR base remains `codex/phase3b-screen-designer`, whose
+remote still resolves to `8f7f9e7`. Branch publication is approved. PR creation,
+merge and release remain separate and unselected.
 
-Kris subsequently requested implementing the recommended root-cause correction
-and testing it. This chat retains writer ownership. The harness correction and
-results are on this branch; production app candidate `602613d` is unchanged.
-[The correction record](../tasks/evidence/simple-help-layout.md#mac-native-runner-correction-selected-2026-10-27)
-owns red/green checks and the retained first harness failure.
-[Native session 4](../tasks/evidence/simple-help-layout.md#corrected-mac-runner-native-verification-2026-10-27)
-now completes verification of that correction on the unchanged signed package.
+All seven bounded criteria have verified evidence. The leaf is `review_ready` and
+stays open for formal acceptance and separate PR creation approval.
+[The final acceptance map](../tasks/evidence/simple-help-layout.md#final-acceptance-review-2026-10-27)
+owns results and reuse boundaries. The prepared title is "Compose Help layouts with
+safe ordering and confirmed removal"; its body is the local ignored review artifact
+`.toolchains/screen-composition/final-review/pr-body.txt`. It is prepared for this
+head/base, not published as a PR. No code, test, package, CI or watcher operation
+remains pending.
 
-C5 source `94c78e7`, revision `workflow-popup-v1`, variant `workflow-popup`, has
-explicit approval. [The approval record](../design/design-lab-help-composition/approval.json)
-owns its fingerprint and 16 captures. Existing design and test-plan approvals remain
-effective. The read-only reference worktree `.toolchains/l02-c5-reference` retains
-that source; verify its port-5175 server before use. The older full-lab source guard
-limitation remains in [the evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26).
+Independent Standards and Spec reviews of the full diff, correction diff and final
+probe/gate have zero remaining findings. Two P2 corrections are complete: invalid
+text now retains the same focused control with associated completion errors; a Mac
+desktop-exit failure remains a failure while fixture cleanup and final reporting
+continue. The new validation checkpoint is required by admission. Historical
+six-group receipts keep their original contract and cannot satisfy the current
+seven-group gate.
 
-The complete composition workflow is implemented and independently reviewed.
-[The detailed evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
-owns fixes, controls, source-preservation contracts and earlier failures. TypeScript
-and 241 local frontend cases pass. The ordinary core run passes 417 cases on
-`9facf7c`, with 48 intentional ignores and three documented exclusions. Later product
-changes only fix renderer scheduling; reuse is bounded in the evidence.
+Final local checks pass 243 frontend cases; 417 ordinary core cases, with 48
+intentional ignores and three documented exclusions; and 249 Python cases with
+three exact Windows-only exclusions. All four harness groups, Rust formatting and
+actionlint pass. Chrome/core passes seven groups and pointer/modal/stale checks.
+Full/shorter headless WebKit diagnostics retain the known ResizeObserver delivery
+notification failure; they supply no pass and were not suppressed.
 
-[Qualification dispatch 1 is audited](../tasks/evidence/simple-help-layout.md#qualification-dispatch-1-audited-2026-10-27).
-Run [40396855757, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40396855757/attempts/1)
-succeeded on `d80c323dd9bcac404bd3bfe446ebc867021765a3`. Both selected Windows and
-portable Mac jobs pass their named tests and actual renderer/core checks. The audit
-verified archive digests, retained executable hashes/architecture, Windows inert
-helper, deliberate nested SDK render, native source/history/reopen and cleanup.
-Windows native elapsed time is 14.547 seconds. Closed qualification routes supply
-no pass. Documentation-only successors do not become this test candidate.
-Raw receipts and the audit are under `.toolchains/screen-composition/ci-40396855757/`.
+Signed Mac package 4/native session 5 qualifies `73ffb7f`: all seven groups pass in
+9.425 seconds, exit 0, no timeout, exact source/history/reopen and all cleanup owners.
+The current native receipt resolves Spec's changed-field focus evidence gap.
+Executable SHA-256 is
+`b118a214b1280489e2e2c6b60ae3df5dd10f17dea18ee8701c4e34d26a4fc8c1`.
+Identity/installer receipts are under `.toolchains/releases/l02-composition-04/`;
+raw checks and native output are under `.toolchains/screen-composition/final-review/`.
+The external `caffeinate -di` process remains untouched; no isolated performance,
+physical-input or broader canvas/editor acceptance is claimed.
 
-Signed local Mac package 3/product `602613d` retains its functional native pass on
-the approved identity. [The diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27)
-establishes host display sleep and WKWebView suspension as the cause of its long gap.
-The original renderer was explicitly suspended by macOS for 246.297 seconds, 99.3%
-of the 247.935-second literal-to-reorder interval. The earlier CUA inspection woke
-the display, WebKit marked the window visible and macOS resumed the renderer.
-Retained power/WebKit/RunningBoard events identify the exact app and child PIDs.
-The shared runtime runner now checks unlocked/awake admission and holds owned IOKit
-display-sleep/system-idle assertions through child cleanup. Each case retains host
-state and individual release receipts. Ten new boundary cases pass; final strict
-Python discovery has 248 passes and three expected Windows-only exclusions. Q1 and
-retention groups pass. Actual Mac locked-host refusal and power-API acquisition/
-release checks pass. After Kris confirmed unlock, the signed composition rerun
-passes all six groups, exact source/history/reopen and cleanup in 9.594 seconds.
-The literal-to-reorder interval is 649 ms. Both runner-owned power assertions are
-released and no Loomlight process remains. A separate `caffeinate -di` assertion
-was also active and remains untouched, so timing alone is not isolated proof of
-the runner's sleep prevention. No foreground responsiveness acceptance is claimed.
+[Windows run 40396855757, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40396855757/attempts/1)
+on `d80c323` remains fully audited for its unchanged source/helper/SDK and successful
+native workflow scope. Core source generation, SDK adapter/runtime and inert helper
+plan are unchanged. Preserve each tested candidate; documentation successors do not
+become new native or SDK candidates. The Mac pause's host-suspension diagnosis and
+its earlier failed runs remain in the same evidence owner.
 
-Current cumulative use is Mac packages 3/7, native sessions 4 and SDK campaigns
-2/2; Windows packages 1/2, native sessions 1/2 and SDK campaigns 2/2; CI dispatches
-1/2. Physical SDK process starts are 4/4 per host. Earlier three-start records counted
-validation as one submission; it launches compile and lint separately. The audit
-records this counting error and the campaign wording discrepancy. No allowance was
-extended by the correction. The user's later "Any allowance it needs for this is
-approved" authorized the diagnosis. It consumed zero app builds, native sessions,
-SDK processes or CI dispatches; its two preliminary native reservations were unused
-and closed after the historical OS intervention established the cause. Kris
-confirmed unlock and the fix/test continuation used native session 4. Its
-second correction reservation is unused and closed. The earlier real locked-host
-refusal and power-API checks consume no editor session. No owned app/helper/server
-or power assertion remains. Raw diagnostic extracts and replays are in ignored
-`.toolchains/screen-composition/pause-diagnosis/`; correction tests and native
-receipts are in `.toolchains/screen-composition/pause-fix/`. Other scope and publication
-boundaries remain unchanged; the later explicit user request selects the runner fix
-and its verification.
+C5 source `94c78e7`, revision `workflow-popup-v1`, retains explicit approval.
+[The approval record](../design/design-lab-help-composition/approval.json) owns its
+fingerprint and captures. The read-only `.toolchains/l02-c5-reference` worktree
+preserves that source; verify its port-5175 server before use. The known full-lab
+source-guard limitation and shell/naming differences remain in the evidence.
+Current invalid-state production captures verify the existing field-error pattern;
+they do not alter C5 approval or claim full canvas fidelity.
 
-The CI watcher event was received and acknowledged, and its audit is complete.
-No CI audit, unexplained-pause investigation or runner verification remains pending.
-Keep #37 open for its acceptance decision and PR preparation. Obtain authorization
-before PR creation; merge and release remain separate. No further package, native
-session or SDK execution is needed for this completed correction.
+Cumulative use is Mac packages 4/7 and native sessions 5/5; Windows packages 1/2
+and native sessions 1/2; SDK campaigns 2/2 and physical SDK starts 4/4 per host;
+focused CI dispatches 1/2. Compile and lint count as separate SDK children. The
+user-selected final review continuation supplied package 4/session 5 within the
+unchanged ceilings. No further costly operation is selected or needed for this
+completed verification. No owned app/helper/server or power assertion remains.
 
 Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
-Retained sections below contain unique prior failures and protected native state.
-Their preservation keeps this handover above its normal word-count target; they do
-not authorize resuming closed work or renewing its allowances.
+The retained sections below contain unique prior failures and protected native
+state. They justify this handover's excess over its normal word-count target and
+do not reopen those outcomes or allowances.
 
 ## Prior automatic checks and policy maintenance
 

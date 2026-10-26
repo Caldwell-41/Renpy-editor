@@ -514,9 +514,30 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   explicit suspension/resumption and the display-wake intervention. No fresh native
   session or product timing claim was needed. Keep UI-process events distinct from
   renderer events when auditing suspension. Portable boundary tests and actual Mac
-  locked-host refusal/power-API checks cover the correction. The signed composition
-  rerun passes all groups and cleanup in 9.594 seconds, with a 649 ms history interval.
+  locked-host refusal/power-API checks cover the correction. The final signed
+  composition candidate passes seven groups and cleanup in 9.425 seconds.
   A separate external display-awake assertion was active, so this is functional
   verification rather than an isolated sleep-prevention timing experiment.
 - **Evidence:** [Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27),
   [runner correction](../tasks/evidence/simple-help-layout.md#mac-native-runner-correction-selected-2026-10-27).
+
+## H36. Empty composition text loses field focus
+
+- **Cause:** local refusal rerendered the form and replaced its focused textarea;
+  errors had no field association or completion validation.
+- **Correction:** reuse the shared authoring field validator on blur/submission,
+  preserve IME input and focus the same invalid control without rerendering.
+- **Verification:** component regressions reject lost focus/missing association;
+  the current renderer/core and signed native probe require a positive validation
+  checkpoint with unchanged source and retained input.
+- **Evidence:** [Final review corrections](../tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).
+
+## H37. Desktop-exit errors skip native fixture cleanup
+
+- **Cause:** a Mac desktop guard exception escaped after child execution and bypassed
+  the remaining helper/fixture audit, cleanup and final failed result.
+- **Correction:** distinguish desktop errors and retain them in the failed result
+  while independent cleanup owners finish. Prelaunch refusal still prevents launch.
+- **Verification:** actual-runner fixtures complete source/metadata and fixture
+  cleanup under post-child lock or assertion-release failure; neither becomes a pass.
+- **Evidence:** [Final review corrections](../tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).

@@ -35,7 +35,9 @@ assertions while the child runs, reaps a failed/interrupted child before releasi
 them, and checks desktop state again at exit. Each case retains
 `runtime-ui-<case>-desktop.json` with admission, monotonic state samples, assertion
 IDs and individual release results. The runner requires an already unlocked,
-awake desktop. Its Windows route uses no Mac APIs.
+awake desktop. A desktop failure after child execution remains a failed result
+while helper/fixture auditing, cleanup and final result recording continue.
+Its Windows route uses no Mac APIs.
 
 ## Native driver requirements
 
