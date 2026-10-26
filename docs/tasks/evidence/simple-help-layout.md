@@ -78,7 +78,9 @@ transactions, persistent node identity and reopen proof remain unimplemented for
 L02. No native package, app launch, SDK qualification or CI matrix has started for
 this ticket. Set applicable costly-operation limits in #37 before those operations.
 
-Proposed TDD boundaries, pending confirmation under the tdd skill:
+The user approved these TDD boundaries on 2026-10-26 when requesting the separate
+prototyping chat. Test-boundary confirmation is complete; design selection remains
+with the user in that chat.
 
 - Public core dispatch and shared history with a disposable nested owned screen.
   Prove exact source edits, protected bytes, one history entry, no-ops, stale/conflict
@@ -90,3 +92,22 @@ Proposed TDD boundaries, pending confirmation under the tdd skill:
   nested example. Prove real source/history/reopen and runtime display, with
   platform evidence selected from the changed behavior. Canvas fidelity remains
   the separate gate named by #37.
+
+## Prototyping handoff, 2026-10-26
+
+The user requested a new chat to display the existing drafts as they are, iterate
+with them, and message the implementation chat when done. The draft candidate is
+`2c4ff1d0d319c5482e919e96f9035f07b28852e4`; its fingerprint is
+`74ee751a16bb56136b40d414b878e4288c329868df560f2c3d06c2ec34074163`.
+The prototype chat takes sole writer ownership of this checkout on
+`codex/37-compose-help-layout` until it returns the approved design. Its scope is
+the `help-composition` lab files, their registry entry, design approval/captures and
+the relevant evidence/status sections. The implementation chat waits during this
+assignment. Production implementation follows the design return.
+
+At handoff, the loopback Design Lab server is stopped. The receiving agent starts
+it through the existing runbook and shows all three committed drafts before edits.
+An unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md` is present;
+preserve it. Prototype behavior, source/runtime acceptance and costly-operation
+limits retain their existing boundaries. The user authorized the receiving chat
+to report back to the implementation chat after prototyping is complete.

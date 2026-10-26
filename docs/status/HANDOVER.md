@@ -18,16 +18,24 @@ The existing screen runner passes 36 rendering cases. The first frontend run's
 Python-version failure, corrected eight-test result and supported-interpreter full
 run (231/231 passing) are retained there.
 
-Next action is the user's design choice and confirmation of the proposed core,
-ScreensWorkspace DOM and real UI-to-core/runtime test boundaries. Root AGENTS.md
-requires design approval before non-trivial production UI edits; the tdd skill
-requires agreement on test boundaries before adding tests. Continue in this thread.
-Once approved, pin the selected revision through Design Lab's integration procedure,
-then implement and qualify #37. The implement skill's final independent Standards/Spec
-reviews and implementation commit remain due. Actual minimal writes, identity/history,
-reopen and deliberate nested-screen preview are required before ticket acceptance.
+On 2026-10-26 the user requested a new prototyping chat. That chat takes sole writer
+ownership of this checkout for the lab files, design records and relevant
+evidence/status sections. It first displays all three committed drafts unchanged,
+then iterates with the user. This implementation chat waits until the user-approved
+design returns. The user authorized the prototyping agent to message this chat when
+done. The proposed core, ScreensWorkspace DOM and real UI-to-core/runtime test
+boundaries are approved; do not request that confirmation again.
 
-The local Design Lab server listens on `127.0.0.1:5174` for review. No native editor,
+Root AGENTS.md still requires design approval before non-trivial production UI edits.
+Pin the selected revision through Design Lab's integration procedure before returning
+writer ownership and resuming implementation here. The implement skill's final
+independent Standards/Spec reviews and implementation commit remain due. Actual
+minimal writes, identity/history, reopen and deliberate nested-screen preview are
+required before ticket acceptance. [The prototype handoff record](../tasks/evidence/simple-help-layout.md#prototyping-handoff-2026-10-26)
+owns this assignment and the unrelated file to preserve.
+
+The Design Lab server is stopped at transfer; the receiving agent starts it on
+`127.0.0.1:5174` for review. No native editor,
 SDK qualification, costly CI operation or watcher has started for #37. Apply
 WORKFLOW's operation-limit policy before a costly operation; routine preparation
 needs no numerical limit. The branch and draft source are local-only. No push, PR,

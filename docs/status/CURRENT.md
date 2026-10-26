@@ -6,9 +6,12 @@
 "Compose and reorder a simple Help layout", on a new branch. Preparation is local
 on `codex/37-compose-help-layout`, based on the current Screens branch at `8f7f9e7`.
 Three isolated Design Lab drafts compare add controls within Choose/Design/Connect.
-Root AGENTS.md requires a design choice before production UI edits.
+On 2026-10-26 the user requested a separate prototyping chat to display the
+existing drafts, iterate and return the approved result. The proposed test
+boundaries are approved. Root AGENTS.md requires the design choice before
+production UI edits.
 [The evidence](../tasks/evidence/simple-help-layout.md) records the drafts, browser
-checks, interpreter diagnosis and proposed implementation checks.
+checks, interpreter diagnosis, approved test boundaries and prototype ownership.
 
 | Capability | Implementation | Evidence and acceptance |
 | --- | --- | --- |
