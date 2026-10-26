@@ -18,7 +18,10 @@ is complete. Host display sleep caused macOS to suspend the WKWebView renderer f
 Kris then selected implementing and testing the runner correction. The shared
 runner now checks the unlocked/awake desktop and holds IOKit power assertions.
 Its ten new lifecycle tests, strict Python discovery and actual Mac locked-host
-refusal/power-API checks pass. The signed-app rerun awaits desktop unlock.
+refusal/power-API checks pass. [The signed-app rerun](../tasks/evidence/simple-help-layout.md#corrected-mac-runner-native-verification-2026-10-27)
+also passes all six groups and cleanup in 9.594 seconds. The historical gap is
+649 ms in this run. A separate display-awake assertion was also active; this is
+functional proof, not an isolated sleep-prevention timing experiment.
 Production app behavior remains unchanged.
 [The approval record](../design/design-lab-help-composition/approval.json) owns the
 source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
@@ -37,7 +40,7 @@ to seven total. Existing design/test approvals remain effective.
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | Both-target functional proof retained. Mac pause diagnosed and runner corrected; automated/OS-boundary checks pass. The corrected runner's signed-app rerun awaits desktop unlock. Acceptance and PR preparation remain; PR creation is unselected. |
+| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | Both-target functional proof retained. Mac pause diagnosed and runner correction verified by automated, OS-boundary and signed-app checks. Acceptance and PR preparation remain; PR creation is unselected. |
 
 ## Automatic checks and operation-limit policy
 

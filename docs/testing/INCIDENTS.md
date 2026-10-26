@@ -515,6 +515,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   session or product timing claim was needed. Keep UI-process events distinct from
   renderer events when auditing suspension. Portable boundary tests and actual Mac
   locked-host refusal/power-API checks cover the correction. The signed composition
-  rerun still requires an unlocked desktop.
+  rerun passes all groups and cleanup in 9.594 seconds, with a 649 ms history interval.
+  A separate external display-awake assertion was active, so this is functional
+  verification rather than an isolated sleep-prevention timing experiment.
 - **Evidence:** [Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27),
   [runner correction](../tasks/evidence/simple-help-layout.md#mac-native-runner-correction-selected-2026-10-27).

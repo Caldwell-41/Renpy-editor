@@ -983,3 +983,54 @@ plus admitted/awake desktop samples and both assertion releases. Compare the
 literal-to-reorder gap with historical session 3 without creating a new product
 performance threshold. The user's unlock is the remaining capability requirement;
 the pending native result supplies no pass.
+
+### Corrected Mac runner native verification, 2026-10-27
+
+Kris confirmed desktop unlock. Live preflight on harness candidate `05cfc9d` finds
+the console logged in and unlocked, main display active and awake, and no existing
+Loomlight process. Strict signature verification passes and the retained package-3
+executable hash remains
+`1a914c1ad33b73a761da853235fa563f9d1d13bf517ef168fa96962cf38d4c53`.
+Reserved native session 4 is selected with fresh `pause-fix/native-mac-04/` output
+and the explicit `screen-composition` case. This starts no SDK and builds no package.
+The second reserved session remains available only for an evidenced correction.
+
+Native session 4 passes on the unchanged signed product candidate `602613d`, using
+the corrected harness at `05cfc9d`. It exits 0 without timeout in **9.594 seconds**.
+All six original groups pass: composition/history, literal editing/history,
+keyboard reorder/history, confirmed removal, protected-source reconciliation and
+reopen. Accepted source matches disk and metadata; all seven owned identities and
+selected-node reopen pass. Host/request/credential-owner and fixture cleanup pass,
+with no source bytecode, saves or scratch jobs. Accepted source SHA-256 is
+`054c7e76bc2336bfa4000b51272342a004ff34e22b98af650224458a833b0901`.
+
+Literal-history completes at 2.473 seconds and reorder-history at 3.122 seconds.
+That interval is **649 ms**, compared with historical session 3's 247.935 seconds.
+The original diagnostic replay changes from detected gap to no detected gap on
+this receipt. It remains a diagnostic comparison, not a product timing threshold.
+
+The desktop receipt records unlocked/awake admission before acquisition, the same
+state immediately before launch and after child exit, and both owned assertion
+IDs (`41701` display, `41702` system idle) released successfully. The OS power log
+independently records the runner's display assertion created at 07:52:36 and
+released at 07:52:45 (Australia/Brisbane). No runner-owned power assertion or
+Loomlight process remains after the audit. `audit.json` retains input hashes,
+source/duration checks and the scope below; `native-power.log` retains those OS
+events beside the original native/desktop receipts in `pause-fix/native-mac-04/`.
+
+A separate pre-existing `caffeinate -di` process (PID `47152`) also held display
+and system-idle assertions during this run. It remains untouched. This native run
+qualifies the complete corrected-runner workflow on an awake desktop and its own
+assertion lifecycle. Its elapsed time alone does not isolate the runner's assertion
+as the only sleep-prevention mechanism. Locked/asleep refusal, the earlier actual
+IOKit acquisition/release observation and the focused lifecycle regressions provide
+the separate boundary checks. No forced sleep, lock or idle-duration campaign was
+selected or claimed.
+
+The requested runner correction and native verification are complete. Additional
+use is one Mac native session, zero package builds, SDK processes or CI dispatches.
+Cumulative Mac use is packages 3/7, native sessions 4 under the approved extension,
+SDK campaigns 2/2 and four physical SDK starts. Windows and CI counts are unchanged.
+The second native correction reservation is unused and closed after the passing
+run. Existing functional qualification retains its scope; acceptance and PR
+preparation remain separate. No app behavior changed.
