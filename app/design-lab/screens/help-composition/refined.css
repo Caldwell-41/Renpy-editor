@@ -1,0 +1,23 @@
+/* C2 is isolated so the three original drafts remain available for comparison. */
+.compose-refined .compose-workspace { grid-template-columns:minmax(0,1fr) 360px; }
+.compose-refined .compose-editor { max-height:calc(100vh - 210px); }
+.compose-refined .compose-palette { display:grid; grid-template-columns:1fr 1fr; gap:2px 8px; margin-bottom:8px; }
+.compose-refined .compose-palette .button { justify-content:flex-start; min-height:34px; padding:6px 8px; }
+.compose-refined .compose-palette .button:last-child { grid-column:1/-1; }
+.compose-refined .compose-type-help { min-height:38px; margin:6px 0 14px; }
+.compose-refined .compose-insertion { margin:-4px 0 16px; font-size:11px; line-height:1.5; overflow-wrap:anywhere; }
+.compose-refined .compose-insertion[data-invalid=true],
+.compose-refined .compose-form-feedback { color:var(--status-error); }
+.compose-refined .compose-form-feedback { border-left:2px solid var(--status-error); padding-left:10px; margin:12px 0; }
+.compose-refined .compose-add textarea { min-height:92px; }
+.compose-refined .compose-add-actions { position:sticky; bottom:0; background:var(--surface-app); z-index:3; padding:10px 0; margin:0; }
+.compose-refined .compose-add-actions .primary { min-width:108px; }
+.compose-refined .compose-pending { outline:1px dashed var(--compose-guide); outline-offset:4px; pointer-events:none; }
+.compose-refined .compose-pending:empty { min-height:28px; }
+.compose-refined .compose-drawing [data-selected=true]:has(.compose-pending) { outline:none; }
+@media(max-width:759px) {
+  .compose-refined .compose-rail { order:0; }
+  .compose-refined .compose-editor { order:1; max-height:none; border-top:0; padding-top:0; }
+  .compose-refined .compose-stage { order:2; border-top:1px solid var(--border-normal); padding-top:14px; }
+  .compose-refined .compose-add-actions { position:static; }
+}

@@ -1,0 +1,11 @@
+.compose-removal .workflow-remove-command { color:var(--status-error); background:transparent; border:0; padding:4px 0; min-height:28px; }
+.compose-removal .workflow-removal-limit { font-size:11px; line-height:1.5; margin:8px 0; }
+.compose-removal .workflow-removal-review { border-left:2px solid var(--status-error); padding-left:12px; margin:10px 0; }
+.compose-removal .workflow-removal-review h3 { margin:0 0 8px; }
+.compose-removal .workflow-removal-review p { margin:8px 0; }
+.compose-removal .workflow-removal-list { padding-left:16px; font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+.compose-removal .workflow-destructive { border-color:var(--status-error); color:var(--status-error); }
+.compose-removal .workflow-removal-result { display:flex; gap:8px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--border-normal); padding:0 0 10px; margin-bottom:12px; font-size:12px; overflow-wrap:anywhere; }
+.compose-removal .workflow-removal-result span { flex:1; min-width:140px; }
+.compose-removal .workflow-removal-result .button { background:transparent; color:var(--accent-primary); }
+.compose-removal .compose-drawing [data-removal=true] { outline:1px dashed var(--status-error); outline-offset:3px; }

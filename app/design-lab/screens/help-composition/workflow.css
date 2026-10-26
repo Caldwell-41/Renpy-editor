@@ -1,0 +1,62 @@
+/* The complete workflow is a separate draft; C and C2 remain unchanged. */
+.compose-workflow-proto .compose-workspace { grid-template-columns:minmax(0,1fr) 370px; }
+.compose-workflow-proto .compose-editor { max-height:calc(100vh - 210px); padding-left:16px; }
+.compose-workflow-proto .workflow-panel-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.compose-workflow-proto .workflow-panel-heading h2 { margin:0; }
+.compose-workflow-proto .compose-tree .button { padding-top:6px; padding-bottom:6px; min-height:32px; justify-content:flex-start; }
+.compose-workflow-proto .workflow-row-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.compose-workflow-proto .workflow-row-note { margin-left:auto; flex:none; font-size:10px; color:var(--accent-primary); }
+.compose-workflow-proto .compose-tree [data-row=custom] .workflow-row-note { color:var(--text-secondary); }
+.compose-workflow-proto .compose-selected-details { padding-top:10px; margin-top:10px; }
+.compose-workflow-proto .workflow-position { font-size:11px; margin:4px 0; }
+.compose-workflow-proto .compose-selected-details .compose-actions { gap:6px; margin:8px 0; }
+.compose-workflow-proto .workflow-help { font-size:11px; margin:6px 0; }
+.compose-workflow-proto .workflow-help summary { cursor:pointer; }
+.compose-workflow-proto .workflow-feedback { border-left:2px solid var(--status-error); color:var(--status-error); padding:0 0 0 10px; line-height:1.6; margin:12px 0; }
+.compose-workflow-proto .workflow-pending-list { display:flex; flex-direction:column; gap:4px; }
+.compose-workflow-proto .workflow-pending-list:empty { display:none; }
+.compose-workflow-proto .workflow-pending-list .button { text-align:left; border:0; border-left:2px solid var(--accent-primary); background:transparent; color:var(--accent-primary); padding:6px 8px; margin-bottom:8px; overflow-wrap:anywhere; }
+.compose-workflow-proto .workflow-edit-location { font-size:11px; line-height:1.6; overflow-wrap:anywhere; margin:0 0 16px; }
+.compose-workflow-proto .workflow-draft-state { min-height:20px; margin:8px 0; }
+.compose-workflow-proto textarea { min-height:145px; line-height:1.6; }
+.compose-workflow-proto .compose-add textarea { min-height:84px; }
+.compose-workflow-proto .compose-palette { display:grid; grid-template-columns:1fr 1fr; gap:2px 8px; margin-bottom:8px; }
+.compose-workflow-proto .compose-palette .button { justify-content:flex-start; min-height:32px; padding:6px 8px; }
+.compose-workflow-proto .compose-palette .button:last-child { grid-column:1/-1; }
+.compose-workflow-proto .compose-type-help { margin:6px 0 12px; }
+.compose-workflow-proto .compose-insertion { margin:-4px 0 12px; font-size:11px; line-height:1.5; overflow-wrap:anywhere; }
+.compose-workflow-proto .compose-insertion[data-invalid=true] { color:var(--status-error); }
+.compose-workflow-proto .compose-add-actions { margin:8px 0; }
+.compose-workflow-proto .compose-pending,.compose-workflow-proto [data-draft=true] { outline:1px dashed var(--compose-guide); outline-offset:4px; }
+.compose-workflow-proto .compose-pending { pointer-events:none; min-height:24px; }
+.compose-workflow-proto .compose-drawing [data-hovered=true]:not([data-selected=true]) { outline:1px solid var(--accent-primary); outline-offset:3px; }
+.compose-workflow-proto .compose-drawing [data-selected=true][data-draft=true] { outline-style:dashed; }
+.compose-workflow-proto .compose-tree [data-drop=before] { box-shadow:inset 0 2px var(--accent-primary); }
+.compose-workflow-proto .compose-tree [data-drop=after] { box-shadow:inset 0 -2px var(--accent-primary); }
+.compose-workflow-proto .compose-tree [data-drop=blocked] { outline:1px solid var(--status-error); outline-offset:-1px; }
+.compose-workflow-proto .workflow-breadcrumb { display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:12px; font-size:11px; }
+.compose-workflow-proto .workflow-breadcrumb .button { min-height:26px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; background:transparent; border:0; padding:3px; font-size:11px; }
+.compose-workflow-proto .workflow-breadcrumb .button[aria-current=true] { color:var(--accent-primary); }
+.compose-workflow-proto .compose-selection { margin:6px 0; font-size:11px; }
+.compose-workflow-proto .workflow-source-dialog { width:min(850px,calc(100vw - 32px)); max-height:calc(100vh - 48px); background:var(--surface-app); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:0; padding:20px; }
+.compose-workflow-proto .workflow-source-dialog::backdrop { background:#0009; }
+.compose-workflow-proto .workflow-source-dialog h2 { font-size:18px; }
+.compose-workflow-proto .workflow-source-dialog p { font-size:12px; line-height:1.6; }
+.compose-workflow-proto .workflow-source-dialog .compose-source { font-family:var(--font-source); }
+@media(max-width:759px) {
+  .compose-workflow-proto .compose-rail { order:0; }
+  .compose-workflow-proto .compose-editor { order:1; max-height:none; border-top:0; padding:0; }
+  .compose-workflow-proto .compose-stage { order:2; border-top:1px solid var(--border-normal); padding-top:14px; }
+}
+
+/* A heading keeps its appearance when sibling order changes. */
+.compose-workflow-proto .compose-art-text { font-size:clamp(12px,3cqw,20px); }
+.compose-workflow-proto .compose-art-text[data-heading=true] { font-size:clamp(18px,4cqw,26px); }
+.compose-workflow-proto .workflow-breadcrumb .button { display:flex; justify-content:flex-start; }
+.compose-workflow-proto .workflow-path-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.compose-workflow-proto .workflow-compact-jump { display:none; }
+@media(max-width:759px) {
+  .compose-workflow-proto .workflow-compact-jump { display:block; flex:none; }
+  .compose-workflow-proto .compose-workspace > .workflow-compact-jump { order:0; align-self:flex-end; margin-bottom:0; }
+  .compose-workflow-proto .compose-canvas-header { flex-wrap:wrap; }
+}

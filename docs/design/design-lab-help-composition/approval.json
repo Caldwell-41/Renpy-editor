@@ -3,8 +3,12 @@
   "screenId": "help-composition",
   "currentApproved": null,
   "revisions": [
+    { "id": "workflow-popup-v1", "variantId": "workflow-popup", "approval": null },
+    { "id": "workflow-removal-v1", "variantId": "workflow-removal", "approval": null },
+    { "id": "workflow-v1", "variantId": "workflow", "approval": null },
     { "id": "inline-v1", "variantId": "inline", "approval": null },
     { "id": "context-v1", "variantId": "context", "approval": null },
+    { "id": "focused-refined-v1", "variantId": "focused-refined", "approval": null },
     { "id": "focused-v1", "variantId": "focused", "approval": null }
   ]
 }

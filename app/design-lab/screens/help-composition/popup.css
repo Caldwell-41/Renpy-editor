@@ -1,0 +1,18 @@
+.compose-popup .lp-content, .compose-popup .compose-editor { scrollbar-gutter:stable; }
+.compose-popup.has-removal-dialog .lp-content, .compose-popup.has-removal-dialog .compose-editor { overflow:hidden; }
+.compose-popup .workflow-removal-dialog { width:min(460px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); margin:auto; padding:24px; border:1px solid var(--border-strong); border-radius:0; background:var(--surface-app); color:var(--text-primary); overflow:auto; overscroll-behavior:contain; }
+.compose-popup .workflow-removal-dialog::backdrop { background:#0009; }
+.compose-popup .workflow-removal-dialog h2 { font-size:18px; margin:0 0 16px; }
+.compose-popup .workflow-removal-dialog p { font-size:12px; line-height:1.6; margin:12px 0; }
+.compose-popup .workflow-removal-dialog .workflow-removal-target { border-left:2px solid var(--border-strong); padding-left:12px; overflow-wrap:anywhere; white-space:pre-wrap; max-height:35dvh; overflow:auto; }
+.compose-popup .workflow-removal-dialog .workflow-removal-list { max-height:35dvh; overflow:auto; }
+.compose-popup .workflow-removal-dialog .compose-actions { justify-content:flex-end; margin:20px 0 0; }
+.compose-popup .workflow-removal-toast { position:fixed; bottom:42px; left:50%; transform:translateX(-50%); z-index:10; width:max-content; max-width:calc(100vw - 32px); display:flex; gap:12px; align-items:center; padding:10px 12px; border:1px solid var(--border-strong); background:var(--surface-app); color:var(--text-primary); font-size:12px; }
+.compose-popup .workflow-removal-toast[hidden] { display:none; }
+.compose-popup .workflow-removal-toast span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.compose-popup .workflow-removal-toast .button { flex:none; }
+@media(max-width:599px) {
+  .compose-popup .workflow-removal-dialog { padding:20px; }
+  .compose-popup .workflow-removal-toast { flex-wrap:wrap; }
+  .compose-popup .workflow-removal-toast span { flex-basis:100%; }
+}
