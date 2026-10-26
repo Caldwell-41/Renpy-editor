@@ -663,3 +663,32 @@ ordinal 1. It runs Windows SDK/native qualification and portable Mac checks, wit
 a Mac package or native launch. The two-dispatch ceiling remains in force; Windows
 package/editor/SDK limits are unchanged. Actual costly starts will be audited from
 the confirmed run. The unexplained Mac timing gap remains a separate pre-PR concern.
+
+### L02 qualification dispatch 1 pending
+
+Publication is verified at `d80c323dd9bcac404bd3bfe446ebc867021765a3` on
+`origin/codex/37-compose-help-layout`. The product and workflow are unchanged from
+reviewed product `602613d`; subsequent changes record authorization and handoff.
+The user-approved dispatch uses `compose_help=true` and ordinal 1.
+[Run 40396855757](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40396855757)
+is confirmed as attempt 1, event `workflow_dispatch`, branch
+`codex/37-compose-help-layout`, with that exact full head SHA. Last observed status
+is `in_progress`, updated `2026-10-26T20:34:37Z`.
+
+Both required jobs started. At the initial step observation Windows was in pinned
+dependencies/evidence checks; Mac was in shared composition/source/desktop gates.
+No Windows package, editor or SDK start had been observed at that snapshot. The
+first run reserves one Windows package, one editor session and both selected SDK
+campaigns, with the existing four-start ceiling. Audit actual started operations,
+including failures, from the exact job steps and retained receipts before another
+attempt. Dispatch consumption is now 1/2. Local Mac use remains packages 3/7,
+native sessions 3/3 and SDK campaigns 2/2 with three of four starts.
+
+Initial metadata is retained under `.toolchains/screen-composition/ci-40396855757/`.
+A documentation-only wait commit may follow; it does not change this test candidate.
+The original chat owns CI registration and result audit. A receiving chat may take
+sole checkout writer ownership after recording that transfer; the CI auditor must
+reconcile it before editing. The selected wait route is installed `ci-watch`, with
+registration confirmed only by its startup acknowledgement. A failed registration
+uses manual same-thread resume. No result is accepted yet. The Mac pause remains
+unexplained, and PR creation/merge/release remain unselected.

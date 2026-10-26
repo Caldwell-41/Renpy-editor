@@ -25,7 +25,7 @@ to seven total. Existing design/test approvals remain effective.
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | TypeScript, 241 frontend tests, 417 ordinary core tests, real UI/core, both Mac SDK campaigns and corrected signed Mac native session 3 pass within their recorded scope. The native timing gap remains unexplained. Branch publication and Windows CI are approved; qualification is being prepared. |
+| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | TypeScript, 241 frontend tests, 417 ordinary core tests, real UI/core, both Mac SDK campaigns and corrected signed Mac native session 3 pass within their recorded scope. The native timing gap remains unexplained. Branch published; Windows and portable Mac qualification are in progress in run 40396855757. The original chat owns the CI audit. |
 
 ## Automatic checks and operation-limit policy
 

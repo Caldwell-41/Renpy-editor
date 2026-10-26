@@ -5,9 +5,9 @@
 Kris requested a fresh-agent handoff on 2026-10-27 under the existing C5 and test
 approvals. The original chat, "Implement ticket #37"
 (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), received the late approval to push and run
-Windows CI. No receiving chat has started. This chat owns publication and the CI
-audit; a receiving chat must reconcile that pending operation before taking writer
-ownership. Both prototype chats are idle. Continue on
+Windows CI. No receiving chat has started. This chat owns the exact CI run audit. A receiving chat may assume sole checkout
+writer ownership after recording the transfer; this chat must recheck that ownership
+before any correction on CI resume. Both prototype chats are idle. Continue on
 `codex/37-compose-help-layout`, based on `8f7f9e7`, with reviewed product candidate
 `602613d`. Intended integration destination remains `codex/phase3b-screen-designer`.
 Push and the prepared Windows qualification are approved. PR creation, merge and
@@ -49,21 +49,39 @@ Do not repeat the unchanged native run or count its diagnostics as another sessi
 Kris approved the prepared GitHub status update and five additional Mac builds on
 2026-10-26. The issue update was published and read back with acceptance unchanged.
 Cumulative use is Mac packages 3/7, native sessions 3/3 and SDK campaigns 2/2, with
-three of four SDK starts. Windows use and focused CI remain zero. The additional
-build approval changes no other recorded limit. No qualification operation is running.
+three of four SDK starts. Windows costly starts await the run audit; focused CI
+dispatch use is 1/2. The additional build approval changes no other recorded limit.
+Qualification dispatch 1 is in progress; its identity is below.
 
-The remaining pre-PR work includes read-only diagnosis of the unexplained Mac pause
-using the existing native receipt and relevant code. Select any additional attempt
-only after checking its separate operation limit. On 2026-10-27 the user explicitly
-approved pushing `codex/37-compose-help-layout` and running the prepared Windows
-qualification. Publish the reviewed branch and dispatch the existing
-`screens-source.yml` workflow with `compose_help` selected, exact candidate SHA and
-ordinal 1. The selected route runs required Windows
-SDK/native proof and portable Mac checks. Preserve its 2-dispatch ceiling and the
-separate Windows package/editor/SDK limits. Existing test selection remains approved.
-PR creation, merge and release remain unselected. No failed, ignored or missing
-proof counts as a pass. Reconcile CI ownership here before a receiving chat starts
-another dispatch or edits the same checkout.
+The user approved branch push and Windows CI on 2026-10-27. The branch was
+published and the exact selected qualification is in progress:
+
+- Workflow `screens-source.yml`, `compose_help=true`, ordinal 1.
+- [Run 40396855757, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40396855757).
+- Candidate `d80c323dd9bcac404bd3bfe446ebc867021765a3`.
+- Last confirmed `in_progress`, updated `2026-10-26T20:34:37Z`.
+- Required jobs are Help composition on Windows x64 and macOS ARM64. Closed L01/L17
+  selectors remain unselected. Mac CI performs portable checks, with no package or
+  native session.
+
+At the initial job observation Windows was in dependency/evidence checks, before
+costly operations. CI1 reserves one Windows package, one native session and both
+selected SDK campaigns, within existing limits. Audit actual starts from its steps
+and receipts before recording consumption or selecting another run. CI ordinal 2
+alone does not renew an exhausted SDK or native allowance.
+
+The original chat owns the CI watcher and exact-result audit. The installed
+`ci-watch` launcher is the selected wait route; its startup acknowledgement in that
+chat confirms registration. If registration is not confirmed, use WORKFLOW's manual
+same-thread fallback. Keep private watcher paths outside the repo. On a completion
+event, verify run/attempt/SHA, read named results and artifacts, reconcile current
+writer ownership, and inspect any later source changes before fixes or acceptance.
+A documentation-only successor records this candidate without becoming its test SHA.
+
+The receiving agent can investigate the unexplained Mac pause from existing receipts
+and code. Select any additional attempt only after checking its separate limit.
+Do not duplicate the pending CI dispatch. PR creation, merge and release remain
+unselected. No failed, ignored or missing proof counts as a pass.
 
 Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
 Retained sections below contain unique prior failures and protected native state.
