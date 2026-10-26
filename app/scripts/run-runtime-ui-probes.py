@@ -1,4 +1,5 @@
 """Bounded independent packaged Runtime UI scenarios; all results retained on failure."""
+from contextlib import ExitStack
 import json
 import os
 from pathlib import Path
@@ -12,6 +13,20 @@ import hashlib
 import ctypes
 
 from runtime_probe_cases import RUNTIME_CASES, OPTIONAL_CASES, runtime_report_ok
+from macos_native_desktop import native_desktop
+
+
+def reap_probe(process):
+    if process.poll() is None:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], check=False, capture_output=True)
+        else:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        process.wait(timeout=15)
+
 
 def stop_remaining_mac_canvas_helpers(profile):
     """Failure cleanup for the owned disposable SDK only; never counts as normal exit."""
@@ -71,9 +86,10 @@ for case in cases:
     if case == "canvas-helper":
         assert observer_command and not observation_path.exists() and not observer_stop.exists()
         env["LOOMLIGHT_CANVAS_OBSERVER_ROOT"] = str(output)
-    with log.open("wb") as stream:
+    with native_desktop(output / f"runtime-ui-{case}-desktop.json"), log.open("wb") as stream, ExitStack() as children:
         process = subprocess.Popen([str(executable)], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                    start_new_session=os.name != "nt")
+        children.callback(reap_probe, process)
         external_errors = []
         def retain_output():
             for line in process.stdout:
@@ -109,21 +125,21 @@ for case in cases:
             code = process.wait(timeout=1800 if case == "canvas-input" else 300 if case == "source-foundation" else 420)
         except subprocess.TimeoutExpired:
             timed_out = True
-            if os.name == "nt":
-                subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], check=False, capture_output=True)
-            else:
-                os.killpg(process.pid, signal.SIGKILL)
-            process.wait(timeout=15)
+            reap_probe(process)
             code = -1
-        reader.join(timeout=10)
-        if case == "canvas-helper":
-            observer_stop.touch()
-            for owned in observer:
-                try:
-                    owned.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    owned.kill(); owned.wait()
-                    external_errors.append("Canvas observer cleanup timed out")
+        except BaseException:
+            reap_probe(process)
+            raise
+        finally:
+            reader.join(timeout=10)
+            if case == "canvas-helper":
+                observer_stop.touch()
+                for owned in observer:
+                    try:
+                        owned.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        owned.kill(); owned.wait()
+                        external_errors.append("Canvas observer cleanup timed out")
     fallback_helpers = []
     if case == "canvas-input":
         profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"

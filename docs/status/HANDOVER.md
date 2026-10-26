@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## L02 CI audited; Mac pause diagnosed
+## L02 runner corrected; native verification awaits desktop
 
 The diagnostic chat completed the user-selected Mac-pause investigation on
 2026-10-27 after checking `e989b72` and taking sole checkout/server writer ownership.
@@ -9,6 +9,12 @@ completed the CI audit and stopped editing. Both prototype chats are idle. Conti
 `codex/37-compose-help-layout`, based on `8f7f9e7`,
 with reviewed product `602613d`. Intended PR base is `codex/phase3b-screen-designer`.
 Branch push is approved; PR creation, merge and release remain unselected.
+
+Kris subsequently requested implementing the recommended root-cause correction
+and testing it. This chat retains writer ownership. The harness correction and
+results are on this branch; production app candidate `602613d` is unchanged.
+[The correction record](../tasks/evidence/simple-help-layout.md#mac-native-runner-correction-selected-2026-10-27)
+owns red/green checks, the retained first harness failure and remaining native proof.
 
 C5 source `94c78e7`, revision `workflow-popup-v1`, variant `workflow-popup`, has
 explicit approval. [The approval record](../design/design-lab-help-composition/approval.json)
@@ -41,10 +47,13 @@ The original renderer was explicitly suspended by macOS for 246.297 seconds, 99.
 of the 247.935-second literal-to-reorder interval. The earlier CUA inspection woke
 the display, WebKit marked the window visible and macOS resumed the renderer.
 Retained power/WebKit/RunningBoard events identify the exact app and child PIDs.
-Production and runner behavior are unchanged. The recommended runner correction is
-an unlocked/awake preflight and a temporary display-awake assertion scoped to the
-native child. It has not been implemented or qualified. No foreground responsiveness
-claim follows from this diagnosis.
+The shared runtime runner now checks unlocked/awake admission and holds owned IOKit
+display-sleep/system-idle assertions through child cleanup. Each case retains host
+state and individual release receipts. Ten new boundary cases pass; final strict
+Python discovery has 248 passes and three expected Windows-only exclusions. Q1 and
+retention groups pass. Actual Mac locked-host refusal and power-API acquisition/
+release checks pass. The signed composition rerun remains pending desktop unlock;
+no new functional or foreground responsiveness pass is claimed.
 
 Current cumulative use is Mac packages 3/7, native sessions 3 and SDK campaigns
 2/2; Windows packages 1/2, native sessions 1/2 and SDK campaigns 2/2; CI dispatches
@@ -55,16 +64,24 @@ extended by the correction. The user's later "Any allowance it needs for this is
 approved" authorized the diagnosis. It consumed zero app builds, native sessions,
 SDK processes or CI dispatches; its two preliminary native reservations were unused
 and closed after the historical OS intervention established the cause. The current
-Mac is locked with its display asleep. No new app/helper/server or power assertion
+Mac remains locked with its display asleep. The fix/test continuation reserves
+native sessions 4 and 5; neither has started. Its real locked-host refusal and
+power-API checks consume no editor session. No new app/helper/server or power assertion
 remains. Raw extracts, replay scripts, hashes and host-state receipts are in ignored
 `.toolchains/screen-composition/pause-diagnosis/`. Other scope and publication
-boundaries remain unchanged; the diagnostic approval does not select runner changes.
+boundaries remain unchanged; the later explicit user request selects the runner fix
+and its verification.
 
 The CI watcher event was received and acknowledged, and its audit is complete.
-No qualification run, CI audit or unexplained-pause investigation remains pending.
-The diagnosis is recorded in #37 and the existing evidence owner. Remaining work is
-the acceptance decision and PR preparation. Keep #37 open until those are complete.
-Obtain authorization before PR creation; merge and release remain separate.
+No CI audit or unexplained-pause investigation remains pending. The corrected
+runner's native verification requires an unlocked, awake desktop. Once available,
+verify no unrelated Loomlight process, then run the existing signed package 3 with
+`app/scripts/run-runtime-ui-probes.py`, selector `screen-composition`, and fresh
+`.toolchains/screen-composition/pause-fix/native-mac-04/` output. Audit functional,
+source/reopen, fixture and power cleanup receipts and compare the historical gap.
+No rebuild or SDK start is needed. Keep #37 open for this result, the acceptance
+decision and PR preparation. Obtain authorization before PR creation; merge and
+release remain separate.
 
 Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
 Retained sections below contain unique prior failures and protected native state.

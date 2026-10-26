@@ -15,8 +15,11 @@ is on `codex/37-compose-help-layout`; formal acceptance and PR preparation remai
 pending. [The Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27)
 is complete. Host display sleep caused macOS to suspend the WKWebView renderer for
 246.297 seconds. The earlier CUA inspection woke the display and resumed it.
-The recommended native-runner preflight/display assertion is recorded; production
-and runner behavior remain unchanged.
+Kris then selected implementing and testing the runner correction. The shared
+runner now checks the unlocked/awake desktop and holds IOKit power assertions.
+Its ten new lifecycle tests, strict Python discovery and actual Mac locked-host
+refusal/power-API checks pass. The signed-app rerun awaits desktop unlock.
+Production app behavior remains unchanged.
 [The approval record](../design/design-lab-help-composition/approval.json) owns the
 source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
 owns the completed Standards/Spec corrections and qualification results.
@@ -34,7 +37,7 @@ to seven total. Existing design/test approvals remain effective.
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | Local source/UI, SDK and signed Mac native functional proof retained. Run 40396855757 is audited: Windows SDK/native and portable Mac checks pass. Mac pause diagnosis is complete; acceptance and PR preparation remain. PR creation is unselected. |
+| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | Both-target functional proof retained. Mac pause diagnosed and runner corrected; automated/OS-boundary checks pass. The corrected runner's signed-app rerun awaits desktop unlock. Acceptance and PR preparation remain; PR creation is unselected. |
 
 ## Automatic checks and operation-limit policy
 

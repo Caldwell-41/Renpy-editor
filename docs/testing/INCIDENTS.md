@@ -505,12 +505,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   and macOS suspended the exact WebContent child for 246.297 seconds. An attempted
   CUA inspection woke the display and resumed that child. The long pause is a host
   condition admitted by the runner, not evidence of a composition/request-lane defect.
-- **Prevention:** verify an unlocked, awake desktop and hold a temporary
-  display-awake assertion for the native child's lifetime. This correction is
-  recommended, not yet implemented or qualified. System-idle prevention alone
-  did not keep the display awake. Retain power, visibility and process-state events.
+- **Prevention:** the shared runtime runner now verifies an unlocked, awake desktop
+  and holds owned IOKit display-sleep/system-idle assertions for each native child.
+  It retains admission and individual release receipts. Child cleanup covers
+  timeout, interruption and output-reader startup failure before power release.
+  System-idle prevention alone did not keep the display awake.
 - **Verification:** replay of original native/OS receipts matches process ownership,
   explicit suspension/resumption and the display-wake intervention. No fresh native
   session or product timing claim was needed. Keep UI-process events distinct from
-  renderer events when auditing suspension.
-- **Evidence:** [Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27).
+  renderer events when auditing suspension. Portable boundary tests and actual Mac
+  locked-host refusal/power-API checks cover the correction. The signed composition
+  rerun still requires an unlocked desktop.
+- **Evidence:** [Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27),
+  [runner correction](../tasks/evidence/simple-help-layout.md#mac-native-runner-correction-selected-2026-10-27).

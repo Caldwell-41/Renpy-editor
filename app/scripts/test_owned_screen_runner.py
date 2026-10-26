@@ -7,7 +7,7 @@ from pathlib import Path
 import runpy
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from test_owned_screen_evidence import receipt
 
@@ -32,6 +32,9 @@ class OwnedScreenRunnerTest(unittest.TestCase):
                 def wait(self, timeout):
                     return 0
 
+                def poll(self):
+                    return 0
+
             def start(*args, **kwargs):
                 (project / ".renpy-editor").mkdir(parents=True)
                 (project / ".renpy-editor/source-map.json").write_text(json.dumps({"ownedScreens": [ownership] if passed else []}))
@@ -50,7 +53,11 @@ class OwnedScreenRunnerTest(unittest.TestCase):
                 return read_text(path, *args, **kwargs)
 
             retention = patch("shutil.copyfile", side_effect=PermissionError("Controlled unreadable metadata")) if unreadable_metadata else contextlib.nullcontext()
-            with patch("subprocess.Popen", side_effect=start), patch("pathlib.Path.read_text", read), retention, patch.dict(os.environ, {"TEMP": str(root), "TMPDIR": str(root)}), patch("sys.argv", [str(runner), str(root / "fixture-app"), str(output), "owned-screen"]), contextlib.redirect_stdout(io.StringIO()):
+            power = Mock()
+            power.state.return_value = dict(onConsole=True, loginDone=True, screenLocked=False,
+                                            displayActive=True, displayAsleep=False)
+            power.hold.side_effect = [1, 2]
+            with patch("macos_native_desktop.MacPower", return_value=power), patch("subprocess.Popen", side_effect=start), patch("pathlib.Path.read_text", read), retention, patch.dict(os.environ, {"TEMP": str(root), "TMPDIR": str(root)}), patch("sys.argv", [str(runner), str(root / "fixture-app"), str(output), "owned-screen"]), contextlib.redirect_stdout(io.StringIO()):
                 if passed:
                     runpy.run_path(str(runner), run_name="__main__")
                 else:

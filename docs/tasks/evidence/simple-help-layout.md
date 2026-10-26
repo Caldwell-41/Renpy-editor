@@ -910,3 +910,76 @@ contains only evidence, live status and the incident index; no product or runner
 file changed. CURRENT and HANDOVER remain above their normal word-count review
 targets because their earlier phase results and protected recovery records remain
 intact. The detailed diagnosis stays in this evidence owner.
+
+### Mac native runner correction selected, 2026-10-27
+
+Kris requested implementing the recommended fix with principle-fix-root-causes and
+testing it. The same chat retains sole writer ownership on `0aba94c`. The selected
+correction is the native runner's unlocked/awake admission and owned power-assertion
+lifecycle, followed by focused regression checks and the real packaged composition
+case. Production app behavior remains outside this harness correction.
+
+Reserve two Mac native sessions for correction verification and one possible
+evidenced correction, cumulative sessions 4 and 5. Count every started app session;
+a host-preflight refusal before launch consumes none. No package build, SDK start
+or CI dispatch is selected. The user's diagnostic allowance and explicit fix/test
+request authorize this bounded continuation. Test the runner boundary already
+identified above, including refusal and assertion cleanup under child failure,
+timeout and interruption. The current locked/asleep desktop has been reported to
+the user; implementation and portable boundary tests proceed while unlock is pending.
+
+The fix applies at the shared `run-runtime-ui-probes.py` launch boundary for every
+ordinary and optional case, including owned-screen, composition and canvas cases.
+It uses a small `macos_native_desktop.py` adapter for CoreGraphics session/display
+queries and process-owned IOKit power assertions. It checks admission before and
+after acquisition, holds display and system-idle assertions, checks the desktop at
+exit and releases every acquired assertion independently. The per-case desktop
+receipt retains monotonic state samples, assertion IDs, admission and cleanup.
+Windows uses no Mac API. Production app code and the signed package are unchanged.
+An audit of neighboring native launchers found separate historical/specialized
+walkthrough owners; this patch changes the shared runner used by #37 and all of its
+cases, without reopening those frozen qualification plans.
+
+Focused tests first failed when locked admission and power ownership were absent.
+The integrated runner test also failed on interruption: it left the app alive while
+the desktop guard released power. A further reader-start failure showed the same
+ownership gap before the wait loop. The runner now registers child cleanup
+immediately after `Popen` and reaps it before the outer power scope can exit.
+The ten new boundary cases pass, including timeout/failure/interruption,
+reader-start failure, partial assertion acquisition, changed/unknown desktop,
+independent release failure and the portable Windows path.
+
+The first full harness run retained in `pause-fix/harness-01/` failed three existing
+simulated owned-screen cases because their fixtures omitted the new OS boundary.
+Their controlled app/source/cleanup assertions remain intact; they now also supply
+controlled awake desktop/power APIs. The corrected `harness-02/` passes all four
+groups with Python 3.12.14 and pinned Node. Its Python group has 247 passes and three
+expected Windows-only exclusions (250 cases); the retention group passes ten cases.
+The later reader-start regression and immediate cleanup registration pass the
+focused ten cases plus all three existing owned-screen runner cases. Final Python
+discovery in `pause-fix/python-final.log` passes the strict host gate with 248 passes
+and the three expected Windows-only exclusions (251 cases). Unchanged Q1/retention
+results retain their scope. Supported Python is 3.12.14; early focused cycles also
+passed on system Python 3.9, which was not used for the full harness qualification.
+
+The actual Mac runner refused the locked/asleep host before `Popen`; its receipt is
+in `.toolchains/screen-composition/pause-fix/locked-preflight/`. No app session was
+started. A separate real OS check creates both IOKit assertions, observes both in
+`pmset -g assertions`, releases them and verifies no owned assertion remains.
+`pause-fix/power-api.json` retains that result. It changes no desktop settings and
+does not unlock or wake the host. Native composition verification is prepared but
+still requires the user's desktop unlock. Both reserved app sessions remain unused;
+no additional package, SDK process or CI dispatch has run.
+
+The final single-agent review checked power ownership, partial acquisition,
+independent release, unsafe/unknown state refusal, child cleanup order and Windows
+API isolation. No debug instrumentation or app behavior change was introduced.
+The retained signed executable hash still matches package 3. Native verification
+must use the corrected runner with that unchanged app, the explicit
+`screen-composition` selector and a fresh
+`.toolchains/screen-composition/pause-fix/native-mac-04/` output directory. Require
+the six original functional groups, source/metadata/reopen and fixture cleanup,
+plus admitted/awake desktop samples and both assertion releases. Compare the
+literal-to-reorder gap with historical session 3 without creating a new product
+performance threshold. The user's unlock is the remaining capability requirement;
+the pending native result supplies no pass.
