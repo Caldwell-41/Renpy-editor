@@ -117,6 +117,7 @@ pub const OPERATIONS: &[&str] = &[
     "screens.canvasStatus",
     "screens.list",
     "screens.create",
+    "screens.compose",
     "screens.setPixelProperty",
     "screens.setSize",
     "screens.setPosition",
@@ -553,6 +554,14 @@ pub fn handle_application_request(
                     .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
             })
             .and_then(|request| lifecycle.screens_create(request))
+            .and_then(to_value),
+        "screens.compose" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::ComposeRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_compose(request))
             .and_then(to_value),
         "screens.inspect" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))

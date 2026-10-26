@@ -869,6 +869,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn screens_compose(
+        &self,
+        request: crate::screens::ComposeRequest,
+    ) -> Result<crate::screens::ComposeResult, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_compose(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn screens_inspect(
         &self,
         request: crate::screens::InspectRequest,

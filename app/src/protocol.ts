@@ -75,6 +75,7 @@ export const CORE_OPERATIONS = [
   "screens.canvasStatus",
   "screens.list",
   "screens.create",
+  "screens.compose",
   "screens.setPixelProperty",
   "screens.setSize",
   "screens.setPosition",

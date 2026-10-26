@@ -129,6 +129,7 @@ fn main() {
                 | "screens.setSize"
                 | "screens.list"
                 | "screens.create"
+                | "screens.compose"
                 | "screens.canvasPlan"
                 | "screens.canvasRender"
                 | "screens.canvasStatus"

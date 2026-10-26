@@ -39,6 +39,14 @@ pub struct Layout {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reference_topic: Option<String>,
     pub graph: Option<GraphView>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub screen_selection: Option<ScreenSelection>,
+}
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ScreenSelection {
+    pub screen_id: String,
+    pub element_id: String,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -90,6 +98,13 @@ impl Preferences {
                     && layout
                         .preview_percent
                         .is_none_or(|v| (20..=70).contains(&v))
+                    && layout.screen_selection.as_ref().is_none_or(|s| {
+                        uuid::Uuid::parse_str(&s.screen_id).is_ok()
+                            && (uuid::Uuid::parse_str(&s.element_id).is_ok()
+                                || s.element_id.strip_prefix("source-").is_some_and(|id| {
+                                    id.len() == 64 && id.bytes().all(|b| b.is_ascii_hexdigit())
+                                }))
+                    })
             })
     }
 }

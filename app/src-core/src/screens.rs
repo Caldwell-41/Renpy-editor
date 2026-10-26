@@ -16,7 +16,9 @@ const MAX_PIXELS: u32 = 16384;
 
 pub mod canvas;
 pub(crate) mod canvas_session;
+mod composition;
 mod ownership;
+pub use composition::{ComposeRequest, ComposeResult};
 pub use ownership::{Catalog, CreateRequest};
 
 pub(crate) fn valid_name(name: &str) -> bool {
@@ -141,6 +143,7 @@ pub struct Property {
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Node {
+    pub id: Option<String>,
     pub kind: String,
     pub literal: Option<String>,
     pub layout: std::collections::BTreeMap<String, f64>,
@@ -149,6 +152,8 @@ pub struct Node {
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
     pub protected: Vec<Span>,
+    #[serde(skip)]
+    source_end: usize,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -170,8 +175,10 @@ pub struct Document {
 
 struct Line<'a> {
     start: usize,
+    end: usize,
     indent: usize,
     code: &'a str,
+    element_id: Option<String>,
     single: bool,
 }
 
@@ -273,6 +280,7 @@ fn parse_body(
     };
     let slot = nodes.len();
     nodes.push(Node {
+        id: line.element_id.clone(),
         kind: if parent.is_none() {
             "screen"
         } else {
@@ -292,6 +300,7 @@ fn parse_body(
         parent_start: parent,
         properties: vec![],
         protected: vec![],
+        source_end: lines[limit - 1].end,
     });
     let mut next = index + 1;
     let mut property_counts = [0usize; 2];
@@ -476,14 +485,33 @@ fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, Sce
             return Err(SceneError::UnsupportedSource);
         }
         let single = !raw.contains(['\n', '\r']);
+        let content = if single {
+            code(&raw[indent..])
+        } else {
+            &raw[indent..]
+        };
+        let element_id = if single {
+            raw[indent + content.len()..]
+                .trim()
+                .strip_prefix("# loomlight-element: ")
+                .and_then(|id| uuid::Uuid::parse_str(id).ok())
+                .map(|id| id.to_string())
+        } else {
+            None
+        };
+        let mut physical_end = end + bom;
+        if bytes.get(physical_end) == Some(&b'\r') {
+            physical_end += 1;
+        }
+        if bytes.get(physical_end) == Some(&b'\n') {
+            physical_end += 1;
+        }
         lines.push(Line {
             start: start + bom,
+            end: physical_end,
             indent,
-            code: if single {
-                code(&raw[indent..])
-            } else {
-                &raw[indent..]
-            },
+            code: content,
+            element_id,
             single,
         });
     }
@@ -559,7 +587,9 @@ impl AuthoringService {
             .transactions
             .snapshot(project, path(&request.path)?)
             .map_err(|_| SceneError::SourceConflict)?;
-        inspect(&bytes, request.path, revision.sha256)
+        let mut document = inspect(&bytes, request.path, revision.sha256)?;
+        self.annotate_screen_ownership(project, &bytes, &mut document)?;
+        Ok(document)
     }
 
     pub fn screens_set_pixel(

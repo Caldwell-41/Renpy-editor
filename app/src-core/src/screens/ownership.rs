@@ -145,6 +145,95 @@ fn resolves(screen: &OwnedScreen, inventory: &Inventory) -> bool {
 }
 
 impl AuthoringService {
+    pub(super) fn annotate_screen_ownership(
+        &self,
+        project: &ProjectId,
+        bytes: &[u8],
+        document: &mut Document,
+    ) -> Result<(), SceneError> {
+        let (project_bytes, _) = self
+            .transactions
+            .snapshot(project, RelativePath::new(PROJECT).unwrap())
+            .map_err(|_| SceneError::SourceConflict)?;
+        let metadata = ProjectMetadata::read_bytes(&project_bytes, None)
+            .map_err(|_| SceneError::InvalidMetadata)?;
+        let (map, _, _, _) = self.screen_metadata(project, &metadata.project_id)?;
+        for screen in &mut document.screens {
+            let owner = map
+                .owned_screens
+                .iter()
+                .find(|o| o.path == document.path && o.name == screen.name);
+            let root = screen.nodes.first_mut().unwrap();
+            let preceding = std::str::from_utf8(&bytes[..root.span.start])
+                .map_err(|_| SceneError::UnsupportedSource)?
+                .trim_end_matches(['\r', '\n']);
+            let owned = owner.filter(|o| {
+                preceding
+                    .rsplit('\n')
+                    .next()
+                    .unwrap_or("")
+                    .trim_start_matches('\u{feff}')
+                    == marker(&o.id)
+            });
+            if let Some(owner) = owned {
+                root.id = Some(owner.root_id.clone());
+            } else {
+                for node in &mut screen.nodes {
+                    node.id = None;
+                }
+            }
+            if owned.is_some() {
+                let mut source_only = vec![];
+                for parent in &screen.nodes {
+                    for (index, span) in parent.protected.iter().enumerate() {
+                        let text = std::str::from_utf8(&bytes[span.start..span.end])
+                            .map_err(|_| SceneError::UnsupportedSource)?;
+                        let header = code(text.lines().next().unwrap_or("").trim_start());
+                        if !header.starts_with("use ")
+                            && !header.starts_with("$ ")
+                            && !header.ends_with(':')
+                        {
+                            continue;
+                        }
+                        if screen.nodes.len() + source_only.len() >= MAX_NODES {
+                            return Err(SceneError::InvariantBlocked);
+                        }
+                        let mut digest = Sha256::new();
+                        digest.update(parent.id.as_deref().unwrap_or("unowned"));
+                        digest.update(index.to_le_bytes());
+                        digest.update(header);
+                        source_only.push(Node {
+                            id: Some(format!("source-{}", hex::encode(digest.finalize()))),
+                            kind: "custom".into(),
+                            literal: Some(header.into()),
+                            layout: Default::default(),
+                            position: None,
+                            span: span.clone(),
+                            parent_start: Some(parent.span.start),
+                            properties: vec![],
+                            protected: vec![span.clone()],
+                            source_end: span.end,
+                        });
+                    }
+                }
+                screen.nodes.extend(source_only);
+                screen.nodes.sort_by_key(|n| n.span.start);
+            }
+            let mut counts = std::collections::HashMap::new();
+            for node in &screen.nodes {
+                if let Some(id) = &node.id {
+                    *counts.entry(id.clone()).or_insert(0) += 1;
+                }
+            }
+            for node in &mut screen.nodes {
+                if node.id.as_ref().is_some_and(|id| counts[id] != 1) {
+                    node.id = None;
+                }
+            }
+        }
+        Ok(())
+    }
+
     fn screen_inventory(&self, project: &ProjectId) -> Result<Inventory, SceneError> {
         let mut paths = self
             .transactions

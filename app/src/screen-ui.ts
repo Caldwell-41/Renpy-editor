@@ -1,9 +1,12 @@
 import { icon } from "./icons.ts";
+import { ScreenComposer, screenNodeKey, type CompositionResult } from "./screen-composition.ts";
+import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SourceInventory, SourceTarget } from "./source-ui.ts";
 import type { ScreenPreview } from "./runtime-preparation.ts";
 
 export interface ScreenNode {
+  id?: string | null;
   kind: string; literal: string | null; layout: Record<string, number>;
   span: { start: number; end: number }; parentStart: number | null;
   properties: { property: "xsize" | "ysize"; value: number }[];
@@ -27,6 +30,7 @@ interface CanvasFrame {
   geometry?: { start: number; x: number; y: number; width: number; height: number }[];
 }
 interface Actions {
+  projectId?: string;
   resolution: { width: number; height: number };
   request: <T>(operation: CoreOperation, payload?: Record<string, unknown>) => Promise<T>;
   coordinate: <T>(task: () => Promise<T>) => Promise<T>;
@@ -53,6 +57,8 @@ export class ScreensWorkspace {
   private readonly canvas = el("div", "screen-game");
   private readonly stage = el("section", "screen-stage");
   private readonly canvasStatus = el("p", "muted screen-canvas-status");
+  private readonly selectionPath = el("nav", "screen-selection-path");
+  private readonly selectionCaption = el("p", "screen-selection-caption");
   private frame?: CanvasFrame;
   private provisionalMove?: { index: number; position: { xalign: number; yalign: number } };
   private canvasKey = "";
@@ -83,8 +89,22 @@ export class ScreensWorkspace {
   private resize?: { width: number; height: number; x: number; y: number; pointer: number; handle: HTMLElement };
   private move?: { xalign:number; yalign:number; x:number; y:number; rangeX:number; rangeY:number; scale:number; pointer:number; target:HTMLElement };
   private readonly observer: ResizeObserver;
+  private readonly composer: ScreenComposer;
+  private readonly compositionHistory: { path: string; before: string; after: string; beforeId?: string | null; afterId: string; removal: boolean }[] = [];
   constructor(private readonly actions: Actions) {
     this.gameResolution = {...actions.resolution};
+    this.composer = new ScreenComposer({
+      view: () => this.current() && this.owned?.resolved && this.doc && this.nodes()[this.selected] ? {
+        document: this.doc, screenId: this.owned.id, screenName: this.screen, nodes: this.nodes(),
+        selected: this.nodes()[this.selected]!, step: this.step, busy: this.busy,
+      } : undefined,
+      select: (id, design) => { const index = this.nodes().findIndex(n => screenNodeKey(n) === id); if (index >= 0) { if (design === false) this.step = "choose"; this.choose(index, design); } },
+      commit: (command, base) => this.compose(command, base),
+      source: node => { if (this.doc) this.actions.source({ path: this.doc.path, expectedRevision: this.doc.revision, byteStart: node.span.start, byteEnd: node.span.end }); },
+      note: (text, error) => this.note(text, error), preview: () => { this.updateSizeControls(); this.renderCanvas(); }, newScreen: () => this.beginCreation(), undo: () => void this.history("undo"),
+      geometry: host => this.renderGeometry(host),
+      hover: id => this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => { target.dataset.hovered = String(screenNodeKey(this.nodes()[Number(target.dataset.index)]!) === id); }),
+    });
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     tools.append(button("Undo", () => void this.history("undo")), button("Redo", () => void this.history("redo")),
@@ -92,7 +112,7 @@ export class ScreensWorkspace {
       button("Validate screen", () => this.test(true)), button("Test in Ren'Py", () => this.test(false), "button primary"));
     heading.append(tools);
     this.selection.ariaLabel = "Screen"; this.selection.onchange = () => {
-      if(this.move || this.resize || this.busy) {
+      if(this.move || this.resize || this.busy || this.composer.hasAddition()) {
         this.selection.value=this.owned ? JSON.stringify(["owned",this.owned.id]) : JSON.stringify([this.doc?.path,this.screen]);
         this.note("Finish the current operation before changing screens. Input retained.",true);return;
       }
@@ -101,9 +121,10 @@ export class ScreensWorkspace {
       this.doc = this.documents.find(d => d.path === (this.owned?.path ?? path));
       if (this.owned && !this.owned.resolved) this.doc = undefined;
       this.screen = this.owned?.name ?? name; this.selected = 0; this.render(); this.reportUnresolved();
+      this.rememberSelection();
     };
     const picker = el("label", "screen-picker", "Screen "); picker.append(this.selection);
-    const limits = el("p", "muted screen-limits", "Blank custom screens, existing dimensions and aligned frames in free layout groups. Adding elements, other movement, styles, assets and Story Connect are not available yet.");
+    const limits = el("p", "muted screen-limits", "Owned elements support composition and literal text edits. Existing dimensions and aligned-frame movement remain available. Styles, assets, actions and Story connections retain their Source controls.");
     for (const [id, label] of [["choose", "1  Choose"], ["design", "2  Design"], ["connect", "3  Connect"]]) {
       this.rail.append(button(label!, () => { this.step = id!; this.renderCard(); }));
     }
@@ -130,22 +151,36 @@ export class ScreensWorkspace {
     caption.append(el("h2", "", "Screen canvas"),aspects,zoom,state);
     const viewport = el("div", "screen-viewport"); viewport.append(this.canvas);
     this.canvasStatus.role = "status";
-    this.stage.ariaLabel = "Screen canvas"; this.stage.append(caption, viewport, this.canvasStatus,
+    this.selectionPath.ariaLabel = "Selection path";
+    this.stage.ariaLabel = "Screen canvas"; this.stage.append(caption, viewport, this.selectionPath, this.selectionCaption, this.canvasStatus,
       el("p", "muted", "Canvas controls select elements. Editing never runs game scripts or actions. Test in Ren'Py runs accepted source."));
-    const workspace = el("div", "screen-flow"); workspace.append(this.rail, this.stage, this.card);
+    const canvasJump = button("Show canvas", () => { this.stage.scrollIntoView({block:"start"}); caption.tabIndex = -1; caption.focus({preventScroll:true}); }, "button secondary screen-compose-jump");
+    caption.append(button("Back to editing", () => { this.card.scrollIntoView({block:"start"}); (this.card.querySelector<HTMLElement>("textarea") ?? this.card.querySelector<HTMLElement>('[aria-selected="true"]') ?? this.card.querySelector<HTMLElement>("button"))?.focus({preventScroll:true}); }, "button secondary screen-compose-jump"));
+    const workspace = el("div", "screen-flow"); workspace.append(this.rail, canvasJump, this.stage, this.card);
     this.message.role = "status"; this.message.ariaLive = "polite";
     this.panel.append(heading, picker, workspace, limits, this.message);
+    this.composer.attach(this.panel);
     this.panel.addEventListener("keydown", event => {
+      if (this.composer.hasRemoval()) return;
+      const field = event.target instanceof HTMLElement && (event.target.matches("input,textarea,select") || event.target.isContentEditable);
+      if (!field && !event.isComposing && !event.repeat && !this.composer.hasRemoval() && (event.metaKey || event.ctrlKey) && ["z","y"].includes(event.key.toLowerCase())) {
+        event.preventDefault(); event.stopPropagation(); void this.history(event.shiftKey || event.key.toLowerCase() === "y" ? "redo" : "undo"); return;
+      }
       if (event.key === "Escape") { if (this.move) this.cancelMove(); else if (this.resize) this.cancelResize(); else this.cancel(); event.stopPropagation(); }
     });
     this.observer = new ResizeObserver(() => this.renderCanvas()); this.observer.observe(viewport);
   }
   mount(host: HTMLElement): void { host.append(this.panel); this.invalidateCanvas("Checking canvas source."); void this.load(); }
-  dispose(): void { this.disposed = true; this.canvasSequence++; clearTimeout(this.canvasTimer); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
-  hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize || !!this.creation; }
+  dispose(): void { this.disposed = true; this.composer.dispose(); this.canvasSequence++; clearTimeout(this.canvasTimer); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
+  hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasDraft(); }
   private current(): boolean { return !this.disposed && this.actions.current(); }
   private nodes(): ScreenNode[] { return this.doc?.screens.find(s => s.name === this.screen)?.nodes ?? []; }
-  private key(): string { return JSON.stringify([this.doc?.path, this.screen, this.selected]); }
+  private key(): string { return JSON.stringify([this.doc?.path, this.screen, this.nodes()[this.selected]?.id ?? this.selected]); }
+  private preferenceKey(): string { return `screen-${this.actions.projectId ?? "workspace"}`; }
+  private rememberSelection(): void {
+    const id = this.nodes()[this.selected]?.id;
+    if (this.owned && id) saveLayout(this.preferenceKey(), { screenSelection: { screenId: this.owned.id, elementId: id } });
+  }
   private draft(): Draft | undefined { return this.drafts.get(this.key()); }
   private note(text: string, error = false): void {
     this.message.textContent = text; this.message.dataset.error = String(error);
@@ -153,7 +188,7 @@ export class ScreensWorkspace {
     if (status) { status.textContent = text; status.dataset.error = String(error); }
   }
   async load(): Promise<void> {
-    if (this.busy || this.resize || this.move) { this.note("Finish the current operation first. Input retained.", true); return; }
+    if (this.busy || this.resize || this.move || this.composer.hasRemoval()) { this.note("Finish the current operation first. Input retained.", true); return; }
     const sequence = ++this.loadSequence;
     try {
       const inventory = await this.actions.request<SourceInventory>("source.list");
@@ -174,14 +209,16 @@ export class ScreensWorkspace {
         const document = documents.find(d => d.path === owned.path);
         if (!document || document.revision !== owned.sourceRevision || !document.screens.some(s => s.name === owned.name)) owned.resolved = false;
       });
-      const path = this.doc?.path; this.documents = documents; this.catalog = catalog;
+      const path = this.doc?.path, selectedId = this.nodes()[this.selected]?.id; this.documents = documents; this.catalog = catalog;
       const supported = documents.filter(d => d.screens.length > 0);
       if (this.owned) this.owned = catalog.owned.find(s => s.id === this.owned!.id) ?? { ...this.owned, resolved: false };
-      else if (!path) this.owned = catalog.owned[0];
+      else if (!path) this.owned = catalog.owned.find(s => s.id === layoutFor(this.preferenceKey()).screenSelection?.screenId) ?? catalog.owned[0];
       this.doc = this.owned ? this.owned.resolved ? supported.find(d => d.path === this.owned!.path) : undefined : supported.find(d => d.path === path) ?? supported[0];
       if (this.owned) this.screen = this.owned.name;
       if (!this.owned && !this.doc?.screens.some(s => s.name === this.screen)) this.screen = this.doc?.screens[0]?.name ?? "";
-      this.selected = Math.min(this.selected, Math.max(0, this.nodes().length - 1));
+      const remembered = layoutFor(this.preferenceKey()).screenSelection;
+      const preferred = selectedId ?? (remembered?.screenId === this.owned?.id ? remembered?.elementId : undefined);
+      this.selected = preferred ? Math.max(0, this.nodes().findIndex(n => n.id === preferred)) : Math.min(this.selected, Math.max(0, this.nodes().length - 1));
       this.selection.replaceChildren();
       const owned = [...catalog.owned];
       if (this.owned && !owned.some(s => s.id === this.owned!.id)) owned.push(this.owned);
@@ -194,13 +231,23 @@ export class ScreensWorkspace {
   }
   private render(): void { this.renderCard(); this.renderCanvas(); }
   private choose(index: number, design = false): void {
-    if (this.busy || this.resize || this.move) return;
-    this.selected = index; if (design) this.step = "design"; this.render();
+    if (this.busy || this.resize || this.move || this.composer.hasRemoval()) return;
+    this.selected = index; if (design) this.step = "design";
+    this.rememberSelection();
+    if (this.owned && !design && this.step === "choose" && this.composer.canKeepTree()) { this.composer.refreshSelection(); this.renderCanvas(); }
+    else this.render();
   }
   private renderCard(): void {
     const scroll = this.card.scrollTop;
     [...this.rail.querySelectorAll("button")].forEach((b, i) => b.ariaPressed = String(["choose", "design", "connect"][i] === this.step));
     this.card.replaceChildren(); this.card.ariaLabel = "Selected properties";
+    if (this.composer.render(this.card)) {
+      this.panel.dataset.composition = "true";
+      [...this.rail.querySelectorAll("button")].forEach((b, i) => b.ariaPressed = String(["choose", "design", "connect"][i] === this.step));
+      if (this.creation) this.renderCreation(); this.card.scrollTop = scroll; return;
+    }
+    this.card.classList.remove("screen-composer");
+    this.panel.dataset.composition = "false";
     const node = this.nodes()[this.selected];
     this.card.append(el("h2", "", this.step === "choose" ? "Choose an element" : names[node?.kind ?? ""] ?? "Screen"));
     if (this.step === "choose") {
@@ -233,27 +280,31 @@ export class ScreensWorkspace {
         input.oninput=()=>{this.textSamples.set(this.key(),{revision:this.doc!.revision,screen:this.screen,path:this.doc!.path,index:this.selected,value:input.value});this.renderCanvas();};
         label.append(input);this.card.append(label,el("p","muted","Sample only. Source and runtime values do not change."),button("Use source text",()=>{this.textSamples.delete(this.key());this.renderCard();this.renderCanvas();}));
       }
-      const details = el("details", "screen-properties"); details.open = true;
+      this.renderGeometry(this.card);
+    }
+    this.card.append(el("p", "muted screen-coverage", this.doc?.partial ? "Partial coverage. Custom Python, actions, styling and unsupported regions are preserved in Source." : "Only existing literal dimensions can change here."));
+    this.card.scrollTop = scroll;
+  }
+  private renderGeometry(host: HTMLElement): void {
+    const node = this.nodes()[this.selected]; if (!node) return;
+      const details = el("details", "screen-properties"); details.open = !this.owned;
       details.append(el("summary", "", "Position & size"));
       if (size(node, "xsize") !== undefined && size(node, "ysize") !== undefined) {
         const draft = this.draft();
         const fields = el("div", "screen-size-fields");
         for (const [label, key, property] of [["Width", "width", "xsize"], ["Height", "height", "ysize"]] as const) {
           const input = el("input"); input.type = "number"; input.min = "1"; input.max = "16384"; input.step = "1";
-          input.ariaLabel = label; input.dataset.size = key; input.value = draft?.[key] ?? String(size(node, property)); input.readOnly = this.busy || !!draft?.position;
+          input.ariaLabel = label; input.dataset.size = key; input.value = draft?.[key] ?? String(size(node, property)); input.readOnly = this.busy || !!draft?.position || this.composer.hasTextDrafts();
           const field = el("label", "", `${label} (px)`); field.append(input); fields.append(field);
-          input.oninput = () => { if (this.busy || this.draft()?.position) return; const value = this.ensureDraft(); value[key] = input.value; this.renderCanvas(); };
+          input.oninput = () => { if (this.busy || this.draft()?.position || this.composer.hasTextDrafts()) return; const value = this.ensureDraft(); value[key] = input.value; this.renderCanvas(); };
           input.onkeydown = event => { if (event.key === "Enter") { event.preventDefault(); void this.apply(); } };
         }
         const actions = el("div", "screen-edit-actions");
-        const apply = button("Apply changes", () => void this.apply(), "button primary"); apply.ariaDisabled = String(this.busy);
-        const cancel = button("Cancel changes", () => this.cancel()); cancel.ariaDisabled = String(this.busy);
+        const apply = button(this.owned ? "Apply size" : "Apply changes", () => void this.apply(), "button primary"); apply.ariaDisabled = String(this.busy);
+        const cancel = button(this.owned ? "Cancel size" : "Cancel changes", () => this.cancel()); cancel.ariaDisabled = String(this.busy);
         actions.append(apply, cancel); details.append(fields, actions, el("p", "muted", "Whole numbers from 1 to 16384. Use arrows for one pixel; Shift + arrows on the resize handle changes eight pixels."));
       } else details.append(el("p", "muted", "This node needs existing literal xsize and ysize to resize. Other properties remain editable in Source."));
-      this.card.append(details);
-    }
-    this.card.append(el("p", "muted screen-coverage", this.doc?.partial ? "Partial coverage. Custom Python, actions, styling and unsupported regions are preserved in Source." : "Only existing literal dimensions can change here."));
-    this.card.scrollTop = scroll;
+      host.append(details);
   }
   private reportUnresolved(): void {
     if (this.owned && !this.owned.resolved) this.note(`Unresolved owned screen ${this.owned.name}. Review its declaration and ownership marker in ${this.owned.path}, then refresh Source.`, true);
@@ -299,7 +350,7 @@ export class ScreensWorkspace {
       const key = input.dataset.size as "width" | "height";
       const value = draft?.[key] ?? String(size(node, key === "width" ? "xsize" : "ysize"));
       if (input.value !== value) input.value = value;
-      input.readOnly = this.busy || !!draft?.position;
+      input.readOnly = this.busy || !!draft?.position || this.composer.hasTextDrafts();
     }
     this.card.ariaBusy = String(this.busy);
     this.card.querySelectorAll<HTMLButtonElement>(".screen-edit-actions button").forEach(b => b.ariaDisabled = String(this.busy));
@@ -318,6 +369,7 @@ export class ScreensWorkspace {
   }
   private async apply(): Promise<void> {
     const draft = this.draft(); if (!draft || this.busy) return;
+    if (this.composer.hasTextDrafts()) { this.note("Apply or cancel unfinished text edits before accepting dimensions. Input retained.", true); return; }
     this.releaseMove();
     if(this.resize) {
       const {handle,pointer}=this.resize;this.resize=undefined;
@@ -347,8 +399,32 @@ export class ScreensWorkspace {
       }
     }
   }
+  private async compose(command: Record<string, unknown>, base: ScreenDocument): Promise<CompositionResult> {
+    if (this.busy || this.resize || this.move || this.creation || this.drafts.size || !this.owned?.resolved) throw new Error("Finish the current edit first");
+    if (base.path !== this.owned.path) throw new Error("This draft belongs to another screen");
+    this.busy = true; this.loadSequence++;
+    const owner = this.owned;
+    const beforeId = this.nodes()[this.selected]?.id;
+    try {
+      const result = await this.actions.coordinate(() => this.actions.request<CompositionResult>("screens.compose", {
+        screenId: owner.id, expectedRevision: base.revision, command,
+      }));
+      if (!this.current()) return result;
+      if (result.document.revision !== base.revision) {
+        this.compositionHistory.push({ path: base.path, before: base.revision, after: result.document.revision, beforeId, afterId: result.selectedId, removal: command.type === "remove" });
+        if (this.compositionHistory.length > 128) this.compositionHistory.shift();
+      }
+      this.documents = this.documents.map(d => d.path === result.document.path ? result.document : d);
+      this.doc = result.document; owner.sourceRevision = result.document.revision;
+      this.selected = Math.max(0, this.nodes().findIndex(n => n.id === result.selectedId));
+      this.composer.clearNotice();
+      this.rememberSelection();
+      this.renderCanvas(); this.actions.saved(); return result;
+    } finally { this.busy = false; }
+  }
   private async history(type: "undo" | "redo"): Promise<void> {
-    if (this.busy || this.hasDraft()) { this.note("Apply or cancel unfinished changes before Undo or Redo. Input retained.", true); return; }
+    if (this.busy || this.hasDraft() || this.composer.hasRemoval()) { this.note("Apply or cancel unfinished changes before Undo or Redo. Input retained.", true); return; }
+    const before = this.doc, selectedId = this.nodes()[this.selected]?.id;
     this.busy = true;
     try {
       await this.actions.coordinate(async () => {
@@ -357,7 +433,19 @@ export class ScreensWorkspace {
       });
       if (this.current()) this.actions.saved();
     } catch (error) { if (this.current()) this.note((error as Error).message, true); }
-    finally { this.busy = false; if (this.current()) await this.load(); }
+    finally {
+      this.busy = false;
+      if (this.current()) {
+        await this.load();
+        const entry = [...this.compositionHistory].reverse().find(item => item.path === before?.path && item.path === this.doc?.path
+          && (type === "undo" ? item.after === before?.revision && item.before === this.doc?.revision : item.before === before?.revision && item.after === this.doc?.revision));
+        const preferred = entry?.removal ? type === "undo" ? entry.beforeId : entry.afterId : selectedId;
+        const index = this.nodes().findIndex(n => n.id === preferred);
+        if (index >= 0) this.selected = index;
+        else if (entry) { const fallback = type === "undo" ? entry.beforeId : entry.afterId; this.selected = Math.max(0, this.nodes().findIndex(n => n.id === fallback)); }
+        this.rememberSelection(); this.composer.clearNotice(); this.render(); this.composer.focusSelection();
+      }
+    }
   }
   private openSource(): void {
     if (this.owned && !this.owned.resolved) { this.reportUnresolved(); return; }
@@ -369,6 +457,17 @@ export class ScreensWorkspace {
   }
   private renderCanvas(): void {
     if (!this.current() || !this.panel.isConnected) return;
+    this.selectionPath.replaceChildren();
+    let selected = this.nodes()[this.selected], depth = 0;
+    const ancestors: ScreenNode[] = [];
+    while (selected && depth++ < 33) { ancestors.unshift(selected); selected = this.nodes().find(n => n.span.start === selected!.parentStart)!; }
+    for (const node of ancestors) {
+      if (this.selectionPath.childElementCount) this.selectionPath.append(el("span", "", "/"));
+      const pick = button(this.composer.selectionLabel(node), () => this.choose(this.nodes().indexOf(node)), "button secondary");
+      pick.ariaLabel = `Select ancestor ${this.composer.selectionLabel(node)}`; if (node === this.nodes()[this.selected]) pick.ariaCurrent = "true"; this.selectionPath.append(pick);
+    }
+    const selectedNode = this.nodes()[this.selected];
+    this.selectionCaption.textContent = selectedNode ? `${selectedNode.kind} · Nesting level ${Math.max(0, ancestors.length - 1)}` : "";
     const { width, height } = this.gameResolution;
     const available = this.canvas.parentElement?.clientWidth ?? 600;
     this.scale = this.zoom === "100" ? 1 : Math.max(0.05, Math.min((available - 32) / width, 360 / height, 1));
@@ -376,14 +475,18 @@ export class ScreensWorkspace {
     if (!this.doc) { this.canvas.replaceChildren(); this.invalidateCanvas("Select a supported screen to render."); return; }
     const drafts = [...this.drafts.values()].filter(d => d.document.path === this.doc!.path && d.screen === this.screen);
     const samples=[...this.textSamples.values()].filter(s=>s.path===this.doc!.path && s.screen===this.screen);
+    const composition = this.composer.canvasDraft();
+    if (composition.stale) { this.invalidateCanvas("Composition draft uses an earlier Source revision. Input retained; review Source before applying."); return; }
     if(samples.some(s=>s.revision!==this.doc!.revision)) {this.invalidateCanvas("Text sample uses an earlier Source revision. Edit the sample or use source text. Input retained.");return;}
     if (drafts.some(d => d.document.revision !== this.doc!.revision || ![d.width,d.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384))) {
       this.invalidateCanvas("Canvas unavailable for this invalid or stale draft. Input retained."); return;
     }
+    const textSamples = new Map(samples.map(s => [this.nodes()[s.index]!.span.start, { nodeStart: this.nodes()[s.index]!.span.start, value: s.value }]));
+    composition.texts.forEach(sample => textSamples.set(sample.nodeStart, sample));
     const payload = { path:this.doc.path, screenName:this.screen, expectedRevision:this.doc.revision, width, height,
       drafts:drafts.filter(d=>!d.position).map(d => ({ nodeStart:d.document.screens.find(s => s.name === d.screen)!.nodes[d.index]!.span.start, width:Number(d.width), height:Number(d.height) })),
       positions:drafts.filter(d=>d.position).map(d=>({nodeStart:d.document.screens.find(s=>s.name===d.screen)!.nodes[d.index]!.span.start,...d.position!})),
-      textSamples:samples.map(s=>({nodeStart:this.nodes()[s.index]!.span.start,value:s.value})),buttonState:this.buttonState };
+      textSamples:[...textSamples.values()],buttonState:this.buttonState, ...(composition.addition ? { addition: composition.addition } : {}) };
     const key = JSON.stringify(payload);
     if (key === this.canvasKey) { if (this.geometryCurrent) this.showFrame(); return; }
     this.canvasKey = key;
@@ -432,7 +535,7 @@ export class ScreensWorkspace {
       this.updateSizeControls();
     }
     if (resetKey && this.move) this.releaseMove();
-    if (!this.resize && !this.move && !this.provisionalMove) this.canvas.querySelectorAll(".screen-node,.screen-selection").forEach(e => e.remove());
+    if (!this.resize && !this.move && !this.provisionalMove) this.canvas.querySelectorAll(".screen-node,.screen-selection,.screen-pending-addition").forEach(e => e.remove());
     this.canvas.dataset.stale = "true"; this.canvasStatus.textContent = message;
     if (!resetKey) this.showMovement();
   }
@@ -447,15 +550,25 @@ export class ScreensWorkspace {
       this.frame = frame;
       if (!this.move && !this.draft() && !this.busy) this.provisionalMove = undefined;
       image.style.transform = ""; delete this.canvas.dataset.provisional;
-      this.geometryCurrent = true; this.canvas.dataset.stale = "false"; this.canvasStatus.textContent = "Ren'Py canvas. Selection guides are editor overlays.";
+      this.geometryCurrent = true; this.canvas.dataset.stale = "false";
+      const composition = this.composer.canvasDraft();
+      this.canvasStatus.textContent = composition.addition ? "Draft addition. Not applied to Source." : composition.texts.length ? "Text preview. Not applied to Source." : "Ren'Py canvas. Selection guides are editor overlays.";
+      this.canvas.querySelector(".screen-pending-addition")?.remove();
       const present = new Set((frame.geometry ?? []).map(g => this.nodes().findIndex(n => n.span.start === g.start)));
       this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => {
         if (!present.has(Number(target.dataset.index))) target.remove();
       });
       for (const geometry of frame.geometry ?? []) {
         const index = this.nodes().findIndex(n => n.span.start === geometry.start);
-        const node = this.nodes()[index]; if (!node || node.kind === "screen") continue;
-        const target = this.canvas.querySelector<HTMLButtonElement>(`[data-index="${index}"]`) ?? button("",() => this.choose(index,true),`screen-node screen-node-${node.kind}`);
+        const node = this.nodes()[index];
+        if (!node && geometry.start === composition.additionStart) {
+          const guide = el("div", "screen-pending-addition"); guide.ariaLabel = "Draft addition (not applied)";
+          for (const [key,value] of Object.entries({left:geometry.x,top:geometry.y,width:geometry.width,height:geometry.height})) guide.style.setProperty(key,`${value*this.scale}px`);
+          this.canvas.append(guide); continue;
+        }
+        if (!node || node.kind === "screen") continue;
+        const target = this.canvas.querySelector<HTMLButtonElement>(`[data-index="${index}"]`) ?? button("",() => this.choose(index,!this.owned),`screen-node screen-node-${node.kind}`);
+        target.ondblclick = () => this.choose(index,true);
         target.ariaLabel = `Select ${node.literal ?? names[node.kind] ?? node.kind}`;
         target.dataset.index = String(index); target.ariaPressed = String(index === this.selected);
         if (!this.move) this.bindMovement(target, index, false);

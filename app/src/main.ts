@@ -496,7 +496,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
   else if (surface === "screens") {
-    screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution,
+    screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution, projectId: project.projectId,
       request: (operation, payload) => projectValue(project, operation, payload),
       coordinate: task => runAuthoringOperation(project, screensWorkspace!, task),
       current: () => currentProject?.sessionId === project.sessionId,
