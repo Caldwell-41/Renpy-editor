@@ -15,7 +15,8 @@ is on `codex/37-compose-help-layout`, local-only and not yet accepted on both ta
 [The approval record](../design/design-lab-help-composition/approval.json) owns the
 source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
 owns the completed Standards/Spec corrections and qualification results.
-The original implementation chat owns the checkout and servers. The user approved
+The user requested a fresh-agent handoff on 2026-10-27. The receiving chat assumes
+checkout/server ownership after checking current state. The user approved
 the GitHub status update and five additional Mac builds, raising its package ceiling
 to seven total. Existing design/test approvals remain effective.
 
