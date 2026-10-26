@@ -1,87 +1,63 @@
 # Current outcome handover
 
-## L02 reviewed implementation and remaining qualification
+## L02 CI audited; Mac pause remains before PR
 
-Kris requested a fresh-agent handoff on 2026-10-27 under the existing C5 and test
-approvals. The original chat, "Implement ticket #37"
-(`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), received the late approval to push and run
-Windows CI. No receiving chat has started. This chat owns the exact CI run audit. A receiving chat may assume sole checkout
-writer ownership after recording the transfer; this chat must recheck that ownership
-before any correction on CI resume. Both prototype chats are idle. Continue on
-`codex/37-compose-help-layout`, based on `8f7f9e7`, with reviewed product candidate
-`602613d`. Intended integration destination remains `codex/phase3b-screen-designer`.
-Push and the prepared Windows qualification are approved. PR creation, merge and
-release remain unselected.
+The user requested a fresh-agent handoff on 2026-10-27, then explicitly approved
+branch push and Windows CI. The original chat, "Implement ticket #37"
+(`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), completed the CI audit. No receiving chat
+had started at the audit's state checks. The receiving chat may assume sole
+checkout/server writer ownership after checking current state. Both prototype chats
+are idle. Continue on published `codex/37-compose-help-layout`, based on `8f7f9e7`,
+with reviewed product `602613d`. Intended PR base is `codex/phase3b-screen-designer`.
+Branch push is approved; PR creation, merge and release remain unselected.
 
 C5 source `94c78e7`, revision `workflow-popup-v1`, variant `workflow-popup`, has
 explicit approval. [The approval record](../design/design-lab-help-composition/approval.json)
-owns its fingerprint and 16 captures. No design or test approval needs renewal.
-The read-only reference worktree `.toolchains/l02-c5-reference` serves the approved
-nested view on port 5175. The older full-lab source guard limitation remains in
-[the evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26).
+owns its fingerprint and 16 captures. Existing design and test-plan approvals remain
+effective. The read-only reference worktree `.toolchains/l02-c5-reference` retains
+that source; verify its port-5175 server before use. The older full-lab source guard
+limitation remains in [the evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26).
 
-The implementation covers add, literal edit, sibling reorder and confirmed removal
-through shared transactions/history, stable owned UUIDs, protected-source refusal,
-retained drafts and reopen. Every eligible removal uses C5's stationary modal with
-initial Cancel focus, trapped Tab and exact invoker restoration. Independent
-Standards and Spec reviews found three distinct defects; focused red/green checks
-and both correction reviews resolve them. Unmarked fallback selection now persists
-only against its exact source revision and grants no write authority.
+The complete composition workflow is implemented and independently reviewed.
+[The detailed evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
+owns fixes, controls, source-preservation contracts and earlier failures. TypeScript
+and 241 local frontend cases pass. The ordinary core run passes 417 cases on
+`9facf7c`, with 48 intentional ignores and three documented exclusions. Later product
+changes only fix renderer scheduling; reuse is bounded in the evidence.
 
-[The qualification evidence](../tasks/evidence/simple-help-layout.md#corrected-signed-mac-functional-qualification)
-owns failures, receipts, acceptance mapping, SDK reuse and the native timing gap.
-TypeScript and all 241 frontend cases pass. The final ordinary core run passes
-417 cases on `9facf7c`, with 48 intentional ignores and three documented exclusions;
-the following correction changes renderer scheduling only. Both Mac SDK campaigns
-pass for their unchanged qualified scope.
+[Qualification dispatch 1 is audited](../tasks/evidence/simple-help-layout.md#qualification-dispatch-1-audited-2026-10-27).
+Run [40396855757, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40396855757/attempts/1)
+succeeded on `d80c323dd9bcac404bd3bfe446ebc867021765a3`. Both selected Windows and
+portable Mac jobs pass their named tests and actual renderer/core checks. The audit
+verified archive digests, retained executable hashes/architecture, Windows inert
+helper, deliberate nested SDK render, native source/history/reopen and cleanup.
+Windows native elapsed time is 14.547 seconds. Closed qualification routes supply
+no pass. Documentation-only successors do not become this test candidate.
+Raw receipts and the audit are under `.toolchains/screen-composition/ci-40396855757/`.
 
-Signed package 3/product `602613d` passes signature and installer verification on
-the approved certificate. Native session 3 passes all six groups, accepted-source
-and metadata disk matching, reopen identity/selection and normal cleanup. It exits
-0 without timeout. Executable SHA-256 is
-`1a914c1ad33b73a761da853235fa563f9d1d13bf517ef168fa96962cf38d4c53`.
-The 261-second run has an unexplained pause after literal-history completion. Source
-was already reordered during the pause. Read-only CUA inspection timed out; the
-later process sample could not start after normal app exit. Cause remains unknown.
-This establishes bounded functional proof, with no responsiveness or performance claim.
-Do not repeat the unchanged native run or count its diagnostics as another session.
+Signed local Mac package 3/product `602613d` retains its functional native pass on
+the approved identity. [Its native record](../tasks/evidence/simple-help-layout.md#corrected-signed-mac-functional-qualification)
+owns the unexplained pause: literal-history finished at 5.4 seconds, reorder-history
+at 253.3, while source had already been reordered. Neither Windows native nor Mac
+CI browser reproduces that delay. No stack sample established its cause. Begin
+remaining work with read-only diagnosis against existing receipts/code; compare the
+previous WebKit diagnostic in the same evidence file when relevant. This is not a
+new responsiveness claim or permission to repeat an unchanged run.
 
-Kris approved the prepared GitHub status update and five additional Mac builds on
-2026-10-26. The issue update was published and read back with acceptance unchanged.
-Cumulative use is Mac packages 3/7, native sessions 3/3 and SDK campaigns 2/2, with
-three of four SDK starts. Windows costly starts await the run audit; focused CI
-dispatch use is 1/2. The additional build approval changes no other recorded limit.
-Qualification dispatch 1 is in progress; its identity is below.
+Current cumulative use is Mac packages 3/7, native sessions 3/3 and SDK campaigns
+2/2; Windows packages 1/2, native sessions 1/2 and SDK campaigns 2/2; CI dispatches
+1/2. Physical SDK process starts are 4/4 per host. Earlier three-start records counted
+validation as one submission; it launches compile and lint separately. The audit
+records this counting error and the campaign wording discrepancy. No allowance was
+extended by the correction. Additional Mac build approval leaves four builds, but
+renews no native/SDK limit. Check the owning #37 limits before another costly attempt.
 
-The user approved branch push and Windows CI on 2026-10-27. The branch was
-published and the exact selected qualification is in progress:
-
-- Workflow `screens-source.yml`, `compose_help=true`, ordinal 1.
-- [Run 40396855757, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40396855757).
-- Candidate `d80c323dd9bcac404bd3bfe446ebc867021765a3`.
-- Last confirmed `in_progress`, updated `2026-10-26T20:34:37Z`.
-- Required jobs are Help composition on Windows x64 and macOS ARM64. Closed L01/L17
-  selectors remain unselected. Mac CI performs portable checks, with no package or
-  native session.
-
-At the initial job observation Windows was in dependency/evidence checks, before
-costly operations. CI1 reserves one Windows package, one native session and both
-selected SDK campaigns, within existing limits. Audit actual starts from its steps
-and receipts before recording consumption or selecting another run. CI ordinal 2
-alone does not renew an exhausted SDK or native allowance.
-
-The original chat owns the CI watcher and exact-result audit. The installed
-`ci-watch` launcher is the selected wait route; its startup acknowledgement in that
-chat confirms registration. If registration is not confirmed, use WORKFLOW's manual
-same-thread fallback. Keep private watcher paths outside the repo. On a completion
-event, verify run/attempt/SHA, read named results and artifacts, reconcile current
-writer ownership, and inspect any later source changes before fixes or acceptance.
-A documentation-only successor records this candidate without becoming its test SHA.
-
-The receiving agent can investigate the unexplained Mac pause from existing receipts
-and code. Select any additional attempt only after checking its separate limit.
-Do not duplicate the pending CI dispatch. PR creation, merge and release remain
-unselected. No failed, ignored or missing proof counts as a pass.
+The CI watcher event was received and acknowledged, and its audit is complete.
+No qualification run or CI audit remains pending. Remaining pre-PR work is the Mac
+pause's diagnosis or explicit disposition, any evidenced correction and focused
+review, then the PR description. Keep #37 open until the remaining work and its
+acceptance decision are complete. Obtain authorization before PR creation; merge
+and release remain separate.
 
 Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
 Retained sections below contain unique prior failures and protected native state.

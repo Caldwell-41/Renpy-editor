@@ -11,13 +11,15 @@ containing groups and the screen root remain protected. Luna research and indepe
 Experience First reviews informed the prototype.
 
 The C5 source is pinned locally at `94c78e7`. Reviewed product candidate `602613d`
-is on `codex/37-compose-help-layout`, local-only and not yet accepted on both targets.
+is on published `codex/37-compose-help-layout`; formal acceptance and PR readiness
+remain pending the unexplained Mac pause.
 [The approval record](../design/design-lab-help-composition/approval.json) owns the
 source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
 owns the completed Standards/Spec corrections and qualification results.
 The user requested a fresh-agent handoff on 2026-10-27, then explicitly approved
-branch push and the prepared Windows CI. The original chat owns publication and
-the CI audit until the receiving chat reconciles that assignment. The user approved
+branch push and the prepared Windows CI. The original chat completed publication and
+the CI audit. The receiving chat can assume writer ownership after checking state.
+The user approved
 the GitHub status update and five additional Mac builds, raising its package ceiling
 to seven total. Existing design/test approvals remain effective.
 
@@ -25,7 +27,7 @@ to seven total. Existing design/test approvals remain effective.
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | TypeScript, 241 frontend tests, 417 ordinary core tests, real UI/core, both Mac SDK campaigns and corrected signed Mac native session 3 pass within their recorded scope. The native timing gap remains unexplained. Branch published; Windows and portable Mac qualification are in progress in run 40396855757. The original chat owns the CI audit. |
+| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | Local source/UI, SDK and signed Mac native functional proof retained. Run 40396855757 is audited: Windows SDK/native and portable Mac checks pass. The Mac native pause remains unexplained before PR readiness; PR creation is unselected. |
 
 ## Automatic checks and operation-limit policy
 

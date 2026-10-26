@@ -692,3 +692,80 @@ reconcile it before editing. The selected wait route is installed `ci-watch`, wi
 registration confirmed only by its startup acknowledgement. A failed registration
 uses manual same-thread resume. No result is accepted yet. The Mac pause remains
 unexplained, and PR creation/merge/release remain unselected.
+
+### Qualification dispatch 1 audited, 2026-10-27
+
+The `ci-watch` completion event was matched to the original thread, run and full SHA;
+its receipt was acknowledged. GitHub independently confirms
+[run 40396855757, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40396855757/attempts/1)
+completed successfully on `d80c323dd9bcac404bd3bfe446ebc867021765a3`. Both selected
+Help composition jobs and selector validation succeeded. Closed Help/L01/L17/GPU
+routes were skipped as intended and supply no additional pass. No source or workflow
+change exists between that candidate and the documentation-only successor at audit.
+No receiving agent had taken writer ownership when the audit began or before its
+status updates.
+
+The audit downloaded both evidence archives, matched their SHA-256 against GitHub's
+artifact digests, and compared every extracted file with its archive entry. It also
+matched retained test/desktop binaries against the producer manifests and Cargo's
+exact emitted executable names. Windows binaries have x64 PE headers; the portable
+Mac test executable has an ARM64 Mach-O header. The native Windows executable is
+`5b42f61af62af42bad1adc92c81270dcd501e0d23681ec8c993a43ad5cf03a0d`.
+
+| Evidence | Windows x64 | macOS ARM64 CI |
+| --- | --- | --- |
+| Frontend/typecheck | 241 passed, zero failed/skipped. | 241 passed, zero failed/skipped. |
+| Selected shared core | Every named case matched source: 25 Screens, 3 metadata, 16 Source and 1 selected scene refinement passed. | Same 45 named passes. |
+| Existing separate four-helper case | Intentionally ignored in the ordinary Screens filter; not a pass. | Same exclusion. |
+| Production renderer/core | Six composition groups, pointer/modal/stale checks and held-preference regression pass. | Same groups/checks pass. |
+| Owned-screen regression | Eight real renderer/core groups plus exact earlier probe rehearsal pass. | Same groups/rehearsal pass. |
+| Inert SDK helper | Actual canvas selection and unapplied draft checks pass. Driver shutdown must succeed before the browser command exits. | Not selected; existing local Mac evidence retains its scope. |
+| Deliberate nested SDK preview | Exact named SDK case passed once with zero ignored/failed cases; accepted-source hash and both cleanup receipts pass the admission checker. | Not selected; existing local Mac evidence retains its scope. |
+| Native packaged controller | All six groups, accepted bytes/metadata and seven UUIDs, history/reopen, exit 0 and complete host/fixture cleanup pass. | No CI package or native launch; existing signed local Mac session 3 remains the proof. |
+
+The Windows SDK accepted source SHA-256 is
+`fb05f53bbe894b746925b00b2a26c75b231167aef1d3c8cb63529e46efc6c820`.
+The official SDK archive/checksum verification step succeeded. Validation exits 0;
+preview Stop exits `-1073741510`, admitted by the existing Windows cancellation
+policy, with complete cleanup and no error diagnostics. The retained 1280x720 PNG
+was visually inspected: quoted Harbor/Platform 2 text, Travel notes, Close and the
+separate protected neighbor are visible. This is deliberate runtime proof, not a
+canvas-fidelity or physical-input acceptance claim.
+
+Windows native elapsed time is 14.547 seconds. Its literal-history and reorder
+checkpoints are 3.730 and 4.697 seconds. Mac CI browser checkpoints are 4.734 and
+5.866 seconds. Neither reproduces the local Mac native pause; neither establishes
+its cause. That pre-PR concern remains unresolved.
+
+Artifact identities retained for recovery:
+
+- Windows artifact `12687134917`, archive SHA-256
+  `9a4e83d30e3ac08adfbab5e84a88a614ae682fa7b14db47d79d3c01b08a0cf36`.
+- Mac artifact `12687392311`, archive SHA-256
+  `03f6608e1c4d462e5445a65a5c5a198844d2d33ac2bbeb01745db2fd098e8468`.
+
+Raw run/log metadata, archives, extracted evidence and the read-only audit result
+are under `.toolchains/screen-composition/ci-40396855757/`. Both CI privacy scans
+passed. The audit executed no retained binary and launched no SDK, editor or package
+build. It does not require another qualification dispatch.
+
+#### SDK process-count correction
+
+Earlier records counted the inert helper plus the two `runtime.start` submissions
+as three starts per host. `RuntimeKind::Validate` in
+`app/src-core/src/renpy/runtime.rs` launches compile and lint as separate SDK child
+processes. The actual execution is helper, compile, lint and preview: four SDK
+process starts per host. The original campaign-2 two-start wording counted its two
+runtime submissions and understated its three child processes. This records the
+counting error rather than rewriting the earlier limit or granting extra attempts.
+The overall four-process ceiling per host is fully used; further SDK execution
+needs an explicit extension and consistent child-process accounting.
+
+Current cumulative use is Mac packages 3/7, native sessions 3/3, SDK campaigns 2/2
+and SDK processes 4/4; Windows packages 1/2, native sessions 1/2, SDK campaigns 2/2
+and SDK processes 4/4; focused CI dispatches 1/2. Both-target functional qualification
+is audited for its stated scope. The remaining work is Mac-pause diagnosis or its
+explicit disposition, any evidenced fixes and focused review, then PR preparation.
+PR creation, merge and release remain unselected. The issue stays open pending that
+work and the acceptance decision. CI watching and the original chat's CI audit are
+complete; the receiving chat can assume sole writer ownership after its state check.
