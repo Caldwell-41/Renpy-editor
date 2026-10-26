@@ -1,12 +1,14 @@
 # Current outcome handover
 
-## L02 C5 approved; resume implementation
+## L02 prototype iteration handoff
 
-Kris approved C5 on 2026-10-26 and explicitly requested sending it back to the
-original chat, "Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), to
-continue implementation. Upon the handback message, that chat regains sole writer
-ownership of this checkout and the running Design Lab server on `127.0.0.1:5174`.
-The prototyping chat stops editing after handback.
+Kris requested a new chat for prototyping on 2026-10-26, with the current design
+displayed unchanged first, iteration with Kris, and a message back when finished.
+The selected chat is "Iterate Help composition prototype for #37". On creation it
+takes sole writer ownership of this checkout and the Design Lab servers. The parent,
+"Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), yields until handback.
+The new chat owns Design Lab changes and their approval/evidence records; preserve
+production checkpoint `79f2e5e` for the parent's implementation continuation.
 
 Continue on local branch `codex/37-compose-help-layout`, based on Screens commit
 `8f7f9e7191f3b9c27343c7f4d4f5fdc65b2135f4`. Intended integration destination remains
@@ -26,19 +28,24 @@ exact subtree restoration and next/previous/parent fallback selection. #37's bod
 already includes bounded deletion; C5's approved confirmation behavior supersedes
 C4's immediate individual removal.
 
-[The handback evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26)
-owns checks and simulation limits. The full lab check stopped after 488 cases at
-the older Screens flow-v1 source guard; it is not a full-suite pass. C5 metadata
-and source identity pass. Read Design Lab INTEGRATION before production
-edits. Use a separate source-pinned reference checkout/server when production
-changes invalidate the shared source fingerprint. The proposed core, ScreensWorkspace
-DOM and real UI-to-core/runtime test boundaries were approved before this prototype;
-do not request them again. Minimal source writes, identity/history, durable reopen,
-deliberate nested-screen runtime preview and final independent Standards/Spec reviews
-remain required for implementation acceptance. Production code is unchanged.
+[The new handoff evidence](../tasks/evidence/simple-help-layout.md#prototype-iteration-handoff-2026-10-26)
+owns the partial implementation and latest checks. Seven composition core tests,
+21 Screens UI tests and TypeScript pass at `79f2e5e`. Full suites, real UI-to-core
+reopen/reconciliation, deliberate nested-screen runtime preview, native qualification
+and final independent Standards/Spec reviews remain due. Kris reaffirmed the approved
+test boundaries. This approval is permission to run tests, not a passing result.
+
+[The previous handback evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26)
+owns C5 checks and simulation limits. The full lab check stopped after 488 cases at
+the older Screens flow-v1 source guard; it is not a full-suite pass. Production edits
+now invalidate the current checkout's C5 fingerprint as expected. The read-only
+reference worktree `.toolchains/l02-c5-reference` retains approved source `94c78e7`
+and its approval metadata. Its server on `127.0.0.1:5175` returned HTTP 200 at handoff.
+Display that reference first. Read Design Lab INTEGRATION before recording a new
+approval; keep further experiments in a new unapproved variant in the main checkout.
 
 Open `preview.html?screen=help-composition&variant=workflow-popup&state=nested&theme=dark&viewport=wide`
-on the existing server to inspect C5. Preserve unrelated untracked
+on the reference server to inspect C5. Preserve unrelated untracked
 `docs/audits/2026-10-25-phase-1-codebase-design.md`. No native editor, SDK qualification,
 costly CI or watcher has started for #37. Follow WORKFLOW's operation limits and host
 routing before those operations. All prototype commits are local-only; no push, PR,

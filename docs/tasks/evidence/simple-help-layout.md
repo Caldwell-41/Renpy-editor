@@ -336,3 +336,34 @@ After recording approval, the targeted C5 screen runner again passed all 84 case
 and complete workflow/popup interactions. C5's source fingerprint remains matched.
 The handback includes the combined-suite limitation above and does not claim the
 older reference or production implementation has passed acceptance.
+
+## Prototype iteration handoff, 2026-10-26
+
+Kris requested a new chat to display the current prototype unchanged, iterate with
+him, then message the implementation chat when finished. He also reaffirmed approval
+of the proposed tests. C5 remains the approved baseline until another explicit design
+decision. The selected receiving chat is "Iterate Help composition prototype for #37";
+the parent is "Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`).
+
+Production checkpoint `79f2e5e` on `codex/37-compose-help-layout` adds revision-bound
+composition commands, source-carried element identities, shared-history integration,
+retained UI drafts, confirmed removal and selection preferences. Its diff is the
+implementation record. It is incomplete and unaccepted. The receiving chat owns
+Design Lab and its evidence/approval records; production continuation returns to the
+parent. The parent yields checkout/server ownership on creation of the receiving chat.
+
+At this checkpoint, `npm run typecheck`, `npm run build:tests`, the two focused
+`screen-composition.dom.test.js` and `screen-ui.dom.test.js` files pass all 21 cases.
+`cargo test -p loomlight-core --locked owned_composition_` passes all seven cases.
+`git diff --check` passes. No full-suite or runtime/native acceptance is claimed.
+Remaining proof includes real UI-to-core operations, Source reconciliation and reopen,
+deliberate nested-screen SDK preview, affected native qualification and final independent
+Standards/Spec reviews. No costly operation has started for #37.
+
+The approved C5 reference is served from the read-only worktree
+`.toolchains/l02-c5-reference` at `94c78e7`, with copied approval metadata. The preview
+URL on port 5175 returned HTTP 200 at handoff. Current production changes invalidate
+the main checkout's approved source fingerprint as expected; preserve the reference
+and create a separate unapproved variant for further experiments. All work is local-only.
+The unrelated untracked Phase 1 audit remains untouched. The new handoff replaces the
+live L02 status sections and preserves the unique prior recovery evidence below them.
