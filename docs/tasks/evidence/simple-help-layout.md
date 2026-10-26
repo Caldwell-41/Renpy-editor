@@ -595,3 +595,53 @@ This continuation reviewed status-document size. CURRENT is about 1,567 words an
 HANDOVER about 3,030 before this final note. They retain prior acceptance decisions,
 protected native recovery and unique failure records outside L02. Their excess is
 preserved rather than folding unrelated historical maintenance into this outcome.
+
+### Additional Mac builds approved, 2026-10-26
+
+Kris approved the prepared #37 status update and said five more builds may run if
+needed. The Mac package ceiling rises from two to seven total. Existing consumption
+is preserved: Mac packages 2/7, native sessions 2/3, SDK campaigns 2/2 with three of
+four starts; Windows use and focused CI remain zero. Other operation limits remain
+unchanged. The next build qualifies the reviewed request-lane correction at
+`602613d`, followed by the already-allowed third native session. Branch push, PR,
+merge and release remain unselected.
+
+The approved status update was published to #37 and read back with its acceptance
+criteria unchanged. Package 3 built successfully for product candidate `602613d`;
+its checkout differs only in documentation. Strict signature and installer-content
+verification pass on the unchanged approved certificate. Executable SHA-256 is
+`1a914c1ad33b73a761da853235fa563f9d1d13bf517ef168fa96962cf38d4c53`; installer SHA-256 is
+`450d9cac8e90b19ebe710db0da293457d4233d03ae19b362bacf9e08fba0d14c`. The package identity and source-equivalence receipt
+are retained in `.toolchains/releases/l02-composition-03/`.
+Native session 3 is running against that exact executable in its disposable fixture.
+Current use is Mac packages 3/7, native sessions 3/3 and SDK campaigns 2/2 with three
+of four SDK starts. Windows use and focused CI remain zero.
+
+### Corrected signed Mac functional qualification
+
+Native session 3 passes all six `screen-composition` groups on package 3/product
+candidate `602613d`. It completes addition/history, literal editing/history,
+keyboard reorder/history, confirmed removal, protected Source reconciliation and
+reopen. All seven owned identities and the selected body survive reopen. The
+runner matches accepted source to disk and metadata, observes no source bytecode,
+saves or scratch residue, and confirms host/request/credential-owner cleanup plus
+fixture removal. Exit is 0 without timeout. `native-mac-03/` retains the complete
+receipt, accepted source and disk audit. The normal native scenario starts no SDK.
+
+The 261-second run includes an unexplained gap between literal-history completion
+at 5.4 seconds and reorder-history completion at 253.3 seconds. A read-only fixture
+observation during that gap found the source already reordered, with its last write
+about nine seconds after launch. A CUA attempt to inspect the current app timed out.
+A later one-second process sample could not start because the app had already
+completed and exited. Its diagnostic command result is retained. There is no stack
+sample or evidence establishing the cause of the pause. This is the bounded
+functional native pass; it makes no new responsiveness or canvas-performance claim.
+No unchanged native retry or extra package build was started.
+
+Cumulative use is Mac packages 3/7, native sessions 3/3 and SDK campaigns 2/2, with
+three of four SDK starts. Windows package/editor/SDK use and focused CI remain zero.
+All required local functional proof is now present for the reviewed product, within
+its recorded SDK/core reuse scope. Windows proof is still pending. All #37 acceptance
+boxes remain open until required target proof and the acceptance decision are complete.
+The next action is publication approval for the reviewed branch, then the prepared
+`compose_help` CI dispatch at ordinal 1. No PR, merge or release is selected.

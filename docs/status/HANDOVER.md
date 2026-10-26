@@ -24,36 +24,37 @@ Standards and Spec reviews found three distinct defects; focused red/green check
 and both correction reviews resolve them. Unmarked fallback selection now persists
 only against its exact source revision and grants no write authority.
 
-[The qualification evidence](../tasks/evidence/simple-help-layout.md#native-request-contention-and-remaining-build-decision)
-owns all failures, receipts, acceptance mapping and SDK reuse. TypeScript and all 241
-frontend cases pass. The final ordinary core run passes 417 cases on `9facf7c`, with
-48 intentional ignores and three documented exclusions; the following correction
-changes renderer scheduling only. Both Mac SDK campaigns pass for their unchanged
-qualified scope. Windows qualification has not started.
+[The qualification evidence](../tasks/evidence/simple-help-layout.md#corrected-signed-mac-functional-qualification)
+owns failures, receipts, acceptance mapping, SDK reuse and the native timing gap.
+TypeScript and all 241 frontend cases pass. The final ordinary core run passes
+417 cases on `9facf7c`, with 48 intentional ignores and three documented exclusions;
+the following correction changes renderer scheduling only. Both Mac SDK campaigns
+pass for their unchanged qualified scope.
 
-Mac native session 2 on signed package 2 failed keyboard reorder with captured
-`RUNTIME_BUSY` feedback. Both native attempts and cleanup remain retained. Selection
-preference writes bypassed the existing app request lane. A controlled held-preference
-browser check reproduced the same refusal before correction. `602613d` shares that
-lane with preference reads/writes, dispatches once and preserves responsive runtime
-control. The held-preference production UI/core scenario now passes all groups.
-Standards and Spec independently reviewed the correction without further findings.
-This is ready for native verification, not a passing native result.
+Signed package 3/product `602613d` passes signature and installer verification on
+the approved certificate. Native session 3 passes all six groups, accepted-source
+and metadata disk matching, reopen identity/selection and normal cleanup. It exits
+0 without timeout. Executable SHA-256 is
+`1a914c1ad33b73a761da853235fa563f9d1d13bf517ef168fa96962cf38d4c53`.
+The 261-second run has an unexplained pause after literal-history completion. Source
+was already reordered during the pause. Read-only CUA inspection timed out; the
+later process sample could not start after normal app exit. Cause remains unknown.
+This establishes bounded functional proof, with no responsiveness or performance claim.
+Do not repeat the unchanged native run or count its diagnostics as another session.
 
-No qualification operation is running. Cumulative Mac use is packages 2/2, native
-sessions 2/3 and SDK campaigns 2/2, with three of four SDK starts. Windows use and focused CI
-are zero. Ask for one additional Mac package build before building this candidate;
-then use the already-allowed third native session. Existing design/test approval
-remains effective. WORKFLOW requires asking before exceeding a stated operation
-limit. After a corrected Mac native pass, branch publication still needs approval
-before the prepared `compose_help` Windows workflow can run. Push, PR, merge and
-release remain unselected. No failed, ignored or missing proof counts as a pass.
+Kris approved the prepared GitHub status update and five additional Mac builds on
+2026-10-26. The issue update was published and read back with acceptance unchanged.
+Cumulative use is Mac packages 3/7, native sessions 3/3 and SDK campaigns 2/2, with
+three of four SDK starts. Windows use and focused CI remain zero. The additional
+build approval changes no other recorded limit. No qualification operation is running.
 
-Automatic approval review rejected the attempted GitHub #37 status update because
-local work did not explicitly authorize external disclosure or issue mutation.
-Nothing was published. Its prepared body is `/tmp/loomlight-37-final-status.md`.
-Ask for permission before publishing it. The issue's pre-qualification count table
-is historical; preserve the actual cumulative consumption above.
+Required Windows proof remains pending. Next obtain approval to push the reviewed
+branch, then dispatch the existing `screens-source.yml` workflow with `compose_help`
+selected, exact candidate SHA and ordinal 1. The selected route runs required Windows
+SDK/native proof and portable Mac checks. Preserve its 2-dispatch ceiling and the
+separate Windows package/editor/SDK limits. Existing test selection remains approved.
+Push, PR, merge and release remain unselected. Publishing this issue status does not
+publish the branch. No failed, ignored or missing proof counts as a pass.
 
 Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
 Retained sections below contain unique prior failures and protected native state.

@@ -15,14 +15,15 @@ is on `codex/37-compose-help-layout`, local-only and not yet accepted on both ta
 [The approval record](../design/design-lab-help-composition/approval.json) owns the
 source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
 owns the completed Standards/Spec corrections and qualification results.
-The original implementation chat owns the checkout and servers. Existing approvals
-remain effective.
+The original implementation chat owns the checkout and servers. The user approved
+the GitHub status update and five additional Mac builds, raising its package ceiling
+to seven total. Existing design/test approvals remain effective.
 
 | Capability | Implementation | Evidence and acceptance |
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | TypeScript, 241 frontend tests, 417 ordinary core tests, real UI/core and both Mac SDK campaigns pass within their recorded scope. Native Mac session 2 failed request contention; its reviewed correction needs an extra package build. Windows proof remains pending. |
+| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | TypeScript, 241 frontend tests, 417 ordinary core tests, real UI/core, both Mac SDK campaigns and corrected signed Mac native session 3 pass within their recorded scope. The native timing gap is retained without a responsiveness claim. Windows proof awaits branch publication. |
 
 ## Automatic checks and operation-limit policy
 
