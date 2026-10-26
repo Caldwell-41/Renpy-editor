@@ -645,3 +645,21 @@ its recorded SDK/core reuse scope. Windows proof is still pending. All #37 accep
 boxes remain open until required target proof and the acceptance decision are complete.
 The next action is publication approval for the reviewed branch, then the prepared
 `compose_help` CI dispatch at ordinal 1. No PR, merge or release is selected.
+
+### Branch publication and Windows CI approved, 2026-10-27
+
+The user answered the earlier explicit approval question with "Approve push and
+Windows CI" after requesting a fresh-agent handoff. This authorizes publishing
+`codex/37-compose-help-layout` and running its prepared qualification route.
+PR creation, merge and release remain unselected. A fresh ownership check found
+no receiving agent active and no checkout changes beyond the preserved unrelated
+audit. The original implementation chat owns publication and the exact CI run's
+audit. A receiving chat must reconcile that assignment before another dispatch or
+checkout edits.
+
+Preflight confirms no remote L02 branch and no earlier `screens-source.yml` run
+for it. The selected route is `compose_help=true`, with the exact pushed SHA and
+ordinal 1. It runs Windows SDK/native qualification and portable Mac checks, without
+a Mac package or native launch. The two-dispatch ceiling remains in force; Windows
+package/editor/SDK limits are unchanged. Actual costly starts will be audited from
+the confirmed run. The unexplained Mac timing gap remains a separate pre-PR concern.

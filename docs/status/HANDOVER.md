@@ -4,12 +4,14 @@
 
 Kris requested a fresh-agent handoff on 2026-10-27 under the existing C5 and test
 approvals. The original chat, "Implement ticket #37"
-(`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), is yielding checkout/server ownership.
-The receiving chat assumes sole ownership after checking the live checkout and
-pending operations. Both prototype chats are idle. Continue on
+(`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), received the late approval to push and run
+Windows CI. No receiving chat has started. This chat owns publication and the CI
+audit; a receiving chat must reconcile that pending operation before taking writer
+ownership. Both prototype chats are idle. Continue on
 `codex/37-compose-help-layout`, based on `8f7f9e7`, with reviewed product candidate
 `602613d`. Intended integration destination remains `codex/phase3b-screen-designer`.
-Work is local-only. Push, PR, merge and release remain unselected.
+Push and the prepared Windows qualification are approved. PR creation, merge and
+release remain unselected.
 
 C5 source `94c78e7`, revision `workflow-popup-v1`, variant `workflow-popup`, has
 explicit approval. [The approval record](../design/design-lab-help-composition/approval.json)
@@ -50,16 +52,18 @@ Cumulative use is Mac packages 3/7, native sessions 3/3 and SDK campaigns 2/2, w
 three of four SDK starts. Windows use and focused CI remain zero. The additional
 build approval changes no other recorded limit. No qualification operation is running.
 
-The remaining pre-PR work starts with read-only diagnosis of the unexplained Mac
-pause using the existing native receipt and relevant code. Select any additional
-attempt only after checking its separate operation limit. Required Windows proof
-remains pending. Obtain approval to push the reviewed
-branch, then dispatch the existing `screens-source.yml` workflow with `compose_help`
-selected, exact candidate SHA and ordinal 1. The selected route runs required Windows
+The remaining pre-PR work includes read-only diagnosis of the unexplained Mac pause
+using the existing native receipt and relevant code. Select any additional attempt
+only after checking its separate operation limit. On 2026-10-27 the user explicitly
+approved pushing `codex/37-compose-help-layout` and running the prepared Windows
+qualification. Publish the reviewed branch and dispatch the existing
+`screens-source.yml` workflow with `compose_help` selected, exact candidate SHA and
+ordinal 1. The selected route runs required Windows
 SDK/native proof and portable Mac checks. Preserve its 2-dispatch ceiling and the
 separate Windows package/editor/SDK limits. Existing test selection remains approved.
-Push, PR, merge and release remain unselected. Publishing this issue status does not
-publish the branch. No failed, ignored or missing proof counts as a pass.
+PR creation, merge and release remain unselected. No failed, ignored or missing
+proof counts as a pass. Reconcile CI ownership here before a receiving chat starts
+another dispatch or edits the same checkout.
 
 Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
 Retained sections below contain unique prior failures and protected native state.
