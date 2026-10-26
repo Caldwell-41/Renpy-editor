@@ -1209,6 +1209,29 @@ All mapped functional actions are verified within the table's scope.
 Final review totals are Standards **0 remaining findings**, Spec **0 remaining
 findings**. No code, qualification, CI or watcher work remains pending. The prepared
 PR targets `codex/phase3b-screen-designer` from the selected branch. Its title/body
-are local review artifacts under `.toolchains/screen-composition/final-review/`;
-PR creation needs the explicit approval preserved in #37. Merge and release remain
-unselected. Keep the issue open for that acceptance/publication decision.
+are local review artifacts under `.toolchains/screen-composition/final-review/`.
+At this checkpoint PR creation needed explicit approval. The later approval and
+publication are recorded below. Merge and release remain unselected.
+
+### PR publication, 2026-10-27
+
+Kris explicitly instructed, "Yes, create the PR for #37 into
+codex/phase3b-screen-designer." [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
+was created as an open, non-draft PR with the prepared title and description, then
+attached to this chat. Read-back verified head `codex/37-compose-help-layout` at
+`ab176ed608752d2172028b958535319a84746a6d` and base
+`codex/phase3b-screen-designer` at `8f7f9e7191f3b9c27343c7f4d4f5fdc65b2135f4`.
+The description says "Implements #37"; the issue remains open for formal acceptance.
+The tested product/probe candidate stays `73ffb7f`; later status documents do not
+become a new native/SDK candidate. Merge and release remain unselected.
+
+Automatic Repository quality run
+[40418047591, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40418047591/attempts/1)
+reports head SHA `ab176ed608752d2172028b958535319a84746a6d` for the PR event.
+At 2026-10-26 23:12 UTC, repository validation passed; frontend tests and Rust
+formatting were still in progress. Dispatch-only qualification jobs were skipped
+by the workflow and supply no new evidence. No manual workflow was dispatched.
+The leaf is `awaiting_ci` pending the automatic run audit. Its live issue owns
+any newer run caused by this documentation receipt and the watcher registration.
+Resume in this chat to verify the exact run/attempt, candidate and required job
+results, then restore `review_ready`. Existing costly-operation counts are unchanged.

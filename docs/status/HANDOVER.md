@@ -1,22 +1,27 @@
 # Current outcome handover
 
-## L02 ready for acceptance and PR approval
+## L02 PR open, automatic checks pending
 
 Kris selected continuing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
 with the implement skill. This chat remains sole checkout/server writer on
 `codex/37-compose-help-layout`, based on `8f7f9e7`. Current product/probe candidate
-is `73ffb7f`. The intended PR base remains `codex/phase3b-screen-designer`, whose
-remote still resolves to `8f7f9e7`. Branch publication is approved. PR creation,
-merge and release remain separate and unselected.
+is `73ffb7f`. Kris explicitly approved creating the PR into
+`codex/phase3b-screen-designer` on 2026-10-27. [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
+is open, with base `8f7f9e7` and initial head `ab176ed`. Branch publication and PR
+creation are complete. Formal acceptance, merge and release remain unselected.
 
-All seven bounded criteria have verified evidence. The leaf is `review_ready` and
-stays open for formal acceptance and separate PR creation approval.
+All seven bounded criteria have verified evidence. Functional review is complete;
+the leaf stays open at `awaiting_ci` for the PR's automatic checks.
 [The final acceptance map](../tasks/evidence/simple-help-layout.md#final-acceptance-review-2026-10-27)
-owns results and reuse boundaries. The prepared title is "Compose Help layouts with
-safe ordering and confirmed removal"; its body is the local ignored review artifact
-`.toolchains/screen-composition/final-review/pr-body.txt`. It is prepared for this
-head/base, not published as a PR. No code, test, package, CI or watcher operation
-remains pending.
+owns results and reuse boundaries. The published title is "Compose Help layouts with
+safe ordering and confirmed removal". Initial Repository quality run
+[40418047591, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40418047591/attempts/1)
+on `ab176ed608752d2172028b958535319a84746a6d` was in progress at
+2026-10-26 23:12 UTC; repository validation passed and frontend/Rust checks remained
+pending. The PR receipt's documentation push may supersede that run. #37 owns the
+latest run identity and watch registration. Audit its exact candidate and required
+jobs in this same chat, then return the leaf to `review_ready`. No additional
+package, native session, SDK process or manual CI dispatch is selected.
 
 Independent Standards and Spec reviews of the full diff, correction diff and final
 probe/gate have zero remaining findings. Two P2 corrections are complete: invalid
