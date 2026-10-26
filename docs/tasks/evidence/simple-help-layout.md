@@ -769,3 +769,22 @@ explicit disposition, any evidenced fixes and focused review, then PR preparatio
 PR creation, merge and release remain unselected. The issue stays open pending that
 work and the acceptance decision. CI watching and the original chat's CI audit are
 complete; the receiving chat can assume sole writer ownership after its state check.
+
+### Mac-pause diagnostic chat selected, 2026-10-27
+
+The user requested a new GPT-6.1 Sol chat at xhigh to review the Mac pause's cause
+and explicitly said, "Any allowance it needs for this is approved." The receiving
+chat owns diagnosis and its checkout/server work after creation and a live state
+check. The original implementation chat stops editing after dispatching it.
+The diagnostic agent may choose and record necessary bounded experiments, including
+additional builds, native sessions, SDK process starts or focused CI, without
+requesting another allowance approval. Historical consumption is preserved, and
+physical SDK child processes must be counted separately. This later approval
+supersedes exhausted diagnostic ceilings for the selected investigation; other
+outcomes and PR/merge/release authorization remain separate.
+
+The assignment is to establish whether the observed pause comes from the app, probe
+or host, and report the cause with evidence and a recommended correction. Diagnostic
+instrumentation is in scope; a production behavior change is not requested by this
+review assignment. Existing signed Mac and audited CI evidence remain available for
+comparison, with their original limits and failures retained.

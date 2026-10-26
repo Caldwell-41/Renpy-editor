@@ -18,7 +18,9 @@ source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help
 owns the completed Standards/Spec corrections and qualification results.
 The user requested a fresh-agent handoff on 2026-10-27, then explicitly approved
 branch push and the prepared Windows CI. The original chat completed publication and
-the CI audit. The receiving chat can assume writer ownership after checking state.
+the CI audit. The user requested a GPT-6.1 Sol xhigh diagnostic chat to take writer
+ownership and investigate the Mac pause, approving any allowances it needs for that
+investigation. Historical consumption remains recorded.
 The user approved
 the GitHub status update and five additional Mac builds, raising its package ceiling
 to seven total. Existing design/test approvals remain effective.

@@ -2,12 +2,12 @@
 
 ## L02 CI audited; Mac pause remains before PR
 
-The user requested a fresh-agent handoff on 2026-10-27, then explicitly approved
-branch push and Windows CI. The original chat, "Implement ticket #37"
-(`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), completed the CI audit. No receiving chat
-had started at the audit's state checks. The receiving chat may assume sole
-checkout/server writer ownership after checking current state. Both prototype chats
-are idle. Continue on published `codex/37-compose-help-layout`, based on `8f7f9e7`,
+The user requested a new GPT-6.1 Sol chat at xhigh on 2026-10-27 to investigate the
+Mac pause, with any allowance needed for that investigation approved. The original
+chat, "Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), completed the
+CI audit and yields checkout/server writer ownership to that diagnostic chat after
+creation and its state check. Both prototype chats are idle. Continue on published
+`codex/37-compose-help-layout`, based on `8f7f9e7`,
 with reviewed product `602613d`. Intended PR base is `codex/phase3b-screen-designer`.
 Branch push is approved; PR creation, merge and release remain unselected.
 
@@ -50,7 +50,12 @@ Current cumulative use is Mac packages 3/7, native sessions 3/3 and SDK campaign
 validation as one submission; it launches compile and lint separately. The audit
 records this counting error and the campaign wording discrepancy. No allowance was
 extended by the correction. Additional Mac build approval leaves four builds, but
-renews no native/SDK limit. Check the owning #37 limits before another costly attempt.
+renewed no native/SDK limit at that time. The later diagnostic approval now authorizes
+any additional builds, native sessions, SDK process starts and focused CI needed to
+establish the Mac pause's cause. Preserve cumulative consumption; choose and record
+bounded experiments and any necessary extensions before execution. Another budget
+approval is not needed for that investigation. Other scope and publication boundaries
+remain unchanged. Record the approval and actual use in #37 and its evidence.
 
 The CI watcher event was received and acknowledged, and its audit is complete.
 No qualification run or CI audit remains pending. Remaining pre-PR work is the Mac
