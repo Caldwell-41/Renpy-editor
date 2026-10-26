@@ -1,57 +1,64 @@
 # Current outcome handover
 
-## L02 implementation resumed
+## L02 reviewed implementation and remaining qualification
 
 Kris requested continuing #37 on 2026-10-26 under the existing C5 and test approvals.
-The duplicate prototype chat is idle and made no changes. "Implement ticket #37"
-(`01a170cf-8fea-74f3-b48d-90c241cf2ad7`) has resumed sole checkout/server ownership.
-Production checkpoint `79f2e5e` is followed by in-scope corrections and real UI-to-core
-verification. [The current evidence](../tasks/evidence/simple-help-layout.md#implementation-resumed-2026-10-26)
-owns results, failures and qualification consumption. Continue the implementation;
-no further prototype approval is needed.
+The original chat, "Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`),
+owns the checkout and servers. Both prototype chats are idle. Continue on
+`codex/37-compose-help-layout`, based on `8f7f9e7`, with reviewed product candidate
+`602613d`. Intended integration destination remains `codex/phase3b-screen-designer`.
+Work is local-only. Push, PR, merge and release remain unselected.
 
-Continue on local branch `codex/37-compose-help-layout`, based on Screens commit
-`8f7f9e7191f3b9c27343c7f4d4f5fdc65b2135f4`. Intended integration destination remains
-`codex/phase3b-screen-designer`; development is on Mac ARM64. C5 source is pinned at
-`94c78e725f48829a017377786a0bcafc0fd48c41`. The following approval/docs commit records
-its fingerprint and 16 retained captures in
-[the approval record](../design/design-lab-help-composition/approval.json).
-The approved screen is `help-composition`, revision `workflow-popup-v1`, variant
-`workflow-popup`. Earlier drafts remain available for comparison.
+C5 source `94c78e7`, revision `workflow-popup-v1`, variant `workflow-popup`, has
+explicit approval. [The approval record](../design/design-lab-help-composition/approval.json)
+owns its fingerprint and 16 captures. No design or test approval needs renewal.
+The read-only reference worktree `.toolchains/l02-c5-reference` serves the approved
+nested view on port 5175. The older full-lab source guard limitation remains in
+[the evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26).
 
-C5 covers the complete add/select/edit/reorder/remove workflow. Every eligible
-removal requires a modal confirmation. It names an individual element or lists a
-group's descendants; Cancel is focused initially, Escape restores the invoking
-control, and the page stays stationary. Undo feedback sits outside the panel
-layout. Preserve C5's retained drafts, protected-source guards, one history entry,
-exact subtree restoration and next/previous/parent fallback selection. #37's body
-already includes bounded deletion; C5's approved confirmation behavior supersedes
-C4's immediate individual removal.
+The implementation covers add, literal edit, sibling reorder and confirmed removal
+through shared transactions/history, stable owned UUIDs, protected-source refusal,
+retained drafts and reopen. Every eligible removal uses C5's stationary modal with
+initial Cancel focus, trapped Tab and exact invoker restoration. Independent
+Standards and Spec reviews found three distinct defects; focused red/green checks
+and both correction reviews resolve them. Unmarked fallback selection now persists
+only against its exact source revision and grants no write authority.
 
-[The new handoff evidence](../tasks/evidence/simple-help-layout.md#prototype-iteration-handoff-2026-10-26)
-owns the partial implementation and latest checks. Seven composition core tests,
-21 Screens UI tests and TypeScript pass at `79f2e5e`. Full suites, real UI-to-core
-reopen/reconciliation, deliberate nested-screen runtime preview, native qualification
-and final independent Standards/Spec reviews remain due. Kris reaffirmed the approved
-test boundaries. This approval is permission to run tests, not a passing result.
+[The qualification evidence](../tasks/evidence/simple-help-layout.md#native-request-contention-and-remaining-build-decision)
+owns all failures, receipts, acceptance mapping and SDK reuse. TypeScript and all 241
+frontend cases pass. The final ordinary core run passes 417 cases on `9facf7c`, with
+48 intentional ignores and three documented exclusions; the following correction
+changes renderer scheduling only. Both Mac SDK campaigns pass for their unchanged
+qualified scope. Windows qualification has not started.
 
-[The previous handback evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26)
-owns C5 checks and simulation limits. The full lab check stopped after 488 cases at
-the older Screens flow-v1 source guard; it is not a full-suite pass. Production edits
-now invalidate the current checkout's C5 fingerprint as expected. The read-only
-reference worktree `.toolchains/l02-c5-reference` retains approved source `94c78e7`
-and its approval metadata. Its server on `127.0.0.1:5175` returned HTTP 200 at handoff.
-Display that reference first. Read Design Lab INTEGRATION before recording a new
-approval; keep further experiments in a new unapproved variant in the main checkout.
+Mac native session 2 on signed package 2 failed keyboard reorder with captured
+`RUNTIME_BUSY` feedback. Both native attempts and cleanup remain retained. Selection
+preference writes bypassed the existing app request lane. A controlled held-preference
+browser check reproduced the same refusal before correction. `602613d` shares that
+lane with preference reads/writes, dispatches once and preserves responsive runtime
+control. The held-preference production UI/core scenario now passes all groups.
+Standards and Spec independently reviewed the correction without further findings.
+This is ready for native verification, not a passing native result.
 
-Open `preview.html?screen=help-composition&variant=workflow-popup&state=nested&theme=dark&viewport=wide`
-on the reference server to inspect C5. Preserve unrelated untracked
-`docs/audits/2026-10-25-phase-1-codebase-design.md`. No native editor, SDK qualification,
-costly CI or watcher has started for #37. Follow WORKFLOW's operation limits and host
-routing before those operations. All prototype commits are local-only; no push, PR,
-merge or release has been selected. The retained recovery sections below contain
-unique prior evidence and protected native state, not instructions to resume closed
-work. Their preservation keeps this handover above the normal word-count target.
+No qualification operation is running. Cumulative Mac use is packages 2/2, native
+sessions 2/3 and SDK campaigns 2/2, with three of four SDK starts. Windows use and focused CI
+are zero. Ask for one additional Mac package build before building this candidate;
+then use the already-allowed third native session. Existing design/test approval
+remains effective. WORKFLOW requires asking before exceeding a stated operation
+limit. After a corrected Mac native pass, branch publication still needs approval
+before the prepared `compose_help` Windows workflow can run. Push, PR, merge and
+release remain unselected. No failed, ignored or missing proof counts as a pass.
+
+Automatic approval review rejected the attempted GitHub #37 status update because
+local work did not explicitly authorize external disclosure or issue mutation.
+Nothing was published. Its prepared body is `/tmp/loomlight-37-final-status.md`.
+Ask for permission before publishing it. The issue's pre-qualification count table
+is historical; preserve the actual cumulative consumption above.
+
+Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
+Retained sections below contain unique prior failures and protected native state.
+Their preservation keeps this handover above its normal word-count target; they do
+not authorize resuming closed work or renewing its allowances.
 
 ## Prior automatic checks and policy maintenance
 

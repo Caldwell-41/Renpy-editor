@@ -512,3 +512,86 @@ package/editor/SDK use and focused CI dispatches remain zero. The explicit
 `compose_help` workflow selector preserves closed L01/L17 guards and prepares the
 required Windows SDK/native route plus portable Mac checks. It has not been published
 or dispatched. The corrected Mac package/session remain due.
+
+### Native request contention and remaining build decision
+
+Signed package 2 qualifies candidate `9facf7c`. Its strict signature and installer
+contents pass on the existing approved certificate. Executable SHA-256 is
+`081de92d5870487c21c118bc993fded6b0c44517854c6a48900bcf1ec49e5906`;
+installer SHA-256 is `bb6aefc8f5a2f9ee24306748846a39e360446923603790887fac03a3f608ec5f`.
+Native session 2 again failed keyboard reorder. This report captures the key event
+and `Another request is in progress.` feedback. The owned fixture and host cleaned
+up; partial source and failure receipts remain in `native-mac-02/`. This is a failed
+qualification, not a passing functional run. The earlier history correction remains
+valid but did not resolve this native failure.
+
+The second failure prompted reassessment at the native request boundary. New selection
+persistence sent `preferences.write` directly through the bridge, bypassing the app's
+existing request lane. A following composition write could reach the checked-out
+service before the preference write returned. `checkout-red/` reproduces the identical
+stage, feedback and refusal by holding the preference response and returning the
+host's pre-dispatch busy response for an overlapping composition request. The actual
+UI and source operations still use the real core; that concurrency condition is a
+controlled client-boundary test, not a second native run. A focused lane test also
+failed before correction.
+
+Candidate `602613d` shares the existing application request lane with preference
+reads/writes. It queues each request once; it adds no mutation replay or new queue,
+and runtime Stop/status retain their independent route. `checkout-green/` passes
+all six controller groups and additional pointer/modal/stale checks under held
+preferences. Its 49 preference writes and 12 composition requests have no preference
+contention refusals. TypeScript and all 241 frontend cases pass. Standards and Spec
+independently reviewed this correction and found no remaining issue. Native proof
+for this candidate remains pending.
+
+The final ordinary core run on `9facf7c` passes all 417 cases, with 48 intentional
+ignores and three documented exclusions, in `core-final-03.log`. The following
+correction changes renderer scheduling only, so those core results retain their
+scope. All four harness groups pass in `harness-final-03/`. Workflow actionlint,
+whitespace checks and the repository validator pass. The previously qualified SDK
+adapter, inert plan, accepted nested source and deliberate runtime path remain
+unchanged; their Mac SDK receipts retain that bounded scope. Windows proof is pending.
+
+| #37 criterion group | Local evidence | Remaining required proof |
+| --- | --- | --- |
+| Minimal composition, group/source order and owned identity through history/reopen | Public dispatcher and six UI/core controller groups pass. | Corrected Mac native and Windows qualification. |
+| Hierarchy/canvas selection, Design entry and type/depth help | Actual inert SDK helper plus browser/controller checks pass. | Corrected native/platform qualification; canvas fidelity remains separate. |
+| Parent/protected constraints and retained input | Dispatcher, component and stale-source browser checks pass. | Corrected native/platform qualification. |
+| Confirmed exact removal and unchanged cancellation | Dispatcher, stationary wide/compact browser and component checks pass. | Corrected native/platform qualification. |
+| Protected/root/group refusal and stale removal | Dispatcher and stale-dialog browser checks pass. | Corrected native/platform qualification. |
+| One history entry, exact subtree/UUID restoration, fallback focus and reopen | Dispatcher, component and UI/core history/reopen checks pass; unmarked fallback has revision-bound reopen coverage. | Corrected native/platform qualification. |
+| Nested example and protected neighbor in deliberate Ren'Py | Mac compile/lint, actual render, Stop and cleanup pass. | Windows SDK campaign; no canvas-fidelity waiver. |
+
+#### Standards
+
+Two initial findings, unsafe EOF insertion and a zero-test SDK gate, are resolved.
+The correction recheck and final request-lane recheck report no remaining documented
+standard defect. Reviews were read-only and did not start builds or runtimes.
+
+#### Spec
+
+Two initial findings, unsafe EOF insertion and skipped unmarked fallback selection,
+are resolved. A follow-up reopen omission is also resolved with revision-qualified
+preferences. The final request-lane review reports no scope or behavior mismatch.
+Native/platform qualification remains required.
+
+At this pause, cumulative consumption is Mac packages 2/2, native sessions 2/3 and
+SDK campaigns 2/2 with three of four SDK starts. Windows counts and focused CI
+consumption remain zero. No qualification operation is running. The next step needs one additional
+Mac package build for `602613d`, followed by the already-allowed third native session.
+WORKFLOW requires asking before exceeding the recorded two-build limit. Existing
+design and test approvals remain effective. Branch publication, PR, merge and release
+remain unselected; required Windows CI follows its publication boundary. The issue
+stays open with all acceptance criteria pending platform completion.
+
+The attempted GitHub status update was rejected by automatic approval review before
+execution. Its reason was that local implementation authorization did not explicitly
+authorize external disclosure or issue mutation. No issue update was published.
+The prepared body remains locally at `/tmp/loomlight-37-final-status.md`; ask for
+explicit permission before publishing it. Current consumption above must be preserved
+even though the issue still shows the historical pre-qualification counts.
+
+This continuation reviewed status-document size. CURRENT is about 1,567 words and
+HANDOVER about 3,030 before this final note. They retain prior acceptance decisions,
+protected native recovery and unique failure records outside L02. Their excess is
+preserved rather than folding unrelated historical maintenance into this outcome.

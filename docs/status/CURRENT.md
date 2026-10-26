@@ -10,21 +10,19 @@ ordinary owned elements. Every removal uses a stationary modal; protected source
 containing groups and the screen root remain protected. Luna research and independent
 Experience First reviews informed the prototype.
 
-The C5 source is pinned locally at `94c78e7`. Production implementation checkpoint
-`79f2e5e` is on `codex/37-compose-help-layout`; it is incomplete and unaccepted.
+The C5 source is pinned locally at `94c78e7`. Reviewed product candidate `602613d`
+is on `codex/37-compose-help-layout`, local-only and not yet accepted on both targets.
 [The approval record](../design/design-lab-help-composition/approval.json) owns the
-source fingerprint, 16 retained captures and agreed behavior.
-[The handback evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26)
-owns the prior approval. [The new handoff evidence](../tasks/evidence/simple-help-layout.md#prototype-iteration-handoff-2026-10-26)
-records the implementation checkpoint. The original implementation chat has resumed
-sole checkout/server ownership. Kris reaffirmed approval of the core, DOM and real UI-to-core/runtime
-test boundaries; acceptance still needs their actual results.
+source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
+owns the completed Standards/Spec corrections and qualification results.
+The original implementation chat owns the checkout and servers. Existing approvals
+remain effective.
 
 | Capability | Implementation | Evidence and acceptance |
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 approved; implementation in progress | Core/component checks and six real UI-to-core groups pass. Runtime/native qualification, broad checks and final review remain due. |
+| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | TypeScript, 241 frontend tests, 417 ordinary core tests, real UI/core and both Mac SDK campaigns pass within their recorded scope. Native Mac session 2 failed request contention; its reviewed correction needs an extra package build. Windows proof remains pending. |
 
 ## Automatic checks and operation-limit policy
 
