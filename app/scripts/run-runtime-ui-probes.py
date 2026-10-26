@@ -173,7 +173,8 @@ for case in cases:
                         accepted = details.get("acceptedSource")
                         expected = accepted.encode() if isinstance(accepted, str) else None
                         if details.get("identity", {}).get("id") != ownership[0]["id"]:
-                            raise ValueError("Composition identity must match disk ownership")
+                            expected = None
+                            disk_errors.append("Composition report identity is missing or does not match disk ownership")
                     else:
                         expected = f'# loomlight-screen: {ownership[0]["id"]}\nscreen travel_notes():\n    pass\n'.encode()
                 except (OSError, ValueError, KeyError, TypeError):

@@ -5,20 +5,21 @@ import {resolve, join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {randomUUID, createHash} from 'node:crypto';
 import {createServer} from 'vite';
-import {chromium} from 'playwright';
+import {chromium, webkit} from 'playwright';
 import {driverProcess} from './phase2-driver-process.mjs';
 import {spawnSync} from 'node:child_process';
 
 const output = resolve(process.env.COMPOSITION_OUTPUT ?? '../.toolchains/screen-composition/browser-01');
 const canvas = process.env.COMPOSITION_CANVAS === '1';
 await mkdir(output, {recursive:true});
-const child = driverProcess(resolve(`target/debug/examples/help-controller-driver${process.platform === 'win32' ? '.exe' : ''}`), [join(tmpdir(), `loomlight-help-controller-${randomUUID()}`), ...(canvas ? ['composition-canvas'] : [])], {timeout:60000});
+const child = driverProcess(resolve(`target/debug/examples/help-controller-driver${process.platform === 'win32' ? '.exe' : ''}`), [join(tmpdir(), `loomlight-help-controller-${randomUUID()}`), ...(canvas ? ['composition-canvas'] : [])]);
 const server = await createServer({root:resolve('.'), logLevel:'error', server:{host:'127.0.0.1',port:0}});
 const receipts = [], errors = [];
 let browser, page;
 try {
-  assert.equal((await child.next()).ready, true); await server.listen();
-  browser = await chromium.launch({channel:'chrome',headless:true}); page = await browser.newPage({viewport:{width:1100,height:800},colorScheme:'dark'});
+  assert.equal((await child.next(canvas ? 180000 : 15000)).ready, true); await server.listen();
+  browser = process.env.COMPOSITION_BROWSER === 'webkit' ? await webkit.launch({headless:true}) : await chromium.launch({channel:'chrome',headless:true});
+  page = await browser.newPage({viewport:{width:1100,height:800},colorScheme:'dark'});
   page.on('pageerror', error => errors.push(error.message));
   await page.exposeBinding('compositionRpc', async (_, request) => {
     if (request.operation === 'probe.runtimeUiReport') { receipts.push({request}); return {ok:true,protocolVersion:1,requestId:request.requestId,value:{recorded:true}}; }

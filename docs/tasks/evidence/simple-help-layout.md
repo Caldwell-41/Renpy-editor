@@ -399,3 +399,77 @@ discard. Focused core and component checks pass; broad suites and native/runtime
 qualification remain pending. The owning issue records operation limits. Before any
 qualification starts, consumption is Mac/Windows package 0/0, editor 0/0, SDK campaign
 0/0 and focused CI 0. Routine checks do not consume these limits.
+
+### C5 controls and production operations
+
+| C5 control or retained capability | Production operation and observable result | Verification owner |
+| --- | --- | --- |
+| Screen picker and New blank screen | Existing catalog/creation retains distinct screen/root IDs and exact Source navigation. | Existing owned-screen browser and packaged-controller rehearsal. |
+| Hierarchy, canvas, ancestor path and type/depth help | One selected element ID; Enter/double-click enters Design. | Component tests, real UI/core controller and inert SDK helper. |
+| Add palette, destination, text and Cancel | Revision-bound `screens.compose` addition; one shared-history entry; a refused draft stays editable. | Core dispatch, component and real UI/core checks. |
+| Pending addition outline and text preview | Typed inert canvas plans; accepted `.rpy` remains unchanged until Apply. | Core plan case and SDK helper campaign. |
+| Text Apply/Cancel and shortcuts | Literal-token patch, no-op refusal, retained per-element drafts and saved-text restoration. | Core dispatch and real UI/core controller. |
+| Order buttons, Alt + arrows and pointer drop | Same-parent source-subtree move; protected crossings refuse. | Whole-group core case, keyboard controller and pointer browser check. |
+| Remove, Delete and Backspace | Stationary modal names the target/subtree; Cancel starts focused; Cancel/Escape restores its exact invoker. Core rechecks revision and protection. | Component, real controller, compact/wide position and stale-removal browser checks. |
+| Undo notice and Dismiss | Existing shared history restores exact source/IDs, with removed-target/fallback selection. Dismiss changes no source. | Core dispatch and real UI/core history. |
+| Source and Connect | Existing revision-bound Source navigation; actions/connections remain in Source. | Real Source reconciliation and retained earlier scope. |
+| Dimensions, aligned movement, canvas samples/aspect/zoom/button state | Existing operations remain; unmarked Source-authored text retains its sample controls. | Existing Screens component/core cases and prior qualified scope. |
+| Validate/Test in Ren'Py | Existing explicit runtime preparation/trust/scratch route for accepted source. | Deliberate nested-screen SDK campaign. |
+
+The C5 comparison retains the split editor, flat tree, typography, add/text controls,
+compact editor-before-canvas order and stationary confirmation. The production shell
+keeps its existing service toolbar, real screen picker, navigation width and technical
+source names; the mock used a smaller fictional shell and friendly sample names.
+The protected `use` neighbor makes the inert canvas explicitly unavailable, while
+the deliberate project preview can execute that accepted source. The mock's HTML
+canvas does not qualify that source or waive the separate canvas-fidelity gate.
+Wide/compact dark captures are retained in each browser output directory. Browser
+run 10 observes settled Source/row state and verifies position before/during each modal.
+
+### Qualification and corrections after the first candidate
+
+Candidate `6e6697b` produced signed Mac package 1 at
+`.toolchains/releases/l02-composition-01/`. Strict signature, certificate-backed
+requirement and installer contents pass. Executable SHA-256 is
+`b2b36a031096c09ff0e9f5eed8ace42d5eeaae9f52514da9823b33b453b2df8b`;
+installer SHA-256 is `31d01944c490b9c2ee1547982eebb61023e9ab818ab9c6acba644c0b6352096a`.
+Native Mac session 1 failed at keyboard reorder after addition and literal-history
+stages. Its report records ordinary cleanup, and the runner retained its source and
+failed result under `.toolchains/screen-composition/native-mac-01/`.
+
+A focused component case reproduced overlapping history commands while the first
+refresh was pending. The workspace now keeps its busy state through refreshed
+document/selection installation. The exact cause of the first native stop remains
+provisional until the corrected package runs. A pinned WebKit rehearsal then exposed
+an independent probe defect: changing the DOM selection without notifying CodeMirror
+could insert a replacement at the old selection. The native editor helper now sends
+the same selection-change event as its range helper. WebKit run 02 completes the six
+controller groups, but its outer browser check fails on a ResizeObserver delivery
+notification. That result remains failed diagnostic evidence; it is not a native pass.
+
+SDK helper setup 01 exceeded the new harness's 60-second ready deadline before any
+helper started. Its identified public partial fixture was removed after driver exit;
+`setup-failure.json` retains the audit. Existing canvas evidence already establishes
+a 180-second SDK setup bound. The harness now uses that bound only for initial
+readiness, retaining the ordinary 15-second request bound. Helper run 02 passes real
+canvas click/double-click selection, unapplied addition rendering without source writes,
+the six controller groups, pointer reorder, compact confirmations and stale-removal
+refusal. The driver confirms host cleanup. This campaign uses one inert helper start.
+
+The first broad core run had 380 passes and 34 failures. Local-server fixtures were
+denied loopback binding by the sandbox; two source-only inspection fixtures exposed
+a real metadata assumption. Raw source inspection is again independent of ownership
+metadata, while managed IPC and mutation responses retain ownership annotation.
+Those two existing fixtures pass after correction. A process fixture also failed;
+the normal-capability rerun is still pending. No failure or ignored SDK case counts
+as a pass. The latest full frontend run passes TypeScript and all 239 tests, without
+skips. The harness's four independent groups pass before the latest workflow change;
+its affected rerun is pending.
+
+At this checkpoint Mac use is one package build and one failed native editor session.
+SDK campaign 1 passes with one helper start; campaign 2 is running its selected
+validation/preview. Windows package/editor/SDK use and focused CI dispatches remain
+zero. The new explicit `compose_help` workflow selector preserves closed L01/L17
+guards and prepares the required Windows SDK/native route plus portable Mac checks.
+It has not been published or dispatched. Final independent review and the corrected
+Mac package/session remain due.

@@ -189,6 +189,9 @@ export class ScreensWorkspace {
   }
   async load(): Promise<void> {
     if (this.busy || this.resize || this.move || this.composer.hasRemoval()) { this.note("Finish the current operation first. Input retained.", true); return; }
+    return this.reload();
+  }
+  private async reload(): Promise<void> {
     const sequence = ++this.loadSequence;
     try {
       const inventory = await this.actions.request<SourceInventory>("source.list");
@@ -439,17 +442,18 @@ export class ScreensWorkspace {
       if (this.current()) this.actions.saved();
     } catch (error) { if (this.current()) this.note((error as Error).message, true); }
     finally {
-      this.busy = false;
       if (this.current()) {
-        await this.load();
+        await this.reload();
         const entry = [...this.compositionHistory].reverse().find(item => item.path === before?.path && item.path === this.doc?.path
           && (type === "undo" ? item.after === before?.revision && item.before === this.doc?.revision : item.before === before?.revision && item.after === this.doc?.revision));
         const preferred = entry?.removal ? type === "undo" ? entry.beforeId : entry.afterId : selectedId;
         const index = this.nodes().findIndex(n => n.id === preferred);
         if (index >= 0) this.selected = index;
         else if (entry) { const fallback = type === "undo" ? entry.beforeId : entry.afterId; this.selected = Math.max(0, this.nodes().findIndex(n => n.id === fallback)); }
-        this.rememberSelection(); this.composer.clearNotice(); this.render(); this.composer.focusSelection();
+        this.rememberSelection(); this.composer.clearNotice();
       }
+      this.busy = false;
+      if (this.current()) { this.render(); this.composer.focusSelection(); }
     }
   }
   private openSource(): void {

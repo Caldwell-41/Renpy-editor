@@ -1,7 +1,7 @@
 // Explicit L02 controller. Synthetic input reaches the production UI and core.
 (async () => {
   const stages = [], started = performance.now();
-  let stage = "open", serial = 0, sessionId, identity, acceptedSource, identities;
+  let stage = "open", serial = 0, sessionId, identity, acceptedSource, identities, awaitedControl = "recent project", keyObservation;
   const assert = (value, message) => { if (!value) throw Error(message); };
   const until = async condition => {
     const deadline = performance.now() + 30000;
@@ -13,7 +13,7 @@
     return result.value;
   });
   const find = window.__loomlightProbeFindButton;
-  const click = async label => { await until(() => find(label) && !find(label).disabled); find(label).click(); };
+  const click = async label => { awaitedControl = `button ${label}`; await until(() => find(label) && !find(label).disabled); find(label).click(); };
   const checkpoint = async name => { stage = name; stages.push({ stage, elapsedMs: Math.round(performance.now() - started) }); await window.__loomlightCompositionObserve?.(name); };
   const inspect = () => call("screens.inspect", { path: identity.path });
   const source = async () => (await call("source.open", { path: identity.path })).text;
@@ -68,7 +68,9 @@
     await history("Undo", beforeText, body); await history("Redo", afterText, body);
     await checkpoint("literal-history-passed");
 
-    await select(body); row(body).focus(); row(body).dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true }));
+    await select(body); row(body).focus();
+    row(body).addEventListener("keydown", event => { keyObservation = {key:event.key,altKey:event.altKey,selected:selected()}; }, {once:true,capture:true});
+    awaitedControl = "keyboard sibling reorder"; row(body).dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true }));
     await until(() => document.querySelector(".screen-message")?.textContent.includes("Order changed"));
     const reordered = await source(); assert(reordered.indexOf('text "Next stop:') < reordered.indexOf('text "Travel notes"'), "Keyboard sibling reorder changes source order");
     assert(selected() === body && document.activeElement === row(body), "Reorder retains identity and keyboard focus");
@@ -123,6 +125,6 @@
     await checkpoint("reopen-passed"); await checkpoint("complete");
     await call("probe.runtimeUiReport", { scenario: "screen-composition", passed: true, stage, stages, identity, identities, acceptedSource, nativeWebView: true, sdkExecuted: false });
   } catch (error) {
-    await call("probe.runtimeUiReport", { scenario: "screen-composition", passed: false, stage, stages, error: String(error), nativeWebView: true, sdkExecuted: false });
+    await call("probe.runtimeUiReport", { scenario: "screen-composition", passed: false, stage, stages, awaitedControl, keyObservation, feedback:document.querySelector(".screen-message")?.textContent, selectedId:selected(), error: String(error), nativeWebView: true, sdkExecuted: false });
   }
 })();

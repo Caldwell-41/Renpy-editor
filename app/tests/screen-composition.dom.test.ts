@@ -20,6 +20,7 @@ function interactiveFixture() {
   const calls: { operation: CoreOperation; payload?: Record<string, unknown> }[] = [];
   let reply: { document: ScreenDocument; selectedId: string } | undefined;
   let historyReply: ScreenDocument | undefined;
+  let inspectionGate: Promise<void> | undefined;
   const workspace = new ScreensWorkspace({ resolution: { width: 1280, height: 720 }, current: () => true,
     coordinate: task => task(), source: () => {}, preview: () => {}, saved: () => {},
     request: async <T>(operation: CoreOperation, payload?: Record<string, unknown>): Promise<T> => {
@@ -27,7 +28,7 @@ function interactiveFixture() {
       if (operation === "source.list") return { files: [{ path: doc.path }] } as T;
       if (operation === "screens.list") return { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "inventory",
         owned: [{ id: "screen-id", rootId: "root-id", name: "notes", path: doc.path, resolved: true, sourceRevision: doc.revision }] } as T;
-      if (operation === "screens.inspect") return structuredClone(doc) as T;
+      if (operation === "screens.inspect") { await inspectionGate; return structuredClone(doc) as T; }
       if (operation === "screens.compose" && reply) { doc = reply.document; return structuredClone(reply) as T; }
       if (operation === "scene.list") return { projectRevision: "project", sourceMapRevision: "map" } as T;
       if (operation === "scene.apply" && historyReply) { doc = historyReply; return {} as T; }
@@ -39,7 +40,8 @@ function interactiveFixture() {
   const edit = (id: string) => { row(id).dispatchEvent(new window.MouseEvent("dblclick")); };
   const text = () => { const input = [...document.querySelectorAll("textarea")].find(i => i.ariaLabel === "Text"); assert.ok(input); return input; };
   return { workspace, calls, click, row, edit, text, browser, original: structuredClone(doc), respond: (next: ScreenDocument, selectedId: string) => { reply = { document: next, selectedId }; },
-    respondHistory: (next: ScreenDocument) => { historyReply = next; }, replaceDocument: (next: ScreenDocument) => { doc = next; } };
+    respondHistory: (next: ScreenDocument) => { historyReply = next; }, replaceDocument: (next: ScreenDocument) => { doc = next; },
+    holdInspection: () => { let release!: () => void; inspectionGate = new Promise<void>(resolve => { release = resolve; }); return () => { inspectionGate = undefined; release(); }; } };
 }
 
 test("owned composition retains a refused addition and Cancel accepts no source request", async () => {
@@ -199,4 +201,15 @@ test("addition history keeps a surviving parent selection on Redo", async () => 
     h.respondHistory(h.original); h.click("Undo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
     h.respondHistory(added); h.click("Redo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
   } finally { h.workspace.dispose(); }
+});
+
+test("history remains busy until its refreshed document and selection are installed", async () => {
+  const h = interactiveFixture(); let release: (() => void) | undefined;
+  try {
+    await tick(); await tick();
+    h.respondHistory(h.original); release = h.holdInspection();
+    h.click("Undo"); await tick(); await tick(); h.click("Redo"); await tick();
+    assert.equal(h.calls.filter(call => call.operation === "scene.apply").length, 1, "A second history command must wait for the first refresh");
+    release(); release = undefined; await tick(); await tick();
+  } finally { release?.(); h.workspace.dispose(); }
 });

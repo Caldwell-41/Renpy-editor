@@ -885,7 +885,7 @@ impl LifecycleService {
     ) -> Result<crate::screens::Document, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
         self.authoring
-            .screens_inspect(&authority, request)
+            .screens_inspect_owned(&authority, request)
             .map_err(LifecycleError::Scene)
     }
 

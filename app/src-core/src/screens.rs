@@ -587,6 +587,18 @@ impl AuthoringService {
             .transactions
             .snapshot(project, path(&request.path)?)
             .map_err(|_| SceneError::SourceConflict)?;
+        inspect(&bytes, request.path, revision.sha256)
+    }
+
+    pub(crate) fn screens_inspect_owned(
+        &self,
+        project: &ProjectId,
+        request: InspectRequest,
+    ) -> Result<Document, SceneError> {
+        let (bytes, revision) = self
+            .transactions
+            .snapshot(project, path(&request.path)?)
+            .map_err(|_| SceneError::SourceConflict)?;
         let mut document = inspect(&bytes, request.path, revision.sha256)?;
         self.annotate_screen_ownership(project, &bytes, &mut document)?;
         Ok(document)
@@ -685,7 +697,7 @@ impl AuthoringService {
                 intent: TransactionIntent::Edit,
             },
         )?;
-        self.screens_inspect(project, InspectRequest { path: source_path })
+        self.screens_inspect_owned(project, InspectRequest { path: source_path })
     }
 
     fn screens_set_properties(
@@ -757,7 +769,7 @@ impl AuthoringService {
                 intent: TransactionIntent::Edit,
             },
         )?;
-        self.screens_inspect(project, InspectRequest { path: source_path })
+        self.screens_inspect_owned(project, InspectRequest { path: source_path })
     }
 }
 

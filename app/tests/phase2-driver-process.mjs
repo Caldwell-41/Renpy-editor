@@ -14,11 +14,11 @@ export function driverProcess(executable,args,{timeout=15000}={}){
   try{const value=JSON.parse(line);if(waiters.length){const w=waiters.shift();clearTimeout(w.timer);w.resolve(value);}else queued.push(value);}
   catch(error){fail(error);child.kill();}
  });
- const next=()=>{
+ const next=(deadline=timeout)=>{
   if(queued.length)return Promise.resolve(queued.shift());
   if(failure)return Promise.reject(failure);
   return new Promise((resolve,reject)=>{
-   const w={resolve,reject,timer:setTimeout(()=>{fail(Error('Driver reply deadline exceeded'));child.kill();},timeout)};
+   const w={resolve,reject,timer:setTimeout(()=>{fail(Error('Driver reply deadline exceeded'));child.kill();},deadline)};
    waiters.push(w);
   });
  };
