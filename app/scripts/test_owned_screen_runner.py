@@ -13,7 +13,7 @@ from test_owned_screen_evidence import receipt
 
 
 class OwnedScreenRunnerTest(unittest.TestCase):
-    def run_fixture(self, passed, unreadable_metadata=False):
+    def run_fixture(self, passed, unreadable_metadata=False, desktop_failure=None):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             profile = root / "loomlight-r2-probe-424242-owned-screen"
@@ -57,19 +57,32 @@ class OwnedScreenRunnerTest(unittest.TestCase):
             power.state.return_value = dict(onConsole=True, loginDone=True, screenLocked=False,
                                             displayActive=True, displayAsleep=False)
             power.hold.side_effect = [1, 2]
-            with patch("macos_native_desktop.MacPower", return_value=power), patch("subprocess.Popen", side_effect=start), patch("pathlib.Path.read_text", read), retention, patch.dict(os.environ, {"TEMP": str(root), "TMPDIR": str(root)}), patch("sys.argv", [str(runner), str(root / "fixture-app"), str(output), "owned-screen"]), contextlib.redirect_stdout(io.StringIO()):
-                if passed:
+            if desktop_failure == 'locked':
+                power.state.side_effect = [power.state.return_value, power.state.return_value,
+                                          {**power.state.return_value, 'screenLocked': True}]
+            elif desktop_failure == 'release':
+                power.release.side_effect = RuntimeError('Controlled assertion release failure')
+            desktop_host = patch('sys.platform', 'darwin') if desktop_failure else contextlib.nullcontext()
+            with desktop_host, patch("macos_native_desktop.MacPower", return_value=power), patch("subprocess.Popen", side_effect=start), patch("pathlib.Path.read_text", read), retention, patch.dict(os.environ, {"TEMP": str(root), "TMPDIR": str(root)}), patch("sys.argv", [str(runner), str(root / "fixture-app"), str(output), "owned-screen"]), contextlib.redirect_stdout(io.StringIO()):
+                if passed and not desktop_failure:
                     runpy.run_path(str(runner), run_name="__main__")
                 else:
                     with self.assertRaises(SystemExit) as exited:
                         runpy.run_path(str(runner), run_name="__main__")
                     self.assertEqual(exited.exception.code, 1)
             result = json.loads((output / "runtime-ui-owned-screen.json").read_text())
-            self.assertEqual(result["passed"], passed)
+            self.assertEqual(result["passed"], passed and not desktop_failure)
             self.assertEqual(len(result["reports"]), 1)
             self.assertTrue(result["fixtureCleanupComplete"])
             self.assertFalse(profile.exists())
             self.assertEqual(bool(result["diskErrors"]), not passed)
+            if desktop_failure:
+                self.assertTrue(result['reports'][0]['passed'], 'The app report cannot hide the desktop failure')
+                self.assertTrue(result['helpDisk']['acceptedBytesMatch'])
+                self.assertEqual(len(result['externalErrors']), 1)
+                self.assertEqual(power.release.call_count, 2, 'Both power owners must attempt cleanup')
+                desktop = json.loads((output / 'runtime-ui-owned-screen-desktop.json').read_text())
+                self.assertEqual(desktop['cleanupComplete'], desktop_failure != 'release')
             if unreadable_metadata:
                 self.assertFalse((output / "disk-source-map.json").exists())
                 self.assertEqual(len(result["diskErrors"]), 2)
@@ -85,6 +98,11 @@ class OwnedScreenRunnerTest(unittest.TestCase):
 
     def test_unreadable_metadata_does_not_skip_cleanup_or_failed_result(self):
         self.run_fixture(False, unreadable_metadata=True)
+
+    def test_desktop_exit_failure_retains_failure_and_completes_fixture_cleanup(self):
+        for failure in ('locked', 'release'):
+            with self.subTest(failure=failure):
+                self.run_fixture(True, desktop_failure=failure)
 
 
 if __name__ == "__main__":

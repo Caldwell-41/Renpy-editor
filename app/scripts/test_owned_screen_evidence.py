@@ -17,7 +17,7 @@ class OwnedScreenEvidenceTest(unittest.TestCase):
     def test_composition_requires_its_own_stages_and_persisted_element_identities(self):
         report = receipt(); report['case'] = 'screen-composition'
         details = report['details']; details['scenario'] = 'screen-composition'
-        stages = ('composition-passed', 'literal-history-passed', 'reorder-passed', 'confirmed-removal-passed', 'protected-source-passed', 'reopen-passed', 'complete')
+        stages = ('composition-passed', 'text-validation-passed', 'literal-history-passed', 'reorder-passed', 'confirmed-removal-passed', 'protected-source-passed', 'reopen-passed', 'complete')
         details['stages'] = [dict(stage=stage) for stage in stages]
         ids = [details['identity']['rootId'], *[str(UUID(int=i)) for i in range(1, 7)]]
         details['identities'] = ids

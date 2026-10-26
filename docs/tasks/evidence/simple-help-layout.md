@@ -1034,3 +1034,88 @@ SDK campaigns 2/2 and four physical SDK starts. Windows and CI counts are unchan
 The second native correction reservation is unused and closed after the passing
 run. Existing functional qualification retains its scope; acceptance and PR
 preparation remain separate. No app behavior changed.
+
+### Final implementation review and corrections, 2026-10-27
+
+Kris selected continuing #37 with the implement skill. The fixed review comparison
+is `8f7f9e7...4d65e91`. Standards and Spec agents worked read-only; this chat remains
+the sole file writer. Spec initially found no implementation mismatch. Standards
+found two P2 violations: invalid text submission replaced the focused control
+without associated field errors, and a Mac desktop-exit failure skipped remaining
+fixture cleanup and result recording.
+
+Both defects reproduced before correction at the existing approved component and
+runner seams. `final-review/dom-red-02.log` records missing completion validation
+and lost submission focus. `runner-red.log` records post-child lock/release failures
+escaping before fixture audit. The first DOM test draft used a Happy DOM ARIA
+selector it does not reflect and object-diff assertions; its earlier failed log
+is retained separately. The corrected fixture catches the intended failures.
+
+Completion validation now reuses the existing authoring field helper, moved from
+the Story condition module to `authoring-input.ts` with textarea support. Empty
+input gets an associated inline error on blur/submission, retains its value and
+the same focused control, and stays untouched during IME composition. Correcting
+the value clears the error without rerendering. The error strings and normal C5
+layout remain unchanged; the invalid state uses the existing field-error pattern
+required by UI.md, not a new layout design. Two new DOM cases pass with all eleven
+composition component cases. TypeScript passes.
+
+The runner now distinguishes desktop errors from unrelated failures. A prelaunch
+refusal still prevents launch. A desktop failure after a child starts remains a
+failed result while helper/fixture audit, cleanup and report writing continue.
+The integrated fixture passes both post-child lock and independent release-failure
+subcases, retaining successful app evidence without converting the overall result
+to a pass. The ten existing desktop lifecycle cases also pass. The Standards
+correction review reports both findings resolved and no remaining standards or
+meaningful smell finding.
+
+Chrome's complete renderer/core case passes the changed invalid fields plus the
+six existing groups, pointer order, stationary confirmations and stale removal.
+The full WebKit rehearsal and a shorter validation diagnostic both retain the
+previously documented ResizeObserver undelivered-notification failure. They supply
+no WebKit pass. Their controller assertions completed, but the outer error gate
+remains failed. The shorter diagnostic's first draft had an import-path refusal
+before any browser/service started; that failed result also remains retained.
+No production change or error suppression was made to satisfy that diagnostic.
+
+Spec's correction review found no new implementation defect but identified the
+remaining native focus proof: old package-3 receipts cannot qualify the new invalid
+field behavior. The common composition probe now exercises both invalid forms and
+reports `text-validation-passed`; admission requires that checkpoint. Its omission
+was accepted before the gate correction and rejected afterward in
+`admission-red.log`/`admission-green.log`. Historical six-group receipts retain their
+original tested contract; they are not passes under this new seven-group gate.
+
+This continuation selects one final Mac package and editor session for the evidenced
+review corrections, within unchanged cumulative ceilings: package 4/7 and native
+session 5/5. The earlier runner-only unused reservation was closed after its pass;
+the current user-selected implementation continuation now needs the focused review
+correction proof. No ceiling is increased. No SDK campaign/start or CI dispatch is
+selected. Unchanged source/core, SDK adapter/helper plan and runtime proof retain
+their earlier candidate-bound scope. Run the ordinary final suites first, then
+qualify this corrected renderer/probe in the signed package. A failed native/build
+attempt requires reassessment before any further costly operation.
+
+Final TypeScript/frontend checks pass all 243 cases, zero failed/skipped. The four
+final harness groups pass; Python discovery has 249 passes and the three expected
+Windows-only exclusions (252 cases), and retention has ten passes. Rust formatting
+and actionlint pass. The strengthened common controller passes all seven groups in
+Chrome against the real core, followed by pointer order, stationary confirmations
+and stale-removal checks. These are browser/service results, not native proof.
+
+Chosen Chrome captures of the two invalid states are retained under
+`docs/design/design-lab-help-composition/production/` with filenames beginning
+`2026-10-27-invalid-`. They show only the disposable public fixture, dark theme,
+1100x800 CSS viewport and scale 1. They are production check evidence, not a new
+design approval. The SHA-256 values for addition and text are respectively
+`4c6162c7c3d0a001a999082723179c10f3eefac78086305f73edca64ec3489c4` and
+`a71f3caf5caae8f84e1684262bbd9fce3a90c308d078cc17d77d5b38135cb89b`.
+The pinned C5 reference and approval remain unchanged.
+
+The final ordinary core suite passes 417 cases, with 48 intentional SDK/specialist
+ignores and the three documented broad-run exclusions. The named audit matches
+all 465 listed cases to their actual pass/ignore rows, including Rust's ignored
+reason suffixes. Its first diagnostic parser omitted those suffixes and was
+corrected without another core run. `final-review/core-audit.json` retains the
+input hashes and unchanged core tree. No ignored case supplies a pass. No SDK
+process started during these ordinary suites.

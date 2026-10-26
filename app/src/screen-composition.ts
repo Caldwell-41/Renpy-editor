@@ -1,4 +1,5 @@
 import { icon } from "./icons.ts";
+import { validateField } from "./authoring-input.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 
 export interface CompositionView {
@@ -58,6 +59,7 @@ export class ScreenComposer {
   private readonly texts = new Map<string, TextDraft>();
   private saving = false;
   private error = "";
+  private textValidation?: () => void;
   private dragging?: { id: string; document: ScreenDocument };
   private readonly dialog = el("dialog", "screen-removal-dialog");
   private readonly notice = el("div", "screen-removal-notice");
@@ -173,6 +175,7 @@ export class ScreenComposer {
   }
   render(card = this.card): boolean {
     const view = this.host.view(); if (!card) return false;
+    this.textValidation = undefined;
     if (!view) {
       if (!this.hasDraft()) return false;
       this.card = card; card.replaceChildren(); card.classList.add("screen-composer");
@@ -292,11 +295,14 @@ export class ScreenComposer {
       : last ? `At the end, after ${this.name(view, last)}.` : "First element in this container."));
     if (["text", "textbutton"].includes(draft.kind)) {
       const text = el("textarea"); text.ariaLabel = "New element text"; text.value = draft.text; text.maxLength = 8192; text.readOnly = this.saving;
+      text.required = true;
       text.oninput = () => { draft.text = text.value; this.host.preview(); };
+      this.textValidation = validateField(text, () => { if (!text.value.trim()) throw Error("Enter text before adding this element. Input retained."); });
       const label = el("label", "field", draft.kind === "textbutton" ? "Button label" : "Text"); label.append(text); form.append(label);
     }
     const cancel = () => { if (this.saving) return; this.addition = undefined; this.error = ""; this.render(); this.focusRow(); this.host.preview(); this.host.note("Addition cancelled. Nothing changed."); };
     form.onkeydown = event => {
+      if (event.isComposing) return;
       if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); cancel(); }
       if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); void this.add(); }
     };
@@ -304,9 +310,13 @@ export class ScreenComposer {
     const add = action(`Add ${draft.kind === "textbutton" ? "button" : names[draft.kind]!.toLowerCase()}`, () => void this.add(), true), stop = action("Cancel", cancel);
     add.disabled = stop.disabled = this.saving; actions.append(add, stop); form.append(actions); card.append(form);
   }
+  private validateTextInput(): boolean {
+    try { this.textValidation?.(); return true; }
+    catch { this.card?.querySelector("textarea")?.focus({ preventScroll: true }); return false; }
+  }
   private async add(): Promise<void> {
     const draft = this.addition; if (!draft || this.saving) return;
-    if (["text", "textbutton"].includes(draft.kind) && !draft.text.trim()) { this.error = "Enter text before adding this element. Input retained."; this.render(); return; }
+    if (!this.validateTextInput()) return;
     this.saving = true; this.render();
     try {
       await this.host.commit({ type: "add", parentId: draft.parentId, kind: draft.kind, text: draft.text }, draft.document);
@@ -319,6 +329,8 @@ export class ScreenComposer {
     card.append(el("h2", "", view.selected.kind === "textbutton" ? "Edit button label" : "Edit text"), el("p", "screen-edit-location", `${this.path(view, this.parent(view, view.selected) ?? view.selected)} · Nesting level ${this.depth(view, view.selected)}`));
     const input = el("textarea"); input.ariaLabel = view.selected.kind === "textbutton" ? "Button label" : "Text";
     input.value = draft?.value ?? view.selected.literal ?? ""; input.maxLength = 8192; input.readOnly = this.saving;
+    input.required = true;
+    this.textValidation = validateField(input, () => { if (!input.value.trim()) throw Error("Enter text before applying. Input retained."); });
     const label = el("label", "field", input.ariaLabel); label.append(input); card.append(label);
     const state = el("p", "screen-text-draft-state", draft ? "Unapplied changes. The canvas shows your draft." : "No unapplied changes."); state.role = "status";
     const actions = el("div", "screen-edit-actions");
@@ -331,6 +343,7 @@ export class ScreenComposer {
       apply.disabled = cancel.disabled = !this.texts.has(key); state.textContent = this.texts.has(key) ? "Unapplied changes. The canvas shows your draft." : "No unapplied changes."; this.host.preview();
     };
     input.onkeydown = event => {
+      if (event.isComposing) return;
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) { event.preventDefault(); void this.applyText(); }
       if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); cancel.click(); }
     };
@@ -339,7 +352,7 @@ export class ScreenComposer {
   private async applyText(): Promise<void> {
     const view = this.host.view(); if (!view || this.saving) return;
     const key = this.textKey(view), draft = this.texts.get(key); if (!draft) return;
-    if (!draft.value.trim()) { this.error = "Enter text before applying. Input retained."; this.render(); return; }
+    if (!this.validateTextInput()) return;
     this.saving = true; this.render();
     try {
       const result = await this.host.commit({ type: "text", nodeId: draft.nodeId, text: draft.value }, draft.document);

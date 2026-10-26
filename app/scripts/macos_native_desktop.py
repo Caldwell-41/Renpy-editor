@@ -6,6 +6,10 @@ import sys
 import time
 
 
+class NativeDesktopError(RuntimeError):
+    """A desktop failure that must not skip other native cleanup owners."""
+
+
 class MacPower:
     """The CoreGraphics/CoreFoundation/IOKit boundary; no credentials or UI input."""
     def __init__(self):
@@ -99,7 +103,7 @@ def require_desktop(state):
     if not (state.get('onConsole') is True and state.get('loginDone') is True
             and state.get('screenLocked') is False and state.get('displayActive') is True
             and state.get('displayAsleep') is False):
-        raise RuntimeError('Native UI probes require an unlocked, awake Mac desktop')
+        raise NativeDesktopError('Native UI probes require an unlocked, awake Mac desktop')
 
 
 @contextmanager
@@ -142,4 +146,4 @@ def native_desktop(receipt_path, *, platform=None, power=None):
         receipt['errors'] = errors
         receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
         if errors:
-            raise RuntimeError('; '.join(errors))
+            raise NativeDesktopError('; '.join(errors))

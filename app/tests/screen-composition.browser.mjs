@@ -106,7 +106,7 @@ try {
   await page.getByRole('dialog').getByText(/Nothing removed/).waitFor();
   assert.equal(Buffer.from((await child.request({driver:'snapshot',path:report.identity.path})).source).toString(),report.acceptedSource+'# ordinary external writer\r\n');
   await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).click();
-  await writeFile(join(output,'additional-checks.json'),JSON.stringify({passed:true,pointerReorder:true,stationaryConfirmations:true,staleRemovalRetained:true,helperCanvas:canvas,selectionPreferenceCheckout:checkoutCheck},null,2));
+  await writeFile(join(output,'additional-checks.json'),JSON.stringify({passed:true,textValidation:true,pointerReorder:true,stationaryConfirmations:true,staleRemovalRetained:true,helperCanvas:canvas,selectionPreferenceCheckout:checkoutCheck},null,2));
   console.log(`PASS ${report.stages.length - 1} composition UI-to-core groups; browser rehearsal only.`);
 } catch(error) {
   if(page){await writeFile(join(output,'failure.txt'),await page.locator('body').innerText());await page.screenshot({path:join(output,'failure.png'),fullPage:true});}

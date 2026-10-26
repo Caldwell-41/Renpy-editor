@@ -58,6 +58,24 @@
     await history("Redo", nested, box);
     await checkpoint("composition-passed");
 
+    const beforeValidation = await source();
+    await click("Add element");
+    const blankAddition = input("New element text", " \n ");
+    await click("Add text");
+    assert(document.activeElement === blankAddition && blankAddition.getAttribute("aria-invalid") === "true", "Invalid addition retains its field, text and focus");
+    assert(document.getElementById(blankAddition.getAttribute("aria-describedby"))?.textContent.includes("Enter text"), "Invalid addition identifies its field error");
+    assert(await source() === beforeValidation && blankAddition.value === " \n ", "Invalid addition writes nothing and retains input");
+    await window.__loomlightCompositionObserve?.("invalid-addition"); await click("Cancel");
+    await select(body); row(body).dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    await until(() => document.querySelector('textarea[aria-label="Text"]'));
+    const blankText = input("Text", " \n "); await click("Apply changes");
+    assert(document.activeElement === blankText && blankText.getAttribute("aria-invalid") === "true", "Invalid Apply retains the same field and focus");
+    assert(document.getElementById(blankText.getAttribute("aria-describedby"))?.textContent.includes("Enter text"), "Invalid Apply identifies its field error");
+    assert(await source() === beforeValidation && blankText.value === " \n ", "Invalid Apply writes nothing and retains input");
+    await window.__loomlightCompositionObserve?.("invalid-text");
+    await click("Cancel changes"); await click("Back to elements");
+    await checkpoint("text-validation-passed");
+
     await select(body); row(body).dispatchEvent(new MouseEvent("dblclick", { bubbles: true })); await until(() => document.querySelector('textarea[aria-label="Text"]'));
     const beforeText = await source(); input("Text", 'Next stop: "Harbor"\nPlatform 2'); await click("Apply changes");
     await until(() => document.querySelector(".screen-message")?.textContent.includes("Text applied"));

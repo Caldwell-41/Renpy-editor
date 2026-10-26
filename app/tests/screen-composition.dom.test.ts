@@ -101,6 +101,48 @@ test("text drafts follow element identity across selection, Apply and Cancel", a
   } finally { h.workspace.dispose(); }
 });
 
+test("addition text validates on completion and submission without losing input or focus", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick(); h.click("Add element");
+    const input = [...document.querySelectorAll("textarea")].find(field => field.ariaLabel === "New element text"); assert.ok(input);
+    assert.equal(input.getAttribute("aria-invalid"), null, "An untouched field is not erroneous");
+    input.focus(); input.dispatchEvent(new window.Event("compositionstart")); input.blur();
+    input.dispatchEvent(new window.KeyboardEvent("keydown", {key:"Enter",ctrlKey:true,isComposing:true,bubbles:true}));
+    assert.equal(input.getAttribute("aria-invalid"), null, "IME completion does not validate or submit");
+    input.dispatchEvent(new window.Event("compositionend")); input.focus(); input.blur();
+    assert.equal(input.getAttribute("aria-invalid"), "true");
+    const error = document.getElementById(input.getAttribute("aria-describedby")!);
+    assert.match(error?.textContent ?? "", /Enter text/);
+    input.value = "  \n"; input.dispatchEvent(new window.Event("input"));
+    h.click("Add text"); await tick();
+    assert.equal(document.activeElement === input, true, "Submission focuses the same invalid control");
+    assert.equal(input.value, "  \n"); assert.equal(input.isConnected, true);
+    assert.equal(h.calls.filter(call => call.operation === "screens.compose").length, 0);
+    input.value = "Retained words"; input.dispatchEvent(new window.Event("input"));
+    assert.equal(input.getAttribute("aria-invalid"), null);
+    assert.equal(error?.hidden, true); assert.equal(document.activeElement === input, true);
+  } finally { h.workspace.dispose(); }
+});
+
+test("invalid text Apply identifies the field and keeps its draft and keyboard focus", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick(); h.edit("title-id");
+    const input = h.text(); input.focus(); input.value = " \n "; input.dispatchEvent(new window.Event("input"));
+    h.click("Apply changes"); await tick();
+    assert.equal(document.activeElement === input, true); assert.equal(input.isConnected, true);
+    assert.equal(input.getAttribute("aria-invalid"), "true");
+    assert.match(document.getElementById(input.getAttribute("aria-describedby")!)?.textContent ?? "", /Enter text/);
+    assert.equal(input.value, " \n "); assert.equal(h.workspace.hasDraft(), true);
+    assert.equal(h.calls.filter(call => call.operation === "screens.compose").length, 0);
+    input.value = "Corrected title"; input.dispatchEvent(new window.Event("input"));
+    assert.equal(input.getAttribute("aria-invalid"), null); assert.equal(document.activeElement === input, true);
+    const enter = new window.KeyboardEvent("keydown", { key:"Enter",cancelable:true,bubbles:true });
+    input.dispatchEvent(enter); assert.equal(enter.defaultPrevented, false, "Ordinary Enter remains multiline input");
+  } finally { h.workspace.dispose(); }
+});
+
 test("keyboard reordering uses stable sibling identities and refuses a protected neighbor", async () => {
   const h = interactiveFixture();
   try {

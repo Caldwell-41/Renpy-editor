@@ -6,7 +6,7 @@ OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "o
 RUNTIME_STAGES = {
     'canvas-helper': ('project-frame-passed','draft-cancel-focus-passed','source-history-passed','second-aspect-passed','logical-pixels-passed','project-close-passed'),
     'owned-screen': ('cancel-passed', 'creation-passed', 'exact-source-passed', 'history-passed', 'reopen-passed'),
-    'screen-composition': ('composition-passed', 'literal-history-passed', 'reorder-passed', 'confirmed-removal-passed', 'protected-source-passed', 'reopen-passed'),
+    'screen-composition': ('composition-passed', 'text-validation-passed', 'literal-history-passed', 'reorder-passed', 'confirmed-removal-passed', 'protected-source-passed', 'reopen-passed'),
     'help-screen': ('screen-inventory-passed', 'source-roundtrip-passed', 'validation-passed', 'preview-geometry-passed', 'stale-stop-passed', 'disk-reopen-passed'),
     'compile': ('diagnostics-real-ipc-passed',),
     'lint': ('diagnostics-real-ipc-passed',),

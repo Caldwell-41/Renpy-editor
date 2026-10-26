@@ -13,7 +13,7 @@ import hashlib
 import ctypes
 
 from runtime_probe_cases import RUNTIME_CASES, OPTIONAL_CASES, runtime_report_ok
-from macos_native_desktop import native_desktop
+from macos_native_desktop import NativeDesktopError, native_desktop
 
 
 def reap_probe(process):
@@ -86,60 +86,67 @@ for case in cases:
     if case == "canvas-helper":
         assert observer_command and not observation_path.exists() and not observer_stop.exists()
         env["LOOMLIGHT_CANVAS_OBSERVER_ROOT"] = str(output)
-    with native_desktop(output / f"runtime-ui-{case}-desktop.json"), log.open("wb") as stream, ExitStack() as children:
-        process = subprocess.Popen([str(executable)], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                   start_new_session=os.name != "nt")
-        children.callback(reap_probe, process)
-        external_errors = []
-        def retain_output():
-            for line in process.stdout:
-                stream.write(line); stream.flush()
-                try:
-                    checkpoint = json.loads(line)
-                    if case == "canvas-helper" and checkpoint.get("evidence") == "canvas-observer-ready":
-                        assert not observer, "Only one canvas observation interval is allowed"
-                        profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
-                        observer.append(subprocess.Popen([*observer_command, str(process.pid), str(profile), str(observer_stop), str(observation_path)]))
-                    if case == "canvas-helper" and checkpoint.get("evidence") == "runtime-ui-packaged":
-                        observer_stop.touch()
-                    if case == "source-foundation" and checkpoint.get("evidence") == "foundation-external-ready":
-                        profile = Path(checkpoint["profile"]).resolve()
-                        assert profile.parent == Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp").resolve()
-                        assert profile.name == f"loomlight-r2-probe-{process.pid}-source-foundation"
-                        path = Path(checkpoint["path"])
-                        assert not path.is_absolute() and ".." not in path.parts and path.parts[:2] == ("game", "chapters")
-                        target = profile / "synthetic-project" / path
-                        before = target.read_bytes()
-                        assert not (profile / "external-written").exists(), "duplicate external dispatch"
-                        after = before + b"# ordinary external writer\n"
-                        target.write_bytes(after)
-                        (output / "external-write.json").write_text(json.dumps(dict(beforeSha256=hashlib.sha256(before).hexdigest(), afterSha256=hashlib.sha256(after).hexdigest(), profile=str(profile), path=str(path))))
-                        (profile / "external-written").write_text("one ordinary external write\n")
-                except (ValueError, AttributeError):
-                    pass
-                except Exception as error:
-                    external_errors.append(str(error))
-        reader = threading.Thread(target=retain_output)
-        reader.start()
-        try:
-            code = process.wait(timeout=1800 if case == "canvas-input" else 300 if case == "source-foundation" else 420)
-        except subprocess.TimeoutExpired:
-            timed_out = True
-            reap_probe(process)
-            code = -1
-        except BaseException:
-            reap_probe(process)
-            raise
-        finally:
-            reader.join(timeout=10)
-            if case == "canvas-helper":
-                observer_stop.touch()
-                for owned in observer:
+    process = None
+    code = -1
+    external_errors = []
+    try:
+        with native_desktop(output / f"runtime-ui-{case}-desktop.json"), log.open("wb") as stream, ExitStack() as children:
+            process = subprocess.Popen([str(executable)], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                       start_new_session=os.name != "nt")
+            children.callback(reap_probe, process)
+            def retain_output():
+                for line in process.stdout:
+                    stream.write(line); stream.flush()
                     try:
-                        owned.wait(timeout=5)
-                    except subprocess.TimeoutExpired:
-                        owned.kill(); owned.wait()
-                        external_errors.append("Canvas observer cleanup timed out")
+                        checkpoint = json.loads(line)
+                        if case == "canvas-helper" and checkpoint.get("evidence") == "canvas-observer-ready":
+                            assert not observer, "Only one canvas observation interval is allowed"
+                            profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
+                            observer.append(subprocess.Popen([*observer_command, str(process.pid), str(profile), str(observer_stop), str(observation_path)]))
+                        if case == "canvas-helper" and checkpoint.get("evidence") == "runtime-ui-packaged":
+                            observer_stop.touch()
+                        if case == "source-foundation" and checkpoint.get("evidence") == "foundation-external-ready":
+                            profile = Path(checkpoint["profile"]).resolve()
+                            assert profile.parent == Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp").resolve()
+                            assert profile.name == f"loomlight-r2-probe-{process.pid}-source-foundation"
+                            path = Path(checkpoint["path"])
+                            assert not path.is_absolute() and ".." not in path.parts and path.parts[:2] == ("game", "chapters")
+                            target = profile / "synthetic-project" / path
+                            before = target.read_bytes()
+                            assert not (profile / "external-written").exists(), "duplicate external dispatch"
+                            after = before + b"# ordinary external writer\n"
+                            target.write_bytes(after)
+                            (output / "external-write.json").write_text(json.dumps(dict(beforeSha256=hashlib.sha256(before).hexdigest(), afterSha256=hashlib.sha256(after).hexdigest(), profile=str(profile), path=str(path))))
+                            (profile / "external-written").write_text("one ordinary external write\n")
+                    except (ValueError, AttributeError):
+                        pass
+                    except Exception as error:
+                        external_errors.append(str(error))
+            reader = threading.Thread(target=retain_output)
+            reader.start()
+            try:
+                code = process.wait(timeout=1800 if case == "canvas-input" else 300 if case == "source-foundation" else 420)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                reap_probe(process)
+                code = -1
+            except BaseException:
+                reap_probe(process)
+                raise
+            finally:
+                reader.join(timeout=10)
+                if case == "canvas-helper":
+                    observer_stop.touch()
+                    for owned in observer:
+                        try:
+                            owned.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            owned.kill(); owned.wait()
+                            external_errors.append("Canvas observer cleanup timed out")
+    except NativeDesktopError as error:
+        if process is None:
+            raise
+        external_errors.append(f"Native desktop check failed: {error}")
     fallback_helpers = []
     if case == "canvas-input":
         profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
