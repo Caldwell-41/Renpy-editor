@@ -1,14 +1,212 @@
 {
   "schemaVersion": 1,
   "screenId": "help-composition",
-  "currentApproved": null,
+  "currentApproved": "workflow-popup-v1",
   "revisions": [
-    { "id": "workflow-popup-v1", "variantId": "workflow-popup", "approval": null },
-    { "id": "workflow-removal-v1", "variantId": "workflow-removal", "approval": null },
-    { "id": "workflow-v1", "variantId": "workflow", "approval": null },
-    { "id": "inline-v1", "variantId": "inline", "approval": null },
-    { "id": "context-v1", "variantId": "context", "approval": null },
-    { "id": "focused-refined-v1", "variantId": "focused-refined", "approval": null },
-    { "id": "focused-v1", "variantId": "focused", "approval": null }
+    {
+      "id": "workflow-popup-v1",
+      "variantId": "workflow-popup",
+      "approval": {
+        "date": "2026-10-26",
+        "decision": "Kris approved C5: \"Looks good, approve C5 and send it back to the parent agent to continue implement #37.\" This approves the complete add, select, edit, reorder and confirmed-removal workflow, including the stationary confirmation popup for every removal.",
+        "reason": "Looks good.",
+        "supersedes": null,
+        "source": {
+          "commit": "94c78e725f48829a017377786a0bcafc0fd48c41",
+          "fingerprint": "bc5cc41629a11465593f49375cd8d7d637c0987f6116ff31d24cc2169245328c"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/nested-dark-wide.png",
+            "sha256": "2923b54c7d9e8e8cd386f8647243e80fc2321c683b46f39e724f57d8f6fec581",
+            "state": "nested",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/nested-dark-compact.png",
+            "sha256": "e4057d6868959f9660be7d019ffc031b1765b25a5c161b07379f58f4d39c97a8",
+            "state": "nested",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/nested-light-wide.png",
+            "sha256": "5fec26c7c2b96339d390a1349a97b35b858d851f7be1721f6a70d6f87c5e49eb",
+            "state": "nested",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/nested-light-compact.png",
+            "sha256": "b4f399e3c4c2c86840710d0901848db43e5f0c70a4aa66e9a09b929026b61684",
+            "state": "nested",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/workflow-popup-02-add.png",
+            "sha256": "04fce53368563104772eeabed0f22666cfc102b7d399506084c555d77a0f545b",
+            "state": "adding",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/workflow-popup-03-edit.png",
+            "sha256": "c1936da00836320c8048516e257de506c78a9d270b0d1382060b63931d5ad7e3",
+            "state": "edit-draft",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/workflow-popup-04-reorder.png",
+            "sha256": "4c7dccb4efc9b801bb883f20b6b8cb004405856e8e2c7baf6a616d003272041e",
+            "state": "reordered",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/workflow-popup-05-protected-reorder.png",
+            "sha256": "afc82ec0267152d2525da526282ed9ba89b1fb5a7fbdee13c126b2306eecf41e",
+            "state": "protected-reorder",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/workflow-popup-06-conflict.png",
+            "sha256": "ac80dfdfc0c0837fc6b6256e51669bd3cc02bc157a1b70f9ff57b11ae8ea410d",
+            "state": "conflict",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/workflow-popup-07-compact.png",
+            "sha256": "e4057d6868959f9660be7d019ffc031b1765b25a5c161b07379f58f4d39c97a8",
+            "state": "compact-edit",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/popup-01-complete-workflow.png",
+            "sha256": "6794961e2483f7e092e2e7f4268a0dc47d5de472a447f0deff39600cd13430ef",
+            "state": "nested",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/popup-02-leaf-confirmation.png",
+            "sha256": "ff502a9a2e429a7bee43d88ade2c0640d35a0e547bdf52afeba6de1027f44711",
+            "state": "leaf-confirmation",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/popup-03-leaf-removed.png",
+            "sha256": "0e426f5bb595578ce0529dc580a3afb9e146235cb15d486d7ae339c06006b7b4",
+            "state": "leaf-removed",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/popup-04-group-confirmation.png",
+            "sha256": "2c65d8e60c0ae4b2c2db65245df33a6aa20d733d61a212163ce9a54eeeaed4ac",
+            "state": "group-confirmation",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/popup-05-protected-group.png",
+            "sha256": "12d918d732939d7a85d0fd4463121dbfcf69a1209a0ae2ccd3cf13c77eb8e8e8",
+            "state": "protected-group",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-composition/captures/workflow-popup-v1/popup-06-compact-group-confirmation.png",
+            "sha256": "989400be4335cd1ae237ecbf7a30c1afd3ba4dc9cbf6b08faa25473b0859cb1f",
+            "state": "group-confirmation",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Keep Choose, Design and Connect. Add all five supported element types through the focused composer with an explicit destination, pending preview and retained input on refusal.",
+          "Keep canvas, hierarchy and ancestor selection synchronized; show element type, nesting level and identifiable repeated containers.",
+          "Edit text through an explicit action, Enter or double-click. Retain per-element drafts across selection changes; Apply and Cancel are explicit.",
+          "Reorder siblings using buttons, Alt+arrows or pointer drag. Move groups with descendants; preserve source-only boundaries and selected identity.",
+          "Every eligible removal opens a centered modal naming the element or listing the group descendants before any mutation. The background geometry and scroll position stay fixed.",
+          "Focus Cancel initially; keep Tab within the dialog. Cancel or Escape changes neither source nor history and returns focus to the invoking control without scrolling.",
+          "Confirm one removal as one history entry. Select and focus the next sibling, else previous sibling, else parent. Undo restores the exact subtree and selected target; Redo restores the fallback.",
+          "Place Undo removal feedback outside the panel layout. Ignore repeated Delete and Backspace keydowns. Refuse screen-root removal, protected source and groups containing it.",
+          "Retain pending input and source on invalid operations or source conflicts. Preserve compact navigation between editing and canvas."
+        ],
+        "deviations": [
+          "Browser prototype uses fictional data and memory-only history. Sample Source is illustrative; real source patching, reconciliation, durable reopening and Ren'Py rendering remain implementation acceptance requirements.",
+          "Connect explains the sample action only; action editing is outside #37 composition scope."
+        ]
+      }
+    },
+    {
+      "id": "workflow-removal-v1",
+      "variantId": "workflow-removal",
+      "approval": null
+    },
+    {
+      "id": "workflow-v1",
+      "variantId": "workflow",
+      "approval": null
+    },
+    {
+      "id": "inline-v1",
+      "variantId": "inline",
+      "approval": null
+    },
+    {
+      "id": "context-v1",
+      "variantId": "context",
+      "approval": null
+    },
+    {
+      "id": "focused-refined-v1",
+      "variantId": "focused-refined",
+      "approval": null
+    },
+    {
+      "id": "focused-v1",
+      "variantId": "focused",
+      "approval": null
+    }
   ]
 }

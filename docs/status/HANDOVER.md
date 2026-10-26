@@ -1,47 +1,50 @@
 # Current outcome handover
 
-## L02 design selection pending
+## L02 C5 approved; resume implementation
 
-The user selected implementing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
-on a new branch through the implement skill. The coordinating agent owns local branch
-`codex/37-compose-help-layout`, based on fetched `8f7f9e7191f3b9c27343c7f4d4f5fdc65b2135f4`,
-with `codex/phase3b-screen-designer` as the intended integration destination. Development
-is on Mac ARM64. The worktree was clean at entry; unrelated worktrees and protected
-recovery remain untouched.
+Kris approved C5 on 2026-10-26 and explicitly requested sending it back to the
+original chat, "Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), to
+continue implementation. Upon the handback message, that chat regains sole writer
+ownership of this checkout and the running Design Lab server on `127.0.0.1:5174`.
+The prototyping chat stops editing after handback.
 
-Three independent draft revisions under `app/design-lab/screens/help-composition/`
-compare inline, contextual and focused add forms within the approved flow-v1 workflow.
-The recommendation is `focused-v1`. Production components have not changed. All
-drafts use fictional browser-memory data. [The evidence](../tasks/evidence/simple-help-layout.md)
-owns review routes, simulation limits, checks and the proposed TDD boundaries.
-The existing screen runner passes 36 rendering cases. The first frontend run's
-Python-version failure, corrected eight-test result and supported-interpreter full
-run (231/231 passing) are retained there.
+Continue on local branch `codex/37-compose-help-layout`, based on Screens commit
+`8f7f9e7191f3b9c27343c7f4d4f5fdc65b2135f4`. Intended integration destination remains
+`codex/phase3b-screen-designer`; development is on Mac ARM64. C5 source is pinned at
+`94c78e725f48829a017377786a0bcafc0fd48c41`. The following approval/docs commit records
+its fingerprint and 16 retained captures in
+[the approval record](../design/design-lab-help-composition/approval.json).
+The approved screen is `help-composition`, revision `workflow-popup-v1`, variant
+`workflow-popup`. Earlier drafts remain available for comparison.
 
-On 2026-10-26 the user requested a new prototyping chat. That chat takes sole writer
-ownership of this checkout for the lab files, design records and relevant
-evidence/status sections. It first displays all three committed drafts unchanged,
-then iterates with the user. This implementation chat waits until the user-approved
-design returns. The user authorized the prototyping agent to message this chat when
-done. The proposed core, ScreensWorkspace DOM and real UI-to-core/runtime test
-boundaries are approved; do not request that confirmation again.
+C5 covers the complete add/select/edit/reorder/remove workflow. Every eligible
+removal requires a modal confirmation. It names an individual element or lists a
+group's descendants; Cancel is focused initially, Escape restores the invoking
+control, and the page stays stationary. Undo feedback sits outside the panel
+layout. Preserve C5's retained drafts, protected-source guards, one history entry,
+exact subtree restoration and next/previous/parent fallback selection. #37's body
+already includes bounded deletion; C5's approved confirmation behavior supersedes
+C4's immediate individual removal.
 
-Root AGENTS.md still requires design approval before non-trivial production UI edits.
-Pin the selected revision through Design Lab's integration procedure before returning
-writer ownership and resuming implementation here. The implement skill's final
-independent Standards/Spec reviews and implementation commit remain due. Actual
-minimal writes, identity/history, reopen and deliberate nested-screen preview are
-required before ticket acceptance. [The prototype handoff record](../tasks/evidence/simple-help-layout.md#prototyping-handoff-2026-10-26)
-owns this assignment and the unrelated file to preserve.
+[The handback evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26)
+owns checks and simulation limits. The full lab check stopped after 488 cases at
+the older Screens flow-v1 source guard; it is not a full-suite pass. C5 metadata
+and source identity pass. Read Design Lab INTEGRATION before production
+edits. Use a separate source-pinned reference checkout/server when production
+changes invalidate the shared source fingerprint. The proposed core, ScreensWorkspace
+DOM and real UI-to-core/runtime test boundaries were approved before this prototype;
+do not request them again. Minimal source writes, identity/history, durable reopen,
+deliberate nested-screen runtime preview and final independent Standards/Spec reviews
+remain required for implementation acceptance. Production code is unchanged.
 
-The Design Lab server is stopped at transfer; the receiving agent starts it on
-`127.0.0.1:5174` for review. No native editor,
-SDK qualification, costly CI operation or watcher has started for #37. Apply
-WORKFLOW's operation-limit policy before a costly operation; routine preparation
-needs no numerical limit. The branch and draft source are local-only. No push, PR,
-merge or release has been selected. The long retained recovery record below preserves
-unique prior evidence and protected native state; it is not a continuation instruction
-for those closed selections.
+Open `preview.html?screen=help-composition&variant=workflow-popup&state=nested&theme=dark&viewport=wide`
+on the existing server to inspect C5. Preserve unrelated untracked
+`docs/audits/2026-10-25-phase-1-codebase-design.md`. No native editor, SDK qualification,
+costly CI or watcher has started for #37. Follow WORKFLOW's operation limits and host
+routing before those operations. All prototype commits are local-only; no push, PR,
+merge or release has been selected. The retained recovery sections below contain
+unique prior evidence and protected native state, not instructions to resume closed
+work. Their preservation keeps this handover above the normal word-count target.
 
 ## Prior automatic checks and policy maintenance
 

@@ -1,23 +1,27 @@
 # Current status
 
-## L02 Help composition in design review
+## L02 Help composition approved for implementation
 
-2026-10-25: The user selected [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37),
-"Compose and reorder a simple Help layout", on a new branch. Preparation is local
-on `codex/37-compose-help-layout`, based on the current Screens branch at `8f7f9e7`.
-Three isolated Design Lab drafts compare add controls within Choose/Design/Connect.
-On 2026-10-26 the user requested a separate prototyping chat to display the
-existing drafts, iterate and return the approved result. The proposed test
-boundaries are approved. Root AGENTS.md requires the design choice before
-production UI edits.
-[The evidence](../tasks/evidence/simple-help-layout.md) records the drafts, browser
-checks, interpreter diagnosis, approved test boundaries and prototype ownership.
+2026-10-26: Kris approved C5 for [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
+and requested returning it to the original implementation chat. The approved
+`workflow-popup-v1` covers add, select, edit, reorder and confirmed removal of
+ordinary owned elements. Every removal uses a stationary modal; protected source,
+containing groups and the screen root remain protected. Luna research and independent
+Experience First reviews informed the prototype.
+
+The source is pinned locally at `94c78e7` on `codex/37-compose-help-layout`.
+[The approval record](../design/design-lab-help-composition/approval.json) owns the
+source fingerprint, 16 retained captures and agreed behavior.
+[The handback evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26)
+owns verification and continuation details. The original implementation chat regains
+checkout/server ownership when the handback message is sent. Previously approved
+core, DOM and real UI-to-core/runtime test boundaries remain approved.
 
 | Capability | Implementation | Evidence and acceptance |
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder (#37) | Three browser mocks; production pending | 36 rendering cases pass; user design selection and real source/runtime proof pending. |
+| Add/edit/reorder/remove (#37) | C5 design approved; production pending | 84 targeted rendering cases and complete workflow/popup checks pass; real source/history/reopen/runtime proof remains due. |
 
 ## Automatic checks and operation-limit policy
 

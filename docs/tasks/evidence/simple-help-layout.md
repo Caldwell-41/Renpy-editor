@@ -111,3 +111,228 @@ An unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md` is pr
 preserve it. Prototype behavior, source/runtime acceptance and costly-operation
 limits retain their existing boundaries. The user authorized the receiving chat
 to report back to the implementation chat after prototyping is complete.
+
+## Focused refinement, 2026-10-26
+
+The user selected C as the direction and requested refinement with the
+Experience First skill. This is a direction for iteration, not final approval.
+The new `focused-refined-v1` revision uses variant `focused-refined`; all three
+original draft modules and their shared styles remain unchanged. Its separate
+sample module preserves the original C for comparison.
+
+C2 compresses the five type choices into a two-column list. The parent selector
+shows the complete container path, and a sentence identifies the append position.
+A dashed pending element appears on the fictional canvas before Add, without
+changing sample source or history. Occupied frames suppress that preview and
+explain the constraint. Validation and Source-conflict errors appear beside the
+form and retain its input. Starting an addition focuses the text input; Add and
+Cancel return focus to the selected hierarchy row. Ctrl/Command+Enter adds;
+Escape cancels. Narrow layouts put the form before the canvas. Existing
+Choose/Design/Connect, hierarchy ordering, text editing and history remain.
+
+The lab TypeScript check and `check-screen.mjs help-composition` pass. The runner
+covers 48 combinations of four layouts, three states, two sizes and two themes,
+with no page errors, horizontal document overflow or native-operation attempts.
+The new interaction module checks that pending previews do not change sample
+source, Cancel and Undo restore the original sample, focus returns after Add and
+Cancel, and occupied-frame, empty-text and Source-conflict refusals retain input.
+Wide and compact dark captures were visually inspected. Temporary captures and
+`report.json` remain under `.toolchains/design-lab/pages/help-composition/`.
+
+Review route:
+`/preview.html?screen=help-composition&variant=focused-refined&state=adding&theme=dark&viewport=wide`.
+The original C remains at `variant=focused`. C2 is local, uncommitted and unapproved.
+The pending preview is HTML simulation; production feasibility and Ren'Py fidelity
+remain with implementation. No production files changed, and writer ownership
+remains with the prototype chat while the user reviews this revision.
+
+## Complete workflow refinement, 2026-10-26
+
+The user clarified that the prototype must cover the whole add, select, edit and
+reorder workflow before any approval. They requested Luna at maximum reasoning to
+research comparable apps before building, followed by a separate Experience First
+review and implementation of its recommendations before presentation.
+
+The research agent completed [the research note](../../design/design-lab-help-composition/workflow-research.md)
+first. It used official Webflow, Figma, Penpot, Unity, Godot and Ren'Py documentation
+and separated observed behavior from recommendations. The agent owned only that
+note; the coordinator remained read-only until it finished, then owned all code
+and status changes. The reviewer had read-only source/capture access.
+
+The new `workflow-v1` revision, variant `workflow` (C3), retains the chosen focused
+composer and the existing Choose/Design/Connect structure. It opens on the complete
+nested layout. C and C2 remain separate and unchanged.
+
+| Workflow | C3 behavior |
+| --- | --- |
+| Add | All five supported types, explicit container path and append position, pending canvas preview, retained input and parent-constraint feedback. |
+| Select | Shared canvas/tree selection, tree hover outline, ancestor-path selection, arrow-key parent/child navigation, visible type and nesting level. |
+| Edit | Named Edit text action, Enter/double-click Design entry, live draft preview, Apply/Cancel, pending markers and Resume draft actions across selection/step changes. |
+| Reorder | Visible Move up/down or earlier/later buttons, Alt+arrows, pointer drag with before/after cues, same-parent guards and protected-source refusal. Groups retain descendants. |
+| Inspect/recover | Shared Undo/Redo, modal accepted sample Source, explicit source-only markers, retained conflict drafts and a labelled simulated source refresh. |
+
+The independent Experience First reviewer assessed source, the research note and
+seven interaction captures. It confirmed coverage of the full workflow and made
+five recommendations; all were implemented before presentation:
+
+- Preserve text appearance by identity during reorder. C3 assigns the sample heading
+  an explicit identity marker instead of inheriting the first-text styling.
+- Distinguish repeated sibling containers with ordinals in the tree and destination
+  paths, so a second vertical group has an identifiable destination.
+- Add Show canvas and Back to editing navigation on compact layouts, preserving
+  selection and drafts across jumps.
+- Left-align and ellipsize breadcrumb labels inside a text span, retaining full titles.
+- Name ancestor depth Nesting level and explain free-layout sibling drawing order
+  separately in the existing type/order help.
+
+The lab TypeScript check and targeted `check-screen.mjs help-composition` pass.
+The runner covers 60 cases across five variants, three states, two sizes and two
+themes with no page errors, horizontal document overflow or native-operation
+attempts. The full workflow check exercises canvas/tree/ancestor selection,
+double-click/Enter editing, exact unapplied text retention across nodes, Apply,
+Cancel, Undo/Redo, pointer and keyboard reorder, protected-neighbor refusal,
+creation of a nested example using all five types, group/descendant movement,
+occupied-frame refusal, source-conflict retention and simulated recovery. Focused
+checks also confirm the review fixes: stable text size across reorder, unique
+repeated-container paths and retained drafts/focus across compact canvas jumps.
+C2's original interaction checks still pass.
+
+Temporary captures and the report stay under
+`.toolchains/design-lab/pages/help-composition/`; the `workflow/` subdirectory has
+select, add, edit, reorder, protected-refusal, conflict and compact captures.
+The coordinator visually inspected the final select, edit and compact captures.
+The live review URL is
+`/preview.html?screen=help-composition&variant=workflow&state=nested&theme=dark&viewport=wide`.
+
+C3 remains local, uncommitted and unapproved. Browser memory and illustrative
+Source do not prove real `.rpy` patching, durable reopening, external reconciliation
+or Ren'Py rendering. The prototype chat retains writer/server ownership until the
+user approves the complete design and the integration approval procedure finishes.
+No production changes, publication or return message to the implementation chat
+have occurred. The original reference and unrelated audit remain intact.
+
+
+## Deletion workflow refinement, 2026-10-26
+
+The user explicitly requested adding deletion to #37 with the agreed boundaries
+and prototyping it with Experience First before approval. The issue body was
+updated through GitHub CLI and read back exactly. The added acceptance covers
+smallest safe source patches, explicit group/descendant scope, protected regions
+and containing groups, screen-root refusal, retained input on refusal/conflict,
+one history entry, exact Undo/Redo restoration, fallback selection/focus and
+persistence after reopening. This scope change is not design or implementation
+acceptance.
+
+C4 (`workflow-removal-v1`, variant `workflow-removal`) keeps the complete C3 workflow
+and adds removal in selected-element controls. Leaf removal immediately offers
+Undo removal. A nonempty group first names and lists all descendants, marks the
+canvas scope, and focuses Keep group before explicit confirmation. Escape cancels.
+Selection moves to the next sibling, then previous sibling, then parent. Undo
+restores the removed target and focus; Redo restores the fallback. Protected
+source, containing groups and the screen root refuse removal. Unfinished edits
+and source conflicts retain input and source.
+
+The same independent Experience First reviewer inspected C4 source and captures
+read-only before presentation. Its requested fix now ignores repeated Delete and
+Backspace keydowns so a held key cannot remove successive fallback elements. Its
+copy recommendation also shortened attempted protected-removal feedback while
+retaining the persistent explanation and source-inspection action.
+
+TypeScript and the targeted Design Lab runner pass. The runner covers 72 rendering
+cases across six variants, three states, two sizes and two themes. Full workflow
+checks run against C4. Focused removal checks cover leaf Undo/Redo, one history
+entry, held-key refusal, group scope/cancellation, descendant restoration, all
+fallback positions, keyboard focus, protected/root refusal, retained drafts,
+source conflicts and compact group review. One initial test checked row focus
+after its source-inspection helper had deliberately moved focus to the toolbar;
+the assertion now runs before source inspection. This was a test-order correction.
+
+Captures stay under `.toolchains/design-lab/pages/help-composition/removal/` and
+`workflow-removal/`. The live draft is
+`/preview.html?screen=help-composition&variant=workflow-removal&state=nested&theme=dark&viewport=wide`.
+C4 is local, uncommitted and unapproved. The issue scope is published; production
+code is unchanged. Browser memory and illustrative Source do not prove real
+patching, durable reopening, reconciliation or Ren'Py rendering. The prototype
+chat retains writer/server ownership pending complete design approval and the
+Design Lab integration procedure.
+
+
+## Confirmation popup refinement, 2026-10-26
+
+The user reported page movement during inline removal review and requested a
+confirmation popup for every removal, retaining the page position. C5
+(`workflow-popup-v1`, variant `workflow-popup`) preserves C4 as a separate comparison.
+Every eligible Remove action, Delete or Backspace now opens a native modal dialog.
+Individual elements show their type and text; groups name and list their descendants.
+Cancel receives focus. Cancel or Escape preserves source/history/selection and
+returns focus to the exact invoking button or row without scrolling. Confirmation
+retains C4's fallback selection, history and protected-source boundaries.
+
+The dialog uses the browser top layer, dims the background and keeps review content
+outside the panel layout. Scrollbar space remains reserved while background scrolling
+is locked. Undo removal now appears in a dismissible fixed notice, so recovery feedback
+does not insert another row above the element tree. No animation is used.
+
+TypeScript and the focused runner pass 84 rendering cases across seven variants,
+three states, two sizes and two themes. Full add/select/edit/reorder checks run
+against C5. Removal checks verify no source change before confirmation, individual
+and group confirmation, Cancel/Escape, exact focus return, keyboard focus cycling,
+held-key refusal, Undo/Redo, fallback focus, protected/root refusal, draft retention
+and conflicts. Geometry and scroll positions match before, during and after cancelled
+review at desktop and compact sizes. The first run found Shift+Tab from Cancel could
+leave the document for browser controls; explicit boundary cycling fixes it, and the
+rerun passes. Captures live under
+`.toolchains/design-lab/pages/help-composition/popup/` and `workflow-popup/`.
+The coordinator visually inspected individual, group and compact confirmations.
+The independent Experience First reviewer inspected source, focused checks and
+those captures after the focus correction, and recommended no further changes.
+
+The live draft is
+`/preview.html?screen=help-composition&variant=workflow-popup&state=nested&theme=dark&viewport=wide`.
+C5 remains local, uncommitted and unapproved. The production editor is unchanged;
+source writes, persistence and runtime behavior still require implementation proof.
+
+
+## C5 approval and handback, 2026-10-26
+
+Kris explicitly approved C5 and requested handback to the original implementation
+chat to continue #37. The exact decision and behavior are recorded in
+[approval.json](../../design/design-lab-help-composition/approval.json).
+Source commit `94c78e725f48829a017377786a0bcafc0fd48c41` reproduces fingerprint
+`bc5cc41629a11465593f49375cd8d7d637c0987f6116ff31d24cc2169245328c`.
+Sixteen SHA-256-verified captures retain desktop/compact and both-theme baseline
+views plus add, edit, reorder, conflict, protection and removal-confirmation states.
+Interaction-state capture IDs describe the exercised state; the three scenario
+URLs remain nested, adding and conflict.
+
+C5 replaces C4's immediate leaf removal with confirmation for every eligible
+removal. Its stationary dialog, initial Cancel focus, exact cancellation focus
+return and Undo outside the panel layout are approved behavior. All implementation
+acceptance remains pending, including real patches, identity/history, reopen,
+external reconciliation and runtime rendering. Earlier test-boundary approval
+remains valid. The original implementation chat resumes sole checkout/server
+ownership on handback; this prototype chat then stops editing. All prototype
+commits remain local-only. The unrelated Phase 1 audit remains untracked.
+
+The CURRENT/HANDOVER word-count targets remain exceeded by retained unique prior
+acceptance and protected native recovery evidence. This handback replaces their
+live L02 sections and preserves that earlier evidence.
+
+
+Approval validation: the lab TypeScript and approval-record checks pass. The live
+C5 preview displays Approved, and `sourceMatches[workflow-popup-v1]` is true.
+The required full `npm run design:check` was run, but is not a pass: after 488
+rendering cases and 13 earlier screen interaction checks it stopped at the existing
+Screens `flow-v1` approval's changed-source guard. That approval requires commit
+`3c7ea31d8210538cc987a2d2f4ceb8b7aa8f5437`; its global source fingerprint predates
+this prototype. The guard correctly refuses to present that older screen as its
+approved reference in the current checkout. Its record was left intact. Log:
+`.toolchains/design-lab/c5-approval-check.log`; partial report:
+`.toolchains/design-lab/report.json`. This is an older-reference limitation of the
+combined check, not a C5 interaction failure. Preserve the source-pinned comparison
+procedure during implementation; do not rewrite older approvals to make it pass.
+
+After recording approval, the targeted C5 screen runner again passed all 84 cases
+and complete workflow/popup interactions. C5's source fingerprint remains matched.
+The handback includes the combined-suite limitation above and does not claim the
+older reference or production implementation has passed acceptance.
