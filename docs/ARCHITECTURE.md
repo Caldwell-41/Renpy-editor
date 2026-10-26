@@ -660,8 +660,10 @@ service checkout, for at most 40 retries at 25 ms. Payload/session identity neve
 changes. Writes, trust grants and process starts are never replayed. This covers
 Source opening/status observations overlapping normal background read consumers.
 
-Source retention/observation, project status/flush and scene/authoring/flow observations
-share a renderer request lane. Initial Story reads therefore finish before early Source
+Source retention/observation, project status/flush, device preference reads/writes and
+scene/authoring/flow observations share one renderer request lane. Selection persistence
+therefore finishes before a following composition write checks out the same service.
+Initial Story reads finish before early Source
 navigation uses the same service, and background observations cannot take it during
 Save. Short runtime submissions and SDK discovery join the lane; runtime control/status
 bypass it so Stop remains responsive. Picker and unrelated surface lifetimes retain

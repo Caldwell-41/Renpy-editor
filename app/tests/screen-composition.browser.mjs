@@ -11,11 +11,13 @@ import {spawnSync} from 'node:child_process';
 
 const output = resolve(process.env.COMPOSITION_OUTPUT ?? '../.toolchains/screen-composition/browser-01');
 const canvas = process.env.COMPOSITION_CANVAS === '1';
+const checkoutCheck = process.env.COMPOSITION_CHECKOUT === '1';
 await mkdir(output, {recursive:true});
 const child = driverProcess(resolve(`target/debug/examples/help-controller-driver${process.platform === 'win32' ? '.exe' : ''}`), [join(tmpdir(), `loomlight-help-controller-${randomUUID()}`), ...(canvas ? ['composition-canvas'] : [])]);
 const server = await createServer({root:resolve('.'), logLevel:'error', server:{host:'127.0.0.1',port:0}});
 const receipts = [], errors = [];
 let browser, page;
+let holdSelectionPreference = false, selectionPreferenceInFlight = false;
 try {
   assert.equal((await child.next(canvas ? 180000 : 15000)).ready, true); await server.listen();
   browser = process.env.COMPOSITION_BROWSER === 'webkit' ? await webkit.launch({headless:true}) : await chromium.launch({channel:'chrome',headless:true});
@@ -23,9 +25,20 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.exposeBinding('compositionRpc', async (_, request) => {
     if (request.operation === 'probe.runtimeUiReport') { receipts.push({request}); return {ok:true,protocolVersion:1,requestId:request.requestId,value:{recorded:true}}; }
-    const response = await child.request(request); receipts.push({request,response}); return response;
+    if (checkoutCheck && selectionPreferenceInFlight && request.operation === 'screens.compose') {
+      const response = {ok:false,protocolVersion:1,requestId:request.requestId,error:{code:'RUNTIME_BUSY',message:'Another request is in progress.'}};
+      receipts.push({request,response,selectionPreferenceInFlight:true}); return response;
+    }
+    const hold = checkoutCheck && holdSelectionPreference && request.operation === 'preferences.write';
+    if (hold) selectionPreferenceInFlight = true;
+    try {
+      const response = await child.request(request); receipts.push({request,response});
+      if (hold) await new Promise(resolve => setTimeout(resolve,150));
+      return response;
+    } finally { if (hold) selectionPreferenceInFlight = false; }
   });
   await page.exposeBinding('compositionObserve', async (_, name) => {
+    if (name === 'literal-history-passed') holdSelectionPreference = true;
     if(name === 'composition-passed' && canvas) {
       await page.locator('.screen-game[data-stale="false"] .screen-node[data-index="5"]').waitFor({timeout:30000});
       const before = await page.evaluate(() => window.compositionRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation:'project.current',payload:{}}));
@@ -93,7 +106,7 @@ try {
   await page.getByRole('dialog').getByText(/Nothing removed/).waitFor();
   assert.equal(Buffer.from((await child.request({driver:'snapshot',path:report.identity.path})).source).toString(),report.acceptedSource+'# ordinary external writer\r\n');
   await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).click();
-  await writeFile(join(output,'additional-checks.json'),JSON.stringify({passed:true,pointerReorder:true,stationaryConfirmations:true,staleRemovalRetained:true,helperCanvas:canvas},null,2));
+  await writeFile(join(output,'additional-checks.json'),JSON.stringify({passed:true,pointerReorder:true,stationaryConfirmations:true,staleRemovalRetained:true,helperCanvas:canvas,selectionPreferenceCheckout:checkoutCheck},null,2));
   console.log(`PASS ${report.stages.length - 1} composition UI-to-core groups; browser rehearsal only.`);
 } catch(error) {
   if(page){await writeFile(join(output,'failure.txt'),await page.locator('body').innerText());await page.screenshot({path:join(output,'failure.png'),fullPage:true});}

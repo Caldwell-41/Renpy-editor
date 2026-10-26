@@ -425,6 +425,7 @@ jobs:
           OWNED_SCREEN_OUTPUT: ${{ runner.temp }}/help-composition/owned-regression
           OWNED_PROBE_OUTPUT: ${{ runner.temp }}/help-composition/controller
           COMPOSITION_OUTPUT: ${{ runner.temp }}/help-composition/browser
+          COMPOSITION_CHECKOUT: '1'
         run: |
           node tests/screen-composition.browser.mjs
           node tests/owned-screen-probe.browser.mjs
