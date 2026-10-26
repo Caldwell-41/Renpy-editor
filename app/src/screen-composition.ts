@@ -82,7 +82,7 @@ export class ScreenComposer {
   }
   dispose(): void { this.dialog.remove(); this.notice.remove(); this.card = undefined; }
   attach(panel: HTMLElement): void {
-    this.panel = panel; this.dialog.setAttribute("aria-modal", "true");
+    this.panel = panel;
     this.dialog.oncancel = event => { event.preventDefault(); this.cancelRemoval(); };
     this.dialog.onkeydown = event => {
       if (event.key !== "Tab") return;
@@ -107,6 +107,23 @@ export class ScreenComposer {
   }
   private path(view: CompositionView, node: ScreenNode): string { const p = this.parent(view, node); return p ? `${this.path(view, p)} / ${this.name(view, node)}` : view.screenName; }
   private textKey(view: CompositionView) { return `${view.screenId}:${screenNodeKey(view.selected)}`; }
+  private renderRetainedDrafts(card: HTMLElement, view?: CompositionView): boolean {
+    let rendered = false;
+    const recovery = (value: string, discard: () => void) => {
+      const section = el("section", "screen-retained-draft");
+      section.append(el("p", "", "The element is no longer available in Source. Your unfinished text is retained here."));
+      const input = el("textarea"); input.ariaLabel = "Retained text draft"; input.readOnly = true; input.value = value;
+      section.append(input, action("Discard retained draft", () => { discard(); section.remove(); this.render(); this.host.preview(); })); card.append(section); rendered = true;
+    };
+    for (const [key, draft] of this.texts) {
+      if (view && (draft.screenId !== view.screenId || view.nodes.some(node => node.id === draft.nodeId))) continue;
+      recovery(draft.value, () => { this.texts.delete(key); });
+    }
+    if (this.addition && (!view || !view.nodes.some(node => node.id === this.addition!.parentId))) {
+      recovery(this.addition.text, () => { this.addition = undefined; });
+    }
+    return rendered;
+  }
   private focusRow(): void {
     const view = this.host.view();
     if (view) [...this.card?.querySelectorAll<HTMLButtonElement>("button[data-node-id]") ?? []].find(row => row.dataset.nodeId === screenNodeKey(view.selected))?.focus({ preventScroll: true });
@@ -155,7 +172,12 @@ export class ScreenComposer {
     else details.insertBefore(el("p", "screen-removal-limit", view.selected.parentStart === null ? "The screen root cannot be removed here." : "This element contains source-only content. View Source to inspect its protection."), info);
   }
   render(card = this.card): boolean {
-    const view = this.host.view(); if (!card || !view) return false;
+    const view = this.host.view(); if (!card) return false;
+    if (!view) {
+      if (!this.hasDraft()) return false;
+      this.card = card; card.replaceChildren(); card.classList.add("screen-composer");
+      return this.renderRetainedDrafts(card);
+    }
     this.card = card; const scroll = card.scrollTop;
     card.replaceChildren(); card.classList.add("screen-composer"); card.ariaLabel = "Element editor";
     if (view.step === "choose") {
@@ -171,6 +193,7 @@ export class ScreenComposer {
           if (node) pending.append(action(`Resume edit · ${this.name(view, node)}`, () => this.host.select(draft.nodeId, true)));
         }
         card.append(pending);
+        this.renderRetainedDrafts(card, view);
         const tree = el("div", "screen-tree"); tree.role = "tree"; tree.ariaLabel = "Screen elements";
         for (const node of view.nodes) {
           const id = screenNodeKey(node), row = action("", () => this.host.select(id));
@@ -237,6 +260,7 @@ export class ScreenComposer {
         card.append(action("Back to elements", () => { this.host.select(screenNodeKey(view.selected), false); this.focusRow(); }));
       }
     }
+    if (view.step !== "choose") this.renderRetainedDrafts(card, view);
     const feedback = el("p", "screen-composition-feedback", this.error); feedback.hidden = !this.error; feedback.role = "alert"; card.append(feedback);
     card.scrollTop = scroll; return true;
   }
@@ -369,10 +393,10 @@ export class ScreenComposer {
     this.panel?.classList.add("screen-removal-open");
     const affected = new Set([node, ...descendants].map(n => n.span.start));
     this.panel?.querySelectorAll<HTMLElement>(".screen-node").forEach(target => { target.dataset.removal = String(affected.has(view.nodes[Number(target.dataset.index)]?.span.start ?? -1)); });
-    this.dialog.showModal(); cancel.focus({ preventScroll: true });
+    this.dialog.setAttribute("aria-modal", "true"); this.dialog.showModal(); cancel.focus({ preventScroll: true });
   }
   private closeRemoval(): void {
-    this.dialog.close(); this.removal = undefined; this.panel?.classList.remove("screen-removal-open");
+    this.dialog.close(); this.dialog.removeAttribute("aria-modal"); this.removal = undefined; this.panel?.classList.remove("screen-removal-open");
     this.panel?.querySelectorAll<HTMLElement>("[data-removal]").forEach(target => delete target.dataset.removal);
   }
   private cancelRemoval(): void {

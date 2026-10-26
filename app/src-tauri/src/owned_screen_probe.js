@@ -32,7 +32,7 @@
     await until(() => document.querySelector('.screens-editor select')?.selectedOptions[0]?.textContent.includes("travel_notes"));
     const catalog = await call("screens.list", { sessionId }); identity = catalog.owned[0];
     assert(identity.name === "travel_notes" && identity.resolved && identity.id !== identity.rootId, "Distinct persistent screen and root IDs required");
-    assert(document.querySelector('.screen-tree [aria-selected="true"]')?.textContent === "Screen root", "Created root selected");
+    assert(document.querySelector('.screen-tree [aria-selected="true"]')?.getAttribute("aria-label") === "Screen root", "Created root selected");
     checkpoint("creation-passed");
     await click("View in Source"); await until(() => document.querySelector(".source-editor"), "Source editor");
     const editor = window.__loomlightProbeEditor(document.querySelector(".source-editor")), accepted = editor.value;
@@ -43,7 +43,7 @@
     checkpoint("exact-source-passed");
     await click("Screens"); await click("Undo"); await until(() => message().includes("Unresolved owned screen travel_notes"));
     assert((await call("screens.list", { sessionId })).owned.length === 0, "One Undo removes creation and ownership");
-    await click("Redo"); await until(() => document.querySelector('.screen-tree [aria-selected="true"]')?.textContent === "Screen root");
+    await click("Redo"); await until(() => document.querySelector('.screen-tree [aria-selected="true"]')?.getAttribute("aria-label") === "Screen root");
     assert(JSON.stringify((await call("screens.list", { sessionId })).owned[0]) === JSON.stringify(identity), "One Redo restores both IDs");
     checkpoint("history-passed");
     await click("Close Project"); await until(() => document.querySelector(".recent-open")); document.querySelector(".recent-open").click();

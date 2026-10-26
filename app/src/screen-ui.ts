@@ -103,7 +103,7 @@ export class ScreensWorkspace {
       source: node => { if (this.doc) this.actions.source({ path: this.doc.path, expectedRevision: this.doc.revision, byteStart: node.span.start, byteEnd: node.span.end }); },
       note: (text, error) => this.note(text, error), preview: () => { this.updateSizeControls(); this.renderCanvas(); }, newScreen: () => this.beginCreation(), undo: () => void this.history("undo"),
       geometry: host => this.renderGeometry(host),
-      hover: id => this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => { target.dataset.hovered = String(screenNodeKey(this.nodes()[Number(target.dataset.index)]!) === id); }),
+      hover: id => this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => { const node = this.nodes()[Number(target.dataset.index)]; target.dataset.hovered = String(!!node && screenNodeKey(node) === id); }),
     });
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
@@ -273,20 +273,25 @@ export class ScreensWorkspace {
       this.card.append(el("p", "muted", "Button actions and Story connections remain in Source. The canvas never runs game actions."), button("View in Source", () => this.openSource()));
     } else if (node) {
       this.card.append(el("p", "muted", `${node.kind} · Edit existing literal dimensions, then apply your changes.`));
-      if(node.kind==="text" || node.kind==="textbutton") {
-        const label=el("label","screen-text-sample","Canvas text sample");
-        const input=el("textarea"); input.ariaLabel="Canvas text sample";input.maxLength=8192;
-        input.value=this.textSamples.get(this.key())?.value ?? node.literal ?? "";
-        input.oninput=()=>{this.textSamples.set(this.key(),{revision:this.doc!.revision,screen:this.screen,path:this.doc!.path,index:this.selected,value:input.value});this.renderCanvas();};
-        label.append(input);this.card.append(label,el("p","muted","Sample only. Source and runtime values do not change."),button("Use source text",()=>{this.textSamples.delete(this.key());this.renderCard();this.renderCanvas();}));
-      }
+      this.renderTextSample(this.card);
       this.renderGeometry(this.card);
     }
     this.card.append(el("p", "muted screen-coverage", this.doc?.partial ? "Partial coverage. Custom Python, actions, styling and unsupported regions are preserved in Source." : "Only existing literal dimensions can change here."));
     this.card.scrollTop = scroll;
   }
+  private renderTextSample(host: HTMLElement): void {
+    const node = this.nodes()[this.selected];
+      if(node && (node.kind==="text" || node.kind==="textbutton")) {
+        const label=el("label","screen-text-sample","Canvas text sample");
+        const input=el("textarea"); input.ariaLabel="Canvas text sample";input.maxLength=8192;
+        input.value=this.textSamples.get(this.key())?.value ?? node.literal ?? "";
+        input.oninput=()=>{this.textSamples.set(this.key(),{revision:this.doc!.revision,screen:this.screen,path:this.doc!.path,index:this.selected,value:input.value});this.renderCanvas();};
+        label.append(input);host.append(label,el("p","muted","Sample only. Source and runtime values do not change."),button("Use source text",()=>{this.textSamples.delete(this.key());this.renderCard();this.renderCanvas();}));
+      }
+  }
   private renderGeometry(host: HTMLElement): void {
     const node = this.nodes()[this.selected]; if (!node) return;
+    if (this.owned && !node.id) this.renderTextSample(host);
       const details = el("details", "screen-properties"); details.open = !this.owned;
       details.append(el("summary", "", "Position & size"));
       if (size(node, "xsize") !== undefined && size(node, "ysize") !== undefined) {
@@ -470,7 +475,7 @@ export class ScreensWorkspace {
     this.selectionCaption.textContent = selectedNode ? `${selectedNode.kind} · Nesting level ${Math.max(0, ancestors.length - 1)}` : "";
     const { width, height } = this.gameResolution;
     const available = this.canvas.parentElement?.clientWidth ?? 600;
-    this.scale = this.zoom === "100" ? 1 : Math.max(0.05, Math.min((available - 32) / width, 360 / height, 1));
+    this.scale = this.zoom === "100" ? 1 : Math.max(0.05, Math.min((available - (this.owned ? 0 : 32)) / width, 360 / height, 1));
     this.canvas.style.width = `${width * this.scale}px`; this.canvas.style.height = `${height * this.scale}px`;
     if (!this.doc) { this.canvas.replaceChildren(); this.invalidateCanvas("Select a supported screen to render."); return; }
     const drafts = [...this.drafts.values()].filter(d => d.document.path === this.doc!.path && d.screen === this.screen);

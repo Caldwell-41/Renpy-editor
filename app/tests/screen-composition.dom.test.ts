@@ -39,7 +39,7 @@ function interactiveFixture() {
   const edit = (id: string) => { row(id).dispatchEvent(new window.MouseEvent("dblclick")); };
   const text = () => { const input = [...document.querySelectorAll("textarea")].find(i => i.ariaLabel === "Text"); assert.ok(input); return input; };
   return { workspace, calls, click, row, edit, text, browser, original: structuredClone(doc), respond: (next: ScreenDocument, selectedId: string) => { reply = { document: next, selectedId }; },
-    respondHistory: (next: ScreenDocument) => { historyReply = next; } };
+    respondHistory: (next: ScreenDocument) => { historyReply = next; }, replaceDocument: (next: ScreenDocument) => { doc = next; } };
 }
 
 test("owned composition retains a refused addition and Cancel accepts no source request", async () => {
@@ -121,10 +121,27 @@ test("keyboard reordering uses stable sibling identities and refuses a protected
   } finally { h.workspace.dispose(); }
 });
 
+test("a Source-removed element keeps its unfinished text available for recovery", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick(); h.edit("title-id");
+    h.text().value = "Keep this unfinished title"; h.text().dispatchEvent(new window.Event("input"));
+    h.click("1  Choose");
+    const external = structuredClone(h.original); external.revision = "external"; external.screens[0]!.nodes.splice(2, 1);
+    h.replaceDocument(external); h.click("Refresh Source"); await tick(); await tick();
+    const retained = [...document.querySelectorAll("textarea")].find(input => input.ariaLabel === "Retained text draft");
+    assert.equal(retained?.value, "Keep this unfinished title");
+    assert.equal(h.workspace.hasDraft(), true);
+    h.click("Discard retained draft"); assert.equal(h.workspace.hasDraft(), false);
+    assert.equal(h.calls.filter(call => call.operation === "screens.compose").length, 0);
+  } finally { h.workspace.dispose(); }
+});
+
 test("removal confirms every element, retains exact Cancel focus, and selects the core fallback", async () => {
   const h = interactiveFixture();
   try {
     await tick(); await tick();
+    assert.equal(document.querySelector('[aria-modal="true"]') === null, true, "A closed confirmation must not block project navigation");
     h.row("box-id").click();
     const card = document.querySelector<HTMLElement>(".screen-card")!; card.scrollTop = 120;
     const invoke = h.click("Remove element");
@@ -133,6 +150,7 @@ test("removal confirms every element, retains exact Cancel focus, and selects th
     const cancel = [...dialog.querySelectorAll("button")].find(b => b.textContent === "Cancel")!;
     assert.equal(document.activeElement === cancel, true, "Cancel starts with focus");
     cancel.click(); assert.equal(dialog.open, false); assert.equal(document.activeElement === invoke, true, "Cancel restores the invoking control"); assert.equal(card.scrollTop, 120);
+    assert.equal(document.querySelector('[aria-modal="true"]') === null, true, "Cancellation releases the application's modal guard");
     assert.equal(h.calls.filter(c => c.operation === "screens.compose").length, 0);
     h.row("title-id").focus(); h.row("title-id").click();
     h.row("title-id").dispatchEvent(new window.KeyboardEvent("keydown", { key: "Delete", repeat: true, bubbles: true }));
@@ -166,5 +184,19 @@ test("shared Undo restores the removed selected identity and Redo restores the f
     h.respondHistory(removed); h.click("Redo"); await tick(); await tick();
     assert.equal(h.row("body-id").ariaSelected, "true");
     assert.equal(document.activeElement === h.row("body-id"), true);
+  } finally { h.workspace.dispose(); }
+});
+
+test("addition history keeps a surviving parent selection on Redo", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick(); h.row("box-id").click(); h.click("Add element");
+    const field = [...document.querySelectorAll("textarea")].find(input => input.ariaLabel === "New element text")!;
+    field.value = "Added"; field.dispatchEvent(new window.Event("input"));
+    const added = structuredClone(h.original); added.revision = "added";
+    added.screens[0]!.nodes.splice(4, 0, { id: "added-id", kind: "text", literal: "Added", parentStart: 30, span: {start:150,end:180}, properties:[], layout:{}, protected:[] });
+    h.respond(added, "added-id"); h.click("Add text"); await tick(); await tick();
+    h.respondHistory(h.original); h.click("Undo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
+    h.respondHistory(added); h.click("Redo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
   } finally { h.workspace.dispose(); }
 });

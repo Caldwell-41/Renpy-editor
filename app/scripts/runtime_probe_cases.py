@@ -1,11 +1,12 @@
 """Cases required by the ordinary packaged runtime gate and evidence manifest."""
 RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh")
-OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "canvas-helper", "canvas-input")
+OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "canvas-helper", "canvas-input")
 
 # Terminal production-probe observations required by each ordinary scenario.
 RUNTIME_STAGES = {
     'canvas-helper': ('project-frame-passed','draft-cancel-focus-passed','source-history-passed','second-aspect-passed','logical-pixels-passed','project-close-passed'),
     'owned-screen': ('cancel-passed', 'creation-passed', 'exact-source-passed', 'history-passed', 'reopen-passed'),
+    'screen-composition': ('composition-passed', 'literal-history-passed', 'reorder-passed', 'confirmed-removal-passed', 'protected-source-passed', 'reopen-passed'),
     'help-screen': ('screen-inventory-passed', 'source-roundtrip-passed', 'validation-passed', 'preview-geometry-passed', 'stale-stop-passed', 'disk-reopen-passed'),
     'compile': ('diagnostics-real-ipc-passed',),
     'lint': ('diagnostics-real-ipc-passed',),
@@ -40,7 +41,7 @@ def runtime_report_ok(case, report, target_os=None):
     if case=='canvas-helper':
         from canvas_evidence import canvas_details_ok
         return canvas_details_ok(details, target_os)
-    if case == 'owned-screen':
+    if case in ('owned-screen', 'screen-composition'):
         identity = details.get('identity')
         if (details.get('nativeWebView') is not True or details.get('sdkExecuted') is not False
                 or details.get('error') or not isinstance(identity, dict)
@@ -48,6 +49,23 @@ def runtime_report_ok(case, report, target_os=None):
                 or identity.get('resolved') is not True or not isinstance(identity.get('id'), str)
                 or not isinstance(identity.get('rootId'), str) or identity['id'] == identity['rootId']):
             return False
+        if case == 'screen-composition':
+            from uuid import UUID
+            ids, source = details.get('identities'), details.get('acceptedSource')
+            if (not isinstance(ids, list) or len(ids) != 7 or not all(isinstance(value, str) for value in ids)
+                    or len(set(ids)) != 7 or ids[0] != identity['rootId']
+                    or not isinstance(source, str) or len(source.encode()) > 65536):
+                return False
+            try:
+                if any(str(UUID(value)) != value for value in ids):
+                    return False
+            except ValueError:
+                return False
+            if (source.count(f'# loomlight-screen: {identity["id"]}\n') != 1
+                    or source.count('screen travel_notes():\n') != 1
+                    or any(source.count(f'# loomlight-element: {value}\n') != 1 for value in ids[1:])
+                    or 'use source_only_footer()\n' not in source or 'text "Protected neighbor"\n' not in source):
+                return False
     if case == 'help-screen':
         if target_os is not None and target_os not in ('windows', 'macos'):
             return False

@@ -1,14 +1,14 @@
 # Current outcome handover
 
-## L02 prototype iteration handoff
+## L02 implementation resumed
 
-Kris requested a new chat for prototyping on 2026-10-26, with the current design
-displayed unchanged first, iteration with Kris, and a message back when finished.
-The selected chat is "Iterate Help composition prototype for #37". On creation it
-takes sole writer ownership of this checkout and the Design Lab servers. The parent,
-"Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), yields until handback.
-The new chat owns Design Lab changes and their approval/evidence records; preserve
-production checkpoint `79f2e5e` for the parent's implementation continuation.
+Kris requested continuing #37 on 2026-10-26 under the existing C5 and test approvals.
+The duplicate prototype chat is idle and made no changes. "Implement ticket #37"
+(`01a170cf-8fea-74f3-b48d-90c241cf2ad7`) has resumed sole checkout/server ownership.
+Production checkpoint `79f2e5e` is followed by in-scope corrections and real UI-to-core
+verification. [The current evidence](../tasks/evidence/simple-help-layout.md#implementation-resumed-2026-10-26)
+owns results, failures and qualification consumption. Continue the implementation;
+no further prototype approval is needed.
 
 Continue on local branch `codex/37-compose-help-layout`, based on Screens commit
 `8f7f9e7191f3b9c27343c7f4d4f5fdc65b2135f4`. Intended integration destination remains

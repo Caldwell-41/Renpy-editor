@@ -730,6 +730,14 @@ the existing transaction/history service. The renderer has no file authority.
 conservative unresolved-reference rules. Existing revision-bound Help edits retain
 their original path/name/range checks.
 
+`screens.compose` uses those resolved owners and a captured source snapshot for
+bounded add, literal text edit, same-parent reorder and confirmed removal. It shares
+the existing transaction/history service. Source-carried element UUIDs, protection
+boundaries and selection persistence follow [the data contract](DATA_MODEL.md#project-lifecycle-metadata).
+The Screens controller retains unapplied input and owns the stationary removal
+confirmation; the core independently re-proves ownership, revision and safe ranges.
+Pending canvas additions are typed inert plans, never temporary game-source writes.
+
 The selected Help-screen implementation adds an optional typed `preview` purpose
 on `runtime.prepare`. A screen purpose carries the supported source path, declaration
 name and accepted revision. Inspection and selection never execute a project.

@@ -140,15 +140,23 @@ for case in cases:
             # Resolve and verify containment before recursive cleanup.
             assert profile.resolve().parent == profile.parent.resolve()
             shutil.rmtree(profile)
+    reports = []
+    for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            report = json.loads(line)
+            if report.get("evidence") == "runtime-ui-packaged":
+                reports.append(report)
+        except (ValueError, AttributeError):
+            pass
     help_disk = None
     disk_errors = []
     fixture_cleanup_complete = True
-    if case in ("help-screen", "owned-screen", "canvas-helper", "canvas-input"):
+    if case in ("help-screen", "owned-screen", "screen-composition", "canvas-helper", "canvas-input"):
         profile = Path(env.get("TEMP") or env.get("TMPDIR") or "/tmp") / f"loomlight-r2-probe-{process.pid}-{case}"
         if profile.exists():
             assert not profile.is_symlink() and profile.resolve().parent == profile.parent.resolve()
             project = profile / "synthetic-project"
-            source = project / ("game/ui/travel_notes.rpy" if case == "owned-screen" else "game/ui/help.rpy")
+            source = project / ("game/ui/travel_notes.rpy" if case in ("owned-screen", "screen-composition") else "game/ui/help.rpy")
             if case == "help-screen":
                 original = (Path(__file__).resolve().parents[2] / "tests/fixtures/phase-3b-screens/help.rpy").read_bytes()
                 expected = b'\xef\xbb\xbf' + original.replace(b'\n', b'\r\n').replace(b'xsize 640', b'xsize 768')
@@ -160,7 +168,14 @@ for case in cases:
                     ownership = json.loads((project / ".renpy-editor/source-map.json").read_text())["ownedScreens"]
                     if len(ownership) != 1 or ownership[0]["name"] != "travel_notes":
                         raise ValueError("One owned blank screen required on disk")
-                    expected = f'# loomlight-screen: {ownership[0]["id"]}\nscreen travel_notes():\n    pass\n'.encode()
+                    if case == "screen-composition":
+                        details = reports[0].get("details", {}) if len(reports) == 1 else {}
+                        accepted = details.get("acceptedSource")
+                        expected = accepted.encode() if isinstance(accepted, str) else None
+                        if details.get("identity", {}).get("id") != ownership[0]["id"]:
+                            raise ValueError("Composition identity must match disk ownership")
+                    else:
+                        expected = f'# loomlight-screen: {ownership[0]["id"]}\nscreen travel_notes():\n    pass\n'.encode()
                 except (OSError, ValueError, KeyError, TypeError):
                     disk_errors.append("Owned screen ownership could not be verified")
                     metadata = project / ".renpy-editor/source-map.json"
@@ -181,24 +196,16 @@ for case in cases:
             try:
                 shutil.rmtree(profile)
             except OSError:
-                if case != "owned-screen":
+                if case not in ("owned-screen", "screen-composition"):
                     raise
                 fixture_cleanup_complete = False
                 disk_errors.append("Owned fixture cleanup failed")
-    reports = []
-    for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
-        try:
-            report = json.loads(line)
-            if report.get("evidence") == "runtime-ui-packaged":
-                reports.append(report)
-        except (ValueError, AttributeError):
-            pass
     target_os = {"win32": "windows", "darwin": "macos"}.get(sys.platform, "unsupported")
     passed = code == 0 and not timed_out and not external_errors and len(reports) == 1 and runtime_report_ok(case, reports[0], target_os=target_os)
     if case == "source-foundation":
         details = reports[0].get("details", {}) if len(reports) == 1 else {}
         passed = passed and details.get("extendedChecksComplete") is True and len(details.get("checks", [])) == 33 and (output / "external-write.json").is_file()
-    if case in ("help-screen", "owned-screen"):
+    if case in ("help-screen", "owned-screen", "screen-composition"):
         passed = passed and help_disk == dict(acceptedBytesMatch=True, scratchJobsRemaining=0, sourceBytecode=False, sourceSaves=False)
     if case=='canvas-helper':
         observation = json.loads(observation_path.read_text()) if observation_path.exists() else {}
@@ -218,7 +225,7 @@ for case in cases:
     if case == "canvas-input":
         # Trusted renderer events alone never qualify the OS delivery route.
         passed = passed and help_disk == dict(acceptedBytesMatch=True,scratchJobsRemaining=0,sourceBytecode=False,sourceSaves=False,canvasJobsRemaining=0)
-    if case == "owned-screen":
+    if case in ("owned-screen", "screen-composition"):
         passed = passed and not disk_errors and fixture_cleanup_complete
     failed |= not passed
     result = dict(case=case, passed=passed, exitCode=code, timedOut=timed_out,
@@ -227,7 +234,7 @@ for case in cases:
         result.update(nativeObservation=observation)
     if case == "canvas-input":
         result.update(nativeInputQualified=False, warmPresentationProof=False, perceivedSmoothnessProof=False)
-    if case == "owned-screen":
+    if case in ("owned-screen", "screen-composition"):
         result.update(diskErrors=disk_errors, fixtureCleanupComplete=fixture_cleanup_complete)
     (output / f"runtime-ui-{case}.json").write_text(json.dumps(result, indent=2)+"\n")
     print(json.dumps(dict(case=case,passed=passed,exitCode=code,timedOut=timed_out,helpDisk=help_disk) if case=='canvas-helper' else result), flush=True)

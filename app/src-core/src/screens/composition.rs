@@ -1,4 +1,5 @@
 use super::*;
+use sha2::{Digest, Sha256};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -75,12 +76,8 @@ impl AuthoringService {
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);
         }
-        let document = self.screens_inspect(
-            project,
-            InspectRequest {
-                path: source_path.clone(),
-            },
-        )?;
+        let mut document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+        self.annotate_screen_ownership(project, &bytes, &mut document)?;
         let screen = document
             .screens
             .iter()
@@ -306,7 +303,12 @@ impl AuthoringService {
                 selected_id,
             });
         }
-        inspect(&proposed, source_path.clone(), String::new())?;
+        let mut accepted = inspect(
+            &proposed,
+            source_path.clone(),
+            hex::encode(Sha256::digest(&proposed)),
+        )?;
+        self.annotate_screen_ownership(project, &proposed, &mut accepted)?;
         self.commit_history(
             project,
             TransactionProposal {
@@ -321,12 +323,7 @@ impl AuthoringService {
             },
         )?;
         Ok(ComposeResult {
-            document: self.screens_inspect(
-                project,
-                InspectRequest {
-                    path: source_path.clone(),
-                },
-            )?,
+            document: accepted,
             selected_id,
         })
     }

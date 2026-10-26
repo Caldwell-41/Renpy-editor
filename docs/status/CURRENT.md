@@ -1,10 +1,10 @@
 # Current status
 
-## L02 Help composition prototype iteration
+## L02 Help composition implementation
 
-2026-10-26: Kris requested a new prototyping chat for
-[#37](https://github.com/Caldwell-41/Renpy-editor/issues/37), starting with the current
-design displayed unchanged. C5 remains the approved baseline. The approved
+2026-10-26: Kris requested continuing implementation of
+[#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) under the existing C5 and
+test approvals. The duplicate prototype chat is idle and made no changes. The approved
 `workflow-popup-v1` covers add, select, edit, reorder and confirmed removal of
 ordinary owned elements. Every removal uses a stationary modal; protected source,
 containing groups and the screen root remain protected. Luna research and independent
@@ -16,16 +16,15 @@ The C5 source is pinned locally at `94c78e7`. Production implementation checkpoi
 source fingerprint, 16 retained captures and agreed behavior.
 [The handback evidence](../tasks/evidence/simple-help-layout.md#c5-approval-and-handback-2026-10-26)
 owns the prior approval. [The new handoff evidence](../tasks/evidence/simple-help-layout.md#prototype-iteration-handoff-2026-10-26)
-records the implementation checkpoint and current checks. The implementation chat
-yields checkout/server ownership to the new prototyping chat on creation and resumes
-after its handback. Kris reaffirmed approval of the core, DOM and real UI-to-core/runtime
+records the implementation checkpoint. The original implementation chat has resumed
+sole checkout/server ownership. Kris reaffirmed approval of the core, DOM and real UI-to-core/runtime
 test boundaries; acceptance still needs their actual results.
 
 | Capability | Implementation | Evidence and acceptance |
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 approved; partial implementation checkpointed; prototype iteration selected | 7 core and 21 UI tests plus TypeScript pass on the checkpoint. Real UI-to-core, runtime, native qualification and final review remain due. |
+| Add/edit/reorder/remove (#37) | C5 approved; implementation in progress | Core/component checks and six real UI-to-core groups pass. Runtime/native qualification, broad checks and final review remain due. |
 
 ## Automatic checks and operation-limit policy
 

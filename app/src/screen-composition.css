@@ -4,7 +4,9 @@
 .screens-editor[data-composition=true] .screen-steps .button { border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; }
 .screens-editor[data-composition=true] .screen-steps [aria-pressed=true] { border-bottom-color:var(--accent-primary); }
 .screens-editor[data-composition=true] .screen-stage { border:0; border-radius:0; padding:0; background:transparent; }
-.screens-editor[data-composition=true] .screen-composer { border:0; border-left:1px solid var(--border-normal); border-radius:0; padding:0 0 12px 16px; max-height:calc(100vh - 210px); scrollbar-gutter:stable; }
+.screens-editor[data-composition=true] .screen-composer { border:0; border-left:1px solid var(--border-normal); border-radius:0; background:transparent; padding:0 0 12px 16px; max-height:calc(100vh - 210px); scrollbar-gutter:stable; }
+.screens-editor[data-composition=true] .screen-viewport { padding:0; min-height:0; border-radius:0; background:transparent; }
+.screens-editor[data-composition=true] .screen-game { box-shadow:none; }
 .screen-composer .button { border-radius:0; font-size:12px; padding:7px 9px; }
 .screen-composer .screen-composition-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
 .screen-composer h2,.screen-composer .screen-composition-heading h2 { font-size:17px; margin:0 0 12px; }

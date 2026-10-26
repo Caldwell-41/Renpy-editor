@@ -1610,6 +1610,16 @@ fn help_scratch_preview_sdk_geometry_revision_and_cleanup() {
 #[test]
 #[ignore = "L01 deliberate SDK preview; requires renderer-accepted blank screen and verified archive"]
 fn owned_blank_screen_sdk_preview_and_cleanup() {
+    owned_screen_sdk_preview_and_cleanup(false);
+}
+
+#[test]
+#[ignore = "L02 deliberate SDK preview; requires renderer-accepted composition and verified archive"]
+fn owned_composition_sdk_preview_and_cleanup() {
+    owned_screen_sdk_preview_and_cleanup(true);
+}
+
+fn owned_screen_sdk_preview_and_cleanup(composed: bool) {
     use sha2::{Digest, Sha256};
     let archive =
         std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").expect("official archive required");
@@ -1618,6 +1628,24 @@ fn owned_blank_screen_sdk_preview_and_cleanup() {
             .expect("renderer-accepted source required"),
     )
     .unwrap();
+    if composed {
+        let source = std::str::from_utf8(&accepted).unwrap();
+        assert_eq!(source.matches("# loomlight-element: ").count(), 6);
+        for required in [
+            "fixed:",
+            "frame:",
+            "vbox:",
+            "text \"Travel notes\"",
+            "textbutton \"Close\"",
+            "use source_only_footer()",
+            "Protected neighbor",
+        ] {
+            assert!(
+                source.contains(required),
+                "Renderer-accepted nested example requires {required}"
+            );
+        }
+    }
     let output = PathBuf::from(
         std::env::var_os("LOOMLIGHT_OWNED_SCREEN_SDK_EVIDENCE")
             .expect("owned evidence directory required"),
@@ -1643,7 +1671,12 @@ fn owned_blank_screen_sdk_preview_and_cleanup() {
     )
     .unwrap();
     let capture = serde_json::to_string(&output.join("preview.png").to_string_lossy()).unwrap();
-    // Test-owned observation is separate from the accepted, unchanged blank screen.
+    let marker = if composed {
+        "OWNED_COMPOSITION_PREVIEW "
+    } else {
+        "OWNED_BLANK_PREVIEW "
+    };
+    // Test-owned observation is separate from the accepted, unchanged screen.
     let probe = format!(
         r#"init python:
     def observe_owned_blank():
@@ -1653,7 +1686,7 @@ fn owned_blank_screen_sdk_preview_and_cleanup() {
             size = renpy.render(screen, config.screen_width, config.screen_height, 0, 0).get_size()
             renpy.take_screenshot()
             captured = renpy.screenshot({capture})
-            print("OWNED_BLANK_PREVIEW " + __import__("json").dumps(dict(screen="travel_notes", size=list(size), menu=main_menu, captured=captured)), flush=True)
+            print("{marker}" + __import__("json").dumps(dict(screen="travel_notes", size=list(size), menu=main_menu, captured=captured)), flush=True)
     config.overlay_screens.append("owned_blank_observer")
 screen owned_blank_observer():
     timer 0.3 repeat True action Function(observe_owned_blank)
@@ -1672,8 +1705,12 @@ screen owned_blank_observer():
         "screens.inspect",
         json!({"path":"game/ui/travel_notes.rpy"}),
     );
-    assert_eq!(document["screens"][0]["nodes"].as_array().unwrap().len(), 1);
-    assert_eq!(document["partial"], false);
+    // A composed screen has seven ordinary nodes plus its protected neighbor.
+    assert_eq!(
+        document["screens"][0]["nodes"].as_array().unwrap().len(),
+        if composed { 7 } else { 1 }
+    );
+    assert_eq!(document["partial"], composed);
     let preview = json!({"purpose":"screen","path":"game/ui/travel_notes.rpy","screenName":"travel_notes","expectedRevision":document["revision"]});
     let mut receipts = vec![];
     for kind in ["validate", "run"] {
@@ -1706,11 +1743,7 @@ screen owned_blank_observer():
                     status_payload.clone(),
                 );
                 observed["cleanupComplete"] == true
-                    || kind == "run"
-                        && observed["output"]
-                            .as_str()
-                            .unwrap()
-                            .contains("OWNED_BLANK_PREVIEW ")
+                    || kind == "run" && observed["output"].as_str().unwrap().contains(marker)
             },
             45,
         );
@@ -1724,7 +1757,7 @@ screen owned_blank_observer():
                 .as_str()
                 .unwrap()
                 .lines()
-                .find_map(|line| line.strip_prefix("OWNED_BLANK_PREVIEW "))
+                .find_map(|line| line.strip_prefix(marker))
                 .expect("actual blank-screen render");
             let rendered: Value = serde_json::from_str(line).unwrap();
             assert_eq!(
@@ -1790,5 +1823,5 @@ screen owned_blank_observer():
     }
     assert!(service.runtime_shutdown());
     service.close().unwrap();
-    fs::write(output.join("result.json"),serde_json::to_vec_pretty(&json!({"passed":true,"acceptedSHA256":hex::encode(Sha256::digest(&accepted)),"receipts":receipts,"nativeWebView":false})).unwrap()).unwrap();
+    fs::write(output.join("result.json"),serde_json::to_vec_pretty(&json!({"passed":true,"composition":composed,"acceptedSHA256":hex::encode(Sha256::digest(&accepted)),"receipts":receipts,"nativeWebView":false})).unwrap()).unwrap();
 }

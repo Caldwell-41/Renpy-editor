@@ -367,3 +367,35 @@ the main checkout's approved source fingerprint as expected; preserve the refere
 and create a separate unapproved variant for further experiments. All work is local-only.
 The unrelated untracked Phase 1 audit remains untouched. The new handoff replaces the
 live L02 status sections and preserves the unique prior recovery evidence below them.
+
+## Implementation resumed, 2026-10-26
+
+Kris requested continuing implementation under the existing C5 and test approvals.
+The duplicate prototype chat remained idle and made no changes. The original
+implementation chat resumed checkout/server ownership. No new design approval is due.
+
+The real `screen_composition_probe.js` controller now drives the production renderer,
+ApplicationHost, Source and shared transactions through six groups. Browser run 06
+passes addition/history, literal-only editing/no-op/Cancel, keyboard sibling reorder,
+confirmed removal with focus/scroll retention, protected-source reconciliation and
+group history, then close/reopen with exact bytes and selected element identity.
+Its output and accepted nested `.rpy` are in ignored
+`.toolchains/screen-composition/browser-06/`. Chrome is not native WebView proof.
+
+The first browser run exposed a harness wait for a message the UI does not emit.
+The second exposed a selection expectation; inspecting pinned C5 established that
+Redo keeps a surviving selection, so production retains that behavior. The third
+found a product defect: the persistent closed confirmation carried `aria-modal=true`,
+which the application's navigation guard treats as an active modal. The dialog now
+sets that attribute only while open. Run 04 reached reopen and found the harness
+passed an obsolete session ID to the session-free `project.current` operation. The
+corrected payload passed in run 05; run 06 repeats after placing the protected footer
+separately so the deliberate SDK preview can show it clearly. These failures remain
+in their separate ignored output directories.
+
+A focused UI case also established that Source removal could leave a retained text
+draft inaccessible. The UI now presents the orphaned text for copying or explicit
+discard. Focused core and component checks pass; broad suites and native/runtime
+qualification remain pending. The owning issue records operation limits. Before any
+qualification starts, consumption is Mac/Windows package 0/0, editor 0/0, SDK campaign
+0/0 and focused CI 0. Routine checks do not consume these limits.
