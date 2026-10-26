@@ -496,3 +496,21 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** actual discovery regression fails before the change and passes
   afterward; the general Mac runner passes all four groups without a recorder.
 - **Evidence:** [Automatic code checks](../tasks/active/automatic-code-checks.md#verification-and-review).
+
+## H35. Sleeping Mac display suspends a packaged WKWebView probe
+
+- **Observed:** the native composition probe had a 247.935-second history gap
+  although source had already changed. Browser and Windows checks did not reproduce it.
+- **Cause:** the display was asleep before launch. WebKit dropped its assertions,
+  and macOS suspended the exact WebContent child for 246.297 seconds. An attempted
+  CUA inspection woke the display and resumed that child. The long pause is a host
+  condition admitted by the runner, not evidence of a composition/request-lane defect.
+- **Prevention:** verify an unlocked, awake desktop and hold a temporary
+  display-awake assertion for the native child's lifetime. This correction is
+  recommended, not yet implemented or qualified. System-idle prevention alone
+  did not keep the display awake. Retain power, visibility and process-state events.
+- **Verification:** replay of original native/OS receipts matches process ownership,
+  explicit suspension/resumption and the display-wake intervention. No fresh native
+  session or product timing claim was needed. Keep UI-process events distinct from
+  renderer events when auditing suspension.
+- **Evidence:** [Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27).

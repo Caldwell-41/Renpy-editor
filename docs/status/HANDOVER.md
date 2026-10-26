@@ -1,12 +1,11 @@
 # Current outcome handover
 
-## L02 CI audited; Mac pause remains before PR
+## L02 CI audited; Mac pause diagnosed
 
-The user requested a new GPT-6.1 Sol chat at xhigh on 2026-10-27 to investigate the
-Mac pause, with any allowance needed for that investigation approved. The original
-chat, "Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`), completed the
-CI audit and yields checkout/server writer ownership to that diagnostic chat after
-creation and its state check. Both prototype chats are idle. Continue on published
+The diagnostic chat completed the user-selected Mac-pause investigation on
+2026-10-27 after checking `e989b72` and taking sole checkout/server writer ownership.
+The original chat, "Implement ticket #37" (`01a170cf-8fea-74f3-b48d-90c241cf2ad7`),
+completed the CI audit and stopped editing. Both prototype chats are idle. Continue on
 `codex/37-compose-help-layout`, based on `8f7f9e7`,
 with reviewed product `602613d`. Intended PR base is `codex/phase3b-screen-designer`.
 Branch push is approved; PR creation, merge and release remain unselected.
@@ -36,33 +35,36 @@ no pass. Documentation-only successors do not become this test candidate.
 Raw receipts and the audit are under `.toolchains/screen-composition/ci-40396855757/`.
 
 Signed local Mac package 3/product `602613d` retains its functional native pass on
-the approved identity. [Its native record](../tasks/evidence/simple-help-layout.md#corrected-signed-mac-functional-qualification)
-owns the unexplained pause: literal-history finished at 5.4 seconds, reorder-history
-at 253.3, while source had already been reordered. Neither Windows native nor Mac
-CI browser reproduces that delay. No stack sample established its cause. Begin
-remaining work with read-only diagnosis against existing receipts/code; compare the
-previous WebKit diagnostic in the same evidence file when relevant. This is not a
-new responsiveness claim or permission to repeat an unchanged run.
+the approved identity. [The diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27)
+establishes host display sleep and WKWebView suspension as the cause of its long gap.
+The original renderer was explicitly suspended by macOS for 246.297 seconds, 99.3%
+of the 247.935-second literal-to-reorder interval. The earlier CUA inspection woke
+the display, WebKit marked the window visible and macOS resumed the renderer.
+Retained power/WebKit/RunningBoard events identify the exact app and child PIDs.
+Production and runner behavior are unchanged. The recommended runner correction is
+an unlocked/awake preflight and a temporary display-awake assertion scoped to the
+native child. It has not been implemented or qualified. No foreground responsiveness
+claim follows from this diagnosis.
 
-Current cumulative use is Mac packages 3/7, native sessions 3/3 and SDK campaigns
+Current cumulative use is Mac packages 3/7, native sessions 3 and SDK campaigns
 2/2; Windows packages 1/2, native sessions 1/2 and SDK campaigns 2/2; CI dispatches
 1/2. Physical SDK process starts are 4/4 per host. Earlier three-start records counted
 validation as one submission; it launches compile and lint separately. The audit
 records this counting error and the campaign wording discrepancy. No allowance was
-extended by the correction. Additional Mac build approval leaves four builds, but
-renewed no native/SDK limit at that time. The later diagnostic approval now authorizes
-any additional builds, native sessions, SDK process starts and focused CI needed to
-establish the Mac pause's cause. Preserve cumulative consumption; choose and record
-bounded experiments and any necessary extensions before execution. Another budget
-approval is not needed for that investigation. Other scope and publication boundaries
-remain unchanged. Record the approval and actual use in #37 and its evidence.
+extended by the correction. The user's later "Any allowance it needs for this is
+approved" authorized the diagnosis. It consumed zero app builds, native sessions,
+SDK processes or CI dispatches; its two preliminary native reservations were unused
+and closed after the historical OS intervention established the cause. The current
+Mac is locked with its display asleep. No new app/helper/server or power assertion
+remains. Raw extracts, replay scripts, hashes and host-state receipts are in ignored
+`.toolchains/screen-composition/pause-diagnosis/`. Other scope and publication
+boundaries remain unchanged; the diagnostic approval does not select runner changes.
 
 The CI watcher event was received and acknowledged, and its audit is complete.
-No qualification run or CI audit remains pending. Remaining pre-PR work is the Mac
-pause's diagnosis or explicit disposition, any evidenced correction and focused
-review, then the PR description. Keep #37 open until the remaining work and its
-acceptance decision are complete. Obtain authorization before PR creation; merge
-and release remain separate.
+No qualification run, CI audit or unexplained-pause investigation remains pending.
+The diagnosis is recorded in #37 and the existing evidence owner. Remaining work is
+the acceptance decision and PR preparation. Keep #37 open until those are complete.
+Obtain authorization before PR creation; merge and release remain separate.
 
 Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
 Retained sections below contain unique prior failures and protected native state.

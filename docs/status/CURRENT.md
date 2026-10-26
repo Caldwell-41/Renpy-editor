@@ -11,16 +11,21 @@ containing groups and the screen root remain protected. Luna research and indepe
 Experience First reviews informed the prototype.
 
 The C5 source is pinned locally at `94c78e7`. Reviewed product candidate `602613d`
-is on published `codex/37-compose-help-layout`; formal acceptance and PR readiness
-remain pending the unexplained Mac pause.
+is on `codex/37-compose-help-layout`; formal acceptance and PR preparation remain
+pending. [The Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27)
+is complete. Host display sleep caused macOS to suspend the WKWebView renderer for
+246.297 seconds. The earlier CUA inspection woke the display and resumed it.
+The recommended native-runner preflight/display assertion is recorded; production
+and runner behavior remain unchanged.
 [The approval record](../design/design-lab-help-composition/approval.json) owns the
 source fingerprint and 16 captures. [The evidence](../tasks/evidence/simple-help-layout.md#independent-review-and-focused-corrections)
 owns the completed Standards/Spec corrections and qualification results.
 The user requested a fresh-agent handoff on 2026-10-27, then explicitly approved
 branch push and the prepared Windows CI. The original chat completed publication and
-the CI audit. The user requested a GPT-6.1 Sol xhigh diagnostic chat to take writer
-ownership and investigate the Mac pause, approving any allowances it needs for that
-investigation. Historical consumption remains recorded.
+the CI audit. The GPT-6.1 Sol xhigh diagnostic chat took writer ownership and
+established the cause from the original session's OS logs. It needed no new app
+build, native session, SDK process or CI dispatch. Historical consumption remains
+recorded.
 The user approved
 the GitHub status update and five additional Mac builds, raising its package ceiling
 to seven total. Existing design/test approvals remain effective.
@@ -29,7 +34,7 @@ to seven total. Existing design/test approvals remain effective.
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
 | Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | Local source/UI, SDK and signed Mac native functional proof retained. Run 40396855757 is audited: Windows SDK/native and portable Mac checks pass. The Mac native pause remains unexplained before PR readiness; PR creation is unselected. |
+| Add/edit/reorder/remove (#37) | C5 implemented and reviewed | Local source/UI, SDK and signed Mac native functional proof retained. Run 40396855757 is audited: Windows SDK/native and portable Mac checks pass. Mac pause diagnosis is complete; acceptance and PR preparation remain. PR creation is unselected. |
 
 ## Automatic checks and operation-limit policy
 

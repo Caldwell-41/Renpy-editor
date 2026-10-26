@@ -788,3 +788,125 @@ or host, and report the cause with evidence and a recommended correction. Diagno
 instrumentation is in scope; a production behavior change is not requested by this
 review assignment. Existing signed Mac and audited CI evidence remain available for
 comparison, with their original limits and failures retained.
+
+### Mac pause investigation started, 2026-10-27
+
+The diagnostic chat checked `e989b72` on `codex/37-compose-help-layout` and took
+sole checkout/server writer ownership. Only the unrelated untracked codebase-design
+audit was present. Live #37, B02 and P3B were refreshed. Production behavior remains
+unchanged. Historical session 3 and its failed sample remain intact.
+
+Initial classification is missing causal evidence, with host/WebKit suspension now
+supported by retained OS logs. The app's WebKit log has a 246.275-second activity
+gap, following removal of its renderer process assertion, and resumes when its
+window becomes visible. The host power log records a display wake caused by the
+earlier CUA inspection at the same boundary. These observations need a bounded
+comparison before a final diagnosis.
+
+Under the user's approved diagnostic extension, reserve at most two additional
+Mac native sessions initially (cumulative sessions 4 and 5), using the existing
+signed package 3 with its executable hash verified. Compare ordinary execution
+with an owned, temporary display-awake assertion; retain exact process/window/power
+state and elapsed receipts. No build, SDK process or CI dispatch is selected for
+this first experiment. A started session counts even if it fails. Reassess before
+extending this experiment; further necessary diagnosis is already authorized.
+Ignored raw diagnostic scripts, extracts and receipts belong under
+`.toolchains/screen-composition/pause-diagnosis/`.
+
+### Mac pause cause established, 2026-10-27
+
+The pause was host display sleep followed by WKWebView renderer suspension. The
+native runner admitted a sleeping display and held no display-awake assertion.
+The source write could finish before macOS suspended the renderer, leaving the
+probe's JavaScript continuation unable to run. Production request-lane contention
+and a wrong UI wait do not explain this interval. This is an environment condition
+with a harness admission/lifecycle omission, not evidence of a composition defect.
+
+Retained native session 3 belongs to app PID `34608`; the OS records its WebContent
+child as PID `34612`. The following events are from that actual session, in
+Australia/Brisbane time on 2026-10-26. They are not a fresh reproduction or a timing
+estimate from the CI browser.
+
+| Time | Causal evidence |
+| --- | --- |
+| 18:45:32 | `pmset` records the display turning off. Its next display-on event is 19:05:28. |
+| 19:01:15.031 | The app's WebKit activity log reports its window visible but occluded, then marks the view invisible. |
+| 19:01:21.652 | WebContent reports ready to suspend. WebKit releases its assertions with no foreground or background activity. |
+| 19:01:22.766 | `runningboardd` explicitly suspends WebContent PID `34612` and records `running-suspended`. |
+| 19:05:28 | `SkyComputerUseService` creates user-active and display-awake assertions for the earlier CUA inspection. The display turns on. |
+| 19:05:29.014 | WebKit marks the same window visible. It sends resume IPC because the process was suspended, naming the activity-state change as the wake reason. |
+| 19:05:29.063 | `runningboardd` explicitly resumes the same renderer. The original probe then finishes reorder/history and the remaining groups. |
+
+The OS suspension lasts **246.297 seconds**. It accounts for **99.3393%** of the
+original **247.935-second** literal-to-reorder interval, leaving **1.638 seconds**
+outside suspension. No retained WebContent event occurs between suspension and resumption.
+The app's UI process records visibility changes immediately before resuming its
+renderer; those are distinct processes. The failed CUA inspection was therefore
+an intervention that woke the display, even though it returned no useful UI snapshot.
+The original functional pass, cleanup and signed executable identity remain valid
+for their stated scope. The result establishes no foreground responsiveness claim.
+
+#### Replay and competing explanations
+
+The ignored `check-pause.py` replays the exact original symptom against
+`native-mac-03/runtime-ui-screen-composition.json`. It exits 1 with
+`literalToReorderMs: 247935` and `functionalPassed: true`. Its 30-second discriminator
+locates this recorded gap; it is not a new product performance threshold.
+
+Before further experiments, the ranked predictions were display sleep, independent
+window occlusion, app request-lane stall, then an incorrect probe wait. The retained
+OS trace supplies the intervention directly: display wake, visibility change and
+explicit renderer resume precede completion. The longest suspend/resume pair for
+the exact child explains the interval. Host power records also show the existing
+assertion prevented system idle sleep but did not prevent display sleep. No separate
+app or probe stall is needed to explain the pause. The earlier ResizeObserver
+diagnostic has no established causal relationship to this host suspension.
+
+`python3 .toolchains/screen-composition/pause-diagnosis/audit-cause.py` exits 0 after
+matching process ownership, suspend/resume, power and visibility order, the explained
+duration and absence of WebContent activity. Its first draft incorrectly required
+the app UI process to remain silent until renderer resumption; the process-specific
+check corrects that diagnostic assertion. `cause.json` retains the result and input
+SHA-256 hashes; `causal-events.log` retains the minimum event sequence. Original
+`historical-host.log`, `historical-webkit.log` and `historical-power.log` extracts
+remain ignored beside them. Nothing in the original native receipt was rewritten.
+
+#### Recommended correction and scope
+
+Correct the Mac native runner at its host boundary. Verify an unlocked console and
+an awake main display before launching, hold an owned temporary display-awake and
+system-idle assertion for the full child lifetime, and release it on every exit path.
+The local `caffeinate(8)` manual confirms that `-d` prevents display sleep while
+`-i` prevents system idle sleep; a utility-bound assertion ends with that utility.
+An already sleeping display needs an explicit wake and another preflight check.
+Retain host power/visibility state with monotonic checkpoints so a suspended renderer
+cannot be mistaken for a slow operation. This review recommends that correction;
+it does not implement or qualify it. A future focused check belongs at the runner's
+preflight/assertion lifecycle and actual Mac desktop boundary, not in a source-model
+unit test. No production timeout, request ordering or UI behavior change is indicated.
+
+The historical intervention made a new native comparison unnecessary. Read-only
+preflight also found the current Mac locked with its display asleep, so neither
+reserved native session was started. The retained signed executable still hashes to
+`1a914c1ad33b73a761da853235fa563f9d1d13bf517ef168fa96962cf38d4c53`, and strict
+signature verification passes. One small read-only Objective-C host-state observer
+was compiled into the ignored diagnostic directory; no app package was built.
+
+Additional use for this investigation is **zero app builds, native sessions, SDK
+processes and CI dispatches**. Historical cumulative counts remain Mac packages
+3/7, native sessions 3, SDK campaigns 2 and physical SDK starts 4; Windows packages
+1/2, native sessions 1/2, SDK campaigns 2 and physical SDK starts 4; CI dispatches
+1/2. Compile and lint remain separately counted SDK children. The two initial
+diagnostic reservations are unused and closed. No new app/helper/server or power
+assertion remains. Diagnostic files stay in the ignored, named debug directory.
+
+The unexplained-pause investigation is complete. #37 remains open for its acceptance
+decision and PR preparation; PR creation, merge and release remain unselected.
+Production behavior and the native runner are unchanged. Existing test and design
+approvals retain their original scope.
+
+Repository validation passes for 956 files, and whitespace checks pass. The diff
+contains only evidence, live status and the incident index; no product or runner
+file changed. CURRENT and HANDOVER remain above their normal word-count review
+targets because their earlier phase results and protected recovery records remain
+intact. The detailed diagnosis stays in this evidence owner.
