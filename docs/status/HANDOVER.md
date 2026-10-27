@@ -3,16 +3,22 @@
 ## L03 numeric layout design checkpoint
 
 Kris selected [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38).
-This chat is the sole writer on `codex/phase3b-l03-numeric-layout`, created from
+This chat owns implementation on `codex/phase3b-l03-numeric-layout`, created from
 freshly fetched Screens base `4d2101f36b7491aa51ca513f3b3d819f9460bff8` on macOS ARM64.
 The assignment includes implementation, focused tests, final review, a PR into
 `codex/phase3b-screen-designer` and CI audit. It excludes merging and other features.
 Prior sections' statements that no successor is selected predate this assignment.
 
 The [numeric-layout Design Lab](../design/design-lab-numeric-layout/README.md) has
-three unapproved layouts. The running local lab uses port 5174. Design approval is
-required by Kris's mock-first rule before production implementation. An asynchronous
-question asks which layout to approve. A separate question asks to confirm the
+three unapproved layouts. Kris requested a separate chat to refine these existing
+mocks with Experience First, present them with a short ticket brief and send the
+approved design back to this implementation chat. During refinement, the design
+agent is the sole checkout writer for the numeric-layout lab files, their registry
+entry and design notes/approval/captures. This implementation chat stays read-only
+until writer ownership returns. The design assignment and chat are linked in #38.
+The running local lab uses port 5174. Design approval remains required before
+production implementation. The earlier A/B/C approval question is superseded by
+the refinement chat's presentation. A separate pending question asks to confirm the
 production UI/controller/real-core and public Rust-operation test boundaries under
 the TDD skill. No production files or tests have changed yet.
 
@@ -25,8 +31,9 @@ production build-isolation check pass. The draft mock checkpoint is committed an
 published on this branch; #38 records its exact candidate. Preserve the unrelated untracked Phase 1
 audit, all native recovery, archives, tags and stashes below.
 
-Resume in this chat after the design/test decisions. Use the committed mock
-candidate when recording approval under Design Lab INTEGRATION. Complete
+The design chat records approval under Design Lab INTEGRATION and messages this
+chat with the exact approved source and writer handback. Resume implementation in
+this chat after that handback and the test-boundary decision. Complete
 implementation and qualification against live #22/#24/#38. Route affected automated
 Windows/macOS proof through CI; name any required capability CI cannot establish.
 No PR, product CI result or #38 completion is claimed at this checkpoint.

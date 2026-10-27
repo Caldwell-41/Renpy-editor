@@ -6,8 +6,10 @@ Kris selected [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) f
 implementation, focused tests, a PR into the Screens branch and CI audit.
 `codex/phase3b-l03-numeric-layout` starts from freshly verified Screens base
 `4d2101f`. L02's prerequisite is satisfied. Three unapproved Design Lab inspector
-proposals are ready for review; production code is unchanged. Design approval and
-TDD boundary confirmation are pending. [Evidence](../tasks/evidence/numeric-layout.md)
+proposals are the starting point for a separate design chat's Experience First
+refinement. This chat retains implementation ownership and stays read-only while
+the design agent owns mock edits. Production code is unchanged. Design approval and
+TDD boundary confirmation remain pending. [Evidence](../tasks/evidence/numeric-layout.md)
 records the checked mock scope and remaining acceptance. #38 owns execution and
 any costly-operation limits. Broader B02/3B acceptance and protected recovery retain
 their existing owners.
