@@ -35,7 +35,7 @@ export class ScreenLayoutEditor {
   private readonly expanded = new Set<string>();
   private readonly formId = `screen-layout-${++sequence}`;
   private hostElement?: HTMLElement;
-  private error = "";
+  private readonly errors = new Map<string, { text: string; field?: string }>();
   private saving = false;
   constructor(private readonly host: Host) {}
   hasDraft(): boolean { return this.drafts.size > 0; }
@@ -49,7 +49,7 @@ export class ScreenLayoutEditor {
       const input = el("textarea"); input.ariaLabel = "Retained layout draft"; input.readOnly = true;
       input.value = Object.keys(this.edits(draft.fields, draft.node)).map(key => `${labels[key]}: ${draft.fields[key]!.text || "Inherited"}${draft.fields[key]!.text ? draft.fields[key]!.unit === "pixels" ? " px" : coordinate(key) && key.endsWith("anchor") ? " of element" : " of parent" : ""}`).join("\n");
       section.append(input, action("Discard retained layout draft", () => {
-        this.drafts.delete(key); this.emptyUnits.delete(key); section.remove(); this.host.preview(); this.host.note("Retained layout draft discarded. No source was written.");
+        this.drafts.delete(key); this.emptyUnits.delete(key); this.errors.delete(key); section.remove(); this.host.preview(); this.host.note("Retained layout draft discarded. No source was written.");
       }));
       host.append(section);
     }
@@ -94,10 +94,10 @@ export class ScreenLayoutEditor {
       const draft = this.drafts.get(id) ?? { key: id, document: view.document, screen: view.screen, node: view.node, fields };
       draft.fields = fields; this.drafts.set(id, draft);
     }
-    this.error = ""; this.sync(); this.host.preview();
+    this.errors.delete(id); this.sync(); this.host.preview();
   }
   accept(key: string, base: ScreenDocument, accepted: ScreenDocument): void {
-    this.drafts.delete(key); this.emptyUnits.delete(key); this.error = ""; this.saving = false;
+    this.drafts.delete(key); this.emptyUnits.delete(key); this.errors.delete(key); this.saving = false;
     for (const draft of this.drafts.values()) {
       if (!draft.node.id || draft.document.path !== base.path || draft.document.revision !== base.revision) continue;
       const node = accepted.screens.find(screen => screen.name === draft.screen)?.nodes.find(node => node.id === draft.node.id);
@@ -123,7 +123,7 @@ export class ScreenLayoutEditor {
     }
   }
   private fail(text: string, key?: string): void {
-    this.error = text; this.host.note(text, true); this.sync();
+    const view = this.host.view(); if (view) this.errors.set(this.key(view), { text, field: key }); this.host.note(text, true); this.sync();
     const input = key && this.hostElement?.querySelector<HTMLInputElement>(`[data-layout-field="${key}"]`);
     if (input) { input.setAttribute("aria-invalid", "true"); const details = input.closest("details"); if (details) details.open = true; input.focus({ preventScroll: true }); input.scrollIntoView({ block: "nearest" }); }
   }
@@ -142,7 +142,7 @@ export class ScreenLayoutEditor {
   private cancel(): void {
     const view = this.host.view(); if (!view || view.busy || this.saving) return;
     const key = (document.activeElement as HTMLElement | null)?.dataset.layoutField;
-    this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.error = ""; const host = this.hostElement; if (host) this.render(host);
+    this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.errors.delete(this.key(view)); const host = this.hostElement; if (host) this.render(host);
     if (key) this.hostElement?.querySelector<HTMLInputElement>(`[data-layout-field="${key}"]`)?.focus({ preventScroll: true });
     this.host.note("Layout changes cancelled. No source was written."); this.host.preview();
   }
@@ -206,9 +206,10 @@ export class ScreenLayoutEditor {
     const view = this.host.view(), host = this.hostElement; if (!view || !host?.isConnected) return;
     const dirty = this.drafts.has(this.key(view)), fields = this.current(view);
     host.querySelector<HTMLElement>(".layout-state")!.textContent = dirty ? "Unapplied" : "Saved";
-    const feedback = host.querySelector<HTMLElement>(".layout-feedback")!; feedback.textContent = this.error; feedback.hidden = !this.error;
+    const error = this.errors.get(this.key(view));
+    const feedback = host.querySelector<HTMLElement>(".layout-feedback")!; feedback.textContent = error?.text ?? ""; feedback.hidden = !error;
     host.querySelector<HTMLElement>(".layout-commit-state")!.textContent = dirty ? "Draft preview. Enter applies all layout fields." : "No pending changes. Enter applies; Escape cancels.";
-    host.querySelectorAll<HTMLInputElement>("input").forEach(input => { input.readOnly = view.busy || this.saving; if (!this.error) input.removeAttribute("aria-invalid"); });
+    host.querySelectorAll<HTMLInputElement>("input").forEach(input => { input.readOnly = view.busy || this.saving; if (error?.field === input.dataset.layoutField) input.setAttribute("aria-invalid", "true"); else input.removeAttribute("aria-invalid"); });
     host.querySelectorAll<HTMLSelectElement>("select").forEach(select => select.disabled = view.busy || this.saving);
     host.querySelectorAll<HTMLButtonElement>("button").forEach(button => button.disabled = view.busy || this.saving || button.textContent === "Cancel layout" && !dirty);
     host.querySelectorAll<HTMLButtonElement>("[data-align-x]").forEach(button => button.ariaPressed = String(["xpos", "xanchor", "ypos", "yanchor"].every(key => fields[key]!.text !== "" && fields[key]!.unit === "relative" && Number(fields[key]!.text) === Number(key.startsWith("x") ? button.dataset.alignX : button.dataset.alignY))));

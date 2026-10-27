@@ -326,6 +326,18 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
             }
         }
     }
+    for entry in &result.entries {
+        if entry
+            .atoms
+            .iter()
+            .flat_map(|atom| &atom.fields)
+            .any(|key| result.unresolved.contains(key))
+        {
+            for key in entry.atoms.iter().flat_map(|atom| &atom.fields) {
+                result.blocked.entry(key.clone()).or_insert_with(|| "This value shares a source alias with an ambiguous layout property. Resolve that alias in Source first.".into());
+            }
+        }
+    }
     Some(result)
 }
 
@@ -447,6 +459,14 @@ impl NumericLayout {
                     }
                 }
             } else {
+                if entry
+                    .atoms
+                    .iter()
+                    .flat_map(|atom| &atom.fields)
+                    .any(|key| self.blocked.contains_key(key))
+                {
+                    return Err(SceneError::OpaqueBoundary);
+                }
                 let fields = entry
                     .atoms
                     .iter()

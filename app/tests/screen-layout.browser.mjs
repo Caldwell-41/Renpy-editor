@@ -77,6 +77,11 @@ try {
   await ui.getByText('Width needs a finite number. Input retained.',{exact:true}).first().waitFor();
   assert.equal(await width.inputValue(),'invalid width');
   assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+  await ui.getByRole('option',{name:'Free layout group',exact:true}).dblclick();
+  assert.equal(await ui.locator('.layout-feedback').isVisible(),false,'A saved element must not show another element\'s draft error');
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
+  assert.equal(await width.inputValue(),'invalid width');assert.equal(await ui.locator('.layout-feedback').isVisible(),true);
   await width.press('Escape');
   await ui.getByText('Layout changes cancelled. No source was written.',{exact:true}).waitFor();
   assert.equal(await width.inputValue(),'640');

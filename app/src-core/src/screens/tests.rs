@@ -242,6 +242,25 @@ fn numeric_layout_refuses_tuple_values_and_malformed_aliases_without_writing() {
 }
 
 #[test]
+fn numeric_layout_refuses_to_split_an_alias_with_an_ambiguous_setter() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    let before = "screen numeric():\n    frame:\n        align (0.5, 0.5) # preserve alias\n        xpos 100 # preserve override\n        text \"Keep\"\n";
+    fs::write(root.join(PATH), before).unwrap();
+    service.open_path(&root).unwrap();
+    let document = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+    let request = json!({"path":PATH,"screenName":"numeric","expectedRevision":document["revision"],"nodeStart":frame(&document)["span"]["start"],"values":{"ypos":{"unit":"relative","value":0.75}}});
+    assert_eq!(
+        reject(&mut service, "screens.setLayout", request)["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), before.as_bytes());
+}
+
+#[test]
 fn numeric_layout_refuses_bounds_that_the_selected_displayable_cannot_apply() {
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");

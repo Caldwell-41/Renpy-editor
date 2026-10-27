@@ -229,3 +229,28 @@ Final review will compare the complete feature against Screens base `4d2101f`.
 The pending CI run reserves four Mac SDK starts (reaching 16/16), up to nine Windows
 SDK starts including native fixture validation, one Windows package and one editor
 session. Mac signing preflight still blocks a native attempt and consumes no slot.
+
+Retained final inspector captures are [desktop](numeric-layout-captures/production-a2-dark-wide.png)
+and [compact](numeric-layout-captures/production-a2-dark-compact.png). Their SHA256
+hashes are `9a4331d09a312a8f2f09757fa1ed952c957a994385cd74229f019ead94172d6c`
+and `36da67874a260322df5c78a7e44989f717d91348ae62c0618b13623cff2e1bea`.
+These 1100×720 and 560×640 dark captures compare the inspector with A2's 640×360,
+centered relative fields. Surrounding production navigation/canvas availability retain
+their existing behavior. The implementation candidate is `2b912c5`; final review is
+read-only and split into Standards and Spec. Publication and CI follow in this chat.
+
+### Independent review and fixes
+
+Standards review reports zero actionable findings at `2b912c5` against base
+`4d2101f`. Spec review finds two P2 defects. The production controller regression
+first reproduces an element's validation error appearing on another saved element.
+Feedback now belongs to each draft key; selecting another element clears that
+inspector's error, and returning preserves the original invalid draft and feedback.
+The complete controller check passes after the fix.
+
+The second public-operation regression first reproduces a vertical edit rewriting
+an ambiguous horizontal setter when both share an align alias. The literal reader
+now explains the shared ambiguity, and alias splitting refuses any blocked field.
+This preserves the original alias/comment/override bytes rather than rewriting a
+Source-only rule as a side effect. Focused screen checks are being rerun on the fix.
+Both reviewers remain read-only; the implementation owner makes the corrections.
