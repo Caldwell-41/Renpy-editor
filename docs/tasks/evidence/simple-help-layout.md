@@ -3,6 +3,69 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Local Enter-to-Design correction, 2026-10-27
+
+Kris selected fixing PR #62's canvas keyboard regression and keeping the changes
+local. The checkout is `codex/37-compose-help-layout` at `a32d525`. Owned canvas
+overlays selected on button activation but had no Enter-to-Design handler; the
+aligned-frame movement handler also ignored Enter. Each overlay now receives one
+Enter listener when created, independently of movement bindings. Single-click
+selection, double-click and movement behavior retain their existing handlers.
+
+Three focused DOM cases reproduced the failure before the fix. They now verify
+text, text-button and movable-frame selection, Enter-to-Design, prevented default
+activation and no source writes. Typechecking and all 246 frontend cases pass
+through `npm run check` with Node 24.19.0 and the supported bundled Python runtime.
+`npm run build` passes. A focused Chrome 156.0.8078.48 check using the production
+controller and fixture IPC passes real click, Enter and double-click for all three
+types, with no source writes or page errors.
+
+The first full run exposed an incorrect label assertion in the new button test,
+then corrected to `Button label`, and the previously documented system-Python
+`tomllib` prerequisite failure. The supported-interpreter rerun has zero failures
+or skips. The initial browser preflight could not bind its loopback server inside
+the sandbox; the permitted local run passes and closes its browser and server.
+The focused browser script is retained under ignored
+`.toolchains/screen-composition/enter-design-regression.mjs`.
+
+The correction changes no layout or CSS. Native packages and SDKs were not rerun;
+their prior receipts retain their original candidate scope and operation limits.
+Product code and tests are committed at `daf6c3b`.
+
+Kris then selected the code-review skill, with push and PR update conditional on
+passing review. Separate read-only Standards and Spec agents reviewed the complete
+`a32d525...daf6c3b` correction. Standards reports zero documented-standard breaches
+and no justified heuristic smells; Spec reports zero missing, incorrect or extra
+requirements. Both verify the Enter listener's independence from movement bindings
+and preservation of selection, double-click, guarded navigation and source safety.
+
+The two-file commit is pushed to `codex/37-compose-help-layout`. At the correction
+audit, PR #62's head was verified as
+`daf6c3b3d44648c5b30b0b5a34f7b56a57ae6d7d`, with unchanged base
+`8f7f9e7191f3b9c27343c7f4d4f5fdc65b2135f4`; its description now records the keyboard
+correction and 246-test result. Automatic Repository quality
+[run 40426321177, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40426321177/attempts/1)
+is independently verified `completed/success` for that exact head, which matched
+PR #62's open branch and unchanged base at audit. The ci-watch event matched this
+chat, its receipt is recorded and the worker is done. Both required jobs and all
+executed steps pass. Downloaded logs verify 246 frontend cases with zero failures,
+skips or cancellations, including all three new canvas Enter cases; Rust 1.90.0
+formatting; validation of 954 published repository files; 13 section-link cases;
+Q1 rejection controls/source-selector audit; and ten retention cases. The nine
+dispatch-only jobs were skipped as configured and provide no new native/SDK proof.
+The raw log is retained under ignored
+`.toolchains/screen-composition/enter-design-ci-40426321177.log`.
+
+PR #62's description includes the audited run and result. No correction, retry,
+manual dispatch or additional costly operation was needed. The correction's CI
+audit is complete. Kris then selected committing and pushing these three status
+and evidence files as a documentation successor, leaving the unrelated audit
+untouched. Automatic checks on that successor require a same-chat terminal audit;
+record the result on PR #62 without another receipt-only commit. The tested
+product candidate remains `daf6c3b`; documentation does not replace native/SDK
+candidates. The tracker is unchanged. Formal acceptance, merge and release remain
+unselected.
+
 ## Design preparation, 2026-10-25
 
 The user selected implementing #37 on a new branch through the implement skill.

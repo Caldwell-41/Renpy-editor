@@ -2,6 +2,29 @@
 
 ## L02 PR open, required checks audited
 
+Kris selected the Enter-to-Design correction for PR #62, followed by publication
+if Standards and Spec reviews passed. Both read-only reviews of `a32d525...daf6c3b`
+pass with zero findings. `codex/37-compose-help-layout` now publishes the two-file
+fix/test commit `daf6c3b`; PR #62's description includes the correction and current
+validation. Typechecking, all 246 frontend cases, the production build and a focused
+Chrome keyboard check pass.
+[The correction record](../tasks/evidence/simple-help-layout.md#local-enter-to-design-correction-2026-10-27)
+owns diagnosis, review and validation limits. Kris selected committing and pushing
+these supporting records on 2026-10-27, leaving the unrelated audit untouched.
+[Automatic Repository quality run 40426321177](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40426321177)
+attempt 1 passes on the correction candidate
+`daf6c3b3d44648c5b30b0b5a34f7b56a57ae6d7d`. Both required jobs and all executed steps
+are audited; logs confirm 246 frontend passes, formatting, repository validation,
+13 section-link tests, Q1 controls/source audit and ten retention passes. The
+watcher event matches this chat, its receipt is recorded and the worker is done.
+PR #62's description includes the audited CI link. The correction's CI audit is
+complete. After this documentation successor publishes, audit its automatic checks
+in the same chat and record the terminal result on PR #62 without another
+receipt-only commit. No manual CI, native session, SDK process or package is
+selected. The tracker is unchanged; formal acceptance, merge and release remain
+unselected.
+Existing native/SDK receipts and exhausted allowances retain their original scope.
+
 Kris selected continuing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
 with the implement skill. This chat remains sole checkout/server writer on
 `codex/37-compose-help-layout`, based on `8f7f9e7`. Current product/probe candidate

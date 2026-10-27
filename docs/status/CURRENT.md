@@ -2,6 +2,17 @@
 
 ## L02 Help composition PR open
 
+2026-10-27 follow-up: PR #62's canvas Enter-to-Design regression is fixed
+with three focused cases. Typechecking, all 246 frontend tests, the production
+build and a focused Chrome keyboard check pass. Standards and Spec reviews pass
+with zero findings. Fix and tests are pushed at `daf6c3b`, and PR #62's description
+is updated. [Automatic checks](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40426321177)
+pass on that candidate; both required jobs and their executed steps are audited.
+Kris selected publishing these status/evidence records as a documentation successor;
+audit its automatic checks in this same chat. Prior native/SDK receipts retain
+their tested candidates.
+[Correction evidence](../tasks/evidence/simple-help-layout.md#local-enter-to-design-correction-2026-10-27).
+
 2026-10-27: [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) is
 functionally `review_ready` on `codex/37-compose-help-layout`. All seven bounded
 criteria have verified evidence and functional review is complete. Product/probe candidate
