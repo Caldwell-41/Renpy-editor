@@ -1,5 +1,6 @@
 import { layoutFor, saveLayout } from "./preferences.ts";
-import { buildAvailabilityEditor, buildConditionEditor, validateField } from "./story-condition-editor.ts";
+import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition-editor.ts";
+import { validateField } from "./authoring-input.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 

@@ -1,5 +1,6 @@
 import { requestCore } from "./bridge.ts";
-export interface Layout { navigationCollapsed: boolean; treeCollapsed: boolean; inspectorOpen: boolean; previewPercent?: number; treeWidth?:number; referenceSelection?:string; referenceTopic?:string; graph?: { zoom:number; x:number; y:number } }
+import { applicationRequestLane } from "./request-lane.ts";
+export interface Layout { navigationCollapsed: boolean; treeCollapsed: boolean; inspectorOpen: boolean; previewPercent?: number; treeWidth?:number; referenceSelection?:string; referenceTopic?:string; graph?: { zoom:number; x:number; y:number }; screenSelection?: {screenId:string; elementId:string; sourceRevision?:string} }
 export interface Preferences { schemaVersion: 1; theme: "system" | "light" | "dark"; density: "small" | "default" | "large"; sourceFontSize: number; rememberLayout: boolean; layouts: Record<string, Layout> }
 let preferences: Preferences = { schemaVersion: 1, theme: "system", density: "default", sourceFontSize: 14, rememberLayout: true, layouts: {} };
 let writer: Promise<void> = Promise.resolve();
@@ -17,7 +18,7 @@ function apply(): void {
 }
 systemTheme?.addEventListener("change", () => { if (preferences.theme === "system") apply(); });
 export async function loadPreferences(): Promise<void> {
-  try { const result = await requestCore<Preferences>("preferences.read"); if (result.ok) preferences = result.value; else persistenceError = result.error.message; }
+  try { const result = await applicationRequestLane.run("preferences.read", () => requestCore<Preferences>("preferences.read")); if (result.ok) preferences = result.value; else persistenceError = result.error.message; }
   catch { persistenceError = "Preferences could not be loaded. Using defaults."; }
   apply();
 }
@@ -25,7 +26,7 @@ export function updatePreferences(patch: Partial<Preferences>): Promise<void> {
   preferences = { ...preferences, ...patch }; apply();
   const snapshot = structuredClone(preferences);
   writer = writer.catch(() => undefined).then(async () => {
-    try { const result = await requestCore<Preferences>("preferences.write", { ...snapshot }); if (!result.ok) throw new Error(result.error.message); persistenceError = ""; }
+    try { const result = await applicationRequestLane.run("preferences.write", () => requestCore<Preferences>("preferences.write", { ...snapshot })); if (!result.ok) throw new Error(result.error.message); persistenceError = ""; }
     catch { persistenceError = "Preferences could not be saved on this device. Your current choices still apply for this session."; }
     subscribers.forEach(listener => listener());
   });

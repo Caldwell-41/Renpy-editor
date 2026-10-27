@@ -11,10 +11,12 @@ fn emit(value: Value) {
     io::stdout().flush().unwrap();
 }
 fn main() {
-    let position_probe = std::env::args().nth(2).is_some_and(|mode| {
-        assert_eq!(mode, "canvas-position");
-        true
-    });
+    let mode = std::env::args().nth(2);
+    assert!(mode
+        .as_deref()
+        .is_none_or(|mode| matches!(mode, "canvas-position" | "composition-canvas")));
+    let position_probe = mode.as_deref() == Some("canvas-position");
+    let composition_canvas = mode.as_deref() == Some("composition-canvas");
     let root = PathBuf::from(std::env::args().nth(1).expect("owned temporary root"));
     assert!(
         root.is_absolute()
@@ -26,23 +28,39 @@ fn main() {
                 .starts_with("loomlight-help-controller-")
     );
     assert!(!root.exists());
-    let mut service = LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap();
+    let mut service = if composition_canvas {
+        LifecycleService::prepare_canvas_screen_probe(
+            root.clone(),
+            &PathBuf::from(
+                std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE")
+                    .expect("explicit verified SDK archive"),
+            ),
+        )
+        .unwrap()
+    } else {
+        LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap()
+    };
     let game = root.join("synthetic-project");
-    fs::create_dir(game.join("game/ui")).unwrap();
-    fs::write(
-        game.join("game/ui/a_styles.rpy"),
-        "style help_label:\n    color \"#ffffff\"\n",
-    )
-    .unwrap();
+    fs::create_dir_all(game.join("game/ui")).unwrap();
+    if !composition_canvas {
+        fs::write(
+            game.join("game/ui/a_styles.rpy"),
+            "style help_label:\n    color \"#ffffff\"\n",
+        )
+        .unwrap();
+    }
     fs::write(game.join("game/ui/z_compare.rpy"), "screen flow_help():\n    frame:\n        xsize 720\n        ysize 360\n        xalign 0.5\n        yalign 0.5\n        text \"Your next stop\"\n").unwrap();
-    fs::write(
-        game.join("game/ui/help.rpy"),
-        format!(
-            "\u{feff}{}",
-            include_str!("../../../tests/fixtures/phase-3b-screens/help.rpy").replace('\n', "\r\n")
-        ),
-    )
-    .unwrap();
+    if !composition_canvas {
+        fs::write(
+            game.join("game/ui/help.rpy"),
+            format!(
+                "\u{feff}{}",
+                include_str!("../../../tests/fixtures/phase-3b-screens/help.rpy")
+                    .replace('\n', "\r\n")
+            ),
+        )
+        .unwrap();
+    }
     if position_probe {
         fs::write(
             game.join("game/ui/help.rpy"),
@@ -87,14 +105,16 @@ fn main() {
             continue;
         }
         if request["driver"] == "snapshot" {
-            emit(json!({"source": fs::read(game.join("game/ui/help.rpy")).unwrap()}));
+            let path = fixture_source_path(&request);
+            emit(json!({"source": fs::read(game.join(path)).unwrap()}));
             continue;
         }
         if request["driver"] == "externalAppend" {
             use std::io::Write;
+            let path = fixture_source_path(&request);
             fs::OpenOptions::new()
                 .append(true)
-                .open(game.join("game/ui/help.rpy"))
+                .open(game.join(path))
                 .unwrap()
                 .write_all(b"# ordinary external writer\r\n")
                 .unwrap();
@@ -129,6 +149,7 @@ fn main() {
                 | "screens.setSize"
                 | "screens.list"
                 | "screens.create"
+                | "screens.compose"
                 | "screens.canvasPlan"
                 | "screens.canvasRender"
                 | "screens.canvasStatus"
@@ -139,4 +160,13 @@ fn main() {
     assert!(host.shutdown());
     drop(host);
     fs::remove_dir_all(root).unwrap();
+}
+
+fn fixture_source_path(request: &Value) -> &str {
+    let path = request["path"].as_str().unwrap_or("game/ui/help.rpy");
+    assert!(matches!(
+        path,
+        "game/ui/help.rpy" | "game/ui/travel_notes.rpy"
+    ));
+    path
 }

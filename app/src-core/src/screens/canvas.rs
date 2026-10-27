@@ -18,6 +18,16 @@ pub struct Request {
     pub text_samples: Vec<TextSample>,
     #[serde(default)]
     pub button_state: ButtonState,
+    #[serde(default)]
+    pub addition: Option<Addition>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Addition {
+    pub parent_start: usize,
+    pub kind: String,
+    pub text: String,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
@@ -135,6 +145,8 @@ impl AuthoringService {
                 if line.is_empty()
                     || line == "pass"
                     || kind(&Line {
+                        end: 0,
+                        element_id: None,
                         start: 0,
                         indent: 0,
                         code: line,
@@ -281,6 +293,41 @@ impl AuthoringService {
                 ));
             }
             node.literal = Some(sample.value);
+        }
+        if let Some(addition) = request.addition {
+            let parent = screen
+                .nodes
+                .iter()
+                .find(|n| n.span.start == addition.parent_start)
+                .ok_or(SceneError::InvalidPayload)?;
+            if !["screen", "fixed", "frame", "vbox"].contains(&parent.kind.as_str())
+                || !["fixed", "frame", "vbox", "text", "textbutton"]
+                    .contains(&addition.kind.as_str())
+                || addition.text.len() > 8192
+                || addition.text.contains('\0')
+                || plan.nodes.len() >= MAX_NODES
+                || (parent.kind == "frame"
+                    && (screen
+                        .nodes
+                        .iter()
+                        .any(|n| n.parent_start == Some(parent.span.start))
+                        || !parent.protected.is_empty()))
+            {
+                return Err(SceneError::InvalidPayload);
+            }
+            let literal =
+                matches!(addition.kind.as_str(), "text" | "textbutton").then_some(addition.text);
+            if literal.as_ref().is_some_and(|s| s.contains(['{', '['])) {
+                plan.limits
+                    .push("Draft text requires supported literal text mapping.".into());
+            }
+            plan.nodes.push(CanvasNode {
+                start: screen.nodes.iter().map(|n| n.span.end).max().unwrap_or(0) + 1,
+                parent: Some(parent.span.start),
+                kind: addition.kind,
+                literal,
+                properties: Map::new(),
+            });
         }
         // The helper's built-in styles are qualified only when project initialization
         // cannot change them. Later style resolution must replace this conservative

@@ -28,6 +28,17 @@ complete the unchanged required sequence. A mock or an outer dialog handle canno
 establish actual native children or later steps. All launches/reservations consume
 the owning task's allowance; an early failure is not a free attempt.
 
+On Mac, `run-runtime-ui-probes.py` checks the console session and main display
+before each app launch. A locked, sleeping or unreadable desktop fails before an
+editor session starts. The runner holds IOKit display-sleep and system-idle
+assertions while the child runs, reaps a failed/interrupted child before releasing
+them, and checks desktop state again at exit. Each case retains
+`runtime-ui-<case>-desktop.json` with admission, monotonic state samples, assertion
+IDs and individual release results. The runner requires an already unlocked,
+awake desktop. A desktop failure after child execution remains a failed result
+while helper/fixture auditing, cleanup and final result recording continue.
+Its Windows route uses no Mac APIs.
+
 ## Native driver requirements
 
 Verify exact executable/PID, window ownership and foreground, unique typed enabled

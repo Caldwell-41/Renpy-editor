@@ -1,27 +1,7 @@
 import type { Condition, ConditionExpression, SceneWorkspace } from "./scene-ui.ts";
+import { validateField } from "./authoring-input.ts";
 
 type Control = HTMLInputElement | HTMLSelectElement;
-let errorSequence = 0;
-/** Completion/submission validation. Incomplete typing and IME remain untouched. */
-export function validateField(control: Control, check: () => void): () => void {
-  const error = document.createElement("span"); error.className = "field-error"; error.id = `story-field-error-${++errorSequence}`; error.hidden = true;
-  control.setAttribute("aria-describedby", [control.getAttribute("aria-describedby"), error.id].filter(Boolean).join(" "));
-  let composing = false;
-  const validate = (): void => {
-    try { check(); control.removeAttribute("aria-invalid"); error.hidden = true; error.textContent = ""; }
-    catch (failure) {
-      error.textContent = failure instanceof Error ? failure.message : "Check this field."; error.hidden = false;
-      if (!error.isConnected) control.insertAdjacentElement("afterend", error);
-      control.setAttribute("aria-invalid", "true"); throw failure;
-    }
-  };
-  control.addEventListener("compositionstart", () => { composing = true; });
-  control.addEventListener("compositionend", () => { composing = false; });
-  control.addEventListener("blur", () => { if (!composing) { try { validate(); } catch { /* Display beside the field. */ } } });
-  control.addEventListener("input", () => { if (!composing && control.getAttribute("aria-invalid") === "true") { try { validate(); } catch { /* Keep current error. */ } } });
-  control.addEventListener("change", () => { if (!composing) { try { validate(); } catch { /* Field completion displays the error. */ } } });
-  return validate;
-}
 function select(values: readonly { value: string; label: string }[], selected: string): HTMLSelectElement {
   const node = document.createElement("select");
   const choices = values.some(value => value.value === selected) ? values : [{ value: selected, label: selected ? `Unavailable · ${selected}` : "Select a Variable" }, ...values];

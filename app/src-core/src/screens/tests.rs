@@ -36,6 +36,739 @@ fn reject(service: &mut LifecycleService, operation: &str, mut payload: Value) -
 }
 
 #[test]
+fn owned_composition_adds_one_element_with_stable_identity_through_history_and_reopen() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    service.open_path(&root).unwrap();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let catalog = ipc(
+        &mut service,
+        "screens.create",
+        json!({"name":"notes",
+        "expectedProjectRevision":catalog["projectRevision"],
+        "expectedSourceMapRevision":catalog["sourceMapRevision"],
+        "expectedInventoryRevision":catalog["inventoryRevision"]}),
+    );
+    let owned = catalog["owned"][0].clone();
+    let path = "game/ui/notes.rpy";
+    let before = fs::read(root.join(path)).unwrap();
+    let document = ipc(&mut service, "screens.inspect", json!({"path":path}));
+    let result = ipc(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":owned["id"],
+        "expectedRevision":document["revision"],
+        "command":{"type":"add","parentId":owned["rootId"],"kind":"vbox","text":""}}),
+    );
+    let id = result["selectedId"].as_str().unwrap().to_owned();
+    assert_ne!(id, owned["rootId"]);
+    let after = fs::read(root.join(path)).unwrap();
+    assert!(
+        after.starts_with(&before),
+        "An addition preserves every existing source byte"
+    );
+    assert!(String::from_utf8(after.clone())
+        .unwrap()
+        .contains(&format!("vbox: # loomlight-element: {id}\n        pass\n")));
+    let history = |service: &mut LifecycleService, kind: &str| {
+        let model = ipc(service, "scene.list", json!({}));
+        ipc(
+            service,
+            "scene.apply",
+            json!({"expectedProjectRevision":model["projectRevision"],
+            "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":kind}}),
+        );
+    };
+    history(&mut service, "undo");
+    assert_eq!(fs::read(root.join(path)).unwrap(), before);
+    history(&mut service, "redo");
+    assert_eq!(fs::read(root.join(path)).unwrap(), after);
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let reopened = ipc(&mut service, "screens.inspect", json!({"path":path}));
+    assert_eq!(reopened["screens"][0]["nodes"][1]["id"], id);
+    assert_eq!(reopened["screens"][0]["nodes"][0]["id"], owned["rootId"]);
+}
+
+fn composition_project() -> (
+    tempfile::TempDir,
+    LifecycleService,
+    std::path::PathBuf,
+    Value,
+) {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    service.open_path(&root).unwrap();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({"name":"notes",
+        "expectedProjectRevision":catalog["projectRevision"],"expectedSourceMapRevision":catalog["sourceMapRevision"],
+        "expectedInventoryRevision":catalog["inventoryRevision"]}),
+    );
+    (temporary, service, root, created["owned"][0].clone())
+}
+
+fn compose_command(service: &mut LifecycleService, owner: &Value, command: Value) -> Value {
+    let doc = ipc(service, "screens.inspect", json!({"path":owner["path"]}));
+    ipc(
+        service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":command}),
+    )
+}
+
+fn composition_history(service: &mut LifecycleService, kind: &str) {
+    let model = ipc(service, "scene.list", json!({}));
+    ipc(
+        service,
+        "scene.apply",
+        json!({"expectedProjectRevision":model["projectRevision"],
+        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":kind}}),
+    );
+}
+
+fn save_composition_source(service: &mut LifecycleService, owner: &Value, text: &str) {
+    let source = ipc(service, "source.open", json!({"path":owner["path"]}));
+    let draft = ipc(
+        service,
+        "source.updateDraft",
+        json!({"path":owner["path"],
+        "expectedBaseRevision":source["baseRevision"], "text":text,"selectionStart":0,"selectionEnd":0}),
+    );
+    ipc(
+        service,
+        "source.save",
+        json!({"path":owner["path"],
+        "expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
+    );
+}
+
+#[test]
+fn owned_geometry_preserves_document_ownership_and_history_for_unchanged_and_changed_saves() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let source_path = owner["path"].as_str().unwrap();
+    let blank = fs::read_to_string(root.join(source_path)).unwrap();
+    let source = format!(
+        "{blank}    fixed: # loomlight-element: 00000000-0000-4000-8000-000000000003\n        frame: # loomlight-element: 00000000-0000-4000-8000-000000000001\n            xsize 640\n            ysize 360\n            xalign 0.5\n            yalign 0.5\n            text \"Retained\" # loomlight-element: 00000000-0000-4000-8000-000000000002\n    use custom_footer()\n"
+    );
+    save_composition_source(&mut service, &owner, &source);
+    let document = ipc(&mut service, "screens.inspect", json!({"path":source_path}));
+    assert_eq!(document["screens"][0]["nodes"][0]["id"], owner["rootId"]);
+    assert!(document["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|node| node["kind"] == "custom"));
+    assert!(!frame(&document)["position"].is_null());
+    for (operation, values) in [
+        ("screens.setSize", json!({"width":640,"height":360})),
+        (
+            "screens.setPixelProperty",
+            json!({"property":"xsize","value":640}),
+        ),
+        ("screens.setPosition", json!({"xalign":0.5,"yalign":0.5})),
+    ] {
+        let mut payload = json!({"path":source_path,"expectedRevision":document["revision"],
+            "screenName":"notes","nodeStart":frame(&document)["span"]["start"]});
+        payload
+            .as_object_mut()
+            .unwrap()
+            .extend(values.as_object().unwrap().clone());
+        let unchanged = ipc(&mut service, operation, payload);
+        assert_eq!(
+            unchanged, document,
+            "{operation} must retain the owned document"
+        );
+        assert_eq!(fs::read(root.join(source_path)).unwrap(), source.as_bytes());
+    }
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read(root.join(source_path)).unwrap(),
+        blank.as_bytes(),
+        "No-op geometry saves must not add an Undo entry"
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+        document
+    );
+    let mut document = document;
+    let mut source = source;
+    for (operation, values, before, after) in [
+        (
+            "screens.setSize",
+            json!({"width":720,"height":400}),
+            "xsize 640\n            ysize 360",
+            "xsize 720\n            ysize 400",
+        ),
+        (
+            "screens.setPixelProperty",
+            json!({"property":"xsize","value":800}),
+            "xsize 720",
+            "xsize 800",
+        ),
+        (
+            "screens.setPosition",
+            json!({"xalign":0.25,"yalign":0.75}),
+            "xalign 0.5\n            yalign 0.5",
+            "xalign 0.25\n            yalign 0.75",
+        ),
+    ] {
+        let mut payload = json!({"path":source_path,"expectedRevision":document["revision"],
+            "screenName":"notes","nodeStart":frame(&document)["span"]["start"]});
+        payload
+            .as_object_mut()
+            .unwrap()
+            .extend(values.as_object().unwrap().clone());
+        let changed = ipc(&mut service, operation, payload);
+        let expected = source.replace(before, after);
+        assert_ne!(expected, source);
+        assert_eq!(
+            fs::read(root.join(source_path)).unwrap(),
+            expected.as_bytes()
+        );
+        assert_eq!(
+            changed,
+            ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+            "{operation} must return the complete inspected document"
+        );
+        assert_eq!(changed["screens"][0]["nodes"][0]["id"], owner["rootId"]);
+        assert_eq!(
+            changed["screens"][0]["nodes"].as_array().unwrap().len(),
+            document["screens"][0]["nodes"].as_array().unwrap().len()
+        );
+        composition_history(&mut service, "undo");
+        assert_eq!(fs::read(root.join(source_path)).unwrap(), source.as_bytes());
+        assert_eq!(
+            ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+            document
+        );
+        composition_history(&mut service, "redo");
+        assert_eq!(
+            fs::read(root.join(source_path)).unwrap(),
+            expected.as_bytes()
+        );
+        assert_eq!(
+            ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+            changed
+        );
+        source = expected;
+        document = changed;
+    }
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(
+        ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+        document
+    );
+}
+
+#[test]
+fn owned_composition_text_changes_only_the_literal_preserving_identity_comments_and_noop_history() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Before"}),
+    );
+    let path = root.join(owner["path"].as_str().unwrap());
+    let before = fs::read_to_string(&path).unwrap();
+    let text = "After \"quoted\"\n第二行";
+    let result = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"text","nodeId":added["selectedId"],"text":text}),
+    );
+    assert_eq!(result["selectedId"], added["selectedId"]);
+    assert_eq!(
+        fs::read_to_string(&path).unwrap(),
+        before.replace("\"Before\"", "\"After \\\"quoted\\\"\\n第二行\"")
+    );
+    let noop = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"text","nodeId":added["selectedId"],"text":text}),
+    );
+    assert_eq!(noop["document"]["revision"], result["document"]["revision"]);
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read_to_string(&path).unwrap(),
+        before,
+        "No-op adds no history entry"
+    );
+    composition_history(&mut service, "redo");
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(doc["screens"][0]["nodes"][1]["literal"], text);
+    assert_eq!(doc["screens"][0]["nodes"][1]["id"], added["selectedId"]);
+}
+
+#[test]
+fn owned_composition_reorders_whole_groups_without_changing_their_children_or_identity() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let a = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"vbox","text":""}),
+    )["selectedId"]
+        .clone();
+    let child = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":a,"kind":"text","text":"Grouped child"}),
+    )["selectedId"]
+        .clone();
+    let b = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"fixed","text":""}),
+    )["selectedId"]
+        .clone();
+    let path = root.join(owner["path"].as_str().unwrap());
+    let before = fs::read_to_string(&path).unwrap();
+    let a_block = format!("    vbox: # loomlight-element: {}\n        pass\n        text \"Grouped child\" # loomlight-element: {}\n", a.as_str().unwrap(), child.as_str().unwrap());
+    let b_block = format!(
+        "    fixed: # loomlight-element: {}\n        pass\n",
+        b.as_str().unwrap()
+    );
+    assert!(before.contains(&format!("{a_block}{b_block}")));
+    let after = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"reorder","nodeId":a,"targetId":b,"after":true}),
+    );
+    assert_eq!(
+        fs::read_to_string(&path).unwrap(),
+        before.replace(
+            &format!("{a_block}{b_block}"),
+            &format!("{b_block}{a_block}")
+        )
+    );
+    assert_eq!(after["selectedId"], a);
+    let nodes = after["document"]["screens"][0]["nodes"].as_array().unwrap();
+    assert_eq!(
+        nodes.iter().map(|n| n["id"].clone()).collect::<Vec<_>>(),
+        vec![owner["rootId"].clone(), b.clone(), a.clone(), child.clone()]
+    );
+    let noop = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"reorder","nodeId":a,"targetId":b,"after":true}),
+    );
+    assert_eq!(noop["document"]["revision"], after["document"]["revision"]);
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read_to_string(&path).unwrap(), before);
+    composition_history(&mut service, "redo");
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let reopened = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(reopened["screens"], after["document"]["screens"]);
+}
+
+#[test]
+fn owned_composition_refuses_reorder_after_an_unterminated_final_sibling_without_writing() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let a = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"A"}),
+    )["selectedId"]
+        .clone();
+    let b = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"B"}),
+    )["selectedId"]
+        .clone();
+    let path = root.join(owner["path"].as_str().unwrap());
+    let terminated = fs::read_to_string(&path).unwrap();
+    let before = terminated.trim_end_matches('\n');
+    save_composition_source(&mut service, &owner, before);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":doc["revision"],
+        "command":{"type":"reorder","nodeId":a,"targetId":b,"after":true}}),
+    );
+    assert_eq!(fs::read_to_string(&path).unwrap(), before);
+    let unchanged = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(unchanged, doc);
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read_to_string(&path).unwrap(),
+        terminated,
+        "Refusal adds no history entry"
+    );
+}
+
+#[test]
+fn owned_composition_removal_selects_an_unmarked_next_sibling_without_granting_edit_authority() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Owned"}),
+    );
+    let path = root.join(owner["path"].as_str().unwrap());
+    let owned_source = fs::read_to_string(&path).unwrap();
+    save_composition_source(
+        &mut service,
+        &owner,
+        &format!("{owned_source}    text \"Source authored\"\n"),
+    );
+    let before = fs::read_to_string(&path).unwrap();
+    let removed = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"remove","nodeId":added["selectedId"]}),
+    );
+    let sibling = &removed["document"]["screens"][0]["nodes"][1];
+    assert_eq!(sibling["literal"], "Source authored");
+    assert!(sibling["id"].is_null());
+    assert_eq!(
+        removed["selectedId"],
+        format!("source-at-{}", sibling["span"]["start"])
+    );
+    let after = fs::read_to_string(&path).unwrap();
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":removed["document"]["revision"],
+        "command":{"type":"remove","nodeId":removed["selectedId"]}}),
+    );
+    assert_eq!(fs::read_to_string(&path).unwrap(), after);
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read_to_string(&path).unwrap(), before);
+    composition_history(&mut service, "redo");
+    assert_eq!(fs::read_to_string(&path).unwrap(), after);
+}
+
+#[test]
+fn owned_composition_removes_exact_subtree_and_returns_next_previous_or_parent_selection() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let group = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"vbox","text":""}),
+    )["selectedId"]
+        .clone();
+    let child = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":group,"kind":"text","text":"Grouped child"}),
+    )["selectedId"]
+        .clone();
+    let next = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Keep me"}),
+    )["selectedId"]
+        .clone();
+    let path = root.join(owner["path"].as_str().unwrap());
+    let before = fs::read_to_string(&path).unwrap();
+    let group_block = format!("    vbox: # loomlight-element: {}\n        pass\n        text \"Grouped child\" # loomlight-element: {}\n",group.as_str().unwrap(),child.as_str().unwrap());
+    let removed = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"remove","nodeId":group}),
+    );
+    assert_eq!(removed["selectedId"], next);
+    assert_eq!(
+        fs::read_to_string(&path).unwrap(),
+        before.replace(&group_block, "")
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read_to_string(&path).unwrap(), before);
+    composition_history(&mut service, "redo");
+    composition_history(&mut service, "undo");
+    let previous = compose_command(&mut service, &owner, json!({"type":"remove","nodeId":next}));
+    assert_eq!(previous["selectedId"], group);
+    let parent = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"remove","nodeId":group}),
+    );
+    assert_eq!(parent["selectedId"], owner["rootId"]);
+    assert!(fs::read_to_string(&path)
+        .unwrap()
+        .ends_with("screen notes():\n    pass\n"));
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(doc["screens"], parent["document"]["screens"]);
+}
+
+#[test]
+fn owned_composition_protected_neighbors_stay_visible_and_refuse_unsafe_operations() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let group = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"vbox","text":""}),
+    )["selectedId"]
+        .clone();
+    let text = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":group,"kind":"text","text":"Before"}),
+    )["selectedId"]
+        .clone();
+    let last = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"frame","text":""}),
+    )["selectedId"]
+        .clone();
+    let path = root.join(owner["path"].as_str().unwrap());
+    let ordinary = fs::read_to_string(&path).unwrap();
+    let external = format!(
+        "\u{feff}{}",
+        ordinary
+            .replace(
+                "    frame:",
+                "    use extra_notes()  # opaque neighbor\n    frame:"
+            )
+            .replace('\n', "\r\n")
+    );
+    fs::write(&path, &external).unwrap();
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let custom = doc["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["kind"] == "custom")
+        .expect("Source-only children stay selectable");
+    assert_eq!(custom["literal"], "use extra_notes()");
+    for command in [
+        json!({"type":"reorder","nodeId":group,"targetId":last,"after":true}),
+        json!({"type":"remove","nodeId":custom["id"]}),
+        json!({"type":"remove","nodeId":owner["rootId"]}),
+    ] {
+        assert_eq!(
+            reject(
+                &mut service,
+                "screens.compose",
+                json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":command})
+            )["error"]["code"],
+            "OPAQUE_BOUNDARY"
+        );
+        assert_eq!(fs::read_to_string(&path).unwrap(), external);
+    }
+    let edited = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"text","nodeId":text,"text":"Accepted"}),
+    );
+    assert_eq!(
+        fs::read_to_string(&path).unwrap(),
+        external.replace("\"Before\"", "\"Accepted\"")
+    );
+    let stale = reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":{"type":"remove","nodeId":text}}),
+    );
+    assert_eq!(stale["error"]["code"], "SOURCE_CONFLICT");
+    let before_remove = fs::read_to_string(&path).unwrap();
+    let removed = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"remove","nodeId":group}),
+    );
+    assert_eq!(
+        removed["selectedId"], custom["id"],
+        "The next sibling may be a source-only element"
+    );
+    assert!(fs::read_to_string(&path)
+        .unwrap()
+        .contains("    use extra_notes()  # opaque neighbor\r\n"));
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read_to_string(&path).unwrap(), before_remove);
+    assert_eq!(
+        edited["document"]["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["kind"] == "custom")
+            .unwrap()["id"],
+        custom["id"]
+    );
+}
+
+#[test]
+fn owned_composition_refuses_parent_protection_and_dirty_drafts_and_keeps_an_empty_body_valid() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let frame = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"frame","text":""}),
+    )["selectedId"]
+        .clone();
+    let child = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":frame,"kind":"text","text":"Child"}),
+    )["selectedId"]
+        .clone();
+    let path = root.join(owner["path"].as_str().unwrap());
+    let saved = fs::read_to_string(&path).unwrap();
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    for command in [
+        json!({"type":"add","parentId":frame,"kind":"text","text":"Second child"}),
+        json!({"type":"add","parentId":child,"kind":"text","text":"Cannot nest under text"}),
+    ] {
+        assert_eq!(
+            reject(
+                &mut service,
+                "screens.compose",
+                json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":command})
+            )["error"]["code"],
+            "OPAQUE_BOUNDARY"
+        );
+        assert_eq!(fs::read_to_string(&path).unwrap(), saved);
+    }
+    let opened = ipc(&mut service, "source.open", json!({"path":owner["path"]}));
+    let dirty = format!("{}# unfinished source", opened["text"].as_str().unwrap());
+    ipc(
+        &mut service,
+        "source.updateDraft",
+        json!({"path":owner["path"],"expectedBaseRevision":opened["baseRevision"],"text":dirty,"selectionStart":0,"selectionEnd":0}),
+    );
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":{"type":"remove","nodeId":child}})
+        )["error"]["code"],
+        "DIRTY_SOURCE"
+    );
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        dirty
+    );
+    ipc(
+        &mut service,
+        "source.discard",
+        json!({"path":owner["path"]}),
+    );
+    let protected = saved.replace(
+        "        pass\n",
+        "        if custom_flag:\n            text \"Protected child\"\n",
+    );
+    fs::write(&path, &protected).unwrap();
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":{"type":"remove","nodeId":frame}})
+        )["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
+    assert_eq!(fs::read_to_string(&path).unwrap(), protected);
+    let without_pass = saved.replace("        pass\n", "");
+    fs::write(&path, &without_pass).unwrap();
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"remove","nodeId":child}),
+    );
+    let expected = without_pass
+        .lines()
+        .filter(|line| !line.contains("text \"Child\""))
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n        pass\n";
+    assert_eq!(
+        fs::read_to_string(&path).unwrap(),
+        expected,
+        "Removing the final statement retains a syntactically valid body"
+    );
+}
+
+#[test]
+fn owned_composition_canvas_addition_is_inert_revision_bound_and_never_changes_source() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let group = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"vbox","text":""}),
+    )["selectedId"]
+        .clone();
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let parent = document["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == group)
+        .unwrap();
+    let path = root.join(owner["path"].as_str().unwrap());
+    let before = fs::read(&path).unwrap();
+    let payload = json!({"path":owner["path"],"screenName":"notes","expectedRevision":document["revision"],
+        "width":1280,"height":720,"drafts":[],"addition":{"parentStart":parent["span"]["start"],"kind":"text","text":"Unapplied draft"}});
+    let plan = ipc(&mut service, "screens.canvasPlan", payload.clone());
+    assert_eq!(
+        plan["nodes"].as_array().unwrap().last().unwrap()["literal"],
+        "Unapplied draft"
+    );
+    assert_eq!(
+        plan["nodes"].as_array().unwrap().last().unwrap()["parent"],
+        parent["span"]["start"]
+    );
+    assert_eq!(fs::read(&path).unwrap(), before);
+    let mut stale = payload;
+    stale["expectedRevision"] = json!("stale");
+    assert_eq!(
+        reject(&mut service, "screens.canvasPlan", stale)["error"]["code"],
+        "SOURCE_CONFLICT"
+    );
+}
+
+#[test]
 fn canvas_plan_uses_saved_literals_and_revision_bound_drafts_without_running_neighbors() {
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");

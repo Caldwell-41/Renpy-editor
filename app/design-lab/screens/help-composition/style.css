@@ -1,0 +1,82 @@
+.compose-lab { --compose-guide:#e4bb70; }
+.compose-lab * { box-sizing:border-box; }
+.compose-lab .lp-main { padding:18px; }
+.compose-lab .lp-heading { margin-bottom:12px; }
+.compose-lab .lp-heading h1 { font-size:23px; }
+.compose-lab .lp-content { overflow:auto; gap:12px; padding-bottom:16px; }
+.compose-lab .button { border-radius:0; font-size:12px; padding:7px 9px; }
+.compose-lab .lp-tools { gap:6px; }
+.compose-lab .lp-tools .button { font-size:11px; }
+.compose-lab .compose-screenbar { display:flex; gap:18px; font-size:12px; padding-bottom:10px; border-bottom:1px solid var(--border-normal); flex-wrap:wrap; }
+.compose-screenbar span:nth-child(2) { margin-right:auto; color:var(--text-secondary); }
+.compose-workspace { display:grid; grid-template-columns:minmax(0,1fr) 320px; grid-template-rows:auto minmax(0,1fr); gap:14px 18px; flex:1; min-height:0; }
+.compose-rail { grid-column:1/-1; display:flex; gap:0; border-bottom:1px solid var(--border-normal); }
+.compose-lab .compose-rail .button { flex:1; padding:10px; border:0; border-bottom:2px solid transparent; background:transparent; }
+.compose-lab .compose-rail [aria-pressed=true] { border-color:var(--accent-primary); color:var(--accent-primary); }
+.compose-stage { min-width:0; align-self:start; }
+.compose-canvas-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:0 0 12px; }
+.compose-canvas-header h2 { margin:0; font-size:14px; }
+.compose-canvas-header span { font-size:11px; color:var(--text-secondary); }
+.compose-drawing { min-height:270px; aspect-ratio:16/9; padding:18px; background:#171f25; display:grid; place-items:center; overflow:auto; container-type:inline-size; }
+.compose-drawing .compose-art { position:relative; min-width:0; }
+.compose-drawing .compose-hit { position:absolute; inset:0; width:100%; height:100%; z-index:1; padding:0; background:transparent; color:transparent; border:0; border-radius:0; cursor:pointer; }
+.compose-drawing .compose-hit:focus-visible { outline:2px solid var(--focus-ring); }
+.compose-drawing [data-selected=true] { outline:2px solid var(--compose-guide); outline-offset:3px; }
+.compose-art-screen { width:100%; }
+.compose-art-fixed { min-height:200px; padding:20px; }
+.compose-art-frame { width:100%; max-width:440px; margin:auto; padding:24px; border:1px solid #7c9190; background:#293b3b; color:#f0e6d2; }
+.compose-art-vbox { display:flex; flex-direction:column; gap:15px; padding:6px; min-height:25px; }
+.compose-art-text { white-space:pre-wrap; font-size:clamp(12px,3cqw,20px); line-height:1.5; }
+.compose-art-text:first-of-type { font-size:clamp(18px,4cqw,26px); }
+.compose-art-textbutton { align-self:flex-start; font-size:clamp(12px,2.8cqw,18px); border:1px solid #8ca099; padding:7px 20px; min-height:26px; white-space:pre-wrap; }
+.compose-art-custom { font-size:10px; color:#a6b4b5; margin-top:22px; }
+.compose-drawing .compose-art .compose-art { z-index:2; }
+.compose-selection { font-size:12px; margin:14px 0 8px; }
+.compose-footnote { font-size:11px; line-height:1.6; color:var(--text-secondary); }
+.compose-editor { min-width:0; padding-left:16px; border-left:1px solid var(--border-normal); overflow:auto; max-height:calc(100vh - 230px); }
+.compose-editor h2 { font-size:17px; margin:0 0 12px; }
+.compose-editor h3 { font-size:14px; margin:0 0 12px; }
+.compose-editor p { font-size:12px; line-height:1.6; }
+.compose-tree-toolbar { display:flex; justify-content:flex-end; margin-bottom:6px; }
+.compose-tree { display:flex; flex-direction:column; }
+.compose-lab .compose-tree .button { display:flex; align-items:center; gap:7px; text-align:left; font-size:12px; padding-top:8px; padding-bottom:8px; border:0; background:transparent; overflow-wrap:anywhere; line-height:1.4; }
+.compose-tree .navigation-icon { width:15px; height:15px; flex:none; margin:0; }
+.compose-lab .compose-tree [aria-selected=true] { background:var(--accent-subtle); color:var(--accent-primary); }
+.compose-tree [data-row=custom] { color:var(--text-muted); }
+.compose-tree [data-drop=true] { box-shadow:inset 0 2px var(--accent-primary); }
+.compose-tree [draggable=true] { cursor:grab; }
+.compose-selected-details { border-top:1px solid var(--border-normal); margin-top:12px; padding-top:12px; }
+.compose-selected-details strong { font-size:12px; }
+.compose-selected-details p { margin:8px 0; }
+.compose-selected-details details { margin:8px 0 12px; font-size:12px; }
+.compose-selected-details summary { cursor:pointer; }
+.compose-actions { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+.compose-lab .compose-key-help { font-size:10px; color:var(--text-secondary); }
+.compose-add { border-top:1px solid var(--border-normal); padding-top:16px; margin-top:16px; }
+.compose-lab[data-composer=focused] .compose-add { border:0; padding:0; margin:0; }
+.compose-lab[data-composer=focused] .compose-add h3 { display:none; }
+.compose-lab[data-composer=focused] .compose-add .lp-field:has(select[hidden]) { display:none; }
+.compose-lab .lp-field { margin-bottom:12px; }
+.compose-lab .lp-label { font-size:12px; }
+.compose-lab textarea,.compose-lab select { width:100%; max-width:100%; font:inherit; font-size:12px; border-radius:0; }
+.compose-lab textarea { min-height:84px; resize:vertical; }
+.compose-lab .compose-type-help { margin:6px 0 12px; }
+.compose-lab .compose-add-start { width:100%; margin-top:10px; text-align:left; }
+.compose-palette { display:flex; flex-direction:column; margin-bottom:14px; }
+.compose-lab .compose-palette .button { display:flex; gap:10px; padding:6px 9px; text-align:left; border:0; background:transparent; }
+.compose-lab .compose-palette [aria-pressed=true] { background:var(--accent-subtle); color:var(--accent-primary); }
+.compose-palette svg { width:16px; height:16px; }
+.compose-source { font-size:12px; line-height:1.6; white-space:pre-wrap; border-top:1px solid var(--border-normal); padding:16px 0; overflow-wrap:anywhere; }
+.compose-lab [hidden] { display:none!important; }
+.compose-lab .lp-status[data-error=true] { color:var(--status-error); }
+@media(max-width:759px) {
+  .compose-lab .lp-main { padding:12px; }
+  .compose-workspace { display:flex; flex-direction:column; flex:none; }
+  .compose-rail { flex:none; }
+  .compose-stage { width:100%; }
+  .compose-drawing { min-height:220px; padding:8px; }
+  .compose-art-frame { padding:16px; }
+  .compose-art-fixed { padding:12px; }
+  .compose-editor { width:100%; max-height:none; border-left:0; border-top:1px solid var(--border-normal); padding:16px 0; overflow:visible; }
+  .compose-lab .lp-tools { flex-wrap:wrap; }
+}

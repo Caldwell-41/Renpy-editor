@@ -486,8 +486,47 @@ The catalog supplies the resolved file revision. The UI requires that same revis
 and declaration in its separately inspected document, retaining an unresolved UUID
 when source changes between reads instead of falling back to another declaration.
 Restoring the original declaration/marker resolves the reference without rewriting
-source. This bounded contract adds only root identity; supported descendant ownership
-and explicit rename/delete commands remain separate work.
+source. Explicit screen rename/delete commands remain separate work.
+
+Ordinary elements created through `screens.compose` carry a canonical UUID in an
+inline `# loomlight-element: <UUID>` comment on their qualified statement header.
+The marker belongs to the source and survives literal edits, sibling moves,
+transactional Undo/Redo and reopen. It is active only inside an explicitly owned,
+resolved screen. Unmarked Source-authored elements are not adopted on inspection;
+duplicate element UUIDs lose structural-edit authority rather than retargeting an edit.
+Source-map schema remains v6.
+
+Composition requests capture screen UUID and exact file revision. Add supports
+fixed/frame/vbox and literal text/textbutton nodes; a frame accepts one child.
+Text edits replace only a qualified literal token. Reorder moves an exact ordinary
+subtree within its parent and refuses protected crossings, an unterminated moved
+statement or insertion after an unterminated destination. Removal refuses the
+screen root, protected nodes and containing groups.
+It deletes the qualified subtree range, preserving surrounding source, and inserts
+`pass` only when the remaining parent body would otherwise be empty. One accepted
+change uses one existing source transaction/history entry; no-op commands add none.
+Parsing, source ranges and returned revision all use the same captured byte buffer.
+
+Protected structural statements appear as read-only hierarchy rows with derived
+`source-<SHA-256>` identities. These identify the current inspected region; they do
+not grant ownership or the durable UUID guarantees of ordinary owned elements.
+After removal the UI selects next sibling, otherwise previous sibling, otherwise
+parent. An unmarked sibling uses its source offset in the accepted revision as a
+selection key. Device preferences restore that key only against the same source
+revision on reopen; this grants no editing authority and is not a durable identity.
+Its shared-history integration restores the removed target on Undo and the
+fallback on Redo. Other history preserves a surviving selection. Device preferences
+optionally remember screen/element selection by project UUID; history itself remains
+session-local. Text/addition drafts retain their original source revision. If Source
+removes their target, the UI keeps the text available for copying or explicit discard.
+Accepted source-changing geometry saves refresh composition controls against the
+returned document, preserving focus, expanded sections and scroll. New edits use
+that revision; existing drafts retain their captured revision.
+No-op geometry saves return the same ownership-annotated document, preserving root
+and element identities and protected rows without changing source or history.
+Explicit Design entry focuses the text editor. The removal notice's specific Undo
+action expires after a later source-changing Screens save or Source reload,
+including return from another workspace. No-op saves retain the action.
 
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing

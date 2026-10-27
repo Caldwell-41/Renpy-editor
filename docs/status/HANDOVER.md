@@ -1,31 +1,133 @@
 # Current outcome handover
 
-## Agent operation-limit policy amendment
+## L02 draft lifetime and history selection fixes
 
-The user approved the repo policy and shared budget-text updates in 26 open 3B
-issues. [The task](../tasks/active/automatic-code-checks.md#operation-limit-policy-amendment-2026-10-25)
-owns scope and verification on `codex/automatic-code-checks`, draft PR #61.
-Policy `7ce51a9` is published. All 26 issue bodies point to that immutable policy
-and pass independent read-back; acceptance, blockers and metadata remain unchanged.
-Snapshots and verification are ignored under
-`.toolchains/automatic-code-checks/operation-policy/`. Audit the final automatic PR
-run after this documentation closeout. This amendment needs no numerical work
-allowance. Prior limits remain historical; product work and merge remain unselected.
+Kris selected fixing the two remaining PR #62 defects, focused tests, commit/push,
+PR maintenance and terminal CI audit. This worker entered local/remote `c1912cb`
+as sole writer on `codex/37-compose-help-layout`; the parent remains read-only.
+Clearing a retained draft now ends its revision lifetime. Further typing in an
+uncleared stale draft still conflicts with input retained. Selection receipts now
+live with their workspace, matching the core's uncapped session-local history.
+`ef07e60`'s owned-document constructor and `c1912cb`'s accepted-edit completion
+remain intact. Their terminal required CI receipts pass in runs 40486719508 and
+40489082242, both attempt 1, as retained in PR #62's description.
 
-## Automatic code checks reviewed
+Both focused tests fail for the reported reasons on the handoff code and pass
+after correction. Typechecking and all 259 frontend cases pass. The real production
+controller/core check covers retained stale refusal, clear-then-edit acceptance,
+128 edits after removal, all 129 Undo/Redo transitions with exact source bytes,
+identities, selection and focus, plus reopen and fixture cleanup. Formatting,
+repository validation and all 13 link tests pass.
+[The correction record](../tasks/evidence/simple-help-layout.md#draft-lifetime-and-history-selection-corrections-2026-10-27)
+owns red/green results, corrected test-environment assumptions and reuse limits.
 
-The selected retrospective maintenance is published on
-`codex/automatic-code-checks`, based on `23e27b4`. Commit `e8039df` separates the
-Rust formatting baseline; the maintenance commit contains test selection, automatic
-PR/main checks and runbook changes. [Draft PR #61](https://github.com/Caldwell-41/Renpy-editor/pull/61)
-targets the existing Screens branch. [The task](../tasks/active/automatic-code-checks.md#ci-audit)
-owns the successful audit of run 40131940297, attempt 1, published implementation
-candidate `248c8fc`. Both automatic jobs and all 231 frontend tests pass; no fix was
-needed. The watcher event is acknowledged. Charged use is 11/13 including final
-documentation publication and its automatic check audit. Exact head check status
-is available on the PR; documentation successors do not redefine the tested
-implementation candidate. Merge remains unselected. The previous L17 acceptance
-and protected recovery below remain intact.
+The fixes and records publish together to [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62).
+Its description owns the exact final SHA, automatic run/attempt and terminal
+required-job/step audit, without a receipt-only successor commit. Worker chat
+`01a17d08-a42c-7031-aa1d-ef0b972df04c` retains any pending audit through ci-watch.
+On resume, reconcile that PR receipt with this checkout and finish pending audit
+in this same chat. Report the commit, reproductions, tests, PR update and terminal
+CI result before returning checkout ownership. Awaiting CI is a checkpoint.
+
+Mac ARM64 remains the development host; these are portable renderer corrections.
+No extra issue comment, package, native session, SDK process, manual CI dispatch,
+formal acceptance, issue closure, merge or release is selected. Earlier native/SDK
+receipts and cumulative limits below retain their tested candidates. Preserve the
+unrelated untracked audit, protected recovery and the parent's report server.
+
+The preceding no-op correction is published at `5f23ec4`; automatic run 40476079031
+is audited and passing in PR #62's description. [Its evidence](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27)
+retains the original defect, red/green checks and controller/core proof.
+
+The previous binding correction is published at `a37fe64`; automatic run 40464304449
+is audited and passing in PR #62's description. Its [evidence](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27)
+retains the focus, source-revision and hierarchy verification.
+
+## Published #37 baseline and qualification
+
+Kris selected continuing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
+with the implement skill. This chat remains sole checkout/server writer on
+`codex/37-compose-help-layout`, based on `8f7f9e7`. Current product/probe candidate
+is `73ffb7f`. Kris explicitly approved creating the PR into
+`codex/phase3b-screen-designer` on 2026-10-27. [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
+is open, with base `8f7f9e7` and initial head `ab176ed`. Branch publication and PR
+creation are complete. Formal acceptance, merge and release remain unselected.
+
+All seven bounded criteria have verified evidence. Functional review and the
+required CI audit are complete; the leaf stays open for formal acceptance.
+[The final acceptance map](../tasks/evidence/simple-help-layout.md#final-acceptance-review-2026-10-27)
+owns results and reuse boundaries. The published title is "Compose Help layouts with
+safe ordering and confirmed removal". Repository quality
+[40418300606, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40418300606/attempts/1)
+passes on `ab8ae3edaf866a65ba8a0cebf56130ce3da79b8a`. Its required steps and logs
+were audited against the unchanged PR head: 243 frontend passes, Rust formatting,
+repository validation, 13 link tests, Q1 controls and ten retention tests.
+The watcher event was acknowledged in this chat and its worker is done.
+[#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
+owns the terminal audit and any automatic checks caused by this final documentation
+successor. Audit those in this same chat and update the issue without another
+receipt-only commit. Return the leaf to `review_ready` once they pass. No additional
+package, native session, SDK process or manual CI dispatch is selected.
+
+Independent Standards and Spec reviews of the full diff, correction diff and final
+probe/gate have zero remaining findings. Two P2 corrections are complete: invalid
+text now retains the same focused control with associated completion errors; a Mac
+desktop-exit failure remains a failure while fixture cleanup and final reporting
+continue. The new validation checkpoint is required by admission. Historical
+six-group receipts keep their original contract and cannot satisfy the current
+seven-group gate.
+
+Final local checks pass 243 frontend cases; 417 ordinary core cases, with 48
+intentional ignores and three documented exclusions; and 249 Python cases with
+three exact Windows-only exclusions. All four harness groups, Rust formatting and
+actionlint pass. Chrome/core passes seven groups and pointer/modal/stale checks.
+Full/shorter headless WebKit diagnostics retain the known ResizeObserver delivery
+notification failure; they supply no pass and were not suppressed.
+
+Signed Mac package 4/native session 5 qualifies `73ffb7f`: all seven groups pass in
+9.425 seconds, exit 0, no timeout, exact source/history/reopen and all cleanup owners.
+The current native receipt resolves Spec's changed-field focus evidence gap.
+Executable SHA-256 is
+`b118a214b1280489e2e2c6b60ae3df5dd10f17dea18ee8701c4e34d26a4fc8c1`.
+Identity/installer receipts are under `.toolchains/releases/l02-composition-04/`;
+raw checks and native output are under `.toolchains/screen-composition/final-review/`.
+The external `caffeinate -di` process remains untouched; no isolated performance,
+physical-input or broader canvas/editor acceptance is claimed.
+
+[Windows run 40396855757, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40396855757/attempts/1)
+on `d80c323` remains fully audited for its unchanged source/helper/SDK and successful
+native workflow scope. Core source generation, SDK adapter/runtime and inert helper
+plan are unchanged. Preserve each tested candidate; documentation successors do not
+become new native or SDK candidates. The Mac pause's host-suspension diagnosis and
+its earlier failed runs remain in the same evidence owner.
+
+C5 source `94c78e7`, revision `workflow-popup-v1`, retains explicit approval.
+[The approval record](../design/design-lab-help-composition/approval.json) owns its
+fingerprint and captures. The read-only `.toolchains/l02-c5-reference` worktree
+preserves that source; verify its port-5175 server before use. The known full-lab
+source-guard limitation and shell/naming differences remain in the evidence.
+Current invalid-state production captures verify the existing field-error pattern;
+they do not alter C5 approval or claim full canvas fidelity.
+
+Cumulative use is Mac packages 4/7 and native sessions 5/5; Windows packages 1/2
+and native sessions 1/2; SDK campaigns 2/2 and physical SDK starts 4/4 per host;
+focused CI dispatches 1/2. Compile and lint count as separate SDK children. The
+user-selected final review continuation supplied package 4/session 5 within the
+unchanged ceilings. No further costly operation is selected or needed for this
+completed verification. No owned app/helper/server or power assertion remains.
+
+Preserve unrelated untracked `docs/audits/2026-10-25-phase-1-codebase-design.md`.
+The retained sections below contain unique prior failures and protected native
+state. They justify this handover's excess over its normal word-count target and
+do not reopen those outcomes or allowances.
+
+## Prior automatic checks and policy maintenance
+
+PR #61 is merged into the selected base `8f7f9e7`.
+[Its task](../tasks/active/automatic-code-checks.md) retains the implementation/CI
+audit and operation-policy reconciliation. Ignored policy snapshots remain under
+`.toolchains/automatic-code-checks/operation-policy/`. Previous L17 acceptance and
+protected recovery below remain intact.
 
 <a id="active-l17-integration-handover"></a>
 

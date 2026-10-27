@@ -496,3 +496,59 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** actual discovery regression fails before the change and passes
   afterward; the general Mac runner passes all four groups without a recorder.
 - **Evidence:** [Automatic code checks](../tasks/active/automatic-code-checks.md#verification-and-review).
+
+## H35. Sleeping Mac display suspends a packaged WKWebView probe
+
+- **Observed:** the native composition probe had a 247.935-second history gap
+  although source had already changed. Browser and Windows checks did not reproduce it.
+- **Cause:** the display was asleep before launch. WebKit dropped its assertions,
+  and macOS suspended the exact WebContent child for 246.297 seconds. An attempted
+  CUA inspection woke the display and resumed that child. The long pause is a host
+  condition admitted by the runner, not evidence of a composition/request-lane defect.
+- **Prevention:** the shared runtime runner now verifies an unlocked, awake desktop
+  and holds owned IOKit display-sleep/system-idle assertions for each native child.
+  It retains admission and individual release receipts. Child cleanup covers
+  timeout, interruption and output-reader startup failure before power release.
+  System-idle prevention alone did not keep the display awake.
+- **Verification:** replay of original native/OS receipts matches process ownership,
+  explicit suspension/resumption and the display-wake intervention. No fresh native
+  session or product timing claim was needed. Keep UI-process events distinct from
+  renderer events when auditing suspension. Portable boundary tests and actual Mac
+  locked-host refusal/power-API checks cover the correction. The final signed
+  composition candidate passes seven groups and cleanup in 9.425 seconds.
+  A separate external display-awake assertion was active, so this is functional
+  verification rather than an isolated sleep-prevention timing experiment.
+- **Evidence:** [Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27),
+  [runner correction](../tasks/evidence/simple-help-layout.md#mac-native-runner-correction-selected-2026-10-27).
+
+## H36. Empty composition text loses field focus
+
+- **Cause:** local refusal rerendered the form and replaced its focused textarea;
+  errors had no field association or completion validation.
+- **Correction:** reuse the shared authoring field validator on blur/submission,
+  preserve IME input and focus the same invalid control without rerendering.
+- **Verification:** component regressions reject lost focus/missing association;
+  the current renderer/core and signed native probe require a positive validation
+  checkpoint with unchanged source and retained input.
+- **Evidence:** [Final review corrections](../tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).
+
+## H37. Desktop-exit errors skip native fixture cleanup
+
+- **Cause:** a Mac desktop guard exception escaped after child execution and bypassed
+  the remaining helper/fixture audit, cleanup and final failed result.
+- **Correction:** distinguish desktop errors and retain them in the failed result
+  while independent cleanup owners finish. Prelaunch refusal still prevents launch.
+- **Verification:** actual-runner fixtures complete source/metadata and fixture
+  cleanup under post-child lock or assertion-release failure; neither becomes a pass.
+- **Evidence:** [Final review corrections](../tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).
+
+## H38. No-op geometry saves lose owned hierarchy state
+
+- **Class/search:** product; unchanged size/position, null root ID, missing protected
+  rows, "Choose an owned container" after Apply.
+- **Cause/correction:** no-op geometry returned a raw parser document while changed
+  saves returned ownership annotations. Annotate the captured document on both
+  no-op paths so the same source revision retains the same owned model.
+- **Verification:** dispatch coverage for size, pixel-property and position no-ops,
+  exact source and Undo/Redo; production controller/core check accepts root Add afterward.
+- **Evidence:** [No-op geometry correction](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27).

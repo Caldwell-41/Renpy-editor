@@ -10,7 +10,7 @@ import { operationProgress } from "./operation-progress.ts";
 import { openStudioRequest } from "./studio-request-ui.ts";
 import { openSettings } from "./settings-ui.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
-import { RequestLane } from "./request-lane.ts";
+import { applicationRequestLane as requestLane } from "./request-lane.ts";
 import { ScreensWorkspace } from "./screen-ui.ts";
 import { RuntimeWorkspace } from "./runtime-ui.ts";
 import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
@@ -250,7 +250,6 @@ function setStatus(message: string, kind: "normal" | "error" = "normal"): void {
   const apply=():void=>{if(status?.isConnected&&(status.textContent!==message||status.dataset.kind!==kind)){status.textContent=message;status.title=message;status.dataset.kind=kind;}};
   if(kind==="normal"&&["Saving…","Checking saved state…"].includes(message))routineStatusTimer=setTimeout(apply,200);else apply();
 }
-const requestLane = new RequestLane();
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const capturedView = viewGeneration;
   const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "screens.list", "screens.inspect", "screens.canvasPlan", "screens.canvasStatus", "scene.list", "authoring.list", "references.list", "prompts.list", "context.options", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
@@ -496,7 +495,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
   else if (surface === "screens") {
-    screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution,
+    screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution, projectId: project.projectId,
       request: (operation, payload) => projectValue(project, operation, payload),
       coordinate: task => runAuthoringOperation(project, screensWorkspace!, task),
       current: () => currentProject?.sessionId === project.sessionId,

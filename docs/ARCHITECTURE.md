@@ -660,8 +660,10 @@ service checkout, for at most 40 retries at 25 ms. Payload/session identity neve
 changes. Writes, trust grants and process starts are never replayed. This covers
 Source opening/status observations overlapping normal background read consumers.
 
-Source retention/observation, project status/flush and scene/authoring/flow observations
-share a renderer request lane. Initial Story reads therefore finish before early Source
+Source retention/observation, project status/flush, device preference reads/writes and
+scene/authoring/flow observations share one renderer request lane. Selection persistence
+therefore finishes before a following composition write checks out the same service.
+Initial Story reads finish before early Source
 navigation uses the same service, and background observations cannot take it during
 Save. Short runtime submissions and SDK discovery join the lane; runtime control/status
 bypass it so Stop remains responsive. Picker and unrelated surface lifetimes retain
@@ -729,6 +731,14 @@ the existing transaction/history service. The renderer has no file authority.
 [Source-map v6](DATA_MODEL.md#project-lifecycle-metadata) owns the marker and
 conservative unresolved-reference rules. Existing revision-bound Help edits retain
 their original path/name/range checks.
+
+`screens.compose` uses those resolved owners and a captured source snapshot for
+bounded add, literal text edit, same-parent reorder and confirmed removal. It shares
+the existing transaction/history service. Source-carried element UUIDs, protection
+boundaries and selection persistence follow [the data contract](DATA_MODEL.md#project-lifecycle-metadata).
+The Screens controller retains unapplied input and owns the stationary removal
+confirmation; the core independently re-proves ownership, revision and safe ranges.
+Pending canvas additions are typed inert plans, never temporary game-source writes.
 
 The selected Help-screen implementation adds an optional typed `preview` purpose
 on `runtime.prepare`. A screen purpose carries the supported source path, declaration

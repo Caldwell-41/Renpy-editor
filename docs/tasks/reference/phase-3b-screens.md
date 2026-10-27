@@ -90,6 +90,11 @@ editing alongside pointer gestures. Inspector changes remain a draft until Apply
 Cancel restores saved values. One Apply and each completed drag create one undo
 entry. Invalid fields and source conflicts retain the draft.
 
+Retained stale text drafts keep their original revision through further typing. Matching
+the current saved literal clears the draft; the next edit starts at the accepted
+revision. Removal Undo/Redo restores selection for every retained shared-history
+entry, including removals followed by more than 128 accepted operations.
+
 Each custom screen has an explicit panel or blocking type. Panels dismiss with Hide;
 blocking screens finish with Finish interaction. Both default to Close and Escape
 dismissal; clicking outside leaves them open. Qualify keyboard focus and dismissal

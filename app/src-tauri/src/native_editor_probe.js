@@ -7,7 +7,7 @@ window.__loomlightProbeEditor = element => {
   const point = at => {const all=lines();for(const line of all){if(at<=line.textContent.length){const walker=document.createTreeWalker(line,4);let text;while((text=walker.nextNode())){if(at<=text.textContent.length)return [text,at];at-=text.textContent.length;}return [line,0];}at-=line.textContent.length+1;}const line=all.at(-1);return [line,line.childNodes.length];};
   return {
     get value(){return lines().map(l=>l.textContent).join('\n');},
-    set value(text){element.focus();const selection=window.getSelection();selection.selectAllChildren(element);if(!document.execCommand('insertText',false,text))throw Error('Native contenteditable insert failed');},
+    set value(text){element.focus();const selection=window.getSelection();selection.selectAllChildren(element);document.dispatchEvent(new Event('selectionchange'));if(!document.execCommand('insertText',false,text))throw Error('Native contenteditable insert failed');},
     get readOnly(){return element.contentEditable==='false';},
     get selectionStart(){const s=window.getSelection();return Math.min(offset(s.anchorNode,s.anchorOffset),offset(s.focusNode,s.focusOffset));},
     get selectionEnd(){const s=window.getSelection();return Math.max(offset(s.anchorNode,s.anchorOffset),offset(s.focusNode,s.focusOffset));},

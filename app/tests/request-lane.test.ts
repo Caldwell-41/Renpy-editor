@@ -89,3 +89,14 @@ test("canvas frames, health and Screens acceptance share the service lane while 
   assert.deepEqual(calls,["retention","stop",operation,"close"]);
  }
 });
+
+test("a selection preference write finishes before composition dispatches once, while Stop stays responsive", async () => {
+  const lane = new RequestLane(), calls: string[] = []; let release!: () => void;
+  const selection = lane.run("preferences.write", async () => { calls.push("selection"); await new Promise<void>(resolve => { release = resolve; }); });
+  await Promise.resolve();
+  const composition = lane.run("screens.compose", async () => { calls.push("compose"); });
+  await lane.run("runtime.stop", async () => { calls.push("stop"); });
+  try { assert.deepEqual(calls, ["selection", "stop"]); }
+  finally { release(); await selection; await composition; }
+  assert.deepEqual(calls, ["selection", "stop", "compose"]);
+});
