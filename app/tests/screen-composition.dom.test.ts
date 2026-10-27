@@ -8,7 +8,8 @@ const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 function interactiveFixture(initial?: ScreenDocument, canvas = false) {
   const browser = new Window();
-  Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, ResizeObserver: browser.ResizeObserver });
+  Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement,
+    ResizeObserver: class { observe() {} disconnect() {} } });
   const node = (id: string, kind: string, start: number, end: number, parentStart: number | null, literal: string | null = null): ScreenNode => ({
     id, kind, literal, span: { start, end }, parentStart, layout: {}, properties: [], protected: [],
   });
@@ -115,6 +116,35 @@ test("owned composition retains a refused addition and Cancel accepts no source 
     assert.equal(calls.filter(c => c.operation === "screens.compose").length, 1);
     assert.ok([...document.querySelectorAll("button")].some(b => b.role === "treeitem" && b.ariaSelected === "true"));
   } finally { workspace.dispose(); }
+});
+
+test("accepted addition refreshes the canvas and selects its source-backed geometry without another interaction", async () => {
+  const h = interactiveFixture(undefined, true);
+  try {
+    await tick(); await tick();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    h.row("box-id").click(); h.click("Add element");
+    const field = [...document.querySelectorAll("textarea")].find(input => input.ariaLabel === "New element text"); assert.ok(field);
+    field.value = "Added"; field.dispatchEvent(new window.Event("input"));
+    const accepted = structuredClone(h.original); accepted.revision = "accepted";
+    accepted.screens[0]!.nodes.splice(4, 0, { id: "added-id", kind: "text", literal: "Added", parentStart: 30,
+      span: { start: 150, end: 180 }, properties: [], layout: {}, protected: [] });
+    h.respond(accepted, "added-id"); h.click("Add text");
+    await tick(); await tick();
+    assert.equal(h.workspace.hasDraft(), false);
+    assert.equal(h.row("added-id").ariaSelected, "true");
+    const render = h.calls.find(call => call.operation === "screens.canvasRender" && call.payload?.expectedRevision === "accepted");
+    assert.ok(render, "Accepted Source must request a canvas frame without another click or resize");
+    assert.equal("addition" in render.payload!, false, "The accepted element must render from Source rather than a draft addition");
+    const canvas = document.querySelector<HTMLElement>(".screen-game"); assert.ok(canvas);
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.equal(canvas.dataset.stale, "false");
+    assert.doesNotMatch(document.querySelector(".screen-canvas-status")?.textContent ?? "", /earlier Source revision|Input retained/);
+    const target = [...canvas.querySelectorAll<HTMLButtonElement>(".screen-node")].find(node => node.ariaLabel === "Select Added");
+    assert.ok(target, "The accepted addition has canvas geometry");
+    assert.equal(target.ariaPressed, "true", "Canvas and hierarchy select the accepted addition");
+    assert.equal(canvas.querySelector(".screen-pending-addition"), null);
+  } finally { h.workspace.dispose(); }
 });
 
 test("text drafts follow element identity across selection, Apply and Cancel", async () => {

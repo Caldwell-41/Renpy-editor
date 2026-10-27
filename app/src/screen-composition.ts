@@ -322,7 +322,7 @@ export class ScreenComposer {
       await this.host.commit({ type: "add", parentId: draft.parentId, kind: draft.kind, text: draft.text }, draft.document);
       this.addition = undefined; this.error = ""; this.host.note("Element added. Undo removes this addition.");
     } catch (error) { this.error = `${(error as Error).message}. Input retained.`; this.host.note(this.error, true); }
-    finally { this.saving = false; this.render(); if (this.addition) this.card?.querySelector<HTMLElement>("textarea")?.focus(); else this.focusRow(); }
+    finally { this.saving = false; this.render(); if (this.addition) this.card?.querySelector<HTMLElement>("textarea")?.focus(); else this.focusRow(); this.host.preview(); }
   }
   private renderText(view: CompositionView, card: HTMLElement): void {
     const key = this.textKey(view), draft = this.texts.get(key);

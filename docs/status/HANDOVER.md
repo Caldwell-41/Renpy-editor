@@ -1,29 +1,27 @@
 # Current outcome handover
 
-## L02 PR open, required checks audited
+## L02 Add canvas refresh publication and CI audit
 
-Kris selected the Enter-to-Design correction for PR #62, followed by publication
-if Standards and Spec reviews passed. Both read-only reviews of `a32d525...daf6c3b`
-pass with zero findings. `codex/37-compose-help-layout` now publishes the two-file
-fix/test commit `daf6c3b`; PR #62's description includes the correction and current
-validation. Typechecking, all 246 frontend cases, the production build and a focused
-Chrome keyboard check pass.
-[The correction record](../tasks/evidence/simple-help-layout.md#local-enter-to-design-correction-2026-10-27)
-owns diagnosis, review and validation limits. Kris selected committing and pushing
-these supporting records on 2026-10-27, leaving the unrelated audit untouched.
-[Automatic Repository quality run 40426321177](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40426321177)
-attempt 1 passes on the correction candidate
-`daf6c3b3d44648c5b30b0b5a34f7b56a57ae6d7d`. Both required jobs and all executed steps
-are audited; logs confirm 246 frontend passes, formatting, repository validation,
-13 section-link tests, Q1 controls/source audit and ten retention passes. The
-watcher event matches this chat, its receipt is recorded and the worker is done.
-PR #62's description includes the audited CI link. The correction's CI audit is
-complete. After this documentation successor publishes, audit its automatic checks
-in the same chat and record the terminal result on PR #62 without another
-receipt-only commit. No manual CI, native session, SDK process or package is
-selected. The tracker is unchanged; formal acceptance, merge and release remain
-unselected.
-Existing native/SDK receipts and exhausted allowances retain their original scope.
+Kris selected one subagent to diagnose, fix and test the P2 issue.
+The correction is complete on `codex/37-compose-help-layout`, starting
+at `66711fa`. Add now notifies the canvas after clearing its accepted draft. A new
+workspace test rejected the old behavior and now verifies the accepted revision,
+selected geometry and cleared stale state without another user interaction.
+Typechecking and all 247 frontend tests pass under the pinned Node/npm versions
+and supported Python. Coordinator review found no required correction.
+[The correction record](../tasks/evidence/simple-help-layout.md#local-add-canvas-refresh-correction-2026-10-27)
+owns diagnosis, test results and limits.
+
+Kris then selected updating PR #62 with the fix and running needed CI. This commit
+includes the code, test and supporting records. Push it to the existing PR branch,
+update the PR description and audit the automatic Repository quality run for its
+exact head. Use ci-watch if it remains pending, then record the terminal audit on
+PR #62 without another receipt-only commit. The correction changes no source
+generation, helper, SDK or native code; their prior receipts retain their tested
+candidates and no new qualification campaign is selected. Preserve the unrelated
+untracked audit. Formal acceptance, merge and release remain unselected.
+
+## Published #37 baseline and qualification
 
 Kris selected continuing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
 with the implement skill. This chat remains sole checkout/server writer on

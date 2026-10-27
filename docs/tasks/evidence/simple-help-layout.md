@@ -3,6 +3,52 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Local Add canvas refresh correction, 2026-10-27
+
+Kris selected a subagent to diagnose, fix and test the P2 Add canvas refresh finding
+on `codex/37-compose-help-layout`, starting at `66711fa`. This correction covers
+the accepted-add canvas refresh.
+
+The failure is a product defect. A successful Add installed the accepted Source
+revision while the composer still held its old addition draft. The canvas correctly
+refused that stale draft. Add then cleared the draft and refreshed only the editor
+card, leaving the canvas stale until another interaction. The draft owner's
+completion step now notifies the preview after clearing the draft and restoring
+focus, matching text Apply. The other composition operations carry no pending
+draft through acceptance. The stale-source guard is unchanged.
+
+The new workspace test disables resize notifications and checks that Add requests
+the accepted revision without draft-addition data, installs geometry for the new
+element, synchronizes canvas/hierarchy selection and clears the stale message
+without another user interaction. Before the production change,
+`npm run build:tests` followed by
+`node --test --test-concurrency=1 --test-name-pattern='accepted addition refreshes' dist-tests/tests/screen-composition.dom.test.js`
+failed with "Accepted Source must request a canvas frame without another click or
+resize". The first run after the fix exposed a test selector mismatch: happy-dom's
+`ariaLabel` property did not populate the attribute selector. The test now reads
+the public property used by existing tests; no extra production change was needed.
+
+The focused refresh and refused-add retention cases pass 2/2 under Node 24.19.0 and
+npm 11.9.0. `npm run check` with those pins and the supported bundled Python 3.12
+passes typechecking and all 247 frontend tests, with zero failures, cancellations
+or skips. The coordinator independently reviewed the production/test diff and
+found no required correction. Repository validation and whitespace checks pass.
+
+Kris subsequently selected updating PR #62 with the fix and running needed CI.
+This commit includes the one-line behavior fix, focused test and supporting records.
+The automatic Repository quality run is the selected check for this portable
+renderer completion change. Audit the exact pushed candidate in this same chat and
+record the terminal result on PR #62 without another receipt-only commit. Raw run,
+job and log receipts belong under ignored `.toolchains/screen-composition/`.
+
+Layout, CSS, source generation, helper, SDK and native code are unchanged. Prior
+native/SDK receipts retain their tested candidates and limits; this correction
+needs no new package, native session, SDK campaign or manual qualification dispatch.
+GitHub #37 remains unchanged. Formal acceptance, merge and release remain unselected.
+The unrelated untracked audit is preserved. CURRENT and HANDOVER retain their
+existing qualification identities and protected recovery despite exceeding their
+soft size targets; this narrow correction does not reorganize those records.
+
 ## Local Enter-to-Design correction, 2026-10-27
 
 Kris selected fixing PR #62's canvas keyboard regression and keeping the changes

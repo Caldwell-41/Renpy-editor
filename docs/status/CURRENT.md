@@ -2,6 +2,17 @@
 
 ## L02 Help composition PR open
 
+2026-10-27 follow-up: Kris selected the P2 Add canvas refresh
+correction. A subagent reproduced the missing accepted-revision frame, fixed the
+draft owner's completion notification and added a focused test. Typechecking and
+all 247 frontend tests pass; coordinator review has no required correction. Kris
+then selected publishing the fix and updating PR #62. This correction includes the
+code, test and supporting records. Audit its automatic Repository quality checks
+in this same chat and record the terminal result on PR #62. Prior native/SDK
+receipts retain their tested candidates; no new qualification campaign is needed
+for this renderer completion notification.
+[Correction evidence](../tasks/evidence/simple-help-layout.md#local-add-canvas-refresh-correction-2026-10-27).
+
 2026-10-27 follow-up: PR #62's canvas Enter-to-Design regression is fixed
 with three focused cases. Typechecking, all 246 frontend tests, the production
 build and a focused Chrome keyboard check pass. Standards and Spec reviews pass
