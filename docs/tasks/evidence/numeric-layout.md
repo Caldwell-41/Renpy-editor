@@ -254,3 +254,26 @@ now explains the shared ambiguity, and alias splitting refuses any blocked field
 This preserves the original alias/comment/override bytes rather than rewriting a
 Source-only rule as a side effect. Focused screen checks are being rerun on the fix.
 Both reviewers remain read-only; the implementation owner makes the corrections.
+
+## Standards
+
+The independent review found no actionable Standards violations at `2b912c5`
+against `4d2101f`, and no new findings in `57b9960`. Source transactions, typed IPC,
+Rust Add eligibility and ScreenCanvasFrames ownership remain intact. No smell
+judgment warranted an additional abstraction or refactor.
+
+## Spec
+
+The independent review reported two P2 defects: validation feedback leaked between
+elements, and an alias split could rewrite a blocked setter. Both have red/green
+production-boundary regressions and fixes in `57b9960`. Recheck confirms both resolved
+and no introduced defect. No scope creep was found. Final local results are 36
+screen-core tests and 264 frontend tests passing, plus the full production numeric
+controller check after per-element feedback changed. CI and signed Mac native proof
+remain pending, without acceptance or merge claims.
+
+The temporary pinned A2 server/checkout was retired after comparison. Its only local
+changes were the identical committed approval record and a dependency symlink.
+Approved source, metadata, nine reference captures and the selected production
+captures remain in the branch history. The unrelated audit and protected recovery
+were not staged, changed or removed.

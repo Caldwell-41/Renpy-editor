@@ -10,12 +10,14 @@ The design chat returned writer ownership. Kris confirmed both the production
 UI/controller/real-core and public Rust-operation TDD boundaries.
 
 Typed numeric editing, alias-safe source patches, shared history and retained drafts
-are implemented locally. Focused screen-core and production Help checks pass. Early
+are committed at `57b9960`. All 36 screen-core and 264 frontend tests pass, as do
+production numeric/Help controller checks. Standards review has zero findings; both
+Spec findings are fixed and rechecked. Early
 Mac SDK geometry passes at both aspects after a retained failed test-runner attempt
 and a normal-entry diagnostic. [Evidence](../tasks/evidence/numeric-layout.md) owns
 exact scope, inputs and pending checks. #38 owns execution and cumulative limits.
-Final review, coherent-candidate Windows/Mac qualification, signed Mac native proof,
-PR and CI audit remain pending. Do not merge or close with missing proof.
+Coherent-candidate Windows/Mac qualification, signed Mac native proof, PR and CI
+audit remain pending. The approved Mac signing identity is currently unavailable. Do not merge or close with missing proof.
 Broader B02/3B acceptance, the unrelated audit and protected recovery keep their owners.
 
 ## Phase 3B architecture refactors merged

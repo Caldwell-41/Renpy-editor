@@ -8,16 +8,18 @@ Kris authorized implementation, focused tests, final review, a PR into
 `codex/phase3b-screen-designer` and CI audit. Merging and other features are excluded.
 A2 / Paired fields is approved. The design chat returned sole writer ownership;
 Kris confirmed both proposed TDD boundaries. Approval source is `c2d23c5`, record
-`c1ab3e6`. The separate reference checkout remains pinned for visual comparison.
+`c1ab3e6`. The reference checkout was retired after comparison; approved source/captures remain committed.
 
 [Evidence](../tasks/evidence/numeric-layout.md) records exact source preservation,
 keyboard/draft/history coverage, the property matrix and early two-aspect SDK proof.
-The implementation checkpoint is local; its final review and publication follow. Final review,
-full checks, CI and native/package proof still need completion. #38 owns cumulative
+Implementation/fixes are committed at `57b9960`. Standards review has zero findings;
+both Spec findings are fixed and rechecked. All 36 screen-core and 264 frontend tests
+pass. Publication, CI audit and native/package proof still need completion. #38 owns cumulative
 operation limits. Mac SDK consumption is 12/16; Windows 0/16. Package builds and
 native sessions are 0/2 per OS, qualification dispatches 0/3. Preserve failed SDK and
 Design Lab results; neither becomes a pass. Route Windows and Mac automated proof
-through CI, with local signed Mac native proof because CI lacks the approved identity.
+through CI. Signed Mac native proof is pending because this host currently lacks
+the approved signing identity; the preflight started no build or native session.
 
 The untracked Phase 1 audit, protected native recovery, archives, tags and stashes
 below are unrelated and remain untouched. Prior sections' statements that no
