@@ -1,73 +1,41 @@
 # Current outcome handover
 
-## L02 draft lifetime and history selection fixes
+<a id="l02-draft-lifetime-and-history-selection-fixes"></a>
 
-Kris selected fixing the two remaining PR #62 defects, focused tests, commit/push,
-PR maintenance and terminal CI audit. This worker entered local/remote `c1912cb`
-as sole writer on `codex/37-compose-help-layout`; the parent remains read-only.
-Clearing a retained draft now ends its revision lifetime. Further typing in an
-uncleared stale draft still conflicts with input retained. Selection receipts now
-live with their workspace, matching the core's uncapped session-local history.
-`ef07e60`'s owned-document constructor and `c1912cb`'s accepted-edit completion
-remain intact. Their terminal required CI receipts pass in runs 40486719508 and
-40489082242, both attempt 1, as retained in PR #62's description.
+## L02 merge and ticket closeout
 
-Both focused tests fail for the reported reasons on the handoff code and pass
-after correction. Typechecking and all 259 frontend cases pass. The real production
-controller/core check covers retained stale refusal, clear-then-edit acceptance,
-128 edits after removal, all 129 Undo/Redo transitions with exact source bytes,
-identities, selection and focus, plus reopen and fixture cleanup. Formatting,
-repository validation and all 13 link tests pass.
-[The correction record](../tasks/evidence/simple-help-layout.md#draft-lifetime-and-history-selection-corrections-2026-10-27)
-owns red/green results, corrected test-environment assumptions and reuse limits.
+Kris instructed merging PR #62 into `codex/phase3b-screen-designer` and updating
+the PR and related tickets. The reviewed head `cbecf36` is merged at
+`eb9ef9a4ef5b84d33b748e43f6cc659df7071f47`. The integration merge has the same tree
+as that head. This checkout is now on the integration branch; preserve the
+unrelated untracked audit and all protected recovery below. The feature branch is
+retained; no branch cleanup or next implementation was selected.
 
-The fixes and records publish together to [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62).
-Its description owns the exact final SHA, automatic run/attempt and terminal
-required-job/step audit, without a receipt-only successor commit. Worker chat
-`01a17d08-a42c-7031-aa1d-ef0b972df04c` retains any pending audit through ci-watch.
-On resume, reconcile that PR receipt with this checkout and finish pending audit
-in this same chat. Report the commit, reproductions, tests, PR update and terminal
-CI result before returning checkout ownership. Awaiting CI is a checkpoint.
+[L02 #37](https://github.com/Caldwell-41/Renpy-editor/issues/37) is accepted and closed
+for its seven bounded Help criteria. [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
+records the actual merge and final audited
+[CI run 40494321663, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40494321663/attempts/1).
+Both required jobs pass, including all 259 frontend tests. The parent's independent
+review reran both focused cases and the real controller/core sequence, including
+129 Undo and 129 Redo transitions, exact source/identities/selection/focus, reopen
+and cleanup. [The merge closeout](../tasks/evidence/simple-help-layout.md#merge-and-ticket-closeout-2026-10-27)
+owns the result and supporting evidence.
 
-Mac ARM64 remains the development host; these are portable renderer corrections.
-No extra issue comment, package, native session, SDK process, manual CI dispatch,
-formal acceptance, issue closure, merge or release is selected. Earlier native/SDK
-receipts and cumulative limits below retain their tested candidates. Preserve the
-unrelated untracked audit, protected recovery and the parent's report server.
+Ticket bodies #22, #24, #25, #28 and #33 reflect scoped completion/dependency/evidence
+credit while their aggregate acceptance stays open. #38-#41 record the satisfied
+L02 prerequisite and remain unselected. #63 remains open for separate dependency
+maintenance. Native dependency relationships are preserved. No watcher, CI audit,
+implementation or costly operation remains pending for #37. Its historical limits
+stay closed. Broader editor/canvas, Phase 2/3A and whole-3B acceptance, plus release,
+remain separate; this closeout selects no successor work.
 
-The preceding no-op correction is published at `5f23ec4`; automatic run 40476079031
-is audited and passing in PR #62's description. [Its evidence](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27)
-retains the original defect, red/green checks and controller/core proof.
+<a id="published-37-baseline-and-qualification"></a>
 
-The previous binding correction is published at `a37fe64`; automatic run 40464304449
-is audited and passing in PR #62's description. Its [evidence](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27)
-retains the focus, source-revision and hierarchy verification.
+## Retained L02 qualification
 
-## Published #37 baseline and qualification
-
-Kris selected continuing [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
-with the implement skill. This chat remains sole checkout/server writer on
-`codex/37-compose-help-layout`, based on `8f7f9e7`. Current product/probe candidate
-is `73ffb7f`. Kris explicitly approved creating the PR into
-`codex/phase3b-screen-designer` on 2026-10-27. [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
-is open, with base `8f7f9e7` and initial head `ab176ed`. Branch publication and PR
-creation are complete. Formal acceptance, merge and release remain unselected.
-
-All seven bounded criteria have verified evidence. Functional review and the
-required CI audit are complete; the leaf stays open for formal acceptance.
-[The final acceptance map](../tasks/evidence/simple-help-layout.md#final-acceptance-review-2026-10-27)
-owns results and reuse boundaries. The published title is "Compose Help layouts with
-safe ordering and confirmed removal". Repository quality
-[40418300606, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40418300606/attempts/1)
-passes on `ab8ae3edaf866a65ba8a0cebf56130ce3da79b8a`. Its required steps and logs
-were audited against the unchanged PR head: 243 frontend passes, Rust formatting,
-repository validation, 13 link tests, Q1 controls and ten retention tests.
-The watcher event was acknowledged in this chat and its worker is done.
-[#37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
-owns the terminal audit and any automatic checks caused by this final documentation
-successor. Audit those in this same chat and update the issue without another
-receipt-only commit. Return the leaf to `review_ready` once they pass. No additional
-package, native session, SDK process or manual CI dispatch is selected.
+These candidate-bound results and recovery locations predate the final portable
+corrections. Their old test totals retain their scope; they do not replace the
+259-test result or establish fresh native/SDK proof for later commits.
 
 Independent Standards and Spec reviews of the full diff, correction diff and final
 probe/gate have zero remaining findings. Two P2 corrections are complete: invalid
@@ -77,7 +45,7 @@ continue. The new validation checkpoint is required by admission. Historical
 six-group receipts keep their original contract and cannot satisfy the current
 seven-group gate.
 
-Final local checks pass 243 frontend cases; 417 ordinary core cases, with 48
+The earlier qualification passes 243 frontend cases; 417 ordinary core cases, with 48
 intentional ignores and three documented exclusions; and 249 Python cases with
 three exact Windows-only exclusions. All four harness groups, Rust formatting and
 actionlint pass. Chrome/core passes seven groups and pointer/modal/stale checks.

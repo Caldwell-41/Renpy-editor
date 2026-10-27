@@ -3,6 +3,50 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Merge and ticket closeout, 2026-10-27
+
+Kris directed: "Merge PR 62 into codex/phase3b-screen-designer. update the PR and
+all related tickets". [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
+merged reviewed head `cbecf368d324b340d1a1651574fb753668629001` into that branch at
+`eb9ef9a4ef5b84d33b748e43f6cc659df7071f47`. The expected-head merge guard matched;
+local fetch and tree comparison confirm the actual merge preserves the reviewed
+candidate exactly. The checkout moved to the integration branch by fast-forward,
+preserving the unrelated untracked audit. No feature branch was deleted.
+
+The parent independently reviewed `c1912cb..cbecf36` and found both reported defects
+resolved, with no actionable finding in that correction. The rebuilt focused tests
+pass 2/2. A fresh run of the production controller/real core check passes stale
+refusal and retained input, clear-then-edit acceptance, 128 later distinct accepted
+edits, all 129 Undo and 129 Redo transitions with exact bytes/full documents/IDs/
+selection/focus, reopen, protected neighbors and driver exit/fixture removal.
+
+[Repository quality run 40494321663, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40494321663/attempts/1)
+is audited passing for `cbecf36`. GitHub tested PR merge candidate `29cdd7b` against
+unchanged base `8f7f9e7`. Both required jobs and all 18 executed steps pass, including
+259 frontend tests, formatting, repository validation, 13 link tests, Q1 controls/
+source-selector audit and ten retention tests. The nine dispatch-only jobs remain
+skipped and provide no new native/SDK result. Earlier native/SDK receipts below
+retain their tested candidates and reuse boundaries.
+
+The PR description records the actual merge. #37 is accepted and closed for its
+seven bounded Help criteria under this user-selected completion. P3B #22's live
+coverage map and B02 #24 record that bounded result while aggregate acceptance
+remains open. Related B03 #25, B06 #28 and B11 #33 record scoped dependency/evidence
+credit only. #38, #39, #40 and #41 record the satisfied prerequisite and stay open
+and unselected. Native dependency edges are preserved. #63 stays open for separate
+dependency maintenance; this merge changes no dependency manifest or lockfile.
+
+CURRENT and HANDOVER replace superseded live continuation with the merged state.
+Historical candidate results, failures, operation counts and protected recovery
+remain retained. Documentation validation and link checks cover this closeout;
+there is no reason to repeat packages, native sessions or SDK campaigns for it.
+No further product work, release or renewed costly-operation allowance is selected.
+Earlier pending-merge/keep-open directions below describe their original checkpoints
+and are superseded by this closeout for #37 only.
+CURRENT and HANDOVER remain above their reference size targets at about 1,593 and
+3,244 words. Their retained earlier acceptance and protected recovery records remain
+necessary; this closeout shortens only L02's superseded live continuation.
+
 ## Draft lifetime and history selection corrections, 2026-10-27
 
 Kris selected fixing both remaining PR #62 defects, focused tests, commit/push,

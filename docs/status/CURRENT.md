@@ -1,91 +1,36 @@
 # Current status
 
-## L02 Help composition PR open
+<a id="l02-help-composition-pr-open"></a>
 
-2026-10-27 follow-up: both remaining PR #62 defects are corrected. Clearing a
-retained text draft ends its revision lifetime, and selection receipts remain
-available beyond 128 accepted operations. Both focused tests fail on the handoff
-code and pass after correction. Typechecking, all 259 frontend cases and the real
-controller/core source/history/reopen sequences pass. The fixes and supporting
-records publish together; PR #62's description owns the exact publication and
-terminal CI receipt. Worker chat `01a17d08-a42c-7031-aa1d-ef0b972df04c` retains
-any pending audit through ci-watch.
-[Correction evidence](../tasks/evidence/simple-help-layout.md#draft-lifetime-and-history-selection-corrections-2026-10-27).
+## L02 Help composition merged
 
-Architecture candidate 2 remains intact at `c1912cb`. `ScreensWorkspace` owns
-accepted-edit completion and draft settlement before rendering. Automatic run
-40489082242 attempt 1 passes on that candidate, as audited in PR #62's description.
-[Completion evidence](../tasks/evidence/simple-help-layout.md#accepted-edit-completion-2026-10-27).
+2026-10-27: Kris selected merging [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
+into `codex/phase3b-screen-designer` and updating its related tickets. The merge is
+`eb9ef9a4ef5b84d33b748e43f6cc659df7071f47`; its tree exactly matches independently
+reviewed head `cbecf36`. [L02 #37](https://github.com/Caldwell-41/Renpy-editor/issues/37)
+is accepted and closed for its bounded Help composition scope.
 
-Candidate 1 remains intact at `ef07e60`. The coordinator independently confirmed
-its complete owned-document construction and passing required CI in run
-40486719508 attempt 1. Its 26 ordinary Screens core passes and prior native/SDK
-receipts retain their tested scopes.
-[Construction evidence](../tasks/evidence/simple-help-layout.md#owned-screen-document-construction-2026-10-27).
+The owned-document and accepted-edit refactors remain intact. Both remaining
+draft/history defects pass independent parent review, the two focused sequence
+tests and the real controller/core check, including all 129 Undo and 129 Redo
+transitions with exact source, identities, selection/focus, reopen and cleanup.
+[Automatic run 40494321663, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40494321663/attempts/1)
+passes both required jobs and all 259 frontend tests. Earlier Mac/Windows native
+and SDK receipts retain their tested candidates and reuse limits.
+[Merge closeout and evidence](../tasks/evidence/simple-help-layout.md#merge-and-ticket-closeout-2026-10-27).
 
-The preceding no-op geometry correction is published at `5f23ec4`; automatic
-run 40476079031 passes on that candidate, as audited in PR #62's description.
-[Correction evidence](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27).
-
-The preceding geometry-save binding fix is published at `a37fe64`. It refreshes
-composition controls after source-changing geometry saves while preserving focus,
-expanded sections and scroll. Automatic run 40464304449 passes on that candidate,
-as audited in PR #62's description.
-[Binding correction evidence](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27).
-
-The earlier Design-focus and removal-Undo corrections are published at `db52bf5`.
-Both required jobs in automatic run 40456167313 pass on that candidate, as audited
-in PR #62's description. Their
-[evidence](../tasks/evidence/simple-help-layout.md#local-focus-and-undo-notice-corrections-2026-10-27)
-retains the diagnosis and verification limits.
-
-2026-10-27 follow-up: PR #62's canvas Enter-to-Design regression is fixed
-with three focused cases. Typechecking, all 246 frontend tests, the production
-build and a focused Chrome keyboard check pass. Standards and Spec reviews pass
-with zero findings. Fix and tests are pushed at `daf6c3b`, and PR #62's description
-is updated. [Automatic checks](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40426321177)
-pass on that candidate; both required jobs and their executed steps are audited.
-Kris selected publishing these status/evidence records as a documentation successor;
-audit its automatic checks in this same chat. Prior native/SDK receipts retain
-their tested candidates.
-[Correction evidence](../tasks/evidence/simple-help-layout.md#local-enter-to-design-correction-2026-10-27).
-
-2026-10-27: [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) is
-functionally `review_ready` on `codex/37-compose-help-layout`. All seven bounded
-criteria have verified evidence and functional review is complete. Product/probe candidate
-`73ffb7f` implements the approved
-C5 add, select, literal edit, sibling reorder and confirmed removal workflow.
-Kris approved PR creation on 2026-10-27. [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62)
-is open into `codex/phase3b-screen-designer`. Automatic run 40418300606 on `ab8ae3e`
-passes its audited required jobs. #37 records automatic checks for later documentation.
-Formal acceptance, merge and release remain unselected.
-
-Final independent Standards/Spec reviews have zero remaining findings or required
-evidence gaps. Their two P2 corrections preserve invalid-field focus and accessible
-errors, and complete native fixture cleanup/reporting after a desktop error.
-[The acceptance map](../tasks/evidence/simple-help-layout.md#final-acceptance-review-2026-10-27)
-owns criteria, candidate/reuse boundaries and earlier failures.
-
-Final checks pass 243 frontend cases; 417 ordinary core cases with 48 intentional
-ignores and three documented exclusions; and 249 Python cases with three exact
-Windows-only exclusions. All four harness groups, formatting and workflow checks
-pass. Chrome/core and signed Mac package 4/native session 5 pass seven groups,
-including the new validation-focus checkpoint, source/history/reopen and cleanup.
-Native elapsed time is 9.425 seconds. A separate display-awake assertion was active;
-no isolated performance claim follows. Full headless WebKit diagnostics retain
-their known ResizeObserver notification failure and supply no pass.
-
-Audited Windows CI 40396855757 on `d80c323` retains its unchanged source/helper/SDK
-and successful native workflow scope. The core source tree and runtime/SDK code
-are unchanged. C5 source `94c78e7` and its [approval record](../design/design-lab-help-composition/approval.json)
-remain authoritative; current invalid-state captures use the existing field-error
-pattern. Canvas fidelity and broader phase acceptance remain separate.
+P3B #22 and B02 #24 remain open for full aggregate acceptance. Related B03/B06/B11 records
+carry only scoped dependency/evidence credit. #38, #39, #40 and #41 now record the
+satisfied L02 prerequisite and remain unselected. Dependency maintenance #63 stays
+open. No CI audit, product correction, new execution allowance or release is pending
+or selected by this closeout. Preserve unrelated work and protected recovery in
+[HANDOVER](HANDOVER.md).
 
 | Capability | Implementation | Evidence and acceptance |
 | --- | --- | --- |
 | Owned blank screen (#34) | Implemented | Accepted for its bounded scope. |
-| Bounded Help canvas (#36) | Implemented | Prior matched-rendering, physical-input and smoothness acceptance retained below. |
-| Help composition (#37) | Implemented and independently reviewed; PR #62 open | All seven leaf criteria verified; required CI audited. Formal acceptance remains separate. |
+| Bounded Help canvas (#36) | Implemented | Prior rendering, physical-input and smoothness acceptance retained below. |
+| Help composition (#37) | Merged through PR #62 | Accepted and closed for its seven bounded criteria; broader B02/3B acceptance remains separate. |
 
 ## Automatic checks and operation-limit policy
 
