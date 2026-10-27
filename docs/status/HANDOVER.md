@@ -21,6 +21,18 @@ Design Lab results; neither becomes a pass. Route Windows and Mac automated proo
 through CI. Signed Mac native proof is pending because this host currently lacks
 the approved signing identity; the preflight started no build or native session.
 
+Draft [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) targets Screens.
+[Qualification run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
+attempt 1, is queued for exact candidate `a79737ec641837803a55ef9fd3e0c30fe3a4d04b`.
+Dispatch use is 1/3. The reservation covers four SDK starts per OS plus one Windows
+package/session and up to five further Windows SDK processes. Mac starts are 12/16
+before this run, with the remaining four reserved; Windows starts are 0/16 before it.
+Audit actual counts, target jobs, package hashes, named cases, source hash, both
+geometry records, cleanup and artifacts on resume. Do not accept a badge alone.
+The CI watcher will resume this same chat if registration succeeds. Its private
+watch directory stays outside committed records. If monitoring fails, resume here
+manually with this run ID. No merge, new feature or extra historical allowance is selected.
+
 The untracked Phase 1 audit, protected native recovery, archives, tags and stashes
 below are unrelated and remain untouched. Prior sections' statements that no
 successor is selected predate this assignment.

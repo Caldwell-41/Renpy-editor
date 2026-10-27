@@ -277,3 +277,22 @@ changes were the identical committed approval record and a dependency symlink.
 Approved source, metadata, nine reference captures and the selected production
 captures remain in the branch history. The unrelated audit and protected recovery
 were not staged, changed or removed.
+
+## PR and pending qualification
+
+Draft [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) targets
+codex/phase3b-screen-designer. The sole dispatched qualification is
+[run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
+attempt 1, candidate `a79737ec641837803a55ef9fd3e0c30fe3a4d04b`, ordinal 1,
+numeric_layout=true. Initial status is queued. All historical selectors remain
+unselected and their guards remain unchanged. Dispatch consumption is 1/3.
+The pending reservation is four SDK starts per OS, one Windows build/session and
+up to five more Windows SDK processes including fixture version validation.
+Mac is 12/16 before CI; Windows is 0/16. Actual starts and outcomes require audit.
+
+The following status-only commit records that run; it changes no application,
+fixture, dependency, probe or workflow input from the selected candidate. Final
+both-platform geometry/controller/Windows package proof remains pending. Signed
+Mac native proof is separately blocked by the unavailable approved identity. The
+CI watcher, if registered, resumes this same implementation chat for audit and
+in-scope fixes. #38 stays open and the PR stays draft while required proof is missing.

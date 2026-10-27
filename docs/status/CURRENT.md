@@ -16,8 +16,10 @@ Spec findings are fixed and rechecked. Early
 Mac SDK geometry passes at both aspects after a retained failed test-runner attempt
 and a normal-entry diagnostic. [Evidence](../tasks/evidence/numeric-layout.md) owns
 exact scope, inputs and pending checks. #38 owns execution and cumulative limits.
-Coherent-candidate Windows/Mac qualification, signed Mac native proof, PR and CI
-audit remain pending. The approved Mac signing identity is currently unavailable. Do not merge or close with missing proof.
+Draft [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) is open into the
+Screens branch. [Qualification CI](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915)
+is queued at `a79737ec641837803a55ef9fd3e0c30fe3a4d04b`, attempt 1. CI audit and signed
+Mac native proof remain pending. The approved Mac signing identity is currently unavailable. Do not merge or close with missing proof.
 Broader B02/3B acceptance, the unrelated audit and protected recovery keep their owners.
 
 ## Phase 3B architecture refactors merged
