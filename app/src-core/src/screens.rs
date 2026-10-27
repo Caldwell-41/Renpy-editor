@@ -599,9 +599,7 @@ impl AuthoringService {
             .transactions
             .snapshot(project, path(&request.path)?)
             .map_err(|_| SceneError::SourceConflict)?;
-        let mut document = inspect(&bytes, request.path, revision.sha256)?;
-        self.annotate_screen_ownership(project, &bytes, &mut document)?;
-        Ok(document)
+        self.owned_screen_document(project, &bytes, request.path, revision.sha256)
     }
 
     pub fn screens_set_pixel(
@@ -659,7 +657,12 @@ impl AuthoringService {
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);
         }
-        let mut document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+        let document = self.owned_screen_document(
+            project,
+            &bytes,
+            source_path.clone(),
+            revision.sha256.clone(),
+        )?;
         let position = document
             .screens
             .iter()
@@ -681,7 +684,6 @@ impl AuthoringService {
             }
         }
         if proposed == bytes {
-            self.annotate_screen_ownership(project, &bytes, &mut document)?;
             return Ok(document);
         }
         inspect(&proposed, source_path.clone(), String::new())?;
@@ -726,7 +728,12 @@ impl AuthoringService {
         if revision.sha256 != expected_revision {
             return Err(SceneError::SourceConflict);
         }
-        let mut document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+        let document = self.owned_screen_document(
+            project,
+            &bytes,
+            source_path.clone(),
+            revision.sha256.clone(),
+        )?;
         let node = document
             .screens
             .iter()
@@ -749,7 +756,6 @@ impl AuthoringService {
             }
         }
         if patches.is_empty() {
-            self.annotate_screen_ownership(project, &bytes, &mut document)?;
             return Ok(document);
         }
         patches.sort_by_key(|(span, _)| std::cmp::Reverse(span.start));

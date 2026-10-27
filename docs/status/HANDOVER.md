@@ -1,29 +1,37 @@
 # Current outcome handover
 
-## L02 no-op geometry publication and CI audit
+## L02 owned document construction and CI audit
 
-Kris selected fixing the P2 no-op geometry finding from PR #62's private review at
-`a37fe64`, checking it, publishing it, updating the PR and running CI. The checkout
-remains `codex/37-compose-help-layout`. Unchanged geometry saves returned raw parser
-documents, losing the owned root ID and protected hierarchy rows. Both no-op return
-paths now annotate their captured document without changing source, revision or history.
+Kris selected architecture report candidate 1 for PR #62, with implementation,
+focused testing, publication and CI. This worker is the sole writer on
+`codex/37-compose-help-layout`, entered at `5f23ec4`; the coordinator is read-only.
+The ownership module now constructs complete documents for inspection, geometry
+and composition. Raw parsing remains available internally; patch policy and shared
+transaction/history owners are unchanged.
 
-The new dispatch regression was red on the reviewed code and now covers unchanged
-size, pixel-property and position saves, complete document preservation and exact
-source/history. All 26 ordinary Screens core tests pass with one intentional SDK
-ignore. Typechecking and all 255 frontend tests pass. The rebuilt fixture driver and
-production controller retain the complete document after unchanged size and accept
-a subsequent root Add. Independent Standards and Spec correction reviews have zero
-findings. [The correction record](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27)
-owns diagnosis, fixture corrections and verification limits.
+All 26 ordinary Screens core cases pass with one intentional SDK ignore.
+Typechecking and all 255 frontend tests pass. The extended geometry dispatch case
+checks changed and unchanged size, pixel-property and position responses, exact
+source, history and reopen. [The construction record](../tasks/evidence/simple-help-layout.md#owned-screen-document-construction-2026-10-27)
+owns focused verification and reuse limits.
 
-Publish the correction and supporting records as one commit to PR #62, update its
-description, and audit the automatic CI run against the exact head in this same chat.
-Use ci-watch if the confirmed run remains pending. Record its identity and terminal
-audit in the PR description without another receipt-only commit. No extra issue
-comment, package, native session, SDK process, merge or release is selected. Prior
-native/SDK receipts retain their tested candidates and operation counts. Preserve
-the unrelated untracked audit. No owned fixture driver remains.
+Publish the refactor and records together to [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62).
+Its description owns the exact final head, automatic run and terminal audit, without
+another receipt-only commit. Worker chat `01a17cd4-16cb-7530-a66d-2abdc66bad5f`
+retains the audit through ci-watch continuation. On resume, read that PR receipt,
+reconcile the recorded run/head with the current branch and finish any pending audit.
+Then report the result to coordinator chat `01a17ca7-17d3-7170-9eca-6bedf6289383`.
+The coordinator confirms candidate 1 before starting candidate 2 in a separate chat.
+Candidate 2's frontend completion work remains untouched here.
+
+No extra issue comment, package, native session, SDK process, manual CI dispatch,
+merge or release is selected. Earlier native/SDK receipts and cumulative limits
+below retain their tested candidates. Preserve the unrelated untracked audit and
+the coordinator's temporary report server.
+
+The preceding no-op correction is published at `5f23ec4`; automatic run 40476079031
+is audited and passing in PR #62's description. [Its evidence](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27)
+retains the original defect, red/green checks and controller/core proof.
 
 The previous binding correction is published at `a37fe64`; automatic run 40464304449
 is audited and passing in PR #62's description. Its [evidence](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27)

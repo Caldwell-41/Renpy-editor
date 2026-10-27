@@ -150,7 +150,7 @@ fn save_composition_source(service: &mut LifecycleService, owner: &Value, text: 
 }
 
 #[test]
-fn owned_geometry_noops_preserve_document_ownership_and_history() {
+fn owned_geometry_preserves_document_ownership_and_history_for_unchanged_and_changed_saves() {
     let (_temporary, mut service, root, owner) = composition_project();
     let source_path = owner["path"].as_str().unwrap();
     let blank = fs::read_to_string(root.join(source_path)).unwrap();
@@ -194,6 +194,75 @@ fn owned_geometry_noops_preserve_document_ownership_and_history() {
         "No-op geometry saves must not add an Undo entry"
     );
     composition_history(&mut service, "redo");
+    assert_eq!(
+        ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+        document
+    );
+    let mut document = document;
+    let mut source = source;
+    for (operation, values, before, after) in [
+        (
+            "screens.setSize",
+            json!({"width":720,"height":400}),
+            "xsize 640\n            ysize 360",
+            "xsize 720\n            ysize 400",
+        ),
+        (
+            "screens.setPixelProperty",
+            json!({"property":"xsize","value":800}),
+            "xsize 720",
+            "xsize 800",
+        ),
+        (
+            "screens.setPosition",
+            json!({"xalign":0.25,"yalign":0.75}),
+            "xalign 0.5\n            yalign 0.5",
+            "xalign 0.25\n            yalign 0.75",
+        ),
+    ] {
+        let mut payload = json!({"path":source_path,"expectedRevision":document["revision"],
+            "screenName":"notes","nodeStart":frame(&document)["span"]["start"]});
+        payload
+            .as_object_mut()
+            .unwrap()
+            .extend(values.as_object().unwrap().clone());
+        let changed = ipc(&mut service, operation, payload);
+        let expected = source.replace(before, after);
+        assert_ne!(expected, source);
+        assert_eq!(
+            fs::read(root.join(source_path)).unwrap(),
+            expected.as_bytes()
+        );
+        assert_eq!(
+            changed,
+            ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+            "{operation} must return the complete inspected document"
+        );
+        assert_eq!(changed["screens"][0]["nodes"][0]["id"], owner["rootId"]);
+        assert_eq!(
+            changed["screens"][0]["nodes"].as_array().unwrap().len(),
+            document["screens"][0]["nodes"].as_array().unwrap().len()
+        );
+        composition_history(&mut service, "undo");
+        assert_eq!(fs::read(root.join(source_path)).unwrap(), source.as_bytes());
+        assert_eq!(
+            ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+            document
+        );
+        composition_history(&mut service, "redo");
+        assert_eq!(
+            fs::read(root.join(source_path)).unwrap(),
+            expected.as_bytes()
+        );
+        assert_eq!(
+            ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+            changed
+        );
+        source = expected;
+        document = changed;
+    }
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
     assert_eq!(
         ipc(&mut service, "screens.inspect", json!({"path":source_path})),
         document

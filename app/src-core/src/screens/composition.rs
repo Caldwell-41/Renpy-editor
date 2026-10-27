@@ -76,8 +76,12 @@ impl AuthoringService {
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);
         }
-        let mut document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
-        self.annotate_screen_ownership(project, &bytes, &mut document)?;
+        let document = self.owned_screen_document(
+            project,
+            &bytes,
+            source_path.clone(),
+            revision.sha256.clone(),
+        )?;
         let screen = document
             .screens
             .iter()
@@ -307,12 +311,12 @@ impl AuthoringService {
                 selected_id,
             });
         }
-        let mut accepted = inspect(
+        let accepted = self.owned_screen_document(
+            project,
             &proposed,
             source_path.clone(),
             hex::encode(Sha256::digest(&proposed)),
         )?;
-        self.annotate_screen_ownership(project, &proposed, &mut accepted)?;
         self.commit_history(
             project,
             TransactionProposal {

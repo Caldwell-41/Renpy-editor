@@ -2,18 +2,20 @@
 
 ## L02 Help composition PR open
 
-2026-10-27 follow-up: Kris selected fixing the P2 no-op geometry finding from
-PR #62's private review at `a37fe64`, then publishing the correction, updating the
-PR and checking CI. Both core no-op return paths now preserve the owned root UUID,
-element identities and protected hierarchy rows. A dispatch regression covers
-unchanged size, pixel-property and position saves, exact source and no added history.
-All 26 ordinary Screens core tests and 255 frontend tests pass; the intentional
-SDK case remains ignored. A production controller/core check passes subsequent
-root Add after unchanged size. Independent Standards and Spec reviews report zero
-findings. The correction and evidence share one commit; PR #62's description owns
-its exact automatic CI run and terminal audit in this same chat. Prior native/SDK
-receipts retain their tested candidates. Formal acceptance, merge and release
-remain unselected.
+2026-10-27 follow-up: Kris selected architecture report candidate 1 for PR #62.
+The ownership module now constructs complete editor documents for inspection,
+geometry and composition, including root/element IDs and protected hierarchy rows.
+The separate parse/annotate obligation is removed. All 26 ordinary Screens core
+cases and 255 frontend tests pass; the intentional SDK case remains ignored.
+The geometry dispatch case also verifies changed responses, minimal source edits,
+history and reopen. PR #62's description owns the exact publication/automatic CI
+receipt; this worker retains the audit through ci-watch before reporting to the
+coordinator. Candidate 2 awaits the coordinator's independent confirmation and a
+separate chat. Prior native/SDK candidates retain their qualification scope.
+[Construction evidence](../tasks/evidence/simple-help-layout.md#owned-screen-document-construction-2026-10-27).
+
+The preceding no-op geometry correction is published at `5f23ec4`; automatic
+run 40476079031 passes on that candidate, as audited in PR #62's description.
 [Correction evidence](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27).
 
 The preceding geometry-save binding fix is published at `a37fe64`. It refreshes

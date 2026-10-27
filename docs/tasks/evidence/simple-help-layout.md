@@ -3,6 +3,49 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Owned screen document construction, 2026-10-27
+
+Kris selected architecture report candidate 1 for PR #62, including focused tests,
+branch publication, the PR update and its automatic CI audit. Candidate 2 remains
+with the coordinator for a separate chat after confirmation of this result.
+
+`ownership.rs::owned_screen_document` now parses the captured source and applies
+root/element identity qualification and protected hierarchy rows before returning.
+Inspection, size/pixel-property/position editing and composition call that constructor.
+The separate annotation interface is removed, so no-op returns need no additional
+qualification step. Each call uses the same captured source buffer and revision;
+composition's proposed document uses its proposed bytes and their SHA-256.
+Raw parsing remains available for canvas, catalog resolution and internal patch
+validation. The catalog retains its stronger marker/namespace resolution checks.
+Patch decisions and shared transaction/history ownership stay with their existing
+owners. Approved visuals and frontend completion behavior are unchanged.
+
+The existing dispatch geometry case now also checks changed size, pixel-property
+and position responses against full inspection, exact minimal source edits, one
+Undo/Redo per change and reopen. Existing no-op, composition, protected-source,
+dirty/stale/conflict and ownership cases remain in the same ordinary test scope.
+Verification on Mac ARM64 passes:
+
+- All 26 ordinary Screens core cases, with the one intentional SDK-helper ignore
+  and 442 out-of-scope cases filtered. Every listed case matches its actual result.
+- Typechecking and all 255 frontend tests, with zero failures/skips/cancellations,
+  using pinned Node 24.19.0/npm 11.9.0 and bundled Python 3.12.14.
+- Rust formatting, repository validation and 13 section-link tests.
+
+The rebuilt fixture driver and compiled production controller check unchanged size
+followed by root Add with retained ownership, protected rows and exact source.
+This supplies controller/core evidence; earlier native/SDK receipts retain their
+tested candidates. No package, native session, SDK start or manual CI dispatch is
+needed for this consolidation. Existing costly-operation counts remain unchanged.
+
+The refactor, focused test and these records share one commit. PR #62's description
+owns its exact automatic run and terminal job/step audit without another receipt-only
+commit. This worker retains that audit through any ci-watch continuation, then
+reports to the coordinator for independent confirmation. Formal acceptance, merge
+and release remain unselected. CURRENT/HANDOVER remain above their reference word
+targets because they retain earlier acceptance and protected recovery records;
+this change replaces the live continuation without rewriting those records.
+
 ## Local no-op geometry ownership correction, 2026-10-27
 
 Kris selected fixing the P2 finding from the fresh private review of PR #62 at

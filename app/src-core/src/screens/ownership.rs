@@ -145,12 +145,15 @@ fn resolves(screen: &OwnedScreen, inventory: &Inventory) -> bool {
 }
 
 impl AuthoringService {
-    pub(super) fn annotate_screen_ownership(
+    /// Construct the editor document from one captured source and its revision.
+    pub(super) fn owned_screen_document(
         &self,
         project: &ProjectId,
         bytes: &[u8],
-        document: &mut Document,
-    ) -> Result<(), SceneError> {
+        source_path: String,
+        revision: String,
+    ) -> Result<Document, SceneError> {
+        let mut document = inspect(bytes, source_path, revision)?;
         let (project_bytes, _) = self
             .transactions
             .snapshot(project, RelativePath::new(PROJECT).unwrap())
@@ -231,7 +234,7 @@ impl AuthoringService {
                 }
             }
         }
-        Ok(())
+        Ok(document)
     }
 
     fn screen_inventory(&self, project: &ProjectId) -> Result<Inventory, SceneError> {
