@@ -147,6 +147,7 @@ fn main() {
                 | "flow.list"
                 | "screens.inspect"
                 | "screens.setSize"
+                | "screens.setLayout"
                 | "screens.list"
                 | "screens.create"
                 | "screens.compose"

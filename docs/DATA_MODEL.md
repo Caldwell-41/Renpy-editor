@@ -528,6 +528,45 @@ Explicit Design entry focuses the text editor. The removal notice's specific Und
 action expires after a later source-changing Screens save or Source reload,
 including return from another workspace. No-op saves retain the action.
 
+### Numeric screen layout
+
+`screens.inspect` returns typed `numericLayout` values and field-specific refusal
+reasons for fixed, frame, vbox, text, textbutton and literal image children.
+`screens.setLayout` captures file revision, screen name, node byte offset and a map
+of changed properties. Each value has `unit` (`pixels` or `relative`) and a finite
+number. Null removes an explicit property. Pixel coordinates are integers; relative
+coordinates are floats in Source, including `0` versus `0.0`. Values are bounded to
+absolute 16384. Dimensions require positive integers; other non-coordinate values
+require nonnegative integers. Relative dimensions remain Source-only.
+
+| Fields | Covered children | Meaning and constraints |
+| --- | --- | --- |
+| Position and anchor | All six types | Integer pixels or a float fraction of the parent/element. A vbox controls child vertical placement, so child vertical position/anchor edits are refused. |
+| Width and height | All six types | Integer pixel layout requests. Text keeps natural glyph bounds and wraps within its available space; children can enlarge a vbox. |
+| Minimum/maximum width and height | Fixed, frame, vbox, textbutton; maximum only on text | Integer pixel bounds. Minimum cannot exceed maximum. Explicit size and its separate bounds cannot overlap. Image bounds remain Source-only and prevent helper rendering. |
+| Side padding | Frame | Integer pixel insets. Existing button padding remains renderable but is not editable here. |
+| Child spacing | Vbox | Integer pixel spacing between children. |
+| Alignment presets | All six types with editable placement | Set position and anchor together to relative 0.0, 0.5 or 1.0. Parent restrictions still apply. |
+
+The literal reader resolves `pos`, `anchor`, `align`, `xalign`/`yalign`, `xysize`,
+`minimum`/`maximum`, `padding`, `xpadding`/`ypadding` into canonical fields. It patches
+only changed numeric tokens when an alias can still represent the result. Otherwise
+it splits the affected alias into canonical statements while retaining its comment.
+Removing an entire property statement leaves `pass` so an empty block stays valid.
+Duplicate setters, expressions, malformed tuples, nested property blocks, overlapping
+size rules and other placement transforms stay Source-only. The renderer reuses the
+same numeric parser and validation for revision-bound drafts. It never evaluates
+source expressions or runs neighboring actions.
+
+One Apply uses the shared source transaction and history. No-op adds no entry.
+Numeric drafts retain their original source revision across refresh and conflicts.
+After an accepted numeric save, unchanged drafts for other durable element UUIDs can
+rebase onto that returned revision. Unmarked nodes use kind, literal and source offset
+as a temporary key, without claiming durable identity. Missing targets expose a
+read-only retained draft with explicit discard. Source remains authoritative.
+[Numeric layout evidence](tasks/evidence/numeric-layout.md) owns the qualified SDK
+cases and the limits of geometry and native proof.
+
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing
 metadata does not authorize reconstruction from `.rpy` files. IDs are UUIDs and paths

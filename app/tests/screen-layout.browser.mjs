@@ -1,0 +1,155 @@
+// Production application, controller, dispatch and transaction/history service.
+// Rendering is unavailable in this check; SDK geometry is qualified separately.
+import assert from 'node:assert/strict';
+import {createServer} from 'vite';
+import {chromium} from 'playwright';
+import {randomUUID} from 'node:crypto';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {driverProcess} from './phase2-driver-process.mjs';
+
+const output=resolve(process.env.SCREEN_LAYOUT_OUTPUT ?? '../.toolchains/numeric-layout/controller');
+await mkdir(output,{recursive:true});
+const child=driverProcess(resolve(`target/debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'canvas-position']);
+const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
+const errors=[],receipts=[],plans=[];
+let browser,sessionId,passed=false;
+let acceptDraft;
+const draftAccepted=new Promise(resolve=>{acceptDraft=resolve;});
+const rpc=async request=>{
+  if(request.operation==='screens.canvasStatus')return {ok:true,value:{phase:'unavailable',message:'SDK rendering is qualified separately.'}};
+  if(request.operation==='screens.canvasRender') {
+    const plan=await child.request({...request,operation:'screens.canvasPlan'});
+    if(plan.ok&&request.payload.layouts?.some(draft=>draft.values.xpos?.value===0.25))acceptDraft(plan);
+    let currentRevision;
+    if(plan.error?.code==='SOURCE_CONFLICT') {
+      const current=await child.request({...request,operation:'screens.inspect',payload:{sessionId:request.payload.sessionId,path:request.payload.path}});
+      if(current.ok)currentRevision=current.value.revision;
+    }
+    plans.push({...plan,expectedRevision:request.payload.expectedRevision,currentRevision});
+    return {ok:true,value:{phase:'unavailable',message:'SDK rendering is qualified separately.'}};
+  }
+  const response=await child.request(request);receipts.push({operation:request.operation,ok:response.ok});
+  if(response.value?.sessionId)sessionId=response.value.sessionId;
+  return response;
+};
+const request=(operation,payload={})=>rpc({protocolVersion:1,requestId:randomUUID(),operation,payload:{sessionId,...payload}});
+try {
+  assert.equal((await child.next()).ready,true);await server.listen();
+  browser=await chromium.launch({channel:'chrome',headless:true});
+  const page=await browser.newPage({viewport:{width:1100,height:800}});page.setDefaultTimeout(8000);
+  await page.routeWebSocket('**',()=>{});page.on('pageerror',error=>errors.push(error.message));
+  await page.exposeBinding('layoutRpc',(_,request)=>rpc(request));
+  await page.route('**/layout-controller',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));
+  await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/layout-controller`);
+  await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');startApplication((operation,payload)=>{if(operation==='screens.canvasRender')window.__layoutRenderPayload=payload;return window.layoutRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation,payload});});});
+  await page.locator('.recent-open').click();await page.getByRole('button',{name:'Screens',exact:true}).click();
+  const ui=page.locator('.screens-editor');
+  await ui.getByLabel('Screen',{exact:true}).selectOption(JSON.stringify(['game/ui/help.rpy','loomlight_help']));
+  await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
+  const horizontal=ui.getByRole('textbox',{name:'Horizontal position',exact:true});
+  await horizontal.waitFor();assert.equal(await horizontal.inputValue(),'0.5');
+  await horizontal.fill('0.25');
+  await page.waitForFunction(()=>window.__layoutRenderPayload?.layouts?.some(draft=>draft.values.xpos?.value===0.25));
+  let draftTimer;
+  try {
+    const proof=await Promise.race([draftAccepted,new Promise((_,reject)=>{draftTimer=setTimeout(()=>reject(Error('Typed draft did not pass core plan validation')),8000);})]);
+    assert.equal(proof.value.nodes[2].properties.xpos,0.25);
+  } finally { clearTimeout(draftTimer); }
+  await horizontal.press('Enter');
+  await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
+  const saved=await request('source.open',{path:'game/ui/help.rpy'});
+  assert.equal(saved.ok,true);assert.match(saved.value.text,/xpos 0\.25/);assert.match(saved.value.text,/xanchor 0\.5/);
+  assert.equal(await horizontal.evaluate(element=>document.activeElement===element),true);
+  const accepted=saved.value.text;
+  await ui.getByRole('button',{name:'Apply layout',exact:true}).click();
+  await ui.getByText('No change. No undo entry added.',{exact:true}).waitFor();
+  await ui.getByRole('button',{name:'Undo',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('[data-layout-field=xpos]')?.value==='0.5');
+  const original=(await request('source.open',{path:'game/ui/help.rpy'})).value.text;
+  assert.match(original,/xalign 0\.5/);
+  await ui.getByRole('button',{name:'Redo',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('[data-layout-field=xpos]')?.value==='0.25');
+  assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
+  const width=ui.getByRole('textbox',{name:'Width',exact:true});
+  await width.fill('invalid width');await width.press('Enter');
+  await ui.getByText('Width needs a finite number. Input retained.',{exact:true}).first().waitFor();
+  assert.equal(await width.inputValue(),'invalid width');
+  assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
+  await width.press('Escape');
+  await ui.getByText('Layout changes cancelled. No source was written.',{exact:true}).waitFor();
+  assert.equal(await width.inputValue(),'640');
+  await width.fill('700');await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+  const frameRow=ui.getByRole('option',{name:'Help frame',exact:true});
+  assert.equal(await frameRow.getAttribute('data-layout-draft'),'true','Choose marks the retained layout draft');
+  await frameRow.dblclick();assert.equal(await width.inputValue(),'700');
+  await width.press('Escape');
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+  await ui.getByRole('option',{name:'Free layout group',exact:true}).dblclick();
+  assert.equal(await horizontal.inputValue(),'');
+  await ui.getByLabel('Horizontal position unit',{exact:true}).selectOption('relative');
+  await horizontal.fill('0.5');await horizontal.press('Enter');
+  await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
+  assert.match((await request('source.open',{path:'game/ui/help.rpy'})).value.text,/fixed:\n        xpos 0\.5/);
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+  await ui.getByRole('option').filter({hasText:/^Text · Help café/}).dblclick();
+  await width.fill('420');
+  const sourceBeforeRemoval=(await request('source.open',{path:'game/ui/help.rpy'})).value;
+  const inspected=(await request('screens.inspect',{path:'game/ui/help.rpy'})).value;
+  const textNode=inspected.screens[0].nodes.find(node=>node.kind==='text');
+  const bytes=Buffer.from(sourceBeforeRemoval.text);
+  const withoutText=Buffer.concat([bytes.subarray(0,textNode.span.start),bytes.subarray(textNode.span.end)]).toString();
+  const sourceDraft=await request('source.updateDraft',{path:'game/ui/help.rpy',expectedBaseRevision:sourceBeforeRemoval.baseRevision,text:withoutText,selectionStart:0,selectionEnd:0});
+  assert.equal(sourceDraft.ok,true);
+  assert.equal((await request('source.save',{path:'game/ui/help.rpy',expectedBaseRevision:sourceDraft.value.baseRevision,expectedDraftVersion:sourceDraft.value.draftVersion})).ok,true);
+  await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
+  const retained=ui.getByRole('textbox',{name:'Retained layout draft',exact:true});
+  await retained.waitFor();assert.match(await retained.inputValue(),/Width: 420 px/);
+  assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,withoutText);
+  await ui.getByRole('button',{name:'Discard retained layout draft',exact:true}).click();
+  const catalog=(await request('screens.list')).value;
+  const created=await request('screens.create',{name:'numeric_group',expectedProjectRevision:catalog.projectRevision,expectedSourceMapRevision:catalog.sourceMapRevision,expectedInventoryRevision:catalog.inventoryRevision});
+  assert.equal(created.ok,true);const owner=created.value.owned.find(screen=>screen.name==='numeric_group');
+  const add=async(parentId,kind,text='')=>{
+    const doc=(await request('screens.inspect',{path:owner.path})).value;
+    const result=await request('screens.compose',{screenId:owner.id,expectedRevision:doc.revision,command:{type:'add',parentId,kind,text}});
+    assert.equal(result.ok,true,JSON.stringify(result));return result.value.selectedId;
+  };
+  const groupId=await add(owner.rootId,'vbox');await add(groupId,'text','Child');
+  await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
+  await ui.getByLabel('Screen',{exact:true}).selectOption(JSON.stringify(['owned',owner.id]));
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+  await ui.getByRole('treeitem',{name:'Text · Child',exact:true}).dblclick();
+  const vertical=ui.getByRole('textbox',{name:'Vertical position',exact:true});
+  await vertical.fill('12');await vertical.press('Enter');
+  await ui.getByText(/The vertical group controls vertical placement.*Input retained/).first().waitFor();
+  assert.equal(await vertical.inputValue(),'12');
+  await width.fill('120');await vertical.fill('');
+  await ui.getByRole('button',{name:'Edit group spacing',exact:true}).click();
+  const spacing=ui.getByRole('textbox',{name:'Spacing',exact:true});await spacing.fill('12');await spacing.press('Enter');
+  await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+  assert.equal(await ui.getByRole('treeitem',{name:'Text · Child',exact:true}).getAttribute('data-layout-draft'),'true');
+  await ui.getByRole('treeitem',{name:'Text · Child',exact:true}).dblclick();assert.equal(await width.inputValue(),'120');
+  await width.press('Enter');await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
+  assert.match((await request('source.open',{path:owner.path})).value.text,/spacing 12/);
+  assert.match((await request('source.open',{path:owner.path})).value.text,/xsize 120/);
+  await width.fill('130');
+  const beforeStale=(await request('source.open',{path:owner.path})).value;
+  const changedSource=beforeStale.text.replace('xsize 120','xsize 125');
+  const changedDraft=(await request('source.updateDraft',{path:owner.path,expectedBaseRevision:beforeStale.baseRevision,text:changedSource,selectionStart:0,selectionEnd:0})).value;
+  assert.equal((await request('source.save',{path:owner.path,expectedBaseRevision:changedDraft.baseRevision,expectedDraftVersion:changedDraft.draftVersion})).ok,true);
+  await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();await ui.getByText('Source refreshed. Unfinished drafts retain their original revision.',{exact:true}).waitFor();await width.press('Enter');
+  await ui.getByText(/This layout draft uses an earlier Source revision/).first().waitFor();
+  assert.equal(await width.inputValue(),'130');assert.equal((await request('source.open',{path:owner.path})).value.text,changedSource);
+  await width.press('Escape');assert.equal(await width.inputValue(),'125');
+  assert.deepEqual(errors,[]);assert(plans.length>0);
+  assert(plans.every(plan=>plan.ok||plan.error?.code==='SOURCE_CONFLICT'&&plan.currentRevision&&plan.currentRevision!==plan.expectedRevision),JSON.stringify(plans.filter(plan=>!plan.ok)));
+  passed=true;
+} catch(error) {
+  errors.push(String(error));throw error;
+} finally {
+  await writeFile(join(output,'result.json'),JSON.stringify({passed,controllerAndRealCore:true,sdkGeometry:false,receipts,errors},null,2));
+  await browser?.close();await server.close();await child.stop();
+}

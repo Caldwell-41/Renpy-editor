@@ -1,18 +1,22 @@
 # Current status
 
-## L03 numeric layout selected
+## L03 numeric layout implementation
 
 Kris selected [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) for
 implementation, focused tests, a PR into the Screens branch and CI audit.
-`codex/phase3b-l03-numeric-layout` starts from freshly verified Screens base
-`4d2101f`. L02's prerequisite is satisfied. Three unapproved Design Lab inspector
-proposals are the starting point for a separate design chat's Experience First
-refinement. This chat retains implementation ownership and stays read-only while
-the design agent owns mock edits. Production code is unchanged. Design approval and
-TDD boundary confirmation remain pending. [Evidence](../tasks/evidence/numeric-layout.md)
-records the checked mock scope and remaining acceptance. #38 owns execution and
-any costly-operation limits. Broader B02/3B acceptance and protected recovery retain
-their existing owners.
+`codex/phase3b-l03-numeric-layout` starts from verified Screens base `4d2101f`.
+A2 / Paired fields is approved at source `c2d23c5`, with approval record `c1ab3e6`.
+The design chat returned writer ownership. Kris confirmed both the production
+UI/controller/real-core and public Rust-operation TDD boundaries.
+
+Typed numeric editing, alias-safe source patches, shared history and retained drafts
+are implemented locally. Focused screen-core and production Help checks pass. Early
+Mac SDK geometry passes at both aspects after a retained failed test-runner attempt
+and a normal-entry diagnostic. [Evidence](../tasks/evidence/numeric-layout.md) owns
+exact scope, inputs and pending checks. #38 owns execution and cumulative limits.
+Final review, coherent-candidate Windows/Mac qualification, signed Mac native proof,
+PR and CI audit remain pending. Do not merge or close with missing proof.
+Broader B02/3B acceptance, the unrelated audit and protected recovery keep their owners.
 
 ## Phase 3B architecture refactors merged
 

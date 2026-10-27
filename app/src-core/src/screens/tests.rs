@@ -36,6 +36,299 @@ fn reject(service: &mut LifecycleService, operation: &str, mut payload: Value) -
 }
 
 #[test]
+fn numeric_layout_applies_typed_coordinates_and_size_as_one_lossless_change() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    let before = "\u{feff}# Keep this file\r\nscreen numeric():\r\n    fixed:\r\n        frame: # Keep this comment\r\n            xsize 640 # width\r\n            ysize 360\r\n            xalign 0.5 # anchored\r\n            yalign 0.5\r\n            text \"Hello\"\r\n        use custom_footer()\r\n";
+    fs::write(root.join(PATH), before).unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+    let change = |document: &Value| {
+        json!({"path":PATH,"screenName":"numeric",
+        "expectedRevision":document["revision"],"nodeStart":frame(document)["span"]["start"],
+        "values":{"xpos":{"unit":"relative","value":0.25},"xanchor":{"unit":"relative","value":0.75},
+            "ysize":{"unit":"pixels","value":320}}})
+    };
+    let after = ipc(&mut service, "screens.setLayout", change(&doc));
+    let expected = before.replace("ysize 360", "ysize 320").replace(
+        "xalign 0.5 # anchored\r\n",
+        "xpos 0.25 # anchored\r\n            xanchor 0.75\r\n",
+    );
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":PATH}))["text"],
+        expected.trim_start_matches('\u{feff}')
+    );
+    assert_eq!(
+        ipc(&mut service, "screens.setLayout", change(&after))["revision"],
+        after["revision"]
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), before.as_bytes());
+    composition_history(&mut service, "redo");
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(
+        ipc(&mut service, "screens.inspect", json!({"path":PATH}))["revision"],
+        after["revision"]
+    );
+}
+
+#[test]
+fn numeric_layout_adds_properties_to_a_leaf_at_end_of_file() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    fs::write(
+        root.join(PATH),
+        "screen numeric():\n    fixed:\n        text \"End\"",
+    )
+    .unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+    let node = &doc["screens"][0]["nodes"][2];
+    ipc(
+        &mut service,
+        "screens.setLayout",
+        json!({"path":PATH,"screenName":"numeric","expectedRevision":doc["revision"],"nodeStart":node["span"]["start"],"values":{"xsize":{"unit":"pixels","value":100}}}),
+    );
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":PATH}))["text"],
+        "screen numeric():\n    fixed:\n        text \"End\":\n            xsize 100\n"
+    );
+}
+
+#[test]
+fn numeric_layout_canvas_draft_preserves_units_and_uses_the_saved_validation_rules() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    let before = "screen numeric():\n    fixed:\n        frame:\n            xsize 640\n            ysize 360\n            xalign 0.5\n            yalign 0.5\n            padding (24, 24)\n            text \"Help\"\n";
+    fs::write(root.join(PATH), before).unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+    let request = json!({"path":PATH,"screenName":"numeric","expectedRevision":doc["revision"],"width":1280,"height":720,
+        "layouts":[{"nodeStart":frame(&doc)["span"]["start"],"values":{"xpos":{"unit":"pixels","value":0},"ypos":{"unit":"relative","value":0.0},"left_padding":{"unit":"pixels","value":32}}}]});
+    let plan = ipc(&mut service, "screens.canvasPlan", request.clone());
+    let properties = &plan["nodes"][2]["properties"];
+    assert!(
+        properties["xpos"].is_i64(),
+        "zero pixels must remain an integer"
+    );
+    assert!(
+        properties["ypos"].is_f64(),
+        "relative zero must remain a float"
+    );
+    assert!(properties["xalign"].is_null());
+    assert!(properties["padding"].is_null());
+    assert_eq!(properties["left_padding"], 32);
+    assert_eq!(properties["right_padding"], 24);
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), before.as_bytes());
+    let mut invalid = request;
+    invalid["layouts"][0]["values"]["xsize"] = json!({"unit":"relative","value":0.5});
+    assert_eq!(
+        reject(&mut service, "screens.canvasPlan", invalid)["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
+}
+
+#[test]
+fn numeric_layout_prepares_the_pinned_sdk_geometry_fixture_through_public_operations() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    let before = include_str!("../../../../tests/fixtures/phase-3b-screens/numeric-layout.rpy");
+    fs::write(root.join(PATH), before).unwrap();
+    service.open_path(&root).unwrap();
+    let mut doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+    for (kind, width, values) in [
+        (
+            "frame",
+            Some(300.0),
+            json!({"xpos":{"unit":"relative","value":0.75},"xsize":{"unit":"pixels","value":320},"left_padding":{"unit":"pixels","value":16},"right_padding":{"unit":"pixels","value":16},"top_padding":{"unit":"pixels","value":20},"bottom_padding":{"unit":"pixels","value":20}}),
+        ),
+        (
+            "frame",
+            None,
+            json!({"xminimum":{"unit":"pixels","value":260},"xmaximum":{"unit":"pixels","value":260}}),
+        ),
+        (
+            "vbox",
+            Some(100.0),
+            json!({"spacing":{"unit":"pixels","value":12}}),
+        ),
+    ] {
+        let node = doc["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|node| {
+                node["kind"] == kind
+                    && node["numericLayout"]["values"]["xsize"]["value"].as_f64() == width
+            })
+            .unwrap();
+        doc = ipc(
+            &mut service,
+            "screens.setLayout",
+            json!({"path":PATH,"screenName":"numeric","expectedRevision":doc["revision"],"nodeStart":node["span"]["start"],"values":values}),
+        );
+    }
+    let caption = doc["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|node| node["literal"] == "First")
+        .unwrap();
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.setLayout",
+            json!({"path":PATH,"screenName":"numeric","expectedRevision":doc["revision"],"nodeStart":caption["span"]["start"],"values":{"ypos":{"unit":"relative","value":0.75}}})
+        )["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
+    let accepted = fs::read(root.join(PATH)).unwrap();
+    let expected = before
+        .replacen("xpos 0.5", "xpos 0.75", 1)
+        .replacen("xsize 300", "xsize 320", 1)
+        .replacen("padding (12, 18)", "padding (16, 20)", 1)
+        .replace("xminimum 240", "xminimum 260")
+        .replace("xmaximum 240", "xmaximum 260")
+        .replace("spacing 8", "spacing 12");
+    assert_eq!(accepted, expected.as_bytes());
+    if let Some(output) = std::env::var_os("LOOMLIGHT_NUMERIC_EVIDENCE") {
+        let output = std::path::PathBuf::from(output);
+        fs::create_dir_all(&output).unwrap();
+        fs::write(output.join("accepted.rpy"), &accepted).unwrap();
+        fs::write(output.join("accepted.json"), serde_json::to_vec_pretty(&json!({"sha256":hex::encode(Sha256::digest(&accepted)),"source":expected,"document":doc,"parentConstraintRejected":true})).unwrap()).unwrap();
+    }
+}
+
+#[test]
+fn numeric_layout_refuses_tuple_values_and_malformed_aliases_without_writing() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    service.open_path(&root).unwrap();
+    for property in [
+        "xpos (1,)",
+        "pos (1,,0.5)",
+        "xalign (0.5,)",
+        "xpos 1\n            xsize 40",
+    ] {
+        let before =
+            format!("screen numeric():\n    frame:\n        {property}\n        text \"Keep\"\n");
+        fs::write(root.join(PATH), &before).unwrap();
+        let document = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+        let request = json!({"path":PATH,"screenName":"numeric","expectedRevision":document["revision"],"nodeStart":frame(&document)["span"]["start"],"values":{"xpos":{"unit":"pixels","value":12}}});
+        assert_eq!(
+            reject(&mut service, "screens.setLayout", request)["error"]["code"],
+            "OPAQUE_BOUNDARY"
+        );
+        assert_eq!(fs::read(root.join(PATH)).unwrap(), before.as_bytes());
+    }
+}
+
+#[test]
+fn numeric_layout_refuses_bounds_that_the_selected_displayable_cannot_apply() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir(root.join("game/ui")).unwrap();
+    service.open_path(&root).unwrap();
+    for (header, property) in [
+        ("text \"Keep\"", "xminimum"),
+        ("add \"assets/help.png\"", "xmaximum"),
+        ("add \"assets/help.png\"", "yminimum"),
+    ] {
+        let before = format!("screen numeric():\n    {header}:\n        pass\n");
+        fs::write(root.join(PATH), &before).unwrap();
+        let document = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+        let node = &document["screens"][0]["nodes"][1];
+        assert_eq!(
+            reject(
+                &mut service,
+                "screens.setLayout",
+                json!({"path":PATH,"screenName":"numeric","expectedRevision":document["revision"],"nodeStart":node["span"]["start"],"values":{property:{"unit":"pixels","value":100}}})
+            )["error"]["code"],
+            "OPAQUE_BOUNDARY"
+        );
+        assert_eq!(fs::read(root.join(PATH)).unwrap(), before.as_bytes());
+        if header.starts_with("add ") {
+            fs::write(
+                root.join(PATH),
+                before.replace("pass", &format!("{property} 100")),
+            )
+            .unwrap();
+            let document = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+            let plan = ipc(
+                &mut service,
+                "screens.canvasPlan",
+                json!({"path":PATH,"screenName":"numeric","expectedRevision":document["revision"],"width":1280,"height":720}),
+            );
+            assert!(
+                plan["limits"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|limit| limit.as_str().unwrap().contains(property)),
+                "Unsupported image bounds must not reach the helper: {plan}"
+            );
+        }
+    }
+}
+
+#[test]
+fn numeric_layout_keeps_an_owned_empty_frame_eligible_for_composition() {
+    let (_temporary, mut service, _root, owner) = composition_project();
+    let fixed = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"fixed","text":""}),
+    );
+    let frame = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":fixed["selectedId"],"kind":"frame","text":""}),
+    );
+    let document = &frame["document"];
+    let node = document["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|node| node["id"] == frame["selectedId"])
+        .unwrap();
+    ipc(
+        &mut service,
+        "screens.setLayout",
+        json!({"path":owner["path"],"screenName":"notes","expectedRevision":document["revision"],"nodeStart":node["span"]["start"],"values":{"xpos":{"unit":"pixels","value":100},"xsize":{"unit":"pixels","value":320},"ysize":{"unit":"pixels","value":180}}}),
+    );
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":frame["selectedId"],"kind":"vbox","text":""}),
+    );
+    assert!(added["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|node| node["id"] == added["selectedId"] && node["kind"] == "vbox"));
+}
+
+#[test]
 fn owned_composition_adds_one_element_with_stable_identity_through_history_and_reopen() {
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");

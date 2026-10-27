@@ -1,42 +1,27 @@
 # Current outcome handover
 
-## L03 numeric layout design checkpoint
+## L03 numeric layout implementation
 
-Kris selected [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38).
-This chat owns implementation on `codex/phase3b-l03-numeric-layout`, created from
-freshly fetched Screens base `4d2101f36b7491aa51ca513f3b3d819f9460bff8` on macOS ARM64.
-The assignment includes implementation, focused tests, final review, a PR into
-`codex/phase3b-screen-designer` and CI audit. It excludes merging and other features.
-Prior sections' statements that no successor is selected predate this assignment.
+This chat owns [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) on
+`codex/phase3b-l03-numeric-layout`, from freshly verified base `4d2101f`.
+Kris authorized implementation, focused tests, final review, a PR into
+`codex/phase3b-screen-designer` and CI audit. Merging and other features are excluded.
+A2 / Paired fields is approved. The design chat returned sole writer ownership;
+Kris confirmed both proposed TDD boundaries. Approval source is `c2d23c5`, record
+`c1ab3e6`. The separate reference checkout remains pinned for visual comparison.
 
-The [numeric-layout Design Lab](../design/design-lab-numeric-layout/README.md) has
-three unapproved layouts. Kris requested a separate chat to refine these existing
-mocks with Experience First, present them with a short ticket brief and send the
-approved design back to this implementation chat. During refinement, the design
-agent is the sole checkout writer for the numeric-layout lab files, their registry
-entry and design notes/approval/captures. This implementation chat stays read-only
-until writer ownership returns. The design assignment and chat are linked in #38.
-The running local lab uses port 5174. Design approval remains required before
-production implementation. The earlier A/B/C approval question is superseded by
-the refinement chat's presentation. A separate pending question asks to confirm the
-production UI/controller/real-core and public Rust-operation test boundaries under
-the TDD skill. No production files or tests have changed yet.
+[Evidence](../tasks/evidence/numeric-layout.md) records exact source preservation,
+keyboard/draft/history coverage, the property matrix and early two-aspect SDK proof.
+The implementation checkpoint is local; its final review and publication follow. Final review,
+full checks, CI and native/package proof still need completion. #38 owns cumulative
+operation limits. Mac SDK consumption is 12/16; Windows 0/16. Package builds and
+native sessions are 0/2 per OS, qualification dispatches 0/3. Preserve failed SDK and
+Design Lab results; neither becomes a pass. Route Windows and Mac automated proof
+through CI, with local signed Mac native proof because CI lacks the approved identity.
 
-[Evidence](../tasks/evidence/numeric-layout.md) records preparation, browser checks,
-SDK reference findings and remaining acceptance. #38 owns live execution and future
-costly-operation limits; none of those operations has started. The combined Design
-Lab check failed at the existing flow-v1 source guard after 488 cases and 13 check
-groups; the targeted 48-case matrix, TypeScript, approval records and separate
-production build-isolation check pass. The draft mock checkpoint is committed and
-published on this branch; #38 records its exact candidate. Preserve the unrelated untracked Phase 1
-audit, all native recovery, archives, tags and stashes below.
-
-The design chat records approval under Design Lab INTEGRATION and messages this
-chat with the exact approved source and writer handback. Resume implementation in
-this chat after that handback and the test-boundary decision. Complete
-implementation and qualification against live #22/#24/#38. Route affected automated
-Windows/macOS proof through CI; name any required capability CI cannot establish.
-No PR, product CI result or #38 completion is claimed at this checkpoint.
+The untracked Phase 1 audit, protected native recovery, archives, tags and stashes
+below are unrelated and remain untouched. Prior sections' statements that no
+successor is selected predate this assignment.
 
 ## Phase 3B architecture refactors merged and cleaned up
 

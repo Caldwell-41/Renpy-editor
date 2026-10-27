@@ -44,18 +44,18 @@ try {
   await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
   await ui.getByLabel('Width',{exact:true}).fill('811');await ui.getByLabel('Height',{exact:true}).fill('407');
   await ui.getByLabel('Height',{exact:true}).evaluate(input=>window.__helpFocus=input);
-  await ui.getByLabel('Height',{exact:true}).press('Enter'); await ui.getByText('Size saved. Undo reverses both dimensions together.',{exact:true}).waitFor();
-  assert.equal(await page.evaluate(()=>document.activeElement===window.__helpFocus && window.__helpFocus.isConnected),true,'Enter Apply retains original focused numeric control');
+  await ui.getByLabel('Height',{exact:true}).press('Enter'); await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
+  assert.equal(await page.evaluate(()=>document.activeElement===document.querySelector('[data-layout-field=ysize]')),true,'Enter Apply retains focus in the same numeric field');
   const accepted=await snapshot();assert.equal(accepted.toString(),baseline.toString().replace('640','811').replace('360','407'));
-  assert.equal(receipts.filter(r=>r.request.operation==='screens.setSize').length,1);cases.push('renderer/core atomic minimal two-token patch; opaque neighbors byte-identical');
+  assert.equal(receipts.filter(r=>r.request.operation==='screens.setLayout').length,1);cases.push('renderer/core atomic minimal two-token patch; opaque neighbors byte-identical');
   await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.screens-editor [aria-label="Width"]')?.value==='640');assert.deepEqual(await snapshot(),baseline);
   await ui.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.screens-editor [aria-label="Width"]')?.value==='811');assert.deepEqual(await snapshot(),accepted);
-  await ui.getByLabel('Width',{exact:true}).fill('811');await ui.getByRole('button',{name:'Apply changes',exact:true}).click();await ui.getByText('No change. No undo entry added.',{exact:true}).waitFor();
+  await ui.getByLabel('Width',{exact:true}).fill('811');await ui.getByRole('button',{name:'Apply layout',exact:true}).click();await ui.getByText('No change. No undo entry added.',{exact:true}).waitFor();
   await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.screens-editor [aria-label="Width"]')?.value==='640');assert.deepEqual(await snapshot(),baseline);cases.push('atomic shared Undo/Redo and no-op adds no history');
-  await ui.getByLabel('Width',{exact:true}).fill('0');await ui.getByRole('button',{name:'Apply changes',exact:true}).click();await ui.getByText('Enter whole numbers from 1 to 16384. Input retained.',{exact:true}).waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'0');assert.deepEqual(await snapshot(),baseline);
-  await ui.getByRole('button',{name:'Cancel changes',exact:true}).click();await ui.getByLabel('Width',{exact:true}).fill('900');await ui.getByLabel('Width',{exact:true}).press('Escape');assert.deepEqual(await snapshot(),baseline);assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'640');cases.push('invalid numeric fields retained; Cancel/Escape write nothing');
-  await rpc({driver:'hold'});await ui.getByLabel('Width',{exact:true}).fill('750');await ui.getByRole('button',{name:'Apply changes',exact:true}).evaluate(button=>window.__helpFocus=button);await ui.getByRole('button',{name:'Apply changes',exact:true}).click();await ui.getByText(/Input retained. Review Source/).waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'750');assert.equal(await page.evaluate(()=>document.activeElement===window.__helpFocus && window.__helpFocus.isConnected),true,'refused Apply retains focused button');await rpc({driver:'release'});assert.deepEqual(await snapshot(),baseline);cases.push('actual held ApplicationHost owner rejects mutation and retains input and button focus');
-  await ui.getByRole('button',{name:'Apply changes',exact:true}).click();await ui.getByText('Size saved. Undo reverses both dimensions together.',{exact:true}).waitFor();
+  await ui.getByLabel('Width',{exact:true}).fill('0');await ui.getByRole('button',{name:'Apply layout',exact:true}).click();await ui.getByText('Width needs a whole number of pixels within 1 to 16384. Input retained.',{exact:true}).first().waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'0');assert.deepEqual(await snapshot(),baseline);
+  await ui.getByRole('button',{name:'Cancel layout',exact:true}).click();await ui.getByLabel('Width',{exact:true}).fill('900');await ui.getByLabel('Width',{exact:true}).press('Escape');assert.deepEqual(await snapshot(),baseline);assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'640');cases.push('invalid numeric fields retained; Cancel/Escape write nothing');
+  await rpc({driver:'hold'});await ui.getByLabel('Width',{exact:true}).fill('750');await ui.getByRole('button',{name:'Apply layout',exact:true}).evaluate(button=>window.__helpFocus=button);await ui.getByRole('button',{name:'Apply layout',exact:true}).click();await ui.getByText(/Input retained. Review Source/).first().waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'750');assert.equal(await page.evaluate(()=>document.activeElement===window.__helpFocus && window.__helpFocus.isConnected),true,'refused Apply retains focused button');await rpc({driver:'release'});assert.deepEqual(await snapshot(),baseline);cases.push('actual held ApplicationHost owner rejects mutation and retains input and button focus');
+  await ui.getByRole('button',{name:'Apply layout',exact:true}).click();await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
   await ui.getByRole('button',{name:'View in Source',exact:true}).first().click();
   const editor=page.locator('textarea.source-editor');await editor.waitFor();const text=await editor.inputValue();await editor.fill(text.replace('750','752'));await page.getByRole('button',{name:'Save Source',exact:true}).first().click();
   await page.waitForFunction(()=>document.querySelector('#app-status')?.textContent==='Saved');await page.getByRole('button',{name:'Screens',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.screens-editor [aria-label="Width"]')?.value==='752');cases.push('supported Source edit reconciles through actual Source Save');
@@ -63,11 +63,11 @@ try {
   const call=async(operation,payload={})=>rpc({protocolVersion:1,requestId:randomUUID(),operation,payload:{sessionId:session,...payload}});
   const opened=(await call('source.open',{path:'game/ui/help.rpy'})).value;
   await call('source.updateDraft',{path:'game/ui/help.rpy',expectedBaseRevision:opened.baseRevision,text:opened.text+'# pending Source',selectionStart:0,selectionEnd:0});
-  await ui.getByLabel('Width',{exact:true}).fill('820');await ui.getByRole('button',{name:'Apply changes',exact:true}).click();await ui.getByText(/Input retained. Review Source/).waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'820');await call('source.discard',{path:'game/ui/help.rpy'});cases.push('actual dirty Source refusal retains numeric draft');
-  await ui.getByRole('button',{name:'Cancel changes',exact:true}).click();await rpc({driver:'externalAppend'});const external=await snapshot();
-  await ui.getByLabel('Width',{exact:true}).fill('830');await ui.getByRole('button',{name:'Apply changes',exact:true}).click();await ui.getByText(/Input retained. Review Source/).waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'830');assert.deepEqual(await snapshot(),external);cases.push('ordinary external conflict retains draft and source');
-  await ui.getByRole('button',{name:'Cancel changes',exact:true}).click();await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();await ui.getByText('Saved screen loaded. Unsupported regions remain in Source.',{exact:true}).waitFor();
-  await ui.getByLabel('Width',{exact:true}).fill('760');await ui.getByRole('button',{name:'Apply changes',exact:true}).click();await ui.getByText('Size saved. Undo reverses both dimensions together.',{exact:true}).waitFor();
+  await ui.getByLabel('Width',{exact:true}).fill('820');await ui.getByRole('button',{name:'Apply layout',exact:true}).click();await ui.getByText(/Input retained. Review Source/).first().waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'820');await call('source.discard',{path:'game/ui/help.rpy'});cases.push('actual dirty Source refusal retains numeric draft');
+  await ui.getByRole('button',{name:'Cancel layout',exact:true}).click();await rpc({driver:'externalAppend'});const external=await snapshot();
+  await ui.getByLabel('Width',{exact:true}).fill('830');await ui.getByRole('button',{name:'Apply layout',exact:true}).click();await ui.getByText(/Input retained. Review Source/).first().waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'830');assert.deepEqual(await snapshot(),external);cases.push('ordinary external conflict retains draft and source');
+  await ui.getByRole('button',{name:'Cancel layout',exact:true}).click();await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();await ui.getByText('Saved screen loaded. Unsupported regions remain in Source.',{exact:true}).waitFor();
+  await ui.getByLabel('Width',{exact:true}).fill('760');await ui.getByRole('button',{name:'Apply layout',exact:true}).click();await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
   const beforePointer=await snapshot();
   assert.equal(await ui.getByRole('button',{name:'Resize selected element',exact:true}).count(),0,'Unresolved styles and opaque layout cannot supply guessed gesture geometry');
   await ui.locator('.screen-canvas-status').filter({hasText:/unresolved/}).waitFor();cases.push('unsupported composition keeps numeric editing and refuses fabricated canvas geometry');
@@ -86,12 +86,22 @@ try {
   await page.setViewportSize({width:1100,height:720});await page.getByRole('button',{name:'Close Project',exact:true}).click();await page.locator('.recent-open').click();await page.getByRole('button',{name:'Screens',exact:true}).click();await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'760');assert.deepEqual(await snapshot(),beforePointer);cases.push('close/open new project session retains accepted source');
   await ui.getByLabel('Screen',{exact:true}).selectOption(JSON.stringify(['game/ui/z_compare.rpy','flow_help']));
   await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
+  await ui.getByLabel('Width',{exact:true}).fill('640');await ui.getByLabel('Width',{exact:true}).press('Enter');
+  await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
   for(const theme of ['light','dark'])for(const [width,height] of [[1100,720],[560,640]]){
     await page.setViewportSize({width,height});await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
     await page.evaluate(()=>{document.querySelectorAll('*').forEach(e=>{e.scrollTop=0;e.scrollLeft=0;});});
     await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
     comparisonLayouts.push(await page.evaluate(()=>({width:innerWidth,height:innerHeight,shells:document.querySelectorAll('.app-shell').length,headers:document.querySelectorAll('.app-header').length,header:document.querySelector('.app-header')?.getBoundingClientRect().toJSON(),footer:document.querySelector('.app-footer')?.getBoundingClientRect().toJSON()})));
     await page.screenshot({path:join(output,`production-comparison-design-${theme}-${width}.png`)});
+    if(width===1100) {
+      const geometry=await ui.locator('.screen-layout').evaluate(host=>({width:host.getBoundingClientRect().width,applyBottom:host.querySelector('.layout-actions').getBoundingClientRect().bottom,fieldHeight:host.querySelector('input').getBoundingClientRect().height,viewport:innerHeight}));
+      assert.equal(geometry.fieldHeight,32);assert(geometry.applyBottom<=geometry.viewport-26,JSON.stringify(geometry));
+      await ui.locator('.layout-group summary').first().click();
+      await ui.getByLabel('Minimum width',{exact:true}).scrollIntoViewIfNeeded();
+      assert(await ui.getByRole('button',{name:'Apply layout',exact:true}).isVisible());
+      await ui.locator('.layout-group summary').first().click();
+    }
     if(width===560){await ui.getByLabel('Width',{exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:join(output,`production-comparison-inspector-${theme}-${width}.png`)});}
     await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await page.evaluate(()=>{document.querySelectorAll('*').forEach(e=>{e.scrollTop=0;e.scrollLeft=0;});});await page.screenshot({path:join(output,`production-comparison-choose-${theme}-${width}.png`)});
     await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();

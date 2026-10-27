@@ -1,0 +1,33 @@
+.screens-editor[data-numeric-layout=true] .screen-flow { grid-template-columns:minmax(0,1fr) 382px; }
+.screens-editor .screen-card.screen-numeric { box-sizing:border-box; display:flex; flex-direction:column; min-height:0; height:calc(100dvh - 242px); max-height:none; overflow:hidden; border:0; border-left:1px solid var(--border-normal); border-radius:0; background:transparent; padding:0 0 0 16px; }
+.screen-numeric > h2 { display:none; }.screen-numeric > :not(.screen-layout) { flex-shrink:0; }
+.screen-layout { min-height:0; flex:1; display:flex; flex-direction:column; padding:0; }
+.layout-heading { display:flex; align-items:center; justify-content:space-between; padding-bottom:10px; }
+.layout-heading h3 { margin:0; font-size:14px; }.layout-state { color:var(--accent-primary); font-size:11px; }
+.layout-form { min-height:0; flex:1; overflow:auto; padding-right:4px; }
+.layout-group { margin:0; padding:10px 0; border-top:1px solid var(--border-normal); }
+.layout-group h3,.layout-group summary { margin:0 0 8px; font-size:12px; font-weight:600; }
+.layout-group summary { cursor:pointer; }.layout-group:not([open]) summary { margin:0; }
+.layout-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 10px; }
+.layout-axis { font-size:11px; font-weight:500; margin:0; color:var(--text-secondary); }
+.screen-layout .layout-field { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:4px; font-size:11px; min-width:0; margin:0; }
+.layout-label { grid-column:1/-1; }.layout-unit { color:var(--text-secondary); }
+.screens-editor .screen-layout .layout-grid .layout-field input[data-layout-field],.screen-layout .layout-grid .layout-field select { min-width:0; min-height:32px; height:32px; width:100%; box-sizing:border-box; padding:5px 7px; border-radius:0; font-size:12px; font-variant-numeric:tabular-nums; }
+.screen-layout .layout-coordinate { grid-template-columns:59px minmax(0,1fr); }.layout-coordinate select { grid-column:2; grid-row:2; }
+.layout-quick { display:grid; grid-template-columns:minmax(0,1fr) 136px; gap:14px; }.layout-quick .layout-grid { grid-template-columns:1fr; }
+.layout-quick .layout-field { grid-template-columns:42px minmax(0,1fr) auto; gap:6px; }.layout-quick .layout-label { grid-column:1; }.layout-quick input { grid-column:2; }.layout-quick .layout-unit { grid-column:3; }
+.layout-presets { display:grid; grid-template-columns:repeat(3,1fr); width:108px; gap:3px; }
+.screen-layout .layout-presets .button { position:relative; height:24px; min-height:24px; padding:0; border-radius:0; font-size:0; background:transparent; }
+.layout-dot { display:block; position:absolute; width:5px; height:5px; background:var(--text-secondary); left:calc(50% - 2.5px); top:calc(50% - 2.5px); }
+.layout-presets .button:nth-child(3n+1) .layout-dot { left:5px; }.layout-presets .button:nth-child(3n) .layout-dot { left:auto; right:5px; }
+.layout-presets .button:nth-child(-n+3) .layout-dot { top:4px; }.layout-presets .button:nth-child(n+7) .layout-dot { top:auto; bottom:4px; }
+.layout-presets .button[aria-pressed=true] { border-color:var(--accent-primary); }.layout-presets [aria-pressed=true] .layout-dot { background:var(--accent-primary); }
+.layout-commit { flex-shrink:0; padding-top:10px; border-top:1px solid var(--border-normal); }.layout-actions { display:flex; gap:8px; }
+.layout-actions .button { border-radius:0; min-height:32px; padding:6px 9px; font-size:12px; }
+.layout-commit-state,.layout-feedback,.layout-constraint { font-size:11px; line-height:1.5; margin:0 0 8px; }.layout-commit-state { color:var(--text-secondary); }
+.layout-sizing-note { font-size:11px; line-height:1.5; margin:0 0 10px; }
+.layout-feedback { color:var(--status-error); }.layout-feedback[hidden] { display:none; }
+.layout-constraint { padding-left:10px; border-left:2px solid var(--accent-primary); }.layout-constraint p { margin:0 0 6px; }.layout-constraint .button { border:0; padding:0; min-height:24px; text-decoration:underline; background:transparent; color:var(--accent-primary); }
+.screen-layout input[aria-invalid=true] { border-color:var(--status-error); }
+.screen-tree [data-layout-draft=true]::after { content:"*"; color:var(--accent-primary); }
+@media(max-width:759px) { .screens-editor .screen-card.screen-numeric { display:block; height:auto; overflow:visible; border-left:0; padding:0; }.layout-form { overflow:visible; }.layout-commit { position:sticky; bottom:0; background:var(--surface-app); padding:10px 0; } }

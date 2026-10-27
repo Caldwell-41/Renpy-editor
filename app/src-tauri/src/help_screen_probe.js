@@ -65,14 +65,14 @@
     row.dispatchEvent(new MouseEvent("dblclick", { bubbles: true })); await until(width);
     checkpoint("screen-inventory-passed");
     const input = edit(760); input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    await until(() => message().startsWith("Size saved"));
-    assert(document.activeElement === input && input.isConnected, "Enter Apply preserves the numeric control and caret");
+    await until(() => message().startsWith("Layout saved"));
+    assert(document.activeElement === width(), "Enter Apply preserves focus in the numeric field");
     const accepted = await read("source.open", { sessionId, path: "game/ui/help.rpy" });
     assert(accepted.text === before.text.replace("xsize 640", "xsize 760"), "Apply patches only the accepted dimension token");
     await click("Undo"); await until(() => width()?.value === "640");
     await click("Redo"); await until(() => width()?.value === "760");
-    edit(0); await click("Apply changes"); await until(() => message().startsWith("Enter whole numbers"));
-    await click("Cancel changes"); assert(width().value === "760", "Cancel restores the accepted value");
+    edit(0); await click("Apply layout"); await until(() => message().startsWith("Width needs a whole number of pixels"));
+    await click("Cancel layout"); assert(width().value === "760", "Cancel restores the accepted value");
     checkpoint("source-roundtrip-passed");
     stage = "validate"; latest = undefined; await click("Validate screen"); await trust();
     await until(() => latest?.cleanupComplete, 120000); await terminal("validate"); checkpoint("validation-passed");
@@ -85,7 +85,7 @@
     const geometry = JSON.parse(output.split("\n").find(line => line.startsWith("HELP_SCRATCH_GEOMETRY ")).slice("HELP_SCRATCH_GEOMETRY ".length));
     assert(JSON.stringify(geometry.size) === "[760,360]" && JSON.stringify(geometry.aspect) === "[1280,720]" && geometry.menu === false, "SDK measured the renderer-accepted Help frame in game context");
     checkpoint("preview-geometry-passed");
-    edit(768); await click("Apply changes"); await until(() => message().startsWith("Size saved"));
+    edit(768); await click("Apply layout"); await until(() => message().startsWith("Layout saved"));
     await until(() => document.querySelector(".runtime-revision")?.textContent.includes("Started from an earlier revision"));
     const running = await read("runtime.status", { sessionId, operationId: latest.operationId, afterSequence: 0 });
     assert(running.earlierRevision && !running.cleanupComplete, "Preview retains its frozen accepted revision");

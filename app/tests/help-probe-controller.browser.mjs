@@ -27,7 +27,7 @@ try{
   else if(op==='runtime.status')value=state();
   else if(op==='runtime.diagnostics')value={diagnostics:[]};
   else if(op==='probe.runtimeUiReport')value={recorded:true};
-  else{const response=await child.request(request);if(op==='screens.setSize'&&kind==='run'&&response.ok)stale=true;return response;}
+  else{const response=await child.request(request);if(op==='screens.setLayout'&&kind==='run'&&response.ok)stale=true;return response;}
   return {ok:true,protocolVersion:1,requestId:request.requestId,value};
  });
  await page.route('**/help-probe-rehearsal',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));

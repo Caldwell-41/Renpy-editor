@@ -25,7 +25,7 @@ try {
       return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'RUNTIME_BUSY',message:'Another request is in progress.'}};
     }
     const response=await child.request(request);
-    if(request.operation==='screens.setSize' && response.ok){accepted=true;acceptedWrites++;}
+    if(request.operation==='screens.setLayout' && response.ok){accepted=true;acceptedWrites++;}
     return response;
   });
   await page.route('**/canvas-controller',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));

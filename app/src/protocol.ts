@@ -78,6 +78,7 @@ export const CORE_OPERATIONS = [
   "screens.compose",
   "screens.setPixelProperty",
   "screens.setSize",
+  "screens.setLayout",
   "screens.setPosition",
   "scene.recovery",
   "scene.resolveRecovery",

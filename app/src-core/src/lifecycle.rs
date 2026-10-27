@@ -879,6 +879,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn screens_set_layout(
+        &self,
+        request: crate::screens::SetLayoutRequest,
+    ) -> Result<crate::screens::Document, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .screens_set_layout(&authority, request)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn screens_inspect(
         &self,
         request: crate::screens::InspectRequest,
