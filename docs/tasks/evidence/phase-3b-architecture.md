@@ -61,5 +61,56 @@ Its Standards and Spec reviewers ran separately and read #64 plus applicable
 repository contracts. Standards has zero findings and no worst issue. Spec has
 zero findings and no worst issue. No P1/P2 correction is required by that review.
 The coordinator also inspected both assignment diffs and their integration.
-Runtime qualification and CI remain pending; the source review does not supply
-those results. Detailed raw checks are retained under ignored `.toolchains/architecture-64/`.
+The source review does not supply runtime or CI results; those are recorded below. Detailed raw checks are retained under ignored `.toolchains/architecture-64/`.
+
+
+## Mac runtime qualification
+
+Product inputs remain those reviewed at `e3c75ef`; candidate `694e2ff240f77f9534bb9bac331b5232285345c9`
+adds only evidence/status text. The official Ren'Py 8.5.3 archive and retained
+published checksum metadata match pinned SHA-256
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+The real-helper renderer/core sequence passes all seven groups, source-backed
+selection and an unapplied draft addition with unchanged source. This proves the
+changed frame-delivery path with actual PNGs; it adds no broader fidelity claim.
+
+Signed Mac package 1 passes strict signature, approved identity, installer-content
+and ARM64 checks. Executable SHA-256 is
+`3ffd0bacff389dd5738452f0af26e09385120510a16b4269266185c6fd0db24e`;
+installer SHA-256 is
+`7a50cc0b517e14adac62fea37c9f6c3740efe95bd187ed576c8022da18788b8f`.
+The existing composition probe passes seven required groups in native session 1,
+exit 0, no timeout, in 9.256 seconds. Accepted bytes match, no scratch job/source
+bytecode/save remains, each credential/host/request cleanup owner passes and the
+fixture is removed. Desktop admission and final checks pass; both sleep assertions
+are released and the receipt has no error. Input is synthetic DOM input in the
+actual packaged WKWebView. This is not fresh physical-input or human acceptance.
+Raw receipts are under ignored `local-01/native-mac`; package/identity records are
+under ignored `.toolchains/releases/architecture-64-01/`.
+
+## PR and pending CI
+
+[PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) targets
+`codex/phase3b-screen-designer` from `codex/phase3b-architecture`.
+[Qualification dispatch 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40514608438)
+used an incorrect full candidate input. Both task/candidate guards failed before
+dependency installation, compilation, SDK or native work. The coordinator cancelled
+the run; its terminal state is cancelled and its failed guard steps remain failures.
+Raw metadata/logs are retained under ignored `ci-01-wrong-candidate`.
+
+[Qualification dispatch 2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40514677531),
+attempt 1, is the replacement, bound to exact candidate
+`694e2ff240f77f9534bb9bac331b5232285345c9`, with `architecture_refactor=true`
+and ordinal 2. The selected Windows x64/macOS ARM64 jobs include frontend/source/
+metadata/desktop and real renderer/core checks; Windows additionally exercises the
+verified SDK, real helper and packaged composition path. Other historical selectors
+remain unselected. This run is pending and is not a pass.
+
+The PR's automatic Repository quality run is
+[40514595303](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40514595303)
+at that same head; a subsequent documentation-only push will have its own run.
+The coordinator must audit required jobs, exact candidate, artifacts, SDK/native
+receipts and cleanup before marking the task accepted or merging. After success,
+finish the authorized merge, safe branch/worktree retirement and requested
+completion notification. The private local continuation record retains routing
+metadata without adding it to the task specification.
