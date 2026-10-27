@@ -35,7 +35,10 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
         width: 1280, height: 720, image: "data:image/png;base64,fixture",
         geometry: doc.screens[0]!.nodes.map((node, index) => ({ start: node.span.start, x: 0, y: 0,
           width: index === 0 ? 1280 : 640, height: index === 0 ? 720 : 360 })) } as T;
-      if (operation === "screens.compose" && reply) { doc = reply.document; return structuredClone(reply) as T; }
+      if (operation === "screens.compose" && reply) {
+        if (payload?.expectedRevision !== doc.revision) throw new Error("Source conflict");
+        doc = reply.document; return structuredClone(reply) as T;
+      }
       if (["screens.setSize", "screens.setPosition"].includes(operation) && reply) { doc = reply.document; return structuredClone(doc) as T; }
       if (operation === "scene.list") return { projectRevision: "project", sourceMapRevision: "map" } as T;
       if (operation === "scene.apply" && historyReply) { doc = historyReply; return {} as T; }
@@ -189,6 +192,78 @@ test("text drafts follow element identity across selection, Apply and Cancel", a
     assert.equal(h.workspace.hasDraft(), false);
   } finally { h.workspace.dispose(); }
 });
+
+test("text editing after a size save uses the accepted revision and preserves numeric focus", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick();
+    const before = structuredClone(h.original);
+    before.screens[0]!.nodes[2]!.properties = [{ property: "xsize", value: 640 }, { property: "ysize", value: 360 }];
+    h.replaceDocument(before); await h.workspace.load(); h.edit("title-id");
+    const properties = document.querySelector<HTMLDetailsElement>(".screen-properties"); assert.ok(properties); properties.open = true;
+    const card = document.querySelector<HTMLElement>(".screen-card"); assert.ok(card); card.scrollTop = 40;
+    const width = document.querySelector<HTMLInputElement>('[data-size="width"]'); assert.ok(width);
+    width.value = "700"; width.dispatchEvent(new window.Event("input")); width.focus();
+    const resized = structuredClone(before); resized.revision = "resized"; resized.screens[0]!.nodes[2]!.properties[0]!.value = 700;
+    h.respond(resized, "title-id"); width.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await tick(); await tick();
+    assert.equal(document.activeElement === document.querySelector('[data-size="width"]'), true, "Save keeps numeric keyboard focus");
+    assert.equal(document.querySelector<HTMLDetailsElement>(".screen-properties")?.open, true);
+    assert.equal(card.scrollTop, 40);
+    h.text().value = "New title"; h.text().dispatchEvent(new window.Event("input"));
+    const edited = structuredClone(resized); edited.revision = "edited"; edited.screens[0]!.nodes[2]!.literal = "New title";
+    h.respond(edited, "title-id"); h.click("Apply changes"); await tick(); await tick();
+    assert.equal(h.calls.find(call => call.operation === "screens.compose")?.payload?.expectedRevision, "resized");
+    assert.equal(h.workspace.hasDraft(), false, "The new text saves without reopening Design");
+    assert.equal(h.text().value, "New title");
+  } finally { h.workspace.dispose(); }
+});
+
+for (const gesture of ["keyboard", "drag"] as const) {
+  test(`${gesture} hierarchy reorder after canvas resize uses the accepted source`, async () => {
+    const h = interactiveFixture(undefined, true);
+    try {
+      await tick(); await tick();
+      const before = structuredClone(h.original), nodes = before.screens[0]!.nodes; before.revision = "geometry-before";
+      nodes[1]!.parentStart = 10;
+      nodes.splice(1, 0, { id: "frame-id", kind: "frame", literal: null, span: { start: 10, end: 205 }, parentStart: 0,
+        layout: {}, properties: [{ property: "xsize", value: gesture === "keyboard" ? 99 : 640 }, { property: "ysize", value: 360 }], protected: [] });
+      h.replaceDocument(before); await h.workspace.load(); await tick();
+      document.querySelector("img")!.dispatchEvent(new window.Event("load")); h.row("frame-id").click();
+      document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+      const resized = structuredClone(before); resized.revision = "resized";
+      resized.screens[0]!.nodes[1]!.properties[0]!.value++;
+      if (gesture === "keyboard") {
+        for (const node of resized.screens[0]!.nodes) {
+          if (node.span.start > 10) node.span.start++;
+          if (node.span.end > 10) node.span.end++;
+          if (node.parentStart !== null && node.parentStart > 10) node.parentStart++;
+        }
+      }
+      h.respond(resized, "frame-id");
+      const handle = document.querySelector<HTMLButtonElement>(".screen-resize"); assert.ok(handle); handle.focus();
+      handle.dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })); await tick(); await tick();
+      document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+      assert.equal(document.activeElement === document.querySelector(".screen-resize"), true, "Save retains canvas resize focus");
+      const reordered = structuredClone(resized); reordered.revision = "reordered";
+      const children = reordered.screens[0]!.nodes; [children[3], children[4]] = [children[4]!, children[3]!];
+      h.respond(reordered, "title-id"); h.row("title-id").click();
+      if (gesture === "keyboard") h.row("title-id").dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true }));
+      else {
+        h.row("title-id").dispatchEvent(new window.DragEvent("dragstart", { bubbles: true }));
+        const drop = new window.DragEvent("drop", { bubbles: true }); Object.defineProperty(drop, "clientY", { value: 1 });
+        h.row("body-id").dispatchEvent(drop);
+      }
+      await tick(); await tick();
+      assert.deepEqual(h.calls.find(call => call.operation === "screens.compose")?.payload,
+        { screenId: "screen-id", expectedRevision: "resized", command: { type: "reorder", nodeId: "title-id", targetId: "body-id", after: true } });
+      assert.equal(h.row("title-id").ariaSelected, "true");
+      assert.equal(document.activeElement === h.row("title-id"), true);
+      assert.deepEqual([...document.querySelectorAll<HTMLElement>('[data-node-id]')].map(row => row.dataset.nodeId),
+        ["root-id", "frame-id", "box-id", "body-id", "title-id", "custom-id"]);
+    } finally { h.workspace.dispose(); }
+  });
+}
 
 test("addition text validates on completion and submission without losing input or focus", async () => {
   const h = interactiveFixture();

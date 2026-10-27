@@ -1,31 +1,32 @@
 # Current outcome handover
 
-## L02 focus and Undo notice publication and CI audit
+## L02 geometry-save publication and CI audit
 
-Kris selected fixing both P2 findings from the fresh private review of PR #62,
-using the root-cause skill and focused tests. The checkout remains
-`codex/37-compose-help-layout`, starting at `d90d7c7`. This correction commit
-includes the code, tests and supporting records. Explicit Design entry now focuses its text field;
-one Screens save-completion handler expires removal-specific Undo feedback after
-source-changing writes. Reload clears feedback from an earlier visit, while no-op
-saves retain the action. The earlier Add canvas correction is included in the base.
+Kris selected fixing the P2 finding from the private review of PR #62 at
+`db52bf5`, using the root-cause skill. The checkout remains
+`codex/37-compose-help-layout`. Geometry saves installed a new document without
+refreshing composition controls. Those controls then used old revisions or source
+offsets. Accepted source-changing geometry saves now refresh the controls while
+preserving focus, expanded sections and scroll. Existing drafts keep their
+original revisions; no-op and failed saves keep their controls.
 
-Typechecking, all 252 frontend tests, production build and a focused Chrome check
-pass. Seven new/strengthened assertions rejected the old behavior; the focused
-composition/request group now passes 28 cases. Chrome verifies real text input,
-no-op retention, notice expiration and shared Undo order with fixture IPC.
-[The correction record](../tasks/evidence/simple-help-layout.md#local-focus-and-undo-notice-corrections-2026-10-27)
-owns diagnosis, initial test failures and verification limits.
+Typechecking, all 255 frontend tests, the production build and focused Chrome
+checks pass. The correction commit includes the fix, three rejecting tests and
+supporting records.
+[The correction record](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27)
+owns reproduction, verification and environment failures. Kris subsequently
+selected committing and pushing the correction to PR #62, updating its description
+and checking automatic CI. Publish this correction, bind the automatic run to its
+exact head and audit it in this same chat. Use ci-watch if the run remains pending.
+Record the run and terminal audit in the PR description without another receipt-only
+commit. This selects no extra issue comments or qualification campaign.
+No owned server/browser remains.
+Prior native/SDK receipts retain their tested candidates and operation counts.
+Preserve the unrelated untracked audit. Formal acceptance, merge and release
+remain unselected.
 
-Kris subsequently selected committing and pushing both fixes to PR #62, updating
-the PR description and auditing the automatic CI checks. Publish this correction
-to the existing branch, bind its automatic run to the exact head, and audit it in
-this same chat. Use ci-watch if the run remains pending, then record its terminal
-audit in the PR description without another receipt-only commit. This authorization
-does not include extra issue comments or manual qualification dispatches.
-Layout, CSS, source generation, helper, SDK and native code are unchanged; prior
-native/SDK receipts retain their candidates and operation counts. Preserve the
-unrelated untracked audit. Formal acceptance, merge and release remain unselected.
+The earlier focus/Undo corrections are published at `db52bf5`; their automatic
+run 40456167313 is audited and passing in PR #62's description.
 
 ## Published #37 baseline and qualification
 

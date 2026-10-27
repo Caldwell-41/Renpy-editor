@@ -519,6 +519,9 @@ fallback on Redo. Other history preserves a surviving selection. Device preferen
 optionally remember screen/element selection by project UUID; history itself remains
 session-local. Text/addition drafts retain their original source revision. If Source
 removes their target, the UI keeps the text available for copying or explicit discard.
+Accepted source-changing geometry saves refresh composition controls against the
+returned document, preserving focus, expanded sections and scroll. New edits use
+that revision; existing drafts retain their captured revision.
 Explicit Design entry focuses the text editor. The removal notice's specific Undo
 action expires after a later source-changing Screens save or Source reload,
 including return from another workspace. No-op saves retain the action.

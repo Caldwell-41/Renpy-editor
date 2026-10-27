@@ -371,6 +371,21 @@ export class ScreensWorkspace {
     this.card.ariaBusy = String(this.busy);
     this.card.querySelectorAll<HTMLButtonElement>(".screen-edit-actions button").forEach(b => b.ariaDisabled = String(this.busy));
   }
+  private refreshGeometryEditor(): void {
+    // Geometry changes keep the same controls, but their source bindings need the accepted document.
+    const selector = "input,textarea,select,button,summary";
+    const focused = [...this.card.querySelectorAll<HTMLElement>(selector)].indexOf(document.activeElement as HTMLElement);
+    const textarea = document.activeElement?.tagName === "TEXTAREA" ? document.activeElement as HTMLTextAreaElement : undefined;
+    const selection = textarea ? [textarea.selectionStart, textarea.selectionEnd] as const : undefined;
+    const expanded = [...this.card.querySelectorAll("details")].map(details => details.open);
+    const scroll = this.card.scrollTop;
+    this.renderCard();
+    this.card.querySelectorAll("details").forEach((details, index) => { details.open = expanded[index] ?? details.open; });
+    const control = this.card.querySelectorAll<HTMLElement>(selector)[focused];
+    control?.focus({ preventScroll: true });
+    if (selection && control?.tagName === "TEXTAREA") (control as HTMLTextAreaElement).setSelectionRange(...selection);
+    this.card.scrollTop = scroll;
+  }
   private ensureDraft(): Draft {
     let draft = this.draft();
     if (!draft) { const node = this.nodes()[this.selected]!; draft = { document: this.doc!, screen: this.screen, index: this.selected, width: String(size(node, "xsize")), height: String(size(node, "ysize")) }; this.drafts.set(this.key(), draft); }
@@ -392,7 +407,8 @@ export class ScreensWorkspace {
       if(handle.hasPointerCapture(pointer))handle.releasePointerCapture(pointer);
     }
     if (![draft.width, draft.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384)) { this.note("Enter whole numbers from 1 to 16384. Input retained.", true); return; }
-    const key = this.key(); this.busy = true; this.loadSequence++; this.updateSizeControls();
+    const key = this.key(); let sourceChanged = false;
+    this.busy = true; this.loadSequence++; this.updateSizeControls();
     try {
       const document = await this.actions.coordinate(() => this.actions.request<ScreenDocument>(draft.position ? "screens.setPosition" : "screens.setSize", {
         path: draft.document.path, expectedRevision: draft.document.revision, screenName: draft.screen,
@@ -402,7 +418,8 @@ export class ScreensWorkspace {
       if (!this.current()) return;
       this.drafts.delete(key); this.documents = this.documents.map(d => d.path === document.path ? document : d);
       if (this.doc?.path === document.path) this.doc = document;
-      this.note(document.revision === draft.document.revision ? "No change. No undo entry added." : draft.position ? "Position saved. Undo reverses the move." : "Size saved. Undo reverses both dimensions together."); this.saved(document.revision !== draft.document.revision);
+      sourceChanged = document.revision !== draft.document.revision;
+      this.note(!sourceChanged ? "No change. No undo entry added." : draft.position ? "Position saved. Undo reverses the move." : "Size saved. Undo reverses both dimensions together."); this.saved(sourceChanged);
     } catch (error) { if (this.current()) this.note(`${(error as Error).message} Input retained. Review Source, or cancel this draft and refresh.`, true); }
     finally {
       this.busy = false;
@@ -410,6 +427,7 @@ export class ScreensWorkspace {
         const resizeFocused = document.activeElement?.classList.contains("screen-resize");
         this.focusResize = !!resizeFocused;
         this.focusMove = !!document.activeElement?.matches(".screen-node,.screen-move");
+        if (sourceChanged && this.owned) this.refreshGeometryEditor();
         this.updateSizeControls(); this.renderCanvas();
         if (resizeFocused) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
       }

@@ -2,19 +2,23 @@
 
 ## L02 Help composition PR open
 
-2026-10-27 follow-up: Kris selected local corrections for two P2 findings from a
-fresh private review of PR #62 at `d90d7c7`. Explicit Design entry now focuses the
-text field. All Screens save paths expire the removal-specific Undo action when
-source changes; reload also clears it, while no-op saves retain it. Five new tests
-and stronger canvas-focus checks cover the corrections. Typechecking, all 252
-frontend tests, production build and focused Chrome checks pass.
-Kris then selected committing and pushing both fixes to PR #62, updating its
-description and auditing the automatic checks in this same chat. This commit
-includes the code, tests and supporting records. PR #62's description will record
+2026-10-27 follow-up: Kris selected fixing the P2 stale-control finding from the
+private review of PR #62 at `db52bf5`. Geometry saves now refresh composition
+controls against the accepted document, preserving focus, expanded sections and
+scroll. Three new tests cover subsequent text editing and keyboard/drag hierarchy
+reordering. Typechecking, all 255 frontend tests, production build and focused
+Chrome checks pass. Kris subsequently selected committing and pushing this fix to
+PR #62, updating its description and checking automatic CI in this chat. This
+commit includes the correction and supporting records; the PR description owns
 the exact run and terminal audit without another receipt-only commit. Prior
-native/SDK receipts retain their tested candidates; no new qualification campaign
-is selected.
-[Correction evidence](../tasks/evidence/simple-help-layout.md#local-focus-and-undo-notice-corrections-2026-10-27).
+native/SDK receipts retain their tested candidates.
+[Correction evidence](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27).
+
+The earlier Design-focus and removal-Undo corrections are published at `db52bf5`.
+Both required jobs in automatic run 40456167313 pass on that candidate, as audited
+in PR #62's description. Their
+[evidence](../tasks/evidence/simple-help-layout.md#local-focus-and-undo-notice-corrections-2026-10-27)
+retains the diagnosis and verification limits.
 
 2026-10-27 follow-up: PR #62's canvas Enter-to-Design regression is fixed
 with three focused cases. Typechecking, all 246 frontend tests, the production

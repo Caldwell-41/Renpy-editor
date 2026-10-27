@@ -3,6 +3,51 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Local geometry-save binding correction, 2026-10-27
+
+Kris selected fixing the P2 finding from the private review of PR #62 at
+`db52bf5`, using the root-cause skill. Publication was initially withheld; the
+later authorization is recorded below.
+
+Geometry save completion installed the accepted document but left composition
+controls bound to the earlier document. Text entry after a size save submitted
+the old revision and received a false Source conflict. Hierarchy drag captured
+the same stale revision. Keyboard reorder could dereference a missing parent
+after a wider numeric token shifted source offsets.
+
+The shared size/position completion path now refreshes composition controls after
+a source-changing save, preserving focus, textarea selection, expanded sections
+and scroll. Existing drafts retain their captured revisions. No-op and failed
+saves keep their controls. Revision checks and source/core code are unchanged.
+
+Three focused tests reproduce text-after-size and keyboard/drag reorder after
+canvas resize. The fixture now enforces the core's expected-revision rule. Before
+the fix, the corrected reproductions failed with old revision assertions and the
+missing-parent error. An initial fixture setup lacked the refreshed canvas image;
+it was corrected before the production change. The three cases then pass.
+
+Typechecking, all 255 frontend tests and the production build pass. The first
+full run passed 254 cases and failed one unrelated validator because system Python
+3.9 lacks `tomllib`; the rerun uses bundled Python 3.12.14. The build retains its
+existing chunk-size warning. Repository validation passes 960 files, and all 13
+section-link tests pass using unittest discovery. An earlier module-style invocation
+could not resolve the validator import and ran no tests.
+Focused Chrome 156.0.8078.48 checks with fixture IPC
+pass text-after-size, resize-then-keyboard reorder and drag reorder, with matching
+accepted revisions, preserved numeric/canvas focus and zero page errors. The
+sandbox first refused the local server before browser launch; approved execution
+outside the sandbox completed the check and cleaned up its browser/server.
+
+No native editor, SDK or CI run was started during local verification. Earlier qualification receipts retain
+their tested candidates. CURRENT/HANDOVER remain above their reference word-count
+targets; this narrow correction preserves the older outcomes and recovery records.
+
+Kris subsequently instructed: "Commit and push the fix to PR #62, update the
+description, and check CI." This commit includes the correction and supporting
+records. Its automatic run, exact candidate and terminal audit belong in the PR
+description without a receipt-only successor commit. No extra issue comment,
+manual qualification dispatch, merge or release is selected.
+
 ## Local focus and Undo notice corrections, 2026-10-27
 
 Kris selected local fixes and focused tests for the two P2 findings from the fresh
