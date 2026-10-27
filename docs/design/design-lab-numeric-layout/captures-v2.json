@@ -1,0 +1,272 @@
+[
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-anchored-dark-wide.png",
+    "sha256": "03b01b0d0a69aaa0b754f98226e2cb2b979394dd4c266928657223d2a410d83d",
+    "state": "anchored",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-anchored-dark-compact.png",
+    "sha256": "fd47d5f1525bf2b21589ac40a14c8f8afa880352fd4bd80f2613d3dc588cce13",
+    "state": "anchored",
+    "theme": "dark",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-anchored-light-wide.png",
+    "sha256": "45db1345c952ac491298e2f81e3cb7de8aa43d94a4e48745d5caf78149a30d10",
+    "state": "anchored",
+    "theme": "light",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-anchored-light-compact.png",
+    "sha256": "f9216467b1c66951db4d167a13badff7a0f28e280d571f988c0fe834c056eb27",
+    "state": "anchored",
+    "theme": "light",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-invalid-dark-wide.png",
+    "sha256": "509160c9e15d6295b1c9e62e22449b14d241303d622b1966e9463cc58d2161ef",
+    "state": "invalid",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-constrained-dark-wide.png",
+    "sha256": "d5b9918dd0ecf312625576dca722bd89236b50b952a239ce9ed6117594679920",
+    "state": "constrained",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-spacing-dark-wide.png",
+    "sha256": "5d6872535d7c8e7254bd0472d520cb1fa6bf2ef6ea58a402ed7cf191036c738f",
+    "state": "spacing",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-conflict-dark-wide.png",
+    "sha256": "1d11861e477873a79490fec590adccf5692c7323ec94b33035feb28d73d430bd",
+    "state": "conflict",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "paired-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-editing-dark-compact.png",
+    "sha256": "7a63f060cf8e633dbe61417d849f9dedb6525084d83b20a3608226ac83b76b91",
+    "state": "editing",
+    "theme": "dark",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-anchored-dark-wide.png",
+    "sha256": "b4c5f140b962c6b7fa421628f9d3dc86e3e60c171c2c0bb55b8a6923053b9f4e",
+    "state": "anchored",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-anchored-dark-compact.png",
+    "sha256": "fd47d5f1525bf2b21589ac40a14c8f8afa880352fd4bd80f2613d3dc588cce13",
+    "state": "anchored",
+    "theme": "dark",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-anchored-light-wide.png",
+    "sha256": "c74d05c6369466db493d7beb0522f892d4d5bca6f889dc416fa9a02238de886d",
+    "state": "anchored",
+    "theme": "light",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-anchored-light-compact.png",
+    "sha256": "f9216467b1c66951db4d167a13badff7a0f28e280d571f988c0fe834c056eb27",
+    "state": "anchored",
+    "theme": "light",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-invalid-dark-wide.png",
+    "sha256": "44f47dbc6485f45a9a051a1ad950fc86dc8852e43aca6271072b49517b7b0bc4",
+    "state": "invalid",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-constrained-dark-wide.png",
+    "sha256": "4daf0d77e52c5cf09bb7fce3bea6075fdd4ef0835404c89e535ebfc38bf3ff10",
+    "state": "constrained",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-spacing-dark-wide.png",
+    "sha256": "48e7e53173a8758428d190b22e7ce347f5056c38473cb88f658cd51e926dd0d9",
+    "state": "spacing",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-conflict-dark-wide.png",
+    "sha256": "6951aa5e8333d54c3416531979ca611cedd61238c8965fec78e01c1a292f8387",
+    "state": "conflict",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "axes-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/axes-v2-editing-dark-compact.png",
+    "sha256": "639f3a44bb112412a3be202b4b4de81959c3709cf26f41a6d343484bc8467bcc",
+    "state": "editing",
+    "theme": "dark",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-anchored-dark-wide.png",
+    "sha256": "1d4a7ece011c81a8c9b7b4e42925d2be6a9f1eacae0b25582633e9384252bfef",
+    "state": "anchored",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-anchored-dark-compact.png",
+    "sha256": "fd47d5f1525bf2b21589ac40a14c8f8afa880352fd4bd80f2613d3dc588cce13",
+    "state": "anchored",
+    "theme": "dark",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-anchored-light-wide.png",
+    "sha256": "7fb16128f4135aa89fc14a26cdb63641800f3e14cd4de84eac1bbf5458f987d5",
+    "state": "anchored",
+    "theme": "light",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-anchored-light-compact.png",
+    "sha256": "f9216467b1c66951db4d167a13badff7a0f28e280d571f988c0fe834c056eb27",
+    "state": "anchored",
+    "theme": "light",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-invalid-dark-wide.png",
+    "sha256": "c5cc54caa8188efe518aba019366d5ee6bc0622c03b73053f29145032df5ec83",
+    "state": "invalid",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-constrained-dark-wide.png",
+    "sha256": "d5310855e3b44dab1f7f6d1ac4dd2540861595afbf38a2a2b4884e043cb13c5c",
+    "state": "constrained",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-spacing-dark-wide.png",
+    "sha256": "9a4f6142f8f4bc5dccb4a04a02414d13ba68fe25daba709a5e43be55807352b3",
+    "state": "spacing",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-conflict-dark-wide.png",
+    "sha256": "ff10334b7674b04949d80db1395675bade86368105f7aabb9eedc446961f6a76",
+    "state": "conflict",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "variantId": "placement-refined",
+    "path": "docs/design/design-lab-numeric-layout/captures/placement-v2-editing-dark-compact.png",
+    "sha256": "6fccbe044cf61f79c9f4bdec583838ef83df7db37ad5eb8d333517348a010ee3",
+    "state": "editing",
+    "theme": "dark",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  }
+]
