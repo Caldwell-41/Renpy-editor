@@ -3,6 +3,80 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Draft lifetime and history selection corrections, 2026-10-27
+
+Kris selected fixing both remaining PR #62 defects, focused tests, commit/push,
+PR maintenance and the terminal automatic CI audit. This worker entered
+`codex/37-compose-help-layout` at local/remote head `c1912cb` as sole implementation
+writer. The unrelated untracked audit and protected recovery remain untouched.
+The owned-document constructor at `ef07e60` and accepted-edit completion at
+`c1912cb` remain intact. The latter's terminal receipt is successful Repository
+quality run 40489082242 attempt 1, retained in PR #62's description.
+
+Both reported failures are product defects with focused reproductions in
+`app/tests/screen-composition.dom.test.ts`. Before production edits, this command
+failed both tests on the handoff code:
+
+```bash
+cd app
+npm run build:tests
+node --test --test-name-pattern='clearing a retained stale|removal selection survives' dist-tests/tests/screen-composition.dom.test.js
+```
+
+- After a Source refresh, a retained draft correctly conflicted. Typing the saved
+  literal cleared it, but typing a fresh change in that same textarea submitted
+  `before` instead of `source-saved`. The input closure still held the deleted
+  draft. Input now reads the current draft map. Further typing in a retained stale
+  draft preserves its original revision; clearing it ends that draft's lifetime.
+- Removing the title and accepting 128 distinct body edits discarded the removal
+  receipt. Undo restored the title but its `ariaSelected` remained `false`.
+  `transaction/history.rs` retains an uncapped session-local vector and truncates
+  only abandoned Redo entries. The renderer's independent 128-entry cap is removed;
+  receipts now live with their workspace. Core history and revision checks are unchanged.
+
+The sequence tests now pass. The draft test also edits the retained stale input,
+checks its conflict and retained value, clears it, then applies a fresh edit against
+the accepted revision. The history test checks all 129 Undo and 129 Redo transitions,
+selected identities, text and removal focus. The initial history test queried a tree
+row while Design was open; switching to Choose corrected that test assumption before
+the intended selection failure was demonstrated. No product change addressed it.
+
+Local verification uses Mac ARM64, Node 24.19.0, npm 11.9.0 and Python 3.12.14.
+`npm run check` passes typechecking and all 259 frontend cases, with zero failures,
+skips or cancellations. The first full run used system Python 3.9 and failed one
+existing validator consumer because `tomllib` was missing (258 passes, one failure).
+Setting `HARNESS_PYTHON` to the available 3.12 runtime resolves that environment error.
+The strengthened stale-typing assertions also pass in the final focused rerun.
+Rust 1.90.0 formatting, repository validation and all 13 section-link tests pass.
+
+The narrow real-core check uses the compiled production `ScreensWorkspace` and
+existing `help-controller-driver`, with its own disposable project and profile.
+It verifies actual stale-draft refusal with unchanged Source/input, clear-then-edit
+acceptance at the current revision, and a removal followed by 128 distinct accepted
+text edits. Every Undo/Redo compares exact source bytes, the complete inspected
+document and identities, controller document, selected row and focus. Final reopen
+checks source and identities; the protected Source neighbor remains intact.
+Its initial attempt did not await the controller's initial load and failed before
+editing. Awaiting `load()` corrects that harness error. The unchanged core driver
+was built for the preceding owned-document candidate; no core behavior changed.
+Scripts and raw results remain ignored under `.toolchains/screen-composition/`
+with the `two-defects-` prefix.
+
+Final local diff review covers the live draft lookup, session history lifetime,
+retained stale input and accepted-edit sequencing. No further in-scope correction
+was found. C5 visuals/copy/CSS, source transactions and core protections are unchanged.
+No package, native session, SDK process or manual qualification dispatch is selected.
+Prior native/SDK receipts retain their original candidates and supply no new proof
+for these portable corrections. Existing costly-operation counts are unchanged.
+
+These fixes, tests, contract clarification and live records publish together.
+PR #62's description owns the exact final SHA, automatic run/attempt and terminal
+job/step audit without a receipt-only successor commit. Worker chat
+`01a17d08-a42c-7031-aa1d-ef0b972df04c` retains any pending audit through ci-watch.
+Formal acceptance, issue closure, merge and release remain unselected.
+CURRENT/HANDOVER remain above their word targets to preserve earlier acceptance
+and protected recovery; only the superseded live continuation is replaced.
+
 ## Accepted edit completion, 2026-10-27
 
 Kris selected architecture report candidate 2 after the coordinator independently

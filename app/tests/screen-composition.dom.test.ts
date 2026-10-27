@@ -396,6 +396,68 @@ test("a Source-removed element keeps its unfinished text available for recovery"
   } finally { h.workspace.dispose(); }
 });
 
+test("clearing a retained stale text draft starts the next edit at the accepted Source revision", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick(); h.edit("title-id");
+    h.text().value = "Unfinished title"; h.text().dispatchEvent(new window.Event("input"));
+    const external = structuredClone(h.original); external.revision = "source-saved";
+    external.screens[0]!.nodes[2]!.literal = "Saved in Source";
+    h.replaceDocument(external); h.click("Refresh Source"); await tick(); await tick();
+    assert.equal(h.text().value, "Unfinished title");
+    h.text().value = "Still unfinished"; h.text().dispatchEvent(new window.Event("input"));
+    const accepted = structuredClone(external); accepted.revision = "fresh-edit";
+    accepted.screens[0]!.nodes[2]!.literal = "Fresh title";
+    h.respond(accepted, "title-id");
+    h.click("Apply changes"); await tick(); await tick();
+    assert.equal(h.calls.filter(c => c.operation === "screens.compose").at(-1)?.payload?.expectedRevision, "before");
+    assert.match(document.querySelector(".screen-message")!.textContent!, /Source conflict/);
+    assert.equal(h.text().value, "Still unfinished"); assert.equal(h.workspace.hasDraft(), true); assert.equal(h.saved(), 0);
+
+    const input = h.text(); input.value = "Saved in Source"; input.dispatchEvent(new window.Event("input"));
+    assert.equal(h.workspace.hasDraft(), false);
+    assert.equal(document.querySelector(".screen-text-draft-state")!.textContent, "No unapplied changes.");
+    input.value = "Fresh title"; input.dispatchEvent(new window.Event("input"));
+    assert.equal(h.text(), input, "The new edit uses the same textarea after the draft was cleared");
+    h.click("Apply changes"); await tick(); await tick();
+    assert.equal(h.calls.filter(c => c.operation === "screens.compose").at(-1)?.payload?.expectedRevision, "source-saved");
+    assert.equal(h.workspace.hasDraft(), false); assert.equal(h.text().value, "Fresh title");
+    assert.equal(h.saved(), 1, "Only the fresh edit is accepted");
+  } finally { h.workspace.dispose(); }
+});
+
+test("removal selection survives Undo and Redo after 128 later accepted text edits", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick(); h.row("title-id").click(); h.click("Remove element");
+    const removed = structuredClone(h.original); removed.revision = "removed"; removed.screens[0]!.nodes.splice(2, 1);
+    h.respond(removed, "body-id"); h.click("Remove text"); await tick(); await tick();
+    assert.equal(h.row("body-id").ariaSelected, "true");
+    const states = [removed]; h.edit("body-id");
+    for (let i = 1; i <= 128; i++) {
+      const next = structuredClone(states.at(-1)!); next.revision = `edit-${i}`;
+      next.screens[0]!.nodes[2]!.literal = `Directions ${i}`;
+      h.text().value = `Directions ${i}`; h.text().dispatchEvent(new window.Event("input"));
+      h.respond(next, "body-id"); h.click("Apply changes"); await tick(); await tick(); states.push(next);
+    }
+    h.click("1  Choose");
+    for (const state of states.slice(0, -1).reverse()) {
+      h.respondHistory(state); h.click("Undo"); await tick(); await tick();
+      assert.equal(h.row("body-id").ariaSelected, "true"); assert.ok(h.row("body-id").textContent!.includes(state.screens[0]!.nodes[2]!.literal!));
+    }
+    h.respondHistory(h.original); h.click("Undo"); await tick(); await tick();
+    assert.equal(h.row("title-id").ariaSelected, "true", "Undo of the older removal restores its selected target");
+    assert.equal(document.activeElement, h.row("title-id")); assert.ok(h.row("title-id").textContent!.includes("Title"));
+    for (const state of states) {
+      h.respondHistory(state); h.click("Redo"); await tick(); await tick();
+      assert.equal(document.querySelector('[data-node-id="title-id"]'), null);
+      assert.equal(h.row("body-id").ariaSelected, "true"); assert.ok(h.row("body-id").textContent!.includes(state.screens[0]!.nodes[2]!.literal!));
+    }
+    assert.equal(h.calls.filter(c => c.operation === "scene.apply").length, 258);
+    assert.equal(h.saved(), 387);
+  } finally { h.workspace.dispose(); }
+});
+
 test("removal confirms every element, retains exact Cancel focus, and selects the core fallback", async () => {
   const h = interactiveFixture();
   try {

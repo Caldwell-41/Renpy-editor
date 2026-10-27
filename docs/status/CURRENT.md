@@ -2,16 +2,20 @@
 
 ## L02 Help composition PR open
 
-2026-10-27 follow-up: architecture report candidate 2 is implemented and locally
-verified. `ScreensWorkspace` owns accepted-edit completion across geometry,
-composition and shared history, including draft settlement before controls and
-canvas refresh. Composer handlers no longer finish successful edits after commit
-returns. Typechecking, all 257 frontend cases, the production build, focused Chrome
-and real controller/core source/history/reopen checks pass. PR #62's description
-owns exact publication and automatic CI state; worker chat
-`01a17cde-9bf5-7162-90a9-371641537526` retains the terminal audit through ci-watch,
-then returns the result and checkout ownership to the coordinator for independent
-review. [Completion evidence](../tasks/evidence/simple-help-layout.md#accepted-edit-completion-2026-10-27).
+2026-10-27 follow-up: both remaining PR #62 defects are corrected. Clearing a
+retained text draft ends its revision lifetime, and selection receipts remain
+available beyond 128 accepted operations. Both focused tests fail on the handoff
+code and pass after correction. Typechecking, all 259 frontend cases and the real
+controller/core source/history/reopen sequences pass. The fixes and supporting
+records publish together; PR #62's description owns the exact publication and
+terminal CI receipt. Worker chat `01a17d08-a42c-7031-aa1d-ef0b972df04c` retains
+any pending audit through ci-watch.
+[Correction evidence](../tasks/evidence/simple-help-layout.md#draft-lifetime-and-history-selection-corrections-2026-10-27).
+
+Architecture candidate 2 remains intact at `c1912cb`. `ScreensWorkspace` owns
+accepted-edit completion and draft settlement before rendering. Automatic run
+40489082242 attempt 1 passes on that candidate, as audited in PR #62's description.
+[Completion evidence](../tasks/evidence/simple-help-layout.md#accepted-edit-completion-2026-10-27).
 
 Candidate 1 remains intact at `ef07e60`. The coordinator independently confirmed
 its complete owned-document construction and passing required CI in run

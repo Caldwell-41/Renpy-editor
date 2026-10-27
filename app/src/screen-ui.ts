@@ -95,6 +95,7 @@ export class ScreensWorkspace {
   private move?: { xalign:number; yalign:number; x:number; y:number; rangeX:number; rangeY:number; scale:number; pointer:number; target:HTMLElement };
   private readonly observer: ResizeObserver;
   private readonly composer: ScreenComposer;
+  // Core history has no entry cap within a session; keep its selection receipts for this workspace's lifetime.
   private readonly compositionHistory: { path: string; before: string; after: string; beforeId?: string | null; afterId: string; removal: boolean }[] = [];
   constructor(private readonly actions: Actions) {
     this.gameResolution = {...actions.resolution};
@@ -430,7 +431,6 @@ export class ScreensWorkspace {
       this.composer.accept(edit.command, base, document);
       if (sourceChanged) {
         this.compositionHistory.push({ path: base.path, before: base.revision, after: document.revision, beforeId: edit.beforeId, afterId: edit.result.selectedId, removal: edit.command.type === "remove" });
-        if (this.compositionHistory.length > 128) this.compositionHistory.shift();
       }
       if (edit.command.type === "remove") this.step = "choose";
     }

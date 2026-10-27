@@ -369,7 +369,7 @@ export class ScreenComposer {
     apply.disabled = cancel.disabled = this.saving || !draft; actions.append(apply, cancel);
     input.oninput = () => {
       if (input.value === view.selected.literal) this.texts.delete(key);
-      else this.texts.set(key, { screenId: view.screenId, nodeId: view.selected.id!, document: draft?.document ?? view.document, value: input.value });
+      else this.texts.set(key, { screenId: view.screenId, nodeId: view.selected.id!, document: this.texts.get(key)?.document ?? view.document, value: input.value });
       apply.disabled = cancel.disabled = !this.texts.has(key); state.textContent = this.texts.has(key) ? "Unapplied changes. The canvas shows your draft." : "No unapplied changes."; this.host.preview();
     };
     input.onkeydown = event => {

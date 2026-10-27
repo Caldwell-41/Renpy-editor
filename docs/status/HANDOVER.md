@@ -1,38 +1,39 @@
 # Current outcome handover
 
-## L02 accepted edit completion and CI audit
+## L02 draft lifetime and history selection fixes
 
-Kris selected architecture report candidate 2 after the coordinator independently
-confirmed candidate 1 at `ef07e60` and passing automatic run 40486719508 attempt 1.
-This worker entered that head as sole writer on `codex/37-compose-help-layout`;
-the coordinator remains read-only until the completed report returns ownership.
-`ScreensWorkspace.finishAcceptedEdit` owns accepted documents, draft settlement,
-selection/history, removal notices, control rebinding and canvas refresh. Composer
-handlers submit edits and retain input on failure; they no longer finish accepted
-results or schedule a second refresh. Candidate 1's core constructor/tests remain intact.
+Kris selected fixing the two remaining PR #62 defects, focused tests, commit/push,
+PR maintenance and terminal CI audit. This worker entered local/remote `c1912cb`
+as sole writer on `codex/37-compose-help-layout`; the parent remains read-only.
+Clearing a retained draft now ends its revision lifetime. Further typing in an
+uncleared stale draft still conflicts with input retained. Selection receipts now
+live with their workspace, matching the core's uncapped session-local history.
+`ef07e60`'s owned-document constructor and `c1912cb`'s accepted-edit completion
+remain intact. Their terminal required CI receipts pass in runs 40486719508 and
+40489082242, both attempt 1, as retained in PR #62's description.
 
-Typechecking, all 257 frontend cases, the production build, 13 link cases and repository
-validation pass. Existing focused Chrome checks pass with current revision bindings,
-preserved focus and zero page errors. The compiled controller/unchanged core fixture
-driver passes geometry, Add, retained text drafts, reorder, confirmed removal, exact
-history and reopen. A temporary check's stale Recent Projects token was corrected
-in the check after diagnosis; no product correction was needed.
-[The completion record](../tasks/evidence/simple-help-layout.md#accepted-edit-completion-2026-10-27)
-owns verification, raw-result location and reuse limits.
+Both focused tests fail for the reported reasons on the handoff code and pass
+after correction. Typechecking and all 259 frontend cases pass. The real production
+controller/core check covers retained stale refusal, clear-then-edit acceptance,
+128 edits after removal, all 129 Undo/Redo transitions with exact source bytes,
+identities, selection and focus, plus reopen and fixture cleanup. Formatting,
+repository validation and all 13 link tests pass.
+[The correction record](../tasks/evidence/simple-help-layout.md#draft-lifetime-and-history-selection-corrections-2026-10-27)
+owns red/green results, corrected test-environment assumptions and reuse limits.
 
-The refactor and records publish together to [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62).
-Its description owns the exact final head, automatic run and terminal audit, without
-another receipt-only commit. Worker chat `01a17cde-9bf5-7162-90a9-371641537526`
-retains the terminal audit through ci-watch continuation. On resume, read that PR
-receipt, reconcile the recorded run/head with this checkout and finish any pending
-audit. Then report the exact commit, tests and required-job/step audit to coordinator
-chat `01a17ca7-17d3-7170-9eca-6bedf6289383`, returning checkout ownership for its
-independent confirmation. Awaiting CI is a checkpoint, not completion.
+The fixes and records publish together to [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62).
+Its description owns the exact final SHA, automatic run/attempt and terminal
+required-job/step audit, without a receipt-only successor commit. Worker chat
+`01a17d08-a42c-7031-aa1d-ef0b972df04c` retains any pending audit through ci-watch.
+On resume, reconcile that PR receipt with this checkout and finish pending audit
+in this same chat. Report the commit, reproductions, tests, PR update and terminal
+CI result before returning checkout ownership. Awaiting CI is a checkpoint.
 
+Mac ARM64 remains the development host; these are portable renderer corrections.
 No extra issue comment, package, native session, SDK process, manual CI dispatch,
-merge or release is selected. Earlier native/SDK receipts and cumulative limits
-below retain their tested candidates. Preserve the unrelated untracked audit and
-the coordinator's temporary report server.
+formal acceptance, issue closure, merge or release is selected. Earlier native/SDK
+receipts and cumulative limits below retain their tested candidates. Preserve the
+unrelated untracked audit, protected recovery and the parent's report server.
 
 The preceding no-op correction is published at `5f23ec4`; automatic run 40476079031
 is audited and passing in PR #62's description. [Its evidence](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27)
