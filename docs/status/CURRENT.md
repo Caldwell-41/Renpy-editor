@@ -1,5 +1,18 @@
 # Current status
 
+## Phase 3B architecture refactors await CI
+
+2026-10-27: Kris selected [maintenance #64](https://github.com/Caldwell-41/Renpy-editor/issues/64)
+to give Add eligibility one owner and move screen canvas frame delivery into a
+focused module, with unchanged IPC. Both subagent assignments are integrated. Standards and Spec review have zero
+findings; local frontend, real renderer/core/helper and signed Mac native checks
+pass. [PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) is open;
+[focused CI](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40514677531)
+remains pending. The coordinator owns its audit, merge and safe cleanup. Work is on `codex/phase3b-architecture`, based on `0d469a6`,
+targeting `codex/phase3b-screen-designer`. [Evidence](../tasks/evidence/phase-3b-architecture.md)
+records verification. Existing L01/L17/L02 acceptance and wider Phase 3B gates retain
+their scope. Protected recovery remains in [HANDOVER](HANDOVER.md).
+
 <a id="l02-help-composition-pr-open"></a>
 
 ## L02 Help composition merged

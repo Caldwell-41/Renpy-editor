@@ -1,5 +1,37 @@
 # Current outcome handover
 
+## Phase 3B architecture refactors await CI
+
+Kris selected [#64](https://github.com/Caldwell-41/Renpy-editor/issues/64) on
+2026-10-27. [PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) is open
+from `codex/phase3b-architecture` to `codex/phase3b-screen-designer`. Base is
+`0d469a6`; Rust `6a31a9e` and frame delivery `20d33e2` are integrated. Both
+independent review axes have zero findings at `e3c75ef`. Local 264-test frontend,
+real renderer/core/helper and signed Mac package/native composition checks pass.
+[Evidence](../tasks/evidence/phase-3b-architecture.md) owns identities, scopes and
+raw receipt locations. Broader product/native/human acceptance retains its scope.
+
+Qualification [run 40514677531](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40514677531),
+attempt 1 / ordinal 2, tests `694e2ff240f77f9534bb9bac331b5232285345c9` on
+Windows x64/macOS ARM64. It is pending. Dispatch 1 used a wrong candidate input;
+both guards rejected it before builds/SDK/native work, and it is cancelled.
+The new documentation commit changes no product or qualification input. Its
+separate automatic PR check must pass before merge.
+
+Next action is to audit the recorded exact run, artifacts and cleanup. Then finish
+any in-scope fixes/review, update the evidence/PR, merge after checks pass, retire
+only integrated/redundant branches and worktrees, and send the user-requested
+completion notification. Private `.toolchains/architecture-64/continuation.json`
+retains routing and operation identities. Register the installed ci-watch before
+yielding; a watch event prompts an audit and is not a pass itself. The user approved
+needed builds/tests/CI/SDK without a numerical cap for this outcome; historical
+closed selections stay closed.
+
+The unrelated untracked Phase 1 audit and all protected recovery below remain.
+Old reference checkout changes match integrated files. Phase 3A worker commits are
+patch-equivalent; the renderer worktree has one distinct local CSS edit that must
+have a recoverable local snapshot before retirement. No old worktree is deleted yet.
+
 <a id="l02-draft-lifetime-and-history-selection-fixes"></a>
 
 ## L02 merge and ticket closeout

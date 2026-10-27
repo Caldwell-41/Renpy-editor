@@ -17,6 +17,10 @@ on:
         description: Select L02 approved Help composition proof
         type: boolean
         default: false
+      architecture_refactor:
+        description: 'Select #64 Add eligibility and screen canvas frame delivery qualification'
+        type: boolean
+        default: false
       owned_blank:
         description: Select L01 owned blank screen proof; leaves closed Help qualification untouched
         type: boolean
@@ -47,13 +51,14 @@ jobs:
       - name: Reject conflicting qualification selectors
         env:
           COMPOSE_HELP: ${{ inputs.compose_help }}
+          ARCHITECTURE_REFACTOR: ${{ inputs.architecture_refactor }}
           OWNED_BLANK: ${{ inputs.owned_blank }}
           CANVAS_HELPER: ${{ inputs.canvas_helper }}
           CANVAS_GPU_CAPABILITY: ${{ inputs.canvas_gpu_capability }}
           CANVAS_COMPARISON: ${{ inputs.canvas_comparison }}
         run: |
           selected_count=0
-          for selected in "$COMPOSE_HELP" "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY" "$CANVAS_COMPARISON"; do
+          for selected in "$COMPOSE_HELP" "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY" "$CANVAS_COMPARISON" "$ARCHITECTURE_REFACTOR"; do
             if test "$selected" = true; then selected_count=$((selected_count + 1)); fi
           done
           if test "$selected_count" -gt 1; then
@@ -62,7 +67,7 @@ jobs:
           fi
 
   focused:
-    if: ${{ !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help }}
+    if: ${{ !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor }}
     name: Help (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -199,7 +204,7 @@ jobs:
           retention-days: 7
 
   owned-blank:
-    if: ${{ inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help }}
+    if: ${{ inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor }}
     name: Owned blank screen (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -356,7 +361,8 @@ jobs:
           retention-days: 7
 
   help-composition:
-    if: ${{ inputs.compose_help && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison }}
+    needs: validate-selection
+    if: ${{ (inputs.compose_help || inputs.architecture_refactor) && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison }}
     name: Help composition (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -379,14 +385,20 @@ jobs:
       HARNESS_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Require selected L02 candidate and cumulative ordinal
+      - name: Require selected composition candidate and task
         env:
           CANDIDATE: ${{ inputs.candidate }}
           ORDINAL: ${{ inputs.ordinal }}
+          ARCHITECTURE_REFACTOR: ${{ inputs.architecture_refactor }}
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/37-compose-help-layout
-          test "$GITHUB_RUN_ATTEMPT" = 1
-          case "$ORDINAL" in 1|2) ;; *) exit 1 ;; esac
+          if test "$ARCHITECTURE_REFACTOR" = true; then
+            test "$GITHUB_REF" = refs/heads/codex/phase3b-architecture
+            case "$ORDINAL" in ''|*[!0-9]*|0) exit 1 ;; esac
+          else
+            test "$GITHUB_REF" = refs/heads/codex/37-compose-help-layout
+            test "$GITHUB_RUN_ATTEMPT" = 1
+            case "$ORDINAL" in 1|2) ;; *) exit 1 ;; esac
+          fi
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/help-composition"
           git rev-parse HEAD > "$RUNNER_TEMP/help-composition/candidate.txt"
@@ -526,7 +538,7 @@ jobs:
           retention-days: 7
 
   canvas-helper:
-    if: ${{ inputs.canvas_helper && !inputs.owned_blank && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help }}
+    if: ${{ inputs.canvas_helper && !inputs.owned_blank && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor }}
     name: L17 canvas helper (Windows x64)
     runs-on: windows-2025
     timeout-minutes: 40
@@ -629,7 +641,7 @@ jobs:
           retention-days: 7
 
   canvas-gpu-capability:
-    if: ${{ inputs.canvas_gpu_capability && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_comparison && !inputs.compose_help }}
+    if: ${{ inputs.canvas_gpu_capability && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor }}
     runs-on: windows-2025
     timeout-minutes: 15
     defaults:
@@ -710,7 +722,7 @@ jobs:
 
   canvas-comparison:
     needs: validate-selection
-    if: ${{ inputs.canvas_comparison && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.compose_help }}
+    if: ${{ inputs.canvas_comparison && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.compose_help && !inputs.architecture_refactor }}
     uses: ./.github/workflows/canvas-rendering.yml
     with:
       candidate: ${{ inputs.candidate }}

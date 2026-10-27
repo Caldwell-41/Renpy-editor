@@ -727,6 +727,123 @@ fn owned_composition_refuses_parent_protection_and_dirty_drafts_and_keeps_an_emp
 }
 
 #[test]
+fn owned_addition_structure_agrees_between_canvas_draft_and_saved_edit() {
+    for (parent_kind, existing, kind, allowed) in [
+        ("screen", "", "text", true),
+        ("fixed", "", "frame", true),
+        ("frame", "", "vbox", true),
+        ("vbox", "", "textbutton", true),
+        ("text", "", "text", false),
+        ("frame", "child", "text", false),
+        ("frame", "protected", "text", false),
+        ("fixed", "protected", "text", true),
+        ("screen", "", "hbox", false),
+    ] {
+        let (_temporary, mut service, root, owner) = composition_project();
+        let parent_id = if parent_kind == "screen" {
+            owner["rootId"].clone()
+        } else {
+            compose_command(
+                &mut service,
+                &owner,
+                json!({"type":"add","parentId":owner["rootId"],"kind":parent_kind,"text":"Parent"}),
+            )["selectedId"]
+                .clone()
+        };
+        let path = root.join(owner["path"].as_str().unwrap());
+        if existing == "child" {
+            compose_command(
+                &mut service,
+                &owner,
+                json!({"type":"add","parentId":parent_id,"kind":"text","text":"Existing child"}),
+            );
+        } else if existing == "protected" {
+            let source = fs::read_to_string(&path).unwrap().replace(
+                "        pass\n",
+                "        if custom_flag:\n            text \"Protected child\"\n",
+            );
+            save_composition_source(&mut service, &owner, &source);
+        }
+        let document = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        let parent = document["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["id"] == parent_id)
+            .unwrap();
+        let before = fs::read(&path).unwrap();
+        let draft = json!({"path":owner["path"],"screenName":"notes","expectedRevision":document["revision"],
+            "width":1280,"height":720,"drafts":[],"addition":{"parentStart":parent["span"]["start"],"kind":kind,"text":"New child"}});
+        let saved = json!({"screenId":owner["id"],"expectedRevision":document["revision"],
+            "command":{"type":"add","parentId":parent_id,"kind":kind,"text":"New child"}});
+        if allowed {
+            let plan = ipc(&mut service, "screens.canvasPlan", draft);
+            let addition = plan["nodes"].as_array().unwrap().last().unwrap();
+            assert_eq!(addition["kind"], kind);
+            assert_eq!(addition["parent"], parent["span"]["start"]);
+            assert_eq!(fs::read(&path).unwrap(), before);
+            let accepted = ipc(&mut service, "screens.compose", saved);
+            assert!(accepted["document"]["screens"][0]["nodes"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|n| n["id"] == accepted["selectedId"] && n["kind"] == kind));
+        } else {
+            assert_eq!(
+                reject(&mut service, "screens.canvasPlan", draft)["error"]["code"],
+                "INVALID_PAYLOAD"
+            );
+            assert_eq!(
+                reject(&mut service, "screens.compose", saved)["error"]["code"],
+                "OPAQUE_BOUNDARY"
+            );
+            assert_eq!(fs::read(&path).unwrap(), before);
+        }
+    }
+}
+
+#[test]
+fn owned_addition_canvas_keeps_unfinished_text_while_saved_add_requires_text() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let parent = &document["screens"][0]["nodes"][0];
+    let path = root.join(owner["path"].as_str().unwrap());
+    let before = fs::read(&path).unwrap();
+    for kind in ["text", "textbutton"] {
+        for text in ["", "  "] {
+            let plan = ipc(
+                &mut service,
+                "screens.canvasPlan",
+                json!({"path":owner["path"],"screenName":"notes","expectedRevision":document["revision"],
+                    "width":1280,"height":720,"drafts":[],"addition":{"parentStart":parent["span"]["start"],"kind":kind,"text":text}}),
+            );
+            assert_eq!(
+                plan["nodes"].as_array().unwrap().last().unwrap()["literal"],
+                text
+            );
+            assert_eq!(
+                reject(
+                    &mut service,
+                    "screens.compose",
+                    json!({"screenId":owner["id"],"expectedRevision":document["revision"],
+                        "command":{"type":"add","parentId":owner["rootId"],"kind":kind,"text":text}}),
+                )["error"]["code"],
+                "INVALID_PAYLOAD"
+            );
+            assert_eq!(fs::read(&path).unwrap(), before);
+        }
+    }
+}
+
+#[test]
 fn owned_composition_canvas_addition_is_inert_revision_bound_and_never_changes_source() {
     let (_temporary, mut service, root, owner) = composition_project();
     let group = compose_command(
