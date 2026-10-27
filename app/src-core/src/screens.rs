@@ -659,7 +659,7 @@ impl AuthoringService {
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);
         }
-        let document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+        let mut document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
         let position = document
             .screens
             .iter()
@@ -681,6 +681,7 @@ impl AuthoringService {
             }
         }
         if proposed == bytes {
+            self.annotate_screen_ownership(project, &bytes, &mut document)?;
             return Ok(document);
         }
         inspect(&proposed, source_path.clone(), String::new())?;
@@ -725,7 +726,7 @@ impl AuthoringService {
         if revision.sha256 != expected_revision {
             return Err(SceneError::SourceConflict);
         }
-        let document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+        let mut document = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
         let node = document
             .screens
             .iter()
@@ -748,6 +749,7 @@ impl AuthoringService {
             }
         }
         if patches.is_empty() {
+            self.annotate_screen_ownership(project, &bytes, &mut document)?;
             return Ok(document);
         }
         patches.sort_by_key(|(span, _)| std::cmp::Reverse(span.start));

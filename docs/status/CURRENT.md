@@ -2,17 +2,25 @@
 
 ## L02 Help composition PR open
 
-2026-10-27 follow-up: Kris selected fixing the P2 stale-control finding from the
-private review of PR #62 at `db52bf5`. Geometry saves now refresh composition
-controls against the accepted document, preserving focus, expanded sections and
-scroll. Three new tests cover subsequent text editing and keyboard/drag hierarchy
-reordering. Typechecking, all 255 frontend tests, production build and focused
-Chrome checks pass. Kris subsequently selected committing and pushing this fix to
-PR #62, updating its description and checking automatic CI in this chat. This
-commit includes the correction and supporting records; the PR description owns
-the exact run and terminal audit without another receipt-only commit. Prior
-native/SDK receipts retain their tested candidates.
-[Correction evidence](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27).
+2026-10-27 follow-up: Kris selected fixing the P2 no-op geometry finding from
+PR #62's private review at `a37fe64`, then publishing the correction, updating the
+PR and checking CI. Both core no-op return paths now preserve the owned root UUID,
+element identities and protected hierarchy rows. A dispatch regression covers
+unchanged size, pixel-property and position saves, exact source and no added history.
+All 26 ordinary Screens core tests and 255 frontend tests pass; the intentional
+SDK case remains ignored. A production controller/core check passes subsequent
+root Add after unchanged size. Independent Standards and Spec reviews report zero
+findings. The correction and evidence share one commit; PR #62's description owns
+its exact automatic CI run and terminal audit in this same chat. Prior native/SDK
+receipts retain their tested candidates. Formal acceptance, merge and release
+remain unselected.
+[Correction evidence](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27).
+
+The preceding geometry-save binding fix is published at `a37fe64`. It refreshes
+composition controls after source-changing geometry saves while preserving focus,
+expanded sections and scroll. Automatic run 40464304449 passes on that candidate,
+as audited in PR #62's description.
+[Binding correction evidence](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27).
 
 The earlier Design-focus and removal-Undo corrections are published at `db52bf5`.
 Both required jobs in automatic run 40456167313 pass on that candidate, as audited

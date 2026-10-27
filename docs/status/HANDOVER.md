@@ -1,32 +1,33 @@
 # Current outcome handover
 
-## L02 geometry-save publication and CI audit
+## L02 no-op geometry publication and CI audit
 
-Kris selected fixing the P2 finding from the private review of PR #62 at
-`db52bf5`, using the root-cause skill. The checkout remains
-`codex/37-compose-help-layout`. Geometry saves installed a new document without
-refreshing composition controls. Those controls then used old revisions or source
-offsets. Accepted source-changing geometry saves now refresh the controls while
-preserving focus, expanded sections and scroll. Existing drafts keep their
-original revisions; no-op and failed saves keep their controls.
+Kris selected fixing the P2 no-op geometry finding from PR #62's private review at
+`a37fe64`, checking it, publishing it, updating the PR and running CI. The checkout
+remains `codex/37-compose-help-layout`. Unchanged geometry saves returned raw parser
+documents, losing the owned root ID and protected hierarchy rows. Both no-op return
+paths now annotate their captured document without changing source, revision or history.
 
-Typechecking, all 255 frontend tests, the production build and focused Chrome
-checks pass. The correction commit includes the fix, three rejecting tests and
-supporting records.
-[The correction record](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27)
-owns reproduction, verification and environment failures. Kris subsequently
-selected committing and pushing the correction to PR #62, updating its description
-and checking automatic CI. Publish this correction, bind the automatic run to its
-exact head and audit it in this same chat. Use ci-watch if the run remains pending.
-Record the run and terminal audit in the PR description without another receipt-only
-commit. This selects no extra issue comments or qualification campaign.
-No owned server/browser remains.
-Prior native/SDK receipts retain their tested candidates and operation counts.
-Preserve the unrelated untracked audit. Formal acceptance, merge and release
-remain unselected.
+The new dispatch regression was red on the reviewed code and now covers unchanged
+size, pixel-property and position saves, complete document preservation and exact
+source/history. All 26 ordinary Screens core tests pass with one intentional SDK
+ignore. Typechecking and all 255 frontend tests pass. The rebuilt fixture driver and
+production controller retain the complete document after unchanged size and accept
+a subsequent root Add. Independent Standards and Spec correction reviews have zero
+findings. [The correction record](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27)
+owns diagnosis, fixture corrections and verification limits.
 
-The earlier focus/Undo corrections are published at `db52bf5`; their automatic
-run 40456167313 is audited and passing in PR #62's description.
+Publish the correction and supporting records as one commit to PR #62, update its
+description, and audit the automatic CI run against the exact head in this same chat.
+Use ci-watch if the confirmed run remains pending. Record its identity and terminal
+audit in the PR description without another receipt-only commit. No extra issue
+comment, package, native session, SDK process, merge or release is selected. Prior
+native/SDK receipts retain their tested candidates and operation counts. Preserve
+the unrelated untracked audit. No owned fixture driver remains.
+
+The previous binding correction is published at `a37fe64`; automatic run 40464304449
+is audited and passing in PR #62's description. Its [evidence](../tasks/evidence/simple-help-layout.md#local-geometry-save-binding-correction-2026-10-27)
+retains the focus, source-revision and hierarchy verification.
 
 ## Published #37 baseline and qualification
 

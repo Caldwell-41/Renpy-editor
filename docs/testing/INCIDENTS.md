@@ -541,3 +541,14 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** actual-runner fixtures complete source/metadata and fixture
   cleanup under post-child lock or assertion-release failure; neither becomes a pass.
 - **Evidence:** [Final review corrections](../tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).
+
+## H38. No-op geometry saves lose owned hierarchy state
+
+- **Class/search:** product; unchanged size/position, null root ID, missing protected
+  rows, "Choose an owned container" after Apply.
+- **Cause/correction:** no-op geometry returned a raw parser document while changed
+  saves returned ownership annotations. Annotate the captured document on both
+  no-op paths so the same source revision retains the same owned model.
+- **Verification:** dispatch coverage for size, pixel-property and position no-ops,
+  exact source and Undo/Redo; production controller/core check accepts root Add afterward.
+- **Evidence:** [No-op geometry correction](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27).

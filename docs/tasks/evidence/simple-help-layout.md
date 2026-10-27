@@ -3,6 +3,56 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Local no-op geometry ownership correction, 2026-10-27
+
+Kris selected fixing the P2 finding from the fresh private review of PR #62 at
+`a37fe64`, then checking, publishing the correction, updating the PR and running
+CI. The root-cause skill governs the correction.
+
+Unchanged size, pixel-property and position saves returned the raw parser document.
+Changed saves returned the ownership-annotated document. The no-op response therefore
+lost the owned root UUID and synthetic protected hierarchy rows despite retaining
+the same source revision. The production Screens controller installed that response;
+subsequent root Add refused with "Choose an owned container" until Refresh Source.
+This is a product response-contract defect, reproduced through the real core fixture
+driver and compiled production controller in happy-dom. No source loss was observed.
+
+Both no-op branches now apply the existing ownership annotation to the document
+and bytes already captured for revision validation. This covers `screens.setSize`,
+`screens.setPixelProperty` and `screens.setPosition`. No renderer fallback, source
+write, extra source read or history entry is introduced.
+
+The new dispatch test compares the entire owned document before and after each
+operation, including root/element IDs and the protected row. It verifies unchanged
+source bytes and that one Undo still reverses the preceding Source save, followed
+by exact Redo restoration. Before the fix it fails on the size response's null root
+ID and missing protected row. The position fixture was placed inside a fixed group
+to qualify movement; an intermediate test used the nonexistent `screens.setPixel`
+operation and correctly refused with `OPERATION_NOT_ALLOWED`. The accepted test uses
+the existing `screens.setPixelProperty` dispatch operation.
+
+Verification passes 26 ordinary Screens core tests with one intentional SDK ignore;
+typechecking and all 255 frontend tests pass using pinned Node 24.19.0/npm 11.9.0
+and bundled Python 3.12.14. Rust formatting, repository validation of 960 files and
+all 13 section-link tests pass. The
+rebuilt fixture driver and unchanged compiled controller pass no-op size, complete
+document retention, exact unchanged Source and a subsequent accepted root Add.
+The temporary UI check initially asserted before Add finished; waiting for actual
+operation completion supplies the passing result. Every owned fixture driver exits
+and removes its temporary project. These are controller/core checks, not browser,
+native WebView or SDK evidence. Independent correction reviews report Standards 0
+and Spec 0 actionable findings.
+
+The correction and supporting records share one commit. PR #62's description owns
+the exact automatic CI run and terminal audit without a receipt-only successor
+commit. Earlier native/SDK receipts retain their tested candidates; the correction
+changes only returned no-op models, not source mutation or runtime behavior. Existing
+costly-operation counts remain unchanged. Formal acceptance, merge and release
+remain unselected.
+CURRENT (1,973 words) and HANDOVER (3,465 words) retain their historical pending
+acceptance and protected recovery sections above the workflow's reference targets;
+this correction replaces their live continuation without rewriting those records.
+
 ## Local geometry-save binding correction, 2026-10-27
 
 Kris selected fixing the P2 finding from the private review of PR #62 at

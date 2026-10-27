@@ -150,6 +150,57 @@ fn save_composition_source(service: &mut LifecycleService, owner: &Value, text: 
 }
 
 #[test]
+fn owned_geometry_noops_preserve_document_ownership_and_history() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let source_path = owner["path"].as_str().unwrap();
+    let blank = fs::read_to_string(root.join(source_path)).unwrap();
+    let source = format!(
+        "{blank}    fixed: # loomlight-element: 00000000-0000-4000-8000-000000000003\n        frame: # loomlight-element: 00000000-0000-4000-8000-000000000001\n            xsize 640\n            ysize 360\n            xalign 0.5\n            yalign 0.5\n            text \"Retained\" # loomlight-element: 00000000-0000-4000-8000-000000000002\n    use custom_footer()\n"
+    );
+    save_composition_source(&mut service, &owner, &source);
+    let document = ipc(&mut service, "screens.inspect", json!({"path":source_path}));
+    assert_eq!(document["screens"][0]["nodes"][0]["id"], owner["rootId"]);
+    assert!(document["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|node| node["kind"] == "custom"));
+    assert!(!frame(&document)["position"].is_null());
+    for (operation, values) in [
+        ("screens.setSize", json!({"width":640,"height":360})),
+        (
+            "screens.setPixelProperty",
+            json!({"property":"xsize","value":640}),
+        ),
+        ("screens.setPosition", json!({"xalign":0.5,"yalign":0.5})),
+    ] {
+        let mut payload = json!({"path":source_path,"expectedRevision":document["revision"],
+            "screenName":"notes","nodeStart":frame(&document)["span"]["start"]});
+        payload
+            .as_object_mut()
+            .unwrap()
+            .extend(values.as_object().unwrap().clone());
+        let unchanged = ipc(&mut service, operation, payload);
+        assert_eq!(
+            unchanged, document,
+            "{operation} must retain the owned document"
+        );
+        assert_eq!(fs::read(root.join(source_path)).unwrap(), source.as_bytes());
+    }
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read(root.join(source_path)).unwrap(),
+        blank.as_bytes(),
+        "No-op geometry saves must not add an Undo entry"
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        ipc(&mut service, "screens.inspect", json!({"path":source_path})),
+        document
+    );
+}
+
+#[test]
 fn owned_composition_text_changes_only_the_literal_preserving_identity_comments_and_noop_history() {
     let (_temporary, mut service, root, owner) = composition_project();
     let added = compose_command(

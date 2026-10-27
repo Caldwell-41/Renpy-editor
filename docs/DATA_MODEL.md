@@ -522,6 +522,8 @@ removes their target, the UI keeps the text available for copying or explicit di
 Accepted source-changing geometry saves refresh composition controls against the
 returned document, preserving focus, expanded sections and scroll. New edits use
 that revision; existing drafts retain their captured revision.
+No-op geometry saves return the same ownership-annotated document, preserving root
+and element identities and protected rows without changing source or history.
 Explicit Design entry focuses the text editor. The removal notice's specific Undo
 action expires after a later source-changing Screens save or Source reload,
 including return from another workspace. No-op saves retain the action.
