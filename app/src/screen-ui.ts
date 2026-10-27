@@ -578,7 +578,13 @@ export class ScreensWorkspace {
           this.canvas.append(guide); continue;
         }
         if (!node || node.kind === "screen") continue;
-        const target = this.canvas.querySelector<HTMLButtonElement>(`[data-index="${index}"]`) ?? button("",() => this.choose(index,!this.owned),`screen-node screen-node-${node.kind}`);
+        let target = this.canvas.querySelector<HTMLButtonElement>(`[data-index="${index}"]`);
+        if (!target) {
+          target = button("",() => this.choose(index,!this.owned),`screen-node screen-node-${node.kind}`);
+          target.addEventListener("keydown", event => {
+            if (event.key === "Enter") { event.preventDefault(); this.choose(index,true); }
+          });
+        }
         target.ondblclick = () => this.choose(index,true);
         target.ariaLabel = `Select ${node.literal ?? names[node.kind] ?? node.kind}`;
         target.dataset.index = String(index); target.ariaPressed = String(index === this.selected);

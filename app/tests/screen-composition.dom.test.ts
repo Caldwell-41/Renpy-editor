@@ -6,7 +6,7 @@ import type { CoreOperation } from "../src/protocol.js";
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
-function interactiveFixture(initial?: ScreenDocument) {
+function interactiveFixture(initial?: ScreenDocument, canvas = false) {
   const browser = new Window();
   Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, ResizeObserver: browser.ResizeObserver });
   const node = (id: string, kind: string, start: number, end: number, parentStart: number | null, literal: string | null = null): ScreenNode => ({
@@ -29,6 +29,11 @@ function interactiveFixture(initial?: ScreenDocument) {
       if (operation === "screens.list") return { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "inventory",
         owned: [{ id: "screen-id", rootId: "root-id", name: "notes", path: doc.path, resolved: true, sourceRevision: doc.revision }] } as T;
       if (operation === "screens.inspect") { await inspectionGate; return structuredClone(doc) as T; }
+      if (operation === "screens.canvasStatus" && canvas) return { phase: "ready" } as T;
+      if (operation === "screens.canvasRender" && canvas) return { phase: "ready", frameId: "fixture-frame", revision: doc.revision,
+        width: 1280, height: 720, image: "data:image/png;base64,fixture",
+        geometry: doc.screens[0]!.nodes.map((node, index) => ({ start: node.span.start, x: 0, y: 0,
+          width: index === 0 ? 1280 : 640, height: index === 0 ? 720 : 360 })) } as T;
       if (operation === "screens.compose" && reply) { doc = reply.document; return structuredClone(reply) as T; }
       if (operation === "scene.list") return { projectRevision: "project", sourceMapRevision: "map" } as T;
       if (operation === "scene.apply" && historyReply) { doc = historyReply; return {} as T; }
@@ -42,6 +47,37 @@ function interactiveFixture(initial?: ScreenDocument) {
   return { workspace, calls, click, row, edit, text, browser, original: structuredClone(doc), respond: (next: ScreenDocument, selectedId: string) => { reply = { document: next, selectedId }; },
     respondHistory: (next: ScreenDocument) => { historyReply = next; }, replaceDocument: (next: ScreenDocument) => { doc = next; },
     holdInspection: () => { let release!: () => void; inspectionGate = new Promise<void>(resolve => { release = resolve; }); return () => { inspectionGate = undefined; release(); }; } };
+}
+
+for (const kind of ["text", "textbutton", "frame"]) {
+  test(`owned canvas ${kind} selects on click and opens Design on Enter`, async () => {
+    const root: ScreenNode = { id: "root-id", kind: "screen", literal: null, span: { start: 0, end: 250 },
+      parentStart: null, layout: {}, properties: [], protected: [] };
+    const element: ScreenNode = { id: "element-id", kind, literal: kind === "frame" ? null : "Content",
+      span: { start: 30, end: 200 }, parentStart: 0, layout: {}, protected: [],
+      properties: kind === "frame" ? [{ property: "xsize", value: 640 }, { property: "ysize", value: 360 }] : [],
+      ...(kind === "frame" ? { position: { xalign: 0.5, yalign: 0.5 } } : {}) };
+    const h = interactiveFixture({ path: "game/ui/notes.rpy", revision: "before", partial: false,
+      screens: [{ name: "notes", nodes: [root, element] }] }, true);
+    try {
+      await tick(); await tick();
+      document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+      const target = document.querySelector<HTMLButtonElement>(`.screen-node-${kind}`); assert.ok(target);
+      target.focus(); target.click();
+      assert.equal(h.row("element-id").ariaSelected, "true", "Click selects the canvas element in Choose");
+      const enter = new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+      target.dispatchEvent(enter);
+      const design = [...document.querySelectorAll("button")].find(button => button.textContent === "2  Design");
+      assert.equal(design?.ariaPressed, "true", "Enter on the canvas element opens Design");
+      assert.equal(enter.defaultPrevented, true, "Enter must not trigger another default button activation");
+      if (kind !== "frame") {
+        const input = [...document.querySelectorAll("textarea")].find(field => field.ariaLabel === (kind === "textbutton" ? "Button label" : "Text"));
+        assert.equal(input?.value, "Content");
+      }
+      assert.equal(h.calls.some(call => ["screens.compose", "screens.setPosition", "screens.setSize"].includes(call.operation)), false,
+        "Selection and Design entry do not write source");
+    } finally { h.workspace.dispose(); }
+  });
 }
 
 test("owned composition retains a refused addition and Cancel accepts no source request", async () => {
