@@ -1,36 +1,33 @@
 # Current outcome handover
 
-## Phase 3B architecture refactors await CI
+## Phase 3B architecture refactors merged and cleaned up
 
-Kris selected [#64](https://github.com/Caldwell-41/Renpy-editor/issues/64) on
-2026-10-27. [PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) is open
-from `codex/phase3b-architecture` to `codex/phase3b-screen-designer`. Base is
-`0d469a6`; Rust `6a31a9e` and frame delivery `20d33e2` are integrated. Both
-independent review axes have zero findings at `e3c75ef`. Local 264-test frontend,
-real renderer/core/helper and signed Mac package/native composition checks pass.
-[Evidence](../tasks/evidence/phase-3b-architecture.md) owns identities, scopes and
-raw receipt locations. Broader product/native/human acceptance retains its scope.
+[PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) merged at
+`99118a147a29937d293b3190b9cda545135e5876` into `codex/phase3b-screen-designer`.
+Its tree exactly matches checked head `15c252f`; this checkout is on the updated
+Screens branch. [#64](https://github.com/Caldwell-41/Renpy-editor/issues/64) and
+[evidence](../tasks/evidence/phase-3b-architecture.md) own scope and final results.
+Standards and Spec have zero findings. CI run `40514677531`, attempt 1, passes the
+selected Windows/macOS qualification at `694e2ff`; automatic run `40515307055`
+passes the checked PR head. Later edits change only evidence/status documents.
+Current signed Mac and Windows native receipts retain their exact candidates and
+synthetic-input scope. Broader product, physical-input and human acceptance remain
+with their existing owners.
 
-Qualification [run 40514677531](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40514677531),
-attempt 1 / ordinal 2, tests `694e2ff240f77f9534bb9bac331b5232285345c9` on
-Windows x64/macOS ARM64. It is pending. Dispatch 1 used a wrong candidate input;
-both guards rejected it before builds/SDK/native work, and it is cancelled.
-The new documentation commit changes no product or qualification input. Its
-separate automatic PR check must pass before merge.
+Eight completed worktrees, five local branches and three obsolete remote branches
+are retired after integration/equivalence checks. Six old-checkout archives and a
+hash/status manifest remain under ignored `.toolchains/retired-worktrees/pr65/`.
+The distinct renderer CSS edit also survives in local recovery tag
+`archive/pr65-phase3a-renderer-local-edit`. Historical design-reference checkout
+paths below are retired; restore their pinned source from Git if another comparison
+is selected. Approved captures remain in the repository. The unrelated untracked
+Phase 1 audit is byte-identical, and protected native recovery and stashes below
+remain untouched.
 
-Next action is to audit the recorded exact run, artifacts and cleanup. Then finish
-any in-scope fixes/review, update the evidence/PR, merge after checks pass, retire
-only integrated/redundant branches and worktrees, and send the user-requested
-completion notification. Private `.toolchains/architecture-64/continuation.json`
-retains routing and operation identities. Register the installed ci-watch before
-yielding; a watch event prompts an audit and is not a pass itself. The user approved
-needed builds/tests/CI/SDK without a numerical cap for this outcome; historical
-closed selections stay closed.
-
-The unrelated untracked Phase 1 audit and all protected recovery below remain.
-Old reference checkout changes match integrated files. Phase 3A worker commits are
-patch-equivalent; the renderer worktree has one distinct local CSS edit that must
-have a recoverable local snapshot before retirement. No old worktree is deleted yet.
+No run, watcher, implementation correction or cleanup is pending. The selected
+implementation and cleanup are complete. #64 and private
+`.toolchains/architecture-64/continuation.json` retain final publication/notification
+receipts. No successor feature or release is selected; old closed allowances stay closed.
 
 <a id="l02-draft-lifetime-and-history-selection-fixes"></a>
 
@@ -103,8 +100,8 @@ its earlier failed runs remain in the same evidence owner.
 
 C5 source `94c78e7`, revision `workflow-popup-v1`, retains explicit approval.
 [The approval record](../design/design-lab-help-composition/approval.json) owns its
-fingerprint and captures. The read-only `.toolchains/l02-c5-reference` worktree
-preserves that source; verify its port-5175 server before use. The known full-lab
+fingerprint and captures. The `.toolchains/l02-c5-reference` checkout was retired during PR #65 cleanup;
+its source remains pinned and its local files are archived as described above. The known full-lab
 source-guard limitation and shell/naming differences remain in the evidence.
 Current invalid-state production captures verify the existing field-error pattern;
 they do not alter C5 approval or claim full canvas fidelity.

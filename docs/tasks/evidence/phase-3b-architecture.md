@@ -88,7 +88,7 @@ actual packaged WKWebView. This is not fresh physical-input or human acceptance.
 Raw receipts are under ignored `local-01/native-mac`; package/identity records are
 under ignored `.toolchains/releases/architecture-64-01/`.
 
-## PR and pending CI
+## PR and CI dispatches
 
 [PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) targets
 `codex/phase3b-screen-designer` from `codex/phase3b-architecture`.
@@ -104,13 +104,90 @@ attempt 1, is the replacement, bound to exact candidate
 and ordinal 2. The selected Windows x64/macOS ARM64 jobs include frontend/source/
 metadata/desktop and real renderer/core checks; Windows additionally exercises the
 verified SDK, real helper and packaged composition path. Other historical selectors
-remain unselected. This run is pending and is not a pass.
+remain unselected. Its completed result and artifact audit follow below.
 
 The PR's automatic Repository quality run is
 [40514595303](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40514595303)
 at that same head; a subsequent documentation-only push will have its own run.
-The coordinator must audit required jobs, exact candidate, artifacts, SDK/native
-receipts and cleanup before marking the task accepted or merging. After success,
-finish the authorized merge, safe branch/worktree retirement and requested
-completion notification. The private local continuation record retains routing
-metadata without adding it to the task specification.
+The terminal audit below resolves the CI requirement. Private local continuation
+metadata retains notification routing without adding it to the specification.
+
+
+## CI terminal audit
+
+Qualification run `40514677531`, attempt 1 / ordinal 2, completes successfully on
+exact candidate `694e2ff240f77f9534bb9bac331b5232285345c9`. The selector gate and
+both selected composition jobs pass. Both hosts pass 264 frontend tests, 28 ordinary
+Screens cases, three metadata cases, 16 Source cases and the named Story refinement
+case, plus desktop compilation and real renderer/core rehearsals. The existing
+four-launch canvas lifecycle SDK case stays ignored in the ordinary Screens scope;
+it is not claimed as a pass. The separate named composition SDK case executes once
+on Windows with no failed or ignored case.
+
+Both-host controller receipts complete all seven composition groups and eight
+owned-screen renderer/core groups, including exact source/history/reopen and
+protected/stale/refused edits. Additional pointer reorder, stationary confirmation,
+stale removal and selection-preference checks pass. Windows real-helper selection
+and inert draft addition pass. Its SDK receipt matches the renderer-accepted source,
+compile/lint exits 0, deliberate preview retains its PNG, and owned Stop records
+cancelled phase with Windows exit `-1073741510`, untruncated output, error-free
+diagnostics and complete cleanup. Re-running the existing SDK admission validator
+against the downloaded receipts passes.
+
+The Windows x64 packaged native composition probe passes seven groups in 14.828
+seconds, exit 0, no timeout, exact accepted bytes and all cleanup owners. The fixture
+is removed; no scratch job, source bytecode or save remains. The retained PE header
+is x64, and its SHA-256 matches the package identity and retained executable record:
+`830454b3070c8ec44440f5365fc453b9858f9249505de74efcc29c7869768553`.
+This is synthetic DOM input in the real WebView. The separately qualified signed
+Mac package above supplies current Mac native proof.
+
+Downloaded archives pass CRC checks and match both GitHub metadata and upload-log
+digests. Their candidate files match the selected SHA. All three retained executable
+hashes recompute correctly.
+
+| Artifact | GitHub ID | Archive SHA-256 |
+| --- | --- | --- |
+| Windows | `12740117343` | `ccd6f4f8745b5432341c9fc2af2645c2537bdf1b91154f3e7a0a161f6df7526a` |
+| macOS | `12738897613` | `4b4d4d72e7ed82496b93ad1cf05a6e0a7de091d2c356111a478ee80f2220608f` |
+
+The first Windows job response retained stale in-progress metadata. Its exact-attempt
+job record and check-run `122225483094` both confirm completed/success at
+`2026-10-27T14:03:14Z`, on the selected SHA, with every required step successful.
+This reconciles the metadata without a rerun. Raw logs, archives, extracted receipts,
+executable identities and the local audit are retained under ignored `ci-02/`.
+
+[Automatic run 40515307055](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40515307055),
+attempt 1, passes both required jobs at PR head
+`15c252f3a17034c9938dd0a4d085a0a599c7792b`. The only changes since qualification
+are CURRENT, HANDOVER and this evidence file; `app/` and `.github/` are identical.
+These are explicit material-input equivalence checks, not fresh native results at
+a documentation successor.
+
+## Merge and cleanup
+
+[PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) merged at
+`99118a147a29937d293b3190b9cda545135e5876` into `codex/phase3b-screen-designer`.
+Its tree exactly matches the checked PR head. The local integration branch was
+fast-forwarded and the unrelated untracked Phase 1 audit retained its exact hash.
+Both review axes have zero findings; there is no remaining P1/P2 issue.
+
+The two implementation worktrees and six older Phase 3A/design-reference worktrees
+are retired. Before retirement, six complete local archives preserved old source,
+local changes and ignored evidence, excluding Git checkout pointers and reproducible
+node dependencies. Their manifest records original commits, status and archive
+hashes under ignored `.toolchains/retired-worktrees/pr65/`. The one distinct local
+renderer CSS edit also has a verified Git recovery snapshot at local-only tag
+`archive/pr65-phase3a-renderer-local-edit`. Other old worker commits are integrated
+or patch-equivalent, and the reference-checkout differences match integrated files.
+Approved captures and their pinned source commits remain available in the repository.
+
+Five completed local branches and three obsolete remote branches were deleted only
+after ancestry/equivalence and open-PR checks. Only the primary worktree remains;
+`main` and the active Screens branch remain. The local recovery tag, protected native
+state and existing stashes were preserved. No CI watch or product process is pending.
+The user-requested completion notification is the final closeout action.
+
+CURRENT is 1,741 words and HANDOVER is 3,465 words, above their review targets.
+They retain earlier candidate-specific acceptance limits and protected native recovery;
+this closeout replaces its live section without deleting that inherited evidence.
