@@ -519,6 +519,9 @@ fallback on Redo. Other history preserves a surviving selection. Device preferen
 optionally remember screen/element selection by project UUID; history itself remains
 session-local. Text/addition drafts retain their original source revision. If Source
 removes their target, the UI keeps the text available for copying or explicit discard.
+Explicit Design entry focuses the text editor. The removal notice's specific Undo
+action expires after a later source-changing Screens save or Source reload,
+including return from another workspace. No-op saves retain the action.
 
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing

@@ -2,16 +2,19 @@
 
 ## L02 Help composition PR open
 
-2026-10-27 follow-up: Kris selected the P2 Add canvas refresh
-correction. A subagent reproduced the missing accepted-revision frame, fixed the
-draft owner's completion notification and added a focused test. Typechecking and
-all 247 frontend tests pass; coordinator review has no required correction. Kris
-then selected publishing the fix and updating PR #62. This correction includes the
-code, test and supporting records. Audit its automatic Repository quality checks
-in this same chat and record the terminal result on PR #62. Prior native/SDK
-receipts retain their tested candidates; no new qualification campaign is needed
-for this renderer completion notification.
-[Correction evidence](../tasks/evidence/simple-help-layout.md#local-add-canvas-refresh-correction-2026-10-27).
+2026-10-27 follow-up: Kris selected local corrections for two P2 findings from a
+fresh private review of PR #62 at `d90d7c7`. Explicit Design entry now focuses the
+text field. All Screens save paths expire the removal-specific Undo action when
+source changes; reload also clears it, while no-op saves retain it. Five new tests
+and stronger canvas-focus checks cover the corrections. Typechecking, all 252
+frontend tests, production build and focused Chrome checks pass.
+Kris then selected committing and pushing both fixes to PR #62, updating its
+description and auditing the automatic checks in this same chat. This commit
+includes the code, tests and supporting records. PR #62's description will record
+the exact run and terminal audit without another receipt-only commit. Prior
+native/SDK receipts retain their tested candidates; no new qualification campaign
+is selected.
+[Correction evidence](../tasks/evidence/simple-help-layout.md#local-focus-and-undo-notice-corrections-2026-10-27).
 
 2026-10-27 follow-up: PR #62's canvas Enter-to-Design regression is fixed
 with three focused cases. Typechecking, all 246 frontend tests, the production

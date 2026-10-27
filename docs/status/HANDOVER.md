@@ -1,25 +1,31 @@
 # Current outcome handover
 
-## L02 Add canvas refresh publication and CI audit
+## L02 focus and Undo notice publication and CI audit
 
-Kris selected one subagent to diagnose, fix and test the P2 issue.
-The correction is complete on `codex/37-compose-help-layout`, starting
-at `66711fa`. Add now notifies the canvas after clearing its accepted draft. A new
-workspace test rejected the old behavior and now verifies the accepted revision,
-selected geometry and cleared stale state without another user interaction.
-Typechecking and all 247 frontend tests pass under the pinned Node/npm versions
-and supported Python. Coordinator review found no required correction.
-[The correction record](../tasks/evidence/simple-help-layout.md#local-add-canvas-refresh-correction-2026-10-27)
-owns diagnosis, test results and limits.
+Kris selected fixing both P2 findings from the fresh private review of PR #62,
+using the root-cause skill and focused tests. The checkout remains
+`codex/37-compose-help-layout`, starting at `d90d7c7`. This correction commit
+includes the code, tests and supporting records. Explicit Design entry now focuses its text field;
+one Screens save-completion handler expires removal-specific Undo feedback after
+source-changing writes. Reload clears feedback from an earlier visit, while no-op
+saves retain the action. The earlier Add canvas correction is included in the base.
 
-Kris then selected updating PR #62 with the fix and running needed CI. This commit
-includes the code, test and supporting records. Push it to the existing PR branch,
-update the PR description and audit the automatic Repository quality run for its
-exact head. Use ci-watch if it remains pending, then record the terminal audit on
-PR #62 without another receipt-only commit. The correction changes no source
-generation, helper, SDK or native code; their prior receipts retain their tested
-candidates and no new qualification campaign is selected. Preserve the unrelated
-untracked audit. Formal acceptance, merge and release remain unselected.
+Typechecking, all 252 frontend tests, production build and a focused Chrome check
+pass. Seven new/strengthened assertions rejected the old behavior; the focused
+composition/request group now passes 28 cases. Chrome verifies real text input,
+no-op retention, notice expiration and shared Undo order with fixture IPC.
+[The correction record](../tasks/evidence/simple-help-layout.md#local-focus-and-undo-notice-corrections-2026-10-27)
+owns diagnosis, initial test failures and verification limits.
+
+Kris subsequently selected committing and pushing both fixes to PR #62, updating
+the PR description and auditing the automatic CI checks. Publish this correction
+to the existing branch, bind its automatic run to the exact head, and audit it in
+this same chat. Use ci-watch if the run remains pending, then record its terminal
+audit in the PR description without another receipt-only commit. This authorization
+does not include extra issue comments or manual qualification dispatches.
+Layout, CSS, source generation, helper, SDK and native code are unchanged; prior
+native/SDK receipts retain their candidates and operation counts. Preserve the
+unrelated untracked audit. Formal acceptance, merge and release remain unselected.
 
 ## Published #37 baseline and qualification
 

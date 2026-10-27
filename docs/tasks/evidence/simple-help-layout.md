@@ -3,6 +3,66 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Local focus and Undo notice corrections, 2026-10-27
+
+Kris selected local fixes and focused tests for the two P2 findings from the fresh
+private review of PR #62 at `d90d7c7`, using the root-cause skill. Publication was
+initially withheld; the later authorization is recorded below.
+
+Explicit Design entry replaced the focused hierarchy row without moving focus to
+the text field. The shared selection handler now focuses the rendered textarea,
+covering hierarchy and canvas Enter, double-click and Resume edit. Ordinary
+selection and existing draft/error focus behavior keep their own paths. This
+restores the approved C5 `workflow-popup-v1` focus behavior without changing layout.
+
+The removal notice called generic shared Undo, but its lifetime did not account
+for later geometry writes or work in another view. Screens now has one save
+completion handler for composition, dimensions, position, creation and history.
+Source-changing saves expire the notice; no-op saves retain it. Source reload,
+including remount after another workspace, expires feedback from the earlier
+snapshot. The fix does not skip or search history entries to reach the removal.
+
+Five new component tests cover hierarchy text/textbutton focus with retained
+drafts, saved size/position notice expiration and return to Screens. Existing
+canvas text/textbutton cases now assert field focus; the removal history case
+uses the actual Undo removal action. The size case also proves that a no-op keeps
+the action and generic Undo still reverses the later edit first.
+
+Before the production change, the focused command using the pattern
+`owned canvas|hierarchy Enter|saved .* edit expires|returning to Screens` produced
+seven matching assertion failures and one pass. The first red run was interrupted
+while Node formatted whole DOM nodes; boolean focus comparisons then exposed the
+intended failures. The corrected production code passes all 28 composition/request
+cases. Pinned Node 24.19.0/npm 11.9.0 and bundled Python 3.12 run `npm run check`
+successfully: typechecking and all 252 frontend tests pass with no failures,
+cancellations or skips. `npm run build` passes with the existing chunk-size warning.
+
+A focused Chrome 156.0.8078.48 check uses the production controller with fixture IPC.
+Hierarchy/canvas Enter focuses text and textbutton editors, actual keyboard input
+reaches the field, no-op size preserves the removal action, changed size hides it,
+and generic Undo reverses size before removal. There are zero page errors. Its
+first run expected insertion before the existing text; Chrome placed the caret at
+the end. Correcting that test expectation required no production change. The
+script is retained under ignored `.toolchains/screen-composition/review-fixes-browser.mjs`.
+
+Visual scope is the approved C5 interaction behavior; CSS, layout and captures are
+unchanged. These checks establish renderer behavior with fixture replies, not new
+native/SDK qualification. Source generation, helper, SDK and native code are
+unchanged. Prior native/SDK receipts retain their tested candidates and operation
+counts. At the local checkpoint no CI, package, native session, SDK process,
+watcher or publication was started. The unrelated untracked audit remains
+untouched. Existing long status records retain their
+qualification identities and protected recovery; this correction replaces only
+the superseded continuation text.
+
+Kris subsequently instructed committing and pushing both fixes to PR #62, updating
+its description and auditing the automatic checks. This commit includes both
+fixes, the focused tests and supporting records. The PR description owns the exact
+published candidate, automatic run/attempt and terminal audit. Register ci-watch
+if that run remains pending and complete the audit in this same chat, without an
+extra receipt-only commit. No manual CI dispatch, package/native/SDK repeat, issue
+comment, merge or release is selected.
+
 ## Local Add canvas refresh correction, 2026-10-27
 
 Kris selected a subagent to diagnose, fix and test the P2 Add canvas refresh finding

@@ -189,11 +189,16 @@ export class ScreensWorkspace {
     const status = this.creationDialog?.querySelector<HTMLElement>('[role="status"]');
     if (status) { status.textContent = text; status.dataset.error = String(error); }
   }
+  private saved(sourceChanged: boolean): void {
+    if (sourceChanged) this.composer.clearNotice();
+    this.actions.saved();
+  }
   async load(): Promise<void> {
     if (this.busy || this.resize || this.move || this.composer.hasRemoval()) { this.note("Finish the current operation first. Input retained.", true); return; }
     return this.reload();
   }
   private async reload(): Promise<void> {
+    this.composer.clearNotice();
     const sequence = ++this.loadSequence;
     try {
       const inventory = await this.actions.request<SourceInventory>("source.list");
@@ -241,6 +246,7 @@ export class ScreensWorkspace {
     this.rememberSelection();
     if (this.owned && !design && this.step === "choose" && this.composer.canKeepTree()) { this.composer.refreshSelection(); this.renderCanvas(); }
     else this.render();
+    if (design) this.card.querySelector<HTMLTextAreaElement>("textarea")?.focus({ preventScroll: true });
   }
   private renderCard(): void {
     const scroll = this.card.scrollTop;
@@ -350,7 +356,7 @@ export class ScreensWorkspace {
       }));
       if (!this.current()) return;
       this.owned = catalog.owned.find(s => !draft.base.owned.some(old => old.id === s.id));
-      this.creation = undefined; this.closeCreationDialog(); this.selected = 0; this.actions.saved();
+      this.creation = undefined; this.closeCreationDialog(); this.selected = 0; this.saved(true);
     } catch (error) { if (this.current()) this.note(`${(error as Error).message} Input retained. Cancel creation and refresh Source before trying again.`, true); }
     finally { this.busy = false; if (this.current()) { const input = this.creationDialog?.querySelector<HTMLInputElement>('[aria-label="Screen name"]'); if (input) input.readOnly = false; if (!this.creation) { await this.load(); this.card.querySelector<HTMLElement>('[aria-selected="true"]')?.focus(); } } }
   }
@@ -396,7 +402,7 @@ export class ScreensWorkspace {
       if (!this.current()) return;
       this.drafts.delete(key); this.documents = this.documents.map(d => d.path === document.path ? document : d);
       if (this.doc?.path === document.path) this.doc = document;
-      this.note(document.revision === draft.document.revision ? "No change. No undo entry added." : draft.position ? "Position saved. Undo reverses the move." : "Size saved. Undo reverses both dimensions together."); this.actions.saved();
+      this.note(document.revision === draft.document.revision ? "No change. No undo entry added." : draft.position ? "Position saved. Undo reverses the move." : "Size saved. Undo reverses both dimensions together."); this.saved(document.revision !== draft.document.revision);
     } catch (error) { if (this.current()) this.note(`${(error as Error).message} Input retained. Review Source, or cancel this draft and refresh.`, true); }
     finally {
       this.busy = false;
@@ -427,9 +433,8 @@ export class ScreensWorkspace {
       this.documents = this.documents.map(d => d.path === result.document.path ? result.document : d);
       this.doc = result.document; owner.sourceRevision = result.document.revision;
       this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === result.selectedId));
-      this.composer.clearNotice();
       this.rememberSelection();
-      this.renderCanvas(); this.actions.saved(); return result;
+      this.renderCanvas(); this.saved(result.document.revision !== base.revision); return result;
     } finally { this.busy = false; }
   }
   private async history(type: "undo" | "redo"): Promise<void> {
@@ -441,7 +446,7 @@ export class ScreensWorkspace {
         const model = await this.actions.request<{ projectRevision: string; sourceMapRevision: string }>("scene.list");
         await this.actions.request("scene.apply", { expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: { type } });
       });
-      if (this.current()) this.actions.saved();
+      if (this.current()) this.saved(true);
     } catch (error) { if (this.current()) this.note((error as Error).message, true); }
     finally {
       if (this.current()) {
@@ -452,7 +457,7 @@ export class ScreensWorkspace {
         const index = this.nodes().findIndex(n => screenNodeKey(n) === preferred);
         if (index >= 0) this.selected = index;
         else if (entry) { const fallback = type === "undo" ? entry.beforeId : entry.afterId; this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === fallback)); }
-        this.rememberSelection(); this.composer.clearNotice();
+        this.rememberSelection();
       }
       this.busy = false;
       if (this.current()) { this.render(); this.composer.focusSelection(); }
