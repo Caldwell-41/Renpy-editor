@@ -11,7 +11,7 @@ The coordinator owns the third subagent's two-axis review, P1/P2 corrections,
 PR/CI audit, authorized merge and safe cleanup. [Evidence](../tasks/evidence/phase-3b-architecture.md)
 owns detailed results. Builds/tests/CI/SDK needed for this outcome have no numerical
 cap under the latest user instruction; closed historical selections stay closed.
-After completion, message thread `01a17d8c-eec0-70e0-a1d8-19b85f517bba` as requested.
+After completion, send the user-requested notification to the linked chat.
 
 The unrelated untracked Phase 1 audit and all protected recovery below remain.
 Older worktrees include unique commits/local edits or retained design references;

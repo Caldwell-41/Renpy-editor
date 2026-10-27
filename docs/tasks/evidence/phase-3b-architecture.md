@@ -46,4 +46,20 @@ existing validator because `tomllib` was unavailable; selecting the documented
 Python version resolved it without code or fixture changes. The existing build
 chunk-size advisory remains unchanged.
 
-Integrated real-path verification, final review and CI remain pending. Detailed raw checks are retained under ignored `.toolchains/architecture-64/`.
+At integrated candidate `e3c75ef3e80be7031c06cff1178bab9103506f49`, the
+production renderer/core sequence passes all seven required groups, exact source,
+identities/history/reopen and cleanup. Additional pointer reorder, stationary
+confirmation, stale-removal retention and selection-preference contention checks
+pass at wide and compact widths. The wrapper identifies this as controller-only
+Chrome proof; raw probe flags do not establish native WebView execution.
+
+## Independent review
+
+The third subagent applied the code-review skill to
+`0d469a6e2c52132d9365f9d2b3a56120c5c51a9c...e3c75ef3e80be7031c06cff1178bab9103506f49`.
+Its Standards and Spec reviewers ran separately and read #64 plus applicable
+repository contracts. Standards has zero findings and no worst issue. Spec has
+zero findings and no worst issue. No P1/P2 correction is required by that review.
+The coordinator also inspected both assignment diffs and their integration.
+Runtime qualification and CI remain pending; the source review does not supply
+those results. Detailed raw checks are retained under ignored `.toolchains/architecture-64/`.
