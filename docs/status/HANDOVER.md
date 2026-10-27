@@ -1,5 +1,36 @@
 # Current outcome handover
 
+## L03 numeric layout design checkpoint
+
+Kris selected [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38).
+This chat is the sole writer on `codex/phase3b-l03-numeric-layout`, created from
+freshly fetched Screens base `4d2101f36b7491aa51ca513f3b3d819f9460bff8` on macOS ARM64.
+The assignment includes implementation, focused tests, final review, a PR into
+`codex/phase3b-screen-designer` and CI audit. It excludes merging and other features.
+Prior sections' statements that no successor is selected predate this assignment.
+
+The [numeric-layout Design Lab](../design/design-lab-numeric-layout/README.md) has
+three unapproved layouts. The running local lab uses port 5174. Design approval is
+required by Kris's mock-first rule before production implementation. An asynchronous
+question asks which layout to approve. A separate question asks to confirm the
+production UI/controller/real-core and public Rust-operation test boundaries under
+the TDD skill. No production files or tests have changed yet.
+
+[Evidence](../tasks/evidence/numeric-layout.md) records preparation, browser checks,
+SDK reference findings and remaining acceptance. #38 owns live execution and future
+costly-operation limits; none of those operations has started. The combined Design
+Lab check failed at the existing flow-v1 source guard after 488 cases and 13 check
+groups; the targeted 48-case matrix, TypeScript, approval records and separate
+production build-isolation check pass. The draft mock checkpoint is committed and
+published on this branch; #38 records its exact candidate. Preserve the unrelated untracked Phase 1
+audit, all native recovery, archives, tags and stashes below.
+
+Resume in this chat after the design/test decisions. Use the committed mock
+candidate when recording approval under Design Lab INTEGRATION. Complete
+implementation and qualification against live #22/#24/#38. Route affected automated
+Windows/macOS proof through CI; name any required capability CI cannot establish.
+No PR, product CI result or #38 completion is claimed at this checkpoint.
+
 ## Phase 3B architecture refactors merged and cleaned up
 
 [PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) merged at

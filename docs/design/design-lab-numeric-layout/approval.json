@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "numeric-layout",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "paired-v1", "variantId": "paired", "approval": null },
+    { "id": "axes-v1", "variantId": "axes", "approval": null },
+    { "id": "placement-v1", "variantId": "placement", "approval": null }
+  ]
+}
