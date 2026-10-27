@@ -1,9 +1,10 @@
 # Numeric layout comparison
 
 [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) owns implementation
-and acceptance. The refined A2/B2/C2 drafts and original A/B/C layouts are unapproved
-proposals for the numeric inspector. [Refinement notes](REFINEMENT.md) describe the
-new controls, tradeoffs, sample limits and #38 implementation brief. The existing flow-v1 and C5 approvals retain their scope.
+and acceptance. Kris approved A2, Paired fields, on 2026-10-28. B2/C2 and the
+original A/B/C layouts remain unapproved proposals for the numeric inspector.
+[Refinement notes](REFINEMENT.md) describe the controls, tradeoffs, sample limits
+and #38 implementation brief. Existing flow-v1 and C5 approvals retain their scope.
 
 - Original A, Paired sections, puts horizontal and vertical fields beside one another.
   Position, anchor, alignment and size stay visible. Size limits and padding expand.

@@ -1,8 +1,9 @@
 # Numeric inspector refinement
 
 Kris requested an Experience First refinement of the existing #38 proposals. The
-original A/B/C sources and unapproved revisions remain available. A2, B2 and C2
-are separate drafts. No design has user approval yet.
+original A/B/C sources and unapproved revisions remain available. Kris approved
+A2 on 2026-10-28. B2 and C2 remain separate drafts.
+[The approval record](approval.json) owns the exact decision, source and captures.
 
 ## Review choices
 
@@ -12,7 +13,7 @@ are separate drafts. No design has user approval yet.
 | B2, Axis columns | Work down one axis through position, anchor, size and limits. | More fields are visible, with more scrolling. |
 | C2, Alignment first | Choose one of nine alignment positions and set dimensions. | Exact position and anchor values require opening a group. |
 
-The recommendation is A2. Numeric values remain visible and related axes line up.
+The approved choice is A2. Numeric values remain visible and related axes line up.
 Each draft keeps Apply and Cancel outside the desktop form's scrolling area. At
 compact width the canvas and inspector stack and the action row sticks to the
 bottom while scrolling the inspector. Existing dimensions, per-element drafts,
@@ -78,3 +79,44 @@ for approved references; do not reset the active checkout or change an older
 approval to make a combined run pass. The implementation owner keeps production,
 tests, task evidence/status, PR and CI ownership. The separate TDD-boundary decision
 remains with that chat.
+
+
+## A2 approval and handback, 2026-10-28
+
+Kris selected A2 after the feature brief and clarification that numeric layout
+controls complement canvas dragging/resizing. The exact decision is in
+[approval.json](approval.json). Source commit
+`c2d23c52d82660c91061aff3d72fef242abe5d29` reproduces fingerprint
+`7071f6b602fccca5c47d5a6d3fd18fa075c7ea76428618daf2477a0f04967627`.
+All nine retained A2 capture hashes match. Their dimensions, themes and interaction
+states are recorded with the approval. B2/C2 and the original proposals remain drafts.
+
+The approved source also opens in a separate detached comparison checkout. Its
+frontend files remain pinned; only the later approval metadata was copied in.
+Both checkouts report `sourceMatches[paired-v2] = true`. The reference browser
+shows A2 as Approved, the current pointer as paired-v2 and the exact user decision
+in its approval history. The implementation handback identifies the local reference
+path and port. Preserve that source for comparisons after production edits.
+
+After promotion, the targeted runner passes all 96 rendering cases and the refined
+interaction module. Lab TypeScript and approval-record checks pass, and the separate
+production build-isolation check passes with one JavaScript chunk and no dist write.
+These results establish sample behavior and approval identity only.
+
+The required combined `npm run design:check` failed twice at its initial
+`page.goto`, before any rendering case or interaction group. Each run exceeded the
+unchanged 8,000 ms navigation deadline. The initial failure and unchanged repeat
+are retained in `.toolchains/design-lab/a2-approval-initial-check.log`,
+`a2-approval-initial-report.json` and `a2-approval-recheck.log`; the final partial
+report is `.toolchains/design-lab/report.json`. Direct approval-metadata loading
+took 7,154 ms for four approved sources. This supports a provisional harness/startup
+performance diagnosis; it does not establish an A2 rendering defect. No source,
+runner deadline or approval guard was changed to make the run pass. These runs
+did not reach the older flow-v1 fingerprint guard recorded at the prior checkpoint.
+The combined check remains failed, and the older-reference limitation also remains.
+
+The design handback returns sole checkout writer ownership to the implementation
+chat. Production code, product tests, task status/evidence, #38 acceptance, PR and CI
+remain with that owner. Design approval leaves its separate TDD-boundary question
+pending. All design commits are local-only at handback. The unrelated audit and
+protected recovery remain unchanged.
