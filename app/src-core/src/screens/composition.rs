@@ -44,6 +44,17 @@ fn text_literal(text: &str) -> Result<String, SceneError> {
     serde_json::to_string(text).map_err(|_| SceneError::InvalidPayload)
 }
 
+pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
+    ["screen", "fixed", "frame", "vbox"].contains(&parent.kind.as_str())
+        && ["fixed", "frame", "vbox", "text", "textbutton"].contains(&kind)
+        && (parent.kind != "frame"
+            || (parent.protected.is_empty()
+                && !screen
+                    .nodes
+                    .iter()
+                    .any(|n| n.parent_start == Some(parent.span.start))))
+}
+
 fn movable(screen: &Screen, node: &Node) -> bool {
     node.parent_start.is_some()
         && screen
@@ -99,15 +110,7 @@ impl AuthoringService {
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&parent_id))
                     .ok_or(SceneError::UnknownEntity)?;
-                if !["screen", "fixed", "frame", "vbox"].contains(&parent.kind.as_str())
-                    || !["fixed", "frame", "vbox", "text", "textbutton"].contains(&kind.as_str())
-                    || (parent.kind == "frame"
-                        && (screen
-                            .nodes
-                            .iter()
-                            .any(|n| n.parent_start == Some(parent.span.start))
-                            || !parent.protected.is_empty()))
-                {
+                if !can_add(screen, parent, &kind) {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 let id = uuid::Uuid::new_v4().to_string();

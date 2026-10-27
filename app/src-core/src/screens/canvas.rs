@@ -300,18 +300,10 @@ impl AuthoringService {
                 .iter()
                 .find(|n| n.span.start == addition.parent_start)
                 .ok_or(SceneError::InvalidPayload)?;
-            if !["screen", "fixed", "frame", "vbox"].contains(&parent.kind.as_str())
-                || !["fixed", "frame", "vbox", "text", "textbutton"]
-                    .contains(&addition.kind.as_str())
+            if !composition::can_add(&screen, parent, &addition.kind)
                 || addition.text.len() > 8192
                 || addition.text.contains('\0')
                 || plan.nodes.len() >= MAX_NODES
-                || (parent.kind == "frame"
-                    && (screen
-                        .nodes
-                        .iter()
-                        .any(|n| n.parent_start == Some(parent.span.start))
-                        || !parent.protected.is_empty()))
             {
                 return Err(SceneError::InvalidPayload);
             }
