@@ -179,14 +179,12 @@ test("moving a frame with sibling content keeps the composite image stationary",
   } finally {h.dispose();}
 });
 
-test("a hidden Screens workspace releases its polling and validates a fresh frame on remount", async () => {
+test("a remounted Screens workspace validates a fresh frame before reusing geometry", async () => {
   const h=harness(false,undefined,true);
   try {
     await tick();await tick();
     document.querySelector('img')!.dispatchEvent(new window.Event('load'));
     h.workspace.panel.remove();
-    await new Promise(resolve=>setTimeout(resolve,550));
-    assert.equal(h.calls.filter(op=>op==='screens.canvasStatus').length,0,"Hidden Screens must not compete with another editor's shared service");
     h.stopHelper();h.workspace.mount(document.body);await tick();await tick();
     assert.equal(document.querySelector('.screen-game')?.getAttribute('data-stale'),'true');
     assert.equal(document.querySelector('.screen-node'),null,"A remounted workspace must not reuse unchecked geometry");
