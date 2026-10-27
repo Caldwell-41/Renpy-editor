@@ -1,5 +1,22 @@
 # Current outcome handover
 
+## Active Phase 3B architecture refactors
+
+Kris selected [#64](https://github.com/Caldwell-41/Renpy-editor/issues/64) on
+2026-10-27. Integration is `codex/phase3b-architecture`, based on `0d469a6`, with
+PR destination `codex/phase3b-screen-designer`. Rust and TypeScript workers have
+separate worktrees and file ownership in the issue. The Rust assignment `6a31a9e` and frame assignment `20d33e2` are integrated;
+combined verification and independent review remain in progress.
+The coordinator owns the third subagent's two-axis review, P1/P2 corrections,
+PR/CI audit, authorized merge and safe cleanup. [Evidence](../tasks/evidence/phase-3b-architecture.md)
+owns detailed results. Builds/tests/CI/SDK needed for this outcome have no numerical
+cap under the latest user instruction; closed historical selections stay closed.
+After completion, message thread `01a17d8c-eec0-70e0-a1d8-19b85f517bba` as requested.
+
+The unrelated untracked Phase 1 audit and all protected recovery below remain.
+Older worktrees include unique commits/local edits or retained design references;
+retire only work proved integrated or redundant. Next action is to run focused combined checks and complete independent review.
+
 <a id="l02-draft-lifetime-and-history-selection-fixes"></a>
 
 ## L02 merge and ticket closeout
