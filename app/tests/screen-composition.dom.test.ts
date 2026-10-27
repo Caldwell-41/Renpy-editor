@@ -22,8 +22,10 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
   let reply: { document: ScreenDocument; selectedId: string } | undefined;
   let historyReply: ScreenDocument | undefined;
   let inspectionGate: Promise<void> | undefined;
-  const workspace = new ScreensWorkspace({ resolution: { width: 1280, height: 720 }, current: () => true,
-    coordinate: task => task(), source: () => {}, preview: () => {}, saved: () => {},
+  let compositionGate: Promise<void> | undefined;
+  let current = true, saved = 0;
+  const workspace = new ScreensWorkspace({ resolution: { width: 1280, height: 720 }, current: () => current,
+    coordinate: task => task(), source: () => {}, preview: () => {}, saved: () => { saved++; },
     request: async <T>(operation: CoreOperation, payload?: Record<string, unknown>): Promise<T> => {
       calls.push({ operation, payload });
       if (operation === "source.list") return { files: [{ path: doc.path }] } as T;
@@ -36,6 +38,7 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
         geometry: doc.screens[0]!.nodes.map((node, index) => ({ start: node.span.start, x: 0, y: 0,
           width: index === 0 ? 1280 : 640, height: index === 0 ? 720 : 360 })) } as T;
       if (operation === "screens.compose" && reply) {
+        await compositionGate;
         if (payload?.expectedRevision !== doc.revision) throw new Error("Source conflict");
         doc = reply.document; return structuredClone(reply) as T;
       }
@@ -51,6 +54,8 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
   const text = () => { const input = [...document.querySelectorAll("textarea")].find(i => i.ariaLabel === "Text"); assert.ok(input); return input; };
   return { workspace, calls, click, row, edit, text, browser, original: structuredClone(doc), respond: (next: ScreenDocument, selectedId: string) => { reply = { document: next, selectedId }; },
     respondHistory: (next: ScreenDocument) => { historyReply = next; }, replaceDocument: (next: ScreenDocument) => { doc = next; },
+    setCurrent: (value: boolean) => { current = value; }, saved: () => saved,
+    holdComposition: () => { let release!: () => void; compositionGate = new Promise<void>(resolve => { release = resolve; }); return () => { compositionGate = undefined; release(); }; },
     holdInspection: () => { let release!: () => void; inspectionGate = new Promise<void>(resolve => { release = resolve; }); return () => { inspectionGate = undefined; release(); }; } };
 }
 
@@ -188,8 +193,54 @@ test("text drafts follow element identity across selection, Apply and Cancel", a
       { screenId: "screen-id", expectedRevision: "before", command: { type: "text", nodeId: "title-id", text: "New title" } });
     assert.equal(h.workspace.hasDraft(), true, "Applying one element keeps another element's draft");
     h.click("1  Choose"); h.edit("body-id"); assert.equal(h.text().value, "Unfinished directions");
-    h.click("Cancel changes"); assert.equal(h.text().value, "Directions");
+    const second = structuredClone(accepted); second.revision = "second"; second.screens[0]!.nodes[3]!.literal = "Unfinished directions";
+    h.respond(second, "body-id"); h.click("Apply changes"); await tick(); await tick();
+    assert.equal(h.calls.filter(c => c.operation === "screens.compose").at(-1)?.payload?.expectedRevision, "accepted",
+      "An unchanged neighboring literal can keep its draft on the accepted revision");
     assert.equal(h.workspace.hasDraft(), false);
+    h.text().value = "Cancelled directions"; h.text().dispatchEvent(new window.Event("input"));
+    h.click("Cancel changes"); assert.equal(h.text().value, "Unfinished directions");
+    assert.equal(h.workspace.hasDraft(), false);
+  } finally { h.workspace.dispose(); }
+});
+
+test("a pending Add blocks competing operations and a stale completion retains its draft without refreshing", async () => {
+  const h = interactiveFixture(undefined, true);
+  try {
+    await tick(); await tick(); h.row("box-id").click(); h.click("Add element");
+    const field = document.querySelector<HTMLTextAreaElement>(".screen-addition textarea"); assert.ok(field);
+    field.value = "Pending addition"; field.dispatchEvent(new window.Event("input"));
+    const accepted = structuredClone(h.original); accepted.revision = "accepted";
+    accepted.screens[0]!.nodes.splice(4, 0, { id: "added-id", kind: "text", literal: "Pending addition", parentStart: 30,
+      span: { start: 150, end: 180 }, properties: [], layout: {}, protected: [] });
+    h.respond(accepted, "added-id"); const release = h.holdComposition(); h.click("Add text");
+    h.click("Add text"); h.click("Undo"); h.click("Refresh Source");
+    assert.equal(h.calls.filter(c => c.operation === "screens.compose").length, 1);
+    assert.equal(h.calls.filter(c => c.operation === "source.list").length, 1);
+    assert.equal(h.calls.some(c => c.operation === "scene.apply"), false);
+    const card = document.querySelector(".screen-card")!.innerHTML;
+    h.setCurrent(false); release(); await tick(); await tick();
+    assert.equal(h.workspace.hasDraft(), true, "A completion for an inactive session must not clear its addition");
+    assert.equal(document.querySelector(".screen-card")!.innerHTML, card);
+    assert.equal(h.saved(), 0);
+    assert.equal(h.calls.some(c => c.operation === "screens.canvasRender" && c.payload?.expectedRevision === "accepted"), false);
+  } finally { h.workspace.dispose(); }
+});
+
+test("removing the only child settles the dialog before rendering the selected root", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick();
+    const before = structuredClone(h.original); before.screens[0]!.nodes = [before.screens[0]!.nodes[0]!, { ...before.screens[0]!.nodes[2]!, parentStart: 0 }];
+    h.replaceDocument(before); await h.workspace.load(); h.row("title-id").click(); h.click("Remove element");
+    const removed = structuredClone(before); removed.revision = "removed"; removed.screens[0]!.nodes.splice(1, 1);
+    h.respond(removed, "root-id"); h.click("Remove text"); await tick(); await tick();
+    assert.equal(document.querySelector<HTMLDialogElement>(".screen-removal-dialog")?.open, false);
+    assert.equal(h.row("root-id").ariaSelected, "true"); assert.equal(document.activeElement, h.row("root-id"));
+    assert.equal(h.row("root-id").disabled, false);
+    assert.equal(document.querySelector<HTMLElement>(".screen-removal-notice")?.hidden, false);
+    h.respondHistory(before); h.click("Undo removal"); await tick(); await tick();
+    assert.equal(h.row("title-id").ariaSelected, "true");
   } finally { h.workspace.dispose(); }
 });
 

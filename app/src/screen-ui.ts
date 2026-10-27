@@ -1,5 +1,5 @@
 import { icon } from "./icons.ts";
-import { ScreenComposer, screenNodeKey, type CompositionResult } from "./screen-composition.ts";
+import { ScreenComposer, screenNodeKey, type CompositionCommand } from "./screen-composition.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SourceInventory, SourceTarget } from "./source-ui.ts";
@@ -22,6 +22,11 @@ interface ScreenCatalog {
   projectRevision: string; sourceMapRevision: string; inventoryRevision: string; owned: OwnedScreen[];
 }
 interface Draft { document: ScreenDocument; screen: string; index: number; width: string; height: string; position?: { xalign: number; yalign: number } }
+interface CompositionResult { document: ScreenDocument; selectedId: string }
+type AcceptedEdit =
+  | { type: "geometry"; document: ScreenDocument; draft: Draft; key: string }
+  | { type: "composition"; result: CompositionResult; command: CompositionCommand; base: ScreenDocument; beforeId?: string | null }
+  | { type: "history"; direction: "undo" | "redo"; before?: ScreenDocument; selectedId?: string | null; sourceChanged: boolean };
 interface CanvasFrame {
   phase: "starting" | "ready" | "stale" | "unavailable";
   frameId?: string; revision?: string; image?: string; width?: number; height?: number;
@@ -197,7 +202,7 @@ export class ScreensWorkspace {
     if (this.busy || this.resize || this.move || this.composer.hasRemoval()) { this.note("Finish the current operation first. Input retained.", true); return; }
     return this.reload();
   }
-  private async reload(): Promise<void> {
+  private async reload(render = true): Promise<void> {
     this.composer.clearNotice();
     const sequence = ++this.loadSequence;
     try {
@@ -235,7 +240,8 @@ export class ScreensWorkspace {
       owned.forEach(s => { const option = el("option", "", `${s.name} · ${s.path}${s.resolved ? " · owned" : " · unresolved"}`); option.value = JSON.stringify(["owned", s.id]); this.selection.append(option); });
       documents.forEach(d => d.screens.forEach(s => { if (catalog.owned.some(o => o.path === d.path && o.name === s.name)) return; const option = el("option", "", `${s.name} · ${d.path}`); option.value = JSON.stringify([d.path, s.name]); this.selection.append(option); }));
       this.selection.value = this.owned ? JSON.stringify(["owned", this.owned.id]) : JSON.stringify([this.doc?.path, this.screen]);
-      this.render(); this.note(this.doc ? this.hasDraft() ? "Source refreshed. Unfinished drafts retain their original revision." : "Saved screen loaded. Unsupported regions remain in Source." : "No supported custom screens in game/ui. Create a blank screen from Choose.");
+      if (render) this.render();
+      this.note(this.doc ? this.hasDraft() ? "Source refreshed. Unfinished drafts retain their original revision." : "Saved screen loaded. Unsupported regions remain in Source." : "No supported custom screens in game/ui. Create a blank screen from Choose.");
       this.reportUnresolved();
     } catch (error) { if (this.current() && sequence === this.loadSequence) this.note(`${(error as Error).message} Input retained.`, true); }
   }
@@ -386,6 +392,65 @@ export class ScreensWorkspace {
     if (selection && control?.tagName === "TEXTAREA") (control as HTMLTextAreaElement).setSelectionRange(...selection);
     this.card.scrollTop = scroll;
   }
+  private refreshGeometryView(sourceChanged: boolean): void {
+    const resizeFocused = document.activeElement?.classList.contains("screen-resize");
+    this.focusResize = !!resizeFocused;
+    this.focusMove = !!document.activeElement?.matches(".screen-node,.screen-move");
+    if (sourceChanged && this.owned) this.refreshGeometryEditor();
+    this.updateSizeControls(); this.renderCanvas();
+    if (resizeFocused) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
+  }
+  private finishAcceptedEdit(edit: AcceptedEdit): void {
+    if (!this.current()) return;
+    if (edit.type === "history") {
+      const { direction, before, selectedId } = edit;
+      const entry = [...this.compositionHistory].reverse().find(item => item.path === before?.path && item.path === this.doc?.path
+        && (direction === "undo" ? item.after === before?.revision && item.before === this.doc?.revision : item.before === before?.revision && item.after === this.doc?.revision));
+      const preferred = entry?.removal ? direction === "undo" ? entry.beforeId : entry.afterId : selectedId;
+      const index = this.nodes().findIndex(n => screenNodeKey(n) === preferred);
+      if (index >= 0) this.selected = index;
+      else if (entry) { const fallback = direction === "undo" ? entry.beforeId : entry.afterId; this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === fallback)); }
+      this.rememberSelection();
+      if (edit.sourceChanged) this.saved(true);
+      this.busy = false; this.render(); this.composer.focusSelection();
+      return;
+    }
+
+    const document = edit.type === "geometry" ? edit.document : edit.result.document;
+    const base = edit.type === "geometry" ? edit.draft.document : edit.base;
+    const sourceChanged = document.revision !== base.revision;
+    this.documents = this.documents.map(d => d.path === document.path ? document : d);
+    if (this.doc?.path === document.path) this.doc = document;
+    if (this.owned?.path === document.path) this.owned.sourceRevision = document.revision;
+
+    // Settle accepted drafts before rebinding controls or asking the canvas to render.
+    if (edit.type === "geometry") this.drafts.delete(edit.key);
+    else {
+      this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === edit.result.selectedId));
+      this.composer.accept(edit.command, base, document);
+      if (sourceChanged) {
+        this.compositionHistory.push({ path: base.path, before: base.revision, after: document.revision, beforeId: edit.beforeId, afterId: edit.result.selectedId, removal: edit.command.type === "remove" });
+        if (this.compositionHistory.length > 128) this.compositionHistory.shift();
+      }
+      if (edit.command.type === "remove") this.step = "choose";
+    }
+    this.rememberSelection(); this.saved(sourceChanged); this.busy = false;
+
+    if (edit.type === "geometry") {
+      this.note(!sourceChanged ? "No change. No undo entry added." : edit.draft.position ? "Position saved. Undo reverses the move." : "Size saved. Undo reverses both dimensions together.");
+      this.refreshGeometryView(sourceChanged);
+    } else {
+      const command = edit.command;
+      if (command.type === "remove") {
+        const removed = base.screens.find(s => s.name === this.screen)?.nodes.find(n => n.id === command.nodeId);
+        if (removed) this.composer.showRemovalNotice(removed);
+        this.note("Element removed. Undo restores its exact source and identity.");
+      } else if (command.type === "add") this.note("Element added. Undo removes this addition.");
+      else if (command.type === "text") this.note(!sourceChanged ? "Text unchanged. No history entry added." : "Text applied. Undo restores the previous text.");
+      else this.note(!sourceChanged ? "Order unchanged. No history entry added." : "Order changed. Groups keep their children; Undo restores the order.");
+      this.render(); this.composer.focusEditor(command);
+    }
+  }
   private ensureDraft(): Draft {
     let draft = this.draft();
     if (!draft) { const node = this.nodes()[this.selected]!; draft = { document: this.doc!, screen: this.screen, index: this.selected, width: String(size(node, "xsize")), height: String(size(node, "ysize")) }; this.drafts.set(this.key(), draft); }
@@ -407,7 +472,7 @@ export class ScreensWorkspace {
       if(handle.hasPointerCapture(pointer))handle.releasePointerCapture(pointer);
     }
     if (![draft.width, draft.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384)) { this.note("Enter whole numbers from 1 to 16384. Input retained.", true); return; }
-    const key = this.key(); let sourceChanged = false;
+    const key = this.key(); let accepted = false;
     this.busy = true; this.loadSequence++; this.updateSizeControls();
     try {
       const document = await this.actions.coordinate(() => this.actions.request<ScreenDocument>(draft.position ? "screens.setPosition" : "screens.setSize", {
@@ -416,24 +481,14 @@ export class ScreensWorkspace {
         ...(draft.position ?? {width: Number(draft.width), height: Number(draft.height)}),
       }));
       if (!this.current()) return;
-      this.drafts.delete(key); this.documents = this.documents.map(d => d.path === document.path ? document : d);
-      if (this.doc?.path === document.path) this.doc = document;
-      sourceChanged = document.revision !== draft.document.revision;
-      this.note(!sourceChanged ? "No change. No undo entry added." : draft.position ? "Position saved. Undo reverses the move." : "Size saved. Undo reverses both dimensions together."); this.saved(sourceChanged);
+      this.finishAcceptedEdit({ type: "geometry", document, draft, key }); accepted = true;
     } catch (error) { if (this.current()) this.note(`${(error as Error).message} Input retained. Review Source, or cancel this draft and refresh.`, true); }
     finally {
       this.busy = false;
-      if (this.current()) {
-        const resizeFocused = document.activeElement?.classList.contains("screen-resize");
-        this.focusResize = !!resizeFocused;
-        this.focusMove = !!document.activeElement?.matches(".screen-node,.screen-move");
-        if (sourceChanged && this.owned) this.refreshGeometryEditor();
-        this.updateSizeControls(); this.renderCanvas();
-        if (resizeFocused) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
-      }
+      if (this.current() && !accepted) this.refreshGeometryView(false);
     }
   }
-  private async compose(command: Record<string, unknown>, base: ScreenDocument): Promise<CompositionResult> {
+  private async compose(command: CompositionCommand, base: ScreenDocument): Promise<void> {
     if (this.busy || this.resize || this.move || this.creation || this.drafts.size || !this.owned?.resolved) throw new Error("Finish the current edit first");
     if (base.path !== this.owned.path) throw new Error("This draft belongs to another screen");
     this.busy = true; this.loadSequence++;
@@ -443,42 +498,26 @@ export class ScreensWorkspace {
       const result = await this.actions.coordinate(() => this.actions.request<CompositionResult>("screens.compose", {
         screenId: owner.id, expectedRevision: base.revision, command,
       }));
-      if (!this.current()) return result;
-      if (result.document.revision !== base.revision) {
-        this.compositionHistory.push({ path: base.path, before: base.revision, after: result.document.revision, beforeId, afterId: result.selectedId, removal: command.type === "remove" });
-        if (this.compositionHistory.length > 128) this.compositionHistory.shift();
-      }
-      this.documents = this.documents.map(d => d.path === result.document.path ? result.document : d);
-      this.doc = result.document; owner.sourceRevision = result.document.revision;
-      this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === result.selectedId));
-      this.rememberSelection();
-      this.renderCanvas(); this.saved(result.document.revision !== base.revision); return result;
+      this.finishAcceptedEdit({ type: "composition", command, base, result, beforeId });
     } finally { this.busy = false; }
   }
   private async history(type: "undo" | "redo"): Promise<void> {
     if (this.busy || this.hasDraft() || this.composer.hasRemoval()) { this.note("Apply or cancel unfinished changes before Undo or Redo. Input retained.", true); return; }
     const before = this.doc, selectedId = this.nodes()[this.selected]?.id;
-    this.busy = true;
+    this.busy = true; let accepted = false;
     try {
       await this.actions.coordinate(async () => {
         const model = await this.actions.request<{ projectRevision: string; sourceMapRevision: string }>("scene.list");
         await this.actions.request("scene.apply", { expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: { type } });
       });
-      if (this.current()) this.saved(true);
+      accepted = true;
     } catch (error) { if (this.current()) this.note((error as Error).message, true); }
     finally {
       if (this.current()) {
-        await this.reload();
-        const entry = [...this.compositionHistory].reverse().find(item => item.path === before?.path && item.path === this.doc?.path
-          && (type === "undo" ? item.after === before?.revision && item.before === this.doc?.revision : item.before === before?.revision && item.after === this.doc?.revision));
-        const preferred = entry?.removal ? type === "undo" ? entry.beforeId : entry.afterId : selectedId;
-        const index = this.nodes().findIndex(n => screenNodeKey(n) === preferred);
-        if (index >= 0) this.selected = index;
-        else if (entry) { const fallback = type === "undo" ? entry.beforeId : entry.afterId; this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === fallback)); }
-        this.rememberSelection();
+        await this.reload(false);
+        this.finishAcceptedEdit({ type: "history", direction: type, before, selectedId, sourceChanged: accepted });
       }
       this.busy = false;
-      if (this.current()) { this.render(); this.composer.focusSelection(); }
     }
   }
   private openSource(): void {

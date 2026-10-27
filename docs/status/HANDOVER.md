@@ -1,28 +1,33 @@
 # Current outcome handover
 
-## L02 owned document construction and CI audit
+## L02 accepted edit completion and CI audit
 
-Kris selected architecture report candidate 1 for PR #62, with implementation,
-focused testing, publication and CI. This worker is the sole writer on
-`codex/37-compose-help-layout`, entered at `5f23ec4`; the coordinator is read-only.
-The ownership module now constructs complete documents for inspection, geometry
-and composition. Raw parsing remains available internally; patch policy and shared
-transaction/history owners are unchanged.
+Kris selected architecture report candidate 2 after the coordinator independently
+confirmed candidate 1 at `ef07e60` and passing automatic run 40486719508 attempt 1.
+This worker entered that head as sole writer on `codex/37-compose-help-layout`;
+the coordinator remains read-only until the completed report returns ownership.
+`ScreensWorkspace.finishAcceptedEdit` owns accepted documents, draft settlement,
+selection/history, removal notices, control rebinding and canvas refresh. Composer
+handlers submit edits and retain input on failure; they no longer finish accepted
+results or schedule a second refresh. Candidate 1's core constructor/tests remain intact.
 
-All 26 ordinary Screens core cases pass with one intentional SDK ignore.
-Typechecking and all 255 frontend tests pass. The extended geometry dispatch case
-checks changed and unchanged size, pixel-property and position responses, exact
-source, history and reopen. [The construction record](../tasks/evidence/simple-help-layout.md#owned-screen-document-construction-2026-10-27)
-owns focused verification and reuse limits.
+Typechecking, all 257 frontend cases, the production build, 13 link cases and repository
+validation pass. Existing focused Chrome checks pass with current revision bindings,
+preserved focus and zero page errors. The compiled controller/unchanged core fixture
+driver passes geometry, Add, retained text drafts, reorder, confirmed removal, exact
+history and reopen. A temporary check's stale Recent Projects token was corrected
+in the check after diagnosis; no product correction was needed.
+[The completion record](../tasks/evidence/simple-help-layout.md#accepted-edit-completion-2026-10-27)
+owns verification, raw-result location and reuse limits.
 
-Publish the refactor and records together to [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62).
+The refactor and records publish together to [PR #62](https://github.com/Caldwell-41/Renpy-editor/pull/62).
 Its description owns the exact final head, automatic run and terminal audit, without
-another receipt-only commit. Worker chat `01a17cd4-16cb-7530-a66d-2abdc66bad5f`
-retains the audit through ci-watch continuation. On resume, read that PR receipt,
-reconcile the recorded run/head with the current branch and finish any pending audit.
-Then report the result to coordinator chat `01a17ca7-17d3-7170-9eca-6bedf6289383`.
-The coordinator confirms candidate 1 before starting candidate 2 in a separate chat.
-Candidate 2's frontend completion work remains untouched here.
+another receipt-only commit. Worker chat `01a17cde-9bf5-7162-90a9-371641537526`
+retains the terminal audit through ci-watch continuation. On resume, read that PR
+receipt, reconcile the recorded run/head with this checkout and finish any pending
+audit. Then report the exact commit, tests and required-job/step audit to coordinator
+chat `01a17ca7-17d3-7170-9eca-6bedf6289383`, returning checkout ownership for its
+independent confirmation. Awaiting CI is a checkpoint, not completion.
 
 No extra issue comment, package, native session, SDK process, manual CI dispatch,
 merge or release is selected. Earlier native/SDK receipts and cumulative limits

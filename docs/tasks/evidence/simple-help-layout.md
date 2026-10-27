@@ -3,6 +3,78 @@
 [#37](https://github.com/Caldwell-41/Renpy-editor/issues/37) owns scope, execution
 state and acceptance. This file retains its design and verification evidence.
 
+## Accepted edit completion, 2026-10-27
+
+Kris selected architecture report candidate 2 after the coordinator independently
+confirmed candidate 1 at `ef07e60` and automatic run 40486719508 attempt 1.
+This worker entered that unchanged head as sole writer on
+`codex/37-compose-help-layout`, with implementation, focused tests, publication,
+PR maintenance and terminal CI audit authorized. The coordinator remains read-only
+until this worker returns the completed result.
+
+`ScreensWorkspace.finishAcceptedEdit` now owns accepted-document installation,
+saved-draft settlement, composition history and selection, removal-notice lifetime,
+control rebinding, focus and the final screen-canvas refresh. Geometry, composition
+and shared-history completion use this owner. History reload defers rendering until
+selection reconciliation. The composer still implements its draft rules and controls,
+but its commit interface returns no result for callers to finish. Add, text, reorder
+and removal handlers no longer clear accepted drafts, interpret accepted documents,
+or schedule successful refreshes after the workspace returns. The workspace settles
+the composer before rendering, including clearing Add and closing removal confirmation.
+This removes the old refresh-before-cleanup sequence and the second Add refresh.
+
+Applying one text draft preserves other drafts. Only same-revision drafts whose
+target kind and literal are unchanged in the before/after documents rebase onto
+the accepted revision. Stale and missing targets remain retained. Geometry still
+preserves focus, textarea selection, expanded details and scroll. No-op saves retain
+the removal-specific Undo action; source-changing saves and reload expire it.
+Stale-session completions retain drafts without installing documents, notifying
+Saved, moving focus or refreshing controls/canvas. Source transactions, core revision
+checks, shell Save, C5 visuals/copy/CSS and the inert helper are unchanged.
+
+Verification on Mac ARM64 uses Node 24.19.0, npm 11.9.0 and Python 3.12.14:
+
+- `npm run check` passes typechecking and all 257 frontend cases, with zero failures,
+  skips or cancellations. The focused Screens scope passes all 41 cases.
+- Existing Add/canvas, geometry-then-text/reorder, refusal, draft recovery,
+  removal/Cancel focus, history and notice-expiry cases remain. Two added interactions
+  cover held-operation exclusion with stale Add completion, and removal of the only
+  child followed by root focus and Undo. The retained-neighbor case now applies
+  its second draft against the accepted revision, then verifies Cancel separately.
+- The compiled production controller and unchanged real core fixture driver pass
+  no-op geometry/root Add, changed geometry then text, two retained text drafts,
+  sibling reorder, confirmed removal, exact-source Undo/Redo, reopen identities,
+  protected Source and clean driver shutdown/removal. The driver was built for
+  candidate 1; its source and all core production code are unchanged here.
+- The existing focused Chrome 156.0.8078.48 fixture passes text after size, canvas
+  resize then keyboard reorder, and drag reorder. Every composition request uses
+  the current accepted revision; numeric/canvas focus remains and page errors are zero.
+- The production build, repository validation and all 13 section-link tests pass.
+  The build retains its existing chunk-size warning. Automatic CI supplies the
+  unchanged Rust-format and repository harness gates on the published candidate.
+
+The temporary controller/core check initially reused a Recent Projects token captured
+before the first open. `update_recent` creates a new token at each open, so reopening
+with that stale token correctly refused `INVALID_LOOMLIGHT_PROJECT`. Reading the
+current list before reopen fixes this harness assumption; no product correction was
+needed. Both logs, the corrected script and other raw results remain ignored under
+`.toolchains/screen-composition/edit-completion-20261027/`.
+
+Final local source/diff review found no actionable in-scope issue. The coordinator's
+independent review remains separate. Candidate 1's constructor and core tests are
+intact. Earlier native/SDK receipts retain their original candidates and scope;
+these portable completion checks supply no new native, SDK or full-canvas qualification.
+Existing costly-operation counts are unchanged. No package, native session, SDK
+start or manual qualification dispatch was needed.
+
+This refactor, tests and status/evidence records publish together. PR #62's description
+owns the exact final commit, automatic run/attempt and terminal job/step audit without
+a receipt-only successor commit. Worker chat `01a17cde-9bf5-7162-90a9-371641537526`
+retains that audit through ci-watch and reports the result to the coordinator before
+returning checkout ownership. Formal acceptance, merge and release remain unselected.
+CURRENT/HANDOVER exceed their reference word targets because they preserve earlier
+acceptance and protected recovery records; only the live continuation is replaced.
+
 ## Owned screen document construction, 2026-10-27
 
 Kris selected architecture report candidate 1 for PR #62, including focused tests,

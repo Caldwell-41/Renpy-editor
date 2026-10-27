@@ -6,11 +6,15 @@ export interface CompositionView {
   document: ScreenDocument; screenId: string; screenName: string; nodes: ScreenNode[];
   selected: ScreenNode; step: string; busy: boolean;
 }
-export interface CompositionResult { document: ScreenDocument; selectedId: string }
+export type CompositionCommand =
+  | { type: "add"; parentId: string; kind: string; text: string }
+  | { type: "text"; nodeId: string; text: string }
+  | { type: "reorder"; nodeId: string; targetId: string; after: boolean }
+  | { type: "remove"; nodeId: string };
 interface Host {
   view: () => CompositionView | undefined;
   select: (id: string, design?: boolean) => void;
-  commit: (command: Record<string, unknown>, base: ScreenDocument) => Promise<CompositionResult>;
+  commit: (command: CompositionCommand, base: ScreenDocument) => Promise<void>;
   source: (node: ScreenNode) => void;
   note: (message: string, error?: boolean) => void;
   preview: () => void;
@@ -52,7 +56,7 @@ function elementIcon(kind: string) {
   return result;
 }
 
-/** Source and shared history stay with the workspace. This controller owns composition drafts. */
+/** Owns composition drafts and controls. The workspace completes accepted edits before rendering. */
 export class ScreenComposer {
   private card?: HTMLElement;
   private addition?: Addition;
@@ -97,6 +101,30 @@ export class ScreenComposer {
   hasRemoval(): boolean { return !!this.removal; }
   clearNotice(): void { this.notice.hidden = true; }
   focusSelection(): void { this.focusRow(); }
+  accept(command: CompositionCommand, base: ScreenDocument, accepted: ScreenDocument): void {
+    const view = this.host.view(); if (!view) return;
+    if (command.type === "add") this.addition = undefined;
+    if (command.type === "text") {
+      const key = `${view.screenId}:${command.nodeId}`, draft = this.texts.get(key);
+      for (const other of this.texts.values()) {
+        if (other === draft || other.screenId !== view.screenId || other.document.revision !== base.revision) continue;
+        const before = other.document.screens.find(s => s.name === view.screenName)?.nodes.find(n => n.id === other.nodeId);
+        const after = accepted.screens.find(s => s.name === view.screenName)?.nodes.find(n => n.id === other.nodeId);
+        if (before && after && before.kind === after.kind && before.literal === after.literal) other.document = accepted;
+      }
+      this.texts.delete(key);
+    }
+    if (command.type === "remove") this.closeRemoval();
+    this.saving = false; this.error = "";
+  }
+  showRemovalNotice(node: ScreenNode): void {
+    this.notice.replaceChildren(el("span", "", `Removed ${node.literal ?? names[node.kind] ?? node.kind}.`), action("Undo removal", this.host.undo), action("Dismiss", () => { this.clearNotice(); this.focusRow(); }));
+    this.notice.hidden = false;
+  }
+  focusEditor(command: CompositionCommand): void {
+    if (command.type === "text") this.card?.querySelector("textarea")?.focus({ preventScroll: true });
+    else this.focusRow();
+  }
   selectionLabel(node: ScreenNode): string { const view = this.host.view(); return view ? this.name(view, node) : node.literal ?? names[node.kind] ?? node.kind; }
   canKeepTree(): boolean { return !this.addition && !!this.card?.querySelector(".screen-tree"); }
   private parent(view: CompositionView, node: ScreenNode) { return view.nodes.find(n => n.span.start === node.parentStart); }
@@ -320,9 +348,11 @@ export class ScreenComposer {
     this.saving = true; this.render();
     try {
       await this.host.commit({ type: "add", parentId: draft.parentId, kind: draft.kind, text: draft.text }, draft.document);
-      this.addition = undefined; this.error = ""; this.host.note("Element added. Undo removes this addition.");
-    } catch (error) { this.error = `${(error as Error).message}. Input retained.`; this.host.note(this.error, true); }
-    finally { this.saving = false; this.render(); if (this.addition) this.card?.querySelector<HTMLElement>("textarea")?.focus(); else this.focusRow(); this.host.preview(); }
+    } catch (error) {
+      if (!this.host.view()) return;
+      this.error = `${(error as Error).message}. Input retained.`; this.host.note(this.error, true);
+      this.saving = false; this.render(); this.card?.querySelector<HTMLElement>("textarea")?.focus(); this.host.preview();
+    } finally { this.saving = false; }
   }
   private renderText(view: CompositionView, card: HTMLElement): void {
     const key = this.textKey(view), draft = this.texts.get(key);
@@ -355,17 +385,12 @@ export class ScreenComposer {
     if (!this.validateTextInput()) return;
     this.saving = true; this.render();
     try {
-      const result = await this.host.commit({ type: "text", nodeId: draft.nodeId, text: draft.value }, draft.document);
-      for (const other of this.texts.values()) {
-        if (other === draft || other.screenId !== view.screenId || other.document.revision !== draft.document.revision) continue;
-        const before = other.document.screens.find(s => s.name === view.screenName)?.nodes.find(n => n.id === other.nodeId);
-        const after = result.document.screens.find(s => s.name === view.screenName)?.nodes.find(n => n.id === other.nodeId);
-        if (before && after && before.kind === after.kind && before.literal === after.literal) other.document = result.document;
-      }
-      this.texts.delete(key); this.error = "";
-      this.host.note(result.document.revision === draft.document.revision ? "Text unchanged. No history entry added." : "Text applied. Undo restores the previous text.");
-    } catch (error) { this.error = `${(error as Error).message}. Input retained.`; this.host.note(this.error, true); }
-    finally { this.saving = false; this.render(); this.card?.querySelector("textarea")?.focus({ preventScroll: true }); this.host.preview(); }
+      await this.host.commit({ type: "text", nodeId: draft.nodeId, text: draft.value }, draft.document);
+    } catch (error) {
+      if (!this.host.view()) return;
+      this.error = `${(error as Error).message}. Input retained.`; this.host.note(this.error, true);
+      this.saving = false; this.render(); this.card?.querySelector("textarea")?.focus({ preventScroll: true }); this.host.preview();
+    } finally { this.saving = false; }
   }
   private async reorder(node: ScreenNode, target: ScreenNode, after: boolean, base?: ScreenDocument): Promise<void> {
     const view = this.host.view(); if (!view || this.saving || view.busy) return;
@@ -374,10 +399,12 @@ export class ScreenComposer {
     if (node === target) return;
     this.saving = true; this.render();
     try {
-      const result = await this.host.commit({ type: "reorder", nodeId: node.id!, targetId: target.id!, after }, base ?? view.document);
-      this.error = ""; this.host.note(result.document.revision === (base ?? view.document).revision ? "Order unchanged. No history entry added." : "Order changed. Groups keep their children; Undo restores the order.");
-    } catch (error) { this.showError(`${(error as Error).message}. Order and input retained.`); }
-    finally { this.saving = false; this.render(); this.focusRow(); }
+      await this.host.commit({ type: "reorder", nodeId: node.id!, targetId: target.id!, after }, base ?? view.document);
+    } catch (error) {
+      if (!this.host.view()) return;
+      this.showError(`${(error as Error).message}. Order and input retained.`);
+      this.saving = false; this.render(); this.focusRow();
+    } finally { this.saving = false; }
   }
   private requestRemoval(): void {
     const view = this.host.view(); if (!view || this.saving || view.busy || this.removal) return;
@@ -424,15 +451,11 @@ export class ScreenComposer {
     const pending = this.removal; if (!pending || this.saving) return;
     this.saving = true; this.dialog.querySelectorAll("button").forEach(b => b.disabled = true);
     try {
-      const result = await this.host.commit({ type: "remove", nodeId: pending.node.id! }, pending.document);
-      if (!this.host.view()) return;
-      this.closeRemoval(); this.error = ""; this.saving = false;
-      this.host.select(result.selectedId, false); this.render(); this.focusRow();
-      this.notice.replaceChildren(el("span", "", `Removed ${pending.node.literal ?? names[pending.node.kind] ?? pending.node.kind}.`), action("Undo removal", this.host.undo), action("Dismiss", () => { this.clearNotice(); this.focusRow(); }));
-      this.notice.hidden = false; this.host.note("Element removed. Undo restores its exact source and identity.");
+      await this.host.commit({ type: "remove", nodeId: pending.node.id! }, pending.document);
     } catch (error) {
+      if (!this.host.view()) return;
       const feedback = this.dialog.querySelector<HTMLElement>(".screen-removal-error");
       if (feedback) { feedback.textContent = `${(error as Error).message}. Nothing removed. Cancel and review Source; input is retained.`; feedback.hidden = false; }
-    } finally { this.saving = false; this.dialog.querySelectorAll("button").forEach(b => b.disabled = false); }
+    } finally { this.saving = false; if (this.host.view()) this.dialog.querySelectorAll("button").forEach(b => b.disabled = false); }
   }
 }

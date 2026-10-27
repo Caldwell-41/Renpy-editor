@@ -2,16 +2,21 @@
 
 ## L02 Help composition PR open
 
-2026-10-27 follow-up: Kris selected architecture report candidate 1 for PR #62.
-The ownership module now constructs complete editor documents for inspection,
-geometry and composition, including root/element IDs and protected hierarchy rows.
-The separate parse/annotate obligation is removed. All 26 ordinary Screens core
-cases and 255 frontend tests pass; the intentional SDK case remains ignored.
-The geometry dispatch case also verifies changed responses, minimal source edits,
-history and reopen. PR #62's description owns the exact publication/automatic CI
-receipt; this worker retains the audit through ci-watch before reporting to the
-coordinator. Candidate 2 awaits the coordinator's independent confirmation and a
-separate chat. Prior native/SDK candidates retain their qualification scope.
+2026-10-27 follow-up: architecture report candidate 2 is implemented and locally
+verified. `ScreensWorkspace` owns accepted-edit completion across geometry,
+composition and shared history, including draft settlement before controls and
+canvas refresh. Composer handlers no longer finish successful edits after commit
+returns. Typechecking, all 257 frontend cases, the production build, focused Chrome
+and real controller/core source/history/reopen checks pass. PR #62's description
+owns exact publication and automatic CI state; worker chat
+`01a17cde-9bf5-7162-90a9-371641537526` retains the terminal audit through ci-watch,
+then returns the result and checkout ownership to the coordinator for independent
+review. [Completion evidence](../tasks/evidence/simple-help-layout.md#accepted-edit-completion-2026-10-27).
+
+Candidate 1 remains intact at `ef07e60`. The coordinator independently confirmed
+its complete owned-document construction and passing required CI in run
+40486719508 attempt 1. Its 26 ordinary Screens core passes and prior native/SDK
+receipts retain their tested scopes.
 [Construction evidence](../tasks/evidence/simple-help-layout.md#owned-screen-document-construction-2026-10-27).
 
 The preceding no-op geometry correction is published at `5f23ec4`; automatic
