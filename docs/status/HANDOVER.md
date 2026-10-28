@@ -1,12 +1,60 @@
 # Current outcome handover
 
-## L03 merged and closed
+## L04 implementation preparation and prototype handoff
+
+Kris selected [#42, Author nested and clipped layouts](https://github.com/Caldwell-41/Renpy-editor/issues/42)
+using the implement skill, assigned delivery ownership to this chat, and requested
+a new branch. This checkout is on `codex/phase3b-l04-nested-layout`, based on
+`eb83d3b1bfe8fd3f62f13b301300a47b61e96dd6`. Its integration destination is
+`codex/phase3b-screen-designer`. Work is local; no push, merge or release has occurred.
+
+The separate `L04 nested layout prototypes` chat
+(`01a1818a-2b56-7230-99bb-ba202fd62b1d`) owns prototype iteration with Kris on
+`codex/phase3b-l04-prototypes` in its managed worktree. It owns only the new
+`app/design-lab/screens/nested-layout/`, its registry entry and
+`docs/design/design-lab-nested-layout/`. This implementation chat
+(`01a18188-aeaf-7300-834d-ae88d31acb85`) owns production, tests, contracts, status
+and ticket state. The prototype owner is authorized to send questions and the
+final approved design back here. Reviewed source must be committed and pinned
+under Design Lab INTEGRATION. No production UI changes precede final approval.
+
+The initial proposal uses the existing transactional composition/numeric layout
+owners. It adds window/hbox/grid/viewport, literal grid dimensions and row-major
+order, window padding, hbox/grid spacing and stationary top-left viewport clipping.
+Windows/viewports accept one explicit child. Scrolling controls, adjustment bindings,
+initial offsets and child-size expressions remain Source-only. These are proposals
+pending design approval and pinned 8.5.3 SDK qualification. Source reads establish
+no rendering proof. A TDD seam-confirmation question is pending for public core
+requests, the real UI-to-core path and pinned-SDK rendering. No new tests or
+production edits have been made.
+
+Automatic approval review rejected the proposed full GitHub issue-body update for
+missing explicit authorization and possible intervening-edit loss. The issue is
+unchanged. The complete proposed body is retained locally in ignored
+`.toolchains/l04-preparation/issue42-proposed.md`. Obtain approval for this tracker
+update and reconcile fresh issue text before any publication. This is a pending
+tracker synchronization, not an offline replacement for GitHub task ownership.
+
+Development remains on Mac ARM64; affected Windows/macOS proof follows host routing.
+No costly operation has started for L04. Set operation limits in #42 before package,
+native, SDK or costly CI operations. Historical allowances remain closed. No CI
+watch, editor session or SDK process is pending for this selection. All four leaf
+criteria, full editor/canvas acceptance and existing human/native limits remain
+pending. Resume here after the approved prototype handoff, reconcile its pinned
+source/approval record, then implement and qualify through the existing owners.
+Preserve the unrelated untracked Phase 1 audit and protected recovery below.
+
+Preparation documentation passes the repository validator (1,022 files) and
+`git diff --check`. CURRENT and HANDOVER remain above their soft length targets
+because they retain earlier candidate-bound evidence and protected recovery.
+
+## Retained L03 closeout
 
 Kris authorized merging PR #66 into its parent, updating the PR and relevant
 issues, and retiring the feature branch after confirmation. The merge is
 `a3035e8b62f8a5211c87e7957bbeba596bd073c3` on
 `codex/phase3b-screen-designer`; its tree exactly matches reviewed head
-`d52753ef6641dea7b0214959fb0b4590d8e4b920`. This checkout follows the parent.
+`d52753ef6641dea7b0214959fb0b4590d8e4b920`.
 The integrated feature branch has been retired locally and remotely.
 
 L03 #38 is accepted and closed for its four bounded criteria. P3B #22, B02 #24,

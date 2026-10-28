@@ -1,6 +1,22 @@
 # Current status
 
-## L03 numeric layout merged and branch retired
+## L04 nested and clipped layouts selected
+
+Kris selected [L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42)
+for implementation on a new branch, `codex/phase3b-l04-nested-layout`, based on
+Screens parent `eb83d3b`. The implementation chat owns delivery. A separate chat,
+`L04 nested layout prototypes`, owns Design Lab alternatives in an isolated
+worktree and branch. Production UI changes wait for Kris's final prototype approval
+and handoff. Source/SDK inspection and implementation preparation are underway;
+no production code, new tests or runtime qualification has started.
+
+The tracker update is prepared locally but remains unpublished after automatic
+approval review rejected the full issue-body update. Its draft and recovery state
+are in [HANDOVER](HANDOVER.md#l04-implementation-preparation-and-prototype-handoff).
+The L03 prerequisite is satisfied. Acceptance remains pending; no merge or release
+is selected. Preserve the unrelated untracked audit and protected recovery.
+
+## Accepted L03 baseline
 
 [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) merged into
 `codex/phase3b-screen-designer` at `a3035e8b62f8a5211c87e7957bbeba596bd073c3`.
@@ -11,11 +27,11 @@ bounded numeric-layout scope; its prerequisite for #42 and #46 is satisfied.
 
 [Merge closeout](../tasks/evidence/numeric-layout.md#merge-and-ticket-closeout-2026-10-28)
 links the scoped source/history, both-target SDK geometry and signed/package proof.
-The feature branch is retired after integration verification. This checkout is on
-the Screens parent. Related tickets retain broader acceptance and unselected work;
+The feature branch is retired after integration verification. Related tickets
+retain broader acceptance and unselected work;
 pointer/full-canvas, OS-native IME and human proof are outside this acceptance.
-No successor or release is selected. Historical limits, protected recovery and the
-unrelated audit remain intact.
+L04 is now selected above. Historical limits, protected recovery and the unrelated
+audit remain intact.
 
 ## Phase 3B architecture refactors merged
 
