@@ -78,3 +78,38 @@ syntax preflight and was corrected before any further SDK launch.
 The next run may reuse only the two successful compile/lint commands for the exact
 same accepted source and asset manifest. It must freshly render both aspects with
 the corrected oracle. The failed first run remains charged and retained.
+
+## Mac normal-entry SDK qualification
+
+Candidate `c26eeab6ca38d50312585b991a48a0aaf61ea73f` passes both 1280x720 and
+1024x768 normal-entry cases in official Ren'Py `8.5.3.26051504`. Its product Rust,
+renderer and desktop files are identical to `a140614`; only the test checker and
+evidence changed. The accepted source SHA-256 is
+`5e1efbb083c9ea966d18447980442f7c69f312b6d1218ef17cd669c7e02a4941`.
+[SDK2 receipt](ui-image-mac-sdk-02.json) records both exact source/reference image
+hashes, all six rectangles and zero differing RGBA pixels. Fresh hashes of all
+four PNGs match the receipt. Visual inspection confirms the distinct quadrant
+arrangements and stretched PNG. No tolerance or product rendering change is used.
+
+The checker reuses only SDK1's successful compile/lint for byte-identical accepted
+source and asset-manifest bytes, bound by its receipt and input SHA-256. It starts
+two fresh normal-entry SDK processes; both exit 0 without timeout or truncated
+output, preserve the accepted source and complete scratch cleanup. Original SDK1
+failure remains failed and charged. Both attempts' captures, logs and exact
+accepted inputs remain in ignored `.toolchains/ui-image/` in the implementation
+worktree. #40 owns cumulative operation use; no operation remains running.
+
+This proves the generated source's image selection and dimensions in Mac normal
+Ren'Py entry. It does not establish GPU canvas fidelity, Windows SDK behavior,
+packaged UI behavior, physical input, mock approval or ticket acceptance.
+
+| Ticket criterion | Current evidence | Remaining proof |
+| --- | --- | --- |
+| Typed role/picker and missing/replaced/invalid handling | Role, formats and specific reference errors pass through public services. | Actual picker, draft retention and desktop paths. |
+| Owned image, size/aspect and shared source transactions | Owned identity, exact minimal source, atomic asset/size edit, no-op and shared history pass. Normal SDK verifies proportional and stretched output. | User-approved aspect controls and actual controller path. |
+| Actual asset at accepted size; inert picker | Mac normal entry has exact rectangles and zero-difference independent references. Passive service inspection executes no project code. | Actual picker/controller; Windows normal SDK and changed helper behavior. |
+| Cancel, conflict, history, Source and reopen with containment | Conflict, typed-handle/raw-path refusal, source/history/reopen service cases pass. | Import cancellation and Source navigation through actual UI; remaining native evidence. |
+
+Production UI implementation waits for the approved mock from the design chat.
+Full-suite verification and both independent review axes remain for the completed
+implementation. These local commits have not been pushed.

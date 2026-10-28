@@ -14,7 +14,9 @@ Core import, owned placement and atomic asset/size editing are implemented and
 have focused service proof. The changed screen slice passes 49 ordinary tests,
 and three passive-media tests pass. The full ticket remains in progress.
 Kris confirmed the service/controller/SDK test boundaries; mock approval and
-production UI work remain pending. No costly operation has started.
+production UI work remain pending. Mac normal-entry SDK proof passes at both
+aspects with exact dimensions and zero differing pixels against an independent
+Ren'Py reference. Its original failed pixel oracle remains recorded.
 [Evidence](../tasks/evidence/ui-image.md) retains results and preparation failures;
 [HANDOVER](HANDOVER.md#l06-preparation-and-design-handoff) owns continuation.
 Earlier closed allowances and protected recovery remain intact.

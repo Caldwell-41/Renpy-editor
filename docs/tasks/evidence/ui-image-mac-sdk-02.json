@@ -1,0 +1,142 @@
+{
+  "passed": true,
+  "sdkProcesses": 2,
+  "os": "Darwin",
+  "architecture": "arm64",
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "rectangles": {
+        "png": [
+          20,
+          20,
+          120.0,
+          60.0
+        ],
+        "jpeg": [
+          180,
+          20,
+          96.0,
+          48.0
+        ],
+        "lossless": [
+          340,
+          20,
+          160.0,
+          80.0
+        ],
+        "lossy": [
+          540,
+          20,
+          128.0,
+          64.0
+        ],
+        "alpha": [
+          720,
+          20,
+          80.0,
+          40.0
+        ],
+        "stretch": [
+          20,
+          160,
+          120.0,
+          90.0
+        ]
+      },
+      "sourceSHA256": "5e1efbb083c9ea966d18447980442f7c69f312b6d1218ef17cd669c7e02a4941",
+      "imageSHA256": "4c059abe9443536e7e858a0695108321a9b4f7bdf8bbb9cd06d014890e70de93",
+      "referenceSHA256": "4c059abe9443536e7e858a0695108321a9b4f7bdf8bbb9cd06d014890e70de93",
+      "differingPixels": 0
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "rectangles": {
+        "png": [
+          20,
+          20,
+          120.0,
+          60.0
+        ],
+        "jpeg": [
+          180,
+          20,
+          96.0,
+          48.0
+        ],
+        "lossless": [
+          340,
+          20,
+          160.0,
+          80.0
+        ],
+        "lossy": [
+          540,
+          20,
+          128.0,
+          64.0
+        ],
+        "alpha": [
+          720,
+          20,
+          80.0,
+          40.0
+        ],
+        "stretch": [
+          20,
+          160,
+          120.0,
+          90.0
+        ]
+      },
+      "sourceSHA256": "5e1efbb083c9ea966d18447980442f7c69f312b6d1218ef17cd669c7e02a4941",
+      "imageSHA256": "ee6227a860b2c7120f48b38bae7f228f3b18dfa469f1a7862af4c3a2c11eca34",
+      "referenceSHA256": "ee6227a860b2c7120f48b38bae7f228f3b18dfa469f1a7862af4c3a2c11eca34",
+      "differingPixels": 0
+    }
+  ],
+  "commands": [
+    {
+      "name": "images-1280x720",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "images-1024x768",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    }
+  ],
+  "cleanupComplete": true,
+  "candidate": "c26eeab6ca38d50312585b991a48a0aaf61ea73f",
+  "rejectingGateSelfCheck": true,
+  "reusedCompileLint": {
+    "candidate": "a140614633c02eca691c9aa8acafef3a82302200",
+    "commands": [
+      {
+        "name": "compile",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "lint",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      }
+    ],
+    "receiptSHA256": "32d678cf39d1efddb546ee355696c6f8220969c42acb65581a2800b30374782b",
+    "acceptedInputsSHA256": "b593f62cf2b023c07a438eadf53cf0c52bad7d059c972fc596441960a50c337b"
+  }
+}

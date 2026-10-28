@@ -43,15 +43,25 @@ Pinned Node 24.19.0/npm 11.9.0 and Cargo 1.90.0 are reused from the primary
 checkout. Bundled Python 3.12.14 is available; system Python 3.9.6 is unsuitable
 for harnesses requiring 3.11+. The dependency symlink is local and must not be
 staged. Current public SDK inputs are under the implementation worktree's
-ignored `.toolchains/ui-image/inputs-02/accepted.json`. The earlier input is
-retained. `qualify-ui-image.py` prepares normal-entry compile/lint and two
-aspect checks; it has not started an SDK yet. Run its rejecting self-checks,
-commit the source checkpoint, then qualify the exact candidate.
+ignored `.toolchains/ui-image/inputs-02/accepted.json`. Keep both input generations
+and both SDK attempts. Source frames and independent reference frames are under
+`sdk-02/`; the first failed raw-RGB oracle is under `sdk-01/`.
 
-#40 owns the selected ceilings and current zero consumption. Routine work needs
-no allowance. No push, PR, merge or release has been selected. The primary
-checkout retains only the unrelated untracked Phase 1 audit. Preserve all
-protected native/session state below. Earlier operation allowances remain closed.
+Core checkpoint is `a140614`; checker correction is `c26eeab`. Mac normal entry
+now passes compile/lint, both aspects and all six image rectangles, with zero
+RGBA differences against an independent literal Ren'Py reference. Product files
+are identical between those candidates. [The evidence and receipts](../tasks/evidence/ui-image.md#mac-normal-entry-sdk-qualification)
+retain hashes, reuse boundaries, the original failure and cleanup. No SDK,
+helper, package, native editor or watcher remains running. This is scoped Mac
+normal-entry proof, not canvas/native/Windows or full-ticket acceptance.
+
+#40 owns cumulative operation use and remaining ceilings. Its first attempt is
+charged and retained; unused limits stay with this outcome. No push, PR, merge or
+release has been selected. Next, receive the approved mock and implement the
+production UI, actual controller and remaining qualification. The implementation
+owner remains this chat. The primary checkout retains only the unrelated
+untracked Phase 1 audit. Preserve all protected native/session state below.
+Earlier operation allowances remain closed.
 
 ## L04 merge and workspace closeout
 
