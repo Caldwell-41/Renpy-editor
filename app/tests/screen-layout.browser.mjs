@@ -72,6 +72,13 @@ try {
   await ui.getByRole('button',{name:'Redo',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('[data-layout-field=xpos]')?.value==='0.25');
   assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
+  const positionUnit=ui.getByLabel('Horizontal position unit',{exact:true});
+  await positionUnit.selectOption('pixels');await horizontal.focus();await horizontal.press('Tab');
+  assert.equal(await horizontal.getAttribute('aria-invalid'),'true','Completing fractional pixels explains the invalid unit/value pair');
+  await positionUnit.selectOption('relative');
+  assert.notEqual(await horizontal.getAttribute('aria-invalid'),'true','Correcting the coordinate unit clears its shown error');
+  assert.equal(await horizontal.evaluate(input=>document.getElementById(input.getAttribute('aria-describedby')).hidden),true);
+  assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
   const width=ui.getByRole('textbox',{name:'Width',exact:true});
   await width.fill('invalid width');await width.press('Enter');
   await ui.getByText('Width needs a finite number. Input retained.',{exact:true}).first().waitFor();

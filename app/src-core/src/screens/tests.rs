@@ -36,6 +36,49 @@ fn reject(service: &mut LifecycleService, operation: &str, mut payload: Value) -
 }
 
 #[test]
+fn numeric_layout_refuses_unsupported_body_indentation_without_changing_source() {
+    for spaces in [6, 10] {
+        let temporary = tempfile::tempdir().unwrap();
+        let profile = temporary.path().join("profile");
+        let mut service =
+            LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+        let root = profile.join("synthetic-project");
+        fs::create_dir(root.join("game/ui")).unwrap();
+        let before = format!(
+            "screen numeric():\n    frame:\n{}xsize 100 # keep this width\n",
+            " ".repeat(spaces)
+        );
+        fs::write(root.join(PATH), &before).unwrap();
+        service.open_path(&root).unwrap();
+        let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
+        let values = json!({"xsize":{"unit":"pixels","value":200}});
+        assert_eq!(
+            reject(
+                &mut service,
+                "screens.setLayout",
+                json!({"path":PATH,"screenName":"numeric","expectedRevision":doc["revision"],"nodeStart":frame(&doc)["span"]["start"],"values":values})
+            )["error"]["code"],
+            "OPAQUE_BOUNDARY"
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":PATH}))["text"],
+            before
+        );
+        assert_eq!(
+            ipc(&mut service, "screens.inspect", json!({"path":PATH}))["revision"],
+            doc["revision"]
+        );
+        let plan = ipc(
+            &mut service,
+            "screens.canvasPlan",
+            json!({"path":PATH,"screenName":"numeric","expectedRevision":doc["revision"],"width":1280,"height":720}),
+        );
+        assert_eq!(plan["available"], false);
+        assert!(!plan["limits"].as_array().unwrap().is_empty());
+    }
+}
+
+#[test]
 fn numeric_layout_applies_typed_coordinates_and_size_as_one_lossless_change() {
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");

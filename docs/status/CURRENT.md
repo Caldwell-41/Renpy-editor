@@ -1,23 +1,23 @@
 # Current status
 
-## L03 numeric layout ready for review
+## L03 PR review corrections in progress
 
-[L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) is implemented in
-[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66), targeting Screens.
-A2 is approved. Standards has no findings; both Spec findings are fixed and rechecked.
-Audited [CI run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
-attempt 1 at a79737e, passes both targets' 264 frontend tests, 36 screen-core tests,
-real controllers and matching SDK geometry at both aspects. Windows packaged proof
-passes. The signed Mac package and native Help case now pass at source a5e0e9a,
-with exact source bytes, history, validation, preview, Stop, reopen and cleanup.
-[Evidence](../tasks/evidence/numeric-layout.md#mac-native-audit-and-review-handoff)
-retains signature, installer, process, source and report identities.
+Kris selected the four [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66)
+review fixes and granted approval for their implementation, TDD, PR update and CI.
+The worker owns code and focused tests; the parent retains final validation and
+publication. The source-indentation finding and three numeric-field validation/
+accessibility/IME findings are fixed with red/green evidence. Parent local validation
+passes 264 frontend tests, 37 screen-core tests and the real controllers. Signed Mac
+and corrected-candidate CI proof remain pending.
 
-All four leaf criteria have evidence; #38 is review-ready and stays open for
-integration. No merge is authorized. #38 owns final consumption: dispatches 1/3,
-packages/editor sessions 1/2 on each OS, SDK starts Mac 20/20 (Kris approved the
-increase) and Windows 8/16. Remaining B02/3B, pointer/full-canvas and human acceptance
-retain their scope. The unrelated audit and protected recovery remain intact.
+[L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) owns the qualification
+ledger. Dispatch 2 and one further package/editor session per OS are reserved.
+The authorized Mac SDK ceiling is now 28; Windows remains 16. Actual use before
+this correction remains dispatches 1, package/editor sessions 1 per OS, Mac SDK 20
+and Windows SDK 8. Earlier CI/native receipts retain their exact candidates and
+scope in [evidence](../tasks/evidence/numeric-layout.md#pr-66-review-corrections).
+A2 approval, protected recovery and the unrelated audit remain intact. The PR stays
+open; no merge or successor feature is selected.
 
 ## Phase 3B architecture refactors merged
 

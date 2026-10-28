@@ -402,3 +402,66 @@ Mac packaged paths pass. Standards is clear; both Spec findings are fixed/rechec
 All four leaf criteria have evidence. PR #66 is ready for review into Screens; the
 issue remains open for integration, and no merge or successor is selected. Broader
 B02/3B and final human acceptance remain outside this leaf's completion claim.
+
+
+## PR #66 review corrections
+
+2026-10-28: independent Standards/Spec review of base 4d2101f through head dbefc67
+found one P1 source-preservation defect on both axes and three P2 UI-contract
+defects on Standards. The production driver accepted a width insertion into a
+valid six-space property body and committed an eight-space setter before it.
+A focused browser reproduction confirmed that blur produced no error, submitted
+errors had no accessible field association, and composing Enter dispatched a commit.
+
+Before correction, parent validation passed typecheck, all 264 frontend tests,
+36 ordinary screen-core tests and the production numeric controller. The selected
+SDK helper test stayed ignored. The first frontend run used system Python 3.9 and
+failed the existing tomllib-dependent validator case; Python 3.12 fixed the host
+selection and the full suite passed. Sandbox loopback refusal was resolved through
+approved execution. These results did not cover the four newly reproduced cases.
+
+Kris then requested a subagent fix with root-cause diagnosis and TDD, retaining
+final checks with the parent, and granted all approvals needed for the fix end to
+end. The confirmed public test boundaries remain Screens IPC/source/history and
+production numeric controls through the real controller/core path. The worker owns
+code and focused tests in the existing checkout; the parent owns evidence, final
+validation, publication and CI. No merge or successor feature is selected.
+
+The owning #38 ledger reserves dispatch 2 and package/editor session 2 per OS.
+The approved Mac SDK ceiling increases from 20 to 28 for four starts in both-target
+numeric CI and four in a fresh signed Mac Help case. Windows stays capped at 16.
+Actual pre-correction use remains dispatches 1, package/editor sessions 1 per OS,
+Mac SDK 20 and Windows SDK 8. Failed starts count. No new costly operation has
+started at this preparation checkpoint.
+
+
+### TDD and parent validation
+
+The worker reproduced each failure before its fix. The public IPC case is red
+before the numeric reader qualifies body indentation and green afterward, covering
+six-space and ten-space bodies, refused writes, unchanged source/revision and
+unavailable canvas. Unsupported indentation remains Source-only under the existing
+bounded parser contract; no new Ren'Py indentation convention is imposed on source.
+
+The numeric editor now uses the existing authoring-input validateField owner for
+blur timing and adjacent accessible explanations. The Help production probe is red
+before that integration and green afterward. Its separate IME slice first exposes
+an unintended source write, then passes after the current form owns composition
+state and ignores composing Enter/Escape. Form replacement clears that state. A
+fourth red/green case verifies that changing fractional pixels to relative units
+clears an already shown error. The same owner refreshes existing linked-field errors.
+
+Parent final validation independently passes the repository validator (1,017 files),
+production typecheck/build, all 264 frontend tests, Rust formatting, 37 ordinary
+screen-core tests, five Help evidence-gate tests, the production numeric controller,
+all 11 real Help controller/core groups and the migrated Help probe rehearsal.
+The ignored SDK helper case remains unselected. The parent's original IPC
+reproduction now refuses with OPAQUE_BOUNDARY and preserves exact source bytes.
+Final Standards and Spec checks have no remaining finding for the correction diff.
+The build retains its existing bundle-size warning; no build threshold was changed.
+
+The worker used no package, native editor, SDK or CI attempt. Native and both-target
+CI qualification are next. Local receipts stay ignored; the corrected application
+inputs will be committed before packaging. CURRENT/HANDOVER remain above their soft
+size targets because prior acceptance and unique protected recovery remain outside
+this correction; the selected L03 sections replace their superseded text.

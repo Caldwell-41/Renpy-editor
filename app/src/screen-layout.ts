@@ -1,4 +1,5 @@
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
+import { validateField } from "./authoring-input.ts";
 
 export type LayoutUnit = "pixels" | "relative";
 export interface LayoutValue { unit: LayoutUnit; value: number }
@@ -36,6 +37,8 @@ export class ScreenLayoutEditor {
   private readonly formId = `screen-layout-${++sequence}`;
   private hostElement?: HTMLElement;
   private readonly errors = new Map<string, { text: string; field?: string }>();
+  private readonly fieldValidators = new Map<string, () => void>();
+  private composing = false;
   private saving = false;
   constructor(private readonly host: Host) {}
   hasDraft(): boolean { return this.drafts.size > 0; }
@@ -94,7 +97,11 @@ export class ScreenLayoutEditor {
       const draft = this.drafts.get(id) ?? { key: id, document: view.document, screen: view.screen, node: view.node, fields };
       draft.fields = fields; this.drafts.set(id, draft);
     }
-    this.errors.delete(id); this.sync(); this.host.preview();
+    this.errors.delete(id);
+    if (!this.composing) for (const input of this.hostElement?.querySelectorAll<HTMLInputElement>('input[aria-invalid="true"]') ?? []) {
+      try { this.fieldValidators.get(input.dataset.layoutField!)?.(); } catch { /* Refresh only errors already shown. */ }
+    }
+    this.sync(); this.host.preview();
   }
   accept(key: string, base: ScreenDocument, accepted: ScreenDocument): void {
     this.drafts.delete(key); this.emptyUnits.delete(key); this.errors.delete(key); this.saving = false;
@@ -106,17 +113,19 @@ export class ScreenLayoutEditor {
       }
     }
   }
-  private validate(view: View, fields: Record<string, Field>): { key: string; text: string } | undefined {
+  private validate(view: View, fields: Record<string, Field>, completed?: string): { key: string; text: string } | undefined {
     const edits = this.edits(fields, view.node);
     for (const [key, field] of Object.entries(fields)) {
+      if (completed && key !== completed) continue;
       if (field.text.trim() === "") continue;
       const value = Number(field.text);
       if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(field.text.trim()) || !Number.isFinite(value)) return { key, text: `${labels[key]} needs a finite number. Input retained.` };
       if (Math.abs(value) > 16384 || field.unit === "pixels" && !Number.isInteger(value) || !coordinate(key) && value < (key.endsWith("size") ? 1 : 0)) return { key, text: `${labels[key]} needs ${coordinate(key) ? "a supported coordinate" : "a whole number of pixels"} within ${coordinate(key) ? "−16384 to 16384" : key.endsWith("size") ? "1 to 16384" : "0 to 16384"}. Input retained.` };
       if (key in edits && view.node.numericLayout?.blocked[key]) return { key, text: `${view.node.numericLayout.blocked[key]} Input retained.` };
     }
-    for (const key of Object.keys(edits)) if (view.node.numericLayout?.blocked[key]) return { key, text: `${view.node.numericLayout.blocked[key]} Input retained.` };
+    for (const key of Object.keys(edits)) if ((!completed || key === completed) && view.node.numericLayout?.blocked[key]) return { key, text: `${view.node.numericLayout.blocked[key]} Input retained.` };
     for (const axis of ["x", "y"]) {
+      if (completed && ![`${axis}size`, `${axis}minimum`, `${axis}maximum`].includes(completed)) continue;
       const size = fields[`${axis}size`]!.text, min = fields[`${axis}minimum`]!.text, max = fields[`${axis}maximum`]!.text;
       if (size && (min || max)) return { key: `${axis}minimum`, text: `Clear ${axis === "x" ? "Width" : "Height"} before setting its limits. Ren'Py's fixed size sets both bounds. Input retained.` };
       if (min && max && Number(min) > Number(max)) return { key: `${axis}minimum`, text: `Minimum ${axis === "x" ? "width" : "height"} exceeds its maximum. Input retained.` };
@@ -125,10 +134,10 @@ export class ScreenLayoutEditor {
   private fail(text: string, key?: string): void {
     const view = this.host.view(); if (view) this.errors.set(this.key(view), { text, field: key }); this.host.note(text, true); this.sync();
     const input = key && this.hostElement?.querySelector<HTMLInputElement>(`[data-layout-field="${key}"]`);
-    if (input) { input.setAttribute("aria-invalid", "true"); const details = input.closest("details"); if (details) details.open = true; input.focus({ preventScroll: true }); input.scrollIntoView({ block: "nearest" }); }
+    if (input) { try { this.fieldValidators.get(key)?.(); } catch { /* The shared validator displays the field error. */ } const details = input.closest("details"); if (details) details.open = true; input.focus({ preventScroll: true }); input.scrollIntoView({ block: "nearest" }); }
   }
   private async apply(): Promise<void> {
-    const view = this.host.view(); if (!view || view.busy || this.saving) return;
+    const view = this.host.view(); if (!view || view.busy || this.saving || this.composing) return;
     const draft = this.drafts.get(this.key(view));
     if (!draft) { this.host.note("No change. No undo entry added."); return; }
     const invalid = this.validate(view, draft.fields); if (invalid) { this.fail(invalid.text, invalid.key); return; }
@@ -140,7 +149,7 @@ export class ScreenLayoutEditor {
     finally { this.saving = false; this.sync(); }
   }
   private cancel(): void {
-    const view = this.host.view(); if (!view || view.busy || this.saving) return;
+    const view = this.host.view(); if (!view || view.busy || this.saving || this.composing) return;
     const key = (document.activeElement as HTMLElement | null)?.dataset.layoutField;
     this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.errors.delete(this.key(view)); const host = this.hostElement; if (host) this.render(host);
     if (key) this.hostElement?.querySelector<HTMLInputElement>(`[data-layout-field="${key}"]`)?.focus({ preventScroll: true });
@@ -148,11 +157,14 @@ export class ScreenLayoutEditor {
   }
   render(host: HTMLElement): void {
     const view = this.host.view(); if (!view?.node.numericLayout) return;
-    this.hostElement = host; host.classList.add("screen-layout"); host.replaceChildren();
+    this.hostElement = host; this.fieldValidators.clear(); this.composing = false; host.classList.add("screen-layout"); host.replaceChildren();
     const heading = el("div", "layout-heading"); heading.append(el("h3", "", ({fixed:"Free layout group",frame:"Frame",vbox:"Vertical group",text:"Text",textbutton:"Button",image:"Image"} as Record<string,string>)[view.node.kind] ?? view.node.kind), el("span", "layout-state"));
     const form = el("form", "layout-form"); form.id = this.formId;
+    form.addEventListener("compositionstart", () => { this.composing = true; });
+    form.addEventListener("compositionend", () => { this.composing = false; });
     form.onsubmit = event => { event.preventDefault(); void this.apply(); };
     form.onkeydown = event => {
+      if (this.composing || event.isComposing || event.keyCode === 229) { event.stopPropagation(); return; }
       if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); this.cancel(); }
       else if (event.key === "Enter" && event.target instanceof HTMLInputElement) { event.preventDefault(); void this.apply(); }
     };
@@ -162,12 +174,22 @@ export class ScreenLayoutEditor {
       input.ariaLabel = labels[key]!; input.dataset.layoutField = key; input.value = fields[key]!.text; input.placeholder = view.node.numericLayout?.blocked[key] ? "Source" : "Inherited";
       if (key === "xsize" || key === "ysize") input.dataset.size = key === "xsize" ? "width" : "height";
       input.oninput = () => this.edit(key, { text: input.value });
+      this.fieldValidators.set(key, validateField(input, () => {
+        const current = this.host.view(); if (!current) return;
+        const invalid = this.validate(current, this.current(current), key);
+        if (invalid) { this.errors.set(this.key(current), {text:invalid.text,field:invalid.key}); this.sync(); throw Error(invalid.text); }
+        if (this.errors.get(this.key(current))?.field === key) this.errors.delete(this.key(current));
+        this.sync();
+      }));
       label.append(el("span", "layout-label", coordinate(key) ? key.endsWith("anchor") ? "Anchor" : "Position" : labels[key]), input);
       if (coordinate(key)) {
         label.classList.add("layout-coordinate"); const unit = el("select"); unit.ariaLabel = `${labels[key]} unit`;
         for (const [value, text] of [["pixels", "px"], ["relative", key.endsWith("anchor") ? "of element" : "of parent"]]) { const option = el("option", "", text); option.value = value!; unit.append(option); }
         unit.value = fields[key]!.unit; unit.title = "Relative 0.5 means half of the parent or element. Changing units keeps the typed number.";
-        unit.onchange = () => this.edit(key, { unit: unit.value as LayoutUnit }); label.append(unit);
+        unit.onchange = () => {
+          this.edit(key, { unit: unit.value as LayoutUnit });
+          if (!this.composing) { try { this.fieldValidators.get(key)?.(); } catch { /* A unit selection completes this coordinate. */ } }
+        }; label.append(unit);
       } else label.append(el("span", "layout-unit", "px"));
       return label;
     };
@@ -201,6 +223,8 @@ export class ScreenLayoutEditor {
     const apply = el("button", "button primary", "Apply layout"); apply.type = "submit"; apply.setAttribute("form", this.formId);
     const cancel = action("Cancel layout", () => this.cancel()); actions.append(apply, cancel); commit.append(feedback, state, actions);
     host.append(heading, form, commit); this.sync();
+    const error = this.errors.get(this.key(view));
+    if (error?.field) { try { this.fieldValidators.get(error.field)?.(); } catch { /* Retain the field's explanation after remounting. */ } }
   }
   sync(): void {
     const view = this.host.view(), host = this.hostElement; if (!view || !host?.isConnected) return;
@@ -208,8 +232,9 @@ export class ScreenLayoutEditor {
     host.querySelector<HTMLElement>(".layout-state")!.textContent = dirty ? "Unapplied" : "Saved";
     const error = this.errors.get(this.key(view));
     const feedback = host.querySelector<HTMLElement>(".layout-feedback")!; feedback.textContent = error?.text ?? ""; feedback.hidden = !error;
+    if (error?.field) feedback.removeAttribute("role"); else feedback.role = "alert";
     host.querySelector<HTMLElement>(".layout-commit-state")!.textContent = dirty ? "Draft preview. Enter applies all layout fields." : "No pending changes. Enter applies; Escape cancels.";
-    host.querySelectorAll<HTMLInputElement>("input").forEach(input => { input.readOnly = view.busy || this.saving; if (error?.field === input.dataset.layoutField) input.setAttribute("aria-invalid", "true"); else input.removeAttribute("aria-invalid"); });
+    host.querySelectorAll<HTMLInputElement>("input").forEach(input => { input.readOnly = view.busy || this.saving; });
     host.querySelectorAll<HTMLSelectElement>("select").forEach(select => select.disabled = view.busy || this.saving);
     host.querySelectorAll<HTMLButtonElement>("button").forEach(button => button.disabled = view.busy || this.saving || button.textContent === "Cancel layout" && !dirty);
     host.querySelectorAll<HTMLButtonElement>("[data-align-x]").forEach(button => button.ariaPressed = String(["xpos", "xanchor", "ypos", "yanchor"].every(key => fields[key]!.text !== "" && fields[key]!.unit === "relative" && Number(fields[key]!.text) === Number(key.startsWith("x") ? button.dataset.alignX : button.dataset.alignY))));

@@ -12,6 +12,7 @@
 .layout-axis { font-size:11px; font-weight:500; margin:0; color:var(--text-secondary); }
 .screen-layout .layout-field { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:4px; font-size:11px; min-width:0; margin:0; }
 .layout-label { grid-column:1/-1; }.layout-unit { color:var(--text-secondary); }
+.layout-field .field-error { grid-column:1/-1; order:1; }.layout-field .field-error[hidden] { display:none; }
 .screens-editor .screen-layout .layout-grid .layout-field input[data-layout-field],.screen-layout .layout-grid .layout-field select { min-width:0; min-height:32px; height:32px; width:100%; box-sizing:border-box; padding:5px 7px; border-radius:0; font-size:12px; font-variant-numeric:tabular-nums; }
 .screen-layout .layout-coordinate { grid-template-columns:59px minmax(0,1fr); }.layout-coordinate select { grid-column:2; grid-row:2; }
 .layout-quick { display:grid; grid-template-columns:minmax(0,1fr) 136px; gap:14px; }.layout-quick .layout-grid { grid-template-columns:1fr; }

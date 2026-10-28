@@ -153,6 +153,21 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         colon: header.code.ends_with(':'),
         indent: header.indent + 4,
     };
+    let body_indent = lines
+        .iter()
+        .filter(|line| line.start > node.span.start && line.start < node.source_end)
+        .map(|line| line.indent)
+        .min();
+    if body_indent.is_some_and(|indent| indent != result.indent) {
+        for key in FIELDS {
+            result.blocked.insert(
+                (*key).into(),
+                "This element uses unsupported body indentation. Edit its layout in Source.".into(),
+            );
+            result.unresolved.insert((*key).into());
+        }
+        return Some(result);
+    }
     for key in FIELDS {
         if node.kind == "image" && matches!(*key, "xminimum" | "yminimum" | "xmaximum" | "ymaximum")
         {

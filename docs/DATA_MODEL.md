@@ -553,8 +553,9 @@ The literal reader resolves `pos`, `anchor`, `align`, `xalign`/`yalign`, `xysize
 only changed numeric tokens when an alias can still represent the result. Otherwise
 it splits the affected alias into canonical statements while retaining its comment.
 Removing an entire property statement leaves `pass` so an empty block stays valid.
-Duplicate setters, expressions, malformed tuples, nested property blocks, overlapping
-size rules and other placement transforms stay Source-only. The renderer reuses the
+Duplicate setters, expressions, malformed tuples, nested property blocks, unsupported
+body indentation, overlapping size rules and other placement transforms stay
+Source-only. The renderer reuses the
 same numeric parser and validation for revision-bound drafts. It never evaluates
 source expressions or runs neighboring actions.
 

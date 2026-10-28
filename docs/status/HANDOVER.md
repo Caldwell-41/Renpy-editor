@@ -1,42 +1,39 @@
 # Current outcome handover
 
-## L03 numeric layout ready for review
+## L03 PR review corrections in progress
 
-This chat delivered [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38)
-in [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) on
-codex/phase3b-l03-numeric-layout, targeting codex/phase3b-screen-designer.
-Kris authorized implementation, focused tests, review, PR and CI audit. Merging and
-other features remain excluded. A2 is approved at source c2d23c5, record c1ab3e6.
-Both TDD boundaries are confirmed. The reference checkout was retired after comparison;
-approved sources/captures remain committed. Source fixes are in 57b9960, with clean
-rechecks on both review axes. The unrelated audit and protected recovery remain intact.
+Kris requested a subagent to fix the four findings on
+[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) using root-cause diagnosis
+and TDD, with the parent retaining final validation, PR publication and CI audit.
+Kris granted all approvals needed for the fix end to end. The sole implementation
+writer uses this checkout on codex/phase3b-l03-numeric-layout from dbefc67; the parent
+owns status/evidence and final checks. No merge or successor feature is selected.
 
-[Qualification run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
-attempt 1 at a79737e, is successful and audited. Both targets pass 264 frontend and
-36 screen-core tests, real controllers and matching SDK geometry at 1280×720 and
-1024×768. Windows packaged WebView proof passes. Automatic PR run 40604514626 at
-status-only 535344c also passes both required jobs. Later status changes alter no
-qualified application, fixture, dependency, probe or workflow input.
+The P1 reproduction commits an eight-space width setter before an existing valid
+six-space setter. The numeric reader mistakes the unsupported body for an empty
+editable body. The worker is qualifying source ownership before offering writes.
+Three P2 findings concern missing blur validation, inaccessible field explanations
+and Enter submitting during IME composition. The confirmed TDD boundaries are
+Screens IPC/source/history and real production UI/controller/core controls. One
+red/green slice preceded each fix. The worker has returned writer ownership. Parent
+final review, typecheck/build, 264 frontend tests, 37 core tests and real numeric/Help
+controllers pass. Signed Mac and corrected-candidate CI qualification are next.
 
-Kris approved the Mac SDK ceiling increase to 20 on 2026-10-28. The exact approved
-self-signed identity was available to the package route's matching-identity query.
-Mac package attempt 1 and native session 1 pass at source a5e0e9a. Strict signature,
-certificate-backed requirement, installer contents and ARM64 architecture pass.
-The native case covers source roundtrip, history, validation, actual SDK preview,
-stale Stop, disk reopen and cleanup. Desktop admission, both power-assertion releases
-and source-byte audits pass. OS log metadata binds the completed process PID to the
-fresh package path. Input is synthetic DOM input; OS-native input and human acceptance
-are not claimed. No trust, ACL, signing policy, names or credential settings changed.
+[L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) owns limits and current
+state. The public correction reservation uses dispatch 2, package/editor session 2
+per OS, four SDK starts per OS in CI and four in the signed Mac Help case. Kris's
+approval raises the Mac SDK ceiling to 28; Windows stays 16. Actual use before
+execution remains dispatches 1, package/editor sessions 1 per OS, Mac SDK 20 and
+Windows SDK 8. Counts are cumulative and failed starts count. The approved signing
+identity is available through the package route's matching query; no signing,
+Keychain trust, ACL or credential policy change is selected.
 
-[Evidence](../tasks/evidence/numeric-layout.md#mac-native-audit-and-review-handoff)
-and its CI/Mac JSON receipts own hashes, cases and scopes. All four leaf criteria
-now have proof. The issue stays open for review/integration; the PR can leave draft.
-No further SDK/native/package run is needed for this candidate. #38 owns cumulative
-limits: dispatches 1/3; Mac package/editor 1/2 each and SDK 20/20; Windows package/editor
-1/2 each and SDK 8/16. Unused selections do not transfer to other outcomes. Preserve
-all failed historical attempts. Do not merge, replay qualified geometry, change the
-identity or select a successor without authorization. Broader B02/3B, pointer/full
-canvas and final human acceptance retain their owners.
+The earlier successful CI run 40604403915 at a79737e and signed Mac proof at a5e0e9a
+remain historical receipts for those material inputs. A2 is approved at c2d23c5,
+record c1ab3e6. [Evidence](../tasks/evidence/numeric-layout.md#pr-66-review-corrections)
+retains the new review/authorization and all earlier source, artifact, signature,
+installer, process, cleanup and failure identities. The unrelated untracked audit,
+protected native recovery and all historical closed allowances remain intact.
 
 ## Phase 3B architecture refactors merged and cleaned up
 
