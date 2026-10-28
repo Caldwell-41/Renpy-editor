@@ -106,3 +106,11 @@ changed-source guard after 488 cases. Those results are retained in README and
 review-draft-v1.json. No shared runner, threshold or existing approval record was
 changed. The focused screen matrix and A2 interaction module establish this draft's
 browser behavior, not the combined gate or any product/native/SDK acceptance.
+
+The final focused run passes 64 rendered cases across all four variants and every
+interaction module. TypeScript, approval-record validation and whitespace checks
+pass. An in-memory build confirms production exclusion. The final feedback and
+compact-navigation corrections leave that import graph unchanged. Source candidate
+`b2fffee2a3983ff309c27502fdfc215f56b1ccd0`, its fingerprint, file hashes and 14
+retained captures are recorded in `review-focused-v2.json`. No final approval is
+recorded and no production code changed.
