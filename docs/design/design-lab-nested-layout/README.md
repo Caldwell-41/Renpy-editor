@@ -43,7 +43,7 @@ pinned SDK. It still needs production and SDK qualification:
   container. Add a group inside them to hold several children.
 - Horizontal and vertical groups own their respective placement axes. Grid owns
   cell placement. Order changes stay within the same parent and keep groups together.
-- Grid uses positive literal row/column counts up to 64 in this prototype. It fills
+- Grid uses positive literal row/column counts from 1 through 64. This is a chosen authoring bound pending SDK qualification, not an engine limit. It fills
   across rows in source order, with `allow_underfull True`. Empty cells are allowed.
   Shrinking below the existing child count refuses and retains the draft. New grids
   start empty at 2 by 2. Alternative fill directions remain in Source.
@@ -75,3 +75,26 @@ notes. Production, tests, contracts, status and issue execution records belong t
 the implementation chat. No prototype is promoted until Kris explicitly selects a
 variant and revision. Approval must pin source identity and retained captures under
 Design Lab INTEGRATION before the final handoff.
+
+## Draft verification, 2026-10-28
+
+The focused `check-screen.mjs nested-layout` run passes all 48 rendering cases
+(three variants, four states, both themes and both sizes), with the interaction
+module passing across all variants. TypeScript and approval-record validation pass.
+An independent in-memory production build confirms that Design Lab modules remain
+excluded and writes no build output.
+
+The standard `npm run design:check` failed on the first navigation at its 8-second
+limit. Direct measurement of existing approval loading took 7,337 ms. A diagnostic
+rerun used an external Node preload that changed only page navigation timeout to
+45 seconds. It passed startup and stopped when the existing flow-v1 preview refused
+changed source at recorded commit `3c7ea31d8210538cc987a2d2f4ceb8b7aa8f5437`.
+No shared runner, assertion, threshold or existing approval record was edited.
+Neither run is a combined-gate pass. Existing approved references need their pinned
+comparison checkout; the new draft remains independently reviewable.
+
+The first focused interaction attempt also exposed an ambiguous test locator for
+Source navigation versus the sample Source toggle. The test now scopes that toggle
+to the main panel. Its subsequent interaction and complete focused matrix runs pass.
+The initial incomplete run before the check module existed is retained in terminal
+history. These are lab harness/setup results, not native or SDK evidence.
