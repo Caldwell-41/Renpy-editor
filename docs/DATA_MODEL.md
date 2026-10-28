@@ -531,9 +531,12 @@ including return from another workspace. No-op saves retain the action.
 ### Numeric screen layout
 
 `screens.inspect` returns typed `numericLayout` values and field-specific refusal
-reasons for fixed, frame, vbox, text, textbutton and literal image children.
+reasons for fixed, frame, window, vbox, hbox, grid, viewport, text, textbutton and
+literal image children. The L04 extension and its qualification state belong to
+[#42](https://github.com/Caldwell-41/Renpy-editor/issues/42).
 `screens.setLayout` captures file revision, screen name, node byte offset and a map
-of changed properties. Each value has `unit` (`pixels` or `relative`) and a finite
+of changed properties. Each value has `unit` (`pixels`, `relative`, or grid-only
+`count`) and a finite
 number. Null removes an explicit property. Pixel coordinates are integers; relative
 coordinates are floats in Source, including `0` versus `0.0`. Values are bounded to
 absolute 16384. Dimensions require positive integers; other non-coordinate values
@@ -541,12 +544,13 @@ require nonnegative integers. Relative dimensions remain Source-only.
 
 | Fields | Covered children | Meaning and constraints |
 | --- | --- | --- |
-| Position and anchor | All six types | Integer pixels or a float fraction of the parent/element. A vbox controls child vertical placement, so child vertical position/anchor edits are refused. |
-| Width and height | All six types | Integer pixel layout requests. Text keeps natural glyph bounds and wraps within its available space; children can enlarge a vbox. |
-| Minimum/maximum width and height | Fixed, frame, vbox, textbutton; maximum only on text | Integer pixel bounds. Minimum cannot exceed maximum. Explicit size and its separate bounds cannot overlap. Image bounds remain Source-only and prevent helper rendering. |
-| Side padding | Frame | Integer pixel insets. Existing button padding remains renderable but is not editable here. |
-| Child spacing | Vbox | Integer pixel spacing between children. |
-| Alignment presets | All six types with editable placement | Set position and anchor together to relative 0.0, 0.5 or 1.0. Parent restrictions still apply. |
+| Position and anchor | All ten types | Integer pixels or a float fraction of the parent/element. Vbox controls vertical placement, hbox controls horizontal placement, and grid controls both axes. Those child coordinate edits refuse; a parent link preserves the child's draft. |
+| Width and height | All ten types | Integer pixel layout requests. Text keeps natural glyph bounds and wraps within its available space; children can enlarge groups. A viewport's dimensions define its clipped opening. |
+| Minimum/maximum width and height | Fixed, frame, window, vbox, hbox, grid, viewport, textbutton; maximum only on text | Integer pixel bounds. Minimum cannot exceed maximum. Explicit size and its separate bounds cannot overlap. Image bounds remain Source-only and prevent helper rendering. |
+| Side padding | Frame, window | Integer pixel insets. Existing button padding remains renderable but is not editable here. |
+| Child spacing | Vbox, hbox, grid | Integer pixel spacing between children or grid cells. |
+| Grid columns and rows | Grid | Positive integer header arguments, 1-64 per axis. Their product cannot be smaller than the direct-child count. Neither argument can be removed. |
+| Alignment presets | Types with editable placement | Set position and anchor together to relative 0.0, 0.5 or 1.0. Parent restrictions still apply. |
 
 The literal reader resolves `pos`, `anchor`, `align`, `xalign`/`yalign`, `xysize`,
 `minimum`/`maximum`, `padding`, `xpadding`/`ypadding` into canonical fields. It patches
@@ -567,6 +571,34 @@ as a temporary key, without claiming durable identity. Missing targets expose a
 read-only retained draft with explicit discard. Source remains authoritative.
 [Numeric layout evidence](tasks/evidence/numeric-layout.md) owns the qualified SDK
 cases and the limits of geometry and native proof.
+
+### Nested containers and viewport limits
+
+Composition adds window, hbox, grid and viewport through the same owned-element
+requests, UUIDs and transaction/history owner as fixed/frame/vbox. Frame, window
+and viewport accept one explicit direct child; use a group for multiple children.
+Empty containers are permitted. Grids start as `grid 2 2:` with
+`allow_underfull True`; source order fills rows left to right. Empty cells remain
+empty. Adding beyond capacity refuses. Grid argument edits patch only the changed
+header tokens, together with the current element's other layout fields in one Apply.
+Dynamic headers and values outside the authoring range remain Source-only.
+Opaque direct children make grid counts Source-only because their cell count is
+unknown. Grids without explicit `allow_underfull True` keep count changes and
+child Add/removal in Source. Safe unrelated layout edits remain available. The
+inspector's `allowsEmptyCells` metadata reports that policy without evaluating it.
+
+L04 viewports show stationary top-left clipping. Wheel/drag/key scrolling,
+scrollbars, adjustment bindings, initial offsets, child_size and alternate grid
+ordering remain Source-only and prevent an inaccurate canvas render. Increasing
+viewport height reveals more content; the enclosing window's height remains editable.
+The helper intersects descendant hit regions with every enclosing viewport and
+omits fully clipped regions. Hierarchy and Source can still select those elements.
+
+The Source modal reads the real source buffer without changing the canvas layout.
+It excludes unapplied Screens drafts. A clean, revision-matched buffer permits
+statement selection; dirty or changed buffers require Source reconciliation.
+Edit in Source opens the existing Source editor and keeps its conflict rules.
+Closing the modal retains screen drafts. No read or selection executes project code.
 
 Scene source-map entries contain the exact file revision and ordered Beat mappings.
 Migration is a recoverable source-map/project-metadata transaction; corrupt or missing

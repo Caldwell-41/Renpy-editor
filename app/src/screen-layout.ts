@@ -1,9 +1,9 @@
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import { validateField } from "./authoring-input.ts";
 
-export type LayoutUnit = "pixels" | "relative";
+export type LayoutUnit = "pixels" | "relative" | "count";
 export interface LayoutValue { unit: LayoutUnit; value: number }
-export interface NumericLayout { values: Record<string, LayoutValue>; blocked: Record<string, string>; sizingNote?: string | null }
+export interface NumericLayout { values: Record<string, LayoutValue>; blocked: Record<string, string>; sizingNote?: string | null; allowsEmptyCells?: boolean }
 export type LayoutEdits = Record<string, LayoutValue | null>;
 interface Field { text: string; unit: LayoutUnit }
 interface Draft { key: string; document: ScreenDocument; screen: string; node: ScreenNode; fields: Record<string, Field> }
@@ -16,6 +16,7 @@ interface Host {
   select: (node: ScreenNode) => void;
 }
 const labels: Record<string, string> = {
+  columns: "Columns", rows: "Rows",
   xpos: "Horizontal position", ypos: "Vertical position", xanchor: "Horizontal anchor", yanchor: "Vertical anchor",
   xsize: "Width", ysize: "Height", xminimum: "Minimum width", xmaximum: "Maximum width", yminimum: "Minimum height", ymaximum: "Maximum height",
   left_padding: "Left padding", right_padding: "Right padding", top_padding: "Top padding", bottom_padding: "Bottom padding", spacing: "Spacing",
@@ -33,7 +34,7 @@ let sequence = 0;
 export class ScreenLayoutEditor {
   private readonly drafts = new Map<string, Draft>();
   private readonly emptyUnits = new Map<string, Record<string, LayoutUnit>>();
-  private readonly expanded = new Set<string>();
+  private readonly expanded = new Map<string, Set<string>>();
   private readonly formId = `screen-layout-${++sequence}`;
   private hostElement?: HTMLElement;
   private readonly errors = new Map<string, { text: string; field?: string }>();
@@ -71,7 +72,7 @@ export class ScreenLayoutEditor {
   cancelCurrent(): boolean { const view = this.host.view(); if (!view || !this.drafts.has(this.key(view))) return false; this.cancel(); return true; }
   private key(view: View): string { return draftKey(view.document, view.screen, view.node); }
   private fields(node: ScreenNode): Record<string, Field> {
-    return Object.fromEntries(Object.keys(labels).map(key => [key, { text: node.numericLayout?.values[key] === undefined ? "" : String(node.numericLayout.values[key]!.value), unit: node.numericLayout?.values[key]?.unit ?? "pixels" }]));
+    return Object.fromEntries(Object.keys(labels).map(key => [key, { text: node.numericLayout?.values[key] === undefined ? "" : String(node.numericLayout.values[key]!.value), unit: node.numericLayout?.values[key]?.unit ?? (["columns", "rows"].includes(key) ? "count" : "pixels") }]));
   }
   private current(view: View): Record<string, Field> {
     const draft = this.drafts.get(this.key(view)); if (draft) return draft.fields;
@@ -115,6 +116,15 @@ export class ScreenLayoutEditor {
   }
   private validate(view: View, fields: Record<string, Field>, completed?: string): { key: string; text: string } | undefined {
     const edits = this.edits(fields, view.node);
+    if (view.node.kind === "grid") {
+      for (const key of ["columns", "rows"]) {
+        if (completed && completed !== key) continue;
+        const value = Number(fields[key]!.text);
+        if (!/^\d+$/.test(fields[key]!.text.trim()) || !Number.isInteger(value) || value < 1 || value > 64) return {key,text:`${labels[key]} needs a whole number from 1 to 64. Input retained.`};
+      }
+      const children = view.nodes.filter(node => node.parentStart === view.node.span.start).length;
+      if (Number(fields.columns!.text) * Number(fields.rows!.text) < children) return {key:completed === "rows" ? "rows" : "columns",text:`The grid needs room for ${children} children. Increase columns or rows. Input retained.`};
+    }
     for (const [key, field] of Object.entries(fields)) {
       if (completed && key !== completed) continue;
       if (field.text.trim() === "") continue;
@@ -157,8 +167,13 @@ export class ScreenLayoutEditor {
   }
   render(host: HTMLElement): void {
     const view = this.host.view(); if (!view?.node.numericLayout) return;
+    for (const details of this.hostElement?.querySelectorAll<HTMLDetailsElement>("details[data-layout-owner]") ?? []) {
+      const expanded = this.expanded.get(details.dataset.layoutOwner!) ?? new Set<string>();
+      if (details.open) expanded.add(details.dataset.layoutGroup!); else expanded.delete(details.dataset.layoutGroup!);
+      this.expanded.set(details.dataset.layoutOwner!, expanded);
+    }
     this.hostElement = host; this.fieldValidators.clear(); this.composing = false; host.classList.add("screen-layout"); host.replaceChildren();
-    const heading = el("div", "layout-heading"); heading.append(el("h3", "", ({fixed:"Free layout group",frame:"Frame",vbox:"Vertical group",text:"Text",textbutton:"Button",image:"Image"} as Record<string,string>)[view.node.kind] ?? view.node.kind), el("span", "layout-state"));
+    const heading = el("div", "layout-heading"); heading.append(el("h3", "", ({fixed:"Free layout group",frame:"Frame",window:"Window",vbox:"Vertical group",hbox:"Horizontal group",grid:"Grid",viewport:"Viewport",text:"Text",textbutton:"Button",image:"Image"} as Record<string,string>)[view.node.kind] ?? view.node.kind), el("span", "layout-state"));
     const form = el("form", "layout-form"); form.id = this.formId;
     form.addEventListener("compositionstart", () => { this.composing = true; });
     form.addEventListener("compositionend", () => { this.composing = false; });
@@ -190,17 +205,32 @@ export class ScreenLayoutEditor {
           this.edit(key, { unit: unit.value as LayoutUnit });
           if (!this.composing) { try { this.fieldValidators.get(key)?.(); } catch { /* A unit selection completes this coordinate. */ } }
         }; label.append(unit);
-      } else label.append(el("span", "layout-unit", "px"));
+      } else if (!["columns", "rows"].includes(key)) label.append(el("span", "layout-unit", "px"));
       return label;
     };
     const group = (name: string, keys: string[], expandable = false) => {
       const section = el(expandable ? "details" : "section", "layout-group"); section.append(el(expandable ? "summary" : "h3", "", name));
-      if (section instanceof HTMLDetailsElement) { section.open = this.expanded.has(name); section.ontoggle = () => { if (section.open) this.expanded.add(name); else this.expanded.delete(name); }; }
+      if (section instanceof HTMLDetailsElement) {
+        const owner = this.key(view), expanded = this.expanded.get(owner) ?? new Set<string>(); this.expanded.set(owner, expanded);
+        section.dataset.layoutOwner = owner; section.dataset.layoutGroup = name; section.open = expanded.has(name);
+        section.ontoggle = () => { if (section.open) expanded.add(name); else expanded.delete(name); };
+      }
       const grid = el("div", "layout-grid"); grid.append(...keys.map(field)); section.append(grid); return section;
     };
     const parent = view.nodes.find(node => node.span.start === view.node.parentStart);
+    if (view.node.kind === "grid") {
+      const grid = group("Grid", ["columns", "rows", "spacing"]);
+      const policy = view.node.numericLayout.allowsEmptyCells === true ? "Empty cells are allowed." : "Empty-cell policy stays in Source. Child-count changes are unavailable.";
+      grid.append(el("p", "layout-sizing-note", `${view.nodes.filter(n => n.parentStart === view.node.span.start).length} children · Rows fill left to right. ${policy}`));
+      if (view.node.numericLayout.blocked.columns) grid.append(el("p", "layout-sizing-note", view.node.numericLayout.blocked.columns));
+      form.append(grid);
+    }
     if (parent?.kind === "vbox") {
       const constraint = el("div", "layout-constraint"); constraint.append(el("p", "", "The vertical group controls this element's vertical placement."), action("Edit group spacing", () => this.host.select(parent))); form.append(constraint);
+    }
+    if (parent && ["hbox", "grid"].includes(parent.kind)) {
+      const constraint = el("div", "layout-constraint");
+      constraint.append(el("p", "", parent.kind === "grid" ? "The grid controls cell placement and order." : "The horizontal group controls this element's horizontal placement."), action(parent.kind === "grid" ? "Edit grid" : "Edit horizontal group", () => this.host.select(parent))); form.append(constraint);
     }
     const coordinates = group("Position and anchor", ["xpos", "ypos", "xanchor", "yanchor"]);
     const grid = coordinates.querySelector(".layout-grid")!;
@@ -216,8 +246,8 @@ export class ScreenLayoutEditor {
     alignment.append(presets); quick.append(alignment); form.append(quick);
     if (view.node.numericLayout.sizingNote) form.append(el("p", "layout-sizing-note", view.node.numericLayout.sizingNote));
     form.append(group("Size limits", ["xminimum", "xmaximum", "yminimum", "ymaximum"], true));
-    if (view.node.kind === "frame") form.append(group("Padding", ["left_padding", "right_padding", "top_padding", "bottom_padding"], true));
-    if (view.node.kind === "vbox") form.append(group("Children", ["spacing"]));
+    if (["frame", "window"].includes(view.node.kind)) form.append(group("Padding", ["left_padding", "right_padding", "top_padding", "bottom_padding"], true));
+    if (["vbox", "hbox"].includes(view.node.kind)) form.append(group("Children", ["spacing"]));
     const commit = el("div", "layout-commit"), feedback = el("p", "layout-feedback"); feedback.role = "alert";
     const state = el("p", "layout-commit-state"), actions = el("div", "layout-actions");
     const apply = el("button", "button primary", "Apply layout"); apply.type = "submit"; apply.setAttribute("form", this.formId);

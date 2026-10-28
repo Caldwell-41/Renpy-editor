@@ -79,10 +79,11 @@ init python:
             raise
 
     class _CanvasNode(renpy.Displayable):
-        def __init__(self, child, start):
+        def __init__(self, child, start, clips=False):
             super(_CanvasNode, self).__init__()
             self.children, self.offsets = [child], [(0, 0)]
             self.start = start
+            self.clips = clips
         def visit(self):
             return self.children
         def get_placement(self):
@@ -104,10 +105,14 @@ init python:
             if "padding" in p:
                 p["padding"] = tuple(p["padding"])
             kind = node["kind"]
-            if kind in ("screen", "fixed", "vbox"):
-                d = renpy.display.layout.MultiBox(layout="vertical" if kind == "vbox" else "fixed", style="vbox" if kind == "vbox" else "fixed", **p)
-            elif kind == "frame":
-                d = renpy.display.layout.Window(style="frame", **p)
+            if kind in ("screen", "fixed", "vbox", "hbox"):
+                d = renpy.display.layout.MultiBox(layout={"vbox":"vertical", "hbox":"horizontal"}.get(kind, "fixed"), style=kind if kind in ("vbox", "hbox") else "fixed", **p)
+            elif kind in ("frame", "window"):
+                d = renpy.display.layout.Window(style=kind, **p)
+            elif kind == "grid":
+                d = renpy.display.layout.Grid(p.pop("columns"), p.pop("rows"), style="grid", **p)
+            elif kind == "viewport":
+                d = renpy.display.viewport.Viewport(style="viewport", **p)
             elif kind == "text":
                 d = renpy.text.text.Text(node["literal"], substitute=False, **p)
             elif kind == "image":
@@ -119,7 +124,13 @@ init python:
                 raise ValueError("Unsupported canvas kind")
             for child in by_parent.get(node["start"], []):
                 d.add(build(child))
-            tracked = _CanvasNode(d, node["start"])
+            if kind in ("frame", "window", "viewport") and not by_parent.get(node["start"]):
+                # Screen Language supplies an implicit Fixed for zero children.
+                d.add(renpy.display.layout.MultiBox(layout="fixed", style="fixed"))
+            if kind == "grid":
+                while len(d.children) < d.cols * d.rows:
+                    d.add(renpy.display.layout.Null())
+            tracked = _CanvasNode(d, node["start"], clips=kind == "viewport")
             objects[id(tracked)] = node["start"]
             return tracked
         root = build(by_parent[None][0])
@@ -140,11 +151,21 @@ init python:
         root, objects = _canvas_build(plan)
         rendered = renpy.render(root, plan["width"], plan["height"], 0, 0)
         geometry = []
-        def locate(d, x, y):
+        def intersect(rect, clip):
+            if clip is None:
+                return rect
+            left, top = max(rect[0], clip[0]), max(rect[1], clip[1])
+            right, bottom = min(rect[0]+rect[2], clip[0]+clip[2]), min(rect[1]+rect[3], clip[1]+clip[3])
+            return (left, top, max(0, right-left), max(0, bottom-top))
+        def locate(d, x, y, clip=None):
             if id(d) in objects:
-                geometry.append(dict(start=objects[id(d)], x=x, y=y, width=d.measured[0], height=d.measured[1]))
+                rect = intersect((x, y, d.measured[0], d.measured[1]), clip)
+                if rect[2] > 0 and rect[3] > 0:
+                    geometry.append(dict(start=objects[id(d)], x=rect[0], y=rect[1], width=rect[2], height=rect[3]))
+                if d.clips:
+                    clip = rect
             for child, offset in zip(getattr(d,"children",[]), getattr(d,"offsets",[])):
-                locate(child, x+offset[0], y+offset[1])
+                locate(child, x+offset[0], y+offset[1], clip)
         locate(root, 0, 0)
         image = config.basedir + "/frame-next.png"
         renpy.render_to_file(rendered, image, resize=True)

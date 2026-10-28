@@ -1,0 +1,438 @@
+{
+  "candidate": "dedf92088c11309801fe03e9449b4a64b5f758a2",
+  "runId": 40742930659,
+  "attempt": 1,
+  "conclusion": "success",
+  "artifacts": [
+    {
+      "id": 12842310103,
+      "name": "nested-layout-Windows-40742930659-1",
+      "size_in_bytes": 949112,
+      "digest": "sha256:e6b016cb7bbfc71f86abadcf996057953eeecc73366b46db1659d47e80784ad2"
+    },
+    {
+      "id": 12840148569,
+      "name": "nested-layout-macOS-40742930659-1",
+      "size_in_bytes": 1250783,
+      "digest": "sha256:39254cfe65638ada2fb59b7da72733ae324bb63f7e8cafb7393f9c453b43f241"
+    }
+  ],
+  "portableHosts": [
+    "Windows x64",
+    "macOS ARM64"
+  ],
+  "sdk": {
+    "passed": true,
+    "sdkProcesses": 6,
+    "os": "Windows",
+    "architecture": "AMD64",
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "outer": [
+            340,
+            200,
+            600.0,
+            320.0
+          ],
+          "row": [
+            352,
+            216,
+            368.0,
+            108.0
+          ],
+          "cells": [
+            352,
+            216,
+            168.0,
+            108.0
+          ],
+          "one": [
+            352,
+            216,
+            80.0,
+            50.0
+          ],
+          "two": [
+            440,
+            216,
+            80.0,
+            50.0
+          ],
+          "three": [
+            352,
+            274,
+            80.0,
+            50.0
+          ],
+          "clip": [
+            540,
+            216,
+            180.0,
+            100.0
+          ],
+          "content": [
+            540,
+            216,
+            180.0,
+            100.0
+          ],
+          "overflow": [
+            540,
+            216,
+            180.0,
+            100.0
+          ]
+        },
+        "opening": 100,
+        "sourceSHA256": "b7bffd3765a3ba02bfe6b83068c7d43a7190afa6e11f32d34367cf0dd5e4b035",
+        "imageSHA256": "fb85009f42f5c0db88c0cb70ca0deb0aaa93bdb32ed299cbfd4935843296bcab"
+      },
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "outer": [
+            340,
+            200,
+            600.0,
+            320.0
+          ],
+          "row": [
+            352,
+            216,
+            368.0,
+            200.0
+          ],
+          "cells": [
+            352,
+            216,
+            168.0,
+            108.0
+          ],
+          "one": [
+            352,
+            216,
+            80.0,
+            50.0
+          ],
+          "two": [
+            440,
+            216,
+            80.0,
+            50.0
+          ],
+          "three": [
+            352,
+            274,
+            80.0,
+            50.0
+          ],
+          "clip": [
+            540,
+            216,
+            180.0,
+            200.0
+          ],
+          "content": [
+            540,
+            216,
+            180.0,
+            200.0
+          ],
+          "overflow": [
+            540,
+            216,
+            180.0,
+            200.0
+          ]
+        },
+        "opening": 200,
+        "sourceSHA256": "c5ce1acd15b2fbaa4f150ed726bd1038453073fa1369d3ab2b9730bde97b5225",
+        "imageSHA256": "82c08c678155c5333923fc010869318171906518d247ec2fc1b4f07058cd29b7"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "outer": [
+            212,
+            224,
+            600.0,
+            320.0
+          ],
+          "row": [
+            224,
+            240,
+            368.0,
+            108.0
+          ],
+          "cells": [
+            224,
+            240,
+            168.0,
+            108.0
+          ],
+          "one": [
+            224,
+            240,
+            80.0,
+            50.0
+          ],
+          "two": [
+            312,
+            240,
+            80.0,
+            50.0
+          ],
+          "three": [
+            224,
+            298,
+            80.0,
+            50.0
+          ],
+          "clip": [
+            412,
+            240,
+            180.0,
+            100.0
+          ],
+          "content": [
+            412,
+            240,
+            180.0,
+            100.0
+          ],
+          "overflow": [
+            412,
+            240,
+            180.0,
+            100.0
+          ]
+        },
+        "opening": 100,
+        "sourceSHA256": "b7bffd3765a3ba02bfe6b83068c7d43a7190afa6e11f32d34367cf0dd5e4b035",
+        "imageSHA256": "9f5e24558f7221514f80f4809d01123a3d4d589c6e97aea8972a5be7ac3ba94f"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "outer": [
+            212,
+            224,
+            600.0,
+            320.0
+          ],
+          "row": [
+            224,
+            240,
+            368.0,
+            200.0
+          ],
+          "cells": [
+            224,
+            240,
+            168.0,
+            108.0
+          ],
+          "one": [
+            224,
+            240,
+            80.0,
+            50.0
+          ],
+          "two": [
+            312,
+            240,
+            80.0,
+            50.0
+          ],
+          "three": [
+            224,
+            298,
+            80.0,
+            50.0
+          ],
+          "clip": [
+            412,
+            240,
+            180.0,
+            200.0
+          ],
+          "content": [
+            412,
+            240,
+            180.0,
+            200.0
+          ],
+          "overflow": [
+            412,
+            240,
+            180.0,
+            200.0
+          ]
+        },
+        "opening": 200,
+        "sourceSHA256": "c5ce1acd15b2fbaa4f150ed726bd1038453073fa1369d3ab2b9730bde97b5225",
+        "imageSHA256": "27d8ad1e144a26dd5761330d109b4997720638454ff018cf738b0444a59d3687"
+      }
+    ],
+    "commands": [
+      {
+        "name": "compile",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "lint",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "layout-1280x720-100",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "layout-1280x720-200",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "layout-1024x768-100",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "layout-1024x768-200",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      }
+    ],
+    "cleanupComplete": true,
+    "candidate": "dedf92088c11309801fe03e9449b4a64b5f758a2",
+    "rejectingGateSelfCheck": true
+  },
+  "helper": {
+    "acceptedSHA256": "b7bffd3765a3ba02bfe6b83068c7d43a7190afa6e11f32d34367cf0dd5e4b035",
+    "emptyCases": [
+      "empty-saved-viewport",
+      "pending-empty-window",
+      "pending-empty-frame",
+      "pending-empty-viewport",
+      "last-child-removed"
+    ],
+    "helperSessions": 1,
+    "passed": true,
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "frameId": "9169d8b8-d914-4aa0-b1cc-99eb7841f96e",
+        "opening": 100,
+        "renderer": "angle2"
+      },
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "frameId": "31f09b47-3085-4720-889d-18f8df44346b",
+        "opening": 200,
+        "renderer": "angle2"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "frameId": "33532947-df03-4be9-95b6-a3b653ee384f",
+        "opening": 100,
+        "renderer": "angle2"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "frameId": "611aa43d-73fe-4173-8689-6c9b95708cfb",
+        "opening": 200,
+        "renderer": "angle2"
+      }
+    ],
+    "sdkProcesses": 1,
+    "shutdown": {
+      "cleanupComplete": true,
+      "cooperative": true,
+      "exitCode": 0
+    }
+  },
+  "windowsPackage": {
+    "executableSHA256": "8EA09A7F671FA0F71A919666069B4EE24F33FB952C5C1F659FC858160FE50A79",
+    "candidate": "dedf92088c11309801fe03e9449b4a64b5f758a2",
+    "architecture": "Windows x64"
+  },
+  "windowsNative": {
+    "passed": true,
+    "reportSHA256": "6e545748ed61ac4da38c5c0ae5ed6b8def1c8c6ab40cee8e2b224ed57b7376cd",
+    "acceptedSourceSHA256": "aa91cc91808d31ade1fc70b3b7bfd31261fd60f6f05b135201b3ce670533943b",
+    "stages": [
+      "nested-composition-passed",
+      "grid-layout-passed",
+      "viewport-source-passed",
+      "nested-history-passed",
+      "nested-reopen-passed",
+      "complete"
+    ],
+    "cleanupOwners": {
+      "credentials": true,
+      "host": true,
+      "requests": true
+    },
+    "helpDisk": {
+      "acceptedBytesMatch": true,
+      "scratchJobsRemaining": 0,
+      "sourceBytecode": false,
+      "sourceSaves": false
+    },
+    "fixtureCleanupComplete": true,
+    "exitCode": 0,
+    "timedOut": false
+  },
+  "operationUse": {
+    "costlyDispatches": 1,
+    "windowsSdkLaunches": 7,
+    "windowsHelperSessions": 1,
+    "windowsPackageBuilds": 1,
+    "windowsNativeSessions": 1,
+    "macSdkLaunches": 12,
+    "macHelperSessions": 4,
+    "macPackageBuilds": 3,
+    "macNativeSessions": 2
+  },
+  "reuse": "Signed Mac 228fe23 and CI dedf920 have identical application/probe/test/fixture code; later commits only change status/evidence.",
+  "limits": "Source alpha-render pixels and bounded helper geometry; synthetic DOM native input. Full GPU pixels, pointer, physical input and human acceptance remain separate."
+}

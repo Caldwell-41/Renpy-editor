@@ -1,0 +1,353 @@
+{
+  "scope": "Local Mac ARM64 bounded source geometry/clipping and inert helper geometry; qualification preceded the implementation commit.",
+  "sdkVersion": "8.5.3",
+  "sdkArchiveSHA256": "eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45",
+  "acceptedSHA256": "0beb392b68f5388cff129be47703defacb372d4699efbfedb089f03c9dd49714",
+  "expandedSHA256": "5ed67273b6732d7e0482a7d8685fc9bac240dbdcf1f88017ea096c50b47a3bac",
+  "normalEntry": {
+    "passed": true,
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "outer": [
+            340,
+            200,
+            600.0,
+            320.0
+          ],
+          "row": [
+            352,
+            216,
+            368.0,
+            108.0
+          ],
+          "cells": [
+            352,
+            216,
+            168.0,
+            108.0
+          ],
+          "one": [
+            352,
+            216,
+            80.0,
+            50.0
+          ],
+          "two": [
+            440,
+            216,
+            80.0,
+            50.0
+          ],
+          "three": [
+            352,
+            274,
+            80.0,
+            50.0
+          ],
+          "clip": [
+            540,
+            216,
+            180.0,
+            100.0
+          ],
+          "content": [
+            540,
+            216,
+            180.0,
+            100.0
+          ],
+          "overflow": [
+            540,
+            216,
+            180.0,
+            100.0
+          ]
+        },
+        "opening": 100,
+        "sourceSHA256": "0beb392b68f5388cff129be47703defacb372d4699efbfedb089f03c9dd49714",
+        "imageSHA256": "fb85009f42f5c0db88c0cb70ca0deb0aaa93bdb32ed299cbfd4935843296bcab"
+      },
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "outer": [
+            340,
+            200,
+            600.0,
+            320.0
+          ],
+          "row": [
+            352,
+            216,
+            368.0,
+            200.0
+          ],
+          "cells": [
+            352,
+            216,
+            168.0,
+            108.0
+          ],
+          "one": [
+            352,
+            216,
+            80.0,
+            50.0
+          ],
+          "two": [
+            440,
+            216,
+            80.0,
+            50.0
+          ],
+          "three": [
+            352,
+            274,
+            80.0,
+            50.0
+          ],
+          "clip": [
+            540,
+            216,
+            180.0,
+            200.0
+          ],
+          "content": [
+            540,
+            216,
+            180.0,
+            200.0
+          ],
+          "overflow": [
+            540,
+            216,
+            180.0,
+            200.0
+          ]
+        },
+        "opening": 200,
+        "sourceSHA256": "5ed67273b6732d7e0482a7d8685fc9bac240dbdcf1f88017ea096c50b47a3bac",
+        "imageSHA256": "82c08c678155c5333923fc010869318171906518d247ec2fc1b4f07058cd29b7"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "outer": [
+            212,
+            224,
+            600.0,
+            320.0
+          ],
+          "row": [
+            224,
+            240,
+            368.0,
+            108.0
+          ],
+          "cells": [
+            224,
+            240,
+            168.0,
+            108.0
+          ],
+          "one": [
+            224,
+            240,
+            80.0,
+            50.0
+          ],
+          "two": [
+            312,
+            240,
+            80.0,
+            50.0
+          ],
+          "three": [
+            224,
+            298,
+            80.0,
+            50.0
+          ],
+          "clip": [
+            412,
+            240,
+            180.0,
+            100.0
+          ],
+          "content": [
+            412,
+            240,
+            180.0,
+            100.0
+          ],
+          "overflow": [
+            412,
+            240,
+            180.0,
+            100.0
+          ]
+        },
+        "opening": 100,
+        "sourceSHA256": "0beb392b68f5388cff129be47703defacb372d4699efbfedb089f03c9dd49714",
+        "imageSHA256": "9f5e24558f7221514f80f4809d01123a3d4d589c6e97aea8972a5be7ac3ba94f"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "outer": [
+            212,
+            224,
+            600.0,
+            320.0
+          ],
+          "row": [
+            224,
+            240,
+            368.0,
+            200.0
+          ],
+          "cells": [
+            224,
+            240,
+            168.0,
+            108.0
+          ],
+          "one": [
+            224,
+            240,
+            80.0,
+            50.0
+          ],
+          "two": [
+            312,
+            240,
+            80.0,
+            50.0
+          ],
+          "three": [
+            224,
+            298,
+            80.0,
+            50.0
+          ],
+          "clip": [
+            412,
+            240,
+            180.0,
+            200.0
+          ],
+          "content": [
+            412,
+            240,
+            180.0,
+            200.0
+          ],
+          "overflow": [
+            412,
+            240,
+            180.0,
+            200.0
+          ]
+        },
+        "opening": 200,
+        "sourceSHA256": "5ed67273b6732d7e0482a7d8685fc9bac240dbdcf1f88017ea096c50b47a3bac",
+        "imageSHA256": "27d8ad1e144a26dd5761330d109b4997720638454ff018cf738b0444a59d3687"
+      }
+    ],
+    "compileLint": {
+      "commands": [
+        {
+          "name": "compile",
+          "exitCode": 0,
+          "timedOut": false,
+          "outputLimited": false
+        },
+        {
+          "name": "lint",
+          "exitCode": 0,
+          "timedOut": false,
+          "outputLimited": false
+        }
+      ],
+      "receiptSHA256": "721f4c2fbaa611b753af07eef8177604782a1176a5b32e0b3c8053d3bbe84242",
+      "acceptedInputsSHA256": "b67e975eaf6ef1f7584e490ef2afe73dffd293fcae36ca37655f58fc97212cfe"
+    },
+    "cleanupComplete": true
+  },
+  "helper": {
+    "passed": true,
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "frameId": "b1c1f786-e18c-47cf-ab79-d07b3925c861",
+        "opening": 100,
+        "renderer": "gl2"
+      },
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "frameId": "94a80ce1-5a26-484d-9b05-1fdc4b4dec83",
+        "opening": 200,
+        "renderer": "gl2"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "frameId": "17183047-ac7d-4782-bacf-1148f3c2d0ff",
+        "opening": 100,
+        "renderer": "gl2"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "frameId": "8ef0b296-99aa-47d4-9872-44aebddc8799",
+        "opening": 200,
+        "renderer": "gl2"
+      }
+    ],
+    "emptyCases": [
+      "empty-saved-viewport",
+      "pending-empty-window",
+      "pending-empty-frame",
+      "pending-empty-viewport",
+      "last-child-removed"
+    ],
+    "shutdown": {
+      "cleanupComplete": true,
+      "cooperative": true,
+      "exitCode": 0
+    }
+  },
+  "limits": [
+    "Software alpha-render clipping pixels do not establish GPU pixel equivalence.",
+    "Helper hit geometry excludes fully clipped descendants; the hierarchy retains them.",
+    "No physical pointer, OS-native IME, full canvas/editor or human acceptance is claimed."
+  ]
+}

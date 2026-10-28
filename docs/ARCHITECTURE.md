@@ -690,6 +690,15 @@ Unknown initialization, inherited styles, unsupported statements and unresolved
 text tags/interpolation make the composition unavailable. These conservative limits
 are specific to the proof and do not accept the full Screens subset.
 
+L04 extends the typed plan with window/hbox/grid/viewport. The helper uses the
+pinned SDK's Window, horizontal MultiBox, Grid and Viewport displayables. Grid
+dimensions are literal data; viewport descendants expose only their visible
+intersection as canvas hit regions. Unsupported scrolling or grid-order controls
+make rendering unavailable while Source and drafts remain usable. The bounded
+mapping and current qualification state remain with
+[#42](https://github.com/Caldwell-41/Renpy-editor/issues/42); this extension does not
+accept L19's full canvas inventory or inherited styles.
+
 The representative sized frame can move inside a `fixed` parent when both axes
 have unambiguous floating-point literal `xalign`/`yalign` values and no competing placement property.
 Dragging changes those existing alignment coordinates, snaps pointer deltas to eight

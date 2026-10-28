@@ -45,9 +45,35 @@ fn text_literal(text: &str) -> Result<String, SceneError> {
 }
 
 pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
-    ["screen", "fixed", "frame", "vbox"].contains(&parent.kind.as_str())
-        && ["fixed", "frame", "vbox", "text", "textbutton"].contains(&kind)
-        && (parent.kind != "frame"
+    [
+        "screen", "fixed", "frame", "window", "vbox", "hbox", "grid", "viewport",
+    ]
+    .contains(&parent.kind.as_str())
+        && [
+            "fixed",
+            "frame",
+            "window",
+            "vbox",
+            "hbox",
+            "grid",
+            "viewport",
+            "text",
+            "textbutton",
+        ]
+        .contains(&kind)
+        && (parent.kind != "grid"
+            || (parent.protected.is_empty()
+                && parent.numeric_layout.as_ref().is_some_and(|layout| {
+                    layout.allows_empty_cells == Some(true)
+                        && screen
+                            .nodes
+                            .iter()
+                            .filter(|n| n.parent_start == Some(parent.span.start))
+                            .count()
+                            < (layout.values["columns"].value * layout.values["rows"].value)
+                                as usize
+                })))
+        && (!single_child(&parent.kind)
             || (parent.protected.is_empty()
                 && !screen
                     .nodes
@@ -127,11 +153,16 @@ impl AuthoringService {
                 let spaces = " ".repeat(indent);
                 let header = if ["text", "textbutton"].contains(&kind.as_str()) {
                     format!("{kind} {}", text_literal(&text)?)
+                } else if kind == "grid" {
+                    "grid 2 2:".into()
                 } else {
                     format!("{kind}:")
                 };
                 let mut addition = format!("{spaces}{header} # loomlight-element: {id}{newline}");
                 if !["text", "textbutton"].contains(&kind.as_str()) {
+                    if kind == "grid" {
+                        addition.push_str(&format!("{spaces}    allow_underfull True{newline}"));
+                    }
                     addition.push_str(&format!("{spaces}    pass{newline}"));
                 }
                 if parent.source_end > 0 && bytes[parent.source_end - 1] != b'\n' {
@@ -265,6 +296,14 @@ impl AuthoringService {
                     .iter()
                     .find(|n| Some(n.span.start) == node.parent_start)
                     .unwrap();
+                if parent.kind == "grid"
+                    && parent
+                        .numeric_layout
+                        .as_ref()
+                        .is_none_or(|layout| layout.allows_empty_cells != Some(true))
+                {
+                    return Err(SceneError::OpaqueBoundary);
+                }
                 let fallback = siblings
                     .get(index + 1)
                     .or_else(|| index.checked_sub(1).and_then(|i| siblings.get(i)))

@@ -4,7 +4,7 @@ import { icon } from "./icons.ts";
 import { ScreenComposer, screenNodeKey, type CompositionCommand } from "./screen-composition.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
-import type { SourceInventory, SourceTarget } from "./source-ui.ts";
+import type { SourceDocument, SourceInventory, SourceTarget } from "./source-ui.ts";
 import type { ScreenPreview } from "./runtime-preparation.ts";
 
 export interface ScreenNode {
@@ -48,7 +48,7 @@ const button = (label: string, run: () => void, className = "button secondary") 
   const result = el("button", className, label); result.type = "button"; result.onclick = run; return result;
 };
 const size = (node: ScreenNode | undefined, property: "xsize" | "ysize") => node?.properties.find(p => p.property === property)?.value;
-const names: Record<string, string> = { screen: "Screen root", frame: "Help frame", fixed: "Free layout group", vbox: "Vertical group", text: "Text", image: "Image", textbutton: "Button" };
+const names: Record<string, string> = { screen: "Screen root", frame: "Help frame", fixed: "Free layout group", window: "Window", hbox: "Horizontal group", grid: "Grid", viewport: "Viewport", vbox: "Vertical group", text: "Text", image: "Image", textbutton: "Button" };
 
 /** One session owns drafts, including while another workspace is visible. Source owns saved values. */
 export class ScreensWorkspace {
@@ -70,6 +70,8 @@ export class ScreensWorkspace {
   private buttonState = "normal";
   private readonly textSamples = new Map<string,{revision:string; screen:string; path:string; index:number; value:string}>();
   private readonly rail = el("nav", "screen-steps");
+  private sourceDialog?: HTMLDialogElement;
+  private sourceSequence = 0;
   private readonly drafts = new Map<string, Draft>();
   private documents: ScreenDocument[] = [];
   private catalog?: ScreenCatalog;
@@ -117,7 +119,7 @@ export class ScreensWorkspace {
       } : undefined,
       select: (id, design) => { const index = this.nodes().findIndex(n => screenNodeKey(n) === id); if (index >= 0) { if (design === false) this.step = "choose"; this.choose(index, design); } },
       commit: (command, base) => this.compose(command, base),
-      source: node => { if (this.doc) this.actions.source({ path: this.doc.path, expectedRevision: this.doc.revision, byteStart: node.span.start, byteEnd: node.span.end }); },
+      source: node => { void this.openSource(node); },
       note: (text, error) => this.note(text, error), preview: () => { this.updateSizeControls(); this.renderCanvas(); }, newScreen: () => this.beginCreation(), undo: () => void this.history("undo"),
       geometry: host => this.renderGeometry(host),
       hover: id => this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => { const node = this.nodes()[Number(target.dataset.index)]; target.dataset.hovered = String(!!node && screenNodeKey(node) === id); }),
@@ -188,7 +190,7 @@ export class ScreensWorkspace {
     this.observer = new ResizeObserver(() => this.renderCanvas()); this.observer.observe(viewport);
   }
   mount(host: HTMLElement): void { host.append(this.panel); this.frames.invalidate("Checking canvas source."); void this.load(); }
-  dispose(): void { this.disposed = true; this.composer.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
+  dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.composer.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
   hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasDraft() || this.layout.hasDraft(); }
   private current(): boolean { return !this.disposed && this.actions.current(); }
   private nodes(): ScreenNode[] { return this.doc?.screens.find(s => s.name === this.screen)?.nodes ?? []; }
@@ -549,9 +551,35 @@ export class ScreensWorkspace {
       this.busy = false;
     }
   }
-  private openSource(): void {
+  private async openSource(selected = this.nodes()[this.selected]): Promise<void> {
     if (this.owned && !this.owned.resolved) { this.reportUnresolved(); return; }
-    const node = this.nodes()[this.selected]; if (this.doc) this.actions.source({ path: this.doc.path, expectedRevision: this.doc.revision, byteStart: node?.span.start, byteEnd: node?.span.end });
+    const doc = this.doc; if (!doc) return;
+    const sequence = ++this.sourceSequence;
+    try {
+      const source = await this.actions.request<SourceDocument>("source.open", {path:doc.path});
+      if (!this.current() || this.doc !== doc || sequence !== this.sourceSequence) return;
+      this.sourceDialog?.remove();
+      const dialog = el("dialog", "screen-source-dialog"); dialog.ariaLabel = "Screen source";
+      dialog.onkeydown = event => event.stopPropagation();
+      const close = () => dialog.close();
+      const heading = el("div", "screen-source-heading");
+      heading.append(el("h2", "", "Screen source"), button("Close source", close));
+      const pre = el("pre"); pre.tabIndex = 0;
+      const reconciled = !source.dirty && source.baseRevision === doc.revision;
+      let offset = source.hasBom ? 3 : 0;
+      for (const line of (source.text ?? "Source unavailable.").split(/(?<=\n)/)) {
+        const index = reconciled ? this.nodes().findIndex(node => node.span.start === offset) : -1;
+        if (index >= 0) {
+          const row = button(line, () => { if (this.doc !== doc) { this.note("Source changed. Refresh before selecting this statement.", true); return; } close(); this.choose(index); this.composer.focusSelection(); });
+          row.className = "screen-source-line"; row.ariaLabel = `Select ${this.nodes()[index]!.kind} in Source`; pre.append(row);
+        } else pre.append(document.createTextNode(line));
+        offset += new TextEncoder().encode(line).length;
+      }
+      dialog.append(heading, el("p", "", reconciled ? "Saved source. Unapplied screen changes are excluded. Select a statement to select its element." : "Source has unfinished or changed content. Open Source to reconcile it before selecting elements."), pre,
+        button("Edit in Source", () => { close(); this.actions.source({path:doc.path,expectedRevision:doc.revision,byteStart:selected?.span.start,byteEnd:selected?.span.end}); }));
+      dialog.onclose = () => { dialog.remove(); if (this.sourceDialog === dialog) this.sourceDialog = undefined; };
+      this.sourceDialog = dialog; this.panel.append(dialog); dialog.showModal(); heading.querySelector("button")?.focus();
+    } catch (error) { if (this.current()) this.note((error as Error).message, true); }
   }
   private test(validate: boolean): void {
     if (!this.doc || this.busy || this.hasDraft()) { this.note("Apply or cancel unfinished changes before testing the saved screen. Input retained.", true); return; }

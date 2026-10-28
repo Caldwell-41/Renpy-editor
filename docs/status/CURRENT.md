@@ -1,6 +1,28 @@
 # Current status
 
-## L03 numeric layout merged and branch retired
+## L04 nested and clipped layouts ready for review
+
+[Draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67) implements
+[L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42) on
+`codex/phase3b-l04-nested-layout`. A2 `focused-v2` approval and the L03 prerequisite
+are satisfied. Window/hbox/grid/viewport controls and Source draft retention
+extend the existing transactional owners.
+
+[Audited CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
+passes at `dedf920`: both-host portable/controller checks, Windows SDK geometry
+and clipping, helper empty/populated cases and packaged WebView history/reopen.
+Signed Mac proof at application-identical `228fe23` passes identity, disk bytes
+and cleanup. Both independent reviews report zero findings.
+[Evidence](../tasks/evidence/nested-layout.md#terminal-ci1-audit-and-review-handoff)
+contains the four functional results, receipts, retained failures and A2 comparison.
+
+State is `review_ready`; #42 remains open. The full combined Design Lab check
+retains its startup/reference failures and is not a pass or waiver. Full canvas,
+physical-input, human and wider Phase 3B acceptance remain separate. No merge or
+release is selected. Mac helper/package ceilings are exhausted. Preserve the
+unrelated audit and protected recovery.
+
+## Accepted L03 baseline
 
 [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) merged into
 `codex/phase3b-screen-designer` at `a3035e8b62f8a5211c87e7957bbeba596bd073c3`.
@@ -11,11 +33,11 @@ bounded numeric-layout scope; its prerequisite for #42 and #46 is satisfied.
 
 [Merge closeout](../tasks/evidence/numeric-layout.md#merge-and-ticket-closeout-2026-10-28)
 links the scoped source/history, both-target SDK geometry and signed/package proof.
-The feature branch is retired after integration verification. This checkout is on
-the Screens parent. Related tickets retain broader acceptance and unselected work;
+The feature branch is retired after integration verification. Related tickets
+retain broader acceptance and unselected work;
 pointer/full-canvas, OS-native IME and human proof are outside this acceptance.
-No successor or release is selected. Historical limits, protected recovery and the
-unrelated audit remain intact.
+L04 is now selected above. Historical limits, protected recovery and the unrelated
+audit remain intact.
 
 ## Phase 3B architecture refactors merged
 

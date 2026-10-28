@@ -1,0 +1,205 @@
+{
+  "status": "explicit user design approval recorded; combined lab gate remains failed",
+  "approvalQuote": "approved",
+  "approvalDate": "2026-10-28",
+  "variant": "focused-refined",
+  "revision": "focused-v2",
+  "source": {
+    "commit": "b2fffee2a3983ff309c27502fdfc215f56b1ccd0",
+    "fingerprint": "98ceba77f44a69e91840ea4afa09e0e19118656fc9caa474a765753d5269e42d"
+  },
+  "sourceFiles": [
+    {
+      "path": "app/design-lab/registry.ts",
+      "sha256": "02f7b689b8e4bc2553e891912c7b308d1313ad1eeb0435053198fdea3c678065"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/check.mjs",
+      "sha256": "19236df974c18c116ea98829f0fa1c44129521c6861501458c9a502ae2f3c8d3"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/definition.ts",
+      "sha256": "aa580e2ebb2bddc69e12de7298ae5cfde8fa86819db00c23e2bab60e116d2dcc"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/focused.ts",
+      "sha256": "5085d781fdfb58275be56889b72d7c9c2630936e574977cc1a6631917432194a"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/refined-canvas.ts",
+      "sha256": "0355cde757194a0be77fc9fdeca893e93c7b676f4ef54bc621063c4065f324bf"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/refined-check.mjs",
+      "sha256": "27568d9097ee97decaa5429a33e4931e5a3d211e5018404ae2093c49d9f62bee"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/refined-model.ts",
+      "sha256": "41b86268a674072a3cb3cddaed66b0db4ac47c1cb4b075a21e60606305060d3f"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/refined.css",
+      "sha256": "c3ec3ca9c77f27bc55d833bd747dce65fb8bf39995171340a35c250398185a5b"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/refined.ts",
+      "sha256": "16a70ad8148e18fa3455309059f503a4de214024de52d227c351b41093338a05"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/source-led.ts",
+      "sha256": "e0ffb9a99f002cee1ff4c15e3771468120587433915cea8c3a8a25db850378b8"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/style.css",
+      "sha256": "bcb1b4ba91a49a643b798234ce47721772d1e6c10a07f3c797ce1ce84fb701a3"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/worksheet.ts",
+      "sha256": "a47558439ed1b8c42404f252c3d8e2a2537fcbfe96a2c92aa5e4d717d9eaafef"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/workspace.ts",
+      "sha256": "dcf18946d5051945b9ff2c0fe9e6f66fb5555b3212970617c7636ea981c966de"
+    }
+  ],
+  "captures": [
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-addition-dark-wide.png",
+      "sha256": "af87fe6066ad8118de28010ea0ac1a863d234c1c60e6bca0d574cb870838f7e9",
+      "state": "addition",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-choose-dark-wide.png",
+      "sha256": "74d4dfc45d6b61f8da244f85d4f104486168519367951c402aa5e855492d0f17",
+      "state": "choose",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-conflict-dark-wide.png",
+      "sha256": "636bfa406834ede7ae3ab9f4fd89195129af698bef84ef7bb15436d2c2c73abb",
+      "state": "conflict",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-connect-dark-wide.png",
+      "sha256": "51edbfdd8955c63c2e20ed1cbdd01ec44d30130761ba691a64dd88ac48a08c3e",
+      "state": "connect",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-editing-dark-compact.png",
+      "sha256": "0b744302acca7925640fab593cc9af93167965ad0f69230df3d4bbe62a5fb601",
+      "state": "editing",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-group-removal-dark-wide.png",
+      "sha256": "9d40ff16a78cbc5d1901a50206d19c1a7d2f57e14d9835474107c7eab80cf443",
+      "state": "group-removal",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-invalid-grid-dark-wide.png",
+      "sha256": "10220c91fb0ebb776f26cd819669109c4b3282c09434cce8693c16caaa25d1b9",
+      "state": "invalid-grid",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-source-dark-wide.png",
+      "sha256": "f374b3086022a5ba22f1951c204ea92cf8c0d8fd8c357bcd37dc820b2243df90",
+      "state": "source",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-source-only-dark-wide.png",
+      "sha256": "9cca46912eb49cae3dfb60dcbbce3654cbeb2522f02691c8700cb2ab6a9c47b2",
+      "state": "source-only",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-viewport-dark-wide.png",
+      "sha256": "48b8803d64bf4da6a9699ad3b5587d860a0bad443e88dc57ffb0d1041630617e",
+      "state": "viewport",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/focused-refined-dark-compact.png",
+      "sha256": "9150bdac08e91279a9f19d5f1e401fb5fa50cd951f2c119df525c6ac96ae8545",
+      "state": "nested",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/focused-refined-dark-wide.png",
+      "sha256": "f0011512b3f8ce4f415498445c747c05b03e3cb97bf72cff3ddf6ef1f5be7c93",
+      "state": "nested",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/focused-refined-light-compact.png",
+      "sha256": "f44ec375eca0c4de7fcf477a1927338fffefbca251732698db37d19f60f56b51",
+      "state": "nested",
+      "theme": "light",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/focused-v2/focused-refined-light-wide.png",
+      "sha256": "5e87882e77755b8ea2ee160c103a7a98fbfc9d9df89bfd61ed85cd0fec88a116",
+      "state": "nested",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    }
+  ],
+  "verification": {
+    "reviewedSourceAndCaptureHashes": "all match",
+    "approvalUI": "Approved \u00b7 focused-v2; source matches",
+    "baselineCaptureReproduction": "all four baseline PNGs byte-identical at recorded dimensions and scale",
+    "focusedBrowser": "64 cases and all original/refined interactions passed before approval; frontend code unchanged",
+    "typeScriptAndApprovalRecords": "post-approval pass",
+    "combinedStandard": "post-approval failure at first navigation, 8000 ms; no browser matrix cases reached",
+    "priorCombinedDiagnostic": "failed after 488 cases at existing flow-v1 changed-source guard; 45-second navigation diagnostic only",
+    "nativeSdk": "not run; owned by implementation chat"
+  },
+  "runtimeDecisions": "No new product decision requested. Agreed L04 bounds still need real source/native/SDK qualification.",
+  "publication": "local only; no push, PR, merge or issue-state change by this chat"
+}

@@ -34,7 +34,7 @@
     assert(identity.name === "travel_notes" && identity.resolved && identity.id !== identity.rootId, "Distinct persistent screen and root IDs required");
     assert(document.querySelector('.screen-tree [aria-selected="true"]')?.getAttribute("aria-label") === "Screen root", "Created root selected");
     checkpoint("creation-passed");
-    await click("View in Source"); await until(() => document.querySelector(".source-editor"), "Source editor");
+    await click("View in Source"); await until(() => document.querySelector(".screen-source-dialog[open]")); await click("Edit in Source"); await until(() => document.querySelector(".source-editor"), "Source editor");
     const editor = window.__loomlightProbeEditor(document.querySelector(".source-editor")), accepted = editor.value;
     assert(accepted.endsWith("screen travel_notes():\n    pass\n"), "Ordinary blank source emitted");
     editor.focus();

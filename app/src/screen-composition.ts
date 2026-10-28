@@ -25,17 +25,21 @@ interface Host {
 }
 interface Addition { parentId: string; kind: string; text: string; document: ScreenDocument }
 interface TextDraft { screenId: string; nodeId: string; value: string; document: ScreenDocument }
-const names: Record<string, string> = { screen: "Screen root", fixed: "Free layout group", frame: "Frame", vbox: "Vertical group", text: "Text", textbutton: "Text button", custom: "Source-only element", image: "Image" };
+const names: Record<string, string> = { screen: "Screen root", fixed: "Free layout group", frame: "Frame", window: "Window", vbox: "Vertical group", hbox: "Horizontal group", grid: "Grid", viewport: "Viewport", text: "Text", textbutton: "Text button", custom: "Source-only element", image: "Image" };
 const help: Record<string, string> = {
   screen: "The screen contains every element. Its order cannot change.",
   fixed: "Places children freely. Later siblings appear in front.",
   frame: "Adds a background around one child. Add a layout group inside it to hold several elements.",
   vbox: "Places children from top to bottom in source order.",
+  hbox: "Places children from left to right in source order.",
+  grid: "Fills rows from left to right in source order. New grids allow empty cells and refuse additions beyond capacity.",
+  window: "Contains one child. Use a layout group inside it for several elements.",
+  viewport: "Clips one child at the initial top-left. Width and height set the visible opening. Scrolling controls remain in Source.",
   text: "Shows literal text. Edit the text under Design.",
   textbutton: "Shows a button label. Editing its label keeps existing actions in Source.",
   custom: "This region stays in Source. Visual structural edits cannot move or remove it.",
 };
-const containers = new Set(["screen", "fixed", "frame", "vbox"]);
+const containers = new Set(["screen", "fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"]);
 let confirmationSequence = 0;
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = "") => {
   const node = document.createElement(tag); node.className = className; node.textContent = text; return node;
@@ -281,6 +285,13 @@ export class ScreenComposer {
     } else if (view.step === "design" && ["text", "textbutton"].includes(view.selected.kind) && view.selected.id) {
       this.renderText(view, card);
       this.host.geometry(card);
+    } else if (view.step === "design" && view.selected.numericLayout) {
+      this.host.geometry(card);
+      const tools = el("div", "screen-edit-actions screen-container-actions");
+      tools.append(action("View in Source", () => this.host.source(view.selected)));
+      if (containers.has(view.selected.kind) && view.selected.id) tools.append(action("Add inside this group", () => this.beginAddition()));
+      tools.append(action("Back to elements", () => { this.host.select(screenNodeKey(view.selected), false); this.focusRow(); }));
+      card.append(tools);
     } else {
       card.append(el("h2", "", view.step === "connect" ? "Connect" : names[view.selected.kind] ?? view.selected.kind),
         el("p", "", view.step === "connect" ? "Button actions and Story connections remain in Source. Canvas controls never run game actions." : help[view.selected.kind] ?? help.custom),
@@ -308,7 +319,7 @@ export class ScreenComposer {
     const draft = this.addition!;
     const form = el("section", "screen-addition"); form.ariaLabel = "Add element";
     const palette = el("div", "screen-element-palette"); palette.ariaLabel = "Element types";
-    for (const kind of ["text", "textbutton", "fixed", "frame", "vbox"]) {
+    for (const kind of ["text", "textbutton", "fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"]) {
       const choice = action(names[kind]!, () => { draft.kind = kind; this.error = ""; this.render(); this.card?.querySelector<HTMLElement>(`[data-kind="${kind}"]`)?.focus({ preventScroll: true }); this.host.preview(); });
       choice.dataset.kind = kind;
       choice.prepend(elementIcon(kind)); choice.ariaPressed = String(draft.kind === kind); choice.disabled = this.saving; palette.append(choice);
@@ -319,7 +330,7 @@ export class ScreenComposer {
     const destination = el("label", "field", "Add inside"); destination.append(parent);
     form.append(palette, el("p", "", help[draft.kind]!), destination);
     const parentNode = view.nodes.find(n => n.id === draft.parentId), last = parentNode && this.children(view, parentNode).at(-1);
-    form.append(el("p", "screen-add-position", parentNode?.kind === "frame" && (last || parentNode.protected.length) ? "This frame already has a child. Choose its inner group to add another element."
+    form.append(el("p", "screen-add-position", parentNode && ["frame", "window", "viewport"].includes(parentNode.kind) && (last || parentNode.protected.length) ? `This ${parentNode.kind} already has a child. Choose its inner group to add another element.`
       : last ? `At the end, after ${this.name(view, last)}.` : "First element in this container."));
     if (["text", "textbutton"].includes(draft.kind)) {
       const text = el("textarea"); text.ariaLabel = "New element text"; text.value = draft.text; text.maxLength = 8192; text.readOnly = this.saving;
@@ -409,6 +420,8 @@ export class ScreenComposer {
   private requestRemoval(): void {
     const view = this.host.view(); if (!view || this.saving || view.busy || this.removal) return;
     if (this.hasDraft()) { this.showError("Apply or cancel unfinished edits before removing elements. Input retained."); return; }
+    const parent = this.parent(view, view.selected);
+    if (parent?.kind === "grid" && parent.numericLayout?.allowsEmptyCells !== true) { this.showError("This grid's empty-cell policy stays in Source. Removal could leave it incomplete; nothing changed."); return; }
     if (!this.movable(view, view.selected)) { this.showError("The screen root and protected source-only elements cannot be removed. Selection is unchanged."); return; }
     const node = view.selected, descendants = view.nodes.filter(n => n.span.start > node.span.start && n.span.start < node.span.end);
     this.removal = { node, document: view.document, invoker: document.activeElement instanceof HTMLElement ? document.activeElement : null,

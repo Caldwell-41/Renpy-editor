@@ -1,0 +1,40 @@
+{
+  "candidate": "228fe2303e361bf8522d13ffcc09e9ce445bd3c9",
+  "applicationEquivalentHead": "2f0386a3fe2fbd48c59943cf03dcc2f41f98da7d",
+  "referenceRevision": "focused-v2",
+  "referenceSource": "b2fffee2a3983ff309c27502fdfc215f56b1ccd0",
+  "theme": "dark",
+  "displayScale": 1,
+  "states": [
+    "matching six text children; grid 2x3; spacing 16; wide1100x720",
+    "same grid compact560x640",
+    "viewport width580 height260; wide1100x720"
+  ],
+  "captures": [
+    {
+      "path": "captures/grid-dark-wide.png",
+      "sha256": "471e593c6d378bee000ed06a28644d926c7005308f88ba1762819fab6d5b1849"
+    },
+    {
+      "path": "captures/grid-dark-compact.png",
+      "sha256": "9e63eaa42cf0a4d68ccbe503829bfc7b93d05e823a1d30f18e6fb0dd4ce3ce2d"
+    },
+    {
+      "path": "captures/viewport-dark-wide.png",
+      "sha256": "e1fff9934d9d1cc0b3215ed137a03eebbea662bcaf7b9c07a8d93d2bb0d59dd1"
+    }
+  ],
+  "findings": {
+    "visualFidelity": "Paired grid counts and spacing, one dense inspector, position/anchor pairs, Apply/Cancel and compact canvas toggle match the approved structure. Existing production toolbars and screen selector remain, adding vertical space. The production grid notice states the actual empty-cell policy.",
+    "functionalCorrectness": "Real UI/core paths and both-host native/SDK proof pass at their recorded scope.",
+    "limits": "The comparison intentionally has no SDK canvas frame. The approved schematic canvas is not pixel-equivalence proof. Full combined Design Lab check retains startup/reference failures."
+  },
+  "compactLayout": {
+    "shells": 1,
+    "headerTop": 0,
+    "headerHeight": 54,
+    "footerTop": 610,
+    "footerHeight": 30,
+    "horizontalOverflow": false
+  }
+}

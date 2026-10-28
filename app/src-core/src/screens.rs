@@ -246,7 +246,13 @@ fn kind(line: &Line<'_>) -> Option<&'static str> {
         "fixed:" => return Some("fixed"),
         "frame:" => return Some("frame"),
         "vbox:" => return Some("vbox"),
+        "hbox:" => return Some("hbox"),
+        "window:" => return Some("window"),
+        "viewport:" => return Some("viewport"),
         _ => {}
+    }
+    if grid_header(line.code).is_some() {
+        return Some("grid");
     }
     for (prefix, kind) in [
         ("text ", "text"),
@@ -261,6 +267,33 @@ fn kind(line: &Line<'_>) -> Option<&'static str> {
         }
     }
     None
+}
+
+/// Literal grid arguments and their byte offsets within an already lexed statement.
+fn grid_header(code: &str) -> Option<[(u32, usize, usize); 2]> {
+    let tokens = code
+        .strip_suffix(':')?
+        .split_whitespace()
+        .collect::<Vec<_>>();
+    if tokens.len() != 3 || tokens[0] != "grid" {
+        return None;
+    }
+    let mut result = [(0, 0, 0); 2];
+    let mut offset = 4;
+    for (slot, token) in tokens[1..].iter().enumerate() {
+        if token.starts_with('0') || !token.bytes().all(|b| b.is_ascii_digit()) {
+            return None;
+        }
+        let value = token.parse::<u32>().ok().filter(|v| (1..=64).contains(v))?;
+        let start = offset + code[offset..].find(token)?;
+        result[slot] = (value, start, start + token.len());
+        offset = start + token.len();
+    }
+    Some(result)
+}
+
+fn single_child(kind: &str) -> bool {
+    matches!(kind, "frame" | "window" | "viewport")
 }
 
 fn parse_body(
@@ -369,6 +402,15 @@ fn parse_body(
             }
         }
         if child.single && child.indent == line.indent + 4 {
+            if nodes[slot].kind == "grid"
+                && after == next + 1
+                && matches!(child.code, "allow_underfull True" | "allow_underfull False")
+                && lines[index + 1..next]
+                    .iter()
+                    .all(|l| !l.code.starts_with("allow_underfull "))
+            {
+                recognized = true;
+            }
             if let Some((key, value)) = child.code.split_once(' ') {
                 if ["xalign", "yalign", "padding", "spacing"].contains(&key) {
                     if let Ok(value) = value.trim().parse::<f64>() {
