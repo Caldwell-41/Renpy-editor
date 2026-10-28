@@ -112,7 +112,7 @@
     await history("Undo", reordered, close); await history("Redo", removed, title); await history("Undo", reordered, close);
     await checkpoint("confirmed-removal-passed");
 
-    await click("View in Source"); await until(() => document.querySelector(".source-editor"));
+    await click("View in Source"); await until(() => document.querySelector(".screen-source-dialog[open]")); await click("Edit in Source"); await until(() => document.querySelector(".source-editor"));
     const editor = window.__loomlightProbeEditor(document.querySelector(".source-editor"));
     // Real Source reconciliation adds an opaque neighbor and shifts all byte offsets.
     const protectedSource = '# Source offset retained\n' + reordered + '        use source_only_footer()\n\nscreen source_only_footer():\n    frame:\n        xpos 860\n        ypos 620\n        text "Protected neighbor"\n';

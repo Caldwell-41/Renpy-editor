@@ -1,56 +1,53 @@
 # Current outcome handover
 
-## L04 implementation preparation and prototype handoff
+## L04 implementation and qualification
 
-Kris selected [#42, Author nested and clipped layouts](https://github.com/Caldwell-41/Renpy-editor/issues/42)
-using the implement skill, assigned delivery ownership to this chat, and requested
-a new branch. This checkout is on `codex/phase3b-l04-nested-layout`, based on
-`eb83d3b1bfe8fd3f62f13b301300a47b61e96dd6`. Its integration destination is
-`codex/phase3b-screen-designer`. Work is local; no push, merge or release has occurred.
+Kris selected [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42), assigned
+this chat end-to-end ownership, requested a new branch and approved status updates
+for this work. This checkout is on `codex/phase3b-l04-nested-layout`, based on
+`eb83d3b1bfe8fd3f62f13b301300a47b61e96dd6`, targeting the Screens parent. Work is
+local; no merge or release is selected. Preserve the unrelated Phase 1 audit.
 
 The separate `L04 nested layout prototypes` chat
-(`01a1818a-2b56-7230-99bb-ba202fd62b1d`) owns prototype iteration with Kris on
-`codex/phase3b-l04-prototypes` in its managed worktree. It owns only the new
-`app/design-lab/screens/nested-layout/`, its registry entry and
-`docs/design/design-lab-nested-layout/`. This implementation chat
-(`01a18188-aeaf-7300-834d-ae88d31acb85`) owns production, tests, contracts, status
-and ticket state. The prototype owner is authorized to send questions and the
-final approved design back here. Reviewed source must be committed and pinned
-under Design Lab INTEGRATION. No production UI changes precede final approval.
+(`01a1818a-2b56-7230-99bb-ba202fd62b1d`) received Kris's exact final decision,
+"approved", for A2 `focused-refined` / `focused-v2`. Its seven scoped commits through
+`682f922` are integrated. The source commit, fingerprint, 13 source hashes and 14
+captures verified. Keep its managed worktree and approved frontend pinned for
+comparison. [Handoff](../design/design-lab-nested-layout/HANDOFF.md) and
+[approval](../design/design-lab-nested-layout/approval.json) retain the exact decision.
+The prototype owner has finished; this chat owns implementation and qualification.
 
-The initial proposal uses the existing transactional composition/numeric layout
-owners. It adds window/hbox/grid/viewport, literal grid dimensions and row-major
-order, window padding, hbox/grid spacing and stationary top-left viewport clipping.
-Windows/viewports accept one explicit child. Scrolling controls, adjustment bindings,
-initial offsets and child-size expressions remain Source-only. These are proposals
-pending design approval and pinned 8.5.3 SDK qualification. Grid dimensions use a
-proposed authoring range of 1-64 per axis. Source reads establish no rendering proof.
-Kris confirmed the TDD boundaries on 2026-10-28: public core requests for lossless
-edits/history/reopen, the real UI-to-core path for drafts/selection/conflicts, and
-pinned-SDK renders at both aspects for grid placement/clipping. Component checks
-alone do not establish integration proof. No new tests or production edits have
-been made.
+The implementation extends existing composition/numeric owners with
+window/hbox/grid/viewport, count units for literal 1-64 grid axes, minimal header
+patches, padding/spacing and stationary top-left clipping. Source opens in a modal
+and Edit in Source retains the existing editor. Current typed/source rules are in
+[DATA_MODEL](../DATA_MODEL.md#nested-containers-and-viewport-limits).
 
-Kris explicitly approved ticket #42 status updates for this work after automatic
-approval review rejected the initial full-body update for missing authorization and
-possible intervening-edit loss. A fresh read found no intervening changes. The
-selected execution record and confirmed test boundaries are now published on #42;
-the full body was read back and matches the prepared update. Reconcile fresh issue
-text before later updates. The local copy is retained in ignored
-`.toolchains/l04-preparation/issue42-proposed.md`.
+Kris confirmed public core requests, the real UI-to-core path and pinned-SDK renders
+as the test boundaries. [Evidence](../tasks/evidence/nested-layout.md) retains
+passing portable/UI/core and scoped Mac SDK/helper results, original failures and
+recovery. All 264 frontend cases and 43 affected screen component cases pass.
+The broad core run passed 402 cases; sandbox localhost denials failed 31 transport
+cases. All 38 cases in that affected module pass with socket access, resolving the
+31 failures. Combined ordinary coverage is 433 cases, with 49 explicit ignores and
+three policy exclusions. The failed broad run and scoped rerun are retained.
+Windows qualification, the signed Mac native candidate and independent review
+remain pending. The full Design Lab gate remains failed at initial navigation;
+its longer external diagnostic also remains failed at the old reference guard.
 
-Development remains on Mac ARM64; affected Windows/macOS proof follows host routing.
-No costly operation has started for L04. Set operation limits in #42 before package,
-native, SDK or costly CI operations. Historical allowances remain closed. No CI
-watch, editor session or SDK process is pending for this selection. All four leaf
-criteria, full editor/canvas acceptance and existing human/native limits remain
-pending. Resume here after the approved prototype handoff, reconcile its pinned
-source/approval record, then implement and qualify through the existing owners.
-Preserve the unrelated untracked Phase 1 audit and protected recovery below.
+Current Mac use is SDK 10/16 and helper sessions 2/4. No package/native session or
+costly CI dispatch has started. #42 owns limits across all hosts and attempts.
+The first helper and source-campaign failures stopped in preflight with no SDK
+process. Later failed launches are included in consumption. Raw local artifacts
+are retained under ignored `.toolchains/l04/`; the evidence links the public receipt.
 
-Preparation documentation passes the repository validator (1,022 files) and
-`git diff --check`. CURRENT and HANDOVER remain above their soft length targets
-because they retain earlier candidate-bound evidence and protected recovery.
+Next, finish the broad/focused checks, freeze and review the candidate, build the
+signed Mac package, run the rehearsed nested-layout WebView case, and use the
+focused Screens CI selector `nested_layout` for Windows qualification and both-host
+portable checks. Reuse unchanged Mac SDK mappings only at their recorded scope;
+record candidate/material equivalence. CI waits use ci-watch in this same chat.
+All four leaf criteria remain pending until required proof and review are complete.
+Protected native recovery and earlier closed allowances below remain intact.
 
 ## Retained L03 closeout
 

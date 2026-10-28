@@ -1005,7 +1005,7 @@ fn main() {
                     if !data.starts_with(std::env::temp_dir()) || !data.file_name().is_some_and(|n|n.to_string_lossy().starts_with("loomlight-reference-")){return Err("Reference probe root refused".into());}
                     if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){LifecycleService::new(data).map_err(|_|"Reference reopen failed")?}
                     else {if data.exists(){return Err("Reference fixture already exists".into());}LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?}
-                } else if data.exists() { return Err("probe destination already exists".into()); } else if matches!(case.as_str(), "source-foundation" | "owned-screen" | "screen-composition") {
+                } else if data.exists() { return Err("probe destination already exists".into()); } else if matches!(case.as_str(), "source-foundation" | "owned-screen" | "screen-composition" | "nested-layout") {
                     LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
                 } else if matches!(case.as_str(), "canvas-helper" | "canvas-input") {
                     let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").ok_or("Canvas probe SDK archive required")?;
@@ -1143,6 +1143,9 @@ fn main() {
                         main.show().expect("Canvas input show"); main.set_focus().expect("Canvas input focus");
                         main.eval(&format!("{}\n{}", include_str!("native_editor_probe.js"), include_str!("canvas_input_probe.js"))).expect("Canvas input probe injection");
                     } else if case == "canvas-helper" { main.show().expect("Canvas probe show");main.set_focus().expect("Canvas probe focus");main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("canvas_helper_probe.js"))).expect("Canvas probe injection");
+                    } else if case == "nested-layout" {
+                        main.show().expect("Nested layout probe show"); main.set_focus().expect("Nested layout probe focus");
+                        main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("nested_layout_probe.js"))).expect("Nested layout probe injection");
                     } else if case == "screen-composition" {
                         main.show().expect("Composition probe show"); main.set_focus().expect("Composition probe focus");
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("screen_composition_probe.js"))).expect("Composition probe injection");

@@ -177,6 +177,14 @@ impl AuthoringService {
                 if node.numeric_layout.is_some() && !layout::aliases(key).is_empty() {
                     continue;
                 }
+                if node.kind == "grid"
+                    && key == "allow_underfull"
+                    && matches!(raw.trim(), "True" | "False")
+                    && !properties.contains_key(key)
+                {
+                    properties.insert(key.into(), Value::Bool(raw.trim() == "True"));
+                    continue;
+                }
                 let value = if key == "padding" {
                     raw.trim()
                         .strip_prefix('(')
@@ -359,13 +367,53 @@ impl AuthoringService {
                 plan.limits
                     .push("Draft text requires supported literal text mapping.".into());
             }
+            let mut properties = Map::new();
+            if addition.kind == "grid" {
+                properties.insert("columns".into(), 2.into());
+                properties.insert("rows".into(), 2.into());
+                properties.insert("allow_underfull".into(), true.into());
+            }
             plan.nodes.push(CanvasNode {
                 start: screen.nodes.iter().map(|n| n.span.end).max().unwrap_or(0) + 1,
                 parent: Some(parent.span.start),
                 kind: addition.kind,
                 literal,
-                properties: Map::new(),
+                properties,
             });
+        }
+        for node in &plan.nodes {
+            let count = plan
+                .nodes
+                .iter()
+                .filter(|child| child.parent == Some(node.start))
+                .count();
+            if single_child(&node.kind) && count > 1 {
+                plan.limits.push(format!(
+                    "{} requires one explicit child at {}",
+                    node.kind, node.start
+                ));
+            }
+            if node.kind == "grid" {
+                let capacity = node
+                    .properties
+                    .get("columns")
+                    .and_then(Value::as_u64)
+                    .unwrap_or(0)
+                    * node
+                        .properties
+                        .get("rows")
+                        .and_then(Value::as_u64)
+                        .unwrap_or(0);
+                if count as u64 > capacity
+                    || (count as u64 != capacity
+                        && node.properties.get("allow_underfull") != Some(&Value::Bool(true)))
+                {
+                    plan.limits.push(format!(
+                        "Grid capacity or empty-cell behavior is unresolved at {}",
+                        node.start
+                    ));
+                }
+            }
         }
         // The helper's built-in styles are qualified only when project initialization
         // cannot change them. Later style resolution must replace this conservative

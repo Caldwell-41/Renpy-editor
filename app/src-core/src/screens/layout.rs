@@ -3,6 +3,8 @@ use super::*;
 use std::collections::{BTreeMap, BTreeSet};
 
 const FIELDS: &[&str] = &[
+    "columns",
+    "rows",
     "xpos",
     "ypos",
     "xanchor",
@@ -25,6 +27,7 @@ const FIELDS: &[&str] = &[
 pub enum Unit {
     Pixels,
     Relative,
+    Count,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
@@ -37,17 +40,22 @@ pub struct NumericValue {
 impl NumericValue {
     pub fn json(self) -> serde_json::Value {
         match self.unit {
-            Unit::Pixels => serde_json::json!(self.value as i64),
+            Unit::Pixels | Unit::Count => serde_json::json!(self.value as i64),
             Unit::Relative => serde_json::json!(self.value),
         }
     }
     fn literal(self) -> String {
         match self.unit {
-            Unit::Pixels => (self.value as i64).to_string(),
+            Unit::Pixels | Unit::Count => (self.value as i64).to_string(),
             Unit::Relative => format!("{:?}", self.value),
         }
     }
     fn valid(self, key: &str) -> bool {
+        if matches!(key, "columns" | "rows") {
+            return self.unit == Unit::Count
+                && self.value.fract() == 0.0
+                && (1.0..=64.0).contains(&self.value);
+        }
         if !self.value.is_finite() || self.value.abs() > MAX_PIXELS as f64 {
             return false;
         }
@@ -98,6 +106,10 @@ pub struct NumericLayout {
     colon: bool,
     #[serde(skip)]
     indent: usize,
+    #[serde(skip)]
+    child_count: usize,
+    #[serde(skip)]
+    grid: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -112,6 +124,7 @@ pub struct SetLayoutRequest {
 
 pub(super) fn aliases(key: &str) -> Vec<Vec<&str>> {
     match key {
+        "columns" | "rows" => vec![], // Positional grid arguments, never body properties.
         "xalign" => vec![vec!["xpos", "xanchor"]],
         "yalign" => vec![vec!["ypos", "yanchor"]],
         "align" => vec![vec!["xpos", "xanchor"], vec!["ypos", "yanchor"]],
@@ -134,7 +147,20 @@ pub(super) fn aliases(key: &str) -> Vec<Vec<&str>> {
 }
 
 pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<NumericLayout> {
-    if !["fixed", "frame", "vbox", "text", "textbutton", "image"].contains(&node.kind.as_str()) {
+    if ![
+        "fixed",
+        "frame",
+        "window",
+        "vbox",
+        "hbox",
+        "grid",
+        "viewport",
+        "text",
+        "textbutton",
+        "image",
+    ]
+    .contains(&node.kind.as_str())
+    {
         return None;
     }
     let header = lines.iter().find(|line| line.start == node.span.start)?;
@@ -143,7 +169,8 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         blocked: BTreeMap::new(),
         sizing_note: match node.kind.as_str() {
             "text" => Some("Text keeps its natural bounds. Width and height limit layout space; they do not stretch glyphs.".into()),
-            "vbox" => Some("Children can make the group larger than its requested size.".into()),
+            "vbox" | "hbox" | "grid" => Some("Children can make the group larger than its requested size.".into()),
+            "viewport" => Some("Width and height set the stationary top-left opening. Scrolling, offsets, bindings and child_size remain in Source.".into()),
             _ => None,
         },
         entries: vec![],
@@ -152,7 +179,34 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         header_code_end: header.start + header.indent + header.code.len(),
         colon: header.code.ends_with(':'),
         indent: header.indent + 4,
+        child_count: nodes.iter().filter(|n| n.parent_start == Some(node.span.start)).count(),
+        grid: node.kind == "grid",
     };
+    if let Some(arguments) = grid_header(header.code) {
+        for (key, (value, start, end)) in ["columns", "rows"].into_iter().zip(arguments) {
+            let value = NumericValue {
+                unit: Unit::Count,
+                value: value as f64,
+            };
+            let span = Span {
+                start: header.start + header.indent + start,
+                end: header.start + header.indent + end,
+            };
+            result.values.insert(key.into(), value);
+            result.entries.push(Entry {
+                key: key.into(),
+                keyword: span.clone(),
+                value: span.clone(),
+                line_end: header.end,
+                indent: 0,
+                atoms: vec![Atom {
+                    span,
+                    fields: vec![key.into()],
+                    value,
+                }],
+            });
+        }
+    }
     let body_indent = lines
         .iter()
         .filter(|line| line.start > node.span.start && line.start < node.source_end)
@@ -169,6 +223,11 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         return Some(result);
     }
     for key in FIELDS {
+        if matches!(*key, "columns" | "rows") && node.kind != "grid" {
+            result
+                .blocked
+                .insert((*key).into(), "Only grids have columns and rows.".into());
+        }
         if node.kind == "image" && matches!(*key, "xminimum" | "yminimum" | "xmaximum" | "ymaximum")
         {
             result.blocked.insert((*key).into(), "Images use transformed width and height rather than layout bounds. Edit unsupported bounds in Source.".into());
@@ -176,8 +235,8 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         if node.kind == "text" && matches!(*key, "xminimum" | "yminimum") {
             result.blocked.insert((*key).into(), "Text keeps its natural bounds. Minimum size does not stretch glyphs; use a frame for a fixed box.".into());
         }
-        if key.ends_with("_padding") && node.kind != "frame"
-            || *key == "spacing" && node.kind != "vbox"
+        if key.ends_with("_padding") && !matches!(node.kind.as_str(), "frame" | "window")
+            || *key == "spacing" && !matches!(node.kind.as_str(), "vbox" | "hbox" | "grid")
         {
             result.blocked.insert(
                 (*key).into(),
@@ -189,6 +248,9 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         line.start > node.span.start && line.start < node.source_end && line.indent == result.indent
     }) {
         let key = line.code.split_whitespace().next().unwrap_or("");
+        if matches!(key, "columns" | "rows") {
+            continue;
+        }
         let mut mapping = aliases(key);
         if mapping.is_empty() {
             if matches!(
@@ -283,6 +345,11 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         let atoms = atoms.unwrap();
         for atom in &atoms {
             for field in &atom.fields {
+                if matches!(node.kind.as_str(), "window" | "hbox" | "grid" | "viewport")
+                    && result.blocked.contains_key(field)
+                {
+                    result.unresolved.insert(field.clone());
+                }
                 if node.kind == "image"
                     && matches!(
                         field.as_str(),
@@ -312,16 +379,21 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
             atoms,
         });
     }
-    if node.parent_start.is_some_and(|start| {
-        nodes
-            .iter()
-            .any(|n| n.span.start == start && n.kind == "vbox")
-    }) {
-        for key in ["ypos", "yanchor"] {
+    if let Some(parent) = nodes
+        .iter()
+        .find(|n| Some(n.span.start) == node.parent_start)
+    {
+        let keys: &[&str] = match parent.kind.as_str() {
+            "vbox" => &["ypos", "yanchor"],
+            "hbox" => &["xpos", "xanchor"],
+            "grid" => &["xpos", "ypos", "xanchor", "yanchor"],
+            _ => &[],
+        };
+        for key in keys {
             result.blocked.insert(
-                key.into(),
-                "The vertical group controls vertical placement. Edit the group's spacing instead."
-                    .into(),
+                (*key).into(),
+                if parent.kind == "vbox" { "The vertical group controls vertical placement. Edit the group's spacing instead." }
+                else { "The parent group controls this placement. Edit the parent's layout instead." }.into(),
             );
         }
     }
@@ -433,6 +505,14 @@ impl NumericLayout {
             {
                 return Err(SceneError::InvalidPayload);
             }
+        }
+        if self.grid
+            && (values
+                .get("columns")
+                .zip(values.get("rows"))
+                .is_none_or(|(cols, rows)| (cols.value * rows.value) < self.child_count as f64))
+        {
+            return Err(SceneError::InvalidPayload);
         }
         Ok(values)
     }

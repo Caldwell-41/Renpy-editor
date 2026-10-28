@@ -7,6 +7,276 @@ use std::fs;
 const FIXTURE: &str = include_str!("../../../../tests/fixtures/phase-3b-screens/help.rpy");
 const PATH: &str = "game/ui/help.rpy";
 
+#[path = "nested_sdk_tests.rs"]
+mod nested_sdk;
+
+#[test]
+fn nested_containers_compose_through_public_requests_and_restore_history() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();
+    let mut parent = owner["rootId"].clone();
+    for kind in ["window", "hbox", "viewport", "grid", "text"] {
+        let result = compose_command(
+            &mut service,
+            &owner,
+            json!({"type":"add", "parentId":parent, "kind":kind, "text":"Nested"}),
+        );
+        let node = result["document"]["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["id"] == result["selectedId"])
+            .unwrap_or_else(|| panic!("{kind}: {result}"));
+        assert_eq!(node["kind"], kind);
+        assert!(node["protected"].as_array().unwrap().is_empty(), "{node}");
+        parent = result["selectedId"].clone();
+    }
+    let accepted = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();
+    assert!(accepted.as_str().unwrap().contains("grid 2 2:"));
+    assert!(accepted.as_str().unwrap().contains("allow_underfull True"));
+    for _ in 0..5 {
+        composition_history(&mut service, "undo");
+    }
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        original
+    );
+    for _ in 0..5 {
+        composition_history(&mut service, "redo");
+    }
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        accepted
+    );
+    service.open_path(&root).unwrap();
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        accepted
+    );
+}
+
+#[test]
+fn nested_grid_layout_is_one_minimal_change_with_capacity_and_canvas_validation() {
+    let (_temporary, mut service, _root, owner) = composition_project();
+    let grid = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"grid","text":""}),
+    );
+    let grid_id = grid["selectedId"].clone();
+    for text in ["One", "Two", "Three"] {
+        compose_command(
+            &mut service,
+            &owner,
+            json!({"type":"add","parentId":grid_id,"kind":"text","text":text}),
+        );
+    }
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let start = doc["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == grid_id)
+        .unwrap()["span"]["start"]
+        .clone();
+    let before = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let values = json!({"columns":{"unit":"count","value":3},"rows":{"unit":"count","value":1},"spacing":{"unit":"pixels","value":8}});
+    let payload = json!({"path":owner["path"],"screenName":"notes","expectedRevision":doc["revision"],"nodeStart":start,"values":values});
+    let accepted = ipc(&mut service, "screens.setLayout", payload.clone());
+    let after = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    assert_eq!(
+        after,
+        before.replacen("grid 2 2:", "grid 3 1:", 1).replacen(
+            "        allow_underfull",
+            "        spacing 8\n        allow_underfull",
+            1
+        )
+    );
+    let mut noop = payload.clone();
+    noop["expectedRevision"] = accepted["revision"].clone();
+    assert_eq!(
+        ipc(&mut service, "screens.setLayout", noop.clone())["revision"],
+        accepted["revision"]
+    );
+    let mut invalid = noop.clone();
+    invalid["values"]["columns"]["value"] = json!(2);
+    assert_eq!(
+        reject(&mut service, "screens.setLayout", invalid)["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
+    let plan_request = json!({"path":owner["path"],"screenName":"notes","expectedRevision":accepted["revision"],"width":1280,"height":720});
+    let plan = ipc(&mut service, "screens.canvasPlan", plan_request.clone());
+    assert_eq!(plan["available"], true, "{plan}");
+    assert_eq!(plan["nodes"][1]["properties"]["columns"], 3);
+    assert_eq!(plan["nodes"][1]["properties"]["allow_underfull"], true);
+    let mut draft = plan_request;
+    draft["layouts"] = json!([{"nodeStart":start,"values":{"columns":{"unit":"count","value":1}}}]);
+    assert_eq!(
+        reject(&mut service, "screens.canvasPlan", draft)["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        before
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        after
+    );
+}
+
+#[test]
+fn nested_viewport_keeps_unsupported_behavior_lossless_and_refuses_false_canvas_success() {
+    let (_temporary, mut service, _root, owner) = composition_project();
+    let window = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"window","text":""}),
+    );
+    let viewport = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":window["selectedId"],"kind":"viewport","text":""}),
+    );
+    let doc = viewport["document"].clone();
+    let node = doc["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == viewport["selectedId"])
+        .unwrap();
+    let payload = json!({"path":owner["path"],"screenName":"notes","expectedRevision":doc["revision"],"nodeStart":node["span"]["start"],"values":{"xsize":{"unit":"pixels","value":240},"ysize":{"unit":"pixels","value":80}}});
+    let accepted = ipc(&mut service, "screens.setLayout", payload);
+    let base = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    assert_eq!(
+        ipc(
+            &mut service,
+            "screens.canvasPlan",
+            json!({"path":owner["path"],"screenName":"notes","expectedRevision":accepted["revision"],"width":1280,"height":720})
+        )["available"],
+        true
+    );
+    for property in [
+        "mousewheel True",
+        "xinitial 0.5",
+        "child_size (500, 400)",
+        "padding (10, 10)",
+        "columns 3",
+    ] {
+        let source = base.replacen(
+            "            xsize 240",
+            &format!("            {property} # preserve exactly\n            xsize 240"),
+            1,
+        );
+        save_composition_source(&mut service, &owner, &source);
+        let doc = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        let plan = ipc(
+            &mut service,
+            "screens.canvasPlan",
+            json!({"path":owner["path"],"screenName":"notes","expectedRevision":doc["revision"],"width":1280,"height":720}),
+        );
+        assert_eq!(plan["available"], false, "{property}: {plan}");
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+            source
+        );
+    }
+}
+
+#[test]
+fn nested_layout_prepares_sdk_fixture_through_public_requests() {
+    let (_temporary, mut service, _root, owner) = composition_project();
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let marker = original.lines().next().unwrap();
+    let fixture = include_str!("../../../../tests/fixtures/phase-3b-screens/nested-layout.rpy")
+        .replace("screen nested():", &format!("{marker}\nscreen notes():"));
+    save_composition_source(&mut service, &owner, &fixture);
+    let mut doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    for (kind, values) in [
+        (
+            "window",
+            json!({"left_padding":{"unit":"pixels","value":12},"right_padding":{"unit":"pixels","value":12},"top_padding":{"unit":"pixels","value":16},"bottom_padding":{"unit":"pixels","value":16}}),
+        ),
+        ("hbox", json!({"spacing":{"unit":"pixels","value":20}})),
+        ("grid", json!({"spacing":{"unit":"pixels","value":8}})),
+        ("viewport", json!({"ysize":{"unit":"pixels","value":100}})),
+    ] {
+        let node = doc["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["kind"] == kind)
+            .unwrap();
+        doc = ipc(
+            &mut service,
+            "screens.setLayout",
+            json!({"path":owner["path"],"screenName":"notes","expectedRevision":doc["revision"],"nodeStart":node["span"]["start"],"values":values}),
+        );
+    }
+    let plan = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":"notes","expectedRevision":doc["revision"],"width":1280,"height":720}),
+    );
+    assert_eq!(plan["available"], true, "{plan}");
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    assert!(source.contains("id \"content\""));
+    assert!(source.contains("ypos 150"));
+    assert_eq!(
+        ipc(&mut service, "screens.list", json!({}))["owned"][0]["resolved"],
+        true
+    );
+    let viewport = doc["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["kind"] == "viewport")
+        .unwrap();
+    ipc(
+        &mut service,
+        "screens.setLayout",
+        json!({"path":owner["path"],"screenName":"notes","expectedRevision":doc["revision"],"nodeStart":viewport["span"]["start"],"values":{"ysize":{"unit":"pixels","value":200}}}),
+    );
+    let expanded = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    if let Some(output) = std::env::var_os("LOOMLIGHT_NESTED_INPUTS") {
+        let output = std::path::PathBuf::from(output);
+        fs::create_dir_all(&output).unwrap();
+        fs::write(output.join("accepted.json"),serde_json::to_vec_pretty(&json!({"source":source,"sha256":hex::encode(Sha256::digest(source.as_bytes())),"expandedSource":expanded,"expandedSHA256":hex::encode(Sha256::digest(expanded.as_bytes())),"plan":plan,"publicCoreRequests":true})).unwrap()).unwrap();
+    }
+}
+
 fn frame(document: &Value) -> &Value {
     document["screens"][0]["nodes"]
         .as_array()
@@ -1092,7 +1362,7 @@ fn owned_addition_structure_agrees_between_canvas_draft_and_saved_edit() {
         ("frame", "child", "text", false),
         ("frame", "protected", "text", false),
         ("fixed", "protected", "text", true),
-        ("screen", "", "hbox", false),
+        ("screen", "", "hbox", true),
     ] {
         let (_temporary, mut service, root, owner) = composition_project();
         let parent_id = if parent_kind == "screen" {

@@ -1,20 +1,21 @@
 # Current status
 
-## L04 nested and clipped layouts selected
+## L04 nested and clipped layouts in progress
 
-Kris selected [L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42)
-for implementation on a new branch, `codex/phase3b-l04-nested-layout`, based on
-Screens parent `eb83d3b`. The implementation chat owns delivery. A separate chat,
-`L04 nested layout prototypes`, owns Design Lab alternatives in an isolated
-worktree and branch. Production UI changes wait for Kris's final prototype approval
-and handoff. Source/SDK inspection and implementation preparation are underway;
-no production code, new tests or runtime qualification has started.
+Kris approved A2 `focused-refined` / `focused-v2` in the separate prototype chat.
+[L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42) is in progress on
+`codex/phase3b-l04-nested-layout`, based on Screens parent `eb83d3b`. The prototype
+is integrated. Window/hbox/grid/viewport authoring, typed grid counts and the Source
+modal extend the existing transactional controllers. L03's prerequisite is satisfied.
 
-Kris approved status updates for #42 and confirmed the test boundaries. The issue's
-selected execution record is published and verified. Prototype approval remains
-pending in [HANDOVER](HANDOVER.md#l04-implementation-preparation-and-prototype-handoff).
-The L03 prerequisite is satisfied. Acceptance remains pending; no merge or release
-is selected. Preserve the unrelated untracked audit and protected recovery.
+[Evidence](../tasks/evidence/nested-layout.md) records public-core and real UI/core
+checks, all 264 frontend cases, and scoped Mac both-aspect SDK layout/clipping and
+inert helper results. The broad-core transport failures resolve with socket access; combined ordinary
+coverage is 433 cases. Windows qualification, signed Mac native proof and independent
+review remain pending.
+The full combined lab check retains its startup/reference failures. No leaf, full
+canvas/editor, physical-input or human acceptance is claimed. No merge or release
+is selected. Preserve the unrelated audit and protected recovery.
 
 ## Accepted L03 baseline
 

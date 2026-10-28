@@ -95,7 +95,7 @@ try {
   deliverBusyLayoutReply.resolve();
   await ui.getByText(/Input retained. Review Source/).first().waitFor();assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'750');await writeFile(join(output,'ownership-focus.json'),JSON.stringify(await focusState(),null,2));assert.equal(await page.evaluate(()=>document.activeElement===window.__helpFocus && window.__helpFocus.isConnected),true,'refused Apply retains focused button');await rpc({driver:'release'});assert.deepEqual(await snapshot(),baseline);cases.push('actual held ApplicationHost owner rejects mutation and retains input and button focus');
   await ui.getByRole('button',{name:'Apply layout',exact:true}).click();await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
-  await ui.getByRole('button',{name:'View in Source',exact:true}).first().click();
+  await ui.getByRole('button',{name:'View in Source',exact:true}).first().click();await page.getByRole('button',{name:'Edit in Source',exact:true}).click();
   const editor=page.locator('textarea.source-editor');await editor.waitFor();const text=await editor.inputValue();await editor.fill(text.replace('750','752'));await page.getByRole('button',{name:'Save Source',exact:true}).first().click();
   await page.waitForFunction(()=>document.querySelector('#app-status')?.textContent==='Saved');await page.getByRole('button',{name:'Screens',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.screens-editor [aria-label="Width"]')?.value==='752');cases.push('supported Source edit reconciles through actual Source Save');
   const session=receipts.filter(r=>r.request.operation==='screens.inspect').at(-1).request.payload.sessionId;
