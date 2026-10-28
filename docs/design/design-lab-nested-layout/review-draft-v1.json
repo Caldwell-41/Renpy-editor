@@ -1,0 +1,171 @@
+{
+  "status": "draft; no design approval",
+  "sourceCommit": "c74fefa7501d5068179646623735b3ab1d383af6",
+  "files": [
+    {
+      "path": "app/design-lab/registry.ts",
+      "sha256": "02f7b689b8e4bc2553e891912c7b308d1313ad1eeb0435053198fdea3c678065"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/check.mjs",
+      "sha256": "195a520ea49f9369bc64684fe019bce10f59caaaa36d779a4ce200bc716cc96f"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/definition.ts",
+      "sha256": "5f1322f599bf9df385bc56351590a82b6aac00f035511324559e3a68eeaf5d99"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/focused.ts",
+      "sha256": "5085d781fdfb58275be56889b72d7c9c2630936e574977cc1a6631917432194a"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/source-led.ts",
+      "sha256": "e0ffb9a99f002cee1ff4c15e3771468120587433915cea8c3a8a25db850378b8"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/style.css",
+      "sha256": "bcb1b4ba91a49a643b798234ce47721772d1e6c10a07f3c797ce1ce84fb701a3"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/worksheet.ts",
+      "sha256": "a47558439ed1b8c42404f252c3d8e2a2537fcbfe96a2c92aa5e4d717d9eaafef"
+    },
+    {
+      "path": "app/design-lab/screens/nested-layout/workspace.ts",
+      "sha256": "dcf18946d5051945b9ff2c0fe9e6f66fb5555b3212970617c7636ea981c966de"
+    }
+  ],
+  "captures": [
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/focused-dark-compact.png",
+      "sha256": "abd91b9cdac1ab6c7a7fb924f90141cea8c9b9dba94a8d68e62cf102cf64a58d",
+      "variant": "focused",
+      "state": "nested",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/focused-dark-wide.png",
+      "sha256": "6ca09093f65901e4a6026bc823c02470f64ea1598eef8718aacd6353f621f46e",
+      "variant": "focused",
+      "state": "nested",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/focused-light-compact.png",
+      "sha256": "d206c4b88440feae55a09e386181090f00229993f839580629fc7d0c7e693745",
+      "variant": "focused",
+      "state": "nested",
+      "theme": "light",
+      "width": 560,
+      "height": 640,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/focused-light-wide.png",
+      "sha256": "2271f25b451036c1ad62ef385d5296a3f2bef8f4854138e2061603f3a016aed9",
+      "variant": "focused",
+      "state": "nested",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/source-led-dark-compact.png",
+      "sha256": "852b052c0ac6e8463c6fe327716e5ecc0ef01672656ba3f9ea1b11b5afe3624f",
+      "variant": "source-led",
+      "state": "nested",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/source-led-dark-wide.png",
+      "sha256": "e19b2130df0bc4879450c6bcee87c66357432cba29f0b75fd25214d5c32dc7bd",
+      "variant": "source-led",
+      "state": "nested",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/source-led-light-compact.png",
+      "sha256": "af10dafa080bbff1072586062e6e2ba354109c97b882ae86f677b9dcbd3db99c",
+      "variant": "source-led",
+      "state": "nested",
+      "theme": "light",
+      "width": 560,
+      "height": 640,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/source-led-light-wide.png",
+      "sha256": "0bf452b4f557cadcf01cf023e2adf9d6df12961504d2ebcf91a95f08e89bc101",
+      "variant": "source-led",
+      "state": "nested",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/worksheet-dark-compact.png",
+      "sha256": "1f57ccbc26cd6c3fec40733b58e48317ca2ce085a8c8ff52855f6a4ff600f322",
+      "variant": "worksheet",
+      "state": "nested",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/worksheet-dark-wide.png",
+      "sha256": "7d1cd0bdc7487c75c13bd118f4144bb61186187b2179e4a2d1b8d95ac8889ac9",
+      "variant": "worksheet",
+      "state": "nested",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/worksheet-light-compact.png",
+      "sha256": "3dbb5f2aca5f5b99dae382acf5fc1cd9519a5d7da78a842fde4867086c1478a3",
+      "variant": "worksheet",
+      "state": "nested",
+      "theme": "light",
+      "width": 560,
+      "height": 640,
+      "displayScale": 1
+    },
+    {
+      "path": "docs/design/design-lab-nested-layout/captures/draft-v1/worksheet-light-wide.png",
+      "sha256": "d893e4cdce8396637f5920cfce6167f807f7836761ae85255ac6dca585efadcc",
+      "variant": "worksheet",
+      "state": "nested",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "displayScale": 1
+    }
+  ],
+  "verification": {
+    "focusedCases": 48,
+    "interactions": "pass in all three variants",
+    "typeScript": "pass",
+    "approvalRecords": "pass",
+    "productionExclusion": "pass",
+    "bothInternalAspects": "fit in all variants",
+    "combinedStandard": "failed first navigation at 8000 ms",
+    "combinedDiagnostic": "45-second navigation timeout; 488 cases before existing flow-v1 changed-source refusal; failed"
+  },
+  "sourceFingerprint": "83ebb95ea750e1b5e0ae66cfc62071df7d33a44bfecb7f26a30310660b4be63d"
+}
