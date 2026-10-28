@@ -1,0 +1,55 @@
+{
+  "sourceCandidate": "228fe2303e361bf8522d13ffcc09e9ce445bd3c9",
+  "architecture": "macOS ARM64",
+  "case": "nested-layout",
+  "passed": true,
+  "nativeWebView": true,
+  "nativeKeyboard": false,
+  "sdkExecuted": false,
+  "package": {
+    "bundle": "Loomlight.app",
+    "identifier": "app.loomlight.desktop",
+    "certificateSHA1": "358372708164C7273A551D746449357C12A3A806",
+    "designatedRequirement": "designated => identifier \"app.loomlight.desktop\" and certificate leaf = H\"358372708164c7273a551d746449357c12a3a806\"",
+    "bundleVersion": "0.1.0",
+    "executableSHA256": "a0891ea0e39168b495108b649293eaace3960060daa661f51dd22d07c2d7b314",
+    "strictSignatureVerified": true,
+    "installerSHA256": "23081a84c1a376e26ecdb506df7cc24762f60f7c21b85db442bc3ba41f78e0a6",
+    "installerContentsVerified": true
+  },
+  "nativeReportSHA256": "adc403c9d395872212c20b396cc75bd795be3b76ab9ad8020cf5e96e0ef2a4b2",
+  "desktopReportSHA256": "289ec2d6365ddd7793dcb729b30f2849cd43f263b50dcc2d56be45324a3ef8e1",
+  "acceptedSourceSHA256": "9b5b2bacbac45022169ede77a2b3563f710a0b5d4de054937cbf56edccc789fd",
+  "stages": [
+    "nested-composition-passed",
+    "grid-layout-passed",
+    "viewport-source-passed",
+    "nested-history-passed",
+    "nested-reopen-passed",
+    "complete"
+  ],
+  "cleanupOwners": {
+    "credentials": true,
+    "host": true,
+    "requests": true
+  },
+  "helpDisk": {
+    "acceptedBytesMatch": true,
+    "scratchJobsRemaining": 0,
+    "sourceBytecode": false,
+    "sourceSaves": false
+  },
+  "fixtureCleanupComplete": true,
+  "desktopAdmitted": true,
+  "desktopCleanupComplete": true,
+  "exitCode": 0,
+  "timedOut": false,
+  "elapsedSeconds": 7.963,
+  "operationUse": {
+    "macPackageBuilds": 3,
+    "macNativeSessions": 2,
+    "macSdkLaunches": 12,
+    "macHelperSessions": 4
+  },
+  "inputScope": "Synthetic DOM events in the packaged native WebView; no physical-keyboard or human acceptance claim."
+}

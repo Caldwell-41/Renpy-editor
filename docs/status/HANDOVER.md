@@ -6,7 +6,7 @@ Kris selected [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42), assi
 this chat end-to-end ownership, requested a new branch and approved status updates
 for this work. This checkout is on `codex/phase3b-l04-nested-layout`, based on
 `eb83d3b1bfe8fd3f62f13b301300a47b61e96dd6`, targeting the Screens parent. Work is
-local; no merge or release is selected. Preserve the unrelated Phase 1 audit.
+local pending explicit publication approval; no merge or release is selected. Preserve the unrelated Phase 1 audit.
 
 The separate `L04 nested layout prototypes` chat
 (`01a1818a-2b56-7230-99bb-ba202fd62b1d`) received Kris's exact final decision,
@@ -16,8 +16,8 @@ captures verified. Keep its managed worktree and approved frontend pinned for
 comparison. [Handoff](../design/design-lab-nested-layout/HANDOFF.md) and
 [approval](../design/design-lab-nested-layout/approval.json) retain the exact decision.
 The prototype owner has finished; this chat owns implementation and qualification.
-Both independent review axes checked the grid/source and empty-viewport fixes; the
-remaining policy-notice copy correction is included before final qualification.
+Both independent review axes report zero findings at `228fe23`, including
+grid/source guards, empty containers, policy copy and the native-probe correction.
 
 The implementation extends existing composition/numeric owners with
 window/hbox/grid/viewport, count units for literal 1-64 grid axes, minimal header
@@ -33,22 +33,28 @@ The broad core run passed 402 cases; sandbox localhost denials failed 31 transpo
 cases. All 38 cases in that affected module pass with socket access, resolving the
 31 failures. Combined ordinary coverage is 433 cases, with 49 explicit ignores and
 three policy exclusions. The failed broad run and scoped rerun are retained.
-Windows qualification and the signed Mac native candidate remain pending. The full Design Lab gate remains failed at initial navigation;
+The signed Mac native case passes at `228fe23`; Windows qualification remains pending. The full Design Lab gate remains failed at initial navigation;
 its longer external diagnostic also remains failed at the old reference guard.
 
-Current Mac use is SDK 12/16 and helper sessions 4/4 (exhausted). Package build 1
-completed at pre-review `b84c863` and remains unqualified. The corrected package
-build will be attempt 2/3. No native editor session or costly CI dispatch has started. #42 owns limits across all hosts and attempts.
-The first helper and source-campaign failures stopped in preflight with no SDK
-process. Later failed launches are included in consumption. Raw local artifacts
-are retained under ignored `.toolchains/l04/`; the evidence links the public receipt.
+Current Mac use is SDK 12/16 and helper sessions 4/4 (exhausted), package builds
+3/3 (exhausted), native sessions 2/3. Package 3 at `228fe23` passes signed identity
+and the full synthetic WebView case, exact disk bytes, reopen and all cleanup.
+Session 1 failed on a probe error-code omission; the browser/core regression and
+session 2 pass after the read-only retry correction. See the candidate-bound
+[Mac receipt](../tasks/evidence/nested-layout/mac-native.json). No new Mac helper
+or package build is allowed without a supplement. All costly CI/Windows counts
+remain zero. #42 owns limits across hosts and attempts.
 
-Next, finish the broad/focused checks, freeze and review the candidate, build the
-signed Mac package, run the rehearsed nested-layout WebView case, and use the
-focused Screens CI selector `nested_layout` for Windows qualification and both-host
-portable checks. Reuse unchanged Mac SDK mappings only at their recorded scope;
-record candidate/material equivalence. CI waits use ci-watch in this same chat.
-All four leaf criteria remain pending until required proof and review are complete.
+The branch push was refused by automatic review for missing explicit publication
+authorization. A user question is pending for push, draft PR and bounded CI.
+Do not bypass that rejection. After approval, publish the branch, create and attach
+a draft PR targeting `codex/phase3b-screen-designer`, dispatch ordinal 1 through
+Screens qualification with `nested_layout=true` at the exact code candidate, then
+register ci-watch in this same chat and yield. The signed Mac candidate is
+`228fe2303e361bf8522d13ffcc09e9ce445bd3c9`; later documentation-only changes can
+reuse it with equivalence stated. Audit Windows SDK/helper/native artifacts and
+both-host portable checks before leaf acceptance. The combined Design Lab failure
+retains its scope and is not a pass or waiver.
 Protected native recovery and earlier closed allowances below remain intact.
 
 ## Retained L03 closeout

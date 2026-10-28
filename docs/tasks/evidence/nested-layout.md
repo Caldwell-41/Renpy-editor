@@ -2,10 +2,9 @@
 
 [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42) owns scope, acceptance,
 operation limits and current consumption. The implementation branch is
-`codex/phase3b-l04-nested-layout`, based on `eb83d3b`. All four acceptance criteria
-remain pending until the affected Windows and signed Mac native checks are complete.
-Independent code review found the corrections recorded below; both axes have checked
-the implementation fixes, with the final policy notice included before qualification.
+`codex/phase3b-l04-nested-layout`, based on `eb83d3b`. Windows qualification remains pending. The corrected signed Mac native case passes.
+Independent Standards and Spec review each report zero findings at `228fe23`,
+including the final policy notice and bounded probe retry correction.
 
 ## Approved design and integration
 
@@ -103,8 +102,7 @@ refinement; the final native candidate and Windows qualification remain separate
 Raw local receipts remain under ignored `.toolchains/l04/`, including original
 failures, screenshots and logs. Package-relative copies were preserved and copied
 into that owning directory. Current actual use is Mac SDK 12/16 and helpers 4/4. The helper allowance is
-exhausted. Signed Mac package build 1 completed at pre-review candidate `b84c863`
-and is not the corrected qualification package. No native session or costly CI
+exhausted. Signed package builds use 3/3 and native sessions use 2/3. No costly CI
 dispatch has started; Windows counters remain zero.
 
 
@@ -133,3 +131,27 @@ helper sessions 4/4. No additional Mac helper launch is selected. Normal-entry S
 source bytes and populated mappings remain unchanged; their earlier proof retains
 its scope. A fresh post-review public-core export produces identical renderer node
 data for the populated fixture apart from source-revision identity.
+
+## Signed Mac native qualification
+
+[Candidate-bound receipt](nested-layout/mac-native.json) records package build 3
+at `228fe2303e361bf8522d13ffcc09e9ce445bd3c9`. The approved certificate, strict
+signature and installer contents verify. Native session 2 passes all six stages,
+exact accepted disk bytes and reopen identities. Host/request/credential cleanup,
+fixture deletion and desktop power-assertion release complete. There are no disk
+errors, scratch jobs, source bytecode or saves. Input is synthetic DOM input in
+the packaged WebView; physical-keyboard and human acceptance remain separate.
+This disposable Source profile starts no SDK/helper process.
+
+Package 1 at `b84c863` and package 2 at `9beb09a` passed identity checks but are
+unqualified. Session 1 at package 2 failed before screen creation when the probe
+converted `RUNTIME_BUSY` to an error without its structured code. Its cleanup
+completed; missing owned-source evidence remains a failure. The existing H25/P03
+incident guidance led to the exact browser/core rehearsal with an initial
+probe-specific busy read. It reproduces the failure, then passes after preserving
+the error code and restricting retry to four reads. Mutations and report
+publication are single requests. No deadline or acceptance assertion changed.
+Both review axes checked that correction and report zero findings.
+
+Publication is pending explicit approval after automatic review refused the branch
+push. The remote branch, draft PR and Windows CI have not been created.
