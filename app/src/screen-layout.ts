@@ -236,7 +236,11 @@ export class ScreenLayoutEditor {
     host.querySelector<HTMLElement>(".layout-commit-state")!.textContent = dirty ? "Draft preview. Enter applies all layout fields." : "No pending changes. Enter applies; Escape cancels.";
     host.querySelectorAll<HTMLInputElement>("input").forEach(input => { input.readOnly = view.busy || this.saving; });
     host.querySelectorAll<HTMLSelectElement>("select").forEach(select => select.disabled = view.busy || this.saving);
-    host.querySelectorAll<HTMLButtonElement>("button").forEach(button => button.disabled = view.busy || this.saving || button.textContent === "Cancel layout" && !dirty);
+    host.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
+      const disabled = view.busy || this.saving || button.textContent === "Cancel layout" && !dirty;
+      if (button.type === "submit") { button.ariaDisabled = String(disabled); button.disabled = false; }
+      else button.disabled = disabled;
+    });
     host.querySelectorAll<HTMLButtonElement>("[data-align-x]").forEach(button => button.ariaPressed = String(["xpos", "xanchor", "ypos", "yanchor"].every(key => fields[key]!.text !== "" && fields[key]!.unit === "relative" && Number(fields[key]!.text) === Number(key.startsWith("x") ? button.dataset.alignX : button.dataset.alignY))));
   }
 }

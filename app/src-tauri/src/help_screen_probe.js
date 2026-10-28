@@ -101,7 +101,8 @@
     const geometry = JSON.parse(output.split("\n").find(line => line.startsWith("HELP_SCRATCH_GEOMETRY ")).slice("HELP_SCRATCH_GEOMETRY ".length));
     assert(JSON.stringify(geometry.size) === "[760,360]" && JSON.stringify(geometry.aspect) === "[1280,720]" && geometry.menu === false, "SDK measured the renderer-accepted Help frame in game context");
     checkpoint("preview-geometry-passed");
-    edit(768); await click("Apply layout"); await until(() => message().startsWith("Layout saved"));
+    edit(768); find("Apply layout").focus(); await click("Apply layout"); await until(() => message().startsWith("Layout saved"));
+    assert(document.activeElement === find("Apply layout"), "Clicked Apply preserves button focus after the accepted edit");
     await until(() => document.querySelector(".runtime-revision")?.textContent.includes("Started from an earlier revision"));
     const running = await read("runtime.status", { sessionId, operationId: latest.operationId, afterSequence: 0 });
     assert(running.earlierRevision && !running.cleanupComplete, "Preview retains its frozen accepted revision");

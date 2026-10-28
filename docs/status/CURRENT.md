@@ -1,23 +1,23 @@
 # Current status
 
-## L03 corrections awaiting CI audit
+## L03 Apply-focus correction ready for qualification
 
-The four [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) review findings
-are fixed in 186c8b0 with red/green evidence. Parent final local validation passes
-264 frontend tests, 37 screen-core tests and the real controllers. The corrected
-signed Mac package and native Help case also pass at that source, including the
-new blur/accessibility/IME assertions, history, SDK preview, Stop and reopen.
+The controlled CI2 reproduction confirms Apply loses focus when disabled during
+pending IPC. The correction uses aria-disabled with the existing duplicate-submit
+guard. The harness now retains the first error and releases its owned hold. Parent
+final validation passes typecheck, 264 frontend tests, all 11 Help groups, the
+numeric controller and updated native-probe rehearsal. The earlier Rust core
+inputs are unchanged; their 37-test local/both-target proof retains its scope.
 
-[Correction CI 40637467395](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40637467395),
-attempt 1 at 44fdf0a, is queued for Windows x64/macOS ARM64. The parent retains its
-terminal audit; ci-watch will resume this thread after confirmed registration.
-[Evidence](../tasks/evidence/numeric-layout.md#correction-ci-awaiting-audit) owns the
-candidate, cases and remaining audit. [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38)
-owns cumulative limits. Actual pre-job use is dispatches 2, Mac package/editor
-sessions 2 each and SDK 24/28, Windows package/editor sessions 1 each and SDK 8/16.
-The selected run reserves the remaining Windows package/session and SDK starts.
-A2 approval, protected recovery and the unrelated audit remain intact. The PR stays
-open; no merge or successor feature is selected.
+[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) remains open.
+[CI2 and correction evidence](../tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification)
+retains the failed Mac run and successful earlier Windows/signed Mac receipts.
+Changed application inputs require fresh packaged proof. Under Kris's end-to-end
+approval, [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) reserves
+package/editor session 3 per OS and final dispatch 3. Current use is dispatches 2/3,
+package/editor sessions 2/3 per OS, Mac SDK 24/32 and Windows SDK 16/24. The parent
+owns packaging, publication and final CI audit. A2 approval, protected recovery and
+the unrelated audit remain intact. No merge or successor is selected.
 
 ## Phase 3B architecture refactors merged
 

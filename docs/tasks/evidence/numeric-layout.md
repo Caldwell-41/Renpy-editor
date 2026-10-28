@@ -522,3 +522,87 @@ ci-watch is selected for this exact run/attempt/SHA and same parent thread. Its
 startup acknowledgement owns registration status; only watcher_running=true
 establishes a live watch. The parent will yield after registration and resume here
 for the audit. No merge or successor is selected.
+
+
+### Correction CI2 failure and retained Windows proof
+
+[Run 40637467395](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40637467395),
+attempt 1 at 44fdf0a, concludes failure. The parent matched the watcher thread/run/SHA
+and acknowledged its event. Selector validation and the Windows job pass. The Mac
+job passes 264 frontend tests, 37 ordinary screen-core tests and the numeric
+controller, then fails in the Help controller's held-owner refusal sequence.
+Its cleanup reports Driver cleanup exit null (SIGTERM), masking the original
+assertion. Receipts retain the held owner and correctly refused width-750 mutation;
+the expected release was not reached. Failure text/screenshot and all receipts
+remain in the downloaded Mac artifact. Classification is provisionally harness/
+missing diagnostic evidence, pending the first assertion and focus-state readback.
+No production correction is selected from the cleanup error alone.
+
+The [CI2 audit receipt](numeric-layout-pr66-ci2.json) retains both artifact IDs and
+verified archive digests. Windows passes all real controllers, 11 Help groups and
+the new native-probe assertions. Both actual SDK aspects match the frozen accepted
+source; rejecting-gate self-check, source hashes/unchanged bytes and cleanup pass.
+Windows package/session 2 passes exact BOM/CRLF source, history/validation, preview,
+stale Stop, reopen and all cleanup owners. Its x64 executable SHA256 is
+9c0b107755655d40abf5e8c544f055b5cd5f822e983b3e7cf7b2cfa41928f888.
+Input remains synthetic DOM input. Both required automatic PR jobs pass in run
+40637629615 at docs-only successor bc626a4.
+
+Mac CI2 stops before SDK download/validation/execution, so it consumes no SDK start.
+Audited cumulative use is dispatches 2/3; package/editor sessions 2/2 on both OSes;
+Mac SDK 24/28 and Windows SDK 16/16. Preserve Windows and signed Mac package results
+for their exact application inputs. The worker owns Help harness diagnosis/tests;
+the parent retains workflows, final checks, tracker/publication and CI audit.
+The remaining selected qualification must avoid replaying successful Windows work.
+
+
+### CI2 root cause and affected requalification
+
+The instrumented Help harness retains the original stack/focus state and releases
+its owned hold before teardown. An ordinary local reproduction passes; that result
+does not diagnose CI2. A discriminating experiment holds the unchanged real-core
+RUNTIME_BUSY response across two acknowledged animation frames. Apply is the same
+connected button before and after, but disabling it while focused moves focus to
+BODY. Re-enabling after rejection leaves BODY focused. The width-750 draft and
+source remain intact. The reproduction now exposes the original focus assertion
+and the released driver exits normally, without masking it with SIGTERM.
+
+This confirms a product focus defect plus a harness diagnostic/cleanup defect.
+The worker owns the smallest Apply-only busy-state correction and public-controller
+regression. aria-disabled preserves focus; the existing busy/saving submission guard
+must reject duplicate writes. No automatic focus restoration after navigation,
+threshold change or timeout increase is selected.
+
+Because application inputs change, prior packaged proof cannot qualify this next
+candidate. Under Kris's approval for all work needed to fix end to end, #38 reserves
+final dispatch 3 and package/editor session 3 per OS. The ceiling becomes 3 per OS
+for packages/editor sessions, Mac SDK 32 and Windows SDK 24. Current actual use is
+dispatches 2, package/editor sessions 2 per OS, Mac SDK 24 and Windows SDK 16. One
+fresh signed Mac Help case uses four starts; the existing both-target CI route uses
+four further Mac and eight Windows starts. This keeps the existing qualification
+route and its checks together rather than adding a special retry selector.
+
+
+### Focus correction red/green and handback
+
+The worker's controlled real-response regression is red before the Apply change
+and green afterward. Apply alone now uses aria-disabled while pending; its existing
+busy/saving guard prevents another submission. Other controls keep their existing
+policy, and no focus-restoration routine can steal focus after navigation. The Help
+harness retains the first stack and bounded control facts, releases its owned hold
+and records independent cleanup/driver results. Successful teardown cannot erase
+the original failure. The native probe adds a clicked-Apply focus assertion.
+
+Worker typecheck, all 11 Help groups with the acknowledged-rendering-turn refusal,
+duplicate Enter check, numeric controller and native-probe rehearsal pass. No
+worker package/native/SDK/CI operation occurred. Writer ownership returns to the
+parent for independent final validation and affected qualification. H39 in the
+incident index records the cause and prevention; the CI2 failure stays failed.
+
+
+Parent final validation of the Apply-focus correction passes production typecheck,
+all 264 frontend tests, all 11 Help groups with the delayed real refusal/duplicate
+Enter regression, the numeric controller and the updated native-probe rehearsal.
+Independent final review finds no remaining correction issue. The unchanged Rust
+inputs reuse their existing 37-test local/both-target proof; no redundant local core
+or SDK run is selected. Fresh packages and final CI remain pending.

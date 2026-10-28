@@ -25,6 +25,7 @@
 .layout-presets .button[aria-pressed=true] { border-color:var(--accent-primary); }.layout-presets [aria-pressed=true] .layout-dot { background:var(--accent-primary); }
 .layout-commit { flex-shrink:0; padding-top:10px; border-top:1px solid var(--border-normal); }.layout-actions { display:flex; gap:8px; }
 .layout-actions .button { border-radius:0; min-height:32px; padding:6px 9px; font-size:12px; }
+.layout-actions .button[aria-disabled=true] { opacity:.6; cursor:progress; }
 .layout-commit-state,.layout-feedback,.layout-constraint { font-size:11px; line-height:1.5; margin:0 0 8px; }.layout-commit-state { color:var(--text-secondary); }
 .layout-sizing-note { font-size:11px; line-height:1.5; margin:0 0 10px; }
 .layout-feedback { color:var(--status-error); }.layout-feedback[hidden] { display:none; }

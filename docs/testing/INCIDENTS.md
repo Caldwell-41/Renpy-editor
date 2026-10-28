@@ -552,3 +552,19 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** dispatch coverage for size, pixel-property and position no-ops,
   exact source and Undo/Redo; production controller/core check accepts root Add afterward.
 - **Evidence:** [No-op geometry correction](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27).
+
+
+## H39. Pending numeric Apply loses focus and cleanup masks the assertion
+
+- **Class/search:** product focus and harness cleanup; Mac Help controller,
+  RUNTIME_BUSY, BODY focus, Driver cleanup exit null (SIGTERM).
+- **Cause/correction:** disabling the focused Apply button during IPC lets the
+  browser move focus to BODY. A fast response can hide this. Apply now uses
+  aria-disabled while its existing busy/saving guard refuses duplicate submissions.
+  The test releases its owned service hold and records the first error before
+  teardown, so cleanup cannot replace the original assertion.
+- **Regression:** hold the unchanged real-core busy reply across acknowledged
+  rendering turns; verify retained control focus/input, no duplicate Enter write,
+  unchanged source and normal driver exit. The packaged Help probe also checks
+  focus after clicked Apply.
+- **Evidence:** [PR #66 CI2 diagnosis](../tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification).
