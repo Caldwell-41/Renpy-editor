@@ -133,7 +133,8 @@ export function mountLayout(variant: Variant): LabMount {
     const actions=el("div","nl-actions");actions.append(action("Add to sample",()=>{if(blocked())return;if(drafts.size){report("Apply or cancel pending edits before adding. Drafts retained.",true);return;}const parent=nodes.find(n=>n.id===parentSelect.value)!;if(single.has(parent.kind)&&children(parent.id).length||parent.kind==="grid"&&children(parent.id).length>=Number(parent.props.columns)*Number(parent.props.rows)){report("This parent cannot accept another child through this draft. Choose a different parent.",true);return;}accepted(()=>{const id=`added${++sequence}`,kind=type.value as Kind;nodes.push(make(id,parent.id,kind,text.value,kind==="grid"?{columns:"2",rows:"2",order:"rows",spacing:"12"}:kind==="viewport"?{xsize:"360",ysize:"180"}:{}));selected=id;adding=false;});},true),action("Cancel addition",()=>{adding=false;render();}));inspector.append(actions);
   }
   function draw(){canvas.replaceChildren();canvas.style.aspectRatio=resolution.value.startsWith("1024")?"4 / 3":"16 / 9";
-    const game=el("div","nl-game"); const scale=canvas.clientWidth/(resolution.value.startsWith("1024")?1024:1280);
+    const game=el("div","nl-game"); const gameWidth=resolution.value.startsWith("1024")?1024:1280, gameHeight=resolution.value.startsWith("1024")?768:720;
+    const scale=Math.min(canvas.clientWidth/gameWidth,canvas.clientHeight/gameHeight);game.style.left=`${(canvas.clientWidth-gameWidth*scale)/2}px`;
     game.style.width=resolution.value.startsWith("1024")?"1024px":"1280px";game.style.height=resolution.value.startsWith("1024")?"768px":"720px";game.style.transform=`scale(${scale})`;
     function paint(id:string):HTMLElement {
       const accepted=nodes.find(n=>n.id===id)!, draft=drafts.get(id), n=draft&&Object.values(draft.props).every(v=>!v||v==="rows"||/^\d+$/.test(v))?draft:accepted;
