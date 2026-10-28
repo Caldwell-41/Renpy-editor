@@ -625,3 +625,24 @@ bytes match, scratch jobs/bytecode/saves are absent, and all cleanup owners and
 power-assertion releases pass. Input remains synthetic DOM input. Four SDK starts
 bring Mac use to 28/32; Mac package/editor use is 3/3. Windows remains package/editor
 2/3 and SDK 16/24. Final dispatch 3 remains reserved; no local process is pending.
+
+
+### Rejected CI3 candidate input
+
+[Dispatch 3 / run 40644447782](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644447782),
+attempt 1, checked out 28432658ce86f87811c17a5481977fdcc3b054ec. The parent supplied
+an incorrectly typed full candidate input. Both exact-candidate guards reject it
+before dependency setup, build, native or SDK execution. The cancellation request
+arrives after completion; the run remains failed. Empty artifact uploads also fail
+because admission created no candidate evidence. No package, editor or SDK start
+occurs. [The refusal receipt](numeric-layout-pr66-ci3-rejected.json) retains this
+agent error and actual consumption; it is not a qualification pass.
+
+The correction reads the candidate directly from Git into the workflow input JSON
+and verifies the published ref before dispatch. Under Kris's end-to-end approval,
+#38 extends only the cumulative dispatch ceiling from 3 to 4 for the corrected
+request. The numeric job's ordinal guard now admits 4; exact branch, attempt 1 and
+candidate equality remain unchanged. Package/editor/SDK ceilings and actual use
+remain as after signed Mac session 3: Mac package/editor 3, SDK 28/32; Windows
+package/editor 2, SDK 16/24. Current dispatch use is 3/4. The application inputs are
+unchanged from the signed Mac focus proof at eb10f71.

@@ -15,10 +15,16 @@ retains the failed Mac run and successful earlier Windows/signed Mac receipts.
 The focus-corrected signed Mac package/session 3 passes at eb10f71; final both-target
 CI remains pending. Under Kris's end-to-end
 approval, [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) reserves
-package/editor session 3 per OS and final dispatch 3. Current use is dispatches 2/3,
+package/editor session 3 per OS and corrected dispatch 4. Current use is dispatches 3/4,
 Mac package/editor sessions 3/3, Windows 2/3, Mac SDK 28/32 and Windows SDK 16/24. The parent
 owns packaging, publication and final CI audit. A2 approval, protected recovery and
 the unrelated audit remain intact. No merge or successor is selected.
+
+Dispatch 3 was rejected before builds/native/SDK work because the agent typed an
+incorrect candidate input. Its failed receipt is retained. The corrected dispatch
+reads the SHA directly from Git; its ordinal guard admits 4 while exact branch,
+attempt and candidate checks remain intact. No application input changed after
+the signed Mac focus proof.
 
 ## Phase 3B architecture refactors merged
 

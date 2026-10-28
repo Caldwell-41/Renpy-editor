@@ -1,0 +1,22 @@
+{
+  "runId": 40644447782,
+  "attempt": 1,
+  "headSha": "28432658ce86f87811c17a5481977fdcc3b054ec",
+  "conclusion": "failure",
+  "cause": "Agent supplied a manually typed candidate input that did not match Git HEAD.",
+  "candidateGateRejectedBothTargets": true,
+  "buildsStarted": 0,
+  "nativeSessionsStarted": 0,
+  "sdkProcessesStarted": 0,
+  "cancellation": "Requested after the run had already completed; failed result retained.",
+  "prevention": "Read candidate directly from git rev-parse HEAD into the workflow input JSON; verify published ref before dispatch.",
+  "cumulativeConsumption": {
+    "qualificationDispatches": 3,
+    "macPackages": 3,
+    "macEditorSessions": 3,
+    "macSDKStarts": 28,
+    "windowsPackages": 2,
+    "windowsEditorSessions": 2,
+    "windowsSDKStarts": 16
+  }
+}

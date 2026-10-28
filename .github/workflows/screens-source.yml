@@ -765,7 +765,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-l03-numeric-layout
           test "$GITHUB_RUN_ATTEMPT" = 1
-          case "$ORDINAL" in 1|2|3) ;; *) exit 1 ;; esac
+          case "$ORDINAL" in 1|2|3|4) ;; *) exit 1 ;; esac
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/numeric-layout"
           git rev-parse HEAD > "$RUNNER_TEMP/numeric-layout/candidate.txt"

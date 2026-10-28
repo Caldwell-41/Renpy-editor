@@ -28,12 +28,18 @@ this next candidate. [Evidence](../tasks/evidence/numeric-layout.md#ci2-root-cau
 and [CI2 receipt](../tasks/evidence/numeric-layout-pr66-ci2.json) own results and hashes.
 
 Under Kris's end-to-end approval, [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38)
-reserves final dispatch 3 and package/editor session 3 per OS. SDK ceilings are Mac
-32 and Windows 24. Current actual use before new starts is dispatches 2/3,
+reserves corrected dispatch 4 and package/editor session 3 per OS. SDK ceilings are Mac
+32 and Windows 24. Current actual use before new starts is dispatches 3/4,
 Mac package/editor sessions 3/3, Windows 2/3, Mac SDK 28/32 and Windows SDK 16/24.
 Next: publish the signed Mac receipt, dispatch the existing both-target numeric CI
 route and audit it here through ci-watch. No costly operation or watch is pending. No merge or successor is selected.
 A2 approval, protected native recovery and the unrelated audit remain intact.
+
+Dispatch 3 was rejected before builds/native/SDK work because the agent typed an
+incorrect candidate input. Its failed receipt is retained. The corrected dispatch
+reads the SHA directly from Git; its ordinal guard admits 4 while exact branch,
+attempt and candidate checks remain intact. No application input changed after
+the signed Mac focus proof.
 
 ## Phase 3B architecture refactors merged and cleaned up
 
