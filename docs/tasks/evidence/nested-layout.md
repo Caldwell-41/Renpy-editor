@@ -153,5 +153,29 @@ the error code and restricting retry to four reads. Mutations and report
 publication are single requests. No deadline or acceptance assertion changed.
 Both review axes checked that correction and report zero findings.
 
-Publication is pending explicit approval after automatic review refused the branch
-push. The remote branch, draft PR and Windows CI have not been created.
+The initial push refusal is resolved by Kris's explicit approval for push, draft
+PR and bounded CI. [Draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67)
+targets the Screens parent. No merge or release is selected.
+
+## CI1 awaiting artifact audit
+
+[Run 40742930659, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
+is the first costly dispatch, at exact candidate
+`dedf92088c11309801fe03e9449b4a64b5f758a2`, branch
+`codex/phase3b-l04-nested-layout`, selector `nested_layout=true`, ordinal 1.
+The candidate differs from signed Mac `228fe23` only in four evidence/status files;
+application, probe, tests, SDK mappings and accepted fixtures are identical.
+Both-host portable/controller checks and Windows SDK/helper/package/native
+qualification are pending. No CI result is accepted before artifact audit.
+
+Dispatch consumption is 1/3. CI1 reserves up to seven Windows SDK launches,
+including one helper, one package build and one native session. Actual Windows
+starts will be counted from retained steps/artifacts, including failures. Mac
+usage remains SDK 12/16, helpers 4/4, package builds 3/3 and native sessions 2/3.
+No Mac SDK/helper/package/native execution is selected in this CI route.
+
+The installed ci-watch skill will register a same-chat watch after this checkpoint
+is published. Registration is confirmed only by its `watcher_running: true`
+acknowledgement. On resume, verify the exact run/attempt/SHA, audit both artifacts
+and automatic PR checks, preserve failed proof and operation counts, then finish
+the four criterion-to-evidence results. Missing or failed proof prevents closure.

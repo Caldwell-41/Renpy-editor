@@ -6,7 +6,8 @@ Kris selected [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42), assi
 this chat end-to-end ownership, requested a new branch and approved status updates
 for this work. This checkout is on `codex/phase3b-l04-nested-layout`, based on
 `eb83d3b1bfe8fd3f62f13b301300a47b61e96dd6`, targeting the Screens parent. Work is
-local pending explicit publication approval; no merge or release is selected. Preserve the unrelated Phase 1 audit.
+published in [draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67);
+no merge or release is selected. Preserve the unrelated Phase 1 audit.
 
 The separate `L04 nested layout prototypes` chat
 (`01a1818a-2b56-7230-99bb-ba202fd62b1d`) received Kris's exact final decision,
@@ -42,19 +43,27 @@ and the full synthetic WebView case, exact disk bytes, reopen and all cleanup.
 Session 1 failed on a probe error-code omission; the browser/core regression and
 session 2 pass after the read-only retry correction. See the candidate-bound
 [Mac receipt](../tasks/evidence/nested-layout/mac-native.json). No new Mac helper
-or package build is allowed without a supplement. All costly CI/Windows counts
-remain zero. #42 owns limits across hosts and attempts.
+or package build is allowed without a supplement. CI1 is recorded below. #42 owns limits across hosts and attempts.
 
-The branch push was refused by automatic review for missing explicit publication
-authorization. A user question is pending for push, draft PR and bounded CI.
-Do not bypass that rejection. After approval, publish the branch, create and attach
-a draft PR targeting `codex/phase3b-screen-designer`, dispatch ordinal 1 through
-Screens qualification with `nested_layout=true` at the exact code candidate, then
-register ci-watch in this same chat and yield. The signed Mac candidate is
-`228fe2303e361bf8522d13ffcc09e9ce445bd3c9`; later documentation-only changes can
-reuse it with equivalence stated. Audit Windows SDK/helper/native artifacts and
-both-host portable checks before leaf acceptance. The combined Design Lab failure
-retains its scope and is not a pass or waiver.
+Kris explicitly approved push, draft PR and bounded CI, resolving the initial
+automatic-review publication refusal. State is `awaiting_ci`.
+[CI1 run 40742930659, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
+qualifies exact `dedf92088c11309801fe03e9449b4a64b5f758a2` with
+`nested_layout=true`, ordinal 1. It differs from signed Mac `228fe23` only in
+evidence/status files. Dispatch consumption is 1/3; the run reserves up to seven
+Windows SDK starts including one helper, one package and one native session.
+Actual Windows counts await the step/artifact audit. No further Mac execution is
+selected. The pending same-chat ci-watch registration must receive
+`watcher_running: true` before reporting active monitoring.
+
+On the CI event, follow ci-watch acknowledgement and exact run/attempt/SHA checks.
+Audit both-host portable/controller artifacts, Windows accepted source/SDK geometry
+and pixels/helper empty/populated cases and cleanup, x64 package identity, native
+stages/disk/reopen/desktop cleanup, and required automatic PR checks. Preserve
+failed results and actual operation counts. Do not infer acceptance from a green
+badge. Finish the criterion-to-evidence map and PR status only when required proof
+is complete. The combined Design Lab failure retains its scope; no pass or waiver
+is claimed. No merge, release or renewed exhausted Mac allowance is authorized.
 Protected native recovery and earlier closed allowances below remain intact.
 
 ## Retained L03 closeout

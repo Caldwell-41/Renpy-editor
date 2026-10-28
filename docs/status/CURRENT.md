@@ -12,8 +12,9 @@ modal extend the existing transactional controllers. L03's prerequisite is satis
 checks, all 264 frontend cases, and scoped Mac both-aspect SDK layout/clipping and
 inert helper results. The broad-core transport failures resolve with socket access; combined ordinary
 coverage is 433 cases. The signed Mac native case passes at `228fe23`, including exact disk bytes and
-cleanup. Both independent reviews have zero findings. Windows qualification and
-explicit publication approval remain pending. Mac package/helper ceilings are exhausted.
+cleanup. Both independent reviews have zero findings. [Draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67) is published
+and [CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
+is pending at `dedf920`. State is `awaiting_ci`. Windows proof awaits artifact audit. Mac package/helper ceilings are exhausted.
 The full combined lab check retains its startup/reference failures. No leaf, full
 canvas/editor, physical-input or human acceptance is claimed. No merge or release
 is selected. Preserve the unrelated audit and protected recovery.
