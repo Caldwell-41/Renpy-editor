@@ -1,73 +1,42 @@
 # Current outcome handover
 
-## L04 implementation and qualification
+## L04 merge and workspace closeout
 
-Kris selected [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42), assigned
-this chat end-to-end ownership, requested a new branch and approved status updates
-for this work. This checkout is on `codex/phase3b-l04-nested-layout`, based on
-`eb83d3b1bfe8fd3f62f13b301300a47b61e96dd6`, targeting the Screens parent. Work is
-published in [draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67);
-no merge or release is selected. Preserve the unrelated Phase 1 audit.
+Kris directed merging [PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67)
+into its Screens parent, updating related tickets and cleaning the completed
+branch/workspace. The merge is `df3d8cac6f1f6d55df340d8a90041a72eaa8de98`;
+its tree exactly matches independently reviewed head `76db7da`.
+This checkout is on `codex/phase3b-screen-designer`.
+[L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42) is accepted for its
+four bounded functional criteria. No successor implementation or release is selected.
 
-The separate `L04 nested layout prototypes` chat
-(`01a1818a-2b56-7230-99bb-ba202fd62b1d`) received Kris's exact final decision,
-"approved", for A2 `focused-refined` / `focused-v2`. Its seven scoped commits through
-`682f922` are integrated. The source commit, fingerprint, 13 source hashes and 14
-captures verified. Keep its managed worktree and approved frontend pinned for
-comparison. [Handoff](../design/design-lab-nested-layout/HANDOFF.md) and
-[approval](../design/design-lab-nested-layout/approval.json) retain the exact decision.
-The prototype owner has finished; this chat owns implementation and qualification.
-Both independent review axes report zero findings at `228fe23`, including
-grid/source guards, empty containers, policy copy and the native-probe correction.
+[Closeout evidence](../tasks/evidence/nested-layout.md#merge-and-ticket-closeout-2026-10-29)
+owns final review, required automatic-check identities, both-target SDK/helper/native
+results, criterion mapping and retained failures. Both review axes report zero
+findings at `76db7da`; the final review rerun passes 42 screen-core tests, TypeScript
+checking and native-evidence validation. Two SDK tests remain intentionally ignored
+in that ordinary slice. Application material matches audited CI1 `dedf920` and signed
+Mac candidate `228fe23`. The combined Design Lab startup/reference failures remain
+failed, with the scoped A2 inspector comparison retained. Merge authorization does
+not claim complete promotion validation, full canvas, physical-input, IME, human
+or wider Phase 3B acceptance.
 
-The implementation extends existing composition/numeric owners with
-window/hbox/grid/viewport, count units for literal 1-64 grid axes, minimal header
-patches, padding/spacing and stationary top-left clipping. Source opens in a modal
-and Edit in Source retains the existing editor. Current typed/source rules are in
-[DATA_MODEL](../DATA_MODEL.md#nested-containers-and-viewport-limits).
+The local/remote feature branch and completed prototype worktree/branch are retired.
+The exact approved prototype is retained by local recovery tag
+`recovery/l04-approved-prototype-2026-10-29`. Ignored review output and the dependency
+symlink are archived with a hash receipt under
+`.toolchains/retired-worktrees/pr67-l04-prototypes/`. The approved source and captures
+also match the merged paths. No prototype preview process remained at cleanup.
+Keep that recovery tag, the unrelated untracked Phase 1 audit and all earlier
+protected native/session recovery below. No runtime journal or primary-workspace
+qualification output was removed.
 
-Kris confirmed public core requests, the real UI-to-core path and pinned-SDK renders
-as the test boundaries. [Evidence](../tasks/evidence/nested-layout.md) retains
-passing portable/UI/core and scoped Mac SDK/helper results, original failures and
-recovery. All 264 frontend cases and 43 affected screen component cases pass.
-The broad core run passed 402 cases; sandbox localhost denials failed 31 transport
-cases. All 38 cases in that affected module pass with socket access, resolving the
-31 failures. Combined ordinary coverage is 433 cases, with 49 explicit ignores and
-three policy exclusions. The failed broad run and scoped rerun are retained.
-The signed Mac native case passes at `228fe23`; Windows qualification remains pending. The full Design Lab gate remains failed at initial navigation;
-its longer external diagnostic also remains failed at the old reference guard.
-
-Current Mac use is SDK 12/16 and helper sessions 4/4 (exhausted), package builds
-3/3 (exhausted), native sessions 2/3. Package 3 at `228fe23` passes signed identity
-and the full synthetic WebView case, exact disk bytes, reopen and all cleanup.
-Session 1 failed on a probe error-code omission; the browser/core regression and
-session 2 pass after the read-only retry correction. See the candidate-bound
-[Mac receipt](../tasks/evidence/nested-layout/mac-native.json). No new Mac helper
-or package build is allowed without a supplement. CI1 is recorded below. #42 owns limits across hosts and attempts.
-
-Kris explicitly approved push, draft PR and bounded CI. CI1 run 40742930659,
-attempt 1 at `dedf92088c11309801fe03e9449b4a64b5f758a2` completed successfully,
-and both artifacts are audited. The watcher event matched this chat and its receipt
-is recorded. Both-host portable/controller checks, Windows six source SDK starts
-plus one helper, x64 package and native stages/disk/reopen/cleanup pass.
-[CI1 receipt](../tasks/evidence/nested-layout/ci1.json) retains exact identities.
-
-Final consumption is dispatches 1/3. Windows uses SDK 7/16, helpers 1/4, package
-builds 1/3 and native sessions 1/3. Mac remains SDK 12/16, helpers 4/4, package
-builds 3/3 and native sessions 2/3. No further expensive execution is selected.
-The exhausted Mac helper/package ceilings remain closed.
-
-State is `review_ready` in draft PR #67; #42 remains open. Four functional
-criterion results pass at their stated scope. A2 grid/viewport inspector comparison
-passes its scoped visual review. The full combined Design Lab check retains
-startup/reference failures; do not claim complete promotion validation or a waiver.
-Required cheap PR checks passed at `2f0386a`; publish this audit checkpoint and
-confirm its cheap checks before the final review handoff. The audit changes only
-status/evidence and retains application equivalence with CI1 and signed Mac.
-No merge, release, full canvas/physical-input/human acceptance or wider Phase 3B
-acceptance is authorized. Remaining action is user review/disposition of PR #67
-and the recorded combined-lab gap, followed by an explicitly selected merge.
-Protected native recovery and earlier closed allowances below remain intact.
+Final L04 use remains dispatches 1/3; Mac SDK 12/16, helpers 4/4, packages 3/3,
+native sessions 2/3; Windows SDK 7/16, helpers 1/4, packages 1/3, native sessions 1/3.
+The outcome's unused allowances are closed; exhausted Mac helper/package limits
+remain closed. No new package, SDK/helper, native or costly CI run occurred during
+merge closeout. Related groups stay open. L19 #50 has its L04 dependency satisfied,
+while L08 #41 and L18 #46 remain. Choose a successor ticket explicitly before work.
 
 ## Retained L03 closeout
 

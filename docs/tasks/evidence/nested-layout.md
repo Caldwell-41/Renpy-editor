@@ -3,7 +3,8 @@
 [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42) owns scope, acceptance,
 operation limits and current consumption. The implementation branch is
 `codex/phase3b-l04-nested-layout`, based on `eb83d3b`. CI1 and the signed Mac native case pass. The artifact audit is complete; the
-implementation is ready for review with the combined Design Lab gap retained.
+implementation is merged and accepted for bounded L04 scope, with the combined
+Design Lab gap retained. See the [merge closeout](#merge-and-ticket-closeout-2026-10-29).
 Independent Standards and Spec review each report zero findings at `228fe23`,
 including the final policy notice and bounded probe retry correction.
 
@@ -15,7 +16,8 @@ Kris approved A2 `focused-refined` / `focused-v2` with "approved".
 `98ceba77f44a69e91840ea4afa09e0e19118656fc9caa474a765753d5269e42d`.
 The seven scoped prototype commits were integrated sequentially. All 13 source
 hashes and 14 captures verified, and the source fingerprint reproduced before
-production edits. The prototype worktree remains pinned for comparison.
+production edits. The prototype worktree stayed pinned through comparison and was retired after
+merge; the closeout below records recovery.
 
 The existing combined Design Lab check remains failed at initial navigation's
 8-second timeout. Its external 45-second diagnostic remains failed at flow-v1's
@@ -248,3 +250,49 @@ is a scoped visual-fidelity finding, not complete promotion validation or a waiv
 The implementation is `review_ready` in draft PR #67. Ticket #42 stays open;
 its final acceptance/closure retains the combined lab validation gap and any user
 review disposition. No merge, release or wider Phase 3B acceptance is claimed.
+
+
+## Merge and ticket closeout, 2026-10-29
+
+Kris directed merging [PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67)
+into `codex/phase3b-screen-designer`, updating its related tickets and cleaning the
+completed branch/workspace. GitHub reports merge
+`df3d8cac6f1f6d55df340d8a90041a72eaa8de98`. Its tree exactly matches independently
+reviewed head `76db7da43af896cd7fed7aaf259222a134950c2a`; the local parent was
+fast-forwarded to that merge. GitHub records 2026-10-28 UTC; this closeout uses
+the local 2026-10-29 date.
+
+Both independent Standards and Spec reviews report zero findings at that head.
+Review verification passes all 42 ordinary screen-core tests, TypeScript checking
+and the native-evidence rejection test. Two explicit SDK cases remain ignored in
+the ordinary run. Required automatic checks both pass in
+[run 40746870220, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40746870220/attempts/1).
+No application bytes changed after the review or during merge. Audited CI1 and
+signed Mac evidence above retain their candidate/equivalence basis.
+
+All four #42 functional criteria in the terminal map above are accepted for the
+bounded container and stationary top-left viewport scope. The user's merge direction
+follows the review that disclosed the combined Design Lab startup/reference gap.
+Those failures remain failed. This closeout does not claim a combined-gate pass,
+complete promotion validation, physical input, native IME, human proof, full GPU
+pixel equivalence or wider Phase 3B acceptance.
+
+#42 is accepted/closed. P3B #22 and B02 #24 retain aggregate acceptance;
+B06 #28, B08 #30 and B11 #33 receive only scoped evidence credit. L19 #50's L04
+prerequisite is satisfied, while L08 #41 and L18 #46 remain actual prerequisites.
+The native dependency edge stays as provenance. No successor implementation is
+selected by this closeout.
+
+The feature branch is retired locally and remotely after ancestry verification.
+The prototype's seven original commits were cherry-picked during implementation;
+its lab code, registry and design records exactly match the merged paths. Its clean
+tracked work and approved source are retained under local recovery tag
+`recovery/l04-approved-prototype-2026-10-29`. Before removing its worktree/branch,
+ignored review files and the untracked dependency symlink were archived and verified
+under `.toolchains/retired-worktrees/pr67-l04-prototypes/`, with a SHA-256 receipt.
+No prototype preview process remained. The unrelated audit, main workspace evidence
+and protected recovery remain intact.
+
+Final operation use remains the terminal CI1 totals above. Unused L04 allowances
+are closed; exhausted Mac helper/package limits remain closed. No new expensive
+qualification ran during closeout. Only documentation changes follow the merge.

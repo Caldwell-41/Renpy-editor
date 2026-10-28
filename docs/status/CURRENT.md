@@ -1,26 +1,24 @@
 # Current status
 
-## L04 nested and clipped layouts ready for review
+## L04 nested and clipped layouts merged
 
-[Draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67) implements
-[L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42) on
-`codex/phase3b-l04-nested-layout`. A2 `focused-v2` approval and the L03 prerequisite
-are satisfied. Window/hbox/grid/viewport controls and Source draft retention
-extend the existing transactional owners.
+[PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67) merged into
+`codex/phase3b-screen-designer` at `df3d8cac6f1f6d55df340d8a90041a72eaa8de98`.
+Its tree exactly matches reviewed head `76db7da`. Kris selected this merge after
+both review axes reported zero findings. [L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42)
+is accepted for its four bounded nested-container and stationary-viewport criteria.
 
-[Audited CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
-passes at `dedf920`: both-host portable/controller checks, Windows SDK geometry
-and clipping, helper empty/populated cases and packaged WebView history/reopen.
-Signed Mac proof at application-identical `228fe23` passes identity, disk bytes
-and cleanup. Both independent reviews report zero findings.
-[Evidence](../tasks/evidence/nested-layout.md#terminal-ci1-audit-and-review-handoff)
-contains the four functional results, receipts, retained failures and A2 comparison.
+[Closeout evidence](../tasks/evidence/nested-layout.md#merge-and-ticket-closeout-2026-10-29)
+retains both-target SDK/helper/native results, exact candidates, required automatic
+checks, original failures and final review checks. The combined Design Lab
+startup/reference failures remain recorded; this merge does not convert them to a
+pass or establish full promotion validation. Broader canvas, physical-input, human
+and Phase 3B acceptance remain open. Historical operation limits stay closed.
 
-State is `review_ready`; #42 remains open. The full combined Design Lab check
-retains its startup/reference failures and is not a pass or waiver. Full canvas,
-physical-input, human and wider Phase 3B acceptance remain separate. No merge or
-release is selected. Mac helper/package ceilings are exhausted. Preserve the
-unrelated audit and protected recovery.
+The feature branch and completed prototype worktree are retired. The prototype's
+exact source and local evidence remain recoverable. The unrelated Phase 1 audit
+and protected recovery remain intact. No successor implementation or release is
+selected. L19 #50 has its L04 prerequisite satisfied; L08 #41 and L18 #46 remain.
 
 ## Accepted L03 baseline
 
