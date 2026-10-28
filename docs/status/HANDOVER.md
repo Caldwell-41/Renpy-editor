@@ -17,14 +17,15 @@ and Enter submitting during IME composition. The confirmed TDD boundaries are
 Screens IPC/source/history and real production UI/controller/core controls. One
 red/green slice preceded each fix. The worker has returned writer ownership. Parent
 final review, typecheck/build, 264 frontend tests, 37 core tests and real numeric/Help
-controllers pass. Signed Mac and corrected-candidate CI qualification are next.
+controllers pass. The corrected signed Mac package and native Help case pass at 186c8b0; the new
+blur/accessibility/IME assertions, history, SDK preview, Stop, reopen and cleanup
+pass. Both-target correction CI qualification is next.
 
 [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) owns limits and current
 state. The public correction reservation uses dispatch 2, package/editor session 2
 per OS, four SDK starts per OS in CI and four in the signed Mac Help case. Kris's
-approval raises the Mac SDK ceiling to 28; Windows stays 16. Actual use before
-execution remains dispatches 1, package/editor sessions 1 per OS, Mac SDK 20 and
-Windows SDK 8. Counts are cumulative and failed starts count. The approved signing
+approval raises the Mac SDK ceiling to 28; Windows stays 16. Current use is dispatches 1, Mac package/editor sessions 2 each and SDK 24, Windows
+package/editor sessions 1 each and SDK 8. Counts are cumulative and failed starts count. The approved signing
 identity is available through the package route's matching query; no signing,
 Keychain trust, ACL or credential policy change is selected.
 

@@ -7,14 +7,13 @@ review fixes and granted approval for their implementation, TDD, PR update and C
 The worker owns code and focused tests; the parent retains final validation and
 publication. The source-indentation finding and three numeric-field validation/
 accessibility/IME findings are fixed with red/green evidence. Parent local validation
-passes 264 frontend tests, 37 screen-core tests and the real controllers. Signed Mac
-and corrected-candidate CI proof remain pending.
+passes 264 frontend tests, 37 screen-core tests and the real controllers. The corrected signed Mac package and native Help case pass at 186c8b0. Both-target
+correction CI remains pending.
 
 [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) owns the qualification
-ledger. Dispatch 2 and one further package/editor session per OS are reserved.
-The authorized Mac SDK ceiling is now 28; Windows remains 16. Actual use before
-this correction remains dispatches 1, package/editor sessions 1 per OS, Mac SDK 20
-and Windows SDK 8. Earlier CI/native receipts retain their exact candidates and
+ledger. Dispatch 2 and Windows package/editor session 2 remain reserved.
+The authorized Mac SDK ceiling is now 28; Windows remains 16. Current use is dispatches 1, Mac package/editor sessions 2 each and SDK 24, Windows
+package/editor sessions 1 each and SDK 8. Earlier CI/native receipts retain their exact candidates and
 scope in [evidence](../tasks/evidence/numeric-layout.md#pr-66-review-corrections).
 A2 approval, protected recovery and the unrelated audit remain intact. The PR stays
 open; no merge or successor feature is selected.

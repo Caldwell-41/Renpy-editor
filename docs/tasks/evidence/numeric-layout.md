@@ -465,3 +465,29 @@ CI qualification are next. Local receipts stay ignored; the corrected applicatio
 inputs will be committed before packaging. CURRENT/HANDOVER remain above their soft
 size targets because prior acceptance and unique protected recovery remain outside
 this correction; the selected L03 sections replace their superseded text.
+
+
+### Corrected signed Mac proof
+
+Signed Mac package/session 2 passes at correction source
+186c8b035acae46f5102e7e0771e332345a1c9c2. The
+[correction receipt](numeric-layout-pr66-fixes-mac-native.json) binds the strict
+certificate-backed signature, installer contents, exact running executable path/PID,
+source, desktop admission and case results. Executable SHA256 is
+f0f251e737a03d6f5963506920ed0e2e72d13fd3dc88b8ba82d617853c1ff691;
+installer SHA256 is 4865e5a74e0e0706a49202bfef002cc27f46216b64adb70ff9c0094e420a8962.
+The approved identity and all signing/credential policy remain unchanged.
+
+The real packaged WKWebView passes invalid blur, adjacent accessible explanation,
+focus retention, unchanged source during validation, and composing Enter/Escape
+without Apply/Cancel. The existing minimal write/history, compile/lint, actual
+760x360 SDK preview, stale Stop and disk reopen sequence also passes. Product exit
+is zero, no timeout or external error occurs, and accepted BOM/CRLF source bytes
+match exactly. Scratch jobs, bytecode and saves are absent. All cleanup owners and
+both power-assertion releases pass. The five retained native files pass the privacy
+scan. Input is synthetic DOM input, without OS-native IME or human acceptance claims.
+
+This case uses four SDK starts: version validation, compile, lint and run. Current
+cumulative use is dispatches 1, Mac package/editor sessions 2 each and SDK 24/28,
+Windows package/editor sessions 1 each and SDK 8/16. No local operation remains
+pending. The single both-target correction qualification remains reserved.
