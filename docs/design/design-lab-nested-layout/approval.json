@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "screenId": "nested-layout",
-  "currentApproved": null,
+  "currentApproved": "focused-v2",
   "revisions": [
     {
       "id": "focused-v1",
@@ -21,7 +21,164 @@
     {
       "id": "focused-v2",
       "variantId": "focused-refined",
-      "approval": null
+      "approval": {
+        "date": "2026-10-28",
+        "decision": "Kris explicitly approved the current A2 focused editor (focused-refined / focused-v2): \"approved\". This followed the refined preview and clarification that viewport Height, and then surrounding Window Height if needed, can increase the visible area. This selects the L04 design extension; flow-v1, C5 composition and paired-v2 numeric approvals retain their scope.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "b2fffee2a3983ff309c27502fdfc215f56b1ccd0",
+          "fingerprint": "98ceba77f44a69e91840ea4afa09e0e19118656fc9caa474a765753d5269e42d"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-addition-dark-wide.png",
+            "sha256": "af87fe6066ad8118de28010ea0ac1a863d234c1c60e6bca0d574cb870838f7e9",
+            "state": "addition",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-choose-dark-wide.png",
+            "sha256": "74d4dfc45d6b61f8da244f85d4f104486168519367951c402aa5e855492d0f17",
+            "state": "choose",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-conflict-dark-wide.png",
+            "sha256": "636bfa406834ede7ae3ab9f4fd89195129af698bef84ef7bb15436d2c2c73abb",
+            "state": "conflict",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-connect-dark-wide.png",
+            "sha256": "51edbfdd8955c63c2e20ed1cbdd01ec44d30130761ba691a64dd88ac48a08c3e",
+            "state": "connect",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-editing-dark-compact.png",
+            "sha256": "0b744302acca7925640fab593cc9af93167965ad0f69230df3d4bbe62a5fb601",
+            "state": "editing",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-group-removal-dark-wide.png",
+            "sha256": "9d40ff16a78cbc5d1901a50206d19c1a7d2f57e14d9835474107c7eab80cf443",
+            "state": "group-removal",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-invalid-grid-dark-wide.png",
+            "sha256": "10220c91fb0ebb776f26cd819669109c4b3282c09434cce8693c16caaa25d1b9",
+            "state": "invalid-grid",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-source-dark-wide.png",
+            "sha256": "f374b3086022a5ba22f1951c204ea92cf8c0d8fd8c357bcd37dc820b2243df90",
+            "state": "source",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-source-only-dark-wide.png",
+            "sha256": "9cca46912eb49cae3dfb60dcbbce3654cbeb2522f02691c8700cb2ab6a9c47b2",
+            "state": "source-only",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/a2-viewport-dark-wide.png",
+            "sha256": "48b8803d64bf4da6a9699ad3b5587d860a0bad443e88dc57ffb0d1041630617e",
+            "state": "viewport",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/focused-refined-dark-compact.png",
+            "sha256": "9150bdac08e91279a9f19d5f1e401fb5fa50cd951f2c119df525c6ac96ae8545",
+            "state": "nested",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/focused-refined-dark-wide.png",
+            "sha256": "f0011512b3f8ce4f415498445c747c05b03e3cb97bf72cff3ddf6ef1f5be7c93",
+            "state": "nested",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/focused-refined-light-compact.png",
+            "sha256": "f44ec375eca0c4de7fcf477a1927338fffefbca251732698db37d19f60f56b51",
+            "state": "nested",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-nested-layout/captures/focused-v2/focused-refined-light-wide.png",
+            "sha256": "5e87882e77755b8ea2ee160c103a7a98fbfc9d9df89bfd61ed85cd0fec88a116",
+            "state": "nested",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Keep the approved Choose / Design / Connect editor with a persistent canvas and one focused editing panel. Hierarchy, source statements, canvas clicks and ancestor links select the same element.",
+          "Restore the approved paired horizontal/vertical position and anchor controls, pixel/relative units, alignment presets, dimensions, expandable size limits and window/frame padding. Keep Apply/Cancel visible outside desktop form scrolling and sticky at compact width.",
+          "Show grid columns, rows, spacing, direct-child count and capacity together. Use literal axes 1 through 64 as an authoring bound pending SDK qualification, fill rows in source order, and generate allow_underfull True. Refuse a capacity smaller than the current child count and retain/focus the draft.",
+          "Use window/frame/viewport single-child rules and horizontal/vertical/grid parent constraints. Explain controlled placement and link directly to the parent while retaining child drafts.",
+          "Viewport width and height control the visible opening at the initial top-left. Increasing viewport Height reveals more content; surrounding Window Height can also be increased when its own bounds constrain the result. Wheel, drag, keys, scrollbars, bindings, offsets and child-size expressions remain Source-only for L04.",
+          "Add with an explicit type and parent, a pending schematic label, contextual child-group destinations and retained input on refusal. New grids, windows and viewports can start empty. Text entry appears only for text and textbutton.",
+          "Keep the nested keyboard hierarchy, type icons, draft markers, Enter/double-click Design entry, pointer sibling ordering, Alt+Up/Down and explicit Move earlier/later controls. Move groups with descendants and refuse moves across custom Source.",
+          "Every eligible removal opens the confirmed C5-style modal with the element or descendant list and initial Cancel focus. Cancel/Escape retain layout, focus, scroll, source and history. Confirm creates one history entry, selects the next sibling, else previous sibling, else parent, and Undo restores the subtree and selected target.",
+          "Apply current element fields together as one history entry; no-op Apply creates none. Enter applies numeric edits; Escape cancels. Invalid values, source conflicts, selection, parent links, preview focus and resolution changes retain drafts. Keep per-element disclosure state, form scroll and numeric focus through Apply.",
+          "Source opens separately without resizing the canvas and shows accepted sample source only. Statement selection returns to the element. Connect shows the existing Close Hide-help action without executing it; Test in Ren'Py remains a deliberate real-project operation in production.",
+          "Keep Fit/75%/100% editor zoom, focus preview and compact Show canvas/Back to editing navigation. Canvas selection never runs game actions.",
+          "This approval extends the earlier approved editor and does not remove existing pointer move/resize, style/asset pickers, shared-look editing or the broader action builder. Their previous approved references remain authoritative."
+        ],
+        "deviations": [
+          "This prototype uses fictional browser-memory state and generated sample Source. Its HTML canvas is schematic; it does not prove Ren'Py fidelity, minimal source patches, durable save/reopen, native input or SDK behavior.",
+          "This refinement simulates layout and composition controls relevant to L04. Pointer move/resize gestures, style/asset pickers, shared-look editing and the broader action builder are not reimplemented in this mock and retain their existing approved behavior in production.",
+          "The chosen grid authoring range and stationary viewport subset still require production and pinned-SDK qualification. Unsupported expressions/ranges remain lossless Source-only regions. No scrolling capability is selected by this approval.",
+          "The full Design Lab gate has retained startup and existing approved-reference failures. Focused browser checks pass within their recorded scope; these failures are not treated as passes or as waived acceptance. No shared runner or existing approval record is changed."
+        ]
+      }
     }
   ]
 }

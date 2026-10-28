@@ -3,7 +3,7 @@
 Three variants ask how to edit a nested layout while keeping parent constraints,
 clipping, hierarchy and accepted Source understandable. They extend the existing
 Screens shell for [L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42).
-All three remain unapproved. [A2 refinement](REFINEMENT.md) adds the requested Experience First revision with the approved numeric and composition controls in context. It also remains unapproved. Existing flow-v1, C5 Help composition and A2 numeric
+The original A/B/C layouts remain unapproved. Kris approved [A2, the focused editor refinement](REFINEMENT.md), on 2026-10-28. It extends the earlier approved Screens, composition and numeric decisions. [Approval handoff](HANDOFF.md) records source identity, verification and the unresolved combined-gate failure. Existing flow-v1, C5 Help composition and A2 numeric
 inspector approvals retain their scope.
 
 - A, Focused inspector, keeps the canvas beside one task panel. Choose opens the
@@ -72,9 +72,9 @@ The final implementation must reuse their approved behaviors and existing servic
 
 The local prototype branch owns only this screen, its registry entry and these
 notes. Production, tests, contracts, status and issue execution records belong to
-the implementation chat. No prototype is promoted until Kris explicitly selects a
-variant and revision. Approval must pin source identity and retained captures under
-Design Lab INTEGRATION before the final handoff.
+the implementation chat. Kris explicitly selected A2 / focused-v2. Its approval record pins the reviewed
+source and retained captures. The combined lab gate remains failed; the handoff
+keeps that validation gap separate from the explicit design decision.
 
 ## Draft verification, 2026-10-28
 

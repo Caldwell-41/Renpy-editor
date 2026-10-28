@@ -1,7 +1,8 @@
 # A2 focused editor refinement
 
-Kris requested an Experience First refinement of A. This is a new unapproved
-variant, `focused-refined`, revision `focused-v2`. A, B and C remain available.
+Kris requested an Experience First refinement of A. Kris then approved the
+current A2 with "approved" on 2026-10-28. The selected variant is
+`focused-refined`, revision `focused-v2`. A, B and C remain available as drafts.
 No existing approval is replaced. Production and issue acceptance remain with the
 implementation chat for [L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42).
 
@@ -87,9 +88,10 @@ transaction layer and retain their approved behavior.
 
 ## Review status and checks
 
-The design remains pending Kris's explicit final approval. The review candidate
-will be pinned with retained wide/compact captures before handoff. Previous A/B/C
-source and draft captures remain available for comparison.
+The explicit approval is recorded in `approval.json`, with the pinned source and
+14 retained captures. Previous A/B/C source and draft captures remain available.
+`review-focused-v2.json` preserves the pre-approval review snapshot; it is not the
+current approval owner. The approval handoff keeps the combined-gate failure open.
 
 The first new interaction check caught Padding closing after Apply. A minimal
 single-element sequence passed; the full sequence reproduced the loss before the
@@ -112,5 +114,15 @@ interaction module. TypeScript, approval-record validation and whitespace checks
 pass. An in-memory build confirms production exclusion. The final feedback and
 compact-navigation corrections leave that import graph unchanged. Source candidate
 `b2fffee2a3983ff309c27502fdfc215f56b1ccd0`, its fingerprint, file hashes and 14
-retained captures are recorded in `review-focused-v2.json`. No final approval is
-recorded and no production code changed.
+retained captures are recorded in `review-focused-v2.json`. The subsequent explicit approval is recorded in `approval.json`. No production
+code changed.
+
+
+Post-approval validation confirms the source fingerprint and every retained file
+and capture hash. The lab shows `Approved · focused-v2`. All four baseline views
+(dark/light at 1100 by 720 and 560 by 640, scale 1) reproduce the retained PNGs
+byte for byte. The unchanged full `npm run design:check` passes typechecking and
+approval validation, then fails at its first page navigation's 8,000 ms timeout.
+No shared runner or threshold changed. That gate remains failed. The implementation
+coordinator receives this gap with the explicit approval; it is not a pass or a
+waiver. [Handoff](HANDOFF.md) owns the compact integration receipt.
