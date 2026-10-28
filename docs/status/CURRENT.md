@@ -1,5 +1,25 @@
 # Current status
 
+## L03 review fixes qualified
+
+[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) fixes unsupported-
+indentation writes, numeric blur/errors/IME handling and pending Apply focus.
+The parent audited [CI4 40644911729](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644911729/attempts/1),
+attempt 1 at 07b82be. Both targets pass 264 frontend tests, 37 core tests, real
+controllers, the delayed-focus/duplicate-Enter case and both SDK aspects. Windows
+packaged proof passes. Signed Mac package/session 3 passes at application-identical
+eb10f71, including clicked-Apply focus, source/history, preview, Stop and reopen.
+
+[Final evidence](../tasks/evidence/numeric-layout.md#final-correction-audit-and-review-ready-handoff)
+owns source/artifact/package identities, cleanup and the retained CI2/CI3 failures.
+The original review findings and CI2 focus defect have no remaining correction.
+[#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) is review-ready and stays
+open for integration. Final use is dispatches 4/4, package/editor sessions 3/3 per OS,
+Mac SDK 32/32 and Windows SDK 24/24. Final documentation publication needs only its
+cheap automatic PR-check audit. A2 approval, protected recovery and the unrelated
+audit remain intact. No merge, successor, pointer/full-canvas or broader acceptance
+is selected.
+
 ## Phase 3B architecture refactors merged
 
 [PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) merged at `99118a1`

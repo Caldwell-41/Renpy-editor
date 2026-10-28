@@ -16,6 +16,7 @@ import { definition as screenDesigner } from "./screens/screens/definition.ts";
 
 import { definition as canvasDrag } from "./screens/canvas-drag/definition.ts";
 import { definition as helpComposition } from "./screens/help-composition/definition.ts";
+import { definition as numericLayout } from "./screens/numeric-layout/definition.ts";
 
 function approvalFor(screenId: string) {
   const approval = approvalRecords.find(item => item.record.screenId === screenId);
@@ -57,7 +58,7 @@ export const screens: readonly LabScreen[] = [{
     { id: "board", title: "Writing board", load: () => import("./screens/characters-writing/board.ts") },
   ],
   check: "./screens/characters-writing/check.mjs",
-}, ...[story, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
+}, ...[story, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
 
 for (const screen of screens) {
   for (const variant of screen.variants) revisionFor(screen.approval, variant.id);

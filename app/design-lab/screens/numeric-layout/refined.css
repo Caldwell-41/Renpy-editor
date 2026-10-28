@@ -1,0 +1,84 @@
+.numeric-refined .lp-main { min-height:0; overflow:hidden; }
+.numeric-refined .lp-content { display:flex; flex-direction:column; min-height:0; overflow:hidden; gap:10px; }
+.numeric-refined .numeric-workspace { grid-template-columns:minmax(0,1fr) 382px; gap:18px; overflow:hidden; }
+.numeric-refined .numeric-stage { overflow:auto; padding-right:2px; }
+.numeric-refined .numeric-stage-header { margin-bottom:8px; }
+.numeric-refined .numeric-stage select { border-radius:0; }
+.numeric-refined .numeric-inspector { display:flex; flex-direction:column; padding-left:16px; overflow:hidden; }
+.numeric-refined .numeric-editor-heading { margin:0; padding:0 0 10px; flex-shrink:0; align-items:flex-end; }
+.numeric-parent { display:block; font-size:11px; color:var(--text-secondary); margin-bottom:5px; }
+.numeric-refined .numeric-inspector form { min-height:0; flex:1; overflow:auto; padding-right:4px; }
+.numeric-refined .numeric-group { padding:10px 0; }
+.numeric-refined .numeric-group h3,.numeric-refined .numeric-group summary { margin-bottom:8px; font-size:12px; }
+.numeric-refined details.numeric-group:not([open]) summary { margin:0; }
+.numeric-refined .numeric-grid { gap:8px 10px; }
+.numeric-refined .numeric-grid input { padding:6px 7px; height:32px; min-height:32px; font-variant-numeric:tabular-nums; }
+.numeric-refined .numeric-grid .numeric-coordinate { grid-template-columns:59px minmax(0,1fr); gap:4px; }
+.numeric-refined .numeric-grid .numeric-coordinate select { height:32px; min-height:32px; font-size:11px; }
+.numeric-axis-label { font-size:11px; font-weight:500; margin:0; color:var(--text-secondary); }
+.numeric-field-help,.numeric-align-help { font-size:11px; color:var(--text-secondary); line-height:1.5; margin:8px 0 0; }
+.numeric-quick { display:grid; grid-template-columns:minmax(0,1fr) 136px; gap:14px; }
+.numeric-refined[data-layout=placement] .numeric-quick { grid-template-columns:136px minmax(0,1fr); }
+.numeric-quick .numeric-grid { grid-template-columns:1fr; }
+.numeric-quick .numeric-grid .lp-field { grid-template-columns:42px minmax(0,1fr) auto; align-items:center; gap:6px; }
+.numeric-quick .numeric-grid .lp-label { grid-column:1; grid-row:1; }
+.numeric-quick .numeric-grid input { grid-column:2; grid-row:1; }
+.numeric-quick .numeric-grid .numeric-unit { grid-column:3; grid-row:1; }
+.numeric-align-grid { display:grid; grid-template-columns:repeat(3,1fr); width:108px; gap:3px; }
+.numeric-refined .numeric-align-grid .button { position:relative; height:24px; min-height:24px; padding:0; font-size:0; background:transparent; border:1px solid var(--border-normal); }
+.numeric-align-dot { display:block; position:absolute; width:5px; height:5px; background:var(--text-secondary); left:calc(50% - 2.5px); top:calc(50% - 2.5px); }
+.numeric-align-grid .button:nth-child(3n+1) .numeric-align-dot { left:5px; }
+.numeric-align-grid .button:nth-child(3n) .numeric-align-dot { left:auto; right:5px; }
+.numeric-align-grid .button:nth-child(-n+3) .numeric-align-dot { top:4px; }
+.numeric-align-grid .button:nth-child(n+7) .numeric-align-dot { top:auto; bottom:4px; }
+.numeric-refined .numeric-align-grid .button[aria-pressed=true] { background:var(--selection-bg,var(--surface-app)); border-color:var(--accent-primary); }
+.numeric-align-grid .button[aria-pressed=true] .numeric-align-dot { background:var(--accent-primary); }
+.numeric-refined .numeric-commit { flex-shrink:0; border-top:1px solid var(--border-normal); padding:10px 0 0; }
+.numeric-refined .numeric-actions { position:static; margin:0; border:0; padding:0; background:transparent; }
+.numeric-refined .numeric-actions .button { min-height:32px; }
+.numeric-commit-state { font-size:11px; line-height:1.5; color:var(--text-secondary); margin:0 0 8px; }
+.numeric-refined .numeric-feedback { margin:0 0 8px; padding:0; font-size:12px; }
+.numeric-refined .numeric-grid input[aria-invalid=true] { border-color:var(--status-error,#d98474); outline:1px solid var(--status-error,#d98474); }
+.numeric-refined .numeric-constraint { margin:0 0 10px; font-size:12px; padding-left:10px; }
+.numeric-constraint p { margin:0 0 6px; }
+.numeric-refined .numeric-constraint .button { background:transparent; padding:0; border:0; color:var(--accent-primary); text-decoration:underline; min-height:24px; }
+.numeric-axis-columns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.numeric-refined .numeric-axis-columns .numeric-grid { display:flex; flex-direction:column; }
+.numeric-refined .numeric-axis-columns .numeric-group .lp-field { display:grid; }
+.numeric-refined[data-layout=axes] .numeric-placement { display:grid; grid-template-columns:1fr 108px; column-gap:10px; }
+.numeric-refined[data-layout=axes] .numeric-placement h3 { grid-column:1; }
+.numeric-refined[data-layout=axes] .numeric-align-grid { grid-column:2; grid-row:1/3; }
+.numeric-refined details .numeric-paired-coordinates { border:0; padding:0; }
+.numeric-refined details .numeric-paired-coordinates h3 { display:none; }
+.numeric-refined .numeric-canvas { background-color:#151c24; background-image:linear-gradient(transparent calc(50% - .5px),#ffffff0b 50%,transparent calc(50% + .5px)),linear-gradient(90deg,transparent calc(50% - .5px),#ffffff0b 50%,transparent calc(50% + .5px)); }
+.numeric-sample-group { display:flex; flex-direction:column; gap:12px; }
+.numeric-refined .numeric-sample-panel { padding:4%; cursor:pointer; }
+.numeric-refined .numeric-sample-panel h3 { font-size:clamp(16px,1.8vw,23px); }
+.numeric-refined .numeric-sample-panel p { font-size:clamp(11px,1.1vw,14px); }
+.numeric-refined .numeric-sample-panel .button { min-height:26px; padding:4px 8px; }
+.numeric-refined .numeric-sample-group[data-selected=true] { outline:1px solid #e4bb70; outline-offset:5px; }
+.numeric-anchor-mark { position:absolute; width:11px; height:11px; border:1px solid #e4bb70; background:#151c24; transform:translate(-50%,-50%); pointer-events:none; }
+.numeric-anchor-mark::before,.numeric-anchor-mark::after { content:""; position:absolute; background:#e4bb70; }
+.numeric-anchor-mark::before { width:17px; height:1px; top:4px; left:-4px; }
+.numeric-anchor-mark::after { width:1px; height:17px; left:4px; top:-4px; }
+.numeric-geometry { margin:8px 0 0; font-size:11px; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+.numeric-refined .numeric-picks { padding-top:10px; gap:0; }
+.numeric-refined .numeric-picks .button { padding:6px 8px; border:0; border-bottom:2px solid transparent; }
+.numeric-refined .numeric-picks .button[aria-pressed=true] { border-bottom-color:var(--accent-primary); }
+.numeric-refined .numeric-picks .button[data-has-draft=true]::after { content:"*"; color:var(--accent-primary); }
+.numeric-refined .numeric-boundary { font-size:11px; margin:10px 0; }
+.numeric-refined .numeric-source-details { padding:10px 0; }
+@media (max-width:800px) {
+  .numeric-refined .numeric-workspace { display:flex; flex-direction:column; overflow:auto; gap:16px; }
+  .numeric-refined .numeric-stage { overflow:visible; flex:none; padding:0; }
+  .numeric-refined .numeric-canvas { max-height:none; }
+  .numeric-refined .numeric-inspector { min-height:470px; overflow:visible; flex:none; padding:12px 0 0; }
+  .numeric-refined .numeric-inspector form { overflow:visible; }
+  .numeric-refined .numeric-commit { position:sticky; bottom:0; background:var(--surface-app); padding:10px 0; }
+  .numeric-refined .numeric-editor-heading { margin-bottom:6px; }
+  .numeric-refined .numeric-rail { margin:0; }
+}
+/* The production input rule uses four :not() selectors. Keep the lab's dense
+   fields local and explicit without changing production styles. */
+.numeric-refined.numeric-lab .numeric-inspector .numeric-grid .lp-field input,
+.numeric-refined.numeric-lab .numeric-inspector .numeric-grid .lp-field select { min-height:32px; height:32px; padding:5px 7px; border-radius:0; }

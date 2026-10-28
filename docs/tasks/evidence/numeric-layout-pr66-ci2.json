@@ -1,0 +1,251 @@
+{
+  "runId": 40637467395,
+  "attempt": 1,
+  "candidate": "44fdf0a136f8bfd68f9c3b9fbc777b9e8ba12a23",
+  "conclusion": "failure",
+  "artifacts": [
+    {
+      "id": 12794595811,
+      "name": "numeric-layout-macOS-40637467395-1",
+      "digest": "sha256:dfcc22149c25f051405db94d2729c697644524dd0d622015d7735c2a9f460afb",
+      "archiveDigestVerified": true,
+      "fileCount": 5
+    },
+    {
+      "id": 12793968409,
+      "name": "numeric-layout-Windows-40637467395-1",
+      "digest": "sha256:b4498d0603a845d48d6d71487b96b5304115c6eac299c42d1bd92a75d71d72f3",
+      "archiveDigestVerified": true,
+      "fileCount": 40
+    }
+  ],
+  "windows": {
+    "jobPassed": true,
+    "frontendTests": 264,
+    "screenCoreTests": 37,
+    "controllerPassed": true,
+    "helpGroups": 11,
+    "probeRehearsalPassed": true,
+    "sdkProcesses": 4,
+    "sdkVersion": "8.5.3.26051504",
+    "acceptedSHA256": "c6192365b9d010c5704fe54560313e147b030a7cb49ba6733aa7e040f786f6d3",
+    "acceptedSourceUnchanged": true,
+    "rejectingGateSelfCheck": true,
+    "sdkRecords": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "free": [
+            10,
+            20,
+            200.0,
+            100.0
+          ],
+          "bounds": [
+            40,
+            50,
+            260.0,
+            160.0
+          ],
+          "stack": [
+            52,
+            68,
+            100.0,
+            100.0
+          ],
+          "action": [
+            52.0,
+            107.0,
+            100.0,
+            60.0
+          ],
+          "asset": [
+            1,
+            0,
+            64.0,
+            48.0
+          ],
+          "free_text": [
+            10,
+            20,
+            46.0,
+            27.0
+          ],
+          "panel": [
+            800,
+            270,
+            320.0,
+            180.0
+          ],
+          "panel_text": [
+            816,
+            290,
+            105.0,
+            27.0
+          ],
+          "caption": [
+            78,
+            68,
+            48.0,
+            27.0
+          ]
+        }
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "rectangles": {
+          "free": [
+            10,
+            20,
+            200.0,
+            100.0
+          ],
+          "bounds": [
+            40,
+            50,
+            260.0,
+            160.0
+          ],
+          "stack": [
+            52,
+            68,
+            100.0,
+            100.0
+          ],
+          "action": [
+            52.0,
+            107.0,
+            100.0,
+            60.0
+          ],
+          "asset": [
+            1,
+            0,
+            64.0,
+            48.0
+          ],
+          "free_text": [
+            10,
+            20,
+            46.0,
+            27.0
+          ],
+          "panel": [
+            608,
+            294,
+            320.0,
+            180.0
+          ],
+          "panel_text": [
+            624,
+            314,
+            105.0,
+            27.0
+          ],
+          "caption": [
+            78,
+            68,
+            48.0,
+            27.0
+          ]
+        }
+      }
+    ],
+    "sdkCleanupComplete": true,
+    "nativePassed": true,
+    "nativeWebView": true,
+    "nativeKeyboard": false,
+    "nativeStages": [
+      "screen-inventory-passed",
+      "source-roundtrip-passed",
+      "validation-passed",
+      "preview-geometry-passed",
+      "stale-stop-passed",
+      "disk-reopen-passed",
+      "complete"
+    ],
+    "nativeCleanupOwners": {
+      "credentials": true,
+      "host": true,
+      "requests": true
+    },
+    "nativeSourceDisk": {
+      "acceptedBytesMatch": true,
+      "scratchJobsRemaining": 0,
+      "sourceBytecode": false,
+      "sourceSaves": false
+    },
+    "nativeSDKProcesses": 4,
+    "package": {
+      "executableSHA256": "9C0B107755655D40ABF5E8C544F055B5CD5F822E983B3E7CF7B2CFA41928F888",
+      "architecture": "Windows x64",
+      "candidate": "44fdf0a136f8bfd68f9c3b9fbc777b9e8ba12a23"
+    },
+    "nativeReportSHA256": "d6137ccf6103febbb3b217ad66a297c43771dd50dbfd16a988ee26eed1401557",
+    "acceptedHelpSHA256": "54dc5582dee854788bcb6266b2ff5254c42709e807e602f353eee1cfed63ca84",
+    "stopExitCode": -1073741510
+  },
+  "macos": {
+    "jobPassed": false,
+    "frontendTests": 264,
+    "screenCoreTests": 37,
+    "numericControllerPassed": true,
+    "failedCase": "help-screen.browser.mjs held-owner refusal sequence",
+    "reportedError": "Driver cleanup exit null (SIGTERM)",
+    "originalAssertion": "Not retained; cleanup failure masked it. Diagnosis pending.",
+    "sdkProcesses": 0,
+    "sdkStepsSkipped": true,
+    "nativePackageStarted": false
+  },
+  "cumulativeConsumption": {
+    "qualificationDispatches": 2,
+    "macPackages": 2,
+    "macEditorSessions": 2,
+    "macSDKStarts": 24,
+    "macSDKCeiling": 28,
+    "windowsPackages": 2,
+    "windowsEditorSessions": 2,
+    "windowsSDKStarts": 16,
+    "windowsSDKCeiling": 16
+  },
+  "remainingProof": [
+    "Diagnose and pass Mac Help controller/probe",
+    "Corrected Mac two-aspect SDK proof"
+  ],
+  "latestAutomaticPRChecks": {
+    "runId": 40637629615,
+    "candidate": "bc626a47db8c5a4b59eee99e22efc702ae3020a2",
+    "requiredJobsPassed": true
+  },
+  "controlledReproduction": {
+    "realCoreResponse": "RUNTIME_BUSY",
+    "responseHeldAcrossAnimationFrames": 2,
+    "beforeFix": {
+      "focusedElementAfterPending": "BODY",
+      "sameApplyControlConnected": true,
+      "draftWidth": "750",
+      "focusAssertionPassed": false,
+      "heldOwnerReleased": true,
+      "driverExitCode": 0
+    },
+    "afterFix": {
+      "sameApplyControlFocused": true,
+      "duplicateEnterWrites": 0,
+      "helpGroups": 11,
+      "heldOwnerReleased": true,
+      "driverExitCode": 0
+    },
+    "classification": [
+      "product focus defect",
+      "harness first-error and owned-hold cleanup defect"
+    ]
+  }
+}

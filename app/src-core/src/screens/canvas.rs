@@ -15,6 +15,8 @@ pub struct Request {
     #[serde(default)]
     pub positions: Vec<PositionDraft>,
     #[serde(default)]
+    pub layouts: Vec<LayoutDraft>,
+    #[serde(default)]
     pub text_samples: Vec<TextSample>,
     #[serde(default)]
     pub button_state: ButtonState,
@@ -61,6 +63,13 @@ pub struct PositionDraft {
     pub yalign: f64,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LayoutDraft {
+    pub node_start: usize,
+    pub values: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Plan {
@@ -99,6 +108,7 @@ impl AuthoringService {
             || request.height > 1080
             || request.drafts.len() > MAX_NODES
             || request.positions.len() > MAX_NODES
+            || request.layouts.len() > MAX_NODES
             || request.text_samples.len() > MAX_NODES
         {
             return Err(SceneError::InvalidPayload);
@@ -164,6 +174,9 @@ impl AuthoringService {
                 if matches!(key, "id" | "modal" | "action" | "hovered" | "unhovered") {
                     continue;
                 }
+                if node.numeric_layout.is_some() && !layout::aliases(key).is_empty() {
+                    continue;
+                }
                 let value = if key == "padding" {
                     raw.trim()
                         .strip_prefix('(')
@@ -214,6 +227,14 @@ impl AuthoringService {
                 } else {
                     plan.limits
                         .push(format!("Unresolved {key} at {}", node.span.start));
+                }
+            }
+            if let Some(numeric) = &node.numeric_layout {
+                match numeric.canvas_properties() {
+                    Ok(values) => properties.extend(values),
+                    Err(fields) => plan
+                        .limits
+                        .push(format!("Unresolved {fields} at {}", node.span.start)),
                 }
             }
             if matches!(node.kind.as_str(), "text" | "textbutton")
@@ -275,6 +296,31 @@ impl AuthoringService {
             node.properties.insert("yalign".into(), draft.yalign.into());
         }
         let mut sampled = HashSet::new();
+        let mut layouts = HashSet::new();
+        for draft in request.layouts {
+            if !layouts.insert(draft.node_start)
+                || seen.contains(&draft.node_start)
+                || positioned.contains(&draft.node_start)
+            {
+                return Err(SceneError::InvalidPayload);
+            }
+            let numeric = screen
+                .nodes
+                .iter()
+                .find(|node| node.span.start == draft.node_start)
+                .and_then(|node| node.numeric_layout.as_ref())
+                .ok_or(SceneError::InvalidPayload)?;
+            let values = numeric.changed(&draft.values)?;
+            let node = plan
+                .nodes
+                .iter_mut()
+                .find(|node| node.start == draft.node_start)
+                .ok_or(SceneError::InvalidPayload)?;
+            node.properties
+                .retain(|key, _| layout::aliases(key).is_empty());
+            node.properties
+                .extend(values.into_iter().map(|(key, value)| (key, value.json())));
+        }
         for sample in request.text_samples {
             if !sampled.insert(sample.node_start) || sample.value.len() > 8192 {
                 return Err(SceneError::InvalidPayload);

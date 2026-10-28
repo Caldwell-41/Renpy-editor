@@ -120,6 +120,7 @@ pub const OPERATIONS: &[&str] = &[
     "screens.compose",
     "screens.setPixelProperty",
     "screens.setSize",
+    "screens.setLayout",
     "screens.setPosition",
     "scene.recovery",
     "scene.resolveRecovery",
@@ -617,6 +618,14 @@ pub fn handle_application_request(
                     .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
             })
             .and_then(|request| lifecycle.screens_set_size(request))
+            .and_then(to_value),
+        "screens.setLayout" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::SetLayoutRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_set_layout(request))
             .and_then(to_value),
         "screens.setPosition" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))

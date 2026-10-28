@@ -1,0 +1,86 @@
+{
+  "sourceCandidate": "eb10f71aeeb0d5ed26edaa19b479dfe43085d7c8",
+  "architecture": "macOS ARM64",
+  "case": "help-screen",
+  "passed": true,
+  "nativeWebView": true,
+  "nativeKeyboard": false,
+  "package": {
+    "bundle": "Loomlight.app",
+    "identifier": "app.loomlight.desktop",
+    "certificateSHA1": "358372708164C7273A551D746449357C12A3A806",
+    "designatedRequirement": "designated => identifier \"app.loomlight.desktop\" and certificate leaf = H\"358372708164c7273a551d746449357c12a3a806\"",
+    "bundleVersion": "0.1.0",
+    "executableSHA256": "512fe593d35ed40e84805f559d14124907921de60877605a2d2e6ab61399dfb6",
+    "strictSignatureVerified": true,
+    "installerSHA256": "6554d0da38fd4d1d2f5438c7c7278470d5c61b389df881fee876195f5a0ec959",
+    "installerContentsVerified": true
+  },
+  "nativeReportSHA256": "0065a5ea20100f6708072ce625c989aef2ae1595feaece1f3e476f3244a16880",
+  "acceptedHelpSHA256": "54dc5582dee854788bcb6266b2ff5254c42709e807e602f353eee1cfed63ca84",
+  "desktopReportSHA256": "8ce61a8c1dcfde036c5638edc62779385c96c7ddf629313cde8a854cd5b21ca7",
+  "stages": [
+    "screen-inventory-passed",
+    "source-roundtrip-passed",
+    "validation-passed",
+    "preview-geometry-passed",
+    "stale-stop-passed",
+    "disk-reopen-passed",
+    "complete"
+  ],
+  "assertions": [
+    "invalid blur retains input/source/focus",
+    "adjacent accessible explanation",
+    "composing Enter/Escape retain draft",
+    "clicked Apply retains focus"
+  ],
+  "geometry": {
+    "aspect": [
+      1280,
+      720
+    ],
+    "menu": false,
+    "size": [
+      760,
+      360
+    ]
+  },
+  "cleanupOwners": {
+    "credentials": true,
+    "host": true,
+    "requests": true
+  },
+  "sourceDisk": {
+    "acceptedBytesMatch": true,
+    "scratchJobsRemaining": 0,
+    "sourceBytecode": false,
+    "sourceSaves": false
+  },
+  "desktopAdmitted": true,
+  "desktopCleanupComplete": true,
+  "sdkProcesses": {
+    "versionValidation": 1,
+    "compile": 1,
+    "lint": 1,
+    "run": 1
+  },
+  "exitCode": 0,
+  "timedOut": false,
+  "processIdentity": {
+    "processId": 12894,
+    "observedAt": "2026-10-28T06:29:06.225619+00:00",
+    "exactExecutablePathMatched": true,
+    "executableSHA256": "512fe593d35ed40e84805f559d14124907921de60877605a2d2e6ab61399dfb6"
+  },
+  "cumulativeConsumption": {
+    "qualificationDispatches": 2,
+    "macPackages": 3,
+    "macEditorSessions": 3,
+    "macSDKStarts": 28,
+    "macSDKCeiling": 32,
+    "windowsPackages": 2,
+    "windowsEditorSessions": 2,
+    "windowsSDKStarts": 16,
+    "windowsSDKCeiling": 24
+  }
+}

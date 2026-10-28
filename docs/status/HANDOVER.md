@@ -1,5 +1,42 @@
 # Current outcome handover
 
+## L03 review fixes qualified
+
+Kris selected the PR #66 fixes with root-cause diagnosis/TDD, granted all approvals
+needed for the fix end to end, and explicitly allowed issue updates. The worker
+returned writer ownership; the parent independently validated and published the
+fixes on codex/phase3b-l03-numeric-layout. Source 186c8b0 fixes unsupported-indentation
+writes and numeric blur/errors/IME. eb10f71 fixes pending Apply focus with
+aria-disabled and the existing duplicate-submit guard. The real-response regression
+spans rendering turns; the harness retains the first failure and releases its hold.
+
+The parent matched/acknowledged and audited
+[CI4 run 40644911729](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644911729/attempts/1),
+attempt 1 at 07b82be5be285ea65ba1dcafa2d657382adafb5d. Selector validation and both
+targets pass. Both have 264 frontend/37 ordinary core tests, numeric/Help/probe
+controllers, retained focus/no duplicate Enter, both SDK aspects and full cleanup.
+The Windows package/native case passes clicked-Apply focus and all source/runtime
+cases. Signed Mac package/session 3 at eb10f71 has identical application, fixture,
+dependency and probe inputs and passes matching scope with strict signature,
+installer, exact process identity and cleanup. Input is synthetic DOM input.
+[Final receipt](../tasks/evidence/numeric-layout-pr66-ci4.json),
+[Mac receipt](../tasks/evidence/numeric-layout-pr66-focus-mac-native.json) and
+[evidence](../tasks/evidence/numeric-layout.md#final-correction-audit-and-review-ready-handoff)
+own hashes, archive digests, cases and counts. CI2's focus/cleanup failure and CI3's
+rejected candidate input remain failed and retained. No correction remains.
+
+Both required automatic PR jobs pass at docs-only e54cac0 in run 40645156369.
+Final evidence publication changes documentation only. Audit its cheap automatic
+PR checks without another package/SDK matrix or a self-referential evidence commit;
+record the last check in #38/PR metadata. The parent remains the audit owner. No
+local costly operation or CI watch is pending at this qualification closeout.
+[#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) remains open/review-ready
+for integration. Final consumption is dispatches 4/4, package/editor sessions 3/3
+per OS, Mac SDK 32/32 and Windows SDK 24/24. All starts are resolved. A2 approval,
+protected recovery and the unrelated audit remain intact. No merge or successor is
+selected; OS-native IME/human, pointer/full-canvas and broader B02/3B acceptance
+retain their existing owners.
+
 ## Phase 3B architecture refactors merged and cleaned up
 
 [PR #65](https://github.com/Caldwell-41/Renpy-editor/pull/65) merged at

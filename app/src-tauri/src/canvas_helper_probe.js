@@ -34,8 +34,8 @@
     const input=edit(760);await until(()=>fresh() && latest.geometry.some(g=>g.width===760 && g.height===360));
     assert(document.activeElement===input,"Helper rendering must preserve the focused field");
     assert((await read("source.open",{sessionId,path:"game/ui/help.rpy"})).text===before.text,"A provisional render must not write source");
-    await click("Cancel changes");await until(()=>fresh() && width()?.value==="640"); checkpoint("draft-cancel-focus-passed");
-    edit(760);await click("Apply changes");await until(()=>document.querySelector('.screen-message')?.textContent.startsWith("Size saved"));
+    await click("Cancel layout");await until(()=>fresh() && width()?.value==="640"); checkpoint("draft-cancel-focus-passed");
+    edit(760);await click("Apply layout");await until(()=>document.querySelector('.screen-message')?.textContent.startsWith("Layout saved"));
     assert((await read("source.open",{sessionId,path:"game/ui/help.rpy"})).text===before.text.replace("xsize 640","xsize 760"),"Only the accepted token may change");
     await click("Undo");await until(()=>width()?.value==="640" && fresh());
     await click("Redo");await until(()=>width()?.value==="760" && fresh());

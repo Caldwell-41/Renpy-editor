@@ -125,7 +125,7 @@
     await until(() => trusted("keydown", "Escape") && field()?.value === "640" && fresh());
     assert((await source()).text === original, "Cancel wrote source"); rows.push({stage, passed:true});
     await announce("enter-apply-752", field());
-    await until(() => trusted("keydown", "Enter") && field()?.value === "752" && fresh() && document.querySelector('.screen-message')?.textContent.startsWith("Size saved"));
+    await until(() => trusted("keydown", "Enter") && field()?.value === "752" && fresh() && document.querySelector('.screen-message')?.textContent.startsWith("Layout saved"));
     await accepted(original.replace("xsize 640", "xsize 752")); checkGeometry(264,180,752,360); rows.push({stage, passed:true});
     await announce("keyboard-undo", find("Undo"));
     await until(() => trusted("keydown", "Enter") && field()?.value === "640" && fresh());

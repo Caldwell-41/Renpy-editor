@@ -17,8 +17,10 @@ const MAX_PIXELS: u32 = 16384;
 pub mod canvas;
 pub(crate) mod canvas_session;
 mod composition;
+pub mod layout;
 mod ownership;
 pub use composition::{ComposeRequest, ComposeResult};
+pub use layout::SetLayoutRequest;
 pub use ownership::{Catalog, CreateRequest};
 
 pub(crate) fn valid_name(name: &str) -> bool {
@@ -148,6 +150,7 @@ pub struct Node {
     pub literal: Option<String>,
     pub layout: std::collections::BTreeMap<String, f64>,
     pub position: Option<Position>,
+    pub numeric_layout: Option<layout::NumericLayout>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
@@ -293,6 +296,7 @@ fn parse_body(
             .and_then(|(_, raw)| serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()),
         layout: Default::default(),
         position: None,
+        numeric_layout: None,
         span: Span {
             start: line.start,
             end,
@@ -568,6 +572,18 @@ fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, Sce
             });
         }
         index = after;
+    }
+    for screen in &mut result.screens {
+        for index in 0..screen.nodes.len() {
+            screen.nodes[index].numeric_layout =
+                layout::read(&lines, &screen.nodes[index], &screen.nodes);
+            if let Some(numeric) = &screen.nodes[index].numeric_layout {
+                let recognized = numeric.recognized_starts();
+                screen.nodes[index]
+                    .protected
+                    .retain(|span| !recognized.contains(&span.start));
+            }
+        }
     }
     result.partial = !result.protected.is_empty()
         || result

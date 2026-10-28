@@ -1,0 +1,219 @@
+{
+  "runId": 40604403915,
+  "attempt": 1,
+  "candidate": "a79737ec641837803a55ef9fd3e0c30fe3a4d04b",
+  "acceptedSHA256": "c6192365b9d010c5704fe54560313e147b030a7cb49ba6733aa7e040f786f6d3",
+  "targets": {
+    "macOS": {
+      "frontendTests": 264,
+      "screenCoreTests": 36,
+      "sdkProcesses": 4,
+      "sdkVersion": "8.5.3.26051504",
+      "cleanupComplete": true,
+      "controllerPassed": true,
+      "helpGroups": 11,
+      "nativeProbeRehearsalPassed": true,
+      "sdkResultSHA256": "e688401ca5d667aa9439ec43986ab16287dee4fdb623c5e564e77e41097a8e50",
+      "nativeWebView": false,
+      "nativePending": "Approved signing identity unavailable; no package or native editor started."
+    },
+    "Windows": {
+      "frontendTests": 264,
+      "screenCoreTests": 36,
+      "sdkProcesses": 4,
+      "sdkVersion": "8.5.3.26051504",
+      "cleanupComplete": true,
+      "controllerPassed": true,
+      "helpGroups": 11,
+      "nativeProbeRehearsalPassed": true,
+      "sdkResultSHA256": "5fbaec14f2fbff15216236341d78a434bb7b68fe95abf32c0d94adca06da39c9",
+      "nativeWebView": true,
+      "nativeKeyboard": false,
+      "nativeStages": [
+        "screen-inventory-passed",
+        "source-roundtrip-passed",
+        "validation-passed",
+        "preview-geometry-passed",
+        "stale-stop-passed",
+        "disk-reopen-passed",
+        "complete"
+      ],
+      "nativeCleanupOwners": {
+        "credentials": true,
+        "host": true,
+        "requests": true
+      },
+      "executableSHA256": "0d384ab689b9e5ff8e27fe4659bad0f4958b07c9f1756c6158378a218d91b2e4",
+      "acceptedHelpSHA256": "54dc5582dee854788bcb6266b2ff5254c42709e807e602f353eee1cfed63ca84",
+      "nativeReportSHA256": "3356341177bac1077bd7ddb0e65b0dfd05a3cc2c544f3637bd2c9f5a9bc36594",
+      "nativeSDKProcesses": {
+        "versionValidation": 1,
+        "compile": 1,
+        "lint": 1,
+        "run": 1
+      }
+    }
+  },
+  "cumulativeConsumption": {
+    "qualificationDispatches": 1,
+    "macSDKStarts": 16,
+    "windowsSDKStarts": 8,
+    "macPackages": 0,
+    "windowsPackages": 1,
+    "macEditorSessions": 0,
+    "windowsEditorSessions": 1
+  },
+  "allSelectedEvidencePassed": true,
+  "remainingRequiredProof": [
+    "Signed Mac native numeric inspector/history/reopen qualification"
+  ],
+  "identicalGeometryAcrossTargets": true,
+  "geometryByAspect": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "rectangles": {
+        "free": [
+          10,
+          20,
+          200.0,
+          100.0
+        ],
+        "bounds": [
+          40,
+          50,
+          260.0,
+          160.0
+        ],
+        "stack": [
+          52,
+          68,
+          100.0,
+          100.0
+        ],
+        "action": [
+          52.0,
+          107.0,
+          100.0,
+          60.0
+        ],
+        "asset": [
+          1,
+          0,
+          64.0,
+          48.0
+        ],
+        "free_text": [
+          10,
+          20,
+          46.0,
+          27.0
+        ],
+        "panel": [
+          800,
+          270,
+          320.0,
+          180.0
+        ],
+        "panel_text": [
+          816,
+          290,
+          105.0,
+          27.0
+        ],
+        "caption": [
+          78,
+          68,
+          48.0,
+          27.0
+        ]
+      }
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "rectangles": {
+        "free": [
+          10,
+          20,
+          200.0,
+          100.0
+        ],
+        "bounds": [
+          40,
+          50,
+          260.0,
+          160.0
+        ],
+        "stack": [
+          52,
+          68,
+          100.0,
+          100.0
+        ],
+        "action": [
+          52.0,
+          107.0,
+          100.0,
+          60.0
+        ],
+        "asset": [
+          1,
+          0,
+          64.0,
+          48.0
+        ],
+        "free_text": [
+          10,
+          20,
+          46.0,
+          27.0
+        ],
+        "panel": [
+          608,
+          294,
+          320.0,
+          180.0
+        ],
+        "panel_text": [
+          624,
+          314,
+          105.0,
+          27.0
+        ],
+        "caption": [
+          78,
+          68,
+          48.0,
+          27.0
+        ]
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12780951480,
+      "name": "numeric-layout-Windows-40604403915-1",
+      "apiSHA256": "172a5706e36703a69437f6198bc87b1ed148485de6334c3ef643ad47c6ef02ee",
+      "files": 40
+    },
+    {
+      "id": 12780796124,
+      "name": "numeric-layout-macOS-40604403915-1",
+      "apiSHA256": "09892c210d80c4e66180cfba62b0f08e346c1f49c3b31d21b44ed6c3253df4ff",
+      "files": 35
+    }
+  ],
+  "automaticPRChecks": {
+    "databaseId": 40604514626,
+    "attempt": 1,
+    "headSha": "535344c3d5af6c8a04c8f80f0ee35b018949ebc7",
+    "conclusion": "success"
+  }
+}

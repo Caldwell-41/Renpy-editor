@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "screenId": "numeric-layout",
+  "currentApproved": "paired-v2",
+  "revisions": [
+    {
+      "id": "paired-v1",
+      "variantId": "paired",
+      "approval": null
+    },
+    {
+      "id": "axes-v1",
+      "variantId": "axes",
+      "approval": null
+    },
+    {
+      "id": "placement-v1",
+      "variantId": "placement",
+      "approval": null
+    },
+    {
+      "id": "paired-v2",
+      "variantId": "paired-refined",
+      "approval": {
+        "date": "2026-10-28",
+        "decision": "Kris explicitly selected A2 (Paired fields, paired-v2 / paired-refined): \"okay let's go with A2, send the approved design back to the implementation chat\". The preceding brief described numeric layout editing alongside canvas dragging and resizing. This approval covers the numeric inspector; existing flow-v1 and C5 approvals retain their scope.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "c2d23c52d82660c91061aff3d72fef242abe5d29",
+          "fingerprint": "7071f6b602fccca5c47d5a6d3fd18fa075c7ea76428618daf2477a0f04967627"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-anchored-dark-wide.png",
+            "sha256": "03b01b0d0a69aaa0b754f98226e2cb2b979394dd4c266928657223d2a410d83d",
+            "state": "anchored",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-anchored-dark-compact.png",
+            "sha256": "fd47d5f1525bf2b21589ac40a14c8f8afa880352fd4bd80f2613d3dc588cce13",
+            "state": "anchored",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-anchored-light-wide.png",
+            "sha256": "45db1345c952ac491298e2f81e3cb7de8aa43d94a4e48745d5caf78149a30d10",
+            "state": "anchored",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-anchored-light-compact.png",
+            "sha256": "f9216467b1c66951db4d167a13badff7a0f28e280d571f988c0fe834c056eb27",
+            "state": "anchored",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-invalid-dark-wide.png",
+            "sha256": "509160c9e15d6295b1c9e62e22449b14d241303d622b1966e9463cc58d2161ef",
+            "state": "invalid",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-constrained-dark-wide.png",
+            "sha256": "d5b9918dd0ecf312625576dca722bd89236b50b952a239ce9ed6117594679920",
+            "state": "constrained",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-spacing-dark-wide.png",
+            "sha256": "5d6872535d7c8e7254bd0472d520cb1fa6bf2ef6ea58a402ed7cf191036c738f",
+            "state": "spacing",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-conflict-dark-wide.png",
+            "sha256": "1d11861e477873a79490fec590adccf5692c7323ec94b33035feb28d73d430bd",
+            "state": "conflict",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-numeric-layout/captures/paired-v2-editing-dark-compact.png",
+            "sha256": "7a63f060cf8e633dbe61417d849f9dedb6525084d83b20a3608226ac83b76b91",
+            "state": "editing",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Use A2 paired horizontal/vertical position and anchor fields, explicit pixel or relative parent/element units, integer dimensions, nine alignment presets, expandable size limits and frame padding, and group spacing.",
+          "Keep Apply and Cancel outside the desktop form scroll; stack canvas and inspector at compact width with the action row sticky while scrolling the inspector.",
+          "Alignment presets set position and anchor together. Changing coordinate units retains the typed number. A preset is selected only while its values match the fields.",
+          "Retain per-element drafts through selection and the Edit group spacing link. Mark unapplied drafts, explain invalid values and parent constraints, focus the invalid field, and retain conflicted drafts.",
+          "Enter applies the layout fields together; Escape cancels. Apply creates one accepted change, a no-op creates none, and Undo/Redo use shared layout history.",
+          "Numeric controls complement canvas dragging and resizing and use the same accepted layout data and transaction/history owners in production. This decision adds no new pointer-gesture scope to #38."
+        ],
+        "deviations": [
+          "The canvas and geometry readout are schematic HTML. Only frame position, anchor and explicit size update the drawing; other properties update generated fictional source in browser memory.",
+          "The prototype has no project writes, durable save/reopen, native operation or SDK proof. Production eligibility, aliases, property types, source preservation, validation, history and both-aspect SDK geometry remain #38 implementation acceptance.",
+          "Interaction captures include invalid input, a constrained child draft, spacing after parent navigation, a source conflict and compact editing. Baseline captures cover both themes and sizes; other conditions are outside the retained visual comparison."
+        ]
+      }
+    },
+    {
+      "id": "axes-v2",
+      "variantId": "axes-refined",
+      "approval": null
+    },
+    {
+      "id": "placement-v2",
+      "variantId": "placement-refined",
+      "approval": null
+    }
+  ]
+}
