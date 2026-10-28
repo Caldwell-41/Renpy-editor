@@ -1,20 +1,21 @@
 # Current status
 
-## L03 PR review corrections in progress
+## L03 corrections awaiting CI audit
 
-Kris selected the four [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66)
-review fixes and granted approval for their implementation, TDD, PR update and CI.
-The worker owns code and focused tests; the parent retains final validation and
-publication. The source-indentation finding and three numeric-field validation/
-accessibility/IME findings are fixed with red/green evidence. Parent local validation
-passes 264 frontend tests, 37 screen-core tests and the real controllers. The corrected signed Mac package and native Help case pass at 186c8b0. Both-target
-correction CI remains pending.
+The four [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) review findings
+are fixed in 186c8b0 with red/green evidence. Parent final local validation passes
+264 frontend tests, 37 screen-core tests and the real controllers. The corrected
+signed Mac package and native Help case also pass at that source, including the
+new blur/accessibility/IME assertions, history, SDK preview, Stop and reopen.
 
-[L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) owns the qualification
-ledger. Dispatch 2 and Windows package/editor session 2 remain reserved.
-The authorized Mac SDK ceiling is now 28; Windows remains 16. Current use is dispatches 1, Mac package/editor sessions 2 each and SDK 24, Windows
-package/editor sessions 1 each and SDK 8. Earlier CI/native receipts retain their exact candidates and
-scope in [evidence](../tasks/evidence/numeric-layout.md#pr-66-review-corrections).
+[Correction CI 40637467395](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40637467395),
+attempt 1 at 44fdf0a, is queued for Windows x64/macOS ARM64. The parent retains its
+terminal audit; ci-watch will resume this thread after confirmed registration.
+[Evidence](../tasks/evidence/numeric-layout.md#correction-ci-awaiting-audit) owns the
+candidate, cases and remaining audit. [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38)
+owns cumulative limits. Actual pre-job use is dispatches 2, Mac package/editor
+sessions 2 each and SDK 24/28, Windows package/editor sessions 1 each and SDK 8/16.
+The selected run reserves the remaining Windows package/session and SDK starts.
 A2 approval, protected recovery and the unrelated audit remain intact. The PR stays
 open; no merge or successor feature is selected.
 

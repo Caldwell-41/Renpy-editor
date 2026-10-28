@@ -1,40 +1,40 @@
 # Current outcome handover
 
-## L03 PR review corrections in progress
+## L03 corrections awaiting CI audit
 
-Kris requested a subagent to fix the four findings on
-[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) using root-cause diagnosis
-and TDD, with the parent retaining final validation, PR publication and CI audit.
-Kris granted all approvals needed for the fix end to end. The sole implementation
-writer uses this checkout on codex/phase3b-l03-numeric-layout from dbefc67; the parent
-owns status/evidence and final checks. No merge or successor feature is selected.
+Kris selected the four PR #66 review fixes with root-cause diagnosis and TDD, granted
+all approvals needed for the fix end to end, and explicitly allowed issue updates.
+The worker has returned writer ownership. The parent owns this checkout on
+codex/phase3b-l03-numeric-layout, final validation, publication and CI audit.
+Correction source 186c8b0 refuses unsupported-indentation writes and fixes numeric
+blur/errors/IME handling through the shared validation owner. Parent review,
+typecheck/build, all 264 frontend tests, 37 ordinary screen-core tests, five evidence
+gate cases and real numeric/Help/probe controllers pass. The corrected signed Mac
+package/session 2 also passes, including new field assertions, source/history,
+SDK validation/preview, Stop, reopen, exact accepted bytes and complete cleanup.
+[Correction receipt](../tasks/evidence/numeric-layout-pr66-fixes-mac-native.json)
+owns package/process/signature hashes and synthetic-input scope.
 
-The P1 reproduction commits an eight-space width setter before an existing valid
-six-space setter. The numeric reader mistakes the unsupported body for an empty
-editable body. The worker is qualifying source ownership before offering writes.
-Three P2 findings concern missing blur validation, inaccessible field explanations
-and Enter submitting during IME composition. The confirmed TDD boundaries are
-Screens IPC/source/history and real production UI/controller/core controls. One
-red/green slice preceded each fix. The worker has returned writer ownership. Parent
-final review, typecheck/build, 264 frontend tests, 37 core tests and real numeric/Help
-controllers pass. The corrected signed Mac package and native Help case pass at 186c8b0; the new
-blur/accessibility/IME assertions, history, SDK preview, Stop, reopen and cleanup
-pass. Both-target correction CI qualification is next.
+[Qualification run 40637467395](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40637467395),
+attempt 1, candidate 44fdf0a136f8bfd68f9c3b9fbc777b9e8ba12a23, is queued on the same
+branch, numeric_layout=true, ordinal 2. Last observed 2026-10-28 05:21 UTC. The
+candidate differs from the signed Mac source only in evidence/status documents.
+This wait record changes no application, probe, fixture, dependency or workflow
+input. The parent must audit both target jobs, case/source/artifact/package hashes,
+actual start counts, cleanup/privacy and latest automatic PR checks before marking
+this correction ready. [Evidence](../tasks/evidence/numeric-layout.md#correction-ci-awaiting-audit)
+owns the exact audit checklist. Artifacts expire seven days after upload.
 
-[L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) owns limits and current
-state. The public correction reservation uses dispatch 2, package/editor session 2
-per OS, four SDK starts per OS in CI and four in the signed Mac Help case. Kris's
-approval raises the Mac SDK ceiling to 28; Windows stays 16. Current use is dispatches 1, Mac package/editor sessions 2 each and SDK 24, Windows
-package/editor sessions 1 each and SDK 8. Counts are cumulative and failed starts count. The approved signing
-identity is available through the package route's matching query; no signing,
-Keychain trust, ACL or credential policy change is selected.
-
-The earlier successful CI run 40604403915 at a79737e and signed Mac proof at a5e0e9a
-remain historical receipts for those material inputs. A2 is approved at c2d23c5,
-record c1ab3e6. [Evidence](../tasks/evidence/numeric-layout.md#pr-66-review-corrections)
-retains the new review/authorization and all earlier source, artifact, signature,
-installer, process, cleanup and failure identities. The unrelated untracked audit,
-protected native recovery and all historical closed allowances remain intact.
+ci-watch is selected for this run/attempt/SHA and this same thread. Confirm its
+startup acknowledgement says watcher_running=true; then yield. On CI_WATCH_EVENT,
+acknowledge delivery, verify run identity/status and current branch, and continue
+the audit here. No CI retry, merge or successor is selected by a watcher event.
+No local operation remains pending. [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38)
+owns the cumulative ledger: dispatches 2; Mac package/editor sessions 2 each and
+SDK 24/28; Windows package/editor sessions 1 each and SDK 8/16 before CI jobs.
+This run reserves four Mac and eight Windows SDK starts plus Windows package/session
+2. Audit actual starts before changing counts. A2 approval, prior candidate-bound
+proof, protected native recovery and the unrelated untracked audit remain intact.
 
 ## Phase 3B architecture refactors merged and cleaned up
 

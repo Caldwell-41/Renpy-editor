@@ -491,3 +491,34 @@ This case uses four SDK starts: version validation, compile, lint and run. Curre
 cumulative use is dispatches 1, Mac package/editor sessions 2 each and SDK 24/28,
 Windows package/editor sessions 1 each and SDK 8/16. No local operation remains
 pending. The single both-target correction qualification remains reserved.
+
+
+### Correction CI awaiting audit
+
+Qualification dispatch 2 is [run 40637467395](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40637467395),
+attempt 1, exact candidate 44fdf0a136f8bfd68f9c3b9fbc777b9e8ba12a23,
+on codex/phase3b-l03-numeric-layout with numeric_layout=true and all other selectors
+false. It was queued when confirmed at 2026-10-28 05:21 UTC. This candidate adds
+only the signed Mac receipt/status to correction source 186c8b0; application,
+fixtures, dependencies, probes and workflow inputs are identical. Automatic PR
+run 40637170143 passes at 186c8b0. Run 40637454534 for 44fdf0a was still in progress
+at the initial observation. A later wait-record commit changes documentation only.
+
+The parent retains the terminal audit. Check both numeric-layout target jobs and
+selector validation; 264 frontend/37 ordinary screen-core tests; actual numeric,
+Help and new blur/accessibility/IME probe cases; accepted source and both SDK
+aspects; Windows package/native case; artifact and executable hashes; cleanup,
+privacy scan and actual cumulative starts. Audit the latest automatic PR check
+separately. Missing, failed or skipped selected proof remains unresolved. Downloaded
+artifacts expire seven days after upload; retain their identities and audit receipt.
+
+Current confirmed consumption before the new CI jobs is dispatches 2, Mac
+package/editor sessions 2 each and SDK 24/28, Windows package/editor sessions 1 each
+and SDK 8/16. The selected run reserves four Mac SDK starts and eight Windows
+starts, plus Windows package/editor session 2. Resolve actual starts from the run
+before updating consumption. No local process remains pending.
+
+ci-watch is selected for this exact run/attempt/SHA and same parent thread. Its
+startup acknowledgement owns registration status; only watcher_running=true
+establishes a live watch. The parent will yield after registration and resume here
+for the audit. No merge or successor is selected.
