@@ -721,3 +721,47 @@ Final cumulative use is dispatches 4/4, package/editor sessions 3/3 per OS, Mac 
 watch remains pending. The unrelated audit and protected recovery remain intact.
 CURRENT/HANDOVER retain their older acceptance/recovery sections above their soft
 size targets; this handoff replaces only the selected L03 section and links here.
+
+
+## Merge and ticket closeout, 2026-10-28
+
+Kris authorized merging [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66)
+into `codex/phase3b-screen-designer`, updating its relevant tickets and retiring the
+feature branch after confirmation. GitHub confirms merge
+`a3035e8b62f8a5211c87e7957bbeba596bd073c3`, with parents `4d2101f` and `d52753e`.
+The merge and reviewed head have identical tree
+`8f73e0f99e132f1c3b5fa688a94a9576b8b3de3a`; ancestry also proves the feature is
+integrated. Only PR #66 was open before the merge, and no other worktree used its
+branch. The checkout moved to the Screens parent before local and remote feature
+branch retirement. The unrelated audit's SHA256 remains
+`b379e38156e84f9a0c23915846d68f05e5b2ecbe82670b6260aed4f02eba69a0`.
+
+The final independent Standards and Spec reviews have zero findings. Typechecking
+and 37 ordinary screen-core cases pass; one explicitly ignored SDK helper test is
+outside this review and supplies no pass. Frontend tests initially passed 263/264;
+the remaining unchanged Windows validator failed because system Python 3.9 lacks
+`tomllib`. That case passes with the bundled Python 3.12. No product or harness
+change was needed. Both required [automatic checks at reviewed head d52753e](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40646628352/attempts/1)
+pass. CI4 and signed Mac evidence above retain their tested inputs and scopes; no
+package, native or SDK rerun was started for this merge.
+
+[L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) is accepted and
+closed for its four bounded criteria. The PR and P3B #22/B02 #24 record integration
+and numeric-property credit. B06 #28, B08 #30 and B11 #33 record the reusable
+workflow, geometry and source/history evidence while keeping full acceptance open.
+Direct dependents #42 and #46 mark the L03 prerequisite satisfied. Numeric gesture
+consumer #48 and qualification/acceptance owners #59/#60 link the scoped mappings
+and receipts; their work remains unselected. Native dependency relationships are
+preserved. Evidence links in the updated PR/issues pin the retained reviewed commit
+so feature-branch deletion does not invalidate them.
+
+The feature branch `codex/phase3b-l03-numeric-layout` is retired locally and
+remotely after merge verification. Closeout documentation is published to the
+Screens parent. This documentation changes no application, fixture, dependency,
+probe or workflow input. Prior failures and cumulative operation counts remain
+unchanged. Broader B02/B06/B08/B11/3B, pointer/full-canvas and physical/human
+acceptance remain open. No successor feature or release is selected.
+
+CURRENT/HANDOVER retain older acceptance and protected recovery above their soft
+word-count targets. This closeout replaces the live L03 section and preserves that
+unrelated history instead of broadening the selected cleanup.

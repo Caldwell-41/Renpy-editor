@@ -1,24 +1,21 @@
 # Current status
 
-## L03 review fixes qualified
+## L03 numeric layout merged and branch retired
 
-[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) fixes unsupported-
-indentation writes, numeric blur/errors/IME handling and pending Apply focus.
-The parent audited [CI4 40644911729](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644911729/attempts/1),
-attempt 1 at 07b82be. Both targets pass 264 frontend tests, 37 core tests, real
-controllers, the delayed-focus/duplicate-Enter case and both SDK aspects. Windows
-packaged proof passes. Signed Mac package/session 3 passes at application-identical
-eb10f71, including clicked-Apply focus, source/history, preview, Stop and reopen.
+[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) merged into
+`codex/phase3b-screen-designer` at `a3035e8b62f8a5211c87e7957bbeba596bd073c3`.
+The merge tree exactly matches independently reviewed head `d52753e`. Both review
+axes have zero findings and both required automatic PR checks pass.
+[L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) is accepted for its
+bounded numeric-layout scope; its prerequisite for #42 and #46 is satisfied.
 
-[Final evidence](../tasks/evidence/numeric-layout.md#final-correction-audit-and-review-ready-handoff)
-owns source/artifact/package identities, cleanup and the retained CI2/CI3 failures.
-The original review findings and CI2 focus defect have no remaining correction.
-[#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) is review-ready and stays
-open for integration. Final use is dispatches 4/4, package/editor sessions 3/3 per OS,
-Mac SDK 32/32 and Windows SDK 24/24. Final documentation publication needs only its
-cheap automatic PR-check audit. A2 approval, protected recovery and the unrelated
-audit remain intact. No merge, successor, pointer/full-canvas or broader acceptance
-is selected.
+[Merge closeout](../tasks/evidence/numeric-layout.md#merge-and-ticket-closeout-2026-10-28)
+links the scoped source/history, both-target SDK geometry and signed/package proof.
+The feature branch is retired after integration verification. This checkout is on
+the Screens parent. Related tickets retain broader acceptance and unselected work;
+pointer/full-canvas, OS-native IME and human proof are outside this acceptance.
+No successor or release is selected. Historical limits, protected recovery and the
+unrelated audit remain intact.
 
 ## Phase 3B architecture refactors merged
 
