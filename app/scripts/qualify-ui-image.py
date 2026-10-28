@@ -35,26 +35,25 @@ ELEMENT_ASSETS = dict(png='seal.png', jpeg='seal.jpg', lossless='seal.webp',
                       lossy='seal-lossy.webp', alpha='seal-alpha.webp', stretch='seal.png')
 
 
-def validate(record, aspect, image=None):
+def validate(record, aspect, image=None, reference=None):
     assert record['aspect'] == list(aspect)
     assert record['sdkVersion'].startswith('8.5.3')
     assert record['rectangles'] == EXPECTED, (record['rectangles'], EXPECTED)
     if image is None:
         return
-    with Image.open(image) as captured:
-        assert captured.size == aspect
-        rgba = captured.convert('RGBA')
-        background = rgba.getpixel((0, 0))
+    assert reference is not None, "Independent Ren'Py reference is required"
+    with Image.open(image) as captured, Image.open(reference) as expected:
+        assert captured.size == expected.size == aspect
+        rgba, wanted = captured.convert('RGBA'), expected.convert('RGBA')
+        from PIL import ImageChops
+        assert ImageChops.difference(rgba, wanted).getextrema() == ((0, 0),) * 4, 'Source and independent reference pixels differ'
+        background = wanted.getpixel((0, 0))
         for name, (x, y, width, height) in EXPECTED.items():
-            with Image.open(FIXTURES / ELEMENT_ASSETS[name]) as original:
-                rgb = original.convert('RGB')
-                for dx, dy in [(1, 1), (3, 1), (1, 3), (3, 3)]:
-                    wanted = rgb.getpixel((original.width * dx // 4, original.height * dy // 4))
-                    actual = rgba.getpixel((x + width * dx // 4, y + height * dy // 4))
-                    assert actual[:3] == wanted, (name, actual, wanted)
-                    assert actual[3] == 255, (name, 'opaque quadrant missing')
-            assert rgba.getpixel((x + width + 3, y + height // 2)) == background, (name, 'right edge leaks')
-            assert rgba.getpixel((x + width // 2, y + height + 3)) == background, (name, 'bottom edge leaks')
+            quadrants = {wanted.getpixel((x + width * dx // 4, y + height * dy // 4))
+                         for dx, dy in [(1, 1), (3, 1), (1, 3), (3, 3)]}
+            assert len(quadrants) == 4 and all(color[3] > 0 for color in quadrants), (name, 'asset quadrants missing')
+            assert wanted.getpixel((x + width + 3, y + height // 2)) == background, (name, 'right edge leaks')
+            assert wanted.getpixel((x + width // 2, y + height + 3)) == background, (name, 'bottom edge leaks')
 
 
 def main():
@@ -62,6 +61,7 @@ def main():
     for name in ['archive', 'checksums', 'accepted', 'output']:
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--allow-fixture-execution', action='store_true', required=True)
+    parser.add_argument('--reuse-compile-lint', type=Path)
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -89,6 +89,15 @@ def main():
         assert expected_sha256(args.checksums.read_text(), args.archive.name) == SDK_SHA
         for asset in accepted['assets']:
             assert hashlib.sha256((FIXTURES / asset['fixture']).read_bytes()).hexdigest() == asset['sha256']
+        if args.reuse_compile_lint:
+            previous = json.loads((args.reuse_compile_lint / 'result.json').read_text())
+            assert (args.reuse_compile_lint / 'accepted.json').read_bytes() == args.accepted.read_bytes(), 'Compile/lint inputs changed'
+            checked = previous['commands'][:2]
+            assert [row['name'] for row in checked] == ['compile', 'lint']
+            assert all(row['exitCode'] == 0 and not row['timedOut'] and not row['outputLimited'] for row in checked)
+            result['reusedCompileLint'] = dict(candidate=previous['candidate'], commands=checked,
+                receiptSHA256=hashlib.sha256((args.reuse_compile_lint / 'result.json').read_bytes()).hexdigest(),
+                acceptedInputsSHA256=hashlib.sha256(args.accepted.read_bytes()).hexdigest())
         shutil.copyfile(args.accepted, output / 'accepted.json')
         with tempfile.TemporaryDirectory(prefix='loomlight-ui-image-sdk-') as temporary:
             scratch = Path(temporary)
@@ -100,13 +109,22 @@ def main():
             (project / 'game/ui/images.rpy').write_bytes(source)
             for fixture, runtime_path in ASSETS.items():
                 shutil.copyfile(FIXTURES / fixture, project / 'game' / runtime_path)
-            (project / 'game/script.rpy').write_text('label start:\n    show screen notes\n    show screen ui_image_finish_screen\n    $ renpy.pause(hard=True)\n    return\n')
+            (project / 'game/script.rpy').write_text('label start:\n    show screen notes\n    show screen ui_image_reference\n    show screen ui_image_finish_screen\n    $ renpy.pause(hard=True)\n    return\n')
+            # An independent literal screen uses the known assets and dimensions,
+            # avoiding any comparison of engine export pixels with raw file RGB.
+            reference_source = ['screen ui_image_reference():', '    pass']
+            for name, (x, y, width, height) in EXPECTED.items():
+                runtime_path = ASSETS[ELEMENT_ASSETS[name]]
+                reference_source.extend([f'    add {json.dumps(runtime_path)}:', f'        xsize {width}',
+                    f'        ysize {height}', f'        xpos {x}', f'        ypos {y}', f'        id {json.dumps(name)}'])
+            (project / 'game/reference.rpy').write_text('\n'.join(reference_source) + '\n')
             env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy', RENPY_RENDERER='sw',
                        RENPY_SCALE_FACTOR='1', RENPY_DISABLE_SOUND='1', RENPY_SKIP_MAIN_MENU='1',
                        RENPY_SKIP_SPLASHSCREEN='1', RENPY_PATH_TO_SAVES=str(scratch / 'saves'))
             for aspect in [(1280, 720), (1024, 768)]:
                 (project / 'game/options.rpy').write_text(f'define config.name = "Loomlight UI image proof"\ndefine config.screen_width = {aspect[0]}\ndefine config.screen_height = {aspect[1]}\ndefine config.save_directory = None\ndefine config.sound = False\n')
                 image = output / f'sdk-{aspect[0]}x{aspect[1]}.png'
+                reference = output / f'reference-{aspect[0]}x{aspect[1]}.png'
                 proof = '''init python:
     def ui_image_finish():
         try:
@@ -121,6 +139,9 @@ def main():
             render = renpy.render(renpy.get_screen("notes"), config.screen_width, config.screen_height, 0, 0)
             surface = renpy.display.draw.render_to_texture(render, True)
             renpy.display.pgrender.pygame.image.save(surface, IMAGE)
+            reference_render = renpy.render(renpy.get_screen("ui_image_reference"), config.screen_width, config.screen_height, 0, 0)
+            reference_surface = renpy.display.draw.render_to_texture(reference_render, True)
+            renpy.display.pgrender.pygame.image.save(reference_surface, REFERENCE)
             print("UI_IMAGE_GEOMETRY " + __import__("json").dumps(dict(aspect=[config.screen_width, config.screen_height], sdkVersion=renpy.version_only, rectangles=rectangles)), flush=True)
         except BaseException:
             __import__("traceback").print_exc()
@@ -128,10 +149,10 @@ def main():
         renpy.quit(status=0, save=False)
 screen ui_image_finish_screen():
     timer 0.5 action Function(ui_image_finish)
-'''.replace('NAMES', repr(list(EXPECTED))).replace('IMAGE)', repr(str(image)) + ')')
+'''.replace('NAMES', repr(list(EXPECTED))).replace('IMAGE)', repr(str(image)) + ')').replace('REFERENCE)', repr(str(reference)) + ')')
                 ast.parse(textwrap.dedent(proof.split('screen ui_image_finish_screen():')[0].removeprefix('init python:\n')))
                 (project / 'game/proof.rpy').write_text(proof)
-                commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if aspect == (1280, 720) else []
+                commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if not args.reuse_compile_lint and aspect == (1280, 720) else []
                 commands.append((f'images-{aspect[0]}x{aspect[1]}', ['run']))
                 for name, arguments in commands:
                     previous = dict(os.environ)
@@ -157,8 +178,8 @@ screen ui_image_finish_screen():
                 lines = [line[len('UI_IMAGE_GEOMETRY '):] for line in command.output.splitlines() if line.startswith('UI_IMAGE_GEOMETRY ')]
                 assert len(lines) == 1, 'Missing or duplicate geometry'
                 record = json.loads(lines[0])
-                validate(record, aspect, image)
-                result['records'].append(dict(record, sourceSHA256=accepted['sha256'], imageSHA256=hashlib.sha256(image.read_bytes()).hexdigest()))
+                validate(record, aspect, image, reference)
+                result['records'].append(dict(record, sourceSHA256=accepted['sha256'], imageSHA256=hashlib.sha256(image.read_bytes()).hexdigest(), referenceSHA256=hashlib.sha256(reference.read_bytes()).hexdigest(), differingPixels=0))
         result['cleanupComplete'] = not scratch.exists()
         result['passed'] = result['cleanupComplete'] and len(result['records']) == 2
     except Exception as error:

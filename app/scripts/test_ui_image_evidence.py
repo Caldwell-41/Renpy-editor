@@ -44,5 +44,8 @@ class UiImageEvidence(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             image = Path(temporary) / 'blank.png'
             Image.new('RGBA', (1280, 720), (0, 0, 0, 0)).save(image)
-            with self.assertRaises(AssertionError):
-                qualification.validate(receipt(), (1280, 720), image)
+            reference = Path(temporary) / 'reference.png'
+            for color in [(0, 0, 0, 0), (0, 0, 255, 255)]:
+                Image.new('RGBA', (1280, 720), color).save(reference)
+                with self.assertRaises(AssertionError):
+                    qualification.validate(receipt(), (1280, 720), image, reference)

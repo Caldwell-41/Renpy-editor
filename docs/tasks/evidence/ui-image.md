@@ -54,3 +54,27 @@ required Windows/macOS desktop proof and final two-axis review remain pending.
 The full frontend/core suite belongs to final implementation verification.
 This record grants no acceptance or ticket closure. No remote code publication,
 PR, merge or release is selected.
+
+## First Mac SDK run and oracle correction
+
+Candidate `a140614633c02eca691c9aa8acafef3a82302200` starts three SDK processes.
+Compile, lint and 1280x720 normal entry exit 0 without timeout or truncated output.
+All six widget rectangles match exactly, including PNG/JPEG/WebP and the stretched
+PNG. The source bytes remain unchanged and scratch cleanup passes. The run still
+fails its pixel gate and establishes no complete rendering pass.
+[Original receipt](ui-image-mac-sdk-01.json) preserves that failure.
+
+The gate compared exported Ren'Py RGBA to raw file RGB. The first PNG sample is
+`(223,47,63,254)` versus input `(224,48,64)`. The earlier
+[engine calibration](canvas-rendering.md#correction-proposal-and-acceptance-boundary)
+records this scaling/compositing/export effect. The new discriminating check uses
+an independently authored literal Ren'Py screen with the known assets, dimensions
+and positions, exported through the same engine path. It requires zero differing
+RGBA pixels, actual quadrant content and no edge overflow. It changes no product
+source, renderer, color value or tolerance. The missing/different/blank evidence
+checks pass. A string-quoting mistake in this checker correction failed Python
+syntax preflight and was corrected before any further SDK launch.
+
+The next run may reuse only the two successful compile/lint commands for the exact
+same accepted source and asset manifest. It must freshly render both aspects with
+the corrected oracle. The failed first run remains charged and retained.

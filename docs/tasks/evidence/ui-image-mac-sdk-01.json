@@ -1,0 +1,34 @@
+{
+  "passed": false,
+  "sdkProcesses": 3,
+  "os": "Darwin",
+  "architecture": "arm64",
+  "records": [],
+  "commands": [
+    {
+      "name": "compile",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "images-1280x720",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    }
+  ],
+  "cleanupComplete": true,
+  "candidate": "a140614633c02eca691c9aa8acafef3a82302200",
+  "rejectingGateSelfCheck": true,
+  "failure": {
+    "type": "AssertionError",
+    "message": "('png', (223, 47, 63, 254), (224, 48, 64))"
+  }
+}
