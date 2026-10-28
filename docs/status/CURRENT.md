@@ -10,9 +10,9 @@ worktree and branch. Production UI changes wait for Kris's final prototype appro
 and handoff. Source/SDK inspection and implementation preparation are underway;
 no production code, new tests or runtime qualification has started.
 
-The tracker update is prepared locally but remains unpublished after automatic
-approval review rejected the full issue-body update. Its draft and recovery state
-are in [HANDOVER](HANDOVER.md#l04-implementation-preparation-and-prototype-handoff).
+Kris approved status updates for #42 and confirmed the test boundaries. The issue's
+selected execution record is published and verified. Prototype approval remains
+pending in [HANDOVER](HANDOVER.md#l04-implementation-preparation-and-prototype-handoff).
 The L03 prerequisite is satisfied. Acceptance remains pending; no merge or release
 is selected. Preserve the unrelated untracked audit and protected recovery.
 

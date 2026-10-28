@@ -23,17 +23,21 @@ owners. It adds window/hbox/grid/viewport, literal grid dimensions and row-major
 order, window padding, hbox/grid spacing and stationary top-left viewport clipping.
 Windows/viewports accept one explicit child. Scrolling controls, adjustment bindings,
 initial offsets and child-size expressions remain Source-only. These are proposals
-pending design approval and pinned 8.5.3 SDK qualification. Source reads establish
-no rendering proof. A TDD seam-confirmation question is pending for public core
-requests, the real UI-to-core path and pinned-SDK rendering. No new tests or
-production edits have been made.
+pending design approval and pinned 8.5.3 SDK qualification. Grid dimensions use a
+proposed authoring range of 1-64 per axis. Source reads establish no rendering proof.
+Kris confirmed the TDD boundaries on 2026-10-28: public core requests for lossless
+edits/history/reopen, the real UI-to-core path for drafts/selection/conflicts, and
+pinned-SDK renders at both aspects for grid placement/clipping. Component checks
+alone do not establish integration proof. No new tests or production edits have
+been made.
 
-Automatic approval review rejected the proposed full GitHub issue-body update for
-missing explicit authorization and possible intervening-edit loss. The issue is
-unchanged. The complete proposed body is retained locally in ignored
-`.toolchains/l04-preparation/issue42-proposed.md`. Obtain approval for this tracker
-update and reconcile fresh issue text before any publication. This is a pending
-tracker synchronization, not an offline replacement for GitHub task ownership.
+Kris explicitly approved ticket #42 status updates for this work after automatic
+approval review rejected the initial full-body update for missing authorization and
+possible intervening-edit loss. A fresh read found no intervening changes. The
+selected execution record and confirmed test boundaries are now published on #42;
+the full body was read back and matches the prepared update. Reconcile fresh issue
+text before later updates. The local copy is retained in ignored
+`.toolchains/l04-preparation/issue42-proposed.md`.
 
 Development remains on Mac ARM64; affected Windows/macOS proof follows host routing.
 No costly operation has started for L04. Set operation limits in #42 before package,
