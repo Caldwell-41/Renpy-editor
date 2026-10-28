@@ -1,0 +1,85 @@
+{
+  "sourceCandidate": "a5e0e9a4426acc9532afa1ddf842b0b69ad10b1e",
+  "architecture": "macOS ARM64",
+  "case": "help-screen",
+  "passed": true,
+  "nativeWebView": true,
+  "nativeKeyboard": false,
+  "package": {
+    "bundle": "Loomlight.app",
+    "identifier": "app.loomlight.desktop",
+    "certificateSHA1": "358372708164C7273A551D746449357C12A3A806",
+    "designatedRequirement": "designated => identifier \"app.loomlight.desktop\" and certificate leaf = H\"358372708164c7273a551d746449357c12a3a806\"",
+    "bundleVersion": "0.1.0",
+    "executableSHA256": "f59e8ecde2c16785286503c0c559d5caff3ff466d4e746a9a5085665ad460832",
+    "strictSignatureVerified": true,
+    "installerSHA256": "43c1eccecc15e4746fe22865ce8111d7f5971218a347d859c4ec1a4054c9b747",
+    "installerContentsVerified": true
+  },
+  "nativeReportSHA256": "e895dcf3a6fd4779ce95ad797ad26e6a19089893f42b42cac95d1b00bc96a498",
+  "acceptedHelpSHA256": "54dc5582dee854788bcb6266b2ff5254c42709e807e602f353eee1cfed63ca84",
+  "desktopReportSHA256": "4439fd7cc082a65c0f4c42e05b3e93e4a80a5794ccfcce6800fedc42986e155e",
+  "stages": [
+    "screen-inventory-passed",
+    "source-roundtrip-passed",
+    "validation-passed",
+    "preview-geometry-passed",
+    "stale-stop-passed",
+    "disk-reopen-passed",
+    "complete"
+  ],
+  "geometry": {
+    "aspect": [
+      1280,
+      720
+    ],
+    "menu": false,
+    "size": [
+      760,
+      360
+    ]
+  },
+  "cleanupOwners": {
+    "credentials": true,
+    "host": true,
+    "requests": true
+  },
+  "sourceDisk": {
+    "acceptedBytesMatch": true,
+    "scratchJobsRemaining": 0,
+    "sourceBytecode": false,
+    "sourceSaves": false
+  },
+  "desktopAdmitted": true,
+  "desktopCleanupComplete": true,
+  "sdkProcesses": {
+    "versionValidation": 1,
+    "compile": 1,
+    "lint": 1,
+    "run": 1
+  },
+  "stopExitCode": 0,
+  "exitCode": 0,
+  "timedOut": false,
+  "cumulativeConsumption": {
+    "qualificationDispatches": 1,
+    "macPackages": 1,
+    "macEditorSessions": 1,
+    "macSDKStarts": 20,
+    "macSDKCeiling": 20,
+    "windowsPackages": 1,
+    "windowsEditorSessions": 1,
+    "windowsSDKStarts": 8,
+    "windowsSDKCeiling": 16
+  },
+  "processIdentity": {
+    "sourceCandidate": "a5e0e9a4426acc9532afa1ddf842b0b69ad10b1e",
+    "observedAfterExit": true,
+    "matchingProcessCount": 1,
+    "processIds": [
+      292
+    ],
+    "osExecutablePathMatched": true,
+    "source": "macOS unified log metadata"
+  }
+}

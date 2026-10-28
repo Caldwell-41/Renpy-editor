@@ -345,3 +345,60 @@ approval to increase that ceiling to 20. No such run or package has started, and
 signing/Keychain change is authorized by this audit. #38 stays open and PR #66 stays
 draft. Matrix, transactional/constraint behavior and two-aspect geometry have audited
 proof; the final production-path criterion remains pending Mac native qualification.
+
+## Approved Mac continuation, 2026-10-28
+
+Kris approved four additional Mac SDK starts, increasing that ceiling from 16 to 20.
+The live #38 ledger is amended before execution. Other ceilings are unchanged.
+The package preflight's matching-identity query now finds the exact approved
+358372708164C7273A551D746449357C12A3A806 self-signed identity. The valid-chain-only
+query omits it; the package route uses the matching query and then strict certificate-
+bound signature verification. No Keychain trust, ACL, identity pin or names changed.
+Mac package attempt 1 starts through macos-package.py against source a5e0e9a.
+The output is fresh and ignored. Editor sessions remain zero and SDK use remains 16
+until the isolated Help case actually starts.
+
+## Mac native audit and review handoff
+
+Mac package 1 passes the strict signature and installer-content gate at source
+`a5e0e9a4426acc9532afa1ddf842b0b69ad10b1e`. Its application inputs are identical to
+the both-target CI candidate; intervening commits change status/evidence only.
+The [retained Mac receipt](numeric-layout-mac-native.json) binds the ARM64 executable,
+approved certificate, designated requirement, installer, source and native reports.
+Executable SHA256 is `f59e8ecde2c16785286503c0c559d5caff3ff466d4e746a9a5085665ad460832`;
+installer SHA256 is `43c1eccecc15e4746fe22865ce8111d7f5971218a347d859c4ec1a4054c9b747`.
+Permanent Loomlight names and the approved fingerprint are unchanged. The existing
+local self-signed route was used; no trust, ACL or credential policy changed.
+
+Native session 1 completes in 34.032 seconds, with product exit 0 and no timeout or
+external errors. All six named Help groups and the complete terminal pass. Validation
+compiles/lints without error. The actual SDK preview measures 760×360 at 1280×720
+in game context. A later accepted edit marks that running preview stale; Stop returns
+exit 0 with the expected cancelled phase and cleanup. Reopen retains only accepted
+bytes. The BOM/CRLF file matches the fixture's exact width-768 result. Scratch jobs
+are zero; source bytecode/saves are absent. Host, requests and credentials all clean up.
+The desktop remains unlocked/awake before and after the child, and both owned power
+assertions release without error.
+
+A post-run live-process query found no process because the successful probe had
+already exited. No rerun was started. Exact-path macOS log metadata instead binds
+PID 292 to the fresh output bundle, and its executable hash matches the verified
+package. This is packaged WKWebView behavior with synthetic DOM input. It does not
+claim OS-native keyboard delivery, pointer fidelity or human acceptance.
+
+The four additional SDK starts are one fixture --version check, compile, lint and
+run. Cumulative use is dispatches 1/3, Mac package/editor 1/2 each and SDK starts 20/20,
+Windows package/editor 1/2 each and SDK starts 8/16. The user-approved increase is
+recorded in #38. No uncertain start or pending owned process remains.
+
+Visual fidelity finding: the inspector matches approved A2's paired units/axes,
+382-pixel desktop proportions, 32-pixel controls, presets, expandable limits/padding
+and separate commit row in the retained same-state browser comparisons. Production
+navigation and unavailable-canvas behavior keep their established scope. The signed
+Mac run verifies actual controls and focus through the same production editor.
+Functional finding: all mapped #38 actions have passing production/controller/core,
+source/history/reopen and two-platform SDK evidence. The required Windows and signed
+Mac packaged paths pass. Standards is clear; both Spec findings are fixed/rechecked.
+All four leaf criteria have evidence. PR #66 is ready for review into Screens; the
+issue remains open for integration, and no merge or successor is selected. Broader
+B02/3B and final human acceptance remain outside this leaf's completion claim.

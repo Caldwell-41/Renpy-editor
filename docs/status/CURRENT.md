@@ -1,22 +1,23 @@
 # Current status
 
-## L03 numeric layout awaiting Mac native proof
+## L03 numeric layout ready for review
 
 [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) is implemented in
-[draft PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66), targeting Screens.
-Kris approved A2 / Paired fields and both TDD boundaries. Standards has no findings;
-both Spec findings are fixed and rechecked. [Qualification run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
-attempt 1, passes and is audited at candidate `a79737e`. Both targets pass 264 frontend
-and 36 screen-core tests, real controller checks and matching SDK geometry at both
-aspects. The Windows x64 packaged WebView path passes history, validation, preview,
-Stop, reopen and cleanup. Automatic PR checks at status-only `535344c` also pass.
-[Evidence](../tasks/evidence/numeric-layout.md#ci-audit-2026-10-28) owns scope and hashes.
+[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66), targeting Screens.
+A2 is approved. Standards has no findings; both Spec findings are fixed and rechecked.
+Audited [CI run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
+attempt 1 at a79737e, passes both targets' 264 frontend tests, 36 screen-core tests,
+real controllers and matching SDK geometry at both aspects. Windows packaged proof
+passes. The signed Mac package and native Help case now pass at source a5e0e9a,
+with exact source bytes, history, validation, preview, Stop, reopen and cleanup.
+[Evidence](../tasks/evidence/numeric-layout.md#mac-native-audit-and-review-handoff)
+retains signature, installer, process, source and report identities.
 
-Signed Mac native proof remains pending. The approved signing identity is unavailable,
-and the Mac SDK ceiling is exhausted at 16/16. The remaining bounded native case
-needs the existing identity and approval for four more SDK starts. No Mac package or
-editor has started. #38 owns the cumulative ledger; do not merge or close with missing
-proof. Broader B02/3B acceptance, the unrelated audit and protected recovery keep their owners.
+All four leaf criteria have evidence; #38 is review-ready and stays open for
+integration. No merge is authorized. #38 owns final consumption: dispatches 1/3,
+packages/editor sessions 1/2 on each OS, SDK starts Mac 20/20 (Kris approved the
+increase) and Windows 8/16. Remaining B02/3B, pointer/full-canvas and human acceptance
+retain their scope. The unrelated audit and protected recovery remain intact.
 
 ## Phase 3B architecture refactors merged
 

@@ -1,42 +1,42 @@
 # Current outcome handover
 
-## L03 numeric layout awaiting Mac native proof
+## L03 numeric layout ready for review
 
-This chat owns [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) and
-[draft PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) on
+This chat delivered [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38)
+in [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) on
 codex/phase3b-l03-numeric-layout, targeting codex/phase3b-screen-designer.
 Kris authorized implementation, focused tests, review, PR and CI audit. Merging and
-other features are excluded. A2 is approved at source c2d23c5, record c1ab3e6.
+other features remain excluded. A2 is approved at source c2d23c5, record c1ab3e6.
 Both TDD boundaries are confirmed. The reference checkout was retired after comparison;
-approved sources/captures remain committed. Fixes are in 57b9960, with clean rechecks
-on both independent review axes. The unrelated audit and protected recovery remain intact.
+approved sources/captures remain committed. Source fixes are in 57b9960, with clean
+rechecks on both review axes. The unrelated audit and protected recovery remain intact.
 
-[CI run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
-attempt 1, completed successfully at a79737ec641837803a55ef9fd3e0c30fe3a4d04b.
-The watcher event is acknowledged and the run/artifacts are audited. Both targets
-pass 264 frontend tests, 36 screen-core tests, real controllers and matching SDK
-geometry at 1280×720 and 1024×768. Windows packaged WebView proof passes its named
-cases and cleanup. Automatic PR run 40604514626 at status-only 535344c passes both
-required jobs. [Evidence](../tasks/evidence/numeric-layout.md#ci-audit-2026-10-28)
-and its compact JSON receipt retain source, artifact, package and report identities.
-Later status-only changes do not alter the qualified runtime inputs.
+[Qualification run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
+attempt 1 at a79737e, is successful and audited. Both targets pass 264 frontend and
+36 screen-core tests, real controllers and matching SDK geometry at 1280×720 and
+1024×768. Windows packaged WebView proof passes. Automatic PR run 40604514626 at
+status-only 535344c also passes both required jobs. Later status changes alter no
+qualified application, fixture, dependency, probe or workflow input.
 
-#38 owns all limits and current consumption. Dispatches are 1/3. Windows use is
-package 1/2, editor 1/2 and SDK starts 8/16. Mac use is package 0/2, editor 0/2 and SDK
-starts 16/16. Signed Mac native proof is pending because the approved identity is
-unavailable. The next bounded Help case needs the existing identity and approval to
-raise Mac SDK starts to 20. No additional Mac SDK, package or editor starts are
-allowed until those prerequisites are met. Do not provision/change signing, Keychain
-policy, credentials or names as a workaround. The async identity-location question
-remains unanswered. #38 and the draft PR stay open; other acceptance retains its scope.
+Kris approved the Mac SDK ceiling increase to 20 on 2026-10-28. The exact approved
+self-signed identity was available to the package route's matching-identity query.
+Mac package attempt 1 and native session 1 pass at source a5e0e9a. Strict signature,
+certificate-backed requirement, installer contents and ARM64 architecture pass.
+The native case covers source roundtrip, history, validation, actual SDK preview,
+stale Stop, disk reopen and cleanup. Desktop admission, both power-assertion releases
+and source-byte audits pass. OS log metadata binds the completed process PID to the
+fresh package path. Input is synthetic DOM input; OS-native input and human acceptance
+are not claimed. No trust, ACL, signing policy, names or credential settings changed.
 
-On authorized continuation, recheck branch/identity/ledger, verify the existing
-approved fingerprint without changing it, build through macos-package.py and run
-one Help packaged case on a disposable profile. Audit source/package identity,
-controls/focus, history/reopen, runtime geometry, cleanup and exact process counts.
-Do not replay the completed both-target SDK geometry run. Do not merge or select a
-successor feature. Earlier failed SDK/lab/broad-core attempts remain failed, with
-their causes and exclusions in the evidence record.
+[Evidence](../tasks/evidence/numeric-layout.md#mac-native-audit-and-review-handoff)
+and its CI/Mac JSON receipts own hashes, cases and scopes. All four leaf criteria
+now have proof. The issue stays open for review/integration; the PR can leave draft.
+No further SDK/native/package run is needed for this candidate. #38 owns cumulative
+limits: dispatches 1/3; Mac package/editor 1/2 each and SDK 20/20; Windows package/editor
+1/2 each and SDK 8/16. Unused selections do not transfer to other outcomes. Preserve
+all failed historical attempts. Do not merge, replay qualified geometry, change the
+identity or select a successor without authorization. Broader B02/3B, pointer/full
+canvas and final human acceptance retain their owners.
 
 ## Phase 3B architecture refactors merged and cleaned up
 
