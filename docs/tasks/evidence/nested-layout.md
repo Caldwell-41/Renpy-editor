@@ -2,7 +2,8 @@
 
 [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42) owns scope, acceptance,
 operation limits and current consumption. The implementation branch is
-`codex/phase3b-l04-nested-layout`, based on `eb83d3b`. Windows qualification remains pending. The corrected signed Mac native case passes.
+`codex/phase3b-l04-nested-layout`, based on `eb83d3b`. CI1 and the signed Mac native case pass. The artifact audit is complete; the
+implementation is ready for review with the combined Design Lab gap retained.
 Independent Standards and Spec review each report zero findings at `228fe23`,
 including the final policy notice and bounded probe retry correction.
 
@@ -102,8 +103,8 @@ refinement; the final native candidate and Windows qualification remain separate
 Raw local receipts remain under ignored `.toolchains/l04/`, including original
 failures, screenshots and logs. Package-relative copies were preserved and copied
 into that owning directory. Current actual use is Mac SDK 12/16 and helpers 4/4. The helper allowance is
-exhausted. Signed package builds use 3/3 and native sessions use 2/3. No costly CI
-dispatch has started; Windows counters remain zero.
+exhausted. Signed package builds use 3/3 and native sessions use 2/3. At that pre-publication checkpoint no costly CI dispatch had started; final
+consumption is recorded in the CI1 audit below.
 
 
 ## Independent review corrections
@@ -157,7 +158,7 @@ The initial push refusal is resolved by Kris's explicit approval for push, draft
 PR and bounded CI. [Draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67)
 targets the Screens parent. No merge or release is selected.
 
-## CI1 awaiting artifact audit
+## CI1 dispatch and audit record
 
 [Run 40742930659, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
 is the first costly dispatch, at exact candidate
@@ -166,7 +167,7 @@ is the first costly dispatch, at exact candidate
 The candidate differs from signed Mac `228fe23` only in four evidence/status files;
 application, probe, tests, SDK mappings and accepted fixtures are identical.
 Both-host portable/controller checks and Windows SDK/helper/package/native
-qualification are pending. No CI result is accepted before artifact audit.
+qualification passed; the terminal artifact audit below establishes their scope.
 
 Dispatch consumption is 1/3. CI1 reserves up to seven Windows SDK launches,
 including one helper, one package build and one native session. Actual Windows
@@ -179,3 +180,71 @@ is published. Registration is confirmed only by its `watcher_running: true`
 acknowledgement. On resume, verify the exact run/attempt/SHA, audit both artifacts
 and automatic PR checks, preserve failed proof and operation counts, then finish
 the four criterion-to-evidence results. Missing or failed proof prevents closure.
+
+## Terminal CI1 audit and review handoff
+
+[CI1 receipt](nested-layout/ci1.json) records exact run 40742930659, attempt 1,
+`dedf920`, both artifact IDs/digests, source hashes, four SDK records, helper
+shutdown, Windows x64 identity and native disk/cleanup results. Both artifact
+candidate files match. The two selected matrix jobs and selector validation pass;
+all other qualification routes were intentionally unselected. Both hosts pass
+264 frontend cases and all 42 ordinary screen-core cases. Two explicit SDK cases
+are ignored in the ordinary slice; Windows runs the selected nested helper case
+separately and passes. Controller, exact-probe rehearsal, eight owned-screen groups,
+eleven Help groups and migrated numeric-layout checks pass on both hosts.
+
+The Windows official checksum check passes. Six source SDK starts pass compile,
+lint and the four aspect/opening runs. Re-reading the four PNGs verifies their
+hashes and exact geometry/clipping assertions. The helper's four populated
+records and five empty cases pass on ANGLE; visible descendant bounds and hidden
+hit exclusion agree with the opening. Its one process stops cooperatively with
+exit 0 and complete private-directory cleanup. Mac and Windows accepted fixtures
+differ only in the generated screen-owner UUID; all layout/text/source statements
+match. Full GPU pixel equivalence remains with L19.
+
+The Windows package receipt binds the x64 executable hash to `dedf920`. Native
+WebView input passes every required stage, exact accepted disk bytes, protected
+neighbor and identity reopen, exit 0 and fixture cleanup. No scratch jobs,
+bytecode, saves, disk errors or external errors remain. The case starts no SDK.
+Signed Mac proof at application-identical `228fe23` retains its approved identity
+and desktop admission/power-cleanup receipt. Neither native case claims physical
+keyboard, pointer, IME or human acceptance.
+
+Final use is dispatches 1/3. Windows uses SDK 7/16, helpers 1/4, package builds
+1/3 and native sessions 1/3. Mac remains SDK 12/16, helpers 4/4, package builds
+3/3 and native sessions 2/3. The exhausted Mac helper/package ceilings remain
+closed. No further expensive execution is selected. Automatic PR quality run
+40743147857 passes both required checks at `2f0386a`; that head differs from CI1
+only in status/evidence. Later audit-document commits require their own cheap
+quality result, with application equivalence retained.
+
+### Visual fidelity and functional correctness
+
+[Comparison receipt](nested-layout/visual-comparison.json) and three captures
+compare the A2 six-child grid (2x3, spacing 16) and 580x260 viewport inspector in
+dark mode at 1100x720 and compact 560x640. The paired count/spacing controls, dense
+inspector, position/anchor pairs, Apply/Cancel and compact canvas toggle follow
+`focused-v2`. Existing production toolbars and screen selector add vertical space;
+they retain existing capabilities. The grid notice states the actual empty-cell
+policy. Compact layout has one shell/header/footer and no horizontal overflow.
+The first immediate-resize capture had stale browser paint; two animation frames
+produce the retained capture and measured layout. No production change was needed.
+A throwaway source generator initially indented the explicit grid permission at
+the wrong depth; the corrected comparison uses the prototype's exact nesting.
+Those failures remain in ignored local evidence and are not accepted captures.
+
+Functional correctness passes the real operations mapped below. The comparison
+uses no SDK canvas frame and makes no schematic-to-SDK pixel-equivalence claim.
+The full combined Design Lab check retains its startup/reference failures. This
+is a scoped visual-fidelity finding, not complete promotion validation or a waiver.
+
+| #42 criterion | Functional result and evidence |
+| --- | --- |
+| Add/edit/reorder containers and declare viewport limits | Pass. Public composition/history tests, both-host real UI/core, native stages, count/padding/spacing mappings and DATA_MODEL. |
+| Nested grid, constraints, clipping and lossless Source | Pass. Four source SDK renders per host, helper clipped bounds, opaque/strict grid regression, exact source/disk checks. |
+| Pinned SDK at both aspects and honest Source-only behavior | Pass within stationary top-left scope. 1280x720 and 1024x768, openings 100/200; expressions/scroll controls visibly remain Source-only. |
+| Selection, partial coverage, history, conflicts and reopen | Pass. Both-host controller sequences and packaged native history/reopen stages, plus public-core lossless requests. |
+
+The implementation is `review_ready` in draft PR #67. Ticket #42 stays open;
+its final acceptance/closure retains the combined lab validation gap and any user
+review disposition. No merge, release or wider Phase 3B acceptance is claimed.

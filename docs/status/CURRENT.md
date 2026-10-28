@@ -1,23 +1,26 @@
 # Current status
 
-## L04 nested and clipped layouts in progress
+## L04 nested and clipped layouts ready for review
 
-Kris approved A2 `focused-refined` / `focused-v2` in the separate prototype chat.
-[L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42) is in progress on
-`codex/phase3b-l04-nested-layout`, based on Screens parent `eb83d3b`. The prototype
-is integrated. Window/hbox/grid/viewport authoring, typed grid counts and the Source
-modal extend the existing transactional controllers. L03's prerequisite is satisfied.
+[Draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67) implements
+[L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42) on
+`codex/phase3b-l04-nested-layout`. A2 `focused-v2` approval and the L03 prerequisite
+are satisfied. Window/hbox/grid/viewport controls and Source draft retention
+extend the existing transactional owners.
 
-[Evidence](../tasks/evidence/nested-layout.md) records public-core and real UI/core
-checks, all 264 frontend cases, and scoped Mac both-aspect SDK layout/clipping and
-inert helper results. The broad-core transport failures resolve with socket access; combined ordinary
-coverage is 433 cases. The signed Mac native case passes at `228fe23`, including exact disk bytes and
-cleanup. Both independent reviews have zero findings. [Draft PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67) is published
-and [CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
-is pending at `dedf920`. State is `awaiting_ci`. Windows proof awaits artifact audit. Mac package/helper ceilings are exhausted.
-The full combined lab check retains its startup/reference failures. No leaf, full
-canvas/editor, physical-input or human acceptance is claimed. No merge or release
-is selected. Preserve the unrelated audit and protected recovery.
+[Audited CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
+passes at `dedf920`: both-host portable/controller checks, Windows SDK geometry
+and clipping, helper empty/populated cases and packaged WebView history/reopen.
+Signed Mac proof at application-identical `228fe23` passes identity, disk bytes
+and cleanup. Both independent reviews report zero findings.
+[Evidence](../tasks/evidence/nested-layout.md#terminal-ci1-audit-and-review-handoff)
+contains the four functional results, receipts, retained failures and A2 comparison.
+
+State is `review_ready`; #42 remains open. The full combined Design Lab check
+retains its startup/reference failures and is not a pass or waiver. Full canvas,
+physical-input, human and wider Phase 3B acceptance remain separate. No merge or
+release is selected. Mac helper/package ceilings are exhausted. Preserve the
+unrelated audit and protected recovery.
 
 ## Accepted L03 baseline
 

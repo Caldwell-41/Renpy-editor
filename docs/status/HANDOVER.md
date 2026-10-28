@@ -45,25 +45,28 @@ session 2 pass after the read-only retry correction. See the candidate-bound
 [Mac receipt](../tasks/evidence/nested-layout/mac-native.json). No new Mac helper
 or package build is allowed without a supplement. CI1 is recorded below. #42 owns limits across hosts and attempts.
 
-Kris explicitly approved push, draft PR and bounded CI, resolving the initial
-automatic-review publication refusal. State is `awaiting_ci`.
-[CI1 run 40742930659, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40742930659/attempts/1)
-qualifies exact `dedf92088c11309801fe03e9449b4a64b5f758a2` with
-`nested_layout=true`, ordinal 1. It differs from signed Mac `228fe23` only in
-evidence/status files. Dispatch consumption is 1/3; the run reserves up to seven
-Windows SDK starts including one helper, one package and one native session.
-Actual Windows counts await the step/artifact audit. No further Mac execution is
-selected. The pending same-chat ci-watch registration must receive
-`watcher_running: true` before reporting active monitoring.
+Kris explicitly approved push, draft PR and bounded CI. CI1 run 40742930659,
+attempt 1 at `dedf92088c11309801fe03e9449b4a64b5f758a2` completed successfully,
+and both artifacts are audited. The watcher event matched this chat and its receipt
+is recorded. Both-host portable/controller checks, Windows six source SDK starts
+plus one helper, x64 package and native stages/disk/reopen/cleanup pass.
+[CI1 receipt](../tasks/evidence/nested-layout/ci1.json) retains exact identities.
 
-On the CI event, follow ci-watch acknowledgement and exact run/attempt/SHA checks.
-Audit both-host portable/controller artifacts, Windows accepted source/SDK geometry
-and pixels/helper empty/populated cases and cleanup, x64 package identity, native
-stages/disk/reopen/desktop cleanup, and required automatic PR checks. Preserve
-failed results and actual operation counts. Do not infer acceptance from a green
-badge. Finish the criterion-to-evidence map and PR status only when required proof
-is complete. The combined Design Lab failure retains its scope; no pass or waiver
-is claimed. No merge, release or renewed exhausted Mac allowance is authorized.
+Final consumption is dispatches 1/3. Windows uses SDK 7/16, helpers 1/4, package
+builds 1/3 and native sessions 1/3. Mac remains SDK 12/16, helpers 4/4, package
+builds 3/3 and native sessions 2/3. No further expensive execution is selected.
+The exhausted Mac helper/package ceilings remain closed.
+
+State is `review_ready` in draft PR #67; #42 remains open. Four functional
+criterion results pass at their stated scope. A2 grid/viewport inspector comparison
+passes its scoped visual review. The full combined Design Lab check retains
+startup/reference failures; do not claim complete promotion validation or a waiver.
+Required cheap PR checks passed at `2f0386a`; publish this audit checkpoint and
+confirm its cheap checks before the final review handoff. The audit changes only
+status/evidence and retains application equivalence with CI1 and signed Mac.
+No merge, release, full canvas/physical-input/human acceptance or wider Phase 3B
+acceptance is authorized. Remaining action is user review/disposition of PR #67
+and the recorded combined-lab gap, followed by an explicitly selected merge.
 Protected native recovery and earlier closed allowances below remain intact.
 
 ## Retained L03 closeout
