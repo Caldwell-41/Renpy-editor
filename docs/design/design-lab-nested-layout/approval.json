@@ -3,8 +3,25 @@
   "screenId": "nested-layout",
   "currentApproved": null,
   "revisions": [
-    { "id": "focused-v1", "variantId": "focused", "approval": null },
-    { "id": "worksheet-v1", "variantId": "worksheet", "approval": null },
-    { "id": "source-led-v1", "variantId": "source-led", "approval": null }
+    {
+      "id": "focused-v1",
+      "variantId": "focused",
+      "approval": null
+    },
+    {
+      "id": "worksheet-v1",
+      "variantId": "worksheet",
+      "approval": null
+    },
+    {
+      "id": "source-led-v1",
+      "variantId": "source-led",
+      "approval": null
+    },
+    {
+      "id": "focused-v2",
+      "variantId": "focused-refined",
+      "approval": null
+    }
   ]
 }

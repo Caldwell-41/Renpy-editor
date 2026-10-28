@@ -3,7 +3,7 @@
 Three variants ask how to edit a nested layout while keeping parent constraints,
 clipping, hierarchy and accepted Source understandable. They extend the existing
 Screens shell for [L04 #42](https://github.com/Caldwell-41/Renpy-editor/issues/42).
-All three remain unapproved. Existing flow-v1, C5 Help composition and A2 numeric
+All three remain unapproved. [A2 refinement](REFINEMENT.md) adds the requested Experience First revision with the approved numeric and composition controls in context. It also remains unapproved. Existing flow-v1, C5 Help composition and A2 numeric
 inspector approvals retain their scope.
 
 - A, Focused inspector, keeps the canvas beside one task panel. Choose opens the

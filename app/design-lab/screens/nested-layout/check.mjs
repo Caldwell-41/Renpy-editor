@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import refinedCheck from "./refined-check.mjs";
 export default async function check({page,open}){
  for(const variant of ["focused","worksheet","source-led"]){
   await page.setViewportSize({width:1100,height:720});await open({variant,theme:"dark"});
@@ -23,4 +24,5 @@ export default async function check({page,open}){
   await open({variant,state:"source-only",theme:"dark"});assert(await page.getByRole("textbox",{name:"Height",exact:true}).getAttribute("readonly")!==null);assert.match(await page.locator('.nl-canvas').innerText(),/cannot represent/);
   await page.setViewportSize({width:560,height:640});await open({variant,viewport:"compact",theme:"dark"});await columns.fill("3");await apply.click();assert.equal(await columns.inputValue(),"3");assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  }
+ await refinedCheck({page,open});
 }
