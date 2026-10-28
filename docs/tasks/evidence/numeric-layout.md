@@ -675,3 +675,49 @@ actual starts before changing counts. No local operation remains pending. ci-wat
 is selected for this exact run/attempt/SHA and same parent thread; its startup
 acknowledgement owns registration status. Yield after watcher_running=true, then
 resume here for the final audit. No merge or successor is selected.
+
+
+### Final correction audit and review-ready handoff
+
+The parent matched and acknowledged the watcher event, then audited
+[CI4 run 40644911729](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644911729/attempts/1),
+attempt 1 at 07b82be5be285ea65ba1dcafa2d657382adafb5d. Selector validation and both
+selected targets pass. [The final audit receipt](numeric-layout-pr66-ci4.json)
+retains artifact identities/digests, cases, source/package/report hashes and counts.
+The Windows archive has 43 files; Mac has 38. Both published archive digests verify,
+and independent privacy scans pass. Failed CI2 and rejected-input CI3 stay failed.
+
+Both targets pass all 264 frontend and 37 ordinary screen-core tests, the numeric
+controller, all 11 real Help groups and the migrated native-probe rehearsal. Apply
+retains the same focused control while the actual rejection spans rendering turns
+and after refusal. Duplicate Enter adds no write. The held owner is released and
+the driver exits zero with no cleanup error. Both actual SDK aspects, 1280x720 and
+1024x768, have identical complete geometry across hosts; the frozen accepted source
+hash remains c6192365b9d010c5704fe54560313e147b030a7cb49ba6733aa7e040f786f6d3.
+Rejecting-gate checks, unchanged source and SDK cleanup all pass.
+
+Windows package/session 3 passes the new clicked-Apply focus, blur/accessibility/
+IME assertions and the existing source/history, validation, SDK preview, stale Stop,
+reopen and cleanup sequence. Its x64 executable SHA256 is
+51c9deff0a5c79bc2ebd6c97ee4b597a13d7d24a340920608be16f5e300a3881.
+Exact BOM/CRLF accepted bytes match; scratch jobs, bytecode and saves are absent.
+All cleanup owners pass. Signed Mac package/session 3 at eb10f71 has identical
+application/fixture/dependency/probe inputs; intervening differences are only the
+recorded workflow ordinal and evidence/status. Its prior audited focus proof
+therefore supplies the matching signed Mac scope, with its own exact hashes.
+Both packaged paths use synthetic DOM input; OS-native IME and human acceptance
+are not claimed. Broader pointer/full-canvas and B02/3B acceptance retain their owners.
+
+Both required automatic PR jobs pass at docs-only e54cac0 in run 40645156369. The
+final evidence publication changes documentation only; its cheap automatic checks
+will be audited without starting another package/SDK matrix or chasing a new
+self-referential evidence commit. No application correction remains. Standards and
+Spec have no remaining finding for the selected fixes. The four #38 leaf criteria
+have current scoped proof. PR #66 is review-ready and the issue remains open for
+integration. No merge or successor is selected.
+
+Final cumulative use is dispatches 4/4, package/editor sessions 3/3 per OS, Mac SDK
+32/32 and Windows SDK 24/24. All starts are resolved; no owned local process or CI
+watch remains pending. The unrelated audit and protected recovery remain intact.
+CURRENT/HANDOVER retain their older acceptance/recovery sections above their soft
+size targets; this handoff replaces only the selected L03 section and links here.

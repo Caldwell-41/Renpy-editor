@@ -1,0 +1,349 @@
+{
+  "runId": 40644911729,
+  "attempt": 1,
+  "candidate": "07b82be5be285ea65ba1dcafa2d657382adafb5d",
+  "conclusion": "success",
+  "allSelectedEvidencePassed": true,
+  "targets": {
+    "Windows": {
+      "frontendTests": 264,
+      "screenCoreTests": 37,
+      "controllerPassed": true,
+      "helpGroups": 11,
+      "focusPending": {
+        "sameControl": true,
+        "expected": {
+          "tagName": "BUTTON",
+          "role": null,
+          "ariaLabel": null,
+          "disabled": false,
+          "ariaDisabled": "true",
+          "connected": true
+        },
+        "actual": {
+          "tagName": "BUTTON",
+          "role": null,
+          "ariaLabel": null,
+          "disabled": false,
+          "ariaDisabled": "true",
+          "connected": true
+        },
+        "width": "750",
+        "message": "Layout changes cancelled. No source was written."
+      },
+      "focusAfterRefusal": {
+        "sameControl": true,
+        "expected": {
+          "tagName": "BUTTON",
+          "role": null,
+          "ariaLabel": null,
+          "disabled": false,
+          "ariaDisabled": "false",
+          "connected": true
+        },
+        "actual": {
+          "tagName": "BUTTON",
+          "role": null,
+          "ariaLabel": null,
+          "disabled": false,
+          "ariaDisabled": "false",
+          "connected": true
+        },
+        "width": "750",
+        "message": "Another request is in progress. Input retained. Review Source, or cancel this draft and refresh."
+      },
+      "helpCleanup": {
+        "ownerHeld": false,
+        "driver": {
+          "exitObserved": true,
+          "exitCode": 0,
+          "signal": null
+        },
+        "errors": []
+      },
+      "probeRehearsalPassed": true,
+      "sdkProcesses": 4,
+      "sdkVersion": "8.5.3.26051504",
+      "sdkResultSHA256": "19235133e70624b7af45814b56e8af6a874e2ba84a7aac4c1f2a0465583379eb",
+      "sdkCleanupComplete": true,
+      "acceptedSourceUnchanged": true,
+      "rejectingGateSelfCheck": true,
+      "artifact": {
+        "id": 12796984896,
+        "name": "numeric-layout-Windows-40644911729-1",
+        "digest": "sha256:8f47f37b7d4e4a565eba4918243ddf85548b503f7a9b3cf8f5e4144c857dd2d3",
+        "expiresAt": "2026-11-04T06:46:30Z",
+        "archiveDigestVerified": true,
+        "fileCount": 43
+      },
+      "native": {
+        "passed": true,
+        "nativeWebView": true,
+        "nativeKeyboard": false,
+        "stages": [
+          "screen-inventory-passed",
+          "source-roundtrip-passed",
+          "validation-passed",
+          "preview-geometry-passed",
+          "stale-stop-passed",
+          "disk-reopen-passed",
+          "complete"
+        ],
+        "geometry": {
+          "aspect": [
+            1280,
+            720
+          ],
+          "menu": false,
+          "size": [
+            760,
+            360
+          ]
+        },
+        "cleanupOwners": {
+          "credentials": true,
+          "host": true,
+          "requests": true
+        },
+        "sourceDisk": {
+          "acceptedBytesMatch": true,
+          "scratchJobsRemaining": 0,
+          "sourceBytecode": false,
+          "sourceSaves": false
+        },
+        "package": {
+          "executableSHA256": "51C9DEFF0A5C79BC2EBD6C97EE4B597A13D7D24A340920608BE16F5E300A3881",
+          "candidate": "07b82be5be285ea65ba1dcafa2d657382adafb5d",
+          "architecture": "Windows x64"
+        },
+        "nativeReportSHA256": "315fa135bbeeba0d9a383781741ff522511ee9b67e3891cf9056d9e97e04abc2",
+        "acceptedHelpSHA256": "54dc5582dee854788bcb6266b2ff5254c42709e807e602f353eee1cfed63ca84",
+        "sdkProcesses": 4,
+        "stopExitCode": -1073741510
+      }
+    },
+    "macOS": {
+      "frontendTests": 264,
+      "screenCoreTests": 37,
+      "controllerPassed": true,
+      "helpGroups": 11,
+      "focusPending": {
+        "sameControl": true,
+        "expected": {
+          "tagName": "BUTTON",
+          "role": null,
+          "ariaLabel": null,
+          "disabled": false,
+          "ariaDisabled": "true",
+          "connected": true
+        },
+        "actual": {
+          "tagName": "BUTTON",
+          "role": null,
+          "ariaLabel": null,
+          "disabled": false,
+          "ariaDisabled": "true",
+          "connected": true
+        },
+        "width": "750",
+        "message": "Layout changes cancelled. No source was written."
+      },
+      "focusAfterRefusal": {
+        "sameControl": true,
+        "expected": {
+          "tagName": "BUTTON",
+          "role": null,
+          "ariaLabel": null,
+          "disabled": false,
+          "ariaDisabled": "false",
+          "connected": true
+        },
+        "actual": {
+          "tagName": "BUTTON",
+          "role": null,
+          "ariaLabel": null,
+          "disabled": false,
+          "ariaDisabled": "false",
+          "connected": true
+        },
+        "width": "750",
+        "message": "Another request is in progress. Input retained. Review Source, or cancel this draft and refresh."
+      },
+      "helpCleanup": {
+        "ownerHeld": false,
+        "driver": {
+          "exitObserved": true,
+          "exitCode": 0,
+          "signal": null
+        },
+        "errors": []
+      },
+      "probeRehearsalPassed": true,
+      "sdkProcesses": 4,
+      "sdkVersion": "8.5.3.26051504",
+      "sdkResultSHA256": "7f778237886d5805b0acdab9694dcb6f79808633fff586f0c592279a698f9f52",
+      "sdkCleanupComplete": true,
+      "acceptedSourceUnchanged": true,
+      "rejectingGateSelfCheck": true,
+      "artifact": {
+        "id": 12796893978,
+        "name": "numeric-layout-macOS-40644911729-1",
+        "digest": "sha256:2d0509c92adcee007ad48ca30816df4430b54052d975bbe55c41e1b91336d2b8",
+        "expiresAt": "2026-11-04T06:41:08Z",
+        "archiveDigestVerified": true,
+        "fileCount": 38
+      }
+    }
+  },
+  "acceptedSHA256": "c6192365b9d010c5704fe54560313e147b030a7cb49ba6733aa7e040f786f6d3",
+  "geometryByAspect": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "rectangles": {
+        "free": [
+          10,
+          20,
+          200.0,
+          100.0
+        ],
+        "bounds": [
+          40,
+          50,
+          260.0,
+          160.0
+        ],
+        "stack": [
+          52,
+          68,
+          100.0,
+          100.0
+        ],
+        "action": [
+          52.0,
+          107.0,
+          100.0,
+          60.0
+        ],
+        "asset": [
+          1,
+          0,
+          64.0,
+          48.0
+        ],
+        "free_text": [
+          10,
+          20,
+          46.0,
+          27.0
+        ],
+        "panel": [
+          800,
+          270,
+          320.0,
+          180.0
+        ],
+        "panel_text": [
+          816,
+          290,
+          105.0,
+          27.0
+        ],
+        "caption": [
+          78,
+          68,
+          48.0,
+          27.0
+        ]
+      }
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "rectangles": {
+        "free": [
+          10,
+          20,
+          200.0,
+          100.0
+        ],
+        "bounds": [
+          40,
+          50,
+          260.0,
+          160.0
+        ],
+        "stack": [
+          52,
+          68,
+          100.0,
+          100.0
+        ],
+        "action": [
+          52.0,
+          107.0,
+          100.0,
+          60.0
+        ],
+        "asset": [
+          1,
+          0,
+          64.0,
+          48.0
+        ],
+        "free_text": [
+          10,
+          20,
+          46.0,
+          27.0
+        ],
+        "panel": [
+          608,
+          294,
+          320.0,
+          180.0
+        ],
+        "panel_text": [
+          624,
+          314,
+          105.0,
+          27.0
+        ],
+        "caption": [
+          78,
+          68,
+          48.0,
+          27.0
+        ]
+      }
+    }
+  ],
+  "identicalGeometryAcrossTargets": true,
+  "signedMacProof": "numeric-layout-pr66-focus-mac-native.json",
+  "signedMacSource": "eb10f71aeeb0d5ed26edaa19b479dfe43085d7c8",
+  "applicationInputsMatchSignedMac": true,
+  "cumulativeConsumption": {
+    "qualificationDispatches": 4,
+    "dispatchCeiling": 4,
+    "macPackages": 3,
+    "macEditorSessions": 3,
+    "macSDKStarts": 32,
+    "macSDKCeiling": 32,
+    "windowsPackages": 3,
+    "windowsEditorSessions": 3,
+    "windowsSDKStarts": 24,
+    "windowsSDKCeiling": 24
+  },
+  "latestAutomaticPRChecks": {
+    "runId": 40645156369,
+    "candidate": "e54cac08d65d1c547677e1146880f7bc8df21723",
+    "requiredJobsPassed": true
+  },
+  "remainingRequiredProof": []
+}

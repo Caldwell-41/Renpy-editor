@@ -1,44 +1,41 @@
 # Current outcome handover
 
-## L03 focus correction awaiting final CI audit
+## L03 review fixes qualified
 
-Kris selected PR #66 fixes with root-cause diagnosis/TDD, granted all approvals
+Kris selected the PR #66 fixes with root-cause diagnosis/TDD, granted all approvals
 needed for the fix end to end, and explicitly allowed issue updates. The worker
-has returned writer ownership. The parent owns this checkout on
-codex/phase3b-l03-numeric-layout, final validation, publication and CI audit.
+returned writer ownership; the parent independently validated and published the
+fixes on codex/phase3b-l03-numeric-layout. Source 186c8b0 fixes unsupported-indentation
+writes and numeric blur/errors/IME. eb10f71 fixes pending Apply focus with
+aria-disabled and the existing duplicate-submit guard. The real-response regression
+spans rendering turns; the harness retains the first failure and releases its hold.
 
-Original correction 186c8b0 fixes source indentation and numeric blur/errors/IME.
-CI2's real-response timing exposes pending Apply focus loss; eb10f71 uses
-aria-disabled with the existing duplicate-submit guard. Its regression holds the
-unchanged real busy reply across acknowledged rendering turns, preserving focus,
-draft/source and normal driver exit. The harness retains its first failure and
-independent owned-hold cleanup. Parent typecheck, 264 frontend tests and real
-numeric/Help/probe controllers pass. Unchanged Rust retains 37-test proof. Signed
-Mac package/session 3 passes at eb10f71 with exact process/signature/installer,
-new clicked-Apply focus assertion and complete source/runtime/cleanup checks.
-[Mac receipt](../tasks/evidence/numeric-layout-pr66-focus-mac-native.json) owns hashes
-and synthetic-input scope. CI2 remains failed; CI3's wrongly typed candidate input
-is rejected before build/native/SDK starts. Its refusal receipt remains intact.
+The parent matched/acknowledged and audited
+[CI4 run 40644911729](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644911729/attempts/1),
+attempt 1 at 07b82be5be285ea65ba1dcafa2d657382adafb5d. Selector validation and both
+targets pass. Both have 264 frontend/37 ordinary core tests, numeric/Help/probe
+controllers, retained focus/no duplicate Enter, both SDK aspects and full cleanup.
+The Windows package/native case passes clicked-Apply focus and all source/runtime
+cases. Signed Mac package/session 3 at eb10f71 has identical application, fixture,
+dependency and probe inputs and passes matching scope with strict signature,
+installer, exact process identity and cleanup. Input is synthetic DOM input.
+[Final receipt](../tasks/evidence/numeric-layout-pr66-ci4.json),
+[Mac receipt](../tasks/evidence/numeric-layout-pr66-focus-mac-native.json) and
+[evidence](../tasks/evidence/numeric-layout.md#final-correction-audit-and-review-ready-handoff)
+own hashes, archive digests, cases and counts. CI2's focus/cleanup failure and CI3's
+rejected candidate input remain failed and retained. No correction remains.
 
-[Corrected run 40644911729](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644911729/attempts/1), attempt 1, exact candidate 07b82be5be285ea65ba1dcafa2d657382adafb5d, is queued,
-numeric_layout=true, ordinal 4. The SHA was read from Git and matched to the published
-PR head before dispatch; the returned run SHA matches. The numeric ordinal guard
-admits 4 and preserves exact branch/attempt/candidate checks. Application, probe,
-fixture and dependency inputs match the signed Mac focus source; only ordinal
-admission and evidence/status differ. This wait record changes documentation only.
-[Evidence](../tasks/evidence/numeric-layout.md#corrected-ci4-awaiting-audit) owns the
-remaining both-target case/artifact/hash/count/cleanup and latest PR-check audit.
-Artifacts expire seven days after upload.
-
-ci-watch is selected for this run/attempt/SHA and the same parent thread. Confirm
-watcher_running=true in its startup acknowledgement, then yield. On CI_WATCH_EVENT,
-acknowledge delivery, verify run identity/current branch and continue the audit.
-No local operation remains pending. [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38)
-owns actual pre-job use: dispatches 4/4; Mac package/editor 3/3 and SDK 28/32;
-Windows package/editor 2/3 and SDK 16/24. This run reserves the remaining Windows
-package/session, four Mac and eight Windows SDK starts. Audit actual starts before
-changing counts. No merge or successor is selected. A2 approval, protected recovery
-and the unrelated untracked audit remain intact.
+Both required automatic PR jobs pass at docs-only e54cac0 in run 40645156369.
+Final evidence publication changes documentation only. Audit its cheap automatic
+PR checks without another package/SDK matrix or a self-referential evidence commit;
+record the last check in #38/PR metadata. The parent remains the audit owner. No
+local costly operation or CI watch is pending at this qualification closeout.
+[#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) remains open/review-ready
+for integration. Final consumption is dispatches 4/4, package/editor sessions 3/3
+per OS, Mac SDK 32/32 and Windows SDK 24/24. All starts are resolved. A2 approval,
+protected recovery and the unrelated audit remain intact. No merge or successor is
+selected; OS-native IME/human, pointer/full-canvas and broader B02/3B acceptance
+retain their existing owners.
 
 ## Phase 3B architecture refactors merged and cleaned up
 
