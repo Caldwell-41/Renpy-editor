@@ -296,3 +296,52 @@ both-platform geometry/controller/Windows package proof remains pending. Signed
 Mac native proof is separately blocked by the unavailable approved identity. The
 CI watcher, if registered, resumes this same implementation chat for audit and
 in-scope fixes. #38 stays open and the PR stays draft while required proof is missing.
+
+## CI audit, 2026-10-28
+
+The ci-watch event belongs to this chat, and its receipt is acknowledged. GitHub
+confirms run `40604403915`, attempt 1, candidate
+`a79737ec641837803a55ef9fd3e0c30fe3a4d04b`, completed successfully. Both selected
+numeric-layout jobs and selector validation pass. Historical jobs were intentionally
+unselected; they are not new passes. The status-only follow-up `535344c` changes no
+application, fixture, dependency, probe or workflow input. Its automatic PR run
+`40604514626`, attempt 1, also passes both required jobs.
+
+The [retained audit receipt](numeric-layout-ci-40604403915.json) records candidate,
+source/report/package hashes, artifact identities, measured geometry and consumption.
+Both artifact sets were downloaded and checked, with 40 Windows and 35 Mac files;
+the corresponding privacy scans pass. Artifact IDs are `12780951480` (Windows) and
+`12780796124` (Mac), with their API digests retained. The current download is available;
+a later expired artifact must not be described as freshly inspected.
+
+Both targets pass 264 frontend and 36 screen-core tests. Their one ignored SDK
+helper case is outside this selection and is not a pass. Real numeric controller,
+all 11 Help controller groups and the exact native-probe rehearsal pass on each
+host. Browser/rehearsal evidence retains its explicit no-native/no-SDK claims.
+The official SDK qualifier passes compile, lint and both aspects, with four starts
+per OS. The exact accepted source hash is
+`c6192365b9d010c5704fe54560313e147b030a7cb49ba6733aa7e040f786f6d3` on both hosts.
+All nine measured rectangles match between hosts at both aspects. Anchored panel
+bounds are [800,270,320,180] and [608,294,320,180]; the constrained frame remains
+[40,50,260,160]. Missing/wrong-result gate checks, source preservation and cleanup
+all pass. This remains geometry proof using software rendering.
+
+The Windows x64 package hash is
+`0d384ab689b9e5ff8e27fe4659bad0f4958b07c9f1756c6158378a218d91b2e4`.
+Its actual packaged WebView case passes inventory, atomic dimension save, shared
+history, validation, preview geometry, stale revision/Stop and disk reopen. Stop
+returns expected STATUS_CONTROL_C_EXIT (-1073741510) with cleanup complete. The
+accepted on-disk BOM/CRLF bytes match exactly, scratch jobs are zero, and no source
+bytecode or saves remain. All host/request/credential cleanup owners report success.
+Input was synthetic DOM input; this is not OS-native keyboard or human acceptance.
+
+Actual cumulative consumption is dispatches 1/3; Windows packages 1/2, editor
+sessions 1/2 and SDK starts 8/16; Mac packages 0/2, editor sessions 0/2 and SDK starts
+16/16. Windows SDK use is four qualifier processes, one fixture --version process,
+compile/lint validation and one run. Mac used its remaining four qualifier starts.
+Signed Mac native proof is still missing because the approved identity is unavailable.
+The next bounded Mac Help case needs four further SDK starts, so it also requires
+approval to increase that ceiling to 20. No such run or package has started, and no
+signing/Keychain change is authorized by this audit. #38 stays open and PR #66 stays
+draft. Matrix, transactional/constraint behavior and two-aspect geometry have audited
+proof; the final production-path criterion remains pending Mac native qualification.

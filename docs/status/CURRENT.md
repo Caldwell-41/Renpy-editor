@@ -1,26 +1,22 @@
 # Current status
 
-## L03 numeric layout implementation
+## L03 numeric layout awaiting Mac native proof
 
-Kris selected [L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) for
-implementation, focused tests, a PR into the Screens branch and CI audit.
-`codex/phase3b-l03-numeric-layout` starts from verified Screens base `4d2101f`.
-A2 / Paired fields is approved at source `c2d23c5`, with approval record `c1ab3e6`.
-The design chat returned writer ownership. Kris confirmed both the production
-UI/controller/real-core and public Rust-operation TDD boundaries.
+[L03 #38](https://github.com/Caldwell-41/Renpy-editor/issues/38) is implemented in
+[draft PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66), targeting Screens.
+Kris approved A2 / Paired fields and both TDD boundaries. Standards has no findings;
+both Spec findings are fixed and rechecked. [Qualification run 40604403915](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915),
+attempt 1, passes and is audited at candidate `a79737e`. Both targets pass 264 frontend
+and 36 screen-core tests, real controller checks and matching SDK geometry at both
+aspects. The Windows x64 packaged WebView path passes history, validation, preview,
+Stop, reopen and cleanup. Automatic PR checks at status-only `535344c` also pass.
+[Evidence](../tasks/evidence/numeric-layout.md#ci-audit-2026-10-28) owns scope and hashes.
 
-Typed numeric editing, alias-safe source patches, shared history and retained drafts
-are committed at `57b9960`. All 36 screen-core and 264 frontend tests pass, as do
-production numeric/Help controller checks. Standards review has zero findings; both
-Spec findings are fixed and rechecked. Early
-Mac SDK geometry passes at both aspects after a retained failed test-runner attempt
-and a normal-entry diagnostic. [Evidence](../tasks/evidence/numeric-layout.md) owns
-exact scope, inputs and pending checks. #38 owns execution and cumulative limits.
-Draft [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) is open into the
-Screens branch. [Qualification CI](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40604403915)
-is queued at `a79737ec641837803a55ef9fd3e0c30fe3a4d04b`, attempt 1. CI audit and signed
-Mac native proof remain pending. The approved Mac signing identity is currently unavailable. Do not merge or close with missing proof.
-Broader B02/3B acceptance, the unrelated audit and protected recovery keep their owners.
+Signed Mac native proof remains pending. The approved signing identity is unavailable,
+and the Mac SDK ceiling is exhausted at 16/16. The remaining bounded native case
+needs the existing identity and approval for four more SDK starts. No Mac package or
+editor has started. #38 owns the cumulative ledger; do not merge or close with missing
+proof. Broader B02/3B acceptance, the unrelated audit and protected recovery keep their owners.
 
 ## Phase 3B architecture refactors merged
 
