@@ -105,6 +105,19 @@ try {
   await width.press('Enter');await ui.getByText(/This layout draft uses an earlier Source revision/).first().waitFor();
   assert.equal(await width.inputValue(),'130');assert.equal(await read(),changed);
   await width.press('Escape');assert.equal(await width.inputValue(),'125');
+  const opaque=changed+'        if enabled:\n            text "Opaque A"\n            text "Opaque B"\n';
+  const save=async text=>{const current=await request('source.open',{path:owner.path});const draft=await request('source.updateDraft',{path:owner.path,expectedBaseRevision:current.baseRevision,text,selectionStart:0,selectionEnd:0});await request('source.save',{path:owner.path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});};
+  await save(opaque);await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('treeitem',{name:'Grid',exact:true}).dblclick();
+  await columns.fill('5');await columns.press('Enter');
+  await ui.getByText(/Source-only grid children have an unknown cell count/).first().waitFor();assert.equal(await columns.inputValue(),'5');assert.equal(await read(),opaque);
+  await columns.press('Escape');await spacing.fill('9');await spacing.press('Enter');await page.waitForFunction(()=>document.querySelector('.layout-state')?.textContent==='Saved');
+  assert.equal(await read(),opaque.replace('spacing 8','spacing 9'),'Unrelated spacing remains editable without touching opaque children');
+  const strict=changed.replace('grid 4 1:','grid 3 1:').replace('allow_underfull True','allow_underfull False');
+  await save(strict);await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('treeitem',{name:'Text · One',exact:true}).click();
+  await ui.getByRole('button',{name:'Remove element',exact:true}).click();
+  await ui.getByText(/This grid's empty-cell policy stays in Source/).first().waitFor();assert.equal(await page.locator('.screen-removal-dialog[open]').count(),0);assert.equal(await read(),strict);
   assert.deepEqual(errors,[]);assert(plans.length>0);passed=true;
 } catch(error) {errors.push(String(error));throw error;}
 finally {

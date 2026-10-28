@@ -3,8 +3,9 @@
 [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42) owns scope, acceptance,
 operation limits and current consumption. The implementation branch is
 `codex/phase3b-l04-nested-layout`, based on `eb83d3b`. All four acceptance criteria
-remain pending until the affected Windows and signed Mac native checks and final
-independent review are complete.
+remain pending until the affected Windows and signed Mac native checks are complete.
+Independent code review found the corrections recorded below; both axes have checked
+the implementation fixes, with the final policy notice included before qualification.
 
 ## Approved design and integration
 
@@ -49,8 +50,9 @@ cases also pass. The ordinary broad core run passed 402 cases and failed 31 unre
 cases because the sandbox denied localhost sockets. All 38 cases in that affected
 module pass with socket access, resolving those 31 failures. Combined ordinary
 coverage is 433 cases; 49 explicitly selected-out SDK/specialist cases remain ignored
-and three policy exclusions remain filtered. The four new core cases pass again
-with explicit grid count units. No failed required case is treated as a pass.
+and three policy exclusions remain filtered. The four initial core cases pass again
+with explicit grid count units. The review adds one six-shape grid regression; all
+42 ordinary screen-core cases pass after the corrections. No failed required case is treated as a pass.
 
 ## Mac SDK geometry and clipping
 
@@ -63,7 +65,10 @@ samples establish that the right edge clips, increasing height reveals content,
 and the surrounding window background remains outside the opening. Pixel checks
 compare exact colors within the same source render; no tolerance is introduced.
 
-The inert GL2 helper passes the same four conditions. Its visible descendant hit
+The inert GL2 helper passes the same four conditions and five empty-container
+cases: saved-empty viewport, pending empty window/frame/viewport, and last-child
+removal. Empty single-child containers receive the implicit Fixed that Screen
+Language supplies. Its visible descendant hit
 bounds match the clipped opening, and completely clipped text has no canvas hit
 region. Closing the project stops the helper cooperatively with exit 0 and removes
 its private directory. Full GPU pixel agreement remains with L19.
@@ -97,5 +102,34 @@ refinement; the final native candidate and Windows qualification remain separate
 
 Raw local receipts remain under ignored `.toolchains/l04/`, including original
 failures, screenshots and logs. Package-relative copies were preserved and copied
-into that owning directory. Current actual use is Mac SDK 10/16 and helpers 2/4;
-Windows SDK/helpers, package/native sessions and costly CI dispatches remain zero.
+into that owning directory. Current actual use is Mac SDK 12/16 and helpers 4/4. The helper allowance is
+exhausted. Signed Mac package build 1 completed at pre-review candidate `b84c863`
+and is not the corrected qualification package. No native session or costly CI
+dispatch has started; Windows counters remain zero.
+
+
+## Independent review corrections
+
+Standards found two P2 grid validation defects; Spec found those and the empty
+viewport helper defect. Public IPC reproduced grid shrinking across opaque children
+and growth under strict/missing empty-cell permission. The corrected model blocks
+only ambiguous grid count changes, preserves safe unrelated spacing, and requires
+explicit empty-cell permission for child Add/removal. Literal id/numeric properties
+remain harmless to direct-child cardinality. Both reviewers confirm their original
+implementation findings are fixed; Spec's remaining policy-notice copy correction
+is included. No additional Standards baseline finding or scope-creep finding remains.
+
+A new six-shape public-core test covers conditional/use/expression children, strict
+and missing permission, and a literal id. It fails before the guards and passes
+afterward. Real UI/core checks also retain the refused count draft, save unrelated
+spacing, and refuse strict-grid child removal without a source write. The inspector
+reports `allowsEmptyCells` and names Source-only policy/count limits visibly.
+
+The third actual helper session reproduced `NoneType.style` when rendering a saved
+empty viewport. The fourth passes all empty and populated cases after the implicit
+Fixed correction. Failure and successful receipts remain under
+`.toolchains/l04/helper-04-red/` and `helper-05-final/`. This uses Mac SDK 12/16 and
+helper sessions 4/4. No additional Mac helper launch is selected. Normal-entry SDK
+source bytes and populated mappings remain unchanged; their earlier proof retains
+its scope. A fresh post-review public-core export produces identical renderer node
+data for the populated fixture apart from source-revision identity.

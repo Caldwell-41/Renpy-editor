@@ -124,6 +124,9 @@ init python:
                 raise ValueError("Unsupported canvas kind")
             for child in by_parent.get(node["start"], []):
                 d.add(build(child))
+            if kind in ("frame", "window", "viewport") and not by_parent.get(node["start"]):
+                # Screen Language supplies an implicit Fixed for zero children.
+                d.add(renpy.display.layout.MultiBox(layout="fixed", style="fixed"))
             if kind == "grid":
                 while len(d.children) < d.cols * d.rows:
                     d.add(renpy.display.layout.Null())

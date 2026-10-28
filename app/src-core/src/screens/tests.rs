@@ -11,6 +11,104 @@ const PATH: &str = "game/ui/help.rpy";
 mod nested_sdk;
 
 #[test]
+fn grid_axes_and_child_removal_refuse_ambiguous_or_strict_source_shapes() {
+    for shape in [
+        "conditional",
+        "use",
+        "expression",
+        "strict",
+        "missing",
+        "literal-id",
+    ] {
+        let (_temporary, mut service, _root, owner) = composition_project();
+        let grid = compose_command(
+            &mut service,
+            &owner,
+            json!({"type":"add","parentId":owner["rootId"],"kind":"grid","text":""}),
+        );
+        let leaf = compose_command(
+            &mut service,
+            &owner,
+            json!({"type":"add","parentId":grid["selectedId"],"kind":"text","text":"Known"}),
+        );
+        let base = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let source = match shape {
+            "conditional" => base.replace(
+                "        pass\n",
+                "        if enabled:\n            text \"A\"\n            text \"B\"\n",
+            ),
+            "use" => base.replace("        pass\n", "        use custom_cells()\n"),
+            "expression" => base.replace("        pass\n", "        text variable_label\n"),
+            "strict" => base
+                .replace("grid 2 2:", "grid 1 1:")
+                .replace("allow_underfull True", "allow_underfull False"),
+            "missing" => base
+                .replace("grid 2 2:", "grid 1 1:")
+                .replace("        allow_underfull True\n", ""),
+            _ => base.replace("        pass\n", "        id \"cells\"\n"),
+        };
+        save_composition_source(&mut service, &owner, &source);
+        let doc = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        let node = doc["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["id"] == grid["selectedId"])
+            .unwrap();
+        let count = if matches!(shape, "strict" | "missing") {
+            2
+        } else {
+            1
+        };
+        let payload = json!({"path":owner["path"],"screenName":"notes","expectedRevision":doc["revision"],"nodeStart":node["span"]["start"],"values":{"columns":{"unit":"count","value":count},"rows":{"unit":"count","value":1}}});
+        if shape == "literal-id" {
+            ipc(&mut service, "screens.setLayout", payload);
+            continue;
+        }
+        assert_eq!(
+            reject(&mut service, "screens.setLayout", payload)["error"]["code"],
+            "OPAQUE_BOUNDARY",
+            "{shape}"
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+            source
+        );
+        if matches!(shape, "strict" | "missing") {
+            assert_eq!(
+                reject(
+                    &mut service,
+                    "screens.compose",
+                    json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":{"type":"remove","nodeId":leaf["selectedId"]}})
+                )["error"]["code"],
+                "OPAQUE_BOUNDARY"
+            );
+        }
+        ipc(
+            &mut service,
+            "screens.setLayout",
+            json!({"path":owner["path"],"screenName":"notes","expectedRevision":doc["revision"],"nodeStart":node["span"]["start"],"values":{"spacing":{"unit":"pixels","value":6}}}),
+        );
+        let after = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        assert_eq!(
+            after,
+            source.replacen("        ", "        spacing 6\n        ", 1),
+            "{shape}"
+        );
+    }
+}
+
+#[test]
 fn nested_containers_compose_through_public_requests_and_restore_history() {
     let (_temporary, mut service, root, owner) = composition_project();
     let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();

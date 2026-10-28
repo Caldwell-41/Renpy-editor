@@ -16,6 +16,8 @@ captures verified. Keep its managed worktree and approved frontend pinned for
 comparison. [Handoff](../design/design-lab-nested-layout/HANDOFF.md) and
 [approval](../design/design-lab-nested-layout/approval.json) retain the exact decision.
 The prototype owner has finished; this chat owns implementation and qualification.
+Both independent review axes checked the grid/source and empty-viewport fixes; the
+remaining policy-notice copy correction is included before final qualification.
 
 The implementation extends existing composition/numeric owners with
 window/hbox/grid/viewport, count units for literal 1-64 grid axes, minimal header
@@ -31,12 +33,12 @@ The broad core run passed 402 cases; sandbox localhost denials failed 31 transpo
 cases. All 38 cases in that affected module pass with socket access, resolving the
 31 failures. Combined ordinary coverage is 433 cases, with 49 explicit ignores and
 three policy exclusions. The failed broad run and scoped rerun are retained.
-Windows qualification, the signed Mac native candidate and independent review
-remain pending. The full Design Lab gate remains failed at initial navigation;
+Windows qualification and the signed Mac native candidate remain pending. The full Design Lab gate remains failed at initial navigation;
 its longer external diagnostic also remains failed at the old reference guard.
 
-Current Mac use is SDK 10/16 and helper sessions 2/4. No package/native session or
-costly CI dispatch has started. #42 owns limits across all hosts and attempts.
+Current Mac use is SDK 12/16 and helper sessions 4/4 (exhausted). Package build 1
+completed at pre-review `b84c863` and remains unqualified. The corrected package
+build will be attempt 2/3. No native editor session or costly CI dispatch has started. #42 owns limits across all hosts and attempts.
 The first helper and source-campaign failures stopped in preflight with no SDK
 process. Later failed launches are included in consumption. Raw local artifacts
 are retained under ignored `.toolchains/l04/`; the evidence links the public receipt.

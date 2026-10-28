@@ -582,6 +582,10 @@ Empty containers are permitted. Grids start as `grid 2 2:` with
 empty. Adding beyond capacity refuses. Grid argument edits patch only the changed
 header tokens, together with the current element's other layout fields in one Apply.
 Dynamic headers and values outside the authoring range remain Source-only.
+Opaque direct children make grid counts Source-only because their cell count is
+unknown. Grids without explicit `allow_underfull True` keep count changes and
+child Add/removal in Source. Safe unrelated layout edits remain available. The
+inspector's `allowsEmptyCells` metadata reports that policy without evaluating it.
 
 L04 viewports show stationary top-left clipping. Wheel/drag/key scrolling,
 scrollbars, adjustment bindings, initial offsets, child_size and alternate grid

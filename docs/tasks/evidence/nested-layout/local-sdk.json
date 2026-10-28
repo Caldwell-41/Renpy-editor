@@ -300,7 +300,7 @@
           1280,
           720
         ],
-        "frameId": "8885f13d-35ef-4f99-b9bd-6afa9c74cca6",
+        "frameId": "b1c1f786-e18c-47cf-ab79-d07b3925c861",
         "opening": 100,
         "renderer": "gl2"
       },
@@ -309,7 +309,7 @@
           1280,
           720
         ],
-        "frameId": "fcc1e98f-108e-4189-a499-3159f6192d43",
+        "frameId": "94a80ce1-5a26-484d-9b05-1fdc4b4dec83",
         "opening": 200,
         "renderer": "gl2"
       },
@@ -318,7 +318,7 @@
           1024,
           768
         ],
-        "frameId": "740d7446-9a92-4523-bb1d-4442eb52dc33",
+        "frameId": "17183047-ac7d-4782-bacf-1148f3c2d0ff",
         "opening": 100,
         "renderer": "gl2"
       },
@@ -327,10 +327,17 @@
           1024,
           768
         ],
-        "frameId": "2c5a0d0c-e9ae-4a3a-a0c6-a29326749cdc",
+        "frameId": "8ef0b296-99aa-47d4-9872-44aebddc8799",
         "opening": 200,
         "renderer": "gl2"
       }
+    ],
+    "emptyCases": [
+      "empty-saved-viewport",
+      "pending-empty-window",
+      "pending-empty-frame",
+      "pending-empty-viewport",
+      "last-child-removed"
     ],
     "shutdown": {
       "cleanupComplete": true,

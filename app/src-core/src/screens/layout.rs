@@ -94,6 +94,8 @@ pub struct NumericLayout {
     pub values: BTreeMap<String, NumericValue>,
     pub blocked: BTreeMap<String, String>,
     pub sizing_note: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allows_empty_cells: Option<bool>,
     #[serde(skip)]
     entries: Vec<Entry>,
     #[serde(skip)]
@@ -181,6 +183,7 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         indent: header.indent + 4,
         child_count: nodes.iter().filter(|n| n.parent_start == Some(node.span.start)).count(),
         grid: node.kind == "grid",
+        allows_empty_cells: None,
     };
     if let Some(arguments) = grid_header(header.code) {
         for (key, (value, start, end)) in ["columns", "rows"].into_iter().zip(arguments) {
@@ -205,6 +208,54 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
                     value,
                 }],
             });
+        }
+        let direct = lines
+            .iter()
+            .enumerate()
+            .filter(|(_, line)| {
+                line.start > node.span.start
+                    && line.start < node.source_end
+                    && line.indent == result.indent
+            })
+            .collect::<Vec<_>>();
+        let scalar = |index: usize, line: &Line<'_>| {
+            line.single
+                && lines
+                    .get(index + 1)
+                    .is_none_or(|next| next.start >= node.source_end || next.indent <= line.indent)
+        };
+        let policies = direct
+            .iter()
+            .filter(|(_, line)| line.code.split_whitespace().next() == Some("allow_underfull"))
+            .collect::<Vec<_>>();
+        let allowed = policies.len() == 1
+            && scalar(policies[0].0, policies[0].1)
+            && policies[0].1.code.split_whitespace().collect::<Vec<_>>()
+                == ["allow_underfull", "True"];
+        result.allows_empty_cells = Some(allowed);
+        let opaque_children = node.protected.iter().any(|span| {
+            let Some((index, line)) = direct.iter().find(|(_, line)| line.start == span.start)
+            else {
+                return true;
+            };
+            if !scalar(*index, line) {
+                return true;
+            }
+            let key = line.code.split_whitespace().next().unwrap_or("");
+            let raw = line.code[key.len()..].trim();
+            !(!aliases(key).is_empty()
+                || key == "id" && serde_json::from_str::<String>(raw).is_ok()
+                || key == "allow_underfull" && matches!(raw, "True" | "False"))
+        });
+        if !allowed || opaque_children {
+            let reason = if !allowed {
+                "Grid counts require explicit allow_underfull True. Edit this grid's counts in Source."
+            } else {
+                "Source-only grid children have an unknown cell count. Edit columns and rows in Source."
+            };
+            for key in ["columns", "rows"] {
+                result.blocked.insert(key.into(), reason.into());
+            }
         }
     }
     let body_indent = lines

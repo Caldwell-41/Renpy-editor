@@ -32,7 +32,7 @@ const help: Record<string, string> = {
   frame: "Adds a background around one child. Add a layout group inside it to hold several elements.",
   vbox: "Places children from top to bottom in source order.",
   hbox: "Places children from left to right in source order.",
-  grid: "Fills rows from left to right in source order. Empty cells are allowed; children cannot exceed capacity.",
+  grid: "Fills rows from left to right in source order. New grids allow empty cells and refuse additions beyond capacity.",
   window: "Contains one child. Use a layout group inside it for several elements.",
   viewport: "Clips one child at the initial top-left. Width and height set the visible opening. Scrolling controls remain in Source.",
   text: "Shows literal text. Edit the text under Design.",
@@ -420,6 +420,8 @@ export class ScreenComposer {
   private requestRemoval(): void {
     const view = this.host.view(); if (!view || this.saving || view.busy || this.removal) return;
     if (this.hasDraft()) { this.showError("Apply or cancel unfinished edits before removing elements. Input retained."); return; }
+    const parent = this.parent(view, view.selected);
+    if (parent?.kind === "grid" && parent.numericLayout?.allowsEmptyCells !== true) { this.showError("This grid's empty-cell policy stays in Source. Removal could leave it incomplete; nothing changed."); return; }
     if (!this.movable(view, view.selected)) { this.showError("The screen root and protected source-only elements cannot be removed. Selection is unchanged."); return; }
     const node = view.selected, descendants = view.nodes.filter(n => n.span.start > node.span.start && n.span.start < node.span.end);
     this.removal = { node, document: view.document, invoker: document.activeElement instanceof HTMLElement ? document.activeElement : null,

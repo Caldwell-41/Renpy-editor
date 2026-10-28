@@ -3,7 +3,7 @@ import { validateField } from "./authoring-input.ts";
 
 export type LayoutUnit = "pixels" | "relative" | "count";
 export interface LayoutValue { unit: LayoutUnit; value: number }
-export interface NumericLayout { values: Record<string, LayoutValue>; blocked: Record<string, string>; sizingNote?: string | null }
+export interface NumericLayout { values: Record<string, LayoutValue>; blocked: Record<string, string>; sizingNote?: string | null; allowsEmptyCells?: boolean }
 export type LayoutEdits = Record<string, LayoutValue | null>;
 interface Field { text: string; unit: LayoutUnit }
 interface Draft { key: string; document: ScreenDocument; screen: string; node: ScreenNode; fields: Record<string, Field> }
@@ -220,7 +220,10 @@ export class ScreenLayoutEditor {
     const parent = view.nodes.find(node => node.span.start === view.node.parentStart);
     if (view.node.kind === "grid") {
       const grid = group("Grid", ["columns", "rows", "spacing"]);
-      grid.append(el("p", "layout-sizing-note", `${view.nodes.filter(n => n.parentStart === view.node.span.start).length} children · Rows fill left to right. Empty cells are allowed.`)); form.append(grid);
+      const policy = view.node.numericLayout.allowsEmptyCells === true ? "Empty cells are allowed." : "Empty-cell policy stays in Source. Child-count changes are unavailable.";
+      grid.append(el("p", "layout-sizing-note", `${view.nodes.filter(n => n.parentStart === view.node.span.start).length} children · Rows fill left to right. ${policy}`));
+      if (view.node.numericLayout.blocked.columns) grid.append(el("p", "layout-sizing-note", view.node.numericLayout.blocked.columns));
+      form.append(grid);
     }
     if (parent?.kind === "vbox") {
       const constraint = el("div", "layout-constraint"); constraint.append(el("p", "", "The vertical group controls this element's vertical placement."), action("Edit group spacing", () => this.host.select(parent))); form.append(constraint);

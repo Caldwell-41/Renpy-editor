@@ -64,12 +64,14 @@ pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
         && (parent.kind != "grid"
             || (parent.protected.is_empty()
                 && parent.numeric_layout.as_ref().is_some_and(|layout| {
-                    screen
-                        .nodes
-                        .iter()
-                        .filter(|n| n.parent_start == Some(parent.span.start))
-                        .count()
-                        < (layout.values["columns"].value * layout.values["rows"].value) as usize
+                    layout.allows_empty_cells == Some(true)
+                        && screen
+                            .nodes
+                            .iter()
+                            .filter(|n| n.parent_start == Some(parent.span.start))
+                            .count()
+                            < (layout.values["columns"].value * layout.values["rows"].value)
+                                as usize
                 })))
         && (!single_child(&parent.kind)
             || (parent.protected.is_empty()
@@ -294,6 +296,14 @@ impl AuthoringService {
                     .iter()
                     .find(|n| Some(n.span.start) == node.parent_start)
                     .unwrap();
+                if parent.kind == "grid"
+                    && parent
+                        .numeric_layout
+                        .as_ref()
+                        .is_none_or(|layout| layout.allows_empty_cells != Some(true))
+                {
+                    return Err(SceneError::OpaqueBoundary);
+                }
                 let fallback = siblings
                     .get(index + 1)
                     .or_else(|| index.checked_sub(1).and_then(|i| siblings.get(i)))
