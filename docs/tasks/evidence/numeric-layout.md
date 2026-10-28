@@ -646,3 +646,32 @@ candidate equality remain unchanged. Package/editor/SDK ceilings and actual use
 remain as after signed Mac session 3: Mac package/editor 3, SDK 28/32; Windows
 package/editor 2, SDK 16/24. Current dispatch use is 3/4. The application inputs are
 unchanged from the signed Mac focus proof at eb10f71.
+
+
+### Corrected CI4 awaiting audit
+
+[Dispatch 4 / run 40644911729](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644911729/attempts/1), attempt 1, exact candidate 07b82be5be285ea65ba1dcafa2d657382adafb5d, is confirmed
+queued. The candidate was read directly from Git and verified against the published
+PR head before the request; the returned run SHA matches. Input is numeric_layout=true,
+ordinal 4, with all other selectors false. The workflow's updated ordinal guard,
+actionlint and positive/negative candidate/ordinal checks pass. Exact branch,
+attempt 1 and candidate equality remain enforced. Application/fixture/dependency/
+probe inputs are identical to the signed Mac focus proof at eb10f71. Only the
+recorded ordinal admission and evidence/status differ. A wait-record successor
+changes documentation only.
+
+The parent retains the terminal audit. Require both target jobs and selector
+validation, 264 frontend/37 ordinary core tests, real numeric/controller cases,
+all 11 Help groups including rendering-turn refusal and duplicate Enter, normal
+owned-hold/driver cleanup, native probe focus/blur/accessibility/IME assertions,
+both actual SDK aspects, Windows package/native source/history/reopen, artifact
+IDs/archive digests and cleanup/privacy. Audit the latest automatic PR checks
+separately. Failed CI2/CI3 remain failed. Artifact retention is seven days.
+
+Current confirmed use before the new jobs is dispatches 4/4, Mac package/editor
+3/3 and SDK 28/32, Windows package/editor 2/3 and SDK 16/24. This run reserves four
+Mac SDK starts, eight Windows starts and Windows package/editor session 3. Resolve
+actual starts before changing counts. No local operation remains pending. ci-watch
+is selected for this exact run/attempt/SHA and same parent thread; its startup
+acknowledgement owns registration status. Yield after watcher_running=true, then
+resume here for the final audit. No merge or successor is selected.

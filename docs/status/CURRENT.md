@@ -1,30 +1,24 @@
 # Current status
 
-## L03 Apply-focus correction ready for qualification
+## L03 focus correction awaiting final CI audit
 
-The controlled CI2 reproduction confirms Apply loses focus when disabled during
-pending IPC. The correction uses aria-disabled with the existing duplicate-submit
-guard. The harness now retains the first error and releases its owned hold. Parent
-final validation passes typecheck, 264 frontend tests, all 11 Help groups, the
-numeric controller and updated native-probe rehearsal. The earlier Rust core
-inputs are unchanged; their 37-test local/both-target proof retains its scope.
+[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) fixes source-indentation
+safety, numeric blur/errors/IME handling and pending Apply focus. Parent final
+validation passes 264 frontend tests and all affected real controllers. The signed
+Mac package/session 3 passes at eb10f71, including new focus assertions,
+source/history, SDK validation/preview, Stop, reopen and cleanup.
 
-[PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) remains open.
-[CI2 and correction evidence](../tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification)
-retains the failed Mac run and successful earlier Windows/signed Mac receipts.
-The focus-corrected signed Mac package/session 3 passes at eb10f71; final both-target
-CI remains pending. Under Kris's end-to-end
-approval, [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) reserves
-package/editor session 3 per OS and corrected dispatch 4. Current use is dispatches 3/4,
-Mac package/editor sessions 3/3, Windows 2/3, Mac SDK 28/32 and Windows SDK 16/24. The parent
-owns packaging, publication and final CI audit. A2 approval, protected recovery and
-the unrelated audit remain intact. No merge or successor is selected.
+[Corrected CI4 40644911729](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40644911729/attempts/1), attempt 1 at 07b82be, is queued for both supported
+targets. The parent retains its terminal audit; ci-watch will resume this thread
+after confirmed registration. [Evidence](../tasks/evidence/numeric-layout.md#corrected-ci4-awaiting-audit)
+owns exact identities, failed CI2/CI3 and the remaining checklist. The application
+inputs are identical to the signed Mac focus proof.
 
-Dispatch 3 was rejected before builds/native/SDK work because the agent typed an
-incorrect candidate input. Its failed receipt is retained. The corrected dispatch
-reads the SHA directly from Git; its ordinal guard admits 4 while exact branch,
-attempt and candidate checks remain intact. No application input changed after
-the signed Mac focus proof.
+[#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) owns current use before
+jobs: dispatches 4/4; Mac package/editor 3/3, SDK 28/32; Windows package/editor 2/3,
+SDK 16/24. This run reserves the remaining Windows package/session and SDK starts.
+A2 approval, protected recovery and the unrelated audit remain intact. No merge or
+successor is selected.
 
 ## Phase 3B architecture refactors merged
 
