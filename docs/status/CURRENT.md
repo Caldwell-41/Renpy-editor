@@ -12,10 +12,11 @@ inputs are unchanged; their 37-test local/both-target proof retains its scope.
 [PR #66](https://github.com/Caldwell-41/Renpy-editor/pull/66) remains open.
 [CI2 and correction evidence](../tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification)
 retains the failed Mac run and successful earlier Windows/signed Mac receipts.
-Changed application inputs require fresh packaged proof. Under Kris's end-to-end
+The focus-corrected signed Mac package/session 3 passes at eb10f71; final both-target
+CI remains pending. Under Kris's end-to-end
 approval, [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38) reserves
 package/editor session 3 per OS and final dispatch 3. Current use is dispatches 2/3,
-package/editor sessions 2/3 per OS, Mac SDK 24/32 and Windows SDK 16/24. The parent
+Mac package/editor sessions 3/3, Windows 2/3, Mac SDK 28/32 and Windows SDK 16/24. The parent
 owns packaging, publication and final CI audit. A2 approval, protected recovery and
 the unrelated audit remain intact. No merge or successor is selected.
 

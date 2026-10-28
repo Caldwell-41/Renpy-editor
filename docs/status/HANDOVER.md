@@ -20,7 +20,9 @@ also checks clicked-Apply focus. H39 records cause and prevention.
 
 Parent final typecheck, all 264 frontend tests, 11 Help groups, numeric controller
 and updated native-probe rehearsal pass. The unchanged Rust inputs retain their
-37-test proof. New application inputs still require packaging/native qualification.
+37-test proof. The focus-corrected signed Mac package/session 3 passes at eb10f71, including the
+new clicked-Apply focus assertion and all earlier cases/cleanup. Final both-target
+CI remains pending.
 Earlier Windows and signed Mac package receipts remain historical, not passes for
 this next candidate. [Evidence](../tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification)
 and [CI2 receipt](../tasks/evidence/numeric-layout-pr66-ci2.json) own results and hashes.
@@ -28,10 +30,9 @@ and [CI2 receipt](../tasks/evidence/numeric-layout-pr66-ci2.json) own results an
 Under Kris's end-to-end approval, [#38](https://github.com/Caldwell-41/Renpy-editor/issues/38)
 reserves final dispatch 3 and package/editor session 3 per OS. SDK ceilings are Mac
 32 and Windows 24. Current actual use before new starts is dispatches 2/3,
-package/editor sessions 2/3 per OS, Mac SDK 24/32 and Windows SDK 16/24. Next: commit
-the checked correction, run one fresh signed Mac Help case, publish its receipt,
-dispatch the existing both-target numeric CI route and audit it here through
-ci-watch. No costly operation or watch is pending. No merge or successor is selected.
+Mac package/editor sessions 3/3, Windows 2/3, Mac SDK 28/32 and Windows SDK 16/24.
+Next: publish the signed Mac receipt, dispatch the existing both-target numeric CI
+route and audit it here through ci-watch. No costly operation or watch is pending. No merge or successor is selected.
 A2 approval, protected native recovery and the unrelated audit remain intact.
 
 ## Phase 3B architecture refactors merged and cleaned up

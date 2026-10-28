@@ -606,3 +606,22 @@ Enter regression, the numeric controller and the updated native-probe rehearsal.
 Independent final review finds no remaining correction issue. The unchanged Rust
 inputs reuse their existing 37-test local/both-target proof; no redundant local core
 or SDK run is selected. Fresh packages and final CI remain pending.
+
+
+### Focus-corrected signed Mac proof
+
+Mac package/session 3 passes at eb10f71aeeb0d5ed26edaa19b479dfe43085d7c8.
+[The focus-correction receipt](numeric-layout-pr66-focus-mac-native.json) binds
+strict signature/installer verification, exact running process identity, source,
+case and desktop cleanup. Executable SHA256 is
+512fe593d35ed40e84805f559d14124907921de60877605a2d2e6ab61399dfb6;
+installer SHA256 is 6554d0da38fd4d1d2f5438c7c7278470d5c61b389df881fee876195f5a0ec959.
+The approved identity, names, signing and credential policy are unchanged.
+
+The actual packaged WKWebView passes clicked-Apply focus, the earlier blur/error/
+IME assertions, minimal source/history, validation, actual SDK preview, stale Stop,
+reopen and cleanup. Exit is zero without timeout or external error. Accepted source
+bytes match, scratch jobs/bytecode/saves are absent, and all cleanup owners and
+power-assertion releases pass. Input remains synthetic DOM input. Four SDK starts
+bring Mac use to 28/32; Mac package/editor use is 3/3. Windows remains package/editor
+2/3 and SDK 16/24. Final dispatch 3 remains reserved; no local process is pending.
