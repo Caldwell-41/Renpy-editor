@@ -111,7 +111,7 @@ impl AuthoringService {
         }
         let image = matches!(
             asset.kind,
-            AssetKind::Background | AssetKind::CharacterAppearance
+            AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage
         );
         if image == matches!(request.purpose, MediaPurpose::AudioAudition) {
             return Err(MediaError::InvalidPayload);
@@ -161,7 +161,7 @@ impl AuthoringService {
     }
 }
 
-fn validate_image(extension: &str, bytes: &[u8]) -> Result<ValidatedImage, MediaError> {
+pub(crate) fn validate_image(extension: &str, bytes: &[u8]) -> Result<ValidatedImage, MediaError> {
     let (mime, dimensions) = match extension {
         "png"
             if bytes.len() >= 24
@@ -188,6 +188,10 @@ fn validate_image(extension: &str, bytes: &[u8]) -> Result<ValidatedImage, Media
             "image/jpeg",
             jpeg_dimensions(bytes).ok_or(MediaError::UnsupportedFormat)?,
         ),
+        "webp" => (
+            "image/webp",
+            webp_dimensions(bytes).ok_or(MediaError::UnsupportedFormat)?,
+        ),
         _ => return Err(MediaError::UnsupportedFormat),
     };
     if dimensions.0 == 0
@@ -198,6 +202,70 @@ fn validate_image(extension: &str, bytes: &[u8]) -> Result<ValidatedImage, Media
         return Err(MediaError::InvalidDimensions);
     }
     Ok((mime, Some(dimensions)))
+}
+
+// Static WebP dimensions, including lossy, lossless and alpha containers.
+// https://developers.google.com/speed/webp/docs/riff_container
+fn webp_dimensions(bytes: &[u8]) -> Option<(u32, u32)> {
+    if bytes.get(..4)? != b"RIFF" || bytes.get(8..12)? != b"WEBP" {
+        return None;
+    }
+    let size = u32::from_le_bytes(bytes.get(4..8)?.try_into().ok()?) as usize;
+    if size.checked_add(8)? != bytes.len() {
+        return None;
+    }
+    let mut offset = 12usize;
+    let mut canvas = None;
+    let mut dimensions = None;
+    while offset < bytes.len() {
+        let tag = bytes.get(offset..offset.checked_add(4)?)?;
+        let length =
+            u32::from_le_bytes(bytes.get(offset + 4..offset + 8)?.try_into().ok()?) as usize;
+        let end = offset.checked_add(8)?.checked_add(length)?;
+        let data = bytes.get(offset + 8..end)?;
+        match tag {
+            b"VP8X" => {
+                if offset != 12 || data.len() != 10 || data[0] & 2 != 0 {
+                    return None;
+                }
+                let width = u32::from_le_bytes([data[4], data[5], data[6], 0]) + 1;
+                let height = u32::from_le_bytes([data[7], data[8], data[9], 0]) + 1;
+                canvas = Some((width, height));
+            }
+            b"VP8L" => {
+                if dimensions.is_some() || *data.first()? != 0x2f {
+                    return None;
+                }
+                let header = u32::from_le_bytes(data.get(1..5)?.try_into().ok()?);
+                if header >> 29 != 0 {
+                    return None;
+                }
+                dimensions = Some(((header & 0x3fff) + 1, ((header >> 14) & 0x3fff) + 1));
+            }
+            b"VP8 " => {
+                if dimensions.is_some()
+                    || *data.first()? & 1 != 0
+                    || data.get(3..6)? != [0x9d, 0x01, 0x2a]
+                {
+                    return None;
+                }
+                let width = u16::from_le_bytes(data.get(6..8)?.try_into().ok()?) & 0x3fff;
+                let height = u16::from_le_bytes(data.get(8..10)?.try_into().ok()?) & 0x3fff;
+                dimensions = Some((width.into(), height.into()));
+            }
+            b"ANIM" | b"ANMF" => return None,
+            _ => {}
+        }
+        if length % 2 != 0 && *bytes.get(end)? != 0 {
+            return None;
+        }
+        offset = end.checked_add(length % 2)?;
+    }
+    let dimensions = dimensions?;
+    if canvas.is_some_and(|canvas| canvas != dimensions) {
+        return None;
+    }
+    Some(dimensions)
 }
 
 fn jpeg_dimensions(bytes: &[u8]) -> Option<(u32, u32)> {

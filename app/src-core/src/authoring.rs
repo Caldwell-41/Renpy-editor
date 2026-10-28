@@ -39,6 +39,7 @@ const EMPTY_VARIABLES_SOURCE: &[u8] = b"# Variable definitions are added by Loom
 pub enum AssetKind {
     Background,
     CharacterAppearance,
+    UiImage,
     Music,
     Sfx,
 }
@@ -302,6 +303,7 @@ pub enum AuthoringError {
     UnknownImport,
     UnsupportedFormat,
     OversizeImport,
+    UiImageTooLarge,
     DuplicateContent,
     PathCollision,
     DiscoveryCollision,
@@ -984,6 +986,51 @@ impl AuthoringService {
             companions.push(self.declaration_mutation(project, &statement)?);
         }
         companions.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
+        // UI images share screen Undo/Redo. Their bytes fit the existing bounded
+        // transaction/history limit; the larger legacy imports remain streaming.
+        if request.kind == AssetKind::UiImage {
+            if authority.byte_count > crate::media::MAX_PRESENTATION_BYTES {
+                return Err(AuthoringError::UiImageTooLarge);
+            }
+            authority.file.rewind().map_err(|_| AuthoringError::Io)?;
+            let mut bytes = Vec::new();
+            authority
+                .file
+                .take(crate::media::MAX_PRESENTATION_BYTES + 1)
+                .read_to_end(&mut bytes)
+                .map_err(|_| AuthoringError::Io)?;
+            if bytes.len() as u64 != authority.byte_count || hash_bytes(&bytes) != authority.sha256
+            {
+                return Err(AuthoringError::SourceConflict);
+            }
+            crate::media::validate_image(&authority.extension, &bytes)
+                .map_err(|_| AuthoringError::UnsupportedFormat)?;
+            companions.insert(
+                0,
+                FileMutation {
+                    path: RelativePath::new(relative_path)
+                        .map_err(|_| AuthoringError::InvalidPayload)?,
+                    kind: MutationKind::CreateNew,
+                    base: Revision::expected_absence(),
+                    expected_bytes: Vec::new(),
+                    proposed: bytes,
+                },
+            );
+            self.commit_history(
+                project,
+                TransactionProposal {
+                    mutations: companions,
+                    intent: TransactionIntent::Edit,
+                },
+            )
+            .map_err(|error| match error {
+                crate::scene::SceneError::RecoveryRequired => AuthoringError::RecoveryRequired,
+                crate::scene::SceneError::RuntimeBusy => AuthoringError::RuntimeBusy,
+                crate::scene::SceneError::DirtySource => AuthoringError::DirtySource,
+                _ => AuthoringError::SourceConflict,
+            })?;
+            return Ok(metadata);
+        }
         let outcome = self.transactions.commit_streaming_import(
             project,
             RelativePath::new(relative_path).map_err(|_| AuthoringError::InvalidPayload)?,
@@ -1471,7 +1518,10 @@ impl AuthoringService {
         relative_path: &str,
         discovery_name: &str,
     ) -> Result<(), AuthoringError> {
-        let directory = if matches!(kind, AssetKind::Background | AssetKind::CharacterAppearance) {
+        let directory = if matches!(
+            kind,
+            AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage
+        ) {
             "game/images"
         } else {
             "game/audio"
@@ -1528,9 +1578,11 @@ impl AuthoringService {
             return Ok(());
         };
         let key = match kind {
-            AssetKind::Background | AssetKind::CharacterAppearance => DeclarationKey::Image(
-                normalized_image_name(discovery_name).ok_or(AuthoringError::InvalidPayload)?,
-            ),
+            AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage => {
+                DeclarationKey::Image(
+                    normalized_image_name(discovery_name).ok_or(AuthoringError::InvalidPayload)?,
+                )
+            }
             AssetKind::Music | AssetKind::Sfx => {
                 DeclarationKey::Audio(discovery_name.to_ascii_lowercase())
             }
@@ -2317,7 +2369,7 @@ fn validate_asset_contract(asset: &Asset) -> Result<AssetContract, AuthoringErro
         .map(str::to_ascii_lowercase)
         .ok_or(AuthoringError::CorruptMetadata)?;
     let (namespace, automatic_name, recorded_name) = match asset.kind {
-        AssetKind::Background | AssetKind::CharacterAppearance
+        AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage
             if matches!(extension.as_str(), "png" | "jpg" | "jpeg" | "webp") =>
         {
             (
@@ -2365,7 +2417,7 @@ fn asset_declaration(asset: &Asset) -> Result<String, AuthoringError> {
     let quoted =
         serde_json::to_string(runtime_path).map_err(|_| AuthoringError::CorruptMetadata)?;
     Ok(match asset.kind {
-        AssetKind::Background | AssetKind::CharacterAppearance => {
+        AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage => {
             format!("image {} = {quoted}", contract.recorded_name)
         }
         AssetKind::Music | AssetKind::Sfx => {
@@ -2384,7 +2436,10 @@ fn import_names(
 ) -> Result<(String, String), AuthoringError> {
     let image = matches!(extension, "png" | "jpg" | "jpeg" | "webp");
     let audio = matches!(extension, "ogg" | "mp3" | "wav" | "flac");
-    if (matches!(kind, AssetKind::Background | AssetKind::CharacterAppearance) && !image)
+    if (matches!(
+        kind,
+        AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage
+    ) && !image)
         || (matches!(kind, AssetKind::Music | AssetKind::Sfx) && !audio)
     {
         return Err(AuthoringError::UnsupportedFormat);
@@ -2393,6 +2448,10 @@ fn import_names(
         AssetKind::Background => Ok((
             format!("game/images/bg {technical}.{extension}"),
             format!("bg {technical}"),
+        )),
+        AssetKind::UiImage => Ok((
+            format!("game/images/ui {technical}.{extension}"),
+            format!("ui {technical}"),
         )),
         AssetKind::CharacterAppearance => {
             let character = metadata

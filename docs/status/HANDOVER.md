@@ -1,5 +1,58 @@
 # Current outcome handover
 
+## L06 preparation and design handoff
+
+Kris selected [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
+through the implement skill. This chat owns implementation on new local branch
+`codex/phase3b-l06-ui-image` in managed worktree `l06-ui-image-implementation/Loomlight`, based on
+`2e045d941bf633e73b8161be0096806203fbc2bb`. Use that worktree explicitly for implementation commands. The primary checkout
+is back on `codex/phase3b-screen-designer`; its unrelated audit is untouched. The
+prototype directory belongs to the design chat.
+
+The user requested a new chat using the handoff skill, without split, for mock
+iteration. "L06 UI image prototypes" is thread
+`01a1845a-685d-7901-a518-8faeafc6ba05`; its assigned managed worktree is
+`l06-image-prototype/Loomlight`. Base is the same `2e045d9`. It owns a new lab
+screen, registry entry and its design approval/capture records. Production code
+and shared status belong here. The temporary handoff is
+`/private/tmp/loomlight-l06-prototype-handoff.md`; the design chat has read it.
+It must return explicit approval, exact source commit/fingerprint, captures and
+checks before UI implementation. Preserve its unique work until integration.
+
+Preparation read #40, B03 #25, P3B #22 and the relevant domain, design,
+transaction and verification contracts. L02 is satisfied. The backend now adds a
+UI-image role, bounded shared-history import, stable owned image insertion and
+atomic asset/size editing. It reuses the numeric source patcher and existing
+Ren'Py image Transform. Public service cases prove source/history/reopen and
+specific missing/replaced/invalid references. Static WebP presentation covers
+lossless, lossy and alpha containers. Production UI files remain untouched.
+
+[Evidence](../tasks/evidence/ui-image.md) retains results, failed preparation and
+pending acceptance. The prior screen slice passed 49 ordinary tests with both
+named SDK cases explicitly excluded; three media tests passed. The later
+byte-limit and public SDK-fixture cases pass individually. All nine current image-service cases and both rejecting SDK-checker tests now
+pass. Repository validation and whitespace checks also pass.
+
+Kris confirmed the TDD boundaries on 2026-10-29. Continue backend/runtime
+qualification while the design chat iterates. Before production UI edits,
+receive its exact approved mock and follow INTEGRATION. The implementation
+owner then completes the real controller, SDK/native proof, both review axes
+and final tests. The full suite has not yet run for this outcome.
+
+Pinned Node 24.19.0/npm 11.9.0 and Cargo 1.90.0 are reused from the primary
+checkout. Bundled Python 3.12.14 is available; system Python 3.9.6 is unsuitable
+for harnesses requiring 3.11+. The dependency symlink is local and must not be
+staged. Current public SDK inputs are under the implementation worktree's
+ignored `.toolchains/ui-image/inputs-02/accepted.json`. The earlier input is
+retained. `qualify-ui-image.py` prepares normal-entry compile/lint and two
+aspect checks; it has not started an SDK yet. Run its rejecting self-checks,
+commit the source checkpoint, then qualify the exact candidate.
+
+#40 owns the selected ceilings and current zero consumption. Routine work needs
+no allowance. No push, PR, merge or release has been selected. The primary
+checkout retains only the unrelated untracked Phase 1 audit. Preserve all
+protected native/session state below. Earlier operation allowances remain closed.
+
 ## L04 merge and workspace closeout
 
 Kris directed merging [PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67)

@@ -1,5 +1,24 @@
 # Current status
 
+## L06 UI-image implementation selected
+
+Kris selected [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40),
+"Import and place a UI image", on a new branch. Implementation ownership stays
+in "Implement ticket 40" on `codex/phase3b-l06-ui-image`, based on `2e045d9`.
+Its L02 prerequisite is satisfied. "L06 UI image prototypes" owns a separate
+Design Lab worktree and will return the exact approved mock before production
+UI changes. The selected scope is the leaf's typed image import, owned placement,
+size/aspect editing and real source/history/runtime proof.
+
+Core import, owned placement and atomic asset/size editing are implemented and
+have focused service proof. The changed screen slice passes 49 ordinary tests,
+and three passive-media tests pass. The full ticket remains in progress.
+Kris confirmed the service/controller/SDK test boundaries; mock approval and
+production UI work remain pending. No costly operation has started.
+[Evidence](../tasks/evidence/ui-image.md) retains results and preparation failures;
+[HANDOVER](HANDOVER.md#l06-preparation-and-design-handoff) owns continuation.
+Earlier closed allowances and protected recovery remain intact.
+
 ## L04 nested and clipped layouts merged
 
 [PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67) merged into

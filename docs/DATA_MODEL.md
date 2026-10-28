@@ -205,6 +205,28 @@ collision/duplicate diagnostics. The pinned 8.5.3 scanner automatically discover
 FLAC alongside WAV/MP2/MP3/OGG/Opus; Loomlight's import subset remains
 WAV/MP3/OGG/FLAC.
 
+### UI-image role
+
+The selected L06 backend adds `uiImage` to the Asset kind enum without changing
+existing IDs or the authoring metadata schema version. Its imports use
+`game/images/ui <name>.<extension>` and the automatic discovery name `ui <name>`.
+PNG/JPEG and static WebP keep the passive presentation bounds of 16 MiB and
+8192 pixels per natural dimension. UI-image import, file creation and metadata
+are one bounded shared-history transaction. Legacy import paths retain their
+separate streaming behavior.
+
+Owned screen insertion and image changes take a stable Asset UUID plus its
+expected SHA-256. Core resolves the contained literal source path and refuses
+missing, changed or invalid references with `UI_IMAGE_MISSING`, `UI_IMAGE_CHANGED`
+or `INVALID_UI_IMAGE`. The source stores `add "images/..."` with pixel `xsize`
+and `ysize`; changing the asset and both dimensions is one minimal transaction.
+Comments, neighboring source, node identity and no-op history remain protected.
+The image byte-limit diagnostic is `UI_IMAGE_TOO_LARGE` and names the 16 MiB bound.
+
+[Ticket #40](https://github.com/Caldwell-41/Renpy-editor/issues/40) owns delivery and
+acceptance. [UI-image evidence](tasks/evidence/ui-image.md) distinguishes service
+checks from pending controller, design, SDK and native qualification.
+
 ## Variables and state
 
 Phase 1 visual variables support `bool`, `int`, and `string` definitions with simple
@@ -630,7 +652,7 @@ all media is disposed when the active project/session changes.
 Staged import uses `asset.previewImport` with only the current session and opaque
 selection authority ID. The authority remains project bound, retains the selected
 file handle and is not consumed by preview. Identity, byte count and SHA-256 must
-still match; PNG/JPEG use the same 16 MiB/8192-pixel limits. The response has the
+still match; PNG/JPEG and static WebP use the same 16 MiB/8192-pixel limits. The response has the
 existing passive media shape, with the selection ID in `assetId` until an Asset
 exists. No renderer path/URL is accepted. Staged object URLs are capped at 32 MiB,
 released on removal, successful import, discard and disposal; late receipts cannot

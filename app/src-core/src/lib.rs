@@ -1135,6 +1135,9 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
             "INCOMING_REFERENCE",
             "The Scene has incoming or unknown references and cannot be deleted safely.",
         ),
+        ImageMissing => ("UI_IMAGE_MISSING", "The chosen UI image is missing. Your draft is retained; choose an available UI image."),
+        ImageChanged => ("UI_IMAGE_CHANGED", "The chosen UI image changed since selection. Your draft is retained; review the asset and choose it again."),
+        ImageInvalid => ("INVALID_UI_IMAGE", "The chosen reference is not a valid supported UI image. Your draft is retained."),
         AmbiguousReturnLabel => (
             "AMBIGUOUS_RETURN_LABEL",
             "This return label is duplicated or conflicts with another label. Inspect Source before editing the Call.",
@@ -1241,6 +1244,7 @@ fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> Co
             "UNSUPPORTED_FORMAT",
             "Choose a supported raster image or audio file.",
         ),
+        UiImageTooLarge => ("UI_IMAGE_TOO_LARGE", "UI images must fit the 16 MiB presentation and history limit."),
         OversizeImport => (
             "IMPORT_TOO_LARGE",
             "The selected file exceeds the 512 MiB import limit.",

@@ -568,7 +568,7 @@ impl NumericLayout {
         Ok(values)
     }
 
-    fn patch(
+    pub(super) fn patch(
         &self,
         bytes: &[u8],
         edits: &BTreeMap<String, Option<NumericValue>>,

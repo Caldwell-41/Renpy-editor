@@ -19,6 +19,22 @@ pub enum Command {
         text: String,
     },
     #[serde(rename_all = "camelCase")]
+    AddImage {
+        parent_id: String,
+        asset_id: String,
+        expected_asset_sha256: String,
+        width: u32,
+        height: u32,
+    },
+    #[serde(rename_all = "camelCase")]
+    Image {
+        node_id: String,
+        asset_id: String,
+        expected_asset_sha256: String,
+        width: u32,
+        height: u32,
+    },
+    #[serde(rename_all = "camelCase")]
     Text { node_id: String, text: String },
     #[serde(rename_all = "camelCase")]
     Reorder {
@@ -59,6 +75,7 @@ pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
             "viewport",
             "text",
             "textbutton",
+            "image",
         ]
         .contains(&kind)
         && (parent.kind != "grid"
@@ -136,7 +153,7 @@ impl AuthoringService {
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&parent_id))
                     .ok_or(SceneError::UnknownEntity)?;
-                if !can_add(screen, parent, &kind) {
+                if kind == "image" || !can_add(screen, parent, &kind) {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 let id = uuid::Uuid::new_v4().to_string();
@@ -170,6 +187,100 @@ impl AuthoringService {
                 }
                 proposed.splice(parent.source_end..parent.source_end, addition.bytes());
                 id
+            }
+            Command::AddImage {
+                parent_id,
+                asset_id,
+                expected_asset_sha256,
+                width,
+                height,
+            } => {
+                if width == 0 || height == 0 || width > MAX_PIXELS || height > MAX_PIXELS {
+                    return Err(SceneError::InvalidPayload);
+                }
+                let parent = screen
+                    .nodes
+                    .iter()
+                    .find(|node| node.id.as_ref() == Some(&parent_id))
+                    .ok_or(SceneError::UnknownEntity)?;
+                if !can_add(screen, parent, "image") {
+                    return Err(SceneError::OpaqueBoundary);
+                }
+                let image =
+                    self.screen_image_path(project, project_id, &asset_id, &expected_asset_sha256)?;
+                let literal =
+                    serde_json::to_string(&image).map_err(|_| SceneError::ImageInvalid)?;
+                let id = uuid::Uuid::new_v4().to_string();
+                let newline = if bytes.windows(2).any(|s| s == b"\r\n") {
+                    "\r\n"
+                } else {
+                    "\n"
+                };
+                let indent = bytes[parent.span.start..]
+                    .iter()
+                    .take_while(|b| **b == b' ')
+                    .count()
+                    + 4;
+                let spaces = " ".repeat(indent);
+                let mut addition = format!("{spaces}add {literal}: # loomlight-element: {id}{newline}{spaces}    xsize {width}{newline}{spaces}    ysize {height}{newline}");
+                if parent.source_end > 0 && bytes[parent.source_end - 1] != b'\n' {
+                    addition.insert_str(0, newline);
+                }
+                proposed.splice(parent.source_end..parent.source_end, addition.bytes());
+                id
+            }
+            Command::Image {
+                node_id,
+                asset_id,
+                expected_asset_sha256,
+                width,
+                height,
+            } => {
+                let node = screen
+                    .nodes
+                    .iter()
+                    .find(|node| node.id.as_ref() == Some(&node_id))
+                    .filter(|node| node.kind == "image")
+                    .ok_or(SceneError::OpaqueBoundary)?;
+                let image =
+                    self.screen_image_path(project, project_id, &asset_id, &expected_asset_sha256)?;
+                let numeric = node
+                    .numeric_layout
+                    .as_ref()
+                    .ok_or(SceneError::OpaqueBoundary)?;
+                let values = std::collections::BTreeMap::from([
+                    (
+                        "xsize".into(),
+                        Some(layout::NumericValue {
+                            unit: layout::Unit::Pixels,
+                            value: width as f64,
+                        }),
+                    ),
+                    (
+                        "ysize".into(),
+                        Some(layout::NumericValue {
+                            unit: layout::Unit::Pixels,
+                            value: height as f64,
+                        }),
+                    ),
+                ]);
+                proposed = numeric.patch(&bytes, &values)?;
+                if node.literal.as_ref() != Some(&image) {
+                    let header = std::str::from_utf8(&bytes[node.span.start..node.source_end])
+                        .map_err(|_| SceneError::UnsupportedSource)?
+                        .lines()
+                        .next()
+                        .unwrap();
+                    let indent = header.len() - header.trim_start_matches(' ').len();
+                    let statement = code(&header[indent..]);
+                    let remaining = statement[3..].trim_start();
+                    let literal = remaining.strip_suffix(':').unwrap_or(remaining).trim_end();
+                    let start = node.span.start + indent + statement.len() - remaining.len();
+                    let value =
+                        serde_json::to_string(&image).map_err(|_| SceneError::ImageInvalid)?;
+                    proposed.splice(start..start + literal.len(), value.bytes());
+                }
+                node_id
             }
             Command::Text { node_id, text } => {
                 let node = screen
