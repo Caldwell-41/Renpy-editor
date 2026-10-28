@@ -10,11 +10,12 @@ import {driverProcess} from './phase2-driver-process.mjs';
 const output=resolve(process.env.NESTED_PROBE_OUTPUT??'../.toolchains/l04/probe-controller');await mkdir(output,{recursive:true});
 const child=driverProcess(resolve(`target/debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'canvas-position']);
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
-let browser;
+let browser;let refusedInitialRead=false;
 try {
  assert.equal((await child.next()).ready,true);await server.listen();browser=await chromium.launch({channel:'chrome',headless:true});const page=await browser.newPage({viewport:{width:1100,height:800}});
  await page.exposeBinding('nestedRpc',async(_,request)=>{
   const reply=value=>({ok:true,protocolVersion:1,requestId:request.requestId,value});
+  if(request.operation==='project.current'&&request.requestId.startsWith('nested-')&&!refusedInitialRead){refusedInitialRead=true;return {ok:false,protocolVersion:1,requestId:request.requestId,error:{code:'RUNTIME_BUSY',message:'Initial observation owns the service.'}};}
   if(request.operation==='probe.runtimeUiReport')return reply({recorded:true});
   if(['screens.canvasRender','screens.canvasStatus'].includes(request.operation))return reply({phase:'unavailable',message:'SDK rendering is qualified separately.'});
   return child.request(request);
@@ -31,6 +32,7 @@ try {
  await page.screenshot({path:join(output,'terminal.png'),fullPage:true});
  await writeFile(join(output,'result.json'),JSON.stringify({controllerTestOnly:true,nativeWebView:false,sdkExecuted:false,scriptReport:report},null,2));
  assert.equal(report?.passed,true,JSON.stringify(report));
+ assert.equal(refusedInitialRead,true,'The native probe encounters an initial busy read.');
  assert.deepEqual(report.stages.map(s=>s.stage),['nested-composition-passed','grid-layout-passed','viewport-source-passed','nested-history-passed','nested-reopen-passed','complete']);
  console.log('PASS exact L04 probe rehearsal with production UI/core; no native or SDK claim.');
 } finally {await browser?.close();await server.close();await child.stop();}

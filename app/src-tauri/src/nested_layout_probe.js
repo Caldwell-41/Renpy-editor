@@ -3,10 +3,12 @@
   const stages=[];let stage='open',serial=0,sessionId,identity,acceptedSource,identities,awaitedControl='recent project';
   const assert=(value,message)=>{if(!value)throw Error(message);};
   const until=async condition=>{const end=performance.now()+30000;while(!await condition()){if(performance.now()>end)throw Error(`Timeout: ${stage}`);await new Promise(resolve=>setTimeout(resolve,30));}};
-  const call=async(operation,payload={})=>window.__loomlightProbeRetryBusy(async()=>{
+  const request=async(operation,payload={})=>{
     const response=await window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:`nested-${++serial}`,operation,payload:operation==='project.current'?payload:{sessionId,...payload}}});
-    if(!response.ok)throw Error(`${operation}: ${response.error.code}`);return response.value;
-  });
+    if(!response.ok)throw Object.assign(Error(`${operation}: ${response.error.code}`),{code:response.error.code});return response.value;
+  };
+  const call=(operation,payload={})=>['project.current','source.open','screens.inspect','screens.list'].includes(operation)
+    ?window.__loomlightProbeRetryBusy(()=>request(operation,payload)):request(operation,payload);
   const find=window.__loomlightProbeFindButton;
   const click=async name=>{awaitedControl=`button ${name}`;await until(()=>find(name)&&!find(name).disabled);find(name).click();};
   const checkpoint=name=>{stage=name;stages.push({stage});};
