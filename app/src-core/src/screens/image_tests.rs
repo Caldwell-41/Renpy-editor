@@ -148,7 +148,7 @@ fn ui_image_formats_present_verified_natural_dimensions_without_execution() {
     }
 }
 
-fn import_image(
+pub(super) fn import_image(
     service: &mut LifecycleService,
     temporary: &std::path::Path,
     root: &std::path::Path,
@@ -581,4 +581,161 @@ fn ui_image_prepares_sdk_fixture_through_public_requests() {
         )
         .unwrap();
     }
+}
+
+#[test]
+fn ui_image_replacement_review_is_readonly_and_apply_accepts_source_and_reference_together() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let asset = import_image(&mut service, temporary.path(), &root, "uiImage");
+    let inserted = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImage","parentId":owner["rootId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80}),
+    );
+    let source = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    let metadata = fs::read(root.join(".renpy-editor/authoring.json")).unwrap();
+    let replacement =
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/replacement.png");
+    fs::write(
+        root.join(asset["relativePath"].as_str().unwrap()),
+        replacement,
+    )
+    .unwrap();
+    let review = ipc(
+        &mut service,
+        "asset.reviewUiImage",
+        json!({"assetId":asset["id"],"expectedAssetSha256":asset["sha256"]}),
+    );
+    assert_eq!(review["width"], 80);
+    assert_eq!(review["height"], 32);
+    assert_eq!(review["sha256"], hex::encode(Sha256::digest(replacement)));
+    assert_eq!(
+        fs::read(root.join(".renpy-editor/authoring.json")).unwrap(),
+        metadata
+    );
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
+    );
+    let result = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"image","nodeId":inserted["selectedId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"replacementSha256":review["sha256"],"width":160,"height":64}),
+    );
+    let accepted = ipc(&mut service, "authoring.list", json!({}));
+    assert_eq!(accepted["assets"][0]["sha256"], review["sha256"]);
+    assert_eq!(accepted["assets"][0]["naturalHeight"], 32);
+    assert!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .contains("ysize 64")
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
+    );
+    assert_eq!(
+        ipc(&mut service, "authoring.list", json!({}))["assets"][0]["sha256"],
+        asset["sha256"]
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]})
+        )["revision"],
+        result["document"]["revision"]
+    );
+    assert_eq!(
+        ipc(&mut service, "authoring.list", json!({}))["assets"][0]["sha256"],
+        review["sha256"]
+    );
+}
+
+#[test]
+fn ui_image_parent_and_numeric_layout_change_is_one_owned_source_transaction() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let asset = import_image(&mut service, temporary.path(), &root, "uiImage");
+    let group = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"vbox","text":""}),
+    );
+    let image = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImage","parentId":owner["rootId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80}),
+    );
+    let before = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();
+    let moved = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"image","nodeId":image["selectedId"],"parentId":group["selectedId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":120,"height":60,"layout":{"xpos":{"unit":"relative","value":0.5},"xanchor":{"unit":"relative","value":0.5}}}),
+    );
+    let nodes = moved["document"]["screens"][0]["nodes"].as_array().unwrap();
+    let container = nodes
+        .iter()
+        .find(|n| n["id"] == group["selectedId"])
+        .unwrap();
+    let node = nodes
+        .iter()
+        .find(|n| n["id"] == image["selectedId"])
+        .unwrap();
+    assert_eq!(node["parentStart"], container["span"]["start"]);
+    assert_eq!(
+        node["numericLayout"]["values"]["xpos"],
+        json!({"unit":"relative","value":0.5})
+    );
+    let after = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        before
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        after
+    );
+}
+
+#[test]
+fn ui_image_canvas_samples_use_typed_verified_assets_and_do_not_write_source() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let asset = import_image(&mut service, temporary.path(), &root, "uiImage");
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImage","parentId":owner["rootId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80}),
+    );
+    let node = added["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == added["selectedId"])
+        .unwrap();
+    let before = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    let mut payload = json!({"path":owner["path"],"screenName":"notes","expectedRevision":added["document"]["revision"],"width":1280,"height":720,
+        "imageSamples":[{"nodeStart":node["span"]["start"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":200,"height":100}]});
+    let plan = ipc(&mut service, "screens.canvasPlan", payload.clone());
+    let rendered = plan["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["kind"] == "image")
+        .unwrap();
+    assert_eq!(rendered["literal"], "images/ui seal.png");
+    assert_eq!(rendered["properties"]["xsize"], 200);
+    payload["imageSamples"][0]["expectedAssetSha256"] = json!("0".repeat(64));
+    assert_eq!(
+        reject(&mut service, "screens.canvasPlan", payload)["error"]["code"],
+        "UI_IMAGE_CHANGED"
+    );
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        before
+    );
 }

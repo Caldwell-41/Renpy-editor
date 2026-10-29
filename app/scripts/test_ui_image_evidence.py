@@ -49,3 +49,19 @@ class UiImageEvidence(unittest.TestCase):
                 Image.new('RGBA', (1280, 720), color).save(reference)
                 with self.assertRaises(AssertionError):
                     qualification.validate(receipt(), (1280, 720), image, reference)
+
+
+class UiImageNativeEvidence(unittest.TestCase):
+    def test_rejects_missing_native_stages_decode_and_source(self):
+        from runtime_probe_cases import runtime_report_ok, RUNTIME_STAGES
+        from uuid import UUID
+        ids = [str(UUID(int=i)) for i in (1,2)]
+        owner = dict(id=str(UUID(int=3)),rootId=ids[0],name='travel_notes',path='game/ui/travel_notes.rpy',resolved=True)
+        value = dict(evidence='runtime-ui-packaged',case='ui-image',passed=True,cleanupComplete=True,details=dict(
+            scenario='ui-image',stage='complete',stages=[dict(stage=s) for s in (*RUNTIME_STAGES['ui-image'],'complete')],
+            identity=owner,identities=ids,nativeWebView=True,sdkExecuted=False,imageDecoded=True,
+            acceptedSource=f'# loomlight-screen: {owner["id"]}\nscreen travel_notes():\n add "images/ui station_seal.png": # loomlight-element: {ids[1]}\n xsize 200\n ysize 70\n use source_only_footer()\n text "Protected neighbor"'))
+        self.assertTrue(runtime_report_ok('ui-image',value))
+        for field,wrong in [('imageDecoded',False),('nativeWebView',False),('sdkExecuted',True),('acceptedSource',''),('identity',None),('identities',[]),('stages',[])]:
+            bad=copy.deepcopy(value);bad['details'][field]=wrong
+            self.assertFalse(runtime_report_ok('ui-image',bad),field)

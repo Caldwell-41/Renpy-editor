@@ -2739,3 +2739,6 @@ fn screen_atomic_size_two_tokens_one_history_entry_and_source_reconciliation() {
         fresh["revision"]
     );
 }
+
+#[path = "image_sdk_tests.rs"]
+mod image_sdk;

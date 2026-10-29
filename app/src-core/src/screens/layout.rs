@@ -50,7 +50,7 @@ impl NumericValue {
             Unit::Relative => format!("{:?}", self.value),
         }
     }
-    fn valid(self, key: &str) -> bool {
+    pub(super) fn valid(self, key: &str) -> bool {
         if matches!(key, "columns" | "rows") {
             return self.unit == Unit::Count
                 && self.value.fract() == 0.0

@@ -293,6 +293,12 @@ fn copy_asset(
         .transactions
         .snapshot_bounded(project, path.clone(), 16 * 1024 * 1024)
         .map_err(|_| SceneError::SourceConflict)?;
+    if dependencies
+        .iter()
+        .any(|(expected_path, hash)| expected_path == path.as_str() && hash != &revision.sha256)
+    {
+        return Err(SceneError::ImageChanged);
+    }
     dependencies.push((path.as_str().into(), revision.sha256));
     *total += bytes.len();
     if *total > 64 * 1024 * 1024 {

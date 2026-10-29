@@ -5,21 +5,22 @@
 Kris selected [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40),
 "Import and place a UI image", on a new branch. Implementation ownership stays
 in "Implement ticket 40" on `codex/phase3b-l06-ui-image`, based on `2e045d9`.
-Its L02 prerequisite is satisfied. "L06 UI image prototypes" owns a separate
-Design Lab worktree and will return the exact approved mock before production
-UI changes. The selected scope is the leaf's typed image import, owned placement,
-size/aspect editing and real source/history/runtime proof.
+Its L02 prerequisite is satisfied. Kris approved A2 (`inspector-v2` / `refined`)
+in "L06 UI image prototypes". The reviewed source and approval records are
+integrated; the separate pinned prototype worktree remains the comparison reference.
 
-Core import, owned placement and atomic asset/size editing are implemented and
-have focused service proof. The changed screen slice passes 49 ordinary tests,
-and three passive-media tests pass. The full ticket remains in progress.
-Kris confirmed the service/controller/SDK test boundaries; mock approval and
-production UI work remain pending. Mac normal-entry SDK proof passes at both
-aspects with exact dimensions and zero differing pixels against an independent
-Ren'Py reference. Its original failed pixel oracle remains recorded.
-[Evidence](../tasks/evidence/ui-image.md) retains results and preparation failures;
-[HANDOVER](HANDOVER.md#l06-preparation-and-design-handoff) owns continuation.
-Earlier closed allowances and protected recovery remain intact.
+The typed image inspector, imports, passive previews, aspect controls, per-image
+drafts and atomic image/size/layout/reviewed-reference transactions are implemented.
+Focused service and actual-controller/core browser proof pass. The exact packaged
+probe also passes its browser/core rehearsal. Mac normal-entry proof covers both
+aspects and six image cases with exact geometry and zero differing reference pixels.
+Its original failed pixel oracle remains retained. Mac GL2 helper proof also passes both aspects and typed image drafts. Current
+packaged/native, Windows and final review/suite evidence remain pending. The combined Design Lab
+startup timeout remains an explicit promotion-validation gap.
+[Evidence](../tasks/evidence/ui-image.md) owns detailed results and failures;
+[HANDOVER](HANDOVER.md#l06-implementation-and-qualification) owns continuation.
+The ticket remains in progress. Earlier closed allowances and protected recovery
+remain intact.
 
 ## L04 nested and clipped layouts merged
 

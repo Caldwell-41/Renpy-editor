@@ -46,14 +46,12 @@ The second uses distinct quadrant arrangements and supersedes it for rendering
 qualification. Neither preparation starts an SDK. The original generated input
 is retained in ignored local evidence.
 
-## Pending proof
+## Remaining proof
 
-Mock approval, actual UI-to-core operations and draft retention, import
-cancellation, aspect controls, Source navigation, helper/normal SDK rendering,
-required Windows/macOS desktop proof and final two-axis review remain pending.
-The full frontend/core suite belongs to final implementation verification.
-This record grants no acceptance or ticket closure. No remote code publication,
-PR, merge or release is selected.
+The approved A2 inspector is integrated and the actual controller-to-core browser
+sequence passes. Current helper, signed Mac package/native, Windows, final suite
+and two-axis review evidence remain pending. No remote code publication, PR,
+merge or release is selected. This record grants no acceptance or ticket closure.
 
 ## First Mac SDK run and oracle correction
 
@@ -110,6 +108,102 @@ packaged UI behavior, physical input, mock approval or ticket acceptance.
 | Actual asset at accepted size; inert picker | Mac normal entry has exact rectangles and zero-difference independent references. Passive service inspection executes no project code. | Actual picker/controller; Windows normal SDK and changed helper behavior. |
 | Cancel, conflict, history, Source and reopen with containment | Conflict, typed-handle/raw-path refusal, source/history/reopen service cases pass. | Import cancellation and Source navigation through actual UI; remaining native evidence. |
 
-Production UI implementation waits for the approved mock from the design chat.
-Full-suite verification and both independent review axes remain for the completed
-implementation. These local commits have not been pushed.
+The entries above retain the earlier core/normal-entry checkpoint. The following
+section owns the subsequent approved UI implementation. These local commits have
+not been pushed.
+
+
+## Approved A2 implementation and controller proof
+
+Kris approved `ui-image` / `inspector-v2` / `refined` in the separate prototype
+chat. Reviewed source `8b960282` and its fingerprint are preserved in the
+[handoff](../../design/design-lab-ui-image/HANDOFF.md), approval and receipt. The
+source/capture identities verify. Source and closeout are integrated as `6ecde62`
+and `cbf9067`; the original checkout stays pinned. Focused lab checks pass. The
+combined Design Lab initial-navigation timeout remains failed. No promotion or
+full-design-suite pass is claimed.
+
+The production inspector implements A2's selected asset, displayed size, natural
+aspect, original size, advanced layout and single commit area. The wider live
+screen selector remains available. Refresh and Validate move into Layout while
+editing an image; Test stays beside the preview. Compact editing places the
+inspector first. It retains the actual app shell and synthetic PNG artwork for
+qualification; schematic game artwork is not product rendering evidence.
+
+| Approved control | Production owner and observable result |
+| --- | --- |
+| Change/Choose image, search and catalog rows | `authoring.list`, bounded `media.present`, browser decoding and a per-node image draft. Selection writes no Source. |
+| Import, Browse, display name, destination, Cancel/import | Images-only `asset.chooseUiImage`, existing import authority and `asset.previewImport`; one `asset.import` transaction. Native cancellation accepts no import. Completed import survives cancelling a screen draft. |
+| Width, Height, Preserve aspect, Use original | Natural dimensions, whole-pixel rounding, retained field validation and typed pending helper inputs. |
+| Parent and Layout | Existing numeric editor and owned image source movement; supported layout, reference and size share one compose transaction. |
+| Apply/Cancel, Enter/Escape | `screens.compose` image commands use the retained Source revision. No-op is disabled; Cancel writes nothing and retains field focus. |
+| Changed-file review and Use changed image | `asset.reviewUiImage` returns passive current bytes; Apply alone accepts reference metadata and Source together. |
+| Source, Undo/Redo, order/removal and Test | Existing Source modal/editor, shared transaction history, owned composition and deliberate accepted-source runtime request. |
+
+Two focused actual-controller component tests pass for natural ratio, invalid
+input, no-op, Escape/Enter, focus, per-node drafts and cancelled browsing. The
+protocol slice also passes. Forty-three existing composition/legacy-screen tests
+pass after integration. These are focused checks, not the final full suite.
+
+The production application/controller/public-core browser sequence passes in
+`controller-03` and `controller-04`. It imports real PNG bytes, adds an ordinary
+owned image, accepts proportional and stretched sizes, verifies exact Source,
+Undo/Redo, no-op, Source draft retention, external-edit conflict, read-only
+replacement review followed by Apply, and missing-file retention. All operations
+use actual application dispatch and transaction/history. Canvas requests produce
+real inert plans; this browser check starts no SDK. Native chooser results are
+explicit test fixtures, so these passes establish no OS-dialog behavior.
+
+`controller-01` failed after cancellation because its next Add skipped Choose.
+`controller-02` reached accepted/history proof but failed compact placement due to
+excess toolbar height. The corrected image layout keeps ancillary tools under
+Layout, preserving their operations. Both failures remain retained; later passes
+require Apply within the compact viewport, and `controller-04` also requires it
+to be the element at its visible center.
+
+The exact packaged probe's browser/core rehearsal passes in `probe-controller-03`,
+including one initial busy read, passive image decoding, picker cancellation,
+accepted sizes, validation/focus, history, Source reconciliation with an opaque
+neighbor and disk reopen identities. Rehearsals 1 and 2 failed because the probe
+looked up a nested-label button by text and assumed reopening restored the Design
+step. The probe now uses the actual accessible name and explicitly opens the
+remembered image. No product behavior or deadline was relaxed. These rehearsals
+consume no SDK, native session or package operation.
+
+The extended public service cases cover read-only replacement review with atomic
+reference metadata/Source history, atomic parent/numeric layout, and typed inert
+canvas image samples. The broad twelve-case image run exposed a diagnostic
+regression for invalid replaced bytes; checking a changed reference before
+attempting decode restores the specific `UI_IMAGE_CHANGED` result. Its focused
+regression passes. Original failed test output remains in local command history.
+
+## Helper qualification in progress
+
+Helper attempt 1 starts one Mac GL2 helper/SDK and returns the 1280x720 frame with
+all six correct rectangles. The test then incorrectly looked up owned IDs after
+copying only Source without source-map ownership. Inspection correctly returns
+no owned IDs for that passive copy. The failed test and first image frame remain
+under `helper-01`; later frames, reference pixels and typed drafts did not run.
+The targeted correction compares the parsed image spans in Source order and
+keeps every geometry/pixel/cleanup assertion. No product code, rendering value or
+tolerance changes. The owning ticket retains cumulative operation accounting.
+
+
+Helper attempt 2 passes at 1280x720 and 1024x768, all six exact image rectangles,
+zero differing RGBA pixels against independently authored literal helper references,
+and four distinct nontransparent fixture quadrants in each image. The pending
+image uses a verified typed asset and numeric placement without Source writes.
+One helper handles the sequence, then exits cooperatively with code 0, complete
+cleanup and no helper directory left. [Receipt](ui-image-mac-helper.json) binds the
+accepted Source hash and both pixel-pair hashes. Raw frames, PNGs and reports stay
+under `helper-02`. The first failed fixture attempt remains charged and failed.
+This is Mac GL2 helper proof, separate from native/Windows and human acceptance.
+
+A third focused controller test verifies advanced numeric layout shares one image
+command. Its first run exposed lost keyboard focus after accepting a layout field.
+The correction restores the advanced field by its layout key after remounting;
+the focused test passes. The original failing assertion's cyclic DOM reporter
+ended as a failed test process and was not counted as a pass. No SDK was involved.
+`controller-05` passes the complete actual UI/core sequence and retains a clean
+compact viewport capture after resize. Its visible Apply center is unobscured.
+A final compact spacing adjustment keeps the entire button above the app footer.

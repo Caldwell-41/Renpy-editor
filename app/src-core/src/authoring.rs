@@ -21,6 +21,9 @@ use std::{
     sync::Mutex,
 };
 
+mod ui_images;
+pub use ui_images::ReviewUiImageRequest;
+
 pub const AUTHORING_SCHEMA_VERSION: u32 = 1;
 const AUTHORING_PATH: &str = ".renpy-editor/authoring.json";
 const CHARACTERS_PATH: &str = "game/definitions/characters.rpy";
@@ -985,7 +988,6 @@ impl AuthoringService {
         if let Some(statement) = declaration {
             companions.push(self.declaration_mutation(project, &statement)?);
         }
-        companions.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
         // UI images share screen Undo/Redo. Their bytes fit the existing bounded
         // transaction/history limit; the larger legacy imports remain streaming.
         if request.kind == AssetKind::UiImage {
@@ -1003,8 +1005,16 @@ impl AuthoringService {
             {
                 return Err(AuthoringError::SourceConflict);
             }
-            crate::media::validate_image(&authority.extension, &bytes)
+            let (_, dimensions) = crate::media::validate_image(&authority.extension, &bytes)
                 .map_err(|_| AuthoringError::UnsupportedFormat)?;
+            let (width, height) = dimensions.ok_or(AuthoringError::UnsupportedFormat)?;
+            let imported = metadata
+                .assets
+                .last_mut()
+                .ok_or(AuthoringError::CorruptMetadata)?;
+            imported.extra.insert("naturalWidth".into(), width.into());
+            imported.extra.insert("naturalHeight".into(), height.into());
+            companions.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
             companions.insert(
                 0,
                 FileMutation {
@@ -1031,6 +1041,7 @@ impl AuthoringService {
             })?;
             return Ok(metadata);
         }
+        companions.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
         let outcome = self.transactions.commit_streaming_import(
             project,
             RelativePath::new(relative_path).map_err(|_| AuthoringError::InvalidPayload)?,

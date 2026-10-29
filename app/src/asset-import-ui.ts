@@ -52,7 +52,7 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
         };
         retry.onclick=()=>{if(!busy){previews.push({row,load});void pump();}};previews.push({row,load});
       }
-      const kind=document.createElement('select');for(const [value,label] of audio?[['music','Music'],['sfx','Sound effect']]:[['background','Background'],['characterAppearance','Character image']]){const option=document.createElement('option');option.value=value!;option.textContent=label!;kind.append(option);}field(row,'Use as',kind);
+      const kind=document.createElement('select');for(const [value,label] of audio?[['music','Music'],['sfx','Sound effect']]:[['background','Background'],['characterAppearance','Character image'],['uiImage','UI image']]){const option=document.createElement('option');option.value=value!;option.textContent=label!;kind.append(option);}field(row,'Use as',kind);
       const name=document.createElement('input');name.value=(selected.displayName.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_]/g,'_').replace(/^[^a-zA-Z]+/,'').slice(0,64)||'asset').toLowerCase();technicalNameInput(name);field(row,'Ren’Py name',name);
       const help=document.createElement('p');help.className='muted';help.textContent=technicalNameHelp;row.append(help);
       const display=document.createElement('input');display.value=selected.displayName.replace(/\.[^.]+$/,'');field(row,'Display name',display);

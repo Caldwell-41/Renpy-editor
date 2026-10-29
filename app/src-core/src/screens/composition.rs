@@ -23,16 +23,26 @@ pub enum Command {
         parent_id: String,
         asset_id: String,
         expected_asset_sha256: String,
+        #[serde(default)]
+        replacement_sha256: Option<String>,
         width: u32,
         height: u32,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
     },
     #[serde(rename_all = "camelCase")]
     Image {
         node_id: String,
         asset_id: String,
         expected_asset_sha256: String,
+        #[serde(default)]
+        replacement_sha256: Option<String>,
         width: u32,
         height: u32,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+        #[serde(default)]
+        parent_id: Option<String>,
     },
     #[serde(rename_all = "camelCase")]
     Text { node_id: String, text: String },
@@ -51,6 +61,7 @@ pub enum Command {
 pub struct ComposeResult {
     pub document: Document,
     pub selected_id: String,
+    pub changed: bool,
 }
 
 fn text_literal(text: &str) -> Result<String, SceneError> {
@@ -142,6 +153,7 @@ impl AuthoringService {
             .find(|s| s.name == owner.screen.name)
             .ok_or(SceneError::ReferenceBlocked)?;
         let mut proposed = bytes.clone();
+        let mut companions = Vec::new();
         let selected_id = match request.command {
             Command::Add {
                 parent_id,
@@ -192,8 +204,10 @@ impl AuthoringService {
                 parent_id,
                 asset_id,
                 expected_asset_sha256,
+                replacement_sha256,
                 width,
                 height,
+                layout,
             } => {
                 if width == 0 || height == 0 || width > MAX_PIXELS || height > MAX_PIXELS {
                     return Err(SceneError::InvalidPayload);
@@ -206,8 +220,17 @@ impl AuthoringService {
                 if !can_add(screen, parent, "image") {
                     return Err(SceneError::OpaqueBoundary);
                 }
-                let image =
-                    self.screen_image_path(project, project_id, &asset_id, &expected_asset_sha256)?;
+                let selection = self.prepare_ui_image_reference(
+                    project,
+                    project_id,
+                    &asset_id,
+                    &expected_asset_sha256,
+                    replacement_sha256.as_deref(),
+                )?;
+                if let Some(metadata) = selection.metadata {
+                    companions.push(metadata);
+                }
+                let image = selection.path;
                 let literal =
                     serde_json::to_string(&image).map_err(|_| SceneError::ImageInvalid)?;
                 let id = uuid::Uuid::new_v4().to_string();
@@ -227,14 +250,34 @@ impl AuthoringService {
                     addition.insert_str(0, newline);
                 }
                 proposed.splice(parent.source_end..parent.source_end, addition.bytes());
+                if !layout.is_empty() {
+                    if layout.contains_key("xsize") || layout.contains_key("ysize") {
+                        return Err(SceneError::InvalidPayload);
+                    }
+                    let candidate = inspect(&proposed, source_path.clone(), String::new())?;
+                    let node = candidate
+                        .screens
+                        .iter()
+                        .find(|s| s.name == screen.name)
+                        .and_then(|s| s.nodes.iter().find(|n| n.id.as_ref() == Some(&id)))
+                        .ok_or(SceneError::InvariantBlocked)?;
+                    proposed = node
+                        .numeric_layout
+                        .as_ref()
+                        .ok_or(SceneError::OpaqueBoundary)?
+                        .patch(&proposed, &layout)?;
+                }
                 id
             }
             Command::Image {
                 node_id,
                 asset_id,
                 expected_asset_sha256,
+                replacement_sha256,
                 width,
                 height,
+                layout,
+                parent_id,
             } => {
                 let node = screen
                     .nodes
@@ -242,35 +285,59 @@ impl AuthoringService {
                     .find(|node| node.id.as_ref() == Some(&node_id))
                     .filter(|node| node.kind == "image")
                     .ok_or(SceneError::OpaqueBoundary)?;
-                let image =
-                    self.screen_image_path(project, project_id, &asset_id, &expected_asset_sha256)?;
+                let selection = self.prepare_ui_image_reference(
+                    project,
+                    project_id,
+                    &asset_id,
+                    &expected_asset_sha256,
+                    replacement_sha256.as_deref(),
+                )?;
+                if let Some(metadata) = selection.metadata {
+                    companions.push(metadata);
+                }
+                let image = selection.path;
+                if let Some(parent_id) = parent_id {
+                    proposed =
+                        super::images::reparent(&bytes, screen, node, &parent_id, source_path)?;
+                }
+                let moved = inspect(&proposed, source_path.clone(), String::new())?;
+                let node = moved
+                    .screens
+                    .iter()
+                    .find(|s| s.name == screen.name)
+                    .and_then(|s| s.nodes.iter().find(|n| n.id.as_ref() == Some(&node_id)))
+                    .ok_or(SceneError::InvariantBlocked)?;
                 let numeric = node
                     .numeric_layout
                     .as_ref()
                     .ok_or(SceneError::OpaqueBoundary)?;
-                let values = std::collections::BTreeMap::from([
-                    (
-                        "xsize".into(),
-                        Some(layout::NumericValue {
-                            unit: layout::Unit::Pixels,
-                            value: width as f64,
-                        }),
-                    ),
-                    (
-                        "ysize".into(),
-                        Some(layout::NumericValue {
-                            unit: layout::Unit::Pixels,
-                            value: height as f64,
-                        }),
-                    ),
-                ]);
-                proposed = numeric.patch(&bytes, &values)?;
+                let mut values = layout;
+                if values.contains_key("xsize") || values.contains_key("ysize") {
+                    return Err(SceneError::InvalidPayload);
+                }
+                values.insert(
+                    "xsize".into(),
+                    Some(layout::NumericValue {
+                        unit: layout::Unit::Pixels,
+                        value: width as f64,
+                    }),
+                );
+                values.insert(
+                    "ysize".into(),
+                    Some(layout::NumericValue {
+                        unit: layout::Unit::Pixels,
+                        value: height as f64,
+                    }),
+                );
+                let before_layout = proposed.clone();
+                proposed = numeric.patch(&before_layout, &values)?;
                 if node.literal.as_ref() != Some(&image) {
-                    let header = std::str::from_utf8(&bytes[node.span.start..node.source_end])
-                        .map_err(|_| SceneError::UnsupportedSource)?
-                        .lines()
-                        .next()
-                        .unwrap();
+                    let header =
+                        std::str::from_utf8(&before_layout[node.span.start..node.source_end])
+                            .map_err(|_| SceneError::UnsupportedSource)?
+                            .lines()
+                            .next()
+                            .unwrap();
                     let indent = header.len() - header.trim_start_matches(' ').len();
                     let statement = code(&header[indent..]);
                     let remaining = statement[3..].trim_start();
@@ -343,6 +410,7 @@ impl AuthoringService {
                     return Ok(ComposeResult {
                         document,
                         selected_id: node_id,
+                        changed: false,
                     });
                 }
                 let start = node.span.start.min(target.span.start);
@@ -458,10 +526,11 @@ impl AuthoringService {
                 selected
             }
         };
-        if proposed == bytes {
+        if proposed == bytes && companions.is_empty() {
             return Ok(ComposeResult {
                 document,
                 selected_id,
+                changed: false,
             });
         }
         let accepted = self.owned_screen_document(
@@ -470,22 +539,29 @@ impl AuthoringService {
             source_path.clone(),
             hex::encode(Sha256::digest(&proposed)),
         )?;
-        self.commit_history(
-            project,
-            TransactionProposal {
-                mutations: vec![FileMutation {
+        if proposed != bytes {
+            companions.insert(
+                0,
+                FileMutation {
                     path: path(source_path)?,
                     kind: MutationKind::ReplaceExisting,
                     base: revision,
                     expected_bytes: bytes,
                     proposed,
-                }],
+                },
+            );
+        }
+        self.commit_history(
+            project,
+            TransactionProposal {
+                mutations: companions,
                 intent: TransactionIntent::Edit,
             },
         )?;
         Ok(ComposeResult {
             document: accepted,
             selected_id,
+            changed: true,
         })
     }
 }

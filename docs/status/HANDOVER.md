@@ -1,67 +1,45 @@
 # Current outcome handover
 
-## L06 preparation and design handoff
+## L06 implementation and qualification
 
 Kris selected [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
-through the implement skill. This chat owns implementation on new local branch
-`codex/phase3b-l06-ui-image` in managed worktree `l06-ui-image-implementation/Loomlight`, based on
-`2e045d941bf633e73b8161be0096806203fbc2bb`. Use that worktree explicitly for implementation commands. The primary checkout
-is back on `codex/phase3b-screen-designer`; its unrelated audit is untouched. The
-prototype directory belongs to the design chat.
+through the implement skill. This chat owns `codex/phase3b-l06-ui-image` in managed
+worktree `l06-ui-image-implementation/Loomlight`, based on `2e045d9`. Use this
+worktree explicitly. Primary remains on `codex/phase3b-screen-designer` with only
+the unrelated untracked Phase 1 audit. Preserve it and protected recovery below.
 
-The user requested a new chat using the handoff skill, without split, for mock
-iteration. "L06 UI image prototypes" is thread
-`01a1845a-685d-7901-a518-8faeafc6ba05`; its assigned managed worktree is
-`l06-image-prototype/Loomlight`. Base is the same `2e045d9`. It owns a new lab
-screen, registry entry and its design approval/capture records. Production code
-and shared status belong here. The temporary handoff is
-`/private/tmp/loomlight-l06-prototype-handoff.md`; the design chat has read it.
-It must return explicit approval, exact source commit/fingerprint, captures and
-checks before UI implementation. Preserve its unique work until integration.
+The separate "L06 UI image prototypes" chat (`01a1845a-685d-7901-a518-8faeafc6ba05`)
+returned Kris's explicit A2 approval. Reviewed source `8b960282` and fingerprint
+`f2e36a40ea0072abb3640c3dfe98dcdff78cc19b4cf3725cb281a0b808afb5ed` are integrated
+as `6ecde62`; approval closeout is `cbf9067`. Keep its pinned comparison worktree
+`l06-image-prototype/Loomlight` unchanged. The return handoff is
+`docs/design/design-lab-ui-image/HANDOFF.md`. Focused design checks pass. The full
+Design Lab initial-navigation timeout remains failed and explicitly retained.
 
-Preparation read #40, B03 #25, P3B #22 and the relevant domain, design,
-transaction and verification contracts. L02 is satisfied. The backend now adds a
-UI-image role, bounded shared-history import, stable owned image insertion and
-atomic asset/size editing. It reuses the numeric source patcher and existing
-Ren'Py image Transform. Public service cases prove source/history/reopen and
-specific missing/replaced/invalid references. Static WebP presentation covers
-lossless, lossy and alpha containers. Production UI files remain untouched.
+The current working changes implement the approved inspector and actual native
+image-only picker. Imports and passive previews use existing asset services;
+replacement review changes no metadata until one Source/metadata transaction.
+Per-node drafts, aspect sizing, layout and parent changes, invalid input, Source
+navigation, history and typed inert canvas inputs use production controllers/core.
+Focused tests and the actual-controller browser sequence pass. The exact packaged
+probe passes its browser/core rehearsal after two test navigation corrections.
+Its native and Windows cases still need execution. A first helper attempt produced
+six correct rectangles but failed a fixture ownership lookup; it remains charged.
+The second helper passes all six rectangles and exact independent-reference pixels
+at both aspects, plus a typed pending image and cooperative cleanup.
+[Evidence](../tasks/evidence/ui-image.md) retains detailed results and remaining proof.
+#40 alone owns cumulative costly-operation accounting; check it before operations.
+No helper operation remains running.
 
-[Evidence](../tasks/evidence/ui-image.md) retains results, failed preparation and
-pending acceptance. The prior screen slice passed 49 ordinary tests with both
-named SDK cases explicitly excluded; three media tests passed. The later
-byte-limit and public SDK-fixture cases pass individually. All nine current image-service cases and both rejecting SDK-checker tests now
-pass. Repository validation and whitespace checks also pass.
-
-Kris confirmed the TDD boundaries on 2026-10-29. Continue backend/runtime
-qualification while the design chat iterates. Before production UI edits,
-receive its exact approved mock and follow INTEGRATION. The implementation
-owner then completes the real controller, SDK/native proof, both review axes
-and final tests. The full suite has not yet run for this outcome.
-
-Pinned Node 24.19.0/npm 11.9.0 and Cargo 1.90.0 are reused from the primary
-checkout. Bundled Python 3.12.14 is available; system Python 3.9.6 is unsuitable
-for harnesses requiring 3.11+. The dependency symlink is local and must not be
-staged. Current public SDK inputs are under the implementation worktree's
-ignored `.toolchains/ui-image/inputs-02/accepted.json`. Keep both input generations
-and both SDK attempts. Source frames and independent reference frames are under
-`sdk-02/`; the first failed raw-RGB oracle is under `sdk-01/`.
-
-Core checkpoint is `a140614`; checker correction is `c26eeab`. Mac normal entry
-now passes compile/lint, both aspects and all six image rectangles, with zero
-RGBA differences against an independent literal Ren'Py reference. Product files
-are identical between those candidates. [The evidence and receipts](../tasks/evidence/ui-image.md#mac-normal-entry-sdk-qualification)
-retain hashes, reuse boundaries, the original failure and cleanup. No SDK,
-helper, package, native editor or watcher remains running. This is scoped Mac
-normal-entry proof, not canvas/native/Windows or full-ticket acceptance.
-
-#40 owns cumulative operation use and remaining ceilings. Its first attempt is
-charged and retained; unused limits stay with this outcome. No push, PR, merge or
-release has been selected. Next, receive the approved mock and implement the
-production UI, actual controller and remaining qualification. The implementation
-owner remains this chat. The primary checkout retains only the unrelated
-untracked Phase 1 audit. Preserve all protected native/session state below.
-Earlier operation allowances remain closed.
+Pinned tools/dependencies remain in the primary checkout. `app/node_modules` is
+an untracked local symlink and must never be staged. Use bundled Python 3.12,
+not system Python 3.9, for harnesses. Accepted SDK inputs and failed/passing outputs
+remain under ignored `.toolchains/ui-image/`; keep all attempts. The earlier
+Mac normal-entry pass binds source/assets at `c26eeab`, with unchanged product
+files from `a140614`. Signed package/native, Windows, final suites
+and both independent review axes remain for this outcome. No push, PR, merge or
+release is selected. Next finish qualification of the implemented candidate,
+fix in-scope review findings and commit. The implementation owner remains here.
 
 ## L04 merge and workspace closeout
 

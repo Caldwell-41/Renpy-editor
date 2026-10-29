@@ -102,8 +102,10 @@ pub const OPERATIONS: &[&str] = &[
     "appearance.setDefault",
     "appearance.update",
     "asset.chooseImport",
+    "asset.chooseUiImage",
     "asset.chooseImports",
     "asset.previewImport",
+    "asset.reviewUiImage",
     "asset.import",
     "asset.repairCompatibility",
     "variable.create",
@@ -752,6 +754,14 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.scene_resolve_recovery(payload))
             .and_then(to_value),
+        "asset.reviewUiImage" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<authoring::ReviewUiImageRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.review_ui_image(payload))
+            .and_then(to_value),
         "asset.previewImport" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| {
@@ -926,6 +936,7 @@ pub fn handle_application_request(
         | "project.openPicker"
         | "sdk.browse"
         | "asset.chooseImport"
+        | "asset.chooseUiImage"
         | "asset.chooseImports" => {
             return CoreResponse::failure(
                 request_id,

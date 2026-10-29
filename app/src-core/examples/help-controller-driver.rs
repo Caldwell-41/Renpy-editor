@@ -12,9 +12,10 @@ fn emit(value: Value) {
 }
 fn main() {
     let mode = std::env::args().nth(2);
-    assert!(mode
-        .as_deref()
-        .is_none_or(|mode| matches!(mode, "canvas-position" | "composition-canvas")));
+    assert!(mode.as_deref().is_none_or(|mode| matches!(
+        mode,
+        "canvas-position" | "composition-canvas" | "ui-image" | "ui-image-probe"
+    )));
     let position_probe = mode.as_deref() == Some("canvas-position");
     let composition_canvas = mode.as_deref() == Some("composition-canvas");
     let root = PathBuf::from(std::env::args().nth(1).expect("owned temporary root"));
@@ -37,6 +38,8 @@ fn main() {
             ),
         )
         .unwrap()
+    } else if mode.as_deref() == Some("ui-image-probe") {
+        LifecycleService::prepare_ui_image_probe(root.clone()).unwrap()
     } else {
         LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap()
     };
@@ -73,6 +76,14 @@ fn main() {
         include_bytes!("../../../tests/fixtures/phase-1h/assets/booth.png"),
     )
     .unwrap();
+    if mode.as_deref() == Some("ui-image") {
+        fs::create_dir_all(game.join("game/images")).unwrap();
+        fs::write(
+            root.join("station_seal.png"),
+            include_bytes!("../../../tests/fixtures/phase-3b-screens/ui-image/seal.png"),
+        )
+        .unwrap();
+    }
     service.close().unwrap();
     let host = ApplicationHost::new(service);
     emit(json!({"ready":true}));
@@ -121,6 +132,40 @@ fn main() {
             emit(json!({"changed":true}));
             continue;
         }
+        if request["driver"] == "chooseImage" {
+            assert_eq!(mode.as_deref(), Some("ui-image"));
+            let choice = host
+                .with_service(|service| {
+                    service.authoring_select_import(&root.join("station_seal.png"))
+                })
+                .unwrap()
+                .unwrap();
+            emit(serde_json::to_value(choice).unwrap());
+            continue;
+        }
+        if request["driver"] == "imageFile" {
+            assert_eq!(mode.as_deref(), Some("ui-image"));
+            let image = game.join("game/images/ui station_seal.png");
+            match request["state"].as_str().unwrap() {
+                "changed" => fs::write(
+                    &image,
+                    include_bytes!(
+                        "../../../tests/fixtures/phase-3b-screens/ui-image/replacement.png"
+                    ),
+                )
+                .unwrap(),
+                "invalid" => fs::write(&image, b"not an image").unwrap(),
+                "missing" => fs::remove_file(&image).unwrap(),
+                "restore" => fs::write(
+                    &image,
+                    include_bytes!("../../../tests/fixtures/phase-3b-screens/ui-image/seal.png"),
+                )
+                .unwrap(),
+                _ => panic!("unknown fixture state"),
+            }
+            emit(json!({"changed":true}));
+            continue;
+        }
         let op = request["operation"].as_str().unwrap();
         assert!(matches!(
             op,
@@ -144,6 +189,10 @@ fn main() {
                 | "source.saveAll"
                 | "source.discardAll"
                 | "authoring.list"
+                | "asset.import"
+                | "asset.previewImport"
+                | "asset.reviewUiImage"
+                | "media.present"
                 | "flow.list"
                 | "screens.inspect"
                 | "screens.setSize"

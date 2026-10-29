@@ -3,6 +3,28 @@ use super::*;
 use serde_json::json;
 
 impl LifecycleService {
+    /// Native-only image fixture; importing passive bytes starts no project code.
+    pub fn prepare_ui_image_probe(data: PathBuf) -> Result<Self, String> {
+        let mut service = Self::prepare_source_foundation_probe(data.clone())?;
+        let root = data.join("synthetic-project");
+        fs::create_dir_all(root.join("game/images")).map_err(|e| e.to_string())?;
+        let selected = data.join("station_seal.png");
+        fs::write(
+            &selected,
+            include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/seal.png"),
+        )
+        .map_err(|e| e.to_string())?;
+        service.open_path(&root).map_err(|e| format!("{e:?}"))?;
+        let choice = service
+            .authoring_select_import(&selected)
+            .map_err(|e| format!("{e:?}"))?;
+        service.authoring_import_asset(serde_json::from_value(json!({
+            "authorityId":choice.authority_id,"kind":"uiImage","technicalName":"station_seal",
+            "displayName":"Station seal","characterId":null,"expression":null
+        })).map_err(|e| e.to_string())?).map_err(|e| format!("{e:?}"))?;
+        service.close().map_err(|e| format!("{e:?}"))?;
+        Ok(service)
+    }
     /// Disposable representative canvas composition with public SDK font/image assets.
     pub fn prepare_canvas_screen_probe(data: PathBuf, archive: &Path) -> Result<Self, String> {
         let mut service = Self::prepare_source_foundation_probe(data)?;

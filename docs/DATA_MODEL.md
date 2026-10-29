@@ -207,25 +207,37 @@ WAV/MP3/OGG/FLAC.
 
 ### UI-image role
 
-The selected L06 backend adds `uiImage` to the Asset kind enum without changing
+L06 adds `uiImage` to the Asset kind enum without changing
 existing IDs or the authoring metadata schema version. Its imports use
 `game/images/ui <name>.<extension>` and the automatic discovery name `ui <name>`.
 PNG/JPEG and static WebP keep the passive presentation bounds of 16 MiB and
 8192 pixels per natural dimension. UI-image import, file creation and metadata
-are one bounded shared-history transaction. Legacy import paths retain their
+are one bounded shared-history transaction. Natural dimensions are stored as
+`naturalWidth` and `naturalHeight` metadata. Legacy import paths retain their
 separate streaming behavior.
 
 Owned screen insertion and image changes take a stable Asset UUID plus its
 expected SHA-256. Core resolves the contained literal source path and refuses
 missing, changed or invalid references with `UI_IMAGE_MISSING`, `UI_IMAGE_CHANGED`
 or `INVALID_UI_IMAGE`. The source stores `add "images/..."` with pixel `xsize`
-and `ysize`; changing the asset and both dimensions is one minimal transaction.
+and `ysize`; changing the asset, dimensions, parent and supported numeric layout
+is one minimal transaction. `asset.reviewUiImage` reads the current contained bytes
+without changing metadata. Apply can include the reviewed `replacementSha256`;
+its new hash, byte count and natural dimensions share that source transaction.
+Undo restores both the prior reference metadata and source. External image bytes
+remain external. Unchanged source plus accepted replacement metadata still counts
+as a changed transaction; `screens.compose.changed` reports that distinction.
+Typed `imageSamples` and `imageAddition` canvas inputs verify the same Asset
+handle/hash without writes. Passive previews and the image-only desktop picker
+execute no project expressions. Browser image decoding completes before import or
+Apply. Width/height drafts use whole pixels; aspect preservation derives from the
+natural ratio and rounds the derived dimension to the nearest whole pixel.
 Comments, neighboring source, node identity and no-op history remain protected.
 The image byte-limit diagnostic is `UI_IMAGE_TOO_LARGE` and names the 16 MiB bound.
 
 [Ticket #40](https://github.com/Caldwell-41/Renpy-editor/issues/40) owns delivery and
 acceptance. [UI-image evidence](tasks/evidence/ui-image.md) distinguishes service
-checks from pending controller, design, SDK and native qualification.
+checks, approved design, controller proof and SDK/native qualification.
 
 ## Variables and state
 
