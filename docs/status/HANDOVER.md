@@ -6,8 +6,9 @@ Kris selected [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39).
 This checkout owns implementation on `codex/l05-project-fonts`, based on
 `8f0d208`. Preserve the unrelated untracked Phase 1 audit and all protected recovery
 below. The design-only chat "Ticket 39 font and typography mockups" owns its
-isolated `codex/l05-font-prototype` worktree. It must return Kris's approved
-runnable revision, captures and control map before production UI edits.
+isolated `codex/l05-font-prototype` worktree. Kris approved A2; its runnable
+revision, captures and control map are integrated through `804405d`.
+Keep the original design worktree pinned for production comparison.
 
 [Preparation evidence](../tasks/evidence/project-fonts.md) records licensed font
 fixtures and passing baseline typechecking and 58 ordinary screen-core tests.
@@ -17,8 +18,13 @@ pending. Automatic approval review rejected the initial GitHub comment; the
 reviewable text is in ignored `.toolchains/project-fonts/ticket-update.md`.
 Every costly-operation counter is zero; publication and acceptance are unclaimed.
 
+Design TypeScript, approval checks, the source fingerprint and all 18 capture
+hashes pass after integration. The design chat's combined startup failure remains
+failed, with no full promotion or product acceptance. The handoff and exact
+source identity are linked from the evidence record.
+
 Next: use the user's boundary answer to begin font-import TDD, record the limits
-in #39 when tracker approval is available, and integrate only the approved mock.
+in #39 when tracker approval is available, and implement the approved A2 controls.
 
 <a id="l06-implementation-and-qualification"></a>
 

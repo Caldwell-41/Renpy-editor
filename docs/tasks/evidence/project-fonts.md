@@ -34,6 +34,32 @@ comment is retained in ignored local output, and a user approval question is
 pending. All costly-operation counters are still zero. No code push, PR, merge,
 release, native, rendering or ticket acceptance is claimed.
 
-Next: confirm the test boundaries, record the selected qualification limits in
-#39 when tracker approval is available, then implement font admission and typed
-minimal text edits while the design chat obtains approval.
+The initial next step was to confirm the test boundaries and obtain mock approval.
+The design approval below resolves the latter; boundary confirmation and tracker
+approval remain pending.
+
+## Approved A2 handoff, 2026-10-29
+
+Kris approved `project-font` / `inspector-v2` / `refined` in the design chat with
+"Approve A2 and send it back to the original implementation chat."
+The [handoff](../../design/design-lab-project-font/HANDOFF.md) maps every control
+to its required real operation and retains the design's simulation limits.
+
+Reviewed source `79d958d5c45dfd12073c2192de05128d6ed19a91` and approval commit
+`54f4ebb8112b6becdc1d24e6228c6a9fb70957c5` are integrated through local
+`38d26b7`, `965e6d4` and `804405d`. The implementation checkout's frontend/lab
+fingerprint matches the approved
+`83a92587e4c13ad2a94fa1c69dbfcd6c87ef927062359939f0d1bd3969472cfc`.
+Design Lab TypeScript and approval checks pass, and all 18 retained capture hashes
+match. The original worktree remains the pinned comparison reference.
+
+The design agent reports a passing focused 24-case matrix and interaction check.
+Its combined Design Lab check remains failed at initial startup navigation; the
+handoff identifies the retained output. Integration neither reran that unchanged
+failure nor claimed full promotion validation. Actual font specimens, writes,
+persistence and native behavior remain unqualified. No production code changed.
+
+Next: confirm the three proposed test boundaries, record the selected limits in
+#39 when tracker approval is available, then implement the approved controls and
+their real service operations. Both pending questions remain with Kris in the
+implementation chat; design approval does not answer them.
