@@ -11,22 +11,23 @@ the shared request-lane fix.
 [Evidence](../tasks/evidence/project-fonts.md) owns receipts, original failures,
 review corrections and remaining limits. Full frontend checks pass; the ordinary
 core suite's sandbox listener failures pass in the affected permitted rerun.
-Earlier implementation-review findings are resolved. The requested separate
-draft-PR review follows audited CI.
+Earlier implementation-review findings are resolved. Kris selected a fresh
+separate draft-PR review after audited CI.
 
 Mac use is SDK 9/20, helpers 3/4, packages 3/3 and native sessions 3/3.
 [Draft PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) passes audited
-Windows [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40908795368)
-and [automatic quality](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40908699824)
-at `664d6930afce67378ebd94c371359d69529107d0`. Required artifact, binary, source,
-pixel and cleanup checks pass. Both targets establish the bounded functional
-criteria; physical OS-dialog/human-input and wider acceptance remain unclaimed.
-Earlier failures and root-cause corrections are retained in the owning evidence.
+Windows CI3 and automatic PR quality at `664d693`; receipt-only head `5845426`
+also passes ordinary PR checks. Both targets establish the bounded functional
+criteria with retained binary, source/pixel and cleanup evidence. The final
+handoff update changes documentation only. Current PR checks and the latest
+execution comment on [#39](https://github.com/Caldwell-41/Renpy-editor/issues/39)
+own its final ordinary-check identity and the separate review-chat identity.
+The selected next owner is a read-only two-axis review of the draft PR against
+`8f0d208fb3a28fac1cf94b3248f807ff85a54ddd`. Independent review is not yet passed.
 Dispatches are 3/3. Windows use is SDK 8/20, helpers 2/4, packages 2/3 and native
-sessions 2/3. No costly operation remains pending. Publish the documentation-only
-receipt update, audit its ordinary PR checks, then start the requested separate
-PR review chat against `8f0d208`. The PR stays draft; no merge, release or ticket
-acceptance is selected. Preserve the
+sessions 2/3. No costly operation or watcher remains pending. Keep the PR draft
+and #39 open; merge, release, physical OS-dialog/human and wider acceptance remain
+unselected. Preserve the
 unrelated Phase 1 audit, pinned design worktree and protected recovery below.
 
 ## L06 UI-image authoring merged

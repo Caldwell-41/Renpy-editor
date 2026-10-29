@@ -443,3 +443,22 @@ and native sessions 2/3. No costly operation remains pending. The final receipt
 update changes documentation only; application and workflow inputs match the
 qualified head. Publish that update and audit its ordinary PR checks, then start
 the user-requested separate code-review chat on PR #70 against `8f0d208`.
+
+## Review handoff
+
+The receipt-only head `5845426` passes ordinary
+[PR quality run 40913166422](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40913166422),
+attempt 1. Its application/workflow material is identical to qualified head
+`664d693`; the corrected Mac package remains `cf01c06`. The final handoff update
+is documentation only and needs ordinary PR checks. The PR's current checks and
+latest execution comment on #39 own that final check identity and the separate
+review-chat identity, avoiding another artifact-only qualification cycle.
+
+Kris selected a fresh separate chat to run the two-axis code-review skill on
+[the draft PR](https://github.com/Caldwell-41/Renpy-editor/pull/70), with fixed
+base `8f0d208fb3a28fac1cf94b3248f807ff85a54ddd`. That chat owns read-only review
+and reports Standards and Spec separately. Implementation and both-target
+qualification are complete for this handoff; independent review is not yet a
+pass. Keep the PR draft and #39 open. Merge, release, human/OS-dialog and wider
+acceptance remain unselected. No costly qualification or watcher is pending.
+The original failures, artifact identities and protected recovery remain retained.
