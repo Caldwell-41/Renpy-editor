@@ -12,7 +12,7 @@ integrated; the separate pinned prototype worktree remains the comparison refere
 The typed image inspector, imports, passive previews, aspect controls, per-image
 drafts and atomic image/size/layout/reviewed-reference transactions are implemented.
 The user-confirmed review base is `2e045d9`; both review axes clear corrected
-candidate `19d71e8`.
+candidate `9d6bf6b`, including the import-stack correction.
 
 | Capability | Automated proof | Native/human status |
 | --- | --- | --- |
@@ -22,12 +22,12 @@ candidate `19d71e8`.
 
 [Evidence](../tasks/evidence/ui-image.md) owns detailed results and failures;
 [HANDOVER](HANDOVER.md#l06-implementation-and-qualification) owns continuation.
-Kris authorized publication and focused Windows CI. The branch is pushed at
-`8eeabc9`; [CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40807895621)
-failed for that exact candidate before any SDK/package/native start. A reproduced
-import stack-buffer defect is corrected at `9d6bf6b`, both reviews clear, and fresh
-signed Mac package/native proof passes; Windows retry is next; no PR,
-merge or release is selected. Earlier closed
+Kris authorized publication and focused Windows CI. The corrected branch is
+pushed at `d9ac51d`; [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40812796885)
+failed for that exact candidate, ordinal 2. CI1 remains failed on the reproduced
+import-stack defect; both heap-buffer corrections pass focused debug/release,
+controller/core and fresh signed Mac package/native proof. Windows helper/native proof passes; normal-entry capture fails its strict pixel
+gate and the harness correction is under qualification. No PR, merge or release is selected. Earlier closed
 allowances and protected recovery remain intact.
 
 ## L04 nested and clipped layouts merged

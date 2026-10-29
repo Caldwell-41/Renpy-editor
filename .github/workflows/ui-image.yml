@@ -145,6 +145,7 @@ jobs:
         if: ${{ always() && runner.os == 'Windows' && hashFiles('app/target/release/loomlight.exe') != '' }}
         shell: pwsh
         run: |
+          Copy-Item 'target/release/loomlight.exe' "$env:RUNNER_TEMP/ui-image/loomlight.exe"
           $binary = [IO.File]::ReadAllBytes((Resolve-Path 'target/release/loomlight.exe'))
           $pe = [BitConverter]::ToInt32($binary, 0x3c)
           if ([BitConverter]::ToUInt16($binary, $pe + 4) -ne 0x8664) { throw 'Windows x64 executable required' }

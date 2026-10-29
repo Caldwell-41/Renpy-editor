@@ -13,10 +13,12 @@ spec.loader.exec_module(qualification)
 
 
 def receipt():
-    return dict(aspect=[1280, 720], sdkVersion='8.5.3', rectangles={
+    value = dict(aspect=[1280, 720], sdkVersion='8.5.3', rectangles={
         'png': [20, 20, 120, 60], 'jpeg': [180, 20, 96, 48],
         'lossless': [340, 20, 160, 80], 'lossy': [540, 20, 128, 64],
         'alpha': [720, 20, 80, 40], 'stretch': [20, 160, 120, 90]})
+    value.update(renderer='gl2', referenceRectangles=copy.deepcopy(value['rectangles']))
+    return value
 
 
 class UiImageEvidence(unittest.TestCase):
@@ -39,6 +41,43 @@ class UiImageEvidence(unittest.TestCase):
         for bad in wrong:
             with self.subTest(bad=bad), self.assertRaises((AssertionError, KeyError)):
                 qualification.validate(copy.deepcopy(bad), (1280, 720))
+
+    def test_requires_the_admitted_native_renderer(self):
+        for renderer in [None, 'sw', 'unknown']:
+            value = receipt()
+            if renderer is not None:
+                value['renderer'] = renderer
+            else:
+                value.pop('renderer')
+            with self.subTest(renderer=renderer), self.assertRaises((AssertionError, KeyError)):
+                qualification.validate(value, (1280, 720))
+
+    def test_native_capture_environment_refuses_dummy_video(self):
+        for system, expected in [('Windows', 'angle2'), ('Darwin', 'gl2')]:
+            env = qualification.rendering_environment({'SDL_VIDEODRIVER':'dummy','SDL_RENDER_DRIVER':'software'}, '/scratch/saves', system)
+            self.assertEqual(env['RENPY_RENDERER'], expected)
+            self.assertNotIn('SDL_VIDEODRIVER', env)
+            self.assertNotIn('SDL_RENDER_DRIVER', env)
+
+    def test_capture_requires_repeatability_and_render_isolation(self):
+        from PIL import ImageDraw
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            image = Image.new('RGBA', (1280,720), (0,0,0,0))
+            draw = ImageDraw.Draw(image)
+            for x,y,w,h in qualification.EXPECTED.values():
+                for dx,dy,color in [(0,0,'red'),(1,0,'green'),(0,1,'blue'),(1,1,'yellow')]:
+                    draw.rectangle((x+dx*w//2,y+dy*h//2,x+(dx+1)*w//2-1,y+(dy+1)*h//2-1),fill=color)
+            original=root/'source.png';reference=root/'reference.png';repeat=root/'repeat.png';empty=root/'empty.png'
+            for path in [original,reference,repeat]: image.save(path)
+            Image.new('RGBA',(1280,720),(0,0,0,0)).save(empty)
+            qualification.validate(receipt(),(1280,720),original,reference,repeated=repeat,empty=empty,renderer='gl2')
+            image.putpixel((21,21),(1,2,3,255));image.save(repeat)
+            with self.assertRaisesRegex(AssertionError,'unstable'):
+                qualification.validate(receipt(),(1280,720),original,reference,repeated=repeat,empty=empty,renderer='gl2')
+            Image.open(original).save(repeat);Image.open(original).save(empty)
+            with self.assertRaisesRegex(AssertionError,'empty Render'):
+                qualification.validate(receipt(),(1280,720),original,reference,repeated=repeat,empty=empty,renderer='gl2')
 
     def test_rejects_placeholder_pixels_with_otherwise_correct_geometry(self):
         with tempfile.TemporaryDirectory() as temporary:

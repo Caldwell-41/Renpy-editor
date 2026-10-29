@@ -396,3 +396,76 @@ Cumulative Mac use is SDK 7/16, helpers 2/4, package builds 2/3 and native sessi
 selected operation is ordinal 2 on the pushed correction plus evidence-only
 closeout. Planned Windows maximum remains five SDK starts, one helper, one package
 and one native session. Do not retry CI1 or reset prior consumption.
+
+
+## CI2 dispatch and waiting state
+
+The corrected branch is published at `d9ac51db5d5ef1965f4c2221f58829bd01b78113`. This evidence-only head
+contains product correction `9d6bf6b`, which passed focused checks, both review
+axes and fresh signed Mac package/native qualification. [Run 40812796885](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40812796885),
+attempt 1, was created at `2026-10-29T03:33:27Z` with `ui_image=true`, exact candidate
+and ordinal 2. GitHub confirms branch/SHA; selection validation passes and only
+the Windows image job is in progress. Dispatch 2/3 is consumed. CI1 remains failed.
+
+Same-chat ci-watch identity is `2aae7e077890903288a864c0`. Raw dispatch metadata remains under
+ignored `ci2/`. On its event, acknowledge delivery and audit exact run/attempt/SHA,
+all required stages, independent source/reference pixels, package/native identity,
+accepted disk bytes, cleanup and actual costly starts. Windows use remains to be
+audited. No pass, PR, merge, release or complete ticket acceptance is claimed.
+
+
+## CI2 Windows capture failure and reassessment
+
+The CI2 watcher event was acknowledged in this chat. GitHub confirms run
+`40812796885`, attempt 1, exact candidate `d9ac51d`; it remains failed.
+[Receipt](ui-image-windows-ci2.json) retains the normal-entry failure and independent
+positive helper/native/package slices. Stack regression, 269 frontend tests,
+54 screen-core positives (three SDK ignores), actual controller/core and exact
+all-format probe rehearsal pass. The import stack defect is qualified on Windows.
+
+Compile/lint and the first 1280x720 normal-entry run exit 0, preserve Source and
+clean scratch. Its six Source rectangles match exactly, but source/reference PNGs
+differ at 149 pixels: 143 near the scaled lossless WebP's lower edge and six near
+the lossy WebP edge. PNG/JPEG/alpha WebP/stretched PNG match exactly. The old checker
+requests dummy video and software rendering, uses private `render_to_texture`/
+pygame export calls and records no actual renderer. These data establish a failed
+capture comparison, not a proven defect in the product's ANGLE2 image path or an
+identified native decoder memory defect. The failed images and measurements stay
+under ignored `ci2/artifacts/sdk/`.
+
+Independent ANGLE2 helper proof passes both aspects, all six exact rectangles,
+zero differing reference RGBA pixels, typed pending image and cooperative cleanup.
+Those frames/pairs were rechecked locally without an SDK start. Windows x64 package
+identity/hash and all native stages, exact disk bytes, reopen and complete cleanup
+pass. No Windows signing verification is claimed. The tested release executable is
+missing from the artifact, so its hash cannot be independently rechecked; CI3 now
+retains that exact binary in addition to the existing identity receipt. This is
+missing diagnostic evidence, not recovered evidence.
+
+Actual CI2 use is four Windows SDK starts (compile/lint/first normal entry plus
+one helper), one helper, one package and one native session. Dispatches are 2/3.
+No later aspect was run by the failed normal-entry checker. Unchanged Mac use is
+SDK 7/16, helpers 2/4, package 2/3 and native 2/3 before the new capture check.
+
+The smallest discriminating correction is in the qualification harness: select
+native `gl2`/`angle2`, require the observed backend, and use public
+`renpy.render_to_file(..., resize=True)` for isolated Render captures. The existing
+product helper already uses that route. [Ren'Py capture docs](https://www.renpy.org/doc/html/screenshot.html)
+state the Render and virtual-size contract; pinned 8.5.3 `displayexports.py` confirms
+it. The [renderer documentation](https://www.renpy.org/doc/html/display_problems.html)
+is current 8.5.4 and identifies model renderers; pinned 8.5.3 still contains an
+internal software fallback, so no claim is made that its implementation is absent.
+
+The new gate admits both Source and independent-reference rectangles, exact
+source/reference RGBA, an exact repeated Source capture and a transparent empty
+Render. It rejects fallback/unknown/missing renderer, unstable capture, whole-window
+capture instead of Render isolation, wrong dimensions and placeholder images.
+The renderer-admission test first fails against the old checker; all six gate
+unit tests pass after correction. No pixel tolerance, color, asset, Source,
+product renderer, timeout or product code changes.
+
+Next qualify this capture locally with four Mac SDK starts within the remaining
+16-start ceiling, then review before selecting final CI ordinal 3. The last run
+is still the bounded existing Windows qualification. Fresh coherent Source inputs
+must pass normal entry and helper together; executable retention remains unresolved,
+so package/native artifact proof also runs. Original CI1/CI2 failures remain failed.

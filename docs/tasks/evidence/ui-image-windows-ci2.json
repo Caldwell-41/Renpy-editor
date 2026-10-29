@@ -1,0 +1,198 @@
+{
+  "runId": 40812796885,
+  "attempt": 1,
+  "candidate": "d9ac51db5d5ef1965f4c2221f58829bd01b78113",
+  "url": "https://github.com/Caldwell-41/Renpy-editor/actions/runs/40812796885",
+  "conclusion": "failure",
+  "normalEntry": {
+    "passed": false,
+    "sdkProcesses": 3,
+    "os": "Windows",
+    "architecture": "AMD64",
+    "records": [],
+    "commands": [
+      {
+        "name": "compile",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "lint",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "images-1280x720",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      }
+    ],
+    "cleanupComplete": true,
+    "candidate": "d9ac51db5d5ef1965f4c2221f58829bd01b78113",
+    "rejectingGateSelfCheck": true,
+    "failure": {
+      "type": "AssertionError",
+      "message": "Source and independent reference pixels differ"
+    }
+  },
+  "helper": {
+    "acceptedSHA256": "616aa909c71dae7a9e9305796e123200330d847080562cdf4d5f97ec15430edf",
+    "helperSessions": 1,
+    "passed": true,
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "frameId": "6260eb44-3416-4e14-9bd3-8ec45e540c90",
+        "renderer": "angle2"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "frameId": "e73bb235-8a0d-4db9-98b7-301a9fc35583",
+        "renderer": "angle2"
+      }
+    ],
+    "sdkProcesses": 1,
+    "shutdown": {
+      "cleanupComplete": true,
+      "cooperative": true,
+      "exitCode": 0
+    },
+    "typedPending": true
+  },
+  "pixels": {
+    "passed": true,
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "imageSHA256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13",
+        "referenceSHA256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13",
+        "differentPixels": 0
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "imageSHA256": "ee541f554e2ddbf9f9af56104746e0a376725c75bcb693f596b9cefbc4fc16d1",
+        "referenceSHA256": "ee541f554e2ddbf9f9af56104746e0a376725c75bcb693f596b9cefbc4fc16d1",
+        "differentPixels": 0
+      }
+    ],
+    "acceptedSHA256": "616aa909c71dae7a9e9305796e123200330d847080562cdf4d5f97ec15430edf"
+  },
+  "native": {
+    "case": "ui-image",
+    "passed": true,
+    "exitCode": 0,
+    "timedOut": false,
+    "elapsedSeconds": 13.375,
+    "reports": [
+      {
+        "case": "ui-image",
+        "cleanupComplete": true,
+        "cleanupOwners": {
+          "credentials": true,
+          "host": true,
+          "requests": true
+        },
+        "details": {
+          "acceptedSource": "# loomlight-screen: 09468746-e08a-4514-8634-0c8888eb4245\nscreen travel_notes():\n    pass\n    add \"images/ui station_seal.png\": # loomlight-element: f4b54792-4894-470d-bd4e-9b4ac4cc8c1c\n        xsize 200\n        ysize 70\n    use source_only_footer()\n\nscreen source_only_footer():\n    text \"Protected neighbor\"\n",
+          "identities": [
+            "f7afbb5e-3d8e-469c-91e1-bf7b89a205e1",
+            "f4b54792-4894-470d-bd4e-9b4ac4cc8c1c"
+          ],
+          "identity": {
+            "id": "09468746-e08a-4514-8634-0c8888eb4245",
+            "name": "travel_notes",
+            "path": "game/ui/travel_notes.rpy",
+            "resolved": true,
+            "rootId": "f7afbb5e-3d8e-469c-91e1-bf7b89a205e1",
+            "sourceRevision": "b6d420593351e277be48be110ec4053d35141d857cefde48faf9d379ed797f9d"
+          },
+          "imageDecoded": true,
+          "imageFormats": [
+            "png",
+            "jpeg",
+            "webp-lossless",
+            "webp-lossy",
+            "webp-alpha"
+          ],
+          "nativeWebView": true,
+          "passed": true,
+          "scenario": "ui-image",
+          "sdkExecuted": false,
+          "sessionId": "5a948aef-97ca-440e-b008-10464bd844af",
+          "stage": "complete",
+          "stages": [
+            {
+              "stage": "image-picker-passed"
+            },
+            {
+              "stage": "image-draft-passed"
+            },
+            {
+              "stage": "image-history-passed"
+            },
+            {
+              "stage": "image-source-passed"
+            },
+            {
+              "stage": "image-reopen-passed"
+            },
+            {
+              "stage": "complete"
+            }
+          ]
+        },
+        "evidence": "runtime-ui-packaged",
+        "passed": true
+      }
+    ],
+    "externalErrors": [],
+    "helpDisk": {
+      "acceptedBytesMatch": true,
+      "scratchJobsRemaining": 0,
+      "sourceBytecode": false,
+      "sourceSaves": false
+    },
+    "diskErrors": [],
+    "fixtureCleanupComplete": true
+  },
+  "packageIdentity": {
+    "architecture": "Windows x64",
+    "executableSHA256": "63E4470014153D021B39136A87F6CC422830C620720EFE01BF091BF2D6759F16",
+    "candidate": "d9ac51db5d5ef1965f4c2221f58829bd01b78113"
+  },
+  "executableRetained": false,
+  "windowsStarted": {
+    "sdk": 4,
+    "helper": 1,
+    "package": 1,
+    "native": 1
+  },
+  "pixelFailure": {
+    "aspect": [
+      1280,
+      720
+    ],
+    "differingPixels": 149,
+    "affected": {
+      "lossless": 143,
+      "lossy": 6
+    },
+    "rendererRecorded": false
+  },
+  "scope": "Positive independent slices do not turn the failed normal-entry gate or overall run into a pass. Windows executable architecture/hash verified; no Windows signature claim."
+}

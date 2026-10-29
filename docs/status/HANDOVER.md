@@ -42,32 +42,39 @@ failed fixture lookup, `controller-*`, probe rehearsals, full-suite logs and sig
 release. Preserve the prototype comparison worktree and earlier protected state.
 
 Kris authorized pushing the reviewed branch and focused Windows CI. Remote
-`codex/phase3b-l06-ui-image` now points to `8eeabc90401374fa57fe1ed2e3ef9d3ddcc149de`.
-[CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40807895621), attempt 1,
-was created at `2026-10-29T02:41:57Z` using the exact candidate and ordinal 1.
-It is now failed and fully identified. Its watcher event was acknowledged; no
-watcher is running. Portable checks pass, then the controller overflows its Windows
-main stack on first image selection. SDK/helper/package/native stages never start;
-Windows operation use remains zero and dispatch 1/3 remains consumed.
+`codex/phase3b-l06-ui-image` now points to `d9ac51db5d5ef1965f4c2221f58829bd01b78113`.
+Product correction is `9d6bf6b`; `d9ac51d` changes only its Mac evidence/status.
+CI1 `40807895621`, attempt 1 at `8eeabc9`, remains failed after portable checks and
+the Windows controller stack overflow. Its event was acknowledged. No Windows
+SDK/helper/package/native operation started in CI1. The public-service constrained
+stack regression reproduced both import/streaming arrays before their heap fixes.
+Both review axes clear the correction; debug/release and affected import/streaming
+checks pass. Controller-08 and signed Mac package/native 2 pass at `9d6bf6b`.
+Keep every original receipt/failure and the unchanged-material SDK/helper reuse
+boundaries in the [evidence](../tasks/evidence/ui-image.md#ci1-windows-import-stack-failure).
 
-[CI1 diagnosis](../tasks/evidence/ui-image.md#ci1-windows-import-stack-failure) owns
-logs, partial-artifact limitations and red/green reproduction. Product fixes are
-committed at `9d6bf6b`: two 1 MiB import/streaming stack arrays move to heap storage,
-with a public-service bounded-stack regression. Preserve in-flight status/evidence
-edits and both local dependency/target symlinks. Both review axes clear the correction and affected debug/release checks pass.
-Fresh signed Mac package build 2 and native session 2 also pass at `9d6bf6b`;
-controller-08 passes with the rebuilt core. Next publish and dispatch ordinal 2
-within unchanged ceilings.
-The new Mac receipt is `ui-image-mac-native-02.json`. Preserve original native
-receipts and existing SDK/helper pixel evidence with its unchanged-material reuse
-boundaries.
+CI2 `40812796885`, attempt 1 at `d9ac51d`, is failed and its event acknowledged.
+Import/controller/rehearsal checks, ANGLE2 helper at both aspects and native
+package/disk/cleanup pass. Only normal-entry pixel admission fails: 149 differing
+pixels near scaled WebP edges at 1280x720. The old private/dummy-video capture
+records no actual renderer; no product decoder or renderer defect is established.
+[CI2 diagnosis](../tasks/evidence/ui-image.md#ci2-windows-capture-failure-and-reassessment)
+owns exact observations, positive slices and missing executable evidence.
 
-CI2 may select at most five Windows SDK starts, one helper, one package and one
-native session. Do not rerun CI1 or reset counts. The user already authorized push
-and focused CI; ordinary in-scope corrections/retries need no repeated permission.
-Register ci-watch only after a new exact run is confirmed. No PR, merge or release
-is selected; no Windows or full-ticket acceptance is claimed. This chat owns
-continuation.
+Dispatch use is 2/3; Windows use is SDK 4/16, helper 1/4, package 1/3, native 1/3.
+Mac completed use before the next campaign is SDK 7/16, helper 2/4, package 2/3,
+native 2/3. The checker now selects GL2/ANGLE2 and public Render capture, checks
+backend, both geometry maps, repeatability and empty-Render isolation, with zero
+pixel tolerance. Six gate tests pass after a renderer-admission red reproduction.
+Product code is unchanged from `9d6bf6b`; no new Mac package is required for this
+harness-only correction. Four Mac SDK starts are selected to verify the new capture.
+
+Next finish local capture proof and both-axis review, then use only final ordinal 3
+on its exact pushed candidate. SDK/helper Source inputs must qualify coherently,
+and the Windows executable must actually be retained. Do not reset counts or
+rerun older attempts. No watcher is running. No full Windows/ticket pass, PR,
+merge or release is claimed. Keep local dependency/target symlinks and all original
+artifacts/failed frames. This chat owns continuation.
 
 ## L04 merge and workspace closeout
 

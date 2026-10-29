@@ -35,9 +35,24 @@ ELEMENT_ASSETS = dict(png='seal.png', jpeg='seal.jpg', lossless='seal.webp',
                       lossy='seal-lossy.webp', alpha='seal-alpha.webp', stretch='seal.png')
 
 
-def validate(record, aspect, image=None, reference=None):
+def rendering_environment(base, saves, system):
+    env = dict(base, SDL_AUDIODRIVER='dummy',
+               RENPY_RENDERER='angle2' if system == 'Windows' else 'gl2',
+               RENPY_SCALE_FACTOR='1', RENPY_DISABLE_SOUND='1',
+               RENPY_SKIP_MAIN_MENU='1', RENPY_SKIP_SPLASHSCREEN='1',
+               RENPY_PATH_TO_SAVES=str(saves))
+    env.pop('SDL_VIDEODRIVER', None)
+    env.pop('SDL_RENDER_DRIVER', None)
+    return env
+
+
+def validate(record, aspect, image=None, reference=None, *, repeated=None, empty=None, renderer=None):
     assert record['aspect'] == list(aspect)
     assert record['sdkVersion'].startswith('8.5.3')
+    assert record['renderer'] in ('gl2', 'angle2'), 'Native model renderer required'
+    if renderer is not None:
+        assert record['renderer'] == renderer, 'Requested renderer was not used'
+    assert record['referenceRectangles'] == EXPECTED
     assert record['rectangles'] == EXPECTED, (record['rectangles'], EXPECTED)
     if image is None:
         return
@@ -47,6 +62,14 @@ def validate(record, aspect, image=None, reference=None):
         rgba, wanted = captured.convert('RGBA'), expected.convert('RGBA')
         from PIL import ImageChops
         assert ImageChops.difference(rgba, wanted).getextrema() == ((0, 0),) * 4, 'Source and independent reference pixels differ'
+        if repeated is not None:
+            with Image.open(repeated) as again:
+                assert again.size == aspect
+                assert ImageChops.difference(rgba, again.convert('RGBA')).getextrema() == ((0, 0),) * 4, 'Repeated source capture is unstable'
+        if empty is not None:
+            with Image.open(empty) as blank:
+                assert blank.size == aspect
+                assert blank.convert('RGBA').getextrema() == ((0, 0),) * 4, 'Capture did not isolate the empty Render'
         background = wanted.getpixel((0, 0))
         for name, (x, y, width, height) in EXPECTED.items():
             quadrants = {wanted.getpixel((x + width * dx // 4, y + height * dy // 4))
@@ -118,38 +141,44 @@ def main():
                 reference_source.extend([f'    add {json.dumps(runtime_path)}:', f'        xsize {width}',
                     f'        ysize {height}', f'        xpos {x}', f'        ypos {y}', f'        id {json.dumps(name)}'])
             (project / 'game/reference.rpy').write_text('\n'.join(reference_source) + '\n')
-            env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy', RENPY_RENDERER='sw',
-                       RENPY_SCALE_FACTOR='1', RENPY_DISABLE_SOUND='1', RENPY_SKIP_MAIN_MENU='1',
-                       RENPY_SKIP_SPLASHSCREEN='1', RENPY_PATH_TO_SAVES=str(scratch / 'saves'))
+            env = rendering_environment(os.environ, scratch / 'saves', platform.system())
+            result['requestedRenderer'] = env['RENPY_RENDERER']
             for aspect in [(1280, 720), (1024, 768)]:
                 (project / 'game/options.rpy').write_text(f'define config.name = "Loomlight UI image proof"\ndefine config.screen_width = {aspect[0]}\ndefine config.screen_height = {aspect[1]}\ndefine config.save_directory = None\ndefine config.sound = False\n')
                 image = output / f'sdk-{aspect[0]}x{aspect[1]}.png'
                 reference = output / f'reference-{aspect[0]}x{aspect[1]}.png'
+                repeated = output / f'repeated-{aspect[0]}x{aspect[1]}.png'
+                empty = output / f'empty-{aspect[0]}x{aspect[1]}.png'
                 proof = '''init python:
     def ui_image_finish():
         try:
             from renpy.test.testfocus import focus_from_displayable
             rectangles = {}
-            for name in NAMES:
-                widget = renpy.get_displayable("notes", name, base=True)
-                assert widget is not None, name
-                focus = focus_from_displayable(widget)
-                assert focus is not None, name
-                rectangles[name] = [focus.x, focus.y, focus.w, focus.h]
-            render = renpy.render(renpy.get_screen("notes"), config.screen_width, config.screen_height, 0, 0)
-            surface = renpy.display.draw.render_to_texture(render, True)
-            renpy.display.pgrender.pygame.image.save(surface, IMAGE)
-            reference_render = renpy.render(renpy.get_screen("ui_image_reference"), config.screen_width, config.screen_height, 0, 0)
-            reference_surface = renpy.display.draw.render_to_texture(reference_render, True)
-            renpy.display.pgrender.pygame.image.save(reference_surface, REFERENCE)
-            print("UI_IMAGE_GEOMETRY " + __import__("json").dumps(dict(aspect=[config.screen_width, config.screen_height], sdkVersion=renpy.version_only, rectangles=rectangles)), flush=True)
+            reference_rectangles = {}
+            for screen_name, target in [("notes", rectangles), ("ui_image_reference", reference_rectangles)]:
+                for name in NAMES:
+                    widget = renpy.get_displayable(screen_name, name, base=True)
+                    assert widget is not None, (screen_name, name)
+                    focus = focus_from_displayable(widget)
+                    assert focus is not None, (screen_name, name)
+                    target[name] = [focus.x, focus.y, focus.w, focus.h]
+            renderer = renpy.get_renderer_info()["renderer"]
+            assert renderer == RENDERER, renderer
+            def capture(displayable, filename):
+                render = renpy.render(displayable, config.screen_width, config.screen_height, 0, 0)
+                renpy.render_to_file(render, filename, resize=True)
+            capture(renpy.get_screen("notes"), IMAGE)
+            capture(renpy.get_screen("ui_image_reference"), REFERENCE)
+            capture(renpy.get_screen("notes"), REPEATED)
+            capture(renpy.display.layout.Null(config.screen_width, config.screen_height), EMPTY)
+            print("UI_IMAGE_GEOMETRY " + __import__("json").dumps(dict(aspect=[config.screen_width, config.screen_height], sdkVersion=renpy.version_only, renderer=renderer, rectangles=rectangles, referenceRectangles=reference_rectangles)), flush=True)
         except BaseException:
             __import__("traceback").print_exc()
             renpy.quit(status=61, save=False)
         renpy.quit(status=0, save=False)
 screen ui_image_finish_screen():
     timer 0.5 action Function(ui_image_finish)
-'''.replace('NAMES', repr(list(EXPECTED))).replace('IMAGE)', repr(str(image)) + ')').replace('REFERENCE)', repr(str(reference)) + ')')
+'''.replace('NAMES', repr(list(EXPECTED))).replace('IMAGE)', repr(str(image)) + ')').replace('REFERENCE)', repr(str(reference)) + ')').replace('REPEATED)', repr(str(repeated)) + ')').replace('EMPTY)', repr(str(empty)) + ')').replace('RENDERER,', repr(env['RENPY_RENDERER']) + ',')
                 ast.parse(textwrap.dedent(proof.split('screen ui_image_finish_screen():')[0].removeprefix('init python:\n')))
                 (project / 'game/proof.rpy').write_text(proof)
                 commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if not args.reuse_compile_lint and aspect == (1280, 720) else []
@@ -178,8 +207,8 @@ screen ui_image_finish_screen():
                 lines = [line[len('UI_IMAGE_GEOMETRY '):] for line in command.output.splitlines() if line.startswith('UI_IMAGE_GEOMETRY ')]
                 assert len(lines) == 1, 'Missing or duplicate geometry'
                 record = json.loads(lines[0])
-                validate(record, aspect, image, reference)
-                result['records'].append(dict(record, sourceSHA256=accepted['sha256'], imageSHA256=hashlib.sha256(image.read_bytes()).hexdigest(), referenceSHA256=hashlib.sha256(reference.read_bytes()).hexdigest(), differingPixels=0))
+                validate(record, aspect, image, reference, repeated=repeated, empty=empty, renderer=env['RENPY_RENDERER'])
+                result['records'].append(dict(record, sourceSHA256=accepted['sha256'], imageSHA256=hashlib.sha256(image.read_bytes()).hexdigest(), referenceSHA256=hashlib.sha256(reference.read_bytes()).hexdigest(), repeatedSHA256=hashlib.sha256(repeated.read_bytes()).hexdigest(), emptySHA256=hashlib.sha256(empty.read_bytes()).hexdigest(), differingPixels=0, repeatedExact=True, emptyRenderIsolated=True))
         result['cleanupComplete'] = not scratch.exists()
         result['passed'] = result['cleanupComplete'] and len(result['records']) == 2
     except Exception as error:
