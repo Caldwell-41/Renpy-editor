@@ -1,0 +1,804 @@
+{
+  "runId": 40816702645,
+  "attempt": 1,
+  "candidate": "b00415f6526476b1c235221f99f03d5cc0547fe5",
+  "url": "https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1",
+  "conclusion": "success",
+  "artifact": {
+    "id": 12873675939,
+    "name": "ui-image-Windows-40816702645-1",
+    "digest": "sha256:f86a197324ccc61246f0393b1f30de31ec7c49c7d94ed5465f451d9858ffa7f7",
+    "expires_at": "2026-11-05T04:32:18Z",
+    "expired": false
+  },
+  "normalEntry": {
+    "passed": true,
+    "sdkProcesses": 4,
+    "os": "Windows",
+    "architecture": "AMD64",
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "renderer": "angle2",
+        "rectangles": {
+          "png": [
+            20,
+            20,
+            120.0,
+            60.0
+          ],
+          "jpeg": [
+            180,
+            20,
+            96.0,
+            48.0
+          ],
+          "lossless": [
+            340,
+            20,
+            160.0,
+            80.0
+          ],
+          "lossy": [
+            540,
+            20,
+            128.0,
+            64.0
+          ],
+          "alpha": [
+            720,
+            20,
+            80.0,
+            40.0
+          ],
+          "stretch": [
+            20,
+            160,
+            120.0,
+            90.0
+          ]
+        },
+        "referenceRectangles": {
+          "png": [
+            20,
+            20,
+            120.0,
+            60.0
+          ],
+          "jpeg": [
+            180,
+            20,
+            96.0,
+            48.0
+          ],
+          "lossless": [
+            340,
+            20,
+            160.0,
+            80.0
+          ],
+          "lossy": [
+            540,
+            20,
+            128.0,
+            64.0
+          ],
+          "alpha": [
+            720,
+            20,
+            80.0,
+            40.0
+          ],
+          "stretch": [
+            20,
+            160,
+            120.0,
+            90.0
+          ]
+        },
+        "sourceSHA256": "6dd73e2b279951551853c2001817fc258a657d6ecd4d00d62eecacbceb04b269",
+        "imageSHA256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13",
+        "referenceSHA256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13",
+        "repeatedSHA256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13",
+        "emptySHA256": "dc59986575fe1902c1bdea4fe25019aa516d826bfe5f9e36a34a40b664276b7f",
+        "differingPixels": 0,
+        "repeatedExact": true,
+        "emptyRenderIsolated": true
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "sdkVersion": "8.5.3.26051504",
+        "renderer": "angle2",
+        "rectangles": {
+          "png": [
+            20,
+            20,
+            120.0,
+            60.0
+          ],
+          "jpeg": [
+            180,
+            20,
+            96.0,
+            48.0
+          ],
+          "lossless": [
+            340,
+            20,
+            160.0,
+            80.0
+          ],
+          "lossy": [
+            540,
+            20,
+            128.0,
+            64.0
+          ],
+          "alpha": [
+            720,
+            20,
+            80.0,
+            40.0
+          ],
+          "stretch": [
+            20,
+            160,
+            120.0,
+            90.0
+          ]
+        },
+        "referenceRectangles": {
+          "png": [
+            20,
+            20,
+            120.0,
+            60.0
+          ],
+          "jpeg": [
+            180,
+            20,
+            96.0,
+            48.0
+          ],
+          "lossless": [
+            340,
+            20,
+            160.0,
+            80.0
+          ],
+          "lossy": [
+            540,
+            20,
+            128.0,
+            64.0
+          ],
+          "alpha": [
+            720,
+            20,
+            80.0,
+            40.0
+          ],
+          "stretch": [
+            20,
+            160,
+            120.0,
+            90.0
+          ]
+        },
+        "sourceSHA256": "6dd73e2b279951551853c2001817fc258a657d6ecd4d00d62eecacbceb04b269",
+        "imageSHA256": "351886cdf32ab629b8cbdc6a17e3babf5ef948c4adde496da611d8c50554f838",
+        "referenceSHA256": "351886cdf32ab629b8cbdc6a17e3babf5ef948c4adde496da611d8c50554f838",
+        "repeatedSHA256": "351886cdf32ab629b8cbdc6a17e3babf5ef948c4adde496da611d8c50554f838",
+        "emptySHA256": "4bd7227ae468226eebda7f0ab55e6fe61fcf57ba0c57e5f8e434b7f98bcec728",
+        "differingPixels": 0,
+        "repeatedExact": true,
+        "emptyRenderIsolated": true
+      }
+    ],
+    "commands": [
+      {
+        "name": "compile",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "lint",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "images-1280x720",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "images-1024x768",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      }
+    ],
+    "cleanupComplete": true,
+    "candidate": "b00415f6526476b1c235221f99f03d5cc0547fe5",
+    "rejectingGateSelfCheck": true,
+    "requestedRenderer": "angle2"
+  },
+  "helper": {
+    "acceptedSHA256": "6dd73e2b279951551853c2001817fc258a657d6ecd4d00d62eecacbceb04b269",
+    "helperSessions": 1,
+    "passed": true,
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "frameId": "b2832120-f963-4873-8c3a-042b37e25546",
+        "renderer": "angle2"
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "frameId": "b02a45a7-8559-4fb0-aa01-7add6cd25461",
+        "renderer": "angle2"
+      }
+    ],
+    "sdkProcesses": 1,
+    "shutdown": {
+      "cleanupComplete": true,
+      "cooperative": true,
+      "exitCode": 0
+    },
+    "typedPending": true
+  },
+  "pixels": {
+    "passed": true,
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "imageSHA256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13",
+        "referenceSHA256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13",
+        "differentPixels": 0
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "imageSHA256": "ee541f554e2ddbf9f9af56104746e0a376725c75bcb693f596b9cefbc4fc16d1",
+        "referenceSHA256": "ee541f554e2ddbf9f9af56104746e0a376725c75bcb693f596b9cefbc4fc16d1",
+        "differentPixels": 0
+      }
+    ],
+    "acceptedSHA256": "6dd73e2b279951551853c2001817fc258a657d6ecd4d00d62eecacbceb04b269"
+  },
+  "helperGeometry": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "kind": "images",
+      "rectangles": [
+        [
+          20.0,
+          20.0,
+          120.0,
+          60.0
+        ],
+        [
+          180.0,
+          20.0,
+          96.0,
+          48.0
+        ],
+        [
+          340.0,
+          20.0,
+          160.0,
+          80.0
+        ],
+        [
+          540.0,
+          20.0,
+          128.0,
+          64.0
+        ],
+        [
+          720.0,
+          20.0,
+          80.0,
+          40.0
+        ],
+        [
+          20.0,
+          160.0,
+          120.0,
+          90.0
+        ]
+      ]
+    },
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "kind": "reference",
+      "rectangles": [
+        [
+          20.0,
+          20.0,
+          120.0,
+          60.0
+        ],
+        [
+          180.0,
+          20.0,
+          96.0,
+          48.0
+        ],
+        [
+          340.0,
+          20.0,
+          160.0,
+          80.0
+        ],
+        [
+          540.0,
+          20.0,
+          128.0,
+          64.0
+        ],
+        [
+          720.0,
+          20.0,
+          80.0,
+          40.0
+        ],
+        [
+          20.0,
+          160.0,
+          120.0,
+          90.0
+        ]
+      ]
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "kind": "images",
+      "rectangles": [
+        [
+          20.0,
+          20.0,
+          120.0,
+          60.0
+        ],
+        [
+          180.0,
+          20.0,
+          96.0,
+          48.0
+        ],
+        [
+          340.0,
+          20.0,
+          160.0,
+          80.0
+        ],
+        [
+          540.0,
+          20.0,
+          128.0,
+          64.0
+        ],
+        [
+          720.0,
+          20.0,
+          80.0,
+          40.0
+        ],
+        [
+          20.0,
+          160.0,
+          120.0,
+          90.0
+        ]
+      ]
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "kind": "reference",
+      "rectangles": [
+        [
+          20.0,
+          20.0,
+          120.0,
+          60.0
+        ],
+        [
+          180.0,
+          20.0,
+          96.0,
+          48.0
+        ],
+        [
+          340.0,
+          20.0,
+          160.0,
+          80.0
+        ],
+        [
+          540.0,
+          20.0,
+          128.0,
+          64.0
+        ],
+        [
+          720.0,
+          20.0,
+          80.0,
+          40.0
+        ],
+        [
+          20.0,
+          160.0,
+          120.0,
+          90.0
+        ]
+      ]
+    }
+  ],
+  "typedPending": {
+    "passed": true,
+    "renderer": "angle2",
+    "rectangle": [
+      30,
+      40,
+      160,
+      80
+    ]
+  },
+  "native": {
+    "case": "ui-image",
+    "passed": true,
+    "exitCode": 0,
+    "timedOut": false,
+    "elapsedSeconds": 11.172,
+    "reports": [
+      {
+        "case": "ui-image",
+        "cleanupComplete": true,
+        "cleanupOwners": {
+          "credentials": true,
+          "host": true,
+          "requests": true
+        },
+        "details": {
+          "acceptedSource": "# loomlight-screen: df0bba64-15d3-4353-aaf6-bec133560aab\nscreen travel_notes():\n    pass\n    add \"images/ui station_seal.png\": # loomlight-element: 653ebbce-d6b7-4f11-b386-a30d5a1ac486\n        xsize 200\n        ysize 70\n    use source_only_footer()\n\nscreen source_only_footer():\n    text \"Protected neighbor\"\n",
+          "identities": [
+            "8051e864-7376-4f19-a303-fc631abb61c9",
+            "653ebbce-d6b7-4f11-b386-a30d5a1ac486"
+          ],
+          "identity": {
+            "id": "df0bba64-15d3-4353-aaf6-bec133560aab",
+            "name": "travel_notes",
+            "path": "game/ui/travel_notes.rpy",
+            "resolved": true,
+            "rootId": "8051e864-7376-4f19-a303-fc631abb61c9",
+            "sourceRevision": "e2cb70f194a396fba60dbf32d089ed48e682806ae4b6f2bab0338ca5a5a1d637"
+          },
+          "imageDecoded": true,
+          "imageFormats": [
+            "png",
+            "jpeg",
+            "webp-lossless",
+            "webp-lossy",
+            "webp-alpha"
+          ],
+          "nativeWebView": true,
+          "passed": true,
+          "scenario": "ui-image",
+          "sdkExecuted": false,
+          "sessionId": "a6f1707e-3124-46f4-a58b-aa8f8c143957",
+          "stage": "complete",
+          "stages": [
+            {
+              "stage": "image-picker-passed"
+            },
+            {
+              "stage": "image-draft-passed"
+            },
+            {
+              "stage": "image-history-passed"
+            },
+            {
+              "stage": "image-source-passed"
+            },
+            {
+              "stage": "image-reopen-passed"
+            },
+            {
+              "stage": "complete"
+            }
+          ]
+        },
+        "evidence": "runtime-ui-packaged",
+        "passed": true
+      }
+    ],
+    "externalErrors": [],
+    "helpDisk": {
+      "acceptedBytesMatch": true,
+      "scratchJobsRemaining": 0,
+      "sourceBytecode": false,
+      "sourceSaves": false
+    },
+    "diskErrors": [],
+    "fixtureCleanupComplete": true
+  },
+  "packageIdentity": {
+    "candidate": "b00415f6526476b1c235221f99f03d5cc0547fe5",
+    "executableSHA256": "C20BBFBFB21E20648FEFAD9351CABC007BFFC6F94D5AA6871CCCBCF57425EE8D",
+    "architecture": "Windows x64"
+  },
+  "executableAudit": {
+    "retained": true,
+    "sha256": "c20bbfbfb21e20648fefad9351cabc007bffc6f94d5aa6871cccbcf57425ee8d",
+    "sizeBytes": 19705344,
+    "peMachine": "0x8664",
+    "signatureVerified": false
+  },
+  "controller": {
+    "passed": true,
+    "controllerAndRealCore": true,
+    "requestCount": 103,
+    "nativePicker": false,
+    "sdkRendering": false
+  },
+  "probeRehearsal": {
+    "passed": true,
+    "controllerTestOnly": true,
+    "nativeWebView": false,
+    "sdkExecuted": false
+  },
+  "audit": {
+    "normalFrames": true,
+    "helperFrames": true,
+    "sourceSHA256": "6dd73e2b279951551853c2001817fc258a657d6ecd4d00d62eecacbceb04b269",
+    "sameAcceptedSource": true,
+    "exactGeometry": true,
+    "exactRGBA": true,
+    "repeatedExact": true,
+    "emptyRenderIsolated": true,
+    "typedPending": true,
+    "nativeAdmission": true,
+    "acceptedDisk": true,
+    "cleanupComplete": true,
+    "executableRehashed": true,
+    "currentApplicationMaterialUnchanged": true
+  },
+  "operationUse": {
+    "sdkProcesses": 5,
+    "helpers": 1,
+    "packages": 1,
+    "nativeSessions": 1
+  },
+  "artifactFiles": [
+    {
+      "path": "candidate.txt",
+      "sizeBytes": 41,
+      "sha256": "03a4dd7a845909dfe9e18e5cd0704fa15b6a45b67e6a24c24e6f11695f677e77"
+    },
+    {
+      "path": "controller/compact-dom.json",
+      "sizeBytes": 944,
+      "sha256": "fa1ae27443d5dd804155b5f8c4f0b85f17c33da648dabda80ef26aced98306a2"
+    },
+    {
+      "path": "controller/placed-dark-compact.png",
+      "sizeBytes": 32765,
+      "sha256": "cf3e966dc329c9f4c4507b9d5ee0c92307d3d677ec44e24feb9f7b2237462b7f"
+    },
+    {
+      "path": "controller/placed-dark-wide.png",
+      "sizeBytes": 45784,
+      "sha256": "8461a114afd119e4ce20df801ecec37299d43838296fed54162b708051ac0a05"
+    },
+    {
+      "path": "controller/result.json",
+      "sizeBytes": 31248,
+      "sha256": "6adf17120d85be931ae99dfc5e52ff73af0d0ef9a9134ba232c9e47095297738"
+    },
+    {
+      "path": "helper/images-1024x768.json",
+      "sizeBytes": 11912,
+      "sha256": "289ef3413bcf28b3ad6cd371ed2c863cd305bed9f5d319d279a6bf38b043a174"
+    },
+    {
+      "path": "helper/images-1024x768.png",
+      "sizeBytes": 7899,
+      "sha256": "ee541f554e2ddbf9f9af56104746e0a376725c75bcb693f596b9cefbc4fc16d1"
+    },
+    {
+      "path": "helper/images-1280x720.json",
+      "sizeBytes": 12938,
+      "sha256": "7ca239f4541500c3283b924cbda19f6d4e14f3eee6b38e233915e5ab2359e66d"
+    },
+    {
+      "path": "helper/images-1280x720.png",
+      "sizeBytes": 8678,
+      "sha256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13"
+    },
+    {
+      "path": "helper/pixels.json",
+      "sizeBytes": 702,
+      "sha256": "d4cee4c4afe0a9012d671b3d386566692743763676d36da090ee23fde534cbc0"
+    },
+    {
+      "path": "helper/reference-1024x768.json",
+      "sizeBytes": 11911,
+      "sha256": "fe62fa5138113e53128dc956b241a6850164618e3ca7ca8d3cb97d2d60d74bed"
+    },
+    {
+      "path": "helper/reference-1024x768.png",
+      "sizeBytes": 7899,
+      "sha256": "ee541f554e2ddbf9f9af56104746e0a376725c75bcb693f596b9cefbc4fc16d1"
+    },
+    {
+      "path": "helper/reference-1280x720.json",
+      "sizeBytes": 12951,
+      "sha256": "d23ff5bf438624df81d18ab31d3804a1f53a64cc861613585c1eae32d5e08ba7"
+    },
+    {
+      "path": "helper/reference-1280x720.png",
+      "sizeBytes": 8678,
+      "sha256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13"
+    },
+    {
+      "path": "helper/result.json",
+      "sizeBytes": 588,
+      "sha256": "1c59346f3d20b930b85255c4d58aca615cf5d869fbc2decd39b1553738c63001"
+    },
+    {
+      "path": "helper/typed-pending.json",
+      "sizeBytes": 6376,
+      "sha256": "ffc348c4a23fb4fad13b6658c6624217920f135ae0cea477698bb9b407cb386f"
+    },
+    {
+      "path": "inputs/accepted.json",
+      "sizeBytes": 3414,
+      "sha256": "aa8e3f2bc1736f6b33d2d1c73c1916170fb355cf75482f87990a71784ba7e768"
+    },
+    {
+      "path": "loomlight.exe",
+      "sizeBytes": 19705344,
+      "sha256": "c20bbfbfb21e20648fefad9351cabc007bffc6f94d5aa6871cccbcf57425ee8d"
+    },
+    {
+      "path": "native/accepted-help.rpy",
+      "sizeBytes": 309,
+      "sha256": "14fbcc094ba8d8ae771e9a2563bef35f17378e148eb6468f95d3af8196c61eef"
+    },
+    {
+      "path": "native/help-disk.json",
+      "sizeBytes": 119,
+      "sha256": "9cae8f879dbe2c1f8fb54692bfd823e54200a6ded0bce645b54f04cd1f38a228"
+    },
+    {
+      "path": "native/runtime-ui-ui-image.json",
+      "sizeBytes": 2340,
+      "sha256": "18f3be6c931b5e099ebbc05f1936c89321ea5b2502cefe4904452914cd0fa414"
+    },
+    {
+      "path": "native/runtime-ui-ui-image.log",
+      "sizeBytes": 1410,
+      "sha256": "469b2bcb96b943f850ee4a58aed02f21adcc1f8cd5e6fa1251d1cb5a0270933b"
+    },
+    {
+      "path": "package-identity.json",
+      "sizeBytes": 190,
+      "sha256": "7940e7912a25c8298ebf97ce7b46b27bbb142a4303d50e411ff10d36535c4390"
+    },
+    {
+      "path": "probe-controller/result.json",
+      "sizeBytes": 1567,
+      "sha256": "7aaa12f0c6d2e8b41c17675e013d2c81c5da1e568483e6ce995b83a4400fb6fd"
+    },
+    {
+      "path": "probe-controller/terminal.png",
+      "sizeBytes": 55919,
+      "sha256": "602b6aa7e6c8d137beff85bd92ef4bdcde9fe0107adcdc2e1f69d49868f00d51"
+    },
+    {
+      "path": "sdk/accepted.json",
+      "sizeBytes": 3414,
+      "sha256": "aa8e3f2bc1736f6b33d2d1c73c1916170fb355cf75482f87990a71784ba7e768"
+    },
+    {
+      "path": "sdk/compile.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "sdk/empty-1024x768.png",
+      "sizeBytes": 3129,
+      "sha256": "4bd7227ae468226eebda7f0ab55e6fe61fcf57ba0c57e5f8e434b7f98bcec728"
+    },
+    {
+      "path": "sdk/empty-1280x720.png",
+      "sizeBytes": 3653,
+      "sha256": "dc59986575fe1902c1bdea4fe25019aa516d826bfe5f9e36a34a40b664276b7f"
+    },
+    {
+      "path": "sdk/images-1024x768.log",
+      "sizeBytes": 533,
+      "sha256": "7801b59afc5b6f1e8dba5340f4e08f843cb37d7555f151ca8eefc439b601b43c"
+    },
+    {
+      "path": "sdk/images-1280x720.log",
+      "sizeBytes": 533,
+      "sha256": "e00785debb2de4450539cac62c0baef7d328f865550cfe8478733ba72f6d2e40"
+    },
+    {
+      "path": "sdk/lint.log",
+      "sizeBytes": 374,
+      "sha256": "9d90939f710f9f60d128ebe6c84481e58e724dac777b6dc785fcb7c412fbca1f"
+    },
+    {
+      "path": "sdk/reference-1024x768.png",
+      "sizeBytes": 7940,
+      "sha256": "351886cdf32ab629b8cbdc6a17e3babf5ef948c4adde496da611d8c50554f838"
+    },
+    {
+      "path": "sdk/reference-1280x720.png",
+      "sizeBytes": 8678,
+      "sha256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13"
+    },
+    {
+      "path": "sdk/repeated-1024x768.png",
+      "sizeBytes": 7940,
+      "sha256": "351886cdf32ab629b8cbdc6a17e3babf5ef948c4adde496da611d8c50554f838"
+    },
+    {
+      "path": "sdk/repeated-1280x720.png",
+      "sizeBytes": 8678,
+      "sha256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13"
+    },
+    {
+      "path": "sdk/result.json",
+      "sizeBytes": 4637,
+      "sha256": "f99c01b7a0a7e9b4cd2a6e88176dd00d60cea105c1ebba3c4832bbde723ab2cd"
+    },
+    {
+      "path": "sdk/sdk-1024x768.png",
+      "sizeBytes": 7940,
+      "sha256": "351886cdf32ab629b8cbdc6a17e3babf5ef948c4adde496da611d8c50554f838"
+    },
+    {
+      "path": "sdk/sdk-1280x720.png",
+      "sizeBytes": 8678,
+      "sha256": "f9b99d0cc256599c95204b9907ad72bcfdb640c0159277731df34e9ad6175a13"
+    }
+  ]
+}

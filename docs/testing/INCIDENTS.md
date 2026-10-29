@@ -581,3 +581,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   child with a 256 KiB stack; verify exact accepted bytes and hashes. Actual Windows
   main-thread/controller and package proof remains a separate target gate.
 - **Evidence:** [L06 CI1 diagnosis](../tasks/evidence/ui-image.md#ci1-windows-import-stack-failure).
+
+## H41. Normal-entry image capture differs under an unrecorded renderer
+
+- **Class/search:** harness/evidence; Windows UI image, 149 differing WebP-edge
+  pixels, dummy video, software fallback, private `render_to_texture` export.
+- **Observed/correction:** exact geometry and successful normal-entry execution
+  did not establish pixel fidelity. The old capture recorded no backend; a product
+  decoder defect was not established. Select and admit native GL2/ANGLE2, use public
+  Render capture, and preserve exact independent-reference equality.
+- **Regression:** reject missing/fallback renderers, unstable repeated capture and
+  whole-window capture of an empty Render. Both-host normal entry and helper pass
+  both aspects with exact pixels after correction; original CI2 remains failed.
+- **Evidence:** [L06 capture diagnosis](../tasks/evidence/ui-image.md#ci2-windows-capture-failure-and-reassessment),
+  [CI3 audit](../tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome).

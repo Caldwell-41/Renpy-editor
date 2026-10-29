@@ -1,39 +1,27 @@
 # Current status
 
-## L06 UI-image implementation selected
+## L06 UI-image implementation ready for review
 
-Kris selected [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40),
-"Import and place a UI image", on a new branch. Implementation ownership stays
-in "Implement ticket 40" on `codex/phase3b-l06-ui-image`, based on `2e045d9`.
-Its L02 prerequisite is satisfied. Kris approved A2 (`inspector-v2` / `refined`)
-in "L06 UI image prototypes". The reviewed source and approval records are
-integrated; the separate pinned prototype worktree remains the comparison reference.
-
-The typed image inspector, imports, passive previews, aspect controls, per-image
-drafts and atomic image/size/layout/reviewed-reference transactions are implemented.
-The user-confirmed review base is `2e045d9`; both review axes clear the product
-correction `9d6bf6b` and capture-checker correction `943ea2f`.
+[L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40), "Import and place a
+UI image", is implemented on `codex/phase3b-l06-ui-image`, based on `2e045d9`.
+Kris approved A2 in the separate prototype chat. Both independent review axes clear
+the product and checker corrections. The ticket remains open for acceptance;
+no PR, merge or release is selected.
 
 | Capability | Automated proof | Native/human status |
 | --- | --- | --- |
-| Typed image import, drafts, size/aspect, Source and history | 269 frontend, 446 ordinary release-core and 38 desktop positives; actual controller/core sequence passes. Core's 50 ignored specialist/SDK cases and three named exclusions remain separate. | Signed Mac WebView passes all supported formats, sizing/history/Source/reopen; Windows pending. |
-| Actual asset rendering | Mac normal entry and GL2 helper pass both aspects, exact dimensions and zero differing independent-reference pixels. | No new physical-input or human acceptance claimed. |
-| A2 inspector | Approved source/captures and scoped wide/compact comparison retained. | Full Design Lab startup timeout remains failed. |
+| Typed image import, retained drafts, size/aspect, Source and history | CI3 passes 269 frontend cases, 54 screen-core positives with three explicit SDK ignores, constrained-stack import, actual controller/core and exact probe rehearsal. Earlier ordinary-core/desktop results retain their original scope. | Mac and Windows WebViews pass all five image variants, sizing/history/Source/reopen, accepted disk bytes and cleanup. Mac signing and Windows retained executable/hash/x64 checks pass. |
+| Actual chosen asset rendering | Mac GL2 and Windows ANGLE2 normal entry/helper pass both aspects, exact geometry and zero differing independent-reference pixels. Normal capture also passes repeatability and empty-Render isolation. | Physical input, OS file-dialog and human acceptance remain separate. |
+| A2 inspector | Approved source/captures and scoped wide/compact comparison retained. | Full Design Lab startup timeout remains failed; complete promotion validation is not claimed. |
 
-[Evidence](../tasks/evidence/ui-image.md) owns detailed results and failures;
-[HANDOVER](HANDOVER.md#l06-implementation-and-qualification) owns continuation.
-Kris authorized publication and focused Windows CI. The corrected branch is
-pushed at `b00415f`; [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1)
-is pending for that exact candidate, ordinal 3. CI2 remains failed on capture
-comparison and CI1 remains failed on the reproduced
-import-stack defect; both heap-buffer corrections pass focused debug/release,
-controller/core and fresh signed Mac package/native proof. Windows helper/native
-proof passes; normal-entry capture failed its strict pixel gate. The corrected
-native capture now passes Mac compile/lint and both aspects with exact pixels,
-repeatability and empty-Render isolation. All three dispatches are consumed.
-This chat will audit CI3 through same-chat ci-watch; registration follows this record.
-No PR, merge or release is selected. Earlier closed
-allowances and protected recovery remain intact.
+[CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1)
+passes at exact `b00415f`; its event, artifacts, retained executable and operation
+use have been audited. Later records change evidence/status only. CI1/CI2 remain
+failed with their original evidence. No watcher or required CI audit is pending.
+[Evidence](../tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome)
+owns the criterion map and candidate-bound receipts; [HANDOVER](HANDOVER.md#l06-implementation-and-qualification)
+owns continuation. #40 owns cumulative limits; all three dispatches are consumed.
+Earlier closed allowances and protected recovery remain intact.
 
 ## L04 nested and clipped layouts merged
 

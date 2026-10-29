@@ -518,3 +518,75 @@ Windows SDK 4/16, helper 1/4, package 1/3 and native 1/3 are completed before CI
 at most five SDK starts and one helper/package/native session are reserved.
 Mac use remains SDK 11/16, helper 2/4, package 2/3 and native 2/3. No fourth dispatch,
 full Windows pass, ticket acceptance, PR, merge or release is selected or claimed.
+
+
+## CI3 success audit and review-ready outcome
+
+The same-chat event was acknowledged. GitHub confirms [run 40816702645](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1),
+attempt 1, exact `b00415f6526476b1c235221f99f03d5cc0547fe5`, branch
+`codex/phase3b-l06-ui-image`, completed successfully. Selector validation and every
+required image qualification step pass. Unselected sibling jobs and the conditional
+failed-controller diagnostic step are skipped; these are not counted as passes.
+Later `d66cd1a` changes wait records only. A Git diff confirms application/workflow/
+fixture inputs are unchanged from the tested candidate.
+
+[CI3 audit receipt](ui-image-windows-ci3.json) binds retained artifact
+`12873675939`, its GitHub digest/expiry, all 39 file hashes and the independent audit.
+The actual Windows executable is now present. Its independently computed SHA-256
+`c20bbfbfb21e20648fefad9351cabc007bffc6f94d5aa6871cccbcf57425ee8d` matches the
+candidate-bound package receipt; its PE machine is x64 `0x8664`. Windows signing
+was not verified or claimed. GitHub retention expires 2026-11-05; the downloaded
+artifact remains under ignored `ci3/artifacts/`. No binary/log/SDK is committed.
+
+Normal-entry compile/lint and both normal runs exit 0. Observed renderer is ANGLE2.
+Both Source and literal-reference geometry maps have all six exact rectangles.
+Independent saved-frame validation finds zero differing RGBA pixels at both aspects,
+exact repeated Source captures and entirely transparent empty Render captures.
+The helper uses the same freshly exported accepted Source SHA
+`6dd73e2b279951551853c2001817fc258a657d6ecd4d00d62eecacbceb04b269`, passes
+both aspects with exact geometry and zero differing reference pixels, then passes
+typed pending image geometry without Source writes. Shutdown is cooperative and
+cleanup complete. No threshold or fixture changed to obtain these passes.
+
+Actual controller/core passes 103 requests, including intended duplicate refusal;
+its picker return is a fixture and it executes no SDK. The exact packaged-probe
+rehearsal passes. Native WebView session 2 passes the picker/draft/history/Source/
+reopen stages and all five raster formats. The native admission gate independently
+accepts its report; accepted disk text, no bytecode/saves, no remaining scratch jobs,
+fixture and host/request/credential cleanup all pass. Input is synthetic DOM input
+through the real packaged WebView, separate from physical keys, OS file-dialog and
+human evidence. The inspected compact screenshot keeps Apply above the footer.
+
+CI3 portable checks pass 269 frontend tests, six image-gate cases, two owned-screen
+evidence cases, the exact constrained-stack public import regression, 54 screen-core
+positives with three explicit SDK ignores, formatting, frontend build and desktop
+checking. Prior ordinary release-core and 38-test desktop results retain their
+original candidates/scopes; this does not invent a fresh full-core total. Mac GL2
+normal-entry receipt 3, helper proof and signed package/native receipt 2 retain the
+qualification and unchanged-product basis recorded above.
+
+| #40 criterion | Result and evidence |
+| --- | --- |
+| Typed UI-image role/picker, formats and retained reference errors | Implemented and automated proof passes through public services, actual controller/core and both native WebViews. Missing/replaced/invalid references retain the draft. |
+| Ordinary owned node, asset/size/aspect and shared transactions | Minimal source, atomic metadata/layout, no-op, Cancel, conflict, history and reopen checks pass; supported layout and opaque neighbors remain protected. |
+| Actual accepted-size asset, inert picker | Both-host normal entry/helper have exact asset/reference geometry and pixels at both aspects; pending helper images write no Source. Picker/inspection runs no game action or project Python. |
+| Cancellation, conflict, history, Source/reopen and containment | Public-service and actual UI/core checks pass; both native sessions pass Source/history/reopen, exact disk bytes and cleanup. Independent completed JPEG import survives screen-draft Cancel. |
+
+All four bounded functional criteria have implementation and automated evidence.
+The outcome is `review_ready`, not accepted or closed. Full Design Lab startup
+validation remains failed and explicitly retained beside the approved A2 scoped
+comparison. Physical-input, human, wider editor and Phase 3B acceptance remain
+separate. No PR, merge, release or successor implementation is selected.
+
+Final independent Standards and Spec review of the evidence-only closeout reports
+zero findings on each axis. The full comparison base remains `2e045d9`; prior
+product/checker reviews remain clear. Both reviewers independently confirm the
+39-file manifest, candidate/executable identity and truthful acceptance boundaries.
+The status documents shorten the live L06 continuation; their total lengths remain
+above workflow targets because earlier protected recovery records are preserved.
+
+Actual CI3 use is five Windows SDK starts, one helper, one package and one native
+session. Final cumulative use in #40 is dispatches 3/3; Windows SDK 9/16, helpers
+2/4, packages 2/3, native 2/3; Mac SDK 11/16, helpers 2/4, packages 2/3, native 2/3.
+All CI1/CI2 failures remain failed and charged. No watcher, costly operation or
+required CI audit remains pending. No fourth costly dispatch without a user decision.
