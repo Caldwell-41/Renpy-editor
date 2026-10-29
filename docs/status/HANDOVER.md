@@ -23,9 +23,13 @@ retain the selected checks and limits. Worker commits `8d4364d`, `1cbe43a` and `
 Code checkpoint `79ad8e8` also contains the validated numeric fixture correction.
 All 274 frontend and 58 ordinary Screens tests pass, as do the rebuilt real-core
 image controller, exact probe rehearsal and numeric controller. Three SDK/helper
-tests remain explicitly ignored. Independent Standards/Spec review is next.
-All worker write ownership and the isolated Cargo target now belong to the
-coordinator; workers remain clean until reviewed retirement.
+tests remain explicitly ignored. Standards and Spec each report zero findings at reviewed candidate `d238e34`.
+All three clean worker worktrees and their two branches are removed after
+ancestry verification and source snapshots. Managed archival retained stale
+ownership, so cleanup used ordinary Git removal without force; the attachment
+history may still list removed paths. The coordinator retains the isolated
+Cargo target and raw evidence. PR #68 owns the published head and current
+automatic-check state; no additional worker or implementation step is pending.
 
 Prior pending-Apply and four-finding corrections remain recorded in the same
 evidence file. Keep the approved A2 prototype and its failed full Design Lab

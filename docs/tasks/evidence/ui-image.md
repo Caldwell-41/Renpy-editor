@@ -822,4 +822,42 @@ remain under the coordinator's ignored `.toolchains/pr68-architecture/` director
 Worker build output is handed to the coordinator before worker retirement.
 No SDK/helper, package, native session or costly CI dispatch ran.
 
-The independent Standards/Spec review and final publication are next.
+### Independent review and worker cleanup
+
+The code-review skill reviewed fixed candidate
+`d238e347d7b8923072ac133a2f47ef2008f0907f` against the full PR base
+`2e045d941bf633e73b8161be0096806203fbc2bb`, with the refactor delta from
+`cd66af6` called out separately. The two agents reviewed independently and changed
+no files. Both used the root-cause and TDD skills.
+
+#### Standards
+
+Zero actionable documented-standard violations or baseline smell findings.
+Source authority, shared transactions, narrow media requests and inert canvas
+behavior remain intact. The review found no general editing framework or
+implementation-coupled replacement tests. Worst Standards issue: none.
+
+#### Spec
+
+Zero actionable findings against #40, the approved A2 scope and the three selected
+refactors. Combined draft reservation, shared image preparation and URL ownership
+match the selected contract. Existing source-only image-bound restrictions and
+acceptance limits remain intact. Worst Spec issue: none.
+
+Standards has 0 findings; Spec has 0 findings. The following closeout edits change
+documentation only; application and test material remain at the reviewed candidate.
+
+All three worker heads are ancestors of the reviewed integration head and their
+tracked/untracked status is clean. Codex's archive tool refused each completed
+worker with "Another active task still uses this worktree", including after the
+child tasks were archived. The coordinator retained source snapshots and an
+ancestry/status receipt, then used ordinary `git worktree remove` without force.
+All three worker checkouts and both worker branches are removed; the Rust worker
+was detached and had no branch to retire. Codex may retain stale attachment
+records for those removed paths. Its archive operation did not succeed.
+
+The coordinator keeps the integration checkout, transferred Cargo target and raw
+evidence. The approved prototype, original implementation/review checkouts,
+prior correction checkout, unrelated audit and protected recovery are preserved.
+The existing draft PR #68 owns the published head and current automatic-check
+state. #40 remains open for acceptance; no merge or release is selected.

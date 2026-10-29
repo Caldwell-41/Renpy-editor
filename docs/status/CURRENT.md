@@ -1,6 +1,6 @@
 # Current status
 
-## L06 architecture refactors in review
+## L06 architecture refactors reviewed
 
 The three selected refactors for [PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68)
 are integrated at code checkpoint `79ad8e8`. Image Apply owns its combined
@@ -11,7 +11,9 @@ All 274 frontend tests and 58 ordinary Screens tests pass. Three SDK/helper test
 remain explicitly ignored. The rebuilt real-core image controller, exact probe
 rehearsal and corrected numeric controller pass. [Evidence](../tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29)
 retains the new conflicting-size regression and original fixture failures.
-Standards/Spec review and publication are next. [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
+Standards and Spec each report zero findings at `d238e34`. All three worker
+worktrees and their two local branches are retired. PR #68 owns the current
+published head and automatic-check state. [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
 remains open for acceptance. No merge, release or costly qualification is selected.
 Earlier candidate-bound evidence, failed full Design Lab startup, the approved
 prototype, unrelated audit and protected recovery remain intact.
