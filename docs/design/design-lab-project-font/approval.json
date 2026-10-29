@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "screenId": "project-font",
+  "currentApproved": null,
+  "revisions": [
+    {
+      "id": "inspector-v1",
+      "variantId": "inspector",
+      "approval": null
+    },
+    {
+      "id": "library-v1",
+      "variantId": "library",
+      "approval": null
+    },
+    {
+      "id": "strip-v1",
+      "variantId": "strip",
+      "approval": null
+    }
+  ]
+}
