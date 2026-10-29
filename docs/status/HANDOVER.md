@@ -6,16 +6,15 @@ Kris selected [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39)
 on `codex/l05-project-fonts`, based on `8f0d208`, and approved test boundaries,
 tracker updates, review and commits. Approved A2 is integrated, and the actual
 controller/core path passes. Mac pinned SDK/helper geometry and strict pixels pass
-at both aspects. Signed package `9cd1dae` passes native WebView qualification;
-a second package/native session will cover the final CSS and compact caption.
+at both aspects. Final signed package `4672bf7` passes native WebView qualification, including
+the final CSS and compact caption.
 [Evidence](../tasks/evidence/project-fonts.md) owns receipts, original failures,
 review corrections and remaining limits. Full frontend checks pass; the ordinary
 core suite's sandbox listener failures pass in the affected permitted rerun.
 Both review axes have no remaining findings after corrections.
 
-Mac use is SDK 9/20, helpers 3/4, packages 1/3 and native sessions 1/3.
-Windows use and costly CI dispatches remain zero. Finish the final Mac candidate,
-then obtain branch-publication authorization for the prepared focused Windows
+Mac use is SDK 9/20, helpers 3/4, packages 2/3 and native sessions 2/3.
+Windows use and costly CI dispatches remain zero. Obtain branch-publication authorization for the prepared focused Windows
 route. No push, PR, merge, release or ticket acceptance is claimed. Preserve the
 unrelated Phase 1 audit, pinned design worktree and protected recovery below.
 

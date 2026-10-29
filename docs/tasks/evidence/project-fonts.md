@@ -225,3 +225,30 @@ identified defects resolved.
 
 Current use is normal Mac SDK 9/20, helpers 3/4, packages 1/3 and native sessions
 1/3. Windows and costly CI remain zero. Code publication remains unselected.
+
+## Final local candidate
+
+Candidate `4672bf728ca8443ef005473077c8bb3e0ea74839` passes the second signed
+Mac package and native session. The [final package identity](project-font-mac-package-02.json)
+records executable SHA-256
+`e08ebe6f518bc9e38f16bb87023f6cad26623cf534889e3416481da9b9cb4596`;
+strict signature and installer inspection pass. The
+[final native receipt](project-font-mac-native-02.json) passes all stages, exits
+zero and confirms cleanup. Controller-24 passes the final production code and
+retains approved-state captures, including correct color-swatch spacing. The
+comparison has one app header and one inspector. No native process remains pending.
+
+| Criterion | Local result and remaining proof |
+| --- | --- |
+| Typed TTF/OTF import and discovery | Public asset tests and actual controller pass import, invalid/missing/changed refusal, contained bytes and role/hash checks. Native WebView decodes both formats. Windows execution remains pending. |
+| Typed typography and minimal source | Public requests pass content/font/size/color/alignment/bold/italic, unsupported expressions, exact edits, reset and no-op. The actual controller passes combined layout/history and async draft retention. |
+| Actual font use, placement and wrapping | Pinned SDK-04 and helper-03 compare accepted source with an independent literal reference at 1280 by 720 and 1024 by 768. Geometry and pixels match; fallback-font evidence fails. Windows execution remains pending. |
+| Focus, Apply/Cancel, Source, history and reopen | Actual controller and final signed Mac WebView pass. TTF/CFF OTF, 16 MiB, whole sizes 1 through 512, four hex color lengths and finite 0 through 1 line alignment are documented in DATA_MODEL. Windows execution remains pending. |
+
+Final local use is Mac normal SDK 9/20, helpers 3/4, packages 2/3 and native
+sessions 2/3; Windows all zero; costly CI dispatches 0/3. The prepared Windows
+route is the existing Screens workflow with `project_font=true`, exact candidate
+and cumulative ordinal. Running it requires publishing this new branch. The user
+has authorized tracker updates and local commits; branch publication has not yet
+been selected. Ticket #39 remains open and unaccepted until required proof exists.
+No PR, merge or release is selected. The unrelated Phase 1 audit is preserved.
