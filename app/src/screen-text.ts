@@ -145,7 +145,7 @@ export class ScreenText {
     const row = el("div","screen-text-emphasis");row.append(select("align","Text alignment",[["","Default"],["0","Left"],["0.5","Center"],["1","Right"]]),select("bold","Bold",[["","Default"],["True","On"],["False","Off"]]),select("italic","Italic",[["","Default"],["True","On"],["False","Off"]]));
     typography.append(fields,row);body.append(content,typography);
     const disclosure = el("details","screen-text-layout");disclosure.open = this.expanded.get(this.cardKey) ?? false;disclosure.append(el("summary","","Layout"));
-    const layoutHost = el("div");disclosure.append(layoutHost);this.layout.render(layoutHost,true);this.host.layoutTools(disclosure);this.host.order(disclosure);body.append(disclosure);
+    const layoutHost = el("div");disclosure.append(layoutHost);this.layout.render(layoutHost,{sharedCommit:true});this.host.layoutTools(disclosure);this.host.order(disclosure);body.append(disclosure);
     const commit = el("div","screen-text-commit"), error = el("p","screen-text-error");error.role = "alert";
     const review = action("Review Source",this.host.source);review.dataset.textReview = "";
     const state = el("p","screen-text-state"), actions = el("div","screen-text-actions");

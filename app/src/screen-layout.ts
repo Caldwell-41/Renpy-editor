@@ -9,6 +9,7 @@ export interface LayoutReservation {
   accept: (accepted: ScreenDocument) => void;
   release: () => void;
 }
+interface LayoutPresentation { sharedCommit?: boolean; dimensions?: boolean }
 interface Field { text: string; unit: LayoutUnit }
 interface Draft { key: string; document: ScreenDocument; screen: string; node: ScreenNode; fields: Record<string, Field> }
 interface View { document: ScreenDocument; screen: string; node: ScreenNode; nodes: ScreenNode[]; busy: boolean; otherDraft: boolean }
@@ -45,7 +46,7 @@ export class ScreenLayoutEditor {
   private readonly fieldValidators = new Map<string, () => void>();
   private composing = false;
   private saving = false;
-  private sharedCommit = false;
+  private presentation: LayoutPresentation = {};
   constructor(private readonly host: Host) {}
   hasDraft(): boolean { return this.drafts.size > 0; }
   hasNodeDraft(document: ScreenDocument, screen: string, node: ScreenNode): boolean { return this.drafts.has(draftKey(document, screen, node)); }
@@ -184,12 +185,13 @@ export class ScreenLayoutEditor {
   private cancel(): void {
     const view = this.host.view(); if (!view || view.busy || this.saving || this.composing) return;
     const key = (document.activeElement as HTMLElement | null)?.dataset.layoutField;
-    this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.errors.delete(this.key(view)); const host = this.hostElement; if (host) this.render(host,this.sharedCommit);
+    this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.errors.delete(this.key(view)); const host = this.hostElement; if (host) this.render(host,this.presentation);
     if (key) this.hostElement?.querySelector<HTMLInputElement>(`[data-layout-field="${key}"]`)?.focus({ preventScroll: true });
     this.host.note("Layout changes cancelled. No source was written."); this.host.preview();
   }
-  render(host: HTMLElement, sharedCommit = false): void {
-    this.sharedCommit = sharedCommit;
+  render(host: HTMLElement, presentation: LayoutPresentation = {}): void {
+    this.presentation = presentation;
+    const { sharedCommit = false, dimensions = true } = presentation;
     const view = this.host.view(); if (!view?.node.numericLayout) return;
     for (const details of this.hostElement?.querySelectorAll<HTMLDetailsElement>("details[data-layout-owner]") ?? []) {
       const expanded = this.expanded.get(details.dataset.layoutOwner!) ?? new Set<string>();
@@ -201,10 +203,10 @@ export class ScreenLayoutEditor {
     const form = el("form", "layout-form"); form.id = this.formId;
     form.addEventListener("compositionstart", () => { this.composing = true; });
     form.addEventListener("compositionend", () => { this.composing = false; });
-    form.onsubmit = event => { event.preventDefault(); if (!this.sharedCommit) void this.apply(); };
+    form.onsubmit = event => { event.preventDefault(); if (!this.presentation.sharedCommit) void this.apply(); };
     form.onkeydown = event => {
       if (this.composing || event.isComposing || event.keyCode === 229) { event.stopPropagation(); return; }
-      if (this.sharedCommit) return;
+      if (this.presentation.sharedCommit) return;
       if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); this.cancel(); }
       else if (event.key === "Enter" && event.target instanceof HTMLInputElement) { event.preventDefault(); void this.apply(); }
     };
@@ -260,12 +262,12 @@ export class ScreenLayoutEditor {
     const coordinates = group("Position and anchor", ["xpos", "ypos", "xanchor", "yanchor"]);
     const grid = coordinates.querySelector(".layout-grid")!;
     grid.prepend(el("h4", "layout-axis", "Horizontal"), el("h4", "layout-axis", "Vertical")); form.append(coordinates);
-    const quick = el("div", "layout-quick"); if (!sharedCommit) quick.append(group("Size", ["xsize", "ysize"]));
+    const quick = el("div", "layout-quick"); if (dimensions) quick.append(group("Size", ["xsize", "ysize"]));
     const alignment = el("section", "layout-group"); alignment.append(el("h3", "", "Align in parent"));
     const presets = el("div", "layout-presets"); presets.ariaLabel = "Alignment presets";
     for (const [row, y] of [0, 0.5, 1].entries()) for (const [column, x] of [0, 0.5, 1].entries()) {
       const name = `${["Top", "Middle", "Bottom"][row]} ${["left", "center", "right"][column]}`;
-      const preset = action(name, () => { for (const [key,value] of [["xpos",x],["xanchor",x],["ypos",y],["yanchor",y]] as const) this.edit(key, {text:String(value),unit:"relative"}); if (this.hostElement) this.render(this.hostElement,this.sharedCommit); });
+      const preset = action(name, () => { for (const [key,value] of [["xpos",x],["xanchor",x],["ypos",y],["yanchor",y]] as const) this.edit(key, {text:String(value),unit:"relative"}); if (this.hostElement) this.render(this.hostElement,this.presentation); });
       preset.ariaLabel = preset.title = name; preset.dataset.alignX = String(x); preset.dataset.alignY = String(y); preset.append(el("span", "layout-dot")); presets.append(preset);
     }
     alignment.append(presets); quick.append(alignment); form.append(quick);

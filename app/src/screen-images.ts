@@ -484,7 +484,7 @@ export class ScreenImages {
     layout.append(parentLabel);
     const numeric = el("div");
     layout.append(numeric);
-    this.layout.render(numeric, true);
+    this.layout.render(numeric, {sharedCommit:true,dimensions:false});
     this.host.layoutTools(numeric);
     if (!this.addition) this.host.order(layout);
     body.append(layout);

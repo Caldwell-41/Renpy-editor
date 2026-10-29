@@ -58,6 +58,14 @@ try {
  await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-text-field=size]')?.value==='');assert.equal(await read(),original,'One Undo restores the entire typography edit');
  await ui.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-text-field=size]')?.value==='26');assert.equal(await read(),accepted);
  const settled=()=>page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true && document.querySelector('.screen-text-state')?.textContent==='');
+ await ui.locator('.screen-text-layout').evaluate(e=>e.open=true);
+ const width=ui.getByRole('textbox',{name:'Width',exact:true}),height=ui.getByRole('textbox',{name:'Height',exact:true});
+ assert.equal(await width.count(),1,'Text width remains editable beside shared Apply');assert.equal(await height.count(),1,'Text height remains editable beside shared Apply');
+ await width.fill('410');await height.fill('190');await width.press('Enter');await settled();
+ const dimensions=await read();assert.match(dimensions,/xsize 410/);assert.match(dimensions,/ysize 190/);
+ await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=xsize]')?.value==='');assert.equal(await read(),accepted,'One Undo restores both text dimensions');
+ await ui.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=xsize]')?.value==='410');assert.equal(await read(),dimensions,'Redo restores the same dimension source');
+ await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=xsize]')?.value==='');assert.equal(await read(),accepted);
  const editNode=async id=>{await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.locator(`[data-node-id="${id}"]`).dblclick();};
  await size.fill('bad');await ui.getByRole('button',{name:'Apply',exact:true}).click();assert.equal(await size.getAttribute('aria-invalid'),'true');assert.equal(await size.evaluate(e=>e===document.activeElement),true);assert.equal(await read(),accepted);
  await editNode(second.selectedId);await ui.getByRole('textbox',{name:'Text',exact:true}).fill('Other draft');await editNode(first.selectedId);
