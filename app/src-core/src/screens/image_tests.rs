@@ -739,3 +739,241 @@ fn ui_image_canvas_samples_use_typed_verified_assets_and_do_not_write_source() {
         before
     );
 }
+
+#[test]
+fn ui_image_canvas_combines_size_and_numeric_drafts_before_apply() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let asset = import_image(&mut service, temporary.path(), &root, "uiImage");
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImage","parentId":owner["rootId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80,
+            "layout":{"xpos":{"unit":"pixels","value":10},"xanchor":{"unit":"relative","value":0.25},"ypos":{"unit":"pixels","value":20}}}),
+    );
+    let node = added["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == added["selectedId"])
+        .unwrap();
+    let draft = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":"notes","expectedRevision":added["document"]["revision"],"width":1280,"height":720,
+            "layouts":[{"nodeStart":node["span"]["start"],"values":{"xpos":{"unit":"pixels","value":77},"xanchor":null,"ypos":{"unit":"pixels","value":25}}}],
+            "imageSamples":[{"nodeStart":node["span"]["start"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":200,"height":100,
+                "layout":{"ypos":{"unit":"pixels","value":33},"yanchor":{"unit":"relative","value":0.5}}}]}),
+    );
+    let properties = &draft["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["kind"] == "image")
+        .unwrap()["properties"];
+    assert_eq!(
+        properties,
+        &json!({"xpos":77,"ypos":33,"yanchor":0.5,"xsize":200,"ysize":100}),
+        "Image-specific edits override matching common layout edits; other edits and removals survive"
+    );
+    let applied = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"image","nodeId":added["selectedId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":200,"height":100,
+            "layout":{"xpos":{"unit":"pixels","value":77},"xanchor":null,"ypos":{"unit":"pixels","value":33},"yanchor":{"unit":"relative","value":0.5}}}),
+    );
+    let accepted = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":"notes","expectedRevision":applied["document"]["revision"],"width":1280,"height":720}),
+    );
+    assert_eq!(
+        accepted["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["kind"] == "image")
+            .unwrap()["properties"],
+        *properties,
+        "Apply preserves the draft canvas properties"
+    );
+}
+
+#[test]
+fn ui_image_canvas_parent_draft_matches_applied_child_order() {
+    for target_kind in ["vbox", "hbox", "fixed", "grid"] {
+        for (same_parent, target_first) in [(true, true), (false, true), (false, false)] {
+            let (temporary, mut service, root, owner) = composition_project();
+            let asset = import_image(&mut service, temporary.path(), &root, "uiImage");
+            let make_target = |service: &mut LifecycleService| {
+                compose_command(
+                    service,
+                    &owner,
+                    json!({"type":"add","parentId":owner["rootId"],"kind":target_kind,"text":""}),
+                )["selectedId"]
+                    .clone()
+            };
+            let mut target_id = if target_first {
+                Some(make_target(&mut service))
+            } else {
+                None
+            };
+            let parent_id = if same_parent {
+                target_id.clone().unwrap()
+            } else {
+                owner["rootId"].clone()
+            };
+            let added = compose_command(
+                &mut service,
+                &owner,
+                json!({"type":"addImage","parentId":parent_id,"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80}),
+            );
+            if target_id.is_none() {
+                target_id = Some(make_target(&mut service));
+            }
+            let target_id = target_id.unwrap();
+            let with_text = compose_command(
+                &mut service,
+                &owner,
+                json!({"type":"add","parentId":target_id,"kind":"text","text":"Already here"}),
+            );
+            let nodes = with_text["document"]["screens"][0]["nodes"]
+                .as_array()
+                .unwrap();
+            let image = nodes
+                .iter()
+                .find(|n| n["id"] == added["selectedId"])
+                .unwrap();
+            let target = nodes.iter().find(|n| n["id"] == target_id).unwrap();
+            let draft = ipc(
+                &mut service,
+                "screens.canvasPlan",
+                json!({"path":owner["path"],"screenName":"notes","expectedRevision":with_text["document"]["revision"],"width":1280,"height":720,
+                    "imageSamples":[{"nodeStart":image["span"]["start"],"parentStart":target["span"]["start"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80}]}),
+            );
+            let children = |plan: &Value, parent: &Value| -> Vec<String> {
+                plan["nodes"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .filter(|n| &n["parent"] == parent)
+                    .map(|n| n["kind"].as_str().unwrap().to_owned())
+                    .collect()
+            };
+            let expected = if same_parent {
+                vec!["image", "text"]
+            } else {
+                vec!["text", "image"]
+            };
+            assert_eq!(
+                children(&draft, &target["span"]["start"]),
+                expected,
+                "{target_kind}, same_parent={same_parent}, target_first={target_first}"
+            );
+            let applied = compose_command(
+                &mut service,
+                &owner,
+                json!({"type":"image","nodeId":added["selectedId"],"parentId":target_id,"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80}),
+            );
+            let accepted = ipc(
+                &mut service,
+                "screens.canvasPlan",
+                json!({"path":owner["path"],"screenName":"notes","expectedRevision":applied["document"]["revision"],"width":1280,"height":720}),
+            );
+            let target = applied["document"]["screens"][0]["nodes"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|n| n["id"] == target_id)
+                .unwrap();
+            assert_eq!(children(&accepted, &target["span"]["start"]), expected);
+        }
+    }
+}
+
+#[test]
+fn ui_image_can_move_from_a_group_to_the_screen_root_with_its_layout_draft() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let asset = import_image(&mut service, temporary.path(), &root, "uiImage");
+    let group = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"vbox","text":""}),
+    );
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImage","parentId":group["selectedId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80}),
+    );
+    let with_text = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Already here"}),
+    );
+    let nodes = with_text["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap();
+    let image = nodes
+        .iter()
+        .find(|n| n["id"] == added["selectedId"])
+        .unwrap();
+    let target = nodes.iter().find(|n| n["id"] == owner["rootId"]).unwrap();
+    let draft = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":"notes","expectedRevision":with_text["document"]["revision"],"width":1280,"height":720,
+            "layouts":[{"nodeStart":image["span"]["start"],"values":{"ypos":{"unit":"pixels","value":77}}}],
+            "imageSamples":[{"nodeStart":image["span"]["start"],"parentStart":target["span"]["start"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":200,"height":100}]}),
+    );
+    let draft_children = draft["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|n| n["parent"] == target["span"]["start"])
+        .map(|n| n["kind"].as_str().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(draft_children, ["vbox", "text", "image"]);
+    let properties = &draft["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["kind"] == "image")
+        .unwrap()["properties"];
+    assert_eq!(properties, &json!({"ypos":77,"xsize":200,"ysize":100}));
+    let applied = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"image","nodeId":added["selectedId"],"parentId":owner["rootId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":200,"height":100,
+            "layout":{"ypos":{"unit":"pixels","value":77}}}),
+    );
+    let nodes = applied["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap();
+    let image = nodes
+        .iter()
+        .find(|n| n["id"] == added["selectedId"])
+        .unwrap();
+    let root = nodes.iter().find(|n| n["id"] == owner["rootId"]).unwrap();
+    assert_eq!(image["parentStart"], root["span"]["start"]);
+    let accepted = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":"notes","expectedRevision":applied["document"]["revision"],"width":1280,"height":720}),
+    );
+    let children = accepted["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|n| n["parent"] == root["span"]["start"])
+        .map(|n| n["kind"].as_str().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(children, ["vbox", "text", "image"]);
+    assert_eq!(
+        &accepted["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["kind"] == "image")
+            .unwrap()["properties"],
+        properties
+    );
+}
