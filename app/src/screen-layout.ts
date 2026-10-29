@@ -5,7 +5,7 @@ export type LayoutUnit = "pixels" | "relative" | "count";
 export interface LayoutValue { unit: LayoutUnit; value: number }
 export interface NumericLayout { values: Record<string, LayoutValue>; blocked: Record<string, string>; sourceBlocked?: Record<string, string>; sizingNote?: string | null; allowsEmptyCells?: boolean }
 export type LayoutEdits = Record<string, LayoutValue | null>;
-export interface ImageLayoutReservation {
+export interface LayoutReservation {
   accept: (accepted: ScreenDocument) => void;
   release: () => void;
 }
@@ -45,7 +45,7 @@ export class ScreenLayoutEditor {
   private readonly fieldValidators = new Map<string, () => void>();
   private composing = false;
   private saving = false;
-  private inlineImage = false;
+  private sharedCommit = false;
   constructor(private readonly host: Host) {}
   hasDraft(): boolean { return this.drafts.size > 0; }
   hasNodeDraft(document: ScreenDocument, screen: string, node: ScreenNode): boolean { return this.drafts.has(draftKey(document, screen, node)); }
@@ -83,8 +83,8 @@ export class ScreenLayoutEditor {
     }
     return { document:draft.document, values:this.edits(draft.fields,draft.node) };
   }
-  /** Image Apply reserves layout even when only image fields changed. */
-  reserveForImage(base: ScreenDocument): ImageLayoutReservation {
+  /** A combined Apply reserves layout even when only the other fields changed. */
+  reserveForComposition(base: ScreenDocument): LayoutReservation {
     const view = this.host.view(), key = view ? this.key(view) : "";
     this.saving = true; this.sync();
     return {
@@ -184,12 +184,12 @@ export class ScreenLayoutEditor {
   private cancel(): void {
     const view = this.host.view(); if (!view || view.busy || this.saving || this.composing) return;
     const key = (document.activeElement as HTMLElement | null)?.dataset.layoutField;
-    this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.errors.delete(this.key(view)); const host = this.hostElement; if (host) this.render(host,this.inlineImage);
+    this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.errors.delete(this.key(view)); const host = this.hostElement; if (host) this.render(host,this.sharedCommit);
     if (key) this.hostElement?.querySelector<HTMLInputElement>(`[data-layout-field="${key}"]`)?.focus({ preventScroll: true });
     this.host.note("Layout changes cancelled. No source was written."); this.host.preview();
   }
-  render(host: HTMLElement, inlineImage = false): void {
-    this.inlineImage = inlineImage;
+  render(host: HTMLElement, sharedCommit = false): void {
+    this.sharedCommit = sharedCommit;
     const view = this.host.view(); if (!view?.node.numericLayout) return;
     for (const details of this.hostElement?.querySelectorAll<HTMLDetailsElement>("details[data-layout-owner]") ?? []) {
       const expanded = this.expanded.get(details.dataset.layoutOwner!) ?? new Set<string>();
@@ -201,10 +201,10 @@ export class ScreenLayoutEditor {
     const form = el("form", "layout-form"); form.id = this.formId;
     form.addEventListener("compositionstart", () => { this.composing = true; });
     form.addEventListener("compositionend", () => { this.composing = false; });
-    form.onsubmit = event => { event.preventDefault(); if (!this.inlineImage) void this.apply(); };
+    form.onsubmit = event => { event.preventDefault(); if (!this.sharedCommit) void this.apply(); };
     form.onkeydown = event => {
       if (this.composing || event.isComposing || event.keyCode === 229) { event.stopPropagation(); return; }
-      if (this.inlineImage) return;
+      if (this.sharedCommit) return;
       if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); this.cancel(); }
       else if (event.key === "Enter" && event.target instanceof HTMLInputElement) { event.preventDefault(); void this.apply(); }
     };
@@ -260,12 +260,12 @@ export class ScreenLayoutEditor {
     const coordinates = group("Position and anchor", ["xpos", "ypos", "xanchor", "yanchor"]);
     const grid = coordinates.querySelector(".layout-grid")!;
     grid.prepend(el("h4", "layout-axis", "Horizontal"), el("h4", "layout-axis", "Vertical")); form.append(coordinates);
-    const quick = el("div", "layout-quick"); if (!inlineImage) quick.append(group("Size", ["xsize", "ysize"]));
+    const quick = el("div", "layout-quick"); if (!sharedCommit) quick.append(group("Size", ["xsize", "ysize"]));
     const alignment = el("section", "layout-group"); alignment.append(el("h3", "", "Align in parent"));
     const presets = el("div", "layout-presets"); presets.ariaLabel = "Alignment presets";
     for (const [row, y] of [0, 0.5, 1].entries()) for (const [column, x] of [0, 0.5, 1].entries()) {
       const name = `${["Top", "Middle", "Bottom"][row]} ${["left", "center", "right"][column]}`;
-      const preset = action(name, () => { for (const [key,value] of [["xpos",x],["xanchor",x],["ypos",y],["yanchor",y]] as const) this.edit(key, {text:String(value),unit:"relative"}); if (this.hostElement) this.render(this.hostElement,this.inlineImage); });
+      const preset = action(name, () => { for (const [key,value] of [["xpos",x],["xanchor",x],["ypos",y],["yanchor",y]] as const) this.edit(key, {text:String(value),unit:"relative"}); if (this.hostElement) this.render(this.hostElement,this.sharedCommit); });
       preset.ariaLabel = preset.title = name; preset.dataset.alignX = String(x); preset.dataset.alignY = String(y); preset.append(el("span", "layout-dot")); presets.append(preset);
     }
     alignment.append(presets); quick.append(alignment); form.append(quick);
@@ -277,7 +277,7 @@ export class ScreenLayoutEditor {
     const state = el("p", "layout-commit-state"), actions = el("div", "layout-actions");
     const apply = el("button", "button primary", "Apply layout"); apply.type = "submit"; apply.setAttribute("form", this.formId);
     const cancel = action("Cancel layout", () => this.cancel()); actions.append(apply, cancel); commit.append(feedback, state, actions);
-    heading.hidden = commit.hidden = inlineImage; host.append(heading, form, commit); this.sync();
+    heading.hidden = commit.hidden = sharedCommit; host.append(heading, form, commit); this.sync();
     const error = this.errors.get(this.key(view));
     if (error?.field) { try { this.fieldValidators.get(error.field)?.(); } catch { /* Retain the field's explanation after remounting. */ } }
   }

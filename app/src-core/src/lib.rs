@@ -1278,7 +1278,7 @@ fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> Co
         UnknownImport => ("UNKNOWN_IMPORT_AUTHORITY", "Choose the import file again."),
         UnsupportedFormat => (
             "UNSUPPORTED_FORMAT",
-            "Choose a supported raster image or audio file.",
+            "Choose a supported raster image, audio file, TTF font or OTF font.",
         ),
         UiImageTooLarge => ("UI_IMAGE_TOO_LARGE", "UI images must fit the 16 MiB presentation and history limit."),
         FontTooLarge => ("FONT_TOO_LARGE", "Fonts must fit the 16 MiB presentation and history limit."),

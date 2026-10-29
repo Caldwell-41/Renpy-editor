@@ -10,8 +10,9 @@ import {driverProcess} from './phase2-driver-process.mjs';
 const output=resolve(process.env.PROJECT_FONT_OUTPUT??'../.toolchains/project-fonts/controller-01');await mkdir(output,{recursive:true});
 const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'project-font']);
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
-const errors=[],receipts=[],plans=[];let page,browser,sessionId,cancelPicker=true,alternate=false,broken=false,heldPicker=false,releasePicker=()=>{},pickerStarted=()=>{};
+const errors=[],receipts=[],plans=[];let page,browser,sessionId,cancelPicker=true,alternate=false,broken=false,heldPicker=false,releasePicker=()=>{},pickerStarted=()=>{},holdPresentation=false,presentationStarted=()=>{},releasePresentation=()=>{};
 const rpc=async request=>{
+ if(request.operation==='asset.presentFont'&&holdPresentation){presentationStarted();await new Promise(r=>{releasePresentation=r;});}
  if(request.operation==='asset.chooseFont'){if(heldPicker){pickerStarted();await new Promise(r=>{releasePicker=r;});}return {ok:true,value:cancelPicker?{cancelled:true}:await child.request({driver:'chooseFont',alternate,broken})};}
  if(request.operation==='screens.canvasStatus')return {ok:true,value:{phase:'unavailable',message:'SDK qualification is separate.'}};
  if(request.operation==='screens.canvasRender'){
@@ -85,8 +86,14 @@ try {
  await page.screenshot({path:join(output,'text-dark-wide.png')});
  await page.setViewportSize({width:560,height:640});await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await page.screenshot({path:join(output,'text-dark-compact.png')});assert.equal(await ui.getByRole('button',{name:'Apply',exact:true}).evaluate(e=>{const r=e.getBoundingClientRect();return r.bottom<640 && r.top>0 && document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===e;}),true);
  await request('project.close');await page.reload();await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');startApplication((operation,payload)=>window.fontRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}));});await page.locator('.recent-open').click();await page.getByRole('button',{name:'Screens',exact:true}).click();await page.locator('.screens-editor').getByLabel('Screen',{exact:true}).selectOption(JSON.stringify(['owned',owner.id]));await page.locator(`[data-node-id="${first.selectedId}"]`).dblclick();assert.equal(await page.getByRole('textbox',{name:'Size · px',exact:true}).inputValue(),'38');
+ await page.setViewportSize({width:1100,height:800});
+ await ui.locator('.screen-text-layout').evaluate(e=>e.open=true);await x.fill('99');await x.press('Escape');assert.equal(await x.inputValue(),'77');assert.equal(await x.evaluate(e=>e===document.activeElement),true,'Layout Cancel restores numeric focus');
+ await x.fill('88');
+ const fontRead=new Promise(r=>{presentationStarted=r;});holdPresentation=true;await size.fill('46');await ui.getByRole('button',{name:'Apply',exact:true}).click();await fontRead;
+ assert.equal(await size.getAttribute('readonly'),'');assert.equal(await x.getAttribute('readonly'),'','Layout is reserved during font loading');assert.equal(await ui.getByRole('button',{name:'Cancel',exact:true}).isDisabled(),true);assert.equal(await ui.getByRole('button',{name:'Choose project font',exact:true}).isDisabled(),true);
+ holdPresentation=false;releasePresentation();await settled();assert.match(await read(),/size 46/);assert.match(await read(),/xpos 88/);await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-text-field=size]')?.value==='38');
  assert.deepEqual(errors,[]);await writeFile(join(output,'result.json'),JSON.stringify({passed:true,actualControllerCore:true,nativeDialogSubstituted:true,sdkExecuted:false,source:accepted,font,receipts,plans},null,2));
  console.log('PASS actual font controller/core import, draft, Apply and shared history.');
 } catch(error) {
  await page?.screenshot({path:join(output,'failure.png')}).catch(()=>{});await writeFile(join(output,'geometry.json'),JSON.stringify(await page?.evaluate(()=>({roots:document.querySelectorAll('#app').length,headers:[...document.querySelectorAll('.app-header')].map(e=>e.getBoundingClientRect().toJSON()),apply:document.querySelector('[data-text-apply]')?.getBoundingClientRect().toJSON(),card:document.querySelector('.screen-text')?.getBoundingClientRect().toJSON(),display:document.querySelector('.screen-text')?getComputedStyle(document.querySelector('.screen-text')).display:null})).catch(()=>null),null,2));await writeFile(join(output,'failure.json'),JSON.stringify({error:String(error),errors,receipts,active:await page?.evaluate(()=>document.activeElement?.outerHTML).catch(()=>null)},null,2));throw error;
-} finally {releasePicker();await browser?.close();await server.close();await child.stop();}
+} finally {releasePresentation();releasePicker();await browser?.close();await server.close();await child.stop();}

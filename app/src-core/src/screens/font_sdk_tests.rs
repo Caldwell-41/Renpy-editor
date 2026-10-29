@@ -1,5 +1,44 @@
 use super::*;
 
+fn reference_node<'a>(nodes: &'a [Value], source: &str, name: &str) -> &'a Value {
+    nodes
+        .iter()
+        .find(|node| {
+            let start = node["span"]["start"].as_u64().unwrap() as usize;
+            let end = node["span"]["end"].as_u64().unwrap() as usize;
+            node["kind"] == "text" && source[start..end].contains(&format!("id \"{name}\""))
+        })
+        .expect("Literal reference text exists")
+}
+
+#[test]
+fn project_font_reference_mapping_uses_text_nodes_without_registered_ownership() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir_all(root.join("game/ui")).unwrap();
+    let source = include_str!("../../../../tests/fixtures/phase-3b-screens/fonts/reference.rpy");
+    fs::write(root.join("game/ui/font_reference.rpy"), source).unwrap();
+    service.open_path(&root).unwrap();
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":"game/ui/font_reference.rpy"}),
+    );
+    let nodes = doc["screens"][0]["nodes"].as_array().unwrap();
+    let starts: std::collections::BTreeSet<_> = ["title", "body", "right", "minimum", "maximum"]
+        .into_iter()
+        .map(|name| {
+            reference_node(nodes, source, name)["span"]["start"]
+                .as_u64()
+                .unwrap()
+        })
+        .collect();
+    assert_eq!(starts.len(), 5);
+    service.close().unwrap();
+}
+
 #[test]
 #[ignore = "L05 selected pinned-SDK proof; one canvas-helper start"]
 fn project_font_helper_matches_normal_sdk_and_retains_typed_pending_source() {
@@ -100,17 +139,11 @@ fn project_font_helper_matches_normal_sdk_and_retains_typed_pending_source() {
             &format!("font-{width}x{height}"),
         );
         for element in accepted["elements"].as_array().unwrap() {
-            let node = doc["screens"][0]["nodes"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .find(|n| {
-                    let start = n["span"]["start"].as_u64().unwrap() as usize;
-                    let end = n["span"]["end"].as_u64().unwrap() as usize;
-                    source[start..end]
-                        .contains(&format!("id \"{}\"", element["name"].as_str().unwrap()))
-                })
-                .unwrap();
+            let node = reference_node(
+                doc["screens"][0]["nodes"].as_array().unwrap(),
+                source,
+                element["name"].as_str().unwrap(),
+            );
             let actual = frame["geometry"]
                 .as_array()
                 .unwrap()

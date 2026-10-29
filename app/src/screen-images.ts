@@ -3,7 +3,7 @@ import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { MediaPresentation } from "./scene-ui.ts";
 import { ScreenImageMedia } from "./screen-image-media.ts";
-import type { ImageLayoutReservation, NumericLayout, ScreenLayoutEditor } from "./screen-layout.ts";
+import type { LayoutReservation, NumericLayout, ScreenLayoutEditor } from "./screen-layout.ts";
 
 export interface UiImageAsset {
   id: string;
@@ -31,7 +31,7 @@ interface Draft {
 interface SubmittedImage {
   draft: Draft;
   command: CompositionCommand;
-  layout: ImageLayoutReservation;
+  layout: LayoutReservation;
 }
 interface Host {
   view: () => CompositionView | undefined;
@@ -673,7 +673,7 @@ export class ScreenImages {
     const submitted: SubmittedImage = {
       draft: { ...draft },
       command,
-      layout: this.layout.reserveForImage(draft.document),
+      layout: this.layout.reserveForComposition(draft.document),
     };
     this.submitted = submitted;
     this.sync();

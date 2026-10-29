@@ -151,3 +151,26 @@ invalid input, focus, Cancel, exact Undo/Redo, Source draft retention, an opaque
 neighbor and disk reopen. Browser rehearsal is explicitly not native evidence.
 The native evidence gate rejects missing decode, stages, formats, Source or IDs.
 Mac helper use is 1/4; other counters retain the prior checkpoint.
+
+## Review corrections
+
+At `ff97b6f`, Standards review found no hard documented-standard violation and
+flagged an inaccurate unsupported-font repair message plus image-specific names
+shared by text. The message now includes TTF/OTF, and the existing layout
+reservation uses action-neutral names. Spec review found two defects: layout
+remained editable during an awaited font load, and Escape from a numeric layout
+field lost focus after Cancel. Apply now reserves layout before any await and
+releases it on refusal; Cancel records numeric focus. Controller-19 passes the
+delayed real font response with typography and layout locked, combined acceptance,
+Undo and numeric Cancel focus. The spec reviewer rechecked both fixes and reports
+no remaining issue in those findings. The first lock assertion expected disabled
+input, while the existing layout contract uses read-only input; that failed test
+is retained as controller-18.
+
+Helper attempt 2 found a second lookup defect: the parent span also contains the
+child's literal Ren'Py ID. The corrected lookup requires a text node. A cheap test
+against the actual source parser now proves five distinct matches without owned
+metadata. Both retained first-aspect frames independently match normal SDK
+reference pixels exactly. Full helper acceptance is still pending. Both failed
+processes have exited; no helper process remained in the process audit. Mac
+helpers total 2/4. Full frontend checks pass 276 cases with Python 3.12.

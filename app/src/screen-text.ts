@@ -4,7 +4,7 @@ import type { CoreOperation } from "./protocol.ts";
 import type { SelectedAsset } from "./asset-import-ui.ts";
 import { technicalName, technicalNameInput } from "./authoring-input.ts";
 import { ScreenFontMedia, type ProjectFont, type FontReference, type FontPresentation } from "./screen-font-media.ts";
-import type { ScreenLayoutEditor, ImageLayoutReservation } from "./screen-layout.ts";
+import type { ScreenLayoutEditor, LayoutReservation } from "./screen-layout.ts";
 
 export interface TextProperties {
   values: { font?: string; size?: number; color?: string; align?: number; bold?: boolean; italic?: boolean };
@@ -50,7 +50,7 @@ export class ScreenText {
   private card?: HTMLElement;
   private cardKey?: string;
   private keys?: AbortController;
-  private submitted?: {draft: Draft; command: CompositionCommand; layout: ImageLayoutReservation};
+  private submitted?: {draft: Draft; command: CompositionCommand; layout: LayoutReservation};
   private dialog?: HTMLDialogElement;
   private pickerKey?: string;
   private search = "";
@@ -210,7 +210,7 @@ export class ScreenText {
   }
   private cancel(): void {
     const view = this.host.view();if (!view || this.isSaving() || view.busy) return;
-    const field = (document.activeElement as HTMLElement | null)?.dataset.textField;
+    const active = (document.activeElement as HTMLElement | null)?.dataset, field = active?.textField ?? (active?.layoutField ? `layout:${active.layoutField}` : undefined);
     this.drafts.delete(this.key(view));this.errors.delete(this.key(view));this.layout.cancelCurrent();this.host.redraw();if (field) this.focus(field);this.host.preview();this.host.note("Text changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
@@ -219,15 +219,16 @@ export class ScreenText {
     try {values = this.values(draft,true);layout = this.layout.currentDraft(true);} catch {return;}
     if (!Object.keys(values).length && !layout) return;
     if (layout && layout.document.revision !== draft.document.revision) {this.fail("source","Text and layout use different Source revisions. Your edits are kept.");return;}
+    const reservation = this.layout.reserveForComposition(draft.document);
     if (!draft.node.textProperties?.blocked.font && draft.fields.font) {
       this.preparing = true;this.sync();
-      try {await this.refreshAssets();const font = this.assets.find(a => fontPath(a) === draft.fields.font);if (!font || font.status !== "available") throw Error("The font is missing or unreadable. Choose another project font. Your edits are kept.");await this.media.load(font);} catch (error) {this.fail("font",(error as Error).message);return;}
+      try {await this.refreshAssets();const font = this.assets.find(a => fontPath(a) === draft.fields.font);if (!font || font.status !== "available") throw Error("The font is missing or unreadable. Choose another project font. Your edits are kept.");await this.media.load(font);} catch (error) {reservation.release();this.fail("font",(error as Error).message);return;}
       finally {this.preparing = false;if (this.active()) this.sync();}
-      if (!this.active()) return;
+      if (!this.active()) {reservation.release();return;}
     }
     const active = (document.activeElement as HTMLElement | null)?.dataset, field = active?.textField ?? (active?.layoutField ? `layout:${active.layoutField}` : "text");
     const command: CompositionCommand = {type:"formatText",nodeId:view.selected.id!,values,...(layout ? {layout:layout.values} : {})};
-    const submitted = {draft,command,layout:this.layout.reserveForImage(draft.document)};this.submitted = submitted;this.sync();
+    const submitted = {draft,command,layout:reservation};this.submitted = submitted;this.sync();
     try {await this.host.commit(command,draft.document);if (this.active()) this.focus(field);}
     catch (error) {if (this.active()) this.fail("source",`${(error as Error).message} Your edits are kept.`);}
     finally {if (this.submitted === submitted) this.submitted = undefined;submitted.layout.release();if (this.active()) this.sync();}
