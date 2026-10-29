@@ -1,0 +1,90 @@
+.image-refined .ui-work{grid-template-columns:minmax(0,1fr) 326px;gap:18px}
+.image-refined .ui-editor{padding-left:16px}
+.image-refined .ui-editor-head{margin:0 0 12px;min-height:24px}
+.image-refined .ui-editor-body{padding-right:5px;scrollbar-gutter:stable}
+.image-refined .ui-editor-head h2{display:flex;align-items:center;gap:7px}
+.ir-draft{font-size:11px;color:var(--accent-primary);margin-left:auto}
+.image-refined .ir-asset-trigger.button{display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;background:transparent;border:1px solid var(--border-normal);padding:9px;text-align:left;min-height:72px}
+.image-refined .ir-asset-trigger:hover{border-color:var(--accent-primary)}
+.ir-asset-trigger>img{width:68px;height:42px;object-fit:contain;background:#132023}
+.ir-asset-trigger>svg{width:28px;height:28px;margin:0 16px;color:var(--text-secondary)}
+.ir-asset-words{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.ir-asset-words strong{font-size:12px;font-weight:600}
+.ir-asset-words small{font:10px/1.4 var(--font-mono,monospace);color:var(--text-secondary);overflow-wrap:anywhere}
+.ir-change-label{font-size:10px;color:var(--accent-primary);flex:none}
+.ir-group{margin:0;padding:14px 0 12px;border:0;border-top:1px solid var(--border-normal)}
+.ir-asset-trigger+.ir-inline-error+.ir-group{border-top:0;padding-top:17px}
+.ir-group h3,.ir-group summary{font-size:12px;font-weight:600;margin:0 0 10px}
+.ir-group summary{cursor:pointer}.ir-group:not([open]) summary{margin:0}.ir-group[open] summary{margin-bottom:12px}
+.ir-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+.image-refined .ir-fields .lp-field{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:5px;align-items:start;margin:0 0 8px}
+.image-refined .ir-fields .lp-label{grid-column:1/-1;font-size:11px;margin:0 0 5px}
+.image-refined .ir-fields .ir-field input{grid-column:1;min-height:32px;height:32px;padding:5px 6px;border-radius:0;font-size:12px;width:100%;font-variant-numeric:tabular-nums}
+.image-refined .ir-fields select{grid-column:2;width:67px;padding:4px;height:32px;min-height:32px;font-size:10px;border-radius:0}
+.ir-unit{align-self:center;font-size:10px;color:var(--text-secondary);padding-right:2px}
+.image-refined .ir-fields input[readonly]{color:var(--text-secondary);background:var(--surface-app)}
+.image-refined .ir-fields input[aria-invalid=true]{outline:1px solid var(--status-error,#de9b82);border-color:var(--status-error,#de9b82)}
+.ir-inline-error{font-size:11px;line-height:1.5;color:var(--status-error,#de9b82);margin:7px 0 0;grid-column:1/-1}
+.ir-inline-error[hidden],.ir-global-error[hidden]{display:none}
+.image-refined .ui-check{margin:3px 0 9px;font-size:12px}
+.ir-original{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:10px;color:var(--text-secondary);min-height:25px}
+.image-refined .ir-text-button.button{background:transparent;border:0;color:var(--accent-primary);padding:1px 0;min-height:23px;font-size:11px;text-align:left;justify-content:flex-start;text-decoration:underline;text-underline-offset:3px}
+.ir-asset-warning{border-left:2px solid #c4a66f;padding:0 0 0 9px;margin:12px 0 0}
+.ir-asset-warning p{font-size:12px;line-height:1.5;margin:0 0 3px}
+.ir-parent-note{font-size:11px;line-height:1.5;margin:6px 0 10px;color:var(--text-secondary)}
+.ir-alignment{display:grid;grid-template-columns:repeat(3,28px);gap:3px}
+.image-refined .ir-align-button.button{position:relative;width:28px;height:24px;min-height:24px;background:transparent;border:1px solid var(--border-normal);padding:0}
+.ir-align-button span{position:absolute;left:calc(50% - 2px);top:calc(50% - 2px);width:4px;height:4px;background:var(--text-secondary)}
+.ir-align-button:nth-child(3n+1) span{left:5px}.ir-align-button:nth-child(3n) span{left:auto;right:5px}.ir-align-button:nth-child(-n+3) span{top:4px}.ir-align-button:nth-child(n+7) span{top:auto;bottom:4px}
+.ir-empty-note{font-size:13px;line-height:1.5;margin:0 0 14px}
+.image-refined .ui-commit{padding-top:12px;margin-top:5px}
+.ir-commit-state{font-size:11px;color:var(--text-secondary);line-height:1.5;margin:0 0 9px;min-height:17px}
+.image-refined .ui-commit .ui-actions{gap:7px}.image-refined .ui-commit [data-apply]{min-width:94px}
+.ir-global-error{margin:0 0 9px;border-left:2px solid var(--status-error,#de9b82);padding-left:9px}
+.ir-global-error p{font-size:12px;line-height:1.5;margin:0 0 4px}
+.ir-stage-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:5px 0 8px}
+.ir-preview-state{font-size:11px;color:var(--text-secondary);margin:0;line-height:1.5}
+.image-refined .ir-stage-foot .button{background:transparent;border:0;color:var(--accent-primary);font-size:11px;padding:2px 0;min-height:24px}
+.image-refined .ui-canvas-wrap{max-height:440px;min-height:0}
+.image-refined .ui-canvas{max-height:none;min-height:0;flex:none;position:relative}
+.ir-game{position:absolute;left:0;top:0;transform-origin:top left;color:#f1e9d6}
+.ir-game-window{position:absolute;left:10%;top:10%;width:80%;height:80%;padding:32px;background:#293b3b;overflow:hidden}
+.image-refined .ir-game-title.button{padding:0;min-height:0;font-size:38px;line-height:1.3;font-weight:600;color:inherit;background:transparent;border:0;justify-content:flex-start;margin-bottom:20px}
+.ir-game-content{display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+.image-refined .ir-game-image.button{display:block;flex:none;min-height:0;min-width:0;padding:0;border:0;background:transparent;border-radius:0;position:relative}
+.ir-game-image img{display:block;width:100%;height:100%;object-fit:fill}
+.ir-game-image[data-selected=true]{outline:3px solid #e4bb70;outline-offset:3px}
+.ir-image-unavailable{display:flex;height:100%;align-items:center;justify-content:center;font-size:22px;line-height:1.5;background:#26332f;color:#edcaa4;border:2px dashed #dbac87}
+.image-refined .ir-game-text.button{padding:0;min-height:0;font-size:26px;line-height:1.5;white-space:pre-line;text-align:left;justify-content:flex-start;color:inherit;background:transparent;border:0}
+.image-refined .ir-game-close.button{padding:7px 24px;min-height:0;border:1px solid #829a94;background:transparent;color:inherit;font-size:24px;line-height:1.5}
+.ir-add-hint{position:absolute;left:12px;bottom:12px;color:#e4bb70;background:#152124;padding:5px 7px;font-size:11px}
+.ir-lab-tools{font-size:10px;border-top:1px solid var(--border-normal);padding-top:8px;color:var(--text-secondary)}
+.ir-lab-tools summary{cursor:pointer}.ir-lab-tools p{font-size:11px;line-height:1.5}.ir-lab-tools pre{font-size:10px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto}
+.ir-tree .ui-tree-row{justify-content:flex-start}.ir-tree small{margin-left:auto;color:var(--accent-primary);font-size:10px}
+.ir-dialog-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:16px}
+.ir-dialog-heading h2{margin:0}.image-refined .ir-dialog-heading .button{background:transparent;border:0;color:var(--text-secondary);font-size:11px;padding:3px}
+.ir-picker{width:min(600px,calc(100vw - 32px))}
+.ir-picker-toolbar{display:flex;gap:10px}.ir-picker-toolbar input{flex:1;min-width:0}.ir-picker-toolbar .button{flex:none}
+.ir-picker-scope{font-size:11px!important;color:var(--text-secondary);margin:10px 0 3px!important}
+.ir-picker .ui-asset-list{margin-top:0;max-height:330px;overflow:auto}.ir-picker .ui-asset-row{min-height:88px;padding:11px 7px;border-left-width:2px}.ir-picker .ui-asset-row img{width:88px;height:56px}
+.ir-picker-boundary{font-size:10px!important;color:var(--text-secondary);border-top:1px solid var(--border-normal);padding-top:10px;margin:13px 0 0!important;line-height:1.5!important}
+.ir-no-matches{padding:22px 0 5px}.ir-staged-file{display:grid;grid-template-columns:82px 1fr;gap:5px 14px;align-items:center;margin-bottom:18px}
+.ir-staged-file img{width:82px;height:82px;object-fit:contain;grid-row:1/3;background:#152224}.ir-staged-file p{margin:0}.ir-staged-file span{font-size:11px;color:var(--text-secondary)}
+.ir-picker .ui-actions{border-top:1px solid var(--border-normal);padding-top:14px;margin-top:16px}
+.ir-file-comparison{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0}.ir-file-comparison img{width:100%;height:120px;object-fit:contain;background:#152224}.ir-file-comparison h3{font-size:12px;margin:0 0 8px}
+.ir-add-image.button{display:block;width:100%;text-align:left;justify-content:flex-start;padding:13px!important}
+@media(max-width:800px){.image-refined .ui-work{display:flex}.image-refined .ui-editor{padding:12px 0 0;min-height:460px}.image-refined .ui-editor-body{padding:0}.image-refined .ui-commit{padding:10px 0;position:sticky;bottom:0;z-index:2}.image-refined .ui-canvas-wrap{max-height:270px}.ir-picker-toolbar{flex-wrap:wrap}.ir-picker-toolbar input{min-width:170px}.ir-picker .ui-asset-row img{width:64px;height:46px}.ir-picker .ui-asset-row{gap:10px}.ir-file-comparison{gap:10px}.ir-file-comparison img{height:95px}.ir-stage-foot{flex-wrap:wrap}}
+
+/* Match the accepted numeric row dimensions despite production field specificity. */
+.image-lab.image-refined .ui-editor .ir-fields .lp-field{align-content:start;grid-template-rows:auto 32px auto}
+.image-lab.image-refined .ui-editor .ir-fields .lp-field .lp-label{grid-row:1}
+.image-lab.image-refined .ui-editor .ir-fields .lp-field input{grid-row:2;border-radius:0;min-height:32px;height:32px;padding:5px 6px}
+.image-lab.image-refined .ui-editor .ir-fields .lp-field select,.image-refined .ir-unit{grid-row:2}
+.image-refined .ir-fields .ir-inline-error{grid-row:3}
+.ir-compact-jump{display:none}
+@media(max-width:800px){.image-refined .ui-editor{order:0;min-height:0;flex:none}.image-refined .ui-stage{order:1}.ir-compact-jump{display:inline-block}.image-refined .ui-editor-head .ir-compact-jump{margin-left:auto;font-size:10px;background:transparent;border:0;color:var(--accent-primary);padding:3px}.image-refined .ui-commit{position:static}.image-refined .ui-editor-body{overflow:visible;flex:none}.image-refined .ui-editor{display:block}.image-refined .ir-draft{margin-left:0}.image-refined .ui-editor-head{gap:9px}}
+
+.image-refined .ir-group .ir-group{border-top:0;padding:0 0 12px}.image-refined .ir-group .ir-group+.ir-group{border-top:1px solid var(--border-normal);padding-top:12px}
+
+.image-lab.image-refined .ui-editor .ir-fields .lp-field{row-gap:0}
+@media(max-width:800px){.image-refined .ir-group{padding:10px 0}.image-refined .ir-asset-trigger+.ir-inline-error+.ir-group{padding-top:12px}.image-refined .ui-commit{padding:8px 0}}

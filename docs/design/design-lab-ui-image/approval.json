@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "screenId": "ui-image",
+  "currentApproved": null,
+  "revisions": [
+    {
+      "id": "inspector-v1",
+      "variantId": "inspector",
+      "approval": null
+    },
+    {
+      "id": "browser-v1",
+      "variantId": "browser",
+      "approval": null
+    },
+    {
+      "id": "guided-v1",
+      "variantId": "guided",
+      "approval": null
+    },
+    {
+      "id": "inspector-v2",
+      "variantId": "refined",
+      "approval": null
+    }
+  ]
+}
