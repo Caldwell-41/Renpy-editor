@@ -709,11 +709,15 @@ fn core_request(
                 | "project.openPicker"
                 | "asset.chooseImport"
                 | "asset.chooseUiImage"
+                | "asset.chooseFont"
                 | "asset.chooseImports"
         ) {
             let asset = matches!(
                 operation.as_str(),
-                "asset.chooseImport" | "asset.chooseImports" | "asset.chooseUiImage"
+                "asset.chooseImport"
+                    | "asset.chooseImports"
+                    | "asset.chooseUiImage"
+                    | "asset.chooseFont"
             );
             if !(if asset {
                 validated.payload.len() == 1 && session_id.is_some()
@@ -771,6 +775,10 @@ fn core_request(
                     }));
             }
             let path = match operation.as_str() {
+                "asset.chooseFont" => rfd::FileDialog::new()
+                    .set_title("Choose project font")
+                    .add_filter("Fonts", &["ttf", "otf"])
+                    .pick_file(),
                 "asset.chooseUiImage" => rfd::FileDialog::new()
                     .set_title("Choose UI image")
                     .add_filter("Images", &["png", "jpg", "jpeg", "webp"])

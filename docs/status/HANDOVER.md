@@ -12,10 +12,12 @@ Keep the original design worktree pinned for production comparison.
 
 [Preparation evidence](../tasks/evidence/project-fonts.md) records licensed font
 fixtures and passing baseline typechecking and 58 ordinary screen-core tests.
-Three SDK/helper cases remain ignored. No production code has changed and no
-process remains pending. The TDD seam question and tracker-update approval are
-pending. Automatic approval review rejected the initial GitHub comment; the
-reviewable text is in ignored `.toolchains/project-fonts/ticket-update.md`.
+Three SDK/helper cases remain ignored in the ordinary selection. Kris has approved
+the test boundaries and tracker updates; the initial GitHub rejection is resolved.
+Core font import, typed text edits, source protection and inert drafts now have
+focused public-request proof. The first broader run's grid-expression regression
+is corrected and its focused case passes. SDK inputs and a rejecting evidence
+checker are prepared in ignored `.toolchains/project-fonts/`.
 Every costly-operation counter is zero; publication and acceptance are unclaimed.
 
 Design TypeScript, approval checks, the source fingerprint and all 18 capture
@@ -23,8 +25,8 @@ hashes pass after integration. The design chat's combined startup failure remain
 failed, with no full promotion or product acceptance. The handoff and exact
 source identity are linked from the evidence record.
 
-Next: use the user's boundary answer to begin font-import TDD, record the limits
-in #39 when tracker approval is available, and implement the approved A2 controls.
+Next: qualify the prepared source in the pinned SDK, implement A2's actual
+controller path, then complete affected desktop checks and both review axes.
 
 <a id="l06-implementation-and-qualification"></a>
 

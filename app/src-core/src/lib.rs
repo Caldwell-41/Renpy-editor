@@ -103,9 +103,12 @@ pub const OPERATIONS: &[&str] = &[
     "appearance.update",
     "asset.chooseImport",
     "asset.chooseUiImage",
+    "asset.chooseFont",
     "asset.chooseImports",
     "asset.previewImport",
     "asset.reviewUiImage",
+    "asset.presentFont",
+    "asset.previewFont",
     "asset.import",
     "asset.repairCompatibility",
     "variable.create",
@@ -754,6 +757,24 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.scene_resolve_recovery(payload))
             .and_then(to_value),
+        "asset.presentFont" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<authoring::FontReference>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.present_font(payload))
+            .and_then(to_value),
+        "asset.previewFont" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<media::ImportPreviewRequest>(Value::Object(payload))
+                    .map_err(|_| {
+                        LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload)
+                    })
+            })
+            .and_then(|payload| lifecycle.preview_font(payload))
+            .and_then(to_value),
         "asset.reviewUiImage" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| {
@@ -937,6 +958,7 @@ pub fn handle_application_request(
         | "sdk.browse"
         | "asset.chooseImport"
         | "asset.chooseUiImage"
+        | "asset.chooseFont"
         | "asset.chooseImports" => {
             return CoreResponse::failure(
                 request_id,
@@ -1149,6 +1171,9 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
         ImageMissing => ("UI_IMAGE_MISSING", "The chosen UI image is missing. Your draft is retained; choose an available UI image."),
         ImageChanged => ("UI_IMAGE_CHANGED", "The chosen UI image changed since selection. Your draft is retained; review the asset and choose it again."),
         ImageInvalid => ("INVALID_UI_IMAGE", "The chosen reference is not a valid supported UI image. Your draft is retained."),
+        FontMissing => ("FONT_MISSING", "The chosen project font is missing. Your draft is retained; restore it or choose another font."),
+        FontChanged => ("FONT_CHANGED", "The chosen project font changed. Your draft is retained; choose a verified font again."),
+        FontInvalid => ("INVALID_FONT", "Choose a valid project-owned TTF or OTF font. Your draft is retained."),
         AmbiguousReturnLabel => (
             "AMBIGUOUS_RETURN_LABEL",
             "This return label is duplicated or conflicts with another label. Inspect Source before editing the Call.",
@@ -1256,6 +1281,7 @@ fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> Co
             "Choose a supported raster image or audio file.",
         ),
         UiImageTooLarge => ("UI_IMAGE_TOO_LARGE", "UI images must fit the 16 MiB presentation and history limit."),
+        FontTooLarge => ("FONT_TOO_LARGE", "Fonts must fit the 16 MiB presentation and history limit."),
         OversizeImport => (
             "IMPORT_TOO_LARGE",
             "The selected file exceeds the 512 MiB import limit.",

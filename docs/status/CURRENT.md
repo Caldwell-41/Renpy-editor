@@ -6,11 +6,11 @@ Kris selected [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) o
 new branch `codex/l05-project-fonts`, based on `8f0d208`. A separate design chat
 owns the pinned font/typography mock in its own worktree. Kris approved A2, and
 its design files are integrated through `804405d` with a matching fingerprint.
-Font fixtures and baseline checks are prepared; production code is unchanged.
-The TDD boundary confirmation and permission for tracker status updates remain
-pending. [Evidence](../tasks/evidence/project-fonts.md) records the handoff,
-baseline, retained full-design-check failure and blocked tracker update.
-No costly operation has run.
+Kris approved the test boundaries and tracker updates. Core font import and typed
+text transactions now have focused public-request proof; A2's production UI and
+SDK/native qualification remain pending. [Evidence](../tasks/evidence/project-fonts.md)
+records the handoff, checks, retained failures and corrected grid-expression
+refusal. The owning issue records qualification limits. No costly operation has run.
 L06 and earlier accepted outcomes retain their scope below.
 
 ## L06 UI-image authoring merged

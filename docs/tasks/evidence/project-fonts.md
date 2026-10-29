@@ -59,7 +59,44 @@ handoff identifies the retained output. Integration neither reran that unchanged
 failure nor claimed full promotion validation. Actual font specimens, writes,
 persistence and native behavior remain unqualified. No production code changed.
 
-Next: confirm the three proposed test boundaries, record the selected limits in
-#39 when tracker approval is available, then implement the approved controls and
-their real service operations. Both pending questions remain with Kris in the
-implementation chat; design approval does not answer them.
+## Core implementation and qualification preparation
+
+Kris approved all three test boundaries and tracker updates, then directed
+continuation through testing, review and commit. The
+[owning issue comment](https://github.com/Caldwell-41/Renpy-editor/issues/39#issuecomment-6497848293)
+records the selection and qualification ceilings. The earlier tracker rejection
+is resolved by that explicit approval. Code publication remains unselected.
+
+Public-request tests pass typed TTF/OTF import, invalid-byte refusal, shared
+history and reopen, exact minimal text/font edits, no-op history, expression
+preservation, property reset with a valid remaining block, typed font specimens,
+asset/source refusals and inert typography drafts. Font parsing uses pinned
+`ttf-parser` 0.25.1 with its standard-library feature. The 16 MiB import limit
+matches bounded font presentation and shared history. No project code executes
+during these reads or edits.
+
+The first broader Screens run passed 65 cases, failed the existing grid-expression
+refusal case and ignored three explicit SDK/helper cases. Recognizing text
+expressions changed that grid's child count and returned `INVALID_PAYLOAD` instead
+of its previous `OPAQUE_BOUNDARY`. The correction retains conservative grid
+count/add and structural-edit refusal around text expressions. The original
+focused grid test then passes. The first run remains failed in ignored local
+`project-fonts/core-01.log`.
+
+Preparation also caught three check/configuration mistakes: the wrong-role fixture
+helper returned the catalog's first asset, the passive-media assertion used a
+nonexistent error code, and the initial exact fixture selector matched zero tests.
+The corrected cases select the image by role, assert the existing `INVALID_PAYLOAD`
+response and run the full exact test name with one passing result. The first
+font-parser compilation also required enabling `std`. No product gate was relaxed.
+
+The accepted SDK input is generated through public asset/screen/Source requests.
+It covers TTF/OTF, line wrapping, alignment, bold/italic, four hex color lengths
+and proposed whole-pixel size bounds 1 and 512. Its checker compares actual
+placement and pixels with an independent literal Ren'Py reference and checks
+that both project fonts differ from the bundled fallback. The offline gate rejects
+missing fonts, fallback fonts, unwrapped text and wrong placement. No SDK result
+has yet been established.
+
+Next: qualify the generated source in the pinned SDK, connect A2 to the real
+controller and services, then finish affected desktop checks and both review axes.

@@ -293,6 +293,9 @@ fn copy_asset(
         .transactions
         .snapshot_bounded(project, path.clone(), 16 * 1024 * 1024)
         .map_err(|_| SceneError::SourceConflict)?;
+    if font {
+        crate::authoring::fonts::validate(&bytes).map_err(|_| SceneError::FontInvalid)?;
+    }
     if dependencies
         .iter()
         .any(|(expected_path, hash)| expected_path == path.as_str() && hash != &revision.sha256)

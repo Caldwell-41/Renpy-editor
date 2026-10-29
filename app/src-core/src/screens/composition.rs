@@ -47,6 +47,13 @@ pub enum Command {
     #[serde(rename_all = "camelCase")]
     Text { node_id: String, text: String },
     #[serde(rename_all = "camelCase")]
+    FormatText {
+        node_id: String,
+        values: text::TextEdits,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+    },
+    #[serde(rename_all = "camelCase")]
     Reorder {
         node_id: String,
         target_id: String,
@@ -91,6 +98,11 @@ pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
         .contains(&kind)
         && (parent.kind != "grid"
             || (parent.protected.is_empty()
+                && !screen.nodes.iter().any(|child| {
+                    child.parent_start == Some(parent.span.start)
+                        && matches!(child.kind.as_str(), "text" | "textbutton")
+                        && child.literal.is_none()
+                })
                 && parent.numeric_layout.as_ref().is_some_and(|layout| {
                     layout.allows_empty_cells == Some(true)
                         && screen
@@ -115,7 +127,11 @@ fn movable(screen: &Screen, node: &Node) -> bool {
             .nodes
             .iter()
             .filter(|n| n.span.start >= node.span.start && n.span.start < node.source_end)
-            .all(|n| n.id.is_some() && n.protected.is_empty())
+            .all(|n| {
+                n.id.is_some()
+                    && n.protected.is_empty()
+                    && !(matches!(n.kind.as_str(), "text" | "textbutton") && n.literal.is_none())
+            })
 }
 
 impl AuthoringService {
@@ -289,7 +305,7 @@ impl AuthoringService {
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&node_id))
                     .ok_or(SceneError::UnknownEntity)?;
-                if !["text", "textbutton"].contains(&node.kind.as_str()) {
+                if !["text", "textbutton"].contains(&node.kind.as_str()) || node.literal.is_none() {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 let header = std::str::from_utf8(&bytes[node.span.start..node.source_end])
@@ -305,6 +321,38 @@ impl AuthoringService {
                 let value = text_literal(&text)?;
                 if node.literal.as_ref() != Some(&text) {
                     proposed.splice(start..start + literal.len(), value.bytes());
+                }
+                node_id
+            }
+            Command::FormatText {
+                node_id,
+                values,
+                layout,
+            } => {
+                let node = screen
+                    .nodes
+                    .iter()
+                    .find(|n| n.id.as_ref() == Some(&node_id))
+                    .ok_or(SceneError::UnknownEntity)?;
+                let changes = self.resolve_text_edits(project, project_id, &values)?;
+                proposed = node
+                    .text_properties
+                    .as_ref()
+                    .ok_or(SceneError::OpaqueBoundary)?
+                    .patch(&bytes, node, &values, changes)?;
+                if !layout.is_empty() {
+                    let context = inspect(&proposed, source_path.clone(), String::new())?;
+                    let updated = context
+                        .screens
+                        .iter()
+                        .find(|s| s.name == screen.name)
+                        .and_then(|s| s.nodes.iter().find(|n| n.id.as_ref() == Some(&node_id)))
+                        .ok_or(SceneError::InvariantBlocked)?;
+                    proposed = updated
+                        .numeric_layout
+                        .as_ref()
+                        .ok_or(SceneError::OpaqueBoundary)?
+                        .patch(&proposed, &layout)?;
                 }
                 node_id
             }
