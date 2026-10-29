@@ -636,3 +636,30 @@ unchanged: dispatches 3/3; Mac SDK 9/20, helpers 3/4, packages 3/3, native sessi
 3/3; Windows SDK 8/20, helpers 2/4, packages 2/3, native sessions 2/3. Ordinary
 PR checks need no numerical allowance. Publication, PR update and CI audit are
 selected; no merge, release, ticket closure or wider acceptance is selected.
+
+### Published correction and ordinary CI audit
+
+Published head `eba17f668ea867d405cf1bee809561914e200e03` contains both
+validated corrections and their evidence. PR #70's body is updated and remains
+draft. [Repository quality run 40955663352](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40955663352),
+attempt 1, is completed with conclusion `success` for that exact head. The
+coordinator verified the current PR still points to that candidate, matched and
+acknowledged the watcher event in this thread, and audited the required jobs and
+logs before accepting the result.
+
+- `Frontend tests and Rust formatting`, job `123734990910`: every step passes;
+  logs confirm 277 tests, 277 passes, zero failures and Rust 1.90.0 formatting.
+- `Validate repository`, job `123734991270`: every step passes, including
+  validation of 1,258 checkout files, all 13 section-link tests, bounded Q1 gate
+  rejection fixtures and source-selector audit.
+- Nine optional jobs were unselected and skipped. They are not required passes,
+  new qualification or evidence of SDK/native/package execution.
+
+The exact terminal JSON, job logs, PR snapshot and watcher receipt remain in
+ignored/private local evidence. The application candidate remains `ef81014`;
+the publication and this terminal audit record change documentation only. The
+ordinary automatic checks of any record-only successor remain visible on the PR;
+this audit does not claim they have already completed. No expensive workflow was
+dispatched. Historical limits, earlier qualification and protected recovery remain
+unchanged. Both review findings are corrected and the selected product validation
+is complete. No merge, release, ticket closure or wider acceptance is selected.

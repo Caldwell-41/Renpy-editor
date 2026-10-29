@@ -18,9 +18,13 @@ candidate and the combined candidate. Font admission now requires a parsed base
 character map. Retained text drafts clear only when every field matches current
 saved values; unresolved drafts retain their original revision.
 
-Publication, PR update and ordinary CI audit are selected and pending. The final
-PR check run owns its published candidate and result; local checks are not a CI
-pass. Fix worktrees remain available. No SDK/helper, package/native or costly CI
+Both required jobs in [Repository quality run 40955663352](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40955663352),
+attempt 1, pass on published head `eba17f668ea867d405cf1bee809561914e200e03`.
+The coordinator audited all required steps and logs, including 277 frontend tests,
+Rust formatting, repository validation and 13 link tests. PR #70 is updated.
+Any later audit-record commit changes documentation only; its ordinary automatic
+checks remain visible on the PR. No product correction or qualification is pending.
+Fix worktrees remain available. No SDK/helper, package/native or costly CI
 operation ran. Historical consumption and earlier both-host qualification retain
 their recorded candidates and scope. Keep the PR draft and #39 open. Merge,
 release and wider acceptance remain unselected. Preserve the unrelated Phase 1
