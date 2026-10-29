@@ -16,30 +16,38 @@ as `6ecde62`; approval closeout is `cbf9067`. Keep its pinned comparison worktre
 `docs/design/design-lab-ui-image/HANDOFF.md`. Focused design checks pass. The full
 Design Lab initial-navigation timeout remains failed and explicitly retained.
 
-The current working changes implement the approved inspector and actual native
-image-only picker. Imports and passive previews use existing asset services;
-replacement review changes no metadata until one Source/metadata transaction.
-Per-node drafts, aspect sizing, layout and parent changes, invalid input, Source
-navigation, history and typed inert canvas inputs use production controllers/core.
-Focused tests and the actual-controller browser sequence pass. The exact packaged
-probe passes its browser/core rehearsal after two test navigation corrections.
-Its native and Windows cases still need execution. A first helper attempt produced
-six correct rectangles but failed a fixture ownership lookup; it remains charged.
-The second helper passes all six rectangles and exact independent-reference pixels
-at both aspects, plus a typed pending image and cooperative cleanup.
-[Evidence](../tasks/evidence/ui-image.md) retains detailed results and remaining proof.
-#40 alone owns cumulative costly-operation accounting; check it before operations.
-No helper operation remains running.
+Implementation is committed at `96c55af`; async draft/picker corrections and
+all-format native fixtures are at `19d71e8697ca7a8294179b8c720c1e9b4cdafe23`.
+Both Standards and Spec re-review report zero remaining findings against the
+user-confirmed base `2e045d9`. Final frontend has 269 passes; ordinary release core
+has 446 positives, 50 explicit ignored specialist/SDK cases and three documented
+exclusions; desktop has 38 passes. Failed runs and scope boundaries remain in
+[the evidence](../tasks/evidence/ui-image.md).
 
-Pinned tools/dependencies remain in the primary checkout. `app/node_modules` is
-an untracked local symlink and must never be staged. Use bundled Python 3.12,
-not system Python 3.9, for harnesses. Accepted SDK inputs and failed/passing outputs
-remain under ignored `.toolchains/ui-image/`; keep all attempts. The earlier
-Mac normal-entry pass binds source/assets at `c26eeab`, with unchanged product
-files from `a140614`. Signed package/native, Windows, final suites
-and both independent review axes remain for this outcome. No push, PR, merge or
-release is selected. Next finish qualification of the implemented candidate,
-fix in-scope review findings and commit. The implementation owner remains here.
+Mac normal entry and GL2 helper have both-aspect, exact-geometry and zero-difference
+independent-reference pixel proof. The helper also verifies typed pending images
+without Source writes. Package build 1 at `19d71e8` uses the unchanged approved
+identity and passes strict signature/installer checks. Native session 1 passes all
+five raster variants, size/validation/history/Source/reopen, exact disk bytes and
+cleanup. These are synthetic DOM inputs through a signed native WebView. Physical
+input, OS file-dialog and human evidence remain distinct. No operation or watcher
+remains running. #40 alone owns cumulative allowances and consumption.
+
+Pinned tools/dependencies remain in primary. `app/node_modules` and `app/target`
+are untracked local symlinks and must never be staged. Use bundled Python 3.12 on
+PATH; system Python 3.9 fails `tomllib` harnesses. Keep every ignored attempt under
+`.toolchains/ui-image/`, including `sdk-01`'s failed original oracle, `helper-01`'s
+failed fixture lookup, `controller-*`, probe rehearsals, full-suite logs and signed
+`mac-package-01`/`mac-native-01`. The package is a local artifact, not an install or
+release. Preserve the prototype comparison worktree and earlier protected state.
+
+Next obtain publication authorization, then push the reviewed branch and dispatch
+only `screens-source.yml` with `ui_image=true`, exact final candidate and ordinal 1.
+The prepared Windows route selects at most five SDK starts, one helper, one
+package and one native session. It retains independent partial evidence without
+converting a failed gate into a pass. Use ci-watch for the known run. No Windows
+check has run, and no push, PR, merge or release has been selected. This chat owns
+that continuation; no implementation handoff is required.
 
 ## L04 merge and workspace closeout
 

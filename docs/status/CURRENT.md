@@ -11,16 +11,20 @@ integrated; the separate pinned prototype worktree remains the comparison refere
 
 The typed image inspector, imports, passive previews, aspect controls, per-image
 drafts and atomic image/size/layout/reviewed-reference transactions are implemented.
-Focused service and actual-controller/core browser proof pass. The exact packaged
-probe also passes its browser/core rehearsal. Mac normal-entry proof covers both
-aspects and six image cases with exact geometry and zero differing reference pixels.
-Its original failed pixel oracle remains retained. Mac GL2 helper proof also passes both aspects and typed image drafts. Current
-packaged/native, Windows and final review/suite evidence remain pending. The combined Design Lab
-startup timeout remains an explicit promotion-validation gap.
+The user-confirmed review base is `2e045d9`; both review axes clear corrected
+candidate `19d71e8`.
+
+| Capability | Automated proof | Native/human status |
+| --- | --- | --- |
+| Typed image import, drafts, size/aspect, Source and history | 269 frontend, 446 ordinary release-core and 38 desktop positives; actual controller/core sequence passes. Core's 50 ignored specialist/SDK cases and three named exclusions remain separate. | Signed Mac WebView passes all supported formats, sizing/history/Source/reopen; Windows pending. |
+| Actual asset rendering | Mac normal entry and GL2 helper pass both aspects, exact dimensions and zero differing independent-reference pixels. | No new physical-input or human acceptance claimed. |
+| A2 inspector | Approved source/captures and scoped wide/compact comparison retained. | Full Design Lab startup timeout remains failed. |
+
 [Evidence](../tasks/evidence/ui-image.md) owns detailed results and failures;
 [HANDOVER](HANDOVER.md#l06-implementation-and-qualification) owns continuation.
-The ticket remains in progress. Earlier closed allowances and protected recovery
-remain intact.
+The ticket remains in progress. Required Windows qualification needs publication
+of the reviewed branch; no push, PR, merge or release is selected. Earlier closed
+allowances and protected recovery remain intact.
 
 ## L04 nested and clipped layouts merged
 

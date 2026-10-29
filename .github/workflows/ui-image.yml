@@ -62,6 +62,7 @@ jobs:
           workspaces: app -> target
           cache-bin: 'false'
       - name: Portable checks and native-probe evidence gate
+        id: preflight
         run: |
           rustup toolchain install 1.90.0 --profile minimal --component rustfmt
           npm install --global npm@11.9.0
@@ -76,6 +77,7 @@ jobs:
           npm run build
           cargo check -p loomlight-desktop --locked
       - name: Real controller/core and exact packaged-probe rehearsal
+        id: controller
         env:
           UI_IMAGE_OUTPUT: ${{ runner.temp }}/ui-image/controller
           UI_IMAGE_PROBE_OUTPUT: ${{ runner.temp }}/ui-image/probe-controller
@@ -106,19 +108,27 @@ jobs:
           New-Item -ItemType Directory -Path $scratch | Out-Null
           "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-      - name: Public-core source, both SDK aspects and inert helper (five SDK starts)
+      - name: Export accepted public-core image source
+        id: accepted-input
+        env:
+          LOOMLIGHT_UI_IMAGE_INPUTS: ${{ runner.temp }}/ui-image/inputs
+        run: |
+          cargo test -p loomlight-core --locked screens::tests::ui_images::ui_image_prepares_sdk_fixture_through_public_requests -- --exact --nocapture
+          test -f "$LOOMLIGHT_UI_IMAGE_INPUTS/accepted.json"
+      - name: Normal pinned SDK entry at both aspects (four SDK starts)
+        run: |
+          "$HARNESS_PYTHON" scripts/qualify-ui-image.py --archive "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" --checksums "$RUNNER_TEMP/image-checksums.txt" --accepted "$RUNNER_TEMP/ui-image/inputs/accepted.json" --output "$RUNNER_TEMP/ui-image/sdk" --allow-fixture-execution
+      - name: Inert image helper (one SDK/helper start)
+        if: ${{ always() && steps.accepted-input.outcome == 'success' }}
         env:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
           LOOMLIGHT_UI_IMAGE_HELPER_EVIDENCE: ${{ runner.temp }}/ui-image/helper
           LOOMLIGHT_UI_IMAGE_INPUTS: ${{ runner.temp }}/ui-image/inputs
         run: |
-          cargo test -p loomlight-core --locked screens::tests::ui_images::ui_image_prepares_sdk_fixture_through_public_requests -- --exact --nocapture
-          test -f "$LOOMLIGHT_UI_IMAGE_INPUTS/accepted.json"
-          "$HARNESS_PYTHON" scripts/qualify-ui-image.py --archive "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" --checksums "$RUNNER_TEMP/image-checksums.txt" --accepted "$LOOMLIGHT_UI_IMAGE_INPUTS/accepted.json" --output "$RUNNER_TEMP/ui-image/sdk" --allow-fixture-execution
           cargo test -p loomlight-core --locked screens::tests::image_sdk::ui_image_helper_qualifies_assets_sizes_and_typed_pending_images -- --exact --ignored --nocapture
           "$HARNESS_PYTHON" scripts/qualify-ui-image-helper.py "$LOOMLIGHT_UI_IMAGE_HELPER_EVIDENCE"
       - name: Windows package and real WebView keyboard/history/reopen (one session)
-        if: runner.os == 'Windows'
+        if: ${{ always() && steps.preflight.outcome == 'success' && steps.controller.outcome == 'success' }}
         env:
           LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
         run: |

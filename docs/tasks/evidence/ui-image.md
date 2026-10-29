@@ -101,7 +101,7 @@ This proves the generated source's image selection and dimensions in Mac normal
 Ren'Py entry. It does not establish GPU canvas fidelity, Windows SDK behavior,
 packaged UI behavior, physical input, mock approval or ticket acceptance.
 
-| Ticket criterion | Current evidence | Remaining proof |
+| Ticket criterion at `c26eeab` | Checkpoint evidence | Proof still pending then |
 | --- | --- | --- |
 | Typed role/picker and missing/replaced/invalid handling | Role, formats and specific reference errors pass through public services. | Actual picker, draft retention and desktop paths. |
 | Owned image, size/aspect and shared source transactions | Owned identity, exact minimal source, atomic asset/size edit, no-op and shared history pass. Normal SDK verifies proportional and stretched output. | User-approved aspect controls and actual controller path. |
@@ -258,3 +258,44 @@ PNG bytes. Core correctly returned `DUPLICATE_CONTENT`; the test's expectation o
 a second imported Asset was wrong. Existing duplicate policy is preserved. The
 corrected sequence verifies that refusal and retained display name, then imports
 a distinct JPEG and cancels its screen draft while retaining the catalog Asset.
+
+
+## Signed Mac package and native result
+
+Candidate `19d71e8697ca7a8294179b8c720c1e9b4cdafe23` passes package build 1 with the
+unchanged approved signing identity, strict signature and installer-contents
+verification. [Receipt](ui-image-mac-native.json) binds the exact executable and
+installer hashes, full native report and desktop admission/power evidence.
+Native session 1 passes all five required stages and completes with exit 0.
+PNG, JPEG and static lossless/lossy/alpha WebP decode through actual media services
+in the packaged WebView. Typed picker cancellation, accepted proportional/stretch
+size, invalid draft retention/focus, no-op, Undo/Redo, Source reconciliation with
+an opaque neighbor and reopen identities pass. Accepted bytes match disk; there
+are no scratch jobs, source bytecode, saves or disk errors. Fixture deletion and
+host/request/credential cleanup pass; desktop assertions release completely.
+This is synthetic DOM input through a signed native WebView. OS file-dialog,
+physical-keyboard and human acceptance remain distinct; this profile starts no SDK.
+
+`controller-07` completes the corrected production UI/core sequence with 104 actual
+operations, zero page errors, duplicate-content refusal, distinct JPEG import
+retained after screen-draft Cancel, reference failures and Source/history proof.
+Its compact capture shows the complete Apply control above the app footer. The
+A2 inspector hierarchy, 326-pixel wide panel, paired 32-pixel fields, flat styling,
+Layout disclosure and compact editing order match the approved version. The live
+screen selector, existing app shell and preview controls remain; their labels and
+synthetic artwork differ from the lab fixture. The browser comparison has no
+SDK frame and establishes no pixel-identical whole-app claim. Actual asset rendering
+is covered separately by the normal-entry and GL2 helper receipts. The full Design
+Lab startup timeout remains failed; no threshold or reviewed source was changed.
+
+Standards initially reported one finding and Spec two (one shared). Both axes
+re-reviewed `19d71e8`, report zero remaining findings and identify no new issue.
+Their review base is the user-confirmed `2e045d9`. The subsequent changes are
+workflow/evidence only. The Windows route keeps independent helper/native evidence
+running after a nondependent normal-entry failure, while the original failure
+continues to fail qualification. It retains exact candidate/dispatch guards and
+partial artifacts; planned maxima are five Windows SDK starts, one helper, one
+package and one native session in one dispatch. Nothing has been dispatched.
+
+Windows remains the required platform gap. No ticket acceptance/closure, push,
+PR, merge or release is claimed. #40 owns current cumulative operation counts.
