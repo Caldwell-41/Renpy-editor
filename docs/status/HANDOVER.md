@@ -6,14 +6,15 @@ Kris selected [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39)
 on `codex/l05-project-fonts`, based on `8f0d208`, and approved test boundaries,
 tracker updates, review and commits. Approved A2 is integrated, and the actual
 controller/core path passes. Mac pinned SDK/helper geometry and strict pixels pass
-at both aspects. Final signed package `4672bf7` passes native WebView qualification, including
-the final CSS and compact caption.
+at both aspects. Corrected signed package `cf01c06` passes native WebView qualification, including
+the shared request-lane fix.
 [Evidence](../tasks/evidence/project-fonts.md) owns receipts, original failures,
 review corrections and remaining limits. Full frontend checks pass; the ordinary
 core suite's sandbox listener failures pass in the affected permitted rerun.
-Both review axes have no remaining findings after corrections.
+Earlier implementation-review findings are resolved. The requested separate
+draft-PR review follows audited CI.
 
-Mac use is SDK 9/20, helpers 3/4, packages 2/3 and native sessions 2/3.
+Mac use is SDK 9/20, helpers 3/4, packages 3/3 and native sessions 3/3.
 [Draft PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) remains open.
 CI2 at `399402f` failed two checks; automatic PR quality passes. All controller
 rehearsals, normal SDK and helper geometry/pending/cleanup pass. The pixel gate
@@ -22,9 +23,8 @@ for both targets and rejects six invalid-evidence cases. The native Apply race i
 reproduced and fixed by routing passive asset reads and import through the shared
 request lane. Full frontend checking passes 277 cases.
 Windows cumulative use is SDK 4/20, helpers 1/4, packages 1/3, native sessions 1/3;
-dispatches are 2/3. Mac counters above remain current. Publish the corrections,
-qualify the changed application within the third Mac package/native allowance,
-then run Windows ordinal 3. After audited CI passes, start the requested separate
+dispatches are 2/3. Mac counters above remain current. The corrected Mac application passes its final package/native check at `cf01c06`.
+Publish the candidate and run Windows ordinal 3. After audited CI passes, start the requested separate
 PR review chat against `8f0d208`. No merge, release or acceptance is selected.
 Preserve the
 unrelated Phase 1 audit, pinned design worktree and protected recovery below.

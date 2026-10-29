@@ -370,3 +370,21 @@ CI2 used Windows normal SDK 4/20, helpers 1/4, packages 1/3 and native sessions
 so qualify the corrected Mac package within its third package/native allowance
 before the final scheduled Windows dispatch. No CI pass or separate-review-chat
 completion is claimed.
+
+## Corrected Mac application qualification
+
+Application candidate `cf01c06` passes its third signed Mac package and native
+session after the request-lane correction. The [package receipt](project-font-mac-package-03.json)
+retains strict signature and installer checks and executable SHA-256
+`39341b864344ec1c192aa374ea4b2d84aabcff5a0a7b19fe47b5e837675faed3`.
+The [native receipt](project-font-mac-native-03.json) passes every font stage,
+exits zero and confirms cleanup. The existing normal SDK/helper rendering proof
+retains its scope: the change orders renderer requests and does not change core
+font admission, source mapping or rendering inputs.
+
+Mac cumulative use is normal SDK 9/20, helpers 3/4, packages 3/3 and native
+sessions 3/3. Windows use remains normal SDK 4/20, helpers 1/4, packages 1/3 and
+native sessions 1/3. Costly dispatches are 2/3. Next: publish this corrected
+candidate and select Windows ordinal 3, then audit both focused and automatic
+checks before starting the requested separate PR review chat. No extra package,
+native session, merge, release or ticket acceptance is selected.

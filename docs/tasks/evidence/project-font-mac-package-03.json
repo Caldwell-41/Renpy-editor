@@ -1,0 +1,11 @@
+{
+  "bundle": "Loomlight.app",
+  "identifier": "app.loomlight.desktop",
+  "certificateSHA1": "358372708164C7273A551D746449357C12A3A806",
+  "designatedRequirement": "designated => identifier \"app.loomlight.desktop\" and certificate leaf = H\"358372708164c7273a551d746449357c12a3a806\"",
+  "bundleVersion": "0.1.0",
+  "executableSHA256": "39341b864344ec1c192aa374ea4b2d84aabcff5a0a7b19fe47b5e837675faed3",
+  "strictSignatureVerified": true,
+  "installerSHA256": "4e0051babece28fd82a038c2c8a0df5102b28e652b19f82e195462b4914c15ff",
+  "installerContentsVerified": true
+}
