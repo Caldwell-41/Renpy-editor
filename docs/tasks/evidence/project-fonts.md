@@ -252,3 +252,8 @@ and cumulative ordinal. Running it requires publishing this new branch. The user
 has authorized tracker updates and local commits; branch publication has not yet
 been selected. Ticket #39 remains open and unaccepted until required proof exists.
 No PR, merge or release is selected. The unrelated Phase 1 audit is preserved.
+
+The approved [tracker checkpoint](https://github.com/Caldwell-41/Renpy-editor/issues/39#issuecomment-6500462879)
+records these results. The issue body now says `in_progress`; acceptance boxes
+remain unchecked because Windows qualification is required. The branch-publication
+question is pending in the implementation chat.
