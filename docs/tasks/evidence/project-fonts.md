@@ -257,3 +257,12 @@ The approved [tracker checkpoint](https://github.com/Caldwell-41/Renpy-editor/is
 records these results. The issue body now says `in_progress`; acceptance boxes
 remain unchecked because Windows qualification is required. The branch-publication
 question is pending in the implementation chat.
+
+## Publication and CI selected
+
+Kris authorized branch publication, a draft PR, CI and root-cause corrections until
+checks pass, then a separate code-review chat on the draft PR. Existing cumulative
+operation ceilings remain in force. The PR targets `codex/phase3b-screen-designer`;
+its current base still resolves to `8f0d208`. The prepared first Windows dispatch
+will use ordinal 1. Publication, run identity and completion will be recorded
+after confirmation. No merge or release is selected.

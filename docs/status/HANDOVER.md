@@ -14,8 +14,10 @@ core suite's sandbox listener failures pass in the affected permitted rerun.
 Both review axes have no remaining findings after corrections.
 
 Mac use is SDK 9/20, helpers 3/4, packages 2/3 and native sessions 2/3.
-Windows use and costly CI dispatches remain zero. Obtain branch-publication authorization for the prepared focused Windows
-route. No push, PR, merge, release or ticket acceptance is claimed. Preserve the
+Windows use and costly CI dispatches remain zero. Kris authorized publication,
+a draft PR and CI corrections, followed by a separate review chat. Publish the
+prepared candidate and run the focused Windows route. No merge, release or ticket
+acceptance is claimed. Preserve the
 unrelated Phase 1 audit, pinned design worktree and protected recovery below.
 
 <a id="l06-implementation-and-qualification"></a>
