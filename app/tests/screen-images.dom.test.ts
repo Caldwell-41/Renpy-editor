@@ -8,7 +8,7 @@ import type { CoreOperation } from "../src/protocol.js";
 const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0));
 };
-function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>) {
+function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, imageBytes?: Buffer) {
   const browser = new Window();
   Object.assign(globalThis, {
     window: browser,
@@ -83,10 +83,21 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>) {
       naturalWidth: 80,
       naturalHeight: 32,
     },
+    {
+      id: "poster",
+      kind: "uiImage",
+      displayName: "Poster",
+      relativePath: "game/images/ui poster.png",
+      sha256: "poster-sha",
+      status: "available",
+      naturalWidth: 80,
+      naturalHeight: 40,
+    },
   ];
-  const bytes = readFileSync(
+  const bytes = imageBytes ?? readFileSync(
     new URL("../../../tests/fixtures/phase-3b-screens/ui-image/seal.png", import.meta.url),
   );
+  let importSequence = 0;
   const calls: { operation: CoreOperation; payload?: Record<string, unknown> }[] = [];
   const workspace = new ScreensWorkspace({
     resolution: { width: 1280, height: 720 },
@@ -134,13 +145,13 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>) {
       if (operation === "asset.chooseImport" || operation === "asset.chooseUiImage")
         return (
           previewReady
-            ? { authorityId: "preview", displayName: "seal.png", extension: "png" }
+            ? { authorityId: `preview-${++importSequence}`, displayName: "seal.png", extension: "png" }
             : { cancelled: true }
         ) as T;
       if (operation === "asset.previewImport") {
         await previewReady;
         return {
-          assetId: "preview",
+          assetId: payload?.authorityId,
           purpose: "imagePreview",
           mimeType: "image/png",
           dataBase64: bytes.toString("base64"),
@@ -150,6 +161,19 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>) {
           width: 80,
           height: 40,
         } as T;
+      }
+      if (operation === "asset.import") {
+        assets.push({
+          id: "imported",
+          kind: "uiImage",
+          displayName: String(payload?.displayName),
+          relativePath: `game/images/ui ${payload?.technicalName}.png`,
+          sha256: "preview-sha",
+          status: "available",
+          naturalWidth: 80,
+          naturalHeight: 40,
+        });
+        return { assets: structuredClone(assets) } as T;
       }
       if (operation === "screens.canvasStatus")
         return { phase: "unavailable", message: "No SDK in component fixture" } as T;
@@ -203,7 +227,7 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>) {
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     return input;
   };
-  return { workspace, calls, click, edit, field, type };
+  return { workspace, calls, click, edit, field, type, browser };
 }
 
 test("A2 image editing links natural aspect, retains invalid input, cancels in place and accepts one image command", async () => {
@@ -378,6 +402,143 @@ test("Back discards late import previews without replacing the project picker", 
       f.calls.some((c) => c.operation === "asset.import"),
       false,
     );
+  } finally {
+    release();
+    f.workspace.dispose();
+  }
+});
+
+test("picker image decodes stay within the media budget and keep visible URLs valid", async (t) => {
+  const live = new Map<string, number>();
+  let peak = 0, sequence = 0;
+  t.mock.method(URL, "createObjectURL", (blob: Blob) => {
+    const url = `blob:picker-${++sequence}`;
+    live.set(url, blob.size);
+    peak = Math.max(peak, [...live.values()].reduce((sum, size) => sum + size, 0));
+    return url;
+  });
+  t.mock.method(URL, "revokeObjectURL", (url: string) => live.delete(url));
+  let release!: () => void;
+  const decoding = new Promise<void>((resolve) => { release = resolve; });
+  const f = fixture(undefined, undefined, Buffer.alloc(12 * 1024 * 1024));
+  t.mock.method(f.browser.HTMLImageElement.prototype, "decode", async () => { await decoding; });
+  try {
+    await flush();
+    f.edit("image-one");
+    await flush();
+    [...document.querySelectorAll<HTMLButtonElement>("button")]
+      .find((b) => b.ariaLabel === "Change image, Station seal")!.click();
+    await flush();
+    assert.ok(peak <= 32 * 1024 * 1024, "Pending image decodes count toward the 32 MiB URL budget");
+    release();
+    await flush();
+    assert.ok(peak <= 32 * 1024 * 1024, "Completed image decodes stay within the same budget");
+    for (const img of document.querySelectorAll<HTMLImageElement>("img[src]"))
+      assert.ok(live.has(img.src), "A live image never points to a revoked URL");
+  } finally {
+    release();
+    f.workspace.dispose();
+  }
+  assert.equal(live.size, 0, "Disposing the workspace releases every image URL");
+});
+
+test("import staging releases its preview on cancel, replacement, close and completed import", async (t) => {
+  const live = new Set<string>();
+  let sequence = 0;
+  t.mock.method(URL, "createObjectURL", () => {
+    const url = `blob:staging-${++sequence}`;
+    live.add(url);
+    return url;
+  });
+  t.mock.method(URL, "revokeObjectURL", (url: string) => live.delete(url));
+  const f = fixture(undefined, Promise.resolve());
+  t.mock.method(f.browser.HTMLImageElement.prototype, "decode", async () => {});
+  const picker = async () => {
+    [...document.querySelectorAll<HTMLButtonElement>("button")]
+      .find((b) => b.ariaLabel?.startsWith("Change image,"))!.click();
+    await flush();
+  };
+  const stage = async () => {
+    f.click("Import image…");
+    f.click("Browse files…");
+    await flush();
+    const image = document.querySelector<HTMLImageElement>(".screen-image-staged img");
+    assert.ok(image?.src, "The selected import has a visible preview");
+    assert.ok(live.has(image.src));
+    return image.src;
+  };
+  try {
+    await flush();
+    f.edit("image-one");
+    await flush();
+    await picker();
+    const cancelled = await stage();
+    f.click("Cancel import");
+    assert.equal(live.has(cancelled), false, "Cancel releases the staged image URL");
+    const replaced = await stage();
+    f.click("Browse files…");
+    await flush();
+    const replacement = document.querySelector<HTMLImageElement>(".screen-image-staged img")!.src;
+    assert.equal(live.has(replaced), false, "Browsing again releases the earlier selection");
+    assert.ok(live.has(replacement), "The replacement selection keeps its preview");
+    f.click("Close");
+    assert.equal(live.has(replacement), false, "Close releases the current staged preview");
+    await picker();
+    const imported = await stage();
+    f.type("Display name", "Imported seal");
+    f.click("Import and use");
+    await flush();
+    assert.equal(live.has(imported), false, "Completed import releases its staging URL");
+    assert.equal(document.querySelector(".screen-image-dialog"), null);
+    assert.equal(document.querySelector<HTMLButtonElement>("[data-image-apply]")!.disabled, false, "The imported asset remains available to Apply");
+    for (const img of document.querySelectorAll<HTMLImageElement>("img[src]"))
+      assert.ok(live.has(img.src), "Visible images retain a valid Asset preview");
+  } finally {
+    f.workspace.dispose();
+  }
+  assert.equal(live.size, 0);
+});
+
+test("leaving import staging and disposing the workspace release pending decode URLs", async (t) => {
+  const live = new Set<string>();
+  let sequence = 0, latest = "";
+  t.mock.method(URL, "createObjectURL", () => {
+    latest = `blob:pending-${++sequence}`;
+    live.add(latest);
+    return latest;
+  });
+  t.mock.method(URL, "revokeObjectURL", (url: string) => live.delete(url));
+  const f = fixture(undefined, Promise.resolve());
+  let release = () => {};
+  try {
+    await flush();
+    f.edit("image-one");
+    await flush();
+    [...document.querySelectorAll<HTMLButtonElement>("button")]
+      .find((b) => b.ariaLabel === "Change image, Station seal")!.click();
+    await flush();
+    let decoding: Promise<void>;
+    t.mock.method(f.browser.HTMLImageElement.prototype, "decode", async () => { await decoding; });
+    decoding = new Promise<void>((resolve) => { release = resolve; });
+    f.click("Import image…");
+    f.click("Browse files…");
+    await flush();
+    const abandoned = latest;
+    f.click("Back to project images");
+    assert.equal(live.has(abandoned), false, "Back releases an import URL even while decoding");
+    release();
+    await flush();
+    assert.ok([...document.querySelectorAll("input")].some((input) => input.ariaLabel === "Search UI images"));
+    assert.equal(document.querySelector(".screen-image-staged"), null, "The late decode cannot restore staging");
+    decoding = new Promise<void>((resolve) => { release = resolve; });
+    f.click("Import image…");
+    f.click("Browse files…");
+    await flush();
+    f.workspace.dispose();
+    assert.equal(live.size, 0, "Workspace disposal releases pending URLs immediately");
+    release();
+    await flush();
+    assert.equal(live.size, 0, "Late decodes cannot recreate disposed previews");
   } finally {
     release();
     f.workspace.dispose();
