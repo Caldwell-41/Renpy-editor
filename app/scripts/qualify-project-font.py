@@ -40,7 +40,8 @@ def validate(record, aspect):
     assert record['fonts'] == {name: row['font'] for name, row in EXPECTED.items()}, 'Wrong actual font'
     for name, row in EXPECTED.items():
         x, y, width, height = record['rectangles'][name]
-        assert [x, y, width] == [row['x'], row['y'], row['width']], (name, 'wrong placement or width')
+        assert [x, y] == [row['x'], row['y']], (name, 'wrong placement')
+        assert 0 < width <= row['width'], (name, 'text exceeds its wrapping limit')
         assert 0 < height and x + width <= aspect[0] and y + height <= aspect[1]
     assert record['rectangles']['body'][3] > 52, 'The body must wrap across several lines'
 
@@ -62,6 +63,7 @@ def main():
     for name in ['archive', 'checksums', 'accepted', 'output']:
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--allow-fixture-execution', action='store_true', required=True)
+    parser.add_argument('--reuse-compile-lint', type=Path)
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -84,6 +86,13 @@ def main():
         assert {a['relativePath'] for a in accepted['assets']} == {'game/fonts/help_ttf.ttf', 'game/fonts/help_otf.otf'}
         (output / 'accepted.json').write_bytes(args.accepted.read_bytes())
         result['acceptedSHA256'] = hashlib.sha256(args.accepted.read_bytes()).hexdigest()
+        if args.reuse_compile_lint:
+            previous = json.loads((args.reuse_compile_lint / 'result.json').read_text())
+            assert (args.reuse_compile_lint / 'accepted.json').read_bytes() == args.accepted.read_bytes(), 'Compile/lint inputs changed'
+            checked = previous['commands'][:2]
+            assert [r['name'] for r in checked] == ['compile', 'lint']
+            assert all(r['exitCode'] == 0 and not r['timedOut'] and not r['outputLimited'] for r in checked)
+            result['reusedCompileLint'] = dict(candidate=previous['candidate'], acceptedSHA256=previous['acceptedSHA256'], commands=checked)
         with tempfile.TemporaryDirectory(prefix='loomlight-project-font-') as temporary:
             scratch = Path(temporary)
             install_verified_tar(args.archive, SDK_SHA, scratch / 'sdk')
@@ -136,7 +145,7 @@ screen font_finish():
 '''.replace('NAMES', repr(list(EXPECTED))).replace('CAPTURES', repr([('notes', str(images['accepted'])), ('font_reference', str(images['reference'])), ('font_default', str(images['default']))]))
                 ast.parse(textwrap.dedent(proof.split('screen font_finish():')[0].removeprefix('init python:\n')))
                 (project / 'game/proof.rpy').write_text(proof)
-                commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if aspect == (1280, 720) else []
+                commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if aspect == (1280, 720) and not args.reuse_compile_lint else []
                 commands.append((f'font-{aspect[0]}x{aspect[1]}', ['run']))
                 for name, arguments in commands:
                     previous = dict(os.environ)

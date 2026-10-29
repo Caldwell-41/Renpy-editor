@@ -15,12 +15,15 @@ class ProjectFontEvidence(unittest.TestCase):
                     fonts={name: row['font'] for name, row in proof.EXPECTED.items()})
         proof.validate(good, (1280, 720))
         import copy
-        for change in ['missing', 'wrong-font', 'unwrapped', 'wrong-position']:
+        for change in ['missing', 'wrong-font', 'unwrapped', 'wrong-position', 'overwide']:
             bad = copy.deepcopy(good)
             if change == 'missing': bad.pop('fonts')
             elif change == 'wrong-font': bad['fonts']['body'] = 'DejaVuSans.ttf'
             elif change == 'unwrapped': bad['rectangles']['body'][3] = 26
-            else: bad['rectangles']['body'][0] = 99
+            elif change == 'wrong-position': bad['rectangles']['body'][0] = 99
+            else:
+                bad['rectangles']['body'][2] = 301
+                bad['referenceRectangles']['body'][2] = 301
             with self.assertRaises((AssertionError, KeyError), msg=change):
                 proof.validate(bad, (1280, 720))
 
