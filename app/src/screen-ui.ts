@@ -30,7 +30,7 @@ interface CompositionResult { document: ScreenDocument; selectedId: string; chan
 type AcceptedEdit =
   | { type: "geometry"; document: ScreenDocument; draft: Draft; key: string }
   | { type: "layout"; document: ScreenDocument; base: ScreenDocument; key: string }
-  | { type: "composition"; result: CompositionResult; command: CompositionCommand; base: ScreenDocument; beforeId?: string | null; layoutKey?: string }
+  | { type: "composition"; result: CompositionResult; command: CompositionCommand; base: ScreenDocument; beforeId?: string | null }
   | { type: "history"; direction: "undo" | "redo"; before?: ScreenDocument; selectedId?: string | null; sourceChanged: boolean };
 interface Actions {
   projectId?: string;
@@ -101,7 +101,7 @@ export class ScreensWorkspace {
       view: () => {
         const view = this.compositionView();
         const pending = view && this.images?.synthetic(view);
-        return this.current() && this.doc && this.nodes()[this.selected] ? { document:this.doc, screen:this.screen, node:pending ?? this.nodes()[this.selected]!, nodes:pending ? [...this.nodes(),pending] : this.nodes(), busy:this.busy || this.images?.isSaving(), otherDraft:!!this.drafts.size || this.composer.hasDraft() } : undefined;
+        return this.current() && this.doc && this.nodes()[this.selected] ? { document:this.doc, screen:this.screen, node:pending ?? this.nodes()[this.selected]!, nodes:pending ? [...this.nodes(),pending] : this.nodes(), busy:this.busy, otherDraft:!!this.drafts.size || this.composer.hasDraft() } : undefined;
       },
       commit: async (draft, edits: LayoutEdits) => {
         this.busy = true; this.loadSequence++;
@@ -136,10 +136,8 @@ export class ScreensWorkspace {
       redraw: () => { if (this.images.hasAddition()) this.step = "design"; this.renderCard(); }, preview: () => this.renderCanvas(),
       note: (message,error) => this.note(message,error), select: (id, design) => { const index = this.nodes().findIndex(n => n.id === id); if (index >= 0) this.choose(index,design); },
       source: () => { void this.openSource(); }, saved: () => this.saved(false),
-      layout: host => { this.layout.render(host,true); const tools = el("div","screen-image-order"); tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true))); host.append(tools); }, layoutDraft: validate => this.layout.currentDraft(validate),
-      syncLayout: () => this.layout.sync(),
-      cancelLayout: () => { this.layout.cancelCurrent(); }, order: host => this.composer.renderOrder(host),
-    });
+      layoutTools: host => { const tools = el("div","screen-image-order"); tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true))); host.append(tools); }, order: host => this.composer.renderOrder(host),
+    }, this.layout);
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     const addImageElement = button("Add element", () => this.composer.beginAddition()); addImageElement.dataset.imageAdd = ""; addImageElement.hidden = true;
@@ -475,7 +473,7 @@ export class ScreensWorkspace {
     const document = edit.type === "geometry" || edit.type === "layout" ? edit.document : edit.result.document;
     const base = edit.type === "geometry" ? edit.draft.document : edit.base;
     const sourceChanged = document.revision !== base.revision || edit.type === "composition" && edit.result.changed === true;
-    if (edit.type === "composition") { this.layout.accept(edit.layoutKey ?? "",base,document); this.images.accept(edit.command,base,document); }
+    if (edit.type === "composition") this.images.accept(edit.command,base,document);
     this.documents = this.documents.map(d => d.path === document.path ? document : d);
     if (this.doc?.path === document.path) this.doc = document;
     if (this.owned?.path === document.path) this.owned.sourceRevision = document.revision;
@@ -555,12 +553,11 @@ export class ScreensWorkspace {
     this.busy = true; this.loadSequence++;
     const owner = this.owned;
     const beforeId = this.nodes()[this.selected]?.id;
-    const layoutKey = this.layout.currentDraft()?.key;
     try {
       const result = await this.actions.coordinate(() => this.actions.request<CompositionResult>("screens.compose", {
         screenId: owner.id, expectedRevision: base.revision, command,
       }));
-      this.finishAcceptedEdit({ type: "composition", command, base, result, beforeId, layoutKey });
+      this.finishAcceptedEdit({ type: "composition", command, base, result, beforeId });
     } finally { this.busy = false; }
   }
   private async history(type: "undo" | "redo"): Promise<void> {

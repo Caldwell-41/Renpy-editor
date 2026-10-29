@@ -2,7 +2,7 @@ import type { CompositionCommand, CompositionView } from "./screen-composition.t
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { MediaPresentation } from "./scene-ui.ts";
-import type { LayoutEdits, NumericLayout } from "./screen-layout.ts";
+import type { ImageLayoutReservation, NumericLayout, ScreenLayoutEditor } from "./screen-layout.ts";
 
 export interface UiImageAsset {
   id: string;
@@ -27,6 +27,11 @@ interface Draft {
   replacement?: MediaPresentation;
   returnId?: string;
 }
+interface SubmittedImage {
+  draft: Draft;
+  command: CompositionCommand;
+  layout: ImageLayoutReservation;
+}
 interface Cached {
   media: MediaPresentation;
   url: string;
@@ -43,10 +48,7 @@ interface Host {
   select: (id: string, design?: boolean) => void;
   source: () => void;
   saved: () => void;
-  layout: (host: HTMLElement) => void;
-  syncLayout: () => void;
-  layoutDraft: (validate?: boolean) => { document: ScreenDocument; values: LayoutEdits } | undefined;
-  cancelLayout: () => void;
+  layoutTools: (host: HTMLElement) => void;
   order: (host: HTMLElement) => void;
 }
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = "") => {
@@ -79,7 +81,7 @@ export class ScreenImages {
   private load?: Promise<void>;
   private generation = 0;
   private disposed = false;
-  private saving = false;
+  private submitted?: SubmittedImage;
   private pickerGeneration = 0;
   private importing = false;
   private staged?: Cached;
@@ -88,7 +90,10 @@ export class ScreenImages {
   private dialog?: HTMLDialogElement;
   private cardKeys = new AbortController();
   private layoutOpen = new Map<string, boolean>();
-  constructor(private readonly host: Host) {}
+  constructor(private readonly host: Host, private readonly layout: ScreenLayoutEditor) {}
+  private get saving(): boolean {
+    return !!this.submitted;
+  }
   isSaving(): boolean {
     return this.saving;
   }
@@ -320,7 +325,7 @@ export class ScreenImages {
   }
   begin(parentId: string, document: ScreenDocument): void {
     const view = this.host.view();
-    if (!view || this.hasDraft() || this.host.layoutDraft()) {
+    if (!view || this.hasDraft() || this.layout.currentDraft()) {
       this.host.note("Apply or cancel pending edits before adding an image.", true);
       return;
     }
@@ -554,7 +559,8 @@ export class ScreenImages {
     layout.append(parentLabel);
     const numeric = el("div");
     layout.append(numeric);
-    this.host.layout(numeric);
+    this.layout.render(numeric, true);
+    this.host.layoutTools(numeric);
     if (!this.addition) this.host.order(layout);
     body.append(layout);
     const footer = el("footer", "screen-image-commit"),
@@ -577,7 +583,7 @@ export class ScreenImages {
         event.preventDefault();
         event.stopPropagation();
         void this.apply();
-      } else if (event.key === "Escape" && (this.hasCurrentDraft() || this.host.layoutDraft())) {
+      } else if (event.key === "Escape" && (this.hasCurrentDraft() || this.layout.currentDraft())) {
         event.preventDefault();
         event.stopPropagation();
         this.cancel();
@@ -619,10 +625,10 @@ export class ScreenImages {
       .forEach((control) => (control.disabled = this.saving || !this.loaded));
     const original = this.card.querySelector<HTMLButtonElement>("[data-image-original]");
     if (original) original.disabled = this.saving || !this.loaded;
-    this.host.syncLayout();
+    this.layout.sync();
     let layout = false;
     try {
-      layout = !!this.host.layoutDraft();
+      layout = !!this.layout.currentDraft();
     } catch {
       layout = true;
     }
@@ -668,7 +674,7 @@ export class ScreenImages {
     if (!draft) return;
     const active = (document.activeElement as HTMLElement | null)?.dataset;
     const focus = active?.imageField ?? (active?.layoutField ? `layout:${active.layoutField}` : undefined);
-    this.host.cancelLayout();
+    this.layout.cancelCurrent();
     this.drafts.delete(draft.key);
     this.errors.delete(draft.key);
     if (this.addition) {
@@ -705,9 +711,9 @@ export class ScreenImages {
       );
       return;
     }
-    let layout: ReturnType<Host["layoutDraft"]>;
+    let layout: ReturnType<ScreenLayoutEditor["currentDraft"]>;
     try {
-      layout = this.host.layoutDraft(true);
+      layout = this.layout.currentDraft(true);
     } catch (error) {
       this.fail("layout", (error as Error).message);
       return;
@@ -722,53 +728,51 @@ export class ScreenImages {
     if (!this.changed(draft, view) && !layout) return;
     const active = (document.activeElement as HTMLElement | null)?.dataset;
     const focus = active?.imageField ?? (active?.layoutField ? `layout:${active.layoutField}` : undefined);
-    this.saving = true;
+    const common = {
+      assetId: asset.id,
+      expectedAssetSha256: draft.expectedSha ?? asset.sha256,
+      width: Number(draft.width),
+      height: Number(draft.height),
+      ...(draft.replacement ? { replacementSha256: draft.replacement.sha256 } : {}),
+      ...(layout ? { layout: layout.values } : {}),
+    };
+    const parent = view.nodes.find((n) => n.span.start === view.selected.parentStart);
+    const command: CompositionCommand = draft.nodeId
+      ? {
+          type: "image",
+          nodeId: draft.nodeId,
+          ...common,
+          ...(draft.parentId !== parent?.id ? { parentId: draft.parentId } : {}),
+        }
+      : { type: "addImage", parentId: draft.parentId, ...common };
+    const submitted: SubmittedImage = {
+      draft: { ...draft },
+      command,
+      layout: this.layout.reserveForImage(draft.document),
+    };
+    this.submitted = submitted;
     this.sync();
     try {
       if (draft.replacement) await this.retain(draft.replacement);
       else await this.media(asset);
       if (!this.active()) return;
-      const common = {
-        assetId: asset.id,
-        expectedAssetSha256: draft.expectedSha ?? asset.sha256,
-        width: Number(draft.width),
-        height: Number(draft.height),
-        ...(draft.replacement ? { replacementSha256: draft.replacement.sha256 } : {}),
-        ...(layout ? { layout: layout.values } : {}),
-      };
-      const parent = view.nodes.find((n) => n.span.start === view.selected.parentStart);
-      const command: CompositionCommand = draft.nodeId
-        ? {
-            type: "image",
-            nodeId: draft.nodeId,
-            ...common,
-            ...(draft.parentId !== parent?.id ? { parentId: draft.parentId } : {}),
-          }
-        : { type: "addImage", parentId: draft.parentId, ...common };
       await this.host.commit(command, draft.document);
       if (this.active() && focus) this.focus(focus);
     } catch (error) {
       if (this.active()) this.fail("source", `${(error as Error).message} Your draft is retained.`);
     } finally {
-      this.saving = false;
+      if (this.submitted === submitted) this.submitted = undefined;
+      submitted.layout.release();
       if (this.active()) this.sync();
     }
   }
   accept(command: CompositionCommand, base: ScreenDocument, accepted: ScreenDocument): void {
     if (command.type === "image" || command.type === "addImage") {
-      const submitted =
-        command.type === "image"
-          ? [...this.drafts.values()].find(
-              (draft) =>
-                draft.nodeId === command.nodeId &&
-                draft.document.path === base.path &&
-                draft.document.revision === base.revision,
-            )
-          : this.addition;
+      const submitted = this.submitted;
       if (command.replacementSha256) {
         const asset = this.asset(command.assetId);
         const media =
-          submitted?.replacement ?? this.cache.get(`${command.assetId}:${command.replacementSha256}`)?.media;
+          submitted?.draft.replacement ?? this.cache.get(`${command.assetId}:${command.replacementSha256}`)?.media;
         if (asset && media) {
           asset.sha256 = command.replacementSha256;
           asset.naturalWidth = media.width ?? undefined;
@@ -776,13 +780,14 @@ export class ScreenImages {
           asset.status = "available";
         }
       }
-      if (submitted) {
-        this.drafts.delete(submitted.key);
-        this.errors.delete(submitted.key);
+      if (submitted && submitted.command === command) {
+        this.drafts.delete(submitted.draft.key);
+        this.errors.delete(submitted.draft.key);
+        if (command.type === "addImage") this.addition = undefined;
+        submitted.layout.accept(accepted);
+        this.submitted = undefined;
       }
-      if (command.type === "addImage") this.addition = undefined;
-      this.saving = false;
-    }
+    } else this.layout.accept("", base, accepted);
     for (const draft of this.drafts.values()) {
       if (draft.document.path !== base.path || draft.document.revision !== base.revision) continue;
       const before = base.screens.flatMap((s) => s.nodes).find((n) => n.id === draft.nodeId),

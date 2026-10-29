@@ -5,6 +5,10 @@ export type LayoutUnit = "pixels" | "relative" | "count";
 export interface LayoutValue { unit: LayoutUnit; value: number }
 export interface NumericLayout { values: Record<string, LayoutValue>; blocked: Record<string, string>; sizingNote?: string | null; allowsEmptyCells?: boolean }
 export type LayoutEdits = Record<string, LayoutValue | null>;
+export interface ImageLayoutReservation {
+  accept: (accepted: ScreenDocument) => void;
+  release: () => void;
+}
 interface Field { text: string; unit: LayoutUnit }
 interface Draft { key: string; document: ScreenDocument; screen: string; node: ScreenNode; fields: Record<string, Field> }
 interface View { document: ScreenDocument; screen: string; node: ScreenNode; nodes: ScreenNode[]; busy: boolean; otherDraft: boolean }
@@ -70,14 +74,23 @@ export class ScreenLayoutEditor {
     }
     return {invalid:false,layouts};
   }
-  currentDraft(validate = false): { key: string; document: ScreenDocument; values: LayoutEdits } | undefined {
+  currentDraft(validate = false): { document: ScreenDocument; values: LayoutEdits } | undefined {
     const view = this.host.view(); if (!view) return;
     const draft = this.drafts.get(this.key(view)); if (!draft) return;
     if (validate) {
       const invalid = this.validate(view, draft.fields);
       if (invalid) { this.fail(invalid.text, invalid.key); throw Error(invalid.text); }
     }
-    return { key:draft.key, document:draft.document, values:this.edits(draft.fields,draft.node) };
+    return { document:draft.document, values:this.edits(draft.fields,draft.node) };
+  }
+  /** Image Apply reserves layout even when only image fields changed. */
+  reserveForImage(base: ScreenDocument): ImageLayoutReservation {
+    const view = this.host.view(), key = view ? this.key(view) : "";
+    this.saving = true; this.sync();
+    return {
+      accept: accepted => this.accept(key, base, accepted),
+      release: () => { this.saving = false; this.sync(); },
+    };
   }
   cancelCurrent(): boolean { const view = this.host.view(); if (!view || !this.drafts.has(this.key(view))) return false; this.cancel(); return true; }
   private key(view: View): string { return draftKey(view.document, view.screen, view.node); }
