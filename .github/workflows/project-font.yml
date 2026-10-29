@@ -87,6 +87,7 @@ jobs:
           PROJECT_FONT_PROBE_OUTPUT: ${{ runner.temp }}/project-font/probe-controller
         run: |
           node tests/project-font.browser.mjs
+          node tests/project-font-cache.browser.mjs
           node tests/project-font-probe-controller.browser.mjs
           node tests/ui-image.browser.mjs
           node tests/screen-composition.browser.mjs
