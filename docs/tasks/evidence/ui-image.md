@@ -590,3 +590,65 @@ session. Final cumulative use in #40 is dispatches 3/3; Windows SDK 9/16, helper
 2/4, packages 2/3, native 2/3; Mac SDK 11/16, helpers 2/4, packages 2/3, native 2/3.
 All CI1/CI2 failures remain failed and charged. No watcher, costly operation or
 required CI audit remains pending. No fourth costly dispatch without a user decision.
+
+
+## PR 68 review corrections, 2026-10-29
+
+Kris selected correcting all four findings from the review of `2e045d9...780c360`,
+with parallel agents, root-cause fixes, TDD, coordinator validation, publication
+and workspace cleanup. This section supersedes the earlier clean-review statements
+for the current candidate. The approved A2 design and existing costly-operation
+limits retain their scope.
+
+Two isolated workers started at `780c360`. Cache/staging commit `98531c1` owns
+`screen-images.ts` and its public UI tests. Canvas commit `d9199c6` owns the plan,
+reparent implementation and public-service tests. The coordinator integrated them
+at `2ce5e39`, added the actual-controller regression and restored its compact
+baseline state at tested code checkpoint `ed965339b2802175f2e99bb0a45b7f58fe893a4a`.
+The two workers cross-reviewed the other lane without new findings; the coordinator
+reviewed the combined production diff and owns the results below.
+
+| Finding | Root correction and red/green proof |
+| --- | --- |
+| Concurrent decodes exceed the URL budget | Serialize admission through decode settlement. A controlled public picker with three 12 MiB images fails the original budget assertion and passes with bounded pending/completed URLs. Eviction clears mounted references before revocation; late completions cannot attach revoked URLs. |
+| Staged previews survive their owner | Track the staged and decoding owner. Cancel, Close, Back, a new selection, successful import and disposal release the applicable URL. Public UI regressions first fail retained-URL and pending-cancellation assertions, then pass. |
+| Image samples overwrite pending numeric layout | Merge common and image-specific edits once against the final parent context. The public-service regression first returns accepted position/anchor values, then preserves the requested edits/removals and explicit precedence. The actual controller first drops `xpos: 77` from a 200 by 100 draft, then preserves all three values without changing Source. |
+| Reparented image previews use old child order | Append a changed-parent image after the target's existing children in the plan. Twelve public cases cover vbox/hbox/fixed/grid, target source order and same-parent no-op order; draft and accepted child order agree after the fix. |
+
+The reparent regression also exposed a supported move back to the screen root
+failing with `SCENE_INVARIANT`. Reparsed Source has no element marker for that
+owned root. Preserve its root role within the already matched screen when resolving
+the target. A separate red/green public test moves an image out of a vbox while
+setting `ypos: 77`, proving both owned-root resolution and final-parent validation.
+No generic ownership or opaque-region check was weakened.
+
+Coordinator validation passes 272 frontend tests with no failures/skips,
+TypeScript checking, the production frontend build, Rust formatting and 57
+screen-service tests. All 60 screen test names are accounted for; only the three
+named existing SDK/helper tests remain ignored. The freshly built public driver
+passes the extended actual-controller journey and the exact packaged-probe browser
+rehearsal, including import, image formats, retained drafts, Source/history/reopen
+and normal cleanup. These are controller/core results, not native WebView or SDK
+rendering qualification. Required automatic-check results belong to the current
+[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68) head.
+
+One controller run retained a harness failure after the combined-draft assertion
+passed: the added journey left Layout expanded, placing compact Apply at y=1154.
+A path mistake prevented the first attempted fixture edit, so the next run repeated
+the same failure on unchanged inputs. Restoring the collapsed disclosure after
+Cancel fixes the fixture; `controller-green-03` and the probe rehearsal pass.
+The product layout and compact visibility assertion are unchanged. This follows
+[H21's disclosure/visibility lesson](../../testing/INCIDENTS.md#h21--generated-arrow-names-and-offscreen-inspector-text-break-browser-checks).
+
+Raw red/green logs, the failed controller captures and final local outputs are
+retained in primary `.toolchains/pr68-review-fixes-2026-10-29/`. The approved
+prototype, original implementation evidence, unrelated audit and protected recovery
+remain intact. The inherited status records remain above their soft size targets
+to preserve earlier qualification/recovery; only the live L06 continuation changed.
+
+No SDK/helper, package, native session or costly CI dispatch ran for these fixes.
+Previous CI3, Mac/Windows SDK/native receipts and all earlier failures retain their
+exact candidates and scope; they do not qualify these new draft scenarios. The full
+Design Lab startup failure, physical-input/human and wider editor/Phase 3B acceptance
+remain open. #40 remains open for acceptance. Publication updates the existing
+draft PR; no merge, release or successor outcome is selected.

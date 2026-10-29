@@ -1,27 +1,27 @@
 # Current status
 
-## L06 UI-image implementation ready for review
+## L06 review corrections complete
 
-[L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40), "Import and place a
-UI image", is implemented on `codex/phase3b-l06-ui-image`, based on `2e045d9`.
-Kris approved A2 in the separate prototype chat. Both independent review axes clear
-the product and checker corrections. The ticket remains open for acceptance. Kris selected draft PR publication into
-`codex/phase3b-screen-designer`; merge and release remain unselected.
+[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68) now corrects the four
+findings from `2e045d9...780c360`: concurrent image URL admission, staged-preview
+cleanup, combined image/layout draft properties and reparented child order. The same
+public reparent tests also exposed and corrected moves back to the owned screen root.
+[L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40) stays open for acceptance.
 
-| Capability | Automated proof | Native/human status |
-| --- | --- | --- |
-| Typed image import, retained drafts, size/aspect, Source and history | CI3 passes 269 frontend cases, 54 screen-core positives with three explicit SDK ignores, constrained-stack import, actual controller/core and exact probe rehearsal. Earlier ordinary-core/desktop results retain their original scope. | Mac and Windows WebViews pass all five image variants, sizing/history/Source/reopen, accepted disk bytes and cleanup. Mac signing and Windows retained executable/hash/x64 checks pass. |
-| Actual chosen asset rendering | Mac GL2 and Windows ANGLE2 normal entry/helper pass both aspects, exact geometry and zero differing independent-reference pixels. Normal capture also passes repeatability and empty-Render isolation. | Physical input, OS file-dialog and human acceptance remain separate. |
-| A2 inspector | Approved source/captures and scoped wide/compact comparison retained. | Full Design Lab startup timeout remains failed; complete promotion validation is not claimed. |
+The two workers used isolated worktrees and public UI/service TDD. Their cross-reviews
+found no remaining issue in the other lane. Coordinator validation at code checkpoint
+`ed96533` passes 272 frontend tests, 57 ordinary screen-service tests, typechecking,
+frontend build, Rust formatting, the actual controller/core journey and exact probe
+browser rehearsal. Three existing SDK/helper tests remain explicitly ignored.
+[Correction evidence](../tasks/evidence/ui-image.md#pr-68-review-corrections-2026-10-29)
+retains red/green failures, candidate relationships and the corrected disclosure-state
+harness failure. PR #68 owns automatic-check results for its latest published head.
 
-[CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1)
-passes at exact `b00415f`; its event, artifacts, retained executable and operation
-use have been audited. Later records change evidence/status only. CI1/CI2 remain
-failed with their original evidence. No watcher or required CI audit is pending.
-[Evidence](../tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome)
-owns the criterion map and candidate-bound receipts; [HANDOVER](HANDOVER.md#l06-implementation-and-qualification)
-owns continuation. #40 owns cumulative limits; all three dispatches are consumed.
-Earlier closed allowances and protected recovery remain intact.
+Earlier CI3 and both-host SDK/native results retain their tested candidates and scope.
+No fresh SDK/helper, native, package or costly CI operation ran. Full Design Lab startup
+validation remains failed; physical-input, human and wider Phase 3B acceptance remain
+separate. The approved prototype, original PR checkout, unrelated audit and protected
+recovery remain needed. Merge and release remain unselected.
 
 ## L04 nested and clipped layouts merged
 

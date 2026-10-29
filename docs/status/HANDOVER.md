@@ -1,73 +1,49 @@
 # Current outcome handover
 
-## L06 implementation and qualification
+<a id="l06-implementation-and-qualification"></a>
 
-[L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40), "Import and place a
-UI image", is implemented and ready for review on `codex/phase3b-l06-ui-image`,
-based on the user-confirmed `2e045d9`. This chat owns implementation and audit in
-managed worktree `l06-ui-image-implementation/Loomlight`. Use it explicitly.
-Product correction is `9d6bf6b`; capture-checker correction is `943ea2f`.
-The qualified published CI3 candidate is `b00415f6526476b1c235221f99f03d5cc0547fe5`.
-Successor commits change evidence/status only. Kris selected pushing and opening a
-draft PR into `codex/phase3b-screen-designer`; #40 records its publication link.
-Merge and release remain unselected; #40 stays open for its acceptance decision.
+## L06 review corrections and publication
 
-Kris approved A2 in the separate "L06 UI image prototypes" chat
-(`01a1845a-685d-7901-a518-8faeafc6ba05`). Reviewed source `8b960282` and fingerprint
-`f2e36a40ea0072abb3640c3dfe98dcdff78cc19b4cf3725cb281a0b808afb5ed` are preserved
-in `docs/design/design-lab-ui-image/`, integrated at `6ecde62` with approval
-closeout `cbf9067`. Keep pinned comparison worktree `l06-image-prototype/Loomlight`
-unchanged. Focused design checks pass. The full Design Lab startup timeout remains
-failed and explicitly retained; no complete promotion-validation claim is made.
+Kris selected fixing all four review findings for
+[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68), with parallel agents,
+root-cause fixes, TDD, coordinator validation, push, PR update and safe cleanup.
+Continue from `codex/phase3b-l06-ui-image` in the original implementation checkout.
+The PR remains a draft into `codex/phase3b-screen-designer`; #40 stays open for
+acceptance. No merge or release is selected.
 
-The inspector implements typed image import/picking, passive previews, per-node
-size/aspect/reference drafts, original size, parent/numeric layout, Source and shared
-history. Apply accepts the supported image/metadata/layout changes atomically.
-Both review axes clear the full work against `2e045d9` after the async draft/picker
-and import-stack corrections. [Evidence](../tasks/evidence/ui-image.md) owns exact
-results, prior failures, source-protection tests and unchanged-material reuse.
+Two workers based on `780c360` delivered cache/staging `98531c1` and canvas/reparent
+`d9199c6`, integrated at `2ce5e39`. Tested code checkpoint `ed96533` also contains
+the coordinator's real-controller regression and its compact fixture-state correction.
+The fixes bound pending/completed image URLs, release stage ownership, preserve
+combined draft layout and match accepted reparent child order. A separate public
+regression also fixes supported moves back to the owned screen root. Both workers
+cross-reviewed the other lane with no new finding; the coordinator reviewed the
+combined production diff and owns final validation.
 
-[CI3 40816702645](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1),
-attempt 1 at exact `b00415f`, passes and has been audited. The same-chat watcher
-event was acknowledged; it is done. Portable checks include 269 frontend cases,
-54 screen-core positives with three explicit SDK ignores, and the constrained-stack
-public import regression. Actual controller/core and exact probe rehearsal pass.
-Normal SDK compile/lint and both aspects use observed ANGLE2, both exact geometry
-maps, zero differing independent-reference pixels, exact repeated captures and
-transparent empty Render isolation. The helper passes both aspects and typed
-pending images without Source writes, with cooperative cleanup.
+[Correction evidence](../tasks/evidence/ui-image.md#pr-68-review-corrections-2026-10-29)
+records exact red/green behavior and validation. Local results pass 272 frontend
+cases, 57 screen-service cases, typechecking/build/formatting, actual controller/core
+and the exact probe browser rehearsal. Three existing SDK/helper cases remain
+ignored. PR #68 holds the current published head and automatic-check results.
+Primary `.toolchains/pr68-review-fixes-2026-10-29/` retains worker/coordinator logs,
+failed controller captures and final output. Temporary review worktrees are safe
+to retire after their commits are integrated and remote publication is verified.
 
-Windows package/native session 2 passes five image variants, sizing/validation,
-history/Source/reopen, exact accepted disk bytes and complete fixture/host/request/
-credential cleanup. The actual executable is retained; independent PE admission
-confirms x64 and SHA-256
-`c20bbfbfb21e20648fefad9351cabc007bffc6f94d5aa6871cccbcf57425ee8d` matches its
-package receipt. No Windows signature verification is claimed.
-[CI3 receipt](../tasks/evidence/ui-image-windows-ci3.json) binds the artifact,
-frames, accepted Source, executable and audit. GitHub retention expires
-2026-11-05; the downloaded artifact remains under ignored `ci3/artifacts/`.
+Earlier CI3 at `b00415f`, its retained Windows executable/artifacts and the Mac
+SDK/helper/signed-native receipts retain their exact candidates and scope under
+[the original evidence](../tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome).
+They do not qualify the new draft scenarios. No new SDK/helper, package, native
+session or costly CI dispatch ran. #40 still owns dispatches 3/3; Mac SDK 11/16,
+helpers 2/4, packages 2/3, native 2/3; Windows SDK 9/16, helpers 2/4, packages 2/3,
+native 2/3. A fourth costly dispatch still requires a new user decision.
 
-Fresh Mac normal-entry capture at `943ea2f` passes compile/lint and both GL2 aspects,
-exact geometry/pixels/repeat/isolation and cleanup. Signed Mac package/native 2 at
-unchanged product `9d6bf6b` passes the approved identity, all formats and disk/cleanup.
-Its receipts and earlier helper proof retain exact candidates. Native input on
-both hosts is synthetic DOM input through real WebViews. Physical input, OS file-
-dialog, human and wider editor/Phase 3B acceptance remain separate. CI1/CI2 stay
-failed with original evidence; CI3 does not rewrite their results.
-
-#40 alone owns cumulative use: dispatches 3/3; Mac SDK 11/16, helpers 2/4, packages
-2/3, native 2/3; Windows SDK 9/16, helpers 2/4, packages 2/3, native 2/3. All actual
-CI3 starts are charged. No costly operation, watcher or required CI audit remains
-pending. A fourth costly dispatch requires a new user decision. The next step is
-review/acceptance of this implemented outcome; no successor ticket is selected.
-
-Keep all ignored evidence under `.toolchains/ui-image/`, including failed oracle,
-helper, CI1/CI2 and original frames/binaries. `app/node_modules` and `app/target` are
-untracked local symlinks; never stage them. Pinned tools/dependencies remain in
-primary; put bundled Python 3.12 on PATH because system 3.9 lacks `tomllib`.
-Primary remains on `codex/phase3b-screen-designer`; preserve its unrelated untracked
-Phase 1 audit and all protected recovery below. No installer was installed or
-released. This chat retains continuation ownership.
+Keep approved prototype `l06-image-prototype/Loomlight` unchanged, including A2
+`inspector-v2` source/captures and its retained failed full Design Lab startup gate.
+Original ignored evidence remains under the implementation checkout's
+`.toolchains/ui-image/`. The Windows artifact expires on GitHub on 2026-11-05;
+the downloaded evidence is retained locally. Physical-input, OS-dialog, human,
+full promotion-validation and wider editor/Phase 3B acceptance remain separate.
+Preserve the primary checkout's unrelated audit and protected recovery below.
 
 ## L04 merge and workspace closeout
 
