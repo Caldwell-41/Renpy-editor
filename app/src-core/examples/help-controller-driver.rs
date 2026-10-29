@@ -11,6 +11,8 @@ fn emit(value: Value) {
     io::stdout().flush().unwrap();
 }
 fn main() {
+    let preparation = std::time::Instant::now();
+    eprintln!("HELP_FIXTURE phase=preparation-start elapsedMs=0");
     let mode = std::env::args().nth(2);
     assert!(mode.as_deref().is_none_or(|mode| matches!(
         mode,
@@ -51,6 +53,10 @@ fn main() {
         LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap()
     };
     let game = root.join("synthetic-project");
+    eprintln!(
+        "HELP_FIXTURE phase=service-prepared elapsedMs={}",
+        preparation.elapsed().as_millis()
+    );
     fs::create_dir_all(game.join("game/ui")).unwrap();
     if !composition_canvas {
         fs::write(
@@ -122,7 +128,11 @@ fn main() {
     }
     service.close().unwrap();
     let host = ApplicationHost::new(service);
-    emit(json!({"ready":true}));
+    eprintln!(
+        "HELP_FIXTURE phase=ready elapsedMs={}",
+        preparation.elapsed().as_millis()
+    );
+    emit(json!({"ready":true,"preparationMilliseconds":preparation.elapsed().as_millis()}));
     let mut hold: Option<(std::sync::mpsc::Sender<()>, std::thread::JoinHandle<()>)> = None;
     for line in io::stdin().lock().lines() {
         let request: Value = serde_json::from_str(&line.unwrap()).unwrap();

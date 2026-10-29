@@ -14,10 +14,15 @@ core suite's sandbox listener failures pass in the affected permitted rerun.
 Both review axes have no remaining findings after corrections.
 
 Mac use is SDK 9/20, helpers 3/4, packages 2/3 and native sessions 2/3.
-Windows use and costly CI dispatches remain zero. Kris authorized publication,
-a draft PR and CI corrections, followed by a separate review chat. Publish the
-prepared candidate and run the focused Windows route. No merge, release or ticket
-acceptance is claimed. Preserve the
+[Draft PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) is published.
+Windows CI1 failed before Chrome opened because fixture construction used the
+normal request deadline. Automatic PR quality passes. The corrected driver
+separates bounded construction from ordinary replies and records preparation
+phases; focused process and real font-controller checks pass. Evidence retains
+the original run, binary and failure. Dispatches are 1/3; Windows SDK, helper,
+package and native counts remain zero. Publish the correction and dispatch
+ordinal 2. After CI passes, start the requested separate PR review chat against
+`8f0d208`. No merge, release or ticket acceptance is claimed. Preserve the
 unrelated Phase 1 audit, pinned design worktree and protected recovery below.
 
 ## L06 UI-image authoring merged

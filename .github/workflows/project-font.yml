@@ -70,6 +70,7 @@ jobs:
           "$HARNESS_PYTHON" -m pip install Pillow==12.3.0
           npm run check
           cargo fmt --all --check
+          node --test tests/phase2-driver-process.test.mjs
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p test_project_font_evidence.py -v
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p test_owned_screen_evidence.py -v
           cargo test -p loomlight-core --locked screens::tests::fonts::project_fonts_import_as_typed_assets_with_shared_history_and_reopen -- --exact --nocapture

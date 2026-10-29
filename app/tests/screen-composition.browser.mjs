@@ -19,7 +19,7 @@ const receipts = [], errors = [];
 let browser, page;
 let holdSelectionPreference = false, selectionPreferenceInFlight = false;
 try {
-  assert.equal((await child.next(canvas ? 180000 : 15000)).ready, true); await server.listen();
+  assert.equal((await child.next(canvas ? 180000 : 60000)).ready, true); await server.listen();
   browser = process.env.COMPOSITION_BROWSER === 'webkit' ? await webkit.launch({headless:true}) : await chromium.launch({channel:'chrome',headless:true});
   page = await browser.newPage({viewport:{width:1100,height:800},colorScheme:'dark'});
   page.on('pageerror', error => errors.push(error.message));

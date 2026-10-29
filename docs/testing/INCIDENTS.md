@@ -621,3 +621,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   hidden toolbar. The corrected journey passes against the integrated candidate
   without changing production UI or its deadline.
 - **Evidence:** [Architecture refactor validation](../tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29).
+
+## H44. Fixture construction uses the ordinary request deadline
+
+- **Class/search:** harness; initial ready response, driver startup, Windows,
+  `Driver reply deadline exceeded`, no browser artifact.
+- **Cause/correction:** the JSON process client started the ordinary reply timer
+  while the child constructed its disposable project. Separate the bounded
+  construction wait from unchanged per-request timing. Retain fixed preparation
+  phases and serialize null geometry when no browser exists.
+- **Regression:** the controlled delayed-start process passes construction, then
+  refuses a stalled ordinary reply and confirms child exit. Both actual font
+  controller paths pass; Windows requalification remains pending.
+- **Evidence:** [L05 CI1](../tasks/evidence/project-fonts.md#ci1-failure-and-root-cause-correction).

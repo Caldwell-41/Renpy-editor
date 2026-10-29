@@ -266,3 +266,52 @@ operation ceilings remain in force. The PR targets `codex/phase3b-screen-designe
 its current base still resolves to `8f0d208`. The prepared first Windows dispatch
 will use ordinal 1. Publication, run identity and completion will be recorded
 after confirmation. No merge or release is selected.
+
+## Windows CI in progress
+
+[Draft PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) targets the
+Screens integration branch. Published head is `06291a9e1cbf2c2308a8136ab7650698992f317e`. Focused Windows
+[run 40899707325](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40899707325), attempt 1, uses `project_font=true`, ordinal 1.
+Automatic PR [quality run 40899627087](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40899627087) uses the same head. Dispatch
+consumption is 1/3. Mac counters retain SDK 9/20, helpers 3/4, packages 2/3 and
+native sessions 2/3. Windows SDK/helper/package/native execution is reserved by
+this run until its retained evidence establishes actual starts.
+
+CI monitoring will use the installed ci-watch skill in this same chat. Registration
+output is retained in ignored `project-fonts/watch-01.json`; private watcher state
+stays outside the repository. Audit both exact run/attempt identities, all required
+steps, artifacts, binaries, source/pixel comparisons and cleanup before reporting
+a pass. Diagnose any failure under the selected root-cause skill and correct
+within the remaining cumulative ceilings. After CI passes, start the requested
+separate review chat on draft PR #70 against base `8f0d208`. No merge, release or
+issue acceptance is selected.
+
+## CI1 failure and root-cause correction
+
+Windows [CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40899707325),
+at `06291a9`, failed before Chrome opened. The first fixture-ready response hit
+the JSON driver's 15-second deadline. No controller failure receipt survived
+because its pre-browser geometry serializer tried to write undefined data.
+The [retained receipt](project-font-windows-ci-01.json) records the failed binary
+hash and artifact digest. The downloaded executable matches that identity.
+Windows frontend 276 and Screens 69 cases pass, with four SDK/helper cases
+ignored. Automatic PR quality run 40899627087 passes both required jobs.
+
+The harness applied a normal request deadline to fixture construction, which
+creates a project and commits unrelated source-foundation transactions before
+serving requests. A controlled delayed fixture reproduces the contract error.
+The driver now separates an explicitly bounded 60-second construction wait from
+the unchanged 15-second ordinary reply deadline. The focused process test turns
+red before this change and passes afterward, including an intentionally stalled
+ordinary reply and observed child exit. No retry or product timeout changed.
+Fixed phase timings on stderr identify preparation start, service preparation and
+ready, without source or path data. Pre-browser failures now retain null geometry
+and the original error. Selected font, image and composition consumers use the
+construction bound; SDK fixture construction keeps its existing 180-second bound.
+
+The actual font controller and exact packaged-probe rehearsal pass locally with
+the corrected driver. Only test drivers, browser checks and the focused workflow
+changed; the qualified Mac application inputs remain unchanged. Windows execution
+will establish actual fixture timings. CI1 consumed dispatch 1/3, with Windows
+SDK/helper/package/native counts all zero because those steps never started.
+Next: publish the correction and use ordinal 2 for the focused Windows run.

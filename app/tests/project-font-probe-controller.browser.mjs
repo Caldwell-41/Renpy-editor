@@ -8,7 +8,7 @@ import {createServer} from 'vite';
 import {chromium} from 'playwright';
 import {driverProcess} from './phase2-driver-process.mjs';
 const output=resolve(process.env.PROJECT_FONT_PROBE_OUTPUT??'../.toolchains/project-font/probe-controller-01');await mkdir(output,{recursive:true});
-const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'project-font-probe']);
+const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'project-font-probe'],{startupTimeout:60000});
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 let browser;let refusedInitialRead=false;
 try {
