@@ -462,3 +462,65 @@ qualification are complete for this handoff; independent review is not yet a
 pass. Keep the PR draft and #39 open. Merge, release, human/OS-dialog and wider
 acceptance remain unselected. No costly qualification or watcher is pending.
 The original failures, artifact identities and protected recovery remain retained.
+
+## Independent PR review corrections, 2026-10-30
+
+The fresh review of `8f0d208...285c2e3` found two unique product defects.
+Standards reported missing text dimensions and the field-validation lifecycle;
+Spec independently reported the same missing dimensions. Kris selected fixes,
+subagent assignments, final coordinator validation, publication, PR update and CI,
+then cleanup of the fix worktrees once green. The review chat now owns this
+correction and integration on `codex/l05-project-fonts`.
+
+Two isolated worktrees started at `285c2e3`. The dimension agent owned layout
+presentation and its callsites; the validation agent owned text-field validation
+and its scoped error styles. Both extended the existing actual Screens
+controller/core journey at the already-approved test boundary. The coordinator
+integrated dimensions first as `2cb2fda`, then validation as `95aeda4`. The test
+additions merged without conflict. No approved design source changed.
+
+- Dimensions: the original `sharedCommit` option also hid `xsize`/`ysize`, which
+  only the image inspector replaced. The red journey finds zero text Width
+  controls. Separate presentation options now retain text Width/Height and
+  suppress duplicate image dimensions. The green journey checks accepted Source,
+  one-entry Undo/Redo and the unchanged image controller.
+- Validation: the inspector bypassed the shared completion validator and cleared
+  field errors after any edit. Red journeys reproduce missing Size and import-name
+  blur feedback. Text, Size, Color and import names now use `validateField`;
+  still-invalid corrections retain errors, valid corrections clear them, and
+  submission focuses the existing invalid control. Per-node feedback, IME input,
+  Source-conflict messages and the approved error styling remain intact.
+
+Final combined application candidate
+`95aeda443c7527758d84560b039c4bdd065c0be2` passes all 277 frontend tests and the
+production build with pinned Node/npm and Python 3.12. Actual font and image
+controller journeys pass. The seven-group composition journey and exact
+packaged-probe browser rehearsal pass, including two delayed font reads with zero
+overlapping Apply requests. The browser receipts retain their controller-only
+scope; they are not fresh native WebView or SDK proof. No test driver remains.
+
+The first coordinator browser runs stopped before Chrome because the sandbox
+refused the loopback listeners. Original logs are retained; the permitted runs
+pass without code or timeout changes. Agent red/green logs and final receipts are
+preserved under ignored `project-fonts/review-fixes/`. The coordinator audited
+the actual receipt shapes and required stages after correcting a local summary
+assertion that expected the composition report under the wrong key.
+
+Independent delta review reports zero remaining Standards and Spec findings. The
+coordinator reviewed the combined source and test diff. Repository validation and
+whitespace are checked before publication. The PR's current checks own the final
+ordinary CI run identity and result; the final published documentation records
+this tested application candidate rather than claiming a new package candidate.
+
+Rust/core, native IPC, workflows, dependencies, SDK/helper rendering and package
+configuration are unchanged by these fixes. Earlier both-target evidence retains
+its exact candidates and scope. No extra SDK/helper, package/native or costly CI
+operation ran. Historical use remains dispatches 3/3; Mac SDK 9/20, helpers 3/4,
+packages 3/3, native sessions 3/3; Windows SDK 8/20, helpers 2/4, packages 2/3,
+native sessions 2/3. Ordinary PR CI needs no numerical allowance.
+
+Automatic approval review rejected a separate #39 progress comment because it
+treated that destination and the internal status details as outside the selected
+PR-update authorization. No issue mutation occurred. The authorized correction
+record stays here and in PR #70. Keep the PR draft and #39 open. No merge,
+release, physical OS-dialog/human-input or wider Phase 3B acceptance is selected.

@@ -657,3 +657,25 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** retained Windows and Mac captures pass; wrong physical size,
   scale, source, missing reference, blank and fallback-font evidence all fail.
 - **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections).
+
+## H47. Shared Apply hides text dimensions
+
+- **Class/search:** product; text Width/Height, wrapping width, `sharedCommit`.
+- **Cause/correction:** shared commit ownership also suppressed dimensions because
+  the image inspector supplied its own. Separate dimension visibility from commit
+  ownership so text keeps its controls and images avoid duplicates.
+- **Regression:** the actual controller journey fails with zero text Width controls,
+  then passes dimension Apply, exact Source and grouped Undo/Redo. The image
+  controller still passes with one set of dimensions.
+- **Evidence:** [L05 review corrections](../tasks/evidence/project-fonts.md#independent-pr-review-corrections-2026-10-30).
+
+## H48. Text inspector bypasses field-completion validation
+
+- **Class/search:** product; Size/Color/Text blur, invalid correction, import names.
+- **Cause/correction:** new inspector fields used submit-only validation and cleared
+  errors on any input. Reuse `validateField` for completion and valid correction,
+  retaining per-node errors separately from Source/font failures.
+- **Regression:** red blur cases for Size and import names turn green. Actual
+  controller checks cover Text/Color, still-invalid correction, IME, focus,
+  unchanged Source and retained Source-conflict feedback.
+- **Evidence:** [L05 review corrections](../tasks/evidence/project-fonts.md#independent-pr-review-corrections-2026-10-30).
