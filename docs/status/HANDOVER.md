@@ -17,18 +17,26 @@ actual cache-eviction journey, existing font journey and probe rehearsal pass;
 separate result files retain both controller receipts. Frontend/core inputs are
 unchanged between their `77d9af4` check candidate and `03cd82a`.
 
-The main checkout owns final validation and publication. Both worker commits
-are integrated; red/green evidence is copied into ignored coordinator evidence.
-Next: publish the validated corrections, audit their exact ordinary PR run, then
-archive the two new worker worktrees after preservation checks. No operation is
-currently waiting. The PR remains draft and #39 remains open.
+The main checkout owns publication. Validated head
+`187f6a1ebbdb60e2b543dbb09f9bdeabd0eb8806` is published; PR #70 is updated.
+[Ordinary CI run 40965398797](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40965398797),
+attempt 1, passes both required jobs at that exact head. The coordinator matched
+and acknowledged the watcher event and audited all required steps and logs.
+The documentation closeout's ordinary checks remain visible on the PR.
+
+The picker worker is archived. The app refuses to archive the namespace worker
+because it is this chat's primary checkout. It remains clean and detached at its
+integrated worker commit; disposable build output is removed. All 21 worker
+evidence files are preserved in ignored coordinator evidence. The main PR branch
+and checkout remain the publication owner. No product correction or expensive
+operation is pending. PR #70 stays draft and #39 stays open; merge, release and
+wider acceptance remain unselected.
 
 The approved A2 design and earlier source/rendering qualification retain their
-scope and exact candidates. No costly CI, SDK/helper, package or native-editor
-operation ran for this correction. Historical operation limits stay closed.
-Preserve the unrelated audit, pinned design worktree, earlier worker worktrees
-and protected recovery below. CURRENT/HANDOVER still exceed soft size targets
-because earlier acceptance and unique recovery records remain relevant.
+scope and exact candidates. Historical operation limits stay closed. Preserve
+the unrelated audit, pinned design reference, earlier worker worktrees and
+protected recovery below. CURRENT/HANDOVER exceed soft size targets because
+earlier acceptance and unique recovery records remain relevant.
 
 ## L06 merge and workspace closeout
 

@@ -784,3 +784,45 @@ and native receipts retain their exact recorded candidates and scope; this
 correction establishes no fresh native/package acceptance. The combined Design
 Lab startup failure, OS-dialog/human input and wider editor/canvas/Phase 3B
 acceptance remain separate. Historical operation consumption stays unchanged.
+
+### Published correction and ordinary CI audit
+
+Published head `187f6a1ebbdb60e2b543dbb09f9bdeabd0eb8806` contains the validated
+corrections and their evidence. PR #70 is updated and remains draft.
+[Repository quality run 40965398797](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40965398797),
+attempt 1, completed successfully at that exact head. The coordinator matched
+and acknowledged the watcher event in this thread, verified the current PR head,
+and audited every required job and step plus their logs.
+
+- `Frontend tests and Rust formatting`, job `123768491412`: all steps pass.
+  Logs confirm 277 tests, 277 passes, zero failures/skips and Rust 1.90.0 formatting.
+- `Validate repository`, job `123768490957`: all steps pass. Logs confirm 1,259
+  checkout files, all 13 section-link tests, ten package-retention tests, bounded
+  Q1 rejection fixtures and the source-selector audit.
+- Nine optional jobs were unselected and skipped. They supply no new
+  SDK/helper/native/package qualification.
+
+Terminal JSON, complete logs and the matching PR snapshot remain in ignored
+coordinator evidence. No costly workflow was dispatched. Earlier both-host
+qualification and all historical operation consumption retain their scope.
+
+### Worker cleanup and final state
+
+The namespace worker patch matches integrated `1b1d2d1`, and the picker worker
+patch matches integrated `3b8bf78`, using stable patch identities. Both worker
+checkouts were clean. The coordinator verified byte-for-byte preservation of all
+seven namespace evidence files and fourteen picker evidence files before cleanup.
+
+The picker worktree is archived with a recoverable snapshot. The app refuses to
+archive the namespace worktree because it is this chat's primary checkout. It
+remains clean, detached at its integrated worker commit; its disposable 575 MiB
+build output was removed after evidence preservation. The main PR checkout owns
+publication. The unrelated audit, pinned design reference, earlier worktrees and
+protected recovery remain intact. This is the retained cleanup exception.
+
+Both selected product findings are corrected, coordinator validation passes and
+both independent review axes have zero remaining findings. This closeout changes
+only documentation; its ordinary automatic checks remain visible on PR #70.
+No product correction, costly CI or package/native qualification is pending.
+PR #70 remains draft and #39 remains open. Merge, release and wider acceptance
+remain unselected.
