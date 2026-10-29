@@ -45,5 +45,6 @@ export default async function check({page, open}) {
   await size().fill('44'); await size().press('Enter'); assert.equal((await state()).accepted[1].size,'44'); assert.equal(await size().evaluate(e=>e===document.activeElement),true);
   await size().fill('48'); await size().press('Escape'); assert.equal(await size().inputValue(),'44'); assert.equal(await size().evaluate(e=>e===document.activeElement),true);
   await page.getByRole('button',{name:'Choose project font'}).click(); const count=await page.getByRole('dialog').getByRole('button').count(); assert(count>3); await page.keyboard.press('Escape');
+  await (await import('./refined-check.mjs')).default({page,open});
   console.log('Font interactions passed: formats, draft retention, focus return, expressions, history and reopen.');
 }

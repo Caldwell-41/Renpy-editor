@@ -1,6 +1,6 @@
 # Project font proposals
 
-Three design-only proposals for [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) explore font choice and text formatting inside Screens. The implementation chat retains ticket ownership. None is approved.
+Three design-only proposals for [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) explore font choice and text formatting inside Screens. The implementation chat retains ticket ownership. None is approved. Kris selected A for an [A2 refinement](REFINEMENT.md); review variant `refined` / revision `inspector-v2`.
 
 - A keeps a compact text inspector beside the canvas. A selected-font row opens a searchable project font chooser with import.
 - B puts the searchable font browser directly inside the inspector. It trades vertical space for fewer picker openings.

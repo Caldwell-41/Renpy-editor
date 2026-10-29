@@ -1,0 +1,164 @@
+[
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/text-dark-wide.png",
+    "sha256": "afe3a41340e27294b322a371f47a891dc54ec98c0b41bb6c89480725c917ce7d",
+    "state": "text",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/text-dark-compact.png",
+    "sha256": "07d596af3e26e04157bce0b1d9a99a8596a8f3d46e90bd82892d2e305b4403ef",
+    "state": "text",
+    "theme": "dark",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/text-light-wide.png",
+    "sha256": "7db350daaaa91e69dda5852dbc22c5fa799bc6e4f31e5c5689f2aef3c74be49d",
+    "state": "text",
+    "theme": "light",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/text-light-compact.png",
+    "sha256": "8649c3f3a89389f272e3bb1e450d2a5fd3b91f275af531e73fefd7c243d4e2c3",
+    "state": "text",
+    "theme": "light",
+    "width": 560,
+    "height": 640,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/missing-dark-wide.png",
+    "sha256": "de55ab57435b3dec2e7734d41ee7111b4e861e6d62912358f3f1e38d081ac69c",
+    "state": "missing",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-dark-wide.png",
+    "sha256": "614294c28bb84b04a332efc163bb76205ed3f5d22c5122968742b8caeb2ac5db",
+    "state": "invalid",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/expression-dark-wide.png",
+    "sha256": "a70a6dea93132550b32f7b09bb513db1bb16c132f1d191057af680bfacec4d80",
+    "state": "expression",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/conflict-dark-wide.png",
+    "sha256": "afe3a41340e27294b322a371f47a891dc54ec98c0b41bb6c89480725c917ce7d",
+    "state": "conflict",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/long-dark-wide.png",
+    "sha256": "34b0602a04a45616ced1ddded2b5b37249de9f6eac83b2291de83369db0daa1f",
+    "state": "long",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/picker-dark-wide.png",
+    "sha256": "524f88f2d0bdee156289156a928dd56f2e4295df0ce71059a60e8cc8b5d70006",
+    "state": "picker",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/empty-search-dark-wide.png",
+    "sha256": "a3b52bfbd98fe965ec817a7b5ddff13b832edc32124f45da9ee2d65c4832ebfd",
+    "state": "empty-search",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/import-dark-wide.png",
+    "sha256": "7875f494ea141558fb74bba332fbe1d52e944eda6a77cb1e29c044241b12b898",
+    "state": "import",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-import-dark-wide.png",
+    "sha256": "1befcae7ec92210ecd8dfee997efe5a8c7dafed6a1937fc28abe59999c9cdadf",
+    "state": "invalid-import",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-size-dark-wide.png",
+    "sha256": "934e0914cef708bc0879db19644274c3cf24138249b004cba4ea010fcc80f632",
+    "state": "invalid-size",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-color-dark-wide.png",
+    "sha256": "6047ba6844e1f03a9c9e5398be782f4d3789026948cae24c8a8e5640fb8744a2",
+    "state": "invalid-color",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/missing-draft-dark-wide.png",
+    "sha256": "905c0413fc70f4727b9c2346a6a4614252febeb63e33234ff300fe80250240f5",
+    "state": "missing-draft",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-draft-dark-wide.png",
+    "sha256": "0323519246146c87f3cb272030b12c182101d36e2f304d803cb7fa8617f8a2f5",
+    "state": "invalid-draft",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  },
+  {
+    "path": "docs/design/design-lab-project-font/captures/inspector-v2/conflict-draft-dark-wide.png",
+    "sha256": "015f5da150a7705a60840ef28a6d687e6cdd07b0455345ecca36de57218e6cc2",
+    "state": "conflict-draft",
+    "theme": "dark",
+    "width": 1100,
+    "height": 720,
+    "scale": 1
+  }
+]

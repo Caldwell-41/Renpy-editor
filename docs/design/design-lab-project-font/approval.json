@@ -17,6 +17,11 @@
       "id": "strip-v1",
       "variantId": "strip",
       "approval": null
+    },
+    {
+      "id": "inspector-v2",
+      "variantId": "refined",
+      "approval": null
     }
   ]
 }
