@@ -1,42 +1,45 @@
 # Current outcome handover
 
-## L05 picker and namespace review fixes
+## L05 merge and workspace closeout
 
-The fresh [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) findings
-are corrected on `codex/l05-project-fonts`. Independent workers fixed discovery
-namespace collisions and font selection after specimen-cache eviction, with
-failing behavior tests before implementation. The coordinator integrated namespace
-first, then picker. Code candidate `03cd82a1fe844daee8f20f52c87caff9ba92d69b`
-passes both correction review axes with zero remaining findings.
-[Detailed evidence](../tasks/evidence/project-fonts.md#picker-cache-and-discovery-namespace-corrections-2026-10-30)
-retains assignments, red/green failures, candidate mapping and qualification limits.
+Kris directed merging [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70),
+updating associated tickets and retiring its completed branch/workspaces.
+Merge `fea2d9d181f9e496d09fb5c70bdbc65f63f0432b` is on
+`codex/phase3b-screen-designer`; its tree exactly matches independently reviewed
+head `4fc3771f52a2ea6e4c3aefde2b9ea6ec8abd8f47`. This primary checkout is current.
+[L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) is accepted and closed
+for its four bounded font/typography criteria. No successor or release is selected.
 
-All 277 frontend tests, the production build, 70 Screens core tests and 33
-authoring tests pass. Four SDK/helper cases remain intentionally ignored. The
-actual cache-eviction journey, existing font journey and probe rehearsal pass;
-separate result files retain both controller receipts. Frontend/core inputs are
-unchanged between their `77d9af4` check candidate and `03cd82a`.
+[Closeout evidence](../tasks/evidence/project-fonts.md#merge-and-ticket-closeout-2026-10-30)
+owns acceptance mapping, exact review/CI candidates, tracker reconciliation and cleanup.
+Both full-PR axes report zero actionable findings against `8f0d208`. Required
+[automatic run 40965993544](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40965993544/attempts/1)
+passes at the reviewed head. Fresh final review passes TypeScript checking and 11
+focused font-core tests. Whitespace checking reports a trailing space in the
+upstream fixture license at line 21; no product edit was made.
+Earlier signed Mac `cf01c06`, Windows CI3 `664d693`, SDK/helper and later portable
+correction results retain their candidate-specific scope and original failures.
+Full Design Lab startup remains failed; physical OS-dialog/human input and wider
+editor/canvas/3B acceptance remain separate.
 
-The main checkout owns publication. Validated head
-`187f6a1ebbdb60e2b543dbb09f9bdeabd0eb8806` is published; PR #70 is updated.
-[Ordinary CI run 40965398797](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40965398797),
-attempt 1, passes both required jobs at that exact head. The coordinator matched
-and acknowledged the watcher event and audited all required steps and logs.
-The documentation closeout's ordinary checks remain visible on the PR.
+The five remaining L05 worktrees and both local feature/prototype branches are
+retired; the remote feature branch is deleted. All 78 local evidence files/symlinks
+are archived and hash-verified under `.toolchains/retired-worktrees/pr70/`.
+`retirement-manifest.json` records exact heads, original paths and hashes.
+The approved prototype is recoverable from local tag
+`recovery/l05-approved-prototype-2026-10-30` and a verified complete Git bundle.
+All 43 changed prototype files match the merge; all four worker patches match their
+integrated commits. Scoped idle worker browser helpers were stopped before cleanup.
+Primary evidence/output, the unrelated audit and protected recovery below remain intact.
 
-The picker worker is archived. The app refuses to archive the namespace worker
-because it is this chat's primary checkout. It remains clean and detached at its
-integrated worker commit; disposable build output is removed. All 21 worker
-evidence files are preserved in ignored coordinator evidence. The main PR branch
-and checkout remain the publication owner. No product correction or expensive
-operation is pending. PR #70 stays draft and #39 stays open; merge, release and
-wider acceptance remain unselected.
-
-The approved A2 design and earlier source/rendering qualification retain their
-scope and exact candidates. Historical operation limits stay closed. Preserve
-the unrelated audit, pinned design reference, earlier worker worktrees and
-protected recovery below. CURRENT/HANDOVER exceed soft size targets because
-earlier acceptance and unique recovery records remain relevant.
+#39, P3B #22, B02 #24, B03 #25, B06 #28, B08 #30, B11 #33 and L07 #43
+are reconciled and read back. Group acceptance remains open. L07's sole prerequisite
+is satisfied; its native dependency edge is retained as provenance. Final costly
+use is unchanged: dispatches 3/3; Mac SDK 9/20, helpers 3/4, packages 3/3, native
+sessions 3/3; Windows SDK 8/20, helpers 2/4, packages 2/3, native sessions 2/3.
+Unused allowances are closed. No SDK/helper, package, native or costly CI operation
+ran during review/merge closeout. No operation or watcher is pending.
+CURRENT/HANDOVER exceed soft size targets to preserve earlier acceptance and unique recovery.
 
 ## L06 merge and workspace closeout
 
@@ -74,8 +77,7 @@ native sessions 2/3; Windows SDK 9/16, helpers 2/4, packages 2/3, native session
 The remaining allowances are closed. No SDK/helper, package, native session or
 costly CI operation ran during review/merge closeout. No operation or watcher remains pending.
 Related groups retain aggregate acceptance. L09 #44 is dependency-ready; L18 #46
-still waits on L07 #43. L05 #39 is recommended next because fonts unlock shared
-styles and then broader Help rendering; recommendation does not select implementation.
+still waits on L07 #43. L05 #39 is now accepted above. No successor implementation is selected.
 
 ## L04 merge and workspace closeout
 

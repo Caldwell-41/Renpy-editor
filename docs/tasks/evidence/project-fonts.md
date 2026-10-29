@@ -826,3 +826,72 @@ only documentation; its ordinary automatic checks remain visible on PR #70.
 No product correction, costly CI or package/native qualification is pending.
 PR #70 remains draft and #39 remains open. Merge, release and wider acceptance
 remain unselected.
+
+
+## Merge and ticket closeout, 2026-10-30
+
+Kris selected merging PR #70, updating its associated tickets and cleaning the
+completed branch/workspaces. Merge
+`fea2d9d181f9e496d09fb5c70bdbc65f63f0432b` is on
+`codex/phase3b-screen-designer`. Its tree exactly matches full reviewed head
+`4fc3771f52a2ea6e4c3aefde2b9ea6ec8abd8f47` against base
+`8f0d208fb3a28fac1cf94b3248f807ff85a54ddd`.
+
+Fresh independent Standards and Spec reviews of the full PR each report zero
+actionable findings. Final review verification passes TypeScript checking and all
+11 focused font-core tests. `git diff --check` identifies a trailing space in the
+copied upstream fixture license at line 21; this tooling finding is disclosed,
+and no product edit or renewed qualification was needed.
+[Repository quality run 40965993544, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40965993544/attempts/1)
+passes both required jobs at the exact reviewed head. Their previous complete
+step/log audit remains valid; fresh GitHub read-back confirms successful terminal
+checks and a clean merge. Unselected specialist jobs remain skipped.
+
+The four bounded L05 criteria are accepted through the selected merge.
+
+| Criterion | Accepted evidence |
+| --- | --- |
+| Typed TTF/OTF import/discovery and retained errors | Public services, actual controller/core, both native WebViews and later admission/namespace correction tests pass. Handles and core-owned bytes exclude arbitrary CSS URLs. |
+| Typed typography and minimal source | Content/font/size/color/alignment/bold/italic, reset/no-op, one shared text/layout transaction and exact history pass. Unsupported expressions and opaque neighbors remain preserved. |
+| Actual font use, placement and wrapping | Both-target normal SDK/helper results compare accepted source with an independent literal reference at 1280x720 and 1024x768; fallback-font evidence is rejected. |
+| Picker focus, Apply/Cancel, Source/history/reopen and bounds | Controller/core and recorded native probes pass. Later dimensions, field validation, stale-draft and specimen-cache corrections pass their focused paths. DATA_MODEL retains supported formats and bounds. |
+
+The [CI3 audit](#ci3-audited-success), corrected signed Mac `cf01c06` and
+Windows CI3 `664d693` keep their exact SDK/helper/native scope. Later portable
+corrections retain the candidate mappings and tests in their sections above;
+this merge establishes no fresh native/package result. The full Design Lab
+startup failure, physical OS-dialog/human input and wider editor/canvas/3B
+acceptance remain separate. Original failures remain preserved.
+
+L05 #39 has all four acceptance boxes checked and is closed as completed. P3B #22
+credits bounded R08/R13 plus R10/R11/R12/R25/R41 evidence. B02 #24, B03 #25,
+B06 #28, B08 #30 and B11 #33 retain wider acceptance and stay open. L07 #43 has
+its sole work-ticket prerequisite satisfied and remains unselected. Native
+dependency edges remain as provenance. All eight issue bodies and states were
+read back against their prepared contents. No successor implementation or release
+is selected.
+
+### Workspace retirement
+
+The five remaining L05 worker/design worktrees are retired. All four worker
+patches have the same stable patch identity as their integrated commits:
+font admission `b1aa8e0`, namespace `1b1d2d1`, stale text `ef81014` and dimensions
+`2cb2fda`. All 43 files changed by the approved prototype exactly match the merge.
+Local recovery tag `recovery/l05-approved-prototype-2026-10-30` retains approved
+head `54f4ebb8112b6becdc1d24e6228c6a9fb70957c5`; the complete Git bundle passes
+verification. The feature/prototype local branches and remote feature branch
+are deleted after preservation. This primary checkout is on the current Screens base.
+
+All 78 ignored/untracked local evidence files and dependency symlinks from those
+worktrees are archived under ignored `.toolchains/retired-worktrees/pr70/`.
+The local retirement manifest records heads, original paths, archive hashes and
+per-file SHA-256 values or symlink targets. Every archived entry was verified
+against the original before removal. Scoped idle worker browser helpers were
+stopped first. No app/SDK/preview process used a retired checkout. The unrelated
+primary audit's hash is unchanged; primary qualification output, historical
+archives/tags and protected native/session recovery remain intact.
+
+Final costly use remains dispatches 3/3; Mac SDK 9/20, helpers 3/4, packages 3/3,
+native sessions 3/3; Windows SDK 8/20, helpers 2/4, packages 2/3, native sessions
+2/3. Unused allowances are closed. Review/merge closeout starts no SDK/helper,
+package, native session or costly CI campaign. No operation or watcher is pending.

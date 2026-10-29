@@ -1,35 +1,27 @@
 # Current status
 
-## L05 picker and namespace review fixes
+## L05 project fonts merged
 
-The fresh [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) findings
-are corrected on `codex/l05-project-fonts`. Independent workers fixed discovery
-namespace collisions and font selection after specimen-cache eviction, with
-failing behavior tests before implementation. The coordinator integrated namespace
-first, then picker. Code candidate `03cd82a1fe844daee8f20f52c87caff9ba92d69b`
-passes both correction review axes with zero remaining findings.
-[Detailed evidence](../tasks/evidence/project-fonts.md#picker-cache-and-discovery-namespace-corrections-2026-10-30)
-retains assignments, red/green failures, candidate mapping and qualification limits.
+[PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) merged into
+`codex/phase3b-screen-designer` at `fea2d9d181f9e496d09fb5c70bdbc65f63f0432b`.
+Its tree exactly matches reviewed head `4fc3771`. Kris selected the merge after
+both full-PR review axes reported zero actionable findings.
+[L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) is accepted and closed
+for its four bounded project-font and typography criteria.
 
-All 277 frontend tests, the production build, 70 Screens core tests and 33
-authoring tests pass. Four SDK/helper cases remain intentionally ignored. The
-actual cache-eviction journey, existing font journey and probe rehearsal pass;
-separate result files retain both controller receipts. Frontend/core inputs are
-unchanged between their `77d9af4` check candidate and `03cd82a`.
+[Merge closeout](../tasks/evidence/project-fonts.md#merge-and-ticket-closeout-2026-10-30)
+retains exact review/check identities, both-target SDK/helper/native evidence,
+correction tests and original failures. Both required automatic checks pass at the
+reviewed head. Fresh final review passes typechecking and all 11 focused font-core
+tests. The upstream fixture license has one trailing space; the product is unchanged.
+Full Design Lab startup, physical OS-dialog/human input and wider editor/canvas/3B
+acceptance retain their disclosed limits. Unused L05 allowances are closed.
 
-Validated corrections are published as `187f6a1`; PR #70 is updated.
-[Ordinary CI run 40965398797](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40965398797),
-attempt 1, passes both required jobs at that exact head; every required step and
-its logs are audited. The picker worker worktree is archived. The app retains the
-namespace worker as this chat's primary checkout; its build output is removed and
-all worker evidence is preserved. No product correction is pending.
-
-Earlier SDK/helper and signed/native evidence retains its recorded candidates
-and scope. No costly CI, SDK/helper, package or native-editor operation ran for
-these corrections. The documentation closeout's ordinary checks remain visible
-on the PR. Keep PR #70 draft and #39 open. Merge, release and wider acceptance
-remain unselected. Preserve the unrelated audit, pinned design reference,
-earlier worktrees and protected recovery below.
+The five remaining L05 worktrees, two local branches and remote feature branch
+are retired after source/evidence verification. The approved A2 prototype remains
+recoverable through a local tag and verified bundle. The unrelated audit and
+protected recovery remain intact. Parent/evidence groups stay open.
+L07 #43 is dependency-ready; no successor implementation or release is selected.
 
 ## L06 UI-image authoring merged
 
@@ -49,9 +41,7 @@ retain their stated limits. L06's unused allowances are closed.
 The six completed worktrees, three local branches and remote feature branch are
 retired after verified source/evidence preservation. The approved A2 prototype
 remains recoverable; the unrelated audit and protected recovery are intact.
-L09 #44 is dependency-ready. L18 #46 still waits on L07 #43. Recommend L05 #39
-(project fonts) next to unblock shared styles and broader Help rendering;
-no successor implementation or release is selected.
+L09 #44 is dependency-ready. L18 #46 still waits on L07 #43. L05 #39 is now accepted above; no successor implementation or release is selected.
 
 ## L04 nested and clipped layouts merged
 
