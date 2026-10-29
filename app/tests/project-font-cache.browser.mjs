@@ -8,7 +8,7 @@ import {join,resolve} from 'node:path';
 import {mkdir,writeFile,rm} from 'node:fs/promises';
 import {driverProcess} from './phase2-driver-process.mjs';
 
-const output=resolve(process.env.PROJECT_FONT_OUTPUT??'../.toolchains/font-cache-review/controller');
+const output=resolve(process.env.PROJECT_FONT_CACHE_OUTPUT??'../.toolchains/font-cache-review/controller');
 await mkdir(output,{recursive:true});
 const fixture=join(tmpdir(),`loomlight-help-controller-${randomUUID()}`);
 const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[fixture,'project-font'],{startupTimeout:60000});
