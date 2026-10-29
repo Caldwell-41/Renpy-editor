@@ -1,6 +1,6 @@
 # A2 text inspector
 
-Kris selected A for an Experience First refinement on 2026-10-29. This is `refined` / `inspector-v2`, a new draft. The original A/B/C source and captures remain available. No design is approved, and the implementation chat keeps #39 ownership.
+Kris selected A for an Experience First refinement on 2026-10-29. Kris then approved A2 with "Approve A2 and send it back to the original implementation chat." The selected variant is `refined`, revision `inspector-v2`. The original A/B/C source and captures remain available as drafts. The implementation chat keeps #39 ownership.
 
 [Open A2](http://127.0.0.1:5177/preview.html?screen=project-font&variant=refined&state=text&theme=dark&viewport=wide).
 
@@ -31,4 +31,4 @@ TypeScript and approval-record checks pass. The required combined Design Lab che
 
 `captures/inspector-v2/` holds the reviewed draft matrix examples, chooser/import states and error drafts. `manifest.json` records their hashes and conditions. All assets, source writes, file selection, history and reopen remain fictional browser-memory operations. Font specimens use browser family stand-ins. No native picker, actual font decoding, SDK, game execution or persistence runs. The earlier production-build isolation check retains its scope; production build inputs and configuration are unchanged by this refinement.
 
-Approval remains open. After Kris approves a specific version, preserve its source identity, record the decision and agreed limits, validate its references and send the approved mock to the implementation owner.
+Approval is recorded in `approval.json` against the reviewed source and retained captures. [The handoff](HANDOFF.md) owns the transfer to the implementation chat. The full Design Lab startup failure remains disclosed; design approval does not mark #39 implemented or accepted.

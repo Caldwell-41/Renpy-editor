@@ -1,6 +1,6 @@
 # Project font proposals
 
-Three design-only proposals for [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) explore font choice and text formatting inside Screens. The implementation chat retains ticket ownership. None is approved. Kris selected A for an [A2 refinement](REFINEMENT.md); review variant `refined` / revision `inspector-v2`.
+Three design-only proposals for [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) explore font choice and text formatting inside Screens. The implementation chat retains ticket ownership. Kris approved [A2](REFINEMENT.md), variant `refined` / revision `inspector-v2`, on 2026-10-29. The [handoff](HANDOFF.md) records its source and verification limits. The original A/B/C remain drafts.
 
 - A keeps a compact text inspector beside the canvas. A selected-font row opens a searchable project font chooser with import.
 - B puts the searchable font browser directly inside the inspector. It trades vertical space for fewer picker openings.
@@ -34,4 +34,4 @@ The production Vite build was inspected in memory and excludes all Design Lab mo
 
 Earlier focused attempts retain a closed-details text read, ambiguous Source locator, CSS separator in accessible path names, a search input queried as a textbox and an unopened Prototype tools disclosure. Those were check setup defects. Visual review found and corrected C's collapsed editor and compact spacing. The final matrix and interactions include those fixes. Browser samples prove no actual font decoding, source patch, persistence, physical input or Ren'Py output.
 
-`captures/draft-v1/` retains dark wide/compact overviews for each option. All approvals remain null. Only this screen, its registry entry and this design directory are included in the local candidate commit. The local dependency symlink is not committed.
+`captures/draft-v1/` retains dark wide/compact overviews for each option. The original A/B/C approvals remain null; A2 approval is recorded separately. Only this screen, its registry entry and this design directory are included in the local candidate commit. The local dependency symlink is not committed.

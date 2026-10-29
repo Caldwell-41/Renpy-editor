@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "screenId": "project-font",
-  "currentApproved": null,
+  "currentApproved": "inspector-v2",
   "revisions": [
     {
       "id": "inspector-v1",
@@ -21,7 +21,199 @@
     {
       "id": "inspector-v2",
       "variantId": "refined",
-      "approval": null
+      "approval": {
+        "date": "2026-10-29",
+        "decision": "Kris approved A2 / inspector-v2, variant refined, in this chat: \"Approve A2 and send it back to the original implementation chat.\"",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "79d958d5c45dfd12073c2192de05128d6ed19a91",
+          "fingerprint": "83a92587e4c13ad2a94fa1c69dbfcd6c87ef927062359939f0d1bd3969472cfc"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/text-dark-wide.png",
+            "sha256": "afe3a41340e27294b322a371f47a891dc54ec98c0b41bb6c89480725c917ce7d",
+            "state": "text",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/text-dark-compact.png",
+            "sha256": "07d596af3e26e04157bce0b1d9a99a8596a8f3d46e90bd82892d2e305b4403ef",
+            "state": "text",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/text-light-wide.png",
+            "sha256": "7db350daaaa91e69dda5852dbc22c5fa799bc6e4f31e5c5689f2aef3c74be49d",
+            "state": "text",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/text-light-compact.png",
+            "sha256": "8649c3f3a89389f272e3bb1e450d2a5fd3b91f275af531e73fefd7c243d4e2c3",
+            "state": "text",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/missing-dark-wide.png",
+            "sha256": "de55ab57435b3dec2e7734d41ee7111b4e861e6d62912358f3f1e38d081ac69c",
+            "state": "missing",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-dark-wide.png",
+            "sha256": "614294c28bb84b04a332efc163bb76205ed3f5d22c5122968742b8caeb2ac5db",
+            "state": "invalid",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/expression-dark-wide.png",
+            "sha256": "a70a6dea93132550b32f7b09bb513db1bb16c132f1d191057af680bfacec4d80",
+            "state": "expression",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/conflict-dark-wide.png",
+            "sha256": "afe3a41340e27294b322a371f47a891dc54ec98c0b41bb6c89480725c917ce7d",
+            "state": "conflict",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/long-dark-wide.png",
+            "sha256": "34b0602a04a45616ced1ddded2b5b37249de9f6eac83b2291de83369db0daa1f",
+            "state": "long",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/picker-dark-wide.png",
+            "sha256": "524f88f2d0bdee156289156a928dd56f2e4295df0ce71059a60e8cc8b5d70006",
+            "state": "picker",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/empty-search-dark-wide.png",
+            "sha256": "a3b52bfbd98fe965ec817a7b5ddff13b832edc32124f45da9ee2d65c4832ebfd",
+            "state": "empty-search",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/import-dark-wide.png",
+            "sha256": "7875f494ea141558fb74bba332fbe1d52e944eda6a77cb1e29c044241b12b898",
+            "state": "import",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-import-dark-wide.png",
+            "sha256": "1befcae7ec92210ecd8dfee997efe5a8c7dafed6a1937fc28abe59999c9cdadf",
+            "state": "invalid-import",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-size-dark-wide.png",
+            "sha256": "934e0914cef708bc0879db19644274c3cf24138249b004cba4ea010fcc80f632",
+            "state": "invalid-size",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-color-dark-wide.png",
+            "sha256": "6047ba6844e1f03a9c9e5398be782f4d3789026948cae24c8a8e5640fb8744a2",
+            "state": "invalid-color",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/missing-draft-dark-wide.png",
+            "sha256": "905c0413fc70f4727b9c2346a6a4614252febeb63e33234ff300fe80250240f5",
+            "state": "missing-draft",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/invalid-draft-dark-wide.png",
+            "sha256": "0323519246146c87f3cb272030b12c182101d36e2f304d803cb7fa8617f8a2f5",
+            "state": "invalid-draft",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-project-font/captures/inspector-v2/conflict-draft-dark-wide.png",
+            "sha256": "015f5da150a7705a60840ef28a6d687e6cdd07b0455345ecca36de57218e6cc2",
+            "state": "conflict-draft",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Keep the Screens shell and Choose/Design/Connect workflow. Use one text inspector beside the wide canvas, with content, the selected project font, size, color, text alignment, bold and italic together.",
+          "Use a searchable project-font chooser with current-text specimens, selected state and TTF/OTF file references. Selecting a font updates the draft, closes the chooser and returns focus to its trigger.",
+          "Stage import in the same chooser with a project destination. Cancel import or Escape returns to the retained search. Cancel or Escape from the chooser returns focus to the inspector. Imported assets remain in the catalog after cancelling a text edit.",
+          "Retain inherited settings through empty size/color and Default font/alignment/bold/italic. Keep explicit On/Off separate from inherited bold and italic. Show a color swatch beside the editable hex value.",
+          "Apply one text change as one history entry and accept no entry for a no-op. Keep Apply/Cancel outside desktop form scrolling and retain numeric focus on Enter/Apply and Escape/Cancel. Show local applied/draft feedback.",
+          "Keep missing/invalid font, invalid field and source-conflict drafts. Put errors beside the relevant field, focus invalid input, offer font repair or Review Source, and retain accepted typography for invalid size/color schematic previews.",
+          "Retain drafts/errors across selection and Source navigation, and remember inspector scroll and layout/limit disclosure state per text element. Preserve shared Undo/Redo, reopen and deliberate Test.",
+          "Preserve unsupported content/font/size expressions and provide direct Source access. Keep other supported fields editable. Keep Layout separate from text line alignment.",
+          "Preserve accepted composition, numeric units/parent constraints/nine placement presets, ordering/removal, nested layouts, UI-image and Source capabilities during integration. This bounded text mock does not replace those workflows.",
+          "Put editing first at compact sizes, retain core text controls and Apply in the normal 560 by 640 view, and provide Show preview and Edit text navigation. Preserve dark, dense presentation and avoid continuously repainting animation."
+        ],
+        "deviations": [
+          "Approval covers browser presentation and simulated interaction. Font selection/import, source acceptance, history, reopen and reconciliation use fictional browser memory. No actual file picker, font decoding, core transaction, project save, SDK or game action runs.",
+          "Font specimens use browser family stand-ins and the canvas is schematic. Actual font use, placement/wrapping, source protection, persistence and supported bounds/formats require production qualification under #39.",
+          "The prototype proposes whole sizes from 1 to 512 and #RGB/#RGBA/#RRGGBB/#RRGGBBAA colors, with empty values inherited. These are not established engine limits; the implementation owner must qualify and record supported bounds/formats.",
+          "The required full Design Lab gate retains its startup-navigation failure. Focused A2 checks, source identity and approval/capture checks are separate evidence. This approval does not waive that gate or establish product acceptance.",
+          "Dynamic captures such as picker/import/invalid fields/error drafts are reproduced by capture-refined.mjs and refined-check.mjs rather than initial-state URLs."
+        ]
+      }
     }
   ]
 }
