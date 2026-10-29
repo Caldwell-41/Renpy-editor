@@ -679,3 +679,28 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   controller checks cover Text/Color, still-invalid correction, IME, focus,
   unchanged Source and retained Source-conflict feedback.
 - **Evidence:** [L05 review corrections](../tasks/evidence/project-fonts.md#independent-pr-review-corrections-2026-10-30).
+
+
+## H49. Font admission accepts an empty character-map container
+
+- **Class/search:** product; malformed TTF/OTF, empty cmap, import succeeds before
+  FontFace decoding rejects the font.
+- **Cause/correction:** presence of a cmap table did not establish a parsed base
+  character map. Require a supported parsed base subtable in the shared validator
+  used by preview, import and presentation.
+- **Regression:** public preview/import reject the licensed TTF fixture after its
+  encoding-record count is set to zero; source, metadata and prior history stay
+  intact. Valid TTF/OTF import/history/reopen still pass.
+- **Evidence:** [L05 root-cause corrections](../tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30).
+
+## H50. Retained text drafts compare with the old saved node
+
+- **Class/search:** product; Source refresh, stale text, matching saved literal,
+  Apply conflict after resolving input, old-value discard.
+- **Cause/correction:** the draft matcher compared against the original node.
+  Compare all text/typography fields with the current accepted node; keep the
+  original revision until the full draft matches, then clear its errors.
+- **Regression:** actual controller/core checks cover current-value resolution,
+  subsequent edit/history, old-literal retention, divergent typography and full
+  conflict resolution without writing Source.
+- **Evidence:** [L05 root-cause corrections](../tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30).

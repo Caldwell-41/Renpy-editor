@@ -1,32 +1,30 @@
 # Current outcome handover
 
-## L05 project font implementation
+## L05 project font review fixes
 
-Kris selected fixes for the two unique findings in the independent review of
-[PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70). This review chat now
-owns correction and integration on `codex/l05-project-fonts`. Separate agents
-restored text Width/Height and the shared field-validation lifecycle, then the
-coordinator integrated them in that order. Combined application candidate
-`95aeda443c7527758d84560b039c4bdd065c0be2` passes all 277 frontend tests, the
-production build, actual font/image controllers, seven-group composition and the
-exact font-probe browser rehearsal. Both review axes have zero remaining findings.
-[Evidence](../tasks/evidence/project-fonts.md#independent-pr-review-corrections-2026-10-30)
-retains red/green cases, original sandbox failures and the scope of reused proof.
+Both fresh review findings in [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70)
+are corrected on `codex/l05-project-fonts`. The coordinator integrated the font
+admission fix as `b1aa8e0`, then stale-text reconciliation as `ef81014`, after
+separate agents completed red/green tests in isolated worktrees. Independent
+Standards and Spec review of the corrections has zero remaining findings.
+[Detailed evidence](../tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30)
+retains assignments, failing cases, final checks and qualification limits.
 
-Publication and ordinary PR CI audit are selected; after green CI, archive only
-the two fix worktrees. Current PR checks own the final run identity and result.
-The original core/SDK/helper and native evidence retains its recorded candidates;
-these frontend fixes do not establish a fresh package/native pass. Existing
-Design Lab, physical OS-dialog/human and wider acceptance limits remain visible.
-Historical costly-operation use is unchanged: dispatches 3/3; Mac SDK 9/20,
-helpers 3/4, packages 3/3, native sessions 3/3; Windows SDK 8/20, helpers 2/4,
-packages 2/3, native sessions 2/3. No extra costly operation is selected.
+Combined application candidate `ef810143980700fa2e2143b70a14528f77aaf6de` passes
+all 277 frontend tests, the production build, actual font/controller journey and
+exact probe rehearsal. The core slice passes 69 tests with four SDK/helper cases
+intentionally ignored. Core inputs are identical between its `b1aa8e0` test
+candidate and the combined candidate. Font admission now requires a parsed base
+character map. Retained text drafts clear only when every field matches current
+saved values; unresolved drafts retain their original revision.
 
-A separate #39 progress comment was rejected by automatic approval review; the
-correction record remains in repository evidence and the authorized PR update.
-Keep the PR draft and [#39](https://github.com/Caldwell-41/Renpy-editor/issues/39)
-open. No merge, release or ticket acceptance is selected. Preserve the unrelated
-Phase 1 audit, pinned design worktree and protected recovery below.
+Publication, PR update and ordinary CI audit are selected and pending. The final
+PR check run owns its published candidate and result; local checks are not a CI
+pass. Fix worktrees remain available. No SDK/helper, package/native or costly CI
+operation ran. Historical consumption and earlier both-host qualification retain
+their recorded candidates and scope. Keep the PR draft and #39 open. Merge,
+release and wider acceptance remain unselected. Preserve the unrelated Phase 1
+audit, pinned design worktree and protected recovery below.
 
 ## L06 merge and workspace closeout
 

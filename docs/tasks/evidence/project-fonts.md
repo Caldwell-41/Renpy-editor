@@ -524,3 +524,115 @@ treated that destination and the internal status details as outside the selected
 PR-update authorization. No issue mutation occurred. The authorized correction
 record stays here and in PR #70. Keep the PR draft and #39 open. No merge,
 release, physical OS-dialog/human-input or wider Phase 3B acceptance is selected.
+
+
+## Font admission and stale-text corrections, 2026-10-30
+
+Kris selected both findings from the fresh full review of `8f0d208...4e2bfef`,
+with separate subagents, coordinator-owned final validation, push, PR update and
+ordinary CI. This chat owns the outcome on `codex/l05-project-fonts`. The earlier
+Width/Height and field-completion fixes remain intact.
+
+Assignments start from `4e2bfef89bf0ab4be8606ea637d4325310c6c2ec`:
+
+- Font admission owns `authoring/fonts.rs` and `screens/font_tests.rs` in the
+  isolated `l05-font-admission-fix` worktree. Its public boundary is asset
+  preview/import dispatch, including unchanged source/metadata/history on refusal.
+- Stale text owns `screen-text.ts` and its actual controller/core browser journey
+  in the isolated `l05-stale-text-fix` worktree. Its boundary is the production
+  Screens controller connected to core, with the native file dialog substituted.
+- The coordinator owns shared documentation, sequential integration in that
+  order, final checks, review, publication, PR update and the ordinary CI audit.
+
+These boundaries reuse the user-approved L05 testing seams. Both agents use
+`principle-fix-root-causes` and the installed TDD 1.3.2 skill; the requested 1.3.1
+skill path no longer exists. Each fix must first fail its focused behavior check.
+No test reaches private controller state. Mutable test outputs and fixtures stay
+separate; no SDK/helper, package/native or costly CI operation is selected.
+
+### Root causes and red/green proof
+
+Font admission tested only whether a `cmap` container was present. The public
+preview returned `ok:true` for a TTF with zero encoding records; importing those
+bytes committed an unusable font before browser decoding failed. The existing
+invalid-font test now changes the licensed fixture's record count to zero and
+exercises public preview and import. It fails before the correction, then passes
+with `UNSUPPORTED_FORMAT`, no created font, unchanged metadata/source and the
+previous history entry intact. The shared validator now requires a parsed base
+character-map subtable. Unsupported mixed coverage and variation-only maps do not
+qualify as a base map. Preview, import and presentation share that owner; this
+adds no browser-only workaround or new dependency. Valid TTF/OTF import, history
+and reopen remain green.
+
+The font agent committed `30e5bb7970086bb2b695c611a144796f84521a04`;
+the coordinator integrated it as `b1aa8e085dd7e89cacf2602df7537abd11a5d165`.
+Its focused command was `cargo test --offline -p loomlight-core --locked --lib
+screens::tests::fonts::invalid_font_import_keeps_metadata_source_and_previous_history
+-- --exact --nocapture`. The positive command selected
+`screens::tests::fonts::project_fonts_import_as_typed_assets_with_shared_history_and_reopen`.
+Each green run passed one named test, with zero ignored or failed cases.
+
+Text drafts compared their fields with the original node after Source refreshed.
+The production controller regression fails before the correction because matching
+the current saved literal leaves Apply enabled. The shared draft matcher now
+compares every text/typography field with the current accepted node for text
+editing and font selection. Until every field matches, it retains the original
+revision. A full match clears the draft and its errors. The actual controller
+journey passes matching-current reconciliation, a subsequent exact Source edit
+and Undo/Redo, retention when typing the old literal, retained stale conflict
+when size still differs, and conflict clearing when all fields match. Resolving
+the draft itself writes no Source.
+
+The draft agent committed `3422ba71aa4e710a7d19ee8d04c179c6dbc129a4`;
+the coordinator integrated it as `ef810143980700fa2e2143b70a14528f77aaf6de`.
+The focused red/green command was `node tests/project-font.browser.mjs` against
+the production controller/core, with fresh disposable fixture and output paths.
+An initial test version typed the old literal before testing the current match,
+which exercised the separate old-value discard path. The agent corrected that
+ordering before editing production code and retained both the original attempt
+and the specific failing current-match run. The final journey covers both paths.
+
+### Coordinator final validation
+
+The coordinator reviewed both source/test diffs, integrated them in the declared
+order and ran the final combined checks using Node 24.19.0, npm 11.9.0,
+Rust 1.90.0 and Python 3.12.14. The application candidate is
+`ef810143980700fa2e2143b70a14528f77aaf6de`.
+
+- `npm run check`: all 277 frontend tests pass, zero failures/skips, with typecheck.
+- `npm run build`: production build passes; the existing large-chunk advisory remains.
+- `cargo test --offline -p loomlight-core --locked --lib screens::tests -- --nocapture`:
+  69 pass, zero failures, four deliberately ignored SDK/helper cases. The core
+  candidate is `b1aa8e0`; its core inputs are byte-identical at the combined
+  candidate. No ignored case is counted as a pass.
+- `cargo fmt --all --check` and the actual controller-driver build pass.
+- `node tests/project-font.browser.mjs` passes the full updated controller/core journey.
+- `node tests/project-font-probe-controller.browser.mjs` passes the exact probe
+  rehearsal, with two delayed font reads, zero overlapping Apply requests and all
+  required stages. This is browser/controller proof, not native WebView evidence.
+- Independent correction reviews report zero remaining Standards and Spec findings.
+  Neither review substitutes for the coordinator's test execution.
+
+Agent red/green logs and coordinator receipts are retained under ignored
+`project-fonts/root-cause-fixes/`, including a checked validation summary.
+Repository validation passes for 1,264 files; all 13 section-link validation tests
+and whitespace checks pass. CURRENT and HANDOVER remain above their soft word
+count targets because their retained earlier acceptance/recovery records remain
+relevant; this correction replaces the live L05 entry without deleting that history.
+The final PR check run owns the published CI candidate, attempt and terminal result;
+CI audit remains pending at this checkpoint.
+
+### Scope and retained qualification
+
+The tighter invalid-font admission gate and text-draft comparison change no IPC,
+source serializer, helper renderer, SDK adapter, dependencies or package identity.
+Earlier SDK/helper/native results retain their exact candidates and valid fixture
+scope. These corrections do not establish a fresh package/native pass. The
+combined Design Lab startup failure, physical OS-dialog/human input and wider
+editor/canvas/Phase 3B acceptance remain separate.
+
+No SDK/helper, package/native session or costly CI dispatch ran. Historical use is
+unchanged: dispatches 3/3; Mac SDK 9/20, helpers 3/4, packages 3/3, native sessions
+3/3; Windows SDK 8/20, helpers 2/4, packages 2/3, native sessions 2/3. Ordinary
+PR checks need no numerical allowance. Publication, PR update and CI audit are
+selected; no merge, release, ticket closure or wider acceptance is selected.
