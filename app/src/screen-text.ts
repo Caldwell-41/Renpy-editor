@@ -2,7 +2,7 @@ import type { CompositionCommand, CompositionView } from "./screen-composition.t
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SelectedAsset } from "./asset-import-ui.ts";
-import { technicalName, technicalNameInput } from "./authoring-input.ts";
+import { technicalName, technicalNameInput, validateField } from "./authoring-input.ts";
 import { ScreenFontMedia, type ProjectFont, type FontReference, type FontPresentation } from "./screen-font-media.ts";
 import type { ScreenLayoutEditor, LayoutReservation } from "./screen-layout.ts";
 
@@ -14,6 +14,7 @@ export interface TextProperties {
 export interface TextEdits { text?: string; font?: FontReference | null; size?: number | null; color?: string | null; align?: number | null; bold?: boolean | null; italic?: boolean | null }
 type Field = "text" | "font" | "size" | "color" | "align" | "bold" | "italic";
 type Fields = Record<Field, string>;
+type TextField = "text" | "size" | "color";
 interface Draft { key: string; document: ScreenDocument; screenId: string; node: ScreenNode; fields: Fields; font?: FontReference | null }
 interface Host {
   view: () => CompositionView | undefined;
@@ -39,6 +40,8 @@ const fontPath = (font: ProjectFont) => font.relativePath.slice(5);
 export class ScreenText {
   private readonly drafts = new Map<string, Draft>();
   private readonly errors = new Map<string, {field: string; text: string}>();
+  private readonly fieldErrors = new Map<string, Set<TextField>>();
+  private readonly fieldValidators = new Map<TextField, () => void>();
   private readonly scrolls = new Map<string, number>();
   private readonly expanded = new Map<string, boolean>();
   private readonly media: ScreenFontMedia;
@@ -62,6 +65,8 @@ export class ScreenText {
   private importName = "";
   private importDisplay = "";
   private importError = "";
+  private readonly importFieldErrors = new Set<string>();
+  private readonly importValidators = new Map<string, {control: HTMLInputElement; validate: () => void}>();
   private stagedValid = false;
   private observer?: IntersectionObserver;
   constructor(private readonly host: Host, private readonly layout: ScreenLayoutEditor) {
@@ -88,7 +93,7 @@ export class ScreenText {
       const layout = this.card.querySelector<HTMLDetailsElement>(".screen-text-layout");
       if (layout) this.expanded.set(this.cardKey,layout.open);
     }
-    this.keys?.abort(); this.card = undefined; this.cardKey = undefined;
+    this.keys?.abort(); this.fieldValidators.clear(); this.card = undefined; this.cardKey = undefined;
   }
   dispose(): void { this.disposed = true; this.generation++; this.closePicker(false); this.unmount(); this.media.dispose(); }
   private async refreshAssets(): Promise<void> {
@@ -109,7 +114,6 @@ export class ScreenText {
   private edit(field: Field, value: string): void {
     const view = this.host.view(); if (!view || this.isSaving() || view.busy || view.selected.textProperties?.blocked[field]) return;
     const draft = this.value(view); draft.fields = {...draft.fields,[field]:value};
-    if (this.errors.get(draft.key)?.field === field) this.errors.delete(draft.key);
     this.store(draft);
   }
   render(card: HTMLElement, view: CompositionView): boolean {
@@ -118,7 +122,7 @@ export class ScreenText {
     const heading = el("header", "screen-text-heading"); heading.append(el("h2", "", view.selected.kind === "textbutton" ? "Button text" : "Help text"),el("span","screen-text-draft"));
     const preview = action("Show preview",() => {const stage = card.closest(".screens-editor")?.querySelector<HTMLElement>(".screen-stage");stage?.scrollIntoView({block:"start"});stage?.querySelector<HTMLElement>("button")?.focus();}); preview.classList.add("screen-text-compact"); heading.append(preview);
     const body = el("div", "screen-text-body"), draft = this.value(view);
-    const input = (field: "text" | "size" | "color", name: string) => {
+    const input = (field: TextField, name: string) => {
       const label = el("label", "screen-text-field", name), control = field === "text" ? el("textarea") : el("input");
       control.ariaLabel = name; control.dataset.textField = field; control.value = draft.fields[field]; control.placeholder = "Default";
       if (control instanceof HTMLTextAreaElement) {control.rows = 3;control.maxLength = 8192;} else if (field === "size") control.inputMode = "numeric";
@@ -127,7 +131,16 @@ export class ScreenText {
       control.oninput = () => this.edit(field,control.value); label.append(control);
       if (control.readOnly) label.append(action("Edit in Source",this.host.source));
       if (field === "color") {const swatch = el("span","screen-text-swatch");swatch.ariaHidden = "true";label.append(swatch);}
-      const error = el("span", "screen-text-field-error"); error.dataset.textError = field;error.id = `text-${view.selected.id}-${field}-error`;error.role = "alert";label.append(error);control.setAttribute("aria-describedby",error.id);
+      const key = this.key(view);
+      this.fieldValidators.set(field,validateField(control,() => {
+        if (control.readOnly) return;
+        const message = this.fieldError(field,control.value);
+        if (message) {
+          const errors = this.fieldErrors.get(key) ?? new Set<TextField>();errors.add(field);this.fieldErrors.set(key,errors);
+          throw Error(message);
+        }
+        const errors = this.fieldErrors.get(key);errors?.delete(field);if (!errors?.size) this.fieldErrors.delete(key);
+      }));
       return label;
     };
     const content = el("section","screen-text-content");content.append(input("text","Text"));
@@ -156,7 +169,9 @@ export class ScreenText {
       if (event.key === "Escape") {event.preventDefault();event.stopPropagation();this.cancel();}
       else if (event.key === "Enter" && (!(event.target instanceof HTMLTextAreaElement) || event.ctrlKey || event.metaKey)) {event.preventDefault();event.stopPropagation();void this.apply();}
     },{signal:this.keys.signal});
-    void this.refreshAssets().catch(error => {if (this.active()) this.host.note((error as Error).message,true);});this.sync();return true;
+    void this.refreshAssets().catch(error => {if (this.active()) this.host.note((error as Error).message,true);});this.sync();
+    for (const field of this.fieldErrors.get(this.key(view)) ?? []) {try {this.fieldValidators.get(field)?.();} catch { /* Restore this element's field error after navigation. */ }}
+    return true;
   }
   sync(): void {
     const view = this.host.view(), card = this.card;if (!view || !card?.isConnected || this.cardKey !== this.key(view)) return;
@@ -169,8 +184,7 @@ export class ScreenText {
     const error = this.errors.get(draft.key);card.querySelector<HTMLElement>(".screen-text-draft")!.textContent = dirty ? "Draft" : "";
     for (const field of ["text","size","color"] as const) {
       const control = card.querySelector<HTMLInputElement|HTMLTextAreaElement>(`[data-text-field="${field}"]`)!;
-      control.readOnly = busy || !!view.selected.textProperties?.blocked[field];control.setAttribute("aria-invalid",String(error?.field === field));
-      const message = card.querySelector<HTMLElement>(`[data-text-error="${field}"]`)!;message.textContent = error?.field === field ? error.text : "";message.hidden = !message.textContent;
+      control.readOnly = busy || !!view.selected.textProperties?.blocked[field];
     }
     const color = draft.fields.color;card.querySelector<HTMLElement>(".screen-text-swatch")!.style.backgroundColor = hex(color) ? color : "transparent";
     for (const select of card.querySelectorAll<HTMLSelectElement>("select[data-text-field]")) select.disabled = busy || !!view.selected.textProperties?.blocked[select.dataset.textField!];
@@ -179,17 +193,21 @@ export class ScreenText {
     card.querySelector<HTMLElement>(".screen-text-state")!.textContent = busy ? "Applying text…" : dirty ? "Changes apply to this text only." : "";
     card.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled = card.querySelector<HTMLButtonElement>("[data-text-cancel]")!.disabled = busy || !dirty;
   }
+  private fieldError(field: TextField, value: string): string | undefined {
+    if (field === "text" && !value.trim()) return "Enter text before applying. Your edits are kept.";
+    if (field === "size" && value.trim() && (!/^\d+$/.test(value.trim()) || +value < 1 || +value > 512)) return "Use a whole size from 1 to 512 px, or clear it for the default. Your edits are kept.";
+    if (field === "color" && value.trim() && !hex(value.trim())) return "Use a hex color such as #f1e9d6, or clear it for the default. Your edits are kept.";
+  }
   private values(draft: Draft, strict: boolean): TextEdits {
     const values: TextEdits = {}, before = this.fields(draft.node), blocked = draft.node.textProperties?.blocked ?? {};
     const fail = (field: string,text: string) => {if (strict) {this.fail(field,text);throw Error(text);}};
     if (!blocked.text && draft.fields.text !== before.text) {
-      if (!draft.fields.text.trim()) fail("text","Enter text before applying. Your edits are kept.");else values.text = draft.fields.text;
+      const problem = this.fieldError("text",draft.fields.text);if (problem) fail("text",problem);else values.text = draft.fields.text;
     }
     for (const field of ["size","color","align","bold","italic"] as const) {
       if (blocked[field] || draft.fields[field] === before[field]) continue;
       const value = draft.fields[field].trim();
-      if (field === "size" && value && (!/^\d+$/.test(value) || +value < 1 || +value > 512)) {fail(field,"Use a whole size from 1 to 512 px, or clear it for the default. Your edits are kept.");continue;}
-      if (field === "color" && value && !hex(value)) {fail(field,"Use a hex color such as #f1e9d6, or clear it for the default. Your edits are kept.");continue;}
+      const problem = (field === "size" || field === "color") && this.fieldError(field,value);if (problem) {fail(field,problem);continue;}
       if (field === "size" || field === "align") values[field] = value ? Number(value) : null;
       else if (field === "color") values.color = value || null;
       else values[field] = value ? value === "True" : null;
@@ -202,7 +220,11 @@ export class ScreenText {
     return values;
   }
   private fail(field: string,text: string): void {
-    const view = this.host.view();if (!view) return;this.errors.set(this.key(view),{field,text});this.host.note(text,true);this.sync();this.focus(field);
+    const view = this.host.view();if (!view) return;
+    const validator = this.fieldValidators.get(field as TextField);
+    if (validator) {try {validator();} catch { /* Submission focuses the same invalid control. */ }}
+    else this.errors.set(this.key(view),{field,text});
+    this.host.note(text,true);this.sync();this.focus(field);
   }
   private focus(field: string): void {
     const selector = field.startsWith("layout:") ? `[data-layout-field="${field.slice(7)}"]` : `[data-text-field="${field}"]`;
@@ -211,7 +233,7 @@ export class ScreenText {
   private cancel(): void {
     const view = this.host.view();if (!view || this.isSaving() || view.busy) return;
     const active = (document.activeElement as HTMLElement | null)?.dataset, field = active?.textField ?? (active?.layoutField ? `layout:${active.layoutField}` : undefined);
-    this.drafts.delete(this.key(view));this.errors.delete(this.key(view));this.layout.cancelCurrent();this.host.redraw();if (field) this.focus(field);this.host.preview();this.host.note("Text changes cancelled. No source was written.");
+    this.drafts.delete(this.key(view));this.errors.delete(this.key(view));this.fieldErrors.delete(this.key(view));this.layout.cancelCurrent();this.host.redraw();if (field) this.focus(field);this.host.preview();this.host.note("Text changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
     const view = this.host.view();if (!view || this.isSaving() || view.busy) return;
@@ -235,7 +257,7 @@ export class ScreenText {
   }
   accept(command: CompositionCommand, base: ScreenDocument, accepted: ScreenDocument): void {
     const submitted = this.submitted;
-    if (command.type === "formatText" && submitted?.command === command) {this.drafts.delete(submitted.draft.key);this.errors.delete(submitted.draft.key);submitted.layout.accept(accepted);}
+    if (command.type === "formatText" && submitted?.command === command) {this.drafts.delete(submitted.draft.key);this.errors.delete(submitted.draft.key);this.fieldErrors.delete(submitted.draft.key);submitted.layout.accept(accepted);}
     for (const draft of this.drafts.values()) {
       if (draft.document.path !== base.path || draft.document.revision !== base.revision) continue;
       const after = accepted.screens.flatMap(s => s.nodes).find(n => n.id === draft.node.id);
@@ -258,11 +280,11 @@ export class ScreenText {
       if (documents.some(d => d.path === draft.document.path && d.screens.some(s => s.nodes.some(n => n.id === draft.node.id)))) continue;
       const section = el("section","screen-retained-draft");section.append(el("p","","This text is no longer available in Source. Your draft is retained."));
       const value = el("textarea");value.readOnly = true;value.ariaLabel = "Retained text draft";value.value = Object.entries(draft.fields).map(([k,v]) => `${k}: ${v}`).join("\n");
-      section.append(value,action("Discard retained text draft",()=>{this.drafts.delete(draft.key);this.errors.delete(draft.key);section.remove();this.host.preview();}));host.append(section);
+      section.append(value,action("Discard retained text draft",()=>{this.drafts.delete(draft.key);this.errors.delete(draft.key);this.fieldErrors.delete(draft.key);section.remove();this.host.preview();}));host.append(section);
     }
   }
   private closePicker(focus = true): void {
-    this.pickerGeneration++;this.observer?.disconnect();const dialog = this.dialog;this.dialog = undefined;dialog?.close();dialog?.remove();this.pickerKey = undefined;this.staged = undefined;this.stagedValid = false;this.choosing = false;
+    this.pickerGeneration++;this.importValidators.clear();this.importFieldErrors.clear();this.observer?.disconnect();const dialog = this.dialog;this.dialog = undefined;dialog?.close();dialog?.remove();this.pickerKey = undefined;this.staged = undefined;this.stagedValid = false;this.choosing = false;
     if (focus && this.active()) this.focus("font");
   }
   private async openPicker(): Promise<void> {
@@ -275,7 +297,7 @@ export class ScreenText {
     this.dialog = dialog;this.card?.closest(".screens-editor")?.append(dialog);this.renderPicker();dialog.showModal();dialog.querySelector<HTMLInputElement>("input")?.focus();
   }
   private renderPicker(): void {
-    const dialog = this.dialog, view = this.host.view();if (!dialog || !view) return;this.observer?.disconnect();dialog.replaceChildren();this.choosing = false;
+    const dialog = this.dialog, view = this.host.view();if (!dialog || !view) return;this.importValidators.clear();this.observer?.disconnect();dialog.replaceChildren();this.choosing = false;
     const heading = el("header");heading.append(el("h2","","Choose project font"),action("Close",()=>this.closePicker()));
     const search = el("input");search.type = "search";search.ariaLabel = "Search project fonts";search.placeholder = "Search project fonts";search.value = this.search;search.oninput = () => {this.search = search.value;this.renderOptions(list);};
     const list = el("div","screen-font-list");dialog.append(heading,search,list,action("Import font…",()=>this.renderImport()));this.renderOptions(list);
@@ -303,12 +325,23 @@ export class ScreenText {
   }
   private cancelImport(): void {if (this.importing) return;this.pickerGeneration++;this.staged = undefined;this.stagedValid = false;this.renderPicker();this.dialog?.querySelector<HTMLInputElement>("input")?.focus();}
   private renderImport(): void {
-    const dialog = this.dialog;if (!dialog) return;this.observer?.disconnect();dialog.replaceChildren();this.choosing = true;
+    const dialog = this.dialog;if (!dialog) return;this.importValidators.clear();this.observer?.disconnect();dialog.replaceChildren();this.choosing = true;
     dialog.append(action("Back to project fonts",()=>this.cancelImport()),el("h2","","Import font"),el("p","screen-font-boundary","TTF or OTF · Up to 16 MiB"));
     const browse = action(this.staged ? "Choose file again…" : "Browse files…",()=>void this.chooseFile());browse.disabled = this.importing;dialog.append(browse);
     if (this.staged) dialog.append(el("p","",this.staged.displayName));
-    const input = (name: string,value: string,change: (value: string) => void) => {const label = el("label","screen-text-field",name),control = el("input");control.ariaLabel = name;control.value = value;control.disabled = this.importing;control.oninput = () => change(control.value);label.append(control);dialog.append(label);return control;};
-    technicalNameInput(input("Ren'Py name",this.importName,value => {this.importName = value;this.updateDestination();}));input("Display name",this.importDisplay,value => {this.importDisplay = value;});
+    const input = (name: string,value: string,change: (value: string) => void,check: (value: string) => void) => {
+      const label = el("label","screen-text-field",name),control = el("input");control.ariaLabel = name;control.value = value;control.disabled = this.importing;control.oninput = () => change(control.value);label.append(control);dialog.append(label);
+      const validate = validateField(control,() => {
+        if (control.disabled) return;
+        try {check(control.value);this.importFieldErrors.delete(name);}
+        catch (error) {this.importFieldErrors.add(name);throw error;}
+      });
+      this.importValidators.set(name,{control,validate});
+      if (this.importFieldErrors.has(name) && !control.disabled) {try {validate();} catch { /* Keep staged-name errors when the import form remounts. */ }}
+      return control;
+    };
+    technicalNameInput(input("Ren'Py name",this.importName,value => {this.importName = value;this.updateDestination();},value => {technicalName(value,"Ren'Py name");}));
+    input("Display name",this.importDisplay,value => {this.importDisplay = value;},value => {if (!value.trim()) throw Error("Display name is required.");});
     dialog.append(el("p","screen-font-destination"),el("p","screen-font-import-error",this.importError));
     const actions = el("div","screen-font-import-actions"),cancel = action("Cancel import",()=>this.cancelImport()),submit = action("Import and use",()=>void this.importFont(),true);cancel.disabled = this.importing;submit.dataset.fontImport = "";submit.disabled = this.importing || !this.staged || !this.stagedValid;actions.append(cancel,submit);dialog.append(actions);this.updateDestination();
   }
@@ -330,7 +363,10 @@ export class ScreenText {
   }
   private async importFont(): Promise<void> {
     const selected = this.staged, view = this.host.view();if (!selected || !this.stagedValid || !view || this.importing) return;
-    let name: string;try {name = technicalName(this.importName,"Ren'Py name");if (!this.importDisplay.trim()) throw Error("Display name is required.");} catch (error) {this.importError = (error as Error).message;this.renderImport();return;}
+    let invalid: HTMLInputElement | undefined;
+    for (const {control,validate} of this.importValidators.values()) {try {validate();} catch {invalid ??= control;}}
+    if (invalid) {invalid.focus();return;}
+    const name = technicalName(this.importName,"Ren'Py name");
     const pickerKey = this.pickerKey;this.importing = true;this.renderImport();this.sync();
     try {
       const model = await this.host.coordinate(()=>this.host.request<{assets: ProjectFont[]}>("asset.import",{authorityId:selected.authorityId,kind:"font",technicalName:name,displayName:this.importDisplay.trim(),characterId:null,expression:null}));
