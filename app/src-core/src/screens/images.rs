@@ -12,6 +12,7 @@ pub(super) fn reparent(
         .iter()
         .find(|n| n.id.as_deref() == Some(target_id))
         .ok_or(SceneError::UnknownEntity)?;
+    let target_is_root = target.kind == "screen";
     if node.parent_start == Some(target.span.start) {
         return Ok(bytes.to_vec());
     }
@@ -93,7 +94,12 @@ pub(super) fn reparent(
         .screens
         .iter()
         .find(|s| s.name == screen.name)
-        .and_then(|s| s.nodes.iter().find(|n| n.id.as_deref() == Some(target_id)))
+        .and_then(|s| {
+            // Root identity comes from the owned projection, not an element marker.
+            s.nodes.iter().find(|n| {
+                n.id.as_deref() == Some(target_id) || target_is_root && n.kind == "screen"
+            })
+        })
         .ok_or(SceneError::InvariantBlocked)?;
     if target.source_end > 0 && proposed[target.source_end - 1] != b'\n' {
         block.splice(0..0, newline.iter().copied());

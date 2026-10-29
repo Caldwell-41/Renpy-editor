@@ -329,12 +329,21 @@ impl AuthoringService {
         }
         let mut sampled = HashSet::new();
         let mut layouts = HashSet::new();
+        let mut image_layouts = std::collections::BTreeMap::new();
         for draft in request.layouts {
             if !layouts.insert(draft.node_start)
                 || seen.contains(&draft.node_start)
                 || positioned.contains(&draft.node_start)
             {
                 return Err(SceneError::InvalidPayload);
+            }
+            if request
+                .image_samples
+                .iter()
+                .any(|sample| sample.node_start == Some(draft.node_start))
+            {
+                image_layouts.insert(draft.node_start, draft.values);
+                continue;
             }
             let numeric = screen
                 .nodes
@@ -487,7 +496,7 @@ impl AuthoringService {
                     if !seen_images.insert(start) {
                         return Err(SceneError::InvalidPayload);
                     }
-                    let index = plan
+                    let mut index = plan
                         .nodes
                         .iter()
                         .position(|n| n.start == start && n.kind == "image")
@@ -522,7 +531,13 @@ impl AuthoringService {
                             parent.id.as_deref().ok_or(SceneError::OpaqueBoundary)?,
                             &source_path,
                         )?;
-                        plan.nodes[index].parent = Some(parent_start);
+                        if node.parent_start != Some(parent_start) {
+                            // Reparenting appends the image after the target's existing children.
+                            let mut moved = plan.nodes.remove(index);
+                            moved.parent = Some(parent_start);
+                            plan.nodes.push(moved);
+                            index = plan.nodes.len() - 1;
+                        }
                     }
                     let context = inspect(&working, source_path.clone(), String::new())?;
                     let node = context
@@ -535,7 +550,9 @@ impl AuthoringService {
                         .numeric_layout
                         .as_ref()
                         .ok_or(SceneError::OpaqueBoundary)?;
-                    let values = numeric.changed(&sample.layout)?;
+                    let mut edits = image_layouts.remove(&start).unwrap_or_default();
+                    edits.extend(sample.layout);
+                    let values = numeric.changed(&edits)?;
                     plan.nodes[index]
                         .properties
                         .retain(|key, _| layout::aliases(key).is_empty());
