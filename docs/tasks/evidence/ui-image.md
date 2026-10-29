@@ -716,3 +716,110 @@ native session or costly CI dispatch ran. Existing both-host proof
 retains its earlier candidates and does not establish this new async scenario. The
 full Design Lab startup failure, physical-input/human and wider acceptance stay open.
 #40 remains open. This work updates PR #68 and selects no merge or release.
+
+
+## PR 68 architecture refactors, 2026-10-29
+
+Kris selected all three candidates from the architecture review at
+`cd66af6e3f0641069627f2ce2d109d06e8654d03`: combined image/layout draft ownership,
+shared Rust image preparation for Apply and the screen canvas, and local ownership
+of passive image URLs. The selected outcome includes delegated implementation,
+coordinator validation, the Standards/Spec review, updating PR #68 after passing
+checks, and safe retirement of the worker worktrees. No merge or release is selected.
+
+The coordinator owns integration and shared documentation. The draft worker owns
+frontend Apply and numeric-layout coordination. The Rust worker owns image
+preparation and its Screens tests in a separate worktree. After the draft worker
+hands off its reviewed checkpoint, a third worker owns passive image URL cleanup.
+The frontend assignments run sequentially because both touch `screen-images.ts`;
+Rust preparation runs alongside them. Workers do not publish or edit shared status.
+
+All agents use the root-cause and TDD skills. The accepted report and #40's prior
+confirmation supply the test interfaces: public ScreensWorkspace and picker
+journeys, public screen/asset requests, and the actual controller/core path.
+Existing tests characterize behavior during the refactors. Any newly found defect
+needs a failing public regression before its fix. Do not invent failures or add
+private-method tests to prove file movement.
+
+Validation selects focused frontend and ordinary Screens/core tests, typechecking,
+production frontend build, the actual UI-image controller and exact probe rehearsal,
+Rust formatting, repository validation and the required automatic PR checks.
+Mac ARM64 remains the development host. These changes introduce no SDK, native,
+package or platform-specific mechanism. Earlier both-host receipts retain their
+exact candidates and coverage; they do not automatically qualify new scenarios.
+#40 keeps its existing cumulative limits, including costly dispatches 3/3.
+The full Design Lab startup failure and physical-input/human/wider acceptance
+remain separate.
+
+### Implementation and local validation
+
+The draft worker delivered `8d4364d`. `ScreenImages` captures the submitted image
+command and numeric-layout reservation before media validation. It settles both
+submitted drafts before the workspace renders the accepted result. Numeric layout
+keeps its own draft key private. The workspace no longer captures that key or
+relays image-saving, layout sync and cancellation callbacks. Ten public image DOM
+tests pass unchanged before and after, plus 43 workspace/composition cases and
+typechecking. This is a behavior-preserving refactor, not a manufactured red test.
+
+The URL worker started from that checkpoint and delivered `1cbe43a`.
+`ScreenImageMedia` owns presentation requests, pending/cached/staged URLs, serialized
+decode admission, mounted-image detachment before revocation and disposal.
+`ScreenImages` keeps picker navigation checks and uses previews without owning URL
+state. The same ten public picker/draft cases pass before and after; typechecking
+and test compilation pass. No UI, IPC or dependency changes were made.
+
+The Rust worker delivered `7cd586f`. The existing image module now prepares the
+in-memory source candidate, final parent context and numeric values for both Apply
+and the screen canvas. Asset verification, metadata companions and actual writes
+keep their existing owners. The canvas retains original source identifiers and
+its planner limits. Existing reparent, NumericLayout and Add checks remain shared.
+
+One new public dispatcher regression finds a real request inconsistency. A common
+layout width of 120 combined with an image-sample width of 200 previously returned
+an available preview at 200, silently discarding the other width. Apply already
+refused duplicate size fields. The first wrong decision was deferring common image
+layout without rejecting duplicate dimensions at combined interpretation. Shared
+preparation now returns `INVALID_PAYLOAD`; accepted Source is unchanged. The test
+fails before the fix and passes afterward. Ordinary position/anchor override
+precedence remains covered and unchanged.
+
+The final worker run passes 58 ordinary Screens tests with no failure. All 61 named
+results are accounted for, including three explicitly ignored SDK/helper tests:
+`canvas_helper_sdk_renders_saved_data_and_stops_on_project_close`,
+`image_sdk::ui_image_helper_qualifies_assets_sizes_and_typed_pending_images`, and
+`nested_sdk::nested_helper_qualifies_grid_and_clipped_selection_at_both_aspects`.
+Those ignores are not passes. The baseline has 57 ordinary passing cases; the new
+regression supplies the extra case. Rust formatting and whitespace checks pass.
+
+The coordinator integrated the workers at `5f3b66` and committed the numeric
+fixture correction at `79ad8e8`. The integrated core tree
+`165c49ea03ce3bcb75d25df4232dc09f228b7c88` exactly matches the tested Rust worker
+tree. The frontend exactly matches the tested URL-worker tree. Coordinator checks
+pass all 274 frontend tests without failures, skips or cancellation, typechecking
+and the production frontend build. The existing chunk-size advisory remains.
+
+The coordinator freshly rebuilt the real controller driver from the integrated
+core. Its SHA-256 is
+`5eb1c06a214a25900c1a0e67e6351208599123075904592c478d97cec708288a`.
+The actual UI-image controller/core journey, exact packaged-probe browser rehearsal
+and numeric-layout controller/core journey pass. They cover retained drafts, held
+Apply, imports, Source, shared history and reopen under their existing assertions.
+These are browser/controller proofs; they start no SDK or native editor.
+
+The numeric journey first failed at Refresh Source after deleting its selected
+text. The untouched `cd66af6` frontend reproduces the same failure against the
+same driver. Captured DOM shows that the adjacent image became selected and its
+Design view hid the shared toolbar. The fixture now returns to Choose before
+refreshing, then passes unchanged assertions with the original deadline.
+[H43](../../testing/INCIDENTS.md#h43-numeric-controller-assumes-the-toolbar-survives-element-removal)
+indexes this existing fixture incompatibility. A coordinator edit first used the
+wrong working directory and did not change the file; its ensuing unchanged-fixture
+failure remains retained. No product code changed for this harness correction.
+
+Pinned local tools are Node 24.19.0, Python 3.12.14 and Rust 1.90.0. Raw commands,
+red/green/final Rust logs, controller results, original numeric failures and captures
+remain under the coordinator's ignored `.toolchains/pr68-architecture/` directory.
+Worker build output is handed to the coordinator before worker retirement.
+No SDK/helper, package, native session or costly CI dispatch ran.
+
+The independent Standards/Spec review and final publication are next.

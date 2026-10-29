@@ -1,26 +1,20 @@
 # Current status
 
-## L06 pending-Apply correction
+## L06 architecture refactors in review
 
-[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68) now reserves original
-size and embedded numeric layout throughout image Apply, including passive media
-validation. Success accepts only the submitted input; failure retains it and makes
-editing available again. [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
-remains open for acceptance.
+The three selected refactors for [PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68)
+are integrated at code checkpoint `79ad8e8`. Image Apply owns its combined
+image/layout draft, Rust image preparation serves Apply and the screen canvas,
+and one local module owns passive image URLs.
 
-The two new component regressions fail before the fix and pass afterward. All 274
-frontend tests and typechecking pass. The actual production controller/core journey
-also passes with a deliberately held Apply and the hash-verified unchanged core
-from the prior correction. [Evidence](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29)
-records the root cause and zero-finding independent review. Code checkpoint
-`e53b5e9` is published; PR #68 and #40 own current automatic-check state.
-Earlier cache, staging, combined-layout and reparent fixes retain their scope.
-
-No SDK/helper, package, native session or costly CI dispatch ran. Earlier both-host
-receipts keep their exact candidates. Full Design Lab startup remains failed;
-physical-input, human and wider acceptance remain separate. The approved prototype,
-original evidence, unrelated audit and protected recovery remain intact. Merge and
-release remain unselected.
+All 274 frontend tests and 58 ordinary Screens tests pass. Three SDK/helper tests
+remain explicitly ignored. The rebuilt real-core image controller, exact probe
+rehearsal and corrected numeric controller pass. [Evidence](../tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29)
+retains the new conflicting-size regression and original fixture failures.
+Standards/Spec review and publication are next. [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
+remains open for acceptance. No merge, release or costly qualification is selected.
+Earlier candidate-bound evidence, failed full Design Lab startup, the approved
+prototype, unrelated audit and protected recovery remain intact.
 
 ## L04 nested and clipped layouts merged
 

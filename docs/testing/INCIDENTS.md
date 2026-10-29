@@ -608,3 +608,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   size, readonly layout and alignment, then success/conflict retention and restored
   editing. The actual controller/core also checks a held Apply and unchanged Source.
 - **Evidence:** [Pending image Apply ownership](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29).
+
+
+## H43. Numeric controller assumes the toolbar survives element removal
+
+- **Class/search:** browser fixture; numeric layout, deleted selected text,
+  image selection, missing Refresh Source, timeout.
+- **Cause/correction:** removing the selected Help text leaves the adjacent image
+  selected. Its Design view hides the shared toolbar. The numeric journey assumed
+  Refresh Source was still visible. Return to Choose before refreshing.
+- **Verification:** the untouched PR #68 frontend reproduces the same timeout and
+  hidden toolbar. The corrected journey passes against the integrated candidate
+  without changing production UI or its deadline.
+- **Evidence:** [Architecture refactor validation](../tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29).

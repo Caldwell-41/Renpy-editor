@@ -2,40 +2,38 @@
 
 <a id="l06-implementation-and-qualification"></a>
 
-## L06 pending-Apply correction and publication
+## L06 architecture refactor coordination
 
-Kris selected fixing the remaining PR #68 edit-loss finding with the root-cause
-skill, independent review and PR update. The correction checkout is the ignored
-`.toolchains/pr68-apply-fix`, detached from prior head `1303918`. Reviewed code
-checkpoint `e53b5e9` is published; the documentation successor records that result.
-It targets `codex/phase3b-l06-ui-image` and the existing draft
-[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68). #40 stays open for
-acceptance. No merge or release is selected.
+Kris selected all three architecture-review candidates and authorized worker
+assignments, coordinator validation, the two-axis code review, PR #68 update after
+passing checks, and cleanup of completed worker worktrees. The fixed starting
+head is `cd66af6e3f0641069627f2ce2d109d06e8654d03`; the full PR base remains
+`2e045d941bf633e73b8161be0096806203fbc2bb`. Integration uses the managed
+`pr68-architecture-integration` worktree and local branch
+`codex/pr68-architecture-refactors`, targeting the existing PR branch
+`codex/phase3b-l06-ui-image`. No merge or release is selected.
 
-Image Apply now reserves Use original and the embedded layout editor through both
-media validation and the core write. Two public-workspace regressions first fail
-and then pass for success and conflict. All 274 frontend tests, typechecking and
-the actual controller/core journey pass. The controller holds an Apply before
-forwarding it to the unchanged real core, verifies unchanged Source and reserved
-controls, then verifies accepted size and restored editing. Native input and SDK
-rendering are not claimed. [Current evidence](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29)
-owns the zero-finding independent review and publication. [#40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
-and PR #68 own the current automatic-check identity, state and remaining audit. Raw outputs remain
-under primary `.toolchains/pr68-apply-fix-evidence/`.
+The draft worker owns frontend image/layout Apply coordination; the Rust worker
+owns shared image preparation. URL ownership follows the draft checkpoint so
+frontend writers do not overlap. All agents use root-cause diagnosis and TDD at
+the approved public interfaces. The coordinator owns shared documents, integration,
+actual controller/core checks and final publication.
+[Scope and validation](../tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29)
+retain the selected checks and limits. Worker commits `8d4364d`, `1cbe43a` and `7cd586f` are integrated.
+Code checkpoint `79ad8e8` also contains the validated numeric fixture correction.
+All 274 frontend and 58 ordinary Screens tests pass, as do the rebuilt real-core
+image controller, exact probe rehearsal and numeric controller. Three SDK/helper
+tests remain explicitly ignored. Independent Standards/Spec review is next.
+All worker write ownership and the isolated Cargo target now belong to the
+coordinator; workers remain clean until reviewed retirement.
 
-The prior [four-finding correction](../tasks/evidence/ui-image.md#pr-68-review-corrections-2026-10-29)
-and its core driver remain candidate-bound evidence. Original implementation and
-review checkouts are preserved. Keep the approved A2 prototype unchanged, including
-its failed full Design Lab startup gate. Earlier Windows CI3 `b00415f`, signed Mac
-and both-host SDK/helper receipts retain their original scope. Local downloaded
-Windows evidence remains retained after GitHub expiry on 2026-11-05.
-
-No SDK/helper, package, native session or costly dispatch ran. #40 still owns
-costly dispatches 3/3; Mac SDK 11/16, helpers 2/4, packages/native sessions 2/3 each;
-Windows SDK 9/16, helpers 2/4, packages/native sessions 2/3 each. A fourth costly
-dispatch needs a new user decision. Physical-input, OS-dialog, human, full promotion
-validation and wider Phase 3B acceptance remain separate. Preserve the primary
-checkout's unrelated audit and protected recovery below.
+Prior pending-Apply and four-finding corrections remain recorded in the same
+evidence file. Keep the approved A2 prototype and its failed full Design Lab
+startup gate unchanged. Preserve earlier CI3, both-host SDK/helper/native
+receipts and downloaded Windows evidence, original implementation/review
+checkouts, the unrelated primary audit and protected recovery below. #40 stays
+open for acceptance. Costly dispatches remain 3/3; no SDK/helper, package or
+native operation starts under this refactor.
 
 ## L04 merge and workspace closeout
 
