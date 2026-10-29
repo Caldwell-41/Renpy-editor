@@ -33,7 +33,9 @@
 .screen-text [hidden],.screen-font-dialog [hidden] { display:none!important; }.screen-text-compact { display:none; }
 .screens-editor[data-ui-text=true] .screen-flow { grid-template-columns:minmax(0,1fr) 326px; }
 .screens-editor[data-ui-text=true] .screen-image-test { display:block; }
-.screens-editor[data-ui-text=true] .screen-card.screen-text { display:flex; height:calc(100dvh - 270px); max-height:none; padding:0 0 0 16px; }
+.screens-editor[data-ui-text=true] .screen-card.screen-text { display:flex; height:calc(100dvh - 250px); max-height:none; padding:0 0 0 16px; }
+.screens-editor .screen-card.screen-text .screen-text-field input[data-text-field],.screens-editor .screen-card.screen-text .screen-text-field select[data-text-field] { height:32px; min-height:32px; padding:5px 8px; }
+.screens-editor .screen-card.screen-text .screen-text-field input[data-text-field=color] { padding-left:28px; }
 .screen-card.screen-text .screen-text-field input,.screen-card.screen-text .screen-text-field select,.screen-card.screen-text .screen-text-field textarea { font-weight:400; }
 .screen-card.screen-text .screen-text-field textarea { min-height:80px; }
 .screens-editor[data-ui-text=true] .screen-flow>.screen-compose-jump { display:none; }

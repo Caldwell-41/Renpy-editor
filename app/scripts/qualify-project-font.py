@@ -100,7 +100,7 @@ def main():
             reference = reference_source()
             (project / 'game/reference.rpy').write_text(reference)
             (project / 'game/default.rpy').write_text(reference.replace('font_reference', 'font_default').replace('fonts/help_ttf.ttf', 'DejaVuSans.ttf').replace('fonts/help_otf.otf', 'DejaVuSans.ttf'))
-            (project / 'game/script.rpy').write_text('label start:\n    show screen notes\n    show screen font_reference\n    show screen font_default\n    show screen font_finish\n    $ renpy.pause(hard=True)\n    return\n')
+            (project / 'game/script.rpy').write_text('label start:\n    $ renpy.set_physical_size((config.screen_width, config.screen_height))\n    $ renpy.display.interface.set_mode()\n    show screen notes\n    show screen font_reference\n    show screen font_default\n    show screen font_finish\n    $ renpy.pause(hard=True)\n    return\n')
             env = dict(os.environ, SDL_AUDIODRIVER='dummy', RENPY_RENDERER='angle2' if platform.system() == 'Windows' else 'gl2',
                        RENPY_SCALE_FACTOR='1', RENPY_DISABLE_SOUND='1', RENPY_SKIP_MAIN_MENU='1', RENPY_SKIP_SPLASHSCREEN='1', RENPY_PATH_TO_SAVES=str(scratch / 'saves'))
             env.pop('SDL_VIDEODRIVER', None)
@@ -127,7 +127,7 @@ def main():
             for screen, filename in CAPTURES:
                 render = renpy.render(renpy.get_screen(screen), config.screen_width, config.screen_height, 0, 0)
                 renpy.render_to_file(render, filename, resize=True)
-            print("PROJECT_FONT_PROOF " + __import__("json").dumps(dict(aspect=[config.screen_width, config.screen_height], sdkVersion=renpy.version_only, renderer=renpy.get_renderer_info()["renderer"], rectangles=rectangles, referenceRectangles=reference_rectangles, fonts=fonts)), flush=True)
+            print("PROJECT_FONT_PROOF " + __import__("json").dumps(dict(aspect=[config.screen_width, config.screen_height], sdkVersion=renpy.version_only, renderer=renpy.get_renderer_info()["renderer"], rectangles=rectangles, referenceRectangles=reference_rectangles, fonts=fonts, physical=list(renpy.get_physical_size()), drawPerVirtual=renpy.display.draw.draw_per_virt)), flush=True)
         except BaseException:
             __import__("traceback").print_exc()
             renpy.quit(status=61, save=False)

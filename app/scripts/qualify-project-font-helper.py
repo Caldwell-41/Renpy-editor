@@ -5,6 +5,8 @@ from io import BytesIO
 import json
 from pathlib import Path
 import sys
+import shutil
+import tempfile
 from PIL import Image, ImageChops
 
 
@@ -26,6 +28,8 @@ def validate(directory, normal):
         for prefix in ['font', 'reference']:
             frame = json.loads((directory / f'{prefix}-{width}x{height}.json').read_text())
             assert frame['phase'] == 'ready' and [frame['width'], frame['height']] == [width, height]
+            assert frame['diagnostics']['physical'] == sdk['records'][index]['physical'] == [width, height]
+            assert frame['diagnostics']['drawPerVirtual'] == sdk['records'][index]['drawPerVirtual']
             raw = base64.b64decode(frame['image'].removeprefix('data:image/png;base64,'), validate=True)
             image = Image.open(BytesIO(raw)).convert('RGBA')
             assert image.size == (width, height)
@@ -40,7 +44,40 @@ def validate(directory, normal):
     return dict(passed=True, records=records, sourceSHA256=receipt['normalSourceSHA256'])
 
 
+def audit_rejections(directory, normal):
+    checked = []
+    for fault in ['missing-reference', 'wrong-source', 'blank-frame', 'fallback-font']:
+        with tempfile.TemporaryDirectory(prefix='loomlight-font-gate-') as temporary:
+            root = Path(temporary) / 'helper'
+            shutil.copytree(directory, root)
+            if fault == 'missing-reference':
+                (root / 'reference-1280x720.json').unlink()
+            elif fault == 'wrong-source':
+                receipt = json.loads((root / 'result.json').read_text())
+                receipt['normalSourceSHA256'] = '0' * 64
+                (root / 'result.json').write_text(json.dumps(receipt))
+            else:
+                frame = json.loads((root / 'font-1280x720.json').read_text())
+                if fault == 'blank-frame':
+                    buffer = BytesIO()
+                    Image.new('RGBA', (1280, 720), (0, 0, 0, 0)).save(buffer, format='PNG')
+                    raw = buffer.getvalue()
+                else:
+                    raw = (Path(normal) / 'default-1280x720.png').read_bytes()
+                frame['image'] = 'data:image/png;base64,' + base64.b64encode(raw).decode()
+                (root / 'font-1280x720.json').write_text(json.dumps(frame))
+            try:
+                validate(root, normal)
+            except (AssertionError, KeyError, FileNotFoundError):
+                checked.append(fault)
+            else:
+                raise AssertionError(f'The gate admitted {fault}')
+    return checked
+
+
 if __name__ == '__main__':
     result = validate(sys.argv[1], sys.argv[2])
+    if '--audit-rejections' in sys.argv[3:]:
+        result['rejectionChecks'] = audit_rejections(sys.argv[1], sys.argv[2])
     Path(sys.argv[1], 'pixels.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(result))

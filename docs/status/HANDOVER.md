@@ -1,34 +1,23 @@
 # Current outcome handover
 
-## L05 project font preparation
+## L05 project font implementation
 
-Kris selected [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39).
-This checkout owns implementation on `codex/l05-project-fonts`, based on
-`8f0d208`. Preserve the unrelated untracked Phase 1 audit and all protected recovery
-below. The design-only chat "Ticket 39 font and typography mockups" owns its
-isolated `codex/l05-font-prototype` worktree. Kris approved A2; its runnable
-revision, captures and control map are integrated through `804405d`.
-Keep the original design worktree pinned for production comparison.
+Kris selected [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39)
+on `codex/l05-project-fonts`, based on `8f0d208`, and approved test boundaries,
+tracker updates, review and commits. Approved A2 is integrated, and the actual
+controller/core path passes. Mac pinned SDK/helper geometry and strict pixels pass
+at both aspects. Signed package `9cd1dae` passes native WebView qualification;
+a second package/native session will cover the final CSS and compact caption.
+[Evidence](../tasks/evidence/project-fonts.md) owns receipts, original failures,
+review corrections and remaining limits. Full frontend checks pass; the ordinary
+core suite's sandbox listener failures pass in the affected permitted rerun.
+Both review axes have no remaining findings after corrections.
 
-[Preparation evidence](../tasks/evidence/project-fonts.md) records licensed font
-fixtures and passing baseline typechecking and 58 ordinary screen-core tests.
-Three SDK/helper cases remain ignored in the ordinary selection. Kris has approved
-the test boundaries and tracker updates; the initial GitHub rejection is resolved.
-Core font import, typed text edits, source protection and inert drafts now have
-focused public-request proof. The first broader run's grid-expression regression
-is corrected and its focused case passes. SDK inputs and a rejecting evidence
-checker are prepared in ignored `.toolchains/project-fonts/`.
-Mac normal SDK starts are 5/20; helpers 0/4, packages 0/3 and native sessions 0/3.
-Windows counters and CI dispatches remain zero. Publication and acceptance are unclaimed.
-
-Design TypeScript, approval checks, the source fingerprint and all 18 capture
-hashes pass after integration. The design chat's combined startup failure remains
-failed, with no full promotion or product acceptance. The handoff and exact
-source identity are linked from the evidence record.
-
-A2's controller/core path and Mac normal SDK rendering now pass.
-Next: qualify the helper and packaged app, obtain Windows evidence, then complete
-both review axes. See the owning evidence record for retained failures and scope.
+Mac use is SDK 9/20, helpers 3/4, packages 1/3 and native sessions 1/3.
+Windows use and costly CI dispatches remain zero. Finish the final Mac candidate,
+then obtain branch-publication authorization for the prepared focused Windows
+route. No push, PR, merge, release or ticket acceptance is claimed. Preserve the
+unrelated Phase 1 audit, pinned design worktree and protected recovery below.
 
 <a id="l06-implementation-and-qualification"></a>
 

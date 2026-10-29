@@ -80,11 +80,15 @@ jobs:
       - name: Real controller/core and exact packaged-probe rehearsal
         id: controller
         env:
+          COMPOSITION_OUTPUT: ${{ runner.temp }}/project-font/composition-controller
+          UI_IMAGE_OUTPUT: ${{ runner.temp }}/project-font/image-controller
           PROJECT_FONT_OUTPUT: ${{ runner.temp }}/project-font/controller
           PROJECT_FONT_PROBE_OUTPUT: ${{ runner.temp }}/project-font/probe-controller
         run: |
           node tests/project-font.browser.mjs
           node tests/project-font-probe-controller.browser.mjs
+          node tests/ui-image.browser.mjs
+          node tests/screen-composition.browser.mjs
       - name: Retain the exact failed controller executable
         if: ${{ always() && steps.controller.outcome == 'failure' && hashFiles('app/target/debug/examples/help-controller-driver.exe') != '' }}
         shell: pwsh
@@ -134,7 +138,7 @@ jobs:
           LOOMLIGHT_PROJECT_FONT_INPUTS: ${{ runner.temp }}/project-font/inputs
         run: |
           cargo test -p loomlight-core --locked screens::tests::font_sdk::project_font_helper_matches_normal_sdk_and_retains_typed_pending_source -- --exact --ignored --nocapture
-          "$HARNESS_PYTHON" scripts/qualify-project-font-helper.py "$LOOMLIGHT_PROJECT_FONT_HELPER_OUTPUT" "$LOOMLIGHT_PROJECT_FONT_NORMAL"
+          "$HARNESS_PYTHON" scripts/qualify-project-font-helper.py "$LOOMLIGHT_PROJECT_FONT_HELPER_OUTPUT" "$LOOMLIGHT_PROJECT_FONT_NORMAL" --audit-rejections
       - name: Windows package and real WebView keyboard/history/reopen (one session)
         if: ${{ always() && steps.preflight.outcome == 'success' && steps.controller.outcome == 'success' }}
         env:

@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "imageSHA256": "f0a54821eaa72bb30ab994eb6dcfbcc7d371d3680ac1791597cec30037097445",
+      "referenceSHA256": "f0a54821eaa72bb30ab994eb6dcfbcc7d371d3680ac1791597cec30037097445",
+      "differingPixels": 0
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "imageSHA256": "8a7e046091ec7d8256378bafdc3f77d4df8a2a21db7a0ebb8737d0a311356347",
+      "referenceSHA256": "8a7e046091ec7d8256378bafdc3f77d4df8a2a21db7a0ebb8737d0a311356347",
+      "differingPixels": 0
+    }
+  ],
+  "sourceSHA256": "16fe07551b916f7f387566a37c7ee5a8681c291027bde973959e2ca17390a916",
+  "rejectionChecks": [
+    "missing-reference",
+    "wrong-source",
+    "blank-frame",
+    "fallback-font"
+  ]
+}

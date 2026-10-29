@@ -1,0 +1,30 @@
+{
+  "helperSessions": 1,
+  "normalSourceSHA256": "16fe07551b916f7f387566a37c7ee5a8681c291027bde973959e2ca17390a916",
+  "passed": true,
+  "pendingMatchesAccepted": true,
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "frameId": "7fd08a28-599c-4224-a9fa-d1517f44e226",
+      "renderer": "gl2"
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "frameId": "70746c2a-6a25-43ce-a4a9-1eeb961a4230",
+      "renderer": "gl2"
+    }
+  ],
+  "shutdown": {
+    "cleanupComplete": true,
+    "cooperative": true,
+    "exitCode": 0
+  },
+  "typedPending": true
+}

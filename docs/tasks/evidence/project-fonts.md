@@ -174,3 +174,54 @@ metadata. Both retained first-aspect frames independently match normal SDK
 reference pixels exactly. Full helper acceptance is still pending. Both failed
 processes have exited; no helper process remained in the process audit. Mac
 helpers total 2/4. Full frontend checks pass 276 cases with Python 3.12.
+
+## Mac qualification and final integration, 2026-10-30
+
+Helper attempt 3 passes all source geometry, pending/accepted typography and
+cooperative shutdown checks. Its [receipt](project-font-mac-helper-01.json) records
+one helper session. The initial offline pixel comparison against SDK-03 failed at
+1024 by 768. Normal entry reused a saved physical window size, while the helper
+explicitly sets physical size per aspect. The checker now sets that same size
+before showing screens and records physical dimensions and drawing scale. Fresh
+compile, lint and both renders pass in [SDK-04](project-font-mac-sdk-03.json), using
+four further normal starts. The strict pixel gate was retained. Its
+[passing comparison](project-font-mac-pixels-01.json) requires matching physical
+size and scale and finds zero differing pixels at both aspects, for accepted and
+independent reference frames. Controlled missing-reference, wrong-source, blank
+and fallback-font mutations each fail the gate. No further helper start was needed.
+
+The signed `9cd1dae` Mac package passes strict signature, the pinned certificate
+requirement and read-only installer inspection. Its
+[identity](project-font-mac-package-01.json) binds the executable hash. The real
+[packaged WebView probe](project-font-mac-native-01.json) passes all five font
+stages, TTF/OTF decoding, history, Source and reopen, exits zero and confirms
+cleanup. This does not exercise a physical OS picker or human typing.
+
+The full ordinary core run passed 430, failed 31 and ignored 51, with three
+selected cases filtered. Every failure was a sandbox-denied local listener in
+`ai_request`. The affected group rerun with loopback access passes 38 cases,
+including all 31 failures. The original failed full run remains retained. The
+new read-only reference-mapping test also passes. Full frontend checks pass 276;
+the post-review affected renderer slice passes 54. Repository validation passes.
+
+The actual image controller passes after the shared reservation rename. The
+existing seven-group composition controller passes after updating its probe to
+A2's Apply/Cancel and exact two-space Choose caption. Its first rehearsal failure
+is retained. The final text-controller run passes and captures matching content,
+values, dark theme, viewport and scroll conditions. A2's 326-pixel inspector,
+typography order, inline picker, Layout disclosure and shared footer are present.
+Production host chrome leaves less vertical space than the lab; compact uses a
+scrolling editor with the footer visible. Real contained font paths replace the
+mock's stand-ins. Canvas captures in this controller remain unavailable; SDK and
+helper receipts supply rendering proof. The original combined Design Lab startup
+failure remains failed.
+
+Visual inspection corrected field sizing that lost to global input specificity,
+restored space for the closed Layout row and retained color-swatch padding.
+Compact preview returns through Edit text. These final narrow CSS/caption changes
+require the second Mac package/native session before a final candidate claim.
+Standards re-review reports no remaining findings; Spec re-review confirms both
+identified defects resolved.
+
+Current use is normal Mac SDK 9/20, helpers 3/4, packages 1/3 and native sessions
+1/3. Windows and costly CI remain zero. Code publication remains unselected.

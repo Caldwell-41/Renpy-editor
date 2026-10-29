@@ -1,18 +1,23 @@
 # Current status
 
-## L05 project fonts selected
+## L05 project font implementation
 
-Kris selected [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) on
-new branch `codex/l05-project-fonts`, based on `8f0d208`. A separate design chat
-owns the pinned font/typography mock in its own worktree. Kris approved A2, and
-its design files are integrated through `804405d` with a matching fingerprint.
-Kris approved the test boundaries and tracker updates. Core font import and typed
-text transactions now have focused public-request proof; A2's actual controller/core path and Mac normal SDK rendering pass;
-helper and native qualification remain pending. [Evidence](../tasks/evidence/project-fonts.md)
-records the handoff, checks, retained failures and corrected grid-expression
-refusal. The owning issue records qualification limits. Mac normal SDK starts are 5/20;
-helper, package, native and Windows operations remain unused.
-L06 and earlier accepted outcomes retain their scope below.
+Kris selected [L05 #39](https://github.com/Caldwell-41/Renpy-editor/issues/39)
+on `codex/l05-project-fonts`, based on `8f0d208`, and approved test boundaries,
+tracker updates, review and commits. Approved A2 is integrated, and the actual
+controller/core path passes. Mac pinned SDK/helper geometry and strict pixels pass
+at both aspects. Signed package `9cd1dae` passes native WebView qualification;
+a second package/native session will cover the final CSS and compact caption.
+[Evidence](../tasks/evidence/project-fonts.md) owns receipts, original failures,
+review corrections and remaining limits. Full frontend checks pass; the ordinary
+core suite's sandbox listener failures pass in the affected permitted rerun.
+Both review axes have no remaining findings after corrections.
+
+Mac use is SDK 9/20, helpers 3/4, packages 1/3 and native sessions 1/3.
+Windows use and costly CI dispatches remain zero. Finish the final Mac candidate,
+then obtain branch-publication authorization for the prepared focused Windows
+route. No push, PR, merge, release or ticket acceptance is claimed. Preserve the
+unrelated Phase 1 audit, pinned design worktree and protected recovery below.
 
 ## L06 UI-image authoring merged
 

@@ -319,6 +319,7 @@ export class ScreensWorkspace {
     this.panel.querySelectorAll<HTMLElement>(".screen-tools [data-image-extra]").forEach(control=>control.hidden=this.panel.dataset.uiImage==="true");
     this.panel.dataset.uiText = String(this.step === "design" && !!this.nodes()[this.selected]?.textProperties && !!this.owned);
     this.panel.querySelectorAll<HTMLElement>(".screen-tools [data-image-extra]").forEach(control=>control.hidden=this.panel.dataset.uiImage==="true" || this.panel.dataset.uiText==="true");
+    this.stage.querySelector<HTMLButtonElement>(".screen-compose-jump")!.textContent = this.panel.dataset.uiText === "true" ? "Edit text" : "Back to editing";
     this.images.unmountCard(); this.text.unmount(); this.card.classList.remove("screen-image","screen-text"); this.card.onkeydown = null;
     this.panel.dataset.numericLayout = String(numeric); this.card.classList.toggle("screen-numeric", numeric);
     [...this.rail.querySelectorAll("button")].forEach((b, i) => b.ariaPressed = String(["choose", "design", "connect"][i] === this.step));
