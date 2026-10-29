@@ -5,8 +5,8 @@
 [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40), "Import and place a
 UI image", is implemented on `codex/phase3b-l06-ui-image`, based on `2e045d9`.
 Kris approved A2 in the separate prototype chat. Both independent review axes clear
-the product and checker corrections. The ticket remains open for acceptance;
-no PR, merge or release is selected.
+the product and checker corrections. The ticket remains open for acceptance. Kris selected draft PR publication into
+`codex/phase3b-screen-designer`; merge and release remain unselected.
 
 | Capability | Automated proof | Native/human status |
 | --- | --- | --- |

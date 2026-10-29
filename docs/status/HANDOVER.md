@@ -8,8 +8,9 @@ based on the user-confirmed `2e045d9`. This chat owns implementation and audit i
 managed worktree `l06-ui-image-implementation/Loomlight`. Use it explicitly.
 Product correction is `9d6bf6b`; capture-checker correction is `943ea2f`.
 The qualified published CI3 candidate is `b00415f6526476b1c235221f99f03d5cc0547fe5`.
-Successor commits change evidence/status only. No PR, merge or release is selected,
-and #40 stays open for its acceptance decision.
+Successor commits change evidence/status only. Kris selected pushing and opening a
+draft PR into `codex/phase3b-screen-designer`; #40 records its publication link.
+Merge and release remain unselected; #40 stays open for its acceptance decision.
 
 Kris approved A2 in the separate "L06 UI image prototypes" chat
 (`01a1845a-685d-7901-a518-8faeafc6ba05`). Reviewed source `8b960282` and fingerprint
