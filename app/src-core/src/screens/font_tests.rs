@@ -549,6 +549,63 @@ fn invalid_font_import_keeps_metadata_source_and_previous_history() {
 }
 
 #[test]
+fn project_fonts_and_audio_share_names_only_across_discovery_namespaces() {
+    for font_first in [false, true] {
+        let (temporary, mut service, root, _) = composition_project();
+        fs::create_dir_all(root.join("game/audio")).unwrap();
+        let font_path = temporary.path().join("theme.ttf");
+        fs::write(&font_path, TTF).unwrap();
+        let music_path = temporary.path().join("theme.wav");
+        fs::write(
+            &music_path,
+            include_bytes!("../../../../tests/fixtures/phase-1h/assets/theme.wav"),
+        )
+        .unwrap();
+        let font = (&font_path, "font", "music_theme");
+        let music = (&music_path, "music", "theme");
+        for (path, kind, technical_name) in if font_first {
+            [font, music]
+        } else {
+            [music, font]
+        } {
+            let choice = service.authoring_select_import(path).unwrap();
+            ipc(
+                &mut service,
+                "asset.import",
+                json!({"authorityId":choice.authority_id,"kind":kind,
+                    "technicalName":technical_name,"displayName":"Theme"}),
+            );
+        }
+        service.close().unwrap();
+        service.open_path(&root).unwrap();
+        let model = ipc(&mut service, "authoring.list", json!({}));
+        let assets = model["assets"].as_array().unwrap();
+        assert_eq!(assets.len(), 2);
+        for (kind, path) in [
+            ("font", "game/fonts/music_theme.ttf"),
+            ("music", "game/audio/music_theme.wav"),
+        ] {
+            let asset = assets.iter().find(|a| a["kind"] == kind).unwrap();
+            assert_eq!(asset["discoveryName"], "music_theme");
+            assert_eq!(asset["relativePath"], path);
+            assert_eq!(asset["status"], "available");
+        }
+
+        let other_font = temporary.path().join("theme.otf");
+        fs::write(&other_font, OTF).unwrap();
+        let choice = service.authoring_select_import(&other_font).unwrap();
+        let refusal = reject(
+            &mut service,
+            "asset.import",
+            json!({"authorityId":choice.authority_id,"kind":"font",
+                "technicalName":"music_theme","displayName":"Other font"}),
+        );
+        assert_eq!(refusal["error"]["code"], "DISCOVERY_NAME_COLLISION");
+        assert_eq!(ipc(&mut service, "authoring.list", json!({})), model);
+    }
+}
+
+#[test]
 fn project_fonts_import_as_typed_assets_with_shared_history_and_reopen() {
     for (extension, bytes) in [("ttf", TTF), ("otf", OTF)] {
         let (temporary, mut service, root, _) = composition_project();

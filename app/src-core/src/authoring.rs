@@ -938,11 +938,10 @@ impl AuthoringService {
         {
             return Err(AuthoringError::PathCollision);
         }
-        if metadata
-            .assets
-            .iter()
-            .any(|item| item.discovery_name == discovery_name)
-        {
+        if metadata.assets.iter().any(|item| {
+            discovery_namespace(item.kind) == discovery_namespace(request.kind)
+                && item.discovery_name == discovery_name
+        }) {
             return Err(AuthoringError::DiscoveryCollision);
         }
         let asset_id = uuid::Uuid::new_v4().to_string();
@@ -2349,6 +2348,16 @@ enum DiscoveryNamespace {
     Image,
     Audio,
     Font,
+}
+
+fn discovery_namespace(kind: AssetKind) -> DiscoveryNamespace {
+    match kind {
+        AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage => {
+            DiscoveryNamespace::Image
+        }
+        AssetKind::Music | AssetKind::Sfx => DiscoveryNamespace::Audio,
+        AssetKind::Font => DiscoveryNamespace::Font,
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
