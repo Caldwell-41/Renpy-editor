@@ -135,3 +135,19 @@ the three new font operations, and a Windows evidence fixture used system Python
 Next: run the prepared helper comparison, rehearse the exact packaged probe,
 qualify the signed Mac app and obtain Windows evidence, then complete review.
 No code publication or ticket acceptance is claimed.
+
+## Helper and native-probe preparation
+
+Helper attempt 1 used one Mac helper start and produced the accepted 1280 by 720
+frame, then failed the test's node lookup. The disposable imported source has no
+registered Loomlight ownership metadata, so its read-only document does not expose
+the exporter project's stable IDs. The correction matches each independent literal
+Ren'Py ID within the exact verified source span. Original output remains in
+ignored `project-fonts/helper-01/` and `helper-01.log`. This is no helper pass.
+
+The exact native probe rehearsal passes against production UI/core after correcting
+its accessible-label button lookup. It checks decoded TTF/OTF specimens, Apply,
+invalid input, focus, Cancel, exact Undo/Redo, Source draft retention, an opaque
+neighbor and disk reopen. Browser rehearsal is explicitly not native evidence.
+The native evidence gate rejects missing decode, stages, formats, Source or IDs.
+Mac helper use is 1/4; other counters retain the prior checkpoint.

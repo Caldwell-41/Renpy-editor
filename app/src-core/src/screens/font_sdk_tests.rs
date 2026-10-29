@@ -104,7 +104,12 @@ fn project_font_helper_matches_normal_sdk_and_retains_typed_pending_source() {
                 .as_array()
                 .unwrap()
                 .iter()
-                .find(|n| n["id"] == element["nodeId"])
+                .find(|n| {
+                    let start = n["span"]["start"].as_u64().unwrap() as usize;
+                    let end = n["span"]["end"].as_u64().unwrap() as usize;
+                    source[start..end]
+                        .contains(&format!("id \"{}\"", element["name"].as_str().unwrap()))
+                })
                 .unwrap();
             let actual = frame["geometry"]
                 .as_array()

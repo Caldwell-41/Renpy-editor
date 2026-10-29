@@ -239,6 +239,36 @@ The image byte-limit diagnostic is `UI_IMAGE_TOO_LARGE` and names the 16 MiB bou
 acceptance. [UI-image evidence](tasks/evidence/ui-image.md) distinguishes service
 checks, approved design, controller proof and SDK/native qualification.
 
+### Project font role and text properties
+
+L05 adds the `font` Asset role. Typed TTF and CFF OTF imports use
+`game/fonts/<technical-name>.<extension>`, a separate font discovery namespace,
+and a 16 MiB byte bound. Font admission parses sfnt tables and requires a usable
+character map and glyph outlines. Collections and webfonts are outside this subset.
+Font file creation and metadata share one history transaction.
+
+`asset.chooseFont` returns a native selection authority. `asset.previewFont` reads
+that authority without consuming it; `asset.presentFont` takes an Asset UUID and
+expected SHA-256. Both return bounded bytes for passive FontFace decoding. No
+renderer-supplied path or CSS URL enters this protocol. Core rechecks contained
+bytes and reports `FONT_MISSING`, `FONT_CHANGED`, `INVALID_FONT` or
+`FONT_TOO_LARGE` without discarding the authoring draft.
+
+`screens.compose` command `formatText` accepts optional typed content, font handle,
+size, color, alignment, bold and italic, plus supported numeric layout. Omission
+keeps a property; null restores its inherited default. Size is a whole pixel from
+1 through 512; colors use #RGB, #RGBA, #RRGGBB or #RRGGBBAA; alignment is finite
+from 0 through 1. Textbutton source uses the corresponding `text_` properties.
+Core patches exact literal tokens or inserts/removes the smallest property range.
+Unresolved expressions stay visible and read-only while supported siblings remain
+editable. An unchanged explicit font is revalidated before any typography write.
+Typography and layout share one history entry; no-op, source revisions, comments
+and neighboring custom source retain the existing protections. Canvas `textStyles`
+uses the same typed values and changes no project source.
+
+[Ticket #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) owns acceptance.
+[Project font evidence](tasks/evidence/project-fonts.md) records the tested limits.
+
 ## Variables and state
 
 Phase 1 visual variables support `bool`, `int`, and `string` definitions with simple

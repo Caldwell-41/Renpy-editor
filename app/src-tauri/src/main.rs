@@ -1020,6 +1020,8 @@ fn main() {
                     else {if data.exists(){return Err("Reference fixture already exists".into());}LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?}
                 } else if data.exists() { return Err("probe destination already exists".into()); } else if case == "ui-image" {
                     LifecycleService::prepare_ui_image_probe(data).map_err(std::io::Error::other)?
+                } else if case == "project-font" {
+                    LifecycleService::prepare_project_font_probe(data).map_err(std::io::Error::other)?
                 } else if matches!(case.as_str(), "source-foundation" | "owned-screen" | "screen-composition" | "nested-layout") {
                     LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
                 } else if matches!(case.as_str(), "canvas-helper" | "canvas-input") {
@@ -1158,6 +1160,9 @@ fn main() {
                         main.show().expect("Canvas input show"); main.set_focus().expect("Canvas input focus");
                         main.eval(&format!("{}\n{}", include_str!("native_editor_probe.js"), include_str!("canvas_input_probe.js"))).expect("Canvas input probe injection");
                     } else if case == "canvas-helper" { main.show().expect("Canvas probe show");main.set_focus().expect("Canvas probe focus");main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("canvas_helper_probe.js"))).expect("Canvas probe injection");
+                    } else if case == "project-font" {
+                        main.show().expect("Project font probe show"); main.set_focus().expect("Project font probe focus");
+                        main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("project_font_probe.js"))).expect("Project font probe injection");
                     } else if case == "ui-image" {
                         main.show().expect("UI image probe show"); main.set_focus().expect("UI image probe focus");
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_image_probe.js"))).expect("UI image probe injection");

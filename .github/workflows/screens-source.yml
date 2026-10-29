@@ -13,6 +13,10 @@ on:
         type: string
         required: true
         default: '3'
+      project_font:
+        description: Select L05 project font Windows qualification; signed Mac proof stays local
+        type: boolean
+        default: false
       ui_image:
         description: Select L06 UI image Windows qualification; signed Mac proof stays local
         type: boolean
@@ -62,6 +66,7 @@ jobs:
     steps:
       - name: Reject conflicting qualification selectors
         env:
+          PROJECT_FONT: ${{ inputs.project_font }}
           UI_IMAGE: ${{ inputs.ui_image }}
           NESTED_LAYOUT: ${{ inputs.nested_layout }}
           NUMERIC_LAYOUT: ${{ inputs.numeric_layout }}
@@ -73,7 +78,7 @@ jobs:
           CANVAS_COMPARISON: ${{ inputs.canvas_comparison }}
         run: |
           selected_count=0
-          for selected in "$UI_IMAGE" "$NESTED_LAYOUT" "$NUMERIC_LAYOUT" "$COMPOSE_HELP" "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY" "$CANVAS_COMPARISON" "$ARCHITECTURE_REFACTOR"; do
+          for selected in "$PROJECT_FONT" "$UI_IMAGE" "$NESTED_LAYOUT" "$NUMERIC_LAYOUT" "$COMPOSE_HELP" "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY" "$CANVAS_COMPARISON" "$ARCHITECTURE_REFACTOR"; do
             if test "$selected" = true; then selected_count=$((selected_count + 1)); fi
           done
           if test "$selected_count" -gt 1; then
@@ -82,7 +87,7 @@ jobs:
           fi
 
   focused:
-    if: ${{ !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image }}
+    if: ${{ !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     name: Help (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -219,7 +224,7 @@ jobs:
           retention-days: 7
 
   owned-blank:
-    if: ${{ inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image }}
+    if: ${{ inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     name: Owned blank screen (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -377,7 +382,7 @@ jobs:
 
   help-composition:
     needs: validate-selection
-    if: ${{ (inputs.compose_help || inputs.architecture_refactor) && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image }}
+    if: ${{ (inputs.compose_help || inputs.architecture_refactor) && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     name: Help composition (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -553,7 +558,7 @@ jobs:
           retention-days: 7
 
   canvas-helper:
-    if: ${{ inputs.canvas_helper && !inputs.owned_blank && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image }}
+    if: ${{ inputs.canvas_helper && !inputs.owned_blank && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     name: L17 canvas helper (Windows x64)
     runs-on: windows-2025
     timeout-minutes: 40
@@ -656,7 +661,7 @@ jobs:
           retention-days: 7
 
   canvas-gpu-capability:
-    if: ${{ inputs.canvas_gpu_capability && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image }}
+    if: ${{ inputs.canvas_gpu_capability && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     runs-on: windows-2025
     timeout-minutes: 15
     defaults:
@@ -737,7 +742,7 @@ jobs:
 
   canvas-comparison:
     needs: validate-selection
-    if: ${{ inputs.canvas_comparison && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image }}
+    if: ${{ inputs.canvas_comparison && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     uses: ./.github/workflows/canvas-rendering.yml
     with:
       candidate: ${{ inputs.candidate }}
@@ -745,7 +750,7 @@ jobs:
 
   numeric-layout:
     needs: validate-selection
-    if: ${{ inputs.numeric_layout && !inputs.compose_help && !inputs.architecture_refactor && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.nested_layout && !inputs.ui_image }}
+    if: ${{ inputs.numeric_layout && !inputs.compose_help && !inputs.architecture_refactor && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     name: Numeric layout (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -870,7 +875,7 @@ jobs:
 
   nested-layout:
     needs: validate-selection
-    if: ${{ inputs.nested_layout && !inputs.ui_image }}
+    if: ${{ inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     uses: ./.github/workflows/nested-layout.yml
     with:
       candidate: ${{ inputs.candidate }}
@@ -879,8 +884,16 @@ jobs:
 
   ui-image:
     needs: validate-selection
-    if: ${{ inputs.ui_image }}
+    if: ${{ inputs.ui_image && !inputs.project_font }}
     uses: ./.github/workflows/ui-image.yml
+    with:
+      candidate: ${{ inputs.candidate }}
+      ordinal: ${{ inputs.ordinal }}
+
+  project-font:
+    needs: validate-selection
+    if: ${{ inputs.project_font }}
+    uses: ./.github/workflows/project-font.yml
     with:
       candidate: ${{ inputs.candidate }}
       ordinal: ${{ inputs.ordinal }}

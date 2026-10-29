@@ -1,9 +1,10 @@
 """Cases required by the ordinary packaged runtime gate and evidence manifest."""
 RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh")
-OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "nested-layout", "ui-image", "canvas-helper", "canvas-input")
+OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "nested-layout", "ui-image", "project-font", "canvas-helper", "canvas-input")
 
 # Terminal production-probe observations required by each ordinary scenario.
 RUNTIME_STAGES = {
+    "project-font": ("font-picker-passed", "font-draft-passed", "font-history-passed", "font-source-passed", "font-reopen-passed"),
     "ui-image": ("image-picker-passed", "image-draft-passed", "image-history-passed", "image-source-passed", "image-reopen-passed"),
     'nested-layout': ('nested-composition-passed','grid-layout-passed','viewport-source-passed','nested-history-passed','nested-reopen-passed'),
     'canvas-helper': ('project-frame-passed','draft-cancel-focus-passed','source-history-passed','second-aspect-passed','logical-pixels-passed','project-close-passed'),
@@ -88,6 +89,25 @@ def runtime_report_ok(case, report, target_os=None):
                 or details.get('error') or not isinstance(source, str)
                 or any(token not in source for token in ['add "images/ui station_seal.png":', 'xsize 200', 'ysize 70', 'use source_only_footer()', 'text "Protected neighbor"'])
                 or source.count(f'# loomlight-screen: {identity.get("id")}\n') != 1
+                or source.count(f'# loomlight-element: {ids[1]}\n') != 1):
+            return False
+    if case == 'project-font':
+        identity, source = details.get('identity'), details.get('acceptedSource')
+        from uuid import UUID
+        try:
+            ids = details['identities']
+            valid_ids = len(ids) == 2 and len(set(ids)) == 2 and all(str(UUID(value)) == value for value in ids)
+        except (ValueError, TypeError, KeyError, AttributeError):
+            valid_ids = False
+        if (not valid_ids or not isinstance(identity, dict) or identity.get('name') != 'travel_notes'
+                or identity.get('path') != 'game/ui/travel_notes.rpy' or identity.get('resolved') is not True
+                or ids[0] != identity.get('rootId') or details.get('nativeWebView') is not True
+                or details.get('sdkExecuted') is not False or details.get('fontDecoded') is not True
+                or details.get('fontFormats') != ['ttf', 'otf'] or details.get('error')
+                or not isinstance(source, str) or len(source.encode()) > 65536
+                or any(token not in source for token in ['font "fonts/help_otf.otf"', 'size 38', 'color "#f1e9d6"', 'text_align 0.5', 'bold True', 'italic True', 'use source_only_footer()', 'text "Protected neighbor"'])
+                or source.count(f'# loomlight-screen: {identity.get("id")}\n') != 1
+                or source.count('screen travel_notes():\n') != 1
                 or source.count(f'# loomlight-element: {ids[1]}\n') != 1):
             return False
     if case == 'help-screen':

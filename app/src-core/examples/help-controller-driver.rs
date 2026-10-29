@@ -14,7 +14,12 @@ fn main() {
     let mode = std::env::args().nth(2);
     assert!(mode.as_deref().is_none_or(|mode| matches!(
         mode,
-        "canvas-position" | "composition-canvas" | "ui-image" | "ui-image-probe" | "project-font"
+        "canvas-position"
+            | "composition-canvas"
+            | "ui-image"
+            | "ui-image-probe"
+            | "project-font"
+            | "project-font-probe"
     )));
     let position_probe = mode.as_deref() == Some("canvas-position");
     let composition_canvas = mode.as_deref() == Some("composition-canvas");
@@ -40,6 +45,8 @@ fn main() {
         .unwrap()
     } else if mode.as_deref() == Some("ui-image-probe") {
         LifecycleService::prepare_ui_image_probe(root.clone()).unwrap()
+    } else if mode.as_deref() == Some("project-font-probe") {
+        LifecycleService::prepare_project_font_probe(root.clone()).unwrap()
     } else {
         LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap()
     };
