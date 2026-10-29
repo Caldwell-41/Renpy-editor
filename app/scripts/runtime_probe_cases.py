@@ -84,6 +84,7 @@ def runtime_report_ok(case, report, target_os=None):
                 or identity.get('path') != 'game/ui/travel_notes.rpy' or identity.get('resolved') is not True
                 or ids[0] != identity.get('rootId') or details.get('nativeWebView') is not True
                 or details.get('sdkExecuted') is not False or details.get('imageDecoded') is not True
+                or details.get('imageFormats') != ['png','jpeg','webp-lossless','webp-lossy','webp-alpha']
                 or details.get('error') or not isinstance(source, str)
                 or any(token not in source for token in ['add "images/ui station_seal.png":', 'xsize 200', 'ysize 70', 'use source_only_footer()', 'text "Protected neighbor"'])
                 or source.count(f'# loomlight-screen: {identity.get("id")}\n') != 1

@@ -30,7 +30,7 @@ interface CompositionResult { document: ScreenDocument; selectedId: string; chan
 type AcceptedEdit =
   | { type: "geometry"; document: ScreenDocument; draft: Draft; key: string }
   | { type: "layout"; document: ScreenDocument; base: ScreenDocument; key: string }
-  | { type: "composition"; result: CompositionResult; command: CompositionCommand; base: ScreenDocument; beforeId?: string | null }
+  | { type: "composition"; result: CompositionResult; command: CompositionCommand; base: ScreenDocument; beforeId?: string | null; layoutKey?: string }
   | { type: "history"; direction: "undo" | "redo"; before?: ScreenDocument; selectedId?: string | null; sourceChanged: boolean };
 interface Actions {
   projectId?: string;
@@ -148,7 +148,7 @@ export class ScreensWorkspace {
     for (const control of tools.querySelectorAll("button")) if (["Refresh Source","Validate screen","Test in Ren'Py"].includes(control.textContent ?? "")) control.dataset.imageExtra = "";
     heading.append(tools);
     this.selection.ariaLabel = "Screen"; this.selection.onchange = () => {
-      if(this.move || this.resize || this.busy || (this.composer.hasAddition() || this.images.hasAddition())) {
+      if(this.move || this.resize || this.busy || this.images.isSaving() || (this.composer.hasAddition() || this.images.hasAddition())) {
         this.selection.value=this.owned ? JSON.stringify(["owned",this.owned.id]) : JSON.stringify([this.doc?.path,this.screen]);
         this.note("Finish the current operation before changing screens. Input retained.",true);return;
       }
@@ -162,7 +162,7 @@ export class ScreensWorkspace {
     const picker = el("label", "screen-picker", "Screen "); picker.append(this.selection);
     const limits = el("p", "muted screen-limits", "Supported numeric layout and literal text edits preserve source-only regions. Styles, assets, actions and Story connections retain their Source controls.");
     for (const [id, label] of [["choose", "1  Choose"], ["design", "2  Design"], ["connect", "3  Connect"]]) {
-      this.rail.append(button(label!, () => { this.step = id!; this.renderCard(); }));
+      this.rail.append(button(label!, () => { if (this.images.isSaving()) return; this.step = id!; this.renderCard(); }));
     }
     this.rail.ariaLabel = "Screen building steps";
     const caption = el("div", "screen-canvas-tools");
@@ -292,7 +292,7 @@ export class ScreensWorkspace {
     });
   }
   private choose(index: number, design = false): void {
-    if (this.busy || this.resize || this.move || this.composer.hasRemoval()) return;
+    if (this.busy || this.images.isSaving() || this.resize || this.move || this.composer.hasRemoval()) return;
     this.selected = index; if (design) this.step = "design";
     this.rememberSelection();
     if (this.owned && !design && this.step === "choose" && this.composer.canKeepTree()) { this.composer.refreshSelection(); this.renderCanvas(); }
@@ -474,7 +474,7 @@ export class ScreensWorkspace {
     const document = edit.type === "geometry" || edit.type === "layout" ? edit.document : edit.result.document;
     const base = edit.type === "geometry" ? edit.draft.document : edit.base;
     const sourceChanged = document.revision !== base.revision || edit.type === "composition" && edit.result.changed === true;
-    if (edit.type === "composition") { this.layout.acceptCurrent(base,document); this.images.accept(edit.command,base,document); }
+    if (edit.type === "composition") { this.layout.accept(edit.layoutKey ?? "",base,document); this.images.accept(edit.command,base,document); }
     this.documents = this.documents.map(d => d.path === document.path ? document : d);
     if (this.doc?.path === document.path) this.doc = document;
     if (this.owned?.path === document.path) this.owned.sourceRevision = document.revision;
@@ -554,11 +554,12 @@ export class ScreensWorkspace {
     this.busy = true; this.loadSequence++;
     const owner = this.owned;
     const beforeId = this.nodes()[this.selected]?.id;
+    const layoutKey = this.layout.currentDraft()?.key;
     try {
       const result = await this.actions.coordinate(() => this.actions.request<CompositionResult>("screens.compose", {
         screenId: owner.id, expectedRevision: base.revision, command,
       }));
-      this.finishAcceptedEdit({ type: "composition", command, base, result, beforeId });
+      this.finishAcceptedEdit({ type: "composition", command, base, result, beforeId, layoutKey });
     } finally { this.busy = false; }
   }
   private async history(type: "undo" | "redo"): Promise<void> {

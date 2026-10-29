@@ -79,6 +79,11 @@ fn main() {
     if mode.as_deref() == Some("ui-image") {
         fs::create_dir_all(game.join("game/images")).unwrap();
         fs::write(
+            root.join("station_seal.jpg"),
+            include_bytes!("../../../tests/fixtures/phase-3b-screens/ui-image/seal.jpg"),
+        )
+        .unwrap();
+        fs::write(
             root.join("station_seal.png"),
             include_bytes!("../../../tests/fixtures/phase-3b-screens/ui-image/seal.png"),
         )
@@ -136,7 +141,11 @@ fn main() {
             assert_eq!(mode.as_deref(), Some("ui-image"));
             let choice = host
                 .with_service(|service| {
-                    service.authoring_select_import(&root.join("station_seal.png"))
+                    service.authoring_select_import(&root.join(if request["alternate"] == true {
+                        "station_seal.jpg"
+                    } else {
+                        "station_seal.png"
+                    }))
                 })
                 .unwrap()
                 .unwrap();

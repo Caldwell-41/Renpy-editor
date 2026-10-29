@@ -207,3 +207,54 @@ ended as a failed test process and was not counted as a pass. No SDK was involve
 `controller-05` passes the complete actual UI/core sequence and retains a clean
 compact viewport capture after resize. Its visible Apply center is unobscured.
 A final compact spacing adjustment keeps the entire button above the app footer.
+
+
+## Final suites and review corrections
+
+Implementation checkpoint `96c55af` passes the documented ordinary release-core
+selection: 446 positive tests, zero failed/measured, 50 explicitly ignored
+specialist/SDK cases and the three documented named exclusions. Its 499-test
+inventory and full output remain under `final/`. Those ignored/excluded cases
+are not passes. The later native-fixture extension changes disposable probe data
+only; ordinary production/core behavior is unchanged.
+
+The first full frontend run has 266 passes and one failure because its old catalog
+expectation omitted the new UI images category. The expectation now matches the
+requested role. The next run lacked the required Python PATH and failed existing
+`tomllib` consumers under Python 3.9. The final run explicitly uses bundled Python
+3.12.14 and passes all 269 tests with zero failed/skipped/cancelled cases. Both
+failed logs remain alongside `frontend-final.log`.
+
+Independent Standards review at `96c55af` found one Apply/draft identity defect;
+Spec review found the same defect and one stale import-stage defect. A delayed
+media read allowed selection to change before the workspace became busy, and
+acceptance used that current selection rather than the submitted image. The fix
+reserves screen/element navigation through validation, settles image drafts by
+submitted node and base revision, and captures the numeric draft key before the
+write. Picker navigation now advances a request generation; late preview, decode,
+selection and replacement completions cannot replace a newer stage. Import commit
+disables navigation until its result, and successful imports select their exact contained destination. Existing
+duplicate-content refusal remains unchanged.
+
+Both new actual-controller regressions fail before those corrections and pass
+afterward. Five focused image cases now pass, including advanced numeric focus.
+A test-edit preflight initially matched no insertion point and therefore ran no
+new case; it is not regression proof. The successful red/green runs are separate.
+The full frontend suite includes the new cases. Both review axes must re-review
+the correction before final closure. Native/Windows and combined Design Lab proof
+remain outside these test results.
+
+
+The all-format packaged-probe rehearsal passes in `probe-controller-04`, using
+real passive PNG/JPEG/lossless/lossy/alpha WebP presentations. Its native evidence
+gate requires each named format and decoded image result. Thirty-eight desktop
+unit tests pass after building the production frontend required by Tauri. The
+first desktop compile correctly refused a missing `dist/`; it started no package,
+SDK or native session. The production build passes with its existing chunk-size
+warning; no bundler threshold changed.
+
+The extended browser import test first attempted a second import of identical
+PNG bytes. Core correctly returned `DUPLICATE_CONTENT`; the test's expectation of
+a second imported Asset was wrong. Existing duplicate policy is preserved. The
+corrected sequence verifies that refusal and retained display name, then imports
+a distinct JPEG and cancels its screen draft while retaining the catalog Asset.

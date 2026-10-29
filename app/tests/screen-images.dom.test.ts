@@ -8,7 +8,7 @@ import type { CoreOperation } from "../src/protocol.js";
 const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0));
 };
-function fixture() {
+function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>) {
   const browser = new Window();
   Object.assign(globalThis, {
     window: browser,
@@ -117,6 +117,7 @@ function fixture() {
       if (operation === "screens.inspect") return structuredClone(doc) as T;
       if (operation === "authoring.list") return { assets: structuredClone(assets) } as T;
       if (operation === "media.present") {
+        await mediaReady;
         const a = assets.find((a) => a.id === payload?.assetId)!;
         return {
           assetId: a.id,
@@ -131,7 +132,25 @@ function fixture() {
         } as T;
       }
       if (operation === "asset.chooseImport" || operation === "asset.chooseUiImage")
-        return { cancelled: true } as T;
+        return (
+          previewReady
+            ? { authorityId: "preview", displayName: "seal.png", extension: "png" }
+            : { cancelled: true }
+        ) as T;
+      if (operation === "asset.previewImport") {
+        await previewReady;
+        return {
+          assetId: "preview",
+          purpose: "imagePreview",
+          mimeType: "image/png",
+          dataBase64: bytes.toString("base64"),
+          sha256: "preview-sha",
+          cacheKey: "preview",
+          byteCount: bytes.length,
+          width: 80,
+          height: 40,
+        } as T;
+      }
       if (operation === "screens.canvasStatus")
         return { phase: "unavailable", message: "No SDK in component fixture" } as T;
       if (operation === "screens.compose") {
@@ -287,6 +306,80 @@ test("image Apply includes advanced layout once and keeps the numeric field focu
     });
     assert.equal(document.activeElement === f.field("Horizontal position"), true);
   } finally {
+    f.workspace.dispose();
+  }
+});
+
+test("slow image Apply reserves selection and preserves the other image's draft", async () => {
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const f = fixture(ready);
+  try {
+    await flush();
+    f.edit("image-two");
+    await flush();
+    f.type("Width", "240");
+    f.click("1  Choose");
+    f.edit("image-one");
+    await flush();
+    f.type("Width", "200");
+    f.click("Apply image");
+    await flush();
+    f.click("1  Choose");
+    assert.equal(
+      document.querySelector('[data-image-field="width"]') !== null,
+      true,
+      "Selection stays reserved through media validation",
+    );
+    release();
+    await flush();
+    assert.equal(f.calls.filter((c) => c.operation === "screens.compose").length, 1);
+    f.click("1  Choose");
+    f.edit("image-two");
+    await flush();
+    assert.equal(f.field("Width").value, "240");
+  } finally {
+    release();
+    f.workspace.dispose();
+  }
+});
+
+test("Back discards late import previews without replacing the project picker", async () => {
+  let release!: () => void;
+  const preview = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const f = fixture(undefined, preview);
+  try {
+    await flush();
+    f.edit("image-one");
+    await flush();
+    [...document.querySelectorAll<HTMLButtonElement>("button")]
+      .find((b) => b.ariaLabel === "Change image, Station seal")!
+      .click();
+    await flush();
+    f.click("Import image…");
+    f.click("Browse files…");
+    await flush();
+    f.click("Back to project images");
+    release();
+    await flush();
+    assert.equal(
+      [...document.querySelectorAll("input")].some((i) => i.ariaLabel === "Search UI images"),
+      true,
+    );
+    assert.equal(
+      [...document.querySelectorAll("input")].some((i) => i.ariaLabel === "Display name"),
+      false,
+    );
+    assert.equal(
+      f.calls.some((c) => c.operation === "asset.import"),
+      false,
+    );
+  } finally {
+    release();
     f.workspace.dispose();
   }
 });

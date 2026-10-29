@@ -77,12 +77,17 @@ export class ScreenImages {
   private generation = 0;
   private disposed = false;
   private saving = false;
+  private pickerGeneration = 0;
+  private importing = false;
   private addition?: Draft;
   private card?: HTMLElement;
   private dialog?: HTMLDialogElement;
   private cardKeys = new AbortController();
   private layoutOpen = new Map<string, boolean>();
   constructor(private readonly host: Host) {}
+  isSaving(): boolean {
+    return this.saving;
+  }
   hasDraft(): boolean {
     return !!this.addition || this.drafts.size > 0;
   }
@@ -709,21 +714,31 @@ export class ScreenImages {
   }
   accept(command: CompositionCommand, base: ScreenDocument, accepted: ScreenDocument): void {
     if (command.type === "image" || command.type === "addImage") {
-      const active = this.value();
-      if (active) {
-        if (active.replacement) {
-          const a = this.asset(active.assetId);
-          if (a) {
-            a.sha256 = active.replacement.sha256;
-            a.naturalWidth = active.replacement.width ?? undefined;
-            a.naturalHeight = active.replacement.height ?? undefined;
-            a.status = "available";
-          }
+      const submitted =
+        command.type === "image"
+          ? [...this.drafts.values()].find(
+              (draft) =>
+                draft.nodeId === command.nodeId &&
+                draft.document.path === base.path &&
+                draft.document.revision === base.revision,
+            )
+          : this.addition;
+      if (command.replacementSha256) {
+        const asset = this.asset(command.assetId);
+        const media =
+          submitted?.replacement ?? this.cache.get(`${command.assetId}:${command.replacementSha256}`)?.media;
+        if (asset && media) {
+          asset.sha256 = command.replacementSha256;
+          asset.naturalWidth = media.width ?? undefined;
+          asset.naturalHeight = media.height ?? undefined;
+          asset.status = "available";
         }
-        this.drafts.delete(active.key);
-        this.errors.delete(active.key);
       }
-      this.addition = undefined;
+      if (submitted) {
+        this.drafts.delete(submitted.key);
+        this.errors.delete(submitted.key);
+      }
+      if (command.type === "addImage") this.addition = undefined;
       this.saving = false;
     }
     for (const draft of this.drafts.values()) {
@@ -791,6 +806,8 @@ export class ScreenImages {
     return result;
   }
   private closePicker(): void {
+    if (this.importing) return;
+    this.pickerGeneration++;
     const dialog = this.dialog;
     this.dialog = undefined;
     dialog?.close();
@@ -798,16 +815,24 @@ export class ScreenImages {
   }
   private async openPicker(): Promise<void> {
     if (this.saving) return;
+    const key = this.value()?.key,
+      generation = ++this.pickerGeneration;
     await this.refreshAssets();
-    if (!this.active()) return;
+    if (!this.active() || generation !== this.pickerGeneration || key !== this.value()?.key) return;
     this.closePicker();
     const dialog = el("dialog", "screen-image-dialog");
     dialog.ariaLabel = "Choose UI image";
     this.dialog = dialog;
     dialog.onclose = () => {
-      if (this.dialog === dialog) this.dialog = undefined;
+      if (this.dialog === dialog) {
+        this.dialog = undefined;
+        this.pickerGeneration++;
+      }
       dialog.remove();
       this.focus("asset");
+    };
+    dialog.oncancel = (event) => {
+      if (this.importing) event.preventDefault();
     };
     document.body.append(dialog);
     this.renderPicker();
@@ -815,6 +840,7 @@ export class ScreenImages {
     dialog.querySelector("input")?.focus();
   }
   private renderPicker(): void {
+    this.pickerGeneration++;
     const dialog = this.dialog;
     if (!dialog) return;
     dialog.replaceChildren();
@@ -876,11 +902,12 @@ export class ScreenImages {
     );
   }
   private async use(asset: UiImageAsset, replacement?: MediaPresentation): Promise<void> {
-    const current = this.value();
+    const current = this.value(),
+      generation = this.pickerGeneration;
     if (!current) return;
     try {
       if (!replacement) await this.media(asset);
-      if (!this.active()) return;
+      if (!this.active() || generation !== this.pickerGeneration || current.key !== this.value()?.key) return;
       const draft = { ...current, assetId: asset.id, expectedSha: asset.sha256, replacement };
       const natural = replacement ?? this.cache.get(`${asset.id}:${asset.sha256}`)?.media;
       if (this.locked(draft) && natural?.width && natural.height && valid(draft.width))
@@ -894,12 +921,14 @@ export class ScreenImages {
       this.focus("width");
       this.host.preview();
     } catch (error) {
+      if (!this.active() || generation !== this.pickerGeneration) return;
       this.fail("asset", (error as Error).message);
       const dialog = this.dialog;
       if (dialog) dialog.append(el("p", "screen-image-error", (error as Error).message));
     }
   }
   private renderImport(): void {
+    this.pickerGeneration++;
     const dialog = this.dialog;
     if (!dialog) return;
     dialog.replaceChildren();
@@ -918,6 +947,8 @@ export class ScreenImages {
     const browse = button("Browse files…", () => void choose());
     dialog.append(browse, status);
     const choose = async () => {
+      const generation = ++this.pickerGeneration;
+      const current = () => this.active() && this.dialog === dialog && generation === this.pickerGeneration;
       browse.disabled = true;
       try {
         const choice = await this.host.request<{
@@ -926,7 +957,7 @@ export class ScreenImages {
           displayName: string;
           extension: string;
         }>("asset.chooseUiImage");
-        if (!this.active() || this.dialog !== dialog) return;
+        if (!current()) return;
         if (choice.cancelled) {
           this.renderPicker();
           return;
@@ -934,8 +965,9 @@ export class ScreenImages {
         const media = await this.host.request<MediaPresentation>("asset.previewImport", {
           authorityId: choice.authorityId,
         });
+        if (!current()) return;
         const shown = await this.retain(media);
-        if (!this.active() || this.dialog !== dialog) return;
+        if (!current()) return;
         const staged = el("div", "screen-image-staged"),
           img = el("img");
         img.src = shown.url;
@@ -973,7 +1005,11 @@ export class ScreenImages {
                 name.focus();
                 return;
               }
-              submit.disabled = cancel.disabled = browse.disabled = true;
+              if (!current()) return;
+              this.importing = true;
+              dialog
+                .querySelectorAll<HTMLInputElement | HTMLButtonElement>("input,button")
+                .forEach((control) => (control.disabled = true));
               try {
                 await this.host.coordinate(() =>
                   this.host.request("asset.import", {
@@ -988,17 +1024,26 @@ export class ScreenImages {
                 if (!this.active()) return;
                 this.host.saved();
                 await this.refreshAssets();
-                const asset = this.assets.find((a) => a.sha256 === media.sha256);
+                if (!current()) return;
+                const destinationPath = `game/images/ui ${technical()}.${choice.extension}`;
+                const asset = this.assets.find(
+                  (a) => a.relativePath === destinationPath && a.sha256 === media.sha256,
+                );
                 if (!asset) throw Error("The imported UI image is unavailable.");
+                this.importing = false;
                 await this.use(asset);
               } catch (error) {
-                if (this.active() && this.dialog === dialog) {
+                if (current()) {
                   status.textContent = `${(error as Error).message} Your draft and display name are retained. Browse again to retry.`;
                   submit.disabled = true;
                 }
               } finally {
-                if (this.active()) {
-                  cancel.disabled = browse.disabled = false;
+                this.importing = false;
+                if (current()) {
+                  dialog
+                    .querySelectorAll<HTMLInputElement | HTMLButtonElement>("input,button")
+                    .forEach((control) => (control.disabled = false));
+                  submit.disabled = true;
                 }
               }
             })(),
@@ -1007,13 +1052,14 @@ export class ScreenImages {
         controls.append(cancel, submit);
         dialog.replaceChildren(heading, staged, label, destination, status, browse, controls);
       } catch (error) {
-        if (this.active() && this.dialog === dialog) status.textContent = (error as Error).message;
+        if (current()) status.textContent = (error as Error).message;
       } finally {
         browse.disabled = false;
       }
     };
   }
   private async review(asset: UiImageAsset): Promise<void> {
+    const generation = ++this.pickerGeneration;
     const draft = this.value();
     if (!draft || this.saving) return;
     try {
@@ -1021,8 +1067,9 @@ export class ScreenImages {
         assetId: asset.id,
         expectedAssetSha256: asset.sha256,
       });
+      if (!this.active() || generation !== this.pickerGeneration) return;
       const after = await this.retain(media);
-      if (!this.active()) return;
+      if (!this.active() || generation !== this.pickerGeneration || draft.key !== this.value()?.key) return;
       this.closePicker();
       const dialog = el("dialog", "screen-image-dialog");
       dialog.ariaLabel = "Review changed image";
@@ -1060,13 +1107,17 @@ export class ScreenImages {
       );
       dialog.onclose = () => {
         dialog.remove();
-        if (this.dialog === dialog) this.dialog = undefined;
+        if (this.dialog === dialog) {
+          this.dialog = undefined;
+          this.pickerGeneration++;
+        }
         this.focus("asset");
       };
       document.body.append(dialog);
       dialog.showModal();
     } catch (error) {
-      if (this.active()) this.fail("asset", `${(error as Error).message} Your draft is retained.`);
+      if (this.active() && generation === this.pickerGeneration)
+        this.fail("asset", `${(error as Error).message} Your draft is retained.`);
     }
   }
 }

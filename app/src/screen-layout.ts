@@ -79,9 +79,6 @@ export class ScreenLayoutEditor {
     }
     return { key:draft.key, document:draft.document, values:this.edits(draft.fields,draft.node) };
   }
-  acceptCurrent(base: ScreenDocument, accepted: ScreenDocument): void {
-    const view = this.host.view(); if (view) this.accept(this.key(view), base, accepted);
-  }
   cancelCurrent(): boolean { const view = this.host.view(); if (!view || !this.drafts.has(this.key(view))) return false; this.cancel(); return true; }
   private key(view: View): string { return draftKey(view.document, view.screen, view.node); }
   private fields(node: ScreenNode): Record<string, Field> {

@@ -13,11 +13,11 @@ await mkdir(output,{recursive:true});
 const driver=resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`);
 const child=driverProcess(driver,[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'ui-image']);
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
-const errors=[],receipts=[],plans=[];let browser,sessionId,passed=false,cancelPicker=true;
+const errors=[],receipts=[],plans=[];let browser,sessionId,passed=false,cancelPicker=true,alternate=false;
 const rpc=async request=>{
  if(request.operation==='asset.chooseUiImage'){
   if(cancelPicker)return {ok:true,value:{cancelled:true}};
-  return {ok:true,value:await child.request({driver:'chooseImage'})};
+  return {ok:true,value:await child.request({driver:'chooseImage',alternate})};
  }
  if(request.operation==='screens.canvasStatus')return {ok:true,value:{phase:'unavailable',message:'SDK proof is separate.'}};
  if(request.operation==='screens.canvasRender'){
@@ -61,6 +61,10 @@ try {
  assert.equal(await width.inputValue(),'320');assert.equal(await height.inputValue(),'160');
  await ui.getByRole('button',{name:'Add image',exact:true}).click();await ui.getByRole('button',{name:'Apply image',exact:true}).waitFor();
  const placed=await read();assert.match(placed,/add "images\/ui station_seal.png":/);assert.match(placed,/xsize 320\n\s+ysize 160/);
+ await ui.locator('.screen-image-asset').click();await browse();await picker().getByRole('textbox',{name:'Display name',exact:true}).fill('Second seal');await picker().getByRole('button',{name:'Import and use',exact:true}).click();
+ await picker().getByText(/Identical asset content is already imported/).waitFor();assert.equal(await picker().getByRole('textbox',{name:'Display name',exact:true}).inputValue(),'Second seal');await picker().getByRole('button',{name:'Cancel import',exact:true}).click();await picker().getByRole('button',{name:'Close',exact:true}).click();assert.equal(await read(),placed);
+ alternate=true;await ui.locator('.screen-image-asset').click();await browse();await picker().getByRole('textbox',{name:'Display name',exact:true}).fill('Second seal');await picker().getByRole('button',{name:'Import and use',exact:true}).click();await picker().waitFor({state:'detached'});
+ await ui.getByRole('button',{name:'Change image, Second seal',exact:true}).waitFor();assert.equal(await read(),placed);await ui.getByRole('button',{name:'Cancel',exact:true}).click();assert.equal(await read(),placed);assert.equal((await request('authoring.list')).assets.some(a=>a.displayName==='Second seal'),true);alternate=false;
  await width.fill('200');assert.equal(await height.inputValue(),'100');await width.press('Enter');await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');
  const sized=await read();assert.match(sized,/xsize 200\n\s+ysize 100/);assert.equal(await width.evaluate(e=>e===document.activeElement),true);
  await width.fill('bad');await ui.getByRole('button',{name:'Apply image',exact:true}).click();assert.equal(await width.getAttribute('aria-invalid'),'true');assert.equal(await read(),sized);await width.press('Escape');assert.equal(await width.inputValue(),'200');
