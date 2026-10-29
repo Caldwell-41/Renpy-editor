@@ -595,3 +595,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   both aspects with exact pixels after correction; original CI2 remains failed.
 - **Evidence:** [L06 capture diagnosis](../tasks/evidence/ui-image.md#ci2-windows-capture-failure-and-reassessment),
   [CI3 audit](../tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome).
+
+
+## H42. Image Apply admits edits that its completion clears
+
+- **Class/search:** product; UI-image Apply, Use original, retained draft, embedded
+  numeric layout, delayed media validation and commit.
+- **Cause/correction:** original-size editing omitted the image-saving reservation,
+  and embedded layout observed only core-write busy state. Apply the same saving
+  state to every draft-producing control throughout validation and commit.
+- **Regression:** hold media and core completion separately; verify reserved original
+  size, readonly layout and alignment, then success/conflict retention and restored
+  editing. The actual controller/core also checks a held Apply and unchanged Source.
+- **Evidence:** [Pending image Apply ownership](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29).

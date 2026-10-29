@@ -8,7 +8,7 @@ import type { CoreOperation } from "../src/protocol.js";
 const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0));
 };
-function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, imageBytes?: Buffer) {
+function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, imageBytes?: Buffer, composeReady?: Promise<void>) {
   const browser = new Window();
   Object.assign(globalThis, {
     window: browser,
@@ -178,6 +178,7 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, image
       if (operation === "screens.canvasStatus")
         return { phase: "unavailable", message: "No SDK in component fixture" } as T;
       if (operation === "screens.compose") {
+        await composeReady;
         const command = payload?.command as {
           type: string;
           nodeId: string;
@@ -366,6 +367,52 @@ test("slow image Apply reserves selection and preserves the other image's draft"
     assert.equal(f.field("Width").value, "240");
   } finally {
     release();
+    f.workspace.dispose();
+  }
+});
+
+for (const fails of [false, true]) test(`image Apply reserves original size and layout until ${fails ? "failure" : "success"}`, async () => {
+  let releaseMedia!: () => void, finishCompose!: () => void;
+  const media = new Promise<void>((resolve) => { releaseMedia = resolve; });
+  const compose = new Promise<void>((resolve, reject) => {
+    finishCompose = () => fails ? reject(Error("Source conflict")) : resolve();
+  });
+  const f = fixture(media, undefined, undefined, compose);
+  try {
+    await flush();
+    f.edit("image-one");
+    await flush();
+    f.type("Width", "200");
+    f.click("Apply image");
+    await flush();
+    const assertReserved = () => {
+      assert.equal(f.click("Use original").disabled, true, "Original size cannot replace the submitted draft");
+      assert.equal(f.field("Width").value, "200");
+      assert.equal(f.field("Height").value, "100");
+      assert.equal(f.field("Horizontal position").readOnly, true, "Image Apply also reserves its layout draft");
+      const preset = document.querySelector<HTMLButtonElement>('[data-align-x="0"][data-align-y="0"]')!;
+      assert.equal(preset.disabled, true, "Alignment cannot create a newer draft during Apply");
+      preset.click();
+    };
+    assertReserved();
+    assert.equal(f.calls.filter((c) => c.operation === "screens.compose").length, 0);
+    releaseMedia();
+    await flush();
+    assert.equal(f.calls.filter((c) => c.operation === "screens.compose").length, 1);
+    assertReserved();
+    finishCompose();
+    await flush();
+    assert.equal(f.field("Width").value, "200");
+    assert.equal(f.field("Horizontal position").value, "");
+    assert.equal(f.field("Horizontal position").readOnly, false);
+    assert.equal(f.workspace.hasDraft(), fails, "Failure retains the submitted draft; success accepts it");
+    assert.equal(f.click("Use original").disabled, false);
+    assert.equal(f.field("Width").value, "80", "Original size works again after Apply settles");
+    assert.equal(f.field("Height").value, "40");
+  } finally {
+    releaseMedia();
+    finishCompose();
+    await flush();
     f.workspace.dispose();
   }
 });

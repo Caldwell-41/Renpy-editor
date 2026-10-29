@@ -1,27 +1,25 @@
 # Current status
 
-## L06 review corrections complete
+## L06 pending-Apply correction
 
-[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68) now corrects the four
-findings from `2e045d9...780c360`: concurrent image URL admission, staged-preview
-cleanup, combined image/layout draft properties and reparented child order. The same
-public reparent tests also exposed and corrected moves back to the owned screen root.
-[L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40) stays open for acceptance.
+[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68) now reserves original
+size and embedded numeric layout throughout image Apply, including passive media
+validation. Success accepts only the submitted input; failure retains it and makes
+editing available again. [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
+remains open for acceptance.
 
-The two workers used isolated worktrees and public UI/service TDD. Their cross-reviews
-found no remaining issue in the other lane. Coordinator validation at code checkpoint
-`ed96533` passes 272 frontend tests, 57 ordinary screen-service tests, typechecking,
-frontend build, Rust formatting, the actual controller/core journey and exact probe
-browser rehearsal. Three existing SDK/helper tests remain explicitly ignored.
-[Correction evidence](../tasks/evidence/ui-image.md#pr-68-review-corrections-2026-10-29)
-retains red/green failures, candidate relationships and the corrected disclosure-state
-harness failure. PR #68 owns automatic-check results for its latest published head.
+The two new component regressions fail before the fix and pass afterward. All 274
+frontend tests and typechecking pass. The actual production controller/core journey
+also passes with a deliberately held Apply and the hash-verified unchanged core
+from the prior correction. [Evidence](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29)
+records the root cause, independent review and current publication/check state.
+Earlier cache, staging, combined-layout and reparent fixes retain their scope.
 
-Earlier CI3 and both-host SDK/native results retain their tested candidates and scope.
-No fresh SDK/helper, native, package or costly CI operation ran. Full Design Lab startup
-validation remains failed; physical-input, human and wider Phase 3B acceptance remain
-separate. The approved prototype, original PR checkout, unrelated audit and protected
-recovery remain needed. Merge and release remain unselected.
+No SDK/helper, package, native session or costly CI dispatch ran. Earlier both-host
+receipts keep their exact candidates. Full Design Lab startup remains failed;
+physical-input, human and wider acceptance remain separate. The approved prototype,
+original evidence, unrelated audit and protected recovery remain intact. Merge and
+release remain unselected.
 
 ## L04 nested and clipped layouts merged
 

@@ -101,7 +101,7 @@ export class ScreensWorkspace {
       view: () => {
         const view = this.compositionView();
         const pending = view && this.images?.synthetic(view);
-        return this.current() && this.doc && this.nodes()[this.selected] ? { document:this.doc, screen:this.screen, node:pending ?? this.nodes()[this.selected]!, nodes:pending ? [...this.nodes(),pending] : this.nodes(), busy:this.busy, otherDraft:!!this.drafts.size || this.composer.hasDraft() } : undefined;
+        return this.current() && this.doc && this.nodes()[this.selected] ? { document:this.doc, screen:this.screen, node:pending ?? this.nodes()[this.selected]!, nodes:pending ? [...this.nodes(),pending] : this.nodes(), busy:this.busy || this.images?.isSaving(), otherDraft:!!this.drafts.size || this.composer.hasDraft() } : undefined;
       },
       commit: async (draft, edits: LayoutEdits) => {
         this.busy = true; this.loadSequence++;
@@ -137,6 +137,7 @@ export class ScreensWorkspace {
       note: (message,error) => this.note(message,error), select: (id, design) => { const index = this.nodes().findIndex(n => n.id === id); if (index >= 0) this.choose(index,design); },
       source: () => { void this.openSource(); }, saved: () => this.saved(false),
       layout: host => { this.layout.render(host,true); const tools = el("div","screen-image-order"); tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true))); host.append(tools); }, layoutDraft: validate => this.layout.currentDraft(validate),
+      syncLayout: () => this.layout.sync(),
       cancelLayout: () => { this.layout.cancelCurrent(); }, order: host => this.composer.renderOrder(host),
     });
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));

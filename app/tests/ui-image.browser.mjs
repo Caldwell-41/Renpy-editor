@@ -13,7 +13,7 @@ await mkdir(output,{recursive:true});
 const driver=resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`);
 const child=driverProcess(driver,[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'ui-image']);
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
-const errors=[],receipts=[],plans=[];let browser,sessionId,passed=false,cancelPicker=true,alternate=false,onPlan=()=>{};
+const errors=[],receipts=[],plans=[];let browser,sessionId,passed=false,cancelPicker=true,alternate=false,onPlan=()=>{},holdCompose=false,releaseCompose=()=>{};
 const rpc=async request=>{
  if(request.operation==='asset.chooseUiImage'){
   if(cancelPicker)return {ok:true,value:{cancelled:true}};
@@ -24,6 +24,7 @@ const rpc=async request=>{
   const response=await child.request({...request,operation:'screens.canvasPlan'});plans.push(response);onPlan(request.payload,response);
   return {ok:true,value:{phase:'unavailable',message:'SDK proof is separate.'}};
  }
+ if(request.operation==='screens.compose'&&holdCompose){holdCompose=false;await new Promise(resolve=>{releaseCompose=resolve;});releaseCompose=()=>{};}
  const response=await child.request(request);receipts.push({operation:request.operation,ok:response.ok,error:response.error?.code});
  if(response.value?.sessionId)sessionId=response.value.sessionId;return response;
 };
@@ -86,7 +87,17 @@ try {
  assert.equal(await read(),placed,'Canvas drafts do not change accepted Source');
  await width.press('Escape');assert.equal(await width.inputValue(),'320');assert.equal(await read(),placed);
  await ui.locator('.screen-image-layout').evaluate(e=>e.open=false);
- await width.fill('200');assert.equal(await height.inputValue(),'100');await width.press('Enter');await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');
+ await width.fill('200');assert.equal(await height.inputValue(),'100');holdCompose=true;await width.press('Enter');
+ await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='Applying image…');
+ const original=ui.getByRole('button',{name:'Use original',exact:true});
+ assert.equal(await original.isDisabled(),true,'Original size is reserved while Apply is pending');
+ assert.equal(await ui.getByRole('textbox',{name:'Horizontal position',exact:true,includeHidden:true}).evaluate(e=>e.readOnly),true);
+ assert.equal(await ui.getByRole('button',{name:'Top left',exact:true,includeHidden:true}).isDisabled(),true);
+ await original.evaluate(e=>e.click());assert.equal(await width.inputValue(),'200');assert.equal(await height.inputValue(),'100');
+ assert.equal(await read(),placed,'The held Apply has not changed Source');
+ releaseCompose();await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');
+ assert.equal(await original.isEnabled(),true);
+ assert.equal(await ui.getByRole('textbox',{name:'Horizontal position',exact:true,includeHidden:true}).evaluate(e=>e.readOnly),false);
  const sized=await read();assert.match(sized,/xsize 200\n\s+ysize 100/);assert.equal(await width.evaluate(e=>e===document.activeElement),true);
  await width.fill('bad');await ui.getByRole('button',{name:'Apply image',exact:true}).click();assert.equal(await width.getAttribute('aria-invalid'),'true');assert.equal(await read(),sized);await width.press('Escape');assert.equal(await width.inputValue(),'200');
  await ui.getByLabel('Preserve aspect ratio',{exact:true}).uncheck();await height.fill('70');await height.press('Enter');await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');const stretched=await read();assert.match(stretched,/ysize 70/);
@@ -104,4 +115,4 @@ try {
  await child.request({driver:'imageFile',state:'missing'});await refresh();await ui.getByText('Image missing. Restore the file or choose another image.',{exact:true}).waitFor();await width.fill('260');await ui.getByRole('button',{name:'Apply image',exact:true}).click();assert.equal(await width.inputValue(),'260');await width.press('Escape');
  assert.equal(receipts.some(r=>r.operation.startsWith('runtime.')),false);assert.equal(plans.some(p=>p.ok&&p.value.nodes.some(n=>n.kind==='image'&&n.literal==='images/ui station_seal.png')),true);assert.deepEqual(errors,[]);passed=true;
 } catch(error){errors.push(String(error));throw error;}
-finally{await writeFile(join(output,'result.json'),JSON.stringify({passed,controllerAndRealCore:true,nativePicker:false,sdkRendering:false,receipts,plans,errors},null,2));await browser?.close();await server.close();await child.stop();}
+finally{releaseCompose();await writeFile(join(output,'result.json'),JSON.stringify({passed,controllerAndRealCore:true,nativePicker:false,sdkRendering:false,receipts,plans,errors},null,2));await browser?.close();await server.close();await child.stop();}

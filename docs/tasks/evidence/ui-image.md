@@ -652,3 +652,63 @@ exact candidates and scope; they do not qualify these new draft scenarios. The f
 Design Lab startup failure, physical-input/human and wider editor/Phase 3B acceptance
 remain open. #40 remains open for acceptance. Publication updates the existing
 draft PR; no merge, release or successor outcome is selected.
+
+
+## Pending image Apply edit ownership, 2026-10-29
+
+Kris selected the remaining PR #68 P2 finding at `1303918`, a root-cause correction,
+independent review and update of the existing PR. This is a product defect. Apply
+submits width 200; Use original can then display 80, but the earlier completion
+clears that newer draft and restores 200 without retaining the later edit.
+
+The first wrong decision was admitting edits while the submitted draft was reserved.
+Image inputs and selection already refuse edits during Apply, but Use original did
+not, and the embedded numeric editor observed only the later core-write busy state.
+The fix applies the existing image-saving state to original-size editing and embedded
+layout. Layout synchronizes immediately on image-saving transitions. Both media
+validation and commit settlement reserve the controls; success accepts the submitted
+draft, while conflict retains it and restores editing. The accepted-edit deletion
+logic, source/history operations and approved A2 design are unchanged.
+
+`npm run build:tests` followed by the Node test-name filter
+`image Apply reserves original size` initially fails both success and failure cases
+with `Original size cannot replace the submitted draft` (`false !== true`). After
+the correction, both pass. The public ScreensWorkspace tests hold media and core
+completion separately, exercise original size and alignment, verify readonly layout,
+and check retained input and restored editing after settlement. Full `npm run check`
+passes typechecking and all 274 tests without failures, cancellations or skips.
+
+The extended `node tests/ui-image.browser.mjs` journey passes through production
+main/controller dispatch and the real core. A held Apply leaves Source unchanged,
+original-size/alignment controls disabled and numeric layout readonly. Releasing it
+accepts the requested 200 by 100 size, restores editing and retains numeric focus.
+Existing import, conflict, Source, history and compact checks also pass.
+The same extended runner against the untouched `1303918` frontend and verified
+core driver fails the new original-size reservation assertion (`false !== true`),
+so the actual-controller check rejects this defect before the fix.
+The reused core driver SHA-256 is
+`85f5e8add5b01d7ebd684811970cca238d8cd8b2b46cb706a2c4ea0fbe0d37b4`;
+its prior receipt records core tree `f933fe64dd49dce34119be675041e73317112e65`,
+which matches this candidate exactly. Core and the driver source did not change.
+
+Retained unsuccessful checks are distinct: sandbox localhost listening failed with
+EPERM; the first unsandboxed controller used an older local driver and reproduced
+the already corrected missing xpos value; the next run used the verified driver but
+its new locator omitted controls inside collapsed Layout. Including hidden controls
+corrected that harness query; no product rule or timeout changed. Final controller
+output is `controller-green-02` under primary `.toolchains/pr68-apply-fix-evidence/`.
+That directory also retains frontend output, earlier controller failures and diagnosis.
+
+Independent review reports zero actionable introduced findings for the four-file
+code/test diff, SHA-256
+`853a8a4c27b3b57898244ef3f378b4a3fb0f1da69a9613da3ce9d735a74ab06d`.
+The reviewer independently passes typechecking, test compilation, all ten image
+component cases and browser-harness syntax; their first temporary test run had a
+fixture-path error, corrected by preserving its directory layout. Publication and
+automatic checks remain pending at this local checkpoint. The inherited CURRENT
+and HANDOVER records exceed their soft size targets to retain protected historical
+recovery; this change replaces only the live L06 blocks. No SDK, helper, package,
+native session or costly CI dispatch ran. Existing both-host proof
+retains its earlier candidates and does not establish this new async scenario. The
+full Design Lab startup failure, physical-input/human and wider acceptance stay open.
+#40 remains open. This work updates PR #68 and selects no merge or release.

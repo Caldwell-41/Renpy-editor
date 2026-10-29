@@ -44,6 +44,7 @@ interface Host {
   source: () => void;
   saved: () => void;
   layout: (host: HTMLElement) => void;
+  syncLayout: () => void;
   layoutDraft: (validate?: boolean) => { document: ScreenDocument; values: LayoutEdits } | undefined;
   cancelLayout: () => void;
   order: (host: HTMLElement) => void;
@@ -513,6 +514,7 @@ export class ScreenImages {
     if (natural)
       original.append(
         button("Use original", () => {
+          if (this.saving) return;
           const next = { ...this.value()!, width: String(natural.width), height: String(natural.height) };
           this.store(next);
           this.errors.delete(next.key);
@@ -521,6 +523,7 @@ export class ScreenImages {
           this.host.preview();
         }),
       );
+    original.querySelector("button")?.setAttribute("data-image-original", "");
     fields.append(original);
     body.append(fields);
     const layout = el("details", "screen-image-layout");
@@ -614,6 +617,9 @@ export class ScreenImages {
     this.card
       .querySelectorAll<HTMLInputElement | HTMLSelectElement>("input[type=checkbox],select")
       .forEach((control) => (control.disabled = this.saving || !this.loaded));
+    const original = this.card.querySelector<HTMLButtonElement>("[data-image-original]");
+    if (original) original.disabled = this.saving || !this.loaded;
+    this.host.syncLayout();
     let layout = false;
     try {
       layout = !!this.host.layoutDraft();

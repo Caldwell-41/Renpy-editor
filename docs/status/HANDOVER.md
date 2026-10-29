@@ -2,48 +2,38 @@
 
 <a id="l06-implementation-and-qualification"></a>
 
-## L06 review corrections and publication
+## L06 pending-Apply correction and publication
 
-Kris selected fixing all four review findings for
-[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68), with parallel agents,
-root-cause fixes, TDD, coordinator validation, push, PR update and safe cleanup.
-Continue from `codex/phase3b-l06-ui-image` in the original implementation checkout.
-The PR remains a draft into `codex/phase3b-screen-designer`; #40 stays open for
+Kris selected fixing the remaining PR #68 edit-loss finding with the root-cause
+skill, independent review and PR update. The correction checkout is the ignored
+`.toolchains/pr68-apply-fix`, detached from prior published head `1303918`.
+It targets `codex/phase3b-l06-ui-image` and the existing draft
+[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68). #40 stays open for
 acceptance. No merge or release is selected.
 
-Two workers based on `780c360` delivered cache/staging `98531c1` and canvas/reparent
-`d9199c6`, integrated at `2ce5e39`. Tested code checkpoint `ed96533` also contains
-the coordinator's real-controller regression and its compact fixture-state correction.
-The fixes bound pending/completed image URLs, release stage ownership, preserve
-combined draft layout and match accepted reparent child order. A separate public
-regression also fixes supported moves back to the owned screen root. Both workers
-cross-reviewed the other lane with no new finding; the coordinator reviewed the
-combined production diff and owns final validation.
+Image Apply now reserves Use original and the embedded layout editor through both
+media validation and the core write. Two public-workspace regressions first fail
+and then pass for success and conflict. All 274 frontend tests, typechecking and
+the actual controller/core journey pass. The controller holds an Apply before
+forwarding it to the unchanged real core, verifies unchanged Source and reserved
+controls, then verifies accepted size and restored editing. Native input and SDK
+rendering are not claimed. [Current evidence](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29)
+owns independent review, publication and automatic-check state. Raw outputs remain
+under primary `.toolchains/pr68-apply-fix-evidence/`.
 
-[Correction evidence](../tasks/evidence/ui-image.md#pr-68-review-corrections-2026-10-29)
-records exact red/green behavior and validation. Local results pass 272 frontend
-cases, 57 screen-service cases, typechecking/build/formatting, actual controller/core
-and the exact probe browser rehearsal. Three existing SDK/helper cases remain
-ignored. PR #68 holds the current published head and automatic-check results.
-Primary `.toolchains/pr68-review-fixes-2026-10-29/` retains worker/coordinator logs,
-failed controller captures and final output. Temporary review worktrees are safe
-to retire after their commits are integrated and remote publication is verified.
+The prior [four-finding correction](../tasks/evidence/ui-image.md#pr-68-review-corrections-2026-10-29)
+and its core driver remain candidate-bound evidence. Original implementation and
+review checkouts are preserved. Keep the approved A2 prototype unchanged, including
+its failed full Design Lab startup gate. Earlier Windows CI3 `b00415f`, signed Mac
+and both-host SDK/helper receipts retain their original scope. Local downloaded
+Windows evidence remains retained after GitHub expiry on 2026-11-05.
 
-Earlier CI3 at `b00415f`, its retained Windows executable/artifacts and the Mac
-SDK/helper/signed-native receipts retain their exact candidates and scope under
-[the original evidence](../tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome).
-They do not qualify the new draft scenarios. No new SDK/helper, package, native
-session or costly CI dispatch ran. #40 still owns dispatches 3/3; Mac SDK 11/16,
-helpers 2/4, packages 2/3, native 2/3; Windows SDK 9/16, helpers 2/4, packages 2/3,
-native 2/3. A fourth costly dispatch still requires a new user decision.
-
-Keep approved prototype `l06-image-prototype/Loomlight` unchanged, including A2
-`inspector-v2` source/captures and its retained failed full Design Lab startup gate.
-Original ignored evidence remains under the implementation checkout's
-`.toolchains/ui-image/`. The Windows artifact expires on GitHub on 2026-11-05;
-the downloaded evidence is retained locally. Physical-input, OS-dialog, human,
-full promotion-validation and wider editor/Phase 3B acceptance remain separate.
-Preserve the primary checkout's unrelated audit and protected recovery below.
+No SDK/helper, package, native session or costly dispatch ran. #40 still owns
+costly dispatches 3/3; Mac SDK 11/16, helpers 2/4, packages/native sessions 2/3 each;
+Windows SDK 9/16, helpers 2/4, packages/native sessions 2/3 each. A fourth costly
+dispatch needs a new user decision. Physical-input, OS-dialog, human, full promotion
+validation and wider Phase 3B acceptance remain separate. Preserve the primary
+checkout's unrelated audit and protected recovery below.
 
 ## L04 merge and workspace closeout
 
