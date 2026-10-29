@@ -47,15 +47,7 @@ def validate(record, aspect):
 
 
 def reference_source():
-    result = ['screen font_reference():', '    pass']
-    for name, row in EXPECTED.items():
-        result.extend([f'    text {json.dumps(row["text"])}:', f'        id "{name}"'])
-        fields = dict(font=row['font'], size=row['size'], color=row['color'], text_align=row['align'],
-                      bold=row['bold'], italic=row['italic'], xpos=row['x'], ypos=row['y'], xsize=row['width'])
-        for key, value in fields.items():
-            literal = str(value) if isinstance(value, bool) else json.dumps(value)
-            result.append(f'        {key} {literal}')
-    return '\n'.join(result) + '\n'
+    return (FIXTURES / 'reference.rpy').read_text()
 
 
 def main():

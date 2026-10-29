@@ -110,6 +110,7 @@ struct Entry {
 pub struct TextProperties {
     pub values: BTreeMap<String, Value>,
     pub blocked: BTreeMap<String, String>,
+    pub expressions: BTreeMap<String, String>,
     #[serde(skip)]
     entries: Vec<Entry>,
     #[serde(skip)]
@@ -129,6 +130,7 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node) -> Option<TextProperties> {
     let mut result = TextProperties {
         values: BTreeMap::new(),
         blocked: BTreeMap::new(),
+        expressions: BTreeMap::new(),
         entries: vec![],
         header_end: header.end,
         code_end: header.start + header.indent + header.code.len(),
@@ -136,6 +138,11 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node) -> Option<TextProperties> {
         colon: header.code.ends_with(':'),
     };
     if node.literal.is_none() {
+        let raw = header.code[node.kind.len()..].trim();
+        result.expressions.insert(
+            "text".into(),
+            raw.strip_suffix(':').unwrap_or(raw).trim_end().into(),
+        );
         result.blocked.insert(
             "text".into(),
             "This text expression stays in Source.".into(),
@@ -184,6 +191,7 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node) -> Option<TextProperties> {
                 "This source expression or repeated property stays in Source.".into(),
             );
             result.values.remove(*key);
+            result.expressions.insert((*key).into(), raw.into());
             continue;
         }
         result.values.insert((*key).into(), value.unwrap());
@@ -349,6 +357,45 @@ impl TextProperties {
     }
 }
 impl AuthoringService {
+    pub(super) fn verify_accepted_text_font(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        node: &Node,
+        edits: &TextEdits,
+    ) -> Result<(), SceneError> {
+        if edits.font.is_some() {
+            return Ok(());
+        }
+        let Some(path) = node
+            .text_properties
+            .as_ref()
+            .and_then(|p| p.values.get("font"))
+            .and_then(Value::as_str)
+        else {
+            return Ok(());
+        };
+        let metadata = self
+            .list(project, project_id)
+            .map_err(|_| SceneError::SourceConflict)?;
+        let font = metadata
+            .assets
+            .iter()
+            .find(|a| {
+                a.kind == crate::authoring::AssetKind::Font
+                    && a.relative_path == format!("game/{path}")
+            })
+            .ok_or(SceneError::FontMissing)?;
+        self.font_bytes(
+            project,
+            project_id,
+            &FontReference {
+                asset_id: font.id.clone(),
+                expected_asset_sha256: font.sha256.clone(),
+            },
+        )?;
+        Ok(())
+    }
     pub(super) fn resolve_text_edits(
         &self,
         project: &ProjectId,

@@ -1,0 +1,35 @@
+{
+  "passed": false,
+  "sdkProcesses": 3,
+  "commands": [
+    {
+      "name": "compile",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "font-1280x720",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    }
+  ],
+  "records": [],
+  "cleanupComplete": true,
+  "os": "Darwin",
+  "architecture": "arm64",
+  "candidate": "d3b09b9eec663045f7f8258001149d86bad416aa",
+  "checkerSHA256": "fdf7306dab00e67459f81ad9576048c3c898d987d3d32477ffa2210c67d5fcb3",
+  "acceptedSHA256": "03a5bdd1d04e3adb0821c345bd436152eca1c8d5ed6478fc6becc1b78b052a42",
+  "failure": {
+    "type": "AssertionError",
+    "message": "('title', 'wrong placement or width')"
+  }
+}

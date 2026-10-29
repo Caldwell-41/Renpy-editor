@@ -100,3 +100,38 @@ has yet been established.
 
 Next: qualify the generated source in the pinned SDK, connect A2 to the real
 controller and services, then finish affected desktop checks and both review axes.
+
+## Mac SDK and controller checkpoint, 2026-10-30
+
+The pinned 8.5.3.26051504 normal entry passes compile, lint and rendering at
+1280 by 720 and 1024 by 768. Accepted public-core source matches the independent
+literal reference in placement, wrapping and every pixel. Both project font rows
+differ from the bundled fallback. The first render's width assertion incorrectly
+required the full wrapping limit instead of Ren'Py's natural text width. Its
+[failed receipt](project-font-mac-sdk-01.json) remains retained. The corrected
+gate bounds natural width and requires exact reference geometry. Two fresh renders
+pass with byte-identical compile/lint inputs reused from the original run. The
+[passing receipt](project-font-mac-sdk-02.json) identifies that candidate and reuse.
+Mac normal SDK starts total 5/20. Helper starts remain 0/4; packages 0/3; native
+sessions 0/3. Windows counters and costly CI dispatches remain zero.
+
+A2 now uses the actual Screens controller and core. The retained controller-16
+run passes native-dialog cancellation and stale completion, TTF/OTF import and
+actual FontFace specimens, per-node draft/error retention, typed Apply/Cancel,
+combined layout and typography in one history entry, exact Undo/Redo, Source
+conflicts, held ownership, missing fonts, expressions and reopen. Its browser
+substitutes the native file dialog and makes no native WebView or SDK claim.
+The 54 existing affected renderer cases pass. Ten font public-request tests pass,
+including a fresh accepted-font check when only a sibling property changes.
+
+Controller checks caught and corrected a stale import-validity flag, native
+search Escape behavior and compact inspector CSS precedence. The core now checks
+an unchanged accepted font before typography writes, so an old catalog cannot
+admit a missing or changed font. Apply also locks controls while font bytes load.
+The initial broader frontend run passed 274/276; the operation allowlist needed
+the three new font operations, and a Windows evidence fixture used system Python
+3.9 without tomllib. Final checks will use the bundled Python 3.12 runtime.
+
+Next: run the prepared helper comparison, rehearse the exact packaged probe,
+qualify the signed Mac app and obtain Windows evidence, then complete review.
+No code publication or ticket acceptance is claimed.

@@ -472,6 +472,39 @@ fn project_font_prepares_sdk_source_through_public_requests() {
 }
 
 #[test]
+fn typography_rechecks_the_accepted_font_when_only_another_field_changes() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let font = import_font(&mut service, temporary.path(), "ttf");
+    let leaf = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Keep"}),
+    );
+    let accepted = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"formatText","nodeId":leaf["selectedId"],"values":{"font":{"assetId":font["id"],"expectedAssetSha256":font["sha256"]}}}),
+    );
+    let before = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    fs::remove_file(root.join(font["relativePath"].as_str().unwrap())).unwrap();
+    let response = reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":accepted["document"]["revision"],"command":{"type":"formatText","nodeId":leaf["selectedId"],"values":{"size":38}}}),
+    );
+    assert_eq!(response["error"]["code"], "FONT_MISSING");
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        before
+    );
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"formatText","nodeId":leaf["selectedId"],"values":{"font":null,"size":38}}),
+    );
+}
+
+#[test]
 fn invalid_font_import_keeps_metadata_source_and_previous_history() {
     for (extension, bytes) in [
         ("ttf", &b"invalid"[..]),

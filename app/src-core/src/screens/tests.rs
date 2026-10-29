@@ -16,6 +16,9 @@ mod ui_images;
 #[path = "font_tests.rs"]
 mod fonts;
 
+#[path = "font_sdk_tests.rs"]
+mod font_sdk;
+
 #[test]
 fn grid_axes_and_child_removal_refuse_ambiguous_or_strict_source_shapes() {
     for shape in [

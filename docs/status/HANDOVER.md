@@ -18,15 +18,17 @@ Core font import, typed text edits, source protection and inert drafts now have
 focused public-request proof. The first broader run's grid-expression regression
 is corrected and its focused case passes. SDK inputs and a rejecting evidence
 checker are prepared in ignored `.toolchains/project-fonts/`.
-Every costly-operation counter is zero; publication and acceptance are unclaimed.
+Mac normal SDK starts are 5/20; helpers 0/4, packages 0/3 and native sessions 0/3.
+Windows counters and CI dispatches remain zero. Publication and acceptance are unclaimed.
 
 Design TypeScript, approval checks, the source fingerprint and all 18 capture
 hashes pass after integration. The design chat's combined startup failure remains
 failed, with no full promotion or product acceptance. The handoff and exact
 source identity are linked from the evidence record.
 
-Next: qualify the prepared source in the pinned SDK, implement A2's actual
-controller path, then complete affected desktop checks and both review axes.
+A2's controller/core path and Mac normal SDK rendering now pass.
+Next: qualify the helper and packaged app, obtain Windows evidence, then complete
+both review axes. See the owning evidence record for retained failures and scope.
 
 <a id="l06-implementation-and-qualification"></a>
 

@@ -14,3 +14,6 @@ test assets, excluded from the application build.
 Use these files to exercise the approved import boundary and actual Ren'Py font
 rendering. A renamed extension alone does not establish OTF support; the OTF
 fixture contains CFF outlines and the TTF fixture contains TrueType outlines.
+
+`reference.rpy` is the independent literal SDK comparison for typography, wrapping
+and placement. The public-core exporter produces its own accepted source.

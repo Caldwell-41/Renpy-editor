@@ -14,7 +14,7 @@ fn main() {
     let mode = std::env::args().nth(2);
     assert!(mode.as_deref().is_none_or(|mode| matches!(
         mode,
-        "canvas-position" | "composition-canvas" | "ui-image" | "ui-image-probe"
+        "canvas-position" | "composition-canvas" | "ui-image" | "ui-image-probe" | "project-font"
     )));
     let position_probe = mode.as_deref() == Some("canvas-position");
     let composition_canvas = mode.as_deref() == Some("composition-canvas");
@@ -94,6 +94,25 @@ fn main() {
         )
         .unwrap();
     }
+    if mode.as_deref() == Some("project-font") {
+        for (name, bytes) in [
+            (
+                "help.ttf",
+                &include_bytes!(
+                    "../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.ttf"
+                )[..],
+            ),
+            (
+                "help.otf",
+                &include_bytes!(
+                    "../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.otf"
+                )[..],
+            ),
+            ("broken.ttf", &b"not a font"[..]),
+        ] {
+            fs::write(root.join(name), bytes).unwrap();
+        }
+    }
     service.close().unwrap();
     let host = ApplicationHost::new(service);
     emit(json!({"ready":true}));
@@ -139,6 +158,40 @@ fn main() {
                 .unwrap()
                 .write_all(b"# ordinary external writer\r\n")
                 .unwrap();
+            emit(json!({"changed":true}));
+            continue;
+        }
+        if request["driver"] == "chooseFont" {
+            assert_eq!(mode.as_deref(), Some("project-font"));
+            let name = if request["broken"] == true {
+                "broken.ttf"
+            } else if request["alternate"] == true {
+                "help.otf"
+            } else {
+                "help.ttf"
+            };
+            let choice = host
+                .with_service(|service| service.authoring_select_import(&root.join(name)))
+                .unwrap()
+                .unwrap();
+            emit(serde_json::to_value(choice).unwrap());
+            continue;
+        }
+        if request["driver"] == "fontFile" {
+            assert_eq!(mode.as_deref(), Some("project-font"));
+            let file = game.join("game/fonts/help.ttf");
+            match request["state"].as_str().unwrap() {
+                "missing" => fs::remove_file(file).unwrap(),
+                "changed" => fs::write(file, b"not a font").unwrap(),
+                "restore" => fs::write(
+                    file,
+                    include_bytes!(
+                        "../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.ttf"
+                    ),
+                )
+                .unwrap(),
+                _ => panic!("unknown font fixture state"),
+            }
             emit(json!({"changed":true}));
             continue;
         }
@@ -208,6 +261,8 @@ fn main() {
                 | "asset.import"
                 | "asset.previewImport"
                 | "asset.reviewUiImage"
+                | "asset.presentFont"
+                | "asset.previewFont"
                 | "media.present"
                 | "flow.list"
                 | "screens.inspect"

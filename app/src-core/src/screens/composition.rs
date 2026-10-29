@@ -308,6 +308,12 @@ impl AuthoringService {
                 if !["text", "textbutton"].contains(&node.kind.as_str()) || node.literal.is_none() {
                     return Err(SceneError::OpaqueBoundary);
                 }
+                self.verify_accepted_text_font(
+                    project,
+                    project_id,
+                    node,
+                    &text::TextEdits::default(),
+                )?;
                 let header = std::str::from_utf8(&bytes[node.span.start..node.source_end])
                     .map_err(|_| SceneError::UnsupportedSource)?
                     .lines()
@@ -334,6 +340,7 @@ impl AuthoringService {
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&node_id))
                     .ok_or(SceneError::UnknownEntity)?;
+                self.verify_accepted_text_font(project, project_id, node, &values)?;
                 let changes = self.resolve_text_edits(project, project_id, &values)?;
                 proposed = node
                     .text_properties

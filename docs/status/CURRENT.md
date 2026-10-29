@@ -7,10 +7,11 @@ new branch `codex/l05-project-fonts`, based on `8f0d208`. A separate design chat
 owns the pinned font/typography mock in its own worktree. Kris approved A2, and
 its design files are integrated through `804405d` with a matching fingerprint.
 Kris approved the test boundaries and tracker updates. Core font import and typed
-text transactions now have focused public-request proof; A2's production UI and
-SDK/native qualification remain pending. [Evidence](../tasks/evidence/project-fonts.md)
+text transactions now have focused public-request proof; A2's actual controller/core path and Mac normal SDK rendering pass;
+helper and native qualification remain pending. [Evidence](../tasks/evidence/project-fonts.md)
 records the handoff, checks, retained failures and corrected grid-expression
-refusal. The owning issue records qualification limits. No costly operation has run.
+refusal. The owning issue records qualification limits. Mac normal SDK starts are 5/20;
+helper, package, native and Windows operations remain unused.
 L06 and earlier accepted outcomes retain their scope below.
 
 ## L06 UI-image authoring merged
