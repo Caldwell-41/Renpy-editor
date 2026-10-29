@@ -566,7 +566,11 @@ including return from another workspace. No-op saves retain the action.
 
 `screens.inspect` returns typed `numericLayout` values and field-specific refusal
 reasons for fixed, frame, window, vbox, hbox, grid, viewport, text, textbutton and
-literal image children. The L04 extension and its qualification state belong to
+literal image children. `blocked` includes the accepted parent's placement rules;
+`sourceBlocked` retains the element and Source restrictions before those rules.
+Image drafts combine `sourceBlocked` with their selected parent's rules for both
+the inspector and retained canvas drafts. Changing parent never clears a
+Source-only restriction. The L04 extension and its qualification state belong to
 [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42).
 `screens.setLayout` captures file revision, screen name, node byte offset and a map
 of changed properties. Each value has `unit` (`pixels`, `relative`, or grid-only

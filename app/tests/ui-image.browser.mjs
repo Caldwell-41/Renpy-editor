@@ -13,8 +13,9 @@ await mkdir(output,{recursive:true});
 const driver=resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`);
 const child=driverProcess(driver,[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'ui-image']);
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
-const errors=[],receipts=[],plans=[];let browser,sessionId,passed=false,cancelPicker=true,alternate=false,onPlan=()=>{},holdCompose=false,releaseCompose=()=>{};
+const errors=[],receipts=[],plans=[];let browser,page,sessionId,passed=false,cancelPicker=true,alternate=false,onPlan=()=>{},holdCompose=false,releaseCompose=()=>{},brokenImport=true;
 const rpc=async request=>{
+ if(request.operation==='asset.chooseImports')return {ok:true,value:{choices:[await child.request({driver:'chooseImage',broken:brokenImport})]}};
  if(request.operation==='asset.chooseUiImage'){
   if(cancelPicker)return {ok:true,value:{cancelled:true}};
   return {ok:true,value:await child.request({driver:'chooseImage',alternate})};
@@ -32,7 +33,7 @@ const request=async(operation,payload={})=>{const response=await rpc({protocolVe
 try {
  assert.equal((await child.next()).ready,true);await server.listen();
  browser=await chromium.launch({channel:'chrome',headless:true});
- const page=await browser.newPage({viewport:{width:1100,height:800}});page.setDefaultTimeout(8000);
+ page=await browser.newPage({viewport:{width:1100,height:800}});page.setDefaultTimeout(8000);
  await page.routeWebSocket('**',()=>{});page.on('pageerror',e=>errors.push(e.message));
  await page.exposeBinding('imageRpc',(_,r)=>rpc(r));
  await page.route('**/image-controller',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));
@@ -62,6 +63,31 @@ try {
  assert.equal(await width.inputValue(),'320');assert.equal(await height.inputValue(),'160');
  await ui.getByRole('button',{name:'Add image',exact:true}).click();await ui.getByRole('button',{name:'Apply image',exact:true}).waitFor();
  const placed=await read();assert.match(placed,/add "images\/ui station_seal.png":/);assert.match(placed,/xsize 320\n\s+ysize 160/);
+ // Fixture setup uses the public core; the combined move must use the production inspector.
+ const group=await request('screens.compose',{screenId:owner.id,expectedRevision:(await request('screens.inspect',{path:owner.path})).revision,command:{type:'add',parentId:owner.rootId,kind:'vbox',text:''}});
+ const withGroup=await read(),imageId=group.document.screens[0].nodes.find(n=>n.kind==='image').id;
+ const waitParent=id=>page.waitForFunction(id=>[...document.querySelectorAll('select')].some(s=>s.ariaLabel==='Inside parent'&&s.value===id),id);
+ await request('screens.compose',{screenId:owner.id,expectedRevision:group.document.revision,command:{type:'image',nodeId:imageId,parentId:group.selectedId,assetId:asset.id,expectedAssetSha256:asset.sha256,width:320,height:160}});
+ const grouped=await read();await refresh();
+ await waitParent(group.selectedId);
+ await ui.getByLabel('Inside parent',{exact:true}).selectOption(owner.rootId);
+ await ui.getByRole('textbox',{name:'Vertical position',exact:true}).fill('77');
+ const moveReceipts=receipts.length;
+ await ui.getByRole('button',{name:'Apply image',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent!=='Applying image…');
+ assert.equal(await ui.locator('.screen-image-state').innerText(),'No pending changes',await ui.locator('.screen-image-error').innerText());
+ assert.equal(receipts.slice(moveReceipts).filter(r=>r.operation==='screens.compose'&&r.ok).length,1,'Parent and position use one accepted command');
+ const moved=await read();assert.match(moved,/ypos 77/);
+ const movedDocument=await request('screens.inspect',{path:owner.path});
+ const movedNode=movedDocument.screens[0].nodes.find(n=>n.id===imageId);
+ assert.equal(movedNode.parentStart,movedDocument.screens[0].nodes.find(n=>n.id===owner.rootId).span.start);
+ await ui.getByRole('button',{name:'Undo',exact:true}).click();await waitParent(group.selectedId);
+ assert.equal(await read(),grouped,'One Undo restores both the parent and position');
+ await ui.getByRole('button',{name:'Redo',exact:true}).click();await waitParent(owner.rootId);
+ assert.equal(await read(),moved,'One Redo restores the combined move');
+ await ui.getByRole('button',{name:'Undo',exact:true}).click();await waitParent(group.selectedId);assert.equal(await read(),grouped);
+ await ui.getByRole('button',{name:'Undo',exact:true}).click();await waitParent(owner.rootId);assert.equal(await read(),withGroup);
+ await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>[...document.querySelectorAll('select')].some(s=>s.ariaLabel==='Inside parent'&&s.options.length===1));assert.equal(await read(),placed);
  await ui.locator('.screen-image-asset').click();await browse();await picker().getByRole('textbox',{name:'Display name',exact:true}).fill('Second seal');await picker().getByRole('button',{name:'Import and use',exact:true}).click();
  await picker().getByText(/Identical asset content is already imported/).waitFor();assert.equal(await picker().getByRole('textbox',{name:'Display name',exact:true}).inputValue(),'Second seal');await picker().getByRole('button',{name:'Cancel import',exact:true}).click();await picker().getByRole('button',{name:'Close',exact:true}).click();assert.equal(await read(),placed);
  alternate=true;await ui.locator('.screen-image-asset').click();await browse();await picker().getByRole('textbox',{name:'Display name',exact:true}).fill('Second seal');await picker().getByRole('button',{name:'Import and use',exact:true}).click();await picker().waitFor({state:'detached'});
@@ -113,6 +139,26 @@ try {
  await child.request({driver:'imageFile',state:'changed'});await refresh();await ui.getByRole('button',{name:'Review changed image',exact:true}).click();const review=page.getByRole('dialog',{name:'Review changed image',exact:true});await review.waitFor();assert.match(await review.innerText(),/80 × 32 px/);await review.getByRole('button',{name:'Use changed image',exact:true}).click();assert.equal((await request('authoring.list')).assets.find(a=>a.id===asset.id).sha256,asset.sha256);
  await ui.getByRole('button',{name:'Apply image',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');assert.notEqual((await request('authoring.list')).assets.find(a=>a.id===asset.id).sha256,asset.sha256);
  await child.request({driver:'imageFile',state:'missing'});await refresh();await ui.getByText('Image missing. Restore the file or choose another image.',{exact:true}).waitFor();await width.fill('260');await ui.getByRole('button',{name:'Apply image',exact:true}).click();assert.equal(await width.inputValue(),'260');await width.press('Escape');
+ // The ordinary Assets workflow must require a real browser decode for the UI-image role.
+ await page.getByRole('button',{name:'Assets',exact:true}).click();
+ await page.getByRole('button',{name:'Import assets',exact:true}).click();
+ await page.getByRole('button',{name:'Choose files…',exact:true}).click();
+ const staged=page.locator('.import-entry');await staged.locator('select').first().selectOption('uiImage');
+ const displayName=staged.getByLabel(/Display name/);await displayName.fill('Retained broken seal');
+ await staged.getByText(/this image could not be decoded/).waitFor();
+ const importReceipts=receipts.length;
+ await page.getByRole('button',{name:'Import selected files',exact:true}).click();
+ assert.equal(receipts.slice(importReceipts).some(r=>r.operation==='asset.import'),false);
+ assert.equal(await displayName.inputValue(),'Retained broken seal');
+ assert.equal((await request('authoring.list')).assets.some(a=>a.displayName==='Retained broken seal'),false);
+ await staged.getByRole('button',{name:'Remove from import',exact:true}).click();brokenImport=false;
+ await page.getByRole('button',{name:'Choose files…',exact:true}).click();
+ await staged.locator('select').first().selectOption('uiImage');await displayName.fill('Third seal');
+ await staged.getByLabel(/Ren.Py name/).fill('third_seal');
+ await staged.locator('img').waitFor({state:'visible'});
+ await page.getByRole('button',{name:'Import selected files',exact:true}).click();
+ await page.getByRole('button',{name:'Show details for Third seal',exact:true}).waitFor();
+ assert.equal((await request('authoring.list')).assets.some(a=>a.kind==='uiImage'&&a.displayName==='Third seal'),true);
  assert.equal(receipts.some(r=>r.operation.startsWith('runtime.')),false);assert.equal(plans.some(p=>p.ok&&p.value.nodes.some(n=>n.kind==='image'&&n.literal==='images/ui station_seal.png')),true);assert.deepEqual(errors,[]);passed=true;
-} catch(error){errors.push(String(error));throw error;}
+} catch(error){errors.push(String(error));if(page)await writeFile(join(output,'failure.html'),await page.content());throw error;}
 finally{releaseCompose();await writeFile(join(output,'result.json'),JSON.stringify({passed,controllerAndRealCore:true,nativePicker:false,sdkRendering:false,receipts,plans,errors},null,2));await browser?.close();await server.close();await child.stop();}

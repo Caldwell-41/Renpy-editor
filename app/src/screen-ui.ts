@@ -100,8 +100,9 @@ export class ScreensWorkspace {
     this.layout = new ScreenLayoutEditor({
       view: () => {
         const view = this.compositionView();
-        const pending = view && this.images?.synthetic(view);
-        return this.current() && this.doc && this.nodes()[this.selected] ? { document:this.doc, screen:this.screen, node:pending ?? this.nodes()[this.selected]!, nodes:pending ? [...this.nodes(),pending] : this.nodes(), busy:this.busy, otherDraft:!!this.drafts.size || this.composer.hasDraft() } : undefined;
+        const nodes = view && this.images ? this.images.layoutNodes(view) : this.nodes();
+        const node = this.images?.hasAddition() ? nodes.at(-1) : nodes[this.selected];
+        return this.current() && this.doc && node ? { document:this.doc, screen:this.screen, node, nodes, busy:this.busy, otherDraft:!!this.drafts.size || this.composer.hasDraft() } : undefined;
       },
       commit: async (draft, edits: LayoutEdits) => {
         this.busy = true; this.loadSequence++;

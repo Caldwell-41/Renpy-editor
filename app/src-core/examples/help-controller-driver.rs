@@ -88,6 +88,11 @@ fn main() {
             include_bytes!("../../../tests/fixtures/phase-3b-screens/ui-image/seal.png"),
         )
         .unwrap();
+        fs::write(
+            root.join("broken_seal.png"),
+            &include_bytes!("../../../tests/fixtures/phase-3b-screens/ui-image/seal.png")[..24],
+        )
+        .unwrap();
     }
     service.close().unwrap();
     let host = ApplicationHost::new(service);
@@ -141,7 +146,9 @@ fn main() {
             assert_eq!(mode.as_deref(), Some("ui-image"));
             let choice = host
                 .with_service(|service| {
-                    service.authoring_select_import(&root.join(if request["alternate"] == true {
+                    service.authoring_select_import(&root.join(if request["broken"] == true {
+                        "broken_seal.png"
+                    } else if request["alternate"] == true {
                         "station_seal.jpg"
                     } else {
                         "station_seal.png"

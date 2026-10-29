@@ -28,6 +28,7 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
       const row=document.createElement('section');row.className='import-entry';row.dataset.unsubmitted='true';
       const title=document.createElement('h3');title.textContent=selected.displayName;row.append(title);
       const audio=['ogg','mp3','wav','flac'].includes(selected.extension.toLowerCase());
+      let decoded=false;
       const status=document.createElement('p');status.className='import-preview-status';status.role='status';row.append(status);
       const retry=document.createElement('button');retry.className='button media-retry';retry.textContent='Retry preview';retry.hidden=true;status.append(retry);
       if(audio){status.textContent=`Audio file · ${(selected.byteCount/1024).toFixed(1)} KB`;}
@@ -35,7 +36,7 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
         const image=document.createElement('img');image.className='import-preview';image.alt=`Preview of ${selected.displayName}`;image.hidden=true;row.insertBefore(image,status);
         const setStatus=(message:string,retryable:boolean):void=>{status.replaceChildren(document.createTextNode(message),retry);retry.hidden=!retryable;};
         const load=async():Promise<void>=>{
-          if(disposed||!jobs.has(row))return;setStatus('Loading preview…',false);image.setAttribute('aria-busy','true');
+          if(disposed||!jobs.has(row))return;decoded=false;setStatus('Loading preview…',false);image.setAttribute('aria-busy','true');
           try{
             const media=await actions.preview(selected.authorityId);
             if(disposed||!jobs.has(row))return;
@@ -45,8 +46,8 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
             for(const [other,entry] of urls){if(total+bytes.length<=32*1024*1024)break;total-=entry.bytes;release(other);}
             const url=URL.createObjectURL(new Blob([bytes],{type:media.mimeType}));
             urls.set(row,{url,bytes:bytes.length,release:()=>{image.hidden=true;image.removeAttribute('src');setStatus('Preview released to save memory. ',true);}});
-            image.onload=()=>{if(!disposed&&jobs.has(row)){image.hidden=false;setStatus(`${media.width??''} × ${media.height??''} · ${(selected.byteCount/1024).toFixed(1)} KB`,false);image.removeAttribute('aria-busy');}};
-            image.onerror=()=>{if(!disposed&&jobs.has(row)){release(row);setStatus('Preview unavailable: this image could not be decoded. ',true);image.removeAttribute('aria-busy');}};
+            image.onload=()=>{if(!disposed&&jobs.has(row)){decoded=true;image.hidden=false;setStatus(`${media.width??''} × ${media.height??''} · ${(selected.byteCount/1024).toFixed(1)} KB`,false);image.removeAttribute('aria-busy');}};
+            image.onerror=()=>{if(!disposed&&jobs.has(row)){decoded=false;release(row);setStatus('Preview unavailable: this image could not be decoded. ',true);image.removeAttribute('aria-busy');}};
             image.src=url;
           }catch(error){if(!disposed&&jobs.has(row)){image.removeAttribute('aria-busy');setStatus(`Preview unavailable: ${error instanceof Error?error.message:'Image could not be read.'} `,true);}}
         };
@@ -60,7 +61,7 @@ export function assetImport(host:HTMLElement, characters:Character[], actions:{c
       const expression=document.createElement('input');expression.value='neutral';technicalNameInput(expression);field(row,'Expression',expression);
       const sync=():void=>{character.parentElement!.hidden=expression.parentElement!.hidden=kind.value!=='characterAppearance';};kind.addEventListener('change',sync);sync();
       const remove=document.createElement('button');remove.className='text-button';remove.textContent='Remove from import';remove.addEventListener('click',()=>{if(busy)return;release(row);row.remove();jobs.delete(row);entries.splice(entries.indexOf(row),1);syncEmpty();if(!choose.hidden)choose.focus();});row.append(remove);entries.push(row);list.append(row);
-      jobs.set(row,()=>{const canonicalName=technicalName(name.value,'Ren’Py name');if(!display.value.trim())throw new Error('Display name is required.');if(kind.value==='characterAppearance'&&!character.value)throw new Error('Select a character.');const canonicalExpression=kind.value==='characterAppearance'?technicalName(expression.value,'Expression'):null;return {authorityId:selected.authorityId,kind:kind.value,technicalName:canonicalName,displayName:display.value.trim(),characterId:kind.value==='characterAppearance'?character.value:null,expression:canonicalExpression};});
+      jobs.set(row,()=>{const canonicalName=technicalName(name.value,'Ren’Py name');if(!display.value.trim())throw new Error('Display name is required.');if(kind.value==='uiImage'&&!decoded)throw new Error('UI images must finish decoding before import. Wait for the preview or retry it. Your staged files and names are retained.');if(kind.value==='characterAppearance'&&!character.value)throw new Error('Select a character.');const canonicalExpression=kind.value==='characterAppearance'?technicalName(expression.value,'Expression'):null;return {authorityId:selected.authorityId,kind:kind.value,technicalName:canonicalName,displayName:display.value.trim(),characterId:kind.value==='characterAppearance'?character.value:null,expression:canonicalExpression};});
     }syncEmpty();void pump();
     if(choose===document.activeElement&&choose.hidden)entries[0]?.querySelector<HTMLElement>('input,select')?.focus();
   };

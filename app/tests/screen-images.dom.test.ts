@@ -8,7 +8,7 @@ import type { CoreOperation } from "../src/protocol.js";
 const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0));
 };
-function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, imageBytes?: Buffer, composeReady?: Promise<void>) {
+function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, imageBytes?: Buffer, composeReady?: Promise<void>, nested = false) {
   const browser = new Window();
   Object.assign(globalThis, {
     window: browser,
@@ -36,6 +36,7 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, image
     numericLayout: {
       values: { xsize: { unit: "pixels", value: 160 }, ysize: { unit: "pixels", value: 80 } },
       blocked: {},
+      sourceBlocked: {},
     },
   });
   let doc: ScreenDocument = {
@@ -62,6 +63,13 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, image
       },
     ],
   };
+  if (nested) {
+    for (const node of doc.screens[0]!.nodes.filter(n => n.kind === "image")) {
+      node.parentStart = 10;
+      node.numericLayout!.blocked = { ypos: "The vertical group controls vertical placement.", yanchor: "The vertical group controls vertical placement." };
+    }
+    doc.screens[0]!.nodes.splice(1, 0, { id: "group", kind: "vbox", literal: null, span: { start: 10, end: 240 }, parentStart: 0, layout: {}, properties: [], protected: [], numericLayout: { values: {}, blocked: {} } });
+  }
   const assets = [
     {
       id: "seal",
@@ -177,6 +185,8 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, image
       }
       if (operation === "screens.canvasStatus")
         return { phase: "unavailable", message: "No SDK in component fixture" } as T;
+      if (operation === "screens.canvasRender")
+        return { phase: "unavailable", message: "No SDK in component fixture" } as T;
       if (operation === "screens.compose") {
         await composeReady;
         const command = payload?.command as {
@@ -230,6 +240,21 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, image
   };
   return { workspace, calls, click, edit, field, type, browser };
 }
+
+test("a reparented image keeps its layout preview when another image is selected", async () => {
+  const f = fixture(undefined, undefined, undefined, undefined, true);
+  try {
+    await flush(); f.edit("image-one"); await flush();
+    const parent = [...document.querySelectorAll("select")].find(s => s.ariaLabel === "Inside parent")!;
+    parent.value = "root"; parent.dispatchEvent(new window.Event("change", { bubbles: true }));
+    f.type("Vertical position", "77");
+    f.click("1  Choose"); f.edit("image-two"); await flush();
+    f.type("Width", "200"); await flush();
+    const preview = f.calls.filter(c => c.operation === "screens.canvasRender").at(-1)!.payload!;
+    assert.equal((preview.imageSamples as unknown[]).length, 2, "Both retained image drafts reach the canvas");
+    assert.deepEqual(preview.layouts, [{ nodeStart: 30, values: { ypos: { unit: "pixels", value: 77 } } }]);
+  } finally { f.workspace.dispose(); }
+});
 
 test("A2 image editing links natural aspect, retains invalid input, cancels in place and accepts one image command", async () => {
   const f = fixture();

@@ -62,6 +62,9 @@ const button = (text: string, run: () => void, primary = false) => {
 };
 const valid = (value: string) => /^[1-9]\d*$/.test(value) && Number(value) <= 16384;
 const containers = new Set(["screen", "fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"]);
+const parentCoordinates = (kind?: string): string[] =>
+  kind === "vbox" ? ["ypos", "yanchor"] : kind === "hbox" ? ["xpos", "xanchor"] :
+  kind === "grid" ? ["xpos", "ypos", "xanchor", "yanchor"] : [];
 let sequence = 0;
 
 /** Owns image drafts and the picker; accepted writes remain with ScreensWorkspace/core. */
@@ -275,13 +278,7 @@ export class ScreenImages {
       "ymaximum",
     ])
       blocked[k] = "This property is not supported for an image.";
-    for (const k of parent?.kind === "vbox"
-      ? ["ypos", "yanchor"]
-      : parent?.kind === "hbox"
-        ? ["xpos", "xanchor"]
-        : parent?.kind === "grid"
-          ? ["xpos", "ypos", "xanchor", "yanchor"]
-          : [])
+    for (const k of parentCoordinates(parent?.kind))
       blocked[k] = "The parent controls this placement.";
     const numericLayout: NumericLayout = {
       values: { xsize: { unit: "pixels", value: 320 }, ysize: { unit: "pixels", value: 180 } },
@@ -301,6 +298,19 @@ export class ScreenImages {
       protected: [],
       numericLayout,
     };
+  }
+  layoutNodes(view: CompositionView): ScreenNode[] {
+    const nodes = view.nodes.map((node) => {
+      const draft = this.drafts.get(this.key({ ...view, selected: node }));
+      if (node.kind !== "image" || !draft || !node.numericLayout) return node;
+      const parent = view.nodes.find((n) => n.id === draft.parentId);
+      if (!parent || parent.span.start === node.parentStart) return node;
+      const blocked = { ...(node.numericLayout.sourceBlocked ?? node.numericLayout.blocked) };
+      for (const key of parentCoordinates(parent.kind)) blocked[key] = "The parent controls this placement.";
+      return { ...node, parentStart: parent.span.start, numericLayout: { ...node.numericLayout, blocked } };
+    });
+    const addition = this.synthetic(view);
+    return addition ? [...nodes, addition] : nodes;
   }
   private edit(field: "width" | "height", value: string): void {
     const current = this.value();

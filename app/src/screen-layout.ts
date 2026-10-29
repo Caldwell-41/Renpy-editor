@@ -3,7 +3,7 @@ import { validateField } from "./authoring-input.ts";
 
 export type LayoutUnit = "pixels" | "relative" | "count";
 export interface LayoutValue { unit: LayoutUnit; value: number }
-export interface NumericLayout { values: Record<string, LayoutValue>; blocked: Record<string, string>; sizingNote?: string | null; allowsEmptyCells?: boolean }
+export interface NumericLayout { values: Record<string, LayoutValue>; blocked: Record<string, string>; sourceBlocked?: Record<string, string>; sizingNote?: string | null; allowsEmptyCells?: boolean }
 export type LayoutEdits = Record<string, LayoutValue | null>;
 export interface ImageLayoutReservation {
   accept: (accepted: ScreenDocument) => void;
