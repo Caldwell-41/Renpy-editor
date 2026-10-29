@@ -469,3 +469,30 @@ Next qualify this capture locally with four Mac SDK starts within the remaining
 is still the bounded existing Windows qualification. Fresh coherent Source inputs
 must pass normal entry and helper together; executable retention remains unresolved,
 so package/native artifact proof also runs. Original CI1/CI2 failures remain failed.
+
+## Native capture correction qualified on Mac
+
+[Mac normal-entry receipt 3](ui-image-mac-sdk-03.json) passes at exact checker
+candidate `943ea2f71b64074be6a8f877cda3886d8bcdeee1`. Compile, lint and both
+normal-entry aspects exit 0. The observed renderer is GL2. Source and independent
+reference have all six exact rectangles and zero differing RGBA pixels. Repeated
+Source captures are exact and empty Render captures are entirely transparent.
+Saved frames, receipt hashes and accepted Source SHA were independently rechecked
+without another SDK start. Scratch cleanup is complete. All four selected starts
+ran; Mac cumulative use is now SDK 11/16, helpers 2/4, packages 2/3, native 2/3.
+
+The accepted Source SHA is
+`616aa909c71dae7a9e9305796e123200330d847080562cdf4d5f97ec15430edf`, matching
+the inspected public-service output used in CI2. Product code remains unchanged
+from `9d6bf6b`; signed Mac package/native receipt 2 retains that exact material.
+Both independent review axes clear `d9ac51d..943ea2f`, with the full review base
+still `2e045d9`. No pixel threshold or supported asset changed.
+
+Final CI ordinal 3 is selected after publication of this evidence-only successor.
+It runs the existing focused Windows workflow with fresh coherent normal-entry
+and helper Source, plus package/native proof and actual executable retention.
+The maximum is five Windows SDK starts, one helper, one package and one native
+session. Windows completed use remains SDK 4/16, helper 1/4, package 1/3, native
+1/3 before dispatch. CI use is 2/3. No further costly dispatch is available after
+ordinal 3 without a new user decision. CI1/CI2 remain failed; no Windows normal-entry
+pass or ticket acceptance is claimed.

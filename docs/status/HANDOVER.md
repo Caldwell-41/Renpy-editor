@@ -61,18 +61,21 @@ records no actual renderer; no product decoder or renderer defect is established
 [CI2 diagnosis](../tasks/evidence/ui-image.md#ci2-windows-capture-failure-and-reassessment)
 owns exact observations, positive slices and missing executable evidence.
 
-Dispatch use is 2/3; Windows use is SDK 4/16, helper 1/4, package 1/3, native 1/3.
-Mac completed use before the next campaign is SDK 7/16, helper 2/4, package 2/3,
-native 2/3. The checker now selects GL2/ANGLE2 and public Render capture, checks
-backend, both geometry maps, repeatability and empty-Render isolation, with zero
-pixel tolerance. Six gate tests pass after a renderer-admission red reproduction.
-Product code is unchanged from `9d6bf6b`; no new Mac package is required for this
-harness-only correction. Four Mac SDK starts are selected to verify the new capture.
+The corrected checker at `943ea2f` passes fresh Mac compile/lint and both normal
+aspects with observed GL2, both exact geometry maps, zero differing reference pixels,
+exact repeated captures and transparent empty Render isolation. Independent saved-
+frame/hash admission passes. All four selected SDK starts ran and cleanup completed.
+Both review axes clear the checker against base `2e045d9`; six gate tests pass.
+Product code remains `9d6bf6b`, so its signed package/native proof remains applicable.
+[Receipt 3](../tasks/evidence/ui-image-mac-sdk-03.json) binds this fresh result.
 
-Next finish local capture proof and both-axis review, then use only final ordinal 3
-on its exact pushed candidate. SDK/helper Source inputs must qualify coherently,
-and the Windows executable must actually be retained. Do not reset counts or
-rerun older attempts. No watcher is running. No full Windows/ticket pass, PR,
+#40 owns cumulative use: dispatches 2/3; Windows SDK 4/16, helper 1/4, package 1/3,
+native 1/3; Mac SDK 11/16, helper 2/4, package 2/3, native 2/3. Next push the
+evidence-only successor and dispatch final ordinal 3 on its exact candidate. Fresh
+SDK/helper Source inputs must qualify coherently and the Windows executable must
+actually be retained. The selected maximum is five Windows SDK starts, one helper,
+one package and one native session. Do not reset counts or rerun older attempts.
+No watcher is running. No full Windows/ticket pass, PR,
 merge or release is claimed. Keep local dependency/target symlinks and all original
 artifacts/failed frames. This chat owns continuation.
 
