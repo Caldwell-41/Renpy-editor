@@ -921,3 +921,56 @@ No SDK/helper, package, native session or costly CI dispatch ran. Existing count
 candidate-bound native evidence, the failed full Design Lab startup gate and
 physical-input/human/wider acceptance retain their scope. #40 remains open for
 acceptance; no merge or release is selected.
+
+## Merge and ticket closeout, 2026-10-29
+
+Kris directed merging PR #68 into its Screens parent, updating associated tickets,
+retiring the completed branch/workspaces and recommending a successor. GitHub
+confirmed merge `a75cb0d6294350c222e65352d24c96ac04d46ca6` at 20:39:21 AEST.
+The merge's tree is `80cb4b4d0bfc707d6eff15dc5dea4b9aeafa1b5b`, exactly equal
+to reviewed head `4fd69e570856bba60104aac37a2d02ea78327520`. The primary checkout
+fast-forwarded from base `2e045d941bf633e73b8161be0096806203fbc2bb` without conflict.
+
+The final full-PR review independently checked Standards and Spec against that
+base. Both report zero findings. Fresh verification at the reviewed head passes
+TypeScript checking, 18 image/import DOM cases, 58 ordinary Screens core cases,
+repository validation and all 13 section-link validator tests. The three SDK/helper
+cases remain intentionally ignored and are not counted as passes. Whitespace
+checking also passes. [Required automatic run 40849033483, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40849033483/attempts/1)
+passes at the exact reviewed head, including all 276 frontend tests; unselected
+specialist jobs remain skipped. GitHub reports no submitted review or inline thread;
+the independent review evidence is the two-axis chat report retained here.
+
+L06 #40 is accepted and closed for its four bounded criteria. P3B #22's live map
+credits bounded UI-image R05/R09/R13 and source/draft/history/reopen evidence under
+R10/R11/R12/R25/R41. B02 #24, B03 #25, B06 #28, B08 #30 and B11 #33 remain open.
+B05 #27 and L09 #44 record the newly satisfied #40 prerequisite; #44 is ready for
+selection. L18 #46 has L03/L06/L17 satisfied and still waits on L07 #43. Native
+dependency edges remain as provenance. Published links pin retained source rather
+than the retired feature branch.
+
+All six completed worktrees and three local branches are retired after ancestry
+or reviewed-file equivalence checks. The non-ancestor prototype is retained by
+local recovery tag `recovery/l06-approved-prototype-2026-10-29`; every prototype
+path matches the merged source/captures. Six archives preserve and verify all 664
+local files, including raw failures/qualification, build output and dependency
+symlinks. `.toolchains/retired-worktrees/pr68/retirement-manifest.json` owns original
+paths, heads, archive/file hashes and completed removal results. No force removal
+was used. The remote `codex/phase3b-l06-ui-image` branch is deleted after confirmation.
+Other idle chats' historical worktree paths are now retired; no task is running in
+them. The primary unrelated audit is hash-identical. Primary toolchains, runtime
+journals, protected native/session recovery and stashes remain intact.
+
+Earlier candidate-bound Mac/Windows SDK/helper/native proof remains scoped to its
+receipts; later correction tests do not create fresh native evidence. CI1/CI2,
+fixture/environment failures and the full Design Lab startup failure remain failed.
+Physical input, OS dialogs, human, full editor/canvas and wider Phase 3B acceptance
+remain separate. No SDK/helper, package, native session or costly CI dispatch ran.
+Final use remains dispatches 3/3; Mac SDK 11/16, helper 2/4, package/native 2/3 each;
+Windows SDK 9/16, helper 2/4, package/native 2/3 each. Unused L06 allowances are closed.
+
+No successor implementation or release is selected. Recommend L05 #39 next: its
+L02 prerequisite is satisfied, and fonts unlock shared styles in L07 #43, then the
+broader Help rendering work in L18 #46. The existing longer status records retain
+older unique recovery details; this closeout replaces only the superseded L06
+continuation and creates no duplicate snapshot.

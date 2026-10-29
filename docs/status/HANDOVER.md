@@ -2,37 +2,44 @@
 
 <a id="l06-implementation-and-qualification"></a>
 
-## L06 import and parent correction
+## L06 merge and workspace closeout
 
-Kris selected both findings from the independent PR #68 review, root-cause fixes,
-TDD and an update to the existing PR. The confirmed test boundaries are the public
-Assets importer, Screens workspace controls and real controller/core journey.
-Starting head is `8f29ec8`; code checkpoint `cf67de2` closes both findings. The full
-PR base remains `2e045d9`. Work uses the isolated checkout at
-`.toolchains/pr68-import-parent-fix`, targeting `codex/phase3b-l06-ui-image`.
+Kris directed merging [PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68),
+updating associated tickets and cleaning its completed branch/workspaces.
+Merge `a75cb0d6294350c222e65352d24c96ac04d46ca6` is on
+`codex/phase3b-screen-designer`; its tree exactly matches reviewed head
+`4fd69e570856bba60104aac37a2d02ea78327520`. This primary checkout is current.
+[L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40) is accepted and closed
+for its four bounded UI-image criteria. No successor implementation or release is selected.
 
-The importer records browser decode readiness per staged row before accepting the
-UI-image role. Core preserves Source restrictions separately from accepted-parent
-rules; the workspace derives all image drafts' layout constraints from their
-selected parents. Public regressions first fail and then pass. Both independent
-review axes report zero findings in the correction delta.
-[Evidence](../tasks/evidence/ui-image.md#import-decoding-and-draft-parent-corrections-2026-10-29)
-retains exact red/green results and original fixture/environment failures.
+[Merge closeout](../tasks/evidence/ui-image.md#merge-and-ticket-closeout-2026-10-29)
+owns final review/check identities, exact candidate relationships, tracker updates
+and recovery. Both full-PR review axes have zero findings against `2e045d9`.
+Required automatic run `40849033483`, attempt 1, passes at the reviewed head.
+Fresh final review passes typechecking, 18 image/import tests, 58 ordinary Screens
+tests, repository validation and 13 section-link tests. Three SDK/helper cases
+remain ignored. Earlier both-host SDK/helper/native receipts and original failures
+retain their scope. Full Design Lab startup remains failed; no complete promotion,
+physical-input, OS-dialog, human or whole-3B acceptance is claimed.
 
-All 276 frontend tests, typechecking/build, Rust formatting, repository validation
-and 13 section-link tests pass. All 58 ordinary Screens tests pass; three existing
-SDK/helper tests remain ignored. The freshly built real controller/core journey
-passes corrupt/valid Assets imports, combined parent/position Apply, exact history
-and the existing image workflow. Raw evidence remains in the primary ignored
-`.toolchains/pr68-import-parent-evidence/`. PR #68 owns its published head and
-current automatic-check state. Publication requires the ordinary check audit;
-no new SDK/helper, package, native session or costly dispatch is selected.
+All six completed worktrees and three local branches are retired. The remote
+feature branch is deleted. Their 664 local files, including raw qualification
+and failure evidence, are archived and hash-verified under
+`.toolchains/retired-worktrees/pr68/`; `retirement-manifest.json` records exact
+heads, original paths, archive/file hashes and dependency symlinks. The approved
+prototype's unique history is retained by local tag
+`recovery/l06-approved-prototype-2026-10-29`; all its changed files match the merge.
+Restore a separate checkout from that tag for a future comparison. Existing
+primary evidence/output, unrelated untracked Phase 1 audit and protected recovery
+below remain intact. No process used a retired checkout at cleanup.
 
-Keep earlier CI3, both-host SDK/helper/native receipts and original failures,
-the approved A2 prototype and failed full Design Lab startup gate, original
-implementation/review checkouts, unrelated primary audit and protected recovery
-below. #40 remains open for acceptance. Costly dispatches remain 3/3. No merge,
-release or successor outcome is selected.
+Final L06 use is dispatches 3/3; Mac SDK 11/16, helpers 2/4, packages 2/3,
+native sessions 2/3; Windows SDK 9/16, helpers 2/4, packages 2/3, native sessions 2/3.
+The remaining allowances are closed. No SDK/helper, package, native session or
+costly CI operation ran during review/merge closeout. No operation or watcher remains pending.
+Related groups retain aggregate acceptance. L09 #44 is dependency-ready; L18 #46
+still waits on L07 #43. L05 #39 is recommended next because fonts unlock shared
+styles and then broader Help rendering; recommendation does not select implementation.
 
 ## L04 merge and workspace closeout
 

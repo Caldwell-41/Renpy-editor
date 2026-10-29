@@ -1,22 +1,26 @@
 # Current status
 
-## L06 import and parent corrections reviewed
+## L06 UI-image authoring merged
 
-The two selected [PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68)
-review findings are fixed at code checkpoint `cf67de2`. UI-image imports require
-successful browser decoding. Image drafts use their selected parent's layout
-rules while retaining Source restrictions, including after selecting another image.
-Both independent review axes report zero findings against starting head `8f29ec8`.
+[PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68) merged into
+`codex/phase3b-screen-designer` at `a75cb0d6294350c222e65352d24c96ac04d46ca6`.
+Its tree exactly matches reviewed head `4fd69e5`. Kris selected this merge after
+both full-PR review axes reported zero findings. [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
+is accepted and closed for its four bounded UI-image import, placement and sizing criteria.
 
-All 276 frontend tests and 58 ordinary Screens tests pass. Three SDK/helper tests
-remain explicitly ignored. The real controller/core journey proves failed and
-successful Assets imports, combined parent/position Apply and exact Undo/Redo.
-[Evidence](../tasks/evidence/ui-image.md#import-decoding-and-draft-parent-corrections-2026-10-29)
-retains red/green results, original fixture/environment failures and current scope.
-PR #68 owns publication and automatic-check state. [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
-remains open for acceptance. No merge, release or costly qualification is selected.
-Earlier candidate-bound evidence, failed full Design Lab startup, the approved
-prototype, unrelated audit and protected recovery remain intact.
+[Closeout evidence](../tasks/evidence/ui-image.md#merge-and-ticket-closeout-2026-10-29)
+retains required automatic checks, fresh final-review checks, both-target
+SDK/helper/native candidates and original failures. Three SDK/helper tests remain
+ignored in the ordinary review slice. The failed full Design Lab startup check,
+physical input, OS dialogs, human and wider editor/canvas/Phase 3B acceptance
+retain their stated limits. L06's unused allowances are closed.
+
+The six completed worktrees, three local branches and remote feature branch are
+retired after verified source/evidence preservation. The approved A2 prototype
+remains recoverable; the unrelated audit and protected recovery are intact.
+L09 #44 is dependency-ready. L18 #46 still waits on L07 #43. Recommend L05 #39
+(project fonts) next to unblock shared styles and broader Help rendering;
+no successor implementation or release is selected.
 
 ## L04 nested and clipped layouts merged
 
