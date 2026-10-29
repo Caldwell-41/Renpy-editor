@@ -52,12 +52,15 @@ Windows operation use remains zero and dispatch 1/3 remains consumed.
 
 [CI1 diagnosis](../tasks/evidence/ui-image.md#ci1-windows-import-stack-failure) owns
 logs, partial-artifact limitations and red/green reproduction. Product fixes are
-currently uncommitted: two 1 MiB import/streaming stack arrays move to heap storage,
+committed at `9d6bf6b`: two 1 MiB import/streaming stack arrays move to heap storage,
 with a public-service bounded-stack regression. Preserve in-flight status/evidence
-edits and both local dependency/target symlinks. Next finish affected verification,
-review the correction, commit/push and dispatch ordinal 2 within unchanged ceilings.
-A fresh signed Mac package/native pass must bind changed product material; preserve
-existing SDK/helper pixel evidence with its unchanged-material reuse boundaries.
+edits and both local dependency/target symlinks. Both review axes clear the correction and affected debug/release checks pass.
+Fresh signed Mac package build 2 and native session 2 also pass at `9d6bf6b`;
+controller-08 passes with the rebuilt core. Next publish and dispatch ordinal 2
+within unchanged ceilings.
+The new Mac receipt is `ui-image-mac-native-02.json`. Preserve original native
+receipts and existing SDK/helper pixel evidence with its unchanged-material reuse
+boundaries.
 
 CI2 may select at most five Windows SDK starts, one helper, one package and one
 native session. Do not rerun CI1 or reset counts. The user already authorized push

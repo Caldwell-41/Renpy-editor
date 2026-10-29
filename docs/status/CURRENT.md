@@ -25,7 +25,8 @@ candidate `19d71e8`.
 Kris authorized publication and focused Windows CI. The branch is pushed at
 `8eeabc9`; [CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40807895621)
 failed for that exact candidate before any SDK/package/native start. A reproduced
-import stack-buffer defect is being corrected and verified; no PR,
+import stack-buffer defect is corrected at `9d6bf6b`, both reviews clear, and fresh
+signed Mac package/native proof passes; Windows retry is next; no PR,
 merge or release is selected. Earlier closed
 allowances and protected recovery remain intact.
 

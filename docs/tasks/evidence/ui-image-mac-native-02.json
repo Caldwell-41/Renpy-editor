@@ -1,0 +1,142 @@
+{
+  "candidate": "9d6bf6bdbb87d1f01c3e529b945d0e2ac6d84953",
+  "architecture": "macOS ARM64",
+  "package": {
+    "bundle": "Loomlight.app",
+    "identifier": "app.loomlight.desktop",
+    "certificateSHA1": "358372708164C7273A551D746449357C12A3A806",
+    "designatedRequirement": "designated => identifier \"app.loomlight.desktop\" and certificate leaf = H\"358372708164c7273a551d746449357c12a3a806\"",
+    "bundleVersion": "0.1.0",
+    "executableSHA256": "ab1469e206ec962ccfa9c3be9925046a99f8fadf76b1325783a11990421175eb",
+    "strictSignatureVerified": true,
+    "installerSHA256": "6047c0cf184e3af883a692856f8ecb952df55f42f004b8f0ec515506548f3ccf",
+    "installerContentsVerified": true
+  },
+  "native": {
+    "case": "ui-image",
+    "passed": true,
+    "exitCode": 0,
+    "timedOut": false,
+    "elapsedSeconds": 7.23,
+    "reports": [
+      {
+        "case": "ui-image",
+        "cleanupComplete": true,
+        "cleanupOwners": {
+          "credentials": true,
+          "host": true,
+          "requests": true
+        },
+        "details": {
+          "acceptedSource": "# loomlight-screen: 521a0232-5633-4072-9505-889a3ccccc93\nscreen travel_notes():\n    pass\n    add \"images/ui station_seal.png\": # loomlight-element: 7c1cee94-a196-47ed-86af-6d4f12be3a9a\n        xsize 200\n        ysize 70\n    use source_only_footer()\n\nscreen source_only_footer():\n    text \"Protected neighbor\"\n",
+          "identities": [
+            "782bcac2-47ca-43ee-b7c0-2229aebe9d30",
+            "7c1cee94-a196-47ed-86af-6d4f12be3a9a"
+          ],
+          "identity": {
+            "id": "521a0232-5633-4072-9505-889a3ccccc93",
+            "name": "travel_notes",
+            "path": "game/ui/travel_notes.rpy",
+            "resolved": true,
+            "rootId": "782bcac2-47ca-43ee-b7c0-2229aebe9d30",
+            "sourceRevision": "8aa8a12e2c5fcc69d4f1dcadc62552bf38f4329750e53a7d1cc9c22c15fa359c"
+          },
+          "imageDecoded": true,
+          "imageFormats": [
+            "png",
+            "jpeg",
+            "webp-lossless",
+            "webp-lossy",
+            "webp-alpha"
+          ],
+          "nativeWebView": true,
+          "passed": true,
+          "scenario": "ui-image",
+          "sdkExecuted": false,
+          "sessionId": "a918213a-a685-4d4e-a7db-5777e79a9fca",
+          "stage": "complete",
+          "stages": [
+            {
+              "stage": "image-picker-passed"
+            },
+            {
+              "stage": "image-draft-passed"
+            },
+            {
+              "stage": "image-history-passed"
+            },
+            {
+              "stage": "image-source-passed"
+            },
+            {
+              "stage": "image-reopen-passed"
+            },
+            {
+              "stage": "complete"
+            }
+          ]
+        },
+        "evidence": "runtime-ui-packaged",
+        "passed": true
+      }
+    ],
+    "externalErrors": [],
+    "helpDisk": {
+      "acceptedBytesMatch": true,
+      "scratchJobsRemaining": 0,
+      "sourceBytecode": false,
+      "sourceSaves": false
+    },
+    "diskErrors": [],
+    "fixtureCleanupComplete": true
+  },
+  "desktop": {
+    "admitted": true,
+    "cleanupComplete": true,
+    "samples": [
+      {
+        "phase": "before-assertions",
+        "monotonic": 2454651.00143625,
+        "onConsole": true,
+        "loginDone": true,
+        "screenLocked": false,
+        "displayActive": true,
+        "displayAsleep": false
+      },
+      {
+        "phase": "before-launch",
+        "monotonic": 2454651.005508458,
+        "onConsole": true,
+        "loginDone": true,
+        "screenLocked": false,
+        "displayActive": true,
+        "displayAsleep": false
+      },
+      {
+        "phase": "after-child",
+        "monotonic": 2454658.193073708,
+        "onConsole": true,
+        "loginDone": true,
+        "screenLocked": false,
+        "displayActive": true,
+        "displayAsleep": false
+      }
+    ],
+    "assertions": [
+      {
+        "kind": "PreventUserIdleDisplaySleep",
+        "id": 41757
+      },
+      {
+        "kind": "PreventUserIdleSystemSleep",
+        "id": 41758
+      }
+    ],
+    "released": [
+      41758,
+      41757
+    ],
+    "errors": []
+  },
+  "scope": "Fresh signed package and synthetic native-WebView input after both heap-buffer corrections. No SDK, physical-keyboard, OS file-dialog or human claim."
+}

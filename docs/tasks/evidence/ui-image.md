@@ -375,3 +375,24 @@ A fresh signed Mac package/native case will qualify the changed core material.
 Existing SDK/helper geometry and pixel proof retain their scope: source generation,
 asset fixtures, renderer, helper/runtime protocol and SDK adapter are unchanged;
 public import checks establish the same bytes and hashes after allocation changes.
+
+
+## Stack correction qualification and CI2 preparation
+
+Both review axes clear `9d6bf6b` against the user-confirmed base `2e045d9`.
+The public controller/core sequence `controller-08` passes after rebuilding the
+actual driver with both allocation changes. No frontend/product layout changed.
+Signed Mac package build 2 and native session 2 pass at exact product candidate
+`9d6bf6bdbb87d1f01c3e529b945d0e2ac6d84953`.
+[Receipt](ui-image-mac-native-02.json) binds signature/installer checks, executable
+hash, native stages, exact accepted disk bytes and complete fixture/host/request/
+credential/power cleanup. The executable hash still matches after the session.
+All five raster variants decode; validation, aspect/stretch, history, Source and
+reopen pass. This profile starts no SDK and establishes no physical/OS-dialog or
+human proof. Both original Mac receipts remain retained on their own candidates.
+
+Cumulative Mac use is SDK 7/16, helpers 2/4, package builds 2/3 and native sessions
+2/3. Windows use remains zero and CI dispatches remain 1/3 before CI2. The next
+selected operation is ordinal 2 on the pushed correction plus evidence-only
+closeout. Planned Windows maximum remains five SDK starts, one helper, one package
+and one native session. Do not retry CI1 or reset prior consumption.
