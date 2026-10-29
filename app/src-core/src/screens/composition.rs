@@ -209,17 +209,11 @@ impl AuthoringService {
                 height,
                 layout,
             } => {
-                if width == 0 || height == 0 || width > MAX_PIXELS || height > MAX_PIXELS {
-                    return Err(SceneError::InvalidPayload);
-                }
                 let parent = screen
                     .nodes
                     .iter()
                     .find(|node| node.id.as_ref() == Some(&parent_id))
                     .ok_or(SceneError::UnknownEntity)?;
-                if !can_add(screen, parent, "image") {
-                    return Err(SceneError::OpaqueBoundary);
-                }
                 let selection = self.prepare_ui_image_reference(
                     project,
                     project_id,
@@ -230,44 +224,20 @@ impl AuthoringService {
                 if let Some(metadata) = selection.metadata {
                     companions.push(metadata);
                 }
-                let image = selection.path;
-                let literal =
-                    serde_json::to_string(&image).map_err(|_| SceneError::ImageInvalid)?;
-                let id = uuid::Uuid::new_v4().to_string();
-                let newline = if bytes.windows(2).any(|s| s == b"\r\n") {
-                    "\r\n"
-                } else {
-                    "\n"
-                };
-                let indent = bytes[parent.span.start..]
-                    .iter()
-                    .take_while(|b| **b == b' ')
-                    .count()
-                    + 4;
-                let spaces = " ".repeat(indent);
-                let mut addition = format!("{spaces}add {literal}: # loomlight-element: {id}{newline}{spaces}    xsize {width}{newline}{spaces}    ysize {height}{newline}");
-                if parent.source_end > 0 && bytes[parent.source_end - 1] != b'\n' {
-                    addition.insert_str(0, newline);
-                }
-                proposed.splice(parent.source_end..parent.source_end, addition.bytes());
-                if !layout.is_empty() {
-                    if layout.contains_key("xsize") || layout.contains_key("ysize") {
-                        return Err(SceneError::InvalidPayload);
-                    }
-                    let candidate = inspect(&proposed, source_path.clone(), String::new())?;
-                    let node = candidate
-                        .screens
-                        .iter()
-                        .find(|s| s.name == screen.name)
-                        .and_then(|s| s.nodes.iter().find(|n| n.id.as_ref() == Some(&id)))
-                        .ok_or(SceneError::InvariantBlocked)?;
-                    proposed = node
-                        .numeric_layout
-                        .as_ref()
-                        .ok_or(SceneError::OpaqueBoundary)?
-                        .patch(&proposed, &layout)?;
-                }
-                id
+                let prepared = super::images::prepare(
+                    &bytes,
+                    screen,
+                    source_path,
+                    super::images::Target::Addition { parent },
+                    super::images::Change {
+                        path: &selection.path,
+                        width,
+                        height,
+                        layout,
+                    },
+                )?;
+                proposed = prepared.source;
+                prepared.id
             }
             Command::Image {
                 node_id,
@@ -295,58 +265,22 @@ impl AuthoringService {
                 if let Some(metadata) = selection.metadata {
                     companions.push(metadata);
                 }
-                let image = selection.path;
-                if let Some(parent_id) = parent_id {
-                    proposed =
-                        super::images::reparent(&bytes, screen, node, &parent_id, source_path)?;
-                }
-                let moved = inspect(&proposed, source_path.clone(), String::new())?;
-                let node = moved
-                    .screens
-                    .iter()
-                    .find(|s| s.name == screen.name)
-                    .and_then(|s| s.nodes.iter().find(|n| n.id.as_ref() == Some(&node_id)))
-                    .ok_or(SceneError::InvariantBlocked)?;
-                let numeric = node
-                    .numeric_layout
-                    .as_ref()
-                    .ok_or(SceneError::OpaqueBoundary)?;
-                let mut values = layout;
-                if values.contains_key("xsize") || values.contains_key("ysize") {
-                    return Err(SceneError::InvalidPayload);
-                }
-                values.insert(
-                    "xsize".into(),
-                    Some(layout::NumericValue {
-                        unit: layout::Unit::Pixels,
-                        value: width as f64,
-                    }),
-                );
-                values.insert(
-                    "ysize".into(),
-                    Some(layout::NumericValue {
-                        unit: layout::Unit::Pixels,
-                        value: height as f64,
-                    }),
-                );
-                let before_layout = proposed.clone();
-                proposed = numeric.patch(&before_layout, &values)?;
-                if node.literal.as_ref() != Some(&image) {
-                    let header =
-                        std::str::from_utf8(&before_layout[node.span.start..node.source_end])
-                            .map_err(|_| SceneError::UnsupportedSource)?
-                            .lines()
-                            .next()
-                            .unwrap();
-                    let indent = header.len() - header.trim_start_matches(' ').len();
-                    let statement = code(&header[indent..]);
-                    let remaining = statement[3..].trim_start();
-                    let literal = remaining.strip_suffix(':').unwrap_or(remaining).trim_end();
-                    let start = node.span.start + indent + statement.len() - remaining.len();
-                    let value =
-                        serde_json::to_string(&image).map_err(|_| SceneError::ImageInvalid)?;
-                    proposed.splice(start..start + literal.len(), value.bytes());
-                }
+                let prepared = super::images::prepare(
+                    &bytes,
+                    screen,
+                    source_path,
+                    super::images::Target::Existing {
+                        node,
+                        parent_id: parent_id.as_deref(),
+                    },
+                    super::images::Change {
+                        path: &selection.path,
+                        width,
+                        height,
+                        layout,
+                    },
+                )?;
+                proposed = prepared.source;
                 node_id
             }
             Command::Text { node_id, text } => {

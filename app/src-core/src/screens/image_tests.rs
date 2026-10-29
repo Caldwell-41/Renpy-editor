@@ -799,6 +799,36 @@ fn ui_image_canvas_combines_size_and_numeric_drafts_before_apply() {
 }
 
 #[test]
+fn ui_image_canvas_refuses_conflicting_common_size_and_image_drafts() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let asset = import_image(&mut service, temporary.path(), &root, "uiImage");
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImage","parentId":owner["rootId"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":160,"height":80}),
+    );
+    let node = added["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == added["selectedId"])
+        .unwrap();
+    let before = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();
+    let result = reject(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":"notes","expectedRevision":added["document"]["revision"],"width":1280,"height":720,
+            "layouts":[{"nodeStart":node["span"]["start"],"values":{"xsize":{"unit":"pixels","value":120}}}],
+            "imageSamples":[{"nodeStart":node["span"]["start"],"assetId":asset["id"],"expectedAssetSha256":asset["sha256"],"width":200,"height":100}]}),
+    );
+    assert_eq!(result["error"]["code"], "INVALID_PAYLOAD");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        before
+    );
+}
+
+#[test]
 fn ui_image_canvas_parent_draft_matches_applied_child_order() {
     for target_kind in ["vbox", "hbox", "fixed", "grid"] {
         for (same_parent, target_first) in [(true, true), (false, true), (false, false)] {
