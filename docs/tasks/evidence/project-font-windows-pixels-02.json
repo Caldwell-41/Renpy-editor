@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "imageSHA256": "44ec47fde626ddbfc95275e9537950de42af428edab260ce0f58d9fa9aaec648",
+      "referenceSHA256": "44ec47fde626ddbfc95275e9537950de42af428edab260ce0f58d9fa9aaec648",
+      "differingPixels": 0
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "imageSHA256": "601e3b48d136c1d928b893bf5388dbb33e5d72117a249137e585ca1285b5734a",
+      "referenceSHA256": "601e3b48d136c1d928b893bf5388dbb33e5d72117a249137e585ca1285b5734a",
+      "differingPixels": 0
+    }
+  ],
+  "sourceSHA256": "d9edc5f5453eb1436ec4765eee50ce8d6f430ba7ac179765670df89820ac30d0",
+  "rejectionChecks": [
+    "missing-reference",
+    "wrong-source",
+    "wrong-physical",
+    "wrong-scale",
+    "blank-frame",
+    "fallback-font"
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "passed": true,
+  "sdkProcesses": 4,
+  "commands": [
+    {
+      "name": "compile",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "font-1280x720",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "font-1024x768",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    }
+  ],
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "renderer": "angle2",
+      "rectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "referenceRectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "fonts": {
+        "title": "fonts/help_ttf.ttf",
+        "body": "fonts/help_otf.otf",
+        "right": "fonts/help_ttf.ttf",
+        "minimum": "fonts/help_ttf.ttf",
+        "maximum": "fonts/help_otf.otf"
+      },
+      "physical": [
+        922,
+        519
+      ],
+      "drawPerVirtual": 0.7203125,
+      "differingPixels": 0,
+      "sourceSHA256": "d9edc5f5453eb1436ec4765eee50ce8d6f430ba7ac179765670df89820ac30d0",
+      "imageHashes": {
+        "accepted": "44ec47fde626ddbfc95275e9537950de42af428edab260ce0f58d9fa9aaec648",
+        "reference": "44ec47fde626ddbfc95275e9537950de42af428edab260ce0f58d9fa9aaec648",
+        "default": "5ea1bd5aea8418ac8a0e1acce46a705dcb362e1e22aacfab85ee6fa54d97785e"
+      }
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "renderer": "angle2",
+      "rectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "referenceRectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "fonts": {
+        "title": "fonts/help_ttf.ttf",
+        "body": "fonts/help_otf.otf",
+        "right": "fonts/help_ttf.ttf",
+        "minimum": "fonts/help_ttf.ttf",
+        "maximum": "fonts/help_otf.otf"
+      },
+      "physical": [
+        888,
+        666
+      ],
+      "drawPerVirtual": 0.8671875,
+      "differingPixels": 0,
+      "sourceSHA256": "d9edc5f5453eb1436ec4765eee50ce8d6f430ba7ac179765670df89820ac30d0",
+      "imageHashes": {
+        "accepted": "601e3b48d136c1d928b893bf5388dbb33e5d72117a249137e585ca1285b5734a",
+        "reference": "601e3b48d136c1d928b893bf5388dbb33e5d72117a249137e585ca1285b5734a",
+        "default": "1923949b326ff580f1e41113ee8ce6380869bbd3bec0984d6d61f9dcb283343e"
+      }
+    }
+  ],
+  "cleanupComplete": true,
+  "os": "Windows",
+  "architecture": "AMD64",
+  "candidate": "664d6930afce67378ebd94c371359d69529107d0",
+  "checkerSHA256": "b57f61ea513e9a6a6d474a30177fdeccc3f134456e302104124b1f88c5625f06",
+  "acceptedSHA256": "c69c7439c3570e2af254199679bd5729525b0d4355973c0063e3f600edc641ce"
+}

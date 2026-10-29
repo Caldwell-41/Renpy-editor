@@ -388,3 +388,58 @@ native sessions 1/3. Costly dispatches are 2/3. Next: publish this corrected
 candidate and select Windows ordinal 3, then audit both focused and automatic
 checks before starting the requested separate PR review chat. No extra package,
 native session, merge, release or ticket acceptance is selected.
+
+## CI3 in progress
+
+Corrected head `664d6930afce67378ebd94c371359d69529107d0` is published on draft PR #70.
+Windows [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40908795368), attempt 1, ordinal 3, and automatic
+[PR quality](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40908699824) are running at that head.
+Costly dispatches are 3/3. Windows use from CI2 is normal SDK 4/20, helpers 1/4,
+packages 1/3 and native sessions 1/3; CI3 execution is reserved until evidence
+confirms actual starts. Mac use is normal SDK 9/20, helpers 3/4, packages 3/3
+and native sessions 3/3. Watch registration is retained in ignored
+`project-fonts/watch-03.json`. Audit both exact runs, all required steps, retained
+artifacts and binaries, source/pixel comparison and cleanup before a pass. Then
+start the requested separate code-review chat on the draft PR, using its fixed
+base `8f0d208`. No merge, release or ticket acceptance is selected.
+
+## CI3 audited success
+
+Windows [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40908795368),
+at `664d6930afce67378ebd94c371359d69529107d0`, attempt 1, passes every selected
+required step. Automatic [PR quality](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40908699824)
+at that same head passes frontend/Rust formatting and repository validation.
+Unselected qualification jobs remain skipped; none substitutes for a required step.
+The [audited receipt](project-font-windows-ci-03.json) records run/attempt, artifact
+identity, source/pixel verification and actual operation consumption.
+
+The [normal SDK receipt](project-font-windows-sdk-02.json) passes compile, lint and
+both render runs with cleanup. The [helper](project-font-windows-helper-02.json)
+passes geometry, pending/accepted typography equality and cooperative exit zero.
+Its [pixel comparison](project-font-windows-pixels-02.json) matches accepted and
+independent reference output exactly at both virtual aspects and the recorded
+physical dimensions/scale. Independent local replay also passes all six negative
+evidence cases. The source binding agrees with the public-core export.
+
+The [Windows native probe](project-font-windows-native-02.json) passes font picker,
+draft, history, Source and reopen stages, TTF/OTF decoding, exit zero and cleanup.
+The [retained package](project-font-windows-package-02.json) matches SHA-256
+`103182eaa96421155e936f75f334518b0bb3845b7b028ff9a6a50e7fd63160d4`;
+the downloaded binary's PE header independently confirms Windows x64. All four
+controller checks pass. The exact font-probe rehearsal loads two actual font
+specimens with delayed responses and records zero overlapping Apply requests.
+
+Both targets now establish the four bounded functional criteria in the earlier
+criterion table: typed TTF/CFF OTF import and handles, minimal typed typography
+with preserved expressions, actual SDK placement/wrapping/font use, and focus,
+Apply/Cancel, Source/history/reopen. Formats/bounds remain in DATA_MODEL. The
+original full Design Lab startup failure, physical OS-dialog/human-input and
+wider editor/canvas/Phase 3B limits remain visible. This does not accept or close
+the ticket, select merge/release, or claim the pending independent PR review.
+
+Final cumulative use is dispatches 3/3; Mac normal SDK 9/20, helpers 3/4, packages
+3/3 and native sessions 3/3; Windows normal SDK 8/20, helpers 2/4, packages 2/3
+and native sessions 2/3. No costly operation remains pending. The final receipt
+update changes documentation only; application and workflow inputs match the
+qualified head. Publish that update and audit its ordinary PR checks, then start
+the user-requested separate code-review chat on PR #70 against `8f0d208`.

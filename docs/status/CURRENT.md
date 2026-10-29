@@ -15,18 +15,18 @@ Earlier implementation-review findings are resolved. The requested separate
 draft-PR review follows audited CI.
 
 Mac use is SDK 9/20, helpers 3/4, packages 3/3 and native sessions 3/3.
-[Draft PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) remains open.
-CI2 at `399402f` failed two checks; automatic PR quality passes. All controller
-rehearsals, normal SDK and helper geometry/pending/cleanup pass. The pixel gate
-mistook physical for virtual dimensions; its corrected replay passes strict pixels
-for both targets and rejects six invalid-evidence cases. The native Apply race is
-reproduced and fixed by routing passive asset reads and import through the shared
-request lane. Full frontend checking passes 277 cases.
-Windows cumulative use is SDK 4/20, helpers 1/4, packages 1/3, native sessions 1/3;
-dispatches are 2/3. Mac counters above remain current. The corrected Mac application passes its final package/native check at `cf01c06`.
-Publish the candidate and run Windows ordinal 3. After audited CI passes, start the requested separate
-PR review chat against `8f0d208`. No merge, release or acceptance is selected.
-Preserve the
+[Draft PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) passes audited
+Windows [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40908795368)
+and [automatic quality](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40908699824)
+at `664d6930afce67378ebd94c371359d69529107d0`. Required artifact, binary, source,
+pixel and cleanup checks pass. Both targets establish the bounded functional
+criteria; physical OS-dialog/human-input and wider acceptance remain unclaimed.
+Earlier failures and root-cause corrections are retained in the owning evidence.
+Dispatches are 3/3. Windows use is SDK 8/20, helpers 2/4, packages 2/3 and native
+sessions 2/3. No costly operation remains pending. Publish the documentation-only
+receipt update, audit its ordinary PR checks, then start the requested separate
+PR review chat against `8f0d208`. The PR stays draft; no merge, release or ticket
+acceptance is selected. Preserve the
 unrelated Phase 1 audit, pinned design worktree and protected recovery below.
 
 ## L06 UI-image authoring merged

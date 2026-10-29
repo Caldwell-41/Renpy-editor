@@ -1,0 +1,35 @@
+{
+  "candidate": "664d6930afce67378ebd94c371359d69529107d0",
+  "qualification": {
+    "run": 40908795368,
+    "attempt": 1,
+    "conclusion": "success"
+  },
+  "automaticQuality": {
+    "run": 40908699824,
+    "attempt": 1,
+    "conclusion": "success"
+  },
+  "requiredStepsVerified": true,
+  "artifact": {
+    "id": 12914082000,
+    "name": "project-font-Windows-40908795368-1",
+    "sha256": "sha256:ea5571569ca3ee8b16af9837569b73c8b7946077a215d2969d7df4ca8da171ef"
+  },
+  "nativeCleanup": true,
+  "sourceAndPixelsVerified": true,
+  "negativeEvidenceCases": 6,
+  "windowsUseThisRun": {
+    "normalSdk": 4,
+    "helpers": 1,
+    "packages": 1,
+    "nativeSessions": 1
+  },
+  "windowsCumulativeUse": {
+    "normalSdk": 8,
+    "helpers": 2,
+    "packages": 2,
+    "nativeSessions": 2
+  },
+  "dispatches": 3
+}
