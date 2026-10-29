@@ -1,8 +1,9 @@
 # A2 image editor refinement
 
 Kris selected A as the direction and requested refinement with the Experience First
-skill on 2026-10-29. This selects a design direction, not final approval. The exact
-candidate is `ui-image` / `inspector-v2`, variant `refined`. Its approval remains null.
+skill on 2026-10-29, then explicitly approved A2 and requested the return handoff.
+The approved version is `ui-image` / `inspector-v2`, variant `refined`.
+[The handoff](HANDOFF.md) owns its source identity and the remaining validation gap.
 
 [Open A2](http://127.0.0.1:5176/preview.html?screen=ui-image&variant=refined&state=placed&theme=dark&viewport=wide).
 The original A, B and C remain available through the lab and comparison arrows.
@@ -67,8 +68,8 @@ The canvas remains schematic, including parent sizing and inherited styles.
 The retained full-lab run still has no pass: `combined-01.log` times out during
 initial navigation after eight seconds. No shared runner or threshold was changed.
 The screen-local review uses the previously documented 45-second navigation timeout.
-It does not replace the combined gate. The full-lab run was not repeated solely to
-reproduce that known startup failure during this refinement.
+It does not replace the combined gate. The later required post-approval run also fails at initial navigation; its exact
+result is retained in [the approval handoff](HANDOFF.md).
 
 Local evidence remains under `.toolchains/design-lab/l06/`. A2's first scoped run
 passes all 24 cases and interactions. The second run catches compact Apply outside
@@ -85,6 +86,6 @@ passes. The original A/B/C checks retain their earlier results; only their compa
 arrows gained the A2 destination and explicit accessible labels.
 
 `captures/a2-draft-v1-*` retains the dark/light wide/compact overviews and important
-interactive states. These are draft review aids. Approval/source fingerprint and
-the implementation handoff remain pending explicit approval of A2. Production files
+interactive states. These preserve the reviewed candidate. `captures/inspector-v2/` and
+[approval.json](approval.json) own the approved, hashed reference set. Production files
 and the original chat's implementation branch remain outside this assignment.

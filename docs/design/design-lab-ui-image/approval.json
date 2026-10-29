@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "screenId": "ui-image",
-  "currentApproved": null,
+  "currentApproved": "inspector-v2",
   "revisions": [
     {
       "id": "inspector-v1",
@@ -21,7 +21,197 @@
     {
       "id": "inspector-v2",
       "variantId": "refined",
-      "approval": null
+      "approval": {
+        "date": "2026-10-29",
+        "decision": "Kris approved A2 / inspector-v2, variant refined, in this chat: \"Approve A2 and send it back to the original implementation chat.q\"",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "8b960282255834972c81ff7d1d13f09293fb366e",
+          "fingerprint": "f2e36a40ea0072abb3640c3dfe98dcdff78cc19b4cf3725cb281a0b808afb5ed"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/add-dark-wide.png",
+            "sha256": "8d9c576ed926b01260df952babe5ae780693b2b1f8ccac648d676b8d460deed7",
+            "state": "add",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/conflict-dark-wide.png",
+            "sha256": "31285108a00a46422bb60fd21d1bb58c07abd64a4b8a3fe4eb363860425ae39f",
+            "state": "conflict",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/conflict-draft-dark-wide.png",
+            "sha256": "38f7cd12cf0196b980f8cb303e0a24ebe41cfcb7dad2f6fddcd5d21bdb9037b5",
+            "state": "conflict-draft",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/editing-dark-compact.png",
+            "sha256": "2b7b4cd26f961678dd10f355081a1fe32e9c7cfec8eba4601786f3a8a694beca",
+            "state": "editing",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/import-dark-wide.png",
+            "sha256": "4140db0a8ea43cb7b34226852f44a069008f120d9bd072efd40c9e89e8d40e36",
+            "state": "import",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/invalid-dark-wide.png",
+            "sha256": "c6880a664656d89bd2ca029fb386d57a4d858ca19b64ded2c827539fdca48559",
+            "state": "invalid",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/invalid-draft-dark-wide.png",
+            "sha256": "6d0b96211508d254858927c4e9919c418dae2d465ca0733d67b1c56e96fd220c",
+            "state": "invalid-draft",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/invalid-size-dark-wide.png",
+            "sha256": "9e1d80a9144b4260e250896677acda3d1e868db0b6f715a026ecf800e7359de1",
+            "state": "invalid-size",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/missing-dark-wide.png",
+            "sha256": "40867060b929a0cc39998b92b03a6eb1cb9571136feb2c8db2cf9d25c15724f4",
+            "state": "missing",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/missing-draft-dark-wide.png",
+            "sha256": "30c9628c8c1f338549d40538cb8ddea9930dacc585444f56251ef6f90a15ade6",
+            "state": "missing-draft",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/no-results-dark-wide.png",
+            "sha256": "6d2c1b3543dd6831eb03b8adb76fd13b68fd0d6a42e41995b3a29bcba4efac3f",
+            "state": "no-results",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/placed-dark-compact.png",
+            "sha256": "e0fdf91fda427b0edc9225a15f13dc8ce99f187870b1016f0e9fa2d5b26d6fc1",
+            "state": "placed",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/placed-dark-wide.png",
+            "sha256": "31285108a00a46422bb60fd21d1bb58c07abd64a4b8a3fe4eb363860425ae39f",
+            "state": "placed",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/placed-light-compact.png",
+            "sha256": "52892c00975bfdbdaf0933d3b4af0259518c0601d5734cb043a6ec29d6f3ed54",
+            "state": "placed",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/placed-light-wide.png",
+            "sha256": "a8a2836e94d199f6d3e5b274b1ecfce83dd549ffa9a2a3127f4ad0e46788b193",
+            "state": "placed",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/replaced-dark-wide.png",
+            "sha256": "1c61ac47d1ed69f62ce6bd480dd373ed22b4546d5906736b1c5298f086b9f086",
+            "state": "replaced",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/replaced-draft-dark-wide.png",
+            "sha256": "82564fbba0f89c9c2fbeaf9daf4aaf8c2bb27edaf4badfc16045aa42f8ff34e8",
+            "state": "replaced-draft",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-ui-image/captures/inspector-v2/review-replacement-dark-wide.png",
+            "sha256": "c39d83b23915ade8d89164c1f594a0625cca3608396a52b48bc9e7888d61d7a0",
+            "state": "review-replacement",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Use the existing Screens shell and Choose/Design/Connect workflow. Keep the canvas beside one image inspector in wide windows.",
+          "Use one clickable selected-asset row, a searchable typed UI-image chooser, and import staging/cancellation inside that chooser. Picker and canvas actions remain inert.",
+          "Keep paired displayed dimensions, explicit aspect preservation, original-size restore and Apply/Cancel together. Disable unchanged Apply/Cancel; preserve numeric focus on Enter/Apply and Escape/Cancel.",
+          "Retain drafts on invalid dimensions, missing/replaced/unreadable references, source conflict, selection changes, import cancellation and Source navigation. Put repair actions and field errors beside the relevant input.",
+          "Review changed files explicitly. With aspect preservation on, retain width and derive the new displayed height from the replacement ratio; otherwise retain both dimensions.",
+          "Add another ordinary image node in the same screen. Cancel returns to the previous selection; each image retains its draft. Preserve Source, shared Undo/Redo, reopen, order, confirmed removal and retained assets.",
+          "Keep position/anchor units, alignment, size limits, parent constraints, ordering and removal under Layout. Preserve the earlier accepted composition, numeric and nested controls during production integration.",
+          "Put editing first in compact windows, with Show preview and Edit image navigation. Keep the initial core controls and Apply visible at 560 by 640.",
+          "Keep Source in the top toolbar and deliberate Test in Ren'Py beside the preview. Preserve dark, dense presentation, current fonts/icons and the absence of continuously repainting animation."
+        ],
+        "deviations": [
+          "This approval covers browser presentation and sample interaction. Catalog/import, source writes, history, reopen, file replacement and previews use fictional browser-memory data; no native picker, project file, actual core decoder, SDK or game action runs.",
+          "The HTML canvas and code-native artwork are schematic. Ren'Py geometry, inherited styling, source protection, persistence and real operation mappings require production qualification under #40.",
+          "The full Design Lab gate has a retained startup-navigation failure. Focused rendering, interactions, source identity and approval/capture validation are tracked separately. This approval does not waive the combined-gate gap or product acceptance.",
+          "Dynamic captures such as import, invalid-size and replacement review are reproduced by the interaction steps in refined-check.mjs rather than registered initial-state URLs."
+        ]
+      }
     }
   ]
 }

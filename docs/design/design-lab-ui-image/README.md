@@ -1,14 +1,14 @@
 # UI image proposals
 
 The original three variants explore asset selection and displayed dimensions inside Screens for
-[L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40). All remain drafts. Kris selected A for [the A2 refinement](REFINEMENT.md); A2 is also a draft pending review.
+[L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40). The original A/B/C remain drafts. Kris approved [the A2 refinement](REFINEMENT.md) on 2026-10-29. [Approval handoff](HANDOFF.md) records its exact source and verification gap.
 
 - A, Inspector picker, keeps the canvas beside image fields and chooses assets in a dialog.
 - B, Asset browser, keeps the project image list beside the canvas and puts fields below it.
 - C, Guided image sheet, separates choosing, sizing and reviewing within the inspector.
 
 Run `npm run design:dev -- --port 5176` from `app/`. Open
-`http://127.0.0.1:5176/preview.html?screen=ui-image&variant=inspector&state=placed&theme=dark&viewport=wide`.
+`http://127.0.0.1:5176/preview.html?screen=ui-image&variant=refined&state=placed&theme=dark&viewport=wide`.
 The bottom arrows switch variants through the URL. Named states cover adding, missing,
 replaced and invalid references, plus a source conflict.
 
@@ -34,8 +34,7 @@ Choosing another element or opening Source retains image input. History and reop
 require pending edits to be resolved. Aspect preservation uses the selected asset's
 original ratio and rounds the other displayed dimension to a whole pixel.
 
-The implementation owner remains in the original chat. Approval must identify an
-exact variant/revision before this screen is promoted or sent back for integration.
+The implementation owner remains in the original chat. Kris approved `refined` / `inspector-v2`; [the handoff](HANDOFF.md) owns its integration references.
 
 ## Draft verification, 2026-10-29
 
