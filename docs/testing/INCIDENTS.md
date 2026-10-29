@@ -568,3 +568,56 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   unchanged source and normal driver exit. The packaged Help probe also checks
   focus after clicked Apply.
 - **Evidence:** [PR #66 CI2 diagnosis](../tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification).
+
+
+## H40. Import hashing overflows the Windows main stack
+
+- **Class/search:** product; `0xC00000FD`, `3221225725`, first image selection,
+  controller cleanup exit, missing import Display name.
+- **Cause/correction:** import hashing and streaming-copy helpers used 1 MiB stack
+  arrays. Allocate those buffers directly on the heap; retain limits, hashes,
+  source authority and ordinary recovery. Do not increase the product stack.
+- **Regression:** public UI-image and Background selection/preview/import in a
+  child with a 256 KiB stack; verify exact accepted bytes and hashes. Actual Windows
+  main-thread/controller and package proof remains a separate target gate.
+- **Evidence:** [L06 CI1 diagnosis](../tasks/evidence/ui-image.md#ci1-windows-import-stack-failure).
+
+## H41. Normal-entry image capture differs under an unrecorded renderer
+
+- **Class/search:** harness/evidence; Windows UI image, 149 differing WebP-edge
+  pixels, dummy video, software fallback, private `render_to_texture` export.
+- **Observed/correction:** exact geometry and successful normal-entry execution
+  did not establish pixel fidelity. The old capture recorded no backend; a product
+  decoder defect was not established. Select and admit native GL2/ANGLE2, use public
+  Render capture, and preserve exact independent-reference equality.
+- **Regression:** reject missing/fallback renderers, unstable repeated capture and
+  whole-window capture of an empty Render. Both-host normal entry and helper pass
+  both aspects with exact pixels after correction; original CI2 remains failed.
+- **Evidence:** [L06 capture diagnosis](../tasks/evidence/ui-image.md#ci2-windows-capture-failure-and-reassessment),
+  [CI3 audit](../tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome).
+
+
+## H42. Image Apply admits edits that its completion clears
+
+- **Class/search:** product; UI-image Apply, Use original, retained draft, embedded
+  numeric layout, delayed media validation and commit.
+- **Cause/correction:** original-size editing omitted the image-saving reservation,
+  and embedded layout observed only core-write busy state. Apply the same saving
+  state to every draft-producing control throughout validation and commit.
+- **Regression:** hold media and core completion separately; verify reserved original
+  size, readonly layout and alignment, then success/conflict retention and restored
+  editing. The actual controller/core also checks a held Apply and unchanged Source.
+- **Evidence:** [Pending image Apply ownership](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29).
+
+
+## H43. Numeric controller assumes the toolbar survives element removal
+
+- **Class/search:** browser fixture; numeric layout, deleted selected text,
+  image selection, missing Refresh Source, timeout.
+- **Cause/correction:** removing the selected Help text leaves the adjacent image
+  selected. Its Design view hides the shared toolbar. The numeric journey assumed
+  Refresh Source was still visible. Return to Choose before refreshing.
+- **Verification:** the untouched PR #68 frontend reproduces the same timeout and
+  hidden toolbar. The corrected journey passes against the integrated candidate
+  without changing production UI or its deadline.
+- **Evidence:** [Architecture refactor validation](../tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29).

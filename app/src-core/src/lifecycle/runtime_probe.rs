@@ -3,6 +3,66 @@ use super::*;
 use serde_json::json;
 
 impl LifecycleService {
+    /// Native-only image fixture; importing passive bytes starts no project code.
+    pub fn prepare_ui_image_probe(data: PathBuf) -> Result<Self, String> {
+        let mut service = Self::prepare_source_foundation_probe(data.clone())?;
+        let root = data.join("synthetic-project");
+        fs::create_dir_all(root.join("game/images")).map_err(|e| e.to_string())?;
+        service.open_path(&root).map_err(|e| format!("{e:?}"))?;
+        for (technical, display, file, bytes) in [
+            (
+                "station_seal",
+                "Station seal",
+                "seal.png",
+                include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/seal.png")
+                    .as_slice(),
+            ),
+            (
+                "jpeg_seal",
+                "JPEG seal",
+                "seal.jpg",
+                include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/seal.jpg")
+                    .as_slice(),
+            ),
+            (
+                "lossless_seal",
+                "Lossless WebP seal",
+                "seal.webp",
+                include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/seal.webp")
+                    .as_slice(),
+            ),
+            (
+                "lossy_seal",
+                "Lossy WebP seal",
+                "seal-lossy.webp",
+                include_bytes!(
+                    "../../../../tests/fixtures/phase-3b-screens/ui-image/seal-lossy.webp"
+                )
+                .as_slice(),
+            ),
+            (
+                "alpha_seal",
+                "Alpha WebP seal",
+                "seal-alpha.webp",
+                include_bytes!(
+                    "../../../../tests/fixtures/phase-3b-screens/ui-image/seal-alpha.webp"
+                )
+                .as_slice(),
+            ),
+        ] {
+            let selected = data.join(file);
+            fs::write(&selected, bytes).map_err(|e| e.to_string())?;
+            let choice = service
+                .authoring_select_import(&selected)
+                .map_err(|e| format!("{e:?}"))?;
+            service.authoring_import_asset(serde_json::from_value(json!({
+                "authorityId":choice.authority_id,"kind":"uiImage","technicalName":technical,
+                "displayName":display,"characterId":null,"expression":null
+            })).map_err(|e| e.to_string())?).map_err(|e| format!("{e:?}"))?;
+        }
+        service.close().map_err(|e| format!("{e:?}"))?;
+        Ok(service)
+    }
     /// Disposable representative canvas composition with public SDK font/image assets.
     pub fn prepare_canvas_screen_probe(data: PathBuf, archive: &Path) -> Result<Self, String> {
         let mut service = Self::prepare_source_foundation_probe(data)?;

@@ -42,7 +42,7 @@ interface RecentProject { id: string; projectId: string; title: string; displayP
 interface Resolution { width: number; height: number }
 interface OpenProject { sessionId: string; projectId: string; title: string; folderName: string; chapterId: string; chapterName: string; sceneId: string; sceneName: string; sdkVersion: string; resolution: Resolution; cancelled?: boolean }
 interface CreationResult { status: string; project?: OpenProject }
-type AssetKind = "background" | "characterAppearance" | "music" | "sfx";
+type AssetKind = "background" | "characterAppearance" | "uiImage" | "music" | "sfx";
 type VariableType = "bool" | "int" | "string";
 interface SourceDefinition { path: string; statement: string; sourceRevision: string }
 interface Character { id: string; technicalName: string; displayName: string; dialogueColor: string; defaultAppearanceId?: string; source: SourceDefinition }
@@ -905,7 +905,7 @@ function renderCharacters(workspace: HTMLElement, project: OpenProject, model: A
 
 function renderAssets(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
   const list = supportingSection(); list.append(formHeading("Project assets"));
-  (["background", "characterAppearance", "music", "sfx"] as AssetKind[]).forEach((kind) => { const heading = document.createElement("h3"); heading.textContent = { background: "Backgrounds", characterAppearance: "Character appearances", music: "Music", sfx: "SFX" }[kind]; list.append(heading); const assets = model.assets.filter((item) => item.kind === kind); if (!assets.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "None imported."; list.append(empty); } assets.forEach((asset) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = asset.displayName; const path = document.createElement("code"); path.textContent = asset.relativePath; const discovery = document.createElement("span"); discovery.textContent = `Ren'Py: ${asset.discoveryName} · ${asset.status}`; row.append(name, path, discovery); list.append(row); }); });
+  (["background", "characterAppearance", "uiImage", "music", "sfx"] as AssetKind[]).forEach((kind) => { const heading = document.createElement("h3"); heading.textContent = { background: "Backgrounds", characterAppearance: "Character appearances", uiImage: "UI images", music: "Music", sfx: "SFX" }[kind]; list.append(heading); const assets = model.assets.filter((item) => item.kind === kind); if (!assets.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "None imported."; list.append(empty); } assets.forEach((asset) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = asset.displayName; const path = document.createElement("code"); path.textContent = asset.relativePath; const discovery = document.createElement("span"); discovery.textContent = `Ren'Py: ${asset.discoveryName} · ${asset.status}`; row.append(name, path, discovery); list.append(row); }); });
   if (model.assets.some((asset) => asset.status === "compatibilityRequired")) { const repair = button("Repair Ren'Py asset names", "button secondary"); repair.addEventListener("click", async () => { const token = beginAuthoringCompletion(project, repair); if (!token) return; repair.disabled = true; setStatus("Saving compatibility declarations…"); try { await projectValue(project, "asset.repairCompatibility"); if (completionIsCurrent(token)) showProject(project, "assets"); } catch (error) { if (!completionIsCurrent(token)) return; repair.disabled = false; setStatus(message(error, "Asset compatibility could not be repaired"), "error"); repair.focus(); } finally { finishAuthoringCompletion(token); } }); list.append(repair); }
   const imported = supportingSection(); imported.append(formHeading("Import assets"));
   const importer=assetImport(imported,model.characters,{
@@ -914,13 +914,13 @@ function renderAssets(workspace: HTMLElement, project: OpenProject, model: Autho
     import:async payload=>{await runAuthoringOperation(project,imported,()=>projectValue(project,"asset.import",payload));},
     complete:()=>{if(currentProject?.sessionId===project.sessionId)showProject(project,"assets");},status:message=>setStatus(message,"error")
   });stageDroppedAssets=importer.stage;workspace.append(list,imported);
-  const ordered=(["background","characterAppearance","music","sfx"] as AssetKind[]).flatMap(k=>model.assets.filter(a=>a.kind===k));
+  const ordered=(["background","characterAppearance","uiImage","music","sfx"] as AssetKind[]).flatMap(k=>model.assets.filter(a=>a.kind===k));
   const repair=list.querySelector<HTMLButtonElement>(":scope > button"); if(repair)workspace.append(repair);
   const disposeCards=catalogue(workspace,list,imported,"Assets",ordered.map(a=>{
-    const kind={background:"Background",characterAppearance:"Character image",music:"Music",sfx:"Sound effect"}[a.kind];
+    const kind={background:"Background",characterAppearance:"Character image",uiImage:"UI image",music:"Music",sfx:"Sound effect"}[a.kind];
     const metadata=document.createElement("dl");metadata.className="asset-metadata";
     for(const [label,value] of [["Type",kind],["Ren’Py name",a.discoveryName],["Project path",a.relativePath],["File size",`${(a.byteCount/1024).toFixed(1)} KB`],["Status",a.status]]){const term=document.createElement("dt");term.textContent=label!;const detail=document.createElement("dd");detail.textContent=value!;metadata.append(term,detail);}
-    return {id:a.id,label:a.displayName,kind,assetId:["background","characterAppearance"].includes(a.kind)?a.id:undefined,extra:[metadata]};
+    return {id:a.id,label:a.displayName,kind,assetId:["background","characterAppearance","uiImage"].includes(a.kind)?a.id:undefined,extra:[metadata]};
   }),id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}),`${project.projectId}:assets`);
   disposeCatalogue=()=>{disposeCards();importer.dispose();stageDroppedAssets=undefined;};
 }

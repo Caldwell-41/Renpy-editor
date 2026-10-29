@@ -1,12 +1,16 @@
 import { icon } from "./icons.ts";
 import { validateField } from "./authoring-input.ts";
+import type { LayoutEdits } from "./screen-layout.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 
 export interface CompositionView {
   document: ScreenDocument; screenId: string; screenName: string; nodes: ScreenNode[];
   selected: ScreenNode; step: string; busy: boolean;
 }
+interface ImageSelection { assetId: string; expectedAssetSha256: string; replacementSha256?: string; width: number; height: number; layout?: LayoutEdits }
 export type CompositionCommand =
+  | ({ type: "addImage"; parentId: string } & ImageSelection)
+  | ({ type: "image"; nodeId: string; parentId?: string } & ImageSelection)
   | { type: "add"; parentId: string; kind: string; text: string }
   | { type: "text"; nodeId: string; text: string }
   | { type: "reorder"; nodeId: string; targetId: string; after: boolean }
@@ -22,6 +26,9 @@ interface Host {
   undo: () => void;
   geometry: (host: HTMLElement) => void;
   hover: (id?: string) => void;
+  image?: (card: HTMLElement, view: CompositionView) => boolean;
+  beginImage?: (parentId: string, document: ScreenDocument) => void;
+  otherDraft?: () => boolean;
 }
 interface Addition { parentId: string; kind: string; text: string; document: ScreenDocument }
 interface TextDraft { screenId: string; nodeId: string; value: string; document: ScreenDocument }
@@ -189,6 +196,7 @@ export class ScreenComposer {
     details.append(el("strong", "", `${names[view.selected.kind] ?? view.selected.kind} · Nesting level ${this.depth(view, view.selected)}`));
     const actions = el("div", "screen-edit-actions");
     if (["text", "textbutton"].includes(view.selected.kind) && view.selected.id) actions.append(action(this.texts.has(this.textKey(view)) ? "Resume edit" : "Edit text", () => this.host.select(screenNodeKey(view.selected), true), true));
+    else if (view.selected.kind === "image" && view.selected.id) actions.append(action("Edit image", () => this.host.select(screenNodeKey(view.selected), true), true));
     else if (containers.has(view.selected.kind) && view.selected.id) actions.append(action("Add inside", () => this.beginAddition(), true));
     else actions.append(action("View in Source", () => this.host.source(view.selected)));
     const parent = this.parent(view, view.selected);
@@ -215,6 +223,7 @@ export class ScreenComposer {
     }
     this.card = card; const scroll = card.scrollTop;
     card.replaceChildren(); card.classList.add("screen-composer"); card.ariaLabel = "Element editor";
+    if (view.step === "design" && this.host.image?.(card, view)) return true;
     if (view.step === "choose") {
       const heading = el("header", "screen-composition-heading"); heading.append(el("h2", "", this.addition ? "Add an element" : "Elements"));
       if (!this.addition) heading.append(action("Add element", () => this.beginAddition(), true));
@@ -258,7 +267,7 @@ export class ScreenComposer {
           };
           row.draggable = this.movable(view, node) && !this.saving;
           row.ondragstart = event => {
-            if (this.hasDraft() || this.saving || view.busy) { event.preventDefault(); this.showError("Apply or cancel unfinished changes before reordering. Input retained."); return; }
+            if (this.hasDraft() || this.host.otherDraft?.() || this.saving || view.busy) { event.preventDefault(); this.showError("Apply or cancel unfinished changes before reordering. Input retained."); return; }
             this.dragging = { id, document: view.document }; this.host.select(id);
             event.dataTransfer?.setData("text/plain", id); if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
           };
@@ -306,9 +315,23 @@ export class ScreenComposer {
     const feedback = el("p", "screen-composition-feedback", this.error); feedback.hidden = !this.error; feedback.role = "alert"; card.append(feedback);
     card.scrollTop = scroll; return true;
   }
-  private beginAddition(): void {
+  renderOrder(host: HTMLElement): void {
+    const view = this.host.view(); if (!view) return;
+    const parent = this.parent(view, view.selected);
+    const controls = el("div", "screen-image-order");
+    if (parent) {
+      const siblings = this.children(view, parent), index = siblings.indexOf(view.selected);
+      for (const [offset, label] of [[-1, "Move earlier"], [1, "Move later"]] as const) {
+        const target = siblings[index + offset];
+        const move = action(label, () => { if (target) void this.reorder(view.selected, target, offset > 0); });
+        move.disabled = !target || view.busy; controls.append(move);
+      }
+    }
+    controls.append(action("Remove image…", () => this.requestRemoval())); host.append(controls);
+  }
+  beginAddition(): void {
     const view = this.host.view(); if (!view || this.saving || view.busy) return;
-    if (this.texts.size) { this.host.note("Apply or cancel unfinished text edits first. Input retained.", true); return; }
+    if (this.texts.size || this.host.otherDraft?.()) { this.host.note("Apply or cancel unfinished text edits first. Input retained.", true); return; }
     const target = containers.has(view.selected.kind) ? view.selected : this.parent(view, view.selected);
     if (!target?.id) { this.host.note("Choose an owned container. Input retained.", true); return; }
     this.addition = { parentId: target.id, kind: "text", text: "", document: view.document }; this.error = "";
@@ -319,8 +342,8 @@ export class ScreenComposer {
     const draft = this.addition!;
     const form = el("section", "screen-addition"); form.ariaLabel = "Add element";
     const palette = el("div", "screen-element-palette"); palette.ariaLabel = "Element types";
-    for (const kind of ["text", "textbutton", "fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"]) {
-      const choice = action(names[kind]!, () => { draft.kind = kind; this.error = ""; this.render(); this.card?.querySelector<HTMLElement>(`[data-kind="${kind}"]`)?.focus({ preventScroll: true }); this.host.preview(); });
+    for (const kind of ["text", "textbutton", "image", "fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"]) {
+      const choice = action(names[kind]!, () => { if (kind === "image" && this.host.beginImage) { this.addition = undefined; this.host.beginImage(draft.parentId, draft.document); return; } draft.kind = kind; this.error = ""; this.render(); this.card?.querySelector<HTMLElement>(`[data-kind="${kind}"]`)?.focus({ preventScroll: true }); this.host.preview(); });
       choice.dataset.kind = kind;
       choice.prepend(elementIcon(kind)); choice.ariaPressed = String(draft.kind === kind); choice.disabled = this.saving; palette.append(choice);
     }
@@ -405,7 +428,7 @@ export class ScreenComposer {
   }
   private async reorder(node: ScreenNode, target: ScreenNode, after: boolean, base?: ScreenDocument): Promise<void> {
     const view = this.host.view(); if (!view || this.saving || view.busy) return;
-    if (this.hasDraft()) { this.showError("Apply or cancel unfinished changes before reordering. Input retained."); return; }
+    if (this.hasDraft() || this.host.otherDraft?.()) { this.showError("Apply or cancel unfinished changes before reordering. Input retained."); return; }
     const refusal = this.moveRefusal(view, node, target); if (refusal) { this.showError(refusal); return; }
     if (node === target) return;
     this.saving = true; this.render();
@@ -419,7 +442,7 @@ export class ScreenComposer {
   }
   private requestRemoval(): void {
     const view = this.host.view(); if (!view || this.saving || view.busy || this.removal) return;
-    if (this.hasDraft()) { this.showError("Apply or cancel unfinished edits before removing elements. Input retained."); return; }
+    if (this.hasDraft() || this.host.otherDraft?.()) { this.showError("Apply or cancel unfinished edits before removing elements. Input retained."); return; }
     const parent = this.parent(view, view.selected);
     if (parent?.kind === "grid" && parent.numericLayout?.allowsEmptyCells !== true) { this.showError("This grid's empty-cell policy stays in Source. Removal could leave it incomplete; nothing changed."); return; }
     if (!this.movable(view, view.selected)) { this.showError("The screen root and protected source-only elements cannot be removed. Selection is unchanged."); return; }

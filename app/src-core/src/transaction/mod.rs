@@ -1731,7 +1731,7 @@ fn copy_hash_bounded(
 ) -> Result<(u64, String), ErrorCode> {
     let mut digest = Sha256::new();
     let mut count = 0_u64;
-    let mut buffer = [0_u8; 1024 * 1024];
+    let mut buffer = vec![0_u8; 1024 * 1024];
     loop {
         crate::runtime_work::check()?;
         let read = reader.read(&mut buffer).map_err(|_| ErrorCode::IoFailure)?;

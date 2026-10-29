@@ -131,7 +131,7 @@ export interface SceneDocument {
 interface Chapter { readonly id: string; readonly displayName: string; readonly directory: string }
 interface Character { readonly id: string; readonly displayName: string; readonly technicalName: string }
 interface Appearance { readonly id: string; readonly characterId: string; readonly label: string; readonly assetId?: string }
-interface Asset { readonly id: string; readonly kind: "background" | "characterAppearance" | "music" | "sfx"; readonly displayName: string; readonly status: string; readonly sha256?: string }
+interface Asset { readonly id: string; readonly kind: "background" | "characterAppearance" | "uiImage" | "music" | "sfx"; readonly displayName: string; readonly status: string; readonly sha256?: string }
 interface Variable { readonly id: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "string"; readonly defaultValue: boolean | string }
 
 export interface SceneWorkspace {

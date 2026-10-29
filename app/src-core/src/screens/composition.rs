@@ -19,6 +19,32 @@ pub enum Command {
         text: String,
     },
     #[serde(rename_all = "camelCase")]
+    AddImage {
+        parent_id: String,
+        asset_id: String,
+        expected_asset_sha256: String,
+        #[serde(default)]
+        replacement_sha256: Option<String>,
+        width: u32,
+        height: u32,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+    },
+    #[serde(rename_all = "camelCase")]
+    Image {
+        node_id: String,
+        asset_id: String,
+        expected_asset_sha256: String,
+        #[serde(default)]
+        replacement_sha256: Option<String>,
+        width: u32,
+        height: u32,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+        #[serde(default)]
+        parent_id: Option<String>,
+    },
+    #[serde(rename_all = "camelCase")]
     Text { node_id: String, text: String },
     #[serde(rename_all = "camelCase")]
     Reorder {
@@ -35,6 +61,7 @@ pub enum Command {
 pub struct ComposeResult {
     pub document: Document,
     pub selected_id: String,
+    pub changed: bool,
 }
 
 fn text_literal(text: &str) -> Result<String, SceneError> {
@@ -59,6 +86,7 @@ pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
             "viewport",
             "text",
             "textbutton",
+            "image",
         ]
         .contains(&kind)
         && (parent.kind != "grid"
@@ -125,6 +153,7 @@ impl AuthoringService {
             .find(|s| s.name == owner.screen.name)
             .ok_or(SceneError::ReferenceBlocked)?;
         let mut proposed = bytes.clone();
+        let mut companions = Vec::new();
         let selected_id = match request.command {
             Command::Add {
                 parent_id,
@@ -136,7 +165,7 @@ impl AuthoringService {
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&parent_id))
                     .ok_or(SceneError::UnknownEntity)?;
-                if !can_add(screen, parent, &kind) {
+                if kind == "image" || !can_add(screen, parent, &kind) {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 let id = uuid::Uuid::new_v4().to_string();
@@ -170,6 +199,89 @@ impl AuthoringService {
                 }
                 proposed.splice(parent.source_end..parent.source_end, addition.bytes());
                 id
+            }
+            Command::AddImage {
+                parent_id,
+                asset_id,
+                expected_asset_sha256,
+                replacement_sha256,
+                width,
+                height,
+                layout,
+            } => {
+                let parent = screen
+                    .nodes
+                    .iter()
+                    .find(|node| node.id.as_ref() == Some(&parent_id))
+                    .ok_or(SceneError::UnknownEntity)?;
+                let selection = self.prepare_ui_image_reference(
+                    project,
+                    project_id,
+                    &asset_id,
+                    &expected_asset_sha256,
+                    replacement_sha256.as_deref(),
+                )?;
+                if let Some(metadata) = selection.metadata {
+                    companions.push(metadata);
+                }
+                let prepared = super::images::prepare(
+                    &bytes,
+                    screen,
+                    source_path,
+                    super::images::Target::Addition { parent },
+                    super::images::Change {
+                        path: &selection.path,
+                        width,
+                        height,
+                        layout,
+                    },
+                )?;
+                proposed = prepared.source;
+                prepared.id
+            }
+            Command::Image {
+                node_id,
+                asset_id,
+                expected_asset_sha256,
+                replacement_sha256,
+                width,
+                height,
+                layout,
+                parent_id,
+            } => {
+                let node = screen
+                    .nodes
+                    .iter()
+                    .find(|node| node.id.as_ref() == Some(&node_id))
+                    .filter(|node| node.kind == "image")
+                    .ok_or(SceneError::OpaqueBoundary)?;
+                let selection = self.prepare_ui_image_reference(
+                    project,
+                    project_id,
+                    &asset_id,
+                    &expected_asset_sha256,
+                    replacement_sha256.as_deref(),
+                )?;
+                if let Some(metadata) = selection.metadata {
+                    companions.push(metadata);
+                }
+                let prepared = super::images::prepare(
+                    &bytes,
+                    screen,
+                    source_path,
+                    super::images::Target::Existing {
+                        node,
+                        parent_id: parent_id.as_deref(),
+                    },
+                    super::images::Change {
+                        path: &selection.path,
+                        width,
+                        height,
+                        layout,
+                    },
+                )?;
+                proposed = prepared.source;
+                node_id
             }
             Command::Text { node_id, text } => {
                 let node = screen
@@ -232,6 +344,7 @@ impl AuthoringService {
                     return Ok(ComposeResult {
                         document,
                         selected_id: node_id,
+                        changed: false,
                     });
                 }
                 let start = node.span.start.min(target.span.start);
@@ -347,10 +460,11 @@ impl AuthoringService {
                 selected
             }
         };
-        if proposed == bytes {
+        if proposed == bytes && companions.is_empty() {
             return Ok(ComposeResult {
                 document,
                 selected_id,
+                changed: false,
             });
         }
         let accepted = self.owned_screen_document(
@@ -359,22 +473,29 @@ impl AuthoringService {
             source_path.clone(),
             hex::encode(Sha256::digest(&proposed)),
         )?;
-        self.commit_history(
-            project,
-            TransactionProposal {
-                mutations: vec![FileMutation {
+        if proposed != bytes {
+            companions.insert(
+                0,
+                FileMutation {
                     path: path(source_path)?,
                     kind: MutationKind::ReplaceExisting,
                     base: revision,
                     expected_bytes: bytes,
                     proposed,
-                }],
+                },
+            );
+        }
+        self.commit_history(
+            project,
+            TransactionProposal {
+                mutations: companions,
                 intent: TransactionIntent::Edit,
             },
         )?;
         Ok(ComposeResult {
             document: accepted,
             selected_id,
+            changed: true,
         })
     }
 }

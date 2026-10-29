@@ -50,7 +50,7 @@ impl NumericValue {
             Unit::Relative => format!("{:?}", self.value),
         }
     }
-    fn valid(self, key: &str) -> bool {
+    pub(super) fn valid(self, key: &str) -> bool {
         if matches!(key, "columns" | "rows") {
             return self.unit == Unit::Count
                 && self.value.fract() == 0.0
@@ -93,6 +93,7 @@ struct Entry {
 pub struct NumericLayout {
     pub values: BTreeMap<String, NumericValue>,
     pub blocked: BTreeMap<String, String>,
+    pub source_blocked: BTreeMap<String, String>,
     pub sizing_note: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub allows_empty_cells: Option<bool>,
@@ -169,6 +170,7 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
     let mut result = NumericLayout {
         values: BTreeMap::new(),
         blocked: BTreeMap::new(),
+        source_blocked: BTreeMap::new(),
         sizing_note: match node.kind.as_str() {
             "text" => Some("Text keeps its natural bounds. Width and height limit layout space; they do not stretch glyphs.".into()),
             "vbox" | "hbox" | "grid" => Some("Children can make the group larger than its requested size.".into()),
@@ -271,6 +273,7 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
             );
             result.unresolved.insert((*key).into());
         }
+        result.source_blocked = result.blocked.clone();
         return Some(result);
     }
     for key in FIELDS {
@@ -430,24 +433,6 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
             atoms,
         });
     }
-    if let Some(parent) = nodes
-        .iter()
-        .find(|n| Some(n.span.start) == node.parent_start)
-    {
-        let keys: &[&str] = match parent.kind.as_str() {
-            "vbox" => &["ypos", "yanchor"],
-            "hbox" => &["xpos", "xanchor"],
-            "grid" => &["xpos", "ypos", "xanchor", "yanchor"],
-            _ => &[],
-        };
-        for key in keys {
-            result.blocked.insert(
-                (*key).into(),
-                if parent.kind == "vbox" { "The vertical group controls vertical placement. Edit the group's spacing instead." }
-                else { "The parent group controls this placement. Edit the parent's layout instead." }.into(),
-            );
-        }
-    }
     for axis in ["x", "y"] {
         if result.values.contains_key(&format!("{axis}size"))
             && ["minimum", "maximum"]
@@ -474,6 +459,25 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
             for key in entry.atoms.iter().flat_map(|atom| &atom.fields) {
                 result.blocked.entry(key.clone()).or_insert_with(|| "This value shares a source alias with an ambiguous layout property. Resolve that alias in Source first.".into());
             }
+        }
+    }
+    result.source_blocked = result.blocked.clone();
+    if let Some(parent) = nodes
+        .iter()
+        .find(|n| Some(n.span.start) == node.parent_start)
+    {
+        let keys: &[&str] = match parent.kind.as_str() {
+            "vbox" => &["ypos", "yanchor"],
+            "hbox" => &["xpos", "xanchor"],
+            "grid" => &["xpos", "ypos", "xanchor", "yanchor"],
+            _ => &[],
+        };
+        for key in keys {
+            result.blocked.insert(
+                (*key).into(),
+                if parent.kind == "vbox" { "The vertical group controls vertical placement. Edit the group's spacing instead." }
+                else { "The parent group controls this placement. Edit the parent's layout instead." }.into(),
+            );
         }
     }
     Some(result)
@@ -568,7 +572,7 @@ impl NumericLayout {
         Ok(values)
     }
 
-    fn patch(
+    pub(super) fn patch(
         &self,
         bytes: &[u8],
         edits: &BTreeMap<String, Option<NumericValue>>,

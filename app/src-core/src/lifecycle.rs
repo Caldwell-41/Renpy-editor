@@ -602,6 +602,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Authoring)
     }
 
+    pub fn review_ui_image(
+        &self,
+        request: crate::authoring::ReviewUiImageRequest,
+    ) -> Result<crate::media::MediaPresentation, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .review_ui_image(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn authoring_preview_import(
         &mut self,
         request: crate::media::ImportPreviewRequest,

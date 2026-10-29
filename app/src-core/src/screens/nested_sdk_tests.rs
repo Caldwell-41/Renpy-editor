@@ -1,6 +1,6 @@
 use super::*;
 
-fn render_frame(
+pub(super) fn render_frame(
     service: &mut LifecycleService,
     payload: Value,
     profile: &std::path::Path,

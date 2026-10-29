@@ -102,8 +102,10 @@ pub const OPERATIONS: &[&str] = &[
     "appearance.setDefault",
     "appearance.update",
     "asset.chooseImport",
+    "asset.chooseUiImage",
     "asset.chooseImports",
     "asset.previewImport",
+    "asset.reviewUiImage",
     "asset.import",
     "asset.repairCompatibility",
     "variable.create",
@@ -752,6 +754,14 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.scene_resolve_recovery(payload))
             .and_then(to_value),
+        "asset.reviewUiImage" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<authoring::ReviewUiImageRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.review_ui_image(payload))
+            .and_then(to_value),
         "asset.previewImport" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| {
@@ -926,6 +936,7 @@ pub fn handle_application_request(
         | "project.openPicker"
         | "sdk.browse"
         | "asset.chooseImport"
+        | "asset.chooseUiImage"
         | "asset.chooseImports" => {
             return CoreResponse::failure(
                 request_id,
@@ -1135,6 +1146,9 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
             "INCOMING_REFERENCE",
             "The Scene has incoming or unknown references and cannot be deleted safely.",
         ),
+        ImageMissing => ("UI_IMAGE_MISSING", "The chosen UI image is missing. Your draft is retained; choose an available UI image."),
+        ImageChanged => ("UI_IMAGE_CHANGED", "The chosen UI image changed since selection. Your draft is retained; review the asset and choose it again."),
+        ImageInvalid => ("INVALID_UI_IMAGE", "The chosen reference is not a valid supported UI image. Your draft is retained."),
         AmbiguousReturnLabel => (
             "AMBIGUOUS_RETURN_LABEL",
             "This return label is duplicated or conflicts with another label. Inspect Source before editing the Call.",
@@ -1241,6 +1255,7 @@ fn authoring_failure(request_id: String, error: authoring::AuthoringError) -> Co
             "UNSUPPORTED_FORMAT",
             "Choose a supported raster image or audio file.",
         ),
+        UiImageTooLarge => ("UI_IMAGE_TOO_LARGE", "UI images must fit the 16 MiB presentation and history limit."),
         OversizeImport => (
             "IMPORT_TOO_LARGE",
             "The selected file exceeds the 512 MiB import limit.",

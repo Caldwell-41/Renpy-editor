@@ -3,6 +3,37 @@ import test from 'node:test';
 import { Window } from 'happy-dom';
 import { assetImport } from '../src/asset-import-ui.js';
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+test('UI image import retains the staged row until browser decoding succeeds',async()=>{
+ const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+ const host=document.createElement('section');document.body.append(host);
+ const calls:Record<string,unknown>[]=[],errors:string[]=[];
+ const media={assetId:'opaque',dataBase64:'YQ==',mimeType:'image/png',sha256:'a',byteCount:1,width:2,height:1,cacheKey:'a',purpose:'imagePreview' as const};
+ let preview!:(value:typeof media)=>void,complete=0;
+ const ui=assetImport(host,[],{choose:async()=>({choices:[]}),preview:()=>new Promise(resolve=>{preview=resolve;}),import:async payload=>{calls.push(payload);},complete:()=>{complete++;},status:message=>errors.push(message)});
+ const click=(text:string)=>[...host.querySelectorAll('button')].find(b=>b.textContent===text)!.click();
+ try{
+  ui.stage({choices:[{authorityId:'opaque',displayName:'seal.png',extension:'png',byteCount:1}]});
+  const row=host.querySelector('.import-entry')!;
+  row.querySelector('select')!.value='uiImage';
+  const name=[...row.querySelectorAll('label')].find(l=>l.firstElementChild?.textContent==='Display name')!.querySelector('input')!;
+  name.value='Station seal';
+  click('Import selected files');await tick();
+  assert.equal(calls.length,0,'A pending preview cannot authorize a UI-image import');
+  assert.equal(complete,0);assert.equal(name.value,'Station seal');assert.equal(row.isConnected,true);
+  preview(media);await tick();
+  const image=row.querySelector('img')!;
+  image.dispatchEvent(new window.Event('error'));
+  click('Import selected files');await tick();
+  assert.equal(calls.length,0,'A failed decode cannot authorize a UI-image import');
+  assert.match(row.textContent!,/could not be decoded/);assert.equal(name.value,'Station seal');
+  click('Retry preview');preview(media);await tick();
+  image.dispatchEvent(new window.Event('load'));
+  click('Import selected files');await tick();
+  assert.deepEqual(calls,[{authorityId:'opaque',kind:'uiImage',technicalName:'seal',displayName:'Station seal',characterId:null,expression:null}]);
+  assert.equal(complete,1);assert.match(row.textContent!,/Imported Station seal/);
+  assert.ok(errors.every(message=>/decod/i.test(message)));
+ }finally{ui.dispose();await browser.happyDOM.close();}
+});
 test('asset import canonicalizes filename suggestions and edited names before IPC',async()=>{
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
  const host=document.createElement('section');document.body.append(host);

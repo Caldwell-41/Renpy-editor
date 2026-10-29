@@ -1,5 +1,23 @@
 # Current status
 
+## L06 import and parent corrections reviewed
+
+The two selected [PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68)
+review findings are fixed at code checkpoint `cf67de2`. UI-image imports require
+successful browser decoding. Image drafts use their selected parent's layout
+rules while retaining Source restrictions, including after selecting another image.
+Both independent review axes report zero findings against starting head `8f29ec8`.
+
+All 276 frontend tests and 58 ordinary Screens tests pass. Three SDK/helper tests
+remain explicitly ignored. The real controller/core journey proves failed and
+successful Assets imports, combined parent/position Apply and exact Undo/Redo.
+[Evidence](../tasks/evidence/ui-image.md#import-decoding-and-draft-parent-corrections-2026-10-29)
+retains red/green results, original fixture/environment failures and current scope.
+PR #68 owns publication and automatic-check state. [L06 #40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
+remains open for acceptance. No merge, release or costly qualification is selected.
+Earlier candidate-bound evidence, failed full Design Lab startup, the approved
+prototype, unrelated audit and protected recovery remain intact.
+
 ## L04 nested and clipped layouts merged
 
 [PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67) merged into

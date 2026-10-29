@@ -11,7 +11,7 @@ export function catalogue(host: HTMLElement, list: HTMLElement, create: HTMLElem
   const toolbar=document.createElement("div");toolbar.className="catalog-toolbar";
   const search=document.createElement("input");search.type="search";search.placeholder=`Search ${title.toLowerCase()}…`;search.ariaLabel=`Search ${title.toLowerCase()}`;
   const filters=document.createElement("select");filters.ariaLabel="Filter by type";
-  const kinds=title==="Assets"?["Background", "Character image", "Music", "Sound effect"]:[...new Set(infos.map(i=>i.kind).filter(Boolean))];["All",...kinds].forEach(kind=>{const o=document.createElement("option");o.value=kind!;o.textContent=kind==="Background"?"Backgrounds":kind==="Character image"?"Character images":kind==="Sound effect"?"Sound effects":kind!;filters.append(o);});
+  const kinds=title==="Assets"?["Background", "Character image", "UI image", "Music", "Sound effect"]:[...new Set(infos.map(i=>i.kind).filter(Boolean))];["All",...kinds].forEach(kind=>{const o=document.createElement("option");o.value=kind!;o.textContent=kind==="Background"?"Backgrounds":kind==="Character image"?"Character images":kind==="UI image"?"UI images":kind==="Sound effect"?"Sound effects":kind!;filters.append(o);});
   search.value=retained?.search??"";filters.value=retained?.kind??"All";
   const view=document.createElement("button");view.className="button";view.textContent="List view";view.ariaPressed="false";
   const body=document.createElement("div");body.className="catalog-body";

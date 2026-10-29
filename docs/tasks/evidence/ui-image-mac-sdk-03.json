@@ -1,0 +1,222 @@
+{
+  "passed": true,
+  "sdkProcesses": 4,
+  "os": "Darwin",
+  "architecture": "arm64",
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "renderer": "gl2",
+      "rectangles": {
+        "png": [
+          20,
+          20,
+          120.0,
+          60.0
+        ],
+        "jpeg": [
+          180,
+          20,
+          96.0,
+          48.0
+        ],
+        "lossless": [
+          340,
+          20,
+          160.0,
+          80.0
+        ],
+        "lossy": [
+          540,
+          20,
+          128.0,
+          64.0
+        ],
+        "alpha": [
+          720,
+          20,
+          80.0,
+          40.0
+        ],
+        "stretch": [
+          20,
+          160,
+          120.0,
+          90.0
+        ]
+      },
+      "referenceRectangles": {
+        "png": [
+          20,
+          20,
+          120.0,
+          60.0
+        ],
+        "jpeg": [
+          180,
+          20,
+          96.0,
+          48.0
+        ],
+        "lossless": [
+          340,
+          20,
+          160.0,
+          80.0
+        ],
+        "lossy": [
+          540,
+          20,
+          128.0,
+          64.0
+        ],
+        "alpha": [
+          720,
+          20,
+          80.0,
+          40.0
+        ],
+        "stretch": [
+          20,
+          160,
+          120.0,
+          90.0
+        ]
+      },
+      "sourceSHA256": "616aa909c71dae7a9e9305796e123200330d847080562cdf4d5f97ec15430edf",
+      "imageSHA256": "f38bc44deda71198ca304d872cc1f3937d1d43ce5b83aadd3b5380c7c88d1da7",
+      "referenceSHA256": "f38bc44deda71198ca304d872cc1f3937d1d43ce5b83aadd3b5380c7c88d1da7",
+      "repeatedSHA256": "f38bc44deda71198ca304d872cc1f3937d1d43ce5b83aadd3b5380c7c88d1da7",
+      "emptySHA256": "dc59986575fe1902c1bdea4fe25019aa516d826bfe5f9e36a34a40b664276b7f",
+      "differingPixels": 0,
+      "repeatedExact": true,
+      "emptyRenderIsolated": true
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "renderer": "gl2",
+      "rectangles": {
+        "png": [
+          20,
+          20,
+          120.0,
+          60.0
+        ],
+        "jpeg": [
+          180,
+          20,
+          96.0,
+          48.0
+        ],
+        "lossless": [
+          340,
+          20,
+          160.0,
+          80.0
+        ],
+        "lossy": [
+          540,
+          20,
+          128.0,
+          64.0
+        ],
+        "alpha": [
+          720,
+          20,
+          80.0,
+          40.0
+        ],
+        "stretch": [
+          20,
+          160,
+          120.0,
+          90.0
+        ]
+      },
+      "referenceRectangles": {
+        "png": [
+          20,
+          20,
+          120.0,
+          60.0
+        ],
+        "jpeg": [
+          180,
+          20,
+          96.0,
+          48.0
+        ],
+        "lossless": [
+          340,
+          20,
+          160.0,
+          80.0
+        ],
+        "lossy": [
+          540,
+          20,
+          128.0,
+          64.0
+        ],
+        "alpha": [
+          720,
+          20,
+          80.0,
+          40.0
+        ],
+        "stretch": [
+          20,
+          160,
+          120.0,
+          90.0
+        ]
+      },
+      "sourceSHA256": "616aa909c71dae7a9e9305796e123200330d847080562cdf4d5f97ec15430edf",
+      "imageSHA256": "b3529b684b1b35861248e7479662cb2b6dfff439cd8b0374c194105c92e3dc3d",
+      "referenceSHA256": "b3529b684b1b35861248e7479662cb2b6dfff439cd8b0374c194105c92e3dc3d",
+      "repeatedSHA256": "b3529b684b1b35861248e7479662cb2b6dfff439cd8b0374c194105c92e3dc3d",
+      "emptySHA256": "4bd7227ae468226eebda7f0ab55e6fe61fcf57ba0c57e5f8e434b7f98bcec728",
+      "differingPixels": 0,
+      "repeatedExact": true,
+      "emptyRenderIsolated": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "compile",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "images-1280x720",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "images-1024x768",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    }
+  ],
+  "cleanupComplete": true,
+  "candidate": "943ea2f71b64074be6a8f877cda3886d8bcdeee1",
+  "rejectingGateSelfCheck": true,
+  "requestedRenderer": "gl2"
+}

@@ -1,0 +1,41 @@
+// L06 packaged-WebView controls and real services. Input is synthetic; starts no SDK.
+(async()=>{
+ const stages=[],imageFormats=[];let stage='open',serial=0,sessionId,identity,identities,acceptedSource,imageDecoded=false,awaitedControl='recent project';
+ const assert=(value,message)=>{if(!value)throw Error(message);};
+ const until=async condition=>{const end=performance.now()+30000;while(!await condition()){if(performance.now()>end)throw Error(`Timeout: ${stage} / ${awaitedControl}`);await new Promise(r=>setTimeout(r,30));}};
+ const request=async(operation,payload={})=>{const response=await window.__TAURI_INTERNALS__.invoke('core_request',{request:{protocolVersion:1,requestId:`image-${++serial}`,operation,payload:operation==='project.current'?payload:{sessionId,...payload}}});if(!response.ok)throw Object.assign(Error(`${operation}: ${response.error.code}`),{code:response.error.code});return response.value;};
+ const call=(operation,payload={})=>['project.current','source.open','screens.inspect','screens.list','authoring.list'].includes(operation)?window.__loomlightProbeRetryBusy(()=>request(operation,payload)):request(operation,payload);
+ const find=window.__loomlightProbeFindButton;
+ const click=async name=>{awaitedControl=`button ${name}`;await until(()=>find(name)&&!find(name).disabled);find(name).click();};
+ const checkpoint=name=>{stage=name;stages.push({stage});};
+ const source=async()=>(await call('source.open',{path:identity.path})).text;
+ const field=name=>document.querySelector(`input[aria-label="${name}"]`);
+ const input=(name,value)=>{const f=field(name);assert(f,`${name} exists`);f.focus();f.value=value;f.dispatchEvent(new Event('input',{bubbles:true}));return f;};
+ const key=(name,value)=>field(name).dispatchEvent(new KeyboardEvent('keydown',{key:value,bubbles:true,cancelable:true}));
+ const settled=async()=>until(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');
+ try {
+  await until(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await click('Screens');sessionId=(await call('project.current')).sessionId;
+  await click('New blank screen');await until(()=>field('Screen name'));input('Screen name','travel_notes');key('Screen name','Enter');await until(()=>document.querySelector('.screen-tree [data-node-id]'));
+  identity=(await call('screens.list')).owned[0];assert(identity?.resolved,'Owned screen resolves');
+  await click('Add element');await until(()=>document.querySelector('[data-kind=image]'));document.querySelector('[data-kind=image]').click();await until(()=>document.querySelector('[aria-label="Choose image"]'));document.querySelector('[aria-label="Choose image"]').click();await until(()=>document.querySelector('.screen-image-dialog[open]'));await click('Close');
+  assert(!(await source()).includes('    add '),'Cancelling picker writes no image');await until(()=>document.querySelector('[aria-label="Choose image"]'));document.querySelector('[aria-label="Choose image"]').click();await until(()=>document.querySelector('[aria-label="Use Station seal"]'));
+  for(const [name,format] of [["Station seal","png"],["JPEG seal","jpeg"],["Lossless WebP seal","webp-lossless"],["Lossy WebP seal","webp-lossy"],["Alpha WebP seal","webp-alpha"],["Station seal",null]]) {
+   await until(()=>document.querySelector(`[aria-label="Use ${name}"]`));document.querySelector(`[aria-label="Use ${name}"]`).click();await until(()=>!document.querySelector('.screen-image-dialog[open]'));
+   await until(()=>document.querySelector('.screen-image-asset img')?.complete&&document.querySelector('.screen-image-asset img')?.naturalWidth===80);
+   if(format) { imageFormats.push(format); document.querySelector('.screen-image-asset').click(); await until(()=>document.querySelector('.screen-image-dialog[open]')); }
+  }
+  imageDecoded=true;
+  assert(field('Height').value==='160','Natural aspect derives height');await click('Add image');await settled();const placed=await source();assert(placed.includes('xsize 320')&&placed.includes('ysize 160'),'Accepted image size appears in Source');
+  const nodes=(await call('screens.inspect',{path:identity.path})).screens[0].nodes;const image=nodes.find(n=>n.kind==='image');identities=[identity.rootId,image.id];checkpoint('image-picker-passed');
+  const invalid=input('Width','bad');await click('Apply image');assert(invalid.value==='bad'&&invalid.getAttribute('aria-invalid')==='true','Invalid image size retains its field');assert(await source()===placed,'Invalid image size writes nothing');key('Width','Escape');assert(field('Width').value==='320'&&document.activeElement===field('Width'),'Escape restores size and focus');
+  input('Width','200');assert(field('Height').value==='100','Aspect derives height');key('Width','Enter');await settled();const proportional=await source();assert(proportional.includes('xsize 200')&&proportional.includes('ysize 100'),'One Apply accepts linked size');assert(document.activeElement===field('Width'),'Apply retains width focus');
+  document.querySelector('input[aria-label="Preserve aspect ratio"]').click();input('Height','70');key('Height','Enter');await settled();const stretched=await source();assert(stretched.includes('ysize 70'),'Unlocked aspect accepts stretch');checkpoint('image-draft-passed');
+  await click('Undo');await until(()=>field('Height')?.value==='100');assert(await source()===proportional,'Undo restores exact source');await click('Redo');await until(()=>field('Height')?.value==='70');assert(await source()===stretched,'Redo restores exact source');assert(find('Apply image').disabled,'No-op Apply is disabled');checkpoint('image-history-passed');
+  input('Width','240');await click('View in Source');await until(()=>document.querySelector('.screen-source-dialog[open]'));assert(document.querySelector('.screen-source-dialog pre').textContent===stretched,'Source excludes pending image size');await click('Close source');assert(field('Width').value==='240','Source navigation retains draft');key('Width','Escape');
+  await click('View in Source');await until(()=>document.querySelector('.screen-source-dialog[open]'));await click('Edit in Source');await until(()=>document.querySelector('.source-editor'));
+  const editor=window.__loomlightProbeEditor(document.querySelector('.source-editor'));acceptedSource=stretched+'    use source_only_footer()\n\nscreen source_only_footer():\n    text "Protected neighbor"\n';editor.value=acceptedSource;editor.dispatchEvent(new Event('input',{bubbles:true}));await click('Save Source');await until(()=>document.querySelector('#app-status')?.textContent==='Saved');await click('Screens');await until(()=>document.querySelector('.screen-image-asset'));assert(await source()===acceptedSource,'Source reconciliation preserves accepted image and opaque neighbor');checkpoint('image-source-passed');
+  await click('Close Project');await until(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await until(()=>find('Screens'));const reopened=await call('project.current');assert(reopened.sessionId!==sessionId,'Reopen changes session');sessionId=reopened.sessionId;await click('Screens');await until(()=>document.querySelector(`[data-node-id="${identities[1]}"]`));document.querySelector(`[data-node-id="${identities[1]}"]`).dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));await until(()=>document.querySelector('.screen-image-asset'));
+  const fresh=(await call('screens.inspect',{path:identity.path})).screens[0].nodes;assert(identities.every(id=>fresh.some(n=>n.id===id))&&await source()===acceptedSource,'Reopen preserves source and identities');assert((await call('authoring.list')).assets.some(a=>a.kind==='uiImage'&&a.status==='available'),'Reopen preserves typed image');checkpoint('image-reopen-passed');checkpoint('complete');
+  await call('probe.runtimeUiReport',{scenario:'ui-image',passed:true,stage,stages,identity,identities,acceptedSource,imageDecoded,imageFormats,nativeWebView:true,sdkExecuted:false});
+ }catch(error){await call('probe.runtimeUiReport',{scenario:'ui-image',passed:false,stage,stages,identity,awaitedControl,error:String(error),feedback:document.querySelector('.screen-message')?.textContent,nativeWebView:true,sdkExecuted:false});}
+})();

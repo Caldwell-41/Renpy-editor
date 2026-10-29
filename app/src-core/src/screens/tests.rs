@@ -10,6 +10,9 @@ const PATH: &str = "game/ui/help.rpy";
 #[path = "nested_sdk_tests.rs"]
 mod nested_sdk;
 
+#[path = "image_tests.rs"]
+mod ui_images;
+
 #[test]
 fn grid_axes_and_child_removal_refuse_ambiguous_or_strict_source_shapes() {
     for shape in [
@@ -2736,3 +2739,6 @@ fn screen_atomic_size_two_tokens_one_history_entry_and_source_reconciliation() {
         fresh["revision"]
     );
 }
+
+#[path = "image_sdk_tests.rs"]
+mod image_sdk;

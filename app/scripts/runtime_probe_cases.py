@@ -1,9 +1,10 @@
 """Cases required by the ordinary packaged runtime gate and evidence manifest."""
 RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh")
-OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "nested-layout", "canvas-helper", "canvas-input")
+OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "nested-layout", "ui-image", "canvas-helper", "canvas-input")
 
 # Terminal production-probe observations required by each ordinary scenario.
 RUNTIME_STAGES = {
+    "ui-image": ("image-picker-passed", "image-draft-passed", "image-history-passed", "image-source-passed", "image-reopen-passed"),
     'nested-layout': ('nested-composition-passed','grid-layout-passed','viewport-source-passed','nested-history-passed','nested-reopen-passed'),
     'canvas-helper': ('project-frame-passed','draft-cancel-focus-passed','source-history-passed','second-aspect-passed','logical-pixels-passed','project-close-passed'),
     'owned-screen': ('cancel-passed', 'creation-passed', 'exact-source-passed', 'history-passed', 'reopen-passed'),
@@ -70,6 +71,25 @@ def runtime_report_ok(case, report, target_os=None):
                 return False
     if case == 'nested-layout' and any(token not in details['acceptedSource'] for token in ['window:', 'hbox:', 'viewport:', 'grid 4 1:', 'allow_underfull True']):
         return False
+    if case == 'ui-image':
+        identity = details.get('identity')
+        source = details.get('acceptedSource')
+        from uuid import UUID
+        try:
+            ids = details['identities']
+            valid_ids = len(ids) == 2 and len(set(ids)) == 2 and all(str(UUID(value)) == value for value in ids)
+        except (ValueError, TypeError, KeyError):
+            valid_ids = False
+        if (not valid_ids or not isinstance(identity, dict) or identity.get('name') != 'travel_notes'
+                or identity.get('path') != 'game/ui/travel_notes.rpy' or identity.get('resolved') is not True
+                or ids[0] != identity.get('rootId') or details.get('nativeWebView') is not True
+                or details.get('sdkExecuted') is not False or details.get('imageDecoded') is not True
+                or details.get('imageFormats') != ['png','jpeg','webp-lossless','webp-lossy','webp-alpha']
+                or details.get('error') or not isinstance(source, str)
+                or any(token not in source for token in ['add "images/ui station_seal.png":', 'xsize 200', 'ysize 70', 'use source_only_footer()', 'text "Protected neighbor"'])
+                or source.count(f'# loomlight-screen: {identity.get("id")}\n') != 1
+                or source.count(f'# loomlight-element: {ids[1]}\n') != 1):
+            return False
     if case == 'help-screen':
         if target_os is not None and target_os not in ('windows', 'macos'):
             return False

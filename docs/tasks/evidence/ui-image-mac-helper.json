@@ -1,0 +1,55 @@
+{
+  "acceptedSHA256": "5e1efbb083c9ea966d18447980442f7c69f312b6d1218ef17cd669c7e02a4941",
+  "helperSessions": 1,
+  "passed": true,
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "frameId": "2b96985d-10d8-42f5-a14d-28d8d5008d6e",
+      "renderer": "gl2"
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "frameId": "86b1f303-7bc0-4c6e-b039-170c7e42147a",
+      "renderer": "gl2"
+    }
+  ],
+  "sdkProcesses": 1,
+  "shutdown": {
+    "cleanupComplete": true,
+    "cooperative": true,
+    "exitCode": 0
+  },
+  "typedPending": true,
+  "pixels": {
+    "passed": true,
+    "records": [
+      {
+        "aspect": [
+          1280,
+          720
+        ],
+        "imageSHA256": "f38bc44deda71198ca304d872cc1f3937d1d43ce5b83aadd3b5380c7c88d1da7",
+        "referenceSHA256": "f38bc44deda71198ca304d872cc1f3937d1d43ce5b83aadd3b5380c7c88d1da7",
+        "differentPixels": 0
+      },
+      {
+        "aspect": [
+          1024,
+          768
+        ],
+        "imageSHA256": "6ff4a3995cdcf2eb4ce33b3d1d562af091845608b61890fb124cb85030f27fc9",
+        "referenceSHA256": "6ff4a3995cdcf2eb4ce33b3d1d562af091845608b61890fb124cb85030f27fc9",
+        "differentPixels": 0
+      }
+    ],
+    "acceptedSHA256": "5e1efbb083c9ea966d18447980442f7c69f312b6d1218ef17cd669c7e02a4941"
+  },
+  "scope": "Mac ARM64 GL2 helper; both aspects, six image rectangles, exact independent-reference RGBA, typed pending image, no Source write and cooperative cleanup. Qualification precedes the implementation checkpoint."
+}

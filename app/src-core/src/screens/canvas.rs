@@ -22,6 +22,27 @@ pub struct Request {
     pub button_state: ButtonState,
     #[serde(default)]
     pub addition: Option<Addition>,
+    #[serde(default)]
+    pub image_samples: Vec<ImageDraft>,
+    #[serde(default)]
+    pub image_addition: Option<ImageDraft>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ImageDraft {
+    #[serde(default)]
+    pub node_start: Option<usize>,
+    #[serde(default)]
+    pub parent_start: Option<usize>,
+    pub asset_id: String,
+    pub expected_asset_sha256: String,
+    #[serde(default)]
+    pub replacement_sha256: Option<String>,
+    pub width: u32,
+    pub height: u32,
+    #[serde(default)]
+    pub layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -110,6 +131,8 @@ impl AuthoringService {
             || request.positions.len() > MAX_NODES
             || request.layouts.len() > MAX_NODES
             || request.text_samples.len() > MAX_NODES
+            || request.image_samples.len() > MAX_NODES
+            || request.addition.is_some() && request.image_addition.is_some()
         {
             return Err(SceneError::InvalidPayload);
         }
@@ -120,6 +143,7 @@ impl AuthoringService {
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);
         }
+        let source_path = request.path.clone();
         let document = inspect(&bytes, request.path, revision.sha256.clone())?;
         let screen = document
             .screens
@@ -305,12 +329,21 @@ impl AuthoringService {
         }
         let mut sampled = HashSet::new();
         let mut layouts = HashSet::new();
+        let mut image_layouts = std::collections::BTreeMap::new();
         for draft in request.layouts {
             if !layouts.insert(draft.node_start)
                 || seen.contains(&draft.node_start)
                 || positioned.contains(&draft.node_start)
             {
                 return Err(SceneError::InvalidPayload);
+            }
+            if request
+                .image_samples
+                .iter()
+                .any(|sample| sample.node_start == Some(draft.node_start))
+            {
+                image_layouts.insert(draft.node_start, draft.values);
+                continue;
             }
             let numeric = screen
                 .nodes
@@ -354,7 +387,8 @@ impl AuthoringService {
                 .iter()
                 .find(|n| n.span.start == addition.parent_start)
                 .ok_or(SceneError::InvalidPayload)?;
-            if !composition::can_add(&screen, parent, &addition.kind)
+            if addition.kind == "image"
+                || !composition::can_add(&screen, parent, &addition.kind)
                 || addition.text.len() > 8192
                 || addition.text.contains('\0')
                 || plan.nodes.len() >= MAX_NODES
@@ -380,6 +414,147 @@ impl AuthoringService {
                 literal,
                 properties,
             });
+        }
+        if !request.image_samples.is_empty() || request.image_addition.is_some() {
+            let (project_bytes, _) = self
+                .transactions
+                .snapshot(
+                    project,
+                    RelativePath::new(".renpy-editor/project.json").unwrap(),
+                )
+                .map_err(|_| SceneError::InvalidMetadata)?;
+            let project_id = crate::metadata::ProjectMetadata::read_bytes(&project_bytes, None)
+                .map_err(|_| SceneError::InvalidMetadata)?
+                .project_id;
+            let mut seen_images = HashSet::new();
+            for (addition, sample) in request
+                .image_samples
+                .into_iter()
+                .map(|s| (false, s))
+                .chain(request.image_addition.into_iter().map(|s| (true, s)))
+            {
+                let selection = self.prepare_ui_image_reference(
+                    project,
+                    &project_id,
+                    &sample.asset_id,
+                    &sample.expected_asset_sha256,
+                    sample.replacement_sha256.as_deref(),
+                )?;
+                plan.dependencies.push((
+                    format!("game/{}", selection.path),
+                    sample
+                        .replacement_sha256
+                        .clone()
+                        .unwrap_or(sample.expected_asset_sha256),
+                ));
+                let (index, prepared) = if addition {
+                    if sample.node_start.is_some() || plan.nodes.len() >= MAX_NODES {
+                        return Err(SceneError::InvalidPayload);
+                    }
+                    let parent_start = sample.parent_start.ok_or(SceneError::InvalidPayload)?;
+                    let parent = screen
+                        .nodes
+                        .iter()
+                        .find(|n| n.span.start == parent_start)
+                        .ok_or(SceneError::InvalidPayload)?;
+                    for key in sample.layout.keys() {
+                        if !["xpos", "ypos", "xanchor", "yanchor"].contains(&key.as_str())
+                            || parent.kind == "grid"
+                            || parent.kind == "vbox" && key.starts_with('y')
+                            || parent.kind == "hbox" && key.starts_with('x')
+                        {
+                            return Err(SceneError::InvalidPayload);
+                        }
+                    }
+                    let prepared = super::images::prepare(
+                        &bytes,
+                        &screen,
+                        &source_path,
+                        super::images::Target::Addition { parent },
+                        super::images::Change {
+                            path: &selection.path,
+                            width: sample.width,
+                            height: sample.height,
+                            layout: sample.layout,
+                        },
+                    )?;
+                    plan.nodes.push(CanvasNode {
+                        start: screen.nodes.iter().map(|n| n.span.end).max().unwrap_or(0) + 1,
+                        parent: Some(parent_start),
+                        kind: "image".into(),
+                        literal: None,
+                        properties: Map::new(),
+                    });
+                    (plan.nodes.len() - 1, prepared)
+                } else {
+                    let start = sample.node_start.ok_or(SceneError::InvalidPayload)?;
+                    if !seen_images.insert(start) {
+                        return Err(SceneError::InvalidPayload);
+                    }
+                    let mut index = plan
+                        .nodes
+                        .iter()
+                        .position(|n| n.start == start && n.kind == "image")
+                        .ok_or(SceneError::InvalidPayload)?;
+                    let owned = self.owned_screen_document(
+                        project,
+                        &bytes,
+                        source_path.clone(),
+                        plan.revision.clone(),
+                    )?;
+                    let original = owned
+                        .screens
+                        .iter()
+                        .find(|s| s.name == screen.name)
+                        .ok_or(SceneError::InvalidPayload)?;
+                    let node = original
+                        .nodes
+                        .iter()
+                        .find(|n| n.span.start == start && n.id.is_some())
+                        .ok_or(SceneError::OpaqueBoundary)?;
+                    let parent_id = sample
+                        .parent_start
+                        .map(|parent_start| {
+                            original
+                                .nodes
+                                .iter()
+                                .find(|n| n.span.start == parent_start)
+                                .ok_or(SceneError::InvalidPayload)?
+                                .id
+                                .as_deref()
+                                .ok_or(SceneError::OpaqueBoundary)
+                        })
+                        .transpose()?;
+                    let mut edits = image_layouts.remove(&start).unwrap_or_default();
+                    edits.extend(sample.layout);
+                    let prepared = super::images::prepare(
+                        &bytes,
+                        original,
+                        &source_path,
+                        super::images::Target::Existing { node, parent_id },
+                        super::images::Change {
+                            path: &selection.path,
+                            width: sample.width,
+                            height: sample.height,
+                            layout: edits,
+                        },
+                    )?;
+                    if prepared.reparented {
+                        let mut moved = plan.nodes.remove(index);
+                        moved.parent = prepared.parent_start;
+                        plan.nodes.push(moved);
+                        index = plan.nodes.len() - 1;
+                    }
+                    (index, prepared)
+                };
+                plan.nodes[index].literal = Some(selection.path);
+                plan.nodes[index]
+                    .properties
+                    .retain(|key, _| layout::aliases(key).is_empty());
+                plan.nodes[index]
+                    .properties
+                    .extend(prepared.values.into_iter().map(|(k, v)| (k, v.json())));
+            }
         }
         for node in &plan.nodes {
             let count = plan

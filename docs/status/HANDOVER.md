@@ -1,5 +1,39 @@
 # Current outcome handover
 
+<a id="l06-implementation-and-qualification"></a>
+
+## L06 import and parent correction
+
+Kris selected both findings from the independent PR #68 review, root-cause fixes,
+TDD and an update to the existing PR. The confirmed test boundaries are the public
+Assets importer, Screens workspace controls and real controller/core journey.
+Starting head is `8f29ec8`; code checkpoint `cf67de2` closes both findings. The full
+PR base remains `2e045d9`. Work uses the isolated checkout at
+`.toolchains/pr68-import-parent-fix`, targeting `codex/phase3b-l06-ui-image`.
+
+The importer records browser decode readiness per staged row before accepting the
+UI-image role. Core preserves Source restrictions separately from accepted-parent
+rules; the workspace derives all image drafts' layout constraints from their
+selected parents. Public regressions first fail and then pass. Both independent
+review axes report zero findings in the correction delta.
+[Evidence](../tasks/evidence/ui-image.md#import-decoding-and-draft-parent-corrections-2026-10-29)
+retains exact red/green results and original fixture/environment failures.
+
+All 276 frontend tests, typechecking/build, Rust formatting, repository validation
+and 13 section-link tests pass. All 58 ordinary Screens tests pass; three existing
+SDK/helper tests remain ignored. The freshly built real controller/core journey
+passes corrupt/valid Assets imports, combined parent/position Apply, exact history
+and the existing image workflow. Raw evidence remains in the primary ignored
+`.toolchains/pr68-import-parent-evidence/`. PR #68 owns its published head and
+current automatic-check state. Publication requires the ordinary check audit;
+no new SDK/helper, package, native session or costly dispatch is selected.
+
+Keep earlier CI3, both-host SDK/helper/native receipts and original failures,
+the approved A2 prototype and failed full Design Lab startup gate, original
+implementation/review checkouts, unrelated primary audit and protected recovery
+below. #40 remains open for acceptance. Costly dispatches remain 3/3. No merge,
+release or successor outcome is selected.
+
 ## L04 merge and workspace closeout
 
 Kris directed merging [PR #67](https://github.com/Caldwell-41/Renpy-editor/pull/67)

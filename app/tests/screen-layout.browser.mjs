@@ -129,6 +129,7 @@ try {
     assert.equal(result.ok,true,JSON.stringify(result));return result.value.selectedId;
   };
   const groupId=await add(owner.rootId,'vbox');await add(groupId,'text','Child');
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
   await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
   await ui.getByLabel('Screen',{exact:true}).selectOption(JSON.stringify(['owned',owner.id]));
   await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
