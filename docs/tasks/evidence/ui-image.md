@@ -496,3 +496,25 @@ session. Windows completed use remains SDK 4/16, helper 1/4, package 1/3, native
 1/3 before dispatch. CI use is 2/3. No further costly dispatch is available after
 ordinal 3 without a new user decision. CI1/CI2 remain failed; no Windows normal-entry
 pass or ticket acceptance is claimed.
+
+
+## CI3 dispatch and pending audit
+
+[Run 40816702645](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1),
+attempt 1, was created at `2026-10-29T04:15:16Z` on exact published candidate
+`b00415f6526476b1c235221f99f03d5cc0547fe5`, branch `codex/phase3b-l06-ui-image`, ordinal 3,
+with only `ui_image=true`. GitHub confirms the full identity and successful selection
+validation. The Windows image job is pending; the overall run is in progress.
+All three dispatches are consumed. Product source remains `9d6bf6b` and the checker
+remains `943ea2f`. This wait record changes evidence/status only.
+
+Same-chat ci-watch registration follows publication of this record. Expected identity
+is `0ed67040977267fe6b30db2d`; registration is not yet claimed. On the event,
+acknowledge delivery and audit the exact run/attempt/SHA, all required stages,
+normal-entry/backend/reference/repeat/empty proof at both aspects, coherent helper
+Source and pixels, actual retained native executable/hash/architecture, accepted
+disk bytes, reopen and cleanup. Audit actual costly starts before updating #40.
+Windows SDK 4/16, helper 1/4, package 1/3 and native 1/3 are completed before CI3;
+at most five SDK starts and one helper/package/native session are reserved.
+Mac use remains SDK 11/16, helper 2/4, package 2/3 and native 2/3. No fourth dispatch,
+full Windows pass, ticket acceptance, PR, merge or release is selected or claimed.

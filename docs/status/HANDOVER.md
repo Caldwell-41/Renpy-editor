@@ -30,8 +30,8 @@ without Source writes. Package build 1 at `19d71e8` uses the unchanged approved
 identity and passes strict signature/installer checks. Native session 1 passes all
 five raster variants, size/validation/history/Source/reopen, exact disk bytes and
 cleanup. These are synthetic DOM inputs through a signed native WebView. Physical
-input, OS file-dialog and human evidence remain distinct. No operation or watcher
-remains running. #40 alone owns cumulative allowances and consumption.
+input, OS file-dialog and human evidence remain distinct. #40 alone owns cumulative
+allowances and consumption; the current pending operation is recorded below.
 
 Pinned tools/dependencies remain in primary. `app/node_modules` and `app/target`
 are untracked local symlinks and must never be staged. Use bundled Python 3.12 on
@@ -42,7 +42,7 @@ failed fixture lookup, `controller-*`, probe rehearsals, full-suite logs and sig
 release. Preserve the prototype comparison worktree and earlier protected state.
 
 Kris authorized pushing the reviewed branch and focused Windows CI. Remote
-`codex/phase3b-l06-ui-image` now points to `d9ac51db5d5ef1965f4c2221f58829bd01b78113`.
+`codex/phase3b-l06-ui-image` qualified candidate is `b00415f6526476b1c235221f99f03d5cc0547fe5`.
 Product correction is `9d6bf6b`; `d9ac51d` changes only its Mac evidence/status.
 CI1 `40807895621`, attempt 1 at `8eeabc9`, remains failed after portable checks and
 the Windows controller stack overflow. Its event was acknowledged. No Windows
@@ -69,13 +69,23 @@ Both review axes clear the checker against base `2e045d9`; six gate tests pass.
 Product code remains `9d6bf6b`, so its signed package/native proof remains applicable.
 [Receipt 3](../tasks/evidence/ui-image-mac-sdk-03.json) binds this fresh result.
 
-#40 owns cumulative use: dispatches 2/3; Windows SDK 4/16, helper 1/4, package 1/3,
-native 1/3; Mac SDK 11/16, helper 2/4, package 2/3, native 2/3. Next push the
-evidence-only successor and dispatch final ordinal 3 on its exact candidate. Fresh
-SDK/helper Source inputs must qualify coherently and the Windows executable must
-actually be retained. The selected maximum is five Windows SDK starts, one helper,
-one package and one native session. Do not reset counts or rerun older attempts.
-No watcher is running. No full Windows/ticket pass, PR,
+#40 owns cumulative use: dispatches 3/3; completed Windows SDK 4/16, helper 1/4,
+package 1/3, native 1/3; Mac SDK 11/16, helper 2/4, package 2/3, native 2/3.
+[CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1),
+attempt 1, was created at `2026-10-29T04:15:16Z` on exact `b00415f`, ordinal 3.
+GitHub confirms the candidate/branch and successful selector validation; Windows
+qualification is pending. At most five SDK starts and one helper/package/native
+session are reserved until audit. Fresh SDK/helper Source must qualify coherently
+and the exact Windows executable must be retained and rehashed. No fourth dispatch
+without a new user decision. Do not reset counts or rerun older attempts.
+
+Next register same-chat ci-watch outside the sandbox and yield immediately on its
+running acknowledgement. Registration follows publication of this evidence-only
+wait record and is not yet claimed. On the event, acknowledge and verify the exact
+run/attempt/SHA, audit required cases, both-aspect pixels/backend/repeat/isolation,
+executable identity, accepted disk bytes/reopen/cleanup and actual operation use.
+[Pending audit](../tasks/evidence/ui-image.md#ci3-dispatch-and-pending-audit) owns details.
+No full Windows/ticket pass, PR,
 merge or release is claimed. Keep local dependency/target symlinks and all original
 artifacts/failed frames. This chat owns continuation.
 

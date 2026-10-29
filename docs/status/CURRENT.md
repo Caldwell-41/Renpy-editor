@@ -23,13 +23,15 @@ correction `9d6bf6b` and capture-checker correction `943ea2f`.
 [Evidence](../tasks/evidence/ui-image.md) owns detailed results and failures;
 [HANDOVER](HANDOVER.md#l06-implementation-and-qualification) owns continuation.
 Kris authorized publication and focused Windows CI. The corrected branch is
-pushed at `d9ac51d`; [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40812796885)
-failed for that exact candidate, ordinal 2. CI1 remains failed on the reproduced
+pushed at `b00415f`; [CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40816702645/attempts/1)
+is pending for that exact candidate, ordinal 3. CI2 remains failed on capture
+comparison and CI1 remains failed on the reproduced
 import-stack defect; both heap-buffer corrections pass focused debug/release,
 controller/core and fresh signed Mac package/native proof. Windows helper/native
 proof passes; normal-entry capture failed its strict pixel gate. The corrected
 native capture now passes Mac compile/lint and both aspects with exact pixels,
-repeatability and empty-Render isolation. Final Windows ordinal 3 is selected next.
+repeatability and empty-Render isolation. All three dispatches are consumed.
+This chat will audit CI3 through same-chat ci-watch; registration follows this record.
 No PR, merge or release is selected. Earlier closed
 allowances and protected recovery remain intact.
 
