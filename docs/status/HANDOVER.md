@@ -2,42 +2,37 @@
 
 <a id="l06-implementation-and-qualification"></a>
 
-## L06 architecture refactor coordination
+## L06 import and parent correction
 
-Kris selected all three architecture-review candidates and authorized worker
-assignments, coordinator validation, the two-axis code review, PR #68 update after
-passing checks, and cleanup of completed worker worktrees. The fixed starting
-head is `cd66af6e3f0641069627f2ce2d109d06e8654d03`; the full PR base remains
-`2e045d941bf633e73b8161be0096806203fbc2bb`. Integration uses the managed
-`pr68-architecture-integration` worktree and local branch
-`codex/pr68-architecture-refactors`, targeting the existing PR branch
-`codex/phase3b-l06-ui-image`. No merge or release is selected.
+Kris selected both findings from the independent PR #68 review, root-cause fixes,
+TDD and an update to the existing PR. The confirmed test boundaries are the public
+Assets importer, Screens workspace controls and real controller/core journey.
+Starting head is `8f29ec8`; code checkpoint `cf67de2` closes both findings. The full
+PR base remains `2e045d9`. Work uses the isolated checkout at
+`.toolchains/pr68-import-parent-fix`, targeting `codex/phase3b-l06-ui-image`.
 
-The draft worker owns frontend image/layout Apply coordination; the Rust worker
-owns shared image preparation. URL ownership follows the draft checkpoint so
-frontend writers do not overlap. All agents use root-cause diagnosis and TDD at
-the approved public interfaces. The coordinator owns shared documents, integration,
-actual controller/core checks and final publication.
-[Scope and validation](../tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29)
-retain the selected checks and limits. Worker commits `8d4364d`, `1cbe43a` and `7cd586f` are integrated.
-Code checkpoint `79ad8e8` also contains the validated numeric fixture correction.
-All 274 frontend and 58 ordinary Screens tests pass, as do the rebuilt real-core
-image controller, exact probe rehearsal and numeric controller. Three SDK/helper
-tests remain explicitly ignored. Standards and Spec each report zero findings at reviewed candidate `d238e34`.
-All three clean worker worktrees and their two branches are removed after
-ancestry verification and source snapshots. Managed archival retained stale
-ownership, so cleanup used ordinary Git removal without force; the attachment
-history may still list removed paths. The coordinator retains the isolated
-Cargo target and raw evidence. PR #68 owns the published head and current
-automatic-check state; no additional worker or implementation step is pending.
+The importer records browser decode readiness per staged row before accepting the
+UI-image role. Core preserves Source restrictions separately from accepted-parent
+rules; the workspace derives all image drafts' layout constraints from their
+selected parents. Public regressions first fail and then pass. Both independent
+review axes report zero findings in the correction delta.
+[Evidence](../tasks/evidence/ui-image.md#import-decoding-and-draft-parent-corrections-2026-10-29)
+retains exact red/green results and original fixture/environment failures.
 
-Prior pending-Apply and four-finding corrections remain recorded in the same
-evidence file. Keep the approved A2 prototype and its failed full Design Lab
-startup gate unchanged. Preserve earlier CI3, both-host SDK/helper/native
-receipts and downloaded Windows evidence, original implementation/review
-checkouts, the unrelated primary audit and protected recovery below. #40 stays
-open for acceptance. Costly dispatches remain 3/3; no SDK/helper, package or
-native operation starts under this refactor.
+All 276 frontend tests, typechecking/build, Rust formatting, repository validation
+and 13 section-link tests pass. All 58 ordinary Screens tests pass; three existing
+SDK/helper tests remain ignored. The freshly built real controller/core journey
+passes corrupt/valid Assets imports, combined parent/position Apply, exact history
+and the existing image workflow. Raw evidence remains in the primary ignored
+`.toolchains/pr68-import-parent-evidence/`. PR #68 owns its published head and
+current automatic-check state. Publication requires the ordinary check audit;
+no new SDK/helper, package, native session or costly dispatch is selected.
+
+Keep earlier CI3, both-host SDK/helper/native receipts and original failures,
+the approved A2 prototype and failed full Design Lab startup gate, original
+implementation/review checkouts, unrelated primary audit and protected recovery
+below. #40 remains open for acceptance. Costly dispatches remain 3/3. No merge,
+release or successor outcome is selected.
 
 ## L04 merge and workspace closeout
 

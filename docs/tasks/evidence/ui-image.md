@@ -861,3 +861,63 @@ evidence. The approved prototype, original implementation/review checkouts,
 prior correction checkout, unrelated audit and protected recovery are preserved.
 The existing draft PR #68 owns the published head and current automatic-check
 state. #40 remains open for acceptance; no merge or release is selected.
+
+## Import decoding and draft-parent corrections, 2026-10-29
+
+Kris selected both findings from the independent PR #68 review, root-cause fixes,
+TDD and an update to the existing PR. Kris confirmed the public Assets importer,
+Screens workspace controls and the real controller/core journey as test boundaries.
+The starting head is `8f29ec8`; code checkpoint `cf67de2` contains both fixes.
+The full PR base remains `2e045d9`.
+
+The ordinary Assets importer offered the new UI-image role while treating preview
+success as optional. Its public regression first imports while preview is pending.
+The fix records each staged row's decode readiness and requires success when
+submitting that role. Pending, failed and retried previews keep the row and edited
+name. Successful decode permits import. The red/green workflow and all six existing
+importer interaction tests pass. Existing roles keep their import behavior.
+
+Existing images exposed layout restrictions for their accepted parent after the
+draft selected a different parent. Core now returns `sourceBlocked` separately
+from the combined `blocked` map. The workspace projects each image draft's parent
+and combines its placement rules with the retained Source restrictions. The same
+projection supplies validation and retained canvas drafts. A second red/green
+workspace regression finds and fixes the same stale-parent fault after selecting
+another image; both retained drafts now reach the canvas together.
+
+The actual application/controller test fails against the untouched PR frontend
+and passes against the correction with the same freshly rebuilt core. It accepts
+parent and position in one command, checks the resulting Source and parent, and
+verifies exact bytes after one Undo and one Redo. The real Assets workflow rejects
+a truncated PNG with a valid header after browser decode fails, retains its edited
+name and issues no import. A distinct valid UI image imports through the real core.
+The rest of the image journey, including source conflict, replacement review,
+history, Source navigation and compact controls, also passes. No project runtime,
+SDK helper or native file dialog is used by this controller check.
+
+The new controller steps initially failed on incomplete fixture synchronization,
+then on assumptions about the Assets dialog, naming-help labels and a colliding
+technical filename. The fixture now waits for Source/history reconciliation,
+opens the existing dialog and uses its actual labels and a distinct filename.
+No product refusal or test deadline changed. Failure DOM is retained automatically.
+The finalized regression also fails against the untouched frontend. Original
+failures and the sandbox's refused loopback listener remain in the raw evidence.
+
+Final local checks pass all 276 frontend tests, typechecking, production frontend
+build, Rust formatting, repository validation and 13 section-link tests. The first
+full frontend run passed 275/276 because system Python 3.9 lacked `tomllib`; the
+full run passes with bundled Python 3.12.14. All 58 ordinary Screens tests pass;
+the same three SDK/helper tests remain ignored and are not counted as passes.
+The existing frontend chunk-size advisory remains. The rebuilt driver SHA-256 is
+`8ba737cd438fd738d886beb5aa98a0e634ef999d19fd996230705bc6a98d70de`.
+
+Raw logs, failing controller receipts and the final passing controller receipt
+are retained in the primary ignored `.toolchains/pr68-import-parent-evidence/`.
+Independent Standards and Spec reviews each report zero findings at `cf67de2`
+against `8f29ec8`; both original P2 findings are closed. The following status
+closeout changes documentation only. PR #68 owns the published head and current
+automatic-check state.
+No SDK/helper, package, native session or costly CI dispatch ran. Existing counts,
+candidate-bound native evidence, the failed full Design Lab startup gate and
+physical-input/human/wider acceptance retain their scope. #40 remains open for
+acceptance; no merge or release is selected.
