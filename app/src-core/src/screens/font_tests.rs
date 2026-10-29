@@ -506,16 +506,31 @@ fn typography_rechecks_the_accepted_font_when_only_another_field_changes() {
 
 #[test]
 fn invalid_font_import_keeps_metadata_source_and_previous_history() {
+    let mut empty_cmap = TTF.to_vec();
+    let table_count = u16::from_be_bytes(empty_cmap[4..6].try_into().unwrap()) as usize;
+    let cmap_record = empty_cmap[12..12 + table_count * 16]
+        .chunks_exact(16)
+        .find(|record| &record[..4] == b"cmap")
+        .unwrap();
+    let cmap_offset = u32::from_be_bytes(cmap_record[8..12].try_into().unwrap()) as usize;
+    empty_cmap[cmap_offset + 2..cmap_offset + 4].copy_from_slice(&0u16.to_be_bytes());
     for (extension, bytes) in [
         ("ttf", &b"invalid"[..]),
         ("otf", &OTF[..64]),
         ("ttf", &TTF[..128]),
+        ("ttf", empty_cmap.as_slice()),
     ] {
         let (temporary, mut service, root, owner) = composition_project();
         let before = fs::read(root.join(".renpy-editor/authoring.json")).unwrap();
         let chosen = temporary.path().join(format!("invalid.{extension}"));
         fs::write(&chosen, bytes).unwrap();
         let choice = service.authoring_select_import(&chosen).unwrap();
+        let preview = reject(
+            &mut service,
+            "asset.previewFont",
+            json!({"authorityId":choice.authority_id}),
+        );
+        assert_eq!(preview["error"]["code"], "UNSUPPORTED_FORMAT");
         let result = reject(
             &mut service,
             "asset.import",

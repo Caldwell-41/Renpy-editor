@@ -128,8 +128,17 @@ pub(crate) fn validate(bytes: &[u8]) -> Result<(), AuthoringError> {
         return Err(AuthoringError::UnsupportedFormat);
     }
     let face = ttf_parser::Face::parse(bytes, 0).map_err(|_| AuthoringError::UnsupportedFormat)?;
+    let has_character_map = face.tables().cmap.is_some_and(|table| {
+        table.subtables.into_iter().any(|subtable| {
+            !matches!(
+                subtable.format,
+                ttf_parser::cmap::Format::MixedCoverage
+                    | ttf_parser::cmap::Format::UnicodeVariationSequences(_)
+            )
+        })
+    });
     if face.number_of_glyphs() == 0
-        || face.tables().cmap.is_none()
+        || !has_character_map
         || (face.tables().glyf.is_none() && face.tables().cff.is_none())
     {
         return Err(AuthoringError::UnsupportedFormat);
