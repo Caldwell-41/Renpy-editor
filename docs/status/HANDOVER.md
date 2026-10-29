@@ -6,7 +6,8 @@
 
 Kris selected fixing the remaining PR #68 edit-loss finding with the root-cause
 skill, independent review and PR update. The correction checkout is the ignored
-`.toolchains/pr68-apply-fix`, detached from prior published head `1303918`.
+`.toolchains/pr68-apply-fix`, detached from prior head `1303918`. Reviewed code
+checkpoint `e53b5e9` is published; the documentation successor records that result.
 It targets `codex/phase3b-l06-ui-image` and the existing draft
 [PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68). #40 stays open for
 acceptance. No merge or release is selected.
@@ -18,7 +19,8 @@ the actual controller/core journey pass. The controller holds an Apply before
 forwarding it to the unchanged real core, verifies unchanged Source and reserved
 controls, then verifies accepted size and restored editing. Native input and SDK
 rendering are not claimed. [Current evidence](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29)
-owns independent review, publication and automatic-check state. Raw outputs remain
+owns the zero-finding independent review and publication. [#40](https://github.com/Caldwell-41/Renpy-editor/issues/40)
+and PR #68 own the current automatic-check identity, state and remaining audit. Raw outputs remain
 under primary `.toolchains/pr68-apply-fix-evidence/`.
 
 The prior [four-finding correction](../tasks/evidence/ui-image.md#pr-68-review-corrections-2026-10-29)

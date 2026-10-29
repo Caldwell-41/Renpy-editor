@@ -12,7 +12,8 @@ The two new component regressions fail before the fix and pass afterward. All 27
 frontend tests and typechecking pass. The actual production controller/core journey
 also passes with a deliberately held Apply and the hash-verified unchanged core
 from the prior correction. [Evidence](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29)
-records the root cause, independent review and current publication/check state.
+records the root cause and zero-finding independent review. Code checkpoint
+`e53b5e9` is published; PR #68 and #40 own current automatic-check state.
 Earlier cache, staging, combined-layout and reparent fixes retain their scope.
 
 No SDK/helper, package, native session or costly CI dispatch ran. Earlier both-host
