@@ -16,7 +16,6 @@ export class ScreenFontMedia {
   private disposed = false;
   constructor(private readonly current: () => boolean,
     private readonly request: <T>(operation: CoreOperation, payload: Record<string, unknown>) => Promise<T>) {}
-  get(font: ProjectFont): string | undefined { return this.cache.get(`${font.id}:${font.sha256}`)?.family; }
   load(font: ProjectFont): Promise<string> {
     const key = `${font.id}:${font.sha256}`, cached = this.cache.get(key);
     if (cached) return Promise.resolve(cached.family);

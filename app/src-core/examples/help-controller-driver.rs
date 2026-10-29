@@ -10,6 +10,52 @@ fn emit(value: Value) {
     println!("{value}");
     io::stdout().flush().unwrap();
 }
+// Extend the public TTF with a checksummed private padding table. The browser
+// decodes a real font while each disposable asset consumes 15 MiB of the cache.
+fn cache_font(index: u32) -> Vec<u8> {
+    let original =
+        include_bytes!("../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.ttf");
+    let count = u16::from_be_bytes(original[4..6].try_into().unwrap()) as usize;
+    let mut bytes = original.to_vec();
+    bytes.splice(12 + count * 16..12 + count * 16, [0; 16]);
+    bytes[4..6].copy_from_slice(&((count + 1) as u16).to_be_bytes());
+    let power = (count + 1).next_power_of_two() / 2;
+    bytes[6..8].copy_from_slice(&((power * 16) as u16).to_be_bytes());
+    bytes[8..10].copy_from_slice(&(power.ilog2() as u16).to_be_bytes());
+    bytes[10..12].copy_from_slice(&(((count + 1) * 16 - power * 16) as u16).to_be_bytes());
+    let mut head = 0;
+    for i in 0..count {
+        let entry = 12 + i * 16;
+        let offset = u32::from_be_bytes(bytes[entry + 8..entry + 12].try_into().unwrap()) + 16;
+        bytes[entry + 8..entry + 12].copy_from_slice(&offset.to_be_bytes());
+        if &bytes[entry..entry + 4] == b"head" {
+            head = offset as usize;
+        }
+    }
+    bytes[head + 8..head + 12].fill(0);
+    let offset = bytes.len();
+    bytes.resize(15 * 1024 * 1024, 0);
+    let end = bytes.len();
+    bytes[end - 4..].copy_from_slice(&index.to_be_bytes());
+    let entry = 12 + count * 16;
+    bytes[entry..entry + 4].copy_from_slice(b"Loom");
+    bytes[entry + 4..entry + 8].copy_from_slice(&index.to_be_bytes());
+    bytes[entry + 8..entry + 12].copy_from_slice(&(offset as u32).to_be_bytes());
+    bytes[entry + 12..entry + 16].copy_from_slice(&((end - offset) as u32).to_be_bytes());
+    let mut entries: Vec<_> = bytes[12..12 + (count + 1) * 16]
+        .chunks_exact(16)
+        .map(|entry| entry.to_vec())
+        .collect();
+    entries.sort_by(|a, b| a[..4].cmp(&b[..4]));
+    for (i, entry) in entries.iter().enumerate() {
+        bytes[12 + i * 16..28 + i * 16].copy_from_slice(entry);
+    }
+    let sum = bytes.chunks_exact(4).fold(0u32, |sum, word| {
+        sum.wrapping_add(u32::from_be_bytes(word.try_into().unwrap()))
+    });
+    bytes[head + 8..head + 12].copy_from_slice(&0xB1B0_AFBAu32.wrapping_sub(sum).to_be_bytes());
+    bytes
+}
 fn main() {
     let preparation = std::time::Instant::now();
     eprintln!("HELP_FIXTURE phase=preparation-start elapsedMs=0");
@@ -180,7 +226,13 @@ fn main() {
         }
         if request["driver"] == "chooseFont" {
             assert_eq!(mode.as_deref(), Some("project-font"));
-            let name = if request["broken"] == true {
+            let cache_name;
+            let name = if let Some(index) = request["cacheIndex"].as_u64() {
+                assert!(index < 5);
+                cache_name = format!("cache_{index}.ttf");
+                fs::write(root.join(&cache_name), cache_font(index as u32)).unwrap();
+                &cache_name
+            } else if request["broken"] == true {
                 "broken.ttf"
             } else if request["alternate"] == true {
                 "help.otf"

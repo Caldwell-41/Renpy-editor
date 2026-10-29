@@ -310,7 +310,7 @@ export class ScreenText {
     if (!matches.length) list.append(el("p","","No project fonts match this search."));
     const load = (row: HTMLButtonElement,font: ProjectFont) => {
       if (row.dataset.loading) return;row.dataset.loading = "true";
-      void this.media.load(font).then(family => {if (!row.isConnected) return;row.querySelector<HTMLElement>(".screen-font-specimen")!.style.fontFamily = family;row.disabled = false;row.querySelector<HTMLElement>(".screen-font-loading")!.textContent = "";}).catch(error => {if (row.isConnected) row.querySelector<HTMLElement>(".screen-font-loading")!.textContent = (error as Error).message;});
+      void this.media.load(font).then(family => {if (!row.isConnected) return;row.querySelector<HTMLElement>(".screen-font-specimen")!.style.fontFamily = family;row.disabled = false;row.querySelector<HTMLElement>(".screen-font-loading")!.textContent = "";}).catch(error => {if (row.isConnected) row.querySelector<HTMLElement>(".screen-font-loading")!.textContent = (error as Error).message;}).finally(() => {delete row.dataset.loading;});
     };
     this.observer = new IntersectionObserver(entries => {for (const entry of entries) if (entry.isIntersecting) {const row = entry.target as HTMLButtonElement,font = matches.find(a => a.id === row.dataset.fontId);if (font) load(row,font);}} ,{root:list});
     for (const font of matches) {
@@ -321,7 +321,7 @@ export class ScreenText {
     }
   }
   private use(font?: ProjectFont): void {
-    const view = this.host.view();if (!view || this.key(view) !== this.pickerKey || font && !this.media.get(font)) return;
+    const view = this.host.view();if (!view || this.key(view) !== this.pickerKey) return;
     const draft = this.value(view);draft.fields = {...draft.fields,font:font ? fontPath(font) : ""};draft.font = font ? {assetId:font.id,expectedAssetSha256:font.sha256} : null;this.errors.delete(draft.key);this.store(draft,view);this.closePicker();
   }
   private cancelImport(): void {if (this.importing) return;this.pickerGeneration++;this.staged = undefined;this.stagedValid = false;this.renderPicker();this.dialog?.querySelector<HTMLInputElement>("input")?.focus();}
