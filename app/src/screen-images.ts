@@ -71,6 +71,8 @@ export class ScreenImages {
   private readonly errors = new Map<string, { field: string; text: string }>();
   private readonly cache = new Map<string, Cached>();
   private readonly loadingMedia = new Map<string, Promise<Cached>>();
+  private mediaQueue: Promise<void> = Promise.resolve();
+  private decoding?: Cached;
   private assets: UiImageAsset[] = [];
   private loaded = false;
   private load?: Promise<void>;
@@ -79,6 +81,7 @@ export class ScreenImages {
   private saving = false;
   private pickerGeneration = 0;
   private importing = false;
+  private staged?: Cached;
   private addition?: Draft;
   private card?: HTMLElement;
   private dialog?: HTMLDialogElement;
@@ -211,7 +214,10 @@ export class ScreenImages {
     this.cardKeys.abort();
     this.generation++;
     this.dialog?.remove();
-    for (const c of this.cache.values()) URL.revokeObjectURL(c.url);
+    const staged = this.staged;
+    this.releaseStaged();
+    if (this.decoding && this.decoding !== staged) this.release(this.decoding);
+    for (const c of this.cache.values()) this.release(c);
     this.cache.clear();
   }
   private async media(asset: UiImageAsset): Promise<Cached> {
@@ -227,8 +233,31 @@ export class ScreenImages {
     this.loadingMedia.set(key, job);
     return job;
   }
-  private async retain(media: MediaPresentation): Promise<Cached> {
-    if (!this.active()) throw Error("This image belongs to a closed workspace.");
+  private retain(media: MediaPresentation, stageCurrent?: () => boolean): Promise<Cached> {
+    const job = this.mediaQueue.then(() => this.decode(media, stageCurrent));
+    // The caller receives the rejection; the queue still admits the next image.
+    this.mediaQueue = job.then(() => {}, () => {});
+    return job;
+  }
+  private show(image: HTMLImageElement, cached: Cached): void {
+    if (this.cache.get(`${cached.media.assetId}:${cached.media.sha256}`) === cached)
+      image.src = cached.url;
+  }
+  private release(cached: Cached): void {
+    for (const image of document.querySelectorAll<HTMLImageElement>("img[src]"))
+      if (image.getAttribute("src") === cached.url) image.removeAttribute("src");
+    URL.revokeObjectURL(cached.url);
+    const key = `${cached.media.assetId}:${cached.media.sha256}`;
+    if (this.cache.get(key) === cached) this.cache.delete(key);
+  }
+  private releaseStaged(): void {
+    const staged = this.staged;
+    this.staged = undefined;
+    if (staged) this.release(staged);
+  }
+  private async decode(media: MediaPresentation, stageCurrent?: () => boolean): Promise<Cached> {
+    if (!this.active() || (stageCurrent && !stageCurrent()))
+      throw Error("This image selection is no longer active.");
     if (
       !["image/png", "image/jpeg", "image/webp"].includes(media.mimeType) ||
       !media.width ||
@@ -238,28 +267,35 @@ export class ScreenImages {
       throw Error("This image cannot be presented safely.");
     const key = `${media.assetId}:${media.sha256}`,
       cached = this.cache.get(key);
-    if (cached) return cached;
+    if (cached) {
+      if (stageCurrent) this.staged = cached;
+      return cached;
+    }
     const bytes = Uint8Array.from(atob(media.dataBase64), (c) => c.charCodeAt(0));
     while (
       [...this.cache.values()].reduce((sum, e) => sum + e.media.byteCount, 0) + bytes.length >
         32 * 1024 * 1024 &&
       this.cache.size
     ) {
-      const [old, c] = this.cache.entries().next().value!;
-      URL.revokeObjectURL(c.url);
-      this.cache.delete(old);
+      this.release([...this.cache.values()].find((entry) => entry !== this.staged)!);
     }
     const url = URL.createObjectURL(new Blob([bytes], { type: media.mimeType }));
+    const entry = { media, url };
+    this.decoding = entry;
+    if (stageCurrent) this.staged = entry;
     const image = document.createElement("img");
     image.src = url;
     try {
       await image.decode();
-      if (!this.active()) throw Error("This image belongs to a closed workspace.");
+      if (!this.active() || (stageCurrent && (!stageCurrent() || this.staged !== entry)))
+        throw Error("This image selection is no longer active.");
     } catch {
-      URL.revokeObjectURL(url);
+      this.release(entry);
+      if (this.staged === entry) this.staged = undefined;
       throw Error("This file cannot be decoded as an image. Choose another image. Your draft is retained.");
+    } finally {
+      this.decoding = undefined;
     }
-    const entry = { media, url };
     this.cache.set(key, entry);
     return entry;
   }
@@ -272,11 +308,11 @@ export class ScreenImages {
     const cached = media
       ? this.cache.get(`${asset.id}:${media.sha256}`)
       : this.cache.get(`${asset.id}:${asset.sha256}`);
-    if (cached) img.src = cached.url;
+    if (cached) this.show(img, cached);
     else if (asset.status === "available")
       void this.media(asset)
         .then((c) => {
-          if (this.active() && img.isConnected) img.src = c.url;
+          if (this.active() && img.isConnected) this.show(img, c);
         })
         .catch(() => {});
     return img;
@@ -807,6 +843,7 @@ export class ScreenImages {
   }
   private closePicker(): void {
     if (this.importing) return;
+    this.releaseStaged();
     this.pickerGeneration++;
     const dialog = this.dialog;
     this.dialog = undefined;
@@ -825,6 +862,7 @@ export class ScreenImages {
     this.dialog = dialog;
     dialog.onclose = () => {
       if (this.dialog === dialog) {
+        this.releaseStaged();
         this.dialog = undefined;
         this.pickerGeneration++;
       }
@@ -840,6 +878,7 @@ export class ScreenImages {
     dialog.querySelector("input")?.focus();
   }
   private renderPicker(): void {
+    this.releaseStaged();
     this.pickerGeneration++;
     const dialog = this.dialog;
     if (!dialog) return;
@@ -928,6 +967,7 @@ export class ScreenImages {
     }
   }
   private renderImport(): void {
+    this.releaseStaged();
     this.pickerGeneration++;
     const dialog = this.dialog;
     if (!dialog) return;
@@ -947,6 +987,7 @@ export class ScreenImages {
     const browse = button("Browse files…", () => void choose());
     dialog.append(browse, status);
     const choose = async () => {
+      this.releaseStaged();
       const generation = ++this.pickerGeneration;
       const current = () => this.active() && this.dialog === dialog && generation === this.pickerGeneration;
       browse.disabled = true;
@@ -966,11 +1007,14 @@ export class ScreenImages {
           authorityId: choice.authorityId,
         });
         if (!current()) return;
-        const shown = await this.retain(media);
-        if (!current()) return;
+        const shown = await this.retain(media, current);
+        if (!current()) {
+          this.release(shown);
+          return;
+        }
         const staged = el("div", "screen-image-staged"),
           img = el("img");
-        img.src = shown.url;
+        this.show(img, shown);
         img.alt = choice.displayName;
         staged.append(
           img,
@@ -1022,6 +1066,7 @@ export class ScreenImages {
                   }),
                 );
                 if (!this.active()) return;
+                this.releaseStaged();
                 this.host.saved();
                 await this.refreshAssets();
                 if (!current()) return;
@@ -1080,13 +1125,13 @@ export class ScreenImages {
       const old = this.cache.get(`${asset.id}:${asset.sha256}`);
       if (old) {
         const img = el("img");
-        img.src = old.url;
+        this.show(img, old);
         img.alt = "Previously selected image";
         before.append(img);
       } else before.append(el("p", "", "Previous file preview unavailable."));
       before.append(el("p", "", `${asset.naturalWidth ?? "?"} × ${asset.naturalHeight ?? "?"} px`));
       const image = el("img");
-      image.src = after.url;
+      this.show(image, after);
       image.alt = "File on disk";
       next.append(el("h3", "", "File on disk"), image, el("p", "", `${media.width} × ${media.height} px`));
       const comparison = el("div", "screen-image-comparison");
