@@ -106,15 +106,16 @@ export class ScreenText {
     }).finally(() => { if (this.loading === loading) this.loading = undefined; });
     this.loading = loading; return loading;
   }
-  private store(draft: Draft): void {
-    const before = this.fields(draft.node);
-    if (same(before,draft.fields)) this.drafts.delete(draft.key); else this.drafts.set(draft.key,draft);
+  private store(draft: Draft, view: CompositionView): void {
+    if (same(this.fields(view.selected),draft.fields)) {
+      this.drafts.delete(draft.key);this.errors.delete(draft.key);this.fieldErrors.delete(draft.key);
+    } else this.drafts.set(draft.key,draft);
     this.sync(); this.host.preview();
   }
   private edit(field: Field, value: string): void {
     const view = this.host.view(); if (!view || this.isSaving() || view.busy || view.selected.textProperties?.blocked[field]) return;
     const draft = this.value(view); draft.fields = {...draft.fields,[field]:value};
-    this.store(draft);
+    this.store(draft,view);
   }
   render(card: HTMLElement, view: CompositionView): boolean {
     if (!view.selected.id || !view.selected.textProperties || !["text","textbutton"].includes(view.selected.kind)) return false;
@@ -321,7 +322,7 @@ export class ScreenText {
   }
   private use(font?: ProjectFont): void {
     const view = this.host.view();if (!view || this.key(view) !== this.pickerKey || font && !this.media.get(font)) return;
-    const draft = this.value(view);draft.fields = {...draft.fields,font:font ? fontPath(font) : ""};draft.font = font ? {assetId:font.id,expectedAssetSha256:font.sha256} : null;this.errors.delete(draft.key);this.store(draft);this.closePicker();
+    const draft = this.value(view);draft.fields = {...draft.fields,font:font ? fontPath(font) : ""};draft.font = font ? {assetId:font.id,expectedAssetSha256:font.sha256} : null;this.errors.delete(draft.key);this.store(draft,view);this.closePicker();
   }
   private cancelImport(): void {if (this.importing) return;this.pickerGeneration++;this.staged = undefined;this.stagedValid = false;this.renderPicker();this.dialog?.querySelector<HTMLInputElement>("input")?.focus();}
   private renderImport(): void {

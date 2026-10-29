@@ -133,6 +133,37 @@ try {
  await compose({type:'formatText',nodeId:first.selectedId,values:{size:26,align:0,bold:null,italic:null,font:{assetId:font.id,expectedAssetSha256:font.sha256}}});await refresh();
  await ui.locator('.screen-text-layout').evaluate(e=>e.open=false);await ui.locator('.screen-text-body').evaluate(e=>e.scrollTop=0);await page.setViewportSize({width:1100,height:720});await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await writeFile(join(output,'matched-geometry.json'),JSON.stringify(await page.evaluate(()=>({headers:document.querySelectorAll('.app-header').length,cards:document.querySelectorAll('.screen-text').length,layout:document.querySelector('.screen-text-layout')?.outerHTML,summary:document.querySelector('.screen-text-layout>summary')?.getBoundingClientRect().toJSON(),body:document.querySelector('.screen-text-body')?.getBoundingClientRect().toJSON()})),null,2));await ui.locator('.screen-text').screenshot({path:join(output,'inspector-matched-dark-wide.png')});await page.screenshot({path:join(output,'matched-dark-wide.png')});
  await page.setViewportSize({width:560,height:640});await ui.locator('.screen-text-body').evaluate(e=>e.scrollTop=0);await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await page.screenshot({path:join(output,'matched-dark-compact.png')});
+ // Source refresh retains a divergent text draft until it matches the current saved values.
+ await page.setViewportSize({width:1100,height:800});
+ const savedBeforeReconcile=await request('source.open',{path:owner.path});
+ const oldLiteral=await content.inputValue(),savedLiteral='The current saved route.',nextLiteral='A new edit after reconciliation.';
+ await content.fill('Retained route draft');
+ const reconciledSource=savedBeforeReconcile.text.replace(JSON.stringify(oldLiteral),JSON.stringify(savedLiteral));
+ assert.notEqual(reconciledSource,savedBeforeReconcile.text);
+ const sourceDraft=await request('source.updateDraft',{path:owner.path,expectedBaseRevision:savedBeforeReconcile.baseRevision,selectionStart:0,selectionEnd:0,text:reconciledSource});
+ await request('source.save',{path:owner.path,expectedBaseRevision:sourceDraft.baseRevision,expectedDraftVersion:sourceDraft.draftVersion});
+ await refresh();assert.equal(await content.inputValue(),'Retained route draft');
+ await content.fill(savedLiteral);
+ assert.equal(await ui.getByRole('button',{name:'Apply',exact:true}).isDisabled(),true,'Matching the current saved literal clears the stale draft');
+ assert.equal(await read(),reconciledSource,'Reconciliation itself writes no Source');
+ await content.fill(nextLiteral);await ui.getByRole('button',{name:'Apply',exact:true}).click();await settled();
+ const afterReconcile=reconciledSource.replace(JSON.stringify(savedLiteral),JSON.stringify(nextLiteral));
+ assert.equal(await read(),afterReconcile,'The next edit uses the current accepted revision');
+ await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(value=>document.querySelector('[data-text-field=text]')?.value===value,savedLiteral);assert.equal(await read(),reconciledSource);
+ await ui.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(value=>document.querySelector('[data-text-field=text]')?.value===value,nextLiteral);assert.equal(await read(),afterReconcile);
+ const acceptedAgain=await request('source.open',{path:owner.path}),latestLiteral='The latest saved route.',acceptedSize=await size.inputValue();
+ await content.fill('Another retained route draft');
+ const latestSource=acceptedAgain.text.replace(JSON.stringify(nextLiteral),JSON.stringify(latestLiteral));
+ const latestDraft=await request('source.updateDraft',{path:owner.path,expectedBaseRevision:acceptedAgain.baseRevision,selectionStart:0,selectionEnd:0,text:latestSource});
+ await request('source.save',{path:owner.path,expectedBaseRevision:latestDraft.baseRevision,expectedDraftVersion:latestDraft.draftVersion});await refresh();
+ await content.fill(nextLiteral);
+ assert.equal(await ui.getByRole('button',{name:'Apply',exact:true}).isDisabled(),false,'Matching the original literal keeps a draft when current Source differs');
+ await size.fill('40');await content.fill(latestLiteral);
+ await ui.getByRole('button',{name:'Apply',exact:true}).click();await ui.locator('.screen-text-error').getByText(/Your edits are kept/).waitFor();
+ assert.equal(await size.inputValue(),'40','Matching text keeps divergent typography and its original revision');assert.equal(await read(),latestSource);
+ await size.fill(acceptedSize);
+ assert.equal(await ui.getByRole('button',{name:'Apply',exact:true}).isDisabled(),true,'Matching every current saved field clears the retained draft');
+ assert.equal(await ui.locator('.screen-text-error').isHidden(),true,'Resolving all stale fields clears their Source conflict');
  assert.deepEqual(errors,[]);await writeFile(join(output,'result.json'),JSON.stringify({passed:true,actualControllerCore:true,nativeDialogSubstituted:true,sdkExecuted:false,source:accepted,font,receipts,plans},null,2));
  console.log('PASS actual font controller/core import, draft, Apply and shared history.');
 } catch(error) {
