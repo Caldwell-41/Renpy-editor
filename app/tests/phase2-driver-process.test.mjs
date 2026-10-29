@@ -12,3 +12,11 @@ test('ordinary driver startup/reply failures reject promptly and finish owned pr
  const missing=driverProcess('/definitely-missing-loomlight-fixture',[],{timeout:1500});
  await assert.rejects(missing.next(),/ENOENT/);await assert.rejects(missing.stop(),/ENOENT/);
 });
+test('fixture construction has its own bound while ordinary replies keep their deadline',async()=>{
+ const driver=driverProcess(process.execPath,['-e',`setTimeout(()=>console.log('{"ready":true}'),150);process.stdin.on('data',()=>{});`],{timeout:50,startupTimeout:2000});
+ try{
+  assert.equal((await driver.next()).ready,true);
+  await assert.rejects(driver.request({synthetic:true}),/reply deadline exceeded/);
+ }finally{await assert.rejects(driver.stop());}
+ assert.equal(driver.exitStatus().exitObserved,true);
+});

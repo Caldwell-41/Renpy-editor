@@ -1,31 +1,33 @@
 // Bounded JSON-line ownership for the synthetic native integration driver.
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
-export function driverProcess(executable,args,{timeout=15000}={}){
+export function driverProcess(executable,args,{timeout=15000,startupTimeout=timeout}={}){
  const child=spawn(executable,args,{stdio:['pipe','pipe','inherit']});
  const lines=createInterface({input:child.stdout}),queued=[],waiters=[];
- let failure,finished,exitError,lane=Promise.resolve(),resolveExit;
+ let failure,finished,exitError,lane=Promise.resolve(),resolveExit,received=false;
  const exited=new Promise(r=>{resolveExit=r;});
  const fail=error=>{failure??=error;for(const w of waiters.splice(0)){clearTimeout(w.timer);w.reject(failure);}};
  child.on('error',error=>{fail(error);finished={error};resolveExit(finished);});
  child.stdin.on('error',fail);
  child.on('exit',(code,signal)=>{finished={code,signal};exitError=Error(`Driver exit ${code} (${signal??'no signal'})`);fail(exitError);resolveExit(finished);});
  lines.on('line',line=>{
+  received=true;
   try{const value=JSON.parse(line);if(waiters.length){const w=waiters.shift();clearTimeout(w.timer);w.resolve(value);}else queued.push(value);}
   catch(error){fail(error);child.kill();}
  });
- const next=(deadline=timeout)=>{
+ const next=(deadline=received?timeout:startupTimeout)=>{
   if(queued.length)return Promise.resolve(queued.shift());
   if(failure)return Promise.reject(failure);
   return new Promise((resolve,reject)=>{
-   const w={resolve,reject,timer:setTimeout(()=>{fail(Error('Driver reply deadline exceeded'));child.kill();},deadline)};
+   const phase=received?'reply':'startup';
+   const w={resolve,reject,timer:setTimeout(()=>{fail(Error(`Driver ${phase} deadline exceeded`));child.kill();},deadline)};
    waiters.push(w);
   });
  };
  const request=value=>{
   const pending=lane.then(async()=>{
    if(failure)throw failure;
-   const response=next();child.stdin.write(JSON.stringify(value)+'\n');return response;
+   const response=next(timeout);child.stdin.write(JSON.stringify(value)+'\n');return response;
   });lane=pending.catch(()=>{});return pending;
  };
  const boundedExit=async()=>{

@@ -1,5 +1,36 @@
 # Current status
 
+## L05 picker and namespace review fixes
+
+The fresh [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) findings
+are corrected on `codex/l05-project-fonts`. Independent workers fixed discovery
+namespace collisions and font selection after specimen-cache eviction, with
+failing behavior tests before implementation. The coordinator integrated namespace
+first, then picker. Code candidate `03cd82a1fe844daee8f20f52c87caff9ba92d69b`
+passes both correction review axes with zero remaining findings.
+[Detailed evidence](../tasks/evidence/project-fonts.md#picker-cache-and-discovery-namespace-corrections-2026-10-30)
+retains assignments, red/green failures, candidate mapping and qualification limits.
+
+All 277 frontend tests, the production build, 70 Screens core tests and 33
+authoring tests pass. Four SDK/helper cases remain intentionally ignored. The
+actual cache-eviction journey, existing font journey and probe rehearsal pass;
+separate result files retain both controller receipts. Frontend/core inputs are
+unchanged between their `77d9af4` check candidate and `03cd82a`.
+
+Validated corrections are published as `187f6a1`; PR #70 is updated.
+[Ordinary CI run 40965398797](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40965398797),
+attempt 1, passes both required jobs at that exact head; every required step and
+its logs are audited. The picker worker worktree is archived. The app retains the
+namespace worker as this chat's primary checkout; its build output is removed and
+all worker evidence is preserved. No product correction is pending.
+
+Earlier SDK/helper and signed/native evidence retains its recorded candidates
+and scope. No costly CI, SDK/helper, package or native-editor operation ran for
+these corrections. The documentation closeout's ordinary checks remain visible
+on the PR. Keep PR #70 draft and #39 open. Merge, release and wider acceptance
+remain unselected. Preserve the unrelated audit, pinned design reference,
+earlier worktrees and protected recovery below.
+
 ## L06 UI-image authoring merged
 
 [PR #68](https://github.com/Caldwell-41/Renpy-editor/pull/68) merged into

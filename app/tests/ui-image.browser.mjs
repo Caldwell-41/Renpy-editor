@@ -11,7 +11,7 @@ import {driverProcess} from './phase2-driver-process.mjs';
 const output=resolve(process.env.UI_IMAGE_OUTPUT??'../.toolchains/ui-image/controller-01');
 await mkdir(output,{recursive:true});
 const driver=resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`);
-const child=driverProcess(driver,[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'ui-image']);
+const child=driverProcess(driver,[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'ui-image'],{startupTimeout:60000});
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 const errors=[],receipts=[],plans=[];let browser,page,sessionId,passed=false,cancelPicker=true,alternate=false,onPlan=()=>{},holdCompose=false,releaseCompose=()=>{},brokenImport=true;
 const rpc=async request=>{

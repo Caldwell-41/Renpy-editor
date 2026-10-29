@@ -1,0 +1,37 @@
+.font-refined .ui-work{grid-template-columns:minmax(0,1fr) 326px}
+.font-refined .ui-editor{padding-left:16px}.font-refined .ui-editor-head{margin-bottom:10px}
+.font-refined .pfr-content{padding:0 0 12px}.font-refined .pfr-content .lp-field{margin:0}
+.font-refined .ui-group{padding:12px 0}.font-refined .pf-type-fields{row-gap:4px}
+.font-refined .pf-type-fields .lp-field{position:relative;margin-bottom:5px}
+.font-refined .pf-type-fields input{height:32px;min-height:32px}
+.font-refined .pf-type-fields [data-field=color]{padding-left:28px!important}
+.pfr-color{position:absolute;left:8px;top:32px;width:12px;height:12px;border:1px solid var(--border-strong);pointer-events:none}
+.font-refined .pf-expression{display:flex;justify-content:space-between;align-items:center;font-size:10px;gap:8px}
+.font-refined .pf-expression .button,.font-refined .pf-font-warning .button{background:transparent;border:0;padding:1px 0;color:var(--accent-primary);font-size:10px;min-height:21px;text-align:left;justify-content:flex-start;text-decoration:underline;text-underline-offset:3px}
+.font-refined .pf-font-warning p{margin:0 0 3px;font-size:11px;line-height:1.5}
+.font-refined .pf-font-warning{margin:9px 0 11px;padding-left:8px}
+.font-refined .pfr-field-error{font-size:11px;color:var(--status-error,#de9b82);line-height:1.5;margin:6px 0 2px}
+.font-refined .pfr-field-error[hidden],.font-refined [hidden]{display:none!important}
+.font-refined [aria-invalid=true]{border-color:var(--status-error,#de9b82);outline:1px solid var(--status-error,#de9b82)}
+.pfr-commit-state{font-size:11px;line-height:1.5;color:var(--text-secondary);margin:0 0 8px}
+.font-refined .ui-commit{padding-top:11px}.font-refined .ui-commit>.button{background:transparent;border:0;color:var(--accent-primary);padding:0 0 6px;min-height:22px;font-size:11px}
+.font-refined .pf-font-trigger{min-height:57px}.font-refined .pf-font-trigger code{font-size:11px}
+.pfr-picker{width:min(630px,calc(100vw - 32px))}.pfr-picker .pf-font-list{max-height:365px}
+.font-refined .pfr-picker .pf-font-option{display:block;min-height:96px;padding:12px 10px}
+.font-refined .pfr-picker .pfr-inherit{min-height:39px;padding-block:10px;font-size:11px}
+.pfr-font-meta{display:block}.pfr-font-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pfr-selected{font-size:10px;color:var(--accent-primary)}
+.font-refined .pfr-picker .pf-specimen{display:block;font-size:21px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:10px}
+.font-refined .pfr-picker .pf-font-option small{margin-top:3px}
+.font-refined .pfr-back.button{display:block;background:transparent;border:0;padding:0 0 12px;color:var(--accent-primary);font-size:11px}
+.pfr-import-label{display:block;font-size:11px;margin:14px 0 7px}.pfr-destination{display:block;font-size:12px;padding:10px 0;border-bottom:1px solid var(--border-normal);overflow-wrap:anywhere}
+.pfr-compact{display:none}
+@media(max-width:800px){
+.font-refined .ui-work{display:flex}.font-refined .ui-editor{padding:0}
+.font-refined .ui-editor-head{margin-bottom:5px}.font-refined .pfr-content{padding:0 0 9px}
+.font-refined .ui-group{padding:8px 0}.font-refined .pf-font-trigger{min-height:48px}
+.font-refined .pf-type-fields{margin-top:8px;row-gap:1px}.font-refined .pf-type-fields .lp-field{margin-bottom:3px}
+.font-refined .ui-commit{padding-top:8px}.pfr-commit-state{margin-bottom:6px;font-size:10px}
+.pfr-compact{display:inline-block!important}.font-refined .ui-editor-head>.pfr-compact{margin-left:auto;background:transparent;border:0;padding:2px 0;color:var(--accent-primary);font-size:10px}
+.font-refined .pfr-picker .pf-font-option{min-height:90px;padding:10px 7px}.font-refined .pfr-picker .pf-specimen{font-size:18px}
+}

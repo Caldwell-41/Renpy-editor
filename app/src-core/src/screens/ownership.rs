@@ -212,6 +212,7 @@ impl AuthoringService {
                             layout: Default::default(),
                             position: None,
                             numeric_layout: None,
+                            text_properties: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
                             properties: vec![],

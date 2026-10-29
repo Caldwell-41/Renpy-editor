@@ -20,6 +20,7 @@ mod composition;
 mod images;
 pub mod layout;
 mod ownership;
+pub mod text;
 pub use composition::{ComposeRequest, ComposeResult};
 pub use layout::SetLayoutRequest;
 pub use ownership::{Catalog, CreateRequest};
@@ -152,6 +153,7 @@ pub struct Node {
     pub layout: std::collections::BTreeMap<String, f64>,
     pub position: Option<Position>,
     pub numeric_layout: Option<layout::NumericLayout>,
+    pub text_properties: Option<text::TextProperties>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
@@ -262,7 +264,9 @@ fn kind(line: &Line<'_>) -> Option<&'static str> {
     ] {
         if let Some(value) = line.code.strip_prefix(prefix) {
             let literal = value.strip_suffix(':').unwrap_or(value).trim_end();
-            if serde_json::from_str::<String>(literal).is_ok() {
+            if serde_json::from_str::<String>(literal).is_ok()
+                || kind != "image" && text::single_expression(literal)
+            {
                 return Some(kind);
             }
         }
@@ -331,6 +335,7 @@ fn parse_body(
         layout: Default::default(),
         position: None,
         numeric_layout: None,
+        text_properties: None,
         span: Span {
             start: line.start,
             end,
@@ -620,6 +625,13 @@ fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, Sce
         for index in 0..screen.nodes.len() {
             screen.nodes[index].numeric_layout =
                 layout::read(&lines, &screen.nodes[index], &screen.nodes);
+            screen.nodes[index].text_properties = text::read(&lines, &screen.nodes[index]);
+            if let Some(typography) = &screen.nodes[index].text_properties {
+                let recognized = typography.recognized_starts();
+                screen.nodes[index]
+                    .protected
+                    .retain(|span| !recognized.contains(&span.start));
+            }
             if let Some(numeric) = &screen.nodes[index].numeric_layout {
                 let recognized = numeric.recognized_starts();
                 screen.nodes[index]
@@ -629,10 +641,12 @@ fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, Sce
         }
     }
     result.partial = !result.protected.is_empty()
-        || result
-            .screens
-            .iter()
-            .any(|s| s.nodes.iter().any(|n| !n.protected.is_empty()));
+        || result.screens.iter().any(|s| {
+            s.nodes.iter().any(|n| {
+                !n.protected.is_empty()
+                    || matches!(n.kind.as_str(), "text" | "textbutton") && n.literal.is_none()
+            })
+        });
     Ok(result)
 }
 

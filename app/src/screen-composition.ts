@@ -1,6 +1,7 @@
 import { icon } from "./icons.ts";
 import { validateField } from "./authoring-input.ts";
 import type { LayoutEdits } from "./screen-layout.ts";
+import type { TextEdits } from "./screen-text.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 
 export interface CompositionView {
@@ -13,6 +14,7 @@ export type CompositionCommand =
   | ({ type: "image"; nodeId: string; parentId?: string } & ImageSelection)
   | { type: "add"; parentId: string; kind: string; text: string }
   | { type: "text"; nodeId: string; text: string }
+  | { type: "formatText"; nodeId: string; values: TextEdits; layout?: LayoutEdits }
   | { type: "reorder"; nodeId: string; targetId: string; after: boolean }
   | { type: "remove"; nodeId: string };
 interface Host {
@@ -27,6 +29,8 @@ interface Host {
   geometry: (host: HTMLElement) => void;
   hover: (id?: string) => void;
   image?: (card: HTMLElement, view: CompositionView) => boolean;
+  text?: (card: HTMLElement, view: CompositionView) => boolean;
+  textDraft?: (screenId: string, nodeId: string) => boolean;
   beginImage?: (parentId: string, document: ScreenDocument) => void;
   otherDraft?: () => boolean;
 }
@@ -171,7 +175,7 @@ export class ScreenComposer {
   }
   private children(view: CompositionView, node: ScreenNode) { return view.nodes.filter(n => n.parentStart === node.span.start); }
   private movable(view: CompositionView, node: ScreenNode) {
-    return node.parentStart !== null && view.nodes.filter(n => n.span.start >= node.span.start && n.span.start < node.span.end).every(n => !!n.id && n.kind !== "custom" && !n.protected.length);
+    return node.parentStart !== null && view.nodes.filter(n => n.span.start >= node.span.start && n.span.start < node.span.end).every(n => !!n.id && n.kind !== "custom" && !n.protected.length && !(n.textProperties?.blocked.text));
   }
   private moveRefusal(view: CompositionView, node: ScreenNode, target: ScreenNode): string {
     if (node.parentStart === null || node.parentStart !== target.parentStart) return "Move within the same parent. Order and selection are unchanged.";
@@ -195,7 +199,7 @@ export class ScreenComposer {
     const details = el("section", "screen-composition-details"); details.ariaLabel = "Selected element";
     details.append(el("strong", "", `${names[view.selected.kind] ?? view.selected.kind} · Nesting level ${this.depth(view, view.selected)}`));
     const actions = el("div", "screen-edit-actions");
-    if (["text", "textbutton"].includes(view.selected.kind) && view.selected.id) actions.append(action(this.texts.has(this.textKey(view)) ? "Resume edit" : "Edit text", () => this.host.select(screenNodeKey(view.selected), true), true));
+    if (["text", "textbutton"].includes(view.selected.kind) && view.selected.id) actions.append(action(this.texts.has(this.textKey(view)) || this.host.textDraft?.(view.screenId,view.selected.id) ? "Resume edit" : "Edit text", () => this.host.select(screenNodeKey(view.selected), true), true));
     else if (view.selected.kind === "image" && view.selected.id) actions.append(action("Edit image", () => this.host.select(screenNodeKey(view.selected), true), true));
     else if (containers.has(view.selected.kind) && view.selected.id) actions.append(action("Add inside", () => this.beginAddition(), true));
     else actions.append(action("View in Source", () => this.host.source(view.selected)));
@@ -224,6 +228,7 @@ export class ScreenComposer {
     this.card = card; const scroll = card.scrollTop;
     card.replaceChildren(); card.classList.add("screen-composer"); card.ariaLabel = "Element editor";
     if (view.step === "design" && this.host.image?.(card, view)) return true;
+    if (view.step === "design" && this.host.text?.(card, view)) return true;
     if (view.step === "choose") {
       const heading = el("header", "screen-composition-heading"); heading.append(el("h2", "", this.addition ? "Add an element" : "Elements"));
       if (!this.addition) heading.append(action("Add element", () => this.beginAddition(), true));
@@ -244,7 +249,7 @@ export class ScreenComposer {
           row.role = "treeitem"; row.dataset.nodeId = id; row.ariaLabel = `${names[node.kind] ?? node.kind}${node.literal ? ` · ${node.literal}` : ""}`;
           row.append(elementIcon(node.kind), el("span", "screen-row-label", this.name(view, node)));
           if (!node.id || node.kind === "custom") row.append(el("span", "screen-row-note", "Source only"));
-          if (this.texts.has(`${view.screenId}:${screenNodeKey(node)}`)) row.append(el("span", "screen-row-note", "Draft"));
+          if (this.texts.has(`${view.screenId}:${screenNodeKey(node)}`) || this.host.textDraft?.(view.screenId,screenNodeKey(node))) row.append(el("span", "screen-row-note", "Draft"));
           row.ariaLevel = String(this.depth(view, node) + 1); row.style.paddingLeft = `${6 + this.depth(view, node) * 12}px`;
           row.title = `${help[node.kind] ?? help.custom} Nesting level ${this.depth(view, node)}.`;
           row.ondblclick = () => this.host.select(id, true);
@@ -327,7 +332,7 @@ export class ScreenComposer {
         move.disabled = !target || view.busy; controls.append(move);
       }
     }
-    controls.append(action("Remove image…", () => this.requestRemoval())); host.append(controls);
+    controls.append(action(view.selected.kind === "image" ? "Remove image…" : "Remove element…", () => this.requestRemoval())); host.append(controls);
   }
   beginAddition(): void {
     const view = this.host.view(); if (!view || this.saving || view.busy) return;

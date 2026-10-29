@@ -68,21 +68,21 @@
     await window.__loomlightCompositionObserve?.("invalid-addition"); await click("Cancel");
     await select(body); row(body).dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
     await until(() => document.querySelector('textarea[aria-label="Text"]'));
-    const blankText = input("Text", " \n "); await click("Apply changes");
+    const blankText = input("Text", " \n "); await click("Apply");
     assert(document.activeElement === blankText && blankText.getAttribute("aria-invalid") === "true", "Invalid Apply retains the same field and focus");
     assert(document.getElementById(blankText.getAttribute("aria-describedby"))?.textContent.includes("Enter text"), "Invalid Apply identifies its field error");
     assert(await source() === beforeValidation && blankText.value === " \n ", "Invalid Apply writes nothing and retains input");
     await window.__loomlightCompositionObserve?.("invalid-text");
-    await click("Cancel changes"); await click("Back to elements");
+    await click("Cancel"); await click("1  Choose");
     await checkpoint("text-validation-passed");
 
     await select(body); row(body).dispatchEvent(new MouseEvent("dblclick", { bubbles: true })); await until(() => document.querySelector('textarea[aria-label="Text"]'));
-    const beforeText = await source(); input("Text", 'Next stop: "Harbor"\nPlatform 2'); await click("Apply changes");
+    const beforeText = await source(); input("Text", 'Next stop: "Harbor"\nPlatform 2'); await click("Apply");
     await until(() => document.querySelector(".screen-message")?.textContent.includes("Text applied"));
-    const afterText = await source(); assert(afterText === beforeText.replace('"Your next stop"', '"Next stop: \\"Harbor\\"\\nPlatform 2"'), "Text Apply changes only the literal token");
-    const noOp = input("Text", "temporary"); noOp.value = 'Next stop: "Harbor"\nPlatform 2'; noOp.dispatchEvent(new Event("input", { bubbles: true })); assert(find("Apply changes").disabled, "Unchanged text cannot add history");
-    input("Text", "cancel this draft"); await click("Cancel changes"); assert(await source() === afterText, "Cancel leaves accepted source unchanged");
-    await click("Back to elements");
+    const afterText = await source(); assert(afterText === beforeText.replace('"Your next stop"', '"Next stop: \\"Harbor\\"\\nPlatform 2"'), "Text Apply only the literal token");
+    const noOp = input("Text", "temporary"); noOp.value = 'Next stop: "Harbor"\nPlatform 2'; noOp.dispatchEvent(new Event("input", { bubbles: true })); assert(find("Apply").disabled, "Unchanged text cannot add history");
+    input("Text", "cancel this draft"); await click("Cancel"); assert(await source() === afterText, "Cancel leaves accepted source unchanged");
+    await click("1  Choose");
     await history("Undo", beforeText, body); await history("Redo", afterText, body);
     await checkpoint("literal-history-passed");
 

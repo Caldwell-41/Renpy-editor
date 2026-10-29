@@ -26,6 +26,15 @@ pub struct Request {
     pub image_samples: Vec<ImageDraft>,
     #[serde(default)]
     pub image_addition: Option<ImageDraft>,
+    #[serde(default)]
+    pub text_styles: Vec<TextStyleDraft>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TextStyleDraft {
+    pub node_start: usize,
+    pub values: text::TextEdits,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -132,6 +141,7 @@ impl AuthoringService {
             || request.layouts.len() > MAX_NODES
             || request.text_samples.len() > MAX_NODES
             || request.image_samples.len() > MAX_NODES
+            || request.text_styles.len() > MAX_NODES
             || request.addition.is_some() && request.image_addition.is_some()
         {
             return Err(SceneError::InvalidPayload);
@@ -201,6 +211,13 @@ impl AuthoringService {
                 if node.numeric_layout.is_some() && !layout::aliases(key).is_empty() {
                     continue;
                 }
+                if node.text_properties.is_some()
+                    && super::text::FIELDS
+                        .iter()
+                        .any(|k| super::text::keyword(&node.kind, k) == key)
+                {
+                    continue;
+                }
                 if node.kind == "grid"
                     && key == "allow_underfull"
                     && matches!(raw.trim(), "True" | "False")
@@ -259,6 +276,15 @@ impl AuthoringService {
                 } else {
                     plan.limits
                         .push(format!("Unresolved {key} at {}", node.span.start));
+                }
+            }
+            if let Some(typography) = &node.text_properties {
+                for (key, value) in &typography.values {
+                    properties.insert(super::text::keyword(&node.kind, key), value.clone());
+                }
+                for key in typography.blocked.keys() {
+                    plan.limits
+                        .push(format!("Unresolved text {key} at {}", node.span.start));
                 }
             }
             if let Some(numeric) = &node.numeric_layout {
@@ -554,6 +580,64 @@ impl AuthoringService {
                 plan.nodes[index]
                     .properties
                     .extend(prepared.values.into_iter().map(|(k, v)| (k, v.json())));
+            }
+        }
+        if !request.text_styles.is_empty() {
+            let (project_bytes, _) = self
+                .transactions
+                .snapshot(
+                    project,
+                    RelativePath::new(".renpy-editor/project.json").unwrap(),
+                )
+                .map_err(|_| SceneError::InvalidMetadata)?;
+            let project_id = crate::metadata::ProjectMetadata::read_bytes(&project_bytes, None)
+                .map_err(|_| SceneError::InvalidMetadata)?
+                .project_id;
+            let mut seen = HashSet::new();
+            for sample in request.text_styles {
+                if !seen.insert(sample.node_start) {
+                    return Err(SceneError::InvalidPayload);
+                }
+                let original = screen
+                    .nodes
+                    .iter()
+                    .find(|n| n.span.start == sample.node_start)
+                    .ok_or(SceneError::InvalidPayload)?;
+                let typography = original
+                    .text_properties
+                    .as_ref()
+                    .ok_or(SceneError::InvalidPayload)?;
+                let changes = self.resolve_text_edits(project, &project_id, &sample.values)?;
+                typography.patch(&bytes, original, &sample.values, changes.clone())?;
+                let node = plan
+                    .nodes
+                    .iter_mut()
+                    .find(|n| n.start == sample.node_start)
+                    .ok_or(SceneError::InvalidPayload)?;
+                for (key, value) in changes {
+                    let key = super::text::keyword(&node.kind, &key);
+                    if let Some(value) = value {
+                        node.properties.insert(key, value);
+                    } else {
+                        node.properties.remove(&key);
+                    }
+                }
+                if let Some(text) = sample.values.text {
+                    if text.contains(['{', '[']) {
+                        plan.limits
+                            .push("Draft text requires supported literal text mapping.".into());
+                    }
+                    node.literal = Some(text);
+                }
+                if let Some(Some(reference)) = sample.values.font {
+                    let path = node
+                        .properties
+                        .get(&super::text::keyword(&node.kind, "font"))
+                        .and_then(Value::as_str)
+                        .ok_or(SceneError::FontInvalid)?;
+                    plan.dependencies
+                        .push((format!("game/{path}"), reference.expected_asset_sha256));
+                }
             }
         }
         for node in &plan.nodes {

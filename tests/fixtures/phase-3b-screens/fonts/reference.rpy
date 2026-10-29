@@ -1,0 +1,57 @@
+screen font_reference():
+    pass
+    text "Help with your route":
+        id "title"
+        font "fonts/help_ttf.ttf"
+        size 38
+        color "#f1e9d6"
+        text_align 0.0
+        bold True
+        italic False
+        xpos 20
+        ypos 20
+        xsize 600
+    text "Choose a route before the last tram leaves at midnight. Return to the map whenever you need help.":
+        id "body"
+        font "fonts/help_otf.otf"
+        size 26
+        color "#ace8"
+        text_align 0.5
+        bold False
+        italic True
+        xpos 20
+        ypos 100
+        xsize 300
+    text "Return to the map":
+        id "right"
+        font "fonts/help_ttf.ttf"
+        size 26
+        color "#12345678"
+        text_align 1.0
+        bold True
+        italic True
+        xpos 20
+        ypos 310
+        xsize 300
+    text "Small":
+        id "minimum"
+        font "fonts/help_ttf.ttf"
+        size 1
+        color "#fff"
+        text_align 0.0
+        bold False
+        italic False
+        xpos 20
+        ypos 500
+        xsize 120
+    text "I":
+        id "maximum"
+        font "fonts/help_otf.otf"
+        size 512
+        color "#ffff"
+        text_align 0.0
+        bold False
+        italic False
+        xpos 800
+        ypos 20
+        xsize 200

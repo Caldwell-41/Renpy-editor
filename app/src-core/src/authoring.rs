@@ -21,7 +21,9 @@ use std::{
     sync::Mutex,
 };
 
+pub(crate) mod fonts;
 mod ui_images;
+pub use fonts::{FontPresentation, FontReference};
 pub use ui_images::ReviewUiImageRequest;
 
 pub const AUTHORING_SCHEMA_VERSION: u32 = 1;
@@ -43,6 +45,7 @@ pub enum AssetKind {
     Background,
     CharacterAppearance,
     UiImage,
+    Font,
     Music,
     Sfx,
 }
@@ -165,6 +168,7 @@ impl AuthoringMetadata {
         let mut paths = HashSet::new();
         let mut image_names = HashSet::new();
         let mut audio_names = HashSet::new();
+        let mut font_names = HashSet::new();
         for appearance in &self.appearances {
             if !self
                 .characters
@@ -250,10 +254,10 @@ impl AuthoringMetadata {
             {
                 return Err(AuthoringError::CorruptMetadata);
             }
-            let names = if contract.namespace == DiscoveryNamespace::Image {
-                &mut image_names
-            } else {
-                &mut audio_names
+            let names = match contract.namespace {
+                DiscoveryNamespace::Image => &mut image_names,
+                DiscoveryNamespace::Audio => &mut audio_names,
+                DiscoveryNamespace::Font => &mut font_names,
             };
             if !names.insert(contract.recorded_name) {
                 return Err(AuthoringError::CorruptMetadata);
@@ -307,6 +311,7 @@ pub enum AuthoringError {
     UnsupportedFormat,
     OversizeImport,
     UiImageTooLarge,
+    FontTooLarge,
     DuplicateContent,
     PathCollision,
     DiscoveryCollision,
@@ -915,6 +920,11 @@ impl AuthoringService {
             &authority.extension,
         )?;
         self.ensure_explicit_name_available(project, request.kind, &discovery_name)?;
+        if request.kind == AssetKind::Font {
+            self.transactions
+                .ensure_directory(project, "game/fonts")
+                .map_err(|_| AuthoringError::SourceConflict)?;
+        }
         self.ensure_physical_name_available(
             project,
             request.kind,
@@ -928,11 +938,10 @@ impl AuthoringService {
         {
             return Err(AuthoringError::PathCollision);
         }
-        if metadata
-            .assets
-            .iter()
-            .any(|item| item.discovery_name == discovery_name)
-        {
+        if metadata.assets.iter().any(|item| {
+            discovery_namespace(item.kind) == discovery_namespace(request.kind)
+                && item.discovery_name == discovery_name
+        }) {
             return Err(AuthoringError::DiscoveryCollision);
         }
         let asset_id = uuid::Uuid::new_v4().to_string();
@@ -990,9 +999,13 @@ impl AuthoringService {
         }
         // UI images share screen Undo/Redo. Their bytes fit the existing bounded
         // transaction/history limit; the larger legacy imports remain streaming.
-        if request.kind == AssetKind::UiImage {
+        if matches!(request.kind, AssetKind::UiImage | AssetKind::Font) {
             if authority.byte_count > crate::media::MAX_PRESENTATION_BYTES {
-                return Err(AuthoringError::UiImageTooLarge);
+                return Err(if request.kind == AssetKind::Font {
+                    AuthoringError::FontTooLarge
+                } else {
+                    AuthoringError::UiImageTooLarge
+                });
             }
             authority.file.rewind().map_err(|_| AuthoringError::Io)?;
             let mut bytes = Vec::new();
@@ -1005,15 +1018,19 @@ impl AuthoringService {
             {
                 return Err(AuthoringError::SourceConflict);
             }
-            let (_, dimensions) = crate::media::validate_image(&authority.extension, &bytes)
-                .map_err(|_| AuthoringError::UnsupportedFormat)?;
-            let (width, height) = dimensions.ok_or(AuthoringError::UnsupportedFormat)?;
-            let imported = metadata
-                .assets
-                .last_mut()
-                .ok_or(AuthoringError::CorruptMetadata)?;
-            imported.extra.insert("naturalWidth".into(), width.into());
-            imported.extra.insert("naturalHeight".into(), height.into());
+            if request.kind == AssetKind::UiImage {
+                let (_, dimensions) = crate::media::validate_image(&authority.extension, &bytes)
+                    .map_err(|_| AuthoringError::UnsupportedFormat)?;
+                let (width, height) = dimensions.ok_or(AuthoringError::UnsupportedFormat)?;
+                let imported = metadata
+                    .assets
+                    .last_mut()
+                    .ok_or(AuthoringError::CorruptMetadata)?;
+                imported.extra.insert("naturalWidth".into(), width.into());
+                imported.extra.insert("naturalHeight".into(), height.into());
+            } else {
+                fonts::validate(&bytes).map_err(|_| AuthoringError::UnsupportedFormat)?;
+            }
             companions.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
             companions.insert(
                 0,
@@ -1450,6 +1467,10 @@ impl AuthoringService {
                 asset.status = physical.into();
                 continue;
             }
+            if asset.kind == AssetKind::Font {
+                asset.status = "available".into();
+                continue;
+            }
             let Ok(contract) = validate_asset_contract(asset) else {
                 asset.status = "unsafe".into();
                 continue;
@@ -1534,6 +1555,8 @@ impl AuthoringService {
             AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage
         ) {
             "game/images"
+        } else if kind == AssetKind::Font {
+            "game/fonts"
         } else {
             "game/audio"
         };
@@ -1545,7 +1568,12 @@ impl AuthoringService {
             if existing.eq_ignore_ascii_case(relative_path) {
                 return Err(AuthoringError::PathCollision);
             }
-            let existing_name = if directory == "game/images" {
+            let existing_name = if directory == "game/fonts" {
+                Path::new(&existing)
+                    .file_stem()
+                    .and_then(OsStr::to_str)
+                    .map(str::to_ascii_lowercase)
+            } else if directory == "game/images" {
                 automatic_image_name(&existing)
             } else {
                 automatic_audio_name(&existing)
@@ -1589,6 +1617,7 @@ impl AuthoringService {
             return Ok(());
         };
         let key = match kind {
+            AssetKind::Font => return Ok(()),
             AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage => {
                 DeclarationKey::Image(
                     normalized_image_name(discovery_name).ok_or(AuthoringError::InvalidPayload)?,
@@ -2310,7 +2339,7 @@ fn build_declaration_source(
 fn supported_extension(extension: &str) -> bool {
     matches!(
         extension,
-        "png" | "jpg" | "jpeg" | "webp" | "ogg" | "mp3" | "wav" | "flac"
+        "png" | "jpg" | "jpeg" | "webp" | "ogg" | "mp3" | "wav" | "flac" | "ttf" | "otf"
     )
 }
 
@@ -2318,6 +2347,17 @@ fn supported_extension(extension: &str) -> bool {
 enum DiscoveryNamespace {
     Image,
     Audio,
+    Font,
+}
+
+fn discovery_namespace(kind: AssetKind) -> DiscoveryNamespace {
+    match kind {
+        AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage => {
+            DiscoveryNamespace::Image
+        }
+        AssetKind::Music | AssetKind::Sfx => DiscoveryNamespace::Audio,
+        AssetKind::Font => DiscoveryNamespace::Font,
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -2380,6 +2420,18 @@ fn validate_asset_contract(asset: &Asset) -> Result<AssetContract, AuthoringErro
         .map(str::to_ascii_lowercase)
         .ok_or(AuthoringError::CorruptMetadata)?;
     let (namespace, automatic_name, recorded_name) = match asset.kind {
+        AssetKind::Font if matches!(extension.as_str(), "ttf" | "otf") => {
+            let stem = asset
+                .relative_path
+                .strip_prefix("game/fonts/")
+                .and_then(|s| s.strip_suffix(&format!(".{extension}")))
+                .filter(|s| validate_identifier(s).is_ok())
+                .ok_or(AuthoringError::CorruptMetadata)?;
+            if asset.discovery_name != stem {
+                return Err(AuthoringError::CorruptMetadata);
+            }
+            (DiscoveryNamespace::Font, stem.into(), stem.into())
+        }
         AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage
             if matches!(extension.as_str(), "png" | "jpg" | "jpeg" | "webp") =>
         {
@@ -2428,6 +2480,7 @@ fn asset_declaration(asset: &Asset) -> Result<String, AuthoringError> {
     let quoted =
         serde_json::to_string(runtime_path).map_err(|_| AuthoringError::CorruptMetadata)?;
     Ok(match asset.kind {
+        AssetKind::Font => return Err(AuthoringError::UnsupportedFormat),
         AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage => {
             format!("image {} = {quoted}", contract.recorded_name)
         }
@@ -2447,15 +2500,21 @@ fn import_names(
 ) -> Result<(String, String), AuthoringError> {
     let image = matches!(extension, "png" | "jpg" | "jpeg" | "webp");
     let audio = matches!(extension, "ogg" | "mp3" | "wav" | "flac");
+    let font = matches!(extension, "ttf" | "otf");
     if (matches!(
         kind,
         AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage
     ) && !image)
         || (matches!(kind, AssetKind::Music | AssetKind::Sfx) && !audio)
+        || (kind == AssetKind::Font && !font)
     {
         return Err(AuthoringError::UnsupportedFormat);
     }
     match kind {
+        AssetKind::Font => Ok((
+            format!("game/fonts/{technical}.{extension}"),
+            technical.into(),
+        )),
         AssetKind::Background => Ok((
             format!("game/images/bg {technical}.{extension}"),
             format!("bg {technical}"),

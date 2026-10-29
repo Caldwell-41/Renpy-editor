@@ -1,0 +1,68 @@
+{
+  "case": "project-font",
+  "passed": true,
+  "exitCode": 0,
+  "timedOut": false,
+  "elapsedSeconds": 6.009,
+  "reports": [
+    {
+      "case": "project-font",
+      "cleanupComplete": true,
+      "cleanupOwners": {
+        "credentials": true,
+        "host": true,
+        "requests": true
+      },
+      "details": {
+        "acceptedSource": "# loomlight-screen: 36cbd859-c3a1-415d-953a-845b9ab28acb\nscreen travel_notes():\n    pass\n    text \"Choose a route.\\nThe last tram leaves at midnight.\": # loomlight-element: c7ab2260-54b8-4de3-9d22-2941f7fe9cf5\n        font \"fonts/help_otf.otf\"\n        size 38\n        color \"#f1e9d6\"\n        text_align 0.5\n        bold True\n        italic True\n    use source_only_footer()\n\nscreen source_only_footer():\n    text \"Protected neighbor\"\n",
+        "fontDecoded": true,
+        "fontFormats": [
+          "ttf",
+          "otf"
+        ],
+        "identities": [
+          "a5c38313-450d-45a1-9695-8f09f1175eb3",
+          "c7ab2260-54b8-4de3-9d22-2941f7fe9cf5"
+        ],
+        "identity": {
+          "id": "36cbd859-c3a1-415d-953a-845b9ab28acb",
+          "name": "travel_notes",
+          "path": "game/ui/travel_notes.rpy",
+          "resolved": true,
+          "rootId": "a5c38313-450d-45a1-9695-8f09f1175eb3",
+          "sourceRevision": "4780f745211479db2ee64499c3f7180791e8d965a68c296c71ce510804b3b758"
+        },
+        "nativeWebView": true,
+        "passed": true,
+        "scenario": "project-font",
+        "sdkExecuted": false,
+        "sessionId": "6c2e2afc-6717-4c6a-92e9-3fa111dc9822",
+        "stage": "complete",
+        "stages": [
+          {
+            "stage": "font-picker-passed"
+          },
+          {
+            "stage": "font-draft-passed"
+          },
+          {
+            "stage": "font-history-passed"
+          },
+          {
+            "stage": "font-source-passed"
+          },
+          {
+            "stage": "font-reopen-passed"
+          },
+          {
+            "stage": "complete"
+          }
+        ]
+      },
+      "evidence": "runtime-ui-packaged",
+      "passed": true
+    }
+  ],
+  "externalErrors": [],
+  "helpDisk": null
+}

@@ -612,6 +612,25 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn present_font(
+        &self,
+        request: crate::authoring::FontReference,
+    ) -> Result<crate::authoring::FontPresentation, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .present_font(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+    pub fn preview_font(
+        &mut self,
+        request: crate::media::ImportPreviewRequest,
+    ) -> Result<crate::authoring::FontPresentation, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .preview_font(&authority, request)
+            .map_err(LifecycleError::Authoring)
+    }
+
     pub fn authoring_preview_import(
         &mut self,
         request: crate::media::ImportPreviewRequest,

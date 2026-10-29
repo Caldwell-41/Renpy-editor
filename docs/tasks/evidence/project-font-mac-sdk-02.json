@@ -1,0 +1,216 @@
+{
+  "passed": true,
+  "sdkProcesses": 2,
+  "commands": [
+    {
+      "name": "font-1280x720",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "font-1024x768",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    }
+  ],
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "renderer": "gl2",
+      "rectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "referenceRectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "fonts": {
+        "title": "fonts/help_ttf.ttf",
+        "body": "fonts/help_otf.otf",
+        "right": "fonts/help_ttf.ttf",
+        "minimum": "fonts/help_ttf.ttf",
+        "maximum": "fonts/help_otf.otf"
+      },
+      "differingPixels": 0,
+      "sourceSHA256": "16fe07551b916f7f387566a37c7ee5a8681c291027bde973959e2ca17390a916",
+      "imageHashes": {
+        "accepted": "f0a54821eaa72bb30ab994eb6dcfbcc7d371d3680ac1791597cec30037097445",
+        "reference": "f0a54821eaa72bb30ab994eb6dcfbcc7d371d3680ac1791597cec30037097445",
+        "default": "9988b25a97b2ae599649d0c06e3299a99c097129136bece06daebc30417b1b8c"
+      }
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "renderer": "gl2",
+      "rectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "referenceRectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "fonts": {
+        "title": "fonts/help_ttf.ttf",
+        "body": "fonts/help_otf.otf",
+        "right": "fonts/help_ttf.ttf",
+        "minimum": "fonts/help_ttf.ttf",
+        "maximum": "fonts/help_otf.otf"
+      },
+      "differingPixels": 0,
+      "sourceSHA256": "16fe07551b916f7f387566a37c7ee5a8681c291027bde973959e2ca17390a916",
+      "imageHashes": {
+        "accepted": "37b9366da6ca3ea6a6503b601a61dafda1842702f5b5b6791a803666e455dd9a",
+        "reference": "37b9366da6ca3ea6a6503b601a61dafda1842702f5b5b6791a803666e455dd9a",
+        "default": "c291f60629a66734a280123b9ef66e0af977f2dcb4b4c0b4af8a20c75fec42b6"
+      }
+    }
+  ],
+  "cleanupComplete": true,
+  "os": "Darwin",
+  "architecture": "arm64",
+  "candidate": "2fc6b833f9d5e10993aced0993dbfee1dd36594c",
+  "checkerSHA256": "4196519ad51dfd2a9bc6198204250d2e67f09a4521b7e03d1afbaeee8e7caf0e",
+  "acceptedSHA256": "03a5bdd1d04e3adb0821c345bd436152eca1c8d5ed6478fc6becc1b78b052a42",
+  "reusedCompileLint": {
+    "candidate": "d3b09b9eec663045f7f8258001149d86bad416aa",
+    "acceptedSHA256": "03a5bdd1d04e3adb0821c345bd436152eca1c8d5ed6478fc6becc1b78b052a42",
+    "commands": [
+      {
+        "name": "compile",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      },
+      {
+        "name": "lint",
+        "exitCode": 0,
+        "timedOut": false,
+        "outputLimited": false
+      }
+    ]
+  }
+}

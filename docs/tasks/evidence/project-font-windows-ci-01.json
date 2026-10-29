@@ -1,0 +1,32 @@
+{
+  "candidate": "06291a9e1cbf2c2308a8136ab7650698992f317e",
+  "qualification": {
+    "run": 40899707325,
+    "attempt": 1,
+    "conclusion": "failure",
+    "failedStep": "Real controller/core and exact packaged-probe rehearsal"
+  },
+  "automaticQuality": {
+    "run": 40899627087,
+    "attempt": 1,
+    "conclusion": "success"
+  },
+  "portable": {
+    "frontendTests": 276,
+    "screensPassed": 69,
+    "screensIgnored": 4
+  },
+  "windowsUse": {
+    "normalSdk": 0,
+    "helpers": 0,
+    "packages": 0,
+    "nativeSessions": 0
+  },
+  "artifact": {
+    "id": 12908174808,
+    "name": "project-font-Windows-40899707325-1",
+    "sha256": "sha256:1b2f4fcb40e183acdd57ff6b109b62e8feca0202b6a7bff2fc6a4036cff4fa67"
+  },
+  "failedExecutableSHA256": "abd8790ad7204a812b6c919a25f3597d9c92bcfe7f61a90d7c818f2ecb8eb19d",
+  "failure": "Initial fixture ready response exceeded the shared 15-second deadline before Chrome opened."
+}

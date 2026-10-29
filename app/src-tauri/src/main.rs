@@ -709,11 +709,15 @@ fn core_request(
                 | "project.openPicker"
                 | "asset.chooseImport"
                 | "asset.chooseUiImage"
+                | "asset.chooseFont"
                 | "asset.chooseImports"
         ) {
             let asset = matches!(
                 operation.as_str(),
-                "asset.chooseImport" | "asset.chooseImports" | "asset.chooseUiImage"
+                "asset.chooseImport"
+                    | "asset.chooseImports"
+                    | "asset.chooseUiImage"
+                    | "asset.chooseFont"
             );
             if !(if asset {
                 validated.payload.len() == 1 && session_id.is_some()
@@ -771,6 +775,10 @@ fn core_request(
                     }));
             }
             let path = match operation.as_str() {
+                "asset.chooseFont" => rfd::FileDialog::new()
+                    .set_title("Choose project font")
+                    .add_filter("Fonts", &["ttf", "otf"])
+                    .pick_file(),
                 "asset.chooseUiImage" => rfd::FileDialog::new()
                     .set_title("Choose UI image")
                     .add_filter("Images", &["png", "jpg", "jpeg", "webp"])
@@ -1012,6 +1020,8 @@ fn main() {
                     else {if data.exists(){return Err("Reference fixture already exists".into());}LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?}
                 } else if data.exists() { return Err("probe destination already exists".into()); } else if case == "ui-image" {
                     LifecycleService::prepare_ui_image_probe(data).map_err(std::io::Error::other)?
+                } else if case == "project-font" {
+                    LifecycleService::prepare_project_font_probe(data).map_err(std::io::Error::other)?
                 } else if matches!(case.as_str(), "source-foundation" | "owned-screen" | "screen-composition" | "nested-layout") {
                     LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?
                 } else if matches!(case.as_str(), "canvas-helper" | "canvas-input") {
@@ -1150,6 +1160,9 @@ fn main() {
                         main.show().expect("Canvas input show"); main.set_focus().expect("Canvas input focus");
                         main.eval(&format!("{}\n{}", include_str!("native_editor_probe.js"), include_str!("canvas_input_probe.js"))).expect("Canvas input probe injection");
                     } else if case == "canvas-helper" { main.show().expect("Canvas probe show");main.set_focus().expect("Canvas probe focus");main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("canvas_helper_probe.js"))).expect("Canvas probe injection");
+                    } else if case == "project-font" {
+                        main.show().expect("Project font probe show"); main.set_focus().expect("Project font probe focus");
+                        main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("project_font_probe.js"))).expect("Project font probe injection");
                     } else if case == "ui-image" {
                         main.show().expect("UI image probe show"); main.set_focus().expect("UI image probe focus");
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_image_probe.js"))).expect("UI image probe injection");

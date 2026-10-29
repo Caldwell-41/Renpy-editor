@@ -235,7 +235,11 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
             && policies[0].1.code.split_whitespace().collect::<Vec<_>>()
                 == ["allow_underfull", "True"];
         result.allows_empty_cells = Some(allowed);
-        let opaque_children = node.protected.iter().any(|span| {
+        let opaque_children = nodes.iter().any(|child| {
+            child.parent_start == Some(node.span.start)
+                && matches!(child.kind.as_str(), "text" | "textbutton")
+                && child.literal.is_none()
+        }) || node.protected.iter().any(|span| {
             let Some((index, line)) = direct.iter().find(|(_, line)| line.start == span.start)
             else {
                 return true;

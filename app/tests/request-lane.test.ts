@@ -100,3 +100,15 @@ test("a selection preference write finishes before composition dispatches once, 
   finally { release(); await selection; await composition; }
   assert.deepEqual(calls, ["selection", "stop", "compose"]);
 });
+
+test('project font reads finish before text Apply takes the shared service',async()=>{
+ for(const operation of ['asset.presentFont','asset.previewFont','asset.previewImport','asset.reviewUiImage'] as const)for(const write of ['screens.compose','asset.import'] as const){
+  const lane=new RequestLane(),calls:string[]=[];let release!:()=>void;
+  const font=lane.run(operation,async()=>{calls.push('font');await new Promise<void>(r=>{release=r;});});
+  await Promise.resolve();const apply=lane.run(write,async()=>{calls.push('apply');});
+  await lane.run('runtime.stop',async()=>{calls.push('stop');});
+  try{assert.deepEqual(calls,['font','stop'],'Font loading must not race a text transaction');}
+  finally{release();await font;await apply;}
+  assert.deepEqual(calls,['font','stop','apply']);
+ }
+});

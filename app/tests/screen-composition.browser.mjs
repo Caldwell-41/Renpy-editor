@@ -19,7 +19,7 @@ const receipts = [], errors = [];
 let browser, page;
 let holdSelectionPreference = false, selectionPreferenceInFlight = false;
 try {
-  assert.equal((await child.next(canvas ? 180000 : 15000)).ready, true); await server.listen();
+  assert.equal((await child.next(canvas ? 180000 : 60000)).ready, true); await server.listen();
   browser = process.env.COMPOSITION_BROWSER === 'webkit' ? await webkit.launch({headless:true}) : await chromium.launch({channel:'chrome',headless:true});
   page = await browser.newPage({viewport:{width:1100,height:800},colorScheme:'dark'});
   page.on('pageerror', error => errors.push(error.message));
@@ -48,7 +48,7 @@ try {
       await page.locator('.screen-node[data-index="5"]').click();
       assert.equal(await page.locator('.screen-tree [aria-selected="true"]').getAttribute('aria-label'),'Text · Your next stop');
       await page.locator('.screen-node[data-index="5"]').dblclick(); await page.getByLabel('Text',{exact:true}).waitFor();
-      await page.getByRole('button',{name:'Back to elements',exact:true}).click();
+      await page.getByRole('button',{name:'1 Choose',exact:true}).click();
       await page.getByRole('button',{name:'Add element',exact:true}).click(); await page.getByLabel('New element text',{exact:true}).fill('Unapplied canvas draft');
       await page.locator('.screen-game[data-stale="false"] .screen-pending-addition').waitFor({timeout:30000});
       assert.equal(await read(), sourceBefore, 'the real helper previews an addition without a source write');

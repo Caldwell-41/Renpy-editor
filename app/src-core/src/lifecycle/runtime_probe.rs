@@ -3,6 +3,40 @@ use super::*;
 use serde_json::json;
 
 impl LifecycleService {
+    /// Native-only font fixture. Imports passive bytes through the normal asset service.
+    pub fn prepare_project_font_probe(data: PathBuf) -> Result<Self, String> {
+        let mut service = Self::prepare_source_foundation_probe(data.clone())?;
+        let root = data.join("synthetic-project");
+        service.open_path(&root).map_err(|e| format!("{e:?}"))?;
+        for (extension, bytes) in [
+            (
+                "ttf",
+                include_bytes!(
+                    "../../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.ttf"
+                )
+                .as_slice(),
+            ),
+            (
+                "otf",
+                include_bytes!(
+                    "../../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.otf"
+                )
+                .as_slice(),
+            ),
+        ] {
+            let selected = data.join(format!("help.{extension}"));
+            fs::write(&selected, bytes).map_err(|e| e.to_string())?;
+            let choice = service
+                .authoring_select_import(&selected)
+                .map_err(|e| format!("{e:?}"))?;
+            service.authoring_import_asset(serde_json::from_value(json!({
+                "authorityId":choice.authority_id,"kind":"font","technicalName":format!("help_{extension}"),
+                "displayName":format!("Help {extension}")
+            })).map_err(|e| e.to_string())?).map_err(|e| format!("{e:?}"))?;
+        }
+        service.close().map_err(|e| format!("{e:?}"))?;
+        Ok(service)
+    }
     /// Native-only image fixture; importing passive bytes starts no project code.
     pub fn prepare_ui_image_probe(data: PathBuf) -> Result<Self, String> {
         let mut service = Self::prepare_source_foundation_probe(data.clone())?;

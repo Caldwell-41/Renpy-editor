@@ -1,0 +1,220 @@
+{
+  "passed": true,
+  "sdkProcesses": 4,
+  "commands": [
+    {
+      "name": "compile",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "font-1280x720",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    },
+    {
+      "name": "font-1024x768",
+      "exitCode": 0,
+      "timedOut": false,
+      "outputLimited": false
+    }
+  ],
+  "records": [
+    {
+      "aspect": [
+        1280,
+        720
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "renderer": "gl2",
+      "rectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "referenceRectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "fonts": {
+        "title": "fonts/help_ttf.ttf",
+        "body": "fonts/help_otf.otf",
+        "right": "fonts/help_ttf.ttf",
+        "minimum": "fonts/help_ttf.ttf",
+        "maximum": "fonts/help_otf.otf"
+      },
+      "physical": [
+        1280,
+        720
+      ],
+      "drawPerVirtual": 2.0,
+      "differingPixels": 0,
+      "sourceSHA256": "16fe07551b916f7f387566a37c7ee5a8681c291027bde973959e2ca17390a916",
+      "imageHashes": {
+        "accepted": "f0a54821eaa72bb30ab994eb6dcfbcc7d371d3680ac1791597cec30037097445",
+        "reference": "f0a54821eaa72bb30ab994eb6dcfbcc7d371d3680ac1791597cec30037097445",
+        "default": "9988b25a97b2ae599649d0c06e3299a99c097129136bece06daebc30417b1b8c"
+      }
+    },
+    {
+      "aspect": [
+        1024,
+        768
+      ],
+      "sdkVersion": "8.5.3.26051504",
+      "renderer": "gl2",
+      "rectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "referenceRectangles": {
+        "title": [
+          20,
+          20,
+          330.0,
+          51.0
+        ],
+        "body": [
+          20,
+          100,
+          265.0,
+          175.0
+        ],
+        "right": [
+          20,
+          310,
+          196.0,
+          35.0
+        ],
+        "minimum": [
+          20,
+          500,
+          5.0,
+          2.0
+        ],
+        "maximum": [
+          800,
+          20,
+          135.0,
+          679.0
+        ]
+      },
+      "fonts": {
+        "title": "fonts/help_ttf.ttf",
+        "body": "fonts/help_otf.otf",
+        "right": "fonts/help_ttf.ttf",
+        "minimum": "fonts/help_ttf.ttf",
+        "maximum": "fonts/help_otf.otf"
+      },
+      "physical": [
+        1024,
+        768
+      ],
+      "drawPerVirtual": 2.0,
+      "differingPixels": 0,
+      "sourceSHA256": "16fe07551b916f7f387566a37c7ee5a8681c291027bde973959e2ca17390a916",
+      "imageHashes": {
+        "accepted": "8a7e046091ec7d8256378bafdc3f77d4df8a2a21db7a0ebb8737d0a311356347",
+        "reference": "8a7e046091ec7d8256378bafdc3f77d4df8a2a21db7a0ebb8737d0a311356347",
+        "default": "e618f59f3694c249e5cb7ba664354b742ee7694e8a5337e438d2fcafe7142405"
+      }
+    }
+  ],
+  "cleanupComplete": true,
+  "os": "Darwin",
+  "architecture": "arm64",
+  "candidate": "9cd1daefb45bc526cdd857ef3902689cab7023b8",
+  "checkerSHA256": "b57f61ea513e9a6a6d474a30177fdeccc3f134456e302104124b1f88c5625f06",
+  "acceptedSHA256": "03a5bdd1d04e3adb0821c345bd436152eca1c8d5ed6478fc6becc1b78b052a42"
+}

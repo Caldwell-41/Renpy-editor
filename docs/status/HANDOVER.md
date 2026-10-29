@@ -1,6 +1,42 @@
 # Current outcome handover
 
-<a id="l06-implementation-and-qualification"></a>
+## L05 picker and namespace review fixes
+
+The fresh [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) findings
+are corrected on `codex/l05-project-fonts`. Independent workers fixed discovery
+namespace collisions and font selection after specimen-cache eviction, with
+failing behavior tests before implementation. The coordinator integrated namespace
+first, then picker. Code candidate `03cd82a1fe844daee8f20f52c87caff9ba92d69b`
+passes both correction review axes with zero remaining findings.
+[Detailed evidence](../tasks/evidence/project-fonts.md#picker-cache-and-discovery-namespace-corrections-2026-10-30)
+retains assignments, red/green failures, candidate mapping and qualification limits.
+
+All 277 frontend tests, the production build, 70 Screens core tests and 33
+authoring tests pass. Four SDK/helper cases remain intentionally ignored. The
+actual cache-eviction journey, existing font journey and probe rehearsal pass;
+separate result files retain both controller receipts. Frontend/core inputs are
+unchanged between their `77d9af4` check candidate and `03cd82a`.
+
+The main checkout owns publication. Validated head
+`187f6a1ebbdb60e2b543dbb09f9bdeabd0eb8806` is published; PR #70 is updated.
+[Ordinary CI run 40965398797](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40965398797),
+attempt 1, passes both required jobs at that exact head. The coordinator matched
+and acknowledged the watcher event and audited all required steps and logs.
+The documentation closeout's ordinary checks remain visible on the PR.
+
+The picker worker is archived. The app refuses to archive the namespace worker
+because it is this chat's primary checkout. It remains clean and detached at its
+integrated worker commit; disposable build output is removed. All 21 worker
+evidence files are preserved in ignored coordinator evidence. The main PR branch
+and checkout remain the publication owner. No product correction or expensive
+operation is pending. PR #70 stays draft and #39 stays open; merge, release and
+wider acceptance remain unselected.
+
+The approved A2 design and earlier source/rendering qualification retain their
+scope and exact candidates. Historical operation limits stay closed. Preserve
+the unrelated audit, pinned design reference, earlier worker worktrees and
+protected recovery below. CURRENT/HANDOVER exceed soft size targets because
+earlier acceptance and unique recovery records remain relevant.
 
 ## L06 merge and workspace closeout
 
