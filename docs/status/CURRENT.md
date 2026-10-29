@@ -14,15 +14,19 @@ core suite's sandbox listener failures pass in the affected permitted rerun.
 Both review axes have no remaining findings after corrections.
 
 Mac use is SDK 9/20, helpers 3/4, packages 2/3 and native sessions 2/3.
-[Draft PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) is published.
-Windows CI1 failed before Chrome opened because fixture construction used the
-normal request deadline. Automatic PR quality passes. The corrected driver
-separates bounded construction from ordinary replies and records preparation
-phases; focused process and real font-controller checks pass. Evidence retains
-the original run, binary and failure. Dispatches are 1/3; Windows SDK, helper,
-package and native counts remain zero. Publish the correction and dispatch
-ordinal 2. After CI passes, start the requested separate PR review chat against
-`8f0d208`. No merge, release or ticket acceptance is claimed. Preserve the
+[Draft PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) remains open.
+CI2 at `399402f` failed two checks; automatic PR quality passes. All controller
+rehearsals, normal SDK and helper geometry/pending/cleanup pass. The pixel gate
+mistook physical for virtual dimensions; its corrected replay passes strict pixels
+for both targets and rejects six invalid-evidence cases. The native Apply race is
+reproduced and fixed by routing passive asset reads and import through the shared
+request lane. Full frontend checking passes 277 cases.
+Windows cumulative use is SDK 4/20, helpers 1/4, packages 1/3, native sessions 1/3;
+dispatches are 2/3. Mac counters above remain current. Publish the corrections,
+qualify the changed application within the third Mac package/native allowance,
+then run Windows ordinal 3. After audited CI passes, start the requested separate
+PR review chat against `8f0d208`. No merge, release or acceptance is selected.
+Preserve the
 unrelated Phase 1 audit, pinned design worktree and protected recovery below.
 
 ## L06 UI-image authoring merged

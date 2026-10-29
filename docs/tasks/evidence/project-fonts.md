@@ -315,3 +315,58 @@ changed; the qualified Mac application inputs remain unchanged. Windows executio
 will establish actual fixture timings. CI1 consumed dispatch 1/3, with Windows
 SDK/helper/package/native counts all zero because those steps never started.
 Next: publish the correction and use ordinal 2 for the focused Windows run.
+
+## CI2 in progress
+
+Corrected candidate `399402f6bc495647e48cb95fa63da0f7937c5208` is published on draft PR #70.
+Windows [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40902890034), attempt 1, ordinal 2, and automatic
+[PR quality](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40902864870) are running at that exact head.
+Dispatch use is 2/3. Windows SDK/helper/package/native use remains zero from CI1,
+with CI2's execution reserved until its evidence establishes actual starts.
+Mac use remains SDK 9/20, helpers 3/4, packages 2/3 and native sessions 2/3.
+Watcher registration is retained in ignored `project-fonts/watch-02.json`. Audit
+both exact runs and required retained evidence before the separate PR review chat.
+
+## CI2 audit and corrections
+
+Windows [CI2](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40902890034)
+failed at `399402f`. [The summary](project-font-windows-ci-02.json) retains its
+artifact identity, preparation timings and counters. Both automatic PR quality
+jobs pass. All four actual controller groups pass, including the seven-group
+composition probe. The [normal SDK receipt](project-font-windows-sdk-01.json)
+passes compile, lint and both aspects. The [helper receipt](project-font-windows-helper-01.json)
+passes geometry, typed pending/accepted equality and cooperative cleanup.
+
+The first failure was the offline gate's assumption that physical window size
+equals virtual resolution. The pinned SDK attempts the requested physical size;
+on Windows the available desktop yields 922 by 519 and 888 by 666. Normal and
+helper captures have exactly the same physical dimensions and drawing scale.
+The corrected gate compares those actual dimensions rather than equating them to
+virtual resolution. Virtual dimensions, source binding, pixel sizes and strict
+pixel equality remain required. The [retained comparison](project-font-windows-pixels-01.json)
+passes at both aspects with zero differing pixels. Replaying the original Mac
+captures also passes. Wrong physical size and scale now join the four existing
+negative mutations; all six are rejected. This replay starts no SDK/helper.
+
+The second failure was a real packaged Apply race. Font presentation bypassed the
+application request lane. A second chooser specimen could still own the native
+service when Apply dispatched, returning `RUNTIME_BUSY` and retaining the draft.
+The [failed native receipt](project-font-windows-native-01.json) records the
+feedback and confirmed cleanup. Its [retained x64 binary](project-font-windows-package-01.json)
+matches the recorded SHA-256 and PE architecture. No native success is claimed.
+
+The exact production-probe rehearsal reproduces that feedback when the second
+font response is held and an overlapping write is refused. It passes after passive
+font reads join the shared lane. A focused lane test turns red before the change,
+then passes for both font read operations and the same omission in existing image
+preview/review operations. Asset import joins the lane as well, so it cannot race
+those reads. Runtime Stop remains independent. No write is retried or discarded.
+Full frontend checking now passes 277 cases; the affected renderer/lane slice
+passes 36, and the actual font controller passes.
+
+CI2 used Windows normal SDK 4/20, helpers 1/4, packages 1/3 and native sessions
+1/3; dispatches total 2/3. Mac use remains normal SDK 9/20, helpers 3/4, packages
+2/3 and native sessions 2/3. The request-lane change affects application behavior,
+so qualify the corrected Mac package within its third package/native allowance
+before the final scheduled Windows dispatch. No CI pass or separate-review-chat
+completion is claimed.

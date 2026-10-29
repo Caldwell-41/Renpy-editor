@@ -634,3 +634,26 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   refuses a stalled ordinary reply and confirms child exit. Both actual font
   controller paths pass; Windows requalification remains pending.
 - **Evidence:** [L05 CI1](../tasks/evidence/project-fonts.md#ci1-failure-and-root-cause-correction).
+
+## H45. Passive font reads bypass the shared request lane
+
+- **Class/search:** product; packaged font Apply, `RUNTIME_BUSY`, a second specimen
+  loading while the first selected font is already decoded.
+- **Cause/correction:** font reads bypassed the application lane and could own the
+  native service during Apply. Serialize passive font/image reads and Asset import
+  with Screens writes; runtime Stop remains independent.
+- **Regression:** exact production probe with a held font response rejects an
+  overlapping Apply before the fix and passes afterward. The lane test covers
+  every affected read against text Apply and import.
+- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections).
+
+## H46. Physical capture size mistaken for virtual resolution
+
+- **Class/search:** harness; Windows SDK/helper font pixels, physical dimensions,
+  virtual 1280 by 720, `drawPerVirtual`.
+- **Cause/correction:** the engine may fit the requested physical window to the
+  desktop. Require matching actual physical dimensions and drawing scale between
+  reference and helper, while preserving exact virtual size and strict pixels.
+- **Regression:** retained Windows and Mac captures pass; wrong physical size,
+  scale, source, missing reference, blank and fallback-font evidence all fail.
+- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections).

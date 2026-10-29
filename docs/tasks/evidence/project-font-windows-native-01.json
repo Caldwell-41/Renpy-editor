@@ -1,0 +1,42 @@
+{
+  "case": "project-font",
+  "passed": false,
+  "exitCode": 1,
+  "timedOut": false,
+  "elapsedSeconds": 37.329,
+  "reports": [
+    {
+      "case": "project-font",
+      "cleanupComplete": true,
+      "cleanupOwners": {
+        "credentials": true,
+        "host": true,
+        "requests": true
+      },
+      "details": {
+        "awaitedControl": "button Apply",
+        "error": "Error: Timeout: open / button Apply",
+        "feedback": "Another request is in progress. Your edits are kept.",
+        "identity": {
+          "id": "a28a887a-0759-4dee-841f-c710d0a42d75",
+          "name": "travel_notes",
+          "path": "game/ui/travel_notes.rpy",
+          "resolved": true,
+          "rootId": "57c6d87d-6489-4479-8685-331ca618b480",
+          "sourceRevision": "1ad743ff2f1603f6cffb563e2ad839c2f697d35bfc4b61bd3d0338630530d4bf"
+        },
+        "nativeWebView": true,
+        "passed": false,
+        "scenario": "project-font",
+        "sdkExecuted": false,
+        "sessionId": "7045b3cd-7901-4746-987a-e842271ebb6d",
+        "stage": "open",
+        "stages": []
+      },
+      "evidence": "runtime-ui-packaged",
+      "passed": false
+    }
+  ],
+  "externalErrors": [],
+  "helpDisk": null
+}

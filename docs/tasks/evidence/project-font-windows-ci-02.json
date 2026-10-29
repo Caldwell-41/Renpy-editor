@@ -1,0 +1,38 @@
+{
+  "candidate": "399402f6bc495647e48cb95fa63da0f7937c5208",
+  "qualification": {
+    "run": 40902890034,
+    "attempt": 1,
+    "conclusion": "failure",
+    "failedSteps": [
+      "Inert font helper (one SDK/helper start)",
+      "Windows package and real WebView keyboard/history/reopen (one session)"
+    ]
+  },
+  "automaticQuality": {
+    "run": 40902864870,
+    "attempt": 1,
+    "conclusion": "success"
+  },
+  "fixturePreparationMilliseconds": [
+    814,
+    1353,
+    4734,
+    896
+  ],
+  "windowsCumulativeUse": {
+    "normalSdk": 4,
+    "helpers": 1,
+    "packages": 1,
+    "nativeSessions": 1
+  },
+  "artifact": {
+    "id": 12911911020,
+    "name": "project-font-Windows-40902890034-1",
+    "sha256": "sha256:cba87d3f038c1b0bfc5544622fcd5d7b3180a541dc4f596a4acaf4bc5654ccd2"
+  },
+  "failures": [
+    "Pixel gate assumed physical dimensions equal virtual resolution; retained helper/normal dimensions, scale and pixels match.",
+    "Packaged font Apply raced an unqueued background font read."
+  ]
+}

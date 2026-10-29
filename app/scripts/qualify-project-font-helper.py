@@ -28,7 +28,9 @@ def validate(directory, normal):
         for prefix in ['font', 'reference']:
             frame = json.loads((directory / f'{prefix}-{width}x{height}.json').read_text())
             assert frame['phase'] == 'ready' and [frame['width'], frame['height']] == [width, height]
-            assert frame['diagnostics']['physical'] == sdk['records'][index]['physical'] == [width, height]
+            physical = frame['diagnostics']['physical']
+            assert physical == sdk['records'][index]['physical'], 'Physical capture dimensions differ'
+            assert len(physical) == 2 and all(isinstance(value, int) and value > 0 for value in physical)
             assert frame['diagnostics']['drawPerVirtual'] == sdk['records'][index]['drawPerVirtual']
             raw = base64.b64decode(frame['image'].removeprefix('data:image/png;base64,'), validate=True)
             image = Image.open(BytesIO(raw)).convert('RGBA')
@@ -46,7 +48,7 @@ def validate(directory, normal):
 
 def audit_rejections(directory, normal):
     checked = []
-    for fault in ['missing-reference', 'wrong-source', 'blank-frame', 'fallback-font']:
+    for fault in ['missing-reference', 'wrong-source', 'wrong-physical', 'wrong-scale', 'blank-frame', 'fallback-font']:
         with tempfile.TemporaryDirectory(prefix='loomlight-font-gate-') as temporary:
             root = Path(temporary) / 'helper'
             shutil.copytree(directory, root)
@@ -56,6 +58,14 @@ def audit_rejections(directory, normal):
                 receipt = json.loads((root / 'result.json').read_text())
                 receipt['normalSourceSHA256'] = '0' * 64
                 (root / 'result.json').write_text(json.dumps(receipt))
+            elif fault in ['wrong-physical', 'wrong-scale']:
+                path = root / 'font-1280x720.json'
+                frame = json.loads(path.read_text())
+                if fault == 'wrong-physical':
+                    frame['diagnostics']['physical'][0] += 1
+                else:
+                    frame['diagnostics']['drawPerVirtual'] += 0.25
+                path.write_text(json.dumps(frame))
             else:
                 frame = json.loads((root / 'font-1280x720.json').read_text())
                 if fault == 'blank-frame':
