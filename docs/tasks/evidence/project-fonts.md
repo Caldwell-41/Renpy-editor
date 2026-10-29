@@ -663,3 +663,124 @@ this audit does not claim they have already completed. No expensive workflow was
 dispatched. Historical limits, earlier qualification and protected recovery remain
 unchanged. Both review findings are corrected and the selected product validation
 is complete. No merge, release, ticket closure or wider acceptance is selected.
+
+## Picker cache and discovery namespace corrections, 2026-10-30
+
+Kris selected both findings from the fresh full review of PR #70 at `237665c`,
+delegated implementation, coordinator validation, publication, PR update, CI and
+cleanup. Both workers start at `237665c117acf8906fc83bd0adc19672387e22f9`.
+
+- The namespace worker owns `authoring.rs` and focused public asset/font tests in
+  the isolated `l05-font-namespace-fix` worktree. It must admit equal names across
+  separate discovery namespaces and preserve collisions within a namespace.
+- The picker worker owns font picker/media code, the actual controller/core
+  browser journey and disposable driver inputs in `l05-font-picker-cache-fix`.
+  It must reproduce selecting a font after normal cache eviction, then correct
+  the loading/selection ownership without changing the approved A2 design.
+- The coordinator owns this record, sequential integration (namespace first,
+  picker second), final combined verification, publication, PR/CI audit and safe
+  retirement. Workers do not publish or modify shared status.
+
+Both workers use `principle-fix-root-causes` and installed TDD 1.3.2. The requested
+1.3.1 path is absent. Tests reuse the approved public asset operations and actual
+Screens controller connected to core; native file-dialog substitution remains
+explicit. Each fix requires a failing behavior test before implementation.
+Routine local checks and automatic PR quality CI need no numerical allowance.
+No SDK/helper start, package build, native-editor session or costly CI dispatch is
+selected. Historical counts, qualified candidates and limits remain unchanged.
+The unrelated audit, pinned design worktree and protected recovery remain intact.
+
+### Namespace root cause and red/green proof
+
+Asset metadata already distinguishes Image, Audio and Font discovery namespaces.
+The import collision check compared names globally, so a valid `music_theme`
+font collided with a Music asset in another namespace. The correction compares
+both namespace and name. The appearance-rename path remains unchanged: its names
+require a space, which valid font/audio identifiers cannot contain.
+
+The new public-operation test imports Music then Font, and Font then Music, with
+the same discovery name. Both typed assets remain available after reopen. A
+distinct OTF using that font name still fails with `DISCOVERY_NAME_COLLISION`
+without changing the listed metadata. Its focused red run failed at the actual
+collision check; the green run passes. An earlier fixture-only failure lacked
+`game/audio` and remains separate from the product failure.
+
+The worker committed `594c28ab8b51b6cd9d4964a3f4381713a43b222d`; the coordinator
+reviewed and integrated it as `1b1d2d14c81aa644e4302e832945e4de9ac1dd6c`.
+The focused command selects
+`project_fonts_and_audio_share_names_only_across_discovery_namespaces` through
+`cargo test --offline -p loomlight-core --locked`. The green selection passes one
+test; the worker's font selection passes 11 and its authoring selection passes
+33, with no failures or ignored tests. Rust formatting and whitespace pass.
+Original red, fixture failure and green logs are retained under the coordinator's
+ignored `project-fonts/picker-namespace-fixes/namespace-agent` evidence.
+
+### Picker root cause and red/green proof
+
+The picker treated decoded-font cache membership as permission to choose an
+already validated asset. Normal 64 MiB eviction therefore made enabled rows
+silently refuse selection. A loading flag also remained set after completion,
+which prevented a returning row from reloading its specimen. Selection now uses
+the durable typed asset handle, while the loading flag tracks only pending work.
+The cache bound, font admission and Apply validation remain unchanged.
+
+`node tests/project-font-cache.browser.mjs` drives the production controller and
+actual core. The disposable driver creates five 15 MiB variants of the pinned
+public TTF with a checksummed private padding table; the checked-in font fixtures
+remain unchanged. Browsing all five exceeds the real cache bound. Before the fix,
+clicking the first enabled font leaves the picker open and fails the test. After
+the fix, selection closes the picker and returns focus, remains a text draft,
+and Apply accepts the chosen font. Undo and Redo restore exact source bytes.
+The final test holds delivery of a real presentation response until after the
+click, so a fast reload cannot mask cache-dependent selection.
+
+The worker committed `6a745c0658a97757216ee5e8ff938da6d52947f1`; the coordinator
+reviewed and integrated it as `3b8bf78`. The initial red and an accidental unchanged
+repeat remain separate from the passing initial/final/held-response runs. Worker
+typecheck, syntax, Rust formatting and whitespace pass. A final cache-directory
+isolation edit received syntax checking and is covered by the coordinator's
+combined run. Worker evidence is retained under ignored
+`project-fonts/picker-namespace-fixes/picker-agent`.
+
+`77d9af4d41645617103b41fc01090dabebee2663` is the combined code/workflow candidate.
+It adds the new browser command to the existing project-font workflow's controller
+step. The coordinator owns final validation and fresh Standards/Spec correction
+review before publication.
+
+### Coordinator validation and correction review
+
+The coordinator validated the combined code with pinned Node 24.19.0, npm 11.9.0,
+Rust 1.90.0 and Python 3.12.14. All 277 frontend tests and the production build
+pass. The Screens core selection passes 70 tests, with four SDK/helper cases
+intentionally ignored; the authoring selection passes all 33 tests. Rust
+formatting and the actual controller-driver build pass. These checks ran on
+`77d9af4`; the only later code/workflow change separates browser evidence paths.
+Frontend, core, dependency and build inputs are byte-identical at `03cd82a`.
+
+The new cache journey, existing font controller/core journey and exact probe
+rehearsal all pass on `03cd82a1fe844daee8f20f52c87caff9ba92d69b`. The rehearsal
+records two delayed font reads and zero overlapping Apply requests. These are
+browser/controller checks, with no fresh native WebView or SDK claim.
+
+Fresh independent correction review found that the newly wired cache test would
+inherit `PROJECT_FONT_OUTPUT` and overwrite the existing controller's
+`result.json`. The coordinator corrected that evidence-owner mistake in
+`03cd82a`: the cache test uses `PROJECT_FONT_CACHE_OUTPUT`, with a separate
+`cache-controller` workflow directory. Both original and cache receipts remain
+present, and the original retains source, font, requests and canvas plans.
+Both reviewers rechecked the correction at that SHA and report zero remaining
+Standards findings and zero remaining Spec findings. No broader abstraction or
+product change was required.
+
+Repository validation passes for 1,265 local files, all 13 section-link tests
+pass, and whitespace passes. The build's existing large-chunk advisory remains.
+Coordinator logs, worker red/green evidence and `validation-summary.json` remain
+under ignored `project-fonts/picker-namespace-fixes`. Ordinary CI audit and safe
+retirement of the two new worker worktrees follow publication.
+
+The approved A2 layout, source serializer, IPC, renderer/helper, SDK adapters,
+dependencies and package identity remain unchanged. Earlier both-host SDK/helper
+and native receipts retain their exact recorded candidates and scope; this
+correction establishes no fresh native/package acceptance. The combined Design
+Lab startup failure, OS-dialog/human input and wider editor/canvas/Phase 3B
+acceptance remain separate. Historical operation consumption stays unchanged.

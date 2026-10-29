@@ -1,34 +1,29 @@
 # Current status
 
-## L05 project font review fixes
+## L05 picker and namespace review fixes
 
-Both fresh review findings in [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70)
-are corrected on `codex/l05-project-fonts`. The coordinator integrated the font
-admission fix as `b1aa8e0`, then stale-text reconciliation as `ef81014`, after
-separate agents completed red/green tests in isolated worktrees. Independent
-Standards and Spec review of the corrections has zero remaining findings.
-[Detailed evidence](../tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30)
-retains assignments, failing cases, final checks and qualification limits.
+The fresh [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) findings
+are corrected on `codex/l05-project-fonts`. Independent workers fixed discovery
+namespace collisions and font selection after specimen-cache eviction, with
+failing behavior tests before implementation. The coordinator integrated namespace
+first, then picker. Code candidate `03cd82a1fe844daee8f20f52c87caff9ba92d69b`
+passes both correction review axes with zero remaining findings.
+[Detailed evidence](../tasks/evidence/project-fonts.md#picker-cache-and-discovery-namespace-corrections-2026-10-30)
+retains assignments, red/green failures, candidate mapping and qualification limits.
 
-Combined application candidate `ef810143980700fa2e2143b70a14528f77aaf6de` passes
-all 277 frontend tests, the production build, actual font/controller journey and
-exact probe rehearsal. The core slice passes 69 tests with four SDK/helper cases
-intentionally ignored. Core inputs are identical between its `b1aa8e0` test
-candidate and the combined candidate. Font admission now requires a parsed base
-character map. Retained text drafts clear only when every field matches current
-saved values; unresolved drafts retain their original revision.
+All 277 frontend tests, the production build, 70 Screens core tests and 33
+authoring tests pass. Four SDK/helper cases remain intentionally ignored. The
+actual cache-eviction journey, existing font journey and probe rehearsal pass;
+separate result files retain both controller receipts. Frontend/core inputs are
+unchanged between their `77d9af4` check candidate and `03cd82a`.
 
-Both required jobs in [Repository quality run 40955663352](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40955663352),
-attempt 1, pass on published head `eba17f668ea867d405cf1bee809561914e200e03`.
-The coordinator audited all required steps and logs, including 277 frontend tests,
-Rust formatting, repository validation and 13 link tests. PR #70 is updated.
-Any later audit-record commit changes documentation only; its ordinary automatic
-checks remain visible on the PR. No product correction or qualification is pending.
-Fix worktrees remain available. No SDK/helper, package/native or costly CI
-operation ran. Historical consumption and earlier both-host qualification retain
-their recorded candidates and scope. Keep the PR draft and #39 open. Merge,
-release and wider acceptance remain unselected. Preserve the unrelated Phase 1
-audit, pinned design worktree and protected recovery below.
+Publication, PR update and ordinary automatic CI are selected. The CI audit
+and retirement of the two new worker worktrees remain pending. Earlier SDK/helper
+and signed/native evidence retains its recorded candidates and scope. No costly
+CI, SDK/helper, package or native-editor operation ran for these corrections.
+Keep PR #70 draft and #39 open. Merge, release and wider acceptance remain
+unselected. Preserve the unrelated Phase 1 audit, pinned design worktree, earlier
+worktrees and protected recovery below.
 
 ## L06 UI-image authoring merged
 
