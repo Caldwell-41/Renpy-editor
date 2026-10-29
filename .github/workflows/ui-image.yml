@@ -72,6 +72,7 @@ jobs:
           cargo fmt --all --check
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p test_ui_image_evidence.py -v
           "$HARNESS_PYTHON" -m unittest discover -s scripts -p test_owned_screen_evidence.py -v
+          cargo test -p loomlight-core --locked authoring::tests::asset_import_uses_bounded_stack_for_selection_preview_and_acceptance -- --exact --nocapture
           cargo test -p loomlight-core --locked --lib screens::tests -- --nocapture
           cargo build -p loomlight-core --example help-controller-driver --locked
           npm run build
@@ -84,6 +85,12 @@ jobs:
         run: |
           node tests/ui-image.browser.mjs
           node tests/ui-image-probe-controller.browser.mjs
+      - name: Retain the exact failed controller executable
+        if: ${{ always() && steps.controller.outcome == 'failure' && hashFiles('app/target/debug/examples/help-controller-driver.exe') != '' }}
+        shell: pwsh
+        run: |
+          Copy-Item 'target/debug/examples/help-controller-driver.exe' "$env:RUNNER_TEMP/ui-image/failed-controller-driver.exe"
+          @{ candidate=$env:GITHUB_SHA; runId=$env:GITHUB_RUN_ID; attempt=$env:GITHUB_RUN_ATTEMPT; executableSHA256=(Get-FileHash 'target/debug/examples/help-controller-driver.exe').Hash } | ConvertTo-Json | Out-File "$env:RUNNER_TEMP/ui-image/failed-controller-identity.json" -Encoding utf8
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         if: runner.os == 'Windows'
         id: image-sdk

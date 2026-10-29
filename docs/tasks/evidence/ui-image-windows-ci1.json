@@ -1,0 +1,37 @@
+{
+  "runId": 40807895621,
+  "attempt": 1,
+  "candidate": "8eeabc90401374fa57fe1ed2e3ef9d3ddcc149de",
+  "url": "https://github.com/Caldwell-41/Renpy-editor/actions/runs/40807895621",
+  "conclusion": "failure",
+  "failedStep": "Real controller/core and exact packaged-probe rehearsal",
+  "driverExitCode": 3221225725,
+  "driverExitHex": "0xC00000FD",
+  "classification": "Product import stack-buffer defect",
+  "portable": {
+    "frontendPassed": 269,
+    "screenCorePassed": 54,
+    "screenCoreIgnored": 3,
+    "pythonEvidencePassed": [
+      3,
+      2
+    ],
+    "productionBuildPassed": true,
+    "desktopCheckPassed": true
+  },
+  "artifact": {
+    "name": "ui-image-Windows-40807895621-1",
+    "candidateVerified": true,
+    "controllerPassed": false,
+    "controllerReportSHA256": "0bc24e57d270a4762d2208bd518c0c206c2fb78aeac49ed9d8922bb899a3ed7d",
+    "testedControllerExecutableAvailable": false
+  },
+  "windowsStarted": {
+    "sdk": 0,
+    "helper": 0,
+    "package": 0,
+    "native": 0
+  },
+  "fixtureCleanupProved": false,
+  "ciDispatchesConsumed": 1
+}

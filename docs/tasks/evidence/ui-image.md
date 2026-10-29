@@ -299,3 +299,79 @@ package and one native session in one dispatch. Nothing has been dispatched.
 
 Windows remains the required platform gap. No ticket acceptance/closure, push,
 PR, merge or release is claimed. #40 owns current cumulative operation counts.
+
+
+## CI1 dispatch and waiting state
+
+Kris explicitly approved pushing `8eeabc9` and running focused Windows CI. The
+reviewed branch is published at full SHA `8eeabc90401374fa57fe1ed2e3ef9d3ddcc149de`.
+[Run 40807895621](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40807895621),
+attempt 1, was created at `2026-10-29T02:41:57Z` with `ui_image=true`, candidate SHA
+and ordinal 1. GitHub confirms the same branch/SHA; selection validation passes
+and the Windows image job is in progress. All other outcomes are unselected.
+CI dispatch 1/3 is consumed. Planned Windows maximum use is five SDK starts, one
+helper, one package and one native session; actual started use remains for the
+artifact audit. No Windows pass is claimed.
+
+Dispatch metadata remains under ignored `ci1/dispatch.json`. The same-chat
+ci-watch identity is `54808829bd2759b1df041151`. After its event, acknowledge delivery, verify
+attempt/candidate and audit all retained artifacts, including failed or partial
+results. Source material still equals the cleared and signed Mac candidate; local
+status/evidence edits do not change the published candidate. No PR, merge or
+release is selected.
+
+
+## CI1 Windows import stack failure
+
+Watcher `54808829bd2759b1df041151` delivered failure and was acknowledged in this
+same chat. GitHub confirms run `40807895621`, attempt 1, exact head `8eeabc9`.
+Portable checks pass: 269 frontend tests, both named Python evidence slices,
+54 screen-core tests (three explicit SDK cases ignored), production build and
+desktop check. The real controller driver then exits with Windows status
+`3221225725` (`0xC00000FD`) and `main has overflowed its stack` during the first
+native-fixture image selection. The UI's missing Display name timeout and cleanup
+exit are consequences of that producer failure. The all-format probe rehearsal,
+SDK, helper, package and native steps never start. CI dispatch use is 1/3;
+Windows SDK/helper/package/native use remains zero.
+
+The partial artifact contains candidate identity and the false controller report.
+It has no tested controller executable; that missing diagnostic artifact is not
+invented or treated as recovered. The corrected route retains and hashes that
+exact executable on any later controller failure. CI1 logs, partial artifact and
+run metadata remain under ignored `ci1/`.
+
+This is a product defect in existing import infrastructure exposed by L06.
+`authoring::hash_file` places a 1 MiB array on the stack. The public select/preview/
+UI-image import regression reproduces stack overflow in a child test process
+with a 256 KiB stack (`stack-red.log`). Moving that buffer directly to a `Vec`
+passes the same test (`stack-ui-green.log`). Pattern search finds one sibling
+1 MiB array in `transaction::copy_hash_bounded`, used by legacy streaming imports.
+Extending the same public-service regression to Background import reproduces
+that second failure (`stack-stream-red.log`). Both buffers now allocate on the
+heap, matching the existing SDK hashing correction. No stack reserve, byte cap,
+checksum, retained-handle check or acceptance threshold changes.
+
+The regression spans multiple hash chunks and verifies count, natural size,
+SHA-256 and exact accepted bytes through the public services. It is a regression
+for the observed product crash, not a hostile-filesystem or persistence-termination
+campaign. Targeted debug/release verification and fresh package/native evidence
+are required before claiming the corrected candidate qualified. Original CI1
+and both red reproductions remain failed. No retry has yet been dispatched.
+
+
+The corrected authoring slice passes all 33 tests. The constrained-stack regression
+passes in both debug and release builds, for both bounded UI-image and legacy
+Background import. The existing 17 MiB streaming import/metadata/history case,
+maximum-size refusal and ordinary post-stage failure classification also pass.
+The code change is two allocation expressions; the read/hash/write loops and their
+limits are unchanged. [CI1 receipt](ui-image-windows-ci1.json) records the failing
+candidate, positive portable slices, missing executable and zero Windows costly
+starts. Runner orphan cleanup does not establish fixture cleanup after the abort.
+
+CI2 adds the regression before expensive stages and preserves the exact failed
+controller executable/hash if another controller failure occurs. This changes
+qualification only; no new test controller or product capability is introduced.
+A fresh signed Mac package/native case will qualify the changed core material.
+Existing SDK/helper geometry and pixel proof retain their scope: source generation,
+asset fixtures, renderer, helper/runtime protocol and SDK adapter are unchanged;
+public import checks establish the same bytes and hashes after allocation changes.

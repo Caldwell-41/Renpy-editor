@@ -41,13 +41,30 @@ failed fixture lookup, `controller-*`, probe rehearsals, full-suite logs and sig
 `mac-package-01`/`mac-native-01`. The package is a local artifact, not an install or
 release. Preserve the prototype comparison worktree and earlier protected state.
 
-Next obtain publication authorization, then push the reviewed branch and dispatch
-only `screens-source.yml` with `ui_image=true`, exact final candidate and ordinal 1.
-The prepared Windows route selects at most five SDK starts, one helper, one
-package and one native session. It retains independent partial evidence without
-converting a failed gate into a pass. Use ci-watch for the known run. No Windows
-check has run, and no push, PR, merge or release has been selected. This chat owns
-that continuation; no implementation handoff is required.
+Kris authorized pushing the reviewed branch and focused Windows CI. Remote
+`codex/phase3b-l06-ui-image` now points to `8eeabc90401374fa57fe1ed2e3ef9d3ddcc149de`.
+[CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40807895621), attempt 1,
+was created at `2026-10-29T02:41:57Z` using the exact candidate and ordinal 1.
+It is now failed and fully identified. Its watcher event was acknowledged; no
+watcher is running. Portable checks pass, then the controller overflows its Windows
+main stack on first image selection. SDK/helper/package/native stages never start;
+Windows operation use remains zero and dispatch 1/3 remains consumed.
+
+[CI1 diagnosis](../tasks/evidence/ui-image.md#ci1-windows-import-stack-failure) owns
+logs, partial-artifact limitations and red/green reproduction. Product fixes are
+currently uncommitted: two 1 MiB import/streaming stack arrays move to heap storage,
+with a public-service bounded-stack regression. Preserve in-flight status/evidence
+edits and both local dependency/target symlinks. Next finish affected verification,
+review the correction, commit/push and dispatch ordinal 2 within unchanged ceilings.
+A fresh signed Mac package/native pass must bind changed product material; preserve
+existing SDK/helper pixel evidence with its unchanged-material reuse boundaries.
+
+CI2 may select at most five Windows SDK starts, one helper, one package and one
+native session. Do not rerun CI1 or reset counts. The user already authorized push
+and focused CI; ordinary in-scope corrections/retries need no repeated permission.
+Register ci-watch only after a new exact run is confirmed. No PR, merge or release
+is selected; no Windows or full-ticket acceptance is claimed. This chat owns
+continuation.
 
 ## L04 merge and workspace closeout
 

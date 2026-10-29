@@ -22,8 +22,11 @@ candidate `19d71e8`.
 
 [Evidence](../tasks/evidence/ui-image.md) owns detailed results and failures;
 [HANDOVER](HANDOVER.md#l06-implementation-and-qualification) owns continuation.
-The ticket remains in progress. Required Windows qualification needs publication
-of the reviewed branch; no push, PR, merge or release is selected. Earlier closed
+Kris authorized publication and focused Windows CI. The branch is pushed at
+`8eeabc9`; [CI1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/40807895621)
+failed for that exact candidate before any SDK/package/native start. A reproduced
+import stack-buffer defect is being corrected and verified; no PR,
+merge or release is selected. Earlier closed
 allowances and protected recovery remain intact.
 
 ## L04 nested and clipped layouts merged

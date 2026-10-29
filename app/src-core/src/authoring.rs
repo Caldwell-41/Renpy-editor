@@ -2502,7 +2502,7 @@ fn hash_file(file: &mut File) -> Result<(u64, String), AuthoringError> {
         .map_err(|_| AuthoringError::Io)?;
     let mut digest = Sha256::new();
     let mut count = 0_u64;
-    let mut buffer = [0_u8; 1024 * 1024];
+    let mut buffer = vec![0_u8; 1024 * 1024];
     loop {
         let read = file.read(&mut buffer).map_err(|_| AuthoringError::Io)?;
         if read == 0 {
@@ -2719,6 +2719,72 @@ mod tests {
         let (count, hash) = hash_file(&mut file).unwrap();
         assert_eq!(count, 17 * 1024 * 1024);
         assert_eq!(hash.len(), 64);
+    }
+
+    #[test]
+    fn asset_import_uses_bounded_stack_for_selection_preview_and_acceptance() {
+        const CHILD: &str = "LOOMLIGHT_IMPORT_STACK_REGRESSION";
+        const TEST: &str = "authoring::tests::asset_import_uses_bounded_stack_for_selection_preview_and_acceptance";
+        if std::env::var_os(CHILD).is_none() {
+            let output = std::process::Command::new(std::env::current_exe().unwrap())
+                .args(["--exact", TEST, "--nocapture", "--test-threads=1"])
+                .env(CHILD, "1")
+                .env("RUST_MIN_STACK", "262144")
+                .output()
+                .unwrap();
+            assert!(
+                output.status.success(),
+                "Bounded-stack import failed: {}\n{}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+            assert!(String::from_utf8_lossy(&output.stdout).contains("1 passed; 0 failed"));
+            return;
+        }
+        for kind in [AssetKind::UiImage, AssetKind::Background] {
+            let (_temporary, root, project_uuid) = project_fixture();
+            fs::create_dir_all(root.join("game/images")).unwrap();
+            let mut service = AuthoringService::default();
+            let project = service.register_project(&root).unwrap();
+            let selected = root.join("selected.png");
+            let mut bytes =
+                include_bytes!("../../../tests/fixtures/phase-3b-screens/ui-image/seal.png")
+                    .to_vec();
+            bytes.resize(1024 * 1024 + 513, 0x5a);
+            fs::write(&selected, &bytes).unwrap();
+            let expected = hex::encode(Sha256::digest(&bytes));
+            let choice = service.select_import(&project, &selected).unwrap();
+            assert_eq!(choice.byte_count, bytes.len() as u64);
+            let preview = service
+                .preview_import(
+                    &project,
+                    crate::media::ImportPreviewRequest {
+                        authority_id: choice.authority_id.clone(),
+                    },
+                )
+                .unwrap();
+            assert_eq!(preview.sha256, expected);
+            assert_eq!((preview.width, preview.height), (Some(80), Some(40)));
+            let accepted = service
+                .import_asset(
+                    &project,
+                    &project_uuid,
+                    ImportAssetRequest {
+                        authority_id: choice.authority_id,
+                        kind,
+                        technical_name: "seal".into(),
+                        display_name: "Seal".into(),
+                        character_id: None,
+                        expression: None,
+                    },
+                )
+                .unwrap();
+            assert_eq!(accepted.assets[0].sha256, expected);
+            assert_eq!(
+                fs::read(root.join(&accepted.assets[0].relative_path)).unwrap(),
+                bytes
+            );
+        }
     }
 
     #[test]

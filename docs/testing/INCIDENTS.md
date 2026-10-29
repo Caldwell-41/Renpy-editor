@@ -568,3 +568,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   unchanged source and normal driver exit. The packaged Help probe also checks
   focus after clicked Apply.
 - **Evidence:** [PR #66 CI2 diagnosis](../tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification).
+
+
+## H40. Import hashing overflows the Windows main stack
+
+- **Class/search:** product; `0xC00000FD`, `3221225725`, first image selection,
+  controller cleanup exit, missing import Display name.
+- **Cause/correction:** import hashing and streaming-copy helpers used 1 MiB stack
+  arrays. Allocate those buffers directly on the heap; retain limits, hashes,
+  source authority and ordinary recovery. Do not increase the product stack.
+- **Regression:** public UI-image and Background selection/preview/import in a
+  child with a 256 KiB stack; verify exact accepted bytes and hashes. Actual Windows
+  main-thread/controller and package proof remains a separate target gate.
+- **Evidence:** [L06 CI1 diagnosis](../tasks/evidence/ui-image.md#ci1-windows-import-stack-failure).
