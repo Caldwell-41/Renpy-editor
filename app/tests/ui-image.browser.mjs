@@ -85,6 +85,7 @@ try {
  assert.deepEqual({xpos:pending.properties.xpos,xsize:pending.properties.xsize,ysize:pending.properties.ysize},{xpos:77,xsize:200,ysize:100});
  assert.equal(await read(),placed,'Canvas drafts do not change accepted Source');
  await width.press('Escape');assert.equal(await width.inputValue(),'320');assert.equal(await read(),placed);
+ await ui.locator('.screen-image-layout').evaluate(e=>e.open=false);
  await width.fill('200');assert.equal(await height.inputValue(),'100');await width.press('Enter');await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');
  const sized=await read();assert.match(sized,/xsize 200\n\s+ysize 100/);assert.equal(await width.evaluate(e=>e===document.activeElement),true);
  await width.fill('bad');await ui.getByRole('button',{name:'Apply image',exact:true}).click();assert.equal(await width.getAttribute('aria-invalid'),'true');assert.equal(await read(),sized);await width.press('Escape');assert.equal(await width.inputValue(),'200');
