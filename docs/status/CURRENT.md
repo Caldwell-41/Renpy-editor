@@ -1,5 +1,15 @@
 # Current status
 
+## L07 shared-look design in progress
+
+Kris selected implementing [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
+on a new branch. `codex/l07-shared-looks` starts at current Screens base `e9e8661`.
+Three [Design Lab drafts](../design/design-lab-shared-look/README.md) are prepared
+for the required design approval. No draft is approved and production code is
+unchanged. [Evidence](../tasks/evidence/shared-look.md) records mock verification
+and remaining SDK/source/history/native proof. No capped operation has started.
+The unrelated audit, protected recovery and wider pending acceptance remain intact.
+
 ## Reviewed text ownership cleanup
 
 `codex/single-text-draft-owner` is `review_ready`, based on `d990298`. Kris selected

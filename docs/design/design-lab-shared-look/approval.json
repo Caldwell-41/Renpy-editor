@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "shared-look",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "inspector-v1", "variantId": "inspector", "approval": null },
+    { "id": "library-v1", "variantId": "library", "approval": null },
+    { "id": "inline-v1", "variantId": "inline", "approval": null }
+  ]
+}
