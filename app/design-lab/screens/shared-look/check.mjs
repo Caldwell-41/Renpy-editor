@@ -63,4 +63,5 @@ export default async function check({ page, open }) {
     await open({ variant, state: "expression", theme: "dark" }); assert.equal(await color().getAttribute("readonly"), ""); assert.equal(await review().isDisabled(), true);
   }
   console.log("Shared-look mock interactions pass for all three layouts.");
+  await (await import("./refined-check.mjs")).default({ page, open });
 }

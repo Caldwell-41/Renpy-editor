@@ -5,6 +5,7 @@
   "revisions": [
     { "id": "inspector-v1", "variantId": "inspector", "approval": null },
     { "id": "library-v1", "variantId": "library", "approval": null },
-    { "id": "inline-v1", "variantId": "inline", "approval": null }
+    { "id": "inline-v1", "variantId": "inline", "approval": null },
+    { "id": "inspector-v2", "variantId": "refined", "approval": null }
   ]
 }

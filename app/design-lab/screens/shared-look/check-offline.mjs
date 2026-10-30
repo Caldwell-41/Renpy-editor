@@ -21,7 +21,7 @@ async function open({ variant = "inspector", state = "shared", theme = "dark" } 
 }
 try {
   mkdirSync(output, { recursive: true });
-  for (const width of [1100, 728, 560]) for (const theme of ["dark", "light"]) for (const variant of ["inspector", "library", "inline"]) for (const state of ["shared", "local", "stale", "missing", "expression"]) {
+  for (const width of [1100, 728, 560]) for (const theme of ["dark", "light"]) for (const variant of ["refined", "inspector", "library", "inline"]) for (const state of ["shared", "local", "stale", "missing", "expression"]) {
     await page.setViewportSize({ width, height: 850 }); await open({ variant, theme, state });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${variant}/${state}/${width}/${theme}: horizontal overflow`);
     assert.equal(await page.getByRole("region", { name: "Look inspector" }).isVisible(), true);

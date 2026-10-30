@@ -3,8 +3,9 @@
 Kris selected implementing [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
 on a new branch on 2026-10-30. Branch `codex/l07-shared-looks` starts at
 `e9e8661`, the current Screens base including #71's text-draft ownership fix.
-The repository's design-before-production rule applies. These three designs are
-drafts; no option has approval and production code has not changed.
+The repository's design-before-production rule applies. Refined A2 and the three
+original designs remain drafts. No option has approval and production code has
+not changed.
 
 The question is where shared appearance editing and affected-use review belong
 within the existing Screens workspace. All options retain the canvas, element
@@ -12,19 +13,34 @@ selection, inspector sections, Source access and shared-history controls.
 
 | Option | Editing and review |
 | --- | --- |
+| A2, refined inspector | Help and About previews show draft changes together. Plain scope choices distinguish shared updates from a copy for only one element. |
 | A, inspector | Appearance stays in the inspector. A dialog lists all screens before Apply or independent copy. |
 | B, library | A style list sits beside Help and About previews. The inspector edits the selected style; a dialog reviews affected screens. |
 | C, inline | Appearance fields form a worksheet below the canvas. Affected screens and confirmation expand beneath the fields. |
 
-A is the suggested starting point. It keeps existing inspector placement and adds
-one review step for shared changes. B makes cross-screen use easier to inspect but
-takes more space. C keeps review beside the fields but lengthens the editing page.
+A2 is the current proposal. Kris found the original A difficult to understand and
+requested an experience-first refinement. A2 keeps editing in the inspector, names
+the shared look in plain language, and makes both uses visible from the start.
+Color presets make the first change easy to try. Choosing Help and About previews
+the change on both screens; choosing Only Help previews an independent copy on that
+one use. Review confirms the screens and exact changed values. Source identifiers
+and diagnostics stay behind their explicit controls.
+
+A2 replaces the separate independent-copy button and source-name field with the
+plain scope choice. It removes the noninteractive layout placeholder and repeated
+used-on rows. The affected screens remain visible in the previews, scope choice
+and final review. These are changes to the mock only; existing production layout
+and asset/font controls retain their earlier scope.
+
+The original A, B and C remain available unchanged for comparison. B makes
+cross-screen use easier to inspect but takes more space. C keeps review beside the
+fields but lengthens the editing page.
 
 ## Review
 
-The registered Design Lab routes are `/preview.html?screen=shared-look&variant=inspector&state=shared&theme=dark&viewport=wide`,
-with `library` or `inline` as the other variant values. The existing lab command
-remains `npm run design:dev` from `app/`.
+The current route is `/preview.html?screen=shared-look&variant=refined&state=shared&theme=dark&viewport=wide`.
+The original variant values are `inspector`, `library` and `inline`. The existing
+lab command remains `npm run design:dev` from `app/`.
 
 For an offline comparison, from `app/` run:
 

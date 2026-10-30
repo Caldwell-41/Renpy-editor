@@ -90,6 +90,39 @@ within this prototype only. The final checkpoint remains local, with no code pus
 or PR. #43's body records the selected outcome and pending design decision; its
 acceptance boxes remain unchecked.
 
+## Experience-first A2 refinement
+
+Kris found A unclear and selected refining that mock with
+`principle-experience-first`. The new `refined` variant, revision `inspector-v2`,
+is an unapproved draft. The original three renderers remain unchanged.
+
+A2 shows Help and About together, uses a human-readable look name, and gives
+explicit Help and About versus Only Help scope choices. Color presets expose the
+shared editing behavior without entering hex values. Both previews display pending
+shared changes; independent scope changes only its selected use. Review states
+which screens update and shows changed values. Accepting independent scope copies
+the style and all appearance states for that element. Technical identifiers stay
+in Source; original behavior is still simulated in browser memory.
+
+Application and lab typechecking, approval validation, the focused original/A2
+interaction checks and the expanded 120-case offline matrix pass. This matrix
+covers four variants, five states, three widths and both themes without page errors
+or network requests. A2 checks include both-preview feedback, independent scope,
+shared and copy Apply, review Cancel/focus/selection, history/reopen, invalid and
+missing/stale retention, frame appearance and isolated button states.
+
+The direct live A2 route reaches `data-ready=true` with zero page errors and both
+previews at 1100x720. The focused A2 interaction check also passes against that live
+route, including actual browser draft previews, review and copy behavior. The
+catalog-based `check-screen.mjs shared-look` still fails
+at its initial `/` navigation with the retained eight-second startup timeout before
+running its matrix. The new log is `refined-lab-check.log` in the local evidence
+directory. This remains failed; neither it nor the earlier combined gate is claimed
+as passing. The user receives the direct `/preview.html` link.
+
+No production file, SDK/helper, transaction, package or native operation changed.
+Design approval and all actual-product acceptance remain pending.
+
 ## Acceptance remains pending
 
 None of #43's four criteria is accepted by these mocks. They establish sample
