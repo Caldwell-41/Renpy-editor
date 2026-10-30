@@ -1,5 +1,18 @@
 # Current status
 
+## Reviewed text ownership cleanup
+
+`codex/single-text-draft-owner` is `review_ready`, based on `d990298`. Kris selected
+removing the duplicate renderer text flow while preserving current behavior and
+the core command. Typed fixtures exposed a hierarchy Enter submission defect;
+the corrected DOM cases and actual controller/core journey pass. All 277 frontend
+tests and the production build pass. [Maintenance evidence](../tasks/evidence/screen-text-ownership.md)
+owns the results and retained failures. Independent Standards and Spec reviews at
+`15477b5` each report zero findings. [PR #71](https://github.com/Caldwell-41/Renpy-editor/pull/71)
+is published. Both required automatic CI jobs pass at `216590d`; every executed
+step and its logs are audited. Nine unselected specialist jobs are skipped.
+The audit closeout is documentation only. Merge and wider acceptance remain separate.
+
 ## L05 project fonts merged
 
 [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70) merged into

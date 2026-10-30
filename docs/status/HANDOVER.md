@@ -1,5 +1,31 @@
 # Current outcome handover
 
+## Text ownership cleanup review ready
+
+Kris selected architecture candidate 1 and a new branch on 2026-10-30.
+`codex/single-text-draft-owner`, based on `d990298`, is `review_ready` for
+integration into `codex/phase3b-screen-designer`. `ScreenText`
+owns existing-text drafts; the composer retains structural editing. The core
+`text` command and combined Apply ownership are unchanged.
+
+All 277 frontend tests, the production build and actual font controller/core journey
+pass. The journey reproduces and then verifies the hierarchy Enter correction;
+the first full-suite Python environment failure is retained separately.
+[The maintenance record](../tasks/evidence/screen-text-ownership.md) owns commands,
+evidence paths and qualification limits. Independent Standards and Spec reviews of
+`15477b5` each report zero findings. Kris selected push, PR creation and automatic
+`Repository quality` CI. [PR #71](https://github.com/Caldwell-41/Renpy-editor/pull/71)
+is published; [run 41020933759, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41020933759/attempts/1)
+passes at exact head `216590d`. Both required jobs, every executed step and its
+logs are audited, including 277 frontend passes and pinned Rust formatting.
+Nine unselected specialist jobs are skipped. No fix or retry is pending.
+The audit closeout changes documentation only; later automatic check identities
+and audits remain in the PR and ignored receipts without another receipt-only commit.
+The next action is user review. Merge and broader acceptance remain unselected.
+The unrelated audit and all
+protected recovery below are intact; historical closed allowances stay closed.
+The status files retain their existing size exception for unique recovery evidence.
+
 ## L05 merge and workspace closeout
 
 Kris directed merging [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70),

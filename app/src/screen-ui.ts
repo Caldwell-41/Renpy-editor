@@ -105,7 +105,7 @@ export class ScreensWorkspace {
         const view = this.compositionView();
         const nodes = view && this.images ? this.images.layoutNodes(view) : this.nodes();
         const node = this.images?.hasAddition() ? nodes.at(-1) : nodes[this.selected];
-        return this.current() && this.doc && node ? { document:this.doc, screen:this.screen, node, nodes, busy:this.busy, otherDraft:!!this.drafts.size || this.composer.hasDraft() || !!this.text?.hasDraft() } : undefined;
+        return this.current() && this.doc && node ? { document:this.doc, screen:this.screen, node, nodes, busy:this.busy, otherDraft:!!this.drafts.size || this.composer.hasAddition() || !!this.text?.hasDraft() } : undefined;
       },
       commit: async (draft, edits: LayoutEdits) => {
         this.busy = true; this.loadSequence++;
@@ -220,7 +220,7 @@ export class ScreensWorkspace {
   }
   mount(host: HTMLElement): void { host.append(this.panel); this.frames.invalidate("Checking canvas source."); void this.load(); }
   dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.composer.dispose(); this.images.dispose(); this.text.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
-  hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasDraft() || this.layout.hasDraft() || this.images.hasDraft() || this.text.hasDraft(); }
+  hasDraft(): boolean { return this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.images.hasDraft() || this.text.hasDraft(); }
   private current(): boolean { return !this.disposed && this.actions.current(); }
   private compositionView(): CompositionView | undefined {
     return this.current() && this.owned?.resolved && this.doc && this.nodes()[this.selected] ? {
@@ -385,9 +385,9 @@ export class ScreensWorkspace {
         const fields = el("div", "screen-size-fields");
         for (const [label, key, property] of [["Width", "width", "xsize"], ["Height", "height", "ysize"]] as const) {
           const input = el("input"); input.type = "number"; input.min = "1"; input.max = "16384"; input.step = "1";
-          input.ariaLabel = label; input.dataset.size = key; input.value = draft?.[key] ?? String(size(node, property)); input.readOnly = this.busy || !!draft?.position || this.composer.hasTextDrafts();
+          input.ariaLabel = label; input.dataset.size = key; input.value = draft?.[key] ?? String(size(node, property)); input.readOnly = this.busy || !!draft?.position;
           const field = el("label", "", `${label} (px)`); field.append(input); fields.append(field);
-          input.oninput = () => { if (this.busy || this.draft()?.position || this.composer.hasTextDrafts()) return; const value = this.ensureDraft(); value[key] = input.value; this.renderCanvas(); };
+          input.oninput = () => { if (this.busy || this.draft()?.position) return; const value = this.ensureDraft(); value[key] = input.value; this.renderCanvas(); };
           input.onkeydown = event => { if (event.key === "Enter") { event.preventDefault(); void this.apply(); } };
         }
         const actions = el("div", "screen-edit-actions");
@@ -442,7 +442,7 @@ export class ScreensWorkspace {
       const key = input.dataset.size as "width" | "height";
       const value = draft?.[key] ?? String(size(node, key === "width" ? "xsize" : "ysize"));
       if (input.value !== value) input.value = value;
-      input.readOnly = this.busy || !!draft?.position || this.composer.hasTextDrafts();
+      input.readOnly = this.busy || !!draft?.position;
     }
     this.card.ariaBusy = String(this.busy);
     this.card.querySelectorAll<HTMLButtonElement>(".screen-edit-actions button").forEach(b => b.ariaDisabled = String(this.busy));
@@ -499,7 +499,7 @@ export class ScreensWorkspace {
     else if (edit.type === "geometry") this.drafts.delete(edit.key);
     else {
       this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === edit.result.selectedId));
-      this.composer.accept(edit.command, base, document);
+      this.composer.accept(edit.command);
       if (sourceChanged) {
         this.compositionHistory.push({ path: base.path, before: base.revision, after: document.revision, beforeId: edit.beforeId, afterId: edit.result.selectedId, removal: edit.command.type === "remove" });
       }
@@ -522,9 +522,8 @@ export class ScreensWorkspace {
       } else if (command.type === "image" || command.type === "addImage") this.note(sourceChanged ? "Image applied. Undo restores its reference, size and layout together." : "No change. No undo entry added.");
       else if (command.type === "add") this.note("Element added. Undo removes this addition.");
       else if (command.type === "formatText") this.note(!sourceChanged ? "No change. No history entry added." : "Text applied. Undo restores its typography and layout together.");
-      else if (command.type === "text") this.note(!sourceChanged ? "Text unchanged. No history entry added." : "Text applied. Undo restores the previous text.");
       else this.note(!sourceChanged ? "Order unchanged. No history entry added." : "Order changed. Groups keep their children; Undo restores the order.");
-      this.render(); this.composer.focusEditor(command);
+      this.render(); this.composer.focusSelection();
     }
   }
   private ensureDraft(): Draft {
@@ -541,7 +540,7 @@ export class ScreensWorkspace {
   }
   private async apply(): Promise<void> {
     const draft = this.draft(); if (!draft || this.busy) return;
-    if (this.composer.hasTextDrafts() || this.text.hasDraft()) { this.note("Apply or cancel unfinished text edits before accepting dimensions. Input retained.", true); return; }
+    if (this.text.hasDraft()) { this.note("Apply or cancel unfinished text edits before accepting dimensions. Input retained.", true); return; }
     this.releaseMove();
     if(this.resize) {
       const {handle,pointer}=this.resize;this.resize=undefined;
@@ -664,12 +663,11 @@ export class ScreensWorkspace {
     if (drafts.some(d => d.document.revision !== this.doc!.revision || ![d.width,d.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384))) {
       this.frames.invalidate("Canvas unavailable for this invalid or stale draft. Input retained."); return;
     }
-    const textSamples = new Map(samples.map(s => [this.nodes()[s.index]!.span.start, { nodeStart: this.nodes()[s.index]!.span.start, value: s.value }]));
-    composition.texts.forEach(sample => textSamples.set(sample.nodeStart, sample));
+    const textSamples = samples.map(s => ({ nodeStart: this.nodes()[s.index]!.span.start, value: s.value }));
     const payload = { path:this.doc.path, screenName:this.screen, expectedRevision:this.doc.revision, width, height,
       drafts:drafts.filter(d=>!d.position).map(d => ({ nodeStart:d.document.screens.find(s => s.name === d.screen)!.nodes[d.index]!.span.start, width:Number(d.width), height:Number(d.height) })),
       positions:drafts.filter(d=>d.position).map(d=>({nodeStart:d.document.screens.find(s=>s.name===d.screen)!.nodes[d.index]!.span.start,...d.position!})),
-      layouts:numeric.layouts.filter(l => l.nodeStart !== virtual?.span.start), imageSamples:images.samples, textStyles:text.samples, ...(images.addition ? {imageAddition:images.addition} : {}), textSamples:[...textSamples.values()],buttonState:this.buttonState, ...(composition.addition ? { addition: composition.addition } : {}) };
+      layouts:numeric.layouts.filter(l => l.nodeStart !== virtual?.span.start), imageSamples:images.samples, textStyles:text.samples, ...(images.addition ? {imageAddition:images.addition} : {}), textSamples,buttonState:this.buttonState, ...(composition.addition ? { addition: composition.addition } : {}) };
     this.frames.render(payload);
   }
   private invalidateGeometry(discardProvisional: boolean): void {
@@ -687,7 +685,7 @@ export class ScreensWorkspace {
     const installedGeometry = this.frames.geometry;
     if (!this.move && !this.draft() && !this.busy) this.provisionalMove = undefined;
     const composition = this.composer.canvasDraft();
-    this.canvasStatus.textContent = composition.addition ? "Draft addition. Not applied to Source." : composition.texts.length ? "Text preview. Not applied to Source." : "Ren'Py canvas. Selection guides are editor overlays.";
+    this.canvasStatus.textContent = composition.addition ? "Draft addition. Not applied to Source." : "Ren'Py canvas. Selection guides are editor overlays.";
     this.canvas.querySelector(".screen-pending-addition")?.remove();
     const present = new Set((installedGeometry ?? []).map(g => this.nodes().findIndex(n => n.span.start === g.start)));
     this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => {

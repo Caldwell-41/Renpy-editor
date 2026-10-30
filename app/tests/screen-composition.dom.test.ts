@@ -5,14 +5,19 @@ import { ScreensWorkspace, type ScreenDocument, type ScreenNode } from "../src/s
 import type { CoreOperation } from "../src/protocol.js";
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+const node = (id: string, kind: string, start: number, end: number, parentStart: number | null, literal: string | null = null): ScreenNode => ({
+  id, kind, literal, span: { start, end }, parentStart, layout: {}, properties: [], protected: [],
+  ...(["text", "textbutton"].includes(kind) ? {
+    textProperties: { values: {}, blocked: {}, expressions: {} },
+    numericLayout: { values: {}, blocked: {}, sourceBlocked: {} },
+  } : {}),
+});
 
 function interactiveFixture(initial?: ScreenDocument, canvas = false) {
   const browser = new Window();
   Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement,
+    HTMLInputElement: browser.HTMLInputElement, HTMLTextAreaElement: browser.HTMLTextAreaElement, HTMLDetailsElement: browser.HTMLDetailsElement,
     ResizeObserver: class { observe() {} disconnect() {} } });
-  const node = (id: string, kind: string, start: number, end: number, parentStart: number | null, literal: string | null = null): ScreenNode => ({
-    id, kind, literal, span: { start, end }, parentStart, layout: {}, properties: [], protected: [],
-  });
   let doc: ScreenDocument = initial ?? { path: "game/ui/notes.rpy", revision: "before", partial: true, screens: [{ name: "notes", nodes: [
     node("root-id", "screen", 0, 250, null), node("box-id", "vbox", 30, 200, 0),
     node("title-id", "text", 60, 100, 30, "Title"), node("body-id", "text", 110, 140, 30, "Directions"),
@@ -32,6 +37,7 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
       if (operation === "screens.list") return { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "inventory",
         owned: [{ id: "screen-id", rootId: "root-id", name: "notes", path: doc.path, resolved: true, sourceRevision: doc.revision }] } as T;
       if (operation === "screens.inspect") { await inspectionGate; return structuredClone(doc) as T; }
+      if (operation === "authoring.list") return { assets: [] } as T;
       if (operation === "screens.canvasStatus" && canvas) return { phase: "ready" } as T;
       if (operation === "screens.canvasRender" && canvas) return { phase: "ready", frameId: "fixture-frame", revision: doc.revision,
         width: 1280, height: 720, image: "data:image/png;base64,fixture",
@@ -61,10 +67,8 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
 
 for (const kind of ["text", "textbutton", "frame"]) {
   test(`owned canvas ${kind} selects on click and opens Design on Enter`, async () => {
-    const root: ScreenNode = { id: "root-id", kind: "screen", literal: null, span: { start: 0, end: 250 },
-      parentStart: null, layout: {}, properties: [], protected: [] };
-    const element: ScreenNode = { id: "element-id", kind, literal: kind === "frame" ? null : "Content",
-      span: { start: 30, end: 200 }, parentStart: 0, layout: {}, protected: [],
+    const root = node("root-id", "screen", 0, 250, null);
+    const element: ScreenNode = { ...node("element-id", kind, 30, 200, 0, kind === "frame" ? null : "Content"),
       properties: kind === "frame" ? [{ property: "xsize", value: 640 }, { property: "ysize", value: 360 }] : [],
       ...(kind === "frame" ? { position: { xalign: 0.5, yalign: 0.5 } } : {}) };
     const h = interactiveFixture({ path: "game/ui/notes.rpy", revision: "before", partial: false,
@@ -81,7 +85,7 @@ for (const kind of ["text", "textbutton", "frame"]) {
       assert.equal(design?.ariaPressed, "true", "Enter on the canvas element opens Design");
       assert.equal(enter.defaultPrevented, true, "Enter must not trigger another default button activation");
       if (kind !== "frame") {
-        const input = [...document.querySelectorAll("textarea")].find(field => field.ariaLabel === (kind === "textbutton" ? "Button label" : "Text"));
+        const input = h.text();
         assert.equal(input?.value, "Content");
         assert.equal(document.activeElement === input, true, "Explicit Design entry focuses the text field");
       }
@@ -158,8 +162,7 @@ test("accepted addition refreshes the canvas and selects its source-backed geome
     const field = [...document.querySelectorAll("textarea")].find(input => input.ariaLabel === "New element text"); assert.ok(field);
     field.value = "Added"; field.dispatchEvent(new window.Event("input"));
     const accepted = structuredClone(h.original); accepted.revision = "accepted";
-    accepted.screens[0]!.nodes.splice(4, 0, { id: "added-id", kind: "text", literal: "Added", parentStart: 30,
-      span: { start: 150, end: 180 }, properties: [], layout: {}, protected: [] });
+    accepted.screens[0]!.nodes.splice(4, 0, node("added-id", "text", 150, 180, 30, "Added"));
     h.respond(accepted, "added-id"); h.click("Add text");
     await tick(); await tick();
     assert.equal(h.workspace.hasDraft(), false);
@@ -188,18 +191,18 @@ test("text drafts follow element identity across selection, Apply and Cancel", a
     h.text().value = "Unfinished directions"; h.text().dispatchEvent(new window.Event("input"));
     h.click("1  Choose"); h.edit("title-id"); assert.equal(h.text().value, "New title");
     const accepted = structuredClone(h.original); accepted.revision = "accepted"; accepted.screens[0]!.nodes[2]!.literal = "New title";
-    h.respond(accepted, "title-id"); h.click("Apply changes"); await tick(); await tick();
+    h.respond(accepted, "title-id"); h.click("Apply"); await tick(); await tick();
     assert.deepEqual(h.calls.find(c => c.operation === "screens.compose")?.payload,
-      { screenId: "screen-id", expectedRevision: "before", command: { type: "text", nodeId: "title-id", text: "New title" } });
+      { screenId: "screen-id", expectedRevision: "before", command: { type: "formatText", nodeId: "title-id", values: { text: "New title" } } });
     assert.equal(h.workspace.hasDraft(), true, "Applying one element keeps another element's draft");
     h.click("1  Choose"); h.edit("body-id"); assert.equal(h.text().value, "Unfinished directions");
     const second = structuredClone(accepted); second.revision = "second"; second.screens[0]!.nodes[3]!.literal = "Unfinished directions";
-    h.respond(second, "body-id"); h.click("Apply changes"); await tick(); await tick();
+    h.respond(second, "body-id"); h.click("Apply"); await tick(); await tick();
     assert.equal(h.calls.filter(c => c.operation === "screens.compose").at(-1)?.payload?.expectedRevision, "accepted",
       "An unchanged neighboring literal can keep its draft on the accepted revision");
     assert.equal(h.workspace.hasDraft(), false);
     h.text().value = "Cancelled directions"; h.text().dispatchEvent(new window.Event("input"));
-    h.click("Cancel changes"); assert.equal(h.text().value, "Unfinished directions");
+    h.click("Cancel"); assert.equal(h.text().value, "Unfinished directions");
     assert.equal(h.workspace.hasDraft(), false);
   } finally { h.workspace.dispose(); }
 });
@@ -211,8 +214,7 @@ test("a pending Add blocks competing operations and a stale completion retains i
     const field = document.querySelector<HTMLTextAreaElement>(".screen-addition textarea"); assert.ok(field);
     field.value = "Pending addition"; field.dispatchEvent(new window.Event("input"));
     const accepted = structuredClone(h.original); accepted.revision = "accepted";
-    accepted.screens[0]!.nodes.splice(4, 0, { id: "added-id", kind: "text", literal: "Pending addition", parentStart: 30,
-      span: { start: 150, end: 180 }, properties: [], layout: {}, protected: [] });
+    accepted.screens[0]!.nodes.splice(4, 0, node("added-id", "text", 150, 180, 30, "Pending addition"));
     h.respond(accepted, "added-id"); const release = h.holdComposition(); h.click("Add text");
     h.click("Add text"); h.click("Undo"); h.click("Refresh Source");
     assert.equal(h.calls.filter(c => c.operation === "screens.compose").length, 1);
@@ -250,21 +252,23 @@ test("text editing after a size save uses the accepted revision and preserves nu
     await tick(); await tick();
     const before = structuredClone(h.original);
     before.screens[0]!.nodes[2]!.properties = [{ property: "xsize", value: 640 }, { property: "ysize", value: 360 }];
+    before.screens[0]!.nodes[2]!.numericLayout!.values = { xsize: { unit: "pixels", value: 640 }, ysize: { unit: "pixels", value: 360 } };
     h.replaceDocument(before); await h.workspace.load(); h.edit("title-id");
-    const properties = document.querySelector<HTMLDetailsElement>(".screen-properties"); assert.ok(properties); properties.open = true;
-    const card = document.querySelector<HTMLElement>(".screen-card"); assert.ok(card); card.scrollTop = 40;
+    const properties = document.querySelector<HTMLDetailsElement>(".screen-text-layout"); assert.ok(properties); properties.open = true;
+    document.querySelector<HTMLElement>(".screen-text-body")!.scrollTop = 40;
     const width = document.querySelector<HTMLInputElement>('[data-size="width"]'); assert.ok(width);
     width.value = "700"; width.dispatchEvent(new window.Event("input")); width.focus();
     const resized = structuredClone(before); resized.revision = "resized"; resized.screens[0]!.nodes[2]!.properties[0]!.value = 700;
+    resized.screens[0]!.nodes[2]!.numericLayout!.values.xsize!.value = 700;
     h.respond(resized, "title-id"); width.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     await tick(); await tick();
     assert.equal(document.activeElement === document.querySelector('[data-size="width"]'), true, "Save keeps numeric keyboard focus");
-    assert.equal(document.querySelector<HTMLDetailsElement>(".screen-properties")?.open, true);
-    assert.equal(card.scrollTop, 40);
+    assert.equal(document.querySelector<HTMLDetailsElement>(".screen-text-layout")?.open, true);
+    assert.equal(document.querySelector<HTMLElement>(".screen-text-body")!.scrollTop, 40);
     h.text().value = "New title"; h.text().dispatchEvent(new window.Event("input"));
     const edited = structuredClone(resized); edited.revision = "edited"; edited.screens[0]!.nodes[2]!.literal = "New title";
-    h.respond(edited, "title-id"); h.click("Apply changes"); await tick(); await tick();
-    assert.equal(h.calls.find(call => call.operation === "screens.compose")?.payload?.expectedRevision, "resized");
+    h.respond(edited, "title-id"); h.click("Apply"); await tick(); await tick();
+    assert.equal(h.calls.filter(call => call.operation === "screens.compose").at(-1)?.payload?.expectedRevision, "resized");
     assert.equal(h.workspace.hasDraft(), false, "The new text saves without reopening Design");
     assert.equal(h.text().value, "New title");
   } finally { h.workspace.dispose(); }
@@ -345,7 +349,7 @@ test("invalid text Apply identifies the field and keeps its draft and keyboard f
   try {
     await tick(); await tick(); h.edit("title-id");
     const input = h.text(); input.focus(); input.value = " \n "; input.dispatchEvent(new window.Event("input"));
-    h.click("Apply changes"); await tick();
+    h.click("Apply"); await tick();
     assert.equal(document.activeElement === input, true); assert.equal(input.isConnected, true);
     assert.equal(input.getAttribute("aria-invalid"), "true");
     assert.match(document.getElementById(input.getAttribute("aria-describedby")!)?.textContent ?? "", /Enter text/);
@@ -389,9 +393,9 @@ test("a Source-removed element keeps its unfinished text available for recovery"
     const external = structuredClone(h.original); external.revision = "external"; external.screens[0]!.nodes.splice(2, 1);
     h.replaceDocument(external); h.click("Refresh Source"); await tick(); await tick();
     const retained = [...document.querySelectorAll("textarea")].find(input => input.ariaLabel === "Retained text draft");
-    assert.equal(retained?.value, "Keep this unfinished title");
+    assert.match(retained?.value ?? "", /^text: Keep this unfinished title\n/);
     assert.equal(h.workspace.hasDraft(), true);
-    h.click("Discard retained draft"); assert.equal(h.workspace.hasDraft(), false);
+    h.click("Discard retained text draft"); assert.equal(h.workspace.hasDraft(), false);
     assert.equal(h.calls.filter(call => call.operation === "screens.compose").length, 0);
   } finally { h.workspace.dispose(); }
 });
@@ -409,17 +413,17 @@ test("clearing a retained stale text draft starts the next edit at the accepted 
     const accepted = structuredClone(external); accepted.revision = "fresh-edit";
     accepted.screens[0]!.nodes[2]!.literal = "Fresh title";
     h.respond(accepted, "title-id");
-    h.click("Apply changes"); await tick(); await tick();
+    h.click("Apply"); await tick(); await tick();
     assert.equal(h.calls.filter(c => c.operation === "screens.compose").at(-1)?.payload?.expectedRevision, "before");
     assert.match(document.querySelector(".screen-message")!.textContent!, /Source conflict/);
     assert.equal(h.text().value, "Still unfinished"); assert.equal(h.workspace.hasDraft(), true); assert.equal(h.saved(), 0);
 
     const input = h.text(); input.value = "Saved in Source"; input.dispatchEvent(new window.Event("input"));
     assert.equal(h.workspace.hasDraft(), false);
-    assert.equal(document.querySelector(".screen-text-draft-state")!.textContent, "No unapplied changes.");
+    assert.equal(document.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled, true);
     input.value = "Fresh title"; input.dispatchEvent(new window.Event("input"));
     assert.equal(h.text(), input, "The new edit uses the same textarea after the draft was cleared");
-    h.click("Apply changes"); await tick(); await tick();
+    h.click("Apply"); await tick(); await tick();
     assert.equal(h.calls.filter(c => c.operation === "screens.compose").at(-1)?.payload?.expectedRevision, "source-saved");
     assert.equal(h.workspace.hasDraft(), false); assert.equal(h.text().value, "Fresh title");
     assert.equal(h.saved(), 1, "Only the fresh edit is accepted");
@@ -438,7 +442,7 @@ test("removal selection survives Undo and Redo after 128 later accepted text edi
       const next = structuredClone(states.at(-1)!); next.revision = `edit-${i}`;
       next.screens[0]!.nodes[2]!.literal = `Directions ${i}`;
       h.text().value = `Directions ${i}`; h.text().dispatchEvent(new window.Event("input"));
-      h.respond(next, "body-id"); h.click("Apply changes"); await tick(); await tick(); states.push(next);
+      h.respond(next, "body-id"); h.click("Apply"); await tick(); await tick(); states.push(next);
     }
     h.click("1  Choose");
     for (const state of states.slice(0, -1).reverse()) {
@@ -566,7 +570,7 @@ test("addition history keeps a surviving parent selection on Redo", async () => 
     const field = [...document.querySelectorAll("textarea")].find(input => input.ariaLabel === "New element text")!;
     field.value = "Added"; field.dispatchEvent(new window.Event("input"));
     const added = structuredClone(h.original); added.revision = "added";
-    added.screens[0]!.nodes.splice(4, 0, { id: "added-id", kind: "text", literal: "Added", parentStart: 30, span: {start:150,end:180}, properties:[], layout:{}, protected:[] });
+    added.screens[0]!.nodes.splice(4, 0, node("added-id", "text", 150, 180, 30, "Added"));
     h.respond(added, "added-id"); h.click("Add text"); await tick(); await tick();
     h.respondHistory(h.original); h.click("Undo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
     h.respondHistory(added); h.click("Redo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");

@@ -704,3 +704,15 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   subsequent edit/history, old-literal retention, divergent typography and full
   conflict resolution without writing Source.
 - **Evidence:** [L05 root-cause corrections](../tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30).
+
+## H51. Hierarchy Enter submits the text draft it opens
+
+- **Class/search:** product; hierarchy Enter, retained text, new editor listener,
+  incomplete text-property fixtures.
+- **Cause/correction:** the row opened Design without consuming Enter. The newly
+  mounted text editor received the same bubbling event and ran Apply. Stop
+  propagation in the row's Enter handler after it accepts the navigation action.
+- **Regression:** existing text/textbutton focus cases now use core-shaped typed
+  documents. The actual controller/core journey first observed changed Source,
+  then passed retained input, focus and unchanged Source after the correction.
+- **Evidence:** [Text ownership maintenance](../tasks/evidence/screen-text-ownership.md#hierarchy-enter-correction).
