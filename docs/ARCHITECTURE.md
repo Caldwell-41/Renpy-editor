@@ -745,8 +745,12 @@ their original path/name/range checks.
 bounded add, literal text edit, same-parent reorder and confirmed removal. It shares
 the existing transaction/history service. Source-carried element UUIDs, protection
 boundaries and selection persistence follow [the data contract](DATA_MODEL.md#project-lifecycle-metadata).
-The Screens controller retains unapplied input and owns the stationary removal
-confirmation; the core independently re-proves ownership, revision and safe ranges.
+`ScreenText` owns existing-text and typography drafts, retention and `formatText`
+submission. `ScreenComposer` owns structural additions, ordering and the stationary
+removal confirmation. Hierarchy Enter opens and focuses the editor without
+submitting its retained draft. `ScreensWorkspace` completes accepted edits through
+the shared transaction/history path; the core independently re-proves ownership,
+revision and safe ranges.
 Pending canvas additions are typed inert plans, never temporary game-source writes.
 
 The selected Help-screen implementation adds an optional typed `preview` purpose

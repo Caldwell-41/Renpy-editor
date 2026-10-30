@@ -1,5 +1,22 @@
 # Current outcome handover
 
+## Local text ownership cleanup
+
+Kris selected architecture candidate 1 and a new branch on 2026-10-30.
+`codex/single-text-draft-owner`, based on `d990298`, is `review_ready` for local
+review and later integration into `codex/phase3b-screen-designer`. `ScreenText`
+owns existing-text drafts; the composer retains structural editing. The core
+`text` command and combined Apply ownership are unchanged.
+
+All 277 frontend tests, the production build and actual font controller/core journey
+pass. The journey reproduces and then verifies the hierarchy Enter correction;
+the first full-suite Python environment failure is retained separately.
+[The maintenance record](../tasks/evidence/screen-text-ownership.md) owns commands,
+evidence paths and qualification limits. No operation is pending. Publication,
+merge and broader acceptance remain unselected. The unrelated audit and all
+protected recovery below are intact; historical closed allowances stay closed.
+The status files retain their existing size exception for unique recovery evidence.
+
 ## L05 merge and workspace closeout
 
 Kris directed merging [PR #70](https://github.com/Caldwell-41/Renpy-editor/pull/70),

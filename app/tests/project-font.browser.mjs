@@ -43,6 +43,15 @@ try {
  await ui.getByRole('button',{name:'Choose project font',exact:true}).waitFor();
  const read=async()=>(await request('source.open',{path:owner.path})).text;
  const original=await read(),picker=()=>page.getByRole('dialog',{name:'Choose project font',exact:true});
+ const composeCount=receipts.filter(r=>r.operation==='screens.compose').length;
+ await ui.getByRole('textbox',{name:'Text',exact:true}).fill('Unfinished route text');
+ await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+ await ui.locator(`[data-node-id="${first.selectedId}"]`).press('Enter');
+ assert.equal(await ui.getByRole('textbox',{name:'Text',exact:true}).inputValue(),'Unfinished route text');
+ assert.equal(await ui.getByRole('textbox',{name:'Text',exact:true}).evaluate(e=>e===document.activeElement),true,'Hierarchy Enter resumes typing in the retained text');
+ assert.equal(await read(),original,'Resuming a text draft never writes Source');
+ assert.equal(receipts.filter(r=>r.operation==='screens.compose').length,composeCount,'Hierarchy Enter opens the editor without applying its retained draft');
+ await ui.getByRole('button',{name:'Cancel',exact:true}).click();
  const open=()=>ui.getByRole('button',{name:'Choose project font',exact:true}).click();
  const browse=async()=>{await picker().getByRole('button',{name:'Import font…',exact:true}).click();assert.equal(await picker().getByRole('button',{name:'Import and use',exact:true}).isDisabled(),true);await picker().getByRole('button',{name:'Browse files…',exact:true}).click();};
  await open();await picker().getByRole('searchbox',{name:'Search project fonts',exact:true}).fill('retained search');await browse();

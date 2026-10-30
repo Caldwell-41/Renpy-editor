@@ -35,8 +35,6 @@
 .screen-composer .screen-element-palette .navigation-icon { width:16px; height:16px; flex:none; margin:0; }
 .screen-composer .screen-element-palette [aria-pressed=true] { background:var(--accent-subtle); color:var(--accent-primary); }
 .screen-composer .screen-composition-feedback,.screen-removal-error { border-left:2px solid var(--status-error); color:var(--status-error); padding-left:10px; }
-.screen-composer .screen-pending-texts .button { display:block; width:100%; text-align:left; border:0; border-left:2px solid var(--accent-primary); color:var(--accent-primary); background:transparent; margin:0 0 8px; }
-.screen-composer .screen-edit-location { font-size:11px; overflow-wrap:anywhere; margin:0 0 16px; }
 .screen-composer .screen-composition-help { font-size:10px; color:var(--text-secondary); }
 .screen-removal-open,.screen-removal-open .screen-composer { overflow:hidden!important; }
 .screen-removal-dialog { box-sizing:border-box; width:min(460px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); margin:auto; padding:24px; border:1px solid var(--border-strong); border-radius:0; background:var(--surface-app); color:var(--text-primary); overflow:auto; overscroll-behavior:contain; }

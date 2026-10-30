@@ -13,7 +13,6 @@ export type CompositionCommand =
   | ({ type: "addImage"; parentId: string } & ImageSelection)
   | ({ type: "image"; nodeId: string; parentId?: string } & ImageSelection)
   | { type: "add"; parentId: string; kind: string; text: string }
-  | { type: "text"; nodeId: string; text: string }
   | { type: "formatText"; nodeId: string; values: TextEdits; layout?: LayoutEdits }
   | { type: "reorder"; nodeId: string; targetId: string; after: boolean }
   | { type: "remove"; nodeId: string };
@@ -29,13 +28,12 @@ interface Host {
   geometry: (host: HTMLElement) => void;
   hover: (id?: string) => void;
   image?: (card: HTMLElement, view: CompositionView) => boolean;
-  text?: (card: HTMLElement, view: CompositionView) => boolean;
-  textDraft?: (screenId: string, nodeId: string) => boolean;
+  text: (card: HTMLElement, view: CompositionView) => boolean;
+  textDraft: (screenId: string, nodeId: string) => boolean;
   beginImage?: (parentId: string, document: ScreenDocument) => void;
   otherDraft?: () => boolean;
 }
 interface Addition { parentId: string; kind: string; text: string; document: ScreenDocument }
-interface TextDraft { screenId: string; nodeId: string; value: string; document: ScreenDocument }
 const names: Record<string, string> = { screen: "Screen root", fixed: "Free layout group", frame: "Frame", window: "Window", vbox: "Vertical group", hbox: "Horizontal group", grid: "Grid", viewport: "Viewport", text: "Text", textbutton: "Text button", custom: "Source-only element", image: "Image" };
 const help: Record<string, string> = {
   screen: "The screen contains every element. Its order cannot change.",
@@ -71,35 +69,25 @@ function elementIcon(kind: string) {
   return result;
 }
 
-/** Owns composition drafts and controls. The workspace completes accepted edits before rendering. */
+/** Owns structural composition drafts and controls. The workspace completes accepted edits before rendering. */
 export class ScreenComposer {
   private card?: HTMLElement;
   private addition?: Addition;
-  private readonly texts = new Map<string, TextDraft>();
   private saving = false;
   private error = "";
-  private textValidation?: () => void;
+  private additionValidation?: () => void;
   private dragging?: { id: string; document: ScreenDocument };
   private readonly dialog = el("dialog", "screen-removal-dialog");
   private readonly notice = el("div", "screen-removal-notice");
   private panel?: HTMLElement;
   private removal?: { node: ScreenNode; document: ScreenDocument; invoker: HTMLElement | null; cardScroll: number; panelScroll: number };
   constructor(private readonly host: Host) {}
-  hasDraft(): boolean { return !!this.addition || this.texts.size > 0; }
   hasAddition(): boolean { return !!this.addition; }
-  hasTextDrafts(): boolean { return this.texts.size > 0; }
-  canvasDraft(): { stale: boolean; texts: { nodeStart: number; value: string }[]; addition?: { parentStart: number; kind: string; text: string }; additionStart?: number } {
-    const view = this.host.view(); if (!view) return { stale: false, texts: [] };
-    const texts: { nodeStart: number; value: string }[] = []; let stale = false;
-    for (const draft of this.texts.values()) {
-      if (draft.screenId !== view.screenId) continue;
-      const node = view.nodes.find(n => n.id === draft.nodeId);
-      if (!node || draft.document.revision !== view.document.revision) stale = true;
-      else texts.push({ nodeStart: node.span.start, value: draft.value });
-    }
+  canvasDraft(): { stale: boolean; addition?: { parentStart: number; kind: string; text: string }; additionStart?: number } {
+    const view = this.host.view(); if (!view) return { stale: false };
     const parent = this.addition && view.nodes.find(n => n.id === this.addition!.parentId);
-    if (this.addition && (!parent || this.addition.document.revision !== view.document.revision)) stale = true;
-    return { stale, texts, ...(parent && this.addition ? { addition: { parentStart: parent.span.start, kind: this.addition.kind, text: this.addition.text }, additionStart: Math.max(...view.nodes.map(n => n.span.end)) + 1 } : {}) };
+    const stale = !!this.addition && (!parent || this.addition.document.revision !== view.document.revision);
+    return { stale, ...(parent && this.addition ? { addition: { parentStart: parent.span.start, kind: this.addition.kind, text: this.addition.text }, additionStart: Math.max(...view.nodes.map(n => n.span.end)) + 1 } : {}) };
   }
   dispose(): void { this.dialog.remove(); this.notice.remove(); this.card = undefined; }
   attach(panel: HTMLElement): void {
@@ -116,29 +104,15 @@ export class ScreenComposer {
   hasRemoval(): boolean { return !!this.removal; }
   clearNotice(): void { this.notice.hidden = true; }
   focusSelection(): void { this.focusRow(); }
-  accept(command: CompositionCommand, base: ScreenDocument, accepted: ScreenDocument): void {
-    const view = this.host.view(); if (!view) return;
+  accept(command: CompositionCommand): void {
+    if (!this.host.view()) return;
     if (command.type === "add") this.addition = undefined;
-    if (command.type === "text") {
-      const key = `${view.screenId}:${command.nodeId}`, draft = this.texts.get(key);
-      for (const other of this.texts.values()) {
-        if (other === draft || other.screenId !== view.screenId || other.document.revision !== base.revision) continue;
-        const before = other.document.screens.find(s => s.name === view.screenName)?.nodes.find(n => n.id === other.nodeId);
-        const after = accepted.screens.find(s => s.name === view.screenName)?.nodes.find(n => n.id === other.nodeId);
-        if (before && after && before.kind === after.kind && before.literal === after.literal) other.document = accepted;
-      }
-      this.texts.delete(key);
-    }
     if (command.type === "remove") this.closeRemoval();
     this.saving = false; this.error = "";
   }
   showRemovalNotice(node: ScreenNode): void {
     this.notice.replaceChildren(el("span", "", `Removed ${node.literal ?? names[node.kind] ?? node.kind}.`), action("Undo removal", this.host.undo), action("Dismiss", () => { this.clearNotice(); this.focusRow(); }));
     this.notice.hidden = false;
-  }
-  focusEditor(command: CompositionCommand): void {
-    if (command.type === "text") this.card?.querySelector("textarea")?.focus({ preventScroll: true });
-    else this.focusRow();
   }
   selectionLabel(node: ScreenNode): string { const view = this.host.view(); return view ? this.name(view, node) : node.literal ?? names[node.kind] ?? node.kind; }
   canKeepTree(): boolean { return !this.addition && !!this.card?.querySelector(".screen-tree"); }
@@ -151,23 +125,14 @@ export class ScreenComposer {
     return `${names[node.kind] ?? node.kind}${peers.length > 1 ? ` ${peers.indexOf(node) + 1}` : ""}`;
   }
   private path(view: CompositionView, node: ScreenNode): string { const p = this.parent(view, node); return p ? `${this.path(view, p)} / ${this.name(view, node)}` : view.screenName; }
-  private textKey(view: CompositionView) { return `${view.screenId}:${screenNodeKey(view.selected)}`; }
-  private renderRetainedDrafts(card: HTMLElement, view?: CompositionView): boolean {
-    let rendered = false;
-    const recovery = (value: string, discard: () => void) => {
-      const section = el("section", "screen-retained-draft");
-      section.append(el("p", "", "The element is no longer available in Source. Your unfinished text is retained here."));
-      const input = el("textarea"); input.ariaLabel = "Retained text draft"; input.readOnly = true; input.value = value;
-      section.append(input, action("Discard retained draft", () => { discard(); section.remove(); this.render(); this.host.preview(); })); card.append(section); rendered = true;
-    };
-    for (const [key, draft] of this.texts) {
-      if (view && (draft.screenId !== view.screenId || view.nodes.some(node => node.id === draft.nodeId))) continue;
-      recovery(draft.value, () => { this.texts.delete(key); });
-    }
-    if (this.addition && (!view || !view.nodes.some(node => node.id === this.addition!.parentId))) {
-      recovery(this.addition.text, () => { this.addition = undefined; });
-    }
-    return rendered;
+  private renderRetainedAddition(card: HTMLElement, view?: CompositionView): boolean {
+    const draft = this.addition;
+    if (!draft || view?.nodes.some(node => node.id === draft.parentId)) return false;
+    const section = el("section", "screen-retained-draft");
+    section.append(el("p", "", "The element is no longer available in Source. Your unfinished text is retained here."));
+    const input = el("textarea"); input.ariaLabel = "Retained text draft"; input.readOnly = true; input.value = draft.text;
+    section.append(input, action("Discard retained draft", () => { this.addition = undefined; section.remove(); this.render(); this.host.preview(); })); card.append(section);
+    return true;
   }
   private focusRow(): void {
     const view = this.host.view();
@@ -199,7 +164,7 @@ export class ScreenComposer {
     const details = el("section", "screen-composition-details"); details.ariaLabel = "Selected element";
     details.append(el("strong", "", `${names[view.selected.kind] ?? view.selected.kind} · Nesting level ${this.depth(view, view.selected)}`));
     const actions = el("div", "screen-edit-actions");
-    if (["text", "textbutton"].includes(view.selected.kind) && view.selected.id) actions.append(action(this.texts.has(this.textKey(view)) || this.host.textDraft?.(view.screenId,view.selected.id) ? "Resume edit" : "Edit text", () => this.host.select(screenNodeKey(view.selected), true), true));
+    if (["text", "textbutton"].includes(view.selected.kind) && view.selected.id) actions.append(action(this.host.textDraft(view.screenId,view.selected.id) ? "Resume edit" : "Edit text", () => this.host.select(screenNodeKey(view.selected), true), true));
     else if (view.selected.kind === "image" && view.selected.id) actions.append(action("Edit image", () => this.host.select(screenNodeKey(view.selected), true), true));
     else if (containers.has(view.selected.kind) && view.selected.id) actions.append(action("Add inside", () => this.beginAddition(), true));
     else actions.append(action("View in Source", () => this.host.source(view.selected)));
@@ -219,37 +184,30 @@ export class ScreenComposer {
   }
   render(card = this.card): boolean {
     const view = this.host.view(); if (!card) return false;
-    this.textValidation = undefined;
+    this.additionValidation = undefined;
     if (!view) {
-      if (!this.hasDraft()) return false;
+      if (!this.hasAddition()) return false;
       this.card = card; card.replaceChildren(); card.classList.add("screen-composer");
-      return this.renderRetainedDrafts(card);
+      return this.renderRetainedAddition(card);
     }
     this.card = card; const scroll = card.scrollTop;
     card.replaceChildren(); card.classList.add("screen-composer"); card.ariaLabel = "Element editor";
     if (view.step === "design" && this.host.image?.(card, view)) return true;
-    if (view.step === "design" && this.host.text?.(card, view)) return true;
+    if (view.step === "design" && this.host.text(card, view)) return true;
     if (view.step === "choose") {
       const heading = el("header", "screen-composition-heading"); heading.append(el("h2", "", this.addition ? "Add an element" : "Elements"));
       if (!this.addition) heading.append(action("Add element", () => this.beginAddition(), true));
       card.append(heading);
       if (this.addition) this.renderAddition(view, card);
       else {
-        const pending = el("div", "screen-pending-texts");
-        for (const draft of this.texts.values()) {
-          if (draft.screenId !== view.screenId) continue;
-          const node = view.nodes.find(n => n.id === draft.nodeId);
-          if (node) pending.append(action(`Resume edit · ${this.name(view, node)}`, () => this.host.select(draft.nodeId, true)));
-        }
-        card.append(pending);
-        this.renderRetainedDrafts(card, view);
+        this.renderRetainedAddition(card, view);
         const tree = el("div", "screen-tree"); tree.role = "tree"; tree.ariaLabel = "Screen elements";
         for (const node of view.nodes) {
           const id = screenNodeKey(node), row = action("", () => this.host.select(id));
           row.role = "treeitem"; row.dataset.nodeId = id; row.ariaLabel = `${names[node.kind] ?? node.kind}${node.literal ? ` · ${node.literal}` : ""}`;
           row.append(elementIcon(node.kind), el("span", "screen-row-label", this.name(view, node)));
           if (!node.id || node.kind === "custom") row.append(el("span", "screen-row-note", "Source only"));
-          if (this.texts.has(`${view.screenId}:${screenNodeKey(node)}`) || this.host.textDraft?.(view.screenId,screenNodeKey(node))) row.append(el("span", "screen-row-note", "Draft"));
+          if (this.host.textDraft(view.screenId,screenNodeKey(node))) row.append(el("span", "screen-row-note", "Draft"));
           row.ariaLevel = String(this.depth(view, node) + 1); row.style.paddingLeft = `${6 + this.depth(view, node) * 12}px`;
           row.title = `${help[node.kind] ?? help.custom} Nesting level ${this.depth(view, node)}.`;
           row.ondblclick = () => this.host.select(id, true);
@@ -257,7 +215,7 @@ export class ScreenComposer {
           row.disabled = this.saving || view.busy;
           row.onkeydown = event => {
             if (event.key === "Delete" || event.key === "Backspace") { event.preventDefault(); if (!event.repeat) { this.host.select(id); this.requestRemoval(); } return; }
-            if (event.key === "Enter") { event.preventDefault(); this.host.select(id, true); }
+            if (event.key === "Enter") { event.preventDefault(); event.stopPropagation(); this.host.select(id, true); }
             if (["ArrowUp", "ArrowDown"].includes(event.key)) {
               event.preventDefault(); const index = view.nodes.indexOf(node);
               if (event.altKey) {
@@ -272,7 +230,7 @@ export class ScreenComposer {
           };
           row.draggable = this.movable(view, node) && !this.saving;
           row.ondragstart = event => {
-            if (this.hasDraft() || this.host.otherDraft?.() || this.saving || view.busy) { event.preventDefault(); this.showError("Apply or cancel unfinished changes before reordering. Input retained."); return; }
+            if (this.hasAddition() || this.host.otherDraft?.() || this.saving || view.busy) { event.preventDefault(); this.showError("Apply or cancel unfinished changes before reordering. Input retained."); return; }
             this.dragging = { id, document: view.document }; this.host.select(id);
             event.dataTransfer?.setData("text/plain", id); if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
           };
@@ -296,9 +254,6 @@ export class ScreenComposer {
         card.append(tree); this.refreshSelection();
         card.append(el("p", "screen-composition-help", "Arrows select · Enter edits · Alt + ↑ / ↓ reorders · Delete reviews removal"), action("New blank screen", this.host.newScreen));
       }
-    } else if (view.step === "design" && ["text", "textbutton"].includes(view.selected.kind) && view.selected.id) {
-      this.renderText(view, card);
-      this.host.geometry(card);
     } else if (view.step === "design" && view.selected.numericLayout) {
       this.host.geometry(card);
       const tools = el("div", "screen-edit-actions screen-container-actions");
@@ -316,7 +271,7 @@ export class ScreenComposer {
         card.append(action("Back to elements", () => { this.host.select(screenNodeKey(view.selected), false); this.focusRow(); }));
       }
     }
-    if (view.step !== "choose") this.renderRetainedDrafts(card, view);
+    if (view.step !== "choose") this.renderRetainedAddition(card, view);
     const feedback = el("p", "screen-composition-feedback", this.error); feedback.hidden = !this.error; feedback.role = "alert"; card.append(feedback);
     card.scrollTop = scroll; return true;
   }
@@ -336,7 +291,7 @@ export class ScreenComposer {
   }
   beginAddition(): void {
     const view = this.host.view(); if (!view || this.saving || view.busy) return;
-    if (this.texts.size || this.host.otherDraft?.()) { this.host.note("Apply or cancel unfinished text edits first. Input retained.", true); return; }
+    if (this.host.otherDraft?.()) { this.host.note("Apply or cancel unfinished text edits first. Input retained.", true); return; }
     const target = containers.has(view.selected.kind) ? view.selected : this.parent(view, view.selected);
     if (!target?.id) { this.host.note("Choose an owned container. Input retained.", true); return; }
     this.addition = { parentId: target.id, kind: "text", text: "", document: view.document }; this.error = "";
@@ -364,7 +319,7 @@ export class ScreenComposer {
       const text = el("textarea"); text.ariaLabel = "New element text"; text.value = draft.text; text.maxLength = 8192; text.readOnly = this.saving;
       text.required = true;
       text.oninput = () => { draft.text = text.value; this.host.preview(); };
-      this.textValidation = validateField(text, () => { if (!text.value.trim()) throw Error("Enter text before adding this element. Input retained."); });
+      this.additionValidation = validateField(text, () => { if (!text.value.trim()) throw Error("Enter text before adding this element. Input retained."); });
       const label = el("label", "field", draft.kind === "textbutton" ? "Button label" : "Text"); label.append(text); form.append(label);
     }
     const cancel = () => { if (this.saving) return; this.addition = undefined; this.error = ""; this.render(); this.focusRow(); this.host.preview(); this.host.note("Addition cancelled. Nothing changed."); };
@@ -377,13 +332,13 @@ export class ScreenComposer {
     const add = action(`Add ${draft.kind === "textbutton" ? "button" : names[draft.kind]!.toLowerCase()}`, () => void this.add(), true), stop = action("Cancel", cancel);
     add.disabled = stop.disabled = this.saving; actions.append(add, stop); form.append(actions); card.append(form);
   }
-  private validateTextInput(): boolean {
-    try { this.textValidation?.(); return true; }
+  private validateAdditionText(): boolean {
+    try { this.additionValidation?.(); return true; }
     catch { this.card?.querySelector("textarea")?.focus({ preventScroll: true }); return false; }
   }
   private async add(): Promise<void> {
     const draft = this.addition; if (!draft || this.saving) return;
-    if (!this.validateTextInput()) return;
+    if (!this.validateAdditionText()) return;
     this.saving = true; this.render();
     try {
       await this.host.commit({ type: "add", parentId: draft.parentId, kind: draft.kind, text: draft.text }, draft.document);
@@ -393,47 +348,9 @@ export class ScreenComposer {
       this.saving = false; this.render(); this.card?.querySelector<HTMLElement>("textarea")?.focus(); this.host.preview();
     } finally { this.saving = false; }
   }
-  private renderText(view: CompositionView, card: HTMLElement): void {
-    const key = this.textKey(view), draft = this.texts.get(key);
-    card.append(el("h2", "", view.selected.kind === "textbutton" ? "Edit button label" : "Edit text"), el("p", "screen-edit-location", `${this.path(view, this.parent(view, view.selected) ?? view.selected)} · Nesting level ${this.depth(view, view.selected)}`));
-    const input = el("textarea"); input.ariaLabel = view.selected.kind === "textbutton" ? "Button label" : "Text";
-    input.value = draft?.value ?? view.selected.literal ?? ""; input.maxLength = 8192; input.readOnly = this.saving;
-    input.required = true;
-    this.textValidation = validateField(input, () => { if (!input.value.trim()) throw Error("Enter text before applying. Input retained."); });
-    const label = el("label", "field", input.ariaLabel); label.append(input); card.append(label);
-    const state = el("p", "screen-text-draft-state", draft ? "Unapplied changes. The canvas shows your draft." : "No unapplied changes."); state.role = "status";
-    const actions = el("div", "screen-edit-actions");
-    const apply = action("Apply changes", () => void this.applyText(), true);
-    const cancel = action("Cancel changes", () => { if (this.saving) return; this.texts.delete(key); this.error = ""; this.render(); this.card?.querySelector("textarea")?.focus({ preventScroll: true }); this.host.preview(); this.host.note("Text draft cancelled. Saved text restored."); });
-    apply.disabled = cancel.disabled = this.saving || !draft; actions.append(apply, cancel);
-    input.oninput = () => {
-      if (input.value === view.selected.literal) this.texts.delete(key);
-      else this.texts.set(key, { screenId: view.screenId, nodeId: view.selected.id!, document: this.texts.get(key)?.document ?? view.document, value: input.value });
-      apply.disabled = cancel.disabled = !this.texts.has(key); state.textContent = this.texts.has(key) ? "Unapplied changes. The canvas shows your draft." : "No unapplied changes."; this.host.preview();
-    };
-    input.onkeydown = event => {
-      if (event.isComposing) return;
-      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) { event.preventDefault(); void this.applyText(); }
-      if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); cancel.click(); }
-    };
-    card.append(state, actions, el("p", "screen-composition-help", "Ctrl / ⌘ + Enter applies · Esc restores saved text"), action("Back to elements", () => { this.host.select(screenNodeKey(view.selected), false); this.focusRow(); }));
-  }
-  private async applyText(): Promise<void> {
-    const view = this.host.view(); if (!view || this.saving) return;
-    const key = this.textKey(view), draft = this.texts.get(key); if (!draft) return;
-    if (!this.validateTextInput()) return;
-    this.saving = true; this.render();
-    try {
-      await this.host.commit({ type: "text", nodeId: draft.nodeId, text: draft.value }, draft.document);
-    } catch (error) {
-      if (!this.host.view()) return;
-      this.error = `${(error as Error).message}. Input retained.`; this.host.note(this.error, true);
-      this.saving = false; this.render(); this.card?.querySelector("textarea")?.focus({ preventScroll: true }); this.host.preview();
-    } finally { this.saving = false; }
-  }
   private async reorder(node: ScreenNode, target: ScreenNode, after: boolean, base?: ScreenDocument): Promise<void> {
     const view = this.host.view(); if (!view || this.saving || view.busy) return;
-    if (this.hasDraft() || this.host.otherDraft?.()) { this.showError("Apply or cancel unfinished changes before reordering. Input retained."); return; }
+    if (this.hasAddition() || this.host.otherDraft?.()) { this.showError("Apply or cancel unfinished changes before reordering. Input retained."); return; }
     const refusal = this.moveRefusal(view, node, target); if (refusal) { this.showError(refusal); return; }
     if (node === target) return;
     this.saving = true; this.render();
@@ -447,7 +364,7 @@ export class ScreenComposer {
   }
   private requestRemoval(): void {
     const view = this.host.view(); if (!view || this.saving || view.busy || this.removal) return;
-    if (this.hasDraft() || this.host.otherDraft?.()) { this.showError("Apply or cancel unfinished edits before removing elements. Input retained."); return; }
+    if (this.hasAddition() || this.host.otherDraft?.()) { this.showError("Apply or cancel unfinished edits before removing elements. Input retained."); return; }
     const parent = this.parent(view, view.selected);
     if (parent?.kind === "grid" && parent.numericLayout?.allowsEmptyCells !== true) { this.showError("This grid's empty-cell policy stays in Source. Removal could leave it incomplete; nothing changed."); return; }
     if (!this.movable(view, view.selected)) { this.showError("The screen root and protected source-only elements cannot be removed. Selection is unchanged."); return; }
