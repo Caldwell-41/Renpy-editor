@@ -8,6 +8,14 @@ export default async function check({ page, open }) {
   for (const variant of ["inspector", "library", "inline"]) {
     await open({ variant, state: "shared", theme: "dark" });
     assert.equal(await review().isDisabled(), true);
+    await color().press("Enter"); assert.equal(await page.locator(".lk-review").count(), 0); assert.equal((await state()).history, 0);
+    await page.getByRole("checkbox", { name: "Bold", exact: true }).focus();
+    await page.getByRole("button", { name: "Make independent copy", exact: true }).click();
+    assert.equal(await page.getByRole("combobox", { name: "Element type", exact: true }).isDisabled(), true);
+    assert.equal(await page.getByRole("combobox", { name: "Selected screen", exact: true }).isDisabled(), true);
+    assert.equal(await color().isDisabled(), true);
+    await page.getByRole("button", { name: "Back to editing", exact: true }).click();
+    assert.equal(await page.getByRole("checkbox", { name: "Bold", exact: true }).evaluate(input => input === document.activeElement), true);
     await color().fill("#abcdef");
     const beforeReview = await color().evaluate(input => {
       input.focus(); input.setSelectionRange(2, 5);
@@ -46,6 +54,7 @@ export default async function check({ page, open }) {
     await open({ variant, state: "local", theme: "dark" });
     await page.getByRole("button", { name: "Share with About", exact: true }).click(); await page.getByRole("button", { name: "Apply to About", exact: true }).click();
     assert.equal((await state()).accepted.uses["About/text"], "tram_body"); assert.equal((await state()).history, 1);
+    await page.getByRole("button", { name: "Share with About", exact: true }).click(); assert.equal(await page.locator(".lk-review").count(), 0); assert.equal((await state()).history, 1);
     await open({ variant, state: "shared", theme: "dark" });
     await page.getByRole("combobox", { name: "Element type", exact: true }).selectOption("button");
     await page.getByRole("combobox", { name: "Appearance sample", exact: true }).selectOption("hover");

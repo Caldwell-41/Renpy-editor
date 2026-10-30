@@ -45,8 +45,50 @@ renderers without that startup route.
 The first full frontend run passes 276 of 277 tests. Its unchanged Windows Studio
 validator consumer fails because system Python 3.9 has no `tomllib`, the same
 environment mismatch recorded in [#71 evidence](screen-text-ownership.md).
-The existing isolated Python 3.12 runtime is selected for the corrected run.
-Original failure logs remain in the ignored evidence directory.
+The corrected run selects the existing isolated Python 3.12 runtime and passes
+typechecking and all 277 tests, with zero failures, cancellations or skips.
+Original and corrected logs remain in the ignored evidence directory.
+
+## Independent checkpoint review
+
+The implement skill's two independent, read-only reviewers examined
+`e9e8661...cd67362`. They owned no files; the parent retained all edits.
+
+### Standards
+
+No hard documented standards breaches or actionable baseline smells were found.
+The reviewer confirmed prototype isolation, null approvals and accurate disclosure
+of pending product proof. It identified two behavioral concerns for the Spec axis:
+inline review read live values after displaying its diff, and unchanged Enter could
+create a history entry.
+
+### Spec
+
+The reviewer found no scope creep or misleading completion claim. It reported
+three P2 findings against the intended workflow:
+
+- "Before Apply, list every affected screen." Inline copy review allowed the
+  selected element to change after review was built, so confirmation could apply
+  to a different element.
+- The shared write rules require "no-op" proof. Unchanged Enter and repeated
+  Share with About could create redundant history entries.
+- "The inspector preserves ... focused field." Bold did not participate in focus
+  restoration after review or copy.
+
+Initial findings were zero Standards violations and three Spec findings, all P2.
+The parent fixed them directly. Review holds the existing editing controls disabled
+until it closes, without remounting inspector fields. Unchanged shared review and
+an already-attached About use return without a write or history change. Focus
+tracking includes checkboxes and selectors as well as text fields.
+The expanded interaction check passes all three layouts, including these cases;
+the final module check and 90-case rendering matrix also pass. No independent
+second review or product acceptance is claimed.
+
+The final styling correction keeps both library previews visible at wide size,
+shortens the inline canvas, and overrides the imported form field minimum height
+within this prototype only. The final checkpoint remains local, with no code push
+or PR. #43's body records the selected outcome and pending design decision; its
+acceptance boxes remain unchecked.
 
 ## Acceptance remains pending
 

@@ -32,7 +32,8 @@ export function mountLook(host: HTMLElement, context: LabContext, variant: Varia
   let draft = copy(initialLook()), baseRevision = 1;
   let problem = context.state === "stale" || context.state === "missing" ? context.state : "";
   let reviewMode: "shared" | "copy" | "attach" = "shared";
-  let lastField: HTMLInputElement | null = null, review: HTMLElement | null = null;
+  let lastField: HTMLInputElement | HTMLSelectElement | null = null, review: HTMLElement | null = null;
+  let heldControls: Array<{ control: HTMLInputElement | HTMLSelectElement | HTMLButtonElement; disabled: boolean }> = [];
   let selection: [number | null, number | null] = [null, null], savedScroll = 0;
   let notice = "Ready in sample";
   const history: Document[] = [], redo: Document[] = [];
@@ -98,7 +99,7 @@ export function mountLook(host: HTMLElement, context: LabContext, variant: Varia
   function select(label: string, values: string[], value: string, change: (value: string) => void) {
     const control = el("select"); control.ariaLabel = label;
     for (const v of values) { const option = el("option", "", v[0]!.toUpperCase() + v.slice(1)); option.value = v; control.append(option); }
-    control.value = value; control.onchange = () => change(control.value); return control;
+    control.value = value; control.onfocus = () => { lastField = control; }; control.onchange = () => change(control.value); return control;
   }
   function section(label: string) {
     const details = el("details", "lk-group"); details.open = true; details.append(el("summary", "", label)); fields.append(details); return details;
@@ -112,10 +113,11 @@ export function mountLook(host: HTMLElement, context: LabContext, variant: Varia
     parent.append(labelled(label, input));
   }
   function buildFields() {
-    fields.replaceChildren(); lastField = null;
+    fields.replaceChildren(); if (!lastField?.isConnected) lastField = null;
     const text = section("Text"); text.hidden = kind === "frame";
     field(text, "Text color", "color"); field(text, "Size · px", "size");
     const bold = el("input"); bold.type = "checkbox"; bold.checked = draft.bold; bold.disabled = context.state === "expression";
+    bold.onfocus = () => { lastField = bold; };
     bold.onchange = () => { draft.bold = bold.checked; sync(); };
     const label = el("label", "lk-check"); label.append(bold, el("span", "", "Bold")); text.append(label);
     const background = section("Background & border"); background.hidden = kind === "text";
@@ -184,8 +186,12 @@ export function mountLook(host: HTMLElement, context: LabContext, variant: Varia
   function openReview(mode: typeof reviewMode) {
     if (review) return;
     if (context.state === "expression") return;
+    if (mode === "shared" && !isDirty()) return;
+    if (mode === "attach" && document.uses[`About/${kind}`] === currentStyle()) { report("About already uses this style. No source or history change."); return; }
     reviewMode = mode; savedScroll = fields.scrollTop;
-    selection = [lastField?.selectionStart ?? null, lastField?.selectionEnd ?? null];
+    selection = lastField instanceof HTMLInputElement ? [lastField.selectionStart, lastField.selectionEnd] : [null, null];
+    heldControls = [...editor.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input,select,button"), screenPicker, ...library.querySelectorAll<HTMLButtonElement>("button")].map(control => ({ control, disabled: control.disabled }));
+    for (const { control } of heldControls) control.disabled = true;
     const inline = variant === "inline";
     const panel = inline ? el("section", "lk-review") : el("dialog", "lk-review lp-dialog");
     panel.ariaLabel = "Review affected screens"; review = panel;
@@ -224,8 +230,10 @@ export function mountLook(host: HTMLElement, context: LabContext, variant: Varia
   }
   function closeReview() {
     if (review instanceof HTMLDialogElement) review.close(); review?.remove(); review = null;
+    for (const { control, disabled } of heldControls) control.disabled = disabled;
+    heldControls = [];
     fields.scrollTop = savedScroll;
-    if (lastField?.isConnected) { lastField.focus({ preventScroll: true }); if (selection[0] !== null) lastField.setSelectionRange(...selection); }
+    if (lastField?.isConnected) { lastField.focus({ preventScroll: true }); if (lastField instanceof HTMLInputElement && selection[0] !== null) lastField.setSelectionRange(...selection); }
     else apply.focus({ preventScroll: true });
   }
   function travel(from: Document[], to: Document[]) {
