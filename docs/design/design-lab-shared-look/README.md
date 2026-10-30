@@ -3,7 +3,7 @@
 Kris selected implementing [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
 on a new branch on 2026-10-30. Branch `codex/l07-shared-looks` starts at
 `e9e8661`, the current Screens base including #71's text-draft ownership fix.
-The repository's design-before-production rule applies. Refined A2 and the three
+The repository's design-before-production rule applies. A3, A2 and the three
 original designs remain drafts. No option has approval and production code has
 not changed.
 
@@ -13,12 +13,36 @@ selection, inspector sections, Source access and shared-history controls.
 
 | Option | Editing and review |
 | --- | --- |
+| A3, existing editor | The production Screens renderer retains its sidebar, Choose/Design/Connect, single canvas and existing forms. A Look row augments Typography; the existing Apply reviews shared changes. |
 | A2, refined inspector | Help and About previews show draft changes together. Plain scope choices distinguish shared updates from a copy for only one element. |
 | A, inspector | Appearance stays in the inspector. A dialog lists all screens before Apply or independent copy. |
 | B, library | A style list sits beside Help and About previews. The inspector edits the selected style; a dialog reviews affected screens. |
 | C, inline | Appearance fields form a worksheet below the canvas. Affected screens and confirmation expand beneath the fields. |
 
-A2 is the current proposal. Kris found the original A difficult to understand and
+A3 is the current proposal. Kris found A2 disconnected from the existing editor
+and selected rebuilding the study inside that editor with experience-first. A3
+mounts the actual `ScreensWorkspace` renderer with fictional memory-only services.
+It adds a compact Look row inside Typography, an existing-look chooser, independent
+copy intent and an affected-screen review on the existing Apply button. Normal
+text content and layout changes remain local to the selected element. Other screens
+appear in the review dialog; the editing canvas stays single.
+
+Start at Screens in the sidebar. Choose Help, double-click its body text under
+Choose, and use Design as usual. The new Look row shows that Body text is shared
+with About. Change Color or Size and press the existing Apply. Review shows Help
+and About before confirmation. Make independent marks a copy for this element;
+Apply reviews that copy together with its pending appearance changes. Cancel
+restores the previous values and reference intent. In the local-use sample, choose
+About and use Change to assign the existing Body text look.
+
+A3 focuses on text and button-text appearance within the existing editor. Broader
+frame decoration, image controls, font import, structural editing and SDK runtime
+behavior are not newly implemented by this study. Existing controls are rendered
+by their production owners; unsupported sample service operations refuse visibly.
+The sample canvas uses browser drawing, and its Source is illustrative. This is
+not real-core or actual-source qualification.
+
+A2 is retained as an earlier proposal. Kris found the original A difficult to understand and
 requested an experience-first refinement. A2 keeps editing in the inspector, names
 the shared look in plain language, and makes both uses visible from the start.
 Color presets make the first change easy to try. Choosing Help and About previews
@@ -38,8 +62,8 @@ fields but lengthens the editing page.
 
 ## Review
 
-The current route is `/preview.html?screen=shared-look&variant=refined&state=shared&theme=dark&viewport=wide`.
-The original variant values are `inspector`, `library` and `inline`. The existing
+The current route is `/preview.html?screen=shared-look&variant=editor&state=shared&theme=dark&viewport=wide`.
+Earlier variant values are `refined`, `inspector`, `library` and `inline`. The existing
 lab command remains `npm run design:dev` from `app/`.
 
 For an offline comparison, from `app/` run:
@@ -51,8 +75,8 @@ node design-lab/screens/shared-look/export.mjs
 Open `.toolchains/l07-shared-look/shared-look.html` in the repository root. This
 bundles the same renderers and imported production styles into one file. Its
 comparison controls reset to a fresh sample on every variant or scenario change.
-The offline wrapper omits project navigation and fixes the sample height for
-embedding; the registered lab uses the normal shell and viewport controls.
+The offline wrapper retains project navigation for A3 and fixes the sample height
+for embedding; the registered lab uses the normal shell and viewport controls.
 
 Try text color, frame background/border and the button appearance samples. Review
 lists Help and About and states which changes. Back to editing retains the draft;

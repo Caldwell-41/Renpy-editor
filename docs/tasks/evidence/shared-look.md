@@ -125,6 +125,53 @@ Design approval and all actual-product acceptance remain pending.
 
 ## Acceptance remains pending
 
+### A3 inside the existing editor
+
+Kris said A2 did not show its fit in the existing editor and selected rebuilding
+the prototype there with `principle-experience-first`. Variant `editor`, revision
+`inspector-v3`, mounts the production `ScreensWorkspace` renderer with explicit
+fictional in-memory service callbacks. No production file is edited. The lab adds
+the missing Screens sidebar entry and a Look row inside the renderer's existing
+Typography section. The existing Text/font/size/color/alignment/emphasis/Layout forms,
+Choose/Design/Connect steps, single canvas, Source and Apply/Cancel remain rendered
+by their existing owners. Other screens appear only in the proposed Apply review.
+
+The lab-only Look extension augments the rendered DOM and intercepts shared Apply
+for a design study. It is not a proposed production integration mechanism. The
+sample adapter simulates shared values, reference assignment, independent copies,
+one-entry history, no-op and stale/missing refusal. Browser canvas drawing supplies
+sample PNGs to the renderer without invoking the SDK/helper. Source is illustrative.
+Native file import, structural changes and unsupported sample operations refuse
+visibly. A3 demonstrates text and button-text appearance; broader frame decoration
+and appearance-state support still need design/implementation and real qualification.
+
+The complete A3 journey passes in the live Design Lab and the self-contained
+preview. It checks sidebar selection, Choose entry by double-click, original Design
+fields and Connect, shared Apply, independent copy with and without a value change,
+review Cancel/focus/text selection/section/scroll retention, local-only text content,
+Cancel, Undo/Redo, assigning an existing look to About, and missing/stale retention.
+The expanded offline matrix passes 150 cases across five variants, five states,
+three widths and both themes. A3 Design also has six width/theme captures and
+overflow checks. Browser checks use a locally fulfilled HTTPS document for a secure
+context, with no server or external requests. Earlier variants' checks still pass.
+
+The live evidence is `editor-live-check.json` and `editor-live-final.log` under
+`.toolchains/l07-shared-look/`. The offline results are in `check.json` and
+`editor-design-verified.log`; versioned screenshots remain local. Initial checks
+retained these setup failures: a broad Layout summary selector also matched Size
+limits; changing screens preserved Design while the check expected a Choose tree;
+the old offline wrapper hid the sidebar; and the old about:blank host lacked secure
+context APIs used by the renderer. The selector and navigation check were corrected,
+A3's wrapper now retains the sidebar, and the offline document is fulfilled in
+memory at an HTTPS origin. The sample no longer needs a random project identifier.
+No product behavior was changed to satisfy those checks. The interrupted pre-restart
+browser check supplied no result; the live check was restarted after restoring Vite.
+
+The earlier catalog-based startup failures remain failed. Passing the direct A3
+route and offline checks does not establish a full Design Lab gate or actual core,
+source, SDK, helper, native or product acceptance. No costly operation has started.
+All designs remain unapproved, and the original implementation is still pending.
+
 None of #43's four criteria is accepted by these mocks. They establish sample
 interaction and design choices only. Actual SDK appearance output, ordinary source
 definitions, minimal transactional edits, shared/use revision protection, Source

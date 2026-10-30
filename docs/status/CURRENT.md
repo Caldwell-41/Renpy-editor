@@ -4,9 +4,10 @@
 
 Kris selected implementing [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
 on a new branch. `codex/l07-shared-looks` starts at current Screens base `e9e8661`.
-The [Design Lab drafts](../design/design-lab-shared-look/README.md) now include A2,
-an experience-first refinement requested after Kris found A unclear. A2 shows both
-screens and explicit shared-versus-independent choices. No draft is approved and production code is
+The [Design Lab drafts](../design/design-lab-shared-look/README.md) now include A3,
+requested after A2 did not show its fit in the existing editor. A3 mounts the
+production Screens renderer with memory-only services, keeps its sidebar, steps,
+single canvas and forms, and adds a Look row plus Apply review. No draft is approved and production code is
 unchanged. [Evidence](../tasks/evidence/shared-look.md) records mock verification
 and remaining SDK/source/history/native proof. No capped operation has started.
 The unrelated audit, protected recovery and wider pending acceptance remain intact.
