@@ -67,4 +67,28 @@ The selected CI is the automatic `Repository quality` PR workflow, with frontend
 tests/Rust formatting and repository validation. Its manual specialist selectors
 remain off. Retain the exact PR head, run, attempt and audit under ignored
 `.toolchains/single-text-owner/`; use the T3 PR watch for continuation.
-The next action is confirming that run and auditing its required jobs and logs.
+
+## Published PR and terminal CI audit
+
+[PR #71](https://github.com/Caldwell-41/Renpy-editor/pull/71) is open into
+`codex/phase3b-screen-designer`. Published head
+`216590d5643488d0b6aea464d35c7248cca737f2` adds publication records only to the
+independently reviewed implementation. [Repository quality run 41020933759,
+attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41020933759/attempts/1)
+is audited `completed/success` at that exact head. The checkout merge
+`4ca1d6bffc8da574b9621f468539b84f716539fb` has the selected head and unchanged
+`d990298` base as parents; its tree exactly matches the PR head.
+
+Both required jobs and every executed step pass. Downloaded logs verify typechecking,
+277 frontend passes with zero failures/skips, pinned Rust formatting, validation
+of 1260 repository files, all 13 section-link tests, ten retention tests, Q1
+rejection controls and selector/runtime-case alignment. The nine unselected
+specialist jobs are skipped and provide no native/SDK evidence. The dependency
+install retains three high-severity advisories; this change modifies no dependency.
+
+Exact run/job metadata, source identity and hashed logs are retained under ignored
+`.toolchains/single-text-owner/pr71-ci-audit/`. No correction, retry or manual
+dispatch was needed. This audit closeout changes documentation only. Automatic
+checks on documentation successors retain their exact head/result in the PR and
+ignored audit receipts; another receipt-only commit is unnecessary.
+The next action is user review of PR #71. Merge remains unselected.
