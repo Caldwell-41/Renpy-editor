@@ -6,7 +6,8 @@ On 2026-10-30 Kris selected architecture candidate 1, confirmed an internal clea
 with existing behavior and the core `text` command preserved, and requested a new
 branch. This local maintenance uses `codex/single-text-draft-owner`, based on
 `d99029840c43886b0de8e6ff1ed37038bafe894c`. Its integration destination is
-`codex/phase3b-screen-designer`; publication and merge remain unselected.
+`codex/phase3b-screen-designer`. Kris subsequently authorized pushing this branch,
+opening a PR and running CI. Merge remains unselected.
 
 State is `review_ready`. `ScreenText` now owns existing-text drafts. The composer
 retains structural additions, ordering and removal; its duplicate text editor,
@@ -54,4 +55,16 @@ This is portable controller/core evidence; earlier native, SDK and broader 3B
 acceptance retain their existing scope. No costly operation was selected.
 
 The unrelated untracked Phase 1 audit and protected native recovery remain intact.
-The next action is review of this local branch.
+
+## Independent review and publication
+
+Independent Standards and Spec reviews of `d990298...15477b5` each report zero
+actionable findings. Both reviews were read-only. Implementation and test candidate
+`15477b55e28910f4a8d6b2ecabc46c84d8412cb3` retains the verification above.
+The publication successor changes only these status/evidence records.
+
+The selected CI is the automatic `Repository quality` PR workflow, with frontend
+tests/Rust formatting and repository validation. Its manual specialist selectors
+remain off. Retain the exact PR head, run, attempt and audit under ignored
+`.toolchains/single-text-owner/`; use the T3 PR watch for continuation.
+The next action is confirming that run and auditing its required jobs and logs.

@@ -1,14 +1,15 @@
 # Current status
 
-## Local text ownership cleanup
+## Reviewed text ownership cleanup
 
 `codex/single-text-draft-owner` is `review_ready`, based on `d990298`. Kris selected
 removing the duplicate renderer text flow while preserving current behavior and
 the core command. Typed fixtures exposed a hierarchy Enter submission defect;
 the corrected DOM cases and actual controller/core journey pass. All 277 frontend
 tests and the production build pass. [Maintenance evidence](../tasks/evidence/screen-text-ownership.md)
-owns the results and retained failures. Work remains local; publication and merge
-are unselected. Existing L05 and wider acceptance remain unchanged.
+owns the results and retained failures. Independent Standards and Spec reviews at
+`15477b5` each report zero findings. Kris selected branch publication, a PR and
+automatic CI; its terminal audit is next. Merge and wider acceptance remain separate.
 
 ## L05 project fonts merged
 
