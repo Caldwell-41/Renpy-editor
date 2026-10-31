@@ -557,3 +557,33 @@ The final corrected frontend run also passes all 277 tests and typechecking
 (`final-frontend-reviewed.log`). Repository validation passes 1,298 tracked files;
 Rust formatting, workflow lint and whitespace checks pass. The final closeout changes
 only documentation after f3a6fbc, so package/native source identity is unchanged.
+
+
+## Publication and CI selection, 2026-10-31
+
+Kris selected opening a draft PR and running CI. The branch is published as draft
+[PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72), based on
+codex/phase3b-screen-designer at e9e8661. The first published head is 9b8dc5a;
+production remains the qualified f3a6fbc tree. This publication checkpoint changes
+only status/evidence documentation. The unrelated audit remains untracked.
+
+Select automatic Repository quality plus the prepared focused Windows Screens
+qualification with shared_style=true, exact published candidate and ordinal=1.
+No other specialist selector is selected. This uses the first of two costly
+CI dispatches; Windows limits remain SDK 16, helpers 4, packages 2 and native
+sessions 2. The expected campaign has eight normal SDK starts, three helper
+validation starts, one helper, one package and one native session. Count actual
+started steps, including failed/cancelled work, rather than planned totals.
+Mac use and the recorded ceiling overrun stay unchanged; no Mac costly retry runs.
+
+The owning [issue CI wait record](https://github.com/Caldwell-41/Renpy-editor/issues/43#publication-and-ci-wait)
+records confirmed run/attempt/full head, inputs, observed status/time and remaining
+audit. Raw receipts stay ignored. Audit all executed steps and artifacts, candidate,
+SDK comparisons, helper count/rejections, package identity, native stages and cleanup
+before reporting Windows acceptance. Failed, cancelled or skipped required proof
+stays unresolved. PR remains draft; merge, release and issue closure are unselected.
+
+T3's PR watch owns same-thread wakeups for these pending checks. The installed
+Codex-desktop ci-watch launcher requires an escalated runner forbidden in this
+session and is not registered; no local polling loop or substitute launcher runs.
+A watch event is a cue to audit the recorded runs, not evidence of a passing run.

@@ -1,9 +1,11 @@
 # Current status
 
-## L07 committed locally; Windows proof pending
+## L07 draft PR published; CI qualification selected
 
-[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) has local
-implementation 5b5ba9d and review fixes f3a6fbc on `codex/l07-shared-looks`.
+[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) has implementation 5b5ba9d
+and review fixes f3a6fbc on `codex/l07-shared-looks`, published in draft
+[PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) against
+`codex/phase3b-screen-designer`. Kris selected publication and CI on 2026-10-31.
 Kris approved A5 with Style naming and explicit scope labels, both TDD boundaries,
 and review against e9e8661. The existing inspector/property/inventory/transaction
 owners support sharing, assignment, creation, selected-use copy and Source/history.
@@ -20,11 +22,17 @@ on their recorded bytes; reuse limits and candidate identities are in the
 Corrected Mac use is SDK 21/16, helpers 2/4, packages 2/2, native sessions 2/2.
 Six implicit validation starts were initially uncounted; the evidence records the
 overrun and added receipt counter. No further Mac costly attempt is selected.
-Windows use and costly dispatches are zero. Required Windows proof awaits publication
-authorization. The prepared Screens qualification selector is shared_style=true,
-with the published exact candidate and ordinal=1. Only local commits are selected;
-no push, PR or release occurred. Issue #43 remains open and unaccepted. Full Design
-Lab startup, physical/human and wider acceptance retain their disclosed gaps.
+Automatic Repository quality and the focused Windows Screens qualification are
+selected. Use shared_style=true, the exact published candidate and ordinal=1;
+all other specialist selectors stay false. The selected campaign uses the first
+of two costly dispatches, with Windows ceilings SDK 16, helpers 4, packages 2 and
+native sessions 2. Actual started operations, confirmed run/attempt/head and last
+observed status belong to [#43's CI wait record](https://github.com/Caldwell-41/Renpy-editor/issues/43#publication-and-ci-wait).
+Audit both the automatic checks and qualification artifacts on the same-thread CI
+resume. A waiting run is not passing proof or retry authority. No further Mac
+SDK/package/native attempt is selected. PR #72 stays draft and #43 stays open;
+merge and release are not selected. Full Design Lab startup, physical/human and
+wider acceptance retain their disclosed gaps.
 The unrelated audit, protected recovery below and other pending acceptance are intact.
 
 ## Reviewed text ownership cleanup
