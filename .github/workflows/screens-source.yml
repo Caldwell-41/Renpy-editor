@@ -14,7 +14,7 @@ on:
         required: true
         default: '3'
       shared_style:
-        description: 'Select L07 Windows Style: ordinal 1 full; ordinal 2 normal-only with retained helper/native'
+        description: Select L07 Windows Style ordinal 2 normal-only with retained helper/native
         type: boolean
         default: false
       project_font:

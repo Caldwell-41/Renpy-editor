@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## L07 root-cause correction prepared; review and bounded CI2 next
+## L07 root-cause correction reviewed; publish and run bounded CI2 next
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
 `codex/l07-shared-looks`, based on e9e8661. The CI1 semantic failure reproduces
@@ -21,7 +21,9 @@ SDK overrun and other consumption remain unchanged.
 No run-specific T3 watcher is available. The installed ci-watch targets a different
 Codex-desktop thread identity. Manual same-thread resume is required after the
 confirmed dispatch completes; a PR check notification cannot establish its result.
-Review, publication, exact dispatch identity and terminal audit remain pending.
+Both review axes found one ordinal-selection issue; it is corrected and the gate
+refuses consumed ordinal 1. Publication, exact dispatch identity and terminal
+audit remain pending.
 #43 remains open and PR #72 stays draft. Full Windows rendering, physical/human,
 full Design Lab startup and wider acceptance remain unresolved. The unrelated audit
 and protected recovery below are intact.

@@ -752,3 +752,22 @@ reuse provenance/native hash, privacy scan and uploaded artifact availability.
 Failed, skipped or absent required proof remains unresolved. Keep PR draft and
 #43 open; merge/release and broader human/editor/canvas/3B acceptance are outside
 this selection. Dispatch identity and actual result are pending below.
+
+### Review and local verification
+
+Fresh-context read-only Standards and Spec reviews each cover
+`git diff e9e8661...HEAD` at ce944ccc2ba0764cbc71f6b8efc091373c49de24. Each reports
+one P2: retaining selectable ordinal 1 would permit the consumed full campaign,
+including eleven SDK starts against ten remaining. No other actionable finding
+is reported on either axis. The coordinating owner corrected this by requiring
+ordinal 2 and deleting the superseded helper/package/native startup steps.
+A focused selector execution accepts only 2 and refuses 1 and 3. The old full
+workflow remains available in CI1's historical commit, not as a current entry.
+
+The corrected workflow passes actionlint and the repository selector source audit.
+Repository validation and all 13 section-link tests pass; whitespace checking
+passes. The three focused image tests and actual retained-capture/provenance
+replays above pass. Source/runtime production, dependencies and input fixtures
+are unchanged from the previously qualified candidate, so their recorded ordinary
+and native checks are reused rather than repeated. No independent re-review of
+the narrow ordinal correction is claimed. Publication and CI2 remain next.
