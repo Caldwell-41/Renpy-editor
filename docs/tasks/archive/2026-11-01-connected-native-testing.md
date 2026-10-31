@@ -8,7 +8,8 @@ This documentation task uses `codex/connected-native-testing`, based on freshly
 fetched `6be2dd0` from `codex/phase3b-screen-designer`, including merged PRs #72
 and #73. Kris subsequently selected draft PR publication and the code-review
 skill's independent Standards and Spec reviews. New machine setup, product execution
-and merge remain unselected.
+remain unselected. Kris accepted the documentation outcome on 2026-11-01 and
+selected merging PR #74 and retiring its completed branch.
 
 ## Acceptance and current results
 
@@ -33,15 +34,19 @@ testing runbooks, the task template and current delivery references. TESTING and
 the remaining agent guides already defer to the canonical policy. Historical
 CI-first evidence in INDEX remains labelled historical.
 
-## State and next action
+## Acceptance and integration
 
-[Draft PR #74](https://github.com/Caldwell-41/Renpy-editor/pull/74) is published.
+[PR #74](https://github.com/Caldwell-41/Renpy-editor/pull/74) owns final integration,
+branch-retirement and current-head CI receipts. The documentation outcome is accepted;
+the remaining merge/cleanup follows the user's selection above.
 Independent review of `36539cf` against `6be2dd0` reports one Standards P2 and zero
 Spec findings. The Standards finding identified competing live continuations in
 CURRENT/HANDOVER. The correction replaces PR #73's obsolete watch/resume instructions
 with links to its verified merge/final audit, preserving original failure evidence.
 The coordinator checks this focused correction; no additional review delegation is
-needed. Final current-head CI and review receipts belong in PR #74.
+needed. The final audit at `e15598f` passes, including all 288 frontend tests and
+required validation jobs. The acceptance/archive closeout is documentation only;
+its own required checks and final integration receipts remain in PR #74.
 
-Preserve the unrelated untracked audit and existing native recovery; merge remains
-a separate user decision.
+No successor implementation, new host setup or platform execution is selected.
+Preserve the unrelated untracked audit and existing native recovery.

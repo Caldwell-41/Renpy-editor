@@ -1,13 +1,14 @@
 # Current outcome handover
 
-## Connected native testing policy
+## Connected native testing policy closeout
 
-The selected [documentation task](../tasks/active/connected-native-testing.md)
-continues on `codex/connected-native-testing`, based on integration commit `6be2dd0`.
-The task owns scope and local verification;
-[draft PR #74](https://github.com/Caldwell-41/Renpy-editor/pull/74) owns publication,
-review and current-head CI receipts. The unrelated audit and protected native recovery
-below remain intact; existing size exceptions preserve those records.
+The [accepted documentation outcome](../tasks/archive/2026-11-01-connected-native-testing.md)
+replaces the feature-branch continuation. Kris selected merging
+[PR #74](https://github.com/Caldwell-41/Renpy-editor/pull/74) into
+`codex/phase3b-screen-designer` and retiring its branch. Read the PR's final receipts
+for checked source, merge and cleanup identities. No successor outcome is selected.
+The unrelated audit and protected native recovery below remain intact; existing
+size exceptions preserve those records.
 
 ## Completed CI reporting
 

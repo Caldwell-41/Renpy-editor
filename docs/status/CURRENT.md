@@ -1,11 +1,11 @@
 # Current status
 
-## Connected native testing policy
+## Connected native testing policy accepted
 
-The [routing task](../tasks/active/connected-native-testing.md) owns the
-documentation update and agent-guidance audit on `codex/connected-native-testing`.
-[Draft PR #74](https://github.com/Caldwell-41/Renpy-editor/pull/74) owns review
-and current-head CI receipts; product execution and merge remain separate.
+Kris accepted the [routing policy and agent-guidance audit](../tasks/archive/2026-11-01-connected-native-testing.md)
+and selected merging [PR #74](https://github.com/Caldwell-41/Renpy-editor/pull/74)
+and retiring its branch. The PR owns final integration and CI receipts.
+No successor product work or platform execution is selected.
 
 ## Complete PR CI reporting merged
 
