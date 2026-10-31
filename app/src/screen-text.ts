@@ -206,13 +206,21 @@ export class ScreenText {
     for (const select of card.querySelectorAll<HTMLSelectElement>("select[data-text-field]")) select.disabled = busy || !!view.selected.textProperties?.blocked[select.dataset.textField!];
     const general = card.querySelector<HTMLElement>(".screen-text-error")!;general.textContent = error && !["text","size","color"].includes(error.field) ? error.text : "";general.hidden = !general.textContent;
     card.querySelector<HTMLElement>("[data-text-review]")!.hidden = error?.field !== "source";
-    const style=this.styleAction(draft,this.values(draft,false)),uses=this.uses(draft),screens=new Set(uses.map(u=>JSON.stringify([u.path,u.screenName]))).size,shared=style?.scope==="shared"&&Object.keys(this.values(draft,false)).some(key=>key!=="text");
+    const style=this.styleAction(draft,this.values(draft,false)),uses=this.uses(draft),screens=new Set(uses.map(u=>JSON.stringify([u.path,u.screenName]))).size,shared=style?.scope==="shared"&&Object.keys(this.sharedValues(draft,this.values(draft,false))).length>0;
     card.querySelector<HTMLElement>(".screen-text-state")!.textContent = busy ? "Applying changes…" : dirty ? shared ? `Shared appearance changes apply to ${screens} screens and ${uses.length} elements. Text content and Layout change this element only.` : "Changes apply to this element only." : "";
     card.querySelector<HTMLButtonElement>("[data-text-apply]")!.textContent=style ? shared ? `Apply to ${screens} ${screens===1?"screen":"screens"}…` : "Apply to this element…" : "Apply";
     card.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled = card.querySelector<HTMLButtonElement>("[data-text-cancel]")!.disabled = busy || !dirty;
   }
   private styleAction(draft:Draft,values:TextEdits):StyleEdit|undefined {
-    return draft.style&&(draft.style.scope!=="shared"||draft.style.name!==draft.node.style?.name||Object.keys(values).some(key=>key!=="text"))?{...draft.style}:undefined;
+    return draft.style&&(draft.style.scope!=="shared"||draft.style.name!==draft.node.style?.name||Object.keys(this.sharedValues(draft,values)).length)?{...draft.style}:undefined;
+  }
+  private styleOwns(draft:Draft,key:string):boolean {
+    return this.definition(draft)?.kind!=="text"||!/(?:background|border(?:Color|Width)?)$/.test(key);
+  }
+  private sharedValues(draft:Draft,values:TextEdits):TextEdits {
+    const shared={...values};delete shared.text;
+    if(shared.appearance){const appearance=Object.fromEntries(Object.entries(shared.appearance).filter(([key])=>this.styleOwns(draft,key)));if(Object.keys(appearance).length)shared.appearance=appearance;else delete shared.appearance;}
+    return shared;
   }
   private uses(draft:Draft):StyleUse[] {
     const uses=[...this.definition(draft)?.uses??[]],view=this.host.view();
@@ -226,6 +234,7 @@ export class ScreenText {
     const appearance:NonNullable<TextEdits["appearance"]>={};
     for(const key of new Set([...Object.keys(draft.node.textProperties?.values??{}),...Object.keys(definition?.values??{})])) {
       if(["font","size","color","align","bold","italic"].includes(key))continue;
+      if(!this.styleOwns(draft,key))continue;
       const value=definition?.values[key];
       if(key.endsWith("_font")&&typeof value==="string") {
         const asset=this.assets.find(a=>fontPath(a)===value);
@@ -238,8 +247,9 @@ export class ScreenText {
   }
   private definition(draft: Draft): StyleDefinition | undefined { return this.host.styles?.()?.definitions.find(d=>d.name===draft.style?.name); }
   private styleValues(draft: Draft): TextProperties["values"] {
-    return draft.style && draft.style.scope !== "create" && draft.style.name !== draft.node.style?.name
-      ? this.definition(draft)?.values ?? {} : draft.node.textProperties?.values ?? {};
+    const original=draft.node.textProperties?.values??{};
+    if(!draft.style||draft.style.scope==="create"||draft.style.name===draft.node.style?.name)return original;
+    return {...Object.fromEntries(Object.entries(original).filter(([key])=>!this.styleOwns(draft,key))),...this.definition(draft)?.values??{}};
   }
   private markEdited(draft:Draft,field:string,changed:boolean):void {
     if(changed)draft.edited.add(field);else draft.edited.delete(field);
@@ -267,7 +277,7 @@ export class ScreenText {
     const def=this.definition(draft);if((!def && draft.style?.scope !== "create") || def?.error || !draft.style){this.fail("source",def?.error??"The style is missing. Your edits are kept.");return false;}
     const current=this.host.view();if(!current||current.document.path!==draft.document.path||current.selected.id!==draft.node.id)return false;
     const selectedUse={path:draft.document.path,screenName:current.screenName,nodeId:draft.node.id!,nodeStart:draft.node.span.start};
-    const sharedChange=draft.style.scope==="shared"&&Object.keys(this.values(draft,false)).some(key=>key!=="text");
+    const sharedChange=draft.style.scope==="shared"&&Object.keys(this.sharedValues(draft,this.values(draft,false))).length>0;
     const uses=apply&&!sharedChange ? [selectedUse] : this.uses(draft);
     if(!uses.some(u=>u.path===selectedUse.path&&u.nodeId===selectedUse.nodeId))uses.push(selectedUse);
     const dialog=el("dialog","screen-style-dialog");dialog.ariaLabel=apply ? "Review style changes" : "Style uses";
@@ -283,7 +293,7 @@ export class ScreenText {
       const values=apply?this.values(draft,false):{},samples:{nodeStart:number;values:TextEdits}[]=[];
       for(const use of uses.filter(u=>u.path===row.path&&u.screenName===row.name)){
         const selected=use.path===draft.document.path&&use.nodeId===draft.node.id;
-        const edits=apply&&selected?this.previewValues(draft):{...values};if(!selected)delete edits.text;
+        const edits=apply&&selected?this.previewValues(draft):this.sharedValues(draft,values);
         if(Object.keys(edits).length)samples.push({nodeStart:use.nodeStart,values:edits});
       }
       const layout=apply?this.layout.currentDraft(false):undefined;
@@ -355,7 +365,7 @@ export class ScreenText {
     const choose=(style:StyleEdit,def?:StyleDefinition)=>{
       draft.style=style;
       if(def) {
-        const extra=this.extraFields(def.values);for(const key of Object.keys(extra))if(!draft.edited.has(`appearance:${key}`))draft.appearance[key]=extra[key]!;
+        const extra=this.extraFields(def.values);for(const key of Object.keys(extra))if(this.styleOwns(draft,key)&&!draft.edited.has(`appearance:${key}`))draft.appearance[key]=extra[key]!;
         const fields=this.appearanceFields(def.values);
         for(const field of ["font","size","color","align","bold","italic"] as const)if(!draft.edited.has(field)) {
           draft.fields[field]=fields[field];
@@ -508,13 +518,13 @@ export class ScreenText {
     const view=this.host.view(),samples=new Map<number,TextEdits>();let stale=false;
     if(!view)return {stale:this.hasDraft(),samples:[]};
     for(const draft of this.drafts.values()) {
-      const own=draft.screenId===view.screenId,shared=draft.style?.scope==="shared"&&Object.keys(this.values(draft,false)).some(key=>key!=="text");
+      const own=draft.screenId===view.screenId,shared=draft.style?.scope==="shared"&&Object.keys(this.sharedValues(draft,this.values(draft,false))).length>0;
       if(!own&&!shared)continue;
       const source=this.host.documents?.().find(d=>d.path===draft.document.path)??(own?view.document:undefined);
       if(!source||source.revision!==draft.document.revision||draft.style&&this.host.styles?.()?.revision!==draft.style.expectedRevision){stale=true;continue;}
       const targets=view.nodes.filter(n=>own&&n.id===draft.node.id||shared&&n.style?.name===draft.style?.name);
       if(own&&!targets.some(n=>n.id===draft.node.id)){stale=true;continue;}
-      for(const node of targets){const selected=own&&node.id===draft.node.id,values=selected?this.previewValues(draft):this.values(draft,false);if(!selected)delete values.text;
+      for(const node of targets){const selected=own&&node.id===draft.node.id,values=selected?this.previewValues(draft):this.sharedValues(draft,this.values(draft,false));
         const existing=samples.get(node.span.start);if(existing&&!same(existing,values))stale=true;else samples.set(node.span.start,values);
       }
     }

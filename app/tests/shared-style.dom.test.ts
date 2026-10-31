@@ -44,7 +44,7 @@ function fixture(styled = false, fonts = false) {
   const choose=(name:string)=>{click("Change style…");const option=[...document.querySelectorAll<HTMLButtonElement>(".screen-style-option")].find(b=>b.textContent?.startsWith(name+" ·"));assert.ok(option,name);option.click();};
   const apply=()=>{const button=document.querySelector<HTMLButtonElement>("[data-text-apply]");assert.ok(button);button.click();};
   render();
-  return {text,layout,commands,field,fill,click,choose,apply,render,definitions,dispose:()=>{text.dispose();browser.happyDOM.abort();}};
+  return {text,layout,commands,field,fill,click,choose,apply,render,definitions,view,dispose:()=>{text.dispose();browser.happyDOM.abort();}};
 }
 function associatedError(control:HTMLElement) {
   const id=control.getAttribute("aria-describedby")?.split(" ").find(id=>id.startsWith("authoring-field-error-"));assert.ok(id,"Associated field error");
@@ -149,5 +149,21 @@ test("Create style preserves valid repeated underscores in the submitted identif
   try {
     await tick();h.click("Change style…");h.fill("Style name","  Body__Text  ");h.click("Create style");h.apply();await tick();h.click("Apply to this element");await tick();
     const command=h.commands[0];assert.ok(command?.type==="formatText");assert.equal(command.style?.name,"body__text");
+  } finally {h.dispose();}
+});
+
+test("assigning a text-only style keeps button decoration local in fields and every pending preview",async()=>{
+  const h=fixture(true);
+  try {
+    await tick();h.definitions.push({name:"label",kind:"text",values:{size:50,color:"#fed",hover_color:"#abc"},path:"game/ui/styles.rpy",uses:[],error:null});
+    h.view.nodes.push({...structuredClone(h.view.selected),id:"other",span:{start:60,end:100},style:{name:"label",error:null},textProperties:{values:{...h.definitions.at(-1)!.values,background:"#fff"},blocked:{}}});
+    h.definitions.at(-1)!.uses.push({path:h.view.document.path,screenName:"caption",nodeId:"other",nodeStart:60});
+    h.choose("B");h.choose("Label");
+    assert.equal(h.text.canvasDraft().samples.length,1,"Local decoration does not preview on existing text-style uses");
+    const sample=h.text.canvasDraft().samples[0];assert.ok(sample);
+    assert.equal(sample.values.appearance?.background,"#456");assert.deepEqual(sample.values.appearance?.border,{color:"#567",width:2});
+    for(const state of ["hover_","selected_","insensitive_"]){assert.equal(sample.values.appearance?.[state+"background"],"#456");assert.deepEqual(sample.values.appearance?.[state+"border"],{color:"#567",width:2});}
+    h.fill("Size · px","60");const shared=h.text.canvasDraft().samples.find(sample=>sample.nodeStart===60);assert.ok(shared);assert.deepEqual(shared.values,{size:60});h.fill("Size · px","50");
+    h.apply();await tick();h.click("Apply to this element");await tick();const command=h.commands[0];assert.ok(command?.type==="formatText");assert.equal(command.style?.name,"label");assert.equal(command.values.appearance?.background,"#456");
   } finally {h.dispose();}
 });
