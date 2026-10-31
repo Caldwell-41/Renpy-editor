@@ -119,6 +119,35 @@ fn reference(lines: &[Line<'_>], node: &Node) -> Option<(String, Span)> {
                 && l.code.split_whitespace().next() == Some(key)
         })
         .collect::<Vec<_>>();
+    // A button can name distinct container and label styles. Until both edges
+    // are modeled, the graph must remain unavailable for shared edits.
+    if node.kind == "textbutton" && key == "style" {
+        let label_refs = lines
+            .iter()
+            .filter(|l| {
+                l.start > node.span.start
+                    && l.start < node.source_end
+                    && l.indent == header.indent + 4
+                    && l.code.split_whitespace().next() == Some("text_style")
+            })
+            .collect::<Vec<_>>();
+        if !label_refs.is_empty()
+            && (label_refs.len() != 1
+                || entries.len() != 1
+                || !label_refs[0].single
+                || !entries[0].single
+                || label_refs[0].code["text_style".len()..].trim()
+                    != entries[0].code[key.len()..].trim())
+        {
+            return Some((
+                String::new(),
+                Span {
+                    start: header.start,
+                    end: header.end,
+                },
+            ));
+        }
+    }
     let line = *entries.first()?;
     if entries.len() != 1 || !line.single {
         return Some((
@@ -284,7 +313,7 @@ impl Index {
                     if !["text", "button_text", "button", "frame", "window"].contains(&parent) {
                         inherited.insert(parent.to_owned());
                     }
-                } else if let Some((parent, _)) = name.rsplit_once('_') {
+                } else if let Some((_, parent)) = name.split_once('_') {
                     inherited.insert(parent.to_owned());
                 }
                 let after = after_block(&lines, i, lines.len());
@@ -307,7 +336,7 @@ impl Index {
                     && properties.blocked.is_empty()
                     && lines[i + 1..after]
                         .iter()
-                        .all(|l| recognized.contains(&l.start) || l.code == "pass");
+                        .all(|l| recognized.contains(&l.start));
                 result.definitions.push(Definition {
                     name: name.into(),
                     path: path.clone(),
@@ -383,6 +412,24 @@ impl Index {
             }
             if result.references.len() + result.definitions.len() > MAX_NODES {
                 return Err(SceneError::InvariantBlocked);
+            }
+        }
+        // Referencing an undeclared name creates its implicit parent chain in
+        // Ren'Py: caption_ll_body -> ll_body -> body. Those uses are not explicit
+        // edges of our supported definitions, so their ancestors stay in Source.
+        for name in result
+            .references
+            .iter()
+            .map(|(name, _)| name.clone())
+            .chain(inherited.clone())
+        {
+            let mut child = name.as_str();
+            while !names.contains(child) {
+                let Some((_, parent)) = child.split_once('_') else {
+                    break;
+                };
+                inherited.insert(parent.to_owned());
+                child = parent;
             }
         }
         for def in &mut result.definitions {

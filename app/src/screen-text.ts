@@ -12,7 +12,7 @@ export interface TextProperties {
   blocked: Record<string, string>;
   expressions?: Record<string, string>;
 }
-export interface TextEdits { appearance?: Record<string,string|number|boolean|{color:string;width:number}|null>; text?: string; font?: FontReference | null; size?: number | null; color?: string | null; align?: number | null; bold?: boolean | null; italic?: boolean | null }
+export interface TextEdits { appearance?: Record<string,string|number|boolean|{color:string;width:number}|FontReference|null>; text?: string; font?: FontReference | null; size?: number | null; color?: string | null; align?: number | null; bold?: boolean | null; italic?: boolean | null }
 export interface StyleUse {path:string; screenName:string; nodeId:string|null; nodeStart:number}
 export interface StyleDefinition {name:string; path:string; kind:string; values:TextProperties["values"]; uses:StyleUse[]; error:string|null}
 export interface StyleCatalog {error?:string|null; revision:string; definitions:StyleDefinition[]}
@@ -230,7 +230,18 @@ export class ScreenText {
   private previewValues(draft:Draft):TextEdits {
     const values=this.values(draft,false);
     if(draft.style?.scope!=="shared"||draft.style.name===draft.node.style?.name)return values;
-    const fields=draft.fields,font=this.assets.find(a=>fontPath(a)===fields.font);
+    const fields=draft.fields,font=this.assets.find(a=>fontPath(a)===fields.font),definition=this.definition(draft);
+    const appearance:NonNullable<TextEdits["appearance"]>={};
+    for(const key of new Set([...Object.keys(draft.node.textProperties?.values??{}),...Object.keys(definition?.values??{})])) {
+      if(["font","size","color","align","bold","italic"].includes(key))continue;
+      const value=definition?.values[key];
+      if(key.endsWith("_font")&&typeof value==="string") {
+        const asset=this.assets.find(a=>fontPath(a)===value);
+        if(asset)appearance[key]={assetId:asset.id,expectedAssetSha256:asset.sha256};
+      } else appearance[key]=(value??null) as NonNullable<TextEdits["appearance"]>[string];
+    }
+    Object.assign(appearance,values.appearance);values.appearance=appearance;
+    if(["frame","window"].includes(draft.node.kind))return values;
     return {...values,size:fields.size?Number(fields.size):null,color:fields.color||null,align:fields.align?Number(fields.align):null,bold:fields.bold?fields.bold==="True":null,italic:fields.italic?fields.italic==="True":null,...(!fields.font?{font:null}:font?{font:{assetId:font.id,expectedAssetSha256:font.sha256}}:{})};
   }
   private definition(draft: Draft): StyleDefinition | undefined { return this.host.styles?.()?.definitions.find(d=>d.name===draft.style?.name); }
@@ -270,10 +281,10 @@ export class ScreenText {
       previewHeading.textContent=row.name;currentDocument=this.host.documents?.().find(d=>d.path===row.path);
       for(const b of list.querySelectorAll<HTMLButtonElement>("button"))b.ariaPressed=String(b.dataset.path===row.path&&b.dataset.screen===row.name);
       if(!currentDocument){status.textContent="Source changed. Refresh before previewing this use.";return;}
-      const values=apply?this.previewValues(draft):{},samples:{nodeStart:number;values:TextEdits}[]=[];
+      const values=apply?this.values(draft,false):{},samples:{nodeStart:number;values:TextEdits}[]=[];
       for(const use of uses.filter(u=>u.path===row.path&&u.screenName===row.name)){
         const selected=use.path===draft.document.path&&use.nodeId===draft.node.id;
-        const edits={...values};if(!selected)delete edits.text;
+        const edits=apply&&selected?this.previewValues(draft):{...values};if(!selected)delete edits.text;
         if(Object.keys(edits).length)samples.push({nodeStart:use.nodeStart,values:edits});
       }
       const layout=apply?this.layout.currentDraft(false):undefined;
@@ -283,7 +294,7 @@ export class ScreenText {
     if(apply){
       const changes=this.values(draft,false),labels:Record<string,string>={text:"Text content",font:"Font",size:"Size",color:"Color",align:"Text alignment",bold:"Bold",italic:"Italic"};
       for(const [key,value] of Object.entries(changes)) {
-        if(key==="appearance") {for(const [property,after] of Object.entries(value as NonNullable<TextEdits["appearance"]>))dialog.append(el("p","",`${property.replaceAll("_"," ")}: ${after===null?"Inherited":typeof after==="object"?`${after.color}, ${after.width} px`:String(after)}`));}
+        if(key==="appearance") {for(const [property,after] of Object.entries(value as NonNullable<TextEdits["appearance"]>))dialog.append(el("p","",`${property.replaceAll("_"," ")}: ${after===null?"Inherited":typeof after==="object"?"color" in after?`${after.color}, ${after.width} px`:this.assets.find(a=>a.id===after.assetId)?.displayName??"Project font":String(after)}`));}
         else {const before=draft.node.textProperties?.values[key]??(key==="text"?draft.node.literal:"Inherited"),after=key==="font"?this.assets.find(a=>fontPath(a)===draft.fields.font)?.displayName??"Inherited":value===null?"Inherited":String(value);dialog.append(el("p","",`${labels[key]??key}: ${String(before)} to ${after}`));}
       }
       dialog.append(el("p","",draft.style.scope==="shared"?"Appearance changes update this style. Text content and Layout remain local.":draft.style.scope==="create"?"Create a style for this element.":"Create an independent copy for this element, including its appearance values."));
@@ -439,13 +450,13 @@ export class ScreenText {
     const view=this.host.view(),samples=new Map<number,TextEdits>();let stale=false;
     if(!view)return {stale:this.hasDraft(),samples:[]};
     for(const draft of this.drafts.values()) {
-      const own=draft.screenId===view.screenId,shared=draft.style?.scope==="shared";
+      const own=draft.screenId===view.screenId,shared=draft.style?.scope==="shared"&&Object.keys(this.values(draft,false)).some(key=>key!=="text");
       if(!own&&!shared)continue;
       const source=this.host.documents?.().find(d=>d.path===draft.document.path)??(own?view.document:undefined);
       if(!source||source.revision!==draft.document.revision||draft.style&&this.host.styles?.()?.revision!==draft.style.expectedRevision){stale=true;continue;}
       const targets=view.nodes.filter(n=>own&&n.id===draft.node.id||shared&&n.style?.name===draft.style?.name);
       if(own&&!targets.some(n=>n.id===draft.node.id)){stale=true;continue;}
-      for(const node of targets){const values=this.previewValues(draft);if(node.id!==draft.node.id||!own)delete values.text;
+      for(const node of targets){const selected=own&&node.id===draft.node.id,values=selected?this.previewValues(draft):this.values(draft,false);if(!selected)delete values.text;
         const existing=samples.get(node.span.start);if(existing&&!same(existing,values))stale=true;else samples.set(node.span.start,values);
       }
     }

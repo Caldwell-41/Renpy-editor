@@ -9,12 +9,17 @@ The existing inspector/property/inventory/transaction owners support shared Appl
 assignment, creation, selected-use copy and Source/history/reopen.
 
 Actual controller/core, all 277 frontend tests, build, Mac SDK/literal comparisons,
-helper comparisons and the signed packaged native probe pass. Final ordinary core
-verification and independent Standards/Spec review are underway.
+helper comparisons and the signed packaged native probe pass. The full ordinary core run passes 474 tests (52 specialist cases ignored); desktop
+tests pass 38. Both independent review axes found two P2 issues, all corrected.
+After fixes, 79 Screens cases (five specialist cases ignored), 59 renderer cases,
+and the actual controller/core and packaged-probe rehearsal pass. A second signed
+Mac package/native check is pending for those corrections.
 [Evidence](../tasks/evidence/shared-look.md#implemented-candidate-and-mac-qualification-2026-10-31)
 owns source/checker/package identities, retained failures and precise proof limits.
-Mac use is SDK 15/16, helpers 2/4, packages 1/2, native sessions 1/2; Windows is
-zero and costly CI dispatches are 0/2. The prepared Windows check awaits publication
+Corrected Mac use is SDK 21/16, helpers 2/4, packages 1/2, native sessions 1/2; Windows is
+zero and costly CI dispatches are 0/2. The helper installer had six uncounted validation starts; no further SDK start is
+selected. The evidence records the ceiling overrun and prevention. The prepared
+Windows check awaits publication
 authorization. Only a local commit is selected, with no push or PR. Required Windows
 proof and the full Design Lab startup failure prevent bounded acceptance/closure.
 The unrelated audit, protected recovery below and wider pending acceptance remain intact.

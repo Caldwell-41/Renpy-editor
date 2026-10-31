@@ -493,7 +493,7 @@ export class ScreensWorkspace {
     const sourceChanged = document.revision !== base.revision || edit.type === "composition" && edit.result.changed === true;
     if (edit.type === "composition") {
       if (edit.result.styles && this.catalog) this.catalog.styles = edit.result.styles;
-      if (edit.result.documents) this.documents = edit.result.documents;
+      if (edit.result.documents?.length) this.documents = edit.result.documents;
     }
     if (edit.type === "composition") {this.images.accept(edit.command,base,document);this.text.accept(edit.command,base,document);}
     this.documents = this.documents.map(d => d.path === document.path ? document : d);

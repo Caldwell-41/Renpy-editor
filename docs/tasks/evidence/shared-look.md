@@ -436,3 +436,68 @@ The prepared focused Windows workflow is not published or dispatched because onl
 a local commit is selected. Windows SDK/helper/package/native proof remains required.
 The full Design Lab startup timeout, physical input and wider acceptance remain
 separate. No issue acceptance or closure is claimed.
+
+
+## Two-axis review and corrections
+
+Independent fresh-context read-only Standards and Spec reviews compared
+`git diff e9e8661...HEAD` at local candidate 5b5ba9d. Each reported two P2 findings.
+Standards found no duplicate production owner. Spec found no scope expansion.
+
+### Standards
+
+- Mixed button `style` and `text_style` references were both marked known while
+  only one edge was indexed. Shared edits could omit a real affected use and its
+  local overrides. This violated the data-model affected-use/override contract.
+  The index now refuses this unsupported mixed graph before any edit.
+- Implicit underscore inheritance used the wrong direction and missed undeclared
+  derived references. SDK documentation removes through the first underscore,
+  so `caption_ll_body` inherits `ll_body`. The index now traces implicit ancestors
+  through undeclared names and refuses shared ancestor edits with untracked uses.
+
+### Spec
+
+- A numeric no-op Apply returned an empty companion-document list that replaced
+  the inspector's entire document inventory. The workspace now preserves its
+  inventory on that no-op result. The actual controller/core check enters 032 for
+  accepted Size 32, then selects both screens and verifies their controls and bytes.
+- Assignment previews omitted the chosen Style's background, border and state
+  values because only changed values were sent. The existing preview owner now
+  expands the selected reference's effective appearance, clears displaced values,
+  and sends only actual shared deltas to other uses. This restores ADR 0021's
+  provisional-property contract and A5's proposed-appearance review.
+
+The speculative colon/pass finding was withdrawn after checking SDK grammar:
+`pass` is not a valid style clause. Such input now stays Source-only and a focused
+public-core test proves refusal without writes. The mixed-reference/inheritance
+reproduction was red before the correction and green afterward. No source or
+image acceptance threshold was weakened. Further browser driver corrections wait
+for an observable refreshed screen inventory rather than using an old cached list.
+
+The final ordinary core run passes 474 tests, with 52 specialist cases ignored;
+it does not qualify those SDK/native gates. Desktop tests pass 38, driver tests pass
+2, and approval validation passes. After review corrections, 79 focused Screens
+cases pass with five explicit SDK/helper cases ignored, and 59 renderer cases pass.
+Typechecking passes. The expanded real-controller journey and exact packaged-probe
+rehearsal pass; final stable-tree receipts are recorded at closeout.
+
+### Corrected operation accounting
+
+A final call-path audit found six uncounted SDK CLI starts in the two helper
+attempts. Each fresh helper fixture installs the managed SDK with staged validation
+and post-promotion discovery, then validates again on initial canvas discovery.
+Each validation executes `--version`. These are SDK CLI starts in addition to the
+helper process, under the recorded policy. Mac SDK consumption is therefore 21/16,
+not the earlier reported 15/16. This exceeded the selected ceiling. No further SDK
+start is selected or needed for the unchanged qualified mappings. The old receipts
+did not count these internal starts; the helper receipt now records the actual
+adapter process counter and checks the expected three validation starts. That new
+counter has not been executed on Mac. Windows's planned eight normal starts plus
+three helper validations would consume 11/16, and its helper consumes 1/4.
+
+Packages/native remain separate categories. Mac use before the corrected package
+is SDK 21/16, helpers 2/4, packages 1/2 and native sessions 1/2. Windows use and
+costly CI dispatches remain zero. The cancelled unrelated full-core SDK gate never
+left its extraction-stage payload, so it contributes no SDK start. Its owned
+partial extraction is identified for cleanup. Original failures and the accounting
+correction remain retained; no allowance is retroactively enlarged.

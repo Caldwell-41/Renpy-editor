@@ -581,6 +581,7 @@ fn style_runtime_inputs_are_authored_through_public_source_and_transaction_reque
 #[test]
 #[ignore = "L07 selected pinned-SDK proof; one canvas-helper start"]
 fn shared_style_helper_matches_qualified_shared_and_independent_source() {
+    let cli_starts_before = crate::renpy::process_spawn_count_for_test();
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");
     let archive =
@@ -701,7 +702,12 @@ fn shared_style_helper_matches_qualified_shared_and_independent_source() {
         serde_json::to_vec_pretty(&accepted).unwrap(),
     )
     .unwrap();
-    fs::write(output.join("result.json"),serde_json::to_vec_pretty(&json!({"passed":true,"helperSessions":1,"pendingMatchesAccepted":true,"rendererSHA256":hex::encode(Sha256::digest(include_bytes!("canvas-renderer.rpy"))),"records":records,"shutdowns":[shutdown]})).unwrap()).unwrap();
+    let sdk_cli_processes = crate::renpy::process_spawn_count_for_test() - cli_starts_before;
+    assert_eq!(
+        sdk_cli_processes, 3,
+        "Count both installer validation starts and initial canvas discovery"
+    );
+    fs::write(output.join("result.json"),serde_json::to_vec_pretty(&json!({"passed":true,"helperSessions":1,"sdkCliProcesses":sdk_cli_processes,"pendingMatchesAccepted":true,"rendererSHA256":hex::encode(Sha256::digest(include_bytes!("canvas-renderer.rpy"))),"records":records,"shutdowns":[shutdown]})).unwrap()).unwrap();
 }
 
 #[test]
@@ -711,6 +717,9 @@ fn shared_review_refuses_untracked_style_uses_inheritance_and_overridden_propert
         "\nscreen inline_use():\n    text \"Unknown use\" style \"ll_body\"\n",
         "\nstyle derived is ll_body:\n    size 18\n",
         "\nscreen dynamic_use():\n    text \"Unknown use\":\n        style selected_style\n",
+        "\nscreen mixed_button():\n    textbutton \"Mixed\":\n        style \"button\"\n        text_style \"ll_body\"\n",
+        "\nstyle caption_ll_body:\n    size 18\n",
+        "\nscreen implicit_use():\n    text \"Implicit\":\n        style \"caption_ll_body\"\n",
     ] {
         let (_temporary, mut service, _root, first, _second, first_id, _) = shared_project();
         let source = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
@@ -764,5 +773,34 @@ fn shared_review_refuses_untracked_style_uses_inheritance_and_overridden_propert
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
         original
+    );
+}
+
+#[test]
+fn unsupported_style_pass_statement_refuses_without_changing_source() {
+    let (_temporary, mut service, _root, first, _second, first_id, _) = shared_project();
+    let original = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let source = original.replace("    color \"#f1e9d6\"", "    pass # source-only statement");
+    save_composition_source(&mut service, &first, &source);
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":first["path"]}),
+    );
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":first["id"],"expectedRevision":doc["revision"],"command":{"type":"formatText","nodeId":first_id,"values":{"size":null},"style":{"scope":"shared","name":"ll_body","expectedRevision":catalog["styles"]["revision"]}}})
+        )["error"]["code"],
+        "STYLE_UNAVAILABLE"
+    );
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
+        source
     );
 }
