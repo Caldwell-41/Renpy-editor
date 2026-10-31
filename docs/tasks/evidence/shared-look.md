@@ -587,3 +587,84 @@ T3's PR watch owns same-thread wakeups for these pending checks. The installed
 Codex-desktop ci-watch launcher requires an escalated runner forbidden in this
 session and is not registered; no local polling loop or substitute launcher runs.
 A watch event is a cue to audit the recorded runs, not evidence of a passing run.
+
+
+## Windows CI1 audit, 2026-10-31
+
+The user requested an audit after the PR watch did not resume for the manually
+selected qualification. The PR check rollup contains only Repository quality;
+it excludes the separate workflow_dispatch run. The only registered watch was the
+PR watch. No working run-specific watcher was registered. The earlier monitoring
+claim therefore overstated coverage, and its pending-run statements are superseded
+by this audit. A PR check notification cannot establish dispatch completion.
+
+Both exact attempt-1 runs use d422d76fce1262fd7c625b3d73a510af7611fdab:
+
+- [Repository quality 41175449511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41175449511/attempts/1)
+  passes its two required jobs and all executed steps. The audit confirms 277
+  frontend passes, pinned Rust formatting, 1,292 checkout files validated,
+  13 section-link tests, 10 retention tests, Q1 fixtures and selector source audit.
+  Nine unselected specialist jobs are skipped. The notice's eleven checks do not
+  mean eleven executed/passing qualifications.
+- [Screens qualification 41175476001](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41175476001/attempts/1)
+  fails. Selection and exact-candidate guards, portable preflight, nine Style tests,
+  actual controller/core, exact probe rehearsal, pinned archive verification,
+  public-core source export, package/native execution, x64 identity and privacy/
+  artifact upload pass. Normal SDK semantic validation fails. The helper producer
+  passes; its full reference consumer then correctly refuses the failed normal
+  receipt. Post-cache steps skipped after failure are not rendering evidence.
+
+### Observed failure and classification
+
+Normal entry executes compile, lint and one game startup successfully for the
+independent 1280 by 720 case. It captures all four states and both screens plus
+literal references, then rejects the semantic border assertion at virtual (40,40).
+Expected color is #abcdef with alpha at least 254; actual RGBA is (66,80,93,100).
+The recorded Windows physical window is 922 by 519, renderer angle2, drawing scale
+0.7203125. The checker samples the exact frame corner and assumes opaque coverage
+there. At this fitted scale the edge is antialiased. Its interior at (43,43) is
+(17,51,85,254), within the existing one-channel-unit check of #123456.
+
+Classification is a harness defect in the opaque corner expectation, matching
+[H46](../../testing/INCIDENTS.md#h46-physical-capture-size-mistaken-for-virtual-resolution).
+The complete original assertion reproduces offline from the downloaded images.
+All eight available source/literal pairs and their eight helper/literal pairs have
+zero difference in every RGBA channel. These are partial diagnostic comparisons,
+not a passing full campaign. No threshold, producer receipt or expected image was
+changed. The campaign aborts before the other stage/aspect cases and records zero
+accepted rows. Full normal and helper-reference qualification remains failed.
+
+### Retained evidence and accepted slices
+
+The unexpired artifact shared-style-Windows-41175476001-1 is downloaded locally
+under the ignored L07 windows-ci-01 directory; expiry is 2026-11-07 06:20:24 UTC.
+The complete run logs, run/attempt/head metadata, artifact metadata and separate
+offline diagnostic/audit JSON are retained. A local privacy recheck passes 71 files.
+
+The helper receipt passes 32 accepted frames and pendingMatchesAccepted in one
+session, with three measured SDK validation commands. Every retained frame's
+source revision, state, dimensions, PNG decode and nonblank content is checked.
+Accepted-source bytes match the public-core export and normal input exactly.
+The helper renderer hash matches the current producer. Cooperative shutdown exits
+zero with cleanup complete. Full comparison and its rejection tests are unqualified
+because the normal reference campaign is incomplete.
+
+The Windows native report passes the actual report consumer offline, all seven
+stages, exit zero, no external errors and complete cleanup. It executes no SDK.
+The retained executable has x64 PE machine 0x8664 and SHA-256
+fbfbc97fc2f69e969dad161c97bc173730c6b4f4d5dcd33a01173cb764e3d53d,
+matching the candidate-bound package receipt. This accepts that bounded native
+slice, without physical-input/human or complete rendering acceptance.
+
+Actual cumulative Windows use is SDK 6/16 (three normal plus three helper
+validations), helper 1/4, package 1/2 and native session 1/2. Costly dispatches are
+1/2. Mac use remains SDK 21/16, helpers 2/4, packages 2/2 and native 2/2. No new
+SDK/helper/package/native process or dispatch starts during this audit.
+
+The next correction belongs in the semantic capture check. Preserve strict
+source/reference/helper pixel equality and verify border/interior semantics with
+valid alpha/scale assumptions. A second full pipeline would need eleven more SDK
+starts and exceed the ten remaining. A normal-only campaign can reuse unchanged
+helper/native receipts and remain within the ceiling. Select that bounded route
+before dispatching. This audit changes no production or qualification code, starts
+no retry, leaves PR #72 draft and keeps #43 open and unaccepted.

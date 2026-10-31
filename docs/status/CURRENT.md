@@ -1,39 +1,34 @@
 # Current status
 
-## L07 draft PR published; CI qualification selected
+## L07 CI audited; Windows rendering qualification failed
 
-[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) has implementation 5b5ba9d
-and review fixes f3a6fbc on `codex/l07-shared-looks`, published in draft
-[PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) against
-`codex/phase3b-screen-designer`. Kris selected publication and CI on 2026-10-31.
-Kris approved A5 with Style naming and explicit scope labels, both TDD boundaries,
-and review against e9e8661. The existing inspector/property/inventory/transaction
-owners support sharing, assignment, creation, selected-use copy and Source/history.
+[Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
+`codex/l07-shared-looks`, based on e9e8661. Production correction f3a6fbc is unchanged.
+Both audited CI runs use d422d76, attempt 1. Repository quality 41175449511 passes
+two required jobs and all executed steps, including 277 frontend tests; nine
+unselected jobs are skipped. Windows qualification 41175476001 fails the normal
+SDK semantic border assertion. Its later full helper comparison correctly refuses
+the failed reference receipt. Controller/core, helper producer and x64 packaged
+native slices pass; complete rendering remains unqualified.
 
-The ordinary core run passes 474 tests (52 specialist cases ignored), desktop tests
-38, and frontend tests 277. After fixes, 79 Screens cases (five specialist cases
-ignored), 59 renderer cases, the actual controller/core journey and exact probe
-rehearsal pass. Both review axes found two P2 issues; all four are fixed. The corrected
-f3a6fbc production tree passes signed Mac package/installer checks and all seven native
-probe stages with cleanup complete. Mac SDK/helper image comparisons remain qualified
-on their recorded bytes; reuse limits and candidate identities are in the
-[evidence](../tasks/evidence/shared-look.md#local-delivery-checkpoint-2026-10-31).
+The opaque sample is at a frame corner while Windows fits 1280 by 720 to 922 by
+519. Retained source/literal/helper images match exactly for the available cases;
+the corner has antialiased alpha. The original assertion reproduces offline.
+[Detailed audit](../tasks/evidence/shared-look.md#windows-ci1-audit-2026-10-31)
+owns all executed-step results, hashes, partial proof limits and original failures.
+The PR watch excluded the manual dispatch, and no run-specific watch was registered.
+The earlier monitoring claim was too broad. No CI run is pending from this selection.
 
-Corrected Mac use is SDK 21/16, helpers 2/4, packages 2/2, native sessions 2/2.
-Six implicit validation starts were initially uncounted; the evidence records the
-overrun and added receipt counter. No further Mac costly attempt is selected.
-Automatic Repository quality and the focused Windows Screens qualification are
-selected. Use shared_style=true, the exact published candidate and ordinal=1;
-all other specialist selectors stay false. The selected campaign uses the first
-of two costly dispatches, with Windows ceilings SDK 16, helpers 4, packages 2 and
-native sessions 2. Actual started operations, confirmed run/attempt/head and last
-observed status belong to [#43's CI wait record](https://github.com/Caldwell-41/Renpy-editor/issues/43#publication-and-ci-wait).
-Audit both the automatic checks and qualification artifacts on the same-thread CI
-resume. A waiting run is not passing proof or retry authority. No further Mac
-SDK/package/native attempt is selected. PR #72 stays draft and #43 stays open;
-merge and release are not selected. Full Design Lab startup, physical/human and
-wider acceptance retain their disclosed gaps.
-The unrelated audit, protected recovery below and other pending acceptance are intact.
+Correct the semantic capture oracle before a bounded rendering requalification.
+No production/harness code or costly retry changes during the requested audit.
+Windows use is SDK 6/16, helpers 1/4, packages 1/2, native 1/2; dispatches 1/2.
+A full repeated pipeline needs eleven SDK starts and exceeds the ten remaining;
+a normal-only run can reuse unchanged helper/native proof. Mac use remains SDK
+21/16, helpers 2/4, packages 2/2, native 2/2, with no further costly attempt selected.
+#43 stays open and PR #72 stays draft. Merge/release, physical/human, full Design
+Lab startup and wider acceptance remain separate. The unrelated audit and protected
+recovery below are intact. The audit-only successor does not replace d422d76's
+production/CI candidate or imply a passing Windows rendering campaign.
 
 ## Reviewed text ownership cleanup
 
