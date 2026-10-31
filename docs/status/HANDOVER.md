@@ -1,33 +1,21 @@
 # Current outcome handover
 
-## Complete PR CI reporting and live verification
+## Connected native testing policy closeout
 
-[PR #73](https://github.com/Caldwell-41/Renpy-editor/pull/73), on
-`codex/ci-validation`, implements the combined required PR status, explicit
-qualification plan and client-specific waiting instructions. Parent closeout
-`e18f293` is already an ancestor. [The owning task](../tasks/active/ci-validation.md)
-records acceptance and the first live experiment; [the technical runbook](../testing/CI-VALIDATION.md)
-owns selection and reporting behavior.
+The [accepted documentation outcome](../tasks/archive/2026-11-01-connected-native-testing.md)
+replaces the feature-branch continuation. Kris selected merging
+[PR #74](https://github.com/Caldwell-41/Renpy-editor/pull/74) into
+`codex/phase3b-screen-designer` and retiring its branch. Read the PR's final receipts
+for checked source, merge and cleanup identities. No successor outcome is selected.
+The unrelated audit and protected native recovery below remain intact; existing
+size exceptions preserve those records.
 
-Eighteen coordinator tests, workflow/repository/link controls and the independent
-review corrections pass. The first live ordinary CI passes all 288 frontend tests
-and Rust formatting. Its combined status correctly stays pending for the separate
-Windows dummy, then fails on the deliberate dummy failure. T3 resumes this same
-thread for that failure and the terminal run/log audit confirms the expected cause.
-Ruleset `26271364` requires the combined status on the integration parent only.
-The first passing trial instead exposed a cancelled waiting reporter. Its exact
-GitHub annotation proves the default single pending concurrency slot replaced it.
-The shared reporter now uses `queue: max`; live overlap verification is required.
-The cancelled attempt remains failed evidence in the owning task.
+## Completed CI reporting
 
-The PR owns final passing-trial identities, terminal audit and success-delivery
-receipts at the final candidate; inspect those before treating verification as
-complete. Keep the existing T3 watch while that trial is pending, audit on wake,
-and stop watching at final handback. Final receipts go in the PR without a
-receipt-only source commit. No SDK/helper/package/native operation, merge or release
-is selected. This coordinator remains the sole writer for this outcome. The unrelated
-audit and protected recovery below remain intact; existing size exceptions still
-preserve unique historical recovery records.
+PR #73 is merged. Its
+[final audit](https://github.com/Caldwell-41/Renpy-editor/pull/73#issuecomment-6544119508)
+records terminal qualification and stopped monitoring; no CI-reporting operation
+remains pending. Original failures remain in the [task](../tasks/active/ci-validation.md).
 
 ## L07 merged and accepted
 

@@ -1,15 +1,6 @@
 {
   "version": 1,
-  "branch": "codex/ci-validation",
-  "qualifications": [
-    {
-      "name": "Windows dummy qualification",
-      "workflow": "quality.yml",
-      "event": "workflow_dispatch",
-      "jobs": [
-        "Dummy qualification / Windows x64"
-      ]
-    }
-  ],
+  "branch": "codex/connected-native-testing",
+  "qualifications": [],
   "base": "codex/phase3b-screen-designer"
 }
