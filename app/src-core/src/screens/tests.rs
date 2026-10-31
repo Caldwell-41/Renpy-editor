@@ -2751,3 +2751,60 @@ fn screen_atomic_size_two_tokens_one_history_entry_and_source_reconciliation() {
 
 #[path = "image_sdk_tests.rs"]
 mod image_sdk;
+
+#[test]
+fn indexed_external_style_use_inspects_and_previews_without_widening_writes() {
+    let (_temporary, mut service, root, _owner) = composition_project();
+    for path in ["game/screens.rpy", "game/custom/chapter-one.rpy"] {
+        fs::create_dir_all(root.join(path).parent().unwrap()).unwrap();
+        let source = "# preserve custom source\nscreen external():\n    textbutton \"Continue\":\n        text_style \"external_label\"\n        background gui.panel\n\nstyle external_label is text:\n    size 24\n";
+        fs::write(root.join(path), source).unwrap();
+        let catalog = ipc(&mut service, "screens.list", json!({}));
+        assert!(catalog["styles"]["definitions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|d| d["uses"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|u| u["path"] == path)));
+        let doc = ipc(&mut service, "screens.inspect", json!({"path":path}));
+        let button = &doc["screens"][0]["nodes"][1];
+        assert_eq!(
+            button["textProperties"]["expressions"]["background"],
+            "gui.panel"
+        );
+        assert_eq!(button["textProperties"]["values"]["size"], 24);
+        assert!(button["id"].is_null());
+        let payload = json!({"path":path,"screenName":"external","expectedRevision":doc["revision"],"width":1280,"height":720});
+        let plan = ipc(&mut service, "screens.canvasPlan", payload.clone());
+        assert_eq!(plan["nodes"][1]["properties"]["text_size"], 24);
+        let mut stale = payload;
+        stale["expectedRevision"] = json!("stale");
+        assert_eq!(
+            reject(&mut service, "screens.canvasPlan", stale)["error"]["code"],
+            "SOURCE_CONFLICT"
+        );
+        assert_eq!(
+            reject(
+                &mut service,
+                "screens.setSize",
+                json!({"path":path,"screenName":"external","expectedRevision":doc["revision"],"nodeStart":button["span"]["start"],"width":240,"height":60})
+            )["error"]["code"],
+            "INVALID_PAYLOAD"
+        );
+        assert_eq!(fs::read_to_string(root.join(path)).unwrap(), source);
+        fs::remove_file(root.join(path)).unwrap();
+    }
+    for path in [
+        "other/screens.rpy",
+        "game/../screens.rpy",
+        "game/screens.rpyc",
+    ] {
+        assert_eq!(
+            reject(&mut service, "screens.inspect", json!({"path":path}))["error"]["code"],
+            "INVALID_PAYLOAD"
+        );
+    }
+}

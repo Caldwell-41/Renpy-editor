@@ -26,6 +26,7 @@ interface Host {
   styles?: () => StyleCatalog | undefined;
   buttonSample?: (state:string) => void;
   documents?: () => readonly ScreenDocument[];
+  inspect: (path:string) => Promise<ScreenDocument>;
   resolution?: {width:number;height:number};
   reviewing?: (active:boolean) => void;
   current: () => boolean;
@@ -181,7 +182,7 @@ export class ScreenText {
     this.keys = new AbortController();card.addEventListener("focusin",event=>{const target=event.target as HTMLElement;if(target.dataset.textField)this.lastField=target.dataset.textField;if(target.dataset.appearanceField)this.lastField=`appearance:${target.dataset.appearanceField}`;if(target.dataset.layoutField)this.lastField=`layout:${target.dataset.layoutField}`;},{signal:this.keys.signal});card.addEventListener("keydown",event => {
       if (event.isComposing || event.keyCode === 229 || (event.target as HTMLElement).closest(".screen-style-heading")) return;
       if (event.key === "Escape") {event.preventDefault();event.stopPropagation();this.cancel();}
-      else if (event.key === "Enter" && (!(event.target instanceof HTMLTextAreaElement) || event.ctrlKey || event.metaKey)) {event.preventDefault();event.stopPropagation();void this.apply();}
+      else if (event.key === "Enter" && !(event.target as HTMLElement).closest("button") && (!(event.target instanceof HTMLTextAreaElement) || event.ctrlKey || event.metaKey)) {event.preventDefault();event.stopPropagation();void this.apply();}
     },{signal:this.keys.signal});
     void this.refreshAssets().catch(error => {if (this.active()) this.host.note((error as Error).message,true);});this.sync();
     for (const field of this.fieldErrors.get(this.key(view)) ?? []) {try {this.fieldValidators.get(field)?.();} catch { /* Restore this element's field error after navigation. */ }}
@@ -234,7 +235,7 @@ export class ScreenText {
     const appearance:NonNullable<TextEdits["appearance"]>={};
     for(const key of new Set([...Object.keys(draft.node.textProperties?.values??{}),...Object.keys(definition?.values??{})])) {
       if(["font","size","color","align","bold","italic"].includes(key))continue;
-      if(!this.styleOwns(draft,key))continue;
+      if(!this.styleOwns(draft,key)||this.appearanceBlocked(draft.node,key))continue;
       const value=definition?.values[key];
       if(key.endsWith("_font")&&typeof value==="string") {
         const asset=this.assets.find(a=>fontPath(a)===value);
@@ -284,12 +285,21 @@ export class ScreenText {
     dialog.append(el("h2","",dialog.ariaLabel),el("p","",`${uses.length} elements across ${new Set(uses.map(u=>JSON.stringify([u.path,u.screenName]))).size} screens`));
     const list=el("ul","screen-style-uses"),content=el("div","screen-style-content"),preview=el("section","screen-style-preview"),canvas=el("div","screen-style-canvas"),previewHeading=el("h3"),status=el("p");status.role="status";preview.append(previewHeading,canvas,status);content.append(list,preview);
     const grouped=new Map<string,{name:string;path:string;count:number}>();for(const use of uses){const key=JSON.stringify([use.path,use.screenName]),row=grouped.get(key)??{name:use.screenName,path:use.path,count:0};row.count++;grouped.set(key,row);}
-    let currentDocument:ScreenDocument|undefined;
+    let currentDocument:ScreenDocument|undefined,previewSequence=0;
     const frames=new ScreenCanvasFrames({canvas,status,request:this.host.request,currentRevision:()=>this.active()?currentDocument?.revision:undefined,installed:()=>{},invalidated:()=>{}});
-    const show=(row:{name:string;path:string})=>{
-      previewHeading.textContent=row.name;currentDocument=this.host.documents?.().find(d=>d.path===row.path);
+    const show=async(row:{name:string;path:string})=>{
+      const sequence=++previewSequence;
+      previewHeading.textContent=row.name;currentDocument=undefined;
+      frames.invalidate("Loading screen from Source…");canvas.replaceChildren();
       for(const b of list.querySelectorAll<HTMLButtonElement>("button"))b.ariaPressed=String(b.dataset.path===row.path&&b.dataset.screen===row.name);
-      if(!currentDocument){status.textContent="Source changed. Refresh before previewing this use.";return;}
+      try {
+        const inspected=await this.host.inspect(row.path);
+        if(sequence!==previewSequence||this.styleDialog!==dialog||!this.active())return;
+        currentDocument=inspected;
+      } catch(error) {
+        if(sequence===previewSequence&&this.styleDialog===dialog)status.textContent=`${(error as Error).message} Open Source to review this use.`;
+        return;
+      }
       const values=apply?this.values(draft,false):{},samples:{nodeStart:number;values:TextEdits}[]=[];
       for(const use of uses.filter(u=>u.path===row.path&&u.screenName===row.name)){
         const selected=use.path===draft.document.path&&use.nodeId===draft.node.id;
@@ -312,7 +322,7 @@ export class ScreenText {
     const scroll=this.card?.querySelector(".screen-text-body")?.scrollTop??0;
     return new Promise(resolve=>{
       const close=(accepted:boolean)=>{
-        frames.dispose();dialog.close();dialog.remove();if(this.styleDialog===dialog){this.styleDialog=undefined;this.dismissStyle=undefined;}
+        previewSequence++;frames.dispose();dialog.close();dialog.remove();if(this.styleDialog===dialog){this.styleDialog=undefined;this.dismissStyle=undefined;}
         this.host.reviewing?.(false);
         if(this.active()){
           this.sync();if(activeField){this.focus(activeField);const field=this.fieldControl(activeField);if(selection&&(field instanceof HTMLTextAreaElement||field instanceof HTMLInputElement&&["text","search","tel","url","password"].includes(field.type)))field.setSelectionRange(selection.start,selection.end);}
@@ -332,6 +342,8 @@ export class ScreenText {
       const border=values[prefix+"border"] as {color?:string;width?:number}|undefined;fields[prefix+"borderColor"]=border?.color??"";fields[prefix+"borderWidth"]=border?.width===undefined?"":String(border.width);
     }return fields;
   }
+  private appearanceProperty(key:string):string {return key.replace(/border(?:Color|Width)$/, "border");}
+  private appearanceBlocked(node:ScreenNode,key:string):string|undefined {return node.textProperties?.blocked[this.appearanceProperty(key)];}
   private renderAppearance(host:HTMLElement,view:CompositionView):void {
     for(const key of this.fieldValidators.keys())if(key.startsWith("appearance:"))this.fieldValidators.delete(key);
     host.replaceChildren();const draft=this.value(view),state=this.appearanceStates.get(draft.key)??"",frame=["frame","window"].includes(view.selected.kind);
@@ -339,9 +351,14 @@ export class ScreenText {
       for(const [value,name] of [["","Normal"],["hover_","Hover"],["selected_","Selected"],["insensitive_","Disabled"]]){const option=el("option","",name);option.value=value!;stateControl.append(option);}stateControl.value=state;
       stateControl.onchange=()=>{this.appearanceStates.set(draft.key,stateControl.value);this.host.buttonSample?.(stateControl.value==="insensitive_"?"disabled":stateControl.value.replace("_","")||"normal");this.renderAppearance(host,view);host.querySelector<HTMLElement>("select")?.focus({preventScroll:true});};label.append(stateControl);host.append(label);
     }
-    const input=(name:string,key:string)=>{const label=el("label","screen-text-field",name),control=el("input");control.ariaLabel=name;control.dataset.appearanceField=key;control.value=draft.appearance[key]??"";control.placeholder="Inherit";
-      control.addEventListener("input",()=>{if(this.isSaving()||view.busy)return;const value=this.value(view);value.appearance={...value.appearance,[key]:control.value};this.markEdited(value,`appearance:${key}`,control.value!==this.extraFields(this.styleValues(value))[key]);this.store(value,view);});label.append(control);host.append(label);
-      this.registerField(view,`appearance:${key}`,control,()=>this.appearanceError(key,this.value(view).appearance));
+    const input=(name:string,key:string)=>{const label=el("label","screen-text-field",name),control=el("input");control.ariaLabel=name;control.dataset.appearanceField=key;const blocked=this.appearanceBlocked(view.selected,key);
+      control.readOnly=!!blocked;control.value=blocked?view.selected.textProperties?.expressions?.[this.appearanceProperty(key)]??"Source-only":draft.appearance[key]??"";control.placeholder=blocked?"Source-only":"Inherit";
+      control.addEventListener("input",()=>{if(this.isSaving()||view.busy||this.appearanceBlocked(view.selected,key))return;const value=this.value(view);value.appearance={...value.appearance,[key]:control.value};this.markEdited(value,`appearance:${key}`,control.value!==this.extraFields(this.styleValues(value))[key]);this.store(value,view);});label.append(control);host.append(label);
+      if(blocked) {
+        const help=el("p","",`Source-only. ${blocked}`);help.id=`appearance-source-${view.selected.span.start}-${key}`;
+        control.setAttribute("aria-describedby",help.id);label.append(help,action("Edit in Source",this.host.source));
+      }
+      this.registerField(view,`appearance:${key}`,control,()=>this.appearanceBlocked(view.selected,key)?undefined:this.appearanceError(key,this.value(view).appearance));
       if(key.endsWith("borderColor")||key.endsWith("borderWidth")) {
         const peer=`appearance:${key.replace(/border(Color|Width)$/,key.endsWith("Color")?"borderWidth":"borderColor")}`;
         let composing=false;
@@ -352,7 +369,10 @@ export class ScreenText {
       }
     };
     if(state)input("State text color",state+"color");
-    const def=this.definition(draft);if(!def||def.kind!=="text") {input("Background color",state+"background");input("Border color",state+"borderColor");input("Border width · px",state+"borderWidth");}
+    if(this.definition(draft)?.kind==="text") {
+      const local=el("div","screen-text-local-label");local.append(el("strong","","Background and border"),el("span","","This element only"));host.append(local);
+    }
+    input("Background color",state+"background");input("Border color",state+"borderColor");input("Border width · px",state+"borderWidth");
     if(!frame)host.append(el("p","screen-appearance-limit","State overrides support text color, background and border. Other state properties stay in Source."));
     for(const field of this.fieldErrors.get(draft.key)??[])if(field.startsWith("appearance:")){try{this.fieldValidators.get(field)?.();}catch{/* Restore errors when changing appearance states. */}}
   }
@@ -412,7 +432,7 @@ export class ScreenText {
       if(draft.node.textProperties?.blocked[field]||["frame","window"].includes(draft.node.kind))continue;
       const message=this.fieldError(field,draft.fields[field]);if(message)problems.set(field,message);
     }
-    for(const key of Object.keys(draft.appearance)){const message=this.appearanceError(key,draft.appearance);if(message)problems.set(`appearance:${key}`,message);}
+    for(const key of Object.keys(draft.appearance)){if(this.appearanceBlocked(draft.node,key))continue;const message=this.appearanceError(key,draft.appearance);if(message)problems.set(`appearance:${key}`,message);}
     const errors=this.fieldErrors.get(draft.key)??new Set<string>();
     for(const key of Object.keys(draft.appearance)){const field=`appearance:${key}`;if(problems.has(field))errors.add(field);else errors.delete(field);}
     if(errors.size)this.fieldErrors.set(draft.key,errors);else this.fieldErrors.delete(draft.key);
@@ -450,11 +470,11 @@ export class ScreenText {
     const base=this.extraFields(draft.style?.scope==="shared" ? this.styleValues(draft) : draft.node.textProperties?.values??{}),appearance:NonNullable<TextEdits["appearance"]>={};
     for(const prefix of ["","hover_","selected_","insensitive_"]) {
       for(const suffix of ["color","background"]) {
-        const key=prefix+suffix;if(key==="color"||draft.appearance[key]===base[key])continue;
+        const key=prefix+suffix;if(key==="color"||blocked[key]||draft.appearance[key]===base[key])continue;
         const value=draft.appearance[key]??"",problem=this.appearanceError(key,draft.appearance);if(problem){fail(`appearance:${key}`,problem);continue;}appearance[key]=value||null;
       }
       const colorKey=prefix+"borderColor",widthKey=prefix+"borderWidth";
-      if(draft.appearance[colorKey]===base[colorKey]&&draft.appearance[widthKey]===base[widthKey])continue;
+      if(blocked[prefix+"border"]||draft.appearance[colorKey]===base[colorKey]&&draft.appearance[widthKey]===base[widthKey])continue;
       const color=draft.appearance[colorKey]??"",width=draft.appearance[widthKey]??"";
       if(!color&&!width)appearance[prefix+"border"]=null;
       else {

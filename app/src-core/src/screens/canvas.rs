@@ -150,7 +150,7 @@ impl AuthoringService {
         }
         let (bytes, revision) = self
             .transactions
-            .snapshot(project, path(&request.path)?)
+            .snapshot(project, read_path(&request.path)?)
             .map_err(|_| SceneError::SourceConflict)?;
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);

@@ -32,10 +32,16 @@ function fixture(styled = false, fonts = false) {
   const source: ScreenDocument = {path:"game/ui/caption.rpy",revision:"source",partial:false,screens:[{name:"caption",nodes:[node]}]};
   const view: CompositionView = {document:source,screenId:"screen",screenName:"caption",nodes:[node],selected:node,step:"design",busy:false};
   const commands: CompositionCommand[] = [];
+  const sources: boolean[] = [];
+  const canvasRequests: Record<string,unknown>[] = [];
+  let inspect = async(path:string) => {assert.equal(path,source.path);return source;};
   const layout = new ScreenLayoutEditor({view:()=>({document:source,screen:"caption",node,nodes:[node],busy:false,otherDraft:false}),commit:async()=>{},preview:()=>{},note:()=>{},select:()=>{}});
-  const text = new ScreenText({view:()=>view,styles:()=>({revision:"catalog",definitions}),documents:()=>[source],current:()=>true,
-    request:async <T>(operation:string):Promise<T> => ({...(operation==="authoring.list"?{assets:[]}:{phase:"unavailable"})}) as T,
-    coordinate:task=>task(),commit:async command=>{commands.push(command);},redraw:()=>render(),preview:()=>{},source:()=>{},saved:()=>{},layoutTools:()=>{},order:()=>{},note:()=>{}},layout);
+  const text = new ScreenText({view:()=>view,styles:()=>({revision:"catalog",definitions}),documents:()=>[source],inspect:path=>inspect(path),current:()=>true,
+    request:async <T>(operation:string,payload?:Record<string,unknown>):Promise<T> => {
+      if(operation==="screens.canvasRender")canvasRequests.push(payload!);
+      return {...(operation==="authoring.list"?{assets:[]}:{phase:"unavailable"})} as T;
+    },
+    coordinate:task=>task(),commit:async command=>{commands.push(command);},redraw:()=>render(),preview:()=>{},source:()=>{sources.push(true);},saved:()=>{},layoutTools:()=>{},order:()=>{},note:()=>{}},layout);
   const host=document.createElement("div");host.className="screens-editor";document.body.append(host);
   function render() {text.unmount();host.replaceChildren();const card=document.createElement("div");host.append(card);text.render(card,view);}
   const click=(name:string)=>{const button=[...document.querySelectorAll("button")].find(b=>b.textContent===name);assert.ok(button,name);button.focus();button.click();};
@@ -44,7 +50,7 @@ function fixture(styled = false, fonts = false) {
   const choose=(name:string)=>{click("Change style…");const option=[...document.querySelectorAll<HTMLButtonElement>(".screen-style-option")].find(b=>b.textContent?.startsWith(name+" ·"));assert.ok(option,name);option.click();};
   const apply=()=>{const button=document.querySelector<HTMLButtonElement>("[data-text-apply]");assert.ok(button);button.click();};
   render();
-  return {text,layout,commands,field,fill,click,choose,apply,render,definitions,view,dispose:()=>{text.dispose();browser.happyDOM.abort();}};
+  return {text,layout,commands,sources,canvasRequests,setInspector:(read:(path:string)=>Promise<ScreenDocument>)=>{inspect=read;},field,fill,click,choose,apply,render,definitions,view,dispose:()=>{text.dispose();browser.happyDOM.abort();}};
 }
 function associatedError(control:HTMLElement) {
   const id=control.getAttribute("aria-describedby")?.split(" ").find(id=>id.startsWith("authoring-field-error-"));assert.ok(id,"Associated field error");
@@ -165,5 +171,79 @@ test("assigning a text-only style keeps button decoration local in fields and ev
     for(const state of ["hover_","selected_","insensitive_"]){assert.equal(sample.values.appearance?.[state+"background"],"#456");assert.deepEqual(sample.values.appearance?.[state+"border"],{color:"#567",width:2});}
     h.fill("Size · px","60");const shared=h.text.canvasDraft().samples.find(sample=>sample.nodeStart===60);assert.ok(shared);assert.deepEqual(shared.values,{size:60});h.fill("Size · px","50");
     h.apply();await tick();h.click("Apply to this element");await tick();const command=h.commands[0];assert.ok(command?.type==="formatText");assert.equal(command.style?.name,"label");assert.equal(command.values.appearance?.background,"#456");
+  } finally {h.dispose();}
+});
+
+
+test("text-only button styles expose local decoration in both scopes and keep one transaction",async()=>{
+  for(const scope of ["shared","local"]) {
+    const h=fixture(true);
+    try {
+      await tick();h.definitions[0]!.kind="text";
+      h.definitions[0]!.values={size:20,color:"#111"};h.render();
+      assert.equal(h.field("Background color").value,"#123");
+      assert.match(h.field("Background color").closest(".screen-appearance-fields")!.textContent??"",/This element only/);
+      if(scope==="local")h.click("This element only");
+      assert.equal(h.field("Border width · px").value,"1");
+      h.fill("Background color","#abc");h.fill("Text","Local caption");h.fill("Width","240");
+      h.apply();await tick();if(scope==="local"){h.click("Apply to this element");await tick();}
+      assert.equal(h.commands.length,1);const command=h.commands[0];assert.ok(command?.type==="formatText");
+      assert.equal(command.style?.scope,scope==="local"?"local":undefined);
+      assert.deepEqual(command.values,{text:"Local caption",appearance:{background:"#abc"}});
+      assert.deepEqual(command.layout,{xsize:{unit:"pixels",value:240}});
+    } finally {h.dispose();}
+  }
+});
+
+test("dynamic appearance properties stay Source-only across states, sync and unrelated edits",async()=>{
+  const h=fixture();
+  try {
+    await tick();const properties=h.view.selected.textProperties!;
+    for(const prefix of ["","hover_","selected_","insensitive_"])for(const key of ["background","border",...(prefix?["color"]:[])]) {
+      properties.blocked[prefix+key]="This source expression or repeated property stays in Source.";
+      (properties.expressions??={})[prefix+key]=key==="background"?"gui.panel":key==="border"?"gui.border":"gui.text_color";
+    }
+    h.render();
+    for(const state of ["","hover_","selected_","insensitive_"]) {
+      h.fill("Appearance state",state);h.text.sync();
+      for(const [name,expression] of [["Background color","gui.panel"],["Border color","gui.border"],["Border width · px","gui.border"],...(state?[["State text color","gui.text_color"]]:[])]) {
+        const control=h.field(name!);assert.equal((control as HTMLInputElement).readOnly,true,name);assert.equal(control.value,expression);
+        assert.match(control.parentElement!.textContent??"",/Source-only/);
+        assert.match(document.getElementById(control.getAttribute("aria-describedby")!.split(" ")[0]!)!.textContent??"",/stays in Source/);
+        const source=[...control.parentElement!.querySelectorAll("button")].find(b=>b.textContent==="Edit in Source");assert.ok(source);
+        const enter=new window.KeyboardEvent("keydown",{key:"Enter",bubbles:true,cancelable:true});source.dispatchEvent(enter);
+        assert.equal(enter.defaultPrevented,false,"Source buttons retain native keyboard activation");source.click();
+        control.value="#abc";control.dispatchEvent(new window.Event("input"));
+      }
+    }
+    assert.equal(h.text.hasDraft(),false);assert.ok(h.sources.length>=12);
+    h.fill("Text","Supported sibling");h.apply();await tick();
+    assert.deepEqual(h.commands,[{type:"formatText",nodeId:"text",values:{text:"Supported sibling"}}]);
+  } finally {h.dispose();}
+});
+
+
+test("style review reads outside-file uses on demand and ignores replaced or dismissed reads",async()=>{
+  const h=fixture(true);
+  try {
+    await tick();const path="game/screens.rpy";
+    h.definitions[0]!.uses.push({path,screenName:"external",nodeId:null,nodeStart:30});
+    const external:ScreenDocument={path,revision:"external-revision",partial:false,screens:[{name:"external",nodes:[]}]};
+    let resolve!:(value:ScreenDocument)=>void;
+    h.setInspector(async p=>p===path?await new Promise<ScreenDocument>(accept=>{resolve=accept;}):h.view.document);
+    const outside=()=>[...document.querySelectorAll<HTMLButtonElement>(".screen-style-uses button")].find(b=>b.dataset.path===path)!;
+    h.click("View uses");await tick();outside().click();
+    assert.match(document.querySelector(".screen-style-preview")!.textContent??"",/Loading screen/);
+    document.querySelector<HTMLButtonElement>(`.screen-style-uses button[data-path="${h.view.document.path}"]`)!.click();
+    await tick();await tick();const count=h.canvasRequests.length;resolve(external);await tick();await tick();
+    assert.equal(h.canvasRequests.length,count,"A replaced read must not replace the selected preview");
+    h.setInspector(async p=>p===path?external:h.view.document);outside().click();await tick();await tick();
+    assert.equal(h.canvasRequests.at(-1)?.path,path);assert.equal(h.canvasRequests.at(-1)?.expectedRevision,"external-revision");
+    h.setInspector(async()=>{throw Error("Source is unavailable.");});outside().click();await tick();
+    assert.match(document.querySelector(".screen-style-preview")!.textContent??"",/Source is unavailable/);
+    assert.doesNotMatch(document.querySelector(".screen-style-preview")!.textContent??"",/Source changed/);
+    h.setInspector(async()=>await new Promise<ScreenDocument>(accept=>{resolve=accept;}));outside().click();h.click("Keep editing");
+    const beforeClose=h.canvasRequests.length;resolve(external);await tick();await tick();assert.equal(h.canvasRequests.length,beforeClose);
+    assert.equal(document.querySelector("dialog"),null);
   } finally {h.dispose();}
 });

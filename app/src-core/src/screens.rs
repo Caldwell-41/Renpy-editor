@@ -198,6 +198,13 @@ fn identifier(s: &str) -> bool {
         && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
 
+fn read_path(value: &str) -> Result<RelativePath, SceneError> {
+    if !value.starts_with("game/") || !value.ends_with(".rpy") {
+        return Err(SceneError::InvalidPayload);
+    }
+    RelativePath::new(value).map_err(|_| SceneError::InvalidPayload)
+}
+
 fn path(value: &str) -> Result<RelativePath, SceneError> {
     let name = value
         .strip_prefix("game/ui/")
@@ -666,7 +673,7 @@ impl AuthoringService {
     ) -> Result<Document, SceneError> {
         let (bytes, revision) = self
             .transactions
-            .snapshot(project, path(&request.path)?)
+            .snapshot(project, read_path(&request.path)?)
             .map_err(|_| SceneError::SourceConflict)?;
         inspect(&bytes, request.path, revision.sha256)
     }
@@ -678,7 +685,7 @@ impl AuthoringService {
     ) -> Result<Document, SceneError> {
         let (bytes, revision) = self
             .transactions
-            .snapshot(project, path(&request.path)?)
+            .snapshot(project, read_path(&request.path)?)
             .map_err(|_| SceneError::SourceConflict)?;
         let mut document =
             self.owned_screen_document(project, &bytes, request.path, revision.sha256)?;
