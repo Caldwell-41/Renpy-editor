@@ -1,5 +1,8 @@
 use super::*;
 
+#[path = "style_transaction_tests.rs"]
+mod transactions;
+
 fn shared_project() -> (
     tempfile::TempDir,
     LifecycleService,

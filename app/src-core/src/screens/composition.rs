@@ -353,6 +353,7 @@ impl AuthoringService {
                         project,
                         edit,
                         &catalog,
+                        &screen.name,
                         node,
                         source_path,
                         &bytes,
@@ -363,8 +364,8 @@ impl AuthoringService {
                         let updated = context
                             .screens
                             .iter()
-                            .flat_map(|s| &s.nodes)
-                            .find(|n| n.id.as_ref() == Some(&node_id))
+                            .find(|s| s.name == screen.name)
+                            .and_then(|s| s.nodes.iter().find(|n| n.id.as_ref() == Some(&node_id)))
                             .ok_or(SceneError::InvariantBlocked)?;
                         proposed = updated
                             .text_properties
@@ -591,8 +592,18 @@ impl AuthoringService {
             if path(p).is_err() {
                 continue;
             }
-            let mut doc =
-                self.owned_screen_document(project, b, p.clone(), hex::encode(Sha256::digest(b)))?;
+            let affected = p == source_path || companions.iter().any(|m| m.path.as_str() == p);
+            let mut doc = match self.owned_screen_document(
+                project,
+                b,
+                p.clone(),
+                hex::encode(Sha256::digest(b)),
+            ) {
+                Ok(doc) => doc,
+                // Unrelated source-only files need not be inspectable to edit this owner.
+                Err(SceneError::UnsupportedSource) if !affected => continue,
+                Err(error) => return Err(error),
+            };
             index.resolve(&mut doc, b)?;
             documents.push(doc);
         }

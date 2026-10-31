@@ -233,6 +233,7 @@ fn set_reference_property(
 }
 fn set_reference(
     source: &[u8],
+    screen_name: &str,
     node: &Node,
     name: &str,
     kind: &str,
@@ -250,8 +251,8 @@ fn set_reference(
     let updated = doc
         .screens
         .iter()
-        .flat_map(|s| &s.nodes)
-        .find(|n| n.id == node.id)
+        .find(|s| s.name == screen_name)
+        .and_then(|s| s.nodes.iter().find(|n| n.id == node.id))
         .ok_or(SceneError::UnknownEntity)?;
     if kind == "text" {
         let lines = source_lines(&first)?;
@@ -584,6 +585,7 @@ impl AuthoringService {
         project: &ProjectId,
         edit: &Edit,
         catalog: &Catalog,
+        screen_name: &str,
         node: &Node,
         source_path: &str,
         source: &[u8],
@@ -645,12 +647,12 @@ impl AuthoringService {
             let updated = doc
                 .screens
                 .iter()
-                .flat_map(|s| &s.nodes)
-                .find(|n| n.id == node.id)
+                .find(|s| s.name == screen_name)
+                .and_then(|s| s.nodes.iter().find(|n| n.id == node.id))
                 .ok_or(SceneError::UnknownEntity)?;
             return Ok((
                 append_definition(
-                    set_reference(&cleared, updated, &edit.name, &node.kind)?,
+                    set_reference(&cleared, screen_name, updated, &edit.name, &node.kind)?,
                     definition,
                 ),
                 vec![],
@@ -726,8 +728,8 @@ impl AuthoringService {
                 let updated = doc
                     .screens
                     .iter()
-                    .flat_map(|s| &s.nodes)
-                    .find(|n| n.id == node.id)
+                    .find(|s| s.name == screen_name)
+                    .and_then(|s| s.nodes.iter().find(|n| n.id == node.id))
                     .ok_or(SceneError::UnknownEntity)?;
                 if reference(&source_lines(&proposed)?, updated)
                     .as_ref()
@@ -752,10 +754,11 @@ impl AuthoringService {
                     let updated = doc
                         .screens
                         .iter()
-                        .flat_map(|s| &s.nodes)
-                        .find(|n| n.id == node.id)
+                        .find(|s| s.name == screen_name)
+                        .and_then(|s| s.nodes.iter().find(|n| n.id == node.id))
                         .ok_or(SceneError::UnknownEntity)?;
-                    proposed = set_reference(&proposed, updated, &edit.name, &def.kind)?;
+                    proposed =
+                        set_reference(&proposed, screen_name, updated, &edit.name, &def.kind)?;
                 }
                 if def.path == source_path || definition == bytes {
                     Ok((proposed, vec![]))
@@ -778,13 +781,17 @@ impl AuthoringService {
                 copy.splice(start..start + def.name.len(), name.bytes());
                 let lines = source_lines(&copy)?;
                 let properties = text::read_block(&lines, &lines[0], copy.len(), "style");
-                let local = node
+                let resolved = node
                     .text_properties
                     .as_ref()
                     .ok_or(SceneError::OpaqueBoundary)?;
-                if changes.keys().any(|k| local.blocked.contains_key(k)) {
+                if changes.keys().any(|k| resolved.blocked.contains_key(k)) {
                     return Err(SceneError::OpaqueBoundary);
                 }
+                // Resolved values include the old style. Only source-local
+                // overrides belong on top of the selected target definition.
+                let local =
+                    text::read(&source_lines(source)?, node).ok_or(SceneError::OpaqueBoundary)?;
                 let mut copied = local
                     .values
                     .iter()
@@ -811,11 +818,13 @@ impl AuthoringService {
                 let updated = doc
                     .screens
                     .iter()
-                    .flat_map(|s| &s.nodes)
-                    .find(|n| n.id == node.id)
+                    .find(|s| s.name == screen_name)
+                    .and_then(|s| s.nodes.iter().find(|n| n.id == node.id))
                     .ok_or(SceneError::UnknownEntity)?;
-                let proposed =
-                    append_definition(set_reference(&cleared, updated, &name, &def.kind)?, copy);
+                let proposed = append_definition(
+                    set_reference(&cleared, screen_name, updated, &name, &def.kind)?,
+                    copy,
+                );
                 Ok((proposed, vec![]))
             }
         }?;
@@ -824,8 +833,8 @@ impl AuthoringService {
             let updated = doc
                 .screens
                 .iter()
-                .flat_map(|s| &s.nodes)
-                .find(|n| n.id == node.id)
+                .find(|s| s.name == screen_name)
+                .and_then(|s| s.nodes.iter().find(|n| n.id == node.id))
                 .ok_or(SceneError::UnknownEntity)?;
             proposed = updated
                 .text_properties
