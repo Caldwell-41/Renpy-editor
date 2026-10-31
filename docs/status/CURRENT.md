@@ -1,30 +1,31 @@
 # Current status
 
-## L07 final-review corrections and fresh qualification selected
+## L07 review fixes validated locally; Windows CI5 selected
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
-`codex/l07-shared-looks`. The fresh full-PR review at `3cb39a6` against confirmed
-base `e9e8661` found two Standards and two Spec issues. Kris selected all four fixes,
-parallel root-cause implementation/self-review and additional testing where needed.
+`codex/l07-shared-looks`. Kris selected all four findings from the fresh full-PR
+review of `3cb39a6` against `e9e8661`, parallel root-cause fixes/self-review and
+additional testing. Both workers are integrated; source checkpoint `895cdb8`
+contains the completed inspector and core corrections.
 
-The core correction `138ca82` is integrated as `f73ad9a`; its 14 ordinary Style
-tests and the 477-test ordinary release-core suite pass. The inspector worker owns validation, technical naming and pending
-assignment. The coordinator owns integration, final checks, publication and CI.
 [Correction evidence](../tasks/evidence/shared-look.md#full-pr-review-corrections-and-fresh-qualification-2026-10-31)
-owns reproductions, worker results and pending validation. The first debug broad
-run failed in unchanged runtime cleanup; its exact replay and full release run pass.
-The original discrepancy and unestablished cause remain recorded.
+records the reproductions, worker/parent review and final results. All 285 frontend,
+477 ordinary release-core, 38 desktop, two driver and five image/source gate tests
+pass, along with the build and real controller/probe journeys. The initial debug
+cleanup-test failure, its passing exact replay and unestablished cause remain recorded.
 
 Fresh Mac proof at `ed9391a` passes 16 normal rows, 32 exact helper comparisons,
-five rejection cases, pending match and cleanup for the corrected runtime fixture.
-Cumulative Mac use is SDK 32/32, helpers 3/3, package/native 2/2 each; the historical
-21/16 overrun remains disclosed. #43 owns the selected full Windows CI5 at ordinal 5
-and cumulative limits. Inspector integration, combined UI checks and Windows proof
-remain pending. Earlier CI4 success stays tied to `d5b19e5` and its recorded fixture.
+five rejections, pending match and cleanup for the corrected text-only button source.
+Its core/source hashes still match after frontend integration. Cumulative Mac use is
+SDK32/helper3/package2/native2 under #43's revised selection; the historical 21/16
+overrun remains disclosed. Earlier CI4 proof stays at `d5b19e5` with its old fixture.
 
-PR #72 stays draft and #43 stays open with all acceptance boxes unchecked.
-Physical/human input, full Design Lab startup and wider editor/canvas/3B acceptance
-remain separate. Existing protected recovery and the unrelated audit are preserved.
+Full Windows CI5 at ordinal 5 and automatic Repository quality remain the pending
+publication/qualification step. [#43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
+owns exact confirmed runs/attempts/heads and actual/reserved use. Keep PR draft and
+criteria unchecked until audit/acceptance. Physical/human input, full Design Lab
+startup and wider editor/canvas/3B acceptance remain separate. Protected recovery
+and the unrelated audit remain intact.
 
 ## Reviewed text ownership cleanup
 

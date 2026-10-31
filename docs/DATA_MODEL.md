@@ -303,7 +303,10 @@ continue through the existing font owner.
 
 The inspector keeps one draft owner and one affected-use dialog. It binds reviewed
 values and use revisions, preserves section/scroll/focus/selection across review,
-and displays the source-derived element/screen counts. Source reconciliation,
+and displays the source-derived element/screen counts. The same draft records which
+appearance fields the user edited, so changing a pending Style replaces untouched
+defaults without turning the previous Style's values into shared edits. Local button
+decoration stays outside text-only shared previews. Source reconciliation,
 Undo/Redo and reopen reconstruct definitions and references from authoritative bytes.
 [Ticket #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) owns acceptance;
 [shared-look evidence](tasks/evidence/shared-look.md) owns candidate-specific proof.

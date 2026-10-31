@@ -1317,3 +1317,46 @@ Actual additional Mac use is SDK 11 and helper 1. Cumulative Mac use is now SDK
 and original CI1-4 evidence remain disclosed above. Windows use remains SDK 25,
 helpers 2, packages 2, native sessions 2 and dispatches 4 before CI5. No new Mac
 package/native session or costly dispatch ran for this local qualification.
+
+### Inspector integration and final local validation
+
+Inspector worker commits `1a31bbb` and `12f3e2e` are integrated in order as
+`e901cc6` and `895cdb8`. The worker reproduces missing associated appearance errors,
+lossy technical-name normalization and A20/B30/C40 default retention before fixing
+them. Its follow-up reproduces a text-only assignment preview clearing background.
+The fix reuses completion/accessible field validation and technical-name validation,
+records actual user edits within the existing draft, and keeps local decoration out
+of shared text-only previews. Self-review corrects user edits that match an
+intermediate Style's defaults instead of treating them as untouched defaults.
+
+The coordinator reviews the combined production changes and the new tests against
+the four findings, the approved inspector and existing source/property/draft owners.
+No further issue is found in that combined correction review. All 285 frontend
+tests pass with zero failures, cancellations or skips, using pinned Node/npm and
+Python 3.12.16. Typechecking and the production build pass. The actual UI/core
+journey and exact packaged-probe rehearsal pass from the primary checkout, including
+the real report consumer. They execute no SDK and do not claim native WebView proof.
+
+The controller asserts exact source preservation and unchanged existing uses after
+repeated pending assignment, Undo/Redo and agreement of correlated provisional and
+accepted core plans. Full-button-to-text-only assignment retains normal/state
+backgrounds and borders locally. Its accepted plan removes the superseded label-style
+reset metadata; appearance properties otherwise agree. New DOM cases cover blur,
+IME, associated errors, dependent border correction, hidden-state invalid submission,
+draft/focus retention, valid underscores, invalid names, untouched defaults, explicit
+font inheritance and actual user edits across repeated Style changes.
+
+Original worker reproductions and successful results remain in the workers' ignored
+evidence. The coordinating results are retained under `final-review-controller-01`,
+`final-review-probe-01` and `final-review-validation`. The Mac-qualified core/source
+hashes still match after frontend integration, so its `ed9391a` rendering proof
+retains that explicit scope. No renderer mapping or native identity changed.
+
+Publication selects full Windows CI5 at ordinal 5 and the candidate's automatic
+Repository quality run. [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
+owns the confirmed run IDs, attempts, exact heads, observed state and cumulative
+actual/reserved use after dispatch. Audit those exact runs before claiming Windows
+qualification. CI4 and the fresh Mac proof keep their original candidate identities.
+The PR stays draft and acceptance remains unchecked pending that audit and the
+user's acceptance. The run-specific T3 watch limitation recorded above still applies;
+the automatic PR rollup does not establish completion of the manual workflow.

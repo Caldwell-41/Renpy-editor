@@ -1,48 +1,48 @@
 # Current outcome handover
 
-## L07 final-review corrections in progress
+## L07 review fixes integrated; Windows CI5 audit next
 
 Continue [draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) on
-`codex/l07-shared-looks`. Kris selected all four findings from the fresh Standards/
-Spec review of `3cb39a6` against confirmed base `e9e8661`, then approved additional
-testing where needed. This supersedes the preceding read-only review restriction.
-
-Core worker `138ca82` is integrated as `f73ad9a`; its worktree branch remains
-`t3/fix-textbutton-style-property-ownership`. The correction preserves local button
-decoration when assigning/copying text-only Styles. All 14 ordinary Style cases
-pass in the worker and after the coordinator extends the runtime fixture.
-The inspector worker owns `screen-text.ts` and frontend tests in its separate
-worktree. It must finish validation, naming and repeated-assignment fixes plus
-self-review. The coordinator owns all integration, docs, final validation and CI.
+`codex/l07-shared-looks`. Kris selected fixing all four final-review findings and
+approved additional testing as needed. Both separate-worktree workers reproduced
+and fixed their faults, then reviewed and corrected their own work. Core `138ca82`
+is integrated as `f73ad9a`; inspector `1a31bbb`/`12f3e2e` are integrated in order as
+`e901cc6`/`895cdb8`. The coordinator reviewed the combined correction without a
+further finding. Worker worktrees and original ignored reproduction evidence remain.
 
 [Correction evidence](../tasks/evidence/shared-look.md#full-pr-review-corrections-and-fresh-qualification-2026-10-31)
-owns reproduction/results and selected tests. The first broad debug run failed an
-unchanged descendant-presence assertion (476 passed, one failed). Exact replay then
-passes, and full ordinary release-core passes 477 tests, zero failures, 52 specialist
-cases ignored and three documented exclusions. All 38 desktop, two driver and five
-image/source gate tests pass. No cleanup assertion or code changed; the original
-discrepancy has no established cause and remains recorded. Combined frontend/
-controller/probe checks and final parent review await the inspector commit.
+owns scope, exact commands and limitations. Primary-checkout final validation passes
+285 frontend tests, build, real UI/core journey, exact packaged-probe rehearsal and
+its report consumer. Core/source proof passes 477 ordinary release-core, 38 desktop,
+two driver and five image/source gate tests. The initial debug broad run failed an
+unchanged cleanup assertion; isolated replay and full release run pass without a
+cleanup/deadline/assertion change. Its cause remains unestablished and recorded.
 
-The updated runtime export exercises text-only button assignment/copy with retained
-normal/state decoration. Fresh Mac proof at core/source candidate `ed9391a` passes
-16 normal rows, 32 exact helper comparisons, five rejections, pending match and
-cooperative cleanup. Export/normal/helper manifests and all source hashes match.
-Ignored `final-review-mac-01/audit.json` owns the compact audit; original producer
-receipts remain immutable. Mac cumulative use is SDK 32/32 and helpers 3/3, with
-package/native 2/2 each. The historical 21/16 overrun remains. #43 owns Windows CI5
-at ordinal 5, its cumulative ceilings and future actual starts. Windows use remains
-SDK25/helper2/package2/native2/dispatches4 before CI5. Earlier CI4 success stays at
-`d5b19e5` with its original fixture and limits.
+The new runtime fixture assigns/copies a text-only button Style while retaining
+normal/state decoration. Fresh Mac normal/helper proof at `ed9391a` passes 16/32
+exact rows/comparisons, five rejections, pending match and cooperative cleanup.
+Export/normal/helper manifests are identical and qualified core/source hashes still
+match after frontend integration. Original ignored `final-review-mac-01/audit.json`
+and producer receipts retain their exact source/hash scope. No new Mac package or
+native session is claimed. Historical CI4 remains at `d5b19e5` with its old fixture.
 
-Next: integrate the completed inspector commit, resolve validation results, review
-and validate the combined change, preserve the audited Mac proof scope, then update/push
-PR #72 and dispatch/confirm Windows CI5 and automatic quality. Record exact candidate,
-run/attempt and actual starts before yielding to the supported wait route.
-Keep PR draft, #43 open and criteria unchecked. Merge/release, physical/human input,
-full Design Lab startup and wider editor/canvas/3B acceptance remain separate.
-Protected recovery and the unrelated untracked audit below remain intact. Status
-records retain the existing size exception for that unique recovery/history.
+Publish this coherent correction candidate, update PR #72, and dispatch full fresh
+Windows CI5 at ordinal 5 plus automatic Repository quality. After dispatch,
+[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) owns the confirmed
+run IDs, attempts, full heads, observation time and actual/reserved use. Read that
+live operation record before resuming the terminal audit. The PR automatic rollup
+cannot establish completion of the manual workflow; no run-specific T3 watch is
+available. Use the supported manual same-thread resume for that audit, with no model
+polling, watcher or duplicate dispatch. Audit both exact runs and every executed
+step, same-source frames, package/native identity, cleanup and retained artifacts.
+
+Mac actual use is SDK32/helper3/package2/native2; preserve the historical 21/16
+overrun. Before CI5, Windows actual use remains SDK25/helper2/package2/native2/
+dispatches4. #43 owns revised ceilings and counts; no allowance resets. Keep PR
+#72 draft, #43 open and criteria unchecked. Merge/release, physical/human, full
+Design Lab startup and wider editor/canvas/3B acceptance remain separate.
+Protected recovery and the unrelated audit below remain intact. Status records
+retain the existing size exception for that unique recovery/history.
 
 ## Text ownership cleanup review ready
 
