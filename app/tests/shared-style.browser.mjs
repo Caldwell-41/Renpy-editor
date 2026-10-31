@@ -10,7 +10,7 @@ import {driverProcess} from './phase2-driver-process.mjs';
 const output=resolve(process.env.SHARED_STYLE_OUTPUT??'../.toolchains/l07-shared-look/controller-01');await mkdir(output,{recursive:true});
 const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'project-font'],{startupTimeout:60000});
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
-let browser,sessionId,page;const errors=[],plans=[],canvasRequests=[];
+let browser,sessionId,page;const errors=[],plans=[],canvasRequests=[],historyRpc=[];
 let assignmentPreviewTarget,assignmentPreviewProof,acceptAssignmentPreview;
 const assignmentPreview=new Promise(resolve=>{acceptAssignmentPreview=resolve;});
 let switchPreviewTarget,switchPreviewProof,acceptSwitchPreview;
@@ -28,7 +28,7 @@ const rpc=async r=>{
   return {ok:true,value:{phase:'unavailable',message:'SDK qualification is separate.'}};
  }
  if(r.operation==='screens.canvasStatus')return {ok:true,value:{phase:'unavailable',message:'SDK qualification is separate.'}};
- const result=await child.request(r);if(result.value?.sessionId)sessionId=result.value.sessionId;return result;
+ const result=await child.request(r);if(['scene.list','scene.apply'].includes(r.operation))historyRpc.push({request:r,result});if(result.value?.sessionId)sessionId=result.value.sessionId;return result;
 };
 const request=async(operation,payload={})=>{const r=await rpc({protocolVersion:1,requestId:randomUUID(),operation,payload:{sessionId,...payload}});assert.equal(r.ok,true,JSON.stringify(r));return r.value;};
 const read=async owner=>(await request('source.open',{path:owner.path})).text;
@@ -178,4 +178,4 @@ try {
  const textSaved=await read(switchOwner);assert.equal(textSaved.split('\nstyle switch_a')[1],textStyleSource.split('\nstyle switch_a')[1]);assert.equal(textSaved.includes('style "switch_c" # keep assignment'),true,'The existing C use remains assigned to C');assert.equal(textSaved.includes('text_style "switch_label" # keep label style'),true);
  await active.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-text-field=size]')?.value==='40');assert.equal(await read(switchOwner),textStyleSource);await active.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-text-field=size]')?.value==='50');assert.equal(await read(switchOwner),textSaved);
  assert.deepEqual(errors,[]);await writeFile(join(output,'result.json'),JSON.stringify({passed:true,realCore:true,sdk:false,native:false,errors,plans,assignmentPreviewProof,switchPreviewProof,textAssignmentProof},null,2));console.log('PASS shared and independent Style journeys through production UI/core.');
-} catch(error) {await page?.screenshot({path:join(output,'failure.png')}).catch(()=>{});await writeFile(join(output,'failure.json'),JSON.stringify({error:String(error),errors,canvasRequests,plans,assignmentPreviewTarget,assignmentPreviewProof,switchPreviewTarget,switchPreviewProof,textAssignmentTarget,textAssignmentProof},null,2));throw error;} finally {await browser?.close();await server.close();await child.stop();}
+} catch(error) {await page?.screenshot({path:join(output,'failure.png')}).catch(()=>{});await writeFile(join(output,'failure.json'),JSON.stringify({error:String(error),errors,canvasRequests,plans,historyRpc,body:await page?.locator('body').innerText(),assignmentPreviewTarget,assignmentPreviewProof,switchPreviewTarget,switchPreviewProof,textAssignmentTarget,textAssignmentProof},null,2));throw error;} finally {await browser?.close();await server.close();await child.stop();}

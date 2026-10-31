@@ -8,7 +8,7 @@ on:
         type: string
         required: true
       ordinal:
-        description: Cumulative L07 dispatch ordinal (5, review-fix Windows qualification)
+        description: Cumulative L07 dispatch ordinal (6, full-review corrections)
         type: string
         required: true
 
@@ -47,7 +47,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/l07-shared-looks
           test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ORDINAL" = 5
+          test "$ORDINAL" = 6
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/shared-style"
           git rev-parse HEAD > "$RUNNER_TEMP/shared-style/candidate.txt"
@@ -73,7 +73,7 @@ jobs:
           npm run check
           cargo fmt --all --check
           node --test tests/phase2-driver-process.test.mjs
-          cargo test -p loomlight-core --locked --lib screens::tests::styles -- --nocapture
+          cargo test -p loomlight-core --locked --lib screens:: -- --nocapture
           cargo build -p loomlight-core --example help-controller-driver --locked
           npm run build
           cargo check -p loomlight-desktop --locked
@@ -82,8 +82,10 @@ jobs:
         env:
           SHARED_STYLE_OUTPUT: ${{ runner.temp }}/shared-style/controller
           SHARED_STYLE_PROBE_OUTPUT: ${{ runner.temp }}/shared-style/probe-controller
+          APPEARANCE_CORRECTIONS_OUTPUT: ${{ runner.temp }}/shared-style/appearance-controller
         run: |
           node tests/shared-style.browser.mjs
+          node tests/screen-appearance-corrections.browser.mjs
           node tests/shared-style-probe-controller.browser.mjs
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         if: runner.os == 'Windows'

@@ -291,6 +291,20 @@ share one transaction/history entry. Unchanged commands add none. The core refus
 a changed definition/use inventory, dirty source, incompatible style or affected
 property overridden at a use. All failures retain the inspector draft.
 
+Element re-lookups after a Style patch remain inside the captured owning screen;
+matching marker text in an unowned screen grants no write authority. A local copy
+starts from the chosen definition and overlays only source-local properties and
+explicit draft edits, rather than inherited values from a previous definition.
+Unrelated unsupported UI files do not block ordinary composition refresh.
+
+The bounded Style index reports its analysis limit without rejecting ordinary
+owned-screen operations. Archives and orphan bytecode make shared review
+unavailable and participate in its revision. Source-only `use` inclusion graphs
+also refuse shared edits until their affected parent screens can be accounted for.
+These refusals retain drafts and explain the missing shared-review capability.
+Read-only inspection and canvas planning accept contained game `.rpy` paths for
+indexed affected-use previews; owned mutations retain their stricter path rules.
+
 `formatText.values.appearance` extends the existing property owner with background
 colors, borders and supported state overrides. A border is `{color, width}` with a
 hex color and whole width 1 through 32. Source stores it as a recognized `foreground`

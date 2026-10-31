@@ -1,5 +1,29 @@
 # Current outcome handover
 
+## L07 full-review corrections integrated
+
+Kris selected fixing all nine findings, parallel root-cause work, worker self-review,
+coordinator final validation, PR update and CI. Three workers reproduced and fixed
+their assigned cases; commits `8b5eb01`, `7cca53f` and `cf95e70` are integrated as
+`1230d65`, `0b0cb1f` and `e176b48`. The coordinator reviewed their combined changes.
+[Correction evidence](../tasks/evidence/shared-look.md#full-review-correction-assignments-2026-10-31)
+owns assignments, tests, retained failures and CI6 selection.
+
+Combined frontend/typecheck passes 288 tests, build, 38 desktop tests, the appearance
+and shared-style controller journeys, two driver tests and five image/evidence
+checks. Broad release-core passes 491 tests with 52 specialist cases ignored and three
+documented exclusions. The exact production-probe rehearsal also passes.
+The initial sandbox-denied loopback checks, missing-Pillow environment and original
+controller Undo timeout remain recorded; the instrumented controller passes without
+a product change and the original timeout cause remains unestablished.
+
+Windows CI6 is prepared within the existing limits. Baseline actual use remains
+SDK36/helper3/package3/native3/dispatches5; reserve eleven SDK starts and one helper/
+package/native session. #43 owns cumulative ceilings and later run identities.
+No additional Mac costly operation is selected. PR #72 remains draft, criteria
+unchecked and all prior evidence retains its candidate-specific scope.
+
+
 ## L07 corrections complete; CI5 audited; user acceptance next
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on

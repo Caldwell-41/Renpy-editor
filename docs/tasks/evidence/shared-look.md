@@ -1489,3 +1489,104 @@ This closeout changes documentation only. `e8750cd` remains the full Windows
 candidate; fresh Mac core/source proof stays at `ed9391a`. Later automatic check
 identities belong in #43 and the PR without another receipt-only commit. The next
 owner is Kris for review/acceptance. No merge, release or issue closure is selected.
+
+
+## Full-review correction assignments, 2026-10-31
+
+Kris selected fixing all nine findings against `322b270`, parallel workers using
+`principle-fix-root-causes`, worker self-review, coordinator final validation, PR
+publication and CI. Integration remains on `codex/l07-shared-looks`, based on
+`322b270`; PR base remains `e9e8661`. Approved A5 behavior remains the target.
+
+Three isolated workers share that base. Source transaction worker
+`t3/fix-screen-style-transactions` produced `8b5eb01`, integrated as `1230d65`.
+It owns scoped element re-lookups, unrelated-document refresh and selected-target
+copy defaults. Inventory worker `t3/fix-shared-style-impact-index` produced
+`7cca53f`, integrated as `0b0cb1f`. It owns bounded shared analysis, executable
+inventory revisions and Source-only inclusion refusal. Their declared `styles.rs`
+overlap merges cleanly. Inspector/preview work remains pending; the coordinator owns
+combined review, shared contracts, evidence, publication and CI. Each worker must
+reproduce its failures, run focused checks and self-review before handoff.
+
+Windows CI6 is selected for the coherent corrected candidate, using the existing
+workflow and exact ordinal guard. Reserve eleven SDK starts and one helper, package
+and native session. Baseline actual use remains SDK36/helper3/package3/native3/
+dispatches5, with ceilings SDK47/helper4/package4/native4/dispatches6. Charge actual
+starts, including failures, and audit receipts before resolving reservations.
+Routine checks have no numerical allowance. No additional Mac costly operation is
+selected; its actual SDK32/helper3/package2/native2 and historical overrun remain.
+Prior qualification candidates and unchecked acceptance criteria retain their scope.
+
+
+### Inspector integration and combined review
+
+Inspector worker `t3/fix-screen-appearance-preview` produced `cf95e70`, integrated
+as `e176b48`. It restores local button decoration controls, marks blocked appearance
+expressions Source-only, preserves Source-button Enter activation and reads external
+indexed uses through the existing inspector/planner. No new preview parser or write
+authority is added. Its declared core overlap merges cleanly.
+
+All three workers reproduced their assigned findings, corrected the existing owners
+and self-reviewed. Coordinator diff review confirms every Style re-lookup is scoped
+to the owning screen, copied defaults come from the selected definition, incomplete
+analysis refuses shared edits, and unrelated ordinary operations retain their owner.
+A5 scope and control placement remain; local decoration and Source-only explanations
+restore the approved functional behavior. No new design approval is claimed.
+
+Combined frontend/typechecking passes 288 tests with no skips, and the production
+build passes. Repository validation, workflow lint and Rust formatting pass. Broad
+core, desktop and real controller/probe checks are in progress. Local evidence is
+retained under ignored `review9-final`. The initial browser preflight could not bind
+loopback under the sandbox; the authorized local-server execution is separate.
+Windows CI6 includes the new actual appearance-controller journey before SDK work.
+
+
+### Full-review finding coverage
+
+| Finding | Corrected owner and focused proof |
+| --- | --- |
+| Copied markers retarget Style edits | Captured screen name scopes every re-lookup; five public-core create/shared/local cases preserve unowned bytes, history and reopen. |
+| Unrelated unsupported file blocks composition | Refresh skips only unrelated UnsupportedSource documents; the selected unsupported owner still refuses. |
+| Project-wide Style limit blocks ordinary edits | Bounded index reports incomplete analysis; definitions/reference fixtures above 4,096 retain ordinary edit/history/reopen. |
+| Archives and orphan bytecode omit uses | Bounded executable inventory affects review revisions and refuses unknown uses; changed/add/remove and source-paired cases pass. |
+| Included parent screens omitted | Source-only inclusion graphs report shared review unavailable; static/dynamic/parameterized fixtures refuse without writes. |
+| Copy retains old inherited properties | Target defaults plus raw source-local overrides; text/button copy cases preserve hidden state values, exact source and history. |
+| Text-style button decoration controls hidden | Decoration remains visible and local in both scopes; DOM and actual UI/core cases prove one transaction. |
+| Dynamic appearance appears editable | Blocked expressions remain read-only with Source access; state changes, validation, previews and unrelated edits retain them. |
+| External indexed-use preview unavailable | Read contained game scripts on demand through existing inspection/planning, keep writes strict, reject late/replaced reads; DOM/core/controller cases pass. |
+
+The exact production-probe rehearsal and native evidence gate pass separately from
+actual native execution. All 38 desktop tests pass with required local HTTP fixture
+access. Two driver tests and five image/evidence checks pass. Python 3.12 in the first
+environment lacked Pillow; the existing qualification environment supplies it.
+The initial sandboxed desktop/core runs hit denied loopback fixtures, with poisoned
+mutex follow-on failures in desktop. Those results remain failures; the desktop
+rerun passes and the core rerun remains pending. The first full controller timed out
+at content Undo. Its original failure images/JSON remain separate; diagnostic
+request/result and UI-body capture was added, and the same journey passes without
+changing product code or deadlines. Its initial timeout cause is unestablished.
+
+
+### Final coordinator validation before CI6
+
+The coherent integrated source passes 491 ordinary release-core tests, 52 specialist
+cases ignored and three documented exclusions. The SDK/helper tests remain explicit
+selections. Doc-tests discover zero cases and are not counted as additional proof.
+All 38 desktop and 288 frontend tests pass, plus typechecking, the production build,
+two driver tests, five image/evidence checks, 13 repository link tests, workflow lint,
+pinned Rust formatting, repository validation and whitespace checks. The appearance
+and shared-style real controller/core journeys and exact production-probe rehearsal
+pass. No assertion, test deadline or product behavior changed to clear the original
+controller timeout. Core source bytes match the tested combined candidate.
+
+The superseded sandbox-denied core run was stopped after its socket failures were
+classified; it is not a pass. Its log, the failing desktop log and the successful
+permitted reruns remain separate. Worker self-reviews and coordinator review cover
+all nine findings. No additional full-branch independent review is claimed.
+
+The approved A5 layout and wording remain the reference. Restored decoration
+controls and Source-only field explanations implement its existing behavior.
+No fresh Mac native or SDK qualification is claimed for these corrections. Previous
+Mac and CI1-5 evidence retain their exact candidates. CI6 is the selected fresh
+Windows source/helper/package/native qualification; terminal audit and user
+acceptance remain pending. Keep PR draft and #43 criteria unchecked.
