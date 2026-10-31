@@ -1,34 +1,28 @@
 # Current status
 
-## L07 CI4 audited passing; final full-PR review next
+## L07 final-review corrections and fresh qualification selected
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
-`codex/l07-shared-looks`; full Windows candidate is
-d5b19e527f3b420af603991d9fdc68a9140adb1e. The audit closeout changes docs only.
-[Full CI4 41187324356, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187324356/attempts/1)
-and [automatic quality 41187217183, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187217183/attempts/1)
-are independently audited passing at that candidate. Every executed step passes.
+`codex/l07-shared-looks`. The fresh full-PR review at `3cb39a6` against confirmed
+base `e9e8661` found two Standards and two Spec issues. Kris selected all four fixes,
+parallel root-cause implementation/self-review and additional testing where needed.
 
-[The terminal audit](../tasks/evidence/shared-look.md#ci4-terminal-success-audit-and-review-handoff-2026-10-31)
-owns the same-source manifest proof, 16 normal semantic/exact rows, 32 fresh helper
-comparisons and five rejection cases, pending match, measured helper counter,
-fresh x64 package hash, seven native stages, exit/cleanup and retained 157-file
-artifact. Digest/privacy checks and offline strict replays pass. Automatic quality
-passes 277 frontend tests and both required jobs; nine unselected jobs are skips.
-Recorded unchanged Mac rendering/signed-native proof retains its stated scope.
+The core correction `138ca82` is integrated as `f73ad9a`; its 14 ordinary Style
+tests pass. The inspector worker owns validation, technical naming and pending
+assignment. The coordinator owns integration, final checks, publication and CI.
+[Correction evidence](../tasks/evidence/shared-look.md#full-pr-review-corrections-and-fresh-qualification-2026-10-31)
+owns reproductions, worker results and pending validation. The first broad core run
+has an unresolved assertion in unchanged runtime descendant cleanup and is not a pass.
 
-Actual cumulative Windows use is SDK 25/25, helper 2/4, package 2/2, native 2/2
-and dispatches 4/4. Mac's earlier disclosed overrun remains unchanged. No costly
-operation runs for the audit or documentation closeout, and none is pending.
-Kris's needed-allowance authorization is retained without resetting prior use.
+The corrected runtime fixture will receive fresh Mac normal/helper comparisons and
+full Windows CI5 at ordinal 5. #43 records revised cumulative selections under Kris's
+approval; actual prior use and the historical Mac overrun remain intact. No new
+costly start has occurred at this checkpoint. Earlier audited CI4 success remains
+tied to `d5b19e5` and its recorded fixture, rather than the correction candidate.
 
-Next is the user-requested separate full-PR review with the code-review skill,
-fresh Standards/Spec subagents and fixed base e9e8661. The new review is read-only;
-this chat completes all writer work before launching it. #43, B03 #25, P3B #22,
-B08 #30 and L18 #46 receive the automated-result update while their acceptance,
-open states and dependency edges stay intact. PR #72 stays draft. Merge/release,
-physical/human, full Design Lab startup and wider editor/canvas/3B acceptance
-remain separate. The unrelated audit and protected recovery below are preserved.
+PR #72 stays draft and #43 stays open with all acceptance boxes unchecked.
+Physical/human input, full Design Lab startup and wider editor/canvas/3B acceptance
+remain separate. Existing protected recovery and the unrelated audit are preserved.
 
 ## Reviewed text ownership cleanup
 

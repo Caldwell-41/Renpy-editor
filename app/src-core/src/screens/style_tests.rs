@@ -890,6 +890,18 @@ fn style_runtime_inputs_are_authored_through_public_source_and_transaction_reque
     let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
         .as_str()
         .unwrap()
+        .to_owned()
+        + "\nstyle button_label is text:\n    size 24\n    color \"#ffeecc\"\n    text_align 0.5\n    bold False\n    italic False\n    hover_color \"#ffffff\"\n    selected_color \"#ccffff\"\n    insensitive_color \"#888888\"\n";
+    save_composition_source(&mut service, &owner, &source);
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"formatText","nodeId":button["selectedId"],"values":{},"style":{"scope":"shared","name":"button_label","expectedRevision":catalog["styles"]["revision"]}}),
+    );
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
         .to_owned();
     let mut with_ids = source;
     for (id, name) in [
@@ -966,6 +978,12 @@ fn style_runtime_inputs_are_authored_through_public_source_and_transaction_reque
         &mut service,
         &owner,
         json!({"type":"formatText","nodeId":body["selectedId"],"values":{"size":40},"style":{"scope":"local","name":"body_style","expectedRevision":catalog["styles"]["revision"]}}),
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"formatText","nodeId":button["selectedId"],"values":{},"style":{"scope":"local","name":"button_label","expectedRevision":catalog["styles"]["revision"]}}),
     );
     let independent = runtime_snapshot(&mut service, &owners);
     service.close().unwrap();

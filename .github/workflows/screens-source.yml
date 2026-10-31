@@ -14,7 +14,7 @@ on:
         required: true
         default: '3'
       shared_style:
-        description: Select L07 Windows Style ordinal 4 with fresh same-source SDK/helper and package/native proof
+        description: Select L07 Windows Style ordinal 5 with fresh same-source SDK/helper and package/native proof
         type: boolean
         default: false
       project_font:

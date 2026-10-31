@@ -282,7 +282,11 @@ in Source. The index uses the existing bounded source inventory and lexical pars
 `expectedRevision`. The revision binds all captured `.rpy` bytes and source-map
 ownership. Shared Apply patches the definition and optional selected reference;
 local Apply copies the definition with effective appearance values and changes only
-its selected use. Creating or changing a reference and accepting local text/layout
+its selected use. A text-only style on a button owns only applicable text properties;
+normal and state background/border properties stay on the selected element. Assigning
+a text-only style preserves that decoration and removes a superseded button-style
+reference. Shared text edits and local decoration edits still share one transaction.
+Creating or changing a reference and accepting local text/layout
 share one transaction/history entry. Unchanged commands add none. The core refuses
 a changed definition/use inventory, dirty source, incompatible style or affected
 property overridden at a use. All failures retain the inspector draft.

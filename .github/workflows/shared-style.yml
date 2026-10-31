@@ -8,7 +8,7 @@ on:
         type: string
         required: true
       ordinal:
-        description: Cumulative L07 dispatch ordinal (4, fresh full Windows qualification)
+        description: Cumulative L07 dispatch ordinal (5, review-fix Windows qualification)
         type: string
         required: true
 
@@ -47,7 +47,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/l07-shared-looks
           test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ORDINAL" = 4
+          test "$ORDINAL" = 5
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/shared-style"
           git rev-parse HEAD > "$RUNNER_TEMP/shared-style/candidate.txt"

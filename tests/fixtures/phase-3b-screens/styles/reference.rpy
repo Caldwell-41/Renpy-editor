@@ -26,7 +26,7 @@ screen style_reference():
         ypos 100
         xsize 240
         ysize 60
-        text_style "button"
+        text_style "text"
         text_size 24
         text_color "#ffeecc"
         text_text_align 0.5

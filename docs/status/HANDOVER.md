@@ -1,34 +1,41 @@
 # Current outcome handover
 
-## L07 CI4 audit complete; separate read-only PR review next
+## L07 final-review corrections in progress
 
-[Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
-`codex/l07-shared-looks`; full Windows candidate is
-d5b19e527f3b420af603991d9fdc68a9140adb1e. The audit closeout changes docs only.
-[Full CI4 41187324356, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187324356/attempts/1)
-and [automatic quality 41187217183, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187217183/attempts/1)
-are independently audited passing at that candidate. Every executed step passes.
+Continue [draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) on
+`codex/l07-shared-looks`. Kris selected all four findings from the fresh Standards/
+Spec review of `3cb39a6` against confirmed base `e9e8661`, then approved additional
+testing where needed. This supersedes the preceding read-only review restriction.
 
-[The terminal audit](../tasks/evidence/shared-look.md#ci4-terminal-success-audit-and-review-handoff-2026-10-31)
-owns the same-source manifest proof, 16 normal semantic/exact rows, 32 fresh helper
-comparisons and five rejection cases, pending match, measured helper counter,
-fresh x64 package hash, seven native stages, exit/cleanup and retained 157-file
-artifact. Digest/privacy checks and offline strict replays pass. Automatic quality
-passes 277 frontend tests and both required jobs; nine unselected jobs are skips.
-Recorded unchanged Mac rendering/signed-native proof retains its stated scope.
+Core worker `138ca82` is integrated as `f73ad9a`; its worktree branch remains
+`t3/fix-textbutton-style-property-ownership`. The correction preserves local button
+decoration when assigning/copying text-only Styles. All 14 ordinary Style cases
+pass in the worker and after the coordinator extends the runtime fixture.
+The inspector worker owns `screen-text.ts` and frontend tests in its separate
+worktree. It must finish validation, naming and repeated-assignment fixes plus
+self-review. The coordinator owns all integration, docs, final validation and CI.
 
-Actual cumulative Windows use is SDK 25/25, helper 2/4, package 2/2, native 2/2
-and dispatches 4/4. Mac's earlier disclosed overrun remains unchanged. No costly
-operation runs for the audit or documentation closeout, and none is pending.
-Kris's needed-allowance authorization is retained without resetting prior use.
+[Correction evidence](../tasks/evidence/shared-look.md#full-pr-review-corrections-and-fresh-qualification-2026-10-31)
+owns reproduction/results and selected tests. The first coordinator broad ordinary
+core run is still running after a failure in unchanged descendant cleanup; an exact
+replay is also running. Neither result may be silently replaced or called a pass.
+Final combined frontend/controller/probe checks and parent review remain pending.
 
-Next is the user-requested separate full-PR review with the code-review skill,
-fresh Standards/Spec subagents and fixed base e9e8661. The new review is read-only;
-this chat completes all writer work before launching it. #43, B03 #25, P3B #22,
-B08 #30 and L18 #46 receive the automated-result update while their acceptance,
-open states and dependency edges stay intact. PR #72 stays draft. Merge/release,
-physical/human, full Design Lab startup and wider editor/canvas/3B acceptance
-remain separate. The unrelated audit and protected recovery below are preserved.
+The updated runtime export exercises text-only button assignment/copy with retained
+normal/state decoration. Select fresh Mac normal/helper comparison, then full
+Windows CI5 at ordinal 5 after combined validation. #43 owns revised cumulative
+ceilings and actual starts. At this checkpoint no new SDK/helper/package/native
+start or costly dispatch has occurred. Previous CI4 success stays at `d5b19e5`
+with its original fixture; immutable ignored receipts remain unchanged.
+
+Next: integrate the completed inspector commit, resolve validation results, review
+and validate the combined change, run the selected fresh Mac proof, then update/push
+PR #72 and dispatch/confirm Windows CI5 and automatic quality. Record exact candidate,
+run/attempt and actual starts before yielding to the supported wait route.
+Keep PR draft, #43 open and criteria unchecked. Merge/release, physical/human input,
+full Design Lab startup and wider editor/canvas/3B acceptance remain separate.
+Protected recovery and the unrelated untracked audit below remain intact. Status
+records retain the existing size exception for that unique recovery/history.
 
 ## Text ownership cleanup review ready
 

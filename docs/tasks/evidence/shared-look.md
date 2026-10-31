@@ -1207,3 +1207,70 @@ The reviewer owns no repository files and starts no costly qualification. This
 chat finishes its writer work before that review starts. The unrelated untracked
 audit and protected recovery remain intact. There is no manual qualification run
 or run-specific watcher pending after this terminal audit.
+
+## Full-PR review corrections and fresh qualification, 2026-10-31
+
+The separate fresh-context review of `3cb39a6` against confirmed base `e9e8661`
+found two Standards issues and two Spec issues. Appearance inputs omitted completion
+validation and accessible field errors; Style creation silently rewrote technical
+names. Repeated pending Style assignment could modify the next Style's definition,
+and copying a text-only button Style moved local decoration into the text definition.
+These findings do not revoke the candidate-specific CI4 results above.
+
+Kris selected fixing all four findings through parallel subagents, each applying
+`principle-fix-root-causes`, reproducing the fault and reviewing its own changes.
+The inspector worker owns `screen-text.ts` and focused frontend tests. The core
+worker owns `styles.rs` and focused public-core tests. Each has a separate worktree;
+the coordinating agent owns integration, final validation, evidence and publication.
+Kris then explicitly approved additional testing runs where needed. The earlier
+review-only restriction no longer applies to this selected correction outcome.
+
+Core worker `138ca82`, integrated as `f73ad9a`, partitions properties through the
+existing applicability and patch owners. Text-only button Styles own text properties;
+normal/state decoration stays on the element. Assignment preserves decoration and
+removes a superseded container reference. Opaque local properties and comments stay
+in place. Reproductions failed before correction. All 14 selected ordinary Style
+tests pass in the worker, along with formatting, whitespace and repository validation.
+Its self-review also corrected mixed-edit routing, opaque text-edit refusal and
+full-button-to-text-style assignment. The worker ran no SDK/helper/package/native
+process or CI dispatch. No helper renderer mapping changed.
+
+The coordinator extended the existing public-core runtime export to assign a
+text-only Style to the decorated button, then copy that Style independently. The
+literal reference uses the matching ordinary text parent. Fresh qualification will
+therefore exercise the corrected source ownership in both stages, all four states
+and both aspects, using one accepted export for normal SDK and helper producers.
+Previous fixture/reference bytes and CI1-4 artifacts remain immutable historical
+evidence. They are not substituted for this new scenario.
+
+The selected next campaign is full Windows CI5 at cumulative ordinal 5, after
+combined local validation. It reserves eight normal SDK starts and three helper
+validation/discovery starts, one helper, one package and one native session. Under
+Kris's additional-run approval, one further diagnosed correction campaign may run
+if CI5 exposes a fault. Cumulative ceilings are Windows SDK 47, helpers 4, packages 4,
+native sessions 4 and dispatches 6. These ceilings include existing use and two full
+campaigns; they do not select an automatic retry. Actual use remains SDK 25, helpers 2,
+packages 2, native sessions 2 and dispatches 4 before either campaign starts. Mac use
+remains SDK 21/16 historical, helpers 2/4, packages 2/2 and native sessions 2/2.
+Any additional Mac operation will have its affected scope and cumulative selection
+recorded before it starts. Earlier overruns and failed results remain disclosed.
+
+Final integration, inspector correction results and CI candidate/run identities
+remain pending in this checkpoint. The first coordinating broad ordinary-core run
+reported a descendant-presence assertion in the unchanged runtime-service cleanup
+test; diagnosis and its terminal result remain pending. It is not a passing suite.
+PR #72 stays draft and #43 acceptance stays unchecked. Physical/human input, full
+Design Lab startup and wider editor/canvas/3B acceptance remain separate.
+
+### Mac rendering selection for the corrected source path
+
+The corrected fixture now uses a text-only button Style instead of the former full
+button Style. Both target renderers must qualify that source path. Before CI5, select
+one fresh Mac normal/helper campaign from one accepted export: eight normal SDK
+starts, three helper validation/discovery starts and one helper session. The
+cumulative Mac ceilings for this selection are SDK 32 and helpers 3; package/native
+use stays 2/2 each. Actual Mac use before the campaign remains SDK 21 and helpers 2.
+The earlier SDK 21/16 overrun remains historical and disclosed. Any diagnosed repeat
+will require a revised cumulative selection before it starts under Kris's
+additional-run approval. The normal/helper comparison remains exact and retains
+all semantic, state, source-identity, rejection and cleanup checks.
