@@ -1,28 +1,31 @@
 # Current outcome handover
 
-## L07 local candidate under final review
+## L07 local implementation complete; remaining Windows proof
 
-[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) is implemented on
-`codex/l07-shared-looks`, based on `e9e8661`. Kris approved A5 with Style naming
-and explicit scope labels, both TDD boundaries and the full-branch review base.
-The existing inspector/property/inventory/transaction owners support shared Apply,
-assignment, creation, selected-use copy and Source/history/reopen.
+[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) has local
+implementation 5b5ba9d and review fixes f3a6fbc on `codex/l07-shared-looks`.
+Kris approved A5 with Style naming and explicit scope labels, both TDD boundaries,
+and review against e9e8661. The existing inspector/property/inventory/transaction
+owners support sharing, assignment, creation, selected-use copy and Source/history.
 
-Actual controller/core, all 277 frontend tests, build, Mac SDK/literal comparisons,
-helper comparisons and the signed packaged native probe pass. The full ordinary core run passes 474 tests (52 specialist cases ignored); desktop
-tests pass 38. Both independent review axes found two P2 issues, all corrected.
-After fixes, 79 Screens cases (five specialist cases ignored), 59 renderer cases,
-and the actual controller/core and packaged-probe rehearsal pass. A second signed
-Mac package/native check is pending for those corrections.
-[Evidence](../tasks/evidence/shared-look.md#implemented-candidate-and-mac-qualification-2026-10-31)
-owns source/checker/package identities, retained failures and precise proof limits.
-Corrected Mac use is SDK 21/16, helpers 2/4, packages 1/2, native sessions 1/2; Windows is
-zero and costly CI dispatches are 0/2. The helper installer had six uncounted validation starts; no further SDK start is
-selected. The evidence records the ceiling overrun and prevention. The prepared
-Windows check awaits publication
-authorization. Only a local commit is selected, with no push or PR. Required Windows
-proof and the full Design Lab startup failure prevent bounded acceptance/closure.
-The unrelated audit, protected recovery below and wider pending acceptance remain intact.
+The ordinary core run passes 474 tests (52 specialist cases ignored), desktop tests
+38, and frontend tests 277. After fixes, 79 Screens cases (five specialist cases
+ignored), 59 renderer cases, the actual controller/core journey and exact probe
+rehearsal pass. Both review axes found two P2 issues; all four are fixed. The corrected
+f3a6fbc production tree passes signed Mac package/installer checks and all seven native
+probe stages with cleanup complete. Mac SDK/helper image comparisons remain qualified
+on their recorded bytes; reuse limits and candidate identities are in the
+[evidence](../tasks/evidence/shared-look.md#local-delivery-checkpoint-2026-10-31).
+
+Corrected Mac use is SDK 21/16, helpers 2/4, packages 2/2, native sessions 2/2.
+Six implicit validation starts were initially uncounted; the evidence records the
+overrun and added receipt counter. No further Mac costly attempt is selected.
+Windows use and costly dispatches are zero. Required Windows proof awaits publication
+authorization. The prepared Screens qualification selector is shared_style=true,
+with the published exact candidate and ordinal=1. Only local commits are selected;
+no push, PR or release occurred. Issue #43 remains open and unaccepted. Full Design
+Lab startup, physical/human and wider acceptance retain their disclosed gaps.
+The unrelated audit, protected recovery below and other pending acceptance are intact.
 
 ## Text ownership cleanup review ready
 

@@ -730,3 +730,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   border/interior semantic checks and distinct-state checks reject the original
   wrong output. Runtime render errors exit with a bounded diagnostic.
 - **Evidence:** [L07 diagnosis and qualification](../tasks/evidence/shared-look.md#implementation-and-first-sdk-diagnosis).
+
+
+## H53. Helper qualification omits implicit SDK validation starts
+
+- **Class/search:** operation accounting; helper startup allowance, SDK --version,
+  managed installation and discovery.
+- **Cause/correction:** each fresh helper fixture starts three SDK validation
+  commands before its helper. Count staged validation, post-promotion discovery
+  and initial canvas discovery separately from the helper process. The L07 helper
+  receipt now records the existing adapter spawn counter and checks this count.
+- **Evidence:** [L07 corrected operation accounting](../tasks/evidence/shared-look.md#corrected-operation-accounting).
+  The old Mac receipt lacked this counter. Its reconstructed SDK overrun remains
+  recorded; the added counter awaits actual Windows execution.

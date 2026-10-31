@@ -501,3 +501,59 @@ costly CI dispatches remain zero. The cancelled unrelated full-core SDK gate nev
 left its extraction-stage payload, so it contributes no SDK start. Its owned
 partial extraction is identified for cleanup. Original failures and the accounting
 correction remain retained; no allowance is retroactively enlarged.
+
+
+## Local delivery checkpoint, 2026-10-31
+
+Implementation commit 5b5ba9d and review-correction commit
+f3a6fbc1c037fd99c303cce8b866fcdb0733dbd0 are local on codex/l07-shared-looks.
+The full-branch review base remains e9e8661. All four reported P2 findings are fixed
+and pass affected verification; no independent review of a later candidate is implied.
+
+The stable corrected production tree passes the expanded controller/core journey
+in `controller-14` and exact packaged-probe rehearsal in `probe-controller-05`.
+The controller checks numeric no-op screen retention, local-only text on a shared
+element, assignment preview background/border removal, and cancellation bytes in
+addition to the earlier journeys. Both final inspector states remain available as
+`controller-14/pending-shared-inspector.png` and `pending-local-inspector.png`.
+All 79 focused Screens cases pass (five deliberate SDK/helper cases ignored), as do
+59 renderer cases and nine focused style cases (one helper case ignored).
+
+The second signed Mac package uses exact production commit f3a6fbc. Its strict
+signature, approved certificate-backed requirement and installer inspection pass.
+Executable SHA-256 is 034ae5038f80270cf1cc7399d9b5a9ca19462b7eefd2ad5a74ba418c080b5718;
+installer SHA-256 is cecaaf42e51dcadeab5fde3d00f3da67c082ab661ea07bcd0c427c2c23c5de8c.
+The two packages have different executable hashes and the same approved requirement.
+`native-02-driver.log` records all seven native WebView stages passing, exit zero,
+no SDK execution, no external errors and complete cleanup. There is no physical
+input or human acceptance claim. The package's production build passes.
+
+SDK output is reused from the recorded normal/helper campaigns, with their captured
+HEAD 8218bbf, uncommitted source-file hashes and emitted accepted-source bytes.
+The normal checker and constructor/reference mapping are unchanged. The final
+helper renderer exactly matches the successful helper receipt. Later changes add
+reference-graph refusals, existing-font validation, UI no-op retention and assignment
+preview expansion; they do not change the qualified border/text/state serializer or
+trusted rendering. The actual source/property and UI tests cover those corrections.
+No new SDK rendering claim or new counter execution is inferred from portable tests.
+
+Final consumption is Mac SDK 21/16 (accounting overrun explained above), helpers
+2/4, packages 2/2 and native sessions 2/2. Windows remains zero; costly CI dispatches
+remain 0/2. No further Mac SDK, package or native attempt is selected. The cancelled
+core run's owned partial extraction is removed, with an ignored cleanup receipt;
+its original failed log remains. Owned browser/driver/native processes have stopped.
+The detached approved-source comparison checkout and original local evidence remain.
+The unrelated untracked Phase 1 audit and protected recovery are unchanged.
+
+The prepared Windows check is Screens qualification with `shared_style=true`,
+`candidate` equal to its published exact head and cumulative `ordinal=1`. Publication
+is not authorized by this local-commit outcome, so it is not dispatched. Required
+Windows SDK/helper/package/native proof, the failed full Design Lab startup gate,
+physical/human proof and wider acceptance retain their disclosed status. Issue #43
+remains open with four unchecked acceptance criteria. No push, PR or release occurs.
+
+
+The final corrected frontend run also passes all 277 tests and typechecking
+(`final-frontend-reviewed.log`). Repository validation passes 1,298 tracked files;
+Rust formatting, workflow lint and whitespace checks pass. The final closeout changes
+only documentation after f3a6fbc, so package/native source identity is unchanged.
