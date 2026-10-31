@@ -23,6 +23,7 @@ import { definition as nestedLayout } from "./screens/nested-layout/definition.t
 import { definition as uiImage } from "./screens/ui-image/definition.ts";
 
 import { definition as projectFont } from "./screens/project-font/definition.ts";
+import { definition as sharedLook } from "./screens/shared-look/definition.ts";
 
 function approvalFor(screenId: string) {
   const approval = approvalRecords.find(item => item.record.screenId === screenId);
@@ -64,7 +65,7 @@ export const screens: readonly LabScreen[] = [{
     { id: "board", title: "Writing board", load: () => import("./screens/characters-writing/board.ts") },
   ],
   check: "./screens/characters-writing/check.mjs",
-}, ...[story, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
+}, ...[story, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
 
 for (const screen of screens) {
   for (const variant of screen.variants) revisionFor(screen.approval, variant.id);

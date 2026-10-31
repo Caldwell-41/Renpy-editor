@@ -14,6 +14,8 @@ fn edit<'de, D: serde::Deserializer<'de>, T: Deserialize<'de>>(
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct TextEdits {
     pub text: Option<String>,
+    #[serde(default)]
+    pub appearance: BTreeMap<String, Option<Value>>,
     #[serde(default, deserialize_with = "edit")]
     pub font: Option<Option<FontReference>>,
     #[serde(default, deserialize_with = "edit")]
@@ -28,7 +30,57 @@ pub struct TextEdits {
     pub italic: Option<Option<bool>>,
 }
 
-pub(super) const FIELDS: &[&str] = &["font", "size", "color", "align", "bold", "italic"];
+pub(super) const FIELDS: &[&str] = &[
+    "font",
+    "size",
+    "color",
+    "align",
+    "bold",
+    "italic",
+    "background",
+    "border",
+    "hover_font",
+    "hover_size",
+    "hover_color",
+    "hover_align",
+    "hover_bold",
+    "hover_italic",
+    "hover_background",
+    "hover_border",
+    "selected_font",
+    "selected_size",
+    "selected_color",
+    "selected_align",
+    "selected_bold",
+    "selected_italic",
+    "selected_background",
+    "selected_border",
+    "insensitive_font",
+    "insensitive_size",
+    "insensitive_color",
+    "insensitive_align",
+    "insensitive_bold",
+    "insensitive_italic",
+    "insensitive_background",
+    "insensitive_border",
+];
+pub(super) fn base_key(key: &str) -> &str {
+    for prefix in ["hover_", "selected_", "insensitive_"] {
+        if let Some(base) = key.strip_prefix(prefix) {
+            return base;
+        }
+    }
+    key
+}
+pub(super) fn applicable(kind: &str, key: &str) -> bool {
+    let base = base_key(key);
+    match kind {
+        "style" | "textbutton" => true,
+        "frame" | "window" => key == base && matches!(base, "background" | "border"),
+        "text" => !matches!(base, "background" | "border"),
+        _ => false,
+    }
+}
 
 /// Keep a single expression intact; trailing inline properties stay source-only.
 pub(super) fn single_expression(raw: &str) -> bool {
@@ -70,16 +122,29 @@ pub(super) fn single_expression(raw: &str) -> bool {
     quote.is_none() && stack.is_empty()
 }
 pub(super) fn keyword(kind: &str, key: &str) -> String {
-    let key = if key == "align" { "text_align" } else { key };
-    format!("{}{key}", if kind == "textbutton" { "text_" } else { "" })
+    let base = base_key(key);
+    let state = &key[..key.len() - base.len()];
+    let property = match base {
+        "align" => "text_align",
+        "border" => "foreground",
+        _ => base,
+    };
+    format!(
+        "{}{state}{property}",
+        if kind == "textbutton" && !matches!(base, "background" | "border") {
+            "text_"
+        } else {
+            ""
+        }
+    )
 }
 fn valid(key: &str, value: &Value) -> bool {
-    match key {
+    match base_key(key) {
         "font" => value
             .as_str()
             .is_some_and(|s| RelativePath::new(format!("game/{s}")).is_ok()),
         "size" => value.as_u64().is_some_and(|v| (1..=512).contains(&v)),
-        "color" => value.as_str().is_some_and(|s| {
+        "color" | "background" => value.as_str().is_some_and(|s| {
             s.starts_with('#')
                 && matches!(s.len(), 4 | 5 | 7 | 9)
                 && s[1..].bytes().all(|b| b.is_ascii_hexdigit())
@@ -88,14 +153,46 @@ fn valid(key: &str, value: &Value) -> bool {
             .as_f64()
             .is_some_and(|v| v.is_finite() && (0.0..=1.0).contains(&v)),
         "bold" | "italic" => value.is_boolean(),
+        "border" => value.as_object().is_some_and(|v| {
+            v.len() == 2
+                && v.get("color").is_some_and(|c| valid("color", c))
+                && v.get("width")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|w| (1..=32).contains(&w))
+        }),
         _ => false,
     }
 }
-fn literal(value: &Value) -> String {
+pub(super) fn literal(key: &str, value: &Value) -> String {
+    if base_key(key) == "border" {
+        let w = value["width"].as_u64().unwrap();
+        let n = 2 * w + 2;
+        let next = w + 2;
+        let c = value["color"].to_string();
+        return format!("Frame(Composite(({n}, {n}), (0, 0), Transform(Solid({c}), xysize=({n}, {w})), (0, {next}), Transform(Solid({c}), xysize=({n}, {w})), (0, {w}), Transform(Solid({c}), xysize=({w}, 2)), ({next}, {w}), Transform(Solid({c}), xysize=({w}, 2))), {w}, {w})");
+    }
     match value {
         Value::Bool(true) => "True".into(),
         Value::Bool(false) => "False".into(),
         _ => value.to_string(),
+    }
+}
+fn parse_value(key: &str, raw: &str) -> Option<Value> {
+    if base_key(key) == "border" {
+        let color = raw.split('"').nth(1)?;
+        let width = raw
+            .rsplit(", ")
+            .next()?
+            .strip_suffix(')')?
+            .parse::<u32>()
+            .ok()?;
+        let value = serde_json::json!({"color":color,"width":width});
+        return (valid(key, &value) && literal(key, &value) == raw).then_some(value);
+    }
+    match raw {
+        "True" => Some(Value::Bool(true)),
+        "False" => Some(Value::Bool(false)),
+        _ => serde_json::from_str(raw).ok(),
     }
 }
 #[derive(Clone, Debug)]
@@ -116,6 +213,8 @@ pub struct TextProperties {
     #[serde(skip)]
     header_end: usize,
     #[serde(skip)]
+    header_start: usize,
+    #[serde(skip)]
     code_end: usize,
     #[serde(skip)]
     indent: usize,
@@ -123,21 +222,15 @@ pub struct TextProperties {
     colon: bool,
 }
 pub(super) fn read(lines: &[Line<'_>], node: &Node) -> Option<TextProperties> {
-    if !matches!(node.kind.as_str(), "text" | "textbutton") {
+    if !matches!(
+        node.kind.as_str(),
+        "text" | "textbutton" | "frame" | "window"
+    ) {
         return None;
     }
     let header = lines.iter().find(|l| l.start == node.span.start)?;
-    let mut result = TextProperties {
-        values: BTreeMap::new(),
-        blocked: BTreeMap::new(),
-        expressions: BTreeMap::new(),
-        entries: vec![],
-        header_end: header.end,
-        code_end: header.start + header.indent + header.code.len(),
-        indent: header.indent + 4,
-        colon: header.code.ends_with(':'),
-    };
-    if node.literal.is_none() {
+    let mut result = read_block(lines, header, node.source_end, &node.kind);
+    if matches!(node.kind.as_str(), "text" | "textbutton") && node.literal.is_none() {
         let raw = header.code[node.kind.len()..].trim();
         result.expressions.insert(
             "text".into(),
@@ -148,10 +241,30 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node) -> Option<TextProperties> {
             "This text expression stays in Source.".into(),
         );
     }
+    Some(result)
+}
+
+pub(super) fn read_block(
+    lines: &[Line<'_>],
+    header: &Line<'_>,
+    source_end: usize,
+    kind: &str,
+) -> TextProperties {
+    let mut result = TextProperties {
+        values: BTreeMap::new(),
+        blocked: BTreeMap::new(),
+        expressions: BTreeMap::new(),
+        entries: vec![],
+        header_end: header.end,
+        header_start: header.start,
+        code_end: header.start + header.indent + header.code.len(),
+        indent: header.indent + 4,
+        colon: header.code.ends_with(':'),
+    };
     let body = lines
         .iter()
         .enumerate()
-        .filter(|(_, l)| l.start > node.span.start && l.start < node.source_end)
+        .filter(|(_, l)| l.start > header.start && l.start < source_end)
         .collect::<Vec<_>>();
     if body
         .iter()
@@ -165,23 +278,22 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node) -> Option<TextProperties> {
                 "This element's indentation stays in Source.".into(),
             );
         }
-        return Some(result);
+        return result;
     }
     for (index, line) in body.iter().filter(|(_, l)| l.indent == result.indent) {
         let source_key = line.code.split_whitespace().next().unwrap_or("");
-        let Some(key) = FIELDS.iter().find(|k| keyword(&node.kind, k) == source_key) else {
+        let Some(key) = FIELDS
+            .iter()
+            .find(|k| applicable(kind, k) && keyword(kind, k) == source_key)
+        else {
             continue;
         };
         let raw = line.code[source_key.len()..].trim();
-        let value = match raw {
-            "True" => Some(Value::Bool(true)),
-            "False" => Some(Value::Bool(false)),
-            _ => serde_json::from_str::<Value>(raw).ok(),
-        };
+        let value = parse_value(key, raw);
         if !line.single
             || lines
                 .get(index + 1)
-                .is_some_and(|l| l.start < node.source_end && l.indent > line.indent)
+                .is_some_and(|l| l.start < source_end && l.indent > line.indent)
             || value.as_ref().is_none_or(|v| !valid(key, v))
             || result.values.contains_key(*key)
             || result.blocked.contains_key(*key)
@@ -209,7 +321,7 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node) -> Option<TextProperties> {
             line_start: line.start,
         });
     }
-    Some(result)
+    result
 }
 impl TextProperties {
     pub(super) fn recognized_starts(&self) -> HashSet<usize> {
@@ -253,6 +365,19 @@ impl TextProperties {
                 ));
             }
         }
+        let mut proposed = self.patch_values(bytes, &node.kind, changes)?;
+        for (span, value) in patches {
+            proposed.splice(span.start..span.end, value.bytes());
+        }
+        Ok(proposed)
+    }
+    pub(super) fn patch_values(
+        &self,
+        bytes: &[u8],
+        kind: &str,
+        changes: BTreeMap<String, Option<Value>>,
+    ) -> Result<Vec<u8>, SceneError> {
+        let mut patches: Vec<(Span, String)> = vec![];
         let newline = if bytes.windows(2).any(|w| w == b"\r\n") {
             "\r\n"
         } else {
@@ -263,7 +388,7 @@ impl TextProperties {
             let Some(value) = changes.get(*key) else {
                 continue;
             };
-            if self.blocked.contains_key(*key) {
+            if !applicable(kind, key) || self.blocked.contains_key(*key) {
                 return Err(SceneError::OpaqueBoundary);
             }
             if value.as_ref() == self.values.get(*key) {
@@ -274,7 +399,7 @@ impl TextProperties {
             }
             if let Some(entry) = self.entries.iter().find(|e| e.key == *key) {
                 if let Some(value) = value {
-                    patches.push((entry.value.clone(), literal(value)));
+                    patches.push((entry.value.clone(), literal(key, value)));
                 } else {
                     patches.push((
                         Span {
@@ -288,10 +413,26 @@ impl TextProperties {
                 added.push_str(&format!(
                     "{}{} {}{newline}",
                     " ".repeat(self.indent),
-                    keyword(&node.kind, key),
-                    literal(value)
+                    keyword(kind, key),
+                    literal(key, value)
                 ));
             }
+        }
+        if kind == "style"
+            && self.colon
+            && self
+                .values
+                .keys()
+                .all(|key| changes.get(key) == Some(&None))
+            && !changes.values().any(Option::is_some)
+        {
+            patches.push((
+                Span {
+                    start: self.code_end - 1,
+                    end: self.code_end,
+                },
+                String::new(),
+            ));
         }
         if !added.is_empty() {
             let colon_at_end = !self.colon && self.code_end == self.header_end;
@@ -325,19 +466,19 @@ impl TextProperties {
         for (span, value) in patches {
             proposed.splice(span.start..span.end, value.bytes());
         }
-        if changes.values().any(Option::is_none) {
+        if kind != "style" && changes.values().any(Option::is_none) {
             let parsed = inspect(&proposed, String::new(), String::new())?;
             if let Some(updated) = parsed
                 .screens
                 .iter()
                 .flat_map(|s| &s.nodes)
-                .find(|n| n.span.start == node.span.start)
+                .find(|n| n.span.start == self.header_start)
             {
-                let header_end = proposed[node.span.start..]
+                let header_end = proposed[self.header_start..]
                     .iter()
                     .position(|b| *b == b'\n')
-                    .map_or(proposed.len(), |i| node.span.start + i + 1);
-                let header = std::str::from_utf8(&proposed[node.span.start..header_end])
+                    .map_or(proposed.len(), |i| self.header_start + i + 1);
+                let header = std::str::from_utf8(&proposed[self.header_start..header_end])
                     .map_err(|_| SceneError::UnsupportedSource)?;
                 if code(header).ends_with(':') && updated.source_end == header_end {
                     let pass = format!(
@@ -364,36 +505,45 @@ impl AuthoringService {
         node: &Node,
         edits: &TextEdits,
     ) -> Result<(), SceneError> {
-        if edits.font.is_some() {
-            return Ok(());
-        }
-        let Some(path) = node
+        let paths = node
             .text_properties
             .as_ref()
-            .and_then(|p| p.values.get("font"))
-            .and_then(Value::as_str)
-        else {
+            .map(|p| {
+                p.values
+                    .iter()
+                    .filter(|(key, _)| {
+                        base_key(key) == "font"
+                            && !(key.as_str() == "font" && edits.font.is_some())
+                            && !edits.appearance.contains_key(*key)
+                    })
+                    .filter_map(|(_, v)| v.as_str())
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
+        if paths.is_empty() {
             return Ok(());
-        };
+        }
         let metadata = self
             .list(project, project_id)
             .map_err(|_| SceneError::SourceConflict)?;
-        let font = metadata
-            .assets
-            .iter()
-            .find(|a| {
-                a.kind == crate::authoring::AssetKind::Font
-                    && a.relative_path == format!("game/{path}")
-            })
-            .ok_or(SceneError::FontMissing)?;
-        self.font_bytes(
-            project,
-            project_id,
-            &FontReference {
-                asset_id: font.id.clone(),
-                expected_asset_sha256: font.sha256.clone(),
-            },
-        )?;
+        for path in paths {
+            let font = metadata
+                .assets
+                .iter()
+                .find(|a| {
+                    a.kind == crate::authoring::AssetKind::Font
+                        && a.relative_path == format!("game/{path}")
+                })
+                .ok_or(SceneError::FontMissing)?;
+            self.font_bytes(
+                project,
+                project_id,
+                &FontReference {
+                    asset_id: font.id.clone(),
+                    expected_asset_sha256: font.sha256.clone(),
+                },
+            )?;
+        }
         Ok(())
     }
     pub(super) fn resolve_text_edits(
@@ -429,6 +579,30 @@ impl AuthoringService {
         field!(align);
         field!(bold);
         field!(italic);
+        for (key, value) in &edits.appearance {
+            if !FIELDS.contains(&key.as_str()) || values.contains_key(key) {
+                return Err(SceneError::InvalidPayload);
+            }
+            let resolved = if base_key(key) == "font" {
+                value
+                    .as_ref()
+                    .map(|v| {
+                        serde_json::from_value::<FontReference>(v.clone())
+                            .map_err(|_| SceneError::InvalidPayload)
+                            .and_then(|f| {
+                                self.font_bytes(project, project_id, &f)
+                                    .map(|(p, _)| Value::String(p))
+                            })
+                    })
+                    .transpose()?
+            } else {
+                value.clone()
+            };
+            if resolved.as_ref().is_some_and(|v| !valid(key, v)) {
+                return Err(SceneError::InvalidPayload);
+            }
+            values.insert(key.clone(), resolved);
+        }
         Ok(values)
     }
 }

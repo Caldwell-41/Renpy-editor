@@ -686,7 +686,7 @@ Core derives the plan from lossless screen inspection and the expected source
 revision. Literal properties, size/position drafts and canvas-only text/button samples enter
 the helper as JSON. It receives copied, hashed image/font assets and a Loomlight
 renderer. It receives no project scripts, bytecode, actions or expressions.
-Unknown initialization, inherited styles, unsupported statements and unresolved
+Unknown initialization, unresolved inheritance, unsupported statements and unresolved
 text tags/interpolation make the composition unavailable. These conservative limits
 are specific to the proof and do not accept the full Screens subset.
 
@@ -698,6 +698,17 @@ make rendering unavailable while Source and drafts remain usable. The bounded
 mapping and current qualification state remain with
 [#42](https://github.com/Caldwell-41/Renpy-editor/issues/42); this extension does not
 accept L19's full canvas inventory or inherited styles.
+
+L07 adds a static style definition/reference index over the existing screen inventory
+and property parser. The plan resolves its supported text/frame/window/button styles
+into typed values. The helper receives colors, bounded border records and button
+state names, then constructs only its own known displayables. It receives no style
+expressions or project code. Runtime render failures exit the helper and retain an
+unavailable canvas, rather than entering Ren'Py's interactive error UI. The existing
+frame-delivery class also owns the affected-use preview; the main canvas pauses
+while that dialog previews one screen at a time. [L07 evidence](tasks/evidence/shared-look.md)
+keeps visual, source, SDK/helper and native results separate. General inherited
+styles and full canvas acceptance remain outside this extension.
 
 The representative sized frame can move inside a `fixed` parent when both axes
 have unambiguous floating-point literal `xalign`/`yalign` values and no competing placement property.

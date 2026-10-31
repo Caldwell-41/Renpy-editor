@@ -1168,6 +1168,7 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
             "INCOMING_REFERENCE",
             "The Scene has incoming or unknown references and cannot be deleted safely.",
         ),
+        StyleUnavailable => ("STYLE_UNAVAILABLE", "The style or one of its uses is missing, dynamic or ambiguous. Your draft is retained. Review Source or choose a supported style."),
         ImageMissing => ("UI_IMAGE_MISSING", "The chosen UI image is missing. Your draft is retained; choose an available UI image."),
         ImageChanged => ("UI_IMAGE_CHANGED", "The chosen UI image changed since selection. Your draft is retained; review the asset and choose it again."),
         ImageInvalid => ("INVALID_UI_IMAGE", "The chosen reference is not a valid supported UI image. Your draft is retained."),

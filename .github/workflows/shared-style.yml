@@ -1,0 +1,166 @@
+name: Shared Style qualification
+
+on:
+  workflow_call:
+    inputs:
+      candidate:
+        description: Exact L07 candidate SHA
+        type: string
+        required: true
+      ordinal:
+        description: Cumulative L07 dispatch ordinal (6, full-review corrections)
+        type: string
+        required: true
+
+permissions:
+  contents: read
+concurrency:
+  group: shared-style-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  shared-style:
+    name: Shared Style (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            target: Windows x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    env:
+      RUSTUP_TOOLCHAIN: 1.90.0
+      CARGO_TERM_COLOR: never
+      PYTHONUTF8: '1'
+      HARNESS_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require the exact L07 candidate and cumulative dispatch
+        env:
+          CANDIDATE: ${{ inputs.candidate }}
+          ORDINAL: ${{ inputs.ordinal }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/l07-shared-looks
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$ORDINAL" = 6
+          test "$(git rev-parse HEAD)" = "$CANDIDATE"
+          mkdir -p "$RUNNER_TEMP/shared-style"
+          git rev-parse HEAD > "$RUNNER_TEMP/shared-style/candidate.txt"
+          printf '%s\n' "STYLE_INPUTS=$RUNNER_TEMP/shared-style/inputs" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: shared-style-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Portable checks and native-probe evidence gate
+        id: preflight
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          npm install --global npm@11.9.0
+          npm ci
+          "$HARNESS_PYTHON" -m pip install Pillow==12.3.0
+          "$HARNESS_PYTHON" -m unittest discover -s scripts -p test_qualify_shared_style.py -v
+          npm run check
+          cargo fmt --all --check
+          node --test tests/phase2-driver-process.test.mjs
+          cargo test -p loomlight-core --locked --lib screens:: -- --nocapture
+          cargo build -p loomlight-core --example help-controller-driver --locked
+          npm run build
+          cargo check -p loomlight-desktop --locked
+      - name: Real controller/core and exact packaged-probe rehearsal
+        id: controller
+        env:
+          SHARED_STYLE_OUTPUT: ${{ runner.temp }}/shared-style/controller
+          SHARED_STYLE_PROBE_OUTPUT: ${{ runner.temp }}/shared-style/probe-controller
+          APPEARANCE_CORRECTIONS_OUTPUT: ${{ runner.temp }}/shared-style/appearance-controller
+        run: |
+          node tests/shared-style.browser.mjs
+          node tests/screen-appearance-corrections.browser.mjs
+          node tests/shared-style-probe-controller.browser.mjs
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        if: runner.os == 'Windows'
+        id: style-sdk
+        with:
+          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          key: phase-1c-renpy-${{ runner.os }}-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
+      - name: Verify the pinned official SDK
+        if: runner.os == 'Windows'
+        run: |
+          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 180 --output "$RUNNER_TEMP/style-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
+          if test '${{ steps.style-sdk.outputs.cache-hit }}' != true; then
+            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
+            mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
+          fi
+          "$HARNESS_PYTHON" scripts/verify-help-sdk.py "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" "$RUNNER_TEMP/style-checksums.txt"
+      - name: Short isolated Windows SDK path
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $scratch = "C:\llstyle${{ inputs.ordinal }}"
+          if (Test-Path $scratch) { throw 'L07 scratch root already exists' }
+          New-Item -ItemType Directory -Path $scratch | Out-Null
+          "TEMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TMP=$scratch" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Export accepted public-core shared and independent source
+        id: accepted-input
+        env:
+          LOOMLIGHT_STYLE_INPUTS: ${{ env.STYLE_INPUTS }}
+        run: |
+          cargo test -p loomlight-core --locked screens::tests::styles::style_runtime_inputs_are_authored_through_public_source_and_transaction_requests -- --exact --nocapture
+          test -f "$LOOMLIGHT_STYLE_INPUTS/accepted.json"
+      - name: Normal pinned SDK entry for shared/copy source and both aspects (eight SDK starts)
+        id: normal
+        run: |
+          "$HARNESS_PYTHON" scripts/qualify-shared-style.py --archive "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" --checksums "$RUNNER_TEMP/style-checksums.txt" --accepted "$STYLE_INPUTS/accepted.json" --output "$RUNNER_TEMP/shared-style/sdk" --allow-fixture-execution
+      - name: Fresh inert helper, pending draft and source transition (three SDK validations and one helper)
+        id: helper
+        if: ${{ always() && steps.accepted-input.outcome == 'success' }}
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+          LOOMLIGHT_STYLE_HELPER_OUTPUT: ${{ runner.temp }}/shared-style/helper
+          LOOMLIGHT_STYLE_INPUTS: ${{ env.STYLE_INPUTS }}
+        run: |
+          cargo test -p loomlight-core --locked screens::tests::styles::shared_style_helper_matches_qualified_shared_and_independent_source -- --exact --ignored --nocapture
+      - name: Compare fresh helper frames with same-source normal references
+        if: ${{ always() && steps.normal.outcome == 'success' && steps.helper.outcome == 'success' }}
+        run: |
+          "$HARNESS_PYTHON" scripts/qualify-shared-style-helper.py "$RUNNER_TEMP/shared-style/helper" "$RUNNER_TEMP/shared-style/sdk" --audit-rejections
+      - name: Fresh Windows package and real WebView keyboard/history/reopen (one session)
+        if: ${{ always() && steps.preflight.outcome == 'success' && steps.controller.outcome == 'success' }}
+        env:
+          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
+        run: |
+          npm exec -- tauri build --no-bundle -- --locked
+          "$HARNESS_PYTHON" scripts/run-runtime-ui-probes.py target/release/loomlight.exe "$RUNNER_TEMP/shared-style/native" shared-style
+      - name: Retain Windows x64 package identity
+        if: ${{ always() && runner.os == 'Windows' && hashFiles('app/target/release/loomlight.exe') != '' }}
+        shell: pwsh
+        run: |
+          Copy-Item 'target/release/loomlight.exe' "$env:RUNNER_TEMP/shared-style/loomlight.exe"
+          $binary = [IO.File]::ReadAllBytes((Resolve-Path 'target/release/loomlight.exe'))
+          $pe = [BitConverter]::ToInt32($binary, 0x3c)
+          if ([BitConverter]::ToUInt16($binary, $pe + 4) -ne 0x8664) { throw 'Windows x64 executable required' }
+          @{ candidate=$env:GITHUB_SHA; architecture='Windows x64'; executableSHA256=(Get-FileHash 'target/release/loomlight.exe').Hash } | ConvertTo-Json | Out-File "$env:RUNNER_TEMP/shared-style/package-identity.json" -Encoding utf8
+      - name: Scan partial or complete public evidence
+        id: numeric-privacy
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/shared-style"
+          node scripts/scan-artifacts.mjs "$RUNNER_TEMP/shared-style"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ always() && steps.numeric-privacy.outcome == 'success' }}
+        with:
+          name: shared-style-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/shared-style/
+          if-no-files-found: error
+          retention-days: 7

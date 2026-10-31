@@ -1,5 +1,5 @@
 import { ScreenImages } from "./screen-images.ts";
-import { ScreenText, type TextProperties } from "./screen-text.ts";
+import { ScreenText, type TextProperties, type StyleCatalog } from "./screen-text.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
 import { ScreenLayoutEditor, type NumericLayout, type LayoutEdits } from "./screen-layout.ts";
 import { icon } from "./icons.ts";
@@ -17,6 +17,7 @@ export interface ScreenNode {
   position?: { xalign: number; yalign: number } | null;
   numericLayout?: NumericLayout | null;
   textProperties?: TextProperties | null;
+  style?: {name:string; error:string|null} | null;
   protected: { start: number; end: number }[];
 }
 export interface ScreenDocument {
@@ -25,10 +26,10 @@ export interface ScreenDocument {
 }
 interface OwnedScreen { id: string; rootId: string; path: string; name: string; resolved: boolean; sourceRevision: string | null }
 interface ScreenCatalog {
-  projectRevision: string; sourceMapRevision: string; inventoryRevision: string; owned: OwnedScreen[];
+  projectRevision: string; sourceMapRevision: string; inventoryRevision: string; owned: OwnedScreen[]; styles?: StyleCatalog;
 }
 interface Draft { document: ScreenDocument; screen: string; index: number; width: string; height: string; position?: { xalign: number; yalign: number } }
-interface CompositionResult { document: ScreenDocument; selectedId: string; changed?: boolean }
+interface CompositionResult { document: ScreenDocument; selectedId: string; changed?: boolean; styles?: StyleCatalog; documents?: ScreenDocument[] }
 type AcceptedEdit =
   | { type: "geometry"; document: ScreenDocument; draft: Draft; key: string }
   | { type: "layout"; document: ScreenDocument; base: ScreenDocument; key: string }
@@ -96,6 +97,7 @@ export class ScreensWorkspace {
   private readonly layout: ScreenLayoutEditor;
   private readonly images: ScreenImages;
   private readonly text: ScreenText;
+  private reviewingAppearance = false;
   // Core history has no entry cap within a session; keep its selection receipts for this workspace's lifetime.
   private readonly compositionHistory: { path: string; before: string; after: string; beforeId?: string | null; afterId: string; removal: boolean }[] = [];
   constructor(private readonly actions: Actions) {
@@ -118,7 +120,7 @@ export class ScreensWorkspace {
     });
     this.frames = new ScreenCanvasFrames({
       canvas: this.canvas, status: this.canvasStatus, request: actions.request,
-      currentRevision: () => this.current() ? this.doc?.revision : undefined,
+      currentRevision: () => this.current() && !this.reviewingAppearance ? this.doc?.revision : undefined,
       installed: () => this.renderCanvasGuides(),
       invalidated: discardProvisional => this.invalidateGeometry(discardProvisional),
     });
@@ -145,7 +147,7 @@ export class ScreensWorkspace {
       layoutTools: host => { const tools = el("div","screen-image-order"); tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true))); host.append(tools); }, order: host => this.composer.renderOrder(host),
     }, this.layout);
     this.text = new ScreenText({
-      view: () => this.compositionView(),current: () => this.current(),request:actions.request,coordinate:actions.coordinate,
+      view: () => this.compositionView(),styles: () => this.catalog?.styles,documents:()=>this.documents,inspect:async path=>this.documents.find(d=>d.path===path)??await actions.request<ScreenDocument>("screens.inspect",{path}),resolution:this.gameResolution,reviewing:active=>{this.reviewingAppearance=active;this.frames.invalidate("Return from style review to update this canvas.");if(!active)this.renderCanvas();},buttonSample: state => {this.buttonState=state;const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;this.renderCanvas();},current: () => this.current(),request:actions.request,coordinate:actions.coordinate,
       commit:(command,base) => this.compose(command,base),redraw:() => this.renderCard(),preview:() => this.renderCanvas(),
       source:() => {void this.openSource();},saved:() => this.saved(false),note:(message,error) => this.note(message,error),
       layoutTools:host => {const tools = el("div","screen-text-layout-tools");tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));host.append(tools);},
@@ -194,7 +196,7 @@ export class ScreensWorkspace {
     for (const [value,label] of [["fit","Fit"],["100","100% (game pixels)"]]) { const option=el("option","",label); option.value=value!; zoom.append(option); }
     zoom.onchange=() => {this.zoom=zoom.value; this.renderCanvas();};
     const state=el("select"); state.ariaLabel="Button state (sample)";
-    for(const value of ["normal","hover"]) {const option=el("option","",`Button sample: ${value}`);option.value=value;state.append(option);}
+    for(const value of ["normal","hover","selected","disabled"]) {const option=el("option","",`Button sample: ${value}`);option.value=value;state.append(option);}
     state.onchange=()=>{this.buttonState=state.value;this.renderCanvas();};
     caption.append(el("h2", "", "Screen canvas"),aspects,zoom,state,button("Test in Ren'Py", () => this.test(false), "button primary screen-image-test"));
     const viewport = el("div", "screen-viewport"); viewport.append(this.canvas);
@@ -489,6 +491,10 @@ export class ScreensWorkspace {
     const document = edit.type === "geometry" || edit.type === "layout" ? edit.document : edit.result.document;
     const base = edit.type === "geometry" ? edit.draft.document : edit.base;
     const sourceChanged = document.revision !== base.revision || edit.type === "composition" && edit.result.changed === true;
+    if (edit.type === "composition") {
+      if (edit.result.styles && this.catalog) this.catalog.styles = edit.result.styles;
+      if (edit.result.documents?.length) this.documents = edit.result.documents;
+    }
     if (edit.type === "composition") {this.images.accept(edit.command,base,document);this.text.accept(edit.command,base,document);}
     this.documents = this.documents.map(d => d.path === document.path ? document : d);
     if (this.doc?.path === document.path) this.doc = document;

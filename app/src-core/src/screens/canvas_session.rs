@@ -97,8 +97,14 @@ impl Session {
                     )?;
                 }
             }
-            for key in ["font", "text_font"] {
-                if let Some(Value::String(name)) = node.properties.get_mut(key) {
+            for key in node
+                .properties
+                .keys()
+                .filter(|key| key.as_str() == "font" || key.ends_with("_font"))
+                .cloned()
+                .collect::<Vec<_>>()
+            {
+                if let Some(Value::String(name)) = node.properties.get_mut(&key) {
                     *name = copy_asset(
                         name,
                         true,

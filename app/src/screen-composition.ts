@@ -1,7 +1,7 @@
 import { icon } from "./icons.ts";
 import { validateField } from "./authoring-input.ts";
 import type { LayoutEdits } from "./screen-layout.ts";
-import type { TextEdits } from "./screen-text.ts";
+import type { TextEdits, StyleEdit } from "./screen-text.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 
 export interface CompositionView {
@@ -13,7 +13,7 @@ export type CompositionCommand =
   | ({ type: "addImage"; parentId: string } & ImageSelection)
   | ({ type: "image"; nodeId: string; parentId?: string } & ImageSelection)
   | { type: "add"; parentId: string; kind: string; text: string }
-  | { type: "formatText"; nodeId: string; values: TextEdits; layout?: LayoutEdits }
+  | { type: "formatText"; nodeId: string; values: TextEdits; style?: StyleEdit; layout?: LayoutEdits }
   | { type: "reorder"; nodeId: string; targetId: string; after: boolean }
   | { type: "remove"; nodeId: string };
 interface Host {

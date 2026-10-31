@@ -434,6 +434,7 @@ pub enum SceneError {
     DirtySource,
     UnknownEntity,
     ReferenceBlocked,
+    StyleUnavailable,
     ImageMissing,
     ImageChanged,
     ImageInvalid,

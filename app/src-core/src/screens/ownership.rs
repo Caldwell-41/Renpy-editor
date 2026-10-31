@@ -24,6 +24,7 @@ pub struct Catalog {
     pub source_map_revision: String,
     pub inventory_revision: String,
     pub owned: Vec<OwnedReference>,
+    pub styles: styles::StyleCatalog,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -35,11 +36,35 @@ pub struct CreateRequest {
     pub expected_inventory_revision: String,
 }
 
-struct Inventory {
-    revision: String,
-    files: Vec<(String, Vec<u8>)>,
+pub(super) struct Inventory {
+    pub(super) revision: String,
+    pub(super) files: Vec<(String, Vec<u8>)>,
+    pub(super) script_files: Vec<String>,
+    pub(super) unresolved_styles: Vec<String>,
+    opaque_revisions: Vec<(String, String)>,
     names: Vec<String>,
     complete: bool,
+}
+
+impl Inventory {
+    pub(super) fn refresh_revision(&mut self) {
+        let mut digest = Sha256::new();
+        for (path, bytes) in &self.files {
+            digest.update((path.len() as u64).to_le_bytes());
+            digest.update(path.as_bytes());
+            digest.update(hex::encode(Sha256::digest(bytes)).as_bytes());
+        }
+        for path in &self.script_files {
+            digest.update((path.len() as u64).to_le_bytes());
+            digest.update(path.as_bytes());
+        }
+        for (path, revision) in &self.opaque_revisions {
+            digest.update((path.len() as u64).to_le_bytes());
+            digest.update(path.as_bytes());
+            digest.update(revision.as_bytes());
+        }
+        self.revision = hex::encode(digest.finalize());
+    }
 }
 
 fn declaration_names(bytes: &[u8]) -> Result<Vec<String>, SceneError> {
@@ -213,6 +238,7 @@ impl AuthoringService {
                             position: None,
                             numeric_layout: None,
                             text_properties: None,
+                            style: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
                             properties: vec![],
@@ -239,24 +265,68 @@ impl AuthoringService {
         Ok(document)
     }
 
-    fn screen_inventory(&self, project: &ProjectId) -> Result<Inventory, SceneError> {
+    pub(super) fn screen_inventory(&self, project: &ProjectId) -> Result<Inventory, SceneError> {
         let mut paths = self
             .transactions
             .inventory_files_bounded(project, "game", 16384)
             .map_err(|_| SceneError::SourceConflict)?;
-        paths.retain(|path| path.to_ascii_lowercase().ends_with(".rpy"));
+        paths.retain(|path| {
+            let lower = path.to_ascii_lowercase();
+            lower.ends_with(".rpy") || lower.ends_with(".rpyc") || lower.ends_with(".rpa")
+        });
         paths.sort();
-        let mut digest = Sha256::new();
+        let source_paths = paths
+            .iter()
+            .filter(|p| p.to_ascii_lowercase().ends_with(".rpy"))
+            .cloned()
+            .collect::<HashSet<_>>();
+        let mut unresolved_styles = vec![];
+        let mut opaque_revisions = vec![];
+        let mut opaque_bytes = 0;
+        // Opaque executables cannot qualify a shared edit. Hash bounded inputs
+        // for review staleness, but never load or execute them.
+        for path in &paths {
+            let lower = path.to_ascii_lowercase();
+            let reason = if lower.ends_with(".rpa") {
+                "archive"
+            } else if lower.ends_with(".rpyc") && !source_paths.contains(&path[..path.len() - 1]) {
+                "bytecode"
+            } else {
+                continue;
+            };
+            unresolved_styles.push(format!("Unresolved {reason} styles in {path}"));
+            let revision = match self.transactions.inspect_file_bounded(
+                project,
+                RelativePath::new(path).map_err(|_| SceneError::InvalidPayload)?,
+                64 * 1024 * 1024 - opaque_bytes,
+            ) {
+                Ok(Some((count, revision))) => {
+                    opaque_bytes += count;
+                    revision.sha256
+                }
+                // An oversized opaque input already makes every shared edit
+                // unavailable. Its presence remains part of the revision.
+                Err(error) if error.code == ErrorCode::InvalidProposal => {
+                    opaque_bytes = 64 * 1024 * 1024;
+                    "unqualified".into()
+                }
+                _ => return Err(SceneError::SourceConflict),
+            };
+            opaque_revisions.push((path.clone(), revision));
+        }
         let mut files = vec![];
         let mut names = vec![];
         let mut complete = true;
         let mut total = 0usize;
-        for path in paths {
-            let (bytes, revision) = self
+        for path in &paths {
+            if !source_paths.contains(path) {
+                continue;
+            }
+            let (bytes, _) = self
                 .transactions
                 .snapshot_bounded(
                     project,
-                    RelativePath::new(&path).map_err(|_| SceneError::InvalidPayload)?,
+                    RelativePath::new(path).map_err(|_| SceneError::InvalidPayload)?,
                     16 * 1024 * 1024,
                 )
                 .map_err(|_| SceneError::SourceConflict)?;
@@ -270,17 +340,19 @@ impl AuthoringService {
                 Ok(found) => names.extend(found),
                 Err(_) => complete = false,
             }
-            digest.update((path.len() as u64).to_le_bytes());
-            digest.update(path.as_bytes());
-            digest.update(revision.sha256.as_bytes());
-            files.push((path, bytes));
+            files.push((path.clone(), bytes));
         }
-        Ok(Inventory {
-            revision: hex::encode(digest.finalize()),
+        let mut inventory = Inventory {
+            revision: String::new(),
             files,
+            script_files: paths,
+            unresolved_styles,
+            opaque_revisions,
             names,
             complete,
-        })
+        };
+        inventory.refresh_revision();
+        Ok(inventory)
     }
 
     fn screen_metadata(
@@ -316,6 +388,7 @@ impl AuthoringService {
     ) -> Result<Catalog, SceneError> {
         let (map, _, revision, project_revision) = self.screen_metadata(project, project_id)?;
         let inventory = self.screen_inventory(project)?;
+        let styles = styles::Index::read(&inventory)?.catalog(&revision.sha256);
         let owned = map
             .owned_screens
             .into_iter()
@@ -342,6 +415,7 @@ impl AuthoringService {
             source_map_revision: revision.sha256,
             inventory_revision: inventory.revision,
             owned,
+            styles,
         })
     }
 

@@ -269,6 +269,62 @@ uses the same typed values and changes no project source.
 [Ticket #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) owns acceptance.
 [Project font evidence](tasks/evidence/project-fonts.md) records the tested limits.
 
+## Shared screen styles
+
+`screens.list.styles` indexes supported ordinary `style name is text`, `frame`,
+`window` or `button` definitions and explicit screen-element references. A button
+style names both its `style` and `text_style`; a text-only button style can retain
+its existing `text_style` reference. Built-in style names, ambiguous definitions,
+unsupported inheritance, untracked style expressions and dynamic references remain
+in Source. The index uses the existing bounded source inventory and lexical parser.
+
+`formatText.style` contains `scope` (`shared`, `local` or `create`), `name` and
+`expectedRevision`. The revision binds all captured `.rpy` bytes and source-map
+ownership. Shared Apply patches the definition and optional selected reference;
+local Apply copies the definition with effective appearance values and changes only
+its selected use. A text-only style on a button owns only applicable text properties;
+normal and state background/border properties stay on the selected element. Assigning
+a text-only style preserves that decoration and removes a superseded button-style
+reference. Shared text edits and local decoration edits still share one transaction.
+Creating or changing a reference and accepting local text/layout
+share one transaction/history entry. Unchanged commands add none. The core refuses
+a changed definition/use inventory, dirty source, incompatible style or affected
+property overridden at a use. All failures retain the inspector draft.
+
+Element re-lookups after a Style patch remain inside the captured owning screen;
+matching marker text in an unowned screen grants no write authority. A local copy
+starts from the chosen definition and overlays only source-local properties and
+explicit draft edits, rather than inherited values from a previous definition.
+Unrelated unsupported UI files do not block ordinary composition refresh.
+
+The bounded Style index reports its analysis limit without rejecting ordinary
+owned-screen operations. Archives and orphan bytecode make shared review
+unavailable and participate in its revision. Source-only `use` inclusion graphs
+also refuse shared edits until their affected parent screens can be accounted for.
+These refusals retain drafts and explain the missing shared-review capability.
+Read-only inspection and canvas planning accept contained game `.rpy` paths for
+indexed affected-use previews; owned mutations retain their stricter path rules.
+
+`formatText.values.appearance` extends the existing property owner with background
+colors, borders and supported state overrides. A border is `{color, width}` with a
+hex color and whole width 1 through 32. Source stores it as a recognized `foreground`
+Frame/Composite expression with fixed-size Solids and a two-pixel transparent centre.
+Normal properties have no prefix. Button overrides use `hover_`, `selected_` and
+`insensitive_`; the UI calls the latter Disabled. State controls expose text color,
+background and border. Other state properties remain in Source. Text content and
+numeric layout are always local. Typed font handles and unchanged-font validation
+continue through the existing font owner.
+
+The inspector keeps one draft owner and one affected-use dialog. It binds reviewed
+values and use revisions, preserves section/scroll/focus/selection across review,
+and displays the source-derived element/screen counts. The same draft records which
+appearance fields the user edited, so changing a pending Style replaces untouched
+defaults without turning the previous Style's values into shared edits. Local button
+decoration stays outside text-only shared previews. Source reconciliation,
+Undo/Redo and reopen reconstruct definitions and references from authoritative bytes.
+[Ticket #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) owns acceptance;
+[shared-look evidence](tasks/evidence/shared-look.md) owns candidate-specific proof.
+
 ## Variables and state
 
 Phase 1 visual variables support `bool`, `int`, and `string` definitions with simple

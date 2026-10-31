@@ -1,5 +1,76 @@
 # Current outcome handover
 
+## L07 full-review corrections integrated
+
+Kris selected fixing all nine findings, parallel root-cause work, worker self-review,
+coordinator final validation, PR update and CI. Three workers reproduced and fixed
+their assigned cases; commits `8b5eb01`, `7cca53f` and `cf95e70` are integrated as
+`1230d65`, `0b0cb1f` and `e176b48`. The coordinator reviewed their combined changes.
+[Correction evidence](../tasks/evidence/shared-look.md#full-review-correction-assignments-2026-10-31)
+owns assignments, tests, retained failures and CI6 selection.
+
+Combined frontend/typecheck passes 288 tests, build, 38 desktop tests, the appearance
+and shared-style controller journeys, two driver tests and five image/evidence
+checks. Broad release-core passes 491 tests with 52 specialist cases ignored and three
+documented exclusions. The exact production-probe rehearsal also passes.
+The initial sandbox-denied loopback checks, missing-Pillow environment and original
+controller Undo timeout remain recorded; the instrumented controller passes without
+a product change and the original timeout cause remains unestablished.
+
+Windows CI6 is prepared within the existing limits. Baseline actual use remains
+SDK36/helper3/package3/native3/dispatches5; reserve eleven SDK starts and one helper/
+package/native session. #43 owns cumulative ceilings and later run identities.
+No additional Mac costly operation is selected. PR #72 remains draft, criteria
+unchecked and all prior evidence retains its candidate-specific scope.
+
+
+## L07 corrections complete; CI5 audited; user acceptance next
+
+[Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
+`codex/l07-shared-looks`. Kris selected all four full-PR review fixes, parallel
+root-cause work/self-review, final validation and needed additional testing. All
+four fixes are integrated. The coordinator's combined review found no further
+issue; this does not claim a new independent full-branch review after the fixes.
+
+[Terminal audit and retirement](../tasks/evidence/shared-look.md#ci5-terminal-audit-and-worker-retirement-2026-10-31)
+owns exact identities, hashes, counts and acceptance limits. Full Windows CI5
+41194613628, attempt 1, is audited successful at exact
+`e8750cdc269522c8b26d1fcc72cb2b78e09ff9a7`. Both selected jobs and every executed
+step pass. One accepted source snapshot feeds normal SDK and fresh helper: 16
+normal rows, 32 exact comparisons, five rejected faults, pending match, measured
+starts and cooperative cleanup pass. Fresh x64 package/native passes seven stages,
+exit and cleanup, with no SDK execution in native. The 157-file artifact, ID
+13040008641, passes downloaded digest/privacy verification; expiry is 2026-11-07
+11:05:42 UTC. Originals remain immutable under ignored `windows-ci-05`.
+
+Candidate automatic quality 41194536315 and docs-head quality 41194870368 at
+`a9b29e4` are separately audited successful, both required jobs/every executed step
+and 285 frontend tests each; nine unselected automatic jobs are skips. Later
+audit publication changes docs only. [#43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
+and the PR own later published-head/automatic identities without a receipt-only
+commit loop. Do not rerun qualification for docs or relabel its SHA as `e8750cd`.
+
+Final local validation and fresh Mac proof retain the exact scope recorded above
+in the evidence owner. Mac rendering at `ed9391a` qualifies corrected core/source,
+not a new Mac package or later frontend native proof. The earlier debug cleanup
+assertion failure remains retained; isolated replay and full release run pass,
+and its cause remains unestablished. CI1-4 and protected recovery remain unchanged.
+
+Windows actual use is SDK36/helper3/package3/native3/dispatches5, within #43's
+ceilings 47/4/4/4/6; all CI5 reservations are resolved. Mac actual use stays
+SDK32/helper3/package2/native2 with the historical SDK21/16 overrun disclosed.
+No retry, successor implementation or costly run is selected.
+
+Both clean, patch-equivalent worker worktrees and local branches are removed.
+Original commits and 41 unique evidence files are preserved under ignored
+`.toolchains/retired-worktrees/pr72/`, with a verified bundle and hash manifest.
+The active PR branch remains. Next is Kris's review/acceptance; keep PR draft,
+#43 open and criteria unchecked, with native dependency edges intact. Merge/release,
+physical/human input, full Design Lab startup and wider editor/canvas/3B acceptance
+remain separate. No specific agent OS or external wait is required for review.
+The unrelated audit and all protected recovery below remain intact. Status records
+retain the existing size exception for that unique recovery/history.
+
 ## Text ownership cleanup review ready
 
 Kris selected architecture candidate 1 and a new branch on 2026-10-30.

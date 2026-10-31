@@ -51,6 +51,8 @@ pub enum Command {
         node_id: String,
         values: text::TextEdits,
         #[serde(default)]
+        style: Option<styles::Edit>,
+        #[serde(default)]
         layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
     },
     #[serde(rename_all = "camelCase")]
@@ -69,6 +71,8 @@ pub struct ComposeResult {
     pub document: Document,
     pub selected_id: String,
     pub changed: bool,
+    pub styles: styles::StyleCatalog,
+    pub documents: Vec<Document>,
 }
 
 fn text_literal(text: &str) -> Result<String, SceneError> {
@@ -157,12 +161,13 @@ impl AuthoringService {
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);
         }
-        let document = self.owned_screen_document(
+        let mut document = self.owned_screen_document(
             project,
             &bytes,
             source_path.clone(),
             revision.sha256.clone(),
         )?;
+        self.resolve_screen_styles(project, &mut document, &bytes)?;
         let screen = document
             .screens
             .iter()
@@ -333,6 +338,7 @@ impl AuthoringService {
             Command::FormatText {
                 node_id,
                 values,
+                style,
                 layout,
             } => {
                 let node = screen
@@ -342,11 +348,46 @@ impl AuthoringService {
                     .ok_or(SceneError::UnknownEntity)?;
                 self.verify_accepted_text_font(project, project_id, node, &values)?;
                 let changes = self.resolve_text_edits(project, project_id, &values)?;
-                proposed = node
-                    .text_properties
-                    .as_ref()
-                    .ok_or(SceneError::OpaqueBoundary)?
-                    .patch(&bytes, node, &values, changes)?;
+                if let Some(edit) = &style {
+                    (proposed, companions) = self.patch_style(
+                        project,
+                        edit,
+                        &catalog,
+                        &screen.name,
+                        node,
+                        source_path,
+                        &bytes,
+                        changes,
+                    )?;
+                    if values.text.is_some() {
+                        let context = inspect(&proposed, source_path.clone(), String::new())?;
+                        let updated = context
+                            .screens
+                            .iter()
+                            .find(|s| s.name == screen.name)
+                            .and_then(|s| s.nodes.iter().find(|n| n.id.as_ref() == Some(&node_id)))
+                            .ok_or(SceneError::InvariantBlocked)?;
+                        proposed = updated
+                            .text_properties
+                            .as_ref()
+                            .ok_or(SceneError::OpaqueBoundary)?
+                            .patch(
+                                &proposed,
+                                updated,
+                                &text::TextEdits {
+                                    text: values.text.clone(),
+                                    ..Default::default()
+                                },
+                                Default::default(),
+                            )?;
+                    }
+                } else {
+                    proposed = node
+                        .text_properties
+                        .as_ref()
+                        .ok_or(SceneError::OpaqueBoundary)?
+                        .patch(&bytes, node, &values, changes)?;
+                }
                 if !layout.is_empty() {
                     let context = inspect(&proposed, source_path.clone(), String::new())?;
                     let updated = context
@@ -400,6 +441,8 @@ impl AuthoringService {
                         document,
                         selected_id: node_id,
                         changed: false,
+                        styles: catalog.styles.clone(),
+                        documents: vec![],
                     });
                 }
                 let start = node.span.start.min(target.span.start);
@@ -515,19 +558,56 @@ impl AuthoringService {
                 selected
             }
         };
+        companions.retain(|m| m.proposed != m.expected_bytes);
         if proposed == bytes && companions.is_empty() {
             return Ok(ComposeResult {
                 document,
                 selected_id,
                 changed: false,
+                styles: catalog.styles.clone(),
+                documents: vec![],
             });
         }
-        let accepted = self.owned_screen_document(
+        let mut accepted = self.owned_screen_document(
             project,
             &proposed,
             source_path.clone(),
             hex::encode(Sha256::digest(&proposed)),
         )?;
+        let mut accepted_inventory = self.screen_inventory(project)?;
+        for (p, b) in &mut accepted_inventory.files {
+            if p == source_path {
+                *b = proposed.clone();
+            }
+            if let Some(m) = companions.iter().find(|m| m.path.as_str() == p) {
+                *b = m.proposed.clone();
+            }
+        }
+        accepted_inventory.refresh_revision();
+        let index = styles::Index::read(&accepted_inventory)?;
+        index.resolve(&mut accepted, &proposed)?;
+        let style_catalog = index.catalog(&catalog.source_map_revision);
+        let mut documents = vec![];
+        for (p, b) in &accepted_inventory.files {
+            if path(p).is_err() {
+                continue;
+            }
+            let affected = p == source_path || companions.iter().any(|m| m.path.as_str() == p);
+            let mut doc = match self.owned_screen_document(
+                project,
+                b,
+                p.clone(),
+                hex::encode(Sha256::digest(b)),
+            ) {
+                Ok(doc) => doc,
+                // Unrelated source-only files need not be inspectable to edit this owner.
+                Err(SceneError::UnsupportedSource) if !affected => continue,
+                Err(error) => return Err(error),
+            };
+            index.resolve(&mut doc, b)?;
+            documents.push(doc);
+        }
+        companions.retain(|m| m.proposed != m.expected_bytes);
         if proposed != bytes {
             companions.insert(
                 0,
@@ -551,6 +631,8 @@ impl AuthoringService {
             document: accepted,
             selected_id,
             changed: true,
+            styles: style_catalog,
+            documents,
         })
     }
 }

@@ -68,6 +68,8 @@ pub enum ButtonState {
     #[default]
     Normal,
     Hover,
+    Selected,
+    Disabled,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -148,13 +150,25 @@ impl AuthoringService {
         }
         let (bytes, revision) = self
             .transactions
-            .snapshot(project, path(&request.path)?)
+            .snapshot(project, read_path(&request.path)?)
             .map_err(|_| SceneError::SourceConflict)?;
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);
         }
         let source_path = request.path.clone();
-        let document = inspect(&bytes, request.path, revision.sha256.clone())?;
+        let style_inventory = self.screen_inventory(project)?;
+        if style_inventory
+            .files
+            .iter()
+            .find(|(p, _)| p == &source_path)
+            .map(|(_, b)| b)
+            != Some(&bytes)
+        {
+            return Err(SceneError::SourceConflict);
+        }
+        let style_index = super::styles::Index::read(&style_inventory)?;
+        let mut document = inspect(&bytes, request.path, revision.sha256.clone())?;
+        style_index.resolve(&mut document, &bytes)?;
         let screen = document
             .screens
             .into_iter()
@@ -205,6 +219,11 @@ impl AuthoringService {
                         .push(format!("Source-only statement at {}", node.span.start));
                     continue;
                 };
+                if matches!(key, "style" | "text_style")
+                    && node.style.as_ref().is_some_and(|s| s.error.is_none())
+                {
+                    continue;
+                }
                 if matches!(key, "id" | "modal" | "action" | "hovered" | "unhovered") {
                     continue;
                 }
@@ -276,6 +295,20 @@ impl AuthoringService {
                 } else {
                     plan.limits
                         .push(format!("Unresolved {key} at {}", node.span.start));
+                }
+            }
+            if let Some(reference) = &node.style {
+                if let Some(error) = &reference.error {
+                    plan.limits.push(error.clone());
+                }
+                if node.kind == "textbutton"
+                    && style_index
+                        .catalog("")
+                        .definitions
+                        .iter()
+                        .any(|d| d.name == reference.name && d.kind == "textbutton")
+                {
+                    properties.insert("text_style".into(), Value::String("button".into()));
                 }
             }
             if let Some(typography) = &node.text_properties {
@@ -674,32 +707,17 @@ impl AuthoringService {
                 }
             }
         }
-        // The helper's built-in styles are qualified only when project initialization
-        // cannot change them. Later style resolution must replace this conservative
-        // refusal, rather than guessing the result of custom initialization.
-        let files = self
-            .transactions
-            .inventory_files(project, "game")
-            .map_err(|_| SceneError::SourceConflict)?;
-        plan.script_files = files
+        // Use the same bounded inventory and executable-source uncertainty as
+        // shared-style review. Local nodes remain inspectable when it cannot qualify.
+        plan.script_files = style_inventory
+            .script_files
             .iter()
             .filter(|p| p.ends_with(".rpy") || p.ends_with(".rpyc") || p.ends_with(".rpa"))
             .cloned()
             .collect();
-        plan.script_files.sort();
-        for file in &files {
-            if file.ends_with(".rpa") {
-                plan.limits
-                    .push(format!("Unresolved archive styles in {file}"));
-                continue;
-            }
-            if file.ends_with(".rpyc") && !files.contains(&file[..file.len() - 1].to_owned()) {
-                plan.limits
-                    .push(format!("Unresolved bytecode styles in {file}"));
-            }
-            if !file.ends_with(".rpy") {
-                continue;
-            }
+        plan.limits
+            .extend(style_inventory.unresolved_styles.iter().cloned());
+        for (file, indexed_bytes) in &style_inventory.files {
             let (bytes, revision) = self
                 .transactions
                 .snapshot(
@@ -713,13 +731,23 @@ impl AuthoringService {
             {
                 continue;
             }
+            if indexed_bytes != &bytes {
+                return Err(SceneError::SourceConflict);
+            }
+            let bom = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
+                3
+            } else {
+                0
+            };
             let bytes = bytes.strip_prefix(&[0xef, 0xbb, 0xbf]).unwrap_or(&bytes);
             let text = std::str::from_utf8(bytes).map_err(|_| SceneError::UnsupportedSource)?;
             let ranges = crate::authoring::lexical_ranges(bytes, false, false)
                 .map_err(|_| SceneError::UnsupportedSource)?;
             if ranges.into_iter().any(|(start, end)| {
                 let raw = &text[start..end];
-                !raw.starts_with(char::is_whitespace) && !safe_initialization(code(raw))
+                !raw.starts_with(char::is_whitespace)
+                    && !safe_initialization(code(raw))
+                    && !style_index.supports_declaration(file, start + bom)
             }) {
                 plan.limits.push(format!(
                     "Unresolved project initialization or inherited styles in {file}"

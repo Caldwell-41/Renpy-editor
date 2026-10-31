@@ -645,7 +645,13 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** exact production probe with a held font response rejects an
   overlapping Apply before the fix and passes afterward. The lane test covers
   every affected read against text Apply and import.
-- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections).
+- **Shared Style follow-up:** a fitted capture's frame corner also has partial
+  coverage and premultiplied RGB. Compare semantic color in that convention,
+  retain opaque interior proof and exact source/literal/helper equality, and record
+  raw/expected samples. Retained Windows/Mac replay passes; missing border, filled
+  interior and even a one-unit literal RGB/alpha difference still fail.
+- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
+  [L07 correction](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
 
 ## H46. Physical capture size mistaken for virtual resolution
 
@@ -656,7 +662,13 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   reference and helper, while preserving exact virtual size and strict pixels.
 - **Regression:** retained Windows and Mac captures pass; wrong physical size,
   scale, source, missing reference, blank and fallback-font evidence all fail.
-- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections).
+- **Shared Style follow-up:** a fitted capture's frame corner also has partial
+  coverage and premultiplied RGB. Compare semantic color in that convention,
+  retain opaque interior proof and exact source/literal/helper equality, and record
+  raw/expected samples. Retained Windows/Mac replay passes; missing border, filled
+  interior and even a one-unit literal RGB/alpha difference still fail.
+- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
+  [L07 correction](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
 
 ## H47. Shared Apply hides text dimensions
 
@@ -716,3 +728,59 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   documents. The actual controller/core journey first observed changed Source,
   then passed retained input, focus and unchanged Source after the correction.
 - **Evidence:** [Text ownership maintenance](../tasks/evidence/screen-text-ownership.md#hierarchy-enter-correction).
+
+
+## H52. SDK border and helper conversion differ from the intended appearance
+
+- **Class/search:** product/harness; filled border interior, Frame centre size,
+  foreground dictionary, RevertableDict, unchanged button-state captures.
+- **Cause/correction:** Frame reserves two centre pixels; fixed rectangles and a
+  two-pixel transparent centre preserve borders. The trusted helper converts typed
+  foreground records without testing against Ren'Py's store dictionary subclass.
+  Qualification processes queued redraws before capturing changed states.
+- **Regression:** normal and helper output matches independent literal screens;
+  border/interior semantic checks and distinct-state checks reject the original
+  wrong output. Runtime render errors exit with a bounded diagnostic.
+- **Evidence:** [L07 diagnosis and qualification](../tasks/evidence/shared-look.md#implementation-and-first-sdk-diagnosis).
+
+
+## H53. Helper qualification omits implicit SDK validation starts
+
+- **Class/search:** operation accounting; helper startup allowance, SDK --version,
+  managed installation and discovery.
+- **Cause/correction:** each fresh helper fixture starts three SDK validation
+  commands before its helper. Count staged validation, post-promotion discovery
+  and initial canvas discovery separately from the helper process. The L07 helper
+  receipt now records the existing adapter spawn counter and checks this count.
+- **Evidence:** [L07 corrected operation accounting](../tasks/evidence/shared-look.md#corrected-operation-accounting).
+  The old Mac receipt lacked this counter. Its reconstructed SDK overrun remains
+  recorded; the added counter awaits actual Windows execution.
+
+
+## H54. Controller closes preview before acknowledging queued delivery
+
+- **Class/search:** harness; Style assignment, canvasRequests, zero-delay timer,
+  exposed binding, correct fields but Starting canvas status.
+- **Cause/correction:** awaiting a review-close click does not acknowledge a
+  queued canvas request or real-core reply. Keep the review open until a preview
+  matching path/screen/node/revision passes the actual core plan, then inspect its
+  appearance. Preserve the existing deadline and record correlated request/plan
+  diagnostics.
+- **Regression:** the original real-controller assertion fails with correct queued
+  payloads and no delivered request under controlled scheduling. The corrected
+  journey passes under the same schedule without a sleep or retry in the test.
+- **Evidence:** [L07 CI2 audit and correction](../tasks/evidence/shared-look.md#ci2-terminal-audit-and-controller-acknowledgement-correction-2026-10-31).
+
+
+## H55. Cross-run helper reuse pairs different authored source snapshots
+
+- **Class/search:** harness; accepted.json mismatch, random project UUIDs, copied
+  style names, asset IDs, visually identical but different source revisions.
+- **Cause/correction:** unchanged authoring code does not create byte-identical
+  projects. Export source once and give fresh normal/helper producers that same
+  snapshot. Remove the cross-run reuse path; keep exact manifest/source/pixel
+  checks and report both manifest hashes when provenance differs.
+- **Regression:** full consumer accepts 32 same-source pairs and rejects another
+  project's manifest despite identical pixels. Actual failed CI3 identity still
+  refuses, while copied same-source retained captures pass all five rejecting cases.
+- **Evidence:** [L07 CI3 audit and full correction](../tasks/evidence/shared-look.md#ci3-terminal-audit-and-fresh-full-ci4-correction-2026-10-31).

@@ -1,5 +1,54 @@
 # Current status
 
+## L07 full-review corrections integrated
+
+Kris selected fixing all nine findings, parallel root-cause work, worker self-review,
+coordinator final validation, PR update and CI. Three workers reproduced and fixed
+their assigned cases; commits `8b5eb01`, `7cca53f` and `cf95e70` are integrated as
+`1230d65`, `0b0cb1f` and `e176b48`. The coordinator reviewed their combined changes.
+[Correction evidence](../tasks/evidence/shared-look.md#full-review-correction-assignments-2026-10-31)
+owns assignments, tests, retained failures and CI6 selection.
+
+Combined frontend/typecheck passes 288 tests, build, 38 desktop tests, the appearance
+and shared-style controller journeys, two driver tests and five image/evidence
+checks. Broad release-core passes 491 tests with 52 specialist cases ignored and three
+documented exclusions. The exact production-probe rehearsal also passes.
+The initial sandbox-denied loopback checks, missing-Pillow environment and original
+controller Undo timeout remain recorded; the instrumented controller passes without
+a product change and the original timeout cause remains unestablished.
+
+Windows CI6 is prepared within the existing limits. Baseline actual use remains
+SDK36/helper3/package3/native3/dispatches5; reserve eleven SDK starts and one helper/
+package/native session. #43 owns cumulative ceilings and later run identities.
+No additional Mac costly operation is selected. PR #72 remains draft, criteria
+unchecked and all prior evidence retains its candidate-specific scope.
+
+## L07 review corrections and CI5 audited
+
+[Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
+`codex/l07-shared-looks`. All four fresh full-PR findings are corrected, worker
+self-review and coordinator review are complete, and final local checks pass.
+[Terminal audit](../tasks/evidence/shared-look.md#ci5-terminal-audit-and-worker-retirement-2026-10-31)
+records exact candidates, original failures and acceptance limits.
+
+[Full Windows CI5 41194613628, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194613628/attempts/1)
+passes at `e8750cd`: 16 normal rows, 32 exact helper comparisons, five rejections,
+pending match, fresh x64 package and all seven native stages/exit/cleanup. The
+157-file artifact passes digest/privacy checks. Candidate and `a9b29e4` automatic
+quality are separately audited passing, including 285 frontend tests each. Later
+docs-only heads do not replace the full qualification candidate.
+
+Fresh Mac rendering retains its core/source scope at `ed9391a`. Cumulative use is
+Windows SDK36/helper3/package3/native3/dispatches5 and Mac SDK32/helper3/package2/
+native2. The historical Mac SDK21/16 overrun remains disclosed. [#43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
+owns limits and later automatic check identities. No further costly run is selected.
+
+Both completed worker worktrees/branches are retired; original commits and 41
+unique evidence files are preserved and hash-verified. User review/acceptance is
+next. PR stays draft, #43 boxes unchecked and dependencies unchanged. Physical/
+human, full Design Lab startup and wider editor/canvas/3B acceptance remain separate.
+Protected recovery and the unrelated audit remain intact.
+
 ## Reviewed text ownership cleanup
 
 `codex/single-text-draft-owner` is `review_ready`, based on `d990298`. Kris selected
