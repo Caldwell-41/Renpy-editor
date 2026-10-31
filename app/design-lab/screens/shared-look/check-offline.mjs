@@ -27,16 +27,16 @@ async function open({ variant = "inspector", state = "shared", theme = "dark" } 
 }
 try {
   mkdirSync(output, { recursive: true });
-  for (const width of [1100, 728, 560]) for (const theme of ["dark", "light"]) for (const variant of ["shared-style", "refined", "inspector", "library", "inline"]) for (const state of ["shared", "many", "local", "stale", "missing", "expression"]) {
+  for (const width of [1100, 728, 560]) for (const theme of ["dark", "light"]) for (const variant of ["appearance-scope", "refined", "inspector", "library", "inline"]) for (const state of ["shared", "many", "local", "stale", "missing", "expression"]) {
     await page.setViewportSize({ width, height: 850 }); await open({ variant, theme, state });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${variant}/${state}/${width}/${theme}: horizontal overflow`);
-    if (variant === "shared-style") await page.locator("[data-node-id=body]").waitFor();
+    if (variant === "appearance-scope") await page.locator("[data-node-id=body]").waitFor();
     else assert.equal(await page.getByRole("region", { name: "Look inspector" }).isVisible(), true);
     if (state === "shared") {
       await page.screenshot({ path: fileURLToPath(new URL(`${variant}-${theme}-${width}.png`, output)) });
-      if (variant === "shared-style") {
+      if (variant === "appearance-scope") {
         await page.locator("[data-node-id=body]").dblclick(); await page.locator(".sle-look").waitFor();
-        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `A4 Design/${width}/${theme}: horizontal overflow`);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `A5 Design/${width}/${theme}: horizontal overflow`);
         await page.screenshot({ path: fileURLToPath(new URL(`editor-design-${theme}-${width}.png`, output)) });
       }
     }

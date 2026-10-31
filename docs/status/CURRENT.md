@@ -4,10 +4,10 @@
 
 Kris selected implementing [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
 on a new branch. `codex/l07-shared-looks` starts at current Screens base `e9e8661`.
-The current [Design Lab proposal](../design/design-lab-shared-look/README.md) is A4,
-which replaces A3's awkward Look wording and two-screen review. It extends the same
-existing-editor prototype owner with explicit shared-style scope and an eight-screen,
-fourteen-element example. View uses and Apply derive their lists from sample uses.
+The current [Design Lab proposal](../design/design-lab-shared-look/README.md) is A5.
+It keeps scope visible with the appearance controls and switches immediately between
+shared-style and element-only editing. Text content and Layout have separate local
+labels. The same editor owner and eight-screen/fourteen-element example remain.
 No draft is approved and production code is
 unchanged. [Evidence](../tasks/evidence/shared-look.md) records mock verification
 and remaining SDK/source/history/native proof. No capped operation has started.

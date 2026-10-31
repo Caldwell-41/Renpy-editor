@@ -1,4 +1,4 @@
-// A4 extends the existing editor study with explicit scope and any number of uses.
+// A5 keeps scope attached to the existing appearance controls while editing.
 import type { LabMount } from "../../contracts.ts";
 import { action, element as el, labPage } from "../../page.ts";
 import { ScreensWorkspace, type ScreenNode, type ScreenDocument } from "../../../src/screen-ui.ts";
@@ -19,7 +19,7 @@ export const mount: LabMount = async (host, context) => {
   let lastField: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null = null;
   const frame = labPage(host, context, { screen: "screens", title: "Screens", subtitle: "", dirty: () => workspace.hasDraft() || pending.size > 0 });
   frame.shell.classList.add("look-integrated"); frame.heading.remove();
-  frame.shell.querySelector(".lp-sample")!.textContent = "A4 · Shared styles · Draft";
+  frame.shell.querySelector(".lp-sample")!.textContent = "A5 · Appearance editing scope · Draft";
   frame.shell.querySelector(".lp-fiction")!.textContent = "Browser mock · Memory-only source and canvas";
   const nav = frame.shell.querySelector(".lp-navigation")!;
   const screens = action("Screens", () => { workspace.panel.querySelector<HTMLElement>(".screen-heading h1")?.focus(); });
@@ -85,6 +85,7 @@ export const mount: LabMount = async (host, context) => {
   }, { capture: true, signal: events.signal });
   workspace.panel.addEventListener("keydown", event => {
     if (event.key !== "Enter" || event.isComposing || event.keyCode === 229 || review || bypass) return;
+    if (event.target instanceof HTMLButtonElement && event.target.closest(".sle-look")) { event.preventDefault(); event.stopImmediatePropagation(); event.target.click(); return; }
     if (event.target instanceof HTMLTextAreaElement && !event.ctrlKey && !event.metaKey) return;
     if ((event.target as HTMLElement).closest(".screen-card.screen-text") && needsReview()) { event.preventDefault(); event.stopImmediatePropagation(); openReview(); }
   }, { capture: true, signal: events.signal });
@@ -130,6 +131,20 @@ export const mount: LabMount = async (host, context) => {
   }
   function updateState() { const text = JSON.stringify({ accepted: sample, pending: [...pending], history: past.length, redo: future.length }, null, 2); if (state.textContent !== text) state.textContent = text; }
   function setText(target: Element, text: string) { if (target.textContent !== text) target.textContent = text; }
+  function setEditingScope(independent: boolean) {
+    const selected = selection(); if (!selected || context.state === "expression") return;
+    const key = useKey(selected.doc, selected.node), current = pending.get(key);
+    pending.set(key, { id: current?.id ?? sample.uses[key]!, independent });
+    if (!independent && pending.get(key)!.id === sample.uses[key]) pending.delete(key);
+    // Ask the existing field owner to recompute Apply/Cancel without changing input.
+    workspace.panel.querySelector<HTMLInputElement>('[data-text-field="size"]')?.dispatchEvent(new Event("input", { bubbles: true }));
+    update();
+  }
+  function markLocal(target: Element | null) {
+    if (!target || target.querySelector(".sle-local-scope")) return;
+    const label = el("span", "sle-local-scope", "This element only"), input = target.querySelector("input,textarea");
+    if (input) target.insertBefore(label, input); else target.append(label);
+  }
   function update() {
     if (disposed) return;
     if (!enteredDesign) { const body = workspace.panel.querySelector('[data-node-id="body"]'); if (body) { enteredDesign = true; body.dispatchEvent(new MouseEvent("dblclick", { bubbles: true })); } }
@@ -137,26 +152,38 @@ export const mount: LabMount = async (host, context) => {
     const image = workspace.panel.querySelector<HTMLImageElement>(".screen-render"); if (image?.alt !== "Browser-drawn screen sample" && image) { image.alt = "Browser-drawn screen sample"; image.ariaLabel = "Screen canvas sample"; }
     const selected = selection(), typography = workspace.panel.querySelector(".screen-text-typography");
     if (!selected?.node.textProperties || !typography) { updateState(); return; }
+    const content = workspace.panel.querySelector(".screen-text-content .screen-text-field");
+    if (content?.firstChild?.nodeType === Node.TEXT_NODE) content.firstChild.nodeValue = "Text content";
+    markLocal(content); markLocal(workspace.panel.querySelector(".screen-text-layout > summary"));
     const key = useKey(selected.doc, selected.node), choice = pending.get(key), id = choice?.id ?? sample.uses[key]!;
     let row = typography.querySelector<HTMLElement>(".sle-look");
     if (!row) {
-      row = el("section", "sle-look"); row.ariaLabel = "Shared style";
-      const heading = el("div", "sle-look-heading"), name = el("strong"); name.dataset.lookName = "";
-      const label = el("span"); label.dataset.styleLabel = "";
-      heading.append(label, name, action("Change style…", chooseLook));
-      const sharing = el("p"); sharing.dataset.lookSharing = "";
+      row = el("section", "sle-look"); row.ariaLabel = "Appearance editing scope";
+      const heading = typography.querySelector("h3")!; heading.classList.add("sle-scope-title"); heading.id = "sle-appearance-title";
+      const summary = el("p", "sle-scope-summary");
+      const modes = el("div", "sle-scope-modes"); modes.role = "group"; modes.ariaLabel = "Appearance editing scope";
+      const shared = action("Shared style", () => setEditingScope(false)); shared.dataset.editScope = "shared";
+      const local = action("This element only", () => setEditingScope(true)); local.dataset.editScope = "local";
+      modes.append(shared, local);
+      const tools = el("div", "sle-style-tools");
       const viewUses = action("View uses", () => openReview(true)); viewUses.dataset.viewUses = "";
-      const independent = action("Edit only this element", () => { const selected = selection()!; const key = useKey(selected.doc, selected.node), current = pending.get(key); pending.set(key, { id: current?.id ?? sample.uses[key]!, independent: !current?.independent }); if (!pending.get(key)!.independent && pending.get(key)!.id === sample.uses[key]) pending.delete(key); update(); }); independent.dataset.lookIndependent = "";
-      row.append(heading, sharing, viewUses, independent); typography.querySelector("h3")!.after(row);
+      tools.append(action("Change style…", chooseLook), viewUses);
+      row.append(heading, summary, modes, tools); typography.prepend(row);
+      typography.setAttribute("role", "group"); typography.setAttribute("aria-labelledby", heading.id);
     }
-    setText(row.querySelector("[data-look-name]")!, sample.looks[id]!.name);
-    const uses = Object.keys(sample.uses).filter(use => sample.uses[use] === id), count = new Set(uses.map(use => use.split("/")[0])).size;
-    setText(row.querySelector("[data-style-label]")!, uses.length > 1 ? "Shared style:" : "Style:");
-    setText(row.querySelector("[data-look-sharing]")!, choice?.independent ? "Only this element will change. Others keep their shared style." : uses.length > 1 ? `Used on ${count} screen${count === 1 ? "" : "s"} · ${uses.length} elements` : uses.length === 1 ? "Used only on this element." : "Not used yet. Apply to use on this element.");
-    const viewUses = row.querySelector<HTMLButtonElement>("[data-view-uses]")!; viewUses.hidden = !!choice?.independent;
-    const independent = row.querySelector<HTMLButtonElement>("[data-look-independent]")!; independent.hidden = uses.length < 2; setText(independent, choice?.independent ? "Edit the shared style instead" : "Edit only this element");
+    const uses = Object.keys(sample.uses).filter(use => sample.uses[use] === id);
+    const potentialUses = [...new Set([...uses, key])], count = new Set(potentialUses.map(use => use.split("/")[0])).size;
+    const shareable = uses.some(use => use !== key), local = !!choice?.independent || !shareable;
+    typography.classList.add("sle-appearance"); (typography as HTMLElement).dataset.editingScope = local ? "local" : "shared";
+    setText(row.querySelector(".sle-scope-title")!, local ? "Editing this element only" : "Editing shared style");
+    setText(row.querySelector(".sle-scope-summary")!, local ? `${selected.doc.screens[0]!.name} · ${choice?.independent ? "Other shared elements stay unchanged" : sample.looks[id]!.name}` : `${sample.looks[id]!.name} · ${potentialUses.length} elements across ${count} screen${count === 1 ? "" : "s"}`);
     const blocked = context.state === "expression";
-    row.querySelectorAll<HTMLButtonElement>("button").forEach(button => { if (button.disabled !== blocked) button.disabled = blocked; });
+    for (const button of row.querySelectorAll<HTMLButtonElement>("button")) {
+      const disabled = blocked || button.dataset.editScope === "shared" && !shareable;
+      if (button.disabled !== disabled) button.disabled = disabled;
+      if (button.dataset.editScope) { const pressed = String((button.dataset.editScope === "local") === local); if (button.ariaPressed !== pressed) button.ariaPressed = pressed; }
+    }
+    const viewUses = row.querySelector<HTMLButtonElement>("[data-view-uses]")!; viewUses.hidden = !!choice?.independent;
     if (choice) for (const selector of ["[data-text-apply]", "[data-text-cancel]"]) { const button = workspace.panel.querySelector<HTMLButtonElement>(selector); if (button?.disabled && !blocked) button.disabled = false; }
     const apply = workspace.panel.querySelector<HTMLButtonElement>("[data-text-apply]");
     if (apply) {

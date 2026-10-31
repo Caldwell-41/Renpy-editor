@@ -8,7 +8,7 @@ export default async function check({ page, open }) {
   const cancel = () => page.locator("[data-text-cancel]");
   const card = () => page.locator(".screen-card");
   const design = async (scenario = "shared") => {
-    await open({ variant: "shared-style", state: scenario, theme: "dark" });
+    await open({ variant: "appearance-scope", state: scenario, theme: "dark" });
     await body().waitFor(); assert.equal(await page.getByRole("button", { name: "1 Choose", exact: true }).getAttribute("aria-pressed"), "true");
     await body().dblclick(); await page.locator(".sle-look").waitFor();
   };
@@ -17,8 +17,14 @@ export default async function check({ page, open }) {
   assert.equal(await page.locator(".screen-game").count(), 1);
   assert.equal(await page.getByRole("button", { name: "2 Design", exact: true }).getAttribute("aria-pressed"), "true");
   assert.equal(await field("text").inputValue(), "Choose a route.\nThe last tram leaves at midnight.");
-  assert.match(await page.locator(".sle-look").innerText(), /Used on 2 screens/);
+  assert.match(await page.locator(".sle-look").innerText(), /2 elements across 2 screens/);
   assert.equal(await apply().isDisabled(), true);
+  await page.locator('[data-edit-scope="local"]').press("Enter");
+  assert.equal(await page.locator(".sle-scope-title").innerText(), "Editing this element only");
+  assert.equal(await page.locator(".sle-review").count(), 0);
+  await page.locator('[data-edit-scope="shared"]').press("Enter");
+  assert.equal(await page.locator(".sle-scope-title").innerText(), "Editing shared style");
+  assert.equal(await apply().isDisabled(), true); assert.equal((await state()).history, 0);
   await field("size").press("Enter"); assert.equal(await page.locator(".sle-review").count(), 0); assert.equal((await state()).history, 0);
   await field("size").fill("32");
   await field("size").evaluate(input => { input.focus(); input.setSelectionRange(0, 1); });
@@ -36,25 +42,43 @@ export default async function check({ page, open }) {
   await page.locator(".screen-tools").getByRole("button", { name: "Undo", exact: true }).click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 0);
   await field("size").waitFor(); assert.equal(await field("size").inputValue(), "26");
   await page.locator(".screen-tools").getByRole("button", { name: "Redo", exact: true }).click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1);
-  await page.getByRole("button", { name: "Edit only this element", exact: true }).click();
+  await page.getByRole("button", { name: "This element only", exact: true }).click();
   await field("color").fill("#e8a87c"); await apply().click(); assert.match(await page.locator(".sle-review").innerText(), /1 other screen keeps the shared style/);
   await page.getByRole("button", { name: "Apply to Help only", exact: true }).click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 2);
   result = await state(); assert.notEqual(result.accepted.uses["Help/body"], result.accepted.uses["About/body"]); assert.equal(result.accepted.looks.body.values.color, "#f1e9d6"); assert.equal(result.accepted.looks[result.accepted.uses["Help/body"]].values.color, "#e8a87c");
   await field("size").fill("40"); await cancel().click(); assert.equal(await field("size").inputValue(), "32"); assert.equal((await state()).history, 2);
-  await page.getByRole("button", { name: "1 Choose", exact: true }).click(); await body().dblclick(); assert.match(await page.locator(".sle-look").innerText(), /Used only/);
+  await page.getByRole("button", { name: "1 Choose", exact: true }).click(); await body().dblclick(); assert.match(await page.locator(".sle-look").innerText(), /Editing this element only/);
   await page.getByRole("button", { name: "3 Connect", exact: true }).click(); assert.equal(await page.locator(".sle-look").count(), 0);
   await page.getByRole("button", { name: "2 Design", exact: true }).click(); await page.locator(".sle-look").waitFor();
   await design(); await field("text").fill("Only the Help content changes."); await apply().click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1);
   assert.equal(await page.locator(".sle-review").count(), 0); result = await state(); assert.match(result.accepted.documents[1].screens[0].nodes.find(n => n.id === "body").literal, /long way home/);
-  await design(); await page.getByRole("button", { name: "Edit only this element", exact: true }).click(); await apply().click(); await page.getByRole("button", { name: "Apply to Help only", exact: true }).click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1); assert.notEqual((await state()).accepted.uses["Help/body"], (await state()).accepted.uses["About/body"]);
+  await design(); await page.getByRole("button", { name: "This element only", exact: true }).click(); await apply().click(); await page.getByRole("button", { name: "Apply to Help only", exact: true }).click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1); assert.notEqual((await state()).accepted.uses["Help/body"], (await state()).accepted.uses["About/body"]);
   for (const scenario of ["stale", "missing"]) {
     await design(scenario); await field("size").fill("34"); await apply().click(); await page.getByRole("button", { name: "Apply to 2 screens", exact: true }).click(); assert.match(await page.locator(".sle-review [role=alert]").innerText(), /Nothing was applied/); assert.equal((await state()).history, 0); await page.getByRole("button", { name: "Keep editing", exact: true }).click(); assert.equal(await field("size").inputValue(), "34");
   }
   await design("local"); await page.getByRole("combobox", { name: "Screen", exact: true }).selectOption(JSON.stringify(["owned", "About"])); await page.getByRole("button", { name: "1 Choose", exact: true }).click(); await body().dblclick(); await page.locator(".sle-look").getByRole("button", { name: "Change style…", exact: true }).click(); await page.getByRole("dialog", { name: "Choose a style" }).getByRole("button", { name: /^Body text/ }).click(); await apply().click(); await page.getByRole("button", { name: "Apply to 1 screen", exact: true }).click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1); assert.equal((await state()).accepted.uses["Help/body"], (await state()).accepted.uses["About/body"]);
   await design("many");
-  assert.match(await page.locator(".sle-look").innerText(), /Shared style:/);
-  assert.match(await page.locator(".sle-look").innerText(), /Used on 8 screens · 14 elements/);
+  assert.match(await page.locator(".sle-look").innerText(), /Editing shared style/);
+  assert.match(await page.locator(".sle-look").innerText(), /14 elements across 8 screens/);
   await field("size").fill("36");
+  await page.locator('[data-edit-scope="local"]').click();
+  assert.equal(await page.locator(".sle-scope-title").innerText(), "Editing this element only");
+  assert.equal(await field("size").inputValue(), "36"); assert.equal((await state()).history, 0);
+  await page.locator('[data-edit-scope="shared"]').click();
+  assert.equal(await page.locator(".sle-scope-title").innerText(), "Editing shared style");
+  assert.equal(await field("size").inputValue(), "36");
+  assert.equal(await page.locator(".screen-text-content .sle-local-scope").innerText(), "This element only");
+  assert.equal(await page.locator(".screen-text-layout .sle-local-scope").innerText(), "This element only");
+  await page.locator(".screen-text-layout > summary").click();
+  await field("size").evaluate(input => {
+    const body = input.closest(".screen-text-body"), scope = body.querySelector(".sle-look");
+    body.scrollTop += input.getBoundingClientRect().top - body.getBoundingClientRect().top - scope.getBoundingClientRect().height - 16;
+  });
+  const bounds = await field("size").evaluate(input => {
+    const body = input.closest(".screen-text-body"), header = body.querySelector(".sle-look").getBoundingClientRect(), viewport = body.getBoundingClientRect(), field = input.getBoundingClientRect();
+    return { scopeVisible: header.top >= viewport.top - 1 && header.bottom <= viewport.bottom, fieldBelowScope: field.top >= header.bottom - 1, fieldVisible: field.bottom <= viewport.bottom };
+  });
+  assert.deepEqual(bounds, { scopeVisible: true, fieldBelowScope: true, fieldVisible: true });
   await page.waitForFunction(() => document.querySelector(".screen-text-state")?.textContent.includes("8 screens and 14 elements"));
   await page.getByRole("button", { name: "View uses", exact: true }).click();
   assert.equal(await page.getByRole("dialog", { name: "Shared style uses" }).locator(".sle-use-row").count(), 8);
@@ -76,7 +100,7 @@ export default async function check({ page, open }) {
   result = await state();
   assert.equal(result.accepted.documents.length, 8);
   for (const doc of result.accepted.documents) for (const node of doc.screens[0].nodes.filter(node => ["body", "note"].includes(node.id))) assert.equal(node.textProperties.values.size, 36);
-  await page.getByRole("button", { name: "Edit only this element", exact: true }).click();
+  await page.getByRole("button", { name: "This element only", exact: true }).click();
   await field("color").fill("#e8a87c"); await apply().click();
   assert.match(await page.locator(".sle-review").innerText(), /1 screen · 1 element will update/);
   assert.match(await page.locator(".sle-review").innerText(), /7 other screens keep the shared style/);
@@ -86,6 +110,6 @@ export default async function check({ page, open }) {
   result = await state(); assert.equal(result.accepted.looks.body.values.color, "#f1e9d6"); assert.notEqual(result.accepted.uses["Help/body"], result.accepted.uses["Pause/body"]);
   await page.locator(".screen-tools").getByRole("button", { name: "Undo", exact: true }).click();
   await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1);
-  assert.match(await page.locator(".sle-look").innerText(), /Used on 8 screens · 14 elements/);
-  console.log("A4 existing-editor journey passes: sidebar, Choose/Design/Connect, existing fields, shared Apply, independent copy, review retention, history and refusal.");
+  assert.match(await page.locator(".sle-look").innerText(), /14 elements across 8 screens/);
+  console.log("A5 existing-editor journey passes: sidebar, Choose/Design/Connect, existing fields, shared Apply, independent copy, review retention, history and refusal.");
 }

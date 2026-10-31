@@ -125,6 +125,37 @@ Design approval and all actual-product acceptance remain pending.
 
 ## Acceptance remains pending
 
+### A5 scope beside appearance controls
+
+Kris required scope to be unmistakable at the font, size and colour controls,
+confirmed the interpretation, and selected an experience-first refinement. They
+requested screenshots of both states. A5 extends the same editor owner; its
+`appearance-scope` variant/revision `inspector-v5` replaces A4's active route and
+checks. A4's unapproved source remains in Git at `874e302`.
+
+The existing appearance group now has a persistent Editing shared style or Editing
+this element only heading, explicit scope choices and a boundary spanning its font,
+size, colour and emphasis fields. Scope switches retain input and create no history
+until Apply. Text content and Layout remain outside that group with local labels.
+The existing property controls and shared-style service sample remain the owners;
+no production file or second renderer was added.
+
+Focused live and offline journeys pass, including keyboard scope switching without
+accidental Apply, unchanged-operation silence, input retention across both modes,
+scope visibility with Size while scrolling, review retention, shared fourteen-use
+Apply, local copy, history and refusal. Eight additional cases cover both scope
+modes at wide/compact sizes in both themes. Typechecking, approval and repository
+validation and whitespace checks pass. The earlier 180-case mounting matrix keeps
+its tested A4 scope; it is not reported as a fresh A5 pass.
+
+The final screenshots capture the same pending Size 32 edit in each scope. Both
+show the separate local Text content and Layout labels. Delivery files are
+`a5-shared-controls.png` and `a5-local-controls.png`; full initial captures and
+`a5-focused-final.json`, `a5-layout-check.json` and their logs remain local under
+`.toolchains/l07-shared-look/`. No actual core/source, SDK/helper, native or package
+acceptance is claimed. Designs remain unapproved and production implementation is
+pending.
+
 ### A4 shared-style scope and many-screen review, 2026-10-31
 
 Kris selected replacing the awkward Look wording and demonstrating more than two
