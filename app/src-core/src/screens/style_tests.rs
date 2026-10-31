@@ -1231,3 +1231,6 @@ fn unsupported_style_pass_statement_refuses_without_changing_source() {
         source
     );
 }
+
+#[path = "style_index_tests.rs"]
+mod index;

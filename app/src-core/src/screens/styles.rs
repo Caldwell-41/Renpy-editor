@@ -61,6 +61,7 @@ pub(super) struct Index {
     revision: String,
     references: Vec<(String, StyleUse)>,
     complete: bool,
+    unavailable: Option<String>,
 }
 // Built-in 8.5.3 styles have implicit uses outside the explicit-reference index.
 fn native_name(name: &str) -> bool {
@@ -295,16 +296,27 @@ impl Index {
             definitions: vec![],
             revision: inventory.revision.clone(),
             references: vec![],
-            complete: true,
+            complete: inventory.unresolved_styles.is_empty(),
+            unavailable: (!inventory.unresolved_styles.is_empty()).then(||
+                "Archives or orphan bytecode may contain style uses. Review Source before sharing a style.".into()),
         };
         let mut duplicates = BTreeSet::new();
         let mut inherited = BTreeSet::new();
         let mut names = BTreeSet::new();
-        for (path, bytes) in &inventory.files {
+        'files: for (path, bytes) in &inventory.files {
             let Ok(lines) = source_lines(bytes) else {
                 result.complete = false;
                 continue;
             };
+            // Includes may add affected parent screens. Until those edges and
+            // their overrides are modeled, an explicit-use-only review is unsafe.
+            if lines
+                .iter()
+                .any(|line| line.code.split_whitespace().next() == Some("use"))
+            {
+                result.complete = false;
+                result.unavailable = Some("Screen inclusions stay in Source. Their affected screens cannot be reviewed for a shared style.".into());
+            }
             let mut known_references = HashSet::new();
             for (i, line) in lines.iter().enumerate() {
                 if line.indent != 0 || !line.single {
@@ -356,6 +368,10 @@ impl Index {
                     && lines[i + 1..after]
                         .iter()
                         .all(|l| recognized.contains(&l.start));
+                if result.definitions.len() + result.references.len() >= MAX_NODES {
+                    result.exhausted();
+                    break 'files;
+                }
                 result.definitions.push(Definition {
                     name: name.into(),
                     path: path.clone(),
@@ -407,6 +423,10 @@ impl Index {
                                             .collect()
                                     })
                                     .unwrap_or_default();
+                                if result.definitions.len() + result.references.len() >= MAX_NODES {
+                                    result.exhausted();
+                                    break 'files;
+                                }
                                 result.references.push((
                                     name,
                                     StyleUse {
@@ -428,9 +448,6 @@ impl Index {
                 .any(|l| !known_references.contains(&l.start) && style_keyword(l.code))
             {
                 result.complete = false;
-            }
-            if result.references.len() + result.definitions.len() > MAX_NODES {
-                return Err(SceneError::InvariantBlocked);
             }
         }
         // Referencing an undeclared name creates its implicit parent chain in
@@ -467,6 +484,10 @@ impl Index {
         }
         Ok(result)
     }
+    fn exhausted(&mut self) {
+        self.complete = false;
+        self.unavailable = Some("The shared-style index exceeds its analysis limit. Ordinary local edits remain available.".into());
+    }
     pub(super) fn supports_declaration(&self, path: &str, start: usize) -> bool {
         self.definitions
             .iter()
@@ -477,7 +498,9 @@ impl Index {
             revision: hex::encode(Sha256::digest(format!("{}:{map_revision}", self.revision))),
             definitions: self.definitions.clone(),
             error: (!self.complete).then(|| {
-                "Some style uses stay in Source. Reconcile them before sharing a style.".into()
+                self.unavailable.clone().unwrap_or_else(|| {
+                    "Some style uses stay in Source. Reconcile them before sharing a style.".into()
+                })
             }),
         }
     }

@@ -707,32 +707,17 @@ impl AuthoringService {
                 }
             }
         }
-        // The helper's built-in styles are qualified only when project initialization
-        // cannot change them. Later style resolution must replace this conservative
-        // refusal, rather than guessing the result of custom initialization.
-        let files = self
-            .transactions
-            .inventory_files(project, "game")
-            .map_err(|_| SceneError::SourceConflict)?;
-        plan.script_files = files
+        // Use the same bounded inventory and executable-source uncertainty as
+        // shared-style review. Local nodes remain inspectable when it cannot qualify.
+        plan.script_files = style_inventory
+            .script_files
             .iter()
             .filter(|p| p.ends_with(".rpy") || p.ends_with(".rpyc") || p.ends_with(".rpa"))
             .cloned()
             .collect();
-        plan.script_files.sort();
-        for file in &files {
-            if file.ends_with(".rpa") {
-                plan.limits
-                    .push(format!("Unresolved archive styles in {file}"));
-                continue;
-            }
-            if file.ends_with(".rpyc") && !files.contains(&file[..file.len() - 1].to_owned()) {
-                plan.limits
-                    .push(format!("Unresolved bytecode styles in {file}"));
-            }
-            if !file.ends_with(".rpy") {
-                continue;
-            }
+        plan.limits
+            .extend(style_inventory.unresolved_styles.iter().cloned());
+        for (file, indexed_bytes) in &style_inventory.files {
             let (bytes, revision) = self
                 .transactions
                 .snapshot(
@@ -746,13 +731,7 @@ impl AuthoringService {
             {
                 continue;
             }
-            if style_inventory
-                .files
-                .iter()
-                .find(|(p, _)| p == file)
-                .map(|(_, b)| b)
-                != Some(&bytes)
-            {
+            if indexed_bytes != &bytes {
                 return Err(SceneError::SourceConflict);
             }
             let bom = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
