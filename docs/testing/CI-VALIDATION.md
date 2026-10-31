@@ -9,7 +9,8 @@ audit; it does not grant human acceptance, merge or another costly attempt.
 ## Select the work before starting CI
 
 On each new PR branch, update `.github/validation-plan.json` before publication.
-Set `branch` to that branch's name and `base` to its integration target. Keep `version: 1`. List each required manual
+Set `branch` to that branch's name and `base` to its integration target. Keep
+`version: 1`. List each required manual
 workflow and its exact GitHub job names in `qualifications`. An explicit empty
 list selects Repository quality only when that satisfies the task. An inherited
 plan for a different branch, a missing plan or invalid selection reports an error.
@@ -45,8 +46,9 @@ green PR or start qualification itself.
 plan through GitHub. It selects the newest run of each required workflow/event at
 that exact head, then retrieves jobs from that run's exact attempt. Automatic
 Repository quality always requires `Frontend tests and Rust formatting` and
-`Validate repository` from a `pull_request` run associated with this PR. Only one open PR may use a
-head branch, because commit statuses are shared across PRs. A manual run of the same workflow
+`Validate repository` from a `pull_request` run associated with this PR. Only one
+open PR may use a head branch, because commit statuses are shared across PRs. A
+manual run of the same workflow
 cannot replace them.
 
 A required run that has not started, or a required job that is queued/running,

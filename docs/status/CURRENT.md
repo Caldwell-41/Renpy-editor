@@ -1,31 +1,55 @@
 # Current status
 
-## Complete PR CI reporting selected
+## Complete PR CI reporting and live verification
 
-Kris selected a new CI-maintenance branch after PR #72 merged, implementation of
-one combined required PR status and client-specific agent waiting rules, then
-cheap dummy CI verification. `codex/ci-validation` starts at parent `58dfae4` and
-targets `codex/phase3b-screen-designer`. [The owning task](../tasks/active/ci-validation.md)
-records acceptance and continuation; [the technical runbook](../testing/CI-VALIDATION.md)
-owns plan selection and reporting behavior.
+[PR #73](https://github.com/Caldwell-41/Renpy-editor/pull/73), on
+`codex/ci-validation`, implements the combined required PR status, explicit
+qualification plan and client-specific waiting instructions. Parent closeout
+`e18f293` is already an ancestor. [The owning task](../tasks/active/ci-validation.md)
+records acceptance and the first live experiment; [the technical runbook](../testing/CI-VALIDATION.md)
+owns selection and reporting behavior.
 
-Shared reporting hooks, explicit qualification selection and focused tests are
-implemented locally. Eighteen coordinator tests, repository validation, thirteen
-section-link tests, workflow lint and Q1 selector controls pass. Independent reviews are complete and findings addressed. Publication,
-required-status setup, live dummy CI and T3 delivery verification remain pending.
-No SDK, helper, package or native operation is selected. The unrelated audit and
-protected recovery below remain intact. This branch's coordinator is the only
-repository writer for this outcome; no merge or release is selected.
+Eighteen coordinator tests, workflow/repository/link controls and the independent
+review corrections pass. The first live ordinary CI passes all 288 frontend tests
+and Rust formatting. Its combined status correctly stays pending for the separate
+Windows dummy, then fails on the deliberate dummy failure. T3 resumes this same
+thread for that failure and the terminal run/log audit confirms the expected cause.
+Ruleset `26271364` requires the combined status on the integration parent only.
 
-## L07 merged into the integration parent
+The PR owns final passing-trial identities, terminal audit and success-delivery
+receipts at the final candidate; inspect those before treating verification as
+complete. Keep the existing T3 watch while that trial is pending, audit on wake,
+and stop watching at final handback. Final receipts go in the PR without a
+receipt-only source commit. No SDK/helper/package/native operation, merge or release
+is selected. This coordinator remains the sole writer for this outcome. The unrelated
+audit and protected recovery below remain intact; existing size exceptions still
+preserve unique historical recovery records.
+
+## L07 merged and accepted
 
 [PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) merged into
-`codex/phase3b-screen-designer` at `58dfae452defe9e20351dead0b089a3e43bd0a9e` on
-2026-10-31. This replaces the earlier draft-PR and pending-CI6 continuation.
-[Shared-look evidence](../tasks/evidence/shared-look.md) and
-[#43](https://github.com/Caldwell-41/Renpy-editor/issues/43) retain exact qualification,
-failure, operation-limit and acceptance records. The CI-maintenance task does not
-reopen those campaigns or infer wider acceptance from the merge.
+`codex/phase3b-screen-designer` at `58dfae4`; its tree exactly matches audited
+head `9be475b`. Kris selected merge after a passing terminal audit. L07 #43 is
+accepted for its four bounded shared-Style criteria.
+
+[CI6 and merge closeout](../tasks/evidence/shared-look.md#ci6-terminal-audit-and-merge-closeout-2026-10-31)
+records all nine corrections, worker/coordinator review, final local checks and
+Windows CI6. All executed CI6 steps pass, with 16 normal rows, 32 strict helper
+comparisons, five rejection cases, pending match and fresh x64 package/native proof.
+Its 180-file artifact passes digest/privacy verification. Automatic quality at
+`9be475b` also passes both required jobs and all 18 executed steps.
+
+All CI6 reservations are resolved; #43 owns final cumulative counts and closed
+allowances. Prior Mac evidence retains its exact scope and historical overrun.
+Full Design Lab startup, physical/human input and wider editor/canvas/3B acceptance
+remain separate. L18's L07 prerequisite is satisfied; L18 and reusable-component
+work remain unselected. No successor product implementation or release is selected.
+
+Three completed worker
+worktrees/local branches and the local L07 branch are retired after patch-equivalence
+and evidence preservation. Original commits and 23 unique files are hash-preserved
+in the ignored retirement archive. Remote refs, unrelated task work, the untracked
+audit and protected native recovery remain intact. No L07 external wait is pending.
 
 ## Reviewed text ownership cleanup
 
