@@ -1392,3 +1392,100 @@ published head and automatic run identity after that handoff. Remaining work is
 the exact CI5 terminal audit, all executed steps, same-source normal/helper images,
 rejections, fresh Windows package/native report, exit/cleanup, artifact digest/privacy
 and actual counts. Keep draft/open/unchecked status until that audit and acceptance.
+
+## CI5 terminal audit and worker retirement, 2026-10-31
+
+Kris reported CI complete and selected its audit, PR/associated-ticket updates and
+retirement of completed subagent worktrees. No new SDK/helper/package/native start
+or costly dispatch is selected or executed during this closeout.
+
+### Exact Windows qualification
+
+[Full Windows CI5 41194613628, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194613628/attempts/1)
+is successful at exact correction candidate
+`e8750cdc269522c8b26d1fcc72cb2b78e09ff9a7`. Both selected jobs and every executed
+step pass, including candidate/branch/ordinal-5/first-attempt guards, portable
+checks, controller/core and probe rehearsal, official SDK verification, accepted
+source export, normal SDK, fresh helper/comparison, package/native, identity,
+privacy/upload and post-job cleanup. Ten other manual specialist jobs are skips.
+The Windows job completes at 2026-10-31 11:05:50 UTC.
+
+Artifact `shared-style-Windows-41194613628-1`, ID 13040008641, contains 157 files
+and expires 2026-11-07 11:05:42 UTC. Downloaded ZIP SHA-256
+`848c7afc7c0fc8e8b7cab598f31ad4079399a175bbb0bb44c98d44942dd4a188`
+matches GitHub's digest. Safe extraction and a local privacy scan pass. Original
+files/receipts remain immutable under ignored `windows-ci-05`; helper consumer
+replay writes only to `ci-focused-05-helper-replay`. Complete logs, metadata, audit
+script and structured terminal audit remain under `ci-focused-05-*`. Complete log
+SHA-256 is `0f42db6d26147a38a4dae00d345c5fab91fab9cbd7e792d4ce6f8d2efd21418c`.
+
+Export, normal and helper accepted manifests are byte-identical with SHA-256
+`539128d6f6a262e99731f46efbcf28f1e28770f803590399e562f03d1d28a264`.
+Every source and font fixture hash verifies. Recorded core/source hashes match
+both the exact candidate and current checkout; normal-checker and helper-renderer
+hashes verify. This is the corrected text-only button assignment/copy fixture,
+with normal/state decoration kept local. CI1-4 retain their original identities.
+
+All 16 normal semantic/state/aspect rows replay successfully, including every PNG
+hash, distinct button states and exact RGBA source/literal equality. Premultiplied
+alpha semantics retain their existing tolerance; exact image equality stays strict.
+All eight normal SDK commands exit zero without timeout or output truncation, and
+scratch cleanup completes. Fresh helper replay verifies all 32 exact literal
+comparisons, revision/state/dimensions and physical drawing scale. All five bad
+cases are rejected: different source snapshot, missing frame, wrong source, wrong
+state and blank frame. The pending frame matches accepted independent output.
+The helper records three measured SDK validation/discovery starts, one session,
+cooperative exit zero and complete cleanup. Rechecking original file hashes after
+replay confirms that no downloaded receipt or image changed.
+
+The actual controller/core journey passes, including correlated assignment,
+repeated selection and text-only assignment plans. The exact probe rehearsal and
+its rejection gate pass separately from native execution. The fresh package is PE
+x64, machine 0x8664. Executable SHA-256
+`be343f7250abeafb3d6cda42efa12f2d4262d569e3e8f14873ba457818b12d26`
+matches the candidate-bound package receipt. The native report passes the actual
+consumer, all seven required stages, exit zero, no external errors and complete
+cleanup. It records `nativeWebView=true` and `sdkExecuted=false`. Automated native
+input does not establish physical/human acceptance.
+
+### Automatic checks and acceptance limits
+
+Both [candidate automatic quality 41194536315](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194536315/attempts/1)
+at `e8750cd` and [documentation-head automatic quality 41194870368](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194870368/attempts/1)
+at `a9b29e48da0d5ff90e4c0c7e2c9d3fe96cda8fc0` are independently audited
+successful. Each has two required passing jobs, every executed step passing and
+285 frontend tests. Nine unselected automatic specialist jobs are skips. The
+current-head complete-log digest remains
+`c0b7e9ca653951c0bea5efd140e46da1282455cd818dd44ab96ae11344b62944`.
+
+The fresh full-PR review's four findings are corrected, self-reviewed and reviewed
+in combination by the coordinator, with final local validation and CI5 passing.
+No new full-branch independent two-axis review after the fixes is claimed. The
+criterion map above retains bounded proof; user acceptance remains pending for
+all four #43 boxes. PR #72 stays draft, #43 and associated tickets stay open and
+native dependency edges remain intact. Physical/human, full Design Lab startup
+and wider editor/canvas/3B acceptance remain separate. The initial local debug
+cleanup failure and its unestablished cause remain recorded above.
+
+### Actual consumption and safe retirement
+
+CI5 adds eleven SDK starts, one helper, one package and one native session.
+Cumulative Windows actual use is SDK36/helper3/package3/native3/dispatches5, within
+selected ceilings SDK47/helper4/package4/native4/dispatches6. Reservations are
+resolved to actual starts; no retry is selected. Mac remains SDK32/helper3/package2/
+native2 under its revised selection. The historical Mac SDK21/16 overrun remains
+disclosed. This audit does not reset consumption or start successor canvas work.
+
+Both completed worker worktrees were clean. `git cherry HEAD <worker-branch>`
+proved every worker commit patch-equivalent to integrated work. The coordinator
+removed `t3-a166dc6c` and `t3-a40abccd` and their two local worker branches after
+hash-verifying 41 unique reproduction/controller evidence files in ignored
+`.toolchains/retired-worktrees/pr72/`. Its verified `worker-commits.bundle` preserves
+original worker commits; `retirement-manifest.json` records heads, patch equivalence,
+saved file hashes and disposable build outputs. Only generated build outputs were
+discarded. The active PR branch, unrelated audit and protected recovery remain.
+
+This closeout changes documentation only. `e8750cd` remains the full Windows
+candidate; fresh Mac core/source proof stays at `ed9391a`. Later automatic check
+identities belong in #43 and the PR without another receipt-only commit. The next
+owner is Kris for review/acceptance. No merge, release or issue closure is selected.
