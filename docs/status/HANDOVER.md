@@ -16,20 +16,27 @@ worktree. It must finish validation, naming and repeated-assignment fixes plus
 self-review. The coordinator owns all integration, docs, final validation and CI.
 
 [Correction evidence](../tasks/evidence/shared-look.md#full-pr-review-corrections-and-fresh-qualification-2026-10-31)
-owns reproduction/results and selected tests. The first coordinator broad ordinary
-core run is still running after a failure in unchanged descendant cleanup; an exact
-replay is also running. Neither result may be silently replaced or called a pass.
-Final combined frontend/controller/probe checks and parent review remain pending.
+owns reproduction/results and selected tests. The first broad debug run failed an
+unchanged descendant-presence assertion (476 passed, one failed). Exact replay then
+passes, and full ordinary release-core passes 477 tests, zero failures, 52 specialist
+cases ignored and three documented exclusions. All 38 desktop, two driver and five
+image/source gate tests pass. No cleanup assertion or code changed; the original
+discrepancy has no established cause and remains recorded. Combined frontend/
+controller/probe checks and final parent review await the inspector commit.
 
 The updated runtime export exercises text-only button assignment/copy with retained
-normal/state decoration. Select fresh Mac normal/helper comparison, then full
-Windows CI5 at ordinal 5 after combined validation. #43 owns revised cumulative
-ceilings and actual starts. At this checkpoint no new SDK/helper/package/native
-start or costly dispatch has occurred. Previous CI4 success stays at `d5b19e5`
-with its original fixture; immutable ignored receipts remain unchanged.
+normal/state decoration. Fresh Mac proof at core/source candidate `ed9391a` passes
+16 normal rows, 32 exact helper comparisons, five rejections, pending match and
+cooperative cleanup. Export/normal/helper manifests and all source hashes match.
+Ignored `final-review-mac-01/audit.json` owns the compact audit; original producer
+receipts remain immutable. Mac cumulative use is SDK 32/32 and helpers 3/3, with
+package/native 2/2 each. The historical 21/16 overrun remains. #43 owns Windows CI5
+at ordinal 5, its cumulative ceilings and future actual starts. Windows use remains
+SDK25/helper2/package2/native2/dispatches4 before CI5. Earlier CI4 success stays at
+`d5b19e5` with its original fixture and limits.
 
 Next: integrate the completed inspector commit, resolve validation results, review
-and validate the combined change, run the selected fresh Mac proof, then update/push
+and validate the combined change, preserve the audited Mac proof scope, then update/push
 PR #72 and dispatch/confirm Windows CI5 and automatic quality. Record exact candidate,
 run/attempt and actual starts before yielding to the supported wait route.
 Keep PR draft, #43 open and criteria unchecked. Merge/release, physical/human input,

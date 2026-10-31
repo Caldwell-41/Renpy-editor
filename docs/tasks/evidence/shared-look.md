@@ -1274,3 +1274,46 @@ The earlier SDK 21/16 overrun remains historical and disclosed. Any diagnosed re
 will require a revised cumulative selection before it starts under Kris's
 additional-run approval. The normal/helper comparison remains exact and retains
 all semantic, state, source-identity, rejection and cleanup checks.
+
+### Coordinator core and Mac rendering results
+
+The core/source qualification candidate is `ed9391a7d1416536fd625b14dbe79590de3e86ce`.
+The first broad debug ordinary-core run at the integrated core code reports
+476 passed, one failed, 52 specialist cases ignored and three documented exclusions.
+The failure is `runtime_service_switch_cancel_stop_shutdown_drop_and_closed_pipe_descendants`:
+its descendant-presence assertion observed a process ID after cleanup. Its test and
+runtime cleanup implementation are unchanged by this correction. An exact isolated
+replay passes in 5.81 seconds; the documented full release-core run then passes
+477 tests with zero failures, 52 specialist cases ignored and the same three
+exclusions in 445.58 seconds. No runtime assertion, deadline or production cleanup
+code was changed to obtain that pass. The original failure remains a non-reproduced
+cleanup discrepancy; its cause is not established by the passing reruns.
+
+The updated 14-case ordinary Style slice, all 38 desktop tests, both driver-process
+tests and all five image/source-identity gate tests pass. Pinned formatting,
+workflow lint, whitespace and repository validation pass. The real controller driver
+is rebuilt from the integrated core. Combined inspector/controller validation is
+still pending the frontend worker's completed change.
+
+Fresh Mac normal output passes eight SDK commands, all 16 stage/aspect/state rows,
+semantic checks, exact RGBA source/literal equality and scratch cleanup. The fresh
+helper passes all 32 exact literal comparisons, all five bad-evidence rejection
+cases and the typed-pending/accepted match. It records three SDK validation/discovery
+starts, one session, cooperative exit zero and complete cleanup. The coordinator
+audits every frame's source revision, state and dimensions, all current core/source
+hashes, renderer hash, command exits and byte-identical export/normal/helper manifests.
+
+The accepted manifest SHA-256 is
+`0dd30dd5e40eefda16b5257ea0009d8c5ccdbe1792aab0e965294173b43b24a3`.
+Renderer SHA-256 remains
+`0f5a9f9b99610fd93a00a92229cd15182344e48f9a41d114e8815653251df749`.
+Original receipts, images and the compact audit remain ignored under
+`final-review-mac-01`; the release-core and desktop logs are under
+`final-review-validation`. The new Mac proof covers the corrected text-only button
+source and unchanged renderer, not a new native package or the pending inspector code.
+
+Actual additional Mac use is SDK 11 and helper 1. Cumulative Mac use is now SDK
+32/32, helpers 3/3, packages 2/2 and native sessions 2/2. The earlier 21/16 overrun
+and original CI1-4 evidence remain disclosed above. Windows use remains SDK 25,
+helpers 2, packages 2, native sessions 2 and dispatches 4 before CI5. No new Mac
+package/native session or costly dispatch ran for this local qualification.

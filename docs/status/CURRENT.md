@@ -8,17 +8,19 @@ base `e9e8661` found two Standards and two Spec issues. Kris selected all four f
 parallel root-cause implementation/self-review and additional testing where needed.
 
 The core correction `138ca82` is integrated as `f73ad9a`; its 14 ordinary Style
-tests pass. The inspector worker owns validation, technical naming and pending
+tests and the 477-test ordinary release-core suite pass. The inspector worker owns validation, technical naming and pending
 assignment. The coordinator owns integration, final checks, publication and CI.
 [Correction evidence](../tasks/evidence/shared-look.md#full-pr-review-corrections-and-fresh-qualification-2026-10-31)
-owns reproductions, worker results and pending validation. The first broad core run
-has an unresolved assertion in unchanged runtime descendant cleanup and is not a pass.
+owns reproductions, worker results and pending validation. The first debug broad
+run failed in unchanged runtime cleanup; its exact replay and full release run pass.
+The original discrepancy and unestablished cause remain recorded.
 
-The corrected runtime fixture will receive fresh Mac normal/helper comparisons and
-full Windows CI5 at ordinal 5. #43 records revised cumulative selections under Kris's
-approval; actual prior use and the historical Mac overrun remain intact. No new
-costly start has occurred at this checkpoint. Earlier audited CI4 success remains
-tied to `d5b19e5` and its recorded fixture, rather than the correction candidate.
+Fresh Mac proof at `ed9391a` passes 16 normal rows, 32 exact helper comparisons,
+five rejection cases, pending match and cleanup for the corrected runtime fixture.
+Cumulative Mac use is SDK 32/32, helpers 3/3, package/native 2/2 each; the historical
+21/16 overrun remains disclosed. #43 owns the selected full Windows CI5 at ordinal 5
+and cumulative limits. Inspector integration, combined UI checks and Windows proof
+remain pending. Earlier CI4 success stays tied to `d5b19e5` and its recorded fixture.
 
 PR #72 stays draft and #43 stays open with all acceptance boxes unchecked.
 Physical/human input, full Design Lab startup and wider editor/canvas/3B acceptance
