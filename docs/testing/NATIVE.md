@@ -1,9 +1,7 @@
 # Native, package and human evidence
 
-[WORKFLOW host routing](../WORKFLOW.md#test-host-routing-and-ownership) is symmetric:
-iterate on the chosen development host and use CI for the other supported target.
-Windows x64 and macOS ARM64 remain distinct evidence hosts. Select only the cases
-affected by the change; identify any required capability CI cannot establish.
+For connected-machine checks, CI selection and capability handoffs, follow
+[WORKFLOW host routing](../WORKFLOW.md#test-host-routing-and-ownership).
 
 ## Evidence layers and ownership
 
