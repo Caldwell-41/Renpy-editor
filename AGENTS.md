@@ -61,8 +61,8 @@ implementations only for distinct behavior or an explicitly scoped migration, an
 explain why both remain. During review, check for duplicated ownership and tests
 that still exercise superseded paths.
 
-For test-host selection, qualification cadence or a capability handoff, follow
-[host routing](docs/WORKFLOW.md#test-host-routing-and-ownership). For failures,
+For connected-machine builds/tests, test-host selection, qualification cadence or
+a capability handoff, follow [host routing](docs/WORKFLOW.md#test-host-routing-and-ownership). For failures,
 follow [diagnosis](docs/WORKFLOW.md#4-classify-failures-before-fixing).
 Failed, cancelled or skipped required checks are not passes. No package matrix for docs alone.
 

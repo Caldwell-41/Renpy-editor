@@ -211,12 +211,8 @@ not a requirement to serialize every row of this table.
 ### Completion loop and stop boundary
 
 Complete implementation, review and required automated platform qualification from
-the current development session, using [CI-first routing](../../WORKFLOW.md#test-host-routing-and-ownership)
-where suitable. Transfer to another local platform only for an identified remaining
-native capability, carrying completed evidence and the unchanged outcome and operation limits.
-Transfer writer ownership for the handed-off assignment under
-[parallel worktrees](../../WORKFLOW.md#parallel-agents-and-worktrees); independent
-assignments may continue. Keep all selected both-target acceptance gates.
+the current development session under [host routing](../../WORKFLOW.md#test-host-routing-and-ownership).
+That policy owns connected-machine execution, CI selection and capability handoffs.
 
 Related deliverables may be selected together with shared applicable operation limits and a
 shared qualification point. Internal checkpoints do not automatically require a
@@ -265,8 +261,8 @@ Deliver <one target>: <observable finished result>.
 Repository: Caldwell-41/Renpy-editor
 Continuation: <current branch/PR, published checkpoint or explicit local-only state>
 Codex machine: <preferred development host; retain the current session>
-Test hosts: <affected Windows x64/macOS ARM64 CI requirements and verified prerequisites>
-Local handoff: <only named required cases CI cannot establish; otherwise none>
+Test hosts: <affected Windows x64/macOS ARM64 targets under WORKFLOW host routing>
+Missing capability: <named remaining requirement and required user action, or none>
 Reason: <why this result is next and which accepted dependencies it uses>
 Read AGENTS.md, CURRENT, HANDOVER and <exact selected task section>.
 Use one GPT-6.1 Sol High owner and zero to two GPT-6.1 Sol High implementation agents
@@ -276,8 +272,8 @@ Prove: <decisive user-action/source/persistence checks and required native evide
 Operation limits: <applicable costly operations and existing consumption, or none>.
 Complete implementation, focused checks, review and in-scope fixes; update canonical
 docs, the current brief, linked evidence and HANDOVER. Publish within the recorded authorization.
-Prepare and dispatch focused CI within scope and applicable limits; follow WORKFLOW's waiting
-policy and audit case/artifact evidence. Do not transfer merely to run automated checks.
+Use WORKFLOW host routing for connected-target work and required CI, and its waiting
+policy for CI completion. Audit case/artifact evidence before reporting success.
 Return the result and a prompt for the next distinct deliverable; do not start it.
 Resume this same target/chat after any workflow wait. <Specific review/publish limits>.
 ```

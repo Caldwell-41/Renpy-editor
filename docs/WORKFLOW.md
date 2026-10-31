@@ -6,6 +6,7 @@
 **Standing 3B scheduling exception and delivery allowances:** 2026-10-22, user directed.
 **Parallel agents in separate worktrees:** 2026-10-22, user directed.
 **Operation limits and root-cause debugging:** 2026-10-25, user approved.
+**Connected native build/test routing:** 2026-10-31, user directed.
 Applies to future project and maintenance tasks.
 
 ## Authority and document ownership
@@ -387,72 +388,64 @@ retains its existing approval boundary.
 
 ## Test host routing and ownership
 
-Keep one coordinating owner on the user's preferred development machine; assign
-implementation work under [parallel worktrees](#parallel-agents-and-worktrees). Use GitHub
-Actions by default for required automated Windows x64 and macOS ARM64 checks. Running
-checks on another operating system does not require transferring the development session.
+Keep one coordinating owner on the user's preferred development machine. Within an
+authorized implementation or diagnosis task, agents may inspect and synchronize
+relevant checkouts, build, test and diagnose through already-linked T3 environments
+within their granted access. Routine use needs no repeated access or test-selection
+approval. Prefer a connected Windows x64 host for focused Windows work during Mac
+development, and a connected macOS ARM64 host for affected Mac work during Windows
+development. The coordinating session stays on the preferred machine.
 
-This applies symmetrically: Mac development uses Windows CI for affected Windows
-evidence; Windows development uses macOS CI for affected Mac evidence. Record the
-chosen development host and required evidence targets once in the selected task;
-do not infer preference from old task history. Select platforms from changed behavior,
-native boundaries and dependencies, not from which machine is convenient.
+Select evidence targets from changed behavior, native boundaries and dependencies.
+Record the chosen development host and required targets once in the owning task.
+Use GitHub Actions when a connected host is unavailable or lacks a required capability.
+Retain required Windows/macOS CI package qualification at the selected milestone and
+the [complete PR validation contract](testing/CI-VALIDATION.md); connected-host results
+do not replace required CI jobs.
 
 During iteration run cheap affected local checks, including actual production-probe
 consumers for changed UI/request contracts. For a new platform-sensitive assumption,
-select an early representative real-path CI check on affected targets. Reuse unchanged
-qualified slices. Put inexpensive harness checks before expensive work in an existing
-selected qualification run; do not require a separate harness dispatch for every feature
-or commit. The optional harness-only selector is for the smallest necessary focused
-platform proof. Qualify a coherent candidate at the selected milestone, then repeat
-only affected or unresolved checks after a diagnosed correction. Ordinary implementation
-steps do not require repeated user test-selection approval within the selected scope
-and applicable operation limits.
+select an early representative real-path check on the affected connected host or CI.
+Reuse unchanged qualified slices. Put inexpensive harness checks before expensive
+work in the selected qualification run; a separate harness dispatch per feature or
+commit is unnecessary. Use the optional harness-only selector for focused platform
+proof when needed. Qualify a coherent candidate at the selected milestone, then
+repeat only affected or unresolved checks after a diagnosed correction.
 
-The rule is the same in both directions; capabilities need not be identical. A Mac
-runner without the approved signing identity, or a runner without the required native
-input/observation surface, leaves that named case pending. Mocked contracts and passing
-local tests do not establish the other platform's behavior. Waiting and resumption
-follow [the waiting policy](#waiting-without-model-polling). Other assigned worktrees
-may continue while CI is pending under the parallel-worktree policy.
+For connected-target execution:
 
-Within the selected outcome, the agent may prepare, dispatch, monitor and review focused
-CI checks, including necessary workflow adjustments. Verify runner capabilities and retain
-candidate identity, package hashes, case results and cleanup evidence. CI builds, launches
-and retries consume the same applicable operation limits as local runs, including
-failed/cancelled attempts and implicit launches. Select only required jobs and cases;
-this routing policy does not authorize an otherwise excluded full matrix or specialist
-experiment. Monitoring follows [the waiting policy](#waiting-without-model-polling).
-Publication remains within the selected outcome's actual authorization.
+1. Discover the linked environment, project, actual Git root and available tools.
+   Check branch, local changes, worktrees and active ownership before synchronizing
+   the selected candidate. Preserve unrelated changes, stashes, ignored files and
+   recovery data; use a safe fast-forward or a separately assigned checkout.
+2. Use existing repository commands and drivers with pinned/locked dependencies;
+   prefer project-local tooling where feasible.
+   When remote execution requires that host's agent session, delegate one bounded
+   remote assignment with its checkout, candidate and permitted operations. A test-only
+   assignment leaves source unchanged. Assign corrections explicitly to one writer
+   under [parallel worktrees](#parallel-agents-and-worktrees), transferring ownership
+   before edits to a shared assignment. Independent work may continue on the coordinator.
+3. Return the exact tested commit and any applied patch identity, relevant host/toolchain
+   details, commands, case results, package hashes when produced and cleanup evidence
+   under [evidence rules](testing/EVIDENCE.md). The coordinator reviews those results
+   and continues the selected outcome.
 
-Request a local platform handoff only for a named required case that CI cannot reliably
-establish. Explain the missing capability and transfer only the remaining work, with
-completed evidence, the verified branch checkpoint and unchanged applicable operation limits.
-Transfer the named assignment's writer ownership before the receiving agent edits
-it; independent worktrees may continue. Access to the user's other computer, remote
-infrastructure installation and signing or credential provisioning require their own authorization;
-use the selected handoff rather than duplicate writers for the same assignment.
-Both-platform evidence remains required where selected; missing access does not block
-unrelated already authorized portable work or turn pending proof into acceptance.
+For native desktop/input and signing prerequisites, fixture isolation and human
+acceptance/reuse, follow [native evidence](testing/NATIVE.md). A missing capability
+leaves the named case pending.
 
-| Work | Codex machine | Evidence host |
-| --- | --- | --- |
-| Docs, planning and portable logic | Any suitable host with repository access | Cheap relevant checks; no native run merely for docs |
-| New shared platform-sensitive path | Preferred development host | Early focused CI proof on affected Windows x64/macOS ARM64 targets; local only for an identified missing capability |
-| Windows crash, process/filesystem or packaging diagnosis | Preferred development host; local Windows only for an identified required capability | Affected Windows executable/path through CI where sufficient; shared changes also qualify affected Mac behavior |
-| macOS rendering, focus, native input/window behavior | Preferred development host; local macOS only for an identified required capability | Actual packaged native app and appropriate native driver/observations, through CI where sufficient; hosted Chrome alone cannot substitute |
-| Final milestone qualification | Any host able to coordinate/review the approved run | Required Windows/macOS CI package matrix and remaining native/human evidence |
+Connected-host and CI work share the same [operation limits](#5-operation-limits-and-reassessment).
+The selected outcome permits focused CI preparation, dispatch, audit and necessary
+workflow adjustments; [waiting](#waiting-without-model-polling) owns monitoring.
+Publication, new machine access, tooling/system installation and signing or credential
+provisioning retain their existing authorization boundaries. This routing change
+selects no excluded matrix or specialist experiment.
 
-Run local application scenarios only against disposable projects and isolated profiles,
-not real game projects. Use pinned/locked dependencies and verify the local environment;
-prefer project-local portable tooling where feasible, keeping machine paths ignored.
-Additional tooling/system changes need the selected task's existing authorization;
-this policy does not grant new installation or access rights.
-The agent owns routine development/automated/native verification. Retain the focused
-final human acceptance session on both platforms; do not add manual testing at every
-checkpoint or automatically repeat unchanged human checks in 1H. TESTING's actual
-reuse rule and changed-scope assessment apply. Expected effect: slightly more precise
-early tests, fewer speculative/full-matrix reruns; no quantified saving is claimed.
+Request a user handoff only for a named remaining requirement that needs unavailable
+access, physical interaction or human observation. Carry completed evidence and the
+remaining requirement rather than transferring routine automated work to the user.
+Missing target access does not block unrelated authorized portable work or establish
+acceptance of pending platform checks.
 
 <a id="required-handover-before-ending-the-chat"></a>
 

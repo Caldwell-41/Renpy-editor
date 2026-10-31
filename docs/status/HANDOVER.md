@@ -1,5 +1,14 @@
 # Current outcome handover
 
+## Connected native testing policy
+
+The selected [documentation task](../tasks/active/connected-native-testing.md)
+continues on `codex/connected-native-testing`, based on integration commit `6be2dd0`.
+Kris selected draft PR publication and independent review. The task owns scope and
+local verification; the draft PR owns publication, review and current-head CI receipts.
+The unrelated audit and protected
+native recovery below remain intact; existing size exceptions preserve those records.
+
 ## Complete PR CI reporting and live verification
 
 [PR #73](https://github.com/Caldwell-41/Renpy-editor/pull/73), on

@@ -1,5 +1,12 @@
 # Current status
 
+## Connected native testing policy
+
+The [routing task](../tasks/active/connected-native-testing.md) owns the
+documentation update and agent-guidance audit on `codex/connected-native-testing`.
+Draft PR publication and independent review are selected; product execution and
+merge remain separate.
+
 ## Complete PR CI reporting and live verification
 
 [PR #73](https://github.com/Caldwell-41/Renpy-editor/pull/73), on
