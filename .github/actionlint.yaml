@@ -1,0 +1,7 @@
+# GitHub supports concurrency.queue, but actionlint 1.7.12 does not yet parse it.
+# Remove this exact diagnostic exception when upstream supports the property.
+# https://github.com/rhysd/actionlint/issues/657
+paths:
+  .github/workflows/validation-status.yml:
+    ignore:
+      - '^unexpected key "queue" for "concurrency" section\. expected one of "cancel-in-progress", "group"$'

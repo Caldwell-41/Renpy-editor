@@ -15,6 +15,10 @@ and Rust formatting. Its combined status correctly stays pending for the separat
 Windows dummy, then fails on the deliberate dummy failure. T3 resumes this same
 thread for that failure and the terminal run/log audit confirms the expected cause.
 Ruleset `26271364` requires the combined status on the integration parent only.
+The first passing trial instead exposed a cancelled waiting reporter. Its exact
+GitHub annotation proves the default single pending concurrency slot replaced it.
+The shared reporter now uses `queue: max`; live overlap verification is required.
+The cancelled attempt remains failed evidence in the owning task.
 
 The PR owns final passing-trial identities, terminal audit and success-delivery
 receipts at the final candidate; inspect those before treating verification as

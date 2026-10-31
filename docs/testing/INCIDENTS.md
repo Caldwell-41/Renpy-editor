@@ -784,3 +784,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   project's manifest despite identical pixels. Actual failed CI3 identity still
   refuses, while copied same-source retained captures pass all five rejecting cases.
 - **Evidence:** [L07 CI3 audit and full correction](../tasks/evidence/shared-look.md#ci3-terminal-audit-and-fresh-full-ci4-correction-2026-10-31).
+
+## H56. A concurrency group cancels a waiting validation reporter
+
+- **Class/search:** CI coordination; cancelled start reporter, higher-priority
+  waiting request, concurrency group, dummy job skipped.
+- **Cause/correction:** the default concurrency queue retains one pending job;
+  another request replaces it even with `cancel-in-progress: false`. Overlapping
+  automatic/manual runs lose a reporter and cancel the dependent dummy. Use
+  `queue: max` on the shared status reporter while retaining serialized updates.
+- **Verification:** the original GitHub check annotation identifies replacement
+  by another waiting request. The cancelled trial is failed evidence. Live overlap
+  verification and terminal audit belong to the owning task and PR #73.
+- **Evidence:** [CI reporter queue diagnosis](../tasks/active/ci-validation.md#passing-trial-exposed-reporter-queue-cancellation).

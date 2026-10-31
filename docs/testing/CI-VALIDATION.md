@@ -72,7 +72,10 @@ start and finish of the registered quality, Screens, production-scaffold, runtim
 foundation/feasibility, SDK-spike and desktop-spike entry points. The finish job
 uses `always()` and depends on all existing jobs. Only reporting jobs receive
 commit-status write permission. The existing test jobs keep their permissions.
-Reporters serialize updates by branch and recalculate current GitHub state.
+Reporters serialize updates by branch with `queue: max` and recalculate current
+GitHub state. The default single pending slot cancels an earlier waiting reporter
+when another arrives, even with `cancel-in-progress: false`. Keep the larger queue
+so overlapping automatic/manual runs retain all reporting jobs.
 They do not poll, dispatch another workflow or execute downloaded project data.
 
 Selected manual workflows must have reporting hooks. Use a reporting entry point
@@ -100,7 +103,11 @@ or duplicate launch. Preserve cumulative limits and the existing audit owner.
 ## Cheap coordinator checks
 
 Run `python3 -m unittest discover -s scripts -p test_ci_validation.py -v` and
-`.toolchains/actionlint/actionlint`. These exercise coordinator behavior without
+`.toolchains/actionlint/actionlint`. The path-specific actionlint configuration
+suppresses only its unsupported `concurrency.queue` diagnostic in the shared
+reporter. GitHub supports that property; [upstream issue 657](https://github.com/rhysd/actionlint/issues/657)
+tracks linter support. Remove the exception when the linter supports it. All other
+workflow lint checks remain active. These checks exercise coordinator behavior without
 starting Ren'Py, a helper, a package or a native application.
 
 The registered Repository quality workflow also accepts `validation_dummy=true`
