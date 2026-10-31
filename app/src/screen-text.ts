@@ -3,7 +3,7 @@ import type { CompositionCommand, CompositionView } from "./screen-composition.t
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SelectedAsset } from "./asset-import-ui.ts";
-import { technicalName, technicalNameInput, validateField } from "./authoring-input.ts";
+import { technicalName, technicalNameInput, technicalNameHelp, validateField } from "./authoring-input.ts";
 import { ScreenFontMedia, type ProjectFont, type FontReference, type FontPresentation } from "./screen-font-media.ts";
 import type { ScreenLayoutEditor, LayoutReservation } from "./screen-layout.ts";
 
@@ -20,7 +20,7 @@ export interface StyleEdit {scope:"shared"|"local"|"create"; name:string; expect
 type Field = "text" | "font" | "size" | "color" | "align" | "bold" | "italic";
 type Fields = Record<Field, string>;
 type TextField = "text" | "size" | "color";
-interface Draft { key: string; document: ScreenDocument; screenId: string; node: ScreenNode; fields: Fields; appearance:Record<string,string>; font?: FontReference | null; style?: StyleEdit }
+interface Draft { key: string; document: ScreenDocument; screenId: string; node: ScreenNode; fields: Fields; appearance:Record<string,string>; edited:Set<string>; font?: FontReference | null; style?: StyleEdit }
 interface Host {
   view: () => CompositionView | undefined;
   styles?: () => StyleCatalog | undefined;
@@ -50,8 +50,8 @@ const fontPath = (font: ProjectFont) => font.relativePath.slice(5);
 export class ScreenText {
   private readonly drafts = new Map<string, Draft>();
   private readonly errors = new Map<string, {field: string; text: string}>();
-  private readonly fieldErrors = new Map<string, Set<TextField>>();
-  private readonly fieldValidators = new Map<TextField, () => void>();
+  private readonly fieldErrors = new Map<string, Set<string>>();
+  private readonly fieldValidators = new Map<string, () => void>();
   private readonly scrolls = new Map<string, number>();
   private readonly expanded = new Map<string, boolean>();
   private readonly media: ScreenFontMedia;
@@ -95,7 +95,7 @@ export class ScreenText {
       bold:v?.bold === undefined ? "" : v.bold ? "True" : "False",italic:v?.italic === undefined ? "" : v.italic ? "True" : "False"};
   }
   private value(view: CompositionView): Draft {
-    return this.drafts.get(this.key(view)) ?? {key:this.key(view),document:view.document,screenId:view.screenId,node:view.selected,fields:this.fields(view.selected),appearance:this.extraFields(view.selected.textProperties?.values??{}), ...(view.selected.style && this.host.styles?.() ? {style:{scope:"shared",name:view.selected.style.name,expectedRevision:this.host.styles()!.revision}} : {})};
+    return this.drafts.get(this.key(view)) ?? {key:this.key(view),document:view.document,screenId:view.screenId,node:view.selected,fields:this.fields(view.selected),appearance:this.extraFields(view.selected.textProperties?.values??{}),edited:new Set(), ...(view.selected.style && this.host.styles?.() ? {style:{scope:"shared",name:view.selected.style.name,expectedRevision:this.host.styles()!.revision}} : {})};
   }
   hasDraft(): boolean { return this.drafts.size > 0; }
   hasNodeDraft(screenId: string, nodeId: string): boolean { return this.drafts.has(`${screenId}:${nodeId}`); }
@@ -129,6 +129,7 @@ export class ScreenText {
   private edit(field: Field, value: string): void {
     const view = this.host.view(); if (!view || this.isSaving() || view.busy || view.selected.textProperties?.blocked[field]) return;
     const draft = this.value(view); draft.fields = {...draft.fields,[field]:value};
+    if(field!=="text")this.markEdited(draft,field,value!==this.appearanceFields(this.styleValues(draft))[field]);
     this.store(draft,view);
   }
   render(card: HTMLElement, view: CompositionView): boolean {
@@ -146,16 +147,7 @@ export class ScreenText {
       control.oninput = () => this.edit(field,control.value); label.append(control);
       if (control.readOnly) label.append(action("Edit in Source",this.host.source));
       if (field === "color") {const swatch = el("span","screen-text-swatch");swatch.ariaHidden = "true";label.append(swatch);}
-      const key = this.key(view);
-      this.fieldValidators.set(field,validateField(control,() => {
-        if (control.readOnly) return;
-        const message = this.fieldError(field,control.value);
-        if (message) {
-          const errors = this.fieldErrors.get(key) ?? new Set<TextField>();errors.add(field);this.fieldErrors.set(key,errors);
-          throw Error(message);
-        }
-        const errors = this.fieldErrors.get(key);errors?.delete(field);if (!errors?.size) this.fieldErrors.delete(key);
-      }));
+      this.registerField(view,field,control,() => control.readOnly ? undefined : this.fieldError(field,control.value));
       return label;
     };
     const content = el("section","screen-text-content");
@@ -245,6 +237,13 @@ export class ScreenText {
     return {...values,size:fields.size?Number(fields.size):null,color:fields.color||null,align:fields.align?Number(fields.align):null,bold:fields.bold?fields.bold==="True":null,italic:fields.italic?fields.italic==="True":null,...(!fields.font?{font:null}:font?{font:{assetId:font.id,expectedAssetSha256:font.sha256}}:{})};
   }
   private definition(draft: Draft): StyleDefinition | undefined { return this.host.styles?.()?.definitions.find(d=>d.name===draft.style?.name); }
+  private styleValues(draft: Draft): TextProperties["values"] {
+    return draft.style && draft.style.scope !== "create" && draft.style.name !== draft.node.style?.name
+      ? this.definition(draft)?.values ?? {} : draft.node.textProperties?.values ?? {};
+  }
+  private markEdited(draft:Draft,field:string,changed:boolean):void {
+    if(changed)draft.edited.add(field);else draft.edited.delete(field);
+  }
   private renderScope(): HTMLElement {
     const group=el("div","screen-style-heading");
     group.append(el("h3","screen-style-title"),el("p","screen-style-name"));
@@ -324,16 +323,28 @@ export class ScreenText {
     }return fields;
   }
   private renderAppearance(host:HTMLElement,view:CompositionView):void {
+    for(const key of this.fieldValidators.keys())if(key.startsWith("appearance:"))this.fieldValidators.delete(key);
     host.replaceChildren();const draft=this.value(view),state=this.appearanceStates.get(draft.key)??"",frame=["frame","window"].includes(view.selected.kind);
     if(!frame){const label=el("label","screen-text-field","Appearance state"),stateControl=el("select");stateControl.ariaLabel="Appearance state";stateControl.dataset.appearanceField="state";
       for(const [value,name] of [["","Normal"],["hover_","Hover"],["selected_","Selected"],["insensitive_","Disabled"]]){const option=el("option","",name);option.value=value!;stateControl.append(option);}stateControl.value=state;
       stateControl.onchange=()=>{this.appearanceStates.set(draft.key,stateControl.value);this.host.buttonSample?.(stateControl.value==="insensitive_"?"disabled":stateControl.value.replace("_","")||"normal");this.renderAppearance(host,view);host.querySelector<HTMLElement>("select")?.focus({preventScroll:true});};label.append(stateControl);host.append(label);
     }
     const input=(name:string,key:string)=>{const label=el("label","screen-text-field",name),control=el("input");control.ariaLabel=name;control.dataset.appearanceField=key;control.value=draft.appearance[key]??"";control.placeholder="Inherit";
-      control.oninput=()=>{if(this.isSaving()||view.busy)return;const value=this.value(view);value.appearance={...value.appearance,[key]:control.value};this.store(value,view);};label.append(control);host.append(label);};
+      control.addEventListener("input",()=>{if(this.isSaving()||view.busy)return;const value=this.value(view);value.appearance={...value.appearance,[key]:control.value};this.markEdited(value,`appearance:${key}`,control.value!==this.extraFields(this.styleValues(value))[key]);this.store(value,view);});label.append(control);host.append(label);
+      this.registerField(view,`appearance:${key}`,control,()=>this.appearanceError(key,this.value(view).appearance));
+      if(key.endsWith("borderColor")||key.endsWith("borderWidth")) {
+        const peer=`appearance:${key.replace(/border(Color|Width)$/,key.endsWith("Color")?"borderWidth":"borderColor")}`;
+        let composing=false;
+        control.addEventListener("compositionstart",()=>{composing=true;});control.addEventListener("compositionend",()=>{composing=false;});
+        const validatePeer=()=>{try{this.fieldValidators.get(peer)?.();}catch{/* Display the dependent error beside its field. */}};
+        control.addEventListener("blur",()=>{if(!composing)validatePeer();});
+        control.addEventListener("input",()=>{if(!composing&&this.fieldErrors.get(draft.key)?.has(peer))validatePeer();});
+      }
+    };
     if(state)input("State text color",state+"color");
     const def=this.definition(draft);if(!def||def.kind!=="text") {input("Background color",state+"background");input("Border color",state+"borderColor");input("Border width · px",state+"borderWidth");}
     if(!frame)host.append(el("p","screen-appearance-limit","State overrides support text color, background and border. Other state properties stay in Source."));
+    for(const field of this.fieldErrors.get(draft.key)??[])if(field.startsWith("appearance:")){try{this.fieldValidators.get(field)?.();}catch{/* Restore errors when changing appearance states. */}}
   }
   private styleName(name:string):string {return name.startsWith("ll_copy_")?"Independent style":name.replace(/^ll_/,"").replaceAll("_"," ").replace(/^./,s=>s.toUpperCase());}
   private appearanceFields(values:TextProperties["values"]):Omit<Fields,"text"> {return {font:values.font??"",size:values.size===undefined?"":String(values.size),color:values.color??"",align:values.align===undefined?"":String(values.align),bold:values.bold===undefined?"":values.bold?"True":"False",italic:values.italic===undefined?"":values.italic?"True":"False"};}
@@ -342,8 +353,15 @@ export class ScreenText {
     const draft=this.value(view),dialog=el("dialog","screen-style-dialog");dialog.ariaLabel="Choose style";dialog.append(el("h2","","Choose style"));
     const close=()=>{dialog.close();dialog.remove();if(this.styleDialog===dialog){this.styleDialog=undefined;this.dismissStyle=undefined;}this.sync();if(this.lastField)this.focus(this.lastField);};
     const choose=(style:StyleEdit,def?:StyleDefinition)=>{
-      const before=this.fields(draft.node);draft.style=style;
-      if(def){const extra=this.extraFields(def.values),base=this.extraFields(draft.node.textProperties?.values??{});for(const key of Object.keys(extra))if(draft.appearance[key]===base[key])draft.appearance[key]=extra[key]!;const fields=this.appearanceFields(def.values);for(const field of ["font","size","color","align","bold","italic"] as const)if(draft.fields[field]===before[field])draft.fields[field]=fields[field];}
+      draft.style=style;
+      if(def) {
+        const extra=this.extraFields(def.values);for(const key of Object.keys(extra))if(!draft.edited.has(`appearance:${key}`))draft.appearance[key]=extra[key]!;
+        const fields=this.appearanceFields(def.values);
+        for(const field of ["font","size","color","align","bold","italic"] as const)if(!draft.edited.has(field)) {
+          draft.fields[field]=fields[field];
+          if(field==="font"){const font=this.assets.find(a=>fontPath(a)===fields.font);draft.font=font?{assetId:font.id,expectedAssetSha256:font.sha256}:undefined;}
+        }
+      }
       close();this.store(draft,view);this.host.redraw();if(this.lastField)this.focus(this.lastField);
     };
     for(const def of catalog.definitions.filter(d=>(d.kind===view.selected.kind||d.kind==="text"&&view.selected.kind==="textbutton")&&!d.error)) {
@@ -351,9 +369,9 @@ export class ScreenText {
     }
     if(catalog.error){dialog.append(el("p","",catalog.error),action("Review Source",()=>{close();this.host.source();}));}
     if(!view.selected.style&&!catalog.error){
-      const label=el("label","screen-text-field","Style name"),input=el("input");input.ariaLabel="Style name";label.append(input);dialog.append(label);
-      const error=el("p");error.role="alert";dialog.append(error);
-      dialog.append(action("Create style",()=>{const name=input.value.trim().toLowerCase().replaceAll(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");if(!/^[a-z][a-z0-9_]{0,63}$/.test(name)){error.textContent="Enter a name beginning with a letter, up to 64 characters.";input.focus();return;}if(catalog.definitions.some(d=>d.name===name)){error.textContent="That style name already exists.";input.focus();return;}choose({scope:"create",name,expectedRevision:catalog.revision});}));
+      const label=el("label","screen-text-field","Style name"),input=el("input");input.ariaLabel="Style name";technicalNameInput(input);label.append(input,el("p","",technicalNameHelp));dialog.append(label);
+      const validate=validateField(input,()=>{const name=technicalName(input.value,"Style name");if(catalog.definitions.some(d=>d.name===name))throw Error("That style name already exists.");});
+      dialog.append(action("Create style",()=>{try{validate();}catch{input.focus();return;}choose({scope:"create",name:technicalName(input.value,"Style name"),expectedRevision:catalog.revision});}));
     }
     this.dismissStyle=close;dialog.append(action("Keep editing",close));dialog.oncancel=e=>{e.preventDefault();close();};dialog.onkeydown=e=>e.stopPropagation();this.styleDialog=dialog;this.card?.closest(".screens-editor")?.append(dialog);this.sync();dialog.showModal();dialog.querySelector<HTMLElement>("button,input")?.focus();
   }
@@ -362,9 +380,46 @@ export class ScreenText {
     if (field === "size" && value.trim() && (!/^\d+$/.test(value.trim()) || +value < 1 || +value > 512)) return "Use a whole size from 1 to 512 px, or clear it for the default. Your edits are kept.";
     if (field === "color" && value.trim() && !hex(value.trim())) return "Use a hex color such as #f1e9d6, or clear it for the default. Your edits are kept.";
   }
+  private registerField(view:CompositionView,field:string,control:HTMLInputElement|HTMLTextAreaElement,check:()=>string|undefined):void {
+    const key=this.key(view);
+    this.fieldValidators.set(field,validateField(control,()=>{
+      const message=check(),errors=this.fieldErrors.get(key)??new Set<string>();
+      if(message){errors.add(field);this.fieldErrors.set(key,errors);throw Error(message);}
+      errors.delete(field);if(!errors.size)this.fieldErrors.delete(key);
+    }));
+  }
+  private appearanceError(key:string,fields:Record<string,string>):string|undefined {
+    const value=fields[key]??"";
+    if(key.endsWith("borderColor")||key.endsWith("borderWidth")) {
+      const prefix=key.replace(/border(Color|Width)$/,"");
+      if(!fields[prefix+"borderColor"]&&!fields[prefix+"borderWidth"])return;
+      if(key.endsWith("Color")?!hex(value):!/^\d+$/.test(value)||+value<1||+value>32)return "Use a border color and whole width from 1 to 32 px, or clear both. Your edits are kept.";
+    } else if(value&&!hex(value))return "Enter a hex color such as #f1e9d6, or clear it for the inherited value. Your edits are kept.";
+  }
+  private validateDraft(draft:Draft):void {
+    const problems=new Map<string,string>();
+    for(const field of ["text","size","color"] as const) {
+      if(draft.node.textProperties?.blocked[field]||["frame","window"].includes(draft.node.kind))continue;
+      const message=this.fieldError(field,draft.fields[field]);if(message)problems.set(field,message);
+    }
+    for(const key of Object.keys(draft.appearance)){const message=this.appearanceError(key,draft.appearance);if(message)problems.set(`appearance:${key}`,message);}
+    const errors=this.fieldErrors.get(draft.key)??new Set<string>();
+    for(const key of Object.keys(draft.appearance)){const field=`appearance:${key}`;if(problems.has(field))errors.add(field);else errors.delete(field);}
+    if(errors.size)this.fieldErrors.set(draft.key,errors);else this.fieldErrors.delete(draft.key);
+    for(const validate of this.fieldValidators.values()){try{validate();}catch{/* Report all visible field errors before focusing the first. */}}
+    const first=problems.entries().next().value;if(!first)return;
+    if(first[0].startsWith("appearance:")) {
+      const key=first[0].slice(11),state=["hover_","selected_","insensitive_"].find(prefix=>key.startsWith(prefix))??"";
+      this.appearanceStates.set(draft.key,state);
+      this.host.buttonSample?.(state==="insensitive_"?"disabled":state.replace("_","")||"normal");
+      const host=this.card?.querySelector<HTMLElement>(".screen-appearance-fields"),view=this.host.view();if(host&&view)this.renderAppearance(host,view);
+    }
+    this.fail(...first);throw Error(first[1]);
+  }
   private values(draft: Draft, strict: boolean): TextEdits {
+    if(strict)this.validateDraft(draft);
     const values: TextEdits = {}, before = this.fields(draft.node), blocked = draft.node.textProperties?.blocked ?? {};
-    if (draft.style?.scope === "shared" && draft.style.name !== draft.node.style?.name) {const def=this.definition(draft);if(def)Object.assign(before,this.appearanceFields(def.values));}
+    if (draft.style?.scope === "shared") Object.assign(before,this.appearanceFields(this.styleValues(draft)));
     const fail = (field: string,text: string) => {if (strict) {this.fail(field,text);throw Error(text);}};
     if (!blocked.text && draft.fields.text !== before.text) {
       const problem = this.fieldError("text",draft.fields.text);if (problem) fail("text",problem);else values.text = draft.fields.text;
@@ -382,25 +437,28 @@ export class ScreenText {
       else if (draft.font) values.font = draft.font;
       else fail("font","Choose a project font. Your edits are kept.");
     }
-    const base=this.extraFields(draft.style?.scope==="shared"&&draft.style.name!==draft.node.style?.name ? this.definition(draft)?.values??{} : draft.node.textProperties?.values??{}),appearance:NonNullable<TextEdits["appearance"]>={};
+    const base=this.extraFields(draft.style?.scope==="shared" ? this.styleValues(draft) : draft.node.textProperties?.values??{}),appearance:NonNullable<TextEdits["appearance"]>={};
     for(const prefix of ["","hover_","selected_","insensitive_"]) {
       for(const suffix of ["color","background"]) {
         const key=prefix+suffix;if(key==="color"||draft.appearance[key]===base[key])continue;
-        const value=draft.appearance[key]??"";if(value&&!hex(value)){fail(`appearance:${key}`,"Enter a hex color, or clear it for the inherited value. Your edits are kept.");continue;}appearance[key]=value||null;
+        const value=draft.appearance[key]??"",problem=this.appearanceError(key,draft.appearance);if(problem){fail(`appearance:${key}`,problem);continue;}appearance[key]=value||null;
       }
       const colorKey=prefix+"borderColor",widthKey=prefix+"borderWidth";
       if(draft.appearance[colorKey]===base[colorKey]&&draft.appearance[widthKey]===base[widthKey])continue;
-      const color=draft.appearance[colorKey],width=draft.appearance[widthKey];
+      const color=draft.appearance[colorKey]??"",width=draft.appearance[widthKey]??"";
       if(!color&&!width)appearance[prefix+"border"]=null;
-      else if(!color||!hex(color)||!width||!/^\d+$/.test(width)||+width<1||+width>32)fail(`appearance:${!color||!hex(color)?colorKey:widthKey}`,"Use a border color and whole width from 1 to 32 px, or clear both. Your edits are kept.");
-      else appearance[prefix+"border"]={color,width:+width};
+      else {
+        const colorError=this.appearanceError(colorKey,draft.appearance),widthError=this.appearanceError(widthKey,draft.appearance);
+        if(colorError||widthError)fail(`appearance:${colorError?colorKey:widthKey}`,(colorError||widthError)!);
+        else appearance[prefix+"border"]={color,width:+width};
+      }
     }
     if(Object.keys(appearance).length)values.appearance=appearance;
     return values;
   }
   private fail(field: string,text: string): void {
     const view = this.host.view();if (!view) return;
-    const validator = this.fieldValidators.get(field as TextField);
+    const validator = this.fieldValidators.get(field);
     if (validator) {try {validator();} catch { /* Submission focuses the same invalid control. */ }}
     else this.errors.set(this.key(view),{field,text});
     this.host.note(text,true);this.sync();this.focus(field);
@@ -508,7 +566,7 @@ export class ScreenText {
   }
   private use(font?: ProjectFont): void {
     const view = this.host.view();if (!view || this.key(view) !== this.pickerKey) return;
-    const draft = this.value(view);draft.fields = {...draft.fields,font:font ? fontPath(font) : ""};draft.font = font ? {assetId:font.id,expectedAssetSha256:font.sha256} : null;this.errors.delete(draft.key);this.store(draft,view);this.closePicker();
+    const draft = this.value(view);draft.fields = {...draft.fields,font:font ? fontPath(font) : ""};draft.font = font ? {assetId:font.id,expectedAssetSha256:font.sha256} : null;this.markEdited(draft,"font",draft.fields.font!==this.appearanceFields(this.styleValues(draft)).font);this.errors.delete(draft.key);this.store(draft,view);this.closePicker();
   }
   private cancelImport(): void {if (this.importing) return;this.pickerGeneration++;this.staged = undefined;this.stagedValid = false;this.renderPicker();this.dialog?.querySelector<HTMLInputElement>("input")?.focus();}
   private renderImport(): void {
