@@ -242,8 +242,8 @@ fn set_reference(
     } else {
         "style"
     };
-    let first = set_reference_property(source, node, key, name)?;
-    if node.kind != "textbutton" || kind != "textbutton" {
+    let mut first = set_reference_property(source, node, key, name)?;
+    if node.kind != "textbutton" {
         return Ok(first);
     }
     let doc = inspect(&first, String::new(), String::new())?;
@@ -253,6 +253,24 @@ fn set_reference(
         .flat_map(|s| &s.nodes)
         .find(|n| n.id == node.id)
         .ok_or(SceneError::UnknownEntity)?;
+    if kind == "text" {
+        let lines = source_lines(&first)?;
+        let header = lines
+            .iter()
+            .find(|l| l.start == updated.span.start)
+            .ok_or(SceneError::UnknownEntity)?;
+        if let Some(line) = lines.iter().find(|l| {
+            l.start > header.start
+                && l.start < updated.source_end
+                && l.indent == header.indent + 4
+                && l.code.starts_with("style ")
+        }) {
+            let start = line.start + line.indent;
+            let end = start + line.code.len();
+            first.splice(start..end, std::iter::empty());
+        }
+        return Ok(first);
+    }
     set_reference_property(&first, updated, "text_style", name)
 }
 
@@ -649,9 +667,23 @@ impl AuthoringService {
         }
         let def = index.definition(&edit.name)?;
         if def.kind != node.kind && !(def.kind == "text" && node.kind == "textbutton")
-            || changes.keys().any(|k| !text::applicable(&def.kind, k))
+            || changes.keys().any(|k| !text::applicable(&node.kind, k))
         {
             return Err(SceneError::InvalidPayload);
+        }
+        // A textbutton's text_style owns text properties; its decoration stays
+        // on the element even when the text style is copied or assigned.
+        let (changes, mut local_changes): (BTreeMap<_, _>, BTreeMap<_, _>) = changes
+            .into_iter()
+            .partition(|(key, _)| text::applicable(&def.kind, key));
+        if let Some(properties) = &node.text_properties {
+            for (key, value) in &properties.values {
+                if !text::applicable(&def.kind, key) && !properties.blocked.contains_key(key) {
+                    local_changes
+                        .entry(key.clone())
+                        .or_insert_with(|| Some(value.clone()));
+                }
+            }
         }
         self.ensure_source_paths_clean(
             project,
@@ -674,7 +706,7 @@ impl AuthoringService {
         {
             return Err(SceneError::SourceConflict);
         }
-        match edit.scope {
+        let (mut proposed, companions) = match edit.scope {
             Scope::Create => unreachable!(),
             Scope::Shared => {
                 if def
@@ -712,6 +744,7 @@ impl AuthoringService {
                         properties
                             .values
                             .keys()
+                            .filter(|k| text::applicable(&def.kind, k))
                             .map(|k| (k.clone(), None))
                             .collect(),
                     )?;
@@ -725,16 +758,18 @@ impl AuthoringService {
                     proposed = set_reference(&proposed, updated, &edit.name, &def.kind)?;
                 }
                 if def.path == source_path || definition == bytes {
-                    return Ok((proposed, vec![]));
+                    Ok((proposed, vec![]))
+                } else {
+                    let mutation = FileMutation {
+                        path: RelativePath::new(&def.path)
+                            .map_err(|_| SceneError::InvalidPayload)?,
+                        kind: MutationKind::ReplaceExisting,
+                        base: revision,
+                        expected_bytes: bytes,
+                        proposed: definition,
+                    };
+                    Ok((proposed, vec![mutation]))
                 }
-                let mutation = FileMutation {
-                    path: RelativePath::new(&def.path).map_err(|_| SceneError::InvalidPayload)?,
-                    kind: MutationKind::ReplaceExisting,
-                    base: revision,
-                    expected_bytes: bytes,
-                    proposed: definition,
-                };
-                Ok((proposed, vec![mutation]))
             }
             Scope::Local => {
                 let name = format!("ll_copy_{}", uuid::Uuid::new_v4().simple());
@@ -743,26 +778,32 @@ impl AuthoringService {
                 copy.splice(start..start + def.name.len(), name.bytes());
                 let lines = source_lines(&copy)?;
                 let properties = text::read_block(&lines, &lines[0], copy.len(), "style");
-                let mut copied = node
+                let local = node
                     .text_properties
                     .as_ref()
-                    .ok_or(SceneError::OpaqueBoundary)?
+                    .ok_or(SceneError::OpaqueBoundary)?;
+                if changes.keys().any(|k| local.blocked.contains_key(k)) {
+                    return Err(SceneError::OpaqueBoundary);
+                }
+                let mut copied = local
                     .values
                     .iter()
+                    .filter(|(k, _)| {
+                        text::applicable(&def.kind, k) && !local.blocked.contains_key(*k)
+                    })
                     .map(|(k, v)| (k.clone(), Some(v.clone())))
                     .collect::<BTreeMap<_, _>>();
                 copied.extend(changes);
                 copy = properties.patch_values(&copy, "style", copied)?;
-                let properties = node
-                    .text_properties
-                    .as_ref()
-                    .ok_or(SceneError::OpaqueBoundary)?;
-                let cleared = properties.patch_values(
+                let cleared = local.patch_values(
                     source,
                     &node.kind,
-                    properties
+                    local
                         .values
                         .keys()
+                        .filter(|k| {
+                            text::applicable(&def.kind, k) && !local.blocked.contains_key(*k)
+                        })
                         .map(|k| (k.clone(), None))
                         .collect(),
                 )?;
@@ -777,6 +818,21 @@ impl AuthoringService {
                     append_definition(set_reference(&cleared, updated, &name, &def.kind)?, copy);
                 Ok((proposed, vec![]))
             }
+        }?;
+        if !local_changes.is_empty() {
+            let doc = inspect(&proposed, source_path.into(), String::new())?;
+            let updated = doc
+                .screens
+                .iter()
+                .flat_map(|s| &s.nodes)
+                .find(|n| n.id == node.id)
+                .ok_or(SceneError::UnknownEntity)?;
+            proposed = updated
+                .text_properties
+                .as_ref()
+                .ok_or(SceneError::OpaqueBoundary)?
+                .patch_values(&proposed, &updated.kind, local_changes)?;
         }
+        Ok((proposed, companions))
     }
 }

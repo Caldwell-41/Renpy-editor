@@ -157,6 +157,412 @@ fn independent_style_copy_keeps_other_use_and_restores_reference_with_history() 
     );
 }
 
+fn text_style_button_project() -> (
+    tempfile::TempDir,
+    LifecycleService,
+    std::path::PathBuf,
+    Value,
+    Value,
+    String,
+    String,
+) {
+    let (temporary, mut service, root, first, second, first_id, second_id) = shared_project();
+    for owner in [&first, &second] {
+        let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .replace("text \"Known text\"", "textbutton \"Known text\"")
+            .replace("        style \"", "        text_style \"")
+            .replace(
+                "init python:\n    untouched = \"keep me\"\n",
+                "# retained without executing project code\n",
+            );
+        save_composition_source(&mut service, owner, &source);
+    }
+    compose_command(
+        &mut service,
+        &first,
+        json!({"type":"formatText","nodeId":first_id,"values":{"size":30,"appearance":{"background":"#123456","border":{"color":"#abcdef","width":2},"hover_color":"#ffffff","hover_background":"#234567","hover_border":{"color":"#fedcba","width":3},"selected_background":"#345678","insensitive_background":"#456789"}}}),
+    );
+    let source = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace(
+            "background \"#123456\"",
+            "background \"#123456\" # local decoration",
+        )
+        .replace("text_size 30", "text_size 30 # local text override");
+    save_composition_source(&mut service, &first, &source);
+    (temporary, service, root, first, second, first_id, second_id)
+}
+
+fn button_canvas_properties(service: &mut LifecycleService, owner: &Value, id: &str) -> Value {
+    let document = ipc(service, "screens.inspect", json!({"path":owner["path"]}));
+    let node = document["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == id)
+        .unwrap();
+    assert!(node["style"]["error"].is_null(), "{node}");
+    let plan = ipc(
+        service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":document["revision"],"width":1280,"height":720}),
+    );
+    assert_eq!(plan["available"], true, "{plan}");
+    plan["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["start"] == node["span"]["start"])
+        .unwrap()["properties"]
+        .clone()
+}
+
+#[test]
+fn text_style_button_copy_preserves_local_decoration_canvas_and_single_history_entry() {
+    let (_temporary, mut service, root, first, second, first_id, second_id) =
+        text_style_button_project();
+    let before = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let other = ipc(&mut service, "source.open", json!({"path":second["path"]}))["text"].clone();
+    let appearance = button_canvas_properties(&mut service, &first, &first_id);
+    let other_appearance = button_canvas_properties(&mut service, &second, &second_id);
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let result = compose_command(
+        &mut service,
+        &first,
+        json!({"type":"formatText","nodeId":first_id,"values":{},"style":{"scope":"local","name":"ll_body","expectedRevision":catalog["styles"]["revision"]}}),
+    );
+    assert_eq!(result["changed"], true);
+    let node = result["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == first_id)
+        .unwrap();
+    let name = node["style"]["name"].as_str().unwrap();
+    let saved = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let (use_source, definition) = saved
+        .split_once(&format!("\nstyle {name} is text:"))
+        .unwrap();
+    let expected_use = before
+        .replace("text_style \"ll_body\"", &format!("text_style \"{name}\""))
+        .replace("text_size 30", "")
+        .replace("text_hover_color \"#ffffff\"", "");
+    assert_eq!(use_source, expected_use);
+    assert!(definition.contains("size 30 # size comment"));
+    assert!(definition.contains("hover_color \"#ffffff\""));
+    assert!(!definition.contains("background"));
+    assert!(!definition.contains("foreground"));
+    assert_eq!(
+        button_canvas_properties(&mut service, &first, &first_id),
+        appearance
+    );
+    assert_eq!(
+        button_canvas_properties(&mut service, &second, &second_id),
+        other_appearance
+    );
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":second["path"]}))["text"],
+        other
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let definition = catalog["styles"]["definitions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|d| d["name"] == name)
+        .unwrap();
+    assert!(definition["error"].is_null(), "{definition}");
+    assert_eq!(definition["uses"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        compose_command(
+            &mut service,
+            &first,
+            json!({"type":"formatText","nodeId":first_id,"values":{},"style":{"scope":"shared","name":name,"expectedRevision":catalog["styles"]["revision"]}})
+        )["changed"],
+        false
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
+        before
+    );
+    assert_eq!(
+        button_canvas_properties(&mut service, &first, &first_id),
+        appearance
+    );
+    composition_history(&mut service, "redo");
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
+        saved
+    );
+    assert_eq!(
+        button_canvas_properties(&mut service, &first, &first_id),
+        appearance
+    );
+}
+
+#[test]
+fn text_style_button_assignment_preserves_element_properties_and_noop() {
+    let (_temporary, mut service, _root, first, _second, first_id, _) = text_style_button_project();
+    let original = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let before = format!("{original}\nstyle ll_other is text:\n    size 30\n    color \"#f1e9d6\"\n    hover_color \"#ffffff\"\n");
+    save_composition_source(&mut service, &first, &before);
+    let appearance = button_canvas_properties(&mut service, &first, &first_id);
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let mut command = json!({"type":"formatText","nodeId":first_id,"values":{},"style":{"scope":"shared","name":"ll_other","expectedRevision":catalog["styles"]["revision"]}});
+    let result = compose_command(&mut service, &first, command.clone());
+    let expected = before
+        .replace("text_style \"ll_body\"", "text_style \"ll_other\"")
+        .replace("text_size 30", "")
+        .replace("text_hover_color \"#ffffff\"", "");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
+        expected
+    );
+    assert_eq!(
+        button_canvas_properties(&mut service, &first, &first_id),
+        appearance
+    );
+    command["style"]["expectedRevision"] = result["styles"]["revision"].clone();
+    assert_eq!(
+        compose_command(&mut service, &first, command)["changed"],
+        false
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
+        before
+    );
+}
+
+#[test]
+fn text_style_button_assignment_from_button_style_keeps_inherited_decoration_local() {
+    let (_temporary, mut service, _root, owner) = composition_project();
+    let button = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Continue"}),
+    );
+    let id = button["selectedId"].as_str().unwrap();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"formatText","nodeId":id,"values":{"size":26,"appearance":{"background":"#123456","border":{"color":"#abcdef","width":2},"hover_background":"#234567"}},"style":{"scope":"create","name":"ll_button","expectedRevision":catalog["styles"]["revision"]}}),
+    );
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let before = format!(
+        "{}\nstyle ll_body is text:\n    size 26\n",
+        original.replace(
+            "style \"ll_button\"\n",
+            "style \"ll_button\" # retained reference comment\n"
+        )
+    );
+    save_composition_source(&mut service, &owner, &before);
+    let mut appearance = button_canvas_properties(&mut service, &owner, id);
+    appearance.as_object_mut().unwrap().remove("text_style");
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"formatText","nodeId":id,"values":{},"style":{"scope":"shared","name":"ll_body","expectedRevision":catalog["styles"]["revision"]}}),
+    );
+    assert_eq!(
+        button_canvas_properties(&mut service, &owner, id),
+        appearance
+    );
+    let saved = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let (use_source, definitions) = saved.split_once("\nstyle ll_button").unwrap();
+    assert!(!use_source.contains("style \"ll_button\""));
+    assert!(use_source.contains("text_style \"ll_body\" # retained reference comment"));
+    assert!(use_source.contains("background \"#123456\""));
+    assert!(use_source.contains("hover_background \"#234567\""));
+    assert!(use_source.contains("foreground Frame("));
+    assert_eq!(
+        definitions,
+        before.split_once("\nstyle ll_button").unwrap().1
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        before
+    );
+}
+
+#[test]
+fn text_style_button_edits_route_decoration_to_use_and_text_to_selected_scope() {
+    for scope in ["local", "shared"] {
+        let (_temporary, mut service, _root, first, second, first_id, second_id) =
+            text_style_button_project();
+        // Shared edits exercise a definition in another file and local decoration
+        // in the selected use through one transaction.
+        let (first, second, first_id, second_id) = if scope == "shared" {
+            (second, first, second_id, first_id)
+        } else {
+            (first, second, first_id, second_id)
+        };
+        let before =
+            ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"].clone();
+        let other = ipc(&mut service, "source.open", json!({"path":second["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let mut appearance = button_canvas_properties(&mut service, &first, &first_id);
+        let mut other_appearance = button_canvas_properties(&mut service, &second, &second_id);
+        let catalog = ipc(&mut service, "screens.list", json!({}));
+        let result = compose_command(
+            &mut service,
+            &first,
+            json!({"type":"formatText","nodeId":first_id,"values":{"bold":true,"appearance":{"background":"#654321","hover_background":"#765432"}},"style":{"scope":scope,"name":"ll_body","expectedRevision":catalog["styles"]["revision"]}}),
+        );
+        let node = result["document"]["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["id"] == first_id)
+            .unwrap();
+        let name = node["style"]["name"].as_str().unwrap();
+        let saved = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let use_source = saved.split("\nstyle ").next().unwrap();
+        assert!(use_source.contains("background \"#654321\""));
+        assert!(use_source.contains("hover_background \"#765432\""));
+        assert!(!use_source.contains("text_bold"));
+        let catalog = ipc(&mut service, "screens.list", json!({}));
+        let definition = catalog["styles"]["definitions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|d| d["name"] == name)
+            .unwrap();
+        assert!(definition["error"].is_null(), "{definition}");
+        assert_eq!(definition["values"]["bold"], true);
+        assert!(definition["values"].get("background").is_none());
+        appearance["text_bold"] = json!(true);
+        appearance["background"] = json!("#654321");
+        appearance["hover_background"] = json!("#765432");
+        assert_eq!(
+            button_canvas_properties(&mut service, &first, &first_id),
+            appearance
+        );
+        if scope == "shared" {
+            other_appearance["text_bold"] = json!(true);
+        }
+        assert_eq!(
+            button_canvas_properties(&mut service, &second, &second_id),
+            other_appearance
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":second["path"]}))["text"],
+            if scope == "shared" {
+                other.replace(
+                    "style ll_body is text:\n",
+                    "style ll_body is text:\n    bold True\n",
+                )
+            } else {
+                other.clone()
+            }
+        );
+        composition_history(&mut service, "undo");
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
+            before
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":second["path"]}))["text"],
+            other
+        );
+        composition_history(&mut service, "redo");
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
+            saved
+        );
+    }
+}
+
+#[test]
+fn text_style_button_copy_preserves_opaque_local_properties_and_comments() {
+    let (_temporary, mut service, _root, first, _second, first_id, _) = text_style_button_project();
+    let original = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let before = original.replace("background \"#123456\"", "background gui.button_background")
+        .replace("text_size 30 # local text override", "text_size gui.button_size # local text override\n        focus_mask True # unsupported local property\n        text_color gui.button_color # opaque override of inherited color");
+    save_composition_source(&mut service, &first, &before);
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":first["path"]}),
+    );
+    for (scope, error) in [
+        ("local", "OPAQUE_BOUNDARY"),
+        ("shared", "STYLE_UNAVAILABLE"),
+    ] {
+        assert_eq!(
+            reject(
+                &mut service,
+                "screens.compose",
+                json!({"screenId":first["id"],"expectedRevision":document["revision"],"command":{"type":"formatText","nodeId":first_id,"values":{"color":"#ffffff"},"style":{"scope":scope,"name":"ll_body","expectedRevision":catalog["styles"]["revision"]}}})
+            )["error"]["code"],
+            error
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
+            before
+        );
+    }
+    let result = compose_command(
+        &mut service,
+        &first,
+        json!({"type":"formatText","nodeId":first_id,"values":{},"style":{"scope":"local","name":"ll_body","expectedRevision":catalog["styles"]["revision"]}}),
+    );
+    let node = result["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == first_id)
+        .unwrap();
+    let name = node["style"]["name"].as_str().unwrap();
+    assert!(node["style"]["error"].is_null(), "{node}");
+    let saved = ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let (use_source, _) = saved
+        .split_once(&format!("\nstyle {name} is text:"))
+        .unwrap();
+    assert_eq!(
+        use_source,
+        before
+            .replace("text_style \"ll_body\"", &format!("text_style \"{name}\""))
+            .replace("text_hover_color \"#ffffff\"", "")
+    );
+}
+
 #[test]
 fn shared_style_review_refuses_changed_uses_missing_definitions_and_retains_exact_source() {
     let (_temporary, mut service, _root, first, second, first_id, _) = shared_project();
