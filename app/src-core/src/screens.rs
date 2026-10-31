@@ -20,6 +20,7 @@ mod composition;
 mod images;
 pub mod layout;
 mod ownership;
+mod styles;
 pub mod text;
 pub use composition::{ComposeRequest, ComposeResult};
 pub use layout::SetLayoutRequest;
@@ -154,6 +155,7 @@ pub struct Node {
     pub position: Option<Position>,
     pub numeric_layout: Option<layout::NumericLayout>,
     pub text_properties: Option<text::TextProperties>,
+    pub style: Option<styles::StyleReference>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
@@ -336,6 +338,7 @@ fn parse_body(
         position: None,
         numeric_layout: None,
         text_properties: None,
+        style: None,
         span: Span {
             start: line.start,
             end,
@@ -516,7 +519,7 @@ fn parse_body(
     Ok(())
 }
 
-fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, SceneError> {
+fn source_lines(bytes: &[u8]) -> Result<Vec<Line<'_>>, SceneError> {
     let bom = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
         3
     } else {
@@ -570,6 +573,11 @@ fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, Sce
     if lines.len() > MAX_NODES * 8 {
         return Err(SceneError::InvariantBlocked);
     }
+    Ok(lines)
+}
+
+fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, SceneError> {
+    let lines = source_lines(bytes)?;
     let mut result = Document {
         path,
         revision,
@@ -672,7 +680,10 @@ impl AuthoringService {
             .transactions
             .snapshot(project, path(&request.path)?)
             .map_err(|_| SceneError::SourceConflict)?;
-        self.owned_screen_document(project, &bytes, request.path, revision.sha256)
+        let mut document =
+            self.owned_screen_document(project, &bytes, request.path, revision.sha256)?;
+        self.resolve_screen_styles(project, &mut document, &bytes)?;
+        Ok(document)
     }
 
     pub fn screens_set_pixel(

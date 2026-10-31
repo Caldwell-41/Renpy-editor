@@ -170,6 +170,16 @@ pickers. Start font qualification with TTF/OTF; retain existing supported image
 formats. Shared style/component edits update all uses, list affected screens before
 Apply and offer an independent copy. Initial reusable components have no parameters.
 
+The approved L07 inspector calls the reusable appearance definition Style. Its
+choices are All elements using this style and This element only, with explicit
+source-derived element/screen counts beside appearance controls. Text content and
+Layout remain local. [A5 approval](../../design/design-lab-shared-look/approval.json)
+owns the layout and wording amendment; [#43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
+owns implementation acceptance. State controls expose text color, background and
+border for normal/hover/selected/disabled appearances. Other state properties remain
+in Source.
+
+
 Text can display existing variables. Bars bind to existing integer variables with
 explicit limits. Buttons can assign literal values to existing bool/int/string
 variables and perform short, visibly ordered action sequences. An action that

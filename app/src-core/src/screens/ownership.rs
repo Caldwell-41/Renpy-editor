@@ -24,6 +24,7 @@ pub struct Catalog {
     pub source_map_revision: String,
     pub inventory_revision: String,
     pub owned: Vec<OwnedReference>,
+    pub styles: styles::StyleCatalog,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -35,11 +36,23 @@ pub struct CreateRequest {
     pub expected_inventory_revision: String,
 }
 
-struct Inventory {
-    revision: String,
-    files: Vec<(String, Vec<u8>)>,
+pub(super) struct Inventory {
+    pub(super) revision: String,
+    pub(super) files: Vec<(String, Vec<u8>)>,
     names: Vec<String>,
     complete: bool,
+}
+
+impl Inventory {
+    pub(super) fn refresh_revision(&mut self) {
+        let mut digest = Sha256::new();
+        for (path, bytes) in &self.files {
+            digest.update((path.len() as u64).to_le_bytes());
+            digest.update(path.as_bytes());
+            digest.update(hex::encode(Sha256::digest(bytes)).as_bytes());
+        }
+        self.revision = hex::encode(digest.finalize());
+    }
 }
 
 fn declaration_names(bytes: &[u8]) -> Result<Vec<String>, SceneError> {
@@ -213,6 +226,7 @@ impl AuthoringService {
                             position: None,
                             numeric_layout: None,
                             text_properties: None,
+                            style: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
                             properties: vec![],
@@ -239,7 +253,7 @@ impl AuthoringService {
         Ok(document)
     }
 
-    fn screen_inventory(&self, project: &ProjectId) -> Result<Inventory, SceneError> {
+    pub(super) fn screen_inventory(&self, project: &ProjectId) -> Result<Inventory, SceneError> {
         let mut paths = self
             .transactions
             .inventory_files_bounded(project, "game", 16384)
@@ -316,6 +330,7 @@ impl AuthoringService {
     ) -> Result<Catalog, SceneError> {
         let (map, _, revision, project_revision) = self.screen_metadata(project, project_id)?;
         let inventory = self.screen_inventory(project)?;
+        let styles = styles::Index::read(&inventory)?.catalog(&revision.sha256);
         let owned = map
             .owned_screens
             .into_iter()
@@ -342,6 +357,7 @@ impl AuthoringService {
             source_map_revision: revision.sha256,
             inventory_revision: inventory.revision,
             owned,
+            styles,
         })
     }
 

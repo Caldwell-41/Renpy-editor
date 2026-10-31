@@ -1,12 +1,74 @@
 {
   "schemaVersion": 1,
   "screenId": "shared-look",
-  "currentApproved": null,
+  "currentApproved": "inspector-v5",
   "revisions": [
-    { "id": "inspector-v1", "variantId": "inspector", "approval": null },
-    { "id": "library-v1", "variantId": "library", "approval": null },
-    { "id": "inline-v1", "variantId": "inline", "approval": null },
-    { "id": "inspector-v2", "variantId": "refined", "approval": null },
-    { "id": "inspector-v5", "variantId": "appearance-scope", "approval": null }
+    {
+      "id": "inspector-v1",
+      "variantId": "inspector",
+      "approval": null
+    },
+    {
+      "id": "library-v1",
+      "variantId": "library",
+      "approval": null
+    },
+    {
+      "id": "inline-v1",
+      "variantId": "inline",
+      "approval": null
+    },
+    {
+      "id": "inspector-v2",
+      "variantId": "refined",
+      "approval": null
+    },
+    {
+      "id": "inspector-v5",
+      "variantId": "appearance-scope",
+      "approval": {
+        "date": "2026-10-31",
+        "decision": "Kris said \"Okay approved\" after reviewing A5 and agreeing the Style naming and explicit editing-scope labels. The implementation continuation explicitly confirms that approval.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "8218bbfab6b6931b1f8610bf85ac6e64f33d747e",
+          "fingerprint": "d8850872861cc9eaae4d51313205ea0b4b18fc0068bdf8bec1d42edfff6e9b0c"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-shared-look/inspector-v5-shared-controls-dark.png",
+            "sha256": "8e7509799dad11d85e95f3822fd0f1744a4b35f3e620330fe35e587f085254c4",
+            "state": "many",
+            "theme": "dark",
+            "width": 1440,
+            "height": 1080,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-shared-look/inspector-v5-local-controls-dark.png",
+            "sha256": "233a9c30f988f7215b2d21f805e28da690b37ca65c31f470fc4cb208f34314d0",
+            "state": "many-element-only",
+            "theme": "dark",
+            "width": 1440,
+            "height": 1080,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Name the reusable appearance definition Style.",
+          "Label scope choices All elements using this style and This element only.",
+          "Show Editing 14 elements across 8 screens or the actual affected counts beside appearance controls.",
+          "Scope covers appearance controls. Text content and Layout remain local.",
+          "Review lists every affected screen before Apply. Shared Apply updates all uses; an independent copy changes only the selected use.",
+          "Preserve pending fields when switching scope or reviewing uses; Cancel writes nothing."
+        ],
+        "deviations": [
+          "The preserved screenshots contain the earlier shared style wording. The approved wording amendment above takes precedence; the reviewed A5 source remains unchanged.",
+          "Each retained image is a 326 by 542 pixel inspector crop from a 1440 by 1080 CSS viewport at display scale 1. Width and height record the source viewport, not crop dimensions. Crop origin was not retained.",
+          "Only these two dark inspector states are captured by this approval. Other states and compact layouts require implementation comparison; prior mock checks retain their recorded scope."
+        ]
+      }
+    }
   ]
 }

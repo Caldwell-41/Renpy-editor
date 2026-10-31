@@ -13,6 +13,9 @@ mod nested_sdk;
 #[path = "image_tests.rs"]
 mod ui_images;
 
+#[path = "style_tests.rs"]
+mod styles;
+
 #[path = "font_tests.rs"]
 mod fonts;
 

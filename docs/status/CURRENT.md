@@ -1,17 +1,23 @@
 # Current status
 
-## L07 shared-look design in progress
+## L07 implemented locally; final review underway
 
-Kris selected implementing [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
-on a new branch. `codex/l07-shared-looks` starts at current Screens base `e9e8661`.
-The current [Design Lab proposal](../design/design-lab-shared-look/README.md) is A5.
-It keeps scope visible with the appearance controls and switches immediately between
-shared-style and element-only editing. Text content and Layout have separate local
-labels. The same editor owner and eight-screen/fourteen-element example remain.
-No draft is approved and production code is
-unchanged. [Evidence](../tasks/evidence/shared-look.md) records mock verification
-and remaining SDK/source/history/native proof. No capped operation has started.
-The unrelated audit, protected recovery and wider pending acceptance remain intact.
+[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) is implemented on
+`codex/l07-shared-looks`, based on `e9e8661`. Kris approved A5 with Style naming
+and explicit scope labels, both TDD boundaries and the full-branch review base.
+The existing inspector/property/inventory/transaction owners support shared Apply,
+assignment, creation, selected-use copy and Source/history/reopen.
+
+Actual controller/core, all 277 frontend tests, build, Mac SDK/literal comparisons,
+helper comparisons and the signed packaged native probe pass. Final ordinary core
+verification and independent Standards/Spec review are underway.
+[Evidence](../tasks/evidence/shared-look.md#implemented-candidate-and-mac-qualification-2026-10-31)
+owns source/checker/package identities, retained failures and precise proof limits.
+Mac use is SDK 15/16, helpers 2/4, packages 1/2, native sessions 1/2; Windows is
+zero and costly CI dispatches are 0/2. The prepared Windows check awaits publication
+authorization. Only a local commit is selected, with no push or PR. Required Windows
+proof and the full Design Lab startup failure prevent bounded acceptance/closure.
+The unrelated audit, protected recovery below and wider pending acceptance remain intact.
 
 ## Reviewed text ownership cleanup
 

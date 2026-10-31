@@ -104,6 +104,12 @@ init python:
             p = dict(node["properties"])
             if "padding" in p:
                 p["padding"] = tuple(p["padding"])
+            for key in list(p):
+                if key.endswith("foreground"):
+                    border = p[key]
+                    w, c = border["width"], border["color"]
+                    n = 2 * w + 2
+                    p[key] = Frame(Composite((n, n), (0, 0), Transform(Solid(c), xysize=(n, w)), (0, w + 2), Transform(Solid(c), xysize=(n, w)), (0, w), Transform(Solid(c), xysize=(w, 2)), (w + 2, w), Transform(Solid(c), xysize=(w, 2))), w, w)
             kind = node["kind"]
             if kind in ("screen", "fixed", "vbox", "hbox"):
                 d = renpy.display.layout.MultiBox(layout={"vbox":"vertical", "hbox":"horizontal"}.get(kind, "fixed"), style=kind if kind in ("vbox", "hbox") else "fixed", **p)
@@ -119,7 +125,7 @@ init python:
                 d = renpy.display.transform.Transform(renpy.display.im.Image(node["literal"]), **p)
             elif kind == "textbutton":
                 d = renpy.ui._textbutton(node["literal"], substitute=False, **p)
-                d.set_style_prefix("hover_" if plan["buttonState"] == "hover" else "idle_", True)
+                d.set_style_prefix({"normal":"idle_", "hover":"hover_", "selected":"selected_idle_", "disabled":"insensitive_"}[plan["buttonState"]], True)
             else:
                 raise ValueError("Unsupported canvas kind")
             for child in by_parent.get(node["start"], []):
@@ -194,5 +200,9 @@ label start:
                     _canvas_previous = _canvas_request["frameId"]
             except FileNotFoundError:
                 pass
+            except Exception:
+                with open(config.basedir + "/render-refusal.txt", "w", encoding="utf-8") as _canvas_error:
+                    __import__("traceback").print_exc(file=_canvas_error)
+                _canvas_os._exit(73)
             _canvas_time.sleep(0.004)
         renpy.quit(relaunch=False, status=0, save=False)

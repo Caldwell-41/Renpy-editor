@@ -252,3 +252,187 @@ The proposed product test boundaries are the existing Screens controller-to-core
 path for review/Apply/copy/draft retention and the source transaction/history service
 for definitions, references, revisions and exact-byte preservation. They are not
 yet confirmed for the TDD skill; no product tests have been written in this step.
+
+## A5 approval and implementation entry, 2026-10-31
+
+Kris approved A5 and selected continuing #43 through implementation, verification,
+review, fixes and a local commit. The approved source is 8218bbfab6b6931b1f8610bf85ac6e64f33d747e;
+`npm run design:source` reproduces fingerprint
+`d8850872861cc9eaae4d51313205ea0b4b18fc0068bdf8bec1d42edfff6e9b0c`.
+The approval record preserves both reviewed 326 by 542 inspector crops from a
+1440 by 1080 CSS viewport at display scale 1. Their crop origins are unavailable.
+The written Style naming and explicit scope amendment takes precedence over the
+earlier screenshot wording. Earlier unapproved statements describe historical checks.
+
+Development remains on Mac ARM64, on the existing codex/l07-shared-looks branch.
+The only unrelated work at entry is the untracked Phase 1 audit; it is preserved.
+No production implementation or costly operation had started at entry.
+The full Design Lab startup timeout remains failed. No actual SDK, durable-source,
+history or native acceptance is inferred from mock checks.
+
+### Production ownership and operation map
+
+| Approved control or existing capability | Existing owner and implementation requirement |
+| --- | --- |
+| Text content | `ScreenText` owns its draft; `screens.compose` / `formatText` accepts its local literal edit. Keep content outside shared scope. |
+| Font, size, color, alignment, bold and italic | Extend `ScreenText` and `screens/text.rs`; preserve typed font handles, exact token patches and blocked expressions. Route shared appearance values to the referenced ordinary style definition. |
+| Scope choices | Keep reference intent in the existing element draft. Switching scope retains entered fields and writes nothing. Independent Apply copies appearance and references together. |
+| Style name and affected-count status | Resolve from authoritative source definitions and actual references. Do not use fictional sample counts or screen names. |
+| Change style | Select a compatible source definition, stage the reference with the appearance draft, then review and apply through the existing composition transaction. |
+| View uses and Apply review | One dialog owner lists every affected screen and use count. Capture the reviewed definition/use revisions and submitted values; reject changes before confirmation. Preserve focus, selection, scroll and disclosure state. |
+| Layout | Keep `ScreenLayoutEditor` as owner. A combined Apply retains local numeric layout and text content in the same accepted transaction. |
+| Canvas preview | Extend `screens/canvas.rs` resolution and the existing helper plan. Resolve only the supported static subset without executing project code; keep unsupported inheritance or initialization visible. |
+| Undo/Redo, Source and reopen | Keep the existing composition acceptance, shared transaction/history and owned-screen reconciliation paths. Restore definition/reference bytes together and preserve opaque neighbors. Refresh every affected document after shared acceptance. |
+| Frame/background/border and button states | #43 requires SDK-qualified mappings. A5 captures text and button-text controls; the older mock-only decoration values do not establish a production mapping or qualification. Preserve this gap until implemented and verified. |
+
+The new source responsibility is the shared definition/reference index. It should
+extend the bounded screen inventory and existing lexical/property parsing, rather
+than introduce another project reader, text draft owner or transaction path. General
+dynamic styles and ambiguous definitions stay in Source. Existing `text` and
+`formatText` commands have distinct compatibility roles; a new shared path must
+not leave the active renderer writing through a superseded implementation.
+
+The TDD skill requires confirmation before tests at a new boundary. Confirmation
+is pending for the existing Screens controller-to-core journey and the source
+transaction/history service. The code-review skill's requested fixed point is also
+pending; proposed base is the recorded L07 start, e9e8661. No new tests or production
+edits have been made while those questions are pending.
+
+### Approval verification
+
+The source identity and approval/capture validator pass. The full promotion
+`npm run design:check` passes lab typechecking and approval checks, then fails at
+initial catalog navigation with the retained eight-second page.goto timeout. The
+log is `approval-promotion-design-check.log` in the ignored evidence directory.
+This run used host Node v26.8.1; the pinned project Node v24.19.0 remains the
+implementation check target. The timeout supplies no full browser-promotion pass.
+No SDK/helper, package, native or CI operation started.
+
+Pinned Node v24.19.0 application typechecking and approval/capture validation pass.
+The Python 3.12 repository validator passes for 1,288 tracked files, and
+`git diff --check` passes. The retained PNG files are newly added local files and
+are checked by the approval validator. No commit, push or PR has been created in
+this continuation while the skill-required confirmations remain pending.
+
+Kris confirmed both proposed test boundaries and review base e9e8661. The source
+transaction/history boundary is the first TDD slice.
+
+## Implementation and first SDK diagnosis
+
+Both confirmed test boundaries are active, with review fixed at e9e8661.
+Shared definitions and references use the existing bounded screen inventory and
+property parser, composition command and transaction/history path. The approved
+inspector scope and affected-use review are connected to actual core operations.
+The first controller journey passes shared Apply and selected-use copy. The
+ordinary focused selection passes 76 Screens core cases (four existing SDK/helper
+cases ignored) and 59 renderer cases. Later corrections retain their own candidate
+basis and focused checks; these are not final whole-feature results.
+
+SDK normal attempt 1 consumes three Mac CLI/game startups. Compile/lint and
+source/literal equality pass for the first independent stage/aspect, but the
+distinct-state check fails. The fixture changed a live button's style prefix and
+rendered again without processing Ren'Py's queued redraws. SDK source confirms
+set_style_prefix schedules redraw, and the event loop calls process_redraws before
+rendering. The correction processes that queue before each capture. No state
+distinctness or zero-pixel-difference check is removed.
+
+Visual inspection also finds a product mapping defect shared by both fixtures.
+Solid's size properties set minima, so a Solid inside a Composite fills the
+available region and the proposed foreground covers the interior. Wrapping each
+Solid in a Transform with fixed dimensions corrects the constructor in the existing
+property serializer and trusted helper. A semantic border/interior pixel check
+now rejects this wrong mapping independently of source/literal equality. The
+existing full-image comparison still permits zero differing pixels. The semantic
+check allows one channel unit for opaque GPU byte conversion and requires alpha
+at least 254. It does not add a source/reference image tolerance.
+
+The original attempt, images and failure remain in sdk-normal-01 and its driver
+log under the ignored L07 evidence directory. This is a mixed harness/product
+diagnosis, not a passing runtime result. Mac SDK use is 3/16; helper, package,
+native and CI use remain zero. No Windows proof has run.
+
+The second normal attempt consumes three more Mac startups and correctly rejects
+the still-filled border interior. One dedicated diagnostic startup then compares
+the displayable and bitmap constructions. It confirms a 5 by 5 input, and SDK
+Frame.render identifies the remaining error: Frame reserves at least two source
+pixels for its centre, so a 2w+1 construction shrinks the requested borders and
+stretches colored edge pixels across the interior. The corrected construction uses
+2w+2 dimensions, a two-pixel transparent centre, and fixed-size transformed Solids.
+The bitmap alternative is rejected because its diagnostic output has interpolated
+alpha. The diagnostic's exception wrapper catches the normal QuitException and
+reports exit 61 after writing its captures; that harness failure remains preserved.
+No diagnostic run is counted as qualification. SDK use is now 7/16 before the next
+normal campaign. No other costly category has started.
+
+
+## Implemented candidate and Mac qualification, 2026-10-31
+
+The production inspector extends `ScreenText`'s existing draft and dialog owners.
+The existing property parser, bounded inventory, composition transaction, Source
+and history services own the actual edits. Ordinary source definitions and explicit
+references support shared changes, assignment, creation and independent copies.
+Unsupported or incomplete reference graphs refuse sharing. Text and Layout remain
+local, including a text-only edit on a shared element. Shared changes refuse affected
+local overrides. Built-in styles and unsupported inheritance stay in Source.
+
+The expanded actual controller/core journey passes (`controller-09/result.json`).
+It covers 14 uses across eight screens, both scopes, review cancellation and retained
+focus/selection/scroll/disclosure, assignment, creation, no-write chooser cancellation,
+frame background/border, hover button appearance, stale refusal, exact-byte history,
+Source reconciliation and reopen. The packaged-probe producer also passes through
+the real controller/core (`probe-controller-03`), including the actual report consumer
+and deliberately invalid stage, source, state and result reports.
+
+The direct approved-source comparison uses a detached local checkout at 8218bbf.
+Its source fingerprint matches the approved record. Both reference and production
+captures use a 1440 by 1080 CSS viewport, scale 1, dark mode, a 326 by 830 inspector,
+pending Size 32, Left/Off/Off, closed Layout and body scroll zero. The original
+reviewed crops remain unchanged. `reference-01` and `controller-09` retain both
+states. Visual inspection confirms the source-derived scope group, local Text and
+Layout labels, fields and scope boundary. The approved longer scope label wraps
+and adds about 12 pixels before the fields. Apply now names the affected scope.
+This is the written naming/scope amendment, with no additional design choice.
+
+Normal SDK campaign 3 passes compile/lint and all 16 stage/aspect/state comparisons
+against separate literal reference screens, with zero differing RGBA pixels for
+both affected screens. Four button states produce distinct output. Independent
+semantic pixel checks establish the border and transparent interior. The accepted
+source inputs come from public core/transaction operations (`sdk-inputs-03`).
+`sdk-normal-03/result.json` retains source and checker hashes. The earlier failed
+campaigns and diagnostic remain failed and retained above.
+
+The first helper attempt rejects the foreground dictionary. Ren'Py's store `dict`
+is a revertable subclass, while JSON decoding produces built-in dictionaries. An
+`isinstance(..., dict)` guard therefore skipped conversion. The typed trusted
+renderer now converts every foreground record and reports render failures with a
+bounded nonzero exit instead of entering Ren'Py's error UI. Helper attempt 2 passes
+33 frames in one session across shared/copy stages. Its pending draft frame equals
+the later accepted frame while source remains unchanged. All 32 accepted frames
+match normal literal SDK output exactly. Wrong source/state, missing and blank
+frames fail the comparison gate. Cooperative shutdown exits zero and cleans up.
+
+All 277 frontend tests, production build and Rust formatting pass. Final ordinary
+core verification is running. The first full core invocation inherited SDK archive
+variables from the local tool entry and was cancelled during archive extraction,
+before its candidate SDK directory was promoted or any SDK CLI could run. Its log
+remains `final-core.log`. The ordinary rerun explicitly unsets those variables.
+The browser expansion retained and corrected navigation and transaction-completion
+races in its test driver; product checks were not weakened.
+
+The signed Mac package passes strict signature, pinned certificate/designated
+requirement and installer-content checks. Executable SHA-256 is
+b43eb7c03d561c28d06b4ea3be74613fd467e0fc7e73bd7b59595f1dd7b96ca9;
+installer SHA-256 is 5a7ae06cbc76ae6a3aee5bff6adc110d96d310b024e1a9334a0a46997526383a.
+The packaged native shared-style probe passes all seven stages, actual Source,
+history, stale retention and reopen, exits zero and reports cleanup complete.
+It does not execute an SDK or establish physical input/human acceptance. Local
+receipts are `package-01.log`, `native-01-driver.log` and `native-01` under the ignored
+evidence directory. Package and native checks use the current production tree;
+review and any later corrections retain their own candidate basis.
+
+Mac consumption is SDK 15/16, helpers 2/4, package builds 1/2 and native sessions 1/2.
+Windows consumption is zero in all categories; costly CI dispatches are 0/2.
+The prepared focused Windows workflow is not published or dispatched because only
+a local commit is selected. Windows SDK/helper/package/native proof remains required.
+The full Design Lab startup timeout, physical input and wider acceptance remain
+separate. No issue acceptance or closure is claimed.

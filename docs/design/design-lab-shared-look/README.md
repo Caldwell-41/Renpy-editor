@@ -3,9 +3,8 @@
 Kris selected implementing [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
 on a new branch on 2026-10-30. Branch `codex/l07-shared-looks` starts at
 `e9e8661`, the current Screens base including #71's text-draft ownership fix.
-The repository's design-before-production rule applies. A5, A2 and the three
-original designs remain drafts. No option has approval and production code has
-not changed.
+A5 is approved with the Style naming and explicit scope amendment recorded below.
+A2 and the three original designs remain drafts. Production code has not changed.
 
 The question is where shared appearance editing and affected-use review belong
 within the existing Screens workspace. All options retain the canvas, element
@@ -19,7 +18,7 @@ selection, inspector sections, Source access and shared-history controls.
 | B, library | A style list sits beside Help and About previews. The inspector edits the selected style; a dialog reviews affected screens. |
 | C, inline | Appearance fields form a worksheet below the canvas. Affected screens and confirmation expand beneath the fields. |
 
-A5 is the current proposal. It extends the existing `editor.ts` and
+A5 is the approved layout. It extends the existing `editor.ts` and
 `editor-sample.ts` owners and mounts the actual `ScreensWorkspace` renderer with
 fictional memory-only services. The appearance controls are grouped beneath a
 persistent "Editing shared style" heading with the style name, element count and
@@ -38,9 +37,8 @@ screen-name list. A copy for the selected Help element leaves seven screens unch
 
 A5 replaces A4's active `shared-style` route and migrates its callers and checks.
 A4's unapproved source remains recoverable at `874e302`, and A3 at `9a2d218`.
-There is no parallel existing-editor
-implementation remains. A2/A/B/C stay registered for their distinct comparison
-layouts. None is an approved production design.
+No parallel existing-editor implementation remains. A2/A/B/C stay registered for their distinct comparison
+layouts. A5 is approved with the wording amendment in approval.json. Earlier variants remain drafts.
 
 Start at Screens in the sidebar. Choose Help, double-click its body text under
 Choose, and use Design as usual. The appearance heading identifies the editing
@@ -111,8 +109,17 @@ outside this study.
 
 The mock adds no game execution, external requests, project file access or new
 production capability. Existing project fonts, numeric layout and image workflows
-keep their approved scope. Approval of one draft is required before production UI
-implementation under AGENTS.md and ADR 0017.
+keep their approved scope. A5 approval is recorded under ADR 0017; production implementation and acceptance remain separate.
 
 Verification and remaining acceptance are recorded in
 [the L07 evidence](../../tasks/evidence/shared-look.md).
+
+## A5 approval, 2026-10-31
+
+Kris approved inspector-v5 at 8218bbf with a wording amendment. Name the reusable
+appearance definition Style. Label scope choices All elements using this style and
+This element only, and show the actual affected element and screen counts near the
+appearance controls. Text content and Layout remain local. The approval record
+retains the reviewed inspector crops and their source viewport metadata. Each image
+is a 326 by 542 crop; its origin was not retained. The old screenshot wording does
+not override the approved amendment. Production verification remains pending.

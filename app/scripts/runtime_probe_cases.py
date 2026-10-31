@@ -1,9 +1,10 @@
 """Cases required by the ordinary packaged runtime gate and evidence manifest."""
 RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh")
-OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "nested-layout", "ui-image", "project-font", "canvas-helper", "canvas-input")
+OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "nested-layout", "ui-image", "project-font", "shared-style", "canvas-helper", "canvas-input")
 
 # Terminal production-probe observations required by each ordinary scenario.
 RUNTIME_STAGES = {
+    "shared-style": ("style-review-passed", "style-shared-passed", "style-copy-passed", "style-history-passed", "style-stale-passed", "style-source-passed", "style-reopen-passed"),
     "project-font": ("font-picker-passed", "font-draft-passed", "font-history-passed", "font-source-passed", "font-reopen-passed"),
     "ui-image": ("image-picker-passed", "image-draft-passed", "image-history-passed", "image-source-passed", "image-reopen-passed"),
     'nested-layout': ('nested-composition-passed','grid-layout-passed','viewport-source-passed','nested-history-passed','nested-reopen-passed'),
@@ -109,6 +110,33 @@ def runtime_report_ok(case, report, target_os=None):
                 or source.count(f'# loomlight-screen: {identity.get("id")}\n') != 1
                 or source.count('screen travel_notes():\n') != 1
                 or source.count(f'# loomlight-element: {ids[1]}\n') != 1):
+            return False
+    if case == 'shared-style':
+        from uuid import UUID
+        import re
+        identity, other = details.get('identity'), details.get('otherIdentity')
+        source, other_source = details.get('acceptedSource'), details.get('otherSource')
+        flags = details.get('flags')
+        if (details.get('nativeWebView') is not True or details.get('sdkExecuted') is not False
+                or details.get('error') or names != [*RUNTIME_STAGES[case], 'complete']
+                or not isinstance(flags, dict) or any(flags.get(k) is not True for k in ['reviewRetention','sharedApply','independentApply','history','staleRefusal','sourceReconcile','reopen'])
+                or not isinstance(identity, dict) or identity.get('path') != 'game/ui/travel_notes.rpy' or identity.get('name') != 'travel_notes' or identity.get('resolved') is not True
+                or not isinstance(other, dict) or other.get('path') != 'game/ui/about.rpy' or other.get('name') != 'about' or other.get('resolved') is not True
+                or not isinstance(source, str) or not 0 < len(source.encode()) <= 65536
+                or not isinstance(other_source, str) or not 0 < len(other_source.encode()) <= 65536
+                or not isinstance(details.get('copyStyleName'), str) or not re.fullmatch(r'll_copy_[a-f0-9]{32}', details['copyStyleName'])):
+            return False
+        try:
+            ids = [identity['id'],identity['rootId'],other['id'],other['rootId'],details['elementId']]
+            if len(set(ids)) != 5 or any(str(UUID(value)) != value for value in ids): return False
+        except (ValueError, KeyError, TypeError, AttributeError):
+            return False
+        if (source.count(f'# loomlight-screen: {identity["id"]}\n') != 1
+                or source.count(f'# loomlight-element: {details["elementId"]}\n') != 1
+                or f'style "{details["copyStyleName"]}"' not in source
+                or f'style {details["copyStyleName"]} is text:' not in source
+                or 'size 42 # keep size' not in source or 'size 32 # keep size' not in source
+                or 'style "ll_body" # keep use' not in other_source):
             return False
     if case == 'help-screen':
         if target_os is not None and target_os not in ('windows', 'macos'):

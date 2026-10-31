@@ -68,6 +68,8 @@ pub enum ButtonState {
     #[default]
     Normal,
     Hover,
+    Selected,
+    Disabled,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -154,7 +156,19 @@ impl AuthoringService {
             return Err(SceneError::SourceConflict);
         }
         let source_path = request.path.clone();
-        let document = inspect(&bytes, request.path, revision.sha256.clone())?;
+        let style_inventory = self.screen_inventory(project)?;
+        if style_inventory
+            .files
+            .iter()
+            .find(|(p, _)| p == &source_path)
+            .map(|(_, b)| b)
+            != Some(&bytes)
+        {
+            return Err(SceneError::SourceConflict);
+        }
+        let style_index = super::styles::Index::read(&style_inventory)?;
+        let mut document = inspect(&bytes, request.path, revision.sha256.clone())?;
+        style_index.resolve(&mut document, &bytes)?;
         let screen = document
             .screens
             .into_iter()
@@ -205,6 +219,11 @@ impl AuthoringService {
                         .push(format!("Source-only statement at {}", node.span.start));
                     continue;
                 };
+                if matches!(key, "style" | "text_style")
+                    && node.style.as_ref().is_some_and(|s| s.error.is_none())
+                {
+                    continue;
+                }
                 if matches!(key, "id" | "modal" | "action" | "hovered" | "unhovered") {
                     continue;
                 }
@@ -276,6 +295,20 @@ impl AuthoringService {
                 } else {
                     plan.limits
                         .push(format!("Unresolved {key} at {}", node.span.start));
+                }
+            }
+            if let Some(reference) = &node.style {
+                if let Some(error) = &reference.error {
+                    plan.limits.push(error.clone());
+                }
+                if node.kind == "textbutton"
+                    && style_index
+                        .catalog("")
+                        .definitions
+                        .iter()
+                        .any(|d| d.name == reference.name && d.kind == "textbutton")
+                {
+                    properties.insert("text_style".into(), Value::String("button".into()));
                 }
             }
             if let Some(typography) = &node.text_properties {
@@ -713,13 +746,29 @@ impl AuthoringService {
             {
                 continue;
             }
+            if style_inventory
+                .files
+                .iter()
+                .find(|(p, _)| p == file)
+                .map(|(_, b)| b)
+                != Some(&bytes)
+            {
+                return Err(SceneError::SourceConflict);
+            }
+            let bom = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
+                3
+            } else {
+                0
+            };
             let bytes = bytes.strip_prefix(&[0xef, 0xbb, 0xbf]).unwrap_or(&bytes);
             let text = std::str::from_utf8(bytes).map_err(|_| SceneError::UnsupportedSource)?;
             let ranges = crate::authoring::lexical_ranges(bytes, false, false)
                 .map_err(|_| SceneError::UnsupportedSource)?;
             if ranges.into_iter().any(|(start, end)| {
                 let raw = &text[start..end];
-                !raw.starts_with(char::is_whitespace) && !safe_initialization(code(raw))
+                !raw.starts_with(char::is_whitespace)
+                    && !safe_initialization(code(raw))
+                    && !style_index.supports_declaration(file, start + bom)
             }) {
                 plan.limits.push(format!(
                     "Unresolved project initialization or inherited styles in {file}"

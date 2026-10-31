@@ -716,3 +716,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   documents. The actual controller/core journey first observed changed Source,
   then passed retained input, focus and unchanged Source after the correction.
 - **Evidence:** [Text ownership maintenance](../tasks/evidence/screen-text-ownership.md#hierarchy-enter-correction).
+
+
+## H52. SDK border and helper conversion differ from the intended appearance
+
+- **Class/search:** product/harness; filled border interior, Frame centre size,
+  foreground dictionary, RevertableDict, unchanged button-state captures.
+- **Cause/correction:** Frame reserves two centre pixels; fixed rectangles and a
+  two-pixel transparent centre preserve borders. The trusted helper converts typed
+  foreground records without testing against Ren'Py's store dictionary subclass.
+  Qualification processes queued redraws before capturing changed states.
+- **Regression:** normal and helper output matches independent literal screens;
+  border/interior semantic checks and distinct-state checks reject the original
+  wrong output. Runtime render errors exit with a bounded diagnostic.
+- **Evidence:** [L07 diagnosis and qualification](../tasks/evidence/shared-look.md#implementation-and-first-sdk-diagnosis).
