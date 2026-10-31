@@ -14,7 +14,7 @@ on:
         required: true
         default: '3'
       shared_style:
-        description: Select L07 Windows Style ordinal 3 normal-only with retained helper/native
+        description: Select L07 Windows Style ordinal 4 with fresh same-source SDK/helper and package/native proof
         type: boolean
         default: false
       project_font:
@@ -60,7 +60,6 @@ on:
 
 permissions:
   contents: read
-  actions: read
 concurrency:
   group: help-screen-${{ github.ref }}
   cancel-in-progress: false

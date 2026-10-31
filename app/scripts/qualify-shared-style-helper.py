@@ -1,5 +1,6 @@
 """Compare inert shared-style helper output with independent normal SDK references."""
 import base64
+import hashlib
 from io import BytesIO
 import json
 from pathlib import Path
@@ -21,7 +22,12 @@ def validate(directory, normal):
     assert receipt['pendingMatchesAccepted'] is True
     assert len(receipt['records']) == 32 and len(sdk['records']) == 16
     assert all(row['cleanupComplete'] and row['cooperative'] and row['exitCode'] == 0 for row in receipt['shutdowns'])
-    assert (directory / 'accepted.json').read_bytes() == (normal / 'accepted.json').read_bytes()
+    helper_source = (directory / 'accepted.json').read_bytes()
+    normal_source = (normal / 'accepted.json').read_bytes()
+    assert helper_source == normal_source, (
+        'Accepted source snapshots differ',
+        dict(helperSHA256=hashlib.sha256(helper_source).hexdigest(),
+             normalSHA256=hashlib.sha256(normal_source).hexdigest()))
     accepted = json.loads((directory / 'accepted.json').read_text()); rows = []
     for stage in ['shared', 'independent']:
         for width, height in ASPECTS:
@@ -47,12 +53,17 @@ def validate(directory, normal):
 
 
 def audit_rejections(directory, normal):
-    faults = ['missing-frame', 'wrong-source', 'wrong-state', 'blank-frame']
+    faults = ['different-source-snapshot', 'missing-frame', 'wrong-source', 'wrong-state', 'blank-frame']
     for fault in faults:
         with tempfile.TemporaryDirectory(prefix='loomlight-style-gate-') as temporary:
             root = Path(temporary) / 'helper'; shutil.copytree(directory, root)
             path = root / 'shared-1280x720-normal-notes.json'
-            if fault == 'missing-frame':
+            if fault == 'different-source-snapshot':
+                manifest = root / 'accepted.json'
+                accepted = json.loads(manifest.read_text())
+                accepted['assets'][0]['id'] = '00000000-0000-4000-8000-000000000000'
+                manifest.write_text(json.dumps(accepted))
+            elif fault == 'missing-frame':
                 path.unlink()
             else:
                 frame = json.loads(path.read_text())

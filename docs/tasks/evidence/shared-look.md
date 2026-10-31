@@ -902,3 +902,176 @@ Only the controller harness, exact-ordinal guard/description, one reuse whitelis
 entry and evidence/status/incident records change. Existing production and all
 qualified helper/native producer inputs are unchanged. CI3 will still execute
 the complete corrected controller and exact probe rehearsal before costly work.
+
+### CI3 dispatch and wait checkpoint
+
+The acknowledgement correction is published at
+e57d3fa0073a45510ca48f9560152fd6fadaea03. The final CI1 reuse gate passes against
+that committed tree. PR #72 and #43 are updated remotely, remain draft/open and
+retain unchecked criteria.
+
+[CI3 41185489731, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41185489731/attempts/1)
+is confirmed at that exact head on codex/l07-shared-looks, event workflow_dispatch,
+shared_style=true, ordinal=3 and other specialist selectors false. Selection
+passes and the Windows job is checking out at the recorded observation in
+`ci3-wait-record.json`. No new SDK start is established by that observation.
+Dispatch use is 3/3 under the user's additional selection. Windows SDK use is
+confirmed 6/16 with eight reserved; helpers/packages/native stay unchanged.
+Do not dispatch another costly campaign; resolve actual starts from this receipt.
+
+[Automatic Repository quality 41185435872](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41185435872)
+is pending at the same head. The selected PR watch covers automatic PR checks
+only. It cannot establish manual qualification completion. No run-specific watcher
+is registered; manual same-thread resume is still required for the exact manual
+run. On resume, audit both exact run identities, all executed steps/logs, matching
+controller proof and probe rehearsal, actual starts, CI1 reuse provenance, all 16
+normal semantic/literal rows and 32 helper comparisons/rejections, cleanup,
+privacy and artifact availability. Any failed or missing proof stays unresolved.
+These dispatch/wait updates are local pending the terminal audit; the published
+fix and remote PR/ticket updates already identify the exact run.
+
+### Automatic CI3 quality audit; manual qualification still pending
+
+The T3 eleven-check notification belongs to
+[Repository quality 41185435872, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41185435872/attempts/1)
+at exact e57d3fa0073a45510ca48f9560152fd6fadaea03. The terminal metadata and
+complete logs establish both required jobs and every executed step passed:
+277 frontend tests with no failures/skips, pinned Rust formatting, validation of
+1,294 checkout files, 13 section-link tests, 10 retention tests, Q1 rejection
+fixtures and selector source audit. Nine unselected specialist jobs are skipped.
+This is an automatic-quality pass, not eleven executed qualifications.
+
+The separate manual CI3 run 41185489731, attempt 1, is still in_progress in
+portable preflight at the resumed observation in `ci3-wait-record.json`.
+Its exact-candidate/ordinal guard passes. No new SDK start is established by that
+observation; eight remain reserved against confirmed Windows SDK 6/16.
+Dispatches remain 3/3 and all other consumption is unchanged. No correction,
+new dispatch or costly operation runs during this audit.
+
+PR #72 and #43 are updated remotely with the verified automatic result and
+remaining manual audit. The manual run still requires same-thread user resume
+after completion. No run-specific watcher is available; the completed PR rollup
+cannot establish the manual result. Detailed original logs and quality audit are
+retained under ignored `ci-quality-03-*`. These wait/evidence updates remain local
+until the manual terminal audit; the published implementation head is unchanged.
+
+## CI3 terminal audit and fresh full CI4 correction, 2026-10-31
+
+Kris requested the complete root-cause fix with a subagent, PR update and another
+CI run, and explicitly approved all needed allowance increases. The coordinating
+agent owns all file changes. The root-cause subagent was read-only and confirmed
+that the existing helper producer can consume one exported snapshot without
+regenerating source IDs. A fresh read-only review examines the final correction.
+
+### Audited CI3 result
+
+[CI3 41185489731, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41185489731/attempts/1)
+failed at exact e57d3fa0073a45510ca48f9560152fd6fadaea03. Portable checks,
+controller/core, exact packaged-probe rehearsal, retained-evidence provenance,
+official SDK verification, source export and all 16 normal SDK semantic/literal
+comparison rows pass. The full helper consumer then rejects different accepted
+source bytes before its image/rejection audit. Privacy scan and artifact upload
+pass; skipped cache/setup post steps do not establish additional evidence.
+
+The original helper manifest and fresh normal manifest differ in screen/element
+UUID comments, independent copied-style definitions/references and asset ID.
+All four source SHA values differ. These IDs legitimately change when a project
+is created again. The reuse workflow's wrong assumption was that unchanged
+producer code creates identical source bytes in separate projects. Its early
+provenance check compared retained helper input only with retained CI1 input;
+the fresh export was never bound to it before the eight normal SDK starts.
+The strict consumer correctly refused that cross-run pairing.
+
+The complete source-identity failure reproduces offline. All 16 normal rows replay
+with matching source/checker/image hashes and semantic samples. Diagnostic-only
+comparison finds all 32 retained helper/literal images equal with matching actual
+physical size and drawing scale; this does not clear source provenance or execute
+the skipped full consumer/rejection audit. Controller correlation, probe result,
+helper frame state/dimensions/revisions and retained native/binary identities are
+also audited. CI3's ZIP digest is
+36f70b9cf5ec8c22e9a9e9b8d49a6b7e4f7ef3af9a2f9d50e4b827c8cc57e581;
+artifact ID 13035898732 expires 2026-11-07 08:45:38 UTC. The original 157 files are
+downloaded under windows-ci-03 and pass privacy recheck. Original receipts remain
+immutable. Complete logs, terminal metadata, diagnostics and read-only audit are
+retained in the ignored L07 evidence root. Prior pending CI3 statements are
+superseded by this failed terminal result.
+
+Actual CI3 use is eight SDK starts, no helper/package/native startup and one
+dispatch. Cumulative Windows use is SDK 14, helpers 1, packages 1, native sessions
+1 and dispatches 3. SDK cleanup is complete. No failed proof is relabelled passing.
+
+### Root-owner correction
+
+The qualification workflow now exports one snapshot for this candidate. Its
+single STYLE_INPUTS directory is passed to the actual public-core exporter and
+fresh helper producer; normal SDK rendering reads that same accepted.json.
+The helper reads its supplied source and applies the supplied independent stage
+through existing source transactions. It does not invoke the exporter again.
+The source-identity guard, per-frame revision/state/dimension/physical-scale
+checks and exact four-channel pixel equality remain required.
+
+The superseded retained-artifact download, source-whitelist/reuse script and
+callers are removed. Extra Actions-read permission and full-history checkout are
+removed with that path. There is no parallel reuse mode. Fresh helper production,
+all 32 helper/literal comparisons, pending-to-accepted proof and fresh Windows
+package/native qualification are restored. Producer and consumer are separate
+steps so their outcomes are visible. The native step keeps its original independent
+preflight/controller prerequisites and can collect evidence after rendering failure.
+Only ordinal 4 is selectable; consumed ordinals refuse.
+
+The helper consumer now reports both accepted-manifest SHA values on mismatch.
+A new rejection case changes a manifest's project identity while leaving rendered
+pixels unchanged. The two focused campaign regressions build complete consumer
+inputs: one source snapshot passes all 32 image comparisons and all five rejecting
+cases; a separately created project's UUID/copied-style snapshot fails despite
+identical image files. The existing semantic/strict-pixel tests remain intact.
+No source IDs, receipts or expected images are normalized to admit old proof.
+
+Five focused tests, actionlint, selector source audit and whitespace checks pass.
+The current consumer also passes all 32 actual same-source Mac comparisons and
+five rejection cases using copies of retained evidence, without new SDK/helper/
+package/native execution. Actual CI3's mismatched manifests still fail with the
+new hash diagnostic. That replay is not a fresh Mac qualification. The initial
+local workflow lint rejected runner.temp in job env; STYLE_INPUTS is instead
+written to GITHUB_ENV by the candidate guard, and final lint passes.
+
+### Selected full campaign and revised limits
+
+Select one fresh full Windows x64 campaign at ordinal 4: eight normal SDK starts,
+three helper SDK validation/discovery starts, one helper session, one package build
+and one native session. Both rendering paths use the same exported source. All
+16 normal rows, 32 exact helper comparisons, five rejection cases, actual helper
+counter/shutdown, x64 package identity and all native stages must be audited.
+The native probe does not execute an SDK. No older helper/native slice substitutes
+for those fresh selected Windows results.
+
+Under Kris's explicit allowance increase, the Windows SDK ceiling is 25 and the
+costly dispatch ceiling is four. Before CI4, use is SDK 14/25, helpers 1/4,
+packages 1/2, native sessions 1/2 and dispatches 3/4. Planned totals are SDK 25/25,
+helpers 2/4, packages 2/2, native sessions 2/2 and dispatches 4/4. Count actual
+starts, including implicit validations and failures. This records one full campaign,
+not a reset of prior consumption. Further necessary increases are authorized by
+the user but must be stated and accounted before the applicable operation starts.
+Mac's historical SDK 21/16 and other consumption remain unchanged; no Mac
+SDK/package/native restart is needed for this Windows workflow correction.
+
+PR #72 stays draft and #43 stays open with unchecked criteria. Publication and
+exact CI4 dispatch identity follow after focused verification/review. The existing
+manual same-thread resume route remains required for workflow_dispatch's terminal
+audit; the PR check watch cannot establish that run's result. No new watcher,
+scheduler or model-polling loop is introduced.
+
+### Final review and publication preparation
+
+A fresh read-only review reports zero actionable findings in the final workflow,
+helper consumer, focused tests and reuse-owner deletion. It confirms that preflight
+cannot export the snapshot through a leaked environment variable, both producers
+receive the same directory, failure propagation remains strict, and the full
+campaign counts are eleven SDK starts, one helper/package/native start each.
+The review starts no costly operation and is not Windows execution evidence.
+
+Repository validation, 13 section-link tests, exact-ordinal selection audit and
+whitespace checks pass. Ordinal 4 alone is accepted; 1/2/3 refuse. Configuration
+review confirms one normal accepted path, two scoped consumers of the common
+input directory and no retained-artifact download, reuse caller or reuse script.
+Original CI3 receipts are untouched. No product source or dependency changes.

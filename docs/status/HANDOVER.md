@@ -1,40 +1,39 @@
 # Current outcome handover
 
-## L07 controller acknowledgement fix; publish and run selected CI3
+## L07 one-source full qualification; review, publish and run CI4
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
-`codex/l07-shared-looks`, published at b1b6303. The next correction is locally verified and ready for publication. Production remains unchanged from f3a6fbc.
+`codex/l07-shared-looks`, currently published at e57d3fa. The fresh-campaign
+correction is locally verified pending publication. Production is unchanged.
 
-[CI2 41184079359, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41184079359/attempts/1)
-is audited failed at that exact head. Portable preflight passes, including three
-image tests, 277 frontend tests and nine Style core cases. The controller then
-asserts before its preview request has been delivered; no SDK/helper/package/native
-step starts. The following probe rehearsal, reuse and rendering steps are skipped.
-Original artifact identity/digest, eight-file privacy pass and detailed results
-are retained in [the CI2 audit](../tasks/evidence/shared-look.md#ci2-terminal-audit-and-controller-acknowledgement-correction-2026-10-31).
+[CI3 41185489731, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41185489731/attempts/1)
+is audited failed. Controller/probe and all 16 normal SDK rows pass. Its full helper
+consumer correctly rejects old helper input against newly generated source IDs.
+All 32 raw image pairs match diagnostically, but that cannot clear provenance.
+Actual Windows use is SDK 14, helpers 1, packages 1, native sessions 1, dispatches 3.
+[The audit and correction](../tasks/evidence/shared-look.md#ci3-terminal-audit-and-fresh-full-ci4-correction-2026-10-31)
+own original artifacts, measurements and the root cause.
 
-A read-only diagnostic subagent traced the queued-preview race. The original
-real-controller test fails under controlled scheduling with the correct payload
-still queued. The local correction passes under that same delay by acknowledging
-the matching real-core plan before closing review. It checks path/screen/node/
-revision and exact request/core appearance; failure evidence now keeps the payload
-and plan. No production timing or image-proof rule changes.
+Kris selected the full fix with a subagent and approved needed allowance increases.
+A read-only subagent confirmed the helper already consumes an exported snapshot
+without regenerating IDs. The workflow now gives fresh normal/helper producers
+one source snapshot, removes the superseded cross-run reuse owner, and restores
+fresh helper/package/native proof. Exact source and pixel checks remain required.
+Five focused tests and same-source actual-capture replay/rejection checks pass;
+workflow lint and source-selector audit pass. Independent final review reports zero actionable findings; publication is next.
 
-Kris's resumed request explicitly selects one additional CI dispatch, revising the
-dispatch ceiling to three total with two consumed before CI3. Windows SDK use stays
-6/16; the eight unexecuted CI2 reservations are released. Helpers/packages/native
-stay 1/4, 1/2 and 1/2. Planned CI3 uses eight normal starts and unchanged candidate-
-bound helper/native evidence, reaching SDK 14/16 and dispatches 3/3. Other ceilings,
-Mac's historical overrun and no-further-Mac selection remain unchanged.
+One full Windows CI4 campaign is selected, ordinal 4. Before dispatch, cumulative
+use is SDK 14/25, helper 1/4, package 1/2, native 1/2 and dispatches 3/4. Planned
+use reaches 25 SDK starts, helpers 2, packages 2, native 2 and dispatches 4.
+Further needed increases are authorized but must remain recorded and cumulative.
+Mac's historical overrun and all earlier failures remain disclosed; this workflow
+repair does not require another costly Mac operation.
 
-The corrected regular controller journey, exact probe rehearsal, image gates,
-workflow lint, selector source audit, repository/link validation and privacy checks
-pass. Next: publish this correction, update PR/ticket and dispatch ordinal 3 at the
-exact new candidate. Manual same-thread resume is
-still the supported completion route; no run-specific T3 watcher is registered.
-#43 stays open and PR #72 stays draft. Complete Windows rendering and wider
-acceptance remain unresolved. The unrelated audit and protected recovery below
-are preserved.
+Next: publish/update PR/ticket and dispatch the exact candidate.
+Manual same-thread resume remains the supported qualification audit route; no
+run-specific T3 watcher exists. #43 stays open and PR #72 stays draft. Complete
+Windows qualification and wider acceptance remain pending. The unrelated audit
+and protected recovery below are intact.
 
 ## Text ownership cleanup review ready
 

@@ -770,3 +770,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   payloads and no delivered request under controlled scheduling. The corrected
   journey passes under the same schedule without a sleep or retry in the test.
 - **Evidence:** [L07 CI2 audit and correction](../tasks/evidence/shared-look.md#ci2-terminal-audit-and-controller-acknowledgement-correction-2026-10-31).
+
+
+## H55. Cross-run helper reuse pairs different authored source snapshots
+
+- **Class/search:** harness; accepted.json mismatch, random project UUIDs, copied
+  style names, asset IDs, visually identical but different source revisions.
+- **Cause/correction:** unchanged authoring code does not create byte-identical
+  projects. Export source once and give fresh normal/helper producers that same
+  snapshot. Remove the cross-run reuse path; keep exact manifest/source/pixel
+  checks and report both manifest hashes when provenance differs.
+- **Regression:** full consumer accepts 32 same-source pairs and rejects another
+  project's manifest despite identical pixels. Actual failed CI3 identity still
+  refuses, while copied same-source retained captures pass all five rejecting cases.
+- **Evidence:** [L07 CI3 audit and full correction](../tasks/evidence/shared-look.md#ci3-terminal-audit-and-fresh-full-ci4-correction-2026-10-31).
