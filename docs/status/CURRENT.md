@@ -1,32 +1,40 @@
 # Current status
 
-## L07 rendering correction reviewed; bounded CI2 next
+## L07 CI2 audited; controller acknowledgement fix and CI3 selected
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
-`codex/l07-shared-looks`, based on e9e8661. The CI1 semantic failure reproduces
-from actual Windows captures. The checker now uses Ren'Py's premultiplied alpha
-at the fitted frame corner, preserving strict full RGBA equality and the opaque
-interior check. Retained Windows/Mac replay and rejecting image/provenance checks
-pass. Production remains unchanged from f3a6fbc.
+`codex/l07-shared-looks`, published at b1b6303. The next correction is locally verified and ready for publication. Production remains unchanged from f3a6fbc.
 
-[Correction and bounded CI2](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31)
-owns diagnosis, checks, reuse bindings, cumulative limits and the audit route.
-The selected ordinal-2 run uses eight normal SDK starts and compares all 32
-retained helper frames with fresh normal references. A source/provenance gate
-binds unchanged CI1 helper/native evidence from d422d76; no new helper, package,
-native or Mac operation is selected. Actual Windows use before dispatch remains
-SDK 6/16, helpers 1/4, packages 1/2, native 1/2 and dispatches 1/2. Mac's historical
-SDK overrun and other consumption remain unchanged.
+[CI2 41184079359, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41184079359/attempts/1)
+is audited failed at that exact head. Portable preflight passes, including three
+image tests, 277 frontend tests and nine Style core cases. The controller then
+asserts before its preview request has been delivered; no SDK/helper/package/native
+step starts. The following probe rehearsal, reuse and rendering steps are skipped.
+Original artifact identity/digest, eight-file privacy pass and detailed results
+are retained in [the CI2 audit](../tasks/evidence/shared-look.md#ci2-terminal-audit-and-controller-acknowledgement-correction-2026-10-31).
 
-No run-specific T3 watcher is available. The installed ci-watch targets a different
-Codex-desktop thread identity. Manual same-thread resume is required after the
-confirmed dispatch completes; a PR check notification cannot establish its result.
-Both review axes found one ordinal-selection issue; it is corrected and the gate
-refuses consumed ordinal 1. Publication, exact dispatch identity and terminal
-audit remain pending.
-#43 remains open and PR #72 stays draft. Full Windows rendering, physical/human,
-full Design Lab startup and wider acceptance remain unresolved. The unrelated audit
-and protected recovery below are intact.
+A read-only diagnostic subagent traced the queued-preview race. The original
+real-controller test fails under controlled scheduling with the correct payload
+still queued. The local correction passes under that same delay by acknowledging
+the matching real-core plan before closing review. It checks path/screen/node/
+revision and exact request/core appearance; failure evidence now keeps the payload
+and plan. No production timing or image-proof rule changes.
+
+Kris's resumed request explicitly selects one additional CI dispatch, revising the
+dispatch ceiling to three total with two consumed before CI3. Windows SDK use stays
+6/16; the eight unexecuted CI2 reservations are released. Helpers/packages/native
+stay 1/4, 1/2 and 1/2. Planned CI3 uses eight normal starts and unchanged candidate-
+bound helper/native evidence, reaching SDK 14/16 and dispatches 3/3. Other ceilings,
+Mac's historical overrun and no-further-Mac selection remain unchanged.
+
+The corrected regular controller journey, exact probe rehearsal, image gates,
+workflow lint, selector source audit, repository/link validation and privacy checks
+pass. Next: publish this correction, update PR/ticket and dispatch ordinal 3 at the
+exact new candidate. Manual same-thread resume is
+still the supported completion route; no run-specific T3 watcher is registered.
+#43 stays open and PR #72 stays draft. Complete Windows rendering and wider
+acceptance remain unresolved. The unrelated audit and protected recovery below
+are preserved.
 
 ## Reviewed text ownership cleanup
 

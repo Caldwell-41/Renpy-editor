@@ -755,3 +755,18 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Evidence:** [L07 corrected operation accounting](../tasks/evidence/shared-look.md#corrected-operation-accounting).
   The old Mac receipt lacked this counter. Its reconstructed SDK overrun remains
   recorded; the added counter awaits actual Windows execution.
+
+
+## H54. Controller closes preview before acknowledging queued delivery
+
+- **Class/search:** harness; Style assignment, canvasRequests, zero-delay timer,
+  exposed binding, correct fields but Starting canvas status.
+- **Cause/correction:** awaiting a review-close click does not acknowledge a
+  queued canvas request or real-core reply. Keep the review open until a preview
+  matching path/screen/node/revision passes the actual core plan, then inspect its
+  appearance. Preserve the existing deadline and record correlated request/plan
+  diagnostics.
+- **Regression:** the original real-controller assertion fails with correct queued
+  payloads and no delivered request under controlled scheduling. The corrected
+  journey passes under the same schedule without a sleep or retry in the test.
+- **Evidence:** [L07 CI2 audit and correction](../tasks/evidence/shared-look.md#ci2-terminal-audit-and-controller-acknowledgement-correction-2026-10-31).

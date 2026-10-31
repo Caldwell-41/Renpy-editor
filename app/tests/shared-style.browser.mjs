@@ -11,8 +11,16 @@ const output=resolve(process.env.SHARED_STYLE_OUTPUT??'../.toolchains/l07-shared
 const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'project-font'],{startupTimeout:60000});
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 let browser,sessionId,page;const errors=[],plans=[],canvasRequests=[];
+let assignmentPreviewTarget,assignmentPreviewProof,acceptAssignmentPreview;
+const assignmentPreview=new Promise(resolve=>{acceptAssignmentPreview=resolve;});
 const rpc=async r=>{
- if(r.operation==='screens.canvasRender'){canvasRequests.push(r.payload);const plan=await child.request({...r,operation:'screens.canvasPlan'});plans.push(plan);return {ok:true,value:{phase:'unavailable',message:'SDK qualification is separate.'}};}
+ if(r.operation==='screens.canvasRender'){
+  canvasRequests.push(r.payload);const plan=await child.request({...r,operation:'screens.canvasPlan'});plans.push(plan);
+  if(assignmentPreviewTarget&&r.payload.path===assignmentPreviewTarget.path&&r.payload.screenName===assignmentPreviewTarget.screenName&&r.payload.expectedRevision===assignmentPreviewTarget.revision&&r.payload.textStyles?.some(sample=>sample.nodeStart===assignmentPreviewTarget.nodeStart)){
+   assignmentPreviewProof??={payload:r.payload,plan};acceptAssignmentPreview(assignmentPreviewProof);
+  }
+  return {ok:true,value:{phase:'unavailable',message:'SDK qualification is separate.'}};
+ }
  if(r.operation==='screens.canvasStatus')return {ok:true,value:{phase:'unavailable',message:'SDK qualification is separate.'}};
  const result=await child.request(r);if(result.value?.sessionId)sessionId=result.value.sessionId;return result;
 };
@@ -104,8 +112,21 @@ try {
  const frame=await add('frame');await active.getByRole('button',{name:'1 Choose',exact:true}).click();await active.getByRole('button',{name:'Refresh Source',exact:true}).click();await active.locator(`[data-node-id="${frame.selectedId}"]`).dblclick();await active.getByRole('textbox',{name:'Background color',exact:true}).fill('#123456');await active.getByRole('textbox',{name:'Border color',exact:true}).fill('#abcdef');await active.getByRole('textbox',{name:'Border width · px',exact:true}).fill('2');await active.locator('[data-text-apply]').click();await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true&&!document.querySelector('.screen-text-state')?.textContent.includes('Applying')); assert.match(await read(caption),/background "#123456"/);assert.match(await read(caption),/foreground Frame\(Composite\(\(6, 6\)/);
  const panelSource=await read(caption),libraryCatalog=await request('screens.list');const libraryResult=await request('screens.create',{name:'panel_styles',expectedProjectRevision:libraryCatalog.projectRevision,expectedSourceMapRevision:libraryCatalog.sourceMapRevision,expectedInventoryRevision:libraryCatalog.inventoryRevision}),library=libraryResult.owned.find(o=>o.name==='panel_styles');const librarySource=await read(library)+'\nstyle panel_style is frame:\n    background "#654321"\n';await save(library,librarySource);assert.equal((await request('screens.list')).styles.definitions.find(d=>d.name==='panel_style')?.error,null);
  await active.getByRole('button',{name:'1 Choose',exact:true}).click();await active.getByRole('button',{name:'Refresh Source',exact:true}).click();await active.getByLabel('Screen',{exact:true}).locator('option').filter({hasText:'panel_styles'}).waitFor({state:'attached'});await active.locator(`[data-node-id="${frame.selectedId}"]`).dblclick();await active.getByRole('button',{name:'Change style…',exact:true}).click();await page.getByRole('dialog',{name:'Choose style',exact:true}).getByRole('button',{name:/Panel style/}).click();
- await active.locator('[data-text-apply]').click();await page.getByRole('dialog',{name:'Review style changes',exact:true}).getByRole('button',{name:'Keep editing',exact:true}).click();
- assert.ok(canvasRequests.some(r=>r.textStyles?.some(sample=>sample.values.appearance?.background==='#654321'&&sample.values.appearance?.border===null)),'Assigning a Style previews its background and clears the old border');assert.equal(await read(caption),panelSource);assert.equal(await read(library),librarySource);await active.getByRole('button',{name:'Cancel',exact:true}).click();
+ const previewDocument=await request('screens.inspect',{path:caption.path});
+ assignmentPreviewTarget={path:caption.path,screenName:caption.name,revision:previewDocument.revision,nodeStart:previewDocument.screens.find(s=>s.name===caption.name).nodes.find(n=>n.id===frame.selectedId).span.start};
+ await active.locator('[data-text-apply]').click();const appearanceReview=page.getByRole('dialog',{name:'Review style changes',exact:true});await appearanceReview.waitFor();
+ // A click does not acknowledge the canvas timer or its asynchronous core reply.
+ let previewTimer;
+ try {
+  const proof=await Promise.race([assignmentPreview,new Promise((_,reject)=>{previewTimer=setTimeout(()=>reject(Error('Assigned Style preview did not reach core plan validation')),8000);})]);
+  assert.equal(proof.plan.ok,true,JSON.stringify(proof));
+  assert.equal(proof.plan.value.revision,assignmentPreviewTarget.revision);
+  assert.deepEqual(proof.payload.textStyles.find(sample=>sample.nodeStart===assignmentPreviewTarget.nodeStart).values.appearance,{background:'#654321',border:null});
+  const properties=proof.plan.value.nodes.find(node=>node.start===assignmentPreviewTarget.nodeStart).properties;
+  assert.equal(properties.background,'#654321');assert.equal(properties.foreground,undefined);
+ } finally {clearTimeout(previewTimer);}
+ await appearanceReview.getByRole('button',{name:'Keep editing',exact:true}).click();
+ assert.equal(await read(caption),panelSource);assert.equal(await read(library),librarySource);await active.getByRole('button',{name:'Cancel',exact:true}).click();
  const button=await add('textbutton');await active.getByRole('button',{name:'1 Choose',exact:true}).click();await active.getByRole('button',{name:'Refresh Source',exact:true}).click();await active.locator(`[data-node-id="${button.selectedId}"]`).dblclick();await active.getByRole('combobox',{name:'Appearance state',exact:true}).selectOption('hover_');await active.getByRole('textbox',{name:'State text color',exact:true}).fill('#ffffff');await active.getByRole('textbox',{name:'Background color',exact:true}).fill('#345678');await active.locator('[data-text-apply]').click();await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true&&!document.querySelector('.screen-text-state')?.textContent.includes('Applying')); assert.match(await read(caption),/text_hover_color "#ffffff"/);assert.match(await read(caption),/hover_background "#345678"/);
- assert.deepEqual(errors,[]);await writeFile(join(output,'result.json'),JSON.stringify({passed:true,realCore:true,sdk:false,native:false,errors,plans},null,2));console.log('PASS shared and independent Style journeys through production UI/core.');
-} catch(error) {await page?.screenshot({path:join(output,'failure.png')}).catch(()=>{});await writeFile(join(output,'failure.json'),JSON.stringify({error:String(error),errors},null,2));throw error;} finally {await browser?.close();await server.close();await child.stop();}
+ assert.deepEqual(errors,[]);await writeFile(join(output,'result.json'),JSON.stringify({passed:true,realCore:true,sdk:false,native:false,errors,plans,assignmentPreviewProof},null,2));console.log('PASS shared and independent Style journeys through production UI/core.');
+} catch(error) {await page?.screenshot({path:join(output,'failure.png')}).catch(()=>{});await writeFile(join(output,'failure.json'),JSON.stringify({error:String(error),errors,canvasRequests,plans,assignmentPreviewTarget,assignmentPreviewProof},null,2));throw error;} finally {await browser?.close();await server.close();await child.stop();}

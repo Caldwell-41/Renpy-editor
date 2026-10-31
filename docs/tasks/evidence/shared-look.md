@@ -771,3 +771,134 @@ replays above pass. Source/runtime production, dependencies and input fixtures
 are unchanged from the previously qualified candidate, so their recorded ordinary
 and native checks are reused rather than repeated. No independent re-review of
 the narrow ordinal correction is claimed. Publication and CI2 remain next.
+
+### CI2 dispatch and wait checkpoint
+
+[CI2 41184079359, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41184079359/attempts/1)
+is confirmed at b1b6303ded16a9edc02054f4f2f5945687996631 on
+codex/l07-shared-looks, event workflow_dispatch. Inputs are shared_style=true,
+ordinal=2 and that exact candidate; all other specialists are false. The selection
+job and exact-candidate/ordinal guard pass. Last observed Windows setup is
+in_progress at 2026-10-31 08:19 UTC, with no new SDK start established by that
+observation. This consumes dispatch 2/2. Windows confirmed SDK use remains 6/16,
+with eight reserved for this run; helper/package/native consumption is unchanged.
+Do not dispatch or rerun another costly campaign. Resolve actual starts at audit.
+
+[Automatic Repository quality 41184038969, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41184038969/attempts/1)
+is audited successful at the same head. Both required jobs and every executed
+step pass: 277 frontend tests, pinned Rust formatting, validation of 1,294 checkout
+files, 13 section-link tests, 10 retention tests, Q1 gate fixtures and selector
+source audit. Nine unselected specialist jobs are skipped. This result is separate
+from the manual qualification. Logs and the audit are retained under the ignored
+L07 evidence root; `ci2-wait-record.json` owns exact pending identity and audit list.
+
+PR #72 and #43 are updated remotely with the correction, review, budget and exact
+pending run. The PR remains draft and the issue remains open with unchecked
+criteria. No run-specific watcher is registered. Use manual same-thread resume
+when CI2 completes, then perform the recorded terminal audit. These dispatch/wait
+updates to repository evidence and CURRENT/HANDOVER are local pending that audit;
+they are not another published or qualified candidate. The fix and reviewed guard
+are published at b1b6303. The unrelated audit remains untouched.
+
+## CI2 terminal audit and controller acknowledgement correction, 2026-10-31
+
+Kris resumed this thread to review CI, fix the issue with
+`principle-fix-root-causes` and a subagent, update PR #72 and run CI again.
+The coordinating agent retains sole writer ownership; the diagnostic subagent
+had read-only ownership and made no repository edits or costly starts.
+
+### CI2 result and actual consumption
+
+[CI2 41184079359, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41184079359/attempts/1)
+failed at exact b1b6303ded16a9edc02054f4f2f5945687996631. Selection, checkout,
+exact candidate/ordinal guard and portable preflight pass, including the three
+image tests, 277 frontend tests, two driver tests, nine Style core cases with one
+helper case ignored, frontend build and desktop check. The controller journey
+fails at the immediate assignment-preview assertion. Its following exact packaged
+probe rehearsal never starts. Reuse binding, SDK fetch/verification/input export,
+normal images and full helper comparison are skipped. Privacy scan and artifact
+upload pass; checkout cleanup passes. Cache/Node post steps skipped after failure
+are not additional qualified evidence.
+
+No SDK, helper, package or native start occurs. Windows consumption remains SDK
+6/16, helpers 1/4, packages 1/2 and native 1/2. CI2's eight reserved SDK starts are
+released, not counted as executed. Dispatch consumption is 2/2 under the original
+selection. The latest user request explicitly selects one further dispatch, so the
+revised dispatch ceiling is three total, with two consumed before CI3. SDK and all
+other ceilings remain unchanged. Planned normal-only CI3 adds eight SDK starts,
+reaching 14/16 and dispatches 3/3. No further Mac costly operation is selected.
+This is an additional selected dispatch, not a reset of either prior attempt.
+
+Artifact shared-style-Windows-41184079359-1, ID 13036301486, is retained remotely
+until 2026-11-07 08:26:17 UTC and downloaded locally under windows-ci-02.
+The ZIP digest is verified as
+9ad5f5c5ee68034bcec3de86f1478da854c2b46be5a5b8ec279cb9002e2208cd.
+Its original eight files and receipts are immutable; local privacy recheck passes.
+`ci-focused-02-terminal.json`, its complete log, artifact metadata and
+`ci-focused-02-audit.json` retain the audited identities and executed-step results.
+The preceding wait observations are superseded by this failed terminal result.
+The normal semantic correction has still not executed on fresh Windows output.
+
+### First wrong assumption and fix
+
+The failure screenshot shows the intended Panel style, background #654321 and
+inherited border fields, while canvas status is still Starting. There are no
+page errors. The diagnostic subagent traced the controller's immediate historical
+`canvasRequests.some` assertion through `ScreenCanvasFrames.render`'s queued
+zero-delay timer, review disposal and rescheduling of the main canvas. Awaiting
+Keep editing does not acknowledge either the timer or exposed-binding/core reply.
+The test closes the review that owns the pending preview before proving receipt.
+This is a harness synchronization defect; it is a different cause from CI1's
+premultiplied-alpha assertion. No independent product-data defect was found.
+
+A controlled real-controller reproduction delays only the expected preview's
+scheduled timer by one second. The original assertion fails with three correct
+queued payloads and zero matching delivered requests. Each queued payload names
+the caption frame, the current revision, background #654321 and border null.
+The corrected journey passes under exactly that scheduling. This diagnostic delay
+exists only in ignored replay files, never in production or the checked-in test.
+The subagent also reproduced the legitimate zero-immediate/one-next-turn state
+with the existing compiled frame owner. No SDK is involved in either experiment.
+
+The existing controller test now registers a target bound to path, screen, node
+and revision, awaits the actual `screens.canvasPlan` response while review remains
+open, then checks the request and core node's appearance before Keep editing.
+It preserves the existing eight-second bound, without retry or sleep. Wrong
+payload/plan values still fail directly; unchanged-source and Cancel assertions
+remain. Successful proof and failure artifacts now retain the correlated payload,
+core response and target, so a future failure distinguishes absent delivery from
+wrong data at first inspection. This follows the existing numeric-controller
+acknowledgement pattern rather than adding another production scheduling owner.
+
+The CI1 reuse gate allows this one controller-harness file to change; production,
+SDK/helper inputs, producer, native consumer and dependency bytes remain required
+unchanged. The harness construction/source fixture is unchanged. CI3 still binds
+the original helper/native receipts and requires all fresh normal and strict
+retained-helper comparisons. The workflow requires ordinal 3 and refuses consumed
+1 and 2; helper/package/native startup steps remain removed. No image threshold,
+semantic rule, source protection or required proof is weakened.
+
+### Focused verification and review
+
+The full corrected controller/core journey passes at `ci2-controller-fixed`, with
+the correlated payload and accepted core node recorded. The exact packaged-probe
+rehearsal and its native-consumer rejection cases pass at `ci2-probe-fixed`; this
+is Chrome/controller evidence, not a new native session. The controlled delayed
+red/green journey is retained under `ci2-controlled-red` and
+`ci2-controlled-green`, alongside diagnostic injection/source and logs. The final
+regular journey additionally matches screen identity and returned plan revision.
+Privacy scans of all three passing output directories pass.
+
+The three image gate tests pass. Actionlint, selector source audit, repository
+validation, all 13 section-link tests and whitespace checking pass. The selector
+accepts only ordinal 3 and refuses 1/2, with no helper/package/native startup
+commands present. Coordinating review confirms the matched promise completes
+only after the actual core reply, wrong data still fails, the eight-second bound
+is cleared on success/failure, and unchanged-source/Cancel/history checks remain.
+The read-only subagent's diagnosis and the controlled reproduction agree. No
+second full-branch review or new native/SDK proof is implied.
+
+Only the controller harness, exact-ordinal guard/description, one reuse whitelist
+entry and evidence/status/incident records change. Existing production and all
+qualified helper/native producer inputs are unchanged. CI3 will still execute
+the complete corrected controller and exact probe rehearsal before costly work.

@@ -12,6 +12,7 @@ CORRECTION_FILES = {
     '.github/workflows/shared-style.yml', '.github/workflows/screens-source.yml',
     'app/scripts/qualify-shared-style.py', 'app/scripts/test_qualify_shared_style.py',
     'app/scripts/audit-shared-style-reuse.py',
+    'app/tests/shared-style.browser.mjs',
 }
 
 

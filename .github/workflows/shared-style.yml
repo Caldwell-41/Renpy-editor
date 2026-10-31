@@ -8,7 +8,7 @@ on:
         type: string
         required: true
       ordinal:
-        description: Cumulative L07 dispatch ordinal (2, normal-only correction)
+        description: Cumulative L07 dispatch ordinal (3, normal-only correction)
         type: string
         required: true
 
@@ -50,7 +50,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/l07-shared-looks
           test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$ORDINAL" = 2
+          test "$ORDINAL" = 3
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/shared-style"
           git rev-parse HEAD > "$RUNNER_TEMP/shared-style/candidate.txt"
