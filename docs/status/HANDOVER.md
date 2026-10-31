@@ -1,34 +1,30 @@
 # Current outcome handover
 
-## L07 CI audit complete; rendering check needs correction
+## L07 root-cause correction prepared; review and bounded CI2 next
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
-`codex/l07-shared-looks`, based on e9e8661. Production correction f3a6fbc is unchanged.
-Both audited CI runs use d422d76, attempt 1. Repository quality 41175449511 passes
-two required jobs and all executed steps, including 277 frontend tests; nine
-unselected jobs are skipped. Windows qualification 41175476001 fails the normal
-SDK semantic border assertion. Its later full helper comparison correctly refuses
-the failed reference receipt. Controller/core, helper producer and x64 packaged
-native slices pass; complete rendering remains unqualified.
+`codex/l07-shared-looks`, based on e9e8661. The CI1 semantic failure reproduces
+from actual Windows captures. The checker now uses Ren'Py's premultiplied alpha
+at the fitted frame corner, preserving strict full RGBA equality and the opaque
+interior check. Retained Windows/Mac replay and rejecting image/provenance checks
+pass. Production remains unchanged from f3a6fbc.
 
-The opaque sample is at a frame corner while Windows fits 1280 by 720 to 922 by
-519. Retained source/literal/helper images match exactly for the available cases;
-the corner has antialiased alpha. The original assertion reproduces offline.
-[Detailed audit](../tasks/evidence/shared-look.md#windows-ci1-audit-2026-10-31)
-owns all executed-step results, hashes, partial proof limits and original failures.
-The PR watch excluded the manual dispatch, and no run-specific watch was registered.
-The earlier monitoring claim was too broad. No CI run is pending from this selection.
+[Correction and bounded CI2](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31)
+owns diagnosis, checks, reuse bindings, cumulative limits and the audit route.
+The selected ordinal-2 run uses eight normal SDK starts and compares all 32
+retained helper frames with fresh normal references. A source/provenance gate
+binds unchanged CI1 helper/native evidence from d422d76; no new helper, package,
+native or Mac operation is selected. Actual Windows use before dispatch remains
+SDK 6/16, helpers 1/4, packages 1/2, native 1/2 and dispatches 1/2. Mac's historical
+SDK overrun and other consumption remain unchanged.
 
-Correct the semantic capture oracle before a bounded rendering requalification.
-No production/harness code or costly retry changes during the requested audit.
-Windows use is SDK 6/16, helpers 1/4, packages 1/2, native 1/2; dispatches 1/2.
-A full repeated pipeline needs eleven SDK starts and exceeds the ten remaining;
-a normal-only run can reuse unchanged helper/native proof. Mac use remains SDK
-21/16, helpers 2/4, packages 2/2, native 2/2, with no further costly attempt selected.
-#43 stays open and PR #72 stays draft. Merge/release, physical/human, full Design
-Lab startup and wider acceptance remain separate. The unrelated audit and protected
-recovery below are intact. The audit-only successor does not replace d422d76's
-production/CI candidate or imply a passing Windows rendering campaign.
+No run-specific T3 watcher is available. The installed ci-watch targets a different
+Codex-desktop thread identity. Manual same-thread resume is required after the
+confirmed dispatch completes; a PR check notification cannot establish its result.
+Review, publication, exact dispatch identity and terminal audit remain pending.
+#43 remains open and PR #72 stays draft. Full Windows rendering, physical/human,
+full Design Lab startup and wider acceptance remain unresolved. The unrelated audit
+and protected recovery below are intact.
 
 ## Text ownership cleanup review ready
 

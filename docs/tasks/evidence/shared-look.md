@@ -668,3 +668,87 @@ starts and exceed the ten remaining. A normal-only campaign can reuse unchanged
 helper/native receipts and remain within the ceiling. Select that bounded route
 before dispatching. This audit changes no production or qualification code, starts
 no retry, leaves PR #72 draft and keeps #43 open and unaccepted.
+
+## Root-cause correction and bounded CI2, 2026-10-31
+
+Kris authorized this successor chat to fix #43, verify, commit/push, update draft
+PR #72 and dispatch one bounded retry through result audit. Sole writer ownership
+transferred to this chat at published 5749fd4; the unrelated audit is preserved.
+The existing ceilings and consumption continue without renewal.
+
+### Reproduction and correction
+
+The actual CI1 normal-image consumer reproduces the original assertion with
+(66,80,93,100) at (40,40). Tracing the pinned SDK's `render_to_surface` shows a
+renderer screenshot followed by smooth scaling back to virtual dimensions.
+Ren'Py uses [premultiplied alpha](https://www.renpy.org/doc/html/model.html).
+The first wrong decision is interpreting the partially covered frame corner as
+opaque straight RGB. The 1024 by 768 helper corner independently has
+(37,45,52,56), while Mac's corner is (170,204,238,254). All represent the same
+border color at their captured coverage. This is a harness defect; no production
+rendering change is indicated.
+
+The shared semantic owner now compares stored RGB with color multiplied by the
+observed alpha. It requires nonzero border coverage and an opaque interior,
+retains the existing one-channel-unit quantization limit, and records the raw
+sample and expected premultiplied RGB in each row and assertion. Strict complete
+RGBA equality between source, literal and helper remains unchanged. The normal
+receipt must still pass before the full helper consumer can admit it.
+
+Offline replay passes four available Windows normal rows, all 16 Windows helper
+semantic samples and all 16 retained Mac normal rows. Both screens in each normal
+row still match the literal reference exactly. Matching missing-border and
+filled-interior mutations in source and literal both fail the independent semantic
+gate. Three focused image tests pass, including exact rejection of a one-unit RGB
+or alpha difference. These are replays of retained captures, not new SDK starts or
+a passing Windows campaign. Receipts are `semantic-replay-02.json` and
+`reuse-rejections-02.json` under the ignored L07 evidence root. The first local
+fault-injection driver missed its Python import path; the corrected driver passes.
+No product correction was needed for that driver error.
+
+### Selected bounded run and evidence reuse
+
+Ordinal 2 of the existing shared-style workflow is normal-only: eight normal SDK
+starts, no helper startup, no package build and no native session. It downloads the
+exact unexpired CI1 artifact from run 41175476001, attempt 1. A reuse gate refuses
+any production, fixture, dependency or native-consumer difference from d422d76;
+only this correction's scripts/workflows and documentation may differ. It checks
+the original candidate, pinned x64 binary hash/PE identity, actual native report
+consumer and cleanup, helper renderer hash, accepted-source bytes and producer
+receipt. Original candidate and receipt hashes are recorded separately from the
+new candidate. Original CI1 artifacts and receipts remain immutable; comparisons
+write only into the new run's downloaded copy.
+
+The original helper/native evidence passes that gate offline. Wrong candidate,
+binary, native stage, helper renderer, shutdown cleanup and accepted-source
+mutations all fail. The fresh normal result will then feed the existing strict
+32-frame helper/literal consumer and all four rejection cases, without starting
+another helper. A changed fitted size or draw scale still fails; no cross-scale
+image tolerance is introduced. Mac's unchanged production/native proof and
+retained-image replay are reused, with no further Mac costly operation.
+
+Before dispatch, actual Windows use remains SDK 6/16, helper 1/4, package 1/2 and
+native 1/2; dispatches 1/2. Planned CI2 use reaches SDK 14/16 and dispatches 2/2;
+other categories stay unchanged. Count actual starts from CI2's receipt, including
+failed starts. Mac remains SDK 21/16, helper 2/4, package 2/2 and native 2/2, with
+its historical overrun unchanged. No additional allowance is implied.
+
+### Completion and audit route
+
+The installed ci-watch launcher resumes a UUID Codex-desktop thread through
+`codex queue`. The current T3 thread has an `mcp:launch:` identity, distinct from
+the backing harness UUID; the available CLI belongs to Codex desktop. Its queue
+help supplies no verified T3 delivery route. No launcher or watcher is registered,
+and no scheduler, ad hoc watcher or model-polling loop substitutes for it.
+Use WORKFLOW's manual same-thread resume for the exact confirmed manual run.
+A PR watch may cover automatic Repository quality only; it cannot establish
+manual qualification completion. The user must resume this thread after the
+manual run completes so the remaining audit can execute.
+
+On resume, retrieve the recorded run ID/attempt/head and every executed step's
+logs; audit eight-start accounting, all 16 normal rows and semantic samples,
+source/checker hashes, all 32 reused-helper comparisons and rejection cases,
+reuse provenance/native hash, privacy scan and uploaded artifact availability.
+Failed, skipped or absent required proof remains unresolved. Keep PR draft and
+#43 open; merge/release and broader human/editor/canvas/3B acceptance are outside
+this selection. Dispatch identity and actual result are pending below.

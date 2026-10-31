@@ -645,7 +645,13 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** exact production probe with a held font response rejects an
   overlapping Apply before the fix and passes afterward. The lane test covers
   every affected read against text Apply and import.
-- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections).
+- **Shared Style follow-up:** a fitted capture's frame corner also has partial
+  coverage and premultiplied RGB. Compare semantic color in that convention,
+  retain opaque interior proof and exact source/literal/helper equality, and record
+  raw/expected samples. Retained Windows/Mac replay passes; missing border, filled
+  interior and even a one-unit literal RGB/alpha difference still fail.
+- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
+  [L07 correction](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
 
 ## H46. Physical capture size mistaken for virtual resolution
 
@@ -656,7 +662,13 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   reference and helper, while preserving exact virtual size and strict pixels.
 - **Regression:** retained Windows and Mac captures pass; wrong physical size,
   scale, source, missing reference, blank and fallback-font evidence all fail.
-- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections).
+- **Shared Style follow-up:** a fitted capture's frame corner also has partial
+  coverage and premultiplied RGB. Compare semantic color in that convention,
+  retain opaque interior proof and exact source/literal/helper equality, and record
+  raw/expected samples. Retained Windows/Mac replay passes; missing border, filled
+  interior and even a one-unit literal RGB/alpha difference still fail.
+- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
+  [L07 correction](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
 
 ## H47. Shared Apply hides text dimensions
 

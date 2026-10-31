@@ -14,7 +14,7 @@ on:
         required: true
         default: '3'
       shared_style:
-        description: Select L07 shared Style Windows qualification; signed Mac proof stays local
+        description: 'Select L07 Windows Style: ordinal 1 full; ordinal 2 normal-only with retained helper/native'
         type: boolean
         default: false
       project_font:
@@ -60,6 +60,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: help-screen-${{ github.ref }}
   cancel-in-progress: false

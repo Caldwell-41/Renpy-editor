@@ -22,6 +22,20 @@ STATES = dict(normal='idle_', hover='hover_', selected='selected_idle_', disable
 ASPECTS = [(1280, 720), (1024, 768)]
 
 
+def validate_frame_semantics(image):
+    samples = []
+    # render_to_surface captures premultiplied RGB. A fitted window partially
+    # covers the corner, even after resize=True restores virtual dimensions.
+    for point, color, opaque in [((40, 40), '#abcdef', False), ((43, 43), '#123456', True)]:
+        pixel = image.getpixel(point)
+        target = tuple(int(color[i:i+2], 16) * pixel[3] // 255 for i in (1, 3, 5))
+        sample = dict(point=list(point), rgba=list(pixel), color=color, expectedPremultipliedRGB=list(target))
+        assert pixel[3] >= (254 if opaque else 1), sample
+        assert all(abs(a-b) <= 1 for a, b in zip(pixel[:3], target)), sample
+        samples.append(sample)
+    return samples
+
+
 def validate_images(output, stage, width, height):
     records = []
     for state in STATES:
@@ -35,13 +49,13 @@ def validate_images(output, stage, width, height):
             if actual == 'notes':
                 # Check that a border leaves the interior visible. Literal equality
                 # alone would miss the same invalid constructor in both fixtures.
-                for point, color in [((40, 40), '#abcdef'), ((43, 43), '#123456')]:
-                    pixel = images[0].getpixel(point)
-                    target = tuple(int(color[i:i+2], 16) for i in (1, 3, 5))
-                    assert all(abs(a-b) <= 1 for a, b in zip(pixel[:3], target)) and pixel[3] >= 254, (stage, state, point, pixel, color)
+                try:
+                    samples = validate_frame_semantics(images[0])
+                except AssertionError as error:
+                    raise AssertionError((stage, state, [width, height], error.args)) from error
             hashes[actual] = hashlib.sha256(paths[0].read_bytes()).hexdigest()
             hashes[reference] = hashlib.sha256(paths[1].read_bytes()).hexdigest()
-        records.append(dict(stage=stage, aspect=[width, height], state=state, differingPixels=0, imageHashes=hashes))
+        records.append(dict(stage=stage, aspect=[width, height], state=state, differingPixels=0, imageHashes=hashes, semanticSamples=samples))
     assert len({r['imageHashes']['notes'] for r in records}) == 4, 'Button states must produce distinct output'
     return records
 
