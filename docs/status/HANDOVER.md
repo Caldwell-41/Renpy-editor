@@ -26,19 +26,30 @@ match after frontend integration. Original ignored `final-review-mac-01/audit.js
 and producer receipts retain their exact source/hash scope. No new Mac package or
 native session is claimed. Historical CI4 remains at `d5b19e5` with its old fixture.
 
-Publish this coherent correction candidate, update PR #72, and dispatch full fresh
-Windows CI5 at ordinal 5 plus automatic Repository quality. After dispatch,
-[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) owns the confirmed
-run IDs, attempts, full heads, observation time and actual/reserved use. Read that
-live operation record before resuming the terminal audit. The PR automatic rollup
-cannot establish completion of the manual workflow; no run-specific T3 watch is
-available. Use the supported manual same-thread resume for that audit, with no model
-polling, watcher or duplicate dispatch. Audit both exact runs and every executed
-step, same-source frames, package/native identity, cleanup and retained artifacts.
+Correction candidate `e8750cdc269522c8b26d1fcc72cb2b78e09ff9a7` is published.
+[Full Windows CI5 41194613628, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194613628/attempts/1)
+is in progress at that exact head, ordinal 5 and shared_style=true. Selection,
+checkout and candidate/ordinal guards pass; cache setup is active at the retained
+2026-10-31T10:55:12Z observation. SDK/helper/package/native steps had not started.
+[Automatic quality 41194536315, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194536315/attempts/1)
+is independently audited successful at the same candidate, both required jobs and
+every executed step, including 285 frontend tests. Nine specialist jobs are skips.
+
+This handoff is documentation only and does not become the full Windows candidate.
+[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) owns the latest
+published head, its automatic run and the live actual/reserved use. Read that
+record, then audit both the current-head automatic run and exact CI5. Do not repeat
+the dispatch. Retained metadata/logs are under ignored `ci-focused-05-*`.
+The PR automatic rollup cannot establish completion of the manual workflow; no
+run-specific T3 watch is available. Use manual same-thread resume for its terminal
+audit, with no model polling or local watcher. Audit all executed steps, same-source
+normal/helper frames/rejections, package/native identity, cleanup, artifact digest/
+privacy and actual starts before any acceptance claim.
 
 Mac actual use is SDK32/helper3/package2/native2; preserve the historical 21/16
-overrun. Before CI5, Windows actual use remains SDK25/helper2/package2/native2/
-dispatches4. #43 owns revised ceilings and counts; no allowance resets. Keep PR
+overrun. Windows use before CI5 remains SDK25/helper2/package2/native2; dispatch use is now
+5/6. Eleven SDK starts and one helper/package/native start each remain reserved
+until the terminal receipts establish actual execution. #43 owns revised ceilings and counts; no allowance resets. Keep PR
 #72 draft, #43 open and criteria unchecked. Merge/release, physical/human, full
 Design Lab startup and wider editor/canvas/3B acceptance remain separate.
 Protected recovery and the unrelated audit below remain intact. Status records

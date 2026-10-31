@@ -1,6 +1,6 @@
 # Current status
 
-## L07 review fixes validated locally; Windows CI5 selected
+## L07 review fixes published; Windows CI5 in progress
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
 `codex/l07-shared-looks`. Kris selected all four findings from the fresh full-PR
@@ -20,9 +20,11 @@ Its core/source hashes still match after frontend integration. Cumulative Mac us
 SDK32/helper3/package2/native2 under #43's revised selection; the historical 21/16
 overrun remains disclosed. Earlier CI4 proof stays at `d5b19e5` with its old fixture.
 
-Full Windows CI5 at ordinal 5 and automatic Repository quality remain the pending
-publication/qualification step. [#43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
-owns exact confirmed runs/attempts/heads and actual/reserved use. Keep PR draft and
+Full [Windows CI5 41194613628, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194613628/attempts/1)
+is in progress at exact candidate `e8750cd`; automatic quality `41194536315` at
+that candidate is audited passing. This handoff changes docs only. [#43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
+owns current-head automatic identity and CI5 actual/reserved use. Dispatch use is
+5/6; SDK/helper/package/native consumption for CI5 awaits its terminal receipts. Keep PR draft and
 criteria unchecked until audit/acceptance. Physical/human input, full Design Lab
 startup and wider editor/canvas/3B acceptance remain separate. Protected recovery
 and the unrelated audit remain intact.

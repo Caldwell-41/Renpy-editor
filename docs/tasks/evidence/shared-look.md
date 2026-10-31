@@ -1360,3 +1360,35 @@ qualification. CI4 and the fresh Mac proof keep their original candidate identit
 The PR stays draft and acceptance remains unchecked pending that audit and the
 user's acceptance. The run-specific T3 watch limitation recorded above still applies;
 the automatic PR rollup does not establish completion of the manual workflow.
+
+### CI5 publication and initial audit
+
+The correction candidate `e8750cdc269522c8b26d1fcc72cb2b78e09ff9a7` is published
+and verified as the draft PR head. [Full Windows CI5 41194613628, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194613628/attempts/1)
+is confirmed at that exact candidate, with `shared_style=true` and ordinal 5.
+At 2026-10-31T10:55:12.327766+00:00 it is `in_progress`. Selection validation,
+checkout and the exact candidate/ordinal guard pass; the Windows job is in cache
+setup. SDK/helper/package/native steps have not started at that observation.
+
+[Automatic Repository quality 41194536315, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41194536315/attempts/1)
+is audited successful at the same candidate. Both required jobs and every executed
+step pass, including all 285 frontend tests, pinned Rust formatting, repository
+validation, 13 section-link tests and Q1 rejection/source checks. Nine unselected
+specialist jobs are skips. Its complete retained log has SHA-256
+`d87e77c65f94d33cefdf2335a3479ab1a3477bc72c59fd89fa3954dea39be2b5`.
+
+Actual costly dispatch use is now 5/6. Before CI5, Windows use is SDK25/helper2/
+package2/native2. Eleven SDK starts and one helper/package/native start each remain
+reserved for this run until its logs and receipts establish actual execution.
+Cumulative ceilings stay SDK47/helper4/package4/native4/dispatches6; no retry is
+selected. Mac actual use remains SDK32/helper3/package2/native2, with the historical
+21/16 overrun retained. Original metadata and quality logs are ignored under
+`ci-focused-05-*`; CI1-4 and fresh Mac evidence remain unchanged.
+
+The following documentation-only handoff does not replace `e8750cd` as the full
+Windows candidate. Its own automatic quality result must be audited separately.
+[L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) owns the latest
+published head and automatic run identity after that handoff. Remaining work is
+the exact CI5 terminal audit, all executed steps, same-source normal/helper images,
+rejections, fresh Windows package/native report, exit/cleanup, artifact digest/privacy
+and actual counts. Keep draft/open/unchecked status until that audit and acceptance.
