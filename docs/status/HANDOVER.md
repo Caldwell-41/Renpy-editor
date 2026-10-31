@@ -1,5 +1,34 @@
 # Current outcome handover
 
+## Complete PR CI reporting and live verification
+
+[PR #73](https://github.com/Caldwell-41/Renpy-editor/pull/73), on
+`codex/ci-validation`, implements the combined required PR status, explicit
+qualification plan and client-specific waiting instructions. Parent closeout
+`e18f293` is already an ancestor. [The owning task](../tasks/active/ci-validation.md)
+records acceptance and the first live experiment; [the technical runbook](../testing/CI-VALIDATION.md)
+owns selection and reporting behavior.
+
+Eighteen coordinator tests, workflow/repository/link controls and the independent
+review corrections pass. The first live ordinary CI passes all 288 frontend tests
+and Rust formatting. Its combined status correctly stays pending for the separate
+Windows dummy, then fails on the deliberate dummy failure. T3 resumes this same
+thread for that failure and the terminal run/log audit confirms the expected cause.
+Ruleset `26271364` requires the combined status on the integration parent only.
+The first passing trial instead exposed a cancelled waiting reporter. Its exact
+GitHub annotation proves the default single pending concurrency slot replaced it.
+The shared reporter now uses `queue: max`; live overlap verification is required.
+The cancelled attempt remains failed evidence in the owning task.
+
+The PR owns final passing-trial identities, terminal audit and success-delivery
+receipts at the final candidate; inspect those before treating verification as
+complete. Keep the existing T3 watch while that trial is pending, audit on wake,
+and stop watching at final handback. Final receipts go in the PR without a
+receipt-only source commit. No SDK/helper/package/native operation, merge or release
+is selected. This coordinator remains the sole writer for this outcome. The unrelated
+audit and protected recovery below remain intact; existing size exceptions still
+preserve unique historical recovery records.
+
 ## L07 merged and accepted
 
 [PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) merged into
@@ -18,13 +47,13 @@ All CI6 reservations are resolved; #43 owns final cumulative counts and closed
 allowances. Prior Mac evidence retains its exact scope and historical overrun.
 Full Design Lab startup, physical/human input and wider editor/canvas/3B acceptance
 remain separate. L18's L07 prerequisite is satisfied; L18 and reusable-component
-work remain unselected. No successor implementation or release is selected.
+work remain unselected. No successor product implementation or release is selected.
 
-The primary checkout is on the merged Screens branch. Three completed worker
+Three completed worker
 worktrees/local branches and the local L07 branch are retired after patch-equivalence
 and evidence preservation. Original commits and 23 unique files are hash-preserved
 in the ignored retirement archive. Remote refs, unrelated task work, the untracked
-audit and protected native recovery remain intact. No external wait is pending.
+audit and protected native recovery remain intact. No L07 external wait is pending.
 
 ## Text ownership cleanup review ready
 

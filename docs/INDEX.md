@@ -79,6 +79,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Public vulnerability reporting | [../SECURITY.md](../SECURITY.md) |
 | Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |
 | Contribution and inbound licensing | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
+| Complete PR CI status, selected qualification and monitoring | [Complete PR validation](testing/CI-VALIDATION.md), [delivery task](tasks/active/ci-validation.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
 | Current automated commands, host exclusions and production-probe consumers | [Automated checks](testing/AUTOMATED.md) |
 | Pinned SDK, source/runtime and performance gates | [SDK/runtime](testing/SDK-RUNTIME.md) |

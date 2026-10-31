@@ -195,3 +195,26 @@ jobs:
             spikes/desktop-shells/src-tauri/target/release/bundle/**
           if-no-files-found: warn
           retention-days: 7
+
+  validation-start:
+    name: Validation status (start)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml
+
+  validation-finish:
+    name: Validation status (finish)
+    if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    needs: [platform-spike, validation-start]
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml
+    with:
+      phase: finish

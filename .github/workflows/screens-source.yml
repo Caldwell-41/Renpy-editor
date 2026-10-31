@@ -910,3 +910,26 @@ jobs:
     with:
       candidate: ${{ inputs.candidate }}
       ordinal: ${{ inputs.ordinal }}
+
+  validation-start:
+    name: Validation status (start)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml
+
+  validation-finish:
+    name: Validation status (finish)
+    if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    needs: [validate-selection, focused, owned-blank, help-composition, canvas-helper, canvas-gpu-capability, canvas-comparison, numeric-layout, nested-layout, ui-image, project-font, shared-style, validation-start]
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml
+    with:
+      phase: finish

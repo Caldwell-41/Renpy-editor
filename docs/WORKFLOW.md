@@ -547,9 +547,18 @@ branch, task, handover, pending operation and unchanged applicable limits in the
 
 ## Waiting without model polling
 
-For a confirmed GitHub Actions run, use the installed `ci-watch` skill.
-If the skill is absent or cannot register a working watch, use manual same-thread
-resume. Other external waits use manual resume.
+Before publishing a PR candidate, select all required automated qualification in
+`.github/validation-plan.json` under [complete PR validation](testing/CI-VALIDATION.md).
+Report CI complete only when `Loomlight validation` passes for the current candidate
+and the selected runs, jobs and retained evidence have been audited. Ordinary PR
+checks alone do not establish completion of separately selected qualification.
+Local/native/human acceptance retains the selected task's separate requirements.
+
+In T3, use its built-in PR watcher for the combined required status and confirm
+registration. Verify actual delivery before claiming automatic continuation works.
+Codex desktop uses the installed compatible `ci-watch` skill for exact runs.
+If the current client's working monitoring route cannot be confirmed, use manual
+same-thread resume. Other external waits use manual resume.
 A wait preserves the current outcome, chat, remaining audit and applicable operation limits.
 Its chat yields; other agents' assigned worktrees may continue under
 [parallel worktrees](#parallel-agents-and-worktrees).
@@ -561,7 +570,12 @@ Its chat yields; other agents' assigned worktrees may continue under
    A successful request without a confirmed run identity is not a confirmed run;
    a rejected request is not pending CI. Preserve ambiguous dispatch state and resolve
    it without duplicate dispatch.
-2. **Select the wait route.** Check whether `ci-watch` is installed on the current
+2. **Select the wait route.** In T3, register its PR watcher after publication and
+   end the turn. Keep separately selected qualification represented by the combined
+   status; a PR-only watch without that coverage is incomplete. On a wake, inspect
+   the combined status and perform step 4. If it is still pending, retain the watch
+   and yield under the client's instructions. Stop the watch at final handback.
+   In Codex desktop, check whether compatible `ci-watch` is installed on the current
    host. If installed, read and follow its current `SKILL.md`, including execution
    approval, registration, recovery and event acknowledgement. Require
    `watcher_running: true` before reporting an active watch. Record registration
@@ -603,7 +617,8 @@ independent assigned work under the parallel-worktree policy.
 
 The model does not poll or run keep-alive loops. Background polling and automatic
 same-thread continuation are permitted through the installed `ci-watch` skill under
-its current instructions. User-requested status checks remain permitted.
+its current instructions, or the client's built-in PR watcher under the route
+above. User-requested status checks remain permitted.
 W0/OPT-1A remains abandoned; this exception does not authorize client-database edits,
 a new scheduler, service, orchestration framework or work on PR #12.
 A documentation change does not validate client lifecycle controls or watcher

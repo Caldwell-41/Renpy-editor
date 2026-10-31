@@ -80,7 +80,7 @@ Failed, cancelled or skipped required checks are not passes. No package matrix f
   [WORKFLOW](docs/WORKFLOW.md). Read the sections needed by the task.
 - Parallel agent assignments or worktree handoffs: follow
   [parallel worktrees](docs/WORKFLOW.md#parallel-agents-and-worktrees).
-- CI or external waits: follow [ci-watch selection and manual fallback](docs/WORKFLOW.md#waiting-without-model-polling).
+- CI selection, completion or external waits: follow [complete validation and client-specific waiting](docs/WORKFLOW.md#waiting-without-model-polling).
 - Meaningful pause, transfer or closure:
   [status maintenance](docs/WORKFLOW.md#status-document-maintenance).
   Record compact results in the owning task, keep one live handover and update
