@@ -1590,3 +1590,94 @@ No fresh Mac native or SDK qualification is claimed for these corrections. Previ
 Mac and CI1-5 evidence retain their exact candidates. CI6 is the selected fresh
 Windows source/helper/package/native qualification; terminal audit and user
 acceptance remain pending. Keep PR draft and #43 criteria unchecked.
+
+
+## CI6 terminal audit and merge closeout, 2026-10-31
+
+Kris selected auditing CI6, merging if no issues, updating relevant tickets and
+cleaning the local workspace. The audit found no blocking issue.
+[PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) merged into
+`codex/phase3b-screen-designer` at `58dfae452defe9e20351dead0b089a3e43bd0a9e`.
+Its tree exactly matches audited head `9be475b11c3238515803e381cd29863adfe99f81`.
+L07 #43 is accepted for its four bounded criteria under that conditional direction.
+
+### Exact CI and artifact audit
+
+[Windows CI6 41202339083, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41202339083/attempts/1)
+is terminal SUCCESS at exact `9be475b`. Selection, ordinal 6 and every executed
+step pass. Preflight includes 288 frontend tests, 98 ordinary Screens tests with
+five explicitly unselected SDK/helper cases, two driver and five image/evidence
+tests. Both real controller/core journeys and exact probe rehearsal pass.
+The separate accepted-source export and selected helper cases each pass.
+
+[Automatic quality 41202289276, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41202289276/attempts/1)
+is independently audited SUCCESS at the same head. Both required jobs and all
+18 executed steps pass. Nine unselected jobs remain skips. Complete log SHA-256
+is `0998ef882385d54c8b63a0234bdd94dc0a6eafb2f031d37308bcc62495aaadc5`.
+
+Artifact `shared-style-Windows-41202339083-1`, ID 13044165023, expires
+2026-11-07 12:59:53 UTC. Downloaded ZIP SHA-256
+`d6128d282089435c8654e64faecfd39948728c232b25e488e6bbdc8b91b4a9a7`
+matches GitHub's digest. Entry/path/link/size checks, safe extraction and privacy
+scan pass for all 180 files. Original files remain immutable under ignored
+`review9-final/windows-ci-06`; the checker replay uses a separate helper copy.
+The exact run/job metadata, complete logs, audit script and structured result remain
+under `review9-final/ci6-*`. Complete Windows log SHA-256 is
+`e4585e251551a76445f1578fbd3f352711f840b656aa48ed4c4988f9629ddf34`.
+
+Export, normal and helper accepted manifests are byte-identical, SHA-256
+`83b2f93fafafdd0c487495c02f6095a90d251bef6178551033abbc09cef7ef93`.
+Every source/font fixture and recorded core/checker/renderer identity verifies
+against the exact candidate and local checkout. All 16 normal semantic/state/aspect
+rows replay successfully, including PNG hashes, distinct button states and strict
+RGBA source/literal equality. Fresh helper replay verifies 32 exact comparisons,
+revision/state/dimensions and scale. All five bad cases refuse: another source
+snapshot, missing frame, wrong source, wrong state and blank frame. Pending draft
+output matches accepted independent output. Eight normal SDK commands and three
+helper validation/discovery starts are measured; cooperative helper exit and
+complete scratch cleanup pass. No receipt/image changes during replay.
+
+The fresh package is PE x64, machine 0x8664. Executable SHA-256
+`7d3a7878fe311c139b371fc03b732d7346bf6a6675de594642755875ab64443c`
+matches its candidate-bound identity. The native report passes the actual consumer,
+all seven required stages, exit zero, no external errors and complete cleanup.
+It records nativeWebView=true and sdkExecuted=false. Automated input does not
+establish physical/human acceptance.
+
+### Bounded acceptance and retained limits
+
+| L07 criterion | Accepted evidence |
+| --- | --- |
+| Supported text/background/border appearance and ordinary shared definitions | CI6 normal/helper/state/aspect proof; earlier Mac core/source proof retains its exact scope. |
+| Affected-use review, shared Apply, selected-use copy and Cancel | UI/core journeys, source/transaction tests and fresh Windows native sequence; incomplete graphs refuse safely. |
+| Inspector section/scroll/focus/draft retention and stale refusal | DOM, controller and native checks; Source-only expressions, local decoration and external indexed-use preview corrections pass. |
+| Source reconciliation, style/use revisions, history and reopen | Public-core ownership/copy tests and actual controller/native Source/history/reopen; opaque neighbors remain preserved. |
+
+All nine final review findings are corrected and worker self-reviewed, with
+coordinator combined review and final local/CI validation. No new independent
+full-branch two-axis review after those fixes is claimed. The original controller
+Undo timeout remains unexplained; its diagnostic run and CI6 pass without changed
+product code, assertions or deadlines. Earlier failures and the historical Mac
+overrun remain recorded. Mac rendering at `ed9391a` and earlier native packages
+retain their qualified scope; no fresh final Mac package/native pass is claimed.
+Full Design Lab startup, physical/human input and wider editor/canvas/3B acceptance
+remain separate. B groups and L18 retain their own criteria and stay open.
+
+CI6 adds eleven SDK starts and one helper/package/native session each. Windows
+final actual use is SDK47/47, helper4/4, package4/4, native4/4, dispatch6/6. All
+reservations are resolved. Mac remains SDK32/helper3/package2/native2 with the
+historical SDK21/16 overrun disclosed. No retry or successor implementation is
+selected; historical and unused allowances remain closed.
+
+### Local workspace retirement
+
+The three completed worker worktrees were clean. Patch equivalence against the
+merged branch proves every original worker commit is integrated. Before retirement,
+23 unique reproduction/controller evidence files were copied and hash-verified under
+ignored `.toolchains/retired-worktrees/pr72-review9/`. Its verified
+`worker-commits.bundle` preserves the three original worker commits and its
+`retirement-manifest.json` records file hashes and patch equivalence. Generated
+worker build/dependency caches were discarded. The three worker worktrees/local
+branches and merged local L07 branch are removed. The primary checkout is on the
+Screens integration branch. Remote refs, unrelated task work, the untracked Phase 1
+audit and protected native recovery remain intact. This closeout changes docs only.
