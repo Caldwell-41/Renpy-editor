@@ -64,3 +64,24 @@ jobs:
           path: ${{ runner.temp }}/runtime-reload-report.json
           if-no-files-found: error
           retention-days: 3
+
+  validation-start:
+    name: Validation status (start)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml
+
+  validation-finish:
+    name: Validation status (finish)
+    if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    needs: [sdk-feasibility, validation-start]
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml

@@ -23,12 +23,14 @@ When selecting a test host, scheduling qualification or resolving missing native
 capability, follow [host routing](WORKFLOW.md#test-host-routing-and-ownership). For diagnosed corrections
 and evidence reuse, follow the [cumulative budget](WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name)
 and [executable-gate policy](WORKFLOW.md#6-make-policy-and-executable-gates-agree).
-CI and external waits follow [ci-watch selection and manual fallback](WORKFLOW.md#waiting-without-model-polling).
+PR CI completion uses [complete PR validation](testing/CI-VALIDATION.md).
+CI and external waits follow [client-specific waiting and manual fallback](WORKFLOW.md#waiting-without-model-polling).
 
 ## Focused runbooks
 
 | Need | Current reference |
 | --- | --- |
+| Complete PR status, selected manual qualification and coordinator diagnosis | [Complete PR validation](testing/CI-VALIDATION.md) |
 | Local commands, Python host exclusions, renderer/probe consumers and workflow gates | [Automated checks](testing/AUTOMATED.md) |
 | Source/transaction expectations, pinned SDK, packaged scenarios and performance boundaries | [SDK and runtime](testing/SDK-RUNTIME.md) |
 | Native input, package identity, credentials and human evidence reuse | [Native evidence](testing/NATIVE.md) |

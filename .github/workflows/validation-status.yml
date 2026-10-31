@@ -1,0 +1,27 @@
+name: Report PR validation
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+  statuses: write
+
+jobs:
+  report:
+    name: Report validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: validation-status-${{ github.repository }}-${{ github.head_ref || github.ref_name }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Report all selected CI for the current PR candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci_validation.py

@@ -1,0 +1,32 @@
+name: Dummy validation qualification
+
+on:
+  workflow_call:
+    inputs:
+      result:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  dummy:
+    name: Windows x64
+    runs-on: windows-2025
+    timeout-minutes: 5
+    steps:
+      - name: Keep qualification pending after ordinary PR checks finish
+        shell: pwsh
+        run: |
+          Write-Output 'Dummy only. No SDK, package or native app is started.'
+          Start-Sleep -Seconds 90
+      - name: Produce the selected dummy result
+        shell: pwsh
+        env:
+          DUMMY_RESULT: ${{ inputs.result }}
+        run: |
+          if ($env:DUMMY_RESULT -ne 'pass') {
+            throw 'Expected dummy qualification failure'
+          }
+          Write-Output 'Dummy qualification passed'

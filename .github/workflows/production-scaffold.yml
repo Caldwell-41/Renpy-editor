@@ -779,3 +779,24 @@ jobs:
     with:
       first_launch_ordinal: ${{ inputs.rewrite_first_launch_ordinal }}
       dispatch_ordinal: ${{ inputs.selectable_dispatch_ordinal }}
+
+  validation-start:
+    name: Validation status (start)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml
+
+  validation-finish:
+    name: Validation status (finish)
+    if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    needs: [preflight, packaged-boundary, dialogue-rewrite-windows, continue-scene-macos, selectable-admission, selectable-proposals, studio-settings-native, validation-start]
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml

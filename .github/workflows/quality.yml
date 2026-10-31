@@ -6,6 +6,15 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      validation_dummy:
+        description: Run only the cheap PR validation dummy; no SDK or package
+        type: boolean
+        default: false
+      validation_dummy_result:
+        description: Expected dummy outcome
+        type: choice
+        options: ['pass', 'fail']
+        default: 'pass'
       studio_connection_native:
         description: Only approved current connection Windows native proof and both-host fixture gates
         type: boolean
@@ -90,7 +99,7 @@ permissions:
 
 jobs:
   code-checks:
-    if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+    if: ${{ !inputs.validation_dummy && (github.event_name == 'pull_request' || github.event_name == 'push') }}
     name: Frontend tests and Rust formatting
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -121,7 +130,7 @@ jobs:
           cargo +1.90.0 fmt --check --all
 
   studio-connection-native:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.studio_connection_native }}
+    if: ${{ !inputs.validation_dummy && (github.event_name == 'workflow_dispatch' && inputs.studio_connection_native) }}
     uses: ./.github/workflows/studio-connection-native.yml
     with:
       candidate: ${{ inputs.studio_connection_candidate }}
@@ -129,7 +138,7 @@ jobs:
       selector_conflict: ${{ inputs.harness_regressions || inputs.thinking_settings || inputs.walkthrough_redesign || inputs.story_logic_early || inputs.assistance_ui || inputs.source_foundation_macos || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.phase1g_candidate_proof }}
 
   harness-regressions:
-    if: ${{ !inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && inputs.harness_regressions) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && inputs.harness_regressions)) }}
     name: Harness regressions — ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -188,7 +197,7 @@ jobs:
           retention-days: 7
 
   validate:
-    if: ${{ !inputs.studio_connection_native && (github.event_name != 'workflow_dispatch' || (!inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && !inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos)) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name != 'workflow_dispatch' || (!inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && !inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos))) }}
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -199,6 +208,8 @@ jobs:
         run: python3 scripts/validate.py
       - name: Test repository section-link validation
         run: python3 -m unittest discover -s scripts -p test_validate.py -v
+      - name: Test complete PR validation reporting
+        run: python3 -m unittest discover -s scripts -p test_ci_validation.py -v
       - name: Exercise bounded Q1 gate rejection fixtures
         run: |
           python3 app/scripts/check-q1-prep-gates.py self-test
@@ -208,7 +219,7 @@ jobs:
 
 
   phase1g-flow-profile:
-    if: ${{ !inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos)) }}
     name: Phase 1G flow profile — ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -352,7 +363,7 @@ jobs:
           retention-days: 7
 
   phase1g-macos-browser-diagnostic:
-    if: ${{ !inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos)) }}
     name: R2-P1 macOS browser diagnostic
     runs-on: macos-26
     timeout-minutes: 10
@@ -472,7 +483,7 @@ jobs:
 
 
   source-foundation-macos:
-    if: ${{ !inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.source_foundation_macos) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.source_foundation_macos)) }}
     name: Bounded source foundation — macOS ARM64
     runs-on: macos-26
     timeout-minutes: 70
@@ -563,20 +574,20 @@ jobs:
           retention-days: 7
 
   assistance-ui:
-    if: ${{ !inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && inputs.assistance_ui) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && inputs.assistance_ui)) }}
     uses: ./.github/workflows/assistance-ui.yml
     with:
       ordinal: ${{ inputs.assistance_ui_ordinal }}
 
   story-logic:
-    if: ${{ !inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && inputs.story_logic_early) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && inputs.story_logic_early)) }}
     uses: ./.github/workflows/story-logic.yml
     with:
       ordinal: ${{ inputs.story_logic_ordinal }}
       excluded_selectors: ${{ inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
 
   walkthrough-redesign:
-    if: ${{ !inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && inputs.walkthrough_redesign) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && inputs.walkthrough_redesign)) }}
     uses: ./.github/workflows/assistance-ui.yml
     with:
       outcome: walkthrough-redesign
@@ -585,8 +596,37 @@ jobs:
       excluded_selectors: ${{ inputs.story_logic_early || inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
 
   thinking-settings:
-    if: ${{ !inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && inputs.thinking_settings) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && inputs.thinking_settings)) }}
     uses: ./.github/workflows/thinking-settings.yml
     with:
       candidate: ${{ inputs.thinking_settings_candidate }}
       ordinal: ${{ inputs.thinking_settings_ordinal }}
+
+  validation-dummy:
+    name: Dummy qualification
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.validation_dummy }}
+    needs: validation-start
+    uses: ./.github/workflows/validation-dummy.yml
+    with:
+      result: ${{ inputs.validation_dummy_result }}
+
+  validation-start:
+    name: Validation status (start)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml
+
+  validation-finish:
+    name: Validation status (finish)
+    if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    needs: [code-checks, studio-connection-native, harness-regressions, validate, phase1g-flow-profile, phase1g-macos-browser-diagnostic, source-foundation-macos, assistance-ui, story-logic, walkthrough-redesign, thinking-settings, validation-dummy, validation-start]
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: write
+    uses: ./.github/workflows/validation-status.yml
