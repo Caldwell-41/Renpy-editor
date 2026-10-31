@@ -1075,3 +1075,135 @@ whitespace checks pass. Ordinal 4 alone is accepted; 1/2/3 refuse. Configuration
 review confirms one normal accepted path, two scoped consumers of the common
 input directory and no retained-artifact download, reuse caller or reuse script.
 Original CI3 receipts are untouched. No product source or dependency changes.
+
+### CI4 publication, dispatch and automatic-quality audit
+
+The complete correction is published at
+d5b19e527f3b420af603991d9fdc68a9140adb1e. PR #72 and #43 are updated remotely
+with the removed reuse path, fresh full proof requirements, revised cumulative
+limits, source diagnostics and focused/independent review results.
+
+[Fresh full CI4 41187324356, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187324356/attempts/1)
+is confirmed at that exact head on codex/l07-shared-looks, event workflow_dispatch.
+Inputs are shared_style=true, ordinal=4 and exact candidate; all other specialist
+selectors are false. Selection and exact-candidate/ordinal guards pass. Portable
+preflight is in progress at the observation in ignored `ci4-wait-record.json`.
+No new costly target start is established by that observation. Dispatches are
+4/4; eleven SDK starts and one helper/package/native start each are reserved
+against confirmed Windows SDK/helper/package/native use 14/1/1/1. Record actual
+starts from the full result, including implicit validation and failed starts.
+
+[Automatic Repository quality 41187217183, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187217183/attempts/1)
+is audited successful at d5b19e5. Both required jobs and every executed step pass:
+277 frontend tests with no failures/skips, pinned Rust formatting, 1,293 checkout
+files validated, 13 section-link tests, 10 retention tests, Q1 rejection fixtures
+and selector source audit. Nine unselected specialist jobs are skipped. Full logs,
+terminal metadata and the audit remain ignored under `ci-quality-04-*`.
+
+The automatic result does not establish manual qualification. The full CI4 log/
+artifact/source/normal/helper/rejection/counter/package/native/cleanup/privacy
+and availability audit remains pending. No run-specific T3 watcher is registered;
+manual same-thread resume is still necessary. The completed PR rollup supplies
+no manual-run completion event. No new watcher or model-polling loop is started.
+These wait updates in repository status/evidence remain local pending terminal
+audit; the fix is published and remote PR/ticket already retain the exact run.
+The unrelated audit is intact, PR remains draft and all issue criteria unchecked.
+
+## CI4 terminal success audit and review handoff, 2026-10-31
+
+Kris resumed for the completed CI audit, PR/associated-ticket updates and a new
+chat to review PR #72 with the code-review skill. The selected full qualification
+is now terminal and audited. No new SDK/helper/package/native start or costly
+dispatch occurs during this audit or documentation publication.
+
+### Exact result and retained proof
+
+[Full Windows CI4 41187324356, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187324356/attempts/1)
+passes at exact d5b19e527f3b420af603991d9fdc68a9140adb1e. Selection and the
+shared-style job pass, including every executed setup, check, qualification,
+privacy, upload, cache and cleanup step. Other specialist selectors are unselected
+skips. The guard confirms branch, candidate, ordinal 4 and first attempt.
+
+The downloaded artifact shared-style-Windows-41187324356-1, ID 13037906620,
+contains 157 files. ZIP SHA-256 is
+0969009c3d781a6b059e76e27d9aad6d0a0676e4d614948a77e18bd9f7b6bca7;
+expiry is 2026-11-07 09:24:16 UTC. Digest verification and local privacy recheck
+pass. Original artifact files/receipts remain immutable under ignored
+windows-ci-04; replay writes only to a separate helper copy. Complete logs,
+metadata and the structured final audit remain under `ci-focused-04-*`.
+
+All three accepted manifests, export/normal/helper, are byte-identical with SHA-256
+7585a23c68ef449e35ad4070f55a4978d114e54cce36984cd744163310671fc0.
+Every source SHA and font fixture SHA verifies. Candidate, normal checker and core/
+renderer source hashes match the tested files. This directly resolves CI3's
+cross-run source mismatch without replacing IDs or weakening provenance.
+
+All 16 normal stage/aspect/state rows replay successfully, including semantic
+border/interior samples, distinct-state evidence, every PNG hash and exact RGBA
+source/literal equality for both screens. All eight normal SDK commands exit zero,
+without timeout or output truncation, and SDK scratch cleanup is complete.
+
+The fresh helper records 32 accepted frames and a typed pending frame. Revision,
+state, size, physical drawing scale and image data validate. The pending frame
+matches its later accepted independent source. All 32 helper/literal comparisons
+replay with zero differing pixels. Both the uploaded comparison and a fresh
+consumer replay reject all five cases: different source snapshot, missing frame,
+wrong source, wrong state and blank frame. The helper reports exactly three SDK
+validation/discovery starts, one helper session, cooperative exit zero and complete
+cleanup. Its renderer hash matches the current producer.
+
+The actual controller/core journey and exact packaged-probe rehearsal pass.
+The correlated assignment payload and core node show the proposed background and
+cleared border at the expected source revision. The fresh x64 package is retained;
+PE machine is 0x8664 and executable SHA-256 is
+542431af94b43e2baac59f5c449e321828f65a7804a52af0dd5207babc1d7cd5,
+matching the candidate-bound package receipt. The native report passes the actual
+consumer, all seven stages, exit zero, no external errors and complete cleanup.
+It reports sdkExecuted=false. This is automated native proof, not physical/human
+input acceptance.
+
+[Automatic Repository quality 41187217183, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187217183/attempts/1)
+also passes at that exact candidate, as audited above. Both required jobs and all
+executed steps pass, including 277 frontend tests, pinned formatting, repository/
+link/retention validation and Q1 fixtures/source audit. Nine specialist jobs are
+unselected skips. The manual qualification and automatic rollup are independently
+identified and audited; neither result is inferred from the other.
+
+### Criterion and accounting result
+
+| L07 criterion | Audited bounded evidence | Remaining acceptance |
+| --- | --- | --- |
+| Supported appearance and ordinary shared source | Same-source Windows normal/helper comparisons, semantics and states; recorded unchanged Mac SDK/helper proof retains its source/hash scope. | Final full-PR review and acceptance decision. |
+| Affected-use review, shared/copy/Cancel | Actual controller/core journey and fresh seven-stage Windows native report; recorded signed Mac native proof. | Final full-PR review; wider physical/human acceptance stays separate. |
+| Inspector state and stale refusal | Review retention, independent/shared draft and stale refusal stages pass through actual controls/core/native consumer. | Final full-PR review and acceptance decision. |
+| Source/revisions/history/reopen and Source-only dynamic cases | Existing public-core tests, fresh controller/native Source/history/reopen and retained unsupported-use refusal evidence. | Final full-PR review and acceptance decision. |
+
+CI4 actual use is eight normal SDK starts plus three helper validation starts,
+one helper, one package and one native session. Final cumulative Windows use is
+SDK 25/25, helpers 2/4, packages 2/2, native 2/2 and dispatches 4/4. Reservations
+are resolved to actual starts. Mac remains SDK 21/16 historical, helpers 2/4,
+packages 2/2 and native 2/2; its earlier overrun and failed attempts remain visible.
+Kris's needed-allowance authorization is unchanged, but no further costly operation
+is selected or needed for this audit/review. No qualification is rerun for docs.
+
+### Publication and next owner
+
+The audit/status closeout is documentation only; d5b19e5 remains the tested full
+Windows candidate and no later documentation SHA is relabelled as that candidate.
+Repository evidence, CURRENT and HANDOVER are reconciled for publication. Status
+records retain their earlier size exception for unique protected recovery/history;
+the selected L07 continuation is replaced instead of adding another live wait.
+
+Update #43, its B03 parent #25, P3B #22, B08 #30 and dependent L18 #46 with the
+bounded automated pass and pending final full-PR review. Keep native dependency
+edges, acceptance boxes and issue states unchanged; L18 does not start from this
+audit. Keep PR #72 draft; merge/release and issue closure are not selected.
+
+Kris requested a separate read-only review chat. Its fixed full-branch base is the
+already confirmed e9e86613a9206212ef0f5c020fb9f13ec00c44df. It must review the
+final published PR head with fresh Standards and Spec subagents using the named
+code-review skill, live #43/P3B/B03, A5 approval and current repository contracts.
+The reviewer owns no repository files and starts no costly qualification. This
+chat finishes its writer work before that review starts. The unrelated untracked
+audit and protected recovery remain intact. There is no manual qualification run
+or run-specific watcher pending after this terminal audit.

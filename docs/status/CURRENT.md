@@ -1,39 +1,34 @@
 # Current status
 
-## L07 fresh full qualification fix prepared; CI4 selected
+## L07 CI4 audited passing; final full-PR review next
 
 [Draft PR #72](https://github.com/Caldwell-41/Renpy-editor/pull/72) remains on
-`codex/l07-shared-looks`, currently published at e57d3fa. The fresh-campaign
-correction is locally verified pending publication. Production is unchanged.
+`codex/l07-shared-looks`; full Windows candidate is
+d5b19e527f3b420af603991d9fdc68a9140adb1e. The audit closeout changes docs only.
+[Full CI4 41187324356, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187324356/attempts/1)
+and [automatic quality 41187217183, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41187217183/attempts/1)
+are independently audited passing at that candidate. Every executed step passes.
 
-[CI3 41185489731, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41185489731/attempts/1)
-is audited failed. Controller/probe and all 16 normal SDK rows pass. Its full helper
-consumer correctly rejects old helper input against newly generated source IDs.
-All 32 raw image pairs match diagnostically, but that cannot clear provenance.
-Actual Windows use is SDK 14, helpers 1, packages 1, native sessions 1, dispatches 3.
-[The audit and correction](../tasks/evidence/shared-look.md#ci3-terminal-audit-and-fresh-full-ci4-correction-2026-10-31)
-own original artifacts, measurements and the root cause.
+[The terminal audit](../tasks/evidence/shared-look.md#ci4-terminal-success-audit-and-review-handoff-2026-10-31)
+owns the same-source manifest proof, 16 normal semantic/exact rows, 32 fresh helper
+comparisons and five rejection cases, pending match, measured helper counter,
+fresh x64 package hash, seven native stages, exit/cleanup and retained 157-file
+artifact. Digest/privacy checks and offline strict replays pass. Automatic quality
+passes 277 frontend tests and both required jobs; nine unselected jobs are skips.
+Recorded unchanged Mac rendering/signed-native proof retains its stated scope.
 
-Kris selected the full fix with a subagent and approved needed allowance increases.
-A read-only subagent confirmed the helper already consumes an exported snapshot
-without regenerating IDs. The workflow now gives fresh normal/helper producers
-one source snapshot, removes the superseded cross-run reuse owner, and restores
-fresh helper/package/native proof. Exact source and pixel checks remain required.
-Five focused tests and same-source actual-capture replay/rejection checks pass;
-workflow lint and source-selector audit pass. Independent final review reports zero actionable findings; publication is next.
+Actual cumulative Windows use is SDK 25/25, helper 2/4, package 2/2, native 2/2
+and dispatches 4/4. Mac's earlier disclosed overrun remains unchanged. No costly
+operation runs for the audit or documentation closeout, and none is pending.
+Kris's needed-allowance authorization is retained without resetting prior use.
 
-One full Windows CI4 campaign is selected, ordinal 4. Before dispatch, cumulative
-use is SDK 14/25, helper 1/4, package 1/2, native 1/2 and dispatches 3/4. Planned
-use reaches 25 SDK starts, helpers 2, packages 2, native 2 and dispatches 4.
-Further needed increases are authorized but must remain recorded and cumulative.
-Mac's historical overrun and all earlier failures remain disclosed; this workflow
-repair does not require another costly Mac operation.
-
-Next: publish/update PR/ticket and dispatch the exact candidate.
-Manual same-thread resume remains the supported qualification audit route; no
-run-specific T3 watcher exists. #43 stays open and PR #72 stays draft. Complete
-Windows qualification and wider acceptance remain pending. The unrelated audit
-and protected recovery below are intact.
+Next is the user-requested separate full-PR review with the code-review skill,
+fresh Standards/Spec subagents and fixed base e9e8661. The new review is read-only;
+this chat completes all writer work before launching it. #43, B03 #25, P3B #22,
+B08 #30 and L18 #46 receive the automated-result update while their acceptance,
+open states and dependency edges stay intact. PR #72 stays draft. Merge/release,
+physical/human, full Design Lab startup and wider editor/canvas/3B acceptance
+remain separate. The unrelated audit and protected recovery below are preserved.
 
 ## Reviewed text ownership cleanup
 
