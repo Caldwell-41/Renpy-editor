@@ -54,6 +54,13 @@ and explicit user limits. Follow [operation limits and reassessment](docs/WORKFL
 when selecting costly operations or revisiting failed corrections. Report a
 concrete blocker when continuation needs a real decision or unavailable capability.
 
+Before adding behavior, trace existing implementations and callers. Prefer extending
+the existing owner. When replacing an implementation, migrate affected callers and
+tests and remove the superseded path in the same change. Retain parallel
+implementations only for distinct behavior or an explicitly scoped migration, and
+explain why both remain. During review, check for duplicated ownership and tests
+that still exercise superseded paths.
+
 For test-host selection, qualification cadence or a capability handoff, follow
 [host routing](docs/WORKFLOW.md#test-host-routing-and-ownership). For failures,
 follow [diagnosis](docs/WORKFLOW.md#4-classify-failures-before-fixing).
