@@ -1,4 +1,4 @@
-// A3 mounts the production editor. Only the Look extension and services are lab code.
+// A4 extends the existing editor study with explicit scope and any number of uses.
 import type { LabMount } from "../../contracts.ts";
 import { action, element as el, labPage } from "../../page.ts";
 import { ScreensWorkspace, type ScreenNode, type ScreenDocument } from "../../../src/screen-ui.ts";
@@ -12,22 +12,23 @@ import "./editor.css";
 export const mount: LabMount = async (host, context) => {
   await loadPreferences();
   document.documentElement.dataset.theme = context.theme;
-  let sample = fixture(context.state === "local", context.state === "expression"), disposed = false;
+  let sample = fixture(context.state), disposed = false;
   const past: Sample[] = [], future: Sample[] = [], pending = new Map<string, PendingLook>();
   let bypass = false, review: HTMLDialogElement | null = null;
+  let enteredDesign = new URLSearchParams(location.search).get("entry") !== "design";
   let lastField: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null = null;
   const frame = labPage(host, context, { screen: "screens", title: "Screens", subtitle: "", dirty: () => workspace.hasDraft() || pending.size > 0 });
   frame.shell.classList.add("look-integrated"); frame.heading.remove();
-  frame.shell.querySelector(".lp-sample")!.textContent = "A3 · Existing editor + Look · Draft";
+  frame.shell.querySelector(".lp-sample")!.textContent = "A4 · Shared styles · Draft";
   frame.shell.querySelector(".lp-fiction")!.textContent = "Browser mock · Memory-only source and canvas";
   const nav = frame.shell.querySelector(".lp-navigation")!;
   const screens = action("Screens", () => { workspace.panel.querySelector<HTMLElement>(".screen-heading h1")?.focus(); });
   screens.className = "tree-item selected"; screens.ariaLabel = screens.title = "Screens"; screens.ariaCurrent = "page"; screens.prepend(icon("panel"));
   nav.querySelector('[aria-label="Source"]')!.after(screens);
   if (innerWidth >= 1000) (frame.shell.querySelector(".lp-project-shell") as HTMLElement).dataset.navigationCollapsed = "false";
-  const details = el("details", "sle-state"), state = el("pre"); details.append(el("summary", "", "Prototype details"), el("p", "", "Actual editor renderer, fictional services. The shared Look extension is a prototype. The canvas is browser-drawn; no project files or Ren'Py process are opened."), state);
+  const details = el("details", "sle-state"), state = el("pre"); details.append(el("summary", "", "Prototype details"), el("p", "", "Actual editor renderer, fictional services. Shared styles are a prototype. The canvas is browser-drawn; no project files or Ren'Py process are opened."), state);
   const workspace = new ScreensWorkspace({
-    projectId: "shared-look-a3", resolution: { width: 1280, height: 720 }, current: () => !disposed,
+    projectId: "shared-style-study", resolution: { width: 1280, height: 720 }, current: () => !disposed,
     coordinate: task => task(), source: () => report("Source editing remains in its existing application workflow. This mock shows saved sample Source only."),
     preview: (_target, validate) => report(validate ? "Browser mock: validation starts no SDK." : "Browser mock: Test in Ren'Py starts no process."),
     saved: () => { update(); },
@@ -131,6 +132,7 @@ export const mount: LabMount = async (host, context) => {
   function setText(target: Element, text: string) { if (target.textContent !== text) target.textContent = text; }
   function update() {
     if (disposed) return;
+    if (!enteredDesign) { const body = workspace.panel.querySelector('[data-node-id="body"]'); if (body) { enteredDesign = true; body.dispatchEvent(new MouseEvent("dblclick", { bubbles: true })); } }
     const status = workspace.panel.querySelector(".screen-canvas-status"); if (status && workspace.panel.querySelector(".screen-render")) setText(status, "Browser sample canvas. Ren'Py is not running.");
     const image = workspace.panel.querySelector<HTMLImageElement>(".screen-render"); if (image?.alt !== "Browser-drawn screen sample" && image) { image.alt = "Browser-drawn screen sample"; image.ariaLabel = "Screen canvas sample"; }
     const selected = selection(), typography = workspace.panel.querySelector(".screen-text-typography");
@@ -138,25 +140,37 @@ export const mount: LabMount = async (host, context) => {
     const key = useKey(selected.doc, selected.node), choice = pending.get(key), id = choice?.id ?? sample.uses[key]!;
     let row = typography.querySelector<HTMLElement>(".sle-look");
     if (!row) {
-      row = el("section", "sle-look"); row.ariaLabel = "Look";
+      row = el("section", "sle-look"); row.ariaLabel = "Shared style";
       const heading = el("div", "sle-look-heading"), name = el("strong"); name.dataset.lookName = "";
-      heading.append(el("span", "", "Look"), name, action("Change…", chooseLook));
+      const label = el("span"); label.dataset.styleLabel = "";
+      heading.append(label, name, action("Change style…", chooseLook));
       const sharing = el("p"); sharing.dataset.lookSharing = "";
-      const independent = action("Make independent", () => { const selected = selection()!; const key = useKey(selected.doc, selected.node), current = pending.get(key); pending.set(key, { id: current?.id ?? sample.uses[key]!, independent: !current?.independent }); if (!pending.get(key)!.independent && pending.get(key)!.id === sample.uses[key]) pending.delete(key); update(); }); independent.dataset.lookIndependent = "";
-      row.append(heading, sharing, independent); typography.querySelector("h3")!.after(row);
+      const viewUses = action("View uses", () => openReview(true)); viewUses.dataset.viewUses = "";
+      const independent = action("Edit only this element", () => { const selected = selection()!; const key = useKey(selected.doc, selected.node), current = pending.get(key); pending.set(key, { id: current?.id ?? sample.uses[key]!, independent: !current?.independent }); if (!pending.get(key)!.independent && pending.get(key)!.id === sample.uses[key]) pending.delete(key); update(); }); independent.dataset.lookIndependent = "";
+      row.append(heading, sharing, viewUses, independent); typography.querySelector("h3")!.after(row);
     }
     setText(row.querySelector("[data-look-name]")!, sample.looks[id]!.name);
-    const names = [...new Set(Object.keys(sample.uses).filter(use => use !== key && sample.uses[use] === id).map(use => use.split("/")[0]))];
-    setText(row.querySelector("[data-look-sharing]")!, choice?.independent ? "Independent copy pending" : names.length ? `Shared with ${names.join(" and ")}` : "Used only on this element.");
-    const independent = row.querySelector<HTMLButtonElement>("[data-look-independent]")!; independent.hidden = !names.length; setText(independent, choice?.independent ? "Keep shared" : "Make independent");
+    const uses = Object.keys(sample.uses).filter(use => sample.uses[use] === id), count = new Set(uses.map(use => use.split("/")[0])).size;
+    setText(row.querySelector("[data-style-label]")!, uses.length > 1 ? "Shared style:" : "Style:");
+    setText(row.querySelector("[data-look-sharing]")!, choice?.independent ? "Only this element will change. Others keep their shared style." : uses.length > 1 ? `Used on ${count} screen${count === 1 ? "" : "s"} · ${uses.length} elements` : uses.length === 1 ? "Used only on this element." : "Not used yet. Apply to use on this element.");
+    const viewUses = row.querySelector<HTMLButtonElement>("[data-view-uses]")!; viewUses.hidden = !!choice?.independent;
+    const independent = row.querySelector<HTMLButtonElement>("[data-look-independent]")!; independent.hidden = uses.length < 2; setText(independent, choice?.independent ? "Edit the shared style instead" : "Edit only this element");
     const blocked = context.state === "expression";
     row.querySelectorAll<HTMLButtonElement>("button").forEach(button => { if (button.disabled !== blocked) button.disabled = blocked; });
     if (choice) for (const selector of ["[data-text-apply]", "[data-text-cancel]"]) { const button = workspace.panel.querySelector<HTMLButtonElement>(selector); if (button?.disabled && !blocked) button.disabled = false; }
+    const apply = workspace.panel.querySelector<HTMLButtonElement>("[data-text-apply]");
+    if (apply) {
+      const affected = targets(), screens = new Set(affected.map(use => use.split("/")[0])).size;
+      setText(apply, choice?.independent ? "Apply to this element…" : appearanceChanged() && affected.length > 1 ? `Apply to ${screens} screen${screens === 1 ? "" : "s"}…` : "Apply");
+      const scope = workspace.panel.querySelector(".screen-text-state");
+      if (scope && choice?.independent) setText(scope, "Only this element will change. Other uses stay unchanged.");
+      else if (scope && appearanceChanged() && affected.length > 1) setText(scope, `Shared appearance changes apply to ${screens} screen${screens === 1 ? "" : "s"} and ${affected.length} elements.`);
+    }
     updateState();
   }
   function chooseLook() {
     const selected = selection(); if (!selected || context.state === "expression") return;
-    const modal = el("dialog", "lp-dialog sle-chooser"); modal.ariaLabel = "Choose a look"; modal.append(el("h2", "", "Choose a look"));
+    const modal = el("dialog", "lp-dialog sle-chooser"); modal.ariaLabel = "Choose a style"; modal.append(el("h2", "", "Choose a style"));
     for (const [id, look] of Object.entries(sample.looks)) {
       const button = action("", () => {
         pending.set(useKey(selected.doc, selected.node), { id, independent: false });
@@ -169,25 +183,52 @@ export const mount: LabMount = async (host, context) => {
     }
     modal.append(action("Cancel", () => modal.close())); modal.onclose = () => modal.remove(); frame.shell.append(modal); modal.showModal();
   }
-  function openReview() {
+  function openReview(viewOnly = false) {
     const selected = selection(); if (!selected || review) return;
-    const key = useKey(selected.doc, selected.node), choice = pending.get(key), values = formValues(), uses = targets();
+    const key = useKey(selected.doc, selected.node), choice = pending.get(key), values = formValues();
+    const style = choice?.id ?? sample.uses[key]!, allUses = Object.keys(sample.uses).filter(use => sample.uses[use] === style);
+    const uses = viewOnly ? allUses : targets();
+    const groups = sample.documents.map(doc => ({ doc, name: doc.screens[0]!.name, nodes: doc.screens[0]!.nodes.filter(node => uses.includes(useKey(doc, node))) })).filter(group => group.nodes.length);
     const active = lastField?.isConnected ? lastField : workspace.panel.querySelector<HTMLInputElement>("[data-text-field=color]");
     const start = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement ? active.selectionStart : null, end = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement ? active.selectionEnd : null;
     const body = workspace.panel.querySelector<HTMLElement>(".screen-text-body")!, scroll = body.scrollTop;
-    const revision = sample.revision, modal = el("dialog", "lp-dialog sle-review"); review = modal; modal.ariaLabel = "Review shared look";
-    modal.append(el("h2", "", choice?.independent ? "Make this element independent?" : "Apply look changes?"), el("p", "", choice?.independent ? "Your appearance changes and a separate look will apply only to this element." : "Review every affected screen before applying. Text content and layout changes stay on the selected element."));
-    for (const name of ["Help", "About"]) {
-      const doc = sample.documents.find(d => d.screens[0]!.name === name)!, affected = uses.filter(use => use.startsWith(`${name}/`));
-      const section = el("section", "sle-review-screen"); section.append(el("strong", "", `${name} · ${affected.length ? "Will update" : "Unchanged"}`));
-      const image = el("img"); image.alt = `${name} ${affected.length ? "proposed" : "saved"} look`;
-      image.src = render(doc, { width: 1280, height: 720, textStyles: doc.screens[0]!.nodes.filter(n => uses.includes(useKey(doc, n))).map(n => ({ nodeStart: n.span.start, values })) }).image;
-      section.append(image); modal.append(section);
+    const revision = sample.revision, modal = el("dialog", "lp-dialog sle-review"); review = modal; modal.ariaLabel = viewOnly ? "Shared style uses" : "Review shared style";
+    const count = `${groups.length} screen${groups.length === 1 ? "" : "s"} · ${uses.length} element${uses.length === 1 ? "" : "s"}`;
+    modal.append(el("h2", "", viewOnly ? `Where ${sample.looks[style]!.name} is used` : choice?.independent ? "Apply only to this element?" : "Apply shared style changes?"), el("p", "sle-review-count", `${count}${viewOnly ? " use this style." : " will update."}`));
+    const untouched = new Set(allUses.filter(use => !uses.includes(use)).map(use => use.split("/")[0])).size;
+    modal.append(el("p", "sle-review-note", viewOnly ? "Select a screen to inspect its uses. This view shows the saved appearance." : choice?.independent ? `This element gets a separate style. ${untouched} other screen${untouched === 1 ? " keeps" : "s keep"} the shared style.` : "Every use listed here will update. Text content and layout stay on the selected element."));
+    const content = el("div", "sle-scope-content"), list = el("div", "sle-use-list"); list.ariaLabel = viewOnly ? "Screens using this style" : "Affected screens";
+    const preview = el("section", "sle-scope-preview"); preview.ariaLabel = "Selected screen preview";
+    const previewName = el("h3"), image = el("img"), caption = el("p"), elementNames = el("ul");
+    preview.append(previewName, image, caption, elementNames);
+    const buttons: HTMLButtonElement[] = [];
+    const show = (group: typeof groups[number]) => {
+      setText(previewName, group.name);
+      image.alt = `${group.name} ${viewOnly ? "saved" : "proposed"} appearance`;
+      image.src = render(group.doc, { width: 1280, height: 720, textStyles: viewOnly ? [] : group.nodes.map(node => ({ nodeStart: node.span.start, values })) }).image;
+      caption.textContent = `${group.nodes.length} element${group.nodes.length === 1 ? "" : "s"} · ${viewOnly ? "Saved appearance" : "After Apply"}`;
+      elementNames.replaceChildren(...group.nodes.map(node => el("li", "", node.id === "body" ? "Body text" : node.id === "note" ? "Secondary text" : node.literal?.split("\n")[0] ?? node.kind)));
+      buttons.forEach(button => button.ariaPressed = String(button.dataset.screen === group.name));
+    };
+    for (const group of groups) {
+      const button = action("", () => show(group)); button.classList.add("sle-use-row"); button.dataset.screen = group.name;
+      button.append(el("strong", "", group.name), el("span", "", `${group.nodes.length} element${group.nodes.length === 1 ? "" : "s"}`));
+      buttons.push(button); list.append(button);
+    }
+    if (groups[0]) show(groups[0]);
+    else { list.append(el("p", "", "This style has no saved uses.")); preview.hidden = true; }
+    content.append(list, preview); modal.append(content);
+    if (!viewOnly && appearanceChanged()) {
+      const diff = el("div", "sle-diff"), before = resolvedValues(sample, selected.doc, selected.node, choice);
+      const labels = { size: "Size", color: "Color", align: "Alignment", bold: "Bold", italic: "Italic", font: "Font" };
+      for (const field of Object.keys(labels) as Array<keyof Appearance>) if (values[field] !== before[field]) diff.append(el("p", "", `${labels[field]}: ${before[field] ?? "Default"} → ${values[field] ?? "Default"}`));
+      modal.append(diff);
     }
     const warning = el("p", "sle-warning"); warning.role = "alert"; warning.hidden = true;
     const footer = el("div", "sle-review-actions");
     const close = () => { modal.close(); modal.remove(); review = null; body.scrollTop = scroll; active?.focus({ preventScroll: true }); if ((active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) && start !== null) active.setSelectionRange(start, end); };
-    footer.append(action("Keep editing", close), action(choice?.independent ? `Apply to ${selected.doc.screens[0]!.name} only` : `Apply to ${new Set(uses.map(use => use.split("/")[0])).size} screen${new Set(uses.map(use => use.split("/")[0])).size === 1 ? "" : "s"}`, () => {
+    footer.append(action(viewOnly ? "Close" : "Keep editing", close));
+    if (!viewOnly) footer.append(action(choice?.independent ? `Apply to ${selected.doc.screens[0]!.name} only` : `Apply to ${groups.length} screen${groups.length === 1 ? "" : "s"}`, () => {
       try { refuseChanged(); if (sample.revision !== revision) throw Error("A use changed. Keep editing to review it again. Your draft is retained."); }
       catch (error) { warning.hidden = false; warning.textContent = (error as Error).message; return; }
       close();

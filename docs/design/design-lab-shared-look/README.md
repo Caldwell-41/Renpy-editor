@@ -3,7 +3,7 @@
 Kris selected implementing [L07 #43](https://github.com/Caldwell-41/Renpy-editor/issues/43)
 on a new branch on 2026-10-30. Branch `codex/l07-shared-looks` starts at
 `e9e8661`, the current Screens base including #71's text-draft ownership fix.
-The repository's design-before-production rule applies. A3, A2 and the three
+The repository's design-before-production rule applies. A4, A2 and the three
 original designs remain drafts. No option has approval and production code has
 not changed.
 
@@ -13,29 +13,40 @@ selection, inspector sections, Source access and shared-history controls.
 
 | Option | Editing and review |
 | --- | --- |
-| A3, existing editor | The production Screens renderer retains its sidebar, Choose/Design/Connect, single canvas and existing forms. A Look row augments Typography; the existing Apply reviews shared changes. |
+| A4, existing editor | Shared-style scope, use counts and a review listing all affected screens sit inside the existing screen editor. The sample has eight screens and fourteen uses. |
 | A2, refined inspector | Help and About previews show draft changes together. Plain scope choices distinguish shared updates from a copy for only one element. |
 | A, inspector | Appearance stays in the inspector. A dialog lists all screens before Apply or independent copy. |
 | B, library | A style list sits beside Help and About previews. The inspector edits the selected style; a dialog reviews affected screens. |
 | C, inline | Appearance fields form a worksheet below the canvas. Affected screens and confirmation expand beneath the fields. |
 
-A3 is the current proposal. Kris found A2 disconnected from the existing editor
-and selected rebuilding the study inside that editor with experience-first. A3
-mounts the actual `ScreensWorkspace` renderer with fictional memory-only services.
-It adds a compact Look row inside Typography, an existing-look chooser, independent
-copy intent and an affected-screen review on the existing Apply button. Normal
-text content and layout changes remain local to the selected element. Other screens
-appear in the review dialog; the editing canvas stays single.
+A4 is the current proposal. It extends the existing `editor.ts` and
+`editor-sample.ts` owners and mounts the actual `ScreensWorkspace` renderer with
+fictional memory-only services. Typography now says "Shared style: Body text",
+"Used on 8 screens · 14 elements", "View uses" and "Edit only this element".
+During editing, Apply and its status show the affected scope. The single canvas,
+existing fields and Choose/Design/Connect remain in place.
+
+The many-screen sample contains Help, About, Journal, Map, Inventory, Settings,
+Credits and Pause. Six screens have two body-text uses each. View uses opens a
+scrollable screen list with per-screen element counts and one saved preview at a
+time. Apply uses the same dialog owner for affected screens and their proposed
+appearance. Review derives its rows from actual sample references, with no fixed
+screen-name list. A copy for the selected Help element leaves seven screens unchanged.
+
+A4 replaces A3's active `editor` route and migrates its callers and checks. A3's
+unapproved source remains recoverable at `9a2d218`; no parallel existing-editor
+implementation remains. A2/A/B/C stay registered for their distinct comparison
+layouts. None is an approved production design.
 
 Start at Screens in the sidebar. Choose Help, double-click its body text under
-Choose, and use Design as usual. The new Look row shows that Body text is shared
-with About. Change Color or Size and press the existing Apply. Review shows Help
-and About before confirmation. Make independent marks a copy for this element;
+Choose, and use Design as usual. Shared style identifies the appearance definition
+and its use count. Change Color or Size and press Apply. Review lists every affected
+screen before confirmation. Edit only this element marks a copy for this element;
 Apply reviews that copy together with its pending appearance changes. Cancel
 restores the previous values and reference intent. In the local-use sample, choose
-About and use Change to assign the existing Body text look.
+About and use Change style to assign the existing Body text style.
 
-A3 focuses on text and button-text appearance within the existing editor. Broader
+A4 focuses on text and button-text appearance within the existing editor. Broader
 frame decoration, image controls, font import, structural editing and SDK runtime
 behavior are not newly implemented by this study. Existing controls are rendered
 by their production owners; unsupported sample service operations refuse visibly.
@@ -62,7 +73,9 @@ fields but lengthens the editing page.
 
 ## Review
 
-The current route is `/preview.html?screen=shared-look&variant=editor&state=shared&theme=dark&viewport=wide`.
+The current route is `/preview.html?screen=shared-look&variant=shared-style&state=many&theme=dark&viewport=wide&entry=design`.
+The optional `entry=design` opens the selected text in Design for review; without
+it the existing Choose entry remains. The eight-screen scenario belongs to A4.
 Earlier variant values are `refined`, `inspector`, `library` and `inline`. The existing
 lab command remains `npm run design:dev` from `app/`.
 
@@ -75,23 +88,22 @@ node design-lab/screens/shared-look/export.mjs
 Open `.toolchains/l07-shared-look/shared-look.html` in the repository root. This
 bundles the same renderers and imported production styles into one file. Its
 comparison controls reset to a fresh sample on every variant or scenario change.
-The offline wrapper retains project navigation for A3 and fixes the sample height
+The offline wrapper retains project navigation for A4 and fixes the sample height
 for embedding; the registered lab uses the normal shell and viewport controls.
 
-Try text color, frame background/border and the button appearance samples. Review
-lists Help and About and states which changes. Back to editing retains the draft;
-Cancel draft restores accepted values. Independent copy accepts the draft with a
-new style reference only for the selected use. The local-use scenario offers
-Share with About. Source displays accepted sample definitions and references.
-Undo/Redo restores definitions and references together; simulated reopen clears
-history while retaining accepted data. Missing/changed-use scenarios refuse Apply.
-Dynamic style expressions keep appearance controls read-only.
+In A4, try View uses, change Size or Color, then Apply. Select any affected screen
+in review to inspect its proposed appearance. Keep editing retains the draft.
+Cancel restores accepted values and pending reference intent. Edit only this element
+accepts a separate style for that selected use. Undo/Redo restores definitions and
+references together. Earlier variants retain their separately described interactions.
+Missing/changed-use scenarios refuse Apply; dynamic expressions remain read-only.
 
 All document data, Source serialization, revision checks, history and reopen are
 fictional browser memory. The canvas uses schematic CSS. This does not qualify
 Ren'Py mappings, actual project transactions, source preservation, real conflict
-handling or SDK/helper/native behavior. Ordinary layout controls are represented by
-an explanatory collapsed section; new layout editing is outside this study.
+handling or SDK/helper/native behavior. A4 mounts the existing layout controls;
+earlier sketches use explanatory placeholders. New production layout editing is
+outside this study.
 
 The mock adds no game execution, external requests, project file access or new
 production capability. Existing project fonts, numeric layout and image workflows

@@ -125,6 +125,43 @@ Design approval and all actual-product acceptance remain pending.
 
 ## Acceptance remains pending
 
+### A4 shared-style scope and many-screen review, 2026-10-31
+
+Kris selected replacing the awkward Look wording and demonstrating more than two
+screens, then requested the link. A4 extends the existing `editor.ts` and
+`editor-sample.ts` owners. The active `shared-style` variant/revision `inspector-v4`
+replaces A3's `editor` route and migrates its checks and offline caller. A3's
+unapproved source remains recoverable at `9a2d218`; no parallel existing-editor
+implementation remains. Earlier A2/A/B/C stay available for their distinct layouts.
+
+The current inspector identifies the shared style, screen/element counts, View uses
+and Edit only this element. Apply and the existing status describe shared scope.
+View uses and Apply reuse one dialog owner with a scrollable, reference-derived
+screen list, element counts and one selected-screen preview. The `many` sample has
+eight screens and fourteen uses, including two body-text uses on six screens.
+The final link's `entry=design` opens body text for review without removing the
+normal Choose entry. A shared edit updates all fourteen uses; a selected-element
+copy leaves the other seven screens unchanged. Source and runtime remain simulated.
+
+Both live and offline focused journeys pass, including the existing two-screen
+checks, readonly use browsing with retained input, all eight list entries and
+per-screen counts, selecting later-screen previews, all fourteen appearance
+updates, selected-element copy and Undo restoring the fourteen-use reference set.
+The expanded offline mounting matrix passes 180 cases. The final A4 focused run
+also verifies the corrected shared-scope status. The correction changed only status
+wording, so the earlier mounting matrix remains applicable. Final wide/compact Design and review captures pass
+in both themes, including the direct Design entry and retained input after closing
+review. Typechecking, approval validation, repository validation and whitespace
+checks pass. Raw local receipts are `a4-live-final.json`, `a4-offline-final.json`,
+`a4-layout-check.json` and their logs under `.toolchains/l07-shared-look/`.
+
+During visual review the imported renderer's generic "Changes apply to this text
+only" status contradicted the shared scope. The lab extension now updates that
+status alongside Apply's scope; the production component is unchanged. The
+original screenshot and final corrected captures remain local. Historical startup
+failures remain failed. No actual source/core, SDK/helper, native, package or costly
+CI qualification ran, and no design or product acceptance is claimed.
+
 ### A3 inside the existing editor
 
 Kris said A2 did not show its fit in the existing editor and selected rebuilding
