@@ -2,6 +2,10 @@ name: Report PR validation
 
 on:
   workflow_call:
+    inputs:
+      phase:
+        type: string
+        default: start
 
 permissions:
   contents: read
@@ -24,4 +28,5 @@ jobs:
       - name: Report all selected CI for the current PR candidate
         env:
           GH_TOKEN: ${{ github.token }}
+          VALIDATION_PHASE: ${{ inputs.phase }}
         run: python3 scripts/ci_validation.py

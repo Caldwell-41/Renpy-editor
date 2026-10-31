@@ -9,7 +9,7 @@ audit; it does not grant human acceptance, merge or another costly attempt.
 ## Select the work before starting CI
 
 On each new PR branch, update `.github/validation-plan.json` before publication.
-Set `branch` to that branch's name. Keep `version: 1`. List each required manual
+Set `branch` to that branch's name and `base` to its integration target. Keep `version: 1`. List each required manual
 workflow and its exact GitHub job names in `qualifications`. An explicit empty
 list selects Repository quality only when that satisfies the task. An inherited
 plan for a different branch, a missing plan or invalid selection reports an error.
@@ -22,6 +22,7 @@ For example, Windows Style qualification selects:
 {
   "version": 1,
   "branch": "codex/example-style-change",
+  "base": "codex/phase3b-screen-designer",
   "qualifications": [
     {
       "name": "Windows Style qualification",
@@ -44,11 +45,12 @@ green PR or start qualification itself.
 plan through GitHub. It selects the newest run of each required workflow/event at
 that exact head, then retrieves jobs from that run's exact attempt. Automatic
 Repository quality always requires `Frontend tests and Rust formatting` and
-`Validate repository` from a `pull_request` run. A manual run of the same workflow
+`Validate repository` from a `pull_request` run associated with this PR. Only one open PR may use a
+head branch, because commit statuses are shared across PRs. A manual run of the same workflow
 cannot replace them.
 
 A required run that has not started, or a required job that is queued/running,
-keeps the status pending. Failed/cancelled runs, missing/duplicate required jobs
+keeps the status pending. Terminal failed/cancelled runs, missing/duplicate required jobs
 and required skips prevent success. Unselected specialist skips are allowed.
 Any failed executed job in a selected run also prevents success. Newer runs replace
 older results; the coordinator does not search backwards for a passing attempt.
@@ -78,10 +80,14 @@ finish call depend on every test job, and preserve the reporting job name prefix
 `Validation status (`. The coordinator excludes only those reporting jobs from
 its in-progress-work check, because its own finish job is still running.
 
-A hard cancellation or GitHub outage can prevent a final report. The required
-status then stays unresolved until an agent inspects the exact run and invokes
-the existing reporter through a safe entry point. It must not be set to success
-by hand.
+A finish reporter can publish success after all actual test jobs finish, while its
+own bookkeeping job is still running. It writes the status as its last operation.
+Other reporters require that run to be terminal before accepting its success.
+Cancellation of required test work cannot pass. A hard cancellation of reporting
+itself, after publication, can leave a green status beside a cancelled parent run;
+terminal audit must reject that discrepancy. Earlier cancellation or an unavailable
+reporter leaves the status unresolved. Inspect the exact run and invoke the existing
+reporter through a safe entry point to reconcile it; never set success by hand.
 
 Before starting an additional authorized run after a candidate already passed,
 set its `Loomlight validation` commit status to `pending`, then dispatch and record

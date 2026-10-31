@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, edited]
   workflow_dispatch:
     inputs:
       validation_dummy:
@@ -630,3 +631,5 @@ jobs:
       actions: read
       statuses: write
     uses: ./.github/workflows/validation-status.yml
+    with:
+      phase: finish

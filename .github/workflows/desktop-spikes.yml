@@ -216,3 +216,5 @@ jobs:
       actions: read
       statuses: write
     uses: ./.github/workflows/validation-status.yml
+    with:
+      phase: finish

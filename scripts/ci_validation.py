@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-from urllib.parse import urlencode, quote
+from urllib.parse import urlencode
 
 CONTEXT = "Loomlight validation"
 PLAN_PATH = ".github/validation-plan.json"
@@ -23,11 +23,11 @@ QUALITY = {
 }
 
 
-def load_plan(document, branch):
-    if not isinstance(document, dict) or set(document) != {"version", "branch", "qualifications"}:
-        raise ValueError("Validation plan must contain version, branch and qualifications")
-    if document["version"] != 1 or document["branch"] != branch:
-        raise ValueError("Validation plan must select version 1 and the current PR branch")
+def load_plan(document, branch, base):
+    if not isinstance(document, dict) or set(document) != {"version", "branch", "base", "qualifications"}:
+        raise ValueError("Validation plan must contain version, branch, base and qualifications")
+    if type(document["version"]) is not int or document["version"] != 1 or document["branch"] != branch or document["base"] != base:
+        raise ValueError("Validation plan must select version 1 and the current PR head and base branches")
     qualifications = document["qualifications"]
     if not isinstance(qualifications, list):
         raise ValueError("qualifications must be an explicit list, including [] for quality only")
@@ -56,11 +56,13 @@ def load_plan(document, branch):
     return requirements
 
 
-def evaluate_run(requirement, sha, runs, jobs_for):
+def evaluate_run(requirement, sha, runs, jobs_for, *, pr_number=None, finishing_run_id=None):
     matching = [run for run in runs if (
         run["head_sha"] == sha
         and run["event"] == requirement["event"]
         and run["path"].split("@", 1)[0] == ".github/workflows/" + requirement["workflow"]
+        and (requirement["event"] != "pull_request" or pr_number is None
+             or any(pr["number"] == pr_number for pr in run.get("pull_requests", [])))
     )]
     if not matching:
         return "pending", "not started", None
@@ -72,13 +74,14 @@ def evaluate_run(requirement, sha, runs, jobs_for):
         return "failure", "a job failed or was cancelled", url
     if run["status"] == "completed" and run["conclusion"] != "success":
         return "failure", "run ended with " + str(run["conclusion"]), url
+    finishing = run["id"] == finishing_run_id
     pending = []
     for name in requirement["jobs"]:
         found = [job for job in jobs if job["name"] == name]
         if len(found) > 1:
             return "error", "duplicate required job: " + name, url
         if not found:
-            if run["status"] == "completed":
+            if run["status"] == "completed" or finishing:
                 return "failure", "required job missing: " + name, url
             pending.append(name)
         elif found[0]["status"] != "completed":
@@ -90,6 +93,8 @@ def evaluate_run(requirement, sha, runs, jobs_for):
     if pending or any(job["status"] != "completed" and not job["name"].startswith(REPORT_PREFIX)
                       for job in jobs):
         return "pending", "queued or running", url
+    if run["status"] != "completed" and not finishing:
+        return "pending", "waiting for terminal run result", url
     return "success", "required jobs passed", url
 
 
@@ -124,6 +129,10 @@ class GitHub:
                 return result
         raise ValueError("More than 1,000 records; refusing an incomplete CI result")
 
+    def open_prs(self, branch):
+        owner = self.root.split("/", 2)[1]
+        return self.pages("pulls?" + urlencode({"state": "open", "head": owner + ":" + branch}))
+
     def contents(self, path, sha):
         data = self.request("contents/" + path + "?ref=" + sha)
         return base64.b64decode(data["content"]).decode("utf-8")
@@ -136,7 +145,9 @@ def report(api, pr, run_url):
     if pr["state"] != "open":
         return None
     try:
-        requirements = load_plan(json.loads(api.contents(PLAN_PATH, sha)), pr["head"]["ref"])
+        if len(api.open_prs(pr["head"]["ref"])) != 1:
+            raise ValueError("Use one open PR per head branch; commit statuses are shared across PRs")
+        requirements = load_plan(json.loads(api.contents(PLAN_PATH, sha)), pr["head"]["ref"], pr["base"]["ref"])
         results = []
         for requirement in requirements:
             if requirement is not QUALITY:
@@ -148,7 +159,9 @@ def report(api, pr, run_url):
                              "workflow_runs")
             def jobs_for(run):
                 return api.pages(f"actions/runs/{run['id']}/attempts/{run['run_attempt']}/jobs", "jobs")
-            results.append(evaluate_run(requirement, sha, runs, jobs_for))
+            finishing_run_id = int(os.environ["GITHUB_RUN_ID"]) if os.environ.get("VALIDATION_PHASE") == "finish" else None
+            results.append(evaluate_run(requirement, sha, runs, jobs_for,
+                                        pr_number=number, finishing_run_id=finishing_run_id))
         state = combined_state(results)
         details = [f"- {item['name']}: {result[1]}" + (f". [Run]({result[2]})" if result[2] else "")
                    for item, result in zip(requirements, results)]
@@ -162,17 +175,19 @@ def report(api, pr, run_url):
     # An old run may finish after a new push. Always evaluate fresh data, and do
     # not publish that snapshot if the PR moved while it was being read.
     current = api.request("pulls/" + str(number))
-    if current["state"] != "open" or current["head"]["sha"] != sha:
+    if (current["state"] != "open" or current["head"]["sha"] != sha
+            or current["base"]["ref"] != pr["base"]["ref"]):
         print("PR changed during evaluation; its new workflow will report the new candidate")
         return None
-    api.request("statuses/" + sha, {
-        "context": CONTEXT, "state": state, "description": description[:140], "target_url": run_url,
-    })
     summary = f"## {CONTEXT}: {state}\n\nPR #{number}, candidate `{sha}`.\n\n" + "\n".join(details) + "\n"
     print(summary)
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as output:
             output.write(summary)
+    # Publish last, after every local output operation has succeeded.
+    api.request("statuses/" + sha, {
+        "context": CONTEXT, "state": state, "description": description[:140], "target_url": run_url,
+    })
     return state
 
 
@@ -183,8 +198,7 @@ def main():
         prs = [event["pull_request"]]
     else:
         branch = os.environ["GITHUB_REF_NAME"]
-        owner = os.environ["GITHUB_REPOSITORY"].split("/", 1)[0]
-        prs = api.pages("pulls?" + urlencode({"state": "open", "head": owner + ":" + branch}))
+        prs = api.open_prs(branch)
     url = f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
     if not prs:
         print("No open PR for this branch; no PR validation status to update")

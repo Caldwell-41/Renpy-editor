@@ -10,8 +10,8 @@ records acceptance and continuation; [the technical runbook](../testing/CI-VALID
 owns plan selection and reporting behavior.
 
 Shared reporting hooks, explicit qualification selection and focused tests are
-implemented locally. Fourteen coordinator tests, repository validation, thirteen
-section-link tests, workflow lint and Q1 selector controls pass. Review, publication,
+implemented locally. Eighteen coordinator tests, repository validation, thirteen
+section-link tests, workflow lint and Q1 selector controls pass. Independent reviews are complete and findings addressed. Publication,
 required-status setup, live dummy CI and T3 delivery verification remain pending.
 No SDK, helper, package or native operation is selected. The unrelated audit and
 protected recovery below remain intact. This branch's coordinator is the only

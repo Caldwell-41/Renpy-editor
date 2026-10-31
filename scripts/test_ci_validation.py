@@ -9,11 +9,12 @@ from ci_validation import QUALITY, PLAN_PATH, combined_state, evaluate_run, load
 
 SHA = "a" * 40
 BRANCH = "codex/ci-validation"
+BASE = "codex/phase3b-screen-designer"
 QUALIFICATION = {
     "name": "Windows qualification", "workflow": "screens-source.yml",
     "event": "workflow_dispatch", "jobs": ["Style / Windows x64"],
 }
-PLAN = {"version": 1, "branch": BRANCH, "qualifications": [QUALIFICATION]}
+PLAN = {"version": 1, "branch": BRANCH, "base": BASE, "qualifications": [QUALIFICATION]}
 
 
 def run(identifier=1, *, requirement=QUALIFICATION, sha=SHA, attempt=1,
@@ -21,7 +22,7 @@ def run(identifier=1, *, requirement=QUALIFICATION, sha=SHA, attempt=1,
     return {"id": identifier, "head_sha": sha, "event": requirement["event"],
             "path": ".github/workflows/" + requirement["workflow"], "run_attempt": attempt,
             "html_url": f"https://github.com/owner/repo/actions/runs/{identifier}",
-            "status": status, "conclusion": conclusion}
+            "status": status, "conclusion": conclusion, "pull_requests": [{"number": 73}]}
 
 
 def job(name="Style / Windows x64", *, status="completed", conclusion="success"):
@@ -71,7 +72,20 @@ class CompletionTests(unittest.TestCase):
         active = run(status="in_progress", conclusion=None)
         jobs = [job(), job("Unselected specialist", conclusion="skipped"),
                 job("Validation status (finish) / Report validation", status="in_progress", conclusion=None)]
-        self.assertEqual(evaluate_run(QUALIFICATION, SHA, [active], lambda _: jobs)[0], "success")
+        self.assertEqual(evaluate_run(QUALIFICATION, SHA, [active], lambda _: jobs, finishing_run_id=1)[0], "success")
+
+    def test_missing_job_in_own_finish_reporter_is_terminal_selection_failure(self):
+        active = run(status="in_progress", conclusion=None)
+        self.assertEqual(evaluate_run(QUALIFICATION, SHA, [active], lambda _: [], finishing_run_id=1)[0], "failure")
+
+    def test_in_progress_run_cannot_pass_from_another_reporter(self):
+        active = run(status="in_progress", conclusion=None)
+        self.assertEqual(evaluate_run(QUALIFICATION, SHA, [active], lambda _: [job()])[0], "pending")
+
+    def test_another_prs_quality_cannot_satisfy_this_pr(self):
+        other = run(requirement=QUALITY)
+        other["pull_requests"] = [{"number": 74}]
+        self.assertEqual(evaluate_run(QUALITY, SHA, [other], lambda _: [job(name) for name in QUALITY["jobs"]], pr_number=73)[0], "pending")
 
     def test_run_or_other_executed_job_failure_cannot_be_hidden(self):
         failed = run(conclusion="cancelled")
@@ -88,11 +102,11 @@ class CompletionTests(unittest.TestCase):
 
 class PlanTests(unittest.TestCase):
     def test_explicit_quality_only_and_selected_qualification(self):
-        self.assertEqual(load_plan({**PLAN, "qualifications": []}, BRANCH), [QUALITY])
-        self.assertEqual(load_plan(PLAN, BRANCH), [QUALITY, QUALIFICATION])
+        self.assertEqual(load_plan({**PLAN, "qualifications": []}, BRANCH, BASE), [QUALITY])
+        self.assertEqual(load_plan(PLAN, BRANCH, BASE), [QUALITY, QUALIFICATION])
 
     def test_missing_wrong_branch_empty_job_or_duplicate_requirement_is_rejected(self):
-        bad_plans = [None, {}, {**PLAN, "branch": "another-branch"},
+        bad_plans = [None, {}, {**PLAN, "branch": "another-branch"}, {**PLAN, "base": "another-base"},
                      {**PLAN, "qualifications": None},
                      {**PLAN, "qualifications": [QUALIFICATION, QUALIFICATION]}]
         for update in ({"jobs": []}, {"jobs": ["Validation status (finish)"]},
@@ -101,12 +115,13 @@ class PlanTests(unittest.TestCase):
             bad_plans.append({**PLAN, "qualifications": [{**QUALIFICATION, **update}]})
         for plan in bad_plans:
             with self.subTest(plan=plan), self.assertRaises(ValueError):
-                load_plan(plan, BRANCH)
+                load_plan(plan, BRANCH, BASE)
 
 
 class FakeGitHub:
     def __init__(self):
-        self.pr = {"number": 73, "state": "open", "head": {"sha": SHA, "ref": BRANCH}}
+        self.pr = {"number": 73, "state": "open", "head": {"sha": SHA, "ref": BRANCH}, "base": {"ref": BASE}}
+        self.open_count = 1
         self.plan = copy.deepcopy(PLAN)
         self.statuses = []
         self.pr_reads = 0
@@ -127,6 +142,10 @@ class FakeGitHub:
             self.statuses.append(body)
             return body
         raise AssertionError(path)
+
+    def open_prs(self, branch):
+        assert branch == BRANCH
+        return [self.pr] * self.open_count
 
     def contents(self, path, sha):
         assert sha == SHA
@@ -176,6 +195,12 @@ class ReporterTests(unittest.TestCase):
                 api.source = "jobs: {}"
             self.assertEqual(report(api, api.pr, "https://example.test/run"), "error")
             self.assertEqual(api.statuses[-1]["state"], "error")
+
+    @patch("builtins.print")
+    def test_shared_commit_with_multiple_open_prs_is_rejected(self, _):
+        api = FakeGitHub()
+        api.open_count = 2
+        self.assertEqual(report(api, api.pr, "https://example.test/run"), "error")
 
     @patch("builtins.print")
     def test_cancelled_required_job_is_reported_as_failure(self, _):

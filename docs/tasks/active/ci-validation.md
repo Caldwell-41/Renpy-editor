@@ -13,12 +13,15 @@ change or authorization to merge this implementation.
 
 - One required PR status accounts for automatic quality and explicitly selected
   manual qualification at the current candidate. Implemented; live proof pending.
-- Missing, skipped, failed, cancelled and stale required results cannot establish
-  success. Fourteen focused coordinator tests pass locally.
+- Missing, skipped, failed, cancelled and stale required job results cannot establish
+  success. Eighteen focused coordinator tests pass locally.
 - Existing tests, logs, artifacts and costly-operation guards retain ownership.
   Workflow lint and the existing Q1 selector/source audit pass locally.
 - Agent waiting rules distinguish T3 from Codex desktop and require an evidence
-  audit after CI. Documentation prepared; final review pending.
+  audit after CI. Documentation prepared. Independent Standards and Spec reviews found missing-job
+  finalization and cross-PR identity gaps; both are corrected with focused tests.
+  Reporting-only cancellation after status publication is explicitly distinguished
+  from test cancellation and remains subject to the required terminal audit.
 - Cheap live dummy CI proves pending, intentional failure and success, with actual
   T3 delivery assessed separately. Pending publication and dispatch.
 
