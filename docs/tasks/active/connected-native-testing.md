@@ -35,6 +35,13 @@ CI-first evidence in INDEX remains labelled historical.
 
 ## State and next action
 
-The documentation is ready for independent review. The draft PR owns publication,
-review findings and current-head automatic CI receipts. Preserve the unrelated
-untracked audit and existing native recovery; merge remains a separate user decision.
+[Draft PR #74](https://github.com/Caldwell-41/Renpy-editor/pull/74) is published.
+Independent review of `36539cf` against `6be2dd0` reports one Standards P2 and zero
+Spec findings. The Standards finding identified competing live continuations in
+CURRENT/HANDOVER. The correction replaces PR #73's obsolete watch/resume instructions
+with links to its verified merge/final audit, preserving original failure evidence.
+The coordinator checks this focused correction; no additional review delegation is
+needed. Final current-head CI and review receipts belong in PR #74.
+
+Preserve the unrelated untracked audit and existing native recovery; merge remains
+a separate user decision.
