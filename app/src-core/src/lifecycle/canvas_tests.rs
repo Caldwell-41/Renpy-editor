@@ -405,10 +405,10 @@ fn canvas_sdk_retries_refused_helper_before_project_close() {
         .iter()
         .find(|node| node["start"] == project.request.drafts[0].node_start)
         .unwrap();
-    assert_eq!(frame["width"], 656);
-    assert_eq!(frame["height"], 376);
-    assert_eq!(frame["x"], 172);
-    assert_eq!(frame["y"], 122);
+    assert_eq!(
+        ["x", "y", "width", "height"].map(|key| frame[key].as_f64().unwrap()),
+        [172.0, 122.0, 656.0, 376.0]
+    );
     let rendered = project
         .service
         .screens_canvas_status(replacement.clone(), true)

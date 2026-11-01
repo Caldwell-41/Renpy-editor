@@ -606,6 +606,12 @@ portable names exclude Ren'Py double-underscore private names, its internal `_m1
 namespace and Windows device names.
 An empty directory may remain after a rejected file transaction; source and metadata
 remain unchanged. Metadata size and relationship validation precede acceptance.
+Creation reserves inventory capacity for the new file and any missing parent
+directory before writing, including the aggregate script-byte limit. Its returned
+catalog is prepared from the captured inventory and proposed map before commit;
+a later inventory read failure cannot turn a committed creation into a refusal.
+The static-name scan skips recognized Python block bodies while retaining Ren'Py
+declarations nested in `init` blocks.
 
 Owned root resolution requires the original path/name, one adjacent matching marker,
 one supported declaration and an unambiguous static namespace. Source body edits and
@@ -635,6 +641,9 @@ It deletes the qualified subtree range, preserving surrounding source, and inser
 `pass` only when the remaining parent body would otherwise be empty. One accepted
 change uses one existing source transaction/history entry; no-op commands add none.
 Parsing, source ranges and returned revision all use the same captured byte buffer.
+An interleaved standalone comment outdented to the subtree header or beyond has
+ambiguous ownership and blocks removal and reorder. Comments within the subtree's
+body retain ordinary subtree behavior.
 
 Protected structural statements appear as read-only hierarchy rows with derived
 `source-<SHA-256>` identities. These identify the current inspected region; they do
@@ -689,6 +698,9 @@ The literal reader resolves `pos`, `anchor`, `align`, `xalign`/`yalign`, `xysize
 `minimum`/`maximum`, `padding`, `xpadding`/`ypadding` into canonical fields. It patches
 only changed numeric tokens when an alias can still represent the result. Otherwise
 it splits the affected alias into canonical statements while retaining its comment.
+Unchanged parent-controlled values in a fully literal alias can be retained during
+that split; source ambiguity still prevents splitting and controlled-field edits
+still refuse.
 Removing an entire property statement leaves `pass` so an empty block stays valid.
 Duplicate setters, expressions, malformed tuples, nested property blocks, unsupported
 body indentation, overlapping size rules and other placement transforms stay
@@ -722,6 +734,8 @@ Opaque direct children make grid counts Source-only because their cell count is
 unknown. Grids without explicit `allow_underfull True` keep count changes and
 child Add/removal in Source. Safe unrelated layout edits remain available. The
 inspector's `allowsEmptyCells` metadata reports that policy without evaluating it.
+Equivalent whitespace in the scalar policy is accepted; duplicate or malformed
+policies remain protected.
 
 L04 viewports show stationary top-left clipping. Wheel/drag/key scrolling,
 scrollbars, adjustment bindings, initial offsets, child_size and alternate grid

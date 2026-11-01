@@ -65,7 +65,7 @@ the coordinator selects costly qualification and records its limits before it
 starts. Historical closed allowances remain closed. Protected recovery and the
 unrelated untracked audit remain untouched.
 
-Current state: text validation, image previews, helper lifecycle and workspace/numeric
-are reviewed and integrated. The core Screens worker remains active. Detailed
+Current state: all five groups are reviewed and integrated. Combined core and
+controller verification is running; platform qualification and draft publication follow. Detailed
 red/green results, integration findings, host operations and CI receipts belong in
 the linked evidence.

@@ -187,3 +187,30 @@ frontend check passes all 300 tests with no skips, and the production build pass
 The existing Vite chunk-size advisory remains. The complete Python 3.12.16 wrapper
 is used for harness consumers. CI workflow lint and all 18 coordinator unit tests
 pass. No real SDK/helper execution or qualification dispatch has started.
+
+## Core Screens integration and review
+
+The core worker returned `c0d9bed43a76703a94a5d34c3f86ad6076324063` from
+`t3/fix-core-screens-audit`, integrated after coordinator review as `c8db7ef`.
+The six selected corrections extend existing source, layout and inventory owners.
+
+| Finding | Reviewed correction and focused failure |
+| --- | --- |
+| #4 | Recognized Python block bodies no longer contribute false screen declarations. The original owned-resolution failure is covered alongside combined Python flags and a following nested `init` collision. |
+| #5 | The existing inventory walker reserves a proposed file and missing parent directories. File, entry and aggregate source-byte limits refuse before writing. A prepared catalog returns the committed result even when a later inventory read fails. |
+| #6 | Protected children omitted by the parser add a canvas-plan refusal. Root and nested two-space children refuse; supported ordinary properties and actions remain admitted. |
+| #9 | Lexically identified outdented standalone comments protect the intersecting subtree. Removal and reorder refuse with unchanged bytes; ordinarily indented subtree comments retain normal removal and Undo. |
+| #12 | Alias splitting uses source ambiguity independently of parent placement controls. Literal horizontal/vertical changes preserve the untouched controlled values and alias comment, while controlled-field edits and stale revisions still refuse. |
+| #18 | Scalar grid-policy recognition accepts equivalent whitespace. Duplicate, malformed and false policies retain structural refusal; accepted additions preserve source and Undo. |
+
+The worker retained red/green logs for each trigger and passed nine public-IPC audit
+cases, ownership compatibility, production core checking and formatting. Its wider
+Screens run passed 105 tests with five intentionally ignored SDK qualifications.
+The coordinator inspected every production change and all nine focused cases.
+No namespace race, Redo, resolution-cap, selection, font validation or typography
+qualification expansion is included. Combined verification is running.
+
+The selected CI gate explicitly requires the nine new audit cases and the controlled
+lifecycle cases to appear as passing in Cargo output. Existing gate checks reject
+missing, ignored and failed required markers. The real SDK recovery fixture remains
+separately selected and intentionally ignored during ordinary portable suites.
