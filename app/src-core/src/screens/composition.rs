@@ -159,16 +159,15 @@ impl AuthoringService {
                 .component_revisions
                 .as_ref()
                 .ok_or(SceneError::InvalidPayload)?;
-            self.screens_resolve_target(
+            self.require_component_write_review(
                 project,
                 project_id,
                 &crate::metadata::ScreenTargetBinding {
                     screen_id: owner.screen.id.clone(),
                     source_name: owner.screen.name.clone(),
                 },
-                Some(expected),
+                expected,
             )?;
-            self.ensure_component_users_clean(project, project_id, &owner.screen.id)?;
         }
         let source_path = &owner.screen.path;
         self.ensure_source_paths_clean(project, [source_path.as_str()])

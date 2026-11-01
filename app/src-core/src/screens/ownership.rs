@@ -57,11 +57,14 @@ pub(super) struct Inventory {
     opaque_revisions: Vec<(String, String)>,
     pub(super) names: Vec<String>,
     pub(super) complete: bool,
+    pub(super) source_map: SourceMapMetadata,
+    pub(super) source_map_revision: String,
 }
 
 impl Inventory {
     pub(super) fn refresh_revision(&mut self) {
         let mut digest = Sha256::new();
+        digest.update(self.source_map_revision.as_bytes());
         for (path, bytes) in &self.files {
             digest.update((path.len() as u64).to_le_bytes());
             digest.update(path.as_bytes());
@@ -476,6 +479,18 @@ impl AuthoringService {
             }
             files.push((path.clone(), bytes));
         }
+        let (project_bytes, _) = self
+            .transactions
+            .snapshot(project, RelativePath::new(PROJECT).unwrap())
+            .map_err(|_| SceneError::SourceConflict)?;
+        let metadata = ProjectMetadata::read_bytes(&project_bytes, None)
+            .map_err(|_| SceneError::InvalidMetadata)?;
+        let (map_bytes, map_revision) = self
+            .transactions
+            .snapshot(project, RelativePath::new(MAP).unwrap())
+            .map_err(|_| SceneError::SourceConflict)?;
+        let source_map = SourceMapMetadata::read_bytes(&map_bytes, &metadata.project_id)
+            .map_err(|_| SceneError::InvalidMetadata)?;
         let mut inventory = Inventory {
             revision: String::new(),
             files,
@@ -484,6 +499,8 @@ impl AuthoringService {
             opaque_revisions,
             names,
             complete,
+            source_map,
+            source_map_revision: map_revision.sha256,
         };
         inventory.refresh_revision();
         Ok(inventory)
@@ -494,20 +511,28 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<(SourceMapMetadata, Vec<u8>, Revision, Revision), SceneError> {
+        self.screen_metadata_for_project(project, Some(project_id))
+    }
+
+    pub(super) fn screen_metadata_for_project(
+        &self,
+        project: &ProjectId,
+        expected_project_id: Option<&str>,
+    ) -> Result<(SourceMapMetadata, Vec<u8>, Revision, Revision), SceneError> {
         let (project_bytes, project_revision) = self
             .transactions
             .snapshot(project, RelativePath::new(PROJECT).unwrap())
             .map_err(|_| SceneError::SourceConflict)?;
         let metadata = ProjectMetadata::read_bytes(&project_bytes, None)
             .map_err(|_| SceneError::InvalidMetadata)?;
-        if metadata.project_id != project_id {
+        if expected_project_id.is_some_and(|id| metadata.project_id != id) {
             return Err(SceneError::InvalidMetadata);
         }
         let (bytes, revision) = self
             .transactions
             .snapshot(project, RelativePath::new(MAP).unwrap())
             .map_err(|_| SceneError::SourceConflict)?;
-        let map = SourceMapMetadata::read_bytes(&bytes, project_id)
+        let map = SourceMapMetadata::read_bytes(&bytes, &metadata.project_id)
             .map_err(|_| SceneError::InvalidMetadata)?;
         if map.schema_version != crate::metadata::SOURCE_MAP_SCHEMA_VERSION {
             return Err(SceneError::InvalidMetadata);
@@ -522,6 +547,9 @@ impl AuthoringService {
     ) -> Result<Catalog, SceneError> {
         let (map, _, revision, project_revision) = self.screen_metadata(project, project_id)?;
         let inventory = self.screen_inventory(project)?;
+        if inventory.source_map_revision != revision.sha256 {
+            return Err(SceneError::SourceConflict);
+        }
         catalog(map, inventory, revision.sha256, project_revision.sha256)
     }
 
@@ -763,10 +791,13 @@ impl AuthoringService {
 
 fn catalog(
     map: SourceMapMetadata,
-    inventory: Inventory,
+    mut inventory: Inventory,
     source_map_revision: String,
     project_revision: String,
 ) -> Result<Catalog, SceneError> {
+    inventory.source_map = map.clone();
+    inventory.source_map_revision = source_map_revision.clone();
+    inventory.refresh_revision();
     let styles = styles::Index::read(&inventory)?.catalog(&source_map_revision);
     let owned = map
         .owned_screens

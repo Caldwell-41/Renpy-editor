@@ -13,6 +13,22 @@ fn resolved_screen_targets_bind_identity_and_reject_stale_or_renamed_source() {
     assert_eq!(before["kind"], "panel");
     assert_eq!(before["effects"]["unknown"], false);
     assert_eq!(before["effects"]["hiddenScreens"], json!([]));
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.canvasPlan",
+            json!({
+                "path":owner["path"],"screenName":"notes","expectedRevision":document["revision"],
+                "width":1280,"height":720,"addition":{"parentStart":document["screens"][0]["nodes"][0]["span"]["start"],"kind":"use","text":""}
+            })
+        )["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
 
     let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
         .as_str()
@@ -231,6 +247,22 @@ fn marked_component_uses_resolve_by_identity_and_preserve_changed_name_intent() 
         .iter()
         .find(|o| o["name"] == "details")
         .unwrap();
+    let child = compose_command(
+        &mut service,
+        component,
+        json!({
+            "type":"add","parentId":component["rootId"],"kind":"text","text":"Styled component"
+        }),
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    compose_command(
+        &mut service,
+        component,
+        json!({
+            "type":"formatText","nodeId":child["selectedId"],"values":{"color":"#eeeeee"},
+            "style":{"scope":"create","name":"component_body","expectedRevision":catalog["styles"]["revision"]}
+        }),
+    );
     let use_id = uuid::Uuid::new_v4().to_string();
     let map_path = root.join(".renpy-editor/source-map.json");
     let mut map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
@@ -260,6 +292,56 @@ fn marked_component_uses_resolve_by_identity_and_preserve_changed_name_intent() 
     assert_eq!(usage["id"], use_id);
     assert_eq!(usage["component"]["componentId"], component["id"]);
     assert_eq!(usage["component"]["resolved"], true);
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    assert_eq!(catalog["styles"]["error"], Value::Null, "{catalog}");
+    let definition = catalog["styles"]["definitions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|d| d["name"] == "component_body")
+        .unwrap();
+    assert!(definition["uses"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|usage| usage["screenName"] == "notes"));
+    let component_doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":component["path"]}),
+    );
+    let styled_node = component_doc["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|node| node["id"] == child["selectedId"])
+        .unwrap();
+    let layout = json!({"path":component["path"],"screenName":"details",
+        "expectedRevision":component_doc["revision"],"nodeStart":styled_node["span"]["start"],
+        "values":{"xsize":{"unit":"pixels","value":300}}});
+    assert_eq!(
+        reject(&mut service, "screens.setLayout", layout.clone())["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
+    let review = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+            "screenId":component["id"],"sourceName":"details"
+        }}),
+    );
+    let original_component = fs::read(root.join("game/ui/details.rpy")).unwrap();
+    let mut reviewed_layout = layout;
+    reviewed_layout["componentRevisions"] = review["revisions"].clone();
+    ipc(&mut service, "screens.setLayout", reviewed_layout);
+    assert!(fs::read_to_string(root.join("game/ui/details.rpy"))
+        .unwrap()
+        .contains("xsize 300"));
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read(root.join("game/ui/details.rpy")).unwrap(),
+        original_component
+    );
     let before = ipc(
         &mut service,
         "screens.resolveTarget",
@@ -377,4 +459,68 @@ fn marked_component_uses_resolve_by_identity_and_preserve_changed_name_intent() 
         json!({"binding":{"screenId":panel["id"],"sourceName":"notes"}}),
     );
     assert_eq!(after["effects"]["unknown"], true);
+    let incomplete = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+            "screenId":component["id"],"sourceName":"details"
+        }}),
+    );
+    let before_refusal = fs::read(root.join("game/ui/details.rpy")).unwrap();
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({
+                "screenId":component["id"],"expectedRevision":incomplete["revisions"]["source"],
+                "componentRevisions":incomplete["revisions"],
+                "command":{"type":"add","parentId":component["rootId"],"kind":"text","text":"Unreviewed scope"}
+            })
+        )["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
+    assert_eq!(
+        fs::read(root.join("game/ui/details.rpy")).unwrap(),
+        before_refusal
+    );
+    fs::write(&path, &source).unwrap();
+    let cycle_id = uuid::Uuid::new_v4().to_string();
+    let mut cycle_map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+    cycle_map["componentUses"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({
+            "screenId":component["id"],"nodeId":cycle_id,"componentId":component["id"]
+        }));
+    fs::write(&map_path, serde_json::to_vec_pretty(&cycle_map).unwrap()).unwrap();
+    let cycle_source = String::from_utf8(before_refusal).unwrap().replacen(
+        "screen details():\n",
+        &format!("screen details():\n    use details # loomlight-element: {cycle_id}\n"),
+        1,
+    );
+    fs::write(root.join("game/ui/details.rpy"), &cycle_source).unwrap();
+    let cyclic = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+            "screenId":component["id"],"sourceName":"details"
+        }}),
+    );
+    assert_eq!(cyclic["effects"]["unknown"], true);
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({
+                "screenId":component["id"],"expectedRevision":cyclic["revisions"]["source"],
+                "componentRevisions":cyclic["revisions"],
+                "command":{"type":"add","parentId":component["rootId"],"kind":"text","text":"Cyclic scope"}
+            })
+        )["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
+    assert_eq!(
+        fs::read_to_string(root.join("game/ui/details.rpy")).unwrap(),
+        cycle_source
+    );
 }

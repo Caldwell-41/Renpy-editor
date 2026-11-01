@@ -478,7 +478,7 @@ impl AuthoringService {
                 .iter()
                 .find(|n| n.span.start == addition.parent_start)
                 .ok_or(SceneError::InvalidPayload)?;
-            if addition.kind == "image"
+            if matches!(addition.kind.as_str(), "image" | "use")
                 || !composition::can_add(&screen, parent, &addition.kind)
                 || addition.text.len() > 8192
                 || addition.text.contains('\0')

@@ -123,6 +123,8 @@ pub struct SetLayoutRequest {
     pub screen_name: String,
     pub node_start: usize,
     pub values: BTreeMap<String, Option<NumericValue>>,
+    #[serde(default)]
+    pub component_revisions: Option<references::ScreenRevisions>,
 }
 
 pub(super) fn aliases(key: &str) -> Vec<Vec<&str>> {
@@ -721,6 +723,11 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetLayoutRequest,
     ) -> Result<Document, SceneError> {
+        self.require_screen_write_review(
+            project,
+            &request.path,
+            request.component_revisions.as_ref(),
+        )?;
         let relative = path(&request.path)?;
         self.ensure_source_paths_clean(project, [request.path.as_str()])
             .map_err(|_| SceneError::DirtySource)?;

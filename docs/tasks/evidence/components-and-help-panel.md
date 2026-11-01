@@ -173,3 +173,27 @@ The schema-7 Story binding test also demonstrated that a typed Show/Hide kind
 without its persisted binding was previously accepted. Validation now requires
 the binding while retaining well-formed missing-target intent. Its focused
 public metadata test passes after the expected failure.
+
+## Complete inclusion graph and writer admission
+
+One bounded graph owner in `screens/references.rs` accounts for typed use IDs,
+source names/markers, unresolved sites, every raw inclusion, executable inventory,
+cycles and depth/count limits. Its captured metadata is part of the inventory
+revision. Style indexing uses the same graph and expands source-derived parent
+screen rows; arbitrary/unmarked/dynamic inclusions remain unavailable. Known Style
+declarations and bindings contribute conservative effect dependency revisions.
+
+Composition and all four geometry operations now require the same component-review
+capture, complete inclusion graph and clean transitive Source users. The earlier
+cleanliness-only admission wrapper is removed. Structural component operations
+will consume `require_component_write_review` and `ComponentGraph::would_cycle`
+on transfer; their interim traversal must then be removed. The latter query is
+unused in the coordinator's preparation-only module until that worker integration;
+no dead-code suppression was added.
+
+Four actual shared IPC journeys pass, including incomplete/cyclic use refusal,
+known-component Style scope, geometry review admission and exact history, retained
+dependent drafts, accepted revision consistency and generic canvas-use refusal.
+The new public gates failed before correction. Existing Style coverage passes
+27 cases; its one explicitly selected SDK/helper case remains ignored. These
+portable checks do not qualify component canvas rendering or normal play.

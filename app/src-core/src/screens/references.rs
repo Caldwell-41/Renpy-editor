@@ -49,6 +49,227 @@ pub struct ResolveTargetRequest {
     pub expected: Option<ScreenRevisions>,
 }
 
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct ComponentUseLocation {
+    pub(super) screen_id: String,
+    pub(super) component_id: String,
+    pub(super) node_id: String,
+    pub(super) path: String,
+    pub(super) screen_name: String,
+    pub(super) span: Option<Span>,
+    pub(super) source_revision: Option<String>,
+    pub(super) resolved: bool,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct ComponentGraph {
+    pub(super) complete: bool,
+    pub(super) uses: Vec<ComponentUseLocation>,
+}
+
+impl ComponentGraph {
+    pub(super) fn would_cycle(
+        &self,
+        component_id: &str,
+        target_id: &str,
+    ) -> Result<bool, SceneError> {
+        if !self.complete {
+            return Err(SceneError::OpaqueBoundary);
+        }
+        let mut pending = vec![component_id];
+        let mut visited = HashSet::new();
+        while let Some(id) = pending.pop() {
+            if id == target_id {
+                return Ok(true);
+            }
+            if !visited.insert(id) {
+                continue;
+            }
+            if visited.len() > MAX_NODES {
+                return Err(SceneError::InvariantBlocked);
+            }
+            pending.extend(
+                self.uses
+                    .iter()
+                    .filter(|u| u.screen_id == id)
+                    .map(|u| u.component_id.as_str()),
+            );
+        }
+        if self.uses.len() >= MAX_NODES {
+            return Err(SceneError::InvariantBlocked);
+        }
+        let mut adjacency = BTreeMap::<&str, Vec<&str>>::new();
+        for usage in &self.uses {
+            adjacency
+                .entry(&usage.screen_id)
+                .or_default()
+                .push(&usage.component_id);
+        }
+        adjacency.entry(target_id).or_default().push(component_id);
+        let mut active = HashSet::new();
+        let mut heights = BTreeMap::new();
+        for id in adjacency.keys() {
+            if component_height(id, &adjacency, &mut active, &mut heights, 0).is_none() {
+                return Err(SceneError::OpaqueBoundary);
+            }
+        }
+        Ok(false)
+    }
+}
+
+pub(super) fn component_graph(
+    map: &SourceMapMetadata,
+    inventory: &ownership::Inventory,
+) -> ComponentGraph {
+    let mut complete = inventory.complete && inventory.unresolved_styles.is_empty();
+    let mut resolved_owners = HashSet::new();
+    let mut source_revisions = BTreeMap::new();
+    let mut observed = BTreeMap::new();
+    let mut duplicate = HashSet::new();
+    let mut remaining = MAX_NODES;
+    for owner in &map.owned_screens {
+        let Some((_, bytes)) = inventory.files.iter().find(|(p, _)| p == &owner.path) else {
+            continue;
+        };
+        source_revisions.insert(owner.id.as_str(), digest(bytes));
+        if ownership::resolves(owner, inventory) {
+            resolved_owners.insert(owner.id.as_str());
+        }
+        let Ok(document) = inspect(bytes, owner.path.clone(), digest(bytes)) else {
+            continue;
+        };
+        let Some(screen) = document.screens.iter().find(|s| s.name == owner.name) else {
+            continue;
+        };
+        for node in screen.nodes.iter().filter(|n| n.kind == "use") {
+            if remaining == 0 {
+                complete = false;
+                break;
+            }
+            remaining -= 1;
+            let Some(id) = &node.id else {
+                complete = false;
+                continue;
+            };
+            let key = (owner.id.clone(), id.clone());
+            if observed
+                .insert(
+                    key.clone(),
+                    (
+                        node.literal.clone(),
+                        Span {
+                            start: node.span.start,
+                            end: node.source_end,
+                        },
+                    ),
+                )
+                .is_some()
+            {
+                duplicate.insert(key);
+            }
+        }
+    }
+    let mut uses = Vec::new();
+    for usage in &map.component_uses {
+        let owner = map.owned_screens.iter().find(|s| s.id == usage.screen_id);
+        let target = map
+            .owned_screens
+            .iter()
+            .find(|s| s.id == usage.component_id && s.kind == OwnedScreenKind::Component);
+        let key = (usage.screen_id.clone(), usage.node_id.clone());
+        let node = observed.get(&key);
+        let resolved = !duplicate.contains(&key)
+            && resolved_owners.contains(usage.screen_id.as_str())
+            && resolved_owners.contains(usage.component_id.as_str())
+            && node
+                .zip(target)
+                .is_some_and(|((name, _), target)| name.as_deref() == Some(target.name.as_str()));
+        complete &= resolved;
+        uses.push(ComponentUseLocation {
+            screen_id: usage.screen_id.clone(),
+            component_id: usage.component_id.clone(),
+            node_id: usage.node_id.clone(),
+            path: owner.map(|s| s.path.clone()).unwrap_or_default(),
+            screen_name: owner.map(|s| s.name.clone()).unwrap_or_default(),
+            span: node.map(|(_, span)| span.clone()),
+            source_revision: source_revisions.get(usage.screen_id.as_str()).cloned(),
+            resolved,
+        });
+    }
+    let accounted = uses
+        .iter()
+        .filter(|u| u.resolved)
+        .filter_map(|u| u.span.as_ref().map(|s| (u.path.as_str(), s.start)))
+        .collect::<HashSet<_>>();
+    let mut raw_count = 0usize;
+    for (path, bytes) in &inventory.files {
+        let Ok(lines) = source_lines(bytes) else {
+            complete = false;
+            continue;
+        };
+        for line in lines
+            .iter()
+            .filter(|l| l.code.split_whitespace().next() == Some("use"))
+        {
+            raw_count += 1;
+            complete &= accounted.contains(&(path.as_str(), line.start));
+            if raw_count > MAX_NODES {
+                complete = false;
+                break;
+            }
+        }
+        if raw_count > MAX_NODES {
+            break;
+        }
+    }
+    let mut adjacency = BTreeMap::<&str, Vec<&str>>::new();
+    for usage in uses.iter().filter(|u| u.resolved) {
+        adjacency
+            .entry(&usage.screen_id)
+            .or_default()
+            .push(&usage.component_id);
+    }
+    let mut active = HashSet::new();
+    let mut heights = BTreeMap::new();
+    for id in adjacency.keys() {
+        if component_height(id, &adjacency, &mut active, &mut heights, 0).is_none() {
+            complete = false;
+            break;
+        }
+    }
+    ComponentGraph { complete, uses }
+}
+
+fn component_height<'a>(
+    id: &'a str,
+    adjacency: &BTreeMap<&'a str, Vec<&'a str>>,
+    active: &mut HashSet<&'a str>,
+    heights: &mut BTreeMap<&'a str, usize>,
+    depth: usize,
+) -> Option<usize> {
+    if depth > MAX_DEPTH {
+        return None;
+    }
+    if let Some(height) = heights.get(id) {
+        return Some(*height);
+    }
+    if !active.insert(id) {
+        return None;
+    }
+    let mut height = 0;
+    for child in adjacency.get(id).into_iter().flatten() {
+        height = height.max(component_height(child, adjacency, active, heights, depth + 1)? + 1);
+        if height > MAX_DEPTH {
+            return None;
+        }
+    }
+    active.remove(id);
+    heights.insert(id, height);
+    Some(height)
+}
+
 /// Exact single statements remain editable only in their owned Panel context.
 pub(super) fn qualified_panel_spans(
     owner: &OwnedScreen,
@@ -103,6 +324,7 @@ pub(super) fn qualified_panel_spans(
 struct Effects<'a> {
     map: &'a SourceMapMetadata,
     inventory: &'a ownership::Inventory,
+    styles: &'a styles::Index,
     active: HashSet<String>,
     remaining: usize,
     unknown: bool,
@@ -136,12 +358,16 @@ impl Effects<'_> {
             .unwrap()
             .1;
         self.dependencies.insert(id.to_owned(), digest(bytes));
-        let Ok(document) = inspect(bytes, owner.path.clone(), digest(bytes)) else {
+        let Ok(mut document) = inspect(bytes, owner.path.clone(), digest(bytes)) else {
             self.unknown = true;
             self.active.remove(id);
             return;
         };
-        self.unknown |= !document.protected.is_empty();
+        self.unknown |= self.styles.resolve(&mut document, bytes).is_err();
+        self.unknown |= document
+            .protected
+            .iter()
+            .any(|span| !self.styles.supports_declaration(&owner.path, span.start));
         let screen = document
             .screens
             .iter()
@@ -154,6 +380,20 @@ impl Effects<'_> {
                 break;
             }
             self.remaining -= 1;
+            if let Some(reference) = &node.style {
+                if let Ok(definition) = self.styles.definition(&reference.name) {
+                    if let Some((_, bytes)) =
+                        inventory.files.iter().find(|(p, _)| p == &definition.path)
+                    {
+                        self.dependencies
+                            .insert(format!("style:{}", definition.name), digest(bytes));
+                    } else {
+                        self.unknown = true;
+                    }
+                } else {
+                    self.unknown = true;
+                }
+            }
             if matches!(node.kind.as_str(), "text" | "textbutton" | "image")
                 && node.literal.is_none()
             {
@@ -256,13 +496,12 @@ fn digest(bytes: &[u8]) -> String {
 }
 
 impl AuthoringService {
-    pub(super) fn ensure_component_users_clean(
+    fn ensure_component_users_clean_in_map(
         &self,
         project: &ProjectId,
-        project_id: &str,
+        map: &SourceMapMetadata,
         component_id: &str,
     ) -> Result<(), SceneError> {
-        let (map, _, _, _) = self.screen_metadata(project, project_id)?;
         let mut affected = HashSet::from([component_id]);
         loop {
             let previous = affected.len();
@@ -285,6 +524,60 @@ impl AuthoringService {
         .map_err(|_| SceneError::DirtySource)
     }
 
+    pub(super) fn require_component_write_review(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        binding: &ScreenTargetBinding,
+        expected: &ScreenRevisions,
+    ) -> Result<ResolvedScreenTarget, SceneError> {
+        let resolved = self.screens_resolve_target(project, project_id, binding, Some(expected))?;
+        if resolved.kind != OwnedScreenKind::Component {
+            return Err(SceneError::ReferenceBlocked);
+        }
+        let inventory = self.screen_inventory(project)?;
+        if inventory.source_map_revision != resolved.revisions.source_map
+            || inventory.revision != resolved.revisions.inventory
+        {
+            return Err(SceneError::SourceConflict);
+        }
+        if !component_graph(&inventory.source_map, &inventory).complete {
+            return Err(SceneError::OpaqueBoundary);
+        }
+        self.ensure_component_users_clean_in_map(
+            project,
+            &inventory.source_map,
+            &binding.screen_id,
+        )?;
+        Ok(resolved)
+    }
+
+    pub(super) fn require_screen_write_review(
+        &self,
+        project: &ProjectId,
+        source_path: &str,
+        expected: Option<&ScreenRevisions>,
+    ) -> Result<(), SceneError> {
+        let (map, _, _, _) = self.screen_metadata_for_project(project, None)?;
+        if let Some(owner) = map
+            .owned_screens
+            .iter()
+            .find(|s| s.path == source_path && s.kind == OwnedScreenKind::Component)
+        {
+            let expected = expected.ok_or(SceneError::InvalidPayload)?;
+            self.require_component_write_review(
+                project,
+                &map.project_id,
+                &ScreenTargetBinding {
+                    screen_id: owner.id.clone(),
+                    source_name: owner.name.clone(),
+                },
+                expected,
+            )?;
+        }
+        Ok(())
+    }
+
     pub fn screens_resolve_target(
         &self,
         project: &ProjectId,
@@ -294,15 +587,20 @@ impl AuthoringService {
     ) -> Result<ResolvedScreenTarget, SceneError> {
         let (map, _, map_revision, _) = self.screen_metadata(project, project_id)?;
         let inventory = self.screen_inventory(project)?;
+        if inventory.source_map_revision != map_revision.sha256 {
+            return Err(SceneError::SourceConflict);
+        }
         let owner = map
             .owned_screens
             .iter()
             .find(|s| s.id == binding.screen_id && s.name == binding.source_name)
             .filter(|s| ownership::resolves(s, &inventory))
             .ok_or(SceneError::ReferenceBlocked)?;
+        let style_index = styles::Index::read(&inventory)?;
         let mut effects = Effects {
             map: &map,
             inventory: &inventory,
+            styles: &style_index,
             active: HashSet::new(),
             remaining: MAX_NODES,
             unknown: false,

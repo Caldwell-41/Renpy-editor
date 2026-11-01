@@ -83,6 +83,8 @@ pub struct SetPixelRequest {
     pub node_start: usize,
     pub property: PixelProperty,
     pub value: u32,
+    #[serde(default)]
+    pub component_revisions: Option<references::ScreenRevisions>,
 }
 
 /// Both dimensions are prepared against one revision and accepted in one transaction.
@@ -95,6 +97,8 @@ pub struct SetSizeRequest {
     pub node_start: usize,
     pub width: u32,
     pub height: u32,
+    #[serde(default)]
+    pub component_revisions: Option<references::ScreenRevisions>,
 }
 
 /// Move the representative aligned frame without changing its coordinate type.
@@ -107,6 +111,8 @@ pub struct SetPositionRequest {
     pub node_start: usize,
     pub xalign: f64,
     pub yalign: f64,
+    #[serde(default)]
+    pub component_revisions: Option<references::ScreenRevisions>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -764,6 +770,11 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetPixelRequest,
     ) -> Result<Document, SceneError> {
+        self.require_screen_write_review(
+            project,
+            &request.path,
+            request.component_revisions.as_ref(),
+        )?;
         self.screens_set_properties(
             project,
             request.path,
@@ -779,6 +790,11 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetSizeRequest,
     ) -> Result<Document, SceneError> {
+        self.require_screen_write_review(
+            project,
+            &request.path,
+            request.component_revisions.as_ref(),
+        )?;
         self.screens_set_properties(
             project,
             request.path,
@@ -797,6 +813,11 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetPositionRequest,
     ) -> Result<Document, SceneError> {
+        self.require_screen_write_review(
+            project,
+            &request.path,
+            request.component_revisions.as_ref(),
+        )?;
         if ![request.xalign, request.yalign]
             .iter()
             .all(|v| v.is_finite() && (0.0..=1.0).contains(v))
