@@ -444,6 +444,11 @@ impl SourceMapMetadata {
                     return Err(MetadataError::InvalidStructure);
                 }
                 last_end = beat.byte_end;
+                if matches!(beat.kind.as_str(), "showScreen" | "hideScreen")
+                    && (self.schema_version < 7 || beat.screen_target.is_none())
+                {
+                    return Err(MetadataError::InvalidStructure);
+                }
                 if let Some(target) = &beat.screen_target {
                     if self.schema_version < 7
                         || !matches!(beat.kind.as_str(), "showScreen" | "hideScreen")
@@ -696,6 +701,9 @@ mod tests {
             round_trip["sceneMappings"][0]["beats"][0]["screenTarget"],
             value["sceneMappings"][0]["beats"][0]["screenTarget"]
         );
+        let binding = value["sceneMappings"][0]["beats"][0]["screenTarget"].take();
+        assert_eq!(read(&value), Err(MetadataError::InvalidStructure));
+        value["sceneMappings"][0]["beats"][0]["screenTarget"] = binding;
         value["sceneMappings"][0]["beats"][0]["screenTarget"]["screenId"] =
             Value::String("invalid-id".into());
         assert_eq!(read(&value), Err(MetadataError::InvalidStructure));

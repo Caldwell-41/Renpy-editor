@@ -824,3 +824,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   focus, revision-bound submission, refusal retention and cancellation. Existing
   nested-fixed and ambiguous-parent cases remain covered.
 - **Evidence:** [Independent-review corrections](../tasks/evidence/phase-3b-audit-fixes.md#independent-review-corrections).
+
+## H59. LibreSSL derives a fixture serial path outside a dotted worktree
+
+- **Class/search:** harness; TLS fixture, OpenSSL, LibreSSL, CAcreateserial,
+  extensionless CA certificate, dotted parent directory, sandbox write refusal.
+- **Cause/correction:** automatic serial-path derivation uses the last dot in the
+  CA certificate's full path. An extensionless certificate below a dotted parent
+  can place the serial file outside the fixture. Supply `-CAserial` with an explicit
+  path inside the same owned temporary root before allowing broader execution.
+- **Verification:** actual host certificate preparation under a dotted temporary
+  path now creates the serial and certificate inside that root and cleans up all
+  generated material. No listener, provider request or native application runs.
+- **Evidence:** [TLS fixture isolation](../tasks/evidence/components-and-help-panel.md#tls-fixture-isolation).

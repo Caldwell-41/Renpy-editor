@@ -153,3 +153,23 @@ coherent Scene slice `d742ceb` is not yet integrated. L08 resumes after consumin
 `ea752f2`. Current gaps are complete affected-use graph admission, known-component
 Style indexing, review admission for geometry writers, complete ticket journeys,
 approved production UI, runtime/target qualification and final independent review.
+
+## TLS fixture isolation
+
+L09's ordinary release-core run exposed sandbox loopback-listener restrictions.
+Before escalation, its discriminating preflight separately reproduced LibreSSL
+deriving a CA serial path outside an extensionless certificate's owned fixture
+root when a parent directory contains a dot. No product fix or test skip applies.
+The fixture now supplies `-CAserial` under its temporary root. The coordinator
+ran the actual certificate-generation portion under a dotted temporary path;
+serial/certificate creation and root containment pass, and temporary material is
+removed. No key contents were printed or retained. H59 indexes this cause.
+
+The worker retains the initial failed run and will rerun the same ordinary suite
+with authorized localhost capability only after consuming this correction.
+No SDK, package or native campaign starts through that escalation.
+
+The schema-7 Story binding test also demonstrated that a typed Show/Hide kind
+without its persisted binding was previously accepted. Validation now requires
+the binding while retaining well-formed missing-target intent. Its focused
+public metadata test passes after the expected failure.
