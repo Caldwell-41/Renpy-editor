@@ -362,6 +362,98 @@ test("invalid text Apply identifies the field and keeps its draft and keyboard f
   } finally { h.workspace.dispose(); }
 });
 
+test("oversized UTF-8 text stays in its field until corrected to the 8192-byte boundary", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick(); h.edit("title-id");
+    let input = h.text(); input.focus(); input.value = "界".repeat(3000);
+    input.dispatchEvent(new window.Event("input"));
+    assert.equal(input.getAttribute("aria-invalid"), null, "Typing defers new validation errors");
+    input.blur();
+    assert.equal(input.getAttribute("aria-invalid"), "true", "Field completion rejects 9000 UTF-8 bytes");
+    assert.match(document.getElementById(input.getAttribute("aria-describedby")!)?.textContent ?? "", /8192.*UTF-8/);
+    input.value = "界".repeat(2731); input.dispatchEvent(new window.Event("input"));
+    h.click("Apply"); await tick();
+    assert.equal(input.getAttribute("aria-invalid"), "true", "8193 UTF-8 bytes remain invalid");
+    assert.equal(document.activeElement === input, true);
+    assert.equal(input.value, "界".repeat(2731)); assert.equal(h.workspace.hasDraft(), true);
+    assert.equal(h.calls.filter(call => call.operation === "screens.compose").length, 0);
+    assert.equal(document.querySelector<HTMLElement>("[data-text-review]")?.hidden, true);
+    h.click("1  Choose"); h.edit("title-id"); input = h.text();
+    assert.equal(input.value, "界".repeat(2731)); assert.equal(input.getAttribute("aria-invalid"), "true");
+    const corrected = "界".repeat(2730) + "ab"; // 8192 UTF-8 bytes.
+    input.focus(); input.value = corrected; input.dispatchEvent(new window.Event("input"));
+    assert.equal(input.getAttribute("aria-invalid"), null);
+    assert.equal(document.activeElement === input, true);
+    const accepted = structuredClone(h.original); accepted.revision = "accepted"; accepted.screens[0]!.nodes[2]!.literal = corrected;
+    h.respond(accepted, "title-id");
+    input.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true, cancelable: true }));
+    await tick(); await tick();
+    assert.deepEqual(h.calls.filter(call => call.operation === "screens.compose").map(call => call.payload?.command),
+      [{ type: "formatText", nodeId: "title-id", values: { text: corrected } }]);
+    assert.equal(h.workspace.hasDraft(), false); assert.equal(h.text().value, corrected);
+  } finally { h.workspace.dispose(); }
+});
+
+test("typography-only edits allow unchanged existing text above the UTF-8 bound", async () => {
+  const h = interactiveFixture();
+  try {
+    await tick(); await tick();
+    const before = structuredClone(h.original), original = "界".repeat(3000);
+    before.screens[0]!.nodes[2]!.literal = original;
+    h.replaceDocument(before); await h.workspace.load(); h.edit("title-id");
+    const input = h.text(); input.focus(); input.blur();
+    assert.equal(input.getAttribute("aria-invalid"), null, "Unchanged source text is not submitted to core");
+    input.value = "界".repeat(2731); input.dispatchEvent(new window.Event("input"));
+    input.focus(); input.blur(); assert.equal(input.getAttribute("aria-invalid"), "true");
+    input.value = original; input.dispatchEvent(new window.Event("input"));
+    assert.equal(input.getAttribute("aria-invalid"), null, "Restoring the source literal clears the field error");
+    const size = document.querySelector<HTMLInputElement>('[data-text-field="size"]'); assert.ok(size);
+    size.value = "26"; size.dispatchEvent(new window.Event("input"));
+    const accepted = structuredClone(before); accepted.revision = "accepted";
+    accepted.screens[0]!.nodes[2]!.textProperties!.values.size = 26;
+    h.respond(accepted, "title-id"); h.click("Apply"); await tick(); await tick();
+    assert.deepEqual(h.calls.filter(call => call.operation === "screens.compose").map(call => call.payload?.command),
+      [{ type: "formatText", nodeId: "title-id", values: { size: 26 } }]);
+    assert.equal(h.workspace.hasDraft(), false); assert.equal(h.text().value, original);
+  } finally { h.workspace.dispose(); }
+});
+
+test("added text and button labels keep oversized input and accept the exact UTF-8 byte boundary", async () => {
+  for (const [kind, oversized, corrected] of [
+    ["text", "界".repeat(2731), "界".repeat(2730) + "ab"], // 8193 and 8192 UTF-8 bytes.
+    ["textbutton", "a".repeat(8193), "a".repeat(8192)],
+  ] as const) {
+    const h = interactiveFixture();
+    try {
+      await tick(); await tick(); h.row("box-id").click(); h.click("Add element");
+      document.querySelector<HTMLButtonElement>(`[data-kind="${kind}"]`)!.click();
+      const input = document.querySelector<HTMLTextAreaElement>(".screen-addition textarea"); assert.ok(input);
+      input.focus(); input.value = oversized; input.dispatchEvent(new window.Event("input"));
+      assert.equal(input.getAttribute("aria-invalid"), null, "Typing defers new validation errors");
+      input.blur();
+      assert.equal(input.getAttribute("aria-invalid"), "true", `${kind} completion rejects 8193 bytes`);
+      const error = document.getElementById(input.getAttribute("aria-describedby")!);
+      assert.match(error?.textContent ?? "", /8192.*UTF-8/);
+      h.click(kind === "text" ? "Add text" : "Add button"); await tick();
+      assert.equal(document.activeElement === input, true); assert.equal(input.isConnected, true);
+      assert.equal(input.value, oversized); assert.equal(h.workspace.hasDraft(), true);
+      assert.equal(h.calls.filter(call => call.operation === "screens.compose").length, 0);
+      input.value = corrected; input.dispatchEvent(new window.Event("input"));
+      assert.equal(input.getAttribute("aria-invalid"), null); assert.equal(error?.hidden, true);
+      assert.equal(document.activeElement === input, true);
+      const accepted = structuredClone(h.original); accepted.revision = "accepted";
+      accepted.screens[0]!.nodes.splice(4, 0, node("added-id", kind, 150, 180, 30, corrected));
+      h.respond(accepted, "added-id");
+      input.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true, cancelable: true }));
+      await tick(); await tick();
+      assert.deepEqual(h.calls.filter(call => call.operation === "screens.compose").map(call => call.payload?.command),
+        [{ type: "add", parentId: "box-id", kind, text: corrected }]);
+      assert.equal(h.workspace.hasDraft(), false); assert.equal(h.row("added-id").ariaSelected, "true");
+    } finally { h.workspace.dispose(); }
+  }
+});
+
 test("keyboard reordering uses stable sibling identities and refuses a protected neighbor", async () => {
   const h = interactiveFixture();
   try {
