@@ -28,12 +28,11 @@ impl AuthoringService {
             || starter.height == 0
             || starter.width > MAX_PIXELS
             || starter.height > MAX_PIXELS
-            || [&starter.title, &starter.explanation]
-                .iter()
-                .any(|text| text.trim().is_empty() || text.len() > 8192 || text.contains('\0'))
         {
             return Err(SceneError::InvalidPayload);
         }
+        let title = composition::text_literal(&starter.title)?;
+        let explanation = composition::text_literal(&starter.explanation)?;
         let image = self.prepare_ui_image_reference(
             project,
             project_id,
@@ -41,10 +40,6 @@ impl AuthoringService {
             &starter.expected_asset_sha256,
             None,
         )?;
-        let title =
-            serde_json::to_string(&starter.title).map_err(|_| SceneError::InvalidPayload)?;
-        let explanation =
-            serde_json::to_string(&starter.explanation).map_err(|_| SceneError::InvalidPayload)?;
         let image_path =
             serde_json::to_string(&image.path).map_err(|_| SceneError::ImageInvalid)?;
         let target = serde_json::to_string(name).map_err(|_| SceneError::InvalidPayload)?;
