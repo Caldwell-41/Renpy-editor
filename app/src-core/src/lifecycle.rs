@@ -902,6 +902,21 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn screens_resolve_target(
+        &self,
+        request: crate::screens::references::ResolveTargetRequest,
+    ) -> Result<crate::screens::references::ResolvedScreenTarget, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_resolve_target(
+                &authority,
+                &project_id,
+                &request.binding,
+                request.expected.as_ref(),
+            )
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn screens_compose(
         &self,
         request: crate::screens::ComposeRequest,

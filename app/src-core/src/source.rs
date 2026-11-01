@@ -5,7 +5,7 @@
 //! updates the source map in the same recoverable transaction.
 
 use crate::{
-    authoring::{AuthoringMetadata, AuthoringService, PersistenceStatus},
+    authoring::{AuthoringService, PersistenceStatus},
     metadata::{ProjectMetadata, SceneMetadata, SceneSourceMapping, SourceMapMetadata},
     scene::{build_mapping, SceneBeat, SceneError},
     transaction::{
@@ -885,7 +885,7 @@ impl AuthoringService {
             &proposed,
             &revision,
             previous,
-            Some((&project_metadata, &authoring)),
+            Some((&project_metadata, &authoring, &source_map.owned_screens)),
         );
         let Ok((_, beats)) = mapping else {
             return Ok((Vec::new(), true));
@@ -981,7 +981,7 @@ impl AuthoringService {
                     &item.proposed,
                     &revision,
                     previous.as_ref(),
-                    Some((&project_metadata, &authoring)),
+                    Some((&project_metadata, &authoring, &source_map.owned_screens)),
                 )
                 .map_err(scene_source_error)?;
                 let slot = source_map
@@ -1071,7 +1071,7 @@ impl AuthoringService {
             &buffer.base_bytes,
             &buffer.base_revision.sha256,
             Some(&previous),
-            Some((&project_metadata, &authoring)),
+            Some((&project_metadata, &authoring, &source_map.owned_screens)),
         );
         let (mapping, _) = match reconciled {
             Ok(value) => value,
@@ -1202,7 +1202,7 @@ fn build_reconciled_mapping(
     bytes: &[u8],
     revision: &str,
     previous: Option<&SceneSourceMapping>,
-    context: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    context: Option<crate::scene::SceneParseContext<'_>>,
 ) -> Result<(SceneSourceMapping, Vec<SceneBeat>), SceneError> {
     let (candidate, candidate_beats) =
         build_mapping(scene, bytes, revision, previous, &[], context)?;

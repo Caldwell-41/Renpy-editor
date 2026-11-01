@@ -25,6 +25,9 @@ mod font_sdk;
 #[path = "audit_tests.rs"]
 mod audit;
 
+#[path = "reference_tests.rs"]
+mod references;
+
 #[test]
 fn grid_axes_and_child_removal_refuse_ambiguous_or_strict_source_shapes() {
     for shape in [

@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 6;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 7;
 pub(crate) const MAX_SOURCE_MAP_BYTES: usize = 1_000_000;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
@@ -362,7 +362,7 @@ impl SourceMapMetadata {
     pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
         if !matches!(
             self.schema_version,
-            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | 5 | SOURCE_MAP_SCHEMA_VERSION
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | 5 | 6 | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id
             || self.sources.len() > 4096
@@ -393,13 +393,14 @@ impl SourceMapMetadata {
                 || !owned_paths.insert(screen.path.to_ascii_lowercase())
                 || !owned_names.insert(screen.name.to_ascii_lowercase())
                 || !sources.contains(&screen.path.to_ascii_lowercase())
+                || (self.schema_version < 7 && screen.kind == OwnedScreenKind::Component)
             {
                 return Err(MetadataError::InvalidStructure);
             }
         }
         let mut use_ids = HashSet::new();
         for usage in &self.component_uses {
-            if self.schema_version < 6
+            if self.schema_version < 7
                 || !valid_id(&usage.node_id)
                 || !use_ids.insert(&usage.node_id)
                 || owned_ids.contains(&usage.node_id)
@@ -444,7 +445,7 @@ impl SourceMapMetadata {
                 }
                 last_end = beat.byte_end;
                 if let Some(target) = &beat.screen_target {
-                    if self.schema_version < 6
+                    if self.schema_version < 7
                         || !matches!(beat.kind.as_str(), "showScreen" | "hideScreen")
                         || !valid_id(&target.screen_id)
                         || !crate::screens::valid_name(&target.source_name)

@@ -65,7 +65,11 @@ component uses record owner, use-node and component IDs. Validation rejects a
 non-component target, missing owner metadata or duplicate/colliding use identity.
 Story bindings retain stable screen ID and source name, including missing targets,
 while validating their shape and applicable Beat kinds. These additive fields
-remain in schema 6; ordinary source bytes and existing IDs remain authoritative.
+initially used additive schema-6 fields. L09 then demonstrated that recognizing
+previous custom-code Show/Hide statements changes mapping meaning on reopen.
+The shared contract now uses schema 7, explicitly accepts old schema 6, and reserves
+versioned recognition/migration to L09. Ordinary source bytes and existing IDs remain
+authoritative; the compatibility case requires its own migration test.
 
 L09 temporarily handed `scene.rs` and `scene/logic.rs` to the coordinator for
 struct-literal initializers while continuing only its panel preparation module.
@@ -77,3 +81,25 @@ Both new metadata tests first failed against the existing unchecked-extra behavi
 then passed after typed validation. All five metadata tests pass with zero ignored
 cases. Pinned Rust formatting passes. This proves the shared identity contract;
 it does not yet prove component or Story operations, UI or runtime behavior.
+
+## Shared target and effects checkpoint
+
+The coordinator reviewed and integrated the Help preparation commits
+`a4e1a914057dc41aed389873d32b836664a1beed` and
+`4d5f7ebe3eae6bfb4fa59de60721d2205d92ee7a`, followed by the Scene context handoff
+`e5c300dbc4b1f4a19bf4c7e59e08f5511e0a99b6`. The shared Source owner now passes the
+same owned-screen catalog into all three reconciliation paths. No duplicate mapper
+was added. L09 retains Scene ownership for recognition, migration and admission.
+
+`screens.resolveTarget` resolves exact owned ID/name/source markers and returns
+captured source/map/inventory/effect revisions. Persisted bindings retain intent;
+transient revisions admit writes. The bounded effect reader preserves unknown
+custom code/interpolation and records known self-Hide effects with dependency hashes.
+Marked component-use verification and shared-component admission are still pending.
+
+Two actual IPC tests pass for identity, stale-source refusal, renamed-source refusal
+and unknown dynamic text. Both began with a relevant failing gate. The initial
+rename assertion expected an invented error label; it was corrected to the existing
+public `INCOMING_REFERENCE` code after observing the established mapping. Five
+metadata tests pass after the schema bump. These are portable core results; normal
+runtime, UI and native proof remain pending.

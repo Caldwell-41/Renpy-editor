@@ -157,7 +157,7 @@ fn marker(id: &str) -> String {
     format!("# loomlight-screen: {id}")
 }
 
-fn resolves(screen: &OwnedScreen, inventory: &Inventory) -> bool {
+pub(super) fn resolves(screen: &OwnedScreen, inventory: &Inventory) -> bool {
     if !inventory.complete {
         return false;
     }

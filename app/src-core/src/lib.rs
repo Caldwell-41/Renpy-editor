@@ -121,6 +121,7 @@ pub const OPERATIONS: &[&str] = &[
     "screens.canvasRender",
     "screens.canvasStatus",
     "screens.list",
+    "screens.resolveTarget",
     "screens.create",
     "screens.compose",
     "screens.setPixelProperty",
@@ -552,6 +553,16 @@ pub fn handle_application_request(
                     Err(LifecycleError::Scene(scene::SceneError::InvalidPayload))
                 }
             })
+            .and_then(to_value),
+        "screens.resolveTarget" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::references::ResolveTargetRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_resolve_target(request))
             .and_then(to_value),
         "screens.create" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))

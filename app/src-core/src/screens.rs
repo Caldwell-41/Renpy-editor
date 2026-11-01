@@ -22,6 +22,7 @@ mod images;
 pub mod layout;
 mod ownership;
 pub mod panels;
+pub mod references;
 mod styles;
 pub mod text;
 pub use composition::{ComposeRequest, ComposeResult};
