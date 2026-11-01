@@ -356,9 +356,10 @@ def qualify_sdk(args):
                 require(all(digest(game / path) == sha for path, sha in hashes.items()), 'accepted source changed during engine test')
             validate_case_set(result['runtimeObserved'])
             require(inputs() == load_json((prepared / 'inputs.json').read_text()), 'inputs changed during qualification')
-            result.update(acceptedSourceUnchanged=True, passed=True)
+            result['acceptedSourceUnchanged'] = True
         result['cleanupComplete'] = not temporary.exists()
         require(result['cleanupComplete'], 'owned SDK/game cleanup incomplete')
+        result['passed'] = True
     except Exception as error:
         result['failure'] = dict(type=type(error).__name__, message=str(error))
         raise
