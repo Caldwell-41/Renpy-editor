@@ -13,7 +13,9 @@ before integrating worker commits. Findings #1, #3, #7, #10, #13 and #15 are exc
 Mac ARM64 coordinates. Text validation (`644e26b`), image previews (`4076688`) and
 helper lifecycle (`11852a1`) are reviewed and integrated. Coordinator checks pass
 30 composition DOM cases, 14 image DOM cases and three controlled lifecycle cases.
-The core Screens and workspace/numeric assignments remain active. The evidence
+Workspace/numeric (`70f1f3a`) is reviewed and integrated; 22 DOM cases and both
+numeric/nested real controller/core journeys pass. The core Screens assignment
+remains active. The evidence
 record grants core Screens the narrow inventory dependency in `transaction/mod.rs`.
 Windows SUNDOWN metadata is inspected; no remote command has run. The evidence
 selects both-host real-SDK recovery with four helper starts per host, and three

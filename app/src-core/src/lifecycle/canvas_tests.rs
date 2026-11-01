@@ -333,6 +333,7 @@ fn canvas_recovery_retains_ownership_when_session_cleanup_is_refused() {
 #[test]
 #[ignore = "selected audit-fix real SDK recovery proof; two helper starts"]
 fn canvas_sdk_retries_refused_helper_before_project_close() {
+    let source = "screen help():\n    fixed:\n        xpos 100\n        ypos 60\n        xsize 800\n        ysize 500\n        frame:\n            xalign 0.5\n            yalign 0.5\n            xsize 640\n            ysize 360\n            text \"Saved\"\n";
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");
     let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE")
@@ -341,18 +342,25 @@ fn canvas_sdk_retries_refused_helper_before_project_close() {
     let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
     let root = profile.join("synthetic-project");
     fs::create_dir_all(root.join("game/ui")).unwrap();
-    fs::write(root.join(PATH), SOURCE).unwrap();
+    fs::write(root.join(PATH), source).unwrap();
     service.open_path(&root).unwrap();
     let document = service
         .screens_inspect(crate::screens::InspectRequest { path: PATH.into() })
         .unwrap();
+    let frame_start = document.screens[0]
+        .nodes
+        .iter()
+        .find(|node| node.kind == "frame")
+        .unwrap()
+        .span
+        .start;
     let request: crate::screens::canvas::Request = serde_json::from_value(json!({
         "path":PATH,"screenName":"help","expectedRevision":document.revision,
         "width":1280,"height":720,
-        "drafts":[{"nodeStart":document.screens[0].nodes[1].span.start,"width":760,"height":360}]
+        "drafts":[{"nodeStart":frame_start,"width":656,"height":376}]
     }))
     .unwrap();
-    let source_draft = SOURCE.replace("Saved", "Unsaved Source");
+    let source_draft = source.replace("Saved", "Unsaved Source");
     let draft = service
         .source_update_draft(SourceDraftRequest {
             path: PATH.into(),
@@ -397,8 +405,10 @@ fn canvas_sdk_retries_refused_helper_before_project_close() {
         .iter()
         .find(|node| node["start"] == project.request.drafts[0].node_start)
         .unwrap();
-    assert_eq!(frame["width"], 760);
-    assert_eq!(frame["height"], 360);
+    assert_eq!(frame["width"], 656);
+    assert_eq!(frame["height"], 376);
+    assert_eq!(frame["x"], 172);
+    assert_eq!(frame["y"], 122);
     let rendered = project
         .service
         .screens_canvas_status(replacement.clone(), true)
@@ -418,7 +428,7 @@ fn canvas_sdk_retries_refused_helper_before_project_close() {
         .unwrap();
     assert_eq!(retained.text, Some(source_draft));
     assert_eq!(retained.draft_version, draft.draft_version);
-    assert_eq!(fs::read_to_string(project.root.join(PATH)).unwrap(), SOURCE);
+    assert_eq!(fs::read_to_string(project.root.join(PATH)).unwrap(), source);
     project
         .service
         .source_discard(SourcePathRequest { path: PATH.into() })
@@ -436,7 +446,7 @@ fn canvas_sdk_retries_refused_helper_before_project_close() {
             serde_json::to_vec_pretty(&json!({
                 "passed":true,"helperStarts":2,"startupRefusal":refusal,
                 "refusalShutdown":refusal_shutdown,"replacementFrame":replacement,
-                "width":760,"height":360,"sourceUnchanged":true,
+                "x":172,"y":122,"width":656,"height":376,"sourceUnchanged":true,
                 "draftRetained":true,"normalShutdown":shutdown,"fixturesRemoved":true
             }))
             .unwrap(),

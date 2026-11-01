@@ -698,6 +698,9 @@ source expressions or runs neighboring actions.
 
 One Apply uses the shared source transaction and history. No-op adds no entry.
 Numeric drafts retain their original source revision across refresh and conflicts.
+Invalid raw spelling remains a draft even when numeric conversion equals the saved
+value; valid equivalent spelling can remain a no-op. For grids with unknown cell
+count, unrelated layout changes do not inherit the count-edit capacity refusal.
 After an accepted numeric save, unchanged drafts for other durable element UUIDs can
 rebase onto that returned revision. Unmarked nodes use kind, literal and source offset
 as a temporary key, without claiming durable identity. Missing targets expose a

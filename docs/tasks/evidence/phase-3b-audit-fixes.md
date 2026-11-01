@@ -148,3 +148,42 @@ dispatches total for an initial run and up to two diagnosed corrections. Ordinar
 automatic PR quality remains separate and needs no numerical cap. The validation
 plan will list the exact target jobs before publication. Connected-host SDK results
 retain their own scope and do not substitute for selected CI jobs.
+
+## Workspace and numeric integration and review
+
+The workspace/numeric worker returned `99ba37cf5ec62f11cd124f5399a140dfcf41f0db`
+from `t3/workspace-numeric-audit-fixes`, integrated after coordinator review as
+`70f1f3a`. Production changes stay within the workspace and numeric editor owners.
+
+For #2, supported fixed-parent alignment uses the installed parent's bounds for
+the provisional resize guide. A padded or otherwise ambiguous parent retains its
+helper guide rather than guessing. The held-response DOM case fails at 312 pixels
+before correction and expects 172 afterward, then checks settled geometry, focus,
+accepted size dispatch and retained input after a refused save.
+
+For #11, raw spelling is checked in the shared edit calculation before deciding
+that an edit is unchanged. Hexadecimal width and decimal grid-count spellings stay
+invalid drafts through remount and target removal; valid `6.4e2` remains a no-op.
+For #17, grid capacity validation applies to eligible count changes. Unrelated
+spacing saves despite opaque branch entries, while the real core still refuses
+ambiguous count changes with `OPAQUE_BOUNDARY`.
+
+Worker tests pass 22 workspace DOM cases, the frontend build and both real
+numeric/nested controller journeys. They retain original failures and stale-fixture
+corrections for the current text Layout disclosure and shared conflict message.
+The coordinator recompiles at integrated `70f1f3a`, passes all 22 DOM cases with
+zero skips, builds the actual driver and passes both controller/core journeys.
+Their exact source and spacing Undo/Redo assertions pass; both receipts report
+`controllerAndRealCore: true`, `sdkGeometry: false` and no errors.
+
+The already-selected two-start SDK recovery fixture also uses #2's offset fixed
+parent and resized 656-by-376 frame. Its expected independent engine rectangle is
+x=172, y=122, matching the provisional DOM regression. This adds no helper starts
+or broad subset proof. It compiles; real execution remains pending until the full
+candidate is integrated. No native painting or physical-input claim is inferred.
+
+At `70f1f3a` with the coordinator's qualification-only test extension, the combined
+frontend check passes all 300 tests with no skips, and the production build passes.
+The existing Vite chunk-size advisory remains. The complete Python 3.12.16 wrapper
+is used for harness consumers. CI workflow lint and all 18 coordinator unit tests
+pass. No real SDK/helper execution or qualification dispatch has started.
