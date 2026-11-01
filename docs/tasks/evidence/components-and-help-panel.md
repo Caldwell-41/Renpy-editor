@@ -1,0 +1,46 @@
+# Components and Help panel evidence
+
+## Assignment checkpoint, 2026-11-01
+
+Kris authorized implementation of [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41)
+and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) after reviewing
+the coordinator's plan. Those issues own bounded acceptance and execution state;
+this file records assignments, integration decisions and candidate-specific results.
+
+The coordinator branch is `codex/components-and-help-panel`, based on
+`8a1fc41959d363e600d739868bb0b37e270e9bdd` from
+`codex/phase3b-screen-designer`. Both workers integrate here, #41 before #44.
+Worker branches and worktrees are allocated by T3 at dispatch and recorded below.
+The primary checkout's unrelated audit and protected recovery remain untouched.
+
+| Owner | Exclusive files and interfaces |
+| --- | --- |
+| Coordinator | Shared `screens.rs`, `screens/ownership.rs`, `metadata.rs`, `source.rs`, `lib.rs`, `screen-ui.ts`, `screen-composition.ts`, `main.ts`, canvas/helper changes, shared contracts, status and this evidence record. |
+| L08 worker | `screens/components.rs`, new `screens/component_*` tests, new `src/screen-components.ts` and its CSS, new `tests/screen-components*` tests. |
+| L09 worker | `screens/panels.rs`, new `screens/panel_*` tests, existing `scene.rs` and `scene/` modules, `scene-ui.ts`, new `src/screen-panels.ts` and its CSS, new panel/Story-screen tests. |
+| Prototype chat | New `design-lab/screens/components-and-help-panel/`, its new `docs/design/design-lab-components-and-help-panel/` record/captures, and its entries in `design-lab/registry.ts`. |
+
+Assignments apply across branches. Workers request shared-file changes from the
+coordinator and consume a reviewed checkpoint before depending on them. Any file
+outside an assignment requires an explicit ownership transfer. All owners reuse
+existing preparation, transactions, source mapping and history. Separate feature
+modules are compiled by the shared Screens owner from the initial checkpoint.
+
+The prototype chat establishes several alternatives and records Kris's exact
+approval before production UI work. Workers may continue independent core work.
+The ordinary Help starter uses existing authoring capabilities; it does not require
+the new component feature. New component parameters, transclusion, Call/Finish,
+arbitrary imports and wider canvas/3B acceptance remain outside these assignments.
+
+Agreed tests use public authoring/transaction APIs, actual UI-to-core journeys and
+deliberate pinned-SDK component output/normal-play panel behavior. Workers use
+focused TDD cycles, regular typechecking and focused tests, and complete their
+ordinary suites and review before handoff. The coordinator owns combined verification
+and final independent Standards/Spec review against the full recorded base.
+
+Development starts on macOS ARM64. Target qualification is selected from changed
+behavior under the host-routing policy. Mutable projects, profiles and build outputs
+are isolated per assignment. Native sessions and shared SDK resources are sequenced
+by the coordinator. No costly SDK campaign, package, native session or CI matrix has
+started; its limit and attempt definition will be recorded in the owning issue
+before execution. Historical allowances remain closed.

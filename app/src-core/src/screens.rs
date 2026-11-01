@@ -16,10 +16,12 @@ const MAX_PIXELS: u32 = 16384;
 
 pub mod canvas;
 pub(crate) mod canvas_session;
+pub mod components;
 mod composition;
 mod images;
 pub mod layout;
 mod ownership;
+pub mod panels;
 mod styles;
 pub mod text;
 pub use composition::{ComposeRequest, ComposeResult};

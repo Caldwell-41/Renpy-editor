@@ -1,5 +1,16 @@
 # Current status
 
+## Owned components and Help panel selected
+
+Kris approved implementation of [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41)
+and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
+`codex/components-and-help-panel`, based on `8a1fc419`. The coordinator owns shared
+contracts, integration and final review; two isolated workers own the ticket modules.
+A separate prototype chat will obtain approval before production UI changes.
+[Assignments and evidence](../tasks/evidence/components-and-help-panel.md) record
+file ownership and qualification scope. Neither ticket is accepted yet. No costly
+SDK, package, native or CI operation has started. Historical limits remain closed.
+
 ## Phase 3B audit corrections merged
 
 [PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75) squash merged as
@@ -18,9 +29,8 @@ original commits and 131 unique evidence files remain hash-preserved in the
 ignored retirement archive. This primary checkout is on the integration branch;
 the unrelated audit, protected recovery and open Dependabot branch remain.
 
-Next recommended ticket is [L08 #41, reusable owned components](https://github.com/Caldwell-41/Renpy-editor/issues/41).
-Its L02 #37 prerequisite is accepted and closed. L08 remains unselected; no new
-implementation, SDK, package, native or CI operation is started.
+L08 #41 and L09 #44 are now selected above. Their accepted prerequisites retain
+their bounded evidence and acceptance.
 
 ## Connected native testing policy accepted
 

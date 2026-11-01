@@ -1,5 +1,19 @@
 # Current outcome handover
 
+## Active components and Help panel implementation
+
+Continue [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
+[L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on coordinator branch
+`codex/components-and-help-panel`, initially based on
+`8a1fc41959d363e600d739868bb0b37e270e9bdd`. Kris approved the two-worker plan and
+starting implementation. [The assignment checkpoint](../tasks/evidence/components-and-help-panel.md)
+owns file boundaries, integration order and test seams. The coordinator owns shared
+files, status, integration and final review. Worker worktrees and the prototype
+chat are pending dispatch at this checkpoint. Production UI waits for the prototype
+chat's exact approved revision; independent core work can proceed. No costly
+SDK/package/native/CI operation has started. The primary checkout's unrelated audit,
+protected native recovery below and historical closed allowances remain intact.
+
 ## Audit correction merge and workspace closeout
 
 Kris selected squash merging [PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75)
@@ -22,11 +36,9 @@ branch remain; the remote Dependabot branch remains with open PR #69. The
 unrelated untracked audit and protected recovery below are intact. Existing
 status-file size exceptions preserve unique historical recovery.
 
-Recommend [L08 #41: Reuse an owned component](https://github.com/Caldwell-41/Renpy-editor/issues/41)
-next. Its only work-ticket prerequisite, L02 #37, is accepted/closed; the
-parent and B03 group retain aggregate acceptance. No successor is selected.
-On selection, read #22, #25 and #41 plus applicable design/implementation contracts.
-Canvas remains deferred. No new SDK/helper, package, native or CI allowance is open.
+The successor selection is recorded above. L02 #37 and L06 #40 prerequisites are
+accepted; parent/group aggregate acceptance remains separate. Broader canvas work
+remains deferred. Historical SDK/helper, package, native and CI allowances stay closed.
 
 ## Connected native testing policy closeout
 
