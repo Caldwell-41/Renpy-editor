@@ -9,16 +9,26 @@ Continue [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
 starting implementation. [The assignment checkpoint](../tasks/evidence/components-and-help-panel.md)
 owns file boundaries, integration order and test seams. The coordinator owns shared
 files, status, integration and final review. The prototype chat has unapproved
-alternatives on `codex/components-help-panel-prototypes`, candidate `2001b04`.
+alternatives on `codex/components-help-panel-prototypes`, draft candidate `405400c`.
 Workers dispatched from `9b7748a`: L08 on `t3/reuse-owned-component` and L09 on
 `t3/help-panel-show-hide`. Both preparation checkpoints are integrated. Shared
-identity, target/effects, creation and marked-use hooks are committed through
-`ea752f2`; workers are continuing their transactional component and Story slices.
-The coordinator now qualifies the Help starter's self-Hide spans and static canvas
-plan, then completes shared graph/Style and geometry-review admission. Source-map
-schema 7 owns new recognition; legacy-6 migration must preserve source and IDs.
+identity, target/effects, creation, marked-use, complete graph/Style and geometry
+admission hooks are integrated. Help/Story core through worker `25eda974` is
+integrated; coordinator candidate `fb2bed50` also fixes ordinary component-use
+removal in one source/map history transaction. Its 17 panel tests and five shared
+IPC journeys pass. L08 is replacing interim traversal with the canonical graph,
+completing its public affected-use review and checking its coherent write candidate.
+Both workers are preparing frozen public-transaction fixtures and rejecting runtime
+validators without SDK execution. L09 temporarily owns only its new module
+registration in `screens/tests.rs`; other shared ownership remains with the coordinator.
+Source-map schema 7 owns recognition and preserves legacy-6 source bytes and IDs.
 Production UI waits for the prototype chat's exact approved revision. No costly
-SDK/package/native/CI operation has started. The primary checkout's unrelated audit,
+SDK/package/native/CI operation has started. L09's earlier ordinary release-core
+candidate `7aa82d1` passed 531 cases; the later comment correction and combined
+candidate still need final qualification. Initial sandbox failures and L08's cancelled
+old-base ordinary run remain failures/cancelled in linked evidence. The linked
+Windows host is reachable; no target checkout or session has been assigned yet.
+All work is local with no push or PR. The primary checkout's unrelated audit,
 protected native recovery below and historical closed allowances remain intact.
 
 ## Audit correction merge and workspace closeout

@@ -6,7 +6,10 @@ Kris approved implementation of [L08 #41](https://github.com/Caldwell-41/Renpy-e
 and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
 `codex/components-and-help-panel`, based on `8a1fc419`. The coordinator owns shared
 contracts, integration and final review; two isolated workers own the ticket modules.
-A separate prototype chat will obtain approval before production UI changes.
+A separate prototype chat has draft alternatives awaiting approval before production
+UI changes. Shared graph/admission and Help/Story core are integrated; the component
+worker is completing its coherent transactional slice. Runtime fixtures and validators
+are being prepared without SDK execution.
 [Assignments and evidence](../tasks/evidence/components-and-help-panel.md) record
 file ownership and qualification scope. Neither ticket is accepted yet. No costly
 SDK, package, native or CI operation has started. Historical limits remain closed.

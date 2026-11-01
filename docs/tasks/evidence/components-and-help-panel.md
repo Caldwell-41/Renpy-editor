@@ -32,6 +32,16 @@ checkpoint and it additionally records the prototype handoff.
 | L09 worker | `screens/panels.rs`, new `screens/panel_*` tests, existing `scene.rs` and `scene/` modules, `scene-ui.ts`, new `src/screen-panels.ts` and its CSS, new panel/Story-screen tests. |
 | Prototype chat | New `design-lab/screens/components-and-help-panel/`, its new `docs/design/design-lab-components-and-help-panel/` record/captures, and its entries in `design-lab/registry.ts`. |
 
+Runtime preparation extends L08 ownership to new
+`app/scripts/qualify-owned-component.py`, its validator test and any new
+`tests/fixtures/phase-3b-screens/components/` driver files. L09 owns new
+`screens/panel_fixture_tests.rs`, `app/scripts/qualify-help-panel.py`, its validator
+test and any new `tests/fixtures/phase-3b-screens/help-panel/` driver files.
+L09 temporarily owns only the corresponding module-registration lines in
+`screens/tests.rs`; the coordinator leaves that file untouched until handback.
+These assignments permit cheap fixture/export and harness checks, with no SDK
+installation/execution, native session, package or CI campaign yet.
+
 Assignments apply across branches. Workers request shared-file changes from the
 coordinator and consume a reviewed checkpoint before depending on them. Any file
 outside an assignment requires an explicit ownership transfer. All owners reuse
@@ -241,3 +251,8 @@ Its 84 offline cases include the no-UI-image state: Help creation is blocked wit
 explicit Assets import guidance, entered name/choice retained, and Blank requires
 an explicit selection. Original draft captures remain preserved. Kris has not
 selected or approved a design; production UI and runtime proof remain pending.
+
+The coordinator verified the linked Windows environment is reachable and has the
+Loomlight project registered. No target checkout was changed or execution assigned.
+The planned target qualification remains Windows x64 and macOS ARM64 under the
+host-routing policy; linked-host checks do not replace required milestone CI.
