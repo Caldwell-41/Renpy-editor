@@ -837,3 +837,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   path now creates the serial and certificate inside that root and cleans up all
   generated material. No listener, provider request or native application runs.
 - **Evidence:** [TLS fixture isolation](../tasks/evidence/components-and-help-panel.md#tls-fixture-isolation).
+
+## H60. Normal-entry fixture calls Start outside a menu context
+
+- **Class/search:** harness; Ren'Py testcase, Start(), JumpOutException, missing menu.
+- **Cause/correction:** a minimal fixture without a main-menu interaction had already
+  entered the story when the hook invoked Start, which jumps out of a menu context.
+  Supply a fixture-only menu and require observed menu entry before Start. Preserve
+  accepted bootstrap and Story bytes. Suite teardown must account for all unselected
+  cases before exit; each selected positive result remains mandatory across the campaign.
+- **Verification:** the first SDK failure and exact pinned implementation establish
+  the cause. Cheap admission checks require the new entry signal; corrected SDK
+  execution remains pending at this record.
+- **Evidence:** [Entry diagnosis](../tasks/evidence/components-and-help-panel.md#first-help-sdk-campaign-and-entry-diagnosis).

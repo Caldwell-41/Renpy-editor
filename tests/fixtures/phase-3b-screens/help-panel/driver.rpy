@@ -5,6 +5,13 @@ define config.screen_height = 720
 define config.save_directory = None
 define config.default_text_cps = 0
 
+screen hp_fixture_main_menu():
+    textbutton "Start" action Start()
+
+label main_menu:
+    call screen hp_fixture_main_menu
+    return
+
 screen say(who, what):
     window:
         yalign 1.0
@@ -29,6 +36,7 @@ init python:
     _hp_inputs = []
     _hp_outside = None
     _hp_frame_rect = None
+    _hp_started_from_menu = False
 
     def _hp_label_seen(name, abnormal):
         _hp_seen_labels.append(name)
@@ -77,6 +85,7 @@ init python:
             manifestSHA256=_hp_manifest_sha, acceptedHashes=hashes,
             normalEntry=all(label in _hp_seen_labels for label in
                 ["start", _hp_manifest["entry"]["label"], _hp_manifest["story"]["label"]]),
+            startedFromMenu=_hp_started_from_menu,
             observations=_hp_observations, inputs=_hp_inputs,
             defaultGameEscape="K_ESCAPE" in config.keymap["game_menu"],
             outsidePoint=list(_hp_outside) if _hp_outside is not None else None,

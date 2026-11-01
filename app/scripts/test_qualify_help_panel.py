@@ -23,7 +23,7 @@ spec.loader.exec_module(gate)
 class RuntimeEvidenceTests(unittest.TestCase):
     def receipt(self):
         return dict(schemaVersion=1, sdkVersion='8.5.3', case='show_persists',
-                    manifestSHA256='a' * 64, normalEntry=True,
+                    manifestSHA256='a' * 64, normalEntry=True, startedFromMenu=True,
                     acceptedHashes={'game/story.rpy': 'b' * 64},
                     inputs=['advance', 'advance'],
                     observations=[
@@ -34,7 +34,7 @@ class RuntimeEvidenceTests(unittest.TestCase):
 
     def log(self, receipt):
         return ('global.help_panel::show_persists\n[rpytest] Status: PASSED\n'
-                '[rpytest] Test cases : 1 | 1 passed | 0 xfailed | 0 failed | 0 xpassed | 0 skipped | 0 not run\n'
+                '[rpytest] Test cases : 6 | 1 passed | 0 xfailed | 0 failed | 0 xpassed | 5 skipped | 0 not run\n'
                 '[rpytest] Time: 0.5 s\nHELP_PANEL_OBSERVED ' + json.dumps(receipt))
 
     def validate(self, log):
@@ -43,7 +43,7 @@ class RuntimeEvidenceTests(unittest.TestCase):
     def test_runtime_requires_two_real_dialogue_advances_and_exact_accepted_identity(self):
         good = self.receipt()
         self.assertEqual(self.validate(self.log(good)), good)
-        for field, value in [('normalEntry', False), ('case', 'authored_hide'),
+        for field, value in [('normalEntry', False), ('startedFromMenu', False), ('case', 'authored_hide'),
                              ('manifestSHA256', 'c' * 64), ('acceptedHashes', {}),
                              ('inputs', ['advance']), ('observations', good['observations'][:-1])]:
             with self.subTest(field=field), self.assertRaises(ValueError):
@@ -56,7 +56,8 @@ class RuntimeEvidenceTests(unittest.TestCase):
     def test_runtime_rejects_missing_duplicate_and_incomplete_engine_evidence(self):
         good = self.log(self.receipt())
         for bad in [good.split('HELP_PANEL_OBSERVED')[0], good + '\nHELP_PANEL_OBSERVED ' + json.dumps(self.receipt()),
-                    good.replace('1 passed', '0 passed'), good.replace('0 skipped', '1 skipped'),
+                    good.replace('1 passed', '0 passed'), good.replace('5 skipped', '4 skipped'),
+                    good.replace('5 skipped | 0 not run', '4 skipped | 1 not run'),
                     good.replace('Status: PASSED', 'Status: FAILED'), good.replace('0.5 s', '0.0 s'),
                     good.replace('"schemaVersion": 1', '"schemaVersion": 1, "schemaVersion": 1')]:
             with self.subTest(log=bad), self.assertRaises(ValueError):

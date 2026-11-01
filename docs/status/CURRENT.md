@@ -9,11 +9,14 @@ contracts, integration and final review; two isolated workers own the ticket mod
 A separate prototype chat has draft alternatives awaiting approval before production
 UI changes. Both ticket cores and typed component IPC are integrated. Independent
 core/preparation reviews are complete, with coordinator fixes verified at their
-focused checks. Runtime fixtures and validators are prepared; SDK execution has not
-started and final combined qualification remains pending.
+focused checks. Runtime fixtures and validators are prepared. The first Help SDK
+campaign passed compile/lint but failed its first runtime case in fixture entry.
+The diagnosed fixture correction is prepared for the next bounded campaign.
+Final combined qualification remains pending.
 [Assignments and evidence](../tasks/evidence/components-and-help-panel.md) record
-file ownership and qualification scope. Neither ticket is accepted yet. No costly
-SDK, package, native or CI operation has started. Historical limits remain closed.
+file ownership and qualification scope. Neither ticket is accepted yet. The selected
+SDK limit and use are recorded in #44. No package, native editor or CI operation has
+started. Historical limits remain closed.
 
 ## Phase 3B audit corrections merged
 

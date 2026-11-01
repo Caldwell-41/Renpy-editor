@@ -31,14 +31,20 @@ integrated as `3ccc584`; its exact IPC test passes. The temporary module-registr
 ownership has returned to the coordinator. All other file assignments remain in
 the linked evidence record.
 Source-map schema 7 owns recognition and preserves legacy-6 source bytes and IDs.
-Production UI waits for the prototype chat's exact approved revision. No costly
-SDK/package/native/CI operation has started. L08's coherent worker release suite
+Production UI waits for the prototype chat's exact approved revision. #44 owns the
+current SDK limit and consumption. The first Help macOS campaign passed version,
+compile and lint, then failed the first case with Start outside a menu context;
+five cases did not run, and owned cleanup completed. Its failed logs remain retained.
+The fixture-only menu and strict entry/accounting correction are prepared for fresh
+input freezing and the next bounded campaign. No package/native editor/CI operation
+has started. L08's coherent worker release suite
 passed 549 cases; L09's earlier ordinary release-core
 candidate `7aa82d1` passed 531 cases; the later comment correction and combined
 candidate still need final qualification. Initial sandbox failures and L08's cancelled
 old-base ordinary run remain failures/cancelled in linked evidence. The linked
 Windows host is reachable; no target checkout or session has been assigned yet.
-All work is local with no push or PR. The primary checkout's unrelated audit,
+Source commits remain local with no push or PR; #44 publishes current execution and
+SDK accounting. The primary checkout's unrelated audit,
 protected native recovery below and historical closed allowances remain intact.
 
 ## Audit correction merge and workspace closeout

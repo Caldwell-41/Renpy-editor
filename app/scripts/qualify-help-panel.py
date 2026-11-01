@@ -150,14 +150,17 @@ def validate_runtime_output(text, case, manifest_sha, accepted_hashes):
     require(lines.count('[rpytest] Status: PASSED') == 1, 'missing/duplicate runtime completion')
     require(any(re.search(r'\bglobal\.help_panel::' + re.escape(case) + r'\b', line) for line in lines), 'missing named case')
     summary = [line for line in lines if line.startswith('[rpytest] Test cases :')]
-    require(len(summary) == 1 and list(map(int, re.findall(r'\d+', summary[0]))) == [1, 1, 0, 0, 0, 0, 0], 'incomplete case summary')
+    # Each process selects one of six cases. The five unselected cases are
+    # explicitly disabled by the pinned runner; the full campaign requires all six.
+    require(len(summary) == 1 and list(map(int, re.findall(r'\d+', summary[0]))) == [6, 1, 0, 0, 0, 5, 0], 'incomplete case summary')
     durations = re.findall(r'\[rpytest\] Time: ([0-9.]+) s', text)
     require(len(durations) == 1 and float(durations[0]) > 0, 'missing runtime duration')
     rows = [load_json(line.removeprefix('HELP_PANEL_OBSERVED ')) for line in lines if line.startswith('HELP_PANEL_OBSERVED ')]
     require(len(rows) == 1, 'missing/duplicate observed evidence')
     row = rows[0]
     require(row.get('schemaVersion') == 1 and row.get('sdkVersion') == '8.5.3', 'wrong evidence version')
-    require(row.get('case') == case and row.get('normalEntry') is True, 'wrong case/entry')
+    require(row.get('case') == case and row.get('normalEntry') is True
+            and row.get('startedFromMenu') is True, 'wrong case/entry')
     require(row.get('manifestSHA256') == manifest_sha and row.get('acceptedHashes') == accepted_hashes, 'accepted source identity mismatch')
     extra, inputs = {
         'show_persists': ([('advance1', 'HP_SHOWN_1', True), ('advance2', 'HP_SHOWN_2', True)], ['advance', 'advance']),

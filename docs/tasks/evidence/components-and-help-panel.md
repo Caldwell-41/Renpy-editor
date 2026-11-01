@@ -341,3 +341,38 @@ under ignored `app/target/help-panel-coordinator-01`; binary retention succeeded
 this real failure. Successful preparation now removes its wholly owned temporary
 directory after preserving accepted bytes and the binary, then verifies its absence.
 SDK execution remains unstarted at this checkpoint.
+
+## First Help SDK campaign and entry diagnosis
+
+The current #44 SDK operation limit and cumulative consumption are owned by
+[the selected leaf](https://github.com/Caldwell-41/Renpy-editor/issues/44#selected-implementation-and-sdk-operation-limit-2026-11-01).
+This record retains attempts; it does not create a second allowance. The pinned
+8.5.3 archive matches its retained official SHA-256 manifest. Preparation at `a70b941`
+passes export, cleanup, frozen-input admission and all 12 artifact/rejection checks.
+Its manifest hash is `8d5c66bd4c37269fd5851a43ac1ae67df865ca874476be098ae53e88064ee5ad`.
+
+The first macOS ARM64 campaign passed version, compile and lint. Its first runtime
+case failed with `JumpOutException: start`; the remaining five cases did not run.
+All four launched processes terminated without timeout/output overflow, and owned
+SDK/game cleanup completed. The failed result and logs remain under ignored
+`app/target/help-panel-sdk-macos-01`. No runtime behavior pass is claimed.
+
+The pinned SDK's Start action jumps out of a menu context. The fixture supplied no
+main-menu interaction, so normal bootstrap had already entered the original story
+when its before-test hook called Start. The correction supplies a fixture-only menu
+and requires the engine's menu context before Start. It preserves all authored panel,
+bootstrap and Story bytes. A new observed menu-entry field is mandatory in admission.
+Diagnosis used the `principle-fix-root-causes` skill and the exact pinned SDK sources;
+no production guard, retry or exception suppression was added.
+
+Source inspection also showed that the pinned reporter counts all six defined
+cases even when one is selected. Fixture teardown now exits after accounting for
+the five unselected cases. Admission requires exactly six defined, one passed,
+five unselected, zero failed and zero not-run per process. The combined campaign
+still requires each of the six distinct named positive observations. This correction
+does not waive a required case. Its actual SDK outcome remains pending.
+
+The component fixture producer now serializes once, writes those bytes and emits
+one digest record. Its exact public test passes; independently parsed stdout matches
+the exported accepted.json SHA-256. L08 consumes checkpoint `0dd9618` for rejecting
+mixed-run, missing and duplicate digest records before its separate SDK allocation.

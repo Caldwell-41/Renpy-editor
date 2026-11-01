@@ -3,6 +3,8 @@
 testsuite help_panel:
     before testcase:
         $ _test.timeout = 10.0
+        assert screen "hp_fixture_main_menu" timeout 10
+        $ _hp_started_from_menu = bool(main_menu and renpy.get_screen("hp_fixture_main_menu"))
         run Start()
         advance until eval (_hp_line() == "HP_BASELINE")
         $ _hp_observe("baseline")
@@ -12,7 +14,7 @@ testsuite help_panel:
         pause 0.2
         $ _hp_observe("shown")
 
-    after testcase:
+    teardown:
         exit
 
     testcase show_persists:
