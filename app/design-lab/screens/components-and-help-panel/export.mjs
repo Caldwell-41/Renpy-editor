@@ -22,4 +22,5 @@ html,body{margin:0;padding:0;height:auto;min-height:0;background:transparent;col
 :root{--surface-app:var(--background,#20201e);--surface-panel:var(--card,#282825);--surface-raised:var(--secondary,#30302c);--surface-hover:var(--muted,#363631);--text-primary:var(--foreground,#eeece5);--text-secondary:var(--muted-foreground,#c8c5bb);--border-normal:var(--border,#45443e);--border-strong:var(--border,#68655c);--font-ui:var(--font-sans,system-ui);--font-source:var(--font-mono,monospace)}
 </style></head><body><div id="preview"></div><script>${js.replaceAll("</script", "<\\/script")}</script></body></html>`;
 mkdirSync(output, { recursive: true }); writeFileSync(new URL("comparison.html", output), html);
+writeFileSync(new URL("empty-images.html", output), html.replace('id="preview"', 'id="preview" data-initial-state="no-images"'));
 console.log(fileURLToPath(new URL("comparison.html", output)));

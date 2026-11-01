@@ -41,7 +41,9 @@ export default async function check({ page, open, capture = async () => {} }) {
     await page.getByText("Component unavailable.", { exact: false }).first().waitFor(); assert.equal(await dialog().count(), 0);
 
     await open({ variant, state: "starter", theme: "dark" });
-    await dialog().locator('[name="new-name"]').fill("travel_help"); await click("confirm-new");
+    await dialog().locator('[name="new-name"]').fill("travel_help");
+    await dialog().locator('[name="starter-image"]').selectOption("route");
+    await click("confirm-new");
     assert.equal(await page.locator('[name="title"]').inputValue(), "Help");
     assert.equal(await page.locator(".cp-canvas-image img").evaluate(img => img.complete && img.naturalWidth > 0), true);
     await page.locator('[data-select="close"]').first().click(); await page.locator('[name="close-label"]').fill("Back to the story"); await click("apply"); await click("confirm-apply");
@@ -49,7 +51,7 @@ export default async function check({ page, open, capture = async () => {} }) {
     await page.locator('[data-select="group"]').first().click();
     await click("image"); await dialog().locator('[name="node-width"]').fill("360"); await click("node-draft");
     await click("apply"); await click("confirm-apply"); await click("source");
-    assert.match(await dialog().innerText(), /xsize 360 ysize 180/); await click("dialog-close");
+    assert.match(await dialog().innerText(), /ui\/route_map\.svg.*xsize 360 ysize 180/); await click("dialog-close");
     await click("step-connect"); await click("add-beat"); await dialog().locator('[name="beat-screen"]').selectOption("screen-help"); await click("confirm-beat");
     await page.locator('[data-action^="beat-source-"]').first().click(); assert.match(await dialog().innerText(), /show screen help/); await click("dialog-close");
     await click("add-beat"); await dialog().locator('[name="beat-kind"]').selectOption("hide"); await click("confirm-beat");
@@ -66,6 +68,26 @@ export default async function check({ page, open, capture = async () => {} }) {
     await page.locator('[name="external"]').selectOption("panel-rename"); await click("play");
     await page.getByText("Target unavailable. Playback refused", { exact: false }).waitFor();
     assert.equal(await dialog().count(), 0);
+
+    await open({ variant, state: "no-images", theme: "dark" });
+    await page.getByText("No typed UI images available.", { exact: true }).waitFor();
+    assert.equal(await dialog().locator('[data-action="confirm-new"]').isDisabled(), true);
+    assert.equal(await dialog().locator("img").count(), 0);
+    await dialog().locator('[name="new-name"]').fill("needs_an_image");
+    await dialog().locator('[data-action="confirm-new"]').dispatchEvent("click");
+    await page.getByText("Help panel needs an existing typed UI image. No screen created", { exact: false }).waitFor();
+    assert.equal(await dialog().locator('[name="new-name"]').inputValue(), "needs_an_image");
+    assert.equal(await dialog().locator('[name="starter"]:checked').inputValue(), "help");
+    await click("dialog-close");
+    assert.equal(await page.locator('[name="screen"]').first().locator("option").count(), 2);
+    assert.equal(await page.locator('[data-action="undo"]').isDisabled(), true);
+    await click("new"); await dialog().locator('[name="starter"][value="blank"]').check();
+    assert.equal(await dialog().locator('[data-action="confirm-new"]').isEnabled(), true);
+    await dialog().locator('[name="starter"][value="help"]').check();
+    assert.equal(await dialog().locator('[data-action="confirm-new"]').isDisabled(), true);
+    await dialog().locator('[name="starter"][value="blank"]').check(); await click("confirm-new");
+    await page.getByText("Blank panel", { exact: true }).waitFor();
+    assert.equal(await page.locator('[name="screen"]').first().locator("option").count(), 3);
 
     await page.setViewportSize({ width: 560, height: 640 }); await open({ variant, state: "shared", theme: "dark", viewport: "compact" });
     await page.locator('[name="title"]').fill("Compact draft"); await click("apply");

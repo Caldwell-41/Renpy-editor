@@ -16,12 +16,12 @@ try {
     await page.goto(url.href); await page.locator('#study[data-ready="true"]').waitFor(); return page;
   }
   if (!process.argv.includes("--interactions-only")) {
-    for (const variant of ["inspector", "library", "worksheet"]) for (const state of ["group", "shared", "starter", "story", "conflict", "missing"]) for (const theme of ["dark", "light"]) for (const size of [{ id: "wide", width: 1100, height: 720 }, { id: "compact", width: 560, height: 640 }]) {
+    for (const variant of ["inspector", "library", "worksheet"]) for (const state of ["group", "shared", "starter", "no-images", "story", "conflict", "missing"]) for (const theme of ["dark", "light"]) for (const size of [{ id: "wide", width: 1100, height: 720 }, { id: "compact", width: 560, height: 640 }]) {
       await page.setViewportSize(size); await open({ variant, state, theme });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${variant}/${state}/${theme}/${size.id}: overflow`);
       assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), theme);
       assert.equal(await page.locator("img").evaluateAll(images => images.every(img => img.complete && img.naturalWidth > 0)), true);
-      if (state === "shared" || theme === "dark" && size.id === "wide") await page.screenshot({ path: new URL(`${variant}-${state}-${theme}-${size.id}.png`, output).pathname });
+      if (["shared", "no-images"].includes(state) || theme === "dark" && size.id === "wide") await page.screenshot({ path: new URL(`${variant}-${state}-${theme}-${size.id}.png`, output).pathname });
       report.cases.push({ variant, state, theme, ...size });
     }
   }

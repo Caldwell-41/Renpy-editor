@@ -143,7 +143,9 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     openDialog(kind === "copy" ? "Make one use independent" : "Make component", `<p>${kind === "copy" ? `Copy only the use in ${escape(active().name)} into a new owned component. Other uses keep route_guide.` : `Move the selected supported group into an owned component. Replace this group in ${escape(active().name)} with one use.`}</p><label class="cp-field">Component name<input name="component-name" value="${kind === "copy" ? "help_guide" : "route_guide"}"></label><p class="cp-form-error" role="alert"></p><p>Parameterless component · Close stays in its owning panel.</p><div class="cp-actions">${button(`confirm-${kind}`, kind === "copy" ? "Create independent copy" : "Create component", true)}${button("dialog-close", "Cancel")}</div>`, "component-name");
   }
   function openNew() {
-    openDialog("New screen", `<label class="cp-field">Screen name<input name="new-name" value="help_panel"></label><fieldset><legend>Start with</legend><label class="cp-option"><input type="radio" name="starter" value="help" checked><span><strong>Help panel</strong><br>Title, explanation, tram image and Close. Edit every node later.</span></label><label class="cp-option"><input type="radio" name="starter" value="blank"><span><strong>Blank</strong><br>An empty screen for your own layout.</span></label></fieldset><p><strong>Type: Panel</strong> · Shown without stopping dialogue.</p><p>Close and game Escape dismiss it. Outside clicks keep it open.</p><div class="cp-starter-preview"><img src="${tram}" alt="Tram emblem sample image"><span>Help<br>Choose a route. The last tram leaves at midnight.<br>Close</span></div><p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("confirm-new", "Create screen", true)}${button("dialog-close", "Cancel")}</div>`, "new-name");
+    openDialog("New screen", `<label class="cp-field">Screen name<input name="new-name" value="help_panel"></label><fieldset><legend>Start with</legend><label class="cp-option"><input type="radio" name="starter" value="help" checked><span><strong>Help panel</strong><br>Title, explanation, an existing UI image and Close. Edit every node later.</span></label><label class="cp-option"><input type="radio" name="starter" value="blank"><span><strong>Blank</strong><br>An empty screen for your own layout.</span></label></fieldset><p><strong>Type: Panel</strong> · Shown without stopping dialogue.</p><p>Close and game Escape dismiss it. Outside clicks keep it open.</p>
+      ${sample.uiImages.length ? `<div class="cp-starter-assets"><label class="cp-field">Existing project UI image<select name="starter-image">${sample.uiImages.map(id => `<option value="${id}">${id === "tram" ? "Tram emblem" : "Route map"} · UI image</option>`).join("")}</select></label><p>Displayed size defaults to 320 × 180 px. Edit the ordinary image node after creation.</p></div><div class="cp-starter-preview"><img src="${sample.uiImages[0] === "tram" ? tram : route}" alt="Selected existing sample UI image"><span>Help<br>Choose a route. The last tram leaves at midnight.<br>Close</span></div>` : `<div class="cp-starter-blocked cp-error" role="status"><strong>No typed UI images available.</strong><p>Help panel needs an existing UI-image asset. Cancel, import an image in Assets with the UI image role, then reopen New screen.</p><p>No screen has been created. Blank is a separate choice.</p></div>`}
+      <p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("confirm-new", "Create screen", true, !sample.uiImages.length)}${button("dialog-close", "Cancel")}</div>`, "new-name");
   }
   function openInsert() {
     if (!sample.component || sample.component.state !== "available") { report("No available owned component. Normal screens and panels are not components."); return; }
@@ -236,8 +238,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       case "confirm-new": {
         const name = modal!.querySelector<HTMLInputElement>("[name=new-name]")!.value.trim(), problem = nameProblem(name);
         if (problem) { modal!.querySelector(".cp-form-error")!.textContent = problem; break; }
-        const starter = modal!.querySelector<HTMLInputElement>("[name=starter]:checked")!.value === "help", next = copy(sample);
-        const id = `screen-created-${next.revision}`; next.screens.push({ ...defaultVisual(), id, name, title: "Help", explanation: "Choose a route. The last tram leaves at midnight.", starter, use: false, local: false, revision: 1 });
+        const starter = modal!.querySelector<HTMLInputElement>("[name=starter]:checked")!.value === "help";
+        const image = modal!.querySelector<HTMLSelectElement>("[name=starter-image]")?.value as "tram" | "route" | undefined;
+        if (starter && (!image || !sample.uiImages.includes(image))) { modal!.querySelector(".cp-form-error")!.textContent = "Help panel needs an existing typed UI image. No screen created; your name and starter choice are retained."; break; }
+        const next = copy(sample), id = `screen-created-${next.revision}`; next.screens.push({ ...defaultVisual(), ...(starter && image ? { image } : {}), id, name, title: "Help", explanation: "Choose a route. The last tram leaves at midnight.", starter, use: false, local: false, revision: 1 });
         screenId = id; step = "design"; closeDialog(); accept(next, `${starter ? "Editable Help starter" : "Blank panel"} created.`); break;
       }
       case "add-beat": openBeat(); break;
@@ -287,12 +291,18 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       notice = "Simulated Source changed. Original identities remain; pending drafts keep their base revision.";
       if (dirty()) error = "Source changed after this draft began. Draft retained."; render();
     }
-    if (input.name === "starter") { modal!.querySelector<HTMLElement>(".cp-starter-preview")!.hidden = input.value === "blank"; }
+    if (input.name === "starter") {
+      const help = input.value === "help";
+      for (const section of modal!.querySelectorAll<HTMLElement>(".cp-starter-preview,.cp-starter-assets,.cp-starter-blocked")) section.hidden = !help;
+      modal!.querySelector<HTMLButtonElement>('[data-action="confirm-new"]')!.disabled = help && !sample.uiImages.length;
+      modal!.querySelector(".cp-form-error")!.textContent = "";
+    }
+    if (input.name === "starter-image") modal!.querySelector<HTMLImageElement>(".cp-starter-preview img")!.src = input.value === "tram" ? tram : route;
   }, { signal: events.signal });
   host.addEventListener("keydown", event => {
     if (event.key !== "Escape" || modal || event.isComposing) return;
     if (dirty()) { event.preventDefault(); drafts.delete(draftKey()); error = ""; reviewInline = false; notice = "Editor Escape cancelled the pending editor operation. Saved Source unchanged."; render(); }
   }, { signal: events.signal });
-  render(); if (context.state === "starter") openNew();
+  render(); if (["starter", "no-images"].includes(context.state)) openNew();
   return () => { events.abort(); modal?.remove(); host.replaceChildren(); host.classList.remove("cp-host"); };
 }

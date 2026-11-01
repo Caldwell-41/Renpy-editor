@@ -7,6 +7,7 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "group", title: "Start with a supported group" },
     { id: "shared", title: "Component in two screens" },
     { id: "starter", title: "Create a Help panel" },
+    { id: "no-images", title: "Help starter · no typed UI images" },
     { id: "story", title: "Show / Hide in Story" },
     { id: "conflict", title: "Retained conflicting draft" },
     { id: "missing", title: "Missing component reference" },

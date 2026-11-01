@@ -9,7 +9,7 @@ const controls = document.createElement("nav"); controls.className = "cp-compari
 const root = document.createElement("div"); root.id = "study";
 const query = new URLSearchParams(location.search);
 let variant = (query.get("variant") ?? "inspector") as Variant;
-let state = query.get("state") ?? "shared";
+let state = query.get("state") ?? host.dataset.initialState ?? "shared";
 let theme: "light" | "dark" = query.get("theme") === "light" ? "light" : "dark";
 let dispose: (() => void) | undefined;
 for (const item of definition.variants) {

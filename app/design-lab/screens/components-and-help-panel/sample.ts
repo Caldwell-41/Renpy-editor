@@ -5,15 +5,17 @@ export type Screen = Visual & { id: string; name: string; title: string; explana
 export type Beat = { id: string; kind: "show" | "hide"; screenId: string; targetName: string; revision: number };
 export type Sample = {
   revision: number;
+  uiImages: Array<"tram" | "route">;
   component: Visual & { id: string; name: string; title: string; explanation: string; revision: number; state: "available" | "renamed" | "deleted"; unknown: boolean } | null;
   screens: Screen[]; beats: Beat[];
 };
 export const copy = <T>(value: T): T => structuredClone(value);
 export const validName = (name: string) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
 export function fixture(state: string): Sample {
-  const shared = !["group", "starter", "story"].includes(state);
+  const shared = !["group", "starter", "story", "no-images"].includes(state);
   return {
     revision: 1,
+    uiImages: state === "no-images" ? [] : ["tram", "route"],
     component: shared ? { ...defaultVisual(), id: "component-guide", name: "route_guide", title: "Find your way", explanation: "Choose a route. The last tram leaves at midnight.", revision: 1, state: state === "missing" ? "deleted" : "available", unknown: false } : null,
     screens: [
       { ...defaultVisual(), id: "screen-help", name: "help", title: "Help", explanation: "Choose a route. The last tram leaves at midnight.", starter: true, use: shared, local: false, revision: 1 },

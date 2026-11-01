@@ -1,29 +1,37 @@
 # Draft review notes
 
 No user design decision has been recorded. These are browser mock checks, not
-product acceptance or approval. Existing approved reference files are unchanged.
+product acceptance or approval. Historical approved source commits, records and
+captures are unchanged. The coordinator's type-only lab correction below is the
+sole shared-file change.
 
 ## Current checks
 
 - The screen-local TypeScript check passes with the inherited strict lab options.
 - The approval-history/source/capture validator passes. All three candidates remain drafts.
-- Offline Chromium 153.0.8010.12 passes 72 layout cases: three variants, six states,
+- The full Design Lab TypeScript check also passes after the coordinator's type-only correction described below.
+- Offline Chromium 153.0.8010.12 passes 84 layout cases: three variants, seven states,
   both themes, and 1100 by 720 / 560 by 640 CSS viewports.
 - Every focused interaction passes for A, B and C, including component extraction,
   name collision refusal, component/parent picker, insertion, explicit shared-use
   review, shared Apply, independent copy, sample Source, history, reopen, retained
   conflict drafts, more typing while stale, editor Escape, unavailable component,
   Help creation, image sizing, local Close editing, Show/Hide Beats, exact Beat Source,
+  empty typed-image creation refusal, retained starter/name, explicit Blank choice,
   continued dialogue, outside click, Close/Hide/game Escape and focus, and renamed
   panel refusal. Compact review remains usable without horizontal overflow.
 - The final inline HTML preview at 728 pixels wide reports no browser console errors.
 - `git diff --check` passes.
 
-The complete lab TypeScript check fails in the unchanged approved-reference file
+The original complete lab TypeScript check failed in the approved-reference file
 `app/design-lab/screens/shared-look/editor.ts:251` with TS7053, a `string | number`
-index into the appearance-field labels. This screen's focused check excludes that
-unrelated module. The full `design:check` gate is not claimed as passing; promotion
-must run it and preserve or resolve that separate gap through its owner. No package,
+index into the appearance-field labels. The coordinator supplied type-only commit
+`282772a883e693dd9716667933cc5f23c03b92df`, cherry-picked here as
+`f4db237` at the coordinator's explicit instruction. It narrows the key type to
+`keyof typeof labels`; runtime code, layout and copy are unchanged. Historical
+approved commits, records and captures remain intact. Both full-lab and focused
+TypeScript checks now pass. The complete `design:check` browser gate is not claimed
+as passing or run for this draft update; promotion must run it. No package,
 native, SDK, installation, CI dispatch or production implementation was performed.
 
 ## Corrections during this draft
@@ -44,15 +52,20 @@ Disclosure open state also survives typing and draft rerenders.
 The latter checks a shorter compact shell with a visible Apply footer and a shorter
 worksheet preview. `interactions-06.log` passes after playback began using accepted
 sample content. `review-07.log` is the final 72-case and interaction pass after a
-canvas-fit correction. `report.json` and `interactions.json` retain current results.
+canvas-fit correction. `review-08.log` checks the subsequent empty typed-image state
+and existing-project UI-image selection. Its 84-case matrix and all focused
+interactions pass. `report.json` retains that current result.
 Earlier failures remain in their named logs; they are not passes.
 
-[Draft captures](draft-captures.json) identify 23 retained PNGs by hash and viewport.
+[Original draft captures](draft-captures.json) identify 23 retained PNGs by hash and viewport.
 They include all three dark wide/compact baselines, affected-screen reviews,
 retained conflict drafts, playback with dialogue continuing, plus A's light
 baselines, New screen, Story and missing component. Their source identity belongs
 to the committed draft candidate. Approval will require Kris's explicit revision
 selection and the source/capture steps in Design Lab INTEGRATION.
+The refreshed [draft-v2 captures](draft-v2-captures.json) retain the current 35 PNGs,
+including the blocked Help starter in all three variants, both themes and both sizes.
+The older draft-v1 files remain unchanged. Both versions are unapproved.
 
 ## Remaining simulations and deliberate limits
 

@@ -36,8 +36,9 @@ node design-lab/screens/components-and-help-panel/review.mjs
 Open `.toolchains/components-and-help-panel/comparison.html` at the repository root.
 It is a self-contained export of the registered Design Lab mounts. It requires no
 server. The comparison controls switch alternatives, fresh scenarios and themes.
+`empty-images.html` in the same output directory opens the blocked starter directly.
 The existing lab registry also exposes screen `components-and-help-panel`, variants
-`inspector`, `library` and `worksheet`, with the six registered scenarios.
+`inspector`, `library` and `worksheet`, with the seven registered scenarios.
 
 Start with **Start with a supported group**. Make component, name it, then use
 **Use component** to insert it in About's panel frame. Change the title and review
@@ -46,9 +47,19 @@ independent copy with its own name, then edit that copy. Source shows the defini
 use and selected source line. The sample refuses name collisions.
 
 New screen offers a name and **Help panel** or **Blank**. Both have explicit panel
-kind. The Help starter uses defaults for title, explanation, a real sample image and
-320 by 180 pixel size. Those become ordinary editable nodes. Close remains local to
+kind. The Help starter uses defaults for title, explanation and 320 by 180 pixel
+size. Its existing-project UI-image picker defaults to the first available typed
+asset. Those become ordinary editable nodes. Close remains local to
 the owning panel. Select Close in the tree or inert canvas to edit its label.
+
+The **Help starter · no typed UI images** scenario keeps Help selected and disables
+Create screen. It explains that an existing typed UI image is required and tells
+the author to cancel, import an image in Assets with the UI image role, then reopen
+New screen. This is an honest blocked starter; the mock performs no import. It
+creates no asset or screen and preserves the entered name. Selecting Blank enables
+creation only as an explicit separate choice. Switching back to Help restores the
+block. The coordinator confirmed this necessary core constraint; no user design
+approval is implied.
 
 Connect opens the Story example. Add a Show or Hide Beat through the owned-panel
 picker, then inspect that Beat's exact sample Source. Playback simulation shows the
@@ -76,7 +87,7 @@ their presence is not design approval.
 | Shared Apply | Review the explicit affected-screen list, then accept the pending content through the shared transaction owner. |
 | Make independent copy | Require a fresh component name. Copy only the selected use; retain every other reference. The sample requires applying or cancelling a pending draft first. |
 | Source | Resolve the selected definition/use/Beat to its exact current source span. Missing or renamed targets refuse silent rebinding. |
-| New screen | Create Blank or ordinary editable Help starter with explicit panel kind. Prefill title/explanation/typed UI-image/size rather than require another form. |
+| New screen | Create Blank or ordinary editable Help starter with explicit panel kind. Prefill title/explanation/size and select an existing typed UI image. With no eligible image, block Help creation without a silent Blank fallback or bundled asset. |
 | Ordinary node editing | Existing qualified text, image, layout, Style, structure and Close operations remain with their current owners. |
 | Add screen Beat | `ShowScreen` / `HideScreen` use target `{screenId, sourceName}`. Core captures transient source/sourceMap/inventory/effects revisions for admission. Persist target identity only; refresh revisions/effects when reading. No user-entered revision fields. |
 | Cancel / editor Escape | Cancel the editor operation without a source write. Keep invalid/conflicting/stale drafts until explicit cancellation. |
@@ -87,7 +98,7 @@ their presence is not design approval.
 ## Evidence and limits
 
 Focused TypeScript checking uses the screen-local `tsconfig.json`. The offline runner
-checks all three layouts, six scenarios, both lab themes and both sizes, 1100 by 720
+checks all three layouts, seven scenarios, both lab themes and both sizes, 1100 by 720
 and 560 by 640. Its focused interaction check covers names/collisions, parent choice,
 shared review, copying, exact sample Source, draft conflict/Escape, starter/image/Close
 editing, Show/Hide, missing-target refusal and simulated playback focus/dismissal.
