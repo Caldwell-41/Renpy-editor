@@ -15,6 +15,7 @@ export class ScreenImageMedia {
   private queue: Promise<void> = Promise.resolve();
   private decoding?: RetainedImage;
   private staged?: RetainedImage;
+  private selected?: { element: HTMLImageElement; preview: ImagePreview };
   private disposed = false;
 
   constructor(
@@ -46,9 +47,12 @@ export class ScreenImageMedia {
     return this.enqueue(media, current);
   }
 
-  show(image: HTMLImageElement, preview: ImagePreview): void {
+  show(image: HTMLImageElement, preview: ImagePreview, selected = false): void {
     const retained = this.cache.get(key(preview.media.assetId, preview.media.sha256));
-    if (retained === preview) image.src = retained.url;
+    if (retained === preview) {
+      image.src = retained.url;
+      if (selected) this.selected = { element: image, preview };
+    }
   }
 
   clearStaged(preview?: ImagePreview): void {
@@ -60,6 +64,7 @@ export class ScreenImageMedia {
 
   dispose(): void {
     this.disposed = true;
+    this.selected = undefined;
     const staged = this.staged;
     this.clearStaged();
     if (this.decoding && this.decoding !== staged) this.release(this.decoding);
@@ -107,7 +112,12 @@ export class ScreenImageMedia {
         32 * 1024 * 1024 &&
       this.cache.size
     ) {
-      this.release([...this.cache.values()].find((image) => image !== this.staged)!);
+      const evicted = [...this.cache.values()].find((image) =>
+        image !== this.staged &&
+        !(image === this.selected?.preview && this.selected.element.isConnected),
+      );
+      if (!evicted) throw Error("The image preview cache is full.");
+      this.release(evicted);
     }
     const url = URL.createObjectURL(new Blob([bytes], { type: media.mimeType }));
     const entry = { media, url };

@@ -223,7 +223,7 @@ export class ScreenImages {
     this.dialog?.remove();
     this.media.dispose();
   }
-  private thumbnail(asset: UiImageAsset, media?: MediaPresentation): HTMLImageElement {
+  private thumbnail(asset: UiImageAsset, media?: MediaPresentation, selected = false): HTMLImageElement {
     const img = el("img");
     img.alt = asset.displayName;
     img.width = 68;
@@ -232,11 +232,11 @@ export class ScreenImages {
     const cached = media
       ? this.media.get(asset.id, media.sha256)
       : this.media.get(asset.id, asset.sha256);
-    if (cached) this.media.show(img, cached);
+    if (cached) this.media.show(img, cached, selected);
     else if (asset.status === "available")
       void this.media.load(asset)
         .then((c) => {
-          if (this.active() && img.isConnected) this.media.show(img, c);
+          if (this.active() && img.isConnected) this.media.show(img, c, selected);
         })
         .catch(() => {});
     return img;
@@ -359,7 +359,7 @@ export class ScreenImages {
     trigger.classList.add("screen-image-asset");
     trigger.ariaLabel = a ? `Change image, ${a.displayName}` : "Choose image";
     trigger.dataset.imageFocus = "asset";
-    if (a) trigger.append(this.thumbnail(a, draft.replacement));
+    if (a) trigger.append(this.thumbnail(a, draft.replacement, true));
     const words = el("span", "screen-image-words");
     words.append(
       el("strong", "", a?.displayName ?? "Choose an image"),
