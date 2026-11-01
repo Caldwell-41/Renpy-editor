@@ -41,6 +41,8 @@ BASE_SOURCES = {'game/chapters/chapter_01/scene_001.rpy', 'game/definitions/char
 EXPORT_TEST = 'screens::components::tests::runtime_fixtures::frozen_two_panel_outputs_come_from_actual_component_transactions'
 MATERIAL_DIRS = ('app/src-core', 'tests/fixtures', '.cargo', 'app/.cargo')
 MATERIAL_FILES = ('app/Cargo.toml', 'app/Cargo.lock', 'app/rust-toolchain.toml', 'app/src-tauri/Cargo.toml',
+                  'app/src-tauri/tauri.conf.json', 'app/src-tauri/capabilities/main.json',
+                  'app/src-tauri/permissions/core-request.toml', 'app/src-tauri/build.rs',
                   'app/scripts/qualify-owned-component.py', 'app/scripts/test_qualify_owned_component.py',
                   'app/scripts/qualify-screens-source.py', 'spikes/renpy-sdk/sdk_adapter.py', 'spikes/renpy-sdk/archive_safety.py')
 
@@ -408,16 +410,33 @@ def prepare_producer(path, expected_candidate=None):
             os.chdir(REPO / 'app')
             os.environ.clear()
             os.environ.update(env)
-            observed = run_bounded(tuple(result['command']['argv']), timeout_seconds=180, output_limit=8_000_000)
+            try:
+                observed = run_bounded(tuple(result['command']['argv']), timeout_seconds=180, output_limit=8_000_000)
+            except BaseException as error:
+                result['command'].update(outcome='exception', exitCode=getattr(error, 'command_exit_code', None),
+                    timedOut=getattr(error, 'command_timed_out', None), outputLimited=getattr(error, 'command_output_limited', None),
+                    processReaped=getattr(error, 'command_process_reaped', None), cleanupComplete=getattr(error, 'command_cleanup_complete', None),
+                    durationSeconds=getattr(error, 'command_duration_seconds', None))
+                partial = getattr(error, 'command_output', None)
+                if partial is not None:
+                    try:
+                        (output / 'core-export.log').write_text(partial, encoding='utf-8')
+                    except Exception as log_error:
+                        result['logRetentionFailure'] = dict(type=type(log_error).__name__, message=str(log_error))
+                    try:
+                        result['testBinary'] = source_gate().retain_test_binary(partial, output)
+                    except Exception as retention_error:
+                        result['binaryRetentionFailure'] = dict(type=type(retention_error).__name__, message=str(retention_error))
+                raise
         finally:
             os.environ.clear()
             os.environ.update(previous_env)
             os.chdir(previous_cwd)
         (output / 'core-export.log').write_text(observed.output, encoding='utf-8')
+        result['command'].update(outcome='returned', exitCode=observed.exit_code, timedOut=observed.timed_out,
+                                 outputLimited=observed.output_limited, durationSeconds=observed.duration_seconds, processReaped=True, cleanupComplete=True)
         # Retain before checking command success, source stability, digest or artifact validity.
         result['testBinary'] = source_gate().retain_test_binary(observed.output, output)
-        result['command'].update(outcome='returned', exitCode=observed.exit_code, timedOut=observed.timed_out,
-                                 outputLimited=observed.output_limited, durationSeconds=observed.duration_seconds)
         after = material_inputs()
         write_json(output / 'inputs-after.json', after)
         require(before == after and checkout_commit() == result['candidate'], 'producer inputs changed during export')
@@ -443,7 +462,8 @@ def prepare_producer(path, expected_candidate=None):
                 result['inputCaptureFailure'] = dict(type=type(error).__name__, message=str(error))
         if temporary.exists():
             shutil.rmtree(temporary)
-        result['cleanupComplete'] = not temporary.exists()
+        result['scratchCleanupComplete'] = not temporary.exists()
+        result['cleanupComplete'] = result['scratchCleanupComplete'] and (result['command']['outcome'] == 'not-started' or result['command'].get('cleanupComplete') is True)
         write_json(output / 'producer.json', result)
     return result
 
@@ -474,6 +494,7 @@ def validate_prepared(path):
         command = receipt['command']
         require(command['argv'] == export_argv(receipt['toolchain']) and command['cwd'] == str(Path(receipt['root']) / 'app'), 'wrong producer command')
         require(command['outcome'] == 'returned' and command['exitCode'] == 0 and command['timedOut'] is False and command['outputLimited'] is False, 'failed producer command')
+        require(command['processReaped'] is True and command['cleanupComplete'] is True, 'producer process cleanup unknown')
         binary = receipt['testBinary']
         retained = prepared_file(root, binary['path'])
         require(binary['path'] == 'test-binary/' + binary['name'] and retained.stat().st_size == binary['bytes'] > 0 and hashlib.sha256(retained.read_bytes()).hexdigest() == binary['sha256'], 'changed retained test binary')

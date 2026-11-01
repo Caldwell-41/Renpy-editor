@@ -216,6 +216,33 @@ class InputAdmission(unittest.TestCase):
 
 
 class ProducerAdmission(unittest.TestCase):
+    def test_interrupted_export_retains_partial_log_and_binary_then_rethrows_same_exception(self):
+        for cleanup in (True, False, None):
+            with self.subTest(cleanup=cleanup), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                with producer_machine(root):
+                    interruption = KeyboardInterrupt('cancel owned fixture export')
+                    def interrupted(text):
+                        interruption.command_output = text
+                        interruption.command_exit_code = -9
+                        interruption.command_duration_seconds = 0.1
+                        interruption.command_timed_out = False
+                        interruption.command_output_limited = False
+                        interruption.command_process_reaped = cleanup
+                        interruption.command_cleanup_complete = cleanup
+                        raise interruption
+                    with self.assertRaises(KeyboardInterrupt) as caught:
+                        prepare_bundle(root, interrupted)
+                    self.assertIs(caught.exception, interruption)
+                    prepared = root / 'prepared'
+                    receipt = json.loads((prepared / 'producer.json').read_text())
+                    self.assertFalse(receipt['passed'])
+                    self.assertEqual((prepared / receipt['testBinary']['path']).read_bytes(), b'retained exact test binary')
+                    self.assertEqual(receipt['command']['processReaped'], cleanup)
+                    self.assertEqual(receipt['cleanupComplete'], cleanup is True)
+                    self.assertTrue((prepared / 'inputs-after.json').is_file())
+                    self.assertIn('compiler-artifact', (prepared / 'core-export.log').read_text())
+
     def test_both_modes_require_a_producer_before_any_output_or_process(self):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / 'must-not-stage'
