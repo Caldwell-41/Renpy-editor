@@ -7,7 +7,7 @@ on:
         type: string
         required: true
       ordinal:
-        description: Cumulative dispatch ordinal, capped at 4 including the added review correction
+        description: Cumulative dispatch ordinal, capped at 5 including the catalog matching correction
         type: string
         required: true
 
@@ -45,7 +45,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-audit-fixes
           test "$GITHUB_RUN_ATTEMPT" = 1
-          case "$ORDINAL" in 1|2|3|4) ;; *) exit 1 ;; esac
+          case "$ORDINAL" in 1|2|3|4|5) ;; *) exit 1 ;; esac
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/audit-fixes"
           git rev-parse HEAD > "$RUNNER_TEMP/audit-fixes/candidate.txt"
@@ -78,6 +78,7 @@ jobs:
             screens::tests::audit::screen_creation_reserves_entries_for_the_file_and_missing_ui_directory \
             screens::tests::audit::screen_creation_preflights_projected_aggregate_source_bytes \
             screens::tests::audit::screen_creation_returns_the_committed_catalog_when_a_later_inventory_cannot_be_read \
+            screens::tests::audit::screen_creation_returns_current_catalog_for_compiled_extension_case \
             screens::tests::audit::canvas_refuses_unparsed_children_but_accepts_supported_property_spans \
             screens::tests::audit::structural_edits_preserve_ambiguous_interleaved_comments \
             screens::tests::audit::literal_alias_edits_preserve_parent_controlled_values_and_comments \

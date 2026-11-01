@@ -1,6 +1,39 @@
 use super::*;
 
 #[test]
+fn screen_creation_returns_current_catalog_for_compiled_extension_case() {
+    for extension in ["rpyc", "rpyC"] {
+        let (_temporary, mut service, root, _owner) = composition_project();
+        fs::write(root.join(format!("game/ui/saved.{extension}")), b"bytecode").unwrap();
+        let before = ipc(&mut service, "screens.list", json!({}));
+        assert!(before["styles"]["error"].is_string());
+        let create = |service: &mut LifecycleService, name: &str, catalog: &Value| {
+            ipc(
+                service,
+                "screens.create",
+                json!({"name":name,
+                "expectedProjectRevision":catalog["projectRevision"],
+                "expectedSourceMapRevision":catalog["sourceMapRevision"],
+                "expectedInventoryRevision":catalog["inventoryRevision"]}),
+            )
+        };
+        let created = create(&mut service, "saved", &before);
+        assert!(created["styles"]["error"].is_null(), "{extension}");
+        assert_eq!(
+            created,
+            ipc(&mut service, "screens.list", json!({})),
+            "{extension}"
+        );
+        let next = create(&mut service, "next_saved", &created);
+        assert_eq!(
+            next,
+            ipc(&mut service, "screens.list", json!({})),
+            "{extension}"
+        );
+    }
+}
+
+#[test]
 fn screen_creation_returns_the_committed_catalog_when_a_later_inventory_cannot_be_read() {
     let (_temporary, mut service, root, _owner) = composition_project();
     fs::write(root.join("game/ui/saved.rpyc"), b"unresolved bytecode").unwrap();

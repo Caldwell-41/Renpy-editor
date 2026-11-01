@@ -356,3 +356,54 @@ working bytes and the refused seal are retained in ignored reports. Restoring th
 required checkout endings produces no source diff, and the exact-candidate seal
 passes across all 734 tracked material inputs. The workflow's strict identity gate
 is unchanged.
+
+## Compiled-file matching correction
+
+The [ordinal-4 terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6552700639)
+closes the previous pending qualification at `aee7475`. Both targets pass and
+their artifacts were audited. Its four consumed dispatches remain distinct from
+the original platform SDK proof and earlier failed/cancelled attempts.
+
+The full-PR Standards review found that `screens.create` projected a stale catalog
+for `game/ui/saved.rpyC`. Inventory reading recognized the extension, while the
+creation response removed only an exact lowercase `.rpyc` path. An immediate
+`screens.list` differed, and a second creation using the returned revisions
+falsely failed with `SOURCE_CONFLICT`. The UI's automatic refresh masked the
+public-API inconsistency. The Spec axis had no findings.
+
+Kris selected fixing this finding, updating PR #75 and running CI. This selects
+one additional both-target qualification dispatch, ordinal 5, for a cumulative
+ceiling of five. Four are already consumed; ordinal 5 is reserved for this
+candidate. A dispatch counts once started, including failure or cancellation.
+There is no additional retry, SDK/helper start, package or native editor selection.
+Mac ARM64 owns local development; the existing CI matrix supplies Windows x64
+and macOS ARM64 qualification. The unchanged validation plan selects both exact
+job names. The workflow's only allowance change admits ordinal 5; ref, SHA,
+attempt-1, source identity, executable retention and privacy checks remain.
+
+The focused public core/IPC case
+`screen_creation_returns_current_catalog_for_compiled_extension_case` first
+passes lowercase `.rpyc` and then fails uppercase `.rpyC` before the correction.
+Afterward both spellings return the same catalog as `screens.list`, and a second
+creation accepts that returned revision. One shared bytecode/source rule now
+serves inventory reading and creation projection; actual matched paths remove
+only their own unresolved-style and revision entries. Source generation, helper
+execution and the shared transaction/history path are unchanged.
+
+The focused red/green logs and full Screens results are retained under ignored
+`.toolchains/reports/phase3b-audit-fixes/catalog-matching/`. The first local test
+command lacked Cargo on PATH; activating the existing pinned checkout tools
+corrected the environment before the recorded red/green run. No dependency or
+system-tool installation was needed. The full Screens group passes 108 cases,
+with five existing SDK cases deliberately ignored and no failures. All ten audit
+cases pass, including the new catalog case. The 22 retention-helper cases, workflow
+lint, repository validation and pinned Rust formatting pass. Self-review covers
+the shared matching rule, unrelated opaque entries and the real public-API test.
+CURRENT/HANDOVER retain their existing size exceptions for unique unrelated
+acceptance and protected recovery; this correction shortens their live sections.
+
+The PR update receipt owns the published candidate, ordinal-5 run/attempt,
+cumulative consumption and watcher registration. Exact-head required jobs and
+retained evidence require terminal audit before closure. Prior SDK results remain
+bound to their original source and scope; they do not establish a new-head SDK
+qualification. No merge or wider acceptance is selected.

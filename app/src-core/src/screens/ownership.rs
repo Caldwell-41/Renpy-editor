@@ -68,6 +68,12 @@ impl Inventory {
     }
 }
 
+fn bytecode_source(path: &str) -> Option<&str> {
+    path.to_ascii_lowercase()
+        .ends_with(".rpyc")
+        .then(|| &path[..path.len() - 1])
+}
+
 fn declaration_names(bytes: &[u8]) -> Result<Vec<String>, SceneError> {
     let bytes = bytes.strip_prefix(&[0xef, 0xbb, 0xbf]).unwrap_or(bytes);
     let ranges = crate::authoring::lexical_ranges(bytes, false, false)
@@ -331,7 +337,7 @@ impl AuthoringService {
             let lower = path.to_ascii_lowercase();
             let reason = if lower.ends_with(".rpa") {
                 "archive"
-            } else if lower.ends_with(".rpyc") && !source_paths.contains(&path[..path.len() - 1]) {
+            } else if bytecode_source(path).is_some_and(|source| !source_paths.contains(source)) {
                 "bytecode"
             } else {
                 continue;
@@ -513,13 +519,14 @@ impl AuthoringService {
         inventory.script_files.push(destination.clone());
         inventory.script_files.sort();
         // This source now accounts for any previously orphaned bytecode at its path.
-        let bytecode = format!("{destination}c");
-        inventory
-            .unresolved_styles
-            .retain(|reason| reason != &format!("Unresolved bytecode styles in {bytecode}"));
-        inventory
-            .opaque_revisions
-            .retain(|(path, _)| path != &bytecode);
+        inventory.opaque_revisions.retain(|(path, _)| {
+            if bytecode_source(path) != Some(destination.as_str()) {
+                return true;
+            }
+            let reason = format!("Unresolved bytecode styles in {path}");
+            inventory.unresolved_styles.retain(|entry| entry != &reason);
+            false
+        });
         inventory.refresh_revision();
         map.sources.push(destination.clone());
         map.owned_screens.push(screen);

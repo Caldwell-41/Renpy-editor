@@ -33,6 +33,12 @@ setup. Kris selected fixing all three, coordinator review, updating PR #75 and C
 This follow-up restores existing behavior and extends the existing evidence helper;
 the original exclusions remain unchanged.
 
+Kris then selected the full-PR review's compiled-file matching correction,
+updating PR #75 and CI. Screen creation must return the same catalog as an
+immediate project scan when the matching compiled file uses `.rpyC`. Both paths
+share the bytecode/source matching rule. The existing public core/IPC test
+boundary covers the returned catalog and a second creation using its revisions.
+
 ## Acceptance
 
 - Each selected trigger has a focused failing test before its correction and a
@@ -72,10 +78,9 @@ the coordinator selects costly qualification and records its limits before it
 starts. Historical closed allowances remain closed. Protected recovery and the
 unrelated untracked audit remain untouched.
 
-Current state: the original twelve fixes passed exact-head qualification at
-`af8c0bf`; the PR receipt owns that closure. Both review-correction workers are
-integrated and coordinator review passes. All 305 frontend cases, the retention
-helper tests and the affected real controller/core journeys pass locally. The
-selected additional CI dispatch is ordinal 4; terminal jobs and artifacts still
-require audit. The evidence record owns cumulative consumption. No additional SDK,
-package or native operation is selected. Detailed results belong in the linked evidence.
+Current state: the original twelve fixes passed at `af8c0bf`; the three review
+corrections passed both-target qualification ordinal 4 at `aee7475`. Their PR
+receipts own terminal results. The compiled-file matching correction is selected
+for one additional both-target CI dispatch, ordinal 5. The evidence record owns
+cumulative consumption and verification. No additional SDK, package or native
+operation is selected. Merge and wider acceptance remain separate.

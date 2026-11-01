@@ -2,19 +2,21 @@
 
 ## Selected Phase 3B audit corrections
 
-The original twelve fixes on `codex/phase3b-audit-fixes` passed exact-head CI at
-`af8c0bf` and both platforms' bounded SDK recovery. The
-[PR #75 closure receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6551921617)
-owns those results. Kris then selected three independent-review corrections:
-screen-root resize feedback, qualification executable retention and image-test
-setup duplication. Both Sol 6.1 High worker commits are integrated and coordinator
-review passes. All 305 frontend tests, 22 retention-helper tests and the affected
-numeric/nested controller/core journeys pass locally. The PR update and selected
-ordinal-4 Windows/macOS CI still require terminal evidence audit.
-The [maintenance task](../tasks/active/phase-3b-audit-fixes.md) owns scope and test
-boundaries; [evidence](../tasks/evidence/phase-3b-audit-fixes.md) owns results and
-cumulative limits. Findings #1, #3, #7, #10, #13 and #15 stay excluded. No merge,
-additional SDK/package/native operation or wider Phase 3B acceptance is selected.
+PR #75's original twelve fixes passed at `af8c0bf`; its three review corrections
+passed both-target qualification ordinal 4 at `aee7475`. The
+[terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6552700639)
+owns those results and retained executable/source identities.
+
+Kris then selected fixing the full-PR review's compiled-file matching finding,
+updating PR #75 and CI. Project scanning and screen creation now share the same
+bytecode/source matching rule. The focused public-API test reproduces `.rpyC`'s
+stale catalog before the fix and passes afterward, including a second creation
+using the returned revisions. The correction awaits exact-head both-target CI.
+The [maintenance task](../tasks/active/phase-3b-audit-fixes.md) owns scope;
+[evidence](../tasks/evidence/phase-3b-audit-fixes.md#compiled-file-matching-correction)
+owns checks and the selected ordinal-5 dispatch. The PR update receipt owns its
+candidate, run and terminal audit. No merge, extra SDK/package/native operation
+or wider acceptance is selected. Original exclusions remain unchanged.
 
 ## Connected native testing policy accepted
 
