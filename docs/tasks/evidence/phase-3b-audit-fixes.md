@@ -348,3 +348,11 @@ both exact job names in `screens-source.yml`; it does not inherit an old-head pa
 Publish one coherent candidate and dispatch ordinal 4. Terminal job identities,
 retained executables, hashes, all required results and privacy/upload status must
 be audited before the new receipt closes the follow-up. No merge is selected.
+
+The prepublication source seal identified four unchanged PowerShell files with LF
+working-copy endings where `.gitattributes` requires CRLF. Their bytes matched the
+committed LF blobs, with no content difference after newline normalization. Original
+working bytes and the refused seal are retained in ignored reports. Restoring the
+required checkout endings produces no source diff, and the exact-candidate seal
+passes across all 734 tracked material inputs. The workflow's strict identity gate
+is unchanged.
