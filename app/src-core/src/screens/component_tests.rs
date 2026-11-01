@@ -16,6 +16,9 @@ const TEXT: &str = "00000000-0000-4000-8000-000000000002";
 #[path = "component_fixture_tests.rs"]
 mod runtime_fixtures;
 
+#[path = "component_writer_tests.rs"]
+mod writers;
+
 struct Fixture {
     _temporary: tempfile::TempDir,
     root: PathBuf,
@@ -707,6 +710,24 @@ fn nested_extraction_and_copy_preserve_targets_with_distinct_internal_use_ids() 
         .unwrap();
     assert_eq!(after.inventory_revision, before.inventory_revision);
     assert_eq!(after.source_map_revision, before.source_map_revision);
+    let review = fixture
+        .service
+        .screens_component_review(&fixture.project, &fixture.project_id, &leaf.id)
+        .unwrap();
+    assert!(review.complete);
+    assert_eq!(
+        review
+            .affected_screens
+            .iter()
+            .map(|owner| owner.screen.id.as_str())
+            .collect::<HashSet<_>>(),
+        HashSet::from([
+            fixture.owner.id.as_str(),
+            panel.id.as_str(),
+            wrapper.id.as_str(),
+            copy.id.as_str()
+        ])
+    );
 }
 
 #[test]
@@ -1108,6 +1129,94 @@ fn component_review_lists_both_affected_screens_and_exact_use_source_locations()
             .scene_workspace(&fixture.project, &fixture.project_id)
             .unwrap()
             .can_undo
+    );
+}
+
+#[test]
+fn review_keeps_missing_use_intent_and_separates_unknown_effects_from_graph_completeness() {
+    let (fixture, component, first) = Fixture::with_component();
+    let second = fixture.create_screen("other");
+    let placed = fixture
+        .service
+        .screens_component_place(
+            &fixture.project,
+            &fixture.project_id,
+            PlaceRequest {
+                component: binding(&component),
+                expected_component: fixture.revisions(&component),
+                target: binding(&second),
+                expected_target: fixture.revisions(&second),
+                parent_id: second.root_id.clone(),
+            },
+        )
+        .unwrap();
+    let source = fixture.read(&component.path).text.unwrap();
+    fs::write(
+        fixture.root.join(&component.path),
+        format!("{source}    $ custom_effect()\n"),
+    )
+    .unwrap();
+    let unknown = fixture
+        .service
+        .screens_component_review(&fixture.project, &fixture.project_id, &component.id)
+        .unwrap();
+    assert!(unknown.complete);
+    assert!(unknown.component.effects.unknown);
+    assert!(unknown.uses.iter().all(|usage| usage.resolved));
+    let source = fixture.source().text.unwrap();
+    fs::write(
+        fixture.root.join(&fixture.owner.path),
+        source.replace("use shared_content", "use other"),
+    )
+    .unwrap();
+    let review = fixture
+        .service
+        .screens_component_review(&fixture.project, &fixture.project_id, &component.id)
+        .unwrap();
+    assert!(!review.complete);
+    assert_eq!(review.uses.len(), 2);
+    let missing = review
+        .uses
+        .iter()
+        .find(|usage| usage.node_id == first.use_id)
+        .unwrap();
+    assert!(!missing.resolved);
+    assert_eq!(missing.component_id, component.id);
+    assert!(missing.span.is_some());
+    assert!(
+        review
+            .uses
+            .iter()
+            .find(|usage| usage.node_id == placed.use_id)
+            .unwrap()
+            .resolved
+    );
+    let before = fixture
+        .service
+        .screens_list(&fixture.project, &fixture.project_id)
+        .unwrap();
+    assert!(fixture
+        .service
+        .screens_component_copy(
+            &fixture.project,
+            &fixture.project_id,
+            CopyRequest {
+                target: binding(&second),
+                expected_target: fixture.revisions(&second),
+                use_id: placed.use_id,
+                expected_component: fixture.revisions(&component),
+                expected_project_revision: before.project_revision,
+                name: "refused_copy".into(),
+            }
+        )
+        .is_err());
+    assert_eq!(
+        fixture
+            .service
+            .screens_list(&fixture.project, &fixture.project_id)
+            .unwrap()
+            .source_map_revision,
+        before.source_map_revision
     );
 }
 
