@@ -1625,6 +1625,7 @@ fn build_overlay_model(
         ],
         scene_mappings: Vec::new(),
         owned_screens: Vec::new(),
+        component_uses: Vec::new(),
         extra: Map::new(),
     };
     (metadata, source_map, script, scene_source)

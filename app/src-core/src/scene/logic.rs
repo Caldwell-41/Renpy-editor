@@ -752,6 +752,7 @@ mod tests {
             map.scene_mappings[0].beats = parsed
                 .iter()
                 .map(|parsed| BeatSourceMapping {
+                    screen_target: None,
                     id: uuid::Uuid::new_v4().to_string(),
                     kind: parsed.payload.kind().into(),
                     byte_start: parsed.start as u64,
@@ -1126,6 +1127,7 @@ mod boundary_tests {
             map.scene_mappings[0].beats = parsed
                 .iter()
                 .map(|p| BeatSourceMapping {
+                    screen_target: None,
                     id: uuid::Uuid::new_v4().to_string(),
                     kind: p.payload.kind().into(),
                     byte_start: p.start as u64,

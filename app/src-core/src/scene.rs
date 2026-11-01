@@ -3635,6 +3635,7 @@ pub(crate) fn build_mapping(
         mappings.push(BeatSourceMapping {
             owner: None,
             conditional_branch: None,
+            screen_target: None,
             id: id.clone(),
             kind,
             byte_start: parsed.start as u64,
@@ -4436,6 +4437,7 @@ mod tests {
                 sources: vec!["game/chapters/chapter_01/scene_001.rpy".into()],
                 scene_mappings: Vec::new(),
                 owned_screens: Vec::new(),
+                component_uses: Vec::new(),
                 extra: map_extra,
             };
             fs::write(
@@ -5079,6 +5081,7 @@ mod tests {
                 sources: vec![],
                 scene_mappings: vec![],
                 owned_screens: vec![],
+                component_uses: vec![],
                 extra: Map::new(),
             },
             source_map_bytes: vec![],

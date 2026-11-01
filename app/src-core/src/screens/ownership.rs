@@ -43,8 +43,8 @@ pub(super) struct Inventory {
     pub(super) script_files: Vec<String>,
     pub(super) unresolved_styles: Vec<String>,
     opaque_revisions: Vec<(String, String)>,
-    names: Vec<String>,
-    complete: bool,
+    pub(super) names: Vec<String>,
+    pub(super) complete: bool,
 }
 
 impl Inventory {
@@ -303,7 +303,7 @@ impl AuthoringService {
         self.screen_inventory_for_create(project, None)
     }
 
-    fn screen_inventory_for_create(
+    pub(super) fn screen_inventory_for_create(
         &self,
         project: &ProjectId,
         destination: Option<&RelativePath>,
@@ -403,7 +403,7 @@ impl AuthoringService {
         Ok(inventory)
     }
 
-    fn screen_metadata(
+    pub(super) fn screen_metadata(
         &self,
         project: &ProjectId,
         project_id: &str,
@@ -495,6 +495,7 @@ impl AuthoringService {
             root_id: uuid::Uuid::new_v4().to_string(),
             name: request.name,
             path: destination.clone(),
+            kind: crate::metadata::OwnedScreenKind::Panel,
             extra: Default::default(),
         };
         let source = format!(

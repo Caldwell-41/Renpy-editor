@@ -75,7 +75,7 @@ pub struct ComposeResult {
     pub documents: Vec<Document>,
 }
 
-fn text_literal(text: &str) -> Result<String, SceneError> {
+pub(super) fn text_literal(text: &str) -> Result<String, SceneError> {
     if text.trim().is_empty() || text.len() > 8192 || text.contains('\0') {
         return Err(SceneError::InvalidPayload);
     }
@@ -125,7 +125,7 @@ pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
                     .any(|n| n.parent_start == Some(parent.span.start))))
 }
 
-fn movable(screen: &Screen, node: &Node) -> bool {
+pub(super) fn movable(screen: &Screen, node: &Node) -> bool {
     node.parent_start.is_some()
         && screen
             .nodes

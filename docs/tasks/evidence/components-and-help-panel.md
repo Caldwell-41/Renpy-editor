@@ -16,7 +16,14 @@ The primary checkout's unrelated audit and protected recovery remain untouched.
 The prototype chat is bound to `codex/components-help-panel-prototypes` in the
 managed worktree of the same basename, from checkpoint
 `b67e1f64a0552410c12a038f4a651a800a87e061`. It owns the combined design alternatives
-and approval handback. Implementation workers start from the same checkpoint.
+and approval handback. The workers' dispatch commit is
+`9b7748a0eb194f55cf12502953f7b6f764d29738`; its product code matches the module
+checkpoint and it additionally records the prototype handoff.
+
+| Assignment | Actual branch | Managed worktree basename | Base |
+| --- | --- | --- | --- |
+| L08 | `t3/reuse-owned-component` | `t3-0eb6a9be` | `9b7748a0eb194f55cf12502953f7b6f764d29738` |
+| L09 | `t3/help-panel-show-hide` | `t3-c53f7b0e` | `9b7748a0eb194f55cf12502953f7b6f764d29738` |
 
 | Owner | Exclusive files and interfaces |
 | --- | --- |
@@ -49,3 +56,24 @@ are isolated per assignment. Native sessions and shared SDK resources are sequen
 by the coordinator. No costly SDK campaign, package, native session or CI matrix has
 started; its limit and attempt definition will be recorded in the owning issue
 before execution. Historical allowances remain closed.
+
+## Shared identity checkpoint
+
+Owned screens use a typed `kind` of panel or component. Existing owned screens
+default to panel on read; no duplicate component-owner registry is added. Typed
+component uses record owner, use-node and component IDs. Validation rejects a
+non-component target, missing owner metadata or duplicate/colliding use identity.
+Story bindings retain stable screen ID and source name, including missing targets,
+while validating their shape and applicable Beat kinds. These additive fields
+remain in schema 6; ordinary source bytes and existing IDs remain authoritative.
+
+L09 temporarily handed `scene.rs` and `scene/logic.rs` to the coordinator for
+struct-literal initializers while continuing only its panel preparation module.
+The shared checkpoint returns those files to L09. Existing metadata/inventory,
+composition eligibility and literal-text helpers gain only the narrow sibling-module
+visibility needed by the two workers.
+
+Both new metadata tests first failed against the existing unchecked-extra behavior,
+then passed after typed validation. All five metadata tests pass with zero ignored
+cases. Pinned Rust formatting passes. This proves the shared identity contract;
+it does not yet prove component or Story operations, UI or runtime behavior.

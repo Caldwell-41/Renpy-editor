@@ -1547,6 +1547,7 @@ mod tests {
                 sources: vec![scene_path.clone()],
                 scene_mappings: Vec::new(),
                 owned_screens: Vec::new(),
+                component_uses: Vec::new(),
                 extra: Map::new(),
             };
             fs::write(
