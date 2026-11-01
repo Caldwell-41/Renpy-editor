@@ -244,10 +244,21 @@ def run_logged(output, name, argv, cwd, env, checks, timeout, retain_output=None
         os.chdir(cwd)
         os.environ.clear()
         os.environ.update(env)
-        result = run_bounded(tuple(map(str, argv)), timeout_seconds=timeout, output_limit=2_000_000)
+        try:
+            result = run_bounded(tuple(map(str, argv)), timeout_seconds=timeout, output_limit=2_000_000)
+        except BaseException as error:
+            partial = getattr(error, 'command_output', None)
+            if partial is not None:
+                (output / (name + '.log')).write_text(partial, encoding='utf-8')
+                record.update(exitCode=error.command_exit_code, timedOut=error.command_timed_out,
+                              outputLimited=error.command_output_limited, processReaped=error.command_process_reaped,
+                              cleanupComplete=error.command_cleanup_complete, durationSeconds=error.command_duration_seconds)
+                if retain_output is not None:
+                    retain_output(partial)
+            raise
         (output / (name + '.log')).write_text(result.output, encoding='utf-8')
         record.update(exitCode=result.exit_code, timedOut=result.timed_out, outputLimited=result.output_limited,
-                      processReaped=True, durationSeconds=result.duration_seconds)
+                      processReaped=True, cleanupComplete=True, durationSeconds=result.duration_seconds)
         if retain_output is not None:
             retain_output(result.output)
         require(result.exit_code == 0 and not result.timed_out and not result.output_limited, name + ' failed; see retained log')
@@ -297,7 +308,7 @@ def prepare(output):
         shutil.rmtree(temporary)
         require(not temporary.exists(), 'exporter temporary cleanup incomplete')
         result.update(passed=True, cleanupComplete=True, acceptedFileCount=len(manifest['files']))
-    except Exception as error:
+    except BaseException as error:
         result['failure'] = dict(type=type(error).__name__, message=str(error))
         raise
     finally:
@@ -382,11 +393,14 @@ def qualify_sdk(args):
         result['cleanupComplete'] = not temporary.exists()
         require(result['cleanupComplete'], 'owned SDK/game cleanup incomplete')
         result['passed'] = True
-    except Exception as error:
+    except BaseException as error:
         result['failure'] = dict(type=type(error).__name__, message=str(error))
         raise
     finally:
-        result['cleanupComplete'] = temporary is None or not temporary.exists()
+        result['scratchCleanupComplete'] = temporary is None or not temporary.exists()
+        result['processCleanupComplete'] = all(check.get('processReaped') is True
+            and check.get('cleanupComplete') is True for check in result['checks'])
+        result['cleanupComplete'] = result['scratchCleanupComplete'] and result['processCleanupComplete']
         write_json(output / 'result.json', result)
 
 

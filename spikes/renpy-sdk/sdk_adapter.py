@@ -161,6 +161,7 @@ def parse_diagnostics(output: str) -> tuple[Diagnostic, ...]:
 
 
 def run_bounded(argv: tuple[str, ...], *, timeout_seconds: float = 120, output_limit: int = 2_000_000) -> CommandResult:
+    """Run one owned command; propagated errors retain bounded output/cleanup facts."""
     if timeout_seconds <= 0 or output_limit <= 0:
         raise ValueError("timeout and output limit must be positive")
     started = time.monotonic()
@@ -214,6 +215,16 @@ def run_bounded(argv: tuple[str, ...], *, timeout_seconds: float = 120, output_l
     timed_out = False
     finished_reading = False
     completed = False
+    failure: BaseException | None = None
+
+    def capture(chunk: bytes) -> bool:
+        nonlocal limited
+        room = output_limit - len(captured)
+        captured.extend(chunk[:room])
+        exceeded = len(chunk) > room
+        limited |= exceeded
+        return exceeded
+
     try:
         while not finished_reading:
             if stop_requested_at is not None and time.monotonic() - stop_requested_at > 2:
@@ -229,33 +240,47 @@ def run_bounded(argv: tuple[str, ...], *, timeout_seconds: float = 120, output_l
                 continue
             if chunk is None:
                 finished_reading = True
-            elif len(captured) < output_limit:
-                room = output_limit - len(captured)
-                captured.extend(chunk[:room])
-                if len(chunk) > room:
-                    limited = True
-                    kill_process_tree()
-            else:
-                limited = True
+            elif capture(chunk):
                 kill_process_tree()
         exit_code = process.wait()
         completed = True
+    except BaseException as error:
+        failure = error
+        raise
     finally:
-        if not completed:
-            kill_process_tree()
-        process.wait()
-        # Let a reader blocked on the bounded queue finish after cancellation.
-        deadline = time.monotonic() + 2
-        while reader.is_alive() and time.monotonic() < deadline:
-            try:
-                chunks.get(timeout=0.05)
-            except queue.Empty:
-                pass
-            reader.join(timeout=0.05)
-        if reader.is_alive():
-            raise AdapterError("Process ended but its output reader did not close")
-        if process.stdout is not None:
-            process.stdout.close()
+        cleanup_failure: BaseException | None = None
+        try:
+            if not completed:
+                kill_process_tree()
+            process.wait()
+            # Retain queued bytes, including output emitted just before cancellation.
+            deadline = time.monotonic() + 2
+            while reader.is_alive() or not chunks.empty():
+                if time.monotonic() >= deadline:
+                    raise AdapterError("Process ended but its output reader did not close")
+                try:
+                    chunk = chunks.get(timeout=0.05)
+                except queue.Empty:
+                    pass
+                else:
+                    if chunk is not None:
+                        capture(chunk)
+                reader.join(timeout=0.01)
+            if process.stdout is not None:
+                process.stdout.close()
+        except BaseException as error:
+            cleanup_failure = error
+            raise
+        finally:
+            for error in (failure, cleanup_failure):
+                if error is not None:
+                    error.command_output = captured.decode("utf-8", errors="replace")
+                    error.command_exit_code = process.returncode
+                    error.command_duration_seconds = time.monotonic() - started
+                    error.command_timed_out = timed_out
+                    error.command_output_limited = limited
+                    error.command_process_reaped = process.returncode is not None
+                    error.command_cleanup_complete = process.returncode is not None and not reader.is_alive() and bool(process.stdout and process.stdout.closed)
     output = captured.decode("utf-8", errors="replace")
     return CommandResult(
         argv=argv,

@@ -35,8 +35,15 @@ Production UI waits for the prototype chat's exact approved revision. #44 owns t
 current SDK limit and consumption. The first Help macOS campaign passed version,
 compile and lint, then failed the first case with Start outside a menu context;
 five cases did not run, and owned cleanup completed. Its failed logs remain retained.
-The fixture-only menu and strict entry/accounting correction are prepared for fresh
-input freezing and the next bounded campaign. No package/native editor/CI operation
+The second campaign's runtime process exited zero but the gate rejected reporter
+trailing whitespace; it remains failed and #44 records eight confirmed starts.
+That parser correction admits the retained Show log without another launch. The
+next campaign tests keyboard focus first after fresh inputs. Shared cancellation
+cleanup now passes 13 actual-subprocess checks and exposes partial output on errors;
+the Help CLI retains interrupted exporter binaries and passes 12 artifact checks.
+L08 is implementing the required producer/source/toolchain/binary receipt in only
+its two Python harness files. Keep those files with that worker until handback.
+No component SDK allowance is selected. No package/native editor/CI operation
 has started. L08's coherent worker release suite
 passed 549 cases; L09's earlier ordinary release-core
 candidate `7aa82d1` passed 531 cases; the later comment correction and combined

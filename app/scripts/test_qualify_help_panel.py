@@ -201,7 +201,25 @@ class CommandTests(unittest.TestCase):
                 + 'state = os.environ["FIXTURE_BINARY_STATE"]\n'
                 + 'if state == "unavailable": row["executable"] += ".missing"\n'
                 + 'if state != "not-compiled": print(json.dumps(row), flush=True)\n'
+                + 'if os.environ["FIXTURE_CARGO_SCENARIO"] == "interrupted":\n'
+                + '    from pathlib import Path\n'
+                + '    import time\n'
+                + '    Path(os.environ["FIXTURE_READY"]).write_text("ready")\n'
+                + '    time.sleep(10)\n'
                 + 'sys.exit(int(os.environ["FIXTURE_CARGO_EXIT"]))\n')
+            wrapper = root / 'interrupt-preparation.py'
+            wrapper.write_text('import _thread, os, runpy, sys, threading, time\n'
+                + 'from pathlib import Path\n'
+                + 'def interrupt():\n'
+                + '    deadline = time.monotonic() + 5\n'
+                + '    while time.monotonic() < deadline:\n'
+                + '        if Path(os.environ["FIXTURE_READY"]).exists():\n'
+                + '            _thread.interrupt_main()\n'
+                + '            return\n'
+                + '        time.sleep(0.01)\n'
+                + 'threading.Thread(target=interrupt, daemon=True).start()\n'
+                + 'script = sys.argv.pop(1)\n'
+                + 'runpy.run_path(script, run_name="__main__")\n')
             if os.name == 'nt':
                 (scripts / 'cargo.cmd').write_text('@"' + sys.executable + '" "' + str(emitter) + '" %*\n')
             else:
@@ -210,12 +228,15 @@ class CommandTests(unittest.TestCase):
                 shim.chmod(0o755)
             for scenario, exit_code, expected_state in (
                 ('failed-command', 101, 'compiled'), ('invalid-bundle', 0, 'compiled'),
-                ('missing-binary', 101, 'unavailable'), ('no-compilation', 101, 'not-compiled')):
+                ('missing-binary', 101, 'unavailable'), ('no-compilation', 101, 'not-compiled'),
+                ('interrupted', 0, 'compiled')):
                 output = root / scenario
                 env = dict(os.environ, PATH=str(scripts) + os.pathsep + os.environ.get('PATH', ''),
                            FIXTURE_CARGO_EXIT=str(exit_code), FIXTURE_BINARY_STATE=expected_state,
+                           FIXTURE_CARGO_SCENARIO=scenario, FIXTURE_READY=str(root / 'ready'),
                            PYTHONDONTWRITEBYTECODE='1')
-                completed = subprocess.run([sys.executable, str(gate.REPO / 'app/scripts/qualify-help-panel.py'),
+                launcher = [sys.executable, str(wrapper)] if scenario == 'interrupted' else [sys.executable]
+                completed = subprocess.run([*launcher, str(gate.REPO / 'app/scripts/qualify-help-panel.py'),
                     'prepare', '--output', str(output)], env=env, capture_output=True, text=True, timeout=30)
                 self.assertNotEqual(completed.returncode, 0, completed.stdout)
                 result = json.loads((output / 'result.json').read_text())
@@ -227,7 +248,12 @@ class CommandTests(unittest.TestCase):
                     self.assertEqual(retained['sha256'], hashlib.sha256(binary.read_bytes()).hexdigest())
                 else:
                     self.assertIsNone(retained)
-                self.assertEqual(result['checks'][0]['exitCode'], exit_code)
+                if scenario == 'interrupted':
+                    self.assertEqual(result['failure']['type'], 'KeyboardInterrupt')
+                    self.assertTrue(result['checks'][0]['processReaped'])
+                    self.assertTrue(result['checks'][0]['cleanupComplete'])
+                else:
+                    self.assertEqual(result['checks'][0]['exitCode'], exit_code)
 
     def test_sdk_execution_requires_explicit_argument_before_any_sdk_work(self):
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as refused:

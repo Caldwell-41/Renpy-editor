@@ -138,12 +138,16 @@ class AdapterTests(unittest.TestCase):
         watcher.start()
         try:
             with mock.patch("sdk_adapter.subprocess.Popen", side_effect=start):
-                with self.assertRaises(KeyboardInterrupt):
+                with self.assertRaises(KeyboardInterrupt) as interrupted:
                     run_bounded((sys.executable, "-c", "from pathlib import Path; "
+                        + "print('partial exporter output', flush=True); "
                         + "Path(" + repr(str(marker)) + ").write_text('ready'); "
                         + "import time; time.sleep(10)"), timeout_seconds=3)
             self.assertTrue(launched)
             self.assertIsNotNone(launched[0].poll(), "cancelled process remains alive")
+            self.assertIn("partial exporter output", interrupted.exception.command_output)
+            self.assertTrue(interrupted.exception.command_process_reaped)
+            self.assertTrue(interrupted.exception.command_cleanup_complete)
         finally:
             stop.set()
             watcher.join(timeout=1)

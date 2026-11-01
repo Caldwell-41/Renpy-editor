@@ -426,3 +426,12 @@ closes its pipe. A reader that fails to close reports an error instead of hangin
 All thirteen adapter tests pass on macOS, including timeout and output limits.
 These use ordinary Python/shell subprocesses, with no SDK launches. Windows behavior
 still needs its target check; unknown process cleanup receives no positive claim.
+
+The shared adapter also preserves bounded partial output and known exit/reap/cleanup
+facts on propagated errors. A real interrupted process first exposed the missing
+output property, then passed with that metadata. The Help CLI's interrupted-export
+case likewise first lost the produced binary, then retained it using the existing
+retainer on partial Cargo output. All 13 adapter and 12 Help artifact checks pass.
+Scratch cleanup and known process cleanup are now distinct in Help SDK results.
+L08's larger mandatory producer-receipt correction continues in its two assigned
+Python files; no component SDK allocation has been selected.
