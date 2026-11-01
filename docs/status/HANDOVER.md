@@ -16,8 +16,15 @@ identity, target/effects, creation, marked-use, complete graph/Style and geometr
 admission hooks are integrated. Help/Story core through worker `25eda974` is
 integrated; coordinator candidate `fb2bed50` also fixes ordinary component-use
 removal in one source/map history transaction. Its 17 panel tests and five shared
-IPC journeys pass. L08 is replacing interim traversal with the canonical graph,
-completing its public affected-use review and checking its coherent write candidate.
+IPC journeys pass. L08's coherent `e5d01ca` core is now integrated through `560b3f2`.
+Its independent reviews found no Spec or hard Standards defects; the coordinator
+removed duplicated user traversal and added typed component IPC. All 21 component
+tests and the new actual IPC journey pass after those changes. Help preparation
+review found two P2 issues, now fixed with rejecting tests: failed binary retention
+and focus observed before a later pointer move. Twelve Python artifact checks,
+application typechecking and nine protocol tests pass. The first coordinator
+preparation's compiler-cache cleanup refusal remains a retained failure, with its
+accepted bytes and binary preserved; owned cleanup is corrected for the next freeze.
 Both workers are preparing frozen public-transaction fixtures and rejecting runtime
 validators without SDK execution. L09's normal-entry Help exporter `3ad43eef` is
 integrated as `3ccc584`; its exact IPC test passes. The temporary module-registration
@@ -25,7 +32,8 @@ ownership has returned to the coordinator. All other file assignments remain in
 the linked evidence record.
 Source-map schema 7 owns recognition and preserves legacy-6 source bytes and IDs.
 Production UI waits for the prototype chat's exact approved revision. No costly
-SDK/package/native/CI operation has started. L09's earlier ordinary release-core
+SDK/package/native/CI operation has started. L08's coherent worker release suite
+passed 549 cases; L09's earlier ordinary release-core
 candidate `7aa82d1` passed 531 cases; the later comment correction and combined
 candidate still need final qualification. Initial sandbox failures and L08's cancelled
 old-base ordinary run remain failures/cancelled in linked evidence. The linked

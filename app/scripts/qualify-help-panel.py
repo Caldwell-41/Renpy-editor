@@ -289,8 +289,10 @@ def prepare(output):
         result['manifestSHA256'] = digest(output / 'accepted/manifest.json')
         validate_core_output(text, result['manifestSHA256'])
         require(inputs() == load_json((output / 'inputs.json').read_text()), 'inputs changed during export')
-        require(not list(temporary.iterdir()), 'exporter temporary cleanup incomplete')
-        temporary.rmdir()
+        # Cargo/macOS may leave compiler caches such as xcrun_db here. This fresh
+        # directory is wholly owned; accepted bytes and the test binary are retained.
+        shutil.rmtree(temporary)
+        require(not temporary.exists(), 'exporter temporary cleanup incomplete')
         result.update(passed=True, cleanupComplete=True, acceptedFileCount=len(manifest['files']))
     except Exception as error:
         result['failure'] = dict(type=type(error).__name__, message=str(error))

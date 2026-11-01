@@ -65,6 +65,12 @@ pub struct ComponentReview {
     pub complete: bool,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ReviewRequest {
+    pub component_id: String,
+}
+
 fn reindent(source: &str, indentation: usize) -> Result<String, SceneError> {
     let original = source.bytes().take_while(|b| *b == b' ').count();
     let prefix = " ".repeat(original);
@@ -155,18 +161,7 @@ impl AuthoringService {
             return Err(SceneError::SourceConflict);
         }
         let graph = references::component_graph(&inventory.source_map, &inventory);
-        let mut affected = HashSet::from([component_id.to_owned()]);
-        loop {
-            let previous = affected.len();
-            for usage in &graph.uses {
-                if affected.contains(&usage.component_id) {
-                    affected.insert(usage.screen_id.clone());
-                }
-            }
-            if previous == affected.len() {
-                break;
-            }
-        }
+        let affected = graph.affected_owners(component_id);
         let mut affected_screens = inventory
             .source_map
             .owned_screens

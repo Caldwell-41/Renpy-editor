@@ -1,6 +1,147 @@
 use super::*;
 
 #[test]
+fn component_ipc_prepares_extracts_places_reviews_and_copies_with_typed_requests() {
+    let (_temporary, mut service, root, panel) = composition_project();
+    let group = compose_command(
+        &mut service,
+        &panel,
+        json!({"type":"add","parentId":panel["rootId"],"kind":"vbox","text":""}),
+    );
+    compose_command(
+        &mut service,
+        &panel,
+        json!({"type":"add","parentId":group["selectedId"],"kind":"text","text":"Shared"}),
+    );
+    let resolve = |service: &mut LifecycleService, owner: &Value| {
+        ipc(
+            service,
+            "screens.resolveTarget",
+            json!({"binding":{"screenId":owner["id"],"sourceName":owner["name"]}}),
+        )
+    };
+    let target = resolve(&mut service, &panel);
+    let source_before = fs::read(root.join(panel["path"].as_str().unwrap())).unwrap();
+    let prepared = ipc(
+        &mut service,
+        "screens.componentPrepareExtract",
+        json!({
+            "screenId":panel["id"],"nodeId":group["selectedId"],"expectedRevision":target["revisions"]["source"]
+        }),
+    );
+    assert!(prepared["source"].as_str().unwrap().contains("Shared"));
+    assert_eq!(
+        fs::read(root.join(panel["path"].as_str().unwrap())).unwrap(),
+        source_before
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let extracted = ipc(
+        &mut service,
+        "screens.componentExtract",
+        json!({
+            "target":target["binding"],"expected":target["revisions"],
+            "expectedProjectRevision":catalog["projectRevision"],"nodeId":group["selectedId"],"name":"shared_details"
+        }),
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let component = catalog["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|owner| owner["id"] == extracted["componentId"])
+        .unwrap()
+        .clone();
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({
+            "name":"other_panel","expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"]
+        }),
+    );
+    let other = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|owner| owner["name"] == "other_panel")
+        .unwrap()
+        .clone();
+    let component_target = resolve(&mut service, &component);
+    let other_target = resolve(&mut service, &other);
+    let placed = ipc(
+        &mut service,
+        "screens.componentPlace",
+        json!({
+            "component":component_target["binding"],"expectedComponent":component_target["revisions"],
+            "target":other_target["binding"],"expectedTarget":other_target["revisions"],"parentId":other["rootId"]
+        }),
+    );
+    let review = ipc(
+        &mut service,
+        "screens.componentReview",
+        json!({"componentId":component["id"]}),
+    );
+    assert_eq!(review["complete"], true);
+    assert_eq!(review["affectedScreens"].as_array().unwrap().len(), 2);
+    assert_eq!(review["uses"].as_array().unwrap().len(), 2);
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.componentReview",
+            json!({
+                "componentId":component["id"],"unchecked":true
+            })
+        )["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
+    let target = resolve(&mut service, &other);
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let map_before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+    let other_before = fs::read(root.join(other["path"].as_str().unwrap())).unwrap();
+    let copied = ipc(
+        &mut service,
+        "screens.componentCopy",
+        json!({
+            "target":target["binding"],"expectedTarget":target["revisions"],"useId":placed["useId"],
+            "expectedComponent":review["component"]["revisions"],"expectedProjectRevision":catalog["projectRevision"],
+            "name":"independent_details"
+        }),
+    );
+    assert_eq!(copied["useId"], placed["useId"]);
+    assert_ne!(copied["componentId"], component["id"]);
+    assert!(
+        fs::read_to_string(root.join(other["path"].as_str().unwrap()))
+            .unwrap()
+            .contains("use independent_details")
+    );
+    assert!(
+        fs::read_to_string(root.join(panel["path"].as_str().unwrap()))
+            .unwrap()
+            .contains("use shared_details")
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read(root.join(other["path"].as_str().unwrap())).unwrap(),
+        other_before
+    );
+    assert_eq!(
+        fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
+        map_before
+    );
+    composition_history(&mut service, "redo");
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(
+        ipc(
+            &mut service,
+            "screens.componentReview",
+            json!({"componentId":copied["componentId"]})
+        )["complete"],
+        true
+    );
+}
+
+#[test]
 fn removing_a_component_subtree_prunes_only_its_use_bindings_in_one_history_entry() {
     let (_temporary, mut service, root, panel) = composition_project();
     let catalog = ipc(&mut service, "screens.list", json!({}));

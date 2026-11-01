@@ -310,3 +310,34 @@ passes after it. This remains prepared engine automation, not runtime or OS inpu
 evidence. The corrected checks pass 12 cases with the accepted artifact and nine
 under ordinary discovery, with no skips or SDK execution. Final combined independent
 review against the original implementation base remains required.
+
+## Component core review and IPC integration
+
+The coordinator reviewed and integrated L08's four exclusive commits from `10e9faf`
+through `e5d01ca`, producing `560b3f2`. Its worker's coherent release-core candidate
+passed 549 tests, with zero failures, 54 default ignores and the three documented
+exclusions. Its cancelled earlier run remains cancelled; no result is transferred
+to a different candidate. Full runtime and controller acceptance remain pending.
+
+Two independent, read-only reviews examined `fb2bed50...e5d01ca`. Spec found no
+core defects or scope creep. Standards found no hard breaches and one P3 possible
+duplication: review and dirty-Source admission separately computed transitive users.
+The coordinator moved that calculation into the canonical ComponentGraph owner;
+all 21 public component tests pass after the change, with zero ignored cases.
+
+Typed lifecycle and IPC operations now expose component preparation, extraction,
+placement, copy and affected-use review. Both operation allowlists include these
+commands and the existing target resolver. A public IPC journey first failed at the
+missing allowlist entry, then passed preparation without writes, extraction, second
+placement, complete two-screen review, unknown-field refusal, independent copy and
+one-step Undo/Redo/reopen. Application typechecking and nine protocol tests pass.
+An initial dependency-link command used an incorrect relative path; fixing the
+command restored the existing pinned tools without an installation or product change.
+
+The first coordinator Help preparation passed its real exporter but refused cleanup
+because Cargo left one `xcrun_db` cache under its wholly owned TMPDIR. No project
+fixture remained. The failed result, accepted bytes, log and exact binary are retained
+under ignored `app/target/help-panel-coordinator-01`; binary retention succeeded on
+this real failure. Successful preparation now removes its wholly owned temporary
+directory after preserving accepted bytes and the binary, then verifies its absence.
+SDK execution remains unstarted at this checkpoint.

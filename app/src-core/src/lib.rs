@@ -124,6 +124,11 @@ pub const OPERATIONS: &[&str] = &[
     "screens.resolveTarget",
     "screens.create",
     "screens.compose",
+    "screens.componentPrepareExtract",
+    "screens.componentExtract",
+    "screens.componentPlace",
+    "screens.componentCopy",
+    "screens.componentReview",
     "screens.setPixelProperty",
     "screens.setSize",
     "screens.setLayout",
@@ -579,6 +584,50 @@ pub fn handle_application_request(
                     .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
             })
             .and_then(|request| lifecycle.screens_compose(request))
+            .and_then(to_value),
+        "screens.componentPrepareExtract" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::components::PrepareExtractRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_component_prepare_extract(request))
+            .and_then(to_value),
+        "screens.componentExtract" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::components::ExtractRequest>(Value::Object(
+                    payload,
+                ))
+                .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_component_extract(request))
+            .and_then(to_value),
+        "screens.componentPlace" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::components::PlaceRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_component_place(request))
+            .and_then(to_value),
+        "screens.componentCopy" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::components::CopyRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_component_copy(request))
+            .and_then(to_value),
+        "screens.componentReview" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<screens::components::ReviewRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.screens_component_review(request))
             .and_then(to_value),
         "screens.inspect" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))

@@ -927,6 +927,56 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn screens_component_prepare_extract(
+        &self,
+        request: crate::screens::components::PrepareExtractRequest,
+    ) -> Result<crate::screens::components::PreparedGroup, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .prepare_extract_group(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_extract(
+        &self,
+        request: crate::screens::components::ExtractRequest,
+    ) -> Result<crate::screens::components::ComponentChange, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_component_extract(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_place(
+        &self,
+        request: crate::screens::components::PlaceRequest,
+    ) -> Result<crate::screens::components::ComponentChange, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_component_place(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_copy(
+        &self,
+        request: crate::screens::components::CopyRequest,
+    ) -> Result<crate::screens::components::ComponentChange, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_component_copy(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_review(
+        &self,
+        request: crate::screens::components::ReviewRequest,
+    ) -> Result<crate::screens::components::ComponentReview, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_component_review(&authority, &project_id, &request.component_id)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn screens_set_layout(
         &self,
         request: crate::screens::SetLayoutRequest,

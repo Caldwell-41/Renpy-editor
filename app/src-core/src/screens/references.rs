@@ -70,6 +70,21 @@ pub(super) struct ComponentGraph {
 }
 
 impl ComponentGraph {
+    pub(super) fn affected_owners(&self, component_id: &str) -> HashSet<String> {
+        let mut affected = HashSet::from([component_id.to_owned()]);
+        loop {
+            let previous = affected.len();
+            for usage in &self.uses {
+                if affected.contains(&usage.component_id) {
+                    affected.insert(usage.screen_id.clone());
+                }
+            }
+            if affected.len() == previous {
+                return affected;
+            }
+        }
+    }
+
     pub(super) fn would_cycle(
         &self,
         component_id: &str,
@@ -496,34 +511,6 @@ fn digest(bytes: &[u8]) -> String {
 }
 
 impl AuthoringService {
-    fn ensure_component_users_clean_in_map(
-        &self,
-        project: &ProjectId,
-        map: &SourceMapMetadata,
-        component_id: &str,
-    ) -> Result<(), SceneError> {
-        let mut affected = HashSet::from([component_id]);
-        loop {
-            let previous = affected.len();
-            for usage in &map.component_uses {
-                if affected.contains(usage.component_id.as_str()) {
-                    affected.insert(usage.screen_id.as_str());
-                }
-            }
-            if affected.len() == previous {
-                break;
-            }
-        }
-        self.ensure_source_paths_clean(
-            project,
-            map.owned_screens
-                .iter()
-                .filter(|s| affected.contains(s.id.as_str()))
-                .map(|s| s.path.as_str()),
-        )
-        .map_err(|_| SceneError::DirtySource)
-    }
-
     pub(super) fn require_component_write_review(
         &self,
         project: &ProjectId,
@@ -541,14 +528,21 @@ impl AuthoringService {
         {
             return Err(SceneError::SourceConflict);
         }
-        if !component_graph(&inventory.source_map, &inventory).complete {
+        let graph = component_graph(&inventory.source_map, &inventory);
+        if !graph.complete {
             return Err(SceneError::OpaqueBoundary);
         }
-        self.ensure_component_users_clean_in_map(
+        let affected = graph.affected_owners(&binding.screen_id);
+        self.ensure_source_paths_clean(
             project,
-            &inventory.source_map,
-            &binding.screen_id,
-        )?;
+            inventory
+                .source_map
+                .owned_screens
+                .iter()
+                .filter(|owner| affected.contains(&owner.id))
+                .map(|owner| owner.path.as_str()),
+        )
+        .map_err(|_| SceneError::DirtySource)?;
         Ok(resolved)
     }
 
