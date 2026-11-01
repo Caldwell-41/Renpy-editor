@@ -148,3 +148,187 @@ fn help_panel_preparation_refuses_invalid_names_text_and_dimensions() {
         before
     );
 }
+
+fn compose(
+    f: &Fixture,
+    owner: &crate::metadata::OwnedScreen,
+    command: serde_json::Value,
+) -> super::ComposeResult {
+    let document = f
+        .service
+        .screens_inspect(
+            &f.project,
+            InspectRequest {
+                path: owner.path.clone(),
+            },
+        )
+        .unwrap();
+    f.service
+        .screens_compose(
+            &f.project,
+            &f.project_id,
+            serde_json::from_value(serde_json::json!({
+                "screenId":owner.id,"expectedRevision":document.revision,"command":command
+            }))
+            .unwrap(),
+        )
+        .unwrap()
+}
+
+fn history(f: &Fixture, command: crate::scene::SceneCommand) {
+    let workspace = f
+        .service
+        .scene_workspace(&f.project, &f.project_id)
+        .unwrap();
+    f.service
+        .scene_apply(
+            &f.project,
+            &f.project_id,
+            crate::scene::SceneCommandRequest {
+                expected_project_revision: workspace.project_revision,
+                expected_source_map_revision: workspace.source_map_revision,
+                command,
+            },
+        )
+        .unwrap();
+}
+
+#[test]
+fn help_starter_nodes_edit_reorder_remove_and_reopen_with_qualified_dismissal_source() {
+    use serde_json::json;
+    let mut f = Fixture::new();
+    let catalog = f.service.screens_list(&f.project, &f.project_id).unwrap();
+    let created = f
+        .service
+        .screens_create(
+            &f.project,
+            &f.project_id,
+            super::CreateRequest {
+                name: "help_panel".into(),
+                expected_project_revision: catalog.project_revision,
+                expected_source_map_revision: catalog.source_map_revision,
+                expected_inventory_revision: catalog.inventory_revision,
+                starter: Some(f.starter()),
+            },
+        )
+        .unwrap();
+    let owner = &created.owned[0].screen;
+    let path = f.root.join(&owner.path);
+    let initial = fs::read_to_string(&path).unwrap();
+    let document = f
+        .service
+        .screens_inspect(
+            &f.project,
+            InspectRequest {
+                path: owner.path.clone(),
+            },
+        )
+        .unwrap();
+    let nodes = &document.screens[0].nodes;
+    let title = nodes
+        .iter()
+        .find(|n| n.kind == "text" && n.literal.as_deref() == Some("Help"))
+        .unwrap()
+        .id
+        .clone()
+        .unwrap();
+    let image = nodes
+        .iter()
+        .find(|n| n.kind == "image")
+        .unwrap()
+        .id
+        .clone()
+        .unwrap();
+    let close = nodes
+        .iter()
+        .find(|n| n.kind == "textbutton")
+        .unwrap()
+        .id
+        .clone()
+        .unwrap();
+    compose(
+        &f,
+        owner,
+        json!({"type":"text","nodeId":title,"text":"Quick help"}),
+    );
+    let edited = fs::read_to_string(&path).unwrap();
+    assert_eq!(
+        edited,
+        initial.replace("text \"Help\"", "text \"Quick help\"")
+    );
+    assert!(
+        !compose(
+            &f,
+            owner,
+            json!({"type":"text","nodeId":title,"text":"Quick help"})
+        )
+        .changed
+    );
+    history(&f, crate::scene::SceneCommand::Undo);
+    assert_eq!(fs::read_to_string(&path).unwrap(), initial);
+    history(&f, crate::scene::SceneCommand::Redo);
+    assert_eq!(fs::read_to_string(&path).unwrap(), edited);
+    compose(
+        &f,
+        owner,
+        json!({"type":"image","nodeId":image,"assetId":f.asset_id,
+        "expectedAssetSha256":f.asset_sha256,"width":160,"height":80}),
+    );
+    let resized = fs::read_to_string(&path).unwrap();
+    assert_eq!(
+        resized,
+        edited
+            .replace("xsize 80", "xsize 160")
+            .replace("ysize 40", "ysize 80")
+    );
+    compose(
+        &f,
+        owner,
+        json!({"type":"reorder","nodeId":close,"targetId":title,"after":false}),
+    );
+    let reordered = fs::read_to_string(&path).unwrap();
+    assert!(
+        reordered.find("textbutton \"Close\"").unwrap()
+            < reordered.find("text \"Quick help\"").unwrap()
+    );
+    assert!(reordered.contains(
+        "                action Hide(\"help_panel\")\n                default_focus True\n"
+    ));
+    compose(&f, owner, json!({"type":"remove","nodeId":close}));
+    let removed = fs::read_to_string(&path).unwrap();
+    assert!(!removed.contains("textbutton \"Close\""));
+    assert!(removed.contains("    key \"game_menu\" action Hide(\"help_panel\")\n"));
+    history(&f, crate::scene::SceneCommand::Undo);
+    assert_eq!(fs::read_to_string(&path).unwrap(), reordered);
+    history(&f, crate::scene::SceneCommand::Redo);
+    assert_eq!(fs::read_to_string(&path).unwrap(), removed);
+    let target = crate::metadata::ScreenTargetBinding {
+        screen_id: owner.id.clone(),
+        source_name: owner.name.clone(),
+    };
+    let resolved = f
+        .service
+        .screens_resolve_target(&f.project, &f.project_id, &target, None)
+        .unwrap();
+    assert!(!resolved.effects.unknown);
+    assert_eq!(resolved.effects.hidden_screens, vec![owner.id.clone()]);
+    f.service.unregister_project(&f.project);
+    f.project = f.service.register_project(&f.root).unwrap();
+    assert_eq!(
+        f.service
+            .screens_list(&f.project, &f.project_id)
+            .unwrap()
+            .owned[0]
+            .screen,
+        *owner
+    );
+    assert!(
+        !compose(
+            &f,
+            owner,
+            json!({"type":"text","nodeId":title,"text":"Quick help"})
+        )
+        .changed
+    );
+    assert_eq!(fs::read_to_string(&path).unwrap(), removed);
+}
