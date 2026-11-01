@@ -28,6 +28,9 @@ mod audit;
 #[path = "reference_tests.rs"]
 mod references;
 
+#[path = "panel_fixture_tests.rs"]
+mod panel_fixture;
+
 #[test]
 fn grid_axes_and_child_removal_refuse_ambiguous_or_strict_source_shapes() {
     for shape in [
