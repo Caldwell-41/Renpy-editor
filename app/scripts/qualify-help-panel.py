@@ -165,7 +165,8 @@ def validate_runtime_output(text, case, manifest_sha, accepted_hashes):
         'reshow_close': ([('reshown', 'HP_RESHOWN', True), ('closed', 'HP_RESHOWN', False)], ['advance'] * 4 + ['clickClose']),
         'outside_click': ([('outside', ('HP_SHOWN_0', 'HP_SHOWN_1'), True)], ['clickOutside']),
         'escape': ([('escaped', 'HP_SHOWN_0', False)], ['K_ESCAPE']),
-        'keyboard_close': ([('activated', 'HP_SHOWN_0', False)], ['K_RETURN']),
+        'keyboard_close': ([('focused', 'HP_SHOWN_0', True), ('activated', 'HP_SHOWN_0', False)],
+                           ['moveOutside', 'K_DOWN', 'K_RETURN']),
     }[case]
     expected = [('baseline', 'HP_BASELINE', False), ('shown', 'HP_SHOWN_0', True)] + extra
     require(row.get('inputs') == inputs, 'wrong input journey')
@@ -177,7 +178,11 @@ def validate_runtime_output(text, case, manifest_sha, accepted_hashes):
                 'wrong engine observation: ' + step)
         require(type(observation.get('focusedClose')) is bool, 'missing focus observation')
     if case == 'keyboard_close':
-        require(observations[1]['focusedClose'] is True, 'Close was not keyboard focused before activation')
+        require(observations[1]['focusedClose'] is True, 'Close did not receive default focus')
+        require(observations[2]['focusedClose'] is True, 'Close was not keyboard focused immediately before activation')
+        require(observations[2].get('mousePoint') == row.get('outsidePoint')
+                and observations[3].get('mousePoint') == row.get('outsidePoint'),
+                'pointer moved between keyboard focus and activation')
     if case == 'escape':
         require(row.get('defaultGameEscape') is True, 'default Escape key mapping not observed')
     if case in ('outside_click', 'escape', 'keyboard_close'):
@@ -225,7 +230,7 @@ def fresh_output(path):
     return path
 
 
-def run_logged(output, name, argv, cwd, env, checks, timeout):
+def run_logged(output, name, argv, cwd, env, checks, timeout, retain_output=None):
     # Reuse the existing bounded process-tree adapter. No shell or content interpolation.
     sys.path.insert(0, str(REPO / 'spikes/renpy-sdk'))
     from sdk_adapter import run_bounded
@@ -240,6 +245,8 @@ def run_logged(output, name, argv, cwd, env, checks, timeout):
         (output / (name + '.log')).write_text(result.output, encoding='utf-8')
         record.update(exitCode=result.exit_code, timedOut=result.timed_out, outputLimited=result.output_limited,
                       processReaped=True, durationSeconds=result.duration_seconds)
+        if retain_output is not None:
+            retain_output(result.output)
         require(result.exit_code == 0 and not result.timed_out and not result.output_limited, name + ' failed; see retained log')
         record['passed'] = True
         return result.output
@@ -253,7 +260,7 @@ def prepare(output):
     output = fresh_output(output)
     result = dict(passed=False, engineStarted=False, scope='public authoring export only', checks=[],
                   candidate=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
-                  python=platform.python_version())
+                  python=platform.python_version(), testBinary=None, testBinaryState='not-compiled')
     try:
         write_json(output / 'inputs.json', inputs())
         temporary = output / 'tmp'
@@ -261,16 +268,26 @@ def prepare(output):
         env = dict(os.environ, CARGO_TARGET_DIR=str(REPO / 'app/target'), TMPDIR=str(temporary),
                    TMP=str(temporary), TEMP=str(temporary), PYTHONDONTWRITEBYTECODE='1',
                    LOOMLIGHT_HELP_PANEL_FIXTURE_DIR=str(output / 'accepted'))
-        text = run_logged(output, 'core-export', ['cargo', 'test', '-p', 'loomlight-core', '--locked', '--offline',
-            '--lib', '--message-format=json', EXPORT_TEST, '--', '--exact', '--nocapture'], REPO / 'app', env, result['checks'], 180)
-        manifest = validate_bundle(output / 'accepted')
-        result['manifestSHA256'] = digest(output / 'accepted/manifest.json')
-        validate_core_output(text, result['manifestSHA256'])
         spec = importlib.util.spec_from_file_location('screens_source_gate', REPO / 'app/scripts/qualify-screens-source.py')
         source_gate = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(source_gate)
-        result['testBinary'] = source_gate.retain_test_binary(text, output)
+
+        def retain_binary(text):
+            try:
+                result['testBinary'] = source_gate.retain_test_binary(text, output)
+                result['testBinaryState'] = 'compiled' if result['testBinary'] is not None else 'not-compiled'
+            except Exception as error:
+                result['testBinaryState'] = 'unavailable' if isinstance(error, FileNotFoundError) else 'retention-failed'
+                result['binaryRetentionFailure'] = dict(type=type(error).__name__, message=str(error))
+                raise
+
+        text = run_logged(output, 'core-export', ['cargo', 'test', '-p', 'loomlight-core', '--locked', '--offline',
+            '--lib', '--message-format=json', EXPORT_TEST, '--', '--exact', '--nocapture'], REPO / 'app', env, result['checks'], 180,
+            retain_output=retain_binary)
         require(result['testBinary'] is not None, 'missing produced test binary')
+        manifest = validate_bundle(output / 'accepted')
+        result['manifestSHA256'] = digest(output / 'accepted/manifest.json')
+        validate_core_output(text, result['manifestSHA256'])
         require(inputs() == load_json((output / 'inputs.json').read_text()), 'inputs changed during export')
         require(not list(temporary.iterdir()), 'exporter temporary cleanup incomplete')
         temporary.rmdir()

@@ -39,13 +39,17 @@ init python:
         screen = renpy.get_screen("say")
         return screen.scope.get("what") if screen is not None else None
 
-    def _hp_observe(step):
+    def _hp_close_focused():
         close = _hp_testfocus.find_focus("Close", False)
+        return close is not None and renpy.display.focus.get_focused() is close.widget
+
+    def _hp_observe(step):
         _hp_observations.append(dict(
             step=step, line=_hp_line(),
             panelVisible=renpy.get_screen(_hp_manifest["panel"]["name"]) is not None,
             gameMenu=bool(renpy.context()._menu),
-            focusedClose=close is not None and renpy.display.focus.get_focused() is close.widget))
+            focusedClose=_hp_close_focused(),
+            mousePoint=list(renpy.test.testmouse.mouse_pos) if renpy.test.testmouse.mouse_pos is not None else None))
 
     def _hp_measure_outside():
         # Pinned 8.5.3 render-tree observer. It never changes the authored screen.

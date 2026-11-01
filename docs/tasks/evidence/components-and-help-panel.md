@@ -275,3 +275,38 @@ The existing isolated Python runtime reports 3.12.14. Both workers reuse it for
 cheap validator checks, with bytecode caches disabled or isolated locally. System
 Python 3.9.6 does not replace the documented harness requirement. No installation
 was needed. Actual six-case runtime validation remains pending.
+
+## Independent preparation review and corrections
+
+Two fresh, read-only reviewers examined `fb2bed50...a186a7c`. The earlier review of
+`4e25f6e` was interrupted when L09 corrected cleanup ordering; it supplied no pass.
+The reviewed preparation is integrated through coordinator `e2f081b`.
+
+### Standards
+
+One P2 documented-standard violation: binary retention followed command success and
+bundle validation, so an exporter failure could lose its produced executable.
+`docs/testing/EVIDENCE.md` requires retention independently of test success. No
+additional documented violations or actionable baseline smells were found.
+
+The coordinator now calls the existing binary retainer on raw bounded process output
+before command or bundle rejection. Results distinguish compiled, not-compiled,
+unavailable and retention-failed states. A public CLI check with an external Cargo
+process fixture first failed, then passed for nonzero command exit, invalid bundle,
+reported-but-missing binary and no compiled artifact. No fictional binary is executed.
+
+### Spec
+
+One P2 preparation defect: Return input moved the virtual mouse outside after the
+recorded Close-focus observation. Pinned Ren'Py input code posts a mouse-motion event
+when that position changes, so the old observation did not prove focus at activation.
+No other missing preparation requirement or scope creep was found.
+
+The coordinator positions the pointer first, uses the default Down key to establish
+keyboard focus, records the engine widget and pointer immediately before Return,
+then keeps that position for activation. The validator rejects stale focus or a
+changed pointer. Its new public admission test failed before the correction and
+passes after it. This remains prepared engine automation, not runtime or OS input
+evidence. The corrected checks pass 12 cases with the accepted artifact and nine
+under ordinary discovery, with no skips or SDK execution. Final combined independent
+review against the original implementation base remains required.

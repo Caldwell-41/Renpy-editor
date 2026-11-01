@@ -11,6 +11,9 @@ import io
 import textwrap
 import unittest
 import sys
+import os
+import subprocess
+import hashlib
 
 spec = importlib.util.spec_from_file_location('help_panel_gate', Path(__file__).with_name('qualify-help-panel.py'))
 gate = importlib.util.module_from_spec(spec)
@@ -65,11 +68,13 @@ class RuntimeEvidenceTests(unittest.TestCase):
             ('reshow_close', [('reshown', 'HP_RESHOWN', True), ('closed', 'HP_RESHOWN', False)], ['advance', 'advance', 'advance', 'advance', 'clickClose']),
             ('outside_click', [('outside', 'HP_SHOWN_1', True)], ['clickOutside']),
             ('escape', [('escaped', 'HP_SHOWN_0', False)], ['K_ESCAPE']),
-            ('keyboard_close', [('activated', 'HP_SHOWN_0', False)], ['K_RETURN'])]:
+            ('keyboard_close', [('focused', 'HP_SHOWN_0', True), ('activated', 'HP_SHOWN_0', False)],
+             ['moveOutside', 'K_DOWN', 'K_RETURN'])]:
             row = self.receipt()
             row.update(case=case, inputs=inputs)
             row['observations'] = row['observations'][:2] + [
-                dict(step=step, line=line, panelVisible=visible, gameMenu=False, focusedClose=False)
+                dict(step=step, line=line, panelVisible=visible, gameMenu=False,
+                     focusedClose=step == 'focused', mousePoint=[0, 0])
                 for step, line, visible in steps]
             row.update(defaultGameEscape=True, outsidePoint=[0, 0], frameRect=[200, 100, 600, 500])
             log = self.log(row).replace('global.help_panel::show_persists', 'global.help_panel::' + case)
@@ -88,6 +93,31 @@ class RuntimeEvidenceTests(unittest.TestCase):
                     bad['observations'][1]['focusedClose'] = False
                 with self.assertRaises(ValueError):
                     gate.validate_runtime_output(self.log(bad).replace('global.help_panel::show_persists', 'global.help_panel::' + case), case, 'a' * 64, row['acceptedHashes'])
+
+    def test_keyboard_focus_is_observed_after_pointer_positioning_before_return(self):
+        row = self.receipt()
+        row.update(case='keyboard_close', inputs=['moveOutside', 'K_DOWN', 'K_RETURN'],
+                   outsidePoint=[0, 0], frameRect=[200, 100, 600, 500])
+        row['observations'] = row['observations'][:2] + [
+            dict(step='focused', line='HP_SHOWN_0', panelVisible=True, gameMenu=False,
+                 focusedClose=True, mousePoint=[0, 0]),
+            dict(step='activated', line='HP_SHOWN_0', panelVisible=False, gameMenu=False,
+                 focusedClose=False, mousePoint=[0, 0])]
+        def validate(value):
+            return gate.validate_runtime_output(self.log(value).replace('global.help_panel::show_persists',
+                'global.help_panel::keyboard_close'), 'keyboard_close', 'a' * 64, value['acceptedHashes'])
+        self.assertEqual(validate(row), row)
+        for modify in ('lostFocus', 'movedPointer', 'oldObservation'):
+            bad = copy.deepcopy(row)
+            if modify == 'lostFocus':
+                bad['observations'][2]['focusedClose'] = False
+            elif modify == 'movedPointer':
+                bad['observations'][2]['mousePoint'] = [300, 200]
+            else:
+                bad['inputs'] = ['K_RETURN']
+                del bad['observations'][2]
+            with self.subTest(modify=modify), self.assertRaises(ValueError):
+                validate(bad)
 
 
 class FrozenEvidenceChecks:
@@ -150,6 +180,50 @@ class FrozenEvidenceChecks:
 
 
 class CommandTests(unittest.TestCase):
+    def test_prepare_retains_compiled_binary_before_command_or_bundle_rejection(self):
+        target = gate.REPO / 'app/target'
+        target.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=target) as temporary:
+            root = Path(temporary)
+            binary = root / 'compiled-test'
+            binary.write_bytes(b'fictional compiled exporter; never executed')
+            scripts = root / 'bin'
+            scripts.mkdir()
+            emitter = scripts / 'cargo-output.py'
+            emitter.write_text('import json, os, sys\n'
+                + 'row = ' + repr(dict(reason='compiler-artifact', profile={'test': True},
+                    executable=str(binary), target={'name': 'loomlight_core'})) + '\n'
+                + 'state = os.environ["FIXTURE_BINARY_STATE"]\n'
+                + 'if state == "unavailable": row["executable"] += ".missing"\n'
+                + 'if state != "not-compiled": print(json.dumps(row), flush=True)\n'
+                + 'sys.exit(int(os.environ["FIXTURE_CARGO_EXIT"]))\n')
+            if os.name == 'nt':
+                (scripts / 'cargo.cmd').write_text('@"' + sys.executable + '" "' + str(emitter) + '" %*\n')
+            else:
+                shim = scripts / 'cargo'
+                shim.write_text('#!' + sys.executable + '\n' + emitter.read_text())
+                shim.chmod(0o755)
+            for scenario, exit_code, expected_state in (
+                ('failed-command', 101, 'compiled'), ('invalid-bundle', 0, 'compiled'),
+                ('missing-binary', 101, 'unavailable'), ('no-compilation', 101, 'not-compiled')):
+                output = root / scenario
+                env = dict(os.environ, PATH=str(scripts) + os.pathsep + os.environ.get('PATH', ''),
+                           FIXTURE_CARGO_EXIT=str(exit_code), FIXTURE_BINARY_STATE=expected_state,
+                           PYTHONDONTWRITEBYTECODE='1')
+                completed = subprocess.run([sys.executable, str(gate.REPO / 'app/scripts/qualify-help-panel.py'),
+                    'prepare', '--output', str(output)], env=env, capture_output=True, text=True, timeout=30)
+                self.assertNotEqual(completed.returncode, 0, completed.stdout)
+                result = json.loads((output / 'result.json').read_text())
+                self.assertFalse(result['passed'])
+                self.assertEqual(result['testBinaryState'], expected_state)
+                retained = result['testBinary']
+                if expected_state == 'compiled':
+                    self.assertEqual((output / retained['path']).read_bytes(), binary.read_bytes())
+                    self.assertEqual(retained['sha256'], hashlib.sha256(binary.read_bytes()).hexdigest())
+                else:
+                    self.assertIsNone(retained)
+                self.assertEqual(result['checks'][0]['exitCode'], exit_code)
+
     def test_sdk_execution_requires_explicit_argument_before_any_sdk_work(self):
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as refused:
             gate.parse_args(['sdk', '--prepared', 'missing', '--output', 'unused', '--archive', 'unused', '--checksums', 'unused'])

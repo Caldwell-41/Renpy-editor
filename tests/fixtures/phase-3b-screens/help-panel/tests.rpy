@@ -75,6 +75,13 @@ testsuite help_panel:
     testcase keyboard_close:
         assert eval (_hp_observations[-1]["focusedClose"])
         $ _hp_frame_rect, _hp_outside = _hp_measure_outside()
+        move pos _hp_outside
+        $ _hp_inputs.append("moveOutside")
+        pause 0.2
+        keysym "K_DOWN" pos _hp_outside
+        $ _hp_inputs.append("K_DOWN")
+        assert eval (_hp_close_focused()) timeout 10
+        $ _hp_observe("focused")
         keysym "K_RETURN" pos _hp_outside
         $ _hp_inputs.append("K_RETURN")
         assert not screen "help_panel" timeout 10
