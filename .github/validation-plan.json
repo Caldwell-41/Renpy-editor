@@ -1,6 +1,16 @@
 {
   "version": 1,
-  "branch": "codex/connected-native-testing",
-  "qualifications": [],
+  "branch": "codex/phase3b-audit-fixes",
+  "qualifications": [
+    {
+      "name": "Audited Screens corrections on both targets",
+      "workflow": "screens-source.yml",
+      "event": "workflow_dispatch",
+      "jobs": [
+        "audit-fixes / Audit fixes (Windows x64)",
+        "audit-fixes / Audit fixes (macOS ARM64)"
+      ]
+    }
+  ],
   "base": "codex/phase3b-screen-designer"
 }

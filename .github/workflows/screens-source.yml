@@ -41,6 +41,10 @@ on:
         description: 'Select #64 Add eligibility and screen canvas frame delivery qualification'
         type: boolean
         default: false
+      audit_fixes:
+        description: Select the twelve audited Screens corrections; no historical SDK or package campaign
+        type: boolean
+        default: false
       owned_blank:
         description: Select L01 owned blank screen proof; leaves closed Help qualification untouched
         type: boolean
@@ -77,13 +81,14 @@ jobs:
           NUMERIC_LAYOUT: ${{ inputs.numeric_layout }}
           COMPOSE_HELP: ${{ inputs.compose_help }}
           ARCHITECTURE_REFACTOR: ${{ inputs.architecture_refactor }}
+          AUDIT_FIXES: ${{ inputs.audit_fixes }}
           OWNED_BLANK: ${{ inputs.owned_blank }}
           CANVAS_HELPER: ${{ inputs.canvas_helper }}
           CANVAS_GPU_CAPABILITY: ${{ inputs.canvas_gpu_capability }}
           CANVAS_COMPARISON: ${{ inputs.canvas_comparison }}
         run: |
           selected_count=0
-          for selected in "$SHARED_STYLE" "$PROJECT_FONT" "$UI_IMAGE" "$NESTED_LAYOUT" "$NUMERIC_LAYOUT" "$COMPOSE_HELP" "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY" "$CANVAS_COMPARISON" "$ARCHITECTURE_REFACTOR"; do
+          for selected in "$SHARED_STYLE" "$PROJECT_FONT" "$UI_IMAGE" "$NESTED_LAYOUT" "$NUMERIC_LAYOUT" "$COMPOSE_HELP" "$OWNED_BLANK" "$CANVAS_HELPER" "$CANVAS_GPU_CAPABILITY" "$CANVAS_COMPARISON" "$ARCHITECTURE_REFACTOR" "$AUDIT_FIXES"; do
             if test "$selected" = true; then selected_count=$((selected_count + 1)); fi
           done
           if test "$selected_count" -gt 1; then
@@ -92,7 +97,7 @@ jobs:
           fi
 
   focused:
-    if: ${{ !inputs.shared_style && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
+    if: ${{ !inputs.shared_style && !inputs.owned_blank && !inputs.canvas_helper && !inputs.canvas_gpu_capability && !inputs.canvas_comparison && !inputs.compose_help && !inputs.architecture_refactor && !inputs.audit_fixes && !inputs.numeric_layout && !inputs.nested_layout && !inputs.ui_image && !inputs.project_font }}
     name: Help (${{ matrix.target }})
     strategy:
       fail-fast: false
@@ -911,6 +916,14 @@ jobs:
       candidate: ${{ inputs.candidate }}
       ordinal: ${{ inputs.ordinal }}
 
+  audit-fixes:
+    needs: validate-selection
+    if: ${{ inputs.audit_fixes }}
+    uses: ./.github/workflows/audit-fixes.yml
+    with:
+      candidate: ${{ inputs.candidate }}
+      ordinal: ${{ inputs.ordinal }}
+
   validation-start:
     name: Validation status (start)
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -924,7 +937,7 @@ jobs:
   validation-finish:
     name: Validation status (finish)
     if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-    needs: [validate-selection, focused, owned-blank, help-composition, canvas-helper, canvas-gpu-capability, canvas-comparison, numeric-layout, nested-layout, ui-image, project-font, shared-style, validation-start]
+    needs: [validate-selection, focused, owned-blank, help-composition, canvas-helper, canvas-gpu-capability, canvas-comparison, numeric-layout, nested-layout, ui-image, project-font, shared-style, audit-fixes, validation-start]
     permissions:
       contents: read
       pull-requests: read

@@ -5,11 +5,14 @@
 Kris selected twelve audited fixes on `codex/phase3b-audit-fixes`, based on the
 fetched Screens head `c5f4ab1`. The [maintenance task](../tasks/active/phase-3b-audit-fixes.md)
 owns scope and the confirmed public test boundaries; [evidence](../tasks/evidence/phase-3b-audit-fixes.md)
-owns parallel file assignments and validation. Five Sol 6.1 High workers will use
-isolated worktrees, root-cause diagnosis and vertical TDD slices. The coordinator
-owns integration, review against each original trigger, a draft PR and selected CI.
+owns parallel file assignments and validation. Five Sol 6.1 High workers use
+isolated worktrees, root-cause diagnosis and vertical TDD slices. Text validation,
+image previews and helper lifecycle are reviewed and integrated; focused tests pass.
+Core Screens and workspace/numeric remain active. The coordinator owns integration,
+review against each original trigger, a draft PR and selected CI.
 Findings #1, #3, #7, #10, #13 and #15 remain excluded. No merge or wider acceptance
-is selected. Windows SUNDOWN is available; no remote execution has occurred yet.
+is selected. Windows SUNDOWN project metadata is inspected; remote execution and
+the selected both-host SDK recovery proof have not started. No CI is pending.
 
 ## Connected native testing policy accepted
 

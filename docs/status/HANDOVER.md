@@ -10,9 +10,15 @@ Read the [maintenance task](../tasks/active/phase-3b-audit-fixes.md) for exact s
 and confirmed test boundaries, then the [assignment/evidence record](../tasks/evidence/phase-3b-audit-fixes.md)
 before integrating worker commits. Findings #1, #3, #7, #10, #13 and #15 are excluded.
 
-Mac ARM64 coordinates. Windows SUNDOWN is linked and reachable; no remote operation
-has run. Routine worker checks are selected; costly qualification requires its
-recorded selection before starting. No CI or native process is pending. The new
+Mac ARM64 coordinates. Text validation (`644e26b`), image previews (`4076688`) and
+helper lifecycle (`11852a1`) are reviewed and integrated. Coordinator checks pass
+30 composition DOM cases, 14 image DOM cases and three controlled lifecycle cases.
+The core Screens and workspace/numeric assignments remain active. The evidence
+record grants core Screens the narrow inventory dependency in `transaction/mod.rs`.
+Windows SUNDOWN metadata is inspected; no remote command has run. The evidence
+selects both-host real-SDK recovery with four helper starts per host, and three
+combined CI qualification dispatches; consumption is zero. No CI or native process
+is pending. The new
 task is local-only until the authorized publication. A separate GitHub maintenance
 issue was not published after automatic approval review rejected that additional
 publication. No merge is selected. Preserve the unrelated untracked audit and all

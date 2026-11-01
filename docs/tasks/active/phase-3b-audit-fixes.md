@@ -56,13 +56,16 @@ Kris confirmed these boundaries in the selecting conversation:
 Mac ARM64 coordinates development. Workers use separate T3-managed worktrees and
 disjoint files under the [assignment record](../evidence/phase-3b-audit-fixes.md).
 The coordinator owns shared contracts, status, CI selection, integration and review.
-The linked Windows host SUNDOWN is available but has not yet been used for execution.
-Record any use and its exact work in evidence and the final report.
+The linked Windows host SUNDOWN is available. Its project metadata has been read;
+no remote build or test has run. The evidence record selects a narrow real-SDK
+recovery check on both hosts and records its limits.
 
 Routine checks need no numerical allowance. Workers run focused local checks;
 the coordinator selects costly qualification and records its limits before it
 starts. Historical closed allowances remain closed. Protected recovery and the
 unrelated untracked audit remain untouched.
 
-Current state: prepared for parallel implementation. Detailed red/green results,
-integration findings, host operations and CI receipts belong in the linked evidence.
+Current state: text validation, image previews and helper lifecycle are reviewed
+and integrated. Core Screens and workspace/numeric workers remain active. Detailed
+red/green results, integration findings, host operations and CI receipts belong in
+the linked evidence.

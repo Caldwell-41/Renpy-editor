@@ -1,0 +1,114 @@
+name: Audited Screens corrections
+
+on:
+  workflow_call:
+    inputs:
+      candidate:
+        type: string
+        required: true
+      ordinal:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  audit-fixes:
+    name: Audit fixes (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            target: Windows x64
+          - runner: macos-26
+            target: macOS ARM64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    env:
+      CARGO_TERM_COLOR: never
+      RUSTUP_TOOLCHAIN: 1.90.0
+      PYTHONUTF8: '1'
+      HARNESS_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require the selected audit-fix candidate and attempt
+        env:
+          CANDIDATE: ${{ inputs.candidate }}
+          ORDINAL: ${{ inputs.ordinal }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/phase3b-audit-fixes
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          case "$ORDINAL" in 1|2|3) ;; *) exit 1 ;; esac
+          test "$(git rev-parse HEAD)" = "$CANDIDATE"
+          mkdir -p "$RUNNER_TEMP/audit-fixes"
+          git rev-parse HEAD > "$RUNNER_TEMP/audit-fixes/candidate.txt"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: phase3b-audit-fixes-${{ matrix.runner }}
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Pinned tools and frontend regressions
+        run: |
+          set -o pipefail
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          npm install --global npm@11.9.0
+          "$HARNESS_PYTHON" -c 'import sys; assert sys.version_info >= (3, 11); print(sys.version)'
+          npm ci
+          npm run check 2>&1 | tee "$RUNNER_TEMP/audit-fixes/frontend.log"
+          cargo fmt --all --check
+      - name: Public Screens, source, metadata and transaction regressions
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --locked --lib screens::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/screens.log"
+          cargo test -p loomlight-core --locked --lib source::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/source.log"
+          cargo test -p loomlight-core --locked --lib metadata::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/metadata.log"
+          cargo test -p loomlight-core --locked --lib transaction::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/transaction.log"
+      - name: Canvas failure, timeout, cleanup and recovery
+        run: |
+          set -o pipefail
+          cargo test -p loomlight-core --locked --lib lifecycle::canvas_tests:: -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/canvas-lifecycle.log"
+          "$HARNESS_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/audit-fixes/canvas-lifecycle.log" lifecycle::canvas_tests::canvas_render_recovers_after_helper_exit_without_losing_drafts lifecycle::canvas_tests::canvas_render_joins_a_timed_out_helper_before_replacement
+          if test "$RUNNER_OS" = macOS; then
+            "$HARNESS_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/audit-fixes/canvas-lifecycle.log" lifecycle::canvas_tests::canvas_recovery_retains_ownership_when_session_cleanup_is_refused
+          fi
+      - name: Build the production controller and desktop boundary
+        run: |
+          cargo build -p loomlight-core --example help-controller-driver --locked
+          npm run build
+          cargo check -p loomlight-desktop --locked
+      - name: Real controller and core authoring journeys
+        env:
+          COMPOSITION_OUTPUT: ${{ runner.temp }}/audit-fixes/composition
+          SCREEN_LAYOUT_OUTPUT: ${{ runner.temp }}/audit-fixes/numeric
+          NESTED_LAYOUT_OUTPUT: ${{ runner.temp }}/audit-fixes/nested
+          UI_IMAGE_OUTPUT: ${{ runner.temp }}/audit-fixes/images
+          PROJECT_FONT_OUTPUT: ${{ runner.temp }}/audit-fixes/text
+        run: |
+          node tests/screen-composition.browser.mjs
+          node tests/screen-layout.browser.mjs
+          node tests/nested-layout.browser.mjs
+          node tests/ui-image.browser.mjs
+          node tests/project-font.browser.mjs
+      - name: Scan retained public-fixture evidence
+        id: privacy
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/audit-fixes"
+          node scripts/scan-artifacts.mjs "$RUNNER_TEMP/audit-fixes"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: ${{ always() && steps.privacy.outcome == 'success' }}
+        with:
+          name: audit-fixes-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/audit-fixes/
+          if-no-files-found: error

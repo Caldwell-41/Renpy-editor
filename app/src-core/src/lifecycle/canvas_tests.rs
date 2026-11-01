@@ -329,3 +329,126 @@ fn canvas_recovery_retains_ownership_when_session_cleanup_is_refused() {
     project.service.close().unwrap();
     assert!(!project.helper_root_exists());
 }
+
+#[test]
+#[ignore = "selected audit-fix real SDK recovery proof; two helper starts"]
+fn canvas_sdk_retries_refused_helper_before_project_close() {
+    let temporary = tempfile::tempdir().unwrap();
+    let profile = temporary.path().join("profile");
+    let archive = std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE")
+        .expect("verified official SDK archive is required");
+    crate::renpy::install_supported_sdk_from_archive(&profile, Path::new(&archive)).unwrap();
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    fs::create_dir_all(root.join("game/ui")).unwrap();
+    fs::write(root.join(PATH), SOURCE).unwrap();
+    service.open_path(&root).unwrap();
+    let document = service
+        .screens_inspect(crate::screens::InspectRequest { path: PATH.into() })
+        .unwrap();
+    let request: crate::screens::canvas::Request = serde_json::from_value(json!({
+        "path":PATH,"screenName":"help","expectedRevision":document.revision,
+        "width":1280,"height":720,
+        "drafts":[{"nodeStart":document.screens[0].nodes[1].span.start,"width":760,"height":360}]
+    }))
+    .unwrap();
+    let source_draft = SOURCE.replace("Saved", "Unsaved Source");
+    let draft = service
+        .source_update_draft(SourceDraftRequest {
+            path: PATH.into(),
+            expected_base_revision: request.expected_revision.clone(),
+            text: source_draft.clone(),
+            selection_start: 0,
+            selection_end: 0,
+        })
+        .unwrap();
+    let mut project = Project {
+        service,
+        root,
+        profile,
+        request,
+        _temporary: temporary,
+    };
+    std::env::set_var(
+        "LOOMLIGHT_CANVAS_REFUSAL_TEST_ROOT",
+        fs::canonicalize(&project.profile).unwrap(),
+    );
+    let refused = project.render();
+    std::env::remove_var("LOOMLIGHT_CANVAS_REFUSAL_TEST_ROOT");
+    project.wait_phase(&refused, "unavailable", Duration::from_secs(20));
+    let old_root = project.helper_root();
+    let refusal: Value =
+        serde_json::from_slice(&fs::read(old_root.join("startup-refusal.json")).unwrap()).unwrap();
+    assert_eq!(refusal, json!({"refused":true,"stage":"selected-refusal"}));
+
+    let replacement = project.render();
+    assert!(!old_root.exists(), "retire the refused helper before retry");
+    let refusal_shutdown = project.service.canvas_shutdown_report().unwrap().clone();
+    assert!(refusal_shutdown.cleanup_complete && !refusal_shutdown.cooperative);
+    assert_eq!(refusal_shutdown.exit_code, Some(72));
+    let ready = project.wait_phase(&replacement, "ready", Duration::from_secs(20));
+    assert_eq!(ready["revision"], project.request.expected_revision);
+    assert_eq!(ready["renderer"], crate::renpy::runtime::canvas::RENDERER);
+    assert_eq!(ready["width"], 1280);
+    assert_eq!(ready["height"], 720);
+    let frame = ready["geometry"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|node| node["start"] == project.request.drafts[0].node_start)
+        .unwrap();
+    assert_eq!(frame["width"], 760);
+    assert_eq!(frame["height"], 360);
+    let rendered = project
+        .service
+        .screens_canvas_status(replacement.clone(), true)
+        .unwrap();
+    let image = rendered["image"].as_str().unwrap();
+    assert!(image.starts_with("data:image/png;base64,iVBOR"));
+    assert_eq!(
+        project
+            .service
+            .screens_canvas_status(refused, false)
+            .unwrap()["phase"],
+        "stale"
+    );
+    let retained = project
+        .service
+        .source_open(serde_json::from_value(json!({"path":PATH})).unwrap())
+        .unwrap();
+    assert_eq!(retained.text, Some(source_draft));
+    assert_eq!(retained.draft_version, draft.draft_version);
+    assert_eq!(fs::read_to_string(project.root.join(PATH)).unwrap(), SOURCE);
+    project
+        .service
+        .source_discard(SourcePathRequest { path: PATH.into() })
+        .unwrap();
+    project.service.close().unwrap();
+    let shutdown = project.service.canvas_shutdown_report().unwrap();
+    assert!(shutdown.cleanup_complete && shutdown.cooperative);
+    assert_eq!(shutdown.exit_code, Some(0));
+    assert!(!project.helper_root_exists());
+    if let Some(output) = std::env::var_os("LOOMLIGHT_AUDIT_HELPER_EVIDENCE") {
+        let output = PathBuf::from(output);
+        fs::create_dir_all(&output).unwrap();
+        fs::write(
+            output.join("recovery.json"),
+            serde_json::to_vec_pretty(&json!({
+                "passed":true,"helperStarts":2,"startupRefusal":refusal,
+                "refusalShutdown":refusal_shutdown,"replacementFrame":replacement,
+                "width":760,"height":360,"sourceUnchanged":true,
+                "draftRetained":true,"normalShutdown":shutdown,"fixturesRemoved":true
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+        use base64::Engine;
+        fs::write(
+            output.join("replacement.png"),
+            base64::engine::general_purpose::STANDARD
+                .decode(image.strip_prefix("data:image/png;base64,").unwrap())
+                .unwrap(),
+        )
+        .unwrap();
+    }
+}

@@ -234,6 +234,10 @@ Apply. Width/height drafts use whole pixels; aspect preservation derives from th
 natural ratio and rounds the derived dimension to the nearest whole pixel.
 Comments, neighboring source, node identity and no-op history remain protected.
 The image byte-limit diagnostic is `UI_IMAGE_TOO_LARGE` and names the 16 MiB bound.
+Passive previews share a 32 MiB cache budget. The mounted selected thumbnail and
+staged import retain their preview priority; picker previews remain evictable.
+Late picker responses cannot clear the selected thumbnail or revive a disposed
+workspace. Selection changes release the previous mounted preview's priority.
 
 [Ticket #40](https://github.com/Caldwell-41/Renpy-editor/issues/40) owns delivery and
 acceptance. [UI-image evidence](tasks/evidence/ui-image.md) distinguishes service
@@ -265,6 +269,11 @@ editable. An unchanged explicit font is revalidated before any typography write.
 Typography and layout share one history entry; no-op, source revisions, comments
 and neighboring custom source retain the existing protections. Canvas `textStyles`
 uses the same typed values and changes no project source.
+
+New or changed text literals are limited to 8,192 UTF-8 bytes. Existing-text and
+addition controls check that byte bound on field completion and submission, retain
+invalid input and focus the affected field. An unchanged source literal above the
+bound does not block typography-only edits, because its text is not submitted.
 
 [Ticket #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) owns acceptance.
 [Project font evidence](tasks/evidence/project-fonts.md) records the tested limits.
