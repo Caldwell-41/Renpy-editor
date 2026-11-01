@@ -126,35 +126,78 @@ def redesign_checker():
     return module
 
 
-def retain_binaries(folder, build_root):
+AUDIT_ARTIFACTS = {
+    'core': ('core-artifacts.jsonl', 'loomlight_core', True),
+    'controller': ('controller-artifacts.jsonl', 'help-controller-driver', False),
+}
+
+
+def retain_binaries(folder, build_root, *, artifacts=None):
     """Always retain available compiler-artifact outputs, even if a later test fails."""
     folder = folder.resolve()
     build_root = build_root.resolve()
     receipt = {}
     errors = []
-    for name in ('core', 'desktop'):
+    mixed_output = artifacts is not None
+    selected = artifacts if mixed_output else {
+        name: (name + '-artifacts.jsonl', None, True) for name in ('core', 'desktop')
+    }
+    for name, (stream_name, target_name, test_profile) in selected.items():
+        target = folder / (name + ('-tests.bin' if test_profile else '.bin'))
+        incomplete = False
         try:
-            stream = folder / (name + '-artifacts.jsonl')
+            target.unlink(missing_ok=True)
+            stream = folder / stream_name
             candidates = []
             if stream.exists():
                 for line in stream.read_text(encoding='utf-8').splitlines():
-                    row = json.loads(line)
-                    if row.get('reason') == 'compiler-artifact' and row.get('profile', {}).get('test') and row.get('executable'):
-                        candidates.append(Path(row['executable']).resolve())
+                    if mixed_output and not line.startswith('{'):
+                        continue  # Cargo's test runner still emits ordinary result lines.
+                    try:
+                        row = json.loads(line)
+                    except json.JSONDecodeError:
+                        incomplete = True
+                        continue  # Retain earlier artifacts even after a truncated record.
+                    if not isinstance(row, dict):
+                        incomplete = True
+                        continue
+                    if (row.get('reason') == 'compiler-artifact'
+                            and row.get('profile', {}).get('test') is test_profile
+                            and (target_name is None or row.get('target', {}).get('name') == target_name)
+                            and row.get('executable')):
+                        source = Path(row['executable']).resolve()
+                        if not mixed_output or source not in candidates:
+                            candidates.append(source)
             if not candidates:
                 receipt[name] = {'state': 'not-compiled'}
-                continue
-            if len(candidates) != 1 or not candidates[0].is_relative_to(build_root):
-                raise ValueError('Ambiguous test binary or path outside the build root')
-            source = candidates[0]
-            target = folder / (name + '-tests.bin')
-            shutil.copy2(source, target)
-            data = target.read_bytes()
-            receipt[name] = {'state': 'compiled', 'file': target.name, 'sha256': hashlib.sha256(data).hexdigest(),
-                             'bytes': len(data), 'header': data[:8].hex()}
+            else:
+                if len(candidates) != 1 or not candidates[0].is_relative_to(build_root):
+                    raise ValueError('Ambiguous executable or path outside the build root')
+                source = candidates[0]
+                if not source.is_file():
+                    receipt[name] = {'state': 'unavailable', 'source': source.relative_to(build_root).as_posix()}
+                    errors.append(name)
+                else:
+                    expected = hashlib.sha256(source.read_bytes()).hexdigest()
+                    shutil.copy2(source, target)
+                    data = target.read_bytes()
+                    if hashlib.sha256(data).hexdigest() != expected:
+                        raise ValueError('Retained executable differs from the produced executable')
+                    receipt[name] = {'state': 'compiled', 'file': target.name, 'sha256': expected,
+                                     'bytes': len(data), 'header': data[:8].hex(),
+                                     'source': source.relative_to(build_root).as_posix()}
+            if incomplete:
+                if not candidates:
+                    raise ValueError('Compiler stream is incomplete without an available artifact')
+                receipt[name]['incompleteStream'] = True
+                errors.append(name)
         except (OSError, ValueError, KeyError, TypeError) as error:
             receipt[name] = {'state':'retention-failed', 'failureType':type(error).__name__}
             errors.append(name)
+            try:
+                target.unlink(missing_ok=True)
+            except OSError as cleanup_error:
+                receipt[name]['cleanupFailureType'] = type(cleanup_error).__name__
     (folder / 'test-binaries.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
     if errors:
         raise ValueError('Test binary retention failed: ' + ', '.join(errors))
@@ -172,6 +215,7 @@ def seal(folder, repo, outcome='thinking-and-harness-repair'):
     mismatches = checker.candidate_mismatches(inputs)
     identity = {'candidate':git('rev-parse', 'HEAD'), 'tree':git('rev-parse', 'HEAD^{tree}'),
                 'outcome':outcome, 'runId':os.getenv('GITHUB_RUN_ID'), 'attempt':os.getenv('GITHUB_RUN_ATTEMPT'),
+                'workflow':os.getenv('GITHUB_WORKFLOW'), 'workflowRef':os.getenv('GITHUB_WORKFLOW_REF'),
                 'machine':platform.machine(), 'runner':os.getenv('RUNNER_OS'), 'inputs':inputs,
                 'missingTrackedInputs':missing, 'mismatchedTrackedInputs':mismatches,
                 'sourceMatchesCandidate':bool(inputs) and not missing and not mismatches}
@@ -199,7 +243,7 @@ if __name__ == '__main__':
     parser.add_argument('path', type=Path)
     parser.add_argument('other', nargs='?', type=Path)
     parser.add_argument('--runner', choices=('Windows', 'macOS'))
-    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions', 'current-studio-connection'), default='thinking-and-harness-repair')
+    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions', 'current-studio-connection', 'phase3b-audit-fixes'), default='thinking-and-harness-repair')
     args = parser.parse_args()
     if args.action == 'cargo':
         print(verify_cargo(args.path.read_text(encoding='utf-8'), args.other.read_text(encoding='utf-8')))
@@ -211,7 +255,10 @@ if __name__ == '__main__':
         if not redesign_checker().browser_ok(args.path, ('settings',)):
             raise SystemExit('Required Thinking/connection browser evidence refused')
     elif args.action == 'retain':
-        retain_binaries(args.path, args.other)
+        audit = args.outcome == 'phase3b-audit-fixes'
+        receipt = retain_binaries(args.path, args.other, artifacts=AUDIT_ARTIFACTS if audit else None)
+        if audit and any(row['state'] != 'compiled' for row in receipt.values()):
+            raise SystemExit('Both selected audit executables must be available')
     elif args.action == 'seal':
         seal(args.path, args.other, args.outcome)
     else:

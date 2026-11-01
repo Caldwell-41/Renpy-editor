@@ -7,6 +7,7 @@ on:
         type: string
         required: true
       ordinal:
+        description: Cumulative dispatch ordinal, capped at 4 including the added review correction
         type: string
         required: true
 
@@ -44,7 +45,7 @@ jobs:
         run: |
           test "$GITHUB_REF" = refs/heads/codex/phase3b-audit-fixes
           test "$GITHUB_RUN_ATTEMPT" = 1
-          case "$ORDINAL" in 1|2|3) ;; *) exit 1 ;; esac
+          case "$ORDINAL" in 1|2|3|4) ;; *) exit 1 ;; esac
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
           mkdir -p "$RUNNER_TEMP/audit-fixes"
           git rev-parse HEAD > "$RUNNER_TEMP/audit-fixes/candidate.txt"
@@ -70,7 +71,7 @@ jobs:
       - name: Public Screens, source, metadata and transaction regressions
         run: |
           set -o pipefail
-          cargo test -p loomlight-core --locked --lib screens::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/screens.log"
+          cargo test -p loomlight-core --locked --lib --message-format=json-render-diagnostics screens::tests -- --nocapture 2>&1 | tee -a "$RUNNER_TEMP/audit-fixes/core-artifacts.jsonl" | tee "$RUNNER_TEMP/audit-fixes/screens.log"
           "$HARNESS_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/audit-fixes/screens.log" \
             screens::tests::audit::python_screen_assignments_preserve_owned_resolution_and_creation \
             screens::tests::audit::screen_creation_preflights_the_projected_file_limit_without_writing \
@@ -81,20 +82,21 @@ jobs:
             screens::tests::audit::structural_edits_preserve_ambiguous_interleaved_comments \
             screens::tests::audit::literal_alias_edits_preserve_parent_controlled_values_and_comments \
             screens::tests::audit::grid_add_accepts_scalar_policy_whitespace_and_refuses_ambiguous_policies
-          cargo test -p loomlight-core --locked --lib source::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/source.log"
-          cargo test -p loomlight-core --locked --lib metadata::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/metadata.log"
-          cargo test -p loomlight-core --locked --lib transaction::tests -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/transaction.log"
+          cargo test -p loomlight-core --locked --lib --message-format=json-render-diagnostics source::tests -- --nocapture 2>&1 | tee -a "$RUNNER_TEMP/audit-fixes/core-artifacts.jsonl" | tee "$RUNNER_TEMP/audit-fixes/source.log"
+          cargo test -p loomlight-core --locked --lib --message-format=json-render-diagnostics metadata::tests -- --nocapture 2>&1 | tee -a "$RUNNER_TEMP/audit-fixes/core-artifacts.jsonl" | tee "$RUNNER_TEMP/audit-fixes/metadata.log"
+          cargo test -p loomlight-core --locked --lib --message-format=json-render-diagnostics transaction::tests -- --nocapture 2>&1 | tee -a "$RUNNER_TEMP/audit-fixes/core-artifacts.jsonl" | tee "$RUNNER_TEMP/audit-fixes/transaction.log"
       - name: Canvas failure, timeout, cleanup and recovery
         run: |
           set -o pipefail
-          cargo test -p loomlight-core --locked --lib lifecycle::canvas_tests:: -- --nocapture 2>&1 | tee "$RUNNER_TEMP/audit-fixes/canvas-lifecycle.log"
+          cargo test -p loomlight-core --locked --lib --message-format=json-render-diagnostics lifecycle::canvas_tests:: -- --nocapture 2>&1 | tee -a "$RUNNER_TEMP/audit-fixes/core-artifacts.jsonl" | tee "$RUNNER_TEMP/audit-fixes/canvas-lifecycle.log"
           "$HARNESS_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/audit-fixes/canvas-lifecycle.log" lifecycle::canvas_tests::canvas_render_recovers_after_helper_exit_without_losing_drafts lifecycle::canvas_tests::canvas_render_joins_a_timed_out_helper_before_replacement
           if test "$RUNNER_OS" = macOS; then
             "$HARNESS_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/audit-fixes/canvas-lifecycle.log" lifecycle::canvas_tests::canvas_recovery_retains_ownership_when_session_cleanup_is_refused
           fi
       - name: Build the production controller and desktop boundary
         run: |
-          cargo build -p loomlight-core --example help-controller-driver --locked
+          set -o pipefail
+          cargo build -p loomlight-core --example help-controller-driver --locked --message-format=json-render-diagnostics 2>&1 | tee "$RUNNER_TEMP/audit-fixes/controller-artifacts.jsonl"
           npm run build
           cargo check -p loomlight-desktop --locked
       - name: Real controller and core authoring journeys
@@ -110,11 +112,18 @@ jobs:
           node tests/nested-layout.browser.mjs
           node tests/ui-image.browser.mjs
           node tests/project-font.browser.mjs
-      - name: Scan retained public-fixture evidence
+      - name: Retain exact compiled executables after success or failure
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/audit-fixes"
+          "$HARNESS_PYTHON" scripts/check-thinking-evidence.py retain "$RUNNER_TEMP/audit-fixes" target --outcome phase3b-audit-fixes
+      - name: Seal and scan retained public-fixture evidence
         id: privacy
         if: always()
         run: |
           mkdir -p "$RUNNER_TEMP/audit-fixes"
+          "$HARNESS_PYTHON" scripts/check-thinking-evidence.py seal "$RUNNER_TEMP/audit-fixes" .. --outcome phase3b-audit-fixes
+          "$HARNESS_PYTHON" -c 'import json,os,pathlib; r=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"audit-fixes/identity.json").read_text()); assert r["sourceMatchesCandidate"] and r["candidate"]==os.environ["GITHUB_SHA"] and r["runId"]==os.environ["GITHUB_RUN_ID"] and r["attempt"]==os.environ["GITHUB_RUN_ATTEMPT"] and r["outcome"]=="phase3b-audit-fixes"'
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/audit-fixes"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: ${{ always() && steps.privacy.outcome == 'success' }}
