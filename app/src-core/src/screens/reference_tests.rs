@@ -131,6 +131,36 @@ fn help_starter_creation_is_one_source_and_metadata_history_transaction() {
     );
     assert_eq!(effects["effects"]["unknown"], false);
     assert_eq!(effects["effects"]["hiddenScreens"], json!([owner["id"]]));
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let plan = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({
+            "path":owner["path"],"screenName":"help_panel","expectedRevision":document["revision"],
+            "width":1280,"height":720,"buttonState":"normal"
+        }),
+    );
+    assert_eq!(plan["available"], true, "{plan}");
+    let nodes = document["screens"][0]["nodes"].as_array().unwrap();
+    let close = nodes.iter().find(|n| n["kind"] == "textbutton").unwrap();
+    let heading = nodes.iter().find(|n| n["kind"] == "text").unwrap();
+    ipc(
+        &mut service,
+        "screens.compose",
+        json!({
+            "screenId":owner["id"],"expectedRevision":document["revision"],
+            "command":{"type":"reorder","nodeId":close["id"],"targetId":heading["id"],"after":false}
+        }),
+    );
+    let moved = fs::read_to_string(&path).unwrap();
+    assert!(moved.find("textbutton \"Close\"").unwrap() < moved.find("text \"Help\"").unwrap());
+    assert_eq!(moved.matches("Hide(\"help_panel\")").count(), 2);
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read(&path).unwrap(), source);
     composition_history(&mut service, "undo");
     assert!(!path.exists());
     assert_eq!(
@@ -143,6 +173,44 @@ fn help_starter_creation_is_one_source_and_metadata_history_transaction() {
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(fs::read(&path).unwrap(), source);
+    let source_text = String::from_utf8(source.clone()).unwrap();
+    for invalid in [
+        source_text.replace(
+            "                default_focus True",
+            "                default_focus True\n                default_focus True",
+        ),
+        source_text.replace(
+            "                action Hide(\"help_panel\")",
+            "                action Hide(\"different_panel\")",
+        ),
+    ] {
+        fs::write(&path, &invalid).unwrap();
+        let current = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        assert_eq!(
+            reject(
+                &mut service,
+                "screens.compose",
+                json!({
+                    "screenId":owner["id"],"expectedRevision":current["revision"],
+                    "command":{"type":"reorder","nodeId":close["id"],"targetId":heading["id"],"after":false}
+                })
+            )["error"]["code"],
+            "OPAQUE_BOUNDARY"
+        );
+        assert_eq!(fs::read_to_string(&path).unwrap(), invalid);
+        let effects = ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":{
+                "screenId":owner["id"],"sourceName":"help_panel"
+            }}),
+        );
+        assert_eq!(effects["effects"]["unknown"], true);
+    }
 }
 
 #[test]

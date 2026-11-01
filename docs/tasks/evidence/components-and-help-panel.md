@@ -131,3 +131,25 @@ dependent Source drafts. The missing starter field, opaque use, unguarded shared
 edit and stale returned revision each produced a failing test before correction.
 Help action-span qualification, UI, complete write journeys and SDK proof remain
 pending. The prototype chat has draft alternatives; none is approved yet.
+
+## Help control qualification
+
+Exact owned-Panel `modal False`, self-Hide game-menu key, Close action and
+`default_focus True` spans are qualified by one source classifier. Ordinary
+subtree moves retain their bytes. Duplicate properties and other target names
+remain protected and report unknown effects. The effect reader still reads the
+captured raw action spans; editor qualification does not erase effect information.
+The static canvas planner reuses that qualified document and omits only those
+nonvisual properties. A positive plan is not a renderer, SDK or native result.
+
+The actual Help IPC test first refused Close reordering, then passed after
+qualification. It verifies exact Undo restoration, retained Hide statements,
+duplicate/other-target refusal and static canvas availability. Canvas planning
+first refused the key/focus properties, establishing the affected boundary before
+correction. Broader component rendering remains unqualified.
+
+L09 continues on its same branch after shared checkpoint `2fea805`; its later
+coherent Scene slice `d742ceb` is not yet integrated. L08 resumes after consuming
+`ea752f2`. Current gaps are complete affected-use graph admission, known-component
+Style indexing, review admission for geometry writers, complete ticket journeys,
+approved production UI, runtime/target qualification and final independent review.

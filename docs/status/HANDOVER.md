@@ -8,11 +8,16 @@ Continue [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
 `8a1fc41959d363e600d739868bb0b37e270e9bdd`. Kris approved the two-worker plan and
 starting implementation. [The assignment checkpoint](../tasks/evidence/components-and-help-panel.md)
 owns file boundaries, integration order and test seams. The coordinator owns shared
-files, status, integration and final review. The prototype chat is running on
-`codex/components-help-panel-prototypes` from assignment checkpoint `b67e1f6`.
-Worker dispatch uses that same checkpoint; task identities are retained by the
-coordinating thread until their first handback. Production UI waits for the prototype
-chat's exact approved revision; independent core work can proceed. No costly
+files, status, integration and final review. The prototype chat has unapproved
+alternatives on `codex/components-help-panel-prototypes`, candidate `2001b04`.
+Workers dispatched from `9b7748a`: L08 on `t3/reuse-owned-component` and L09 on
+`t3/help-panel-show-hide`. Both preparation checkpoints are integrated. Shared
+identity, target/effects, creation and marked-use hooks are committed through
+`ea752f2`; workers are continuing their transactional component and Story slices.
+The coordinator now qualifies the Help starter's self-Hide spans and static canvas
+plan, then completes shared graph/Style and geometry-review admission. Source-map
+schema 7 owns new recognition; legacy-6 migration must preserve source and IDs.
+Production UI waits for the prototype chat's exact approved revision. No costly
 SDK/package/native/CI operation has started. The primary checkout's unrelated audit,
 protected native recovery below and historical closed allowances remain intact.
 

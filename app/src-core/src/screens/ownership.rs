@@ -374,6 +374,13 @@ impl AuthoringService {
                     }
                 }
             }
+            if let Some(owner) = owned {
+                let qualified = references::qualified_panel_spans(owner, screen, bytes);
+                for node in &mut screen.nodes {
+                    node.protected
+                        .retain(|span| !qualified.contains_key(&span.start));
+                }
+            }
         }
         Ok(document)
     }

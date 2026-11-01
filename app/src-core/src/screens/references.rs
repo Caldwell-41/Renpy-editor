@@ -1,6 +1,6 @@
 //! Stable screen targets and conservative effects derived from captured source.
 use super::*;
-use crate::metadata::{OwnedScreenKind, ScreenTargetBinding, SourceMapMetadata};
+use crate::metadata::{OwnedScreen, OwnedScreenKind, ScreenTargetBinding, SourceMapMetadata};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -47,6 +47,57 @@ pub struct ResolveTargetRequest {
     pub binding: ScreenTargetBinding,
     #[serde(default)]
     pub expected: Option<ScreenRevisions>,
+}
+
+/// Exact single statements remain editable only in their owned Panel context.
+pub(super) fn qualified_panel_spans(
+    owner: &OwnedScreen,
+    screen: &Screen,
+    bytes: &[u8],
+) -> BTreeMap<usize, bool> {
+    let mut qualified = BTreeMap::new();
+    if owner.kind != OwnedScreenKind::Panel {
+        return qualified;
+    }
+    for node in &screen.nodes {
+        let mut statements = Vec::new();
+        let mut counts = BTreeMap::<&str, usize>::new();
+        for span in &node.protected {
+            let Ok(lines) = source_lines(&bytes[span.start..span.end]) else {
+                continue;
+            };
+            let Some(line) = lines.first() else {
+                continue;
+            };
+            let key = line.code.split_whitespace().next().unwrap_or("");
+            *counts.entry(key).or_default() += 1;
+            statements.push((span.start, key, line.code, lines.len() == 1));
+        }
+        for (start, key, code, single) in statements {
+            if !single || counts[key] != 1 {
+                continue;
+            }
+            if (node.kind == "screen" && code == "modal False")
+                || (node.kind == "textbutton" && code == "default_focus True")
+            {
+                qualified.insert(start, false);
+                continue;
+            }
+            let hide = (if node.kind == "screen" {
+                code.strip_prefix("key \"game_menu\" action Hide(")
+            } else if node.kind == "textbutton" {
+                code.strip_prefix("action Hide(")
+            } else {
+                None
+            })
+            .and_then(|s| s.strip_suffix(')'))
+            .and_then(|s| serde_json::from_str::<String>(s).ok());
+            if hide.as_deref() == Some(owner.name.as_str()) {
+                qualified.insert(start, true);
+            }
+        }
+    }
+    qualified
 }
 
 struct Effects<'a> {
@@ -96,6 +147,7 @@ impl Effects<'_> {
             .iter()
             .find(|s| s.name == owner.name)
             .unwrap();
+        let qualified = qualified_panel_spans(owner, screen, bytes);
         for node in &screen.nodes {
             if self.remaining == 0 {
                 self.unknown = true;
@@ -120,6 +172,16 @@ impl Effects<'_> {
                 self.unknown = true;
             }
             for span in &node.protected {
+                if let Some(hides) = qualified.get(&span.start) {
+                    if *hides {
+                        self.hidden.insert(owner.id.clone());
+                        self.dependencies.insert(
+                            format!("{}:action", node.id.as_deref().unwrap_or(&owner.root_id)),
+                            digest(&bytes[span.start..span.end]),
+                        );
+                    }
+                    continue;
+                }
                 let Ok(lines) = source_lines(&bytes[span.start..span.end]) else {
                     self.unknown = true;
                     continue;
@@ -129,31 +191,7 @@ impl Effects<'_> {
                     continue;
                 }
                 let code = lines[0].code;
-                if (code == "modal False" && node.kind == "screen")
-                    || (matches!(code, "default_focus True" | "action Null()")
-                        && node.kind == "textbutton")
-                {
-                    continue;
-                }
-                let hide = (if node.kind == "textbutton" {
-                    code.strip_prefix("action Hide(")
-                } else if node.kind == "screen" {
-                    code.strip_prefix("key \"game_menu\" action Hide(")
-                } else {
-                    None
-                })
-                .and_then(|s| s.strip_suffix(')'))
-                .and_then(|s| serde_json::from_str::<String>(s).ok());
-                if hide
-                    .filter(|name| name == &owner.name && owner.kind == OwnedScreenKind::Panel)
-                    .is_some()
-                {
-                    self.hidden.insert(owner.id.clone());
-                    self.dependencies.insert(
-                        format!("{}:action", node.id.as_deref().unwrap_or(&owner.root_id)),
-                        digest(code.as_bytes()),
-                    );
-                } else {
+                if code != "action Null()" || node.kind != "textbutton" {
                     self.unknown = true;
                 }
             }
