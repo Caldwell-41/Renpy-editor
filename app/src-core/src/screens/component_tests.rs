@@ -1007,6 +1007,23 @@ fn shared_component_text_noop_has_no_history_and_changed_apply_updates_both_uses
 }
 
 #[test]
+fn incomplete_inclusion_graph_refuses_placement_even_into_an_owned_panel() {
+    let (fixture, component, _) = Fixture::with_component();
+    let target = fixture.create_screen("other");
+    fs::write(fixture.root.join("game/ui/opaque.rpy"), "screen opaque():\n    use expression chosen_screen\n").unwrap();
+    let before = fixture.service.screens_list(&fixture.project, &fixture.project_id).unwrap();
+    let source = fixture.read(&target.path).text;
+    let result = fixture.service.screens_component_place(&fixture.project, &fixture.project_id, PlaceRequest {
+        component:binding(&component),expected_component:fixture.revisions(&component),target:binding(&target),expected_target:fixture.revisions(&target),parent_id:target.root_id.clone(),
+    });
+    assert!(result.is_err(), "unaccounted graph admitted placement: {result:?}");
+    let after = fixture.service.screens_list(&fixture.project, &fixture.project_id).unwrap();
+    assert_eq!(after.inventory_revision, before.inventory_revision);
+    assert_eq!(after.source_map_revision, before.source_map_revision);
+    assert_eq!(fixture.read(&target.path).text, source);
+}
+
+#[test]
 fn extract_replaces_only_the_group_and_creates_one_owned_component_history_entry() {
     let mut fixture = Fixture::new();
     let group = format!("        vbox: # loomlight-element: {GROUP}\r\n            # retained comment\r\n            text \"Shared\" # loomlight-element: {TEXT}\r\n");
