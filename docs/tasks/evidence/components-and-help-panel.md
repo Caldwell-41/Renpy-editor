@@ -489,3 +489,23 @@ Runtime result SHA-256 is `259cb8674dbbadc273f7f10dbfb3e70762524c8da221601d1f82d
 Ignored evidence remains under `.toolchains/component-sdk-macos-01`; #41 owns the
 single ceiling/accounting record. No extra Mac repetition is selected. This proves
 accepted core output in the macOS SDK, not UI/controller, Windows or physical input.
+
+## Windows readiness and binding refusal
+
+The read-only SUNDOWN assignment completed with no source changes, fetch, build,
+SDK/helper/native/package/CI execution or installs. Its actual Git repository is
+one `repo` level below the folder registered with T3. The primary checkout is clean
+at `039f22ce3c118f408145573ccedfeac0e93b7b70`; one existing stash and all existing
+worktrees/recovery remain preserved. Rust/Cargo 1.90.0 and Python 3.13.15 are installed;
+the selected Python lacks Pillow metadata. The official 8.5.3 SDK/archive and
+published checksum file exist, but inventory did not rehash or launch them.
+Coordinator source/base objects are absent, so exact source delivery is required.
+
+The coordinator attempted the narrow T3 project workspace-root update. It returned
+`capability_denied`, stating that changing projects/environment settings needs a live
+full-access/default calling thread or full-access client. No project setting or
+checkout changed. This is a T3 capability refusal, not a failed product check or an
+automatic approval-review rejection. Windows work remains pending on correcting
+that binding, private source delivery and Pillow availability. No alternate tool
+was used to bypass the denied change. The remote assignment is complete and stopped;
+its exact local continuation identity remains in the ignored assignment receipt.

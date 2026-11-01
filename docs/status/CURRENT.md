@@ -14,7 +14,9 @@ outside click and dialogue persistence. Earlier failed campaigns remain retained
 #44 owns cumulative SDK use. Component provenance corrections pass 17 cheap checks. Its fresh public producer
 and macOS SDK campaign pass all eight commands and four actual/literal image pairs
 at two sizes. Windows and approved UI/controller proof remain pending.
-Final combined qualification remains pending.
+The linked Windows inventory is complete; target work is blocked on the T3
+project-root binding and source delivery. The settings correction was denied by
+T3 capability enforcement. Final combined qualification remains pending.
 [Assignments and evidence](../tasks/evidence/components-and-help-panel.md) record
 file ownership and qualification scope. Neither ticket is accepted yet. The selected
 SDK limit and use are recorded in #44. No package, native editor or CI operation has

@@ -57,11 +57,18 @@ passed 549 cases; L09's earlier ordinary release-core
 candidate `7aa82d1` passed 531 cases; the later comment correction and combined
 candidate still need final qualification. Initial sandbox failures and L08's cancelled
 old-base ordinary run remain failures/cancelled in linked evidence. The linked
-Windows host is reachable. A read-only inventory assignment on SUNDOWN is running
-to verify checkout ownership, tools and source-transfer readiness; it owns no files
-and has no SDK/build/native execution authority. Its pending T3 identity is retained
-locally in `.toolchains/windows-inventory-assignment.json`. No target qualification
-checkout or execution is assigned yet.
+Windows host is reachable. The SUNDOWN read-only inventory completed: its actual
+Git root is the registered folder's `repo` child, at clean `039f22ce` with one
+preserved stash and clean existing worktrees. Rust/Cargo 1.90.0, Python 3.13.15
+and the official SDK/archive exist; that Python has no Pillow metadata. None of
+the coordinator candidate/base objects are present. No build, SDK or app ran.
+The attempted T3 project-root correction returned `capability_denied`: changing
+project settings requires a live full-access/default calling thread or full-access
+client. No setting or checkout changed. Windows qualification is blocked on that
+binding, private delivery of the unpushed source and resolving Pillow. Do not bypass
+the denied setting through another tool or alter the preserved checkout/stash.
+The inventory identity is retained locally in `.toolchains/windows-inventory-assignment.json`.
+No remote work is active or target execution assigned.
 Source commits remain local with no push or PR; #44 publishes current execution and
 SDK accounting. The primary checkout's unrelated audit,
 protected native recovery below and historical closed allowances remain intact.
