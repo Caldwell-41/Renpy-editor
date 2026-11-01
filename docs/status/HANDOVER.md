@@ -8,8 +8,10 @@ Continue [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
 `8a1fc41959d363e600d739868bb0b37e270e9bdd`. Kris approved the two-worker plan and
 starting implementation. [The assignment checkpoint](../tasks/evidence/components-and-help-panel.md)
 owns file boundaries, integration order and test seams. The coordinator owns shared
-files, status, integration and final review. Worker worktrees and the prototype
-chat are pending dispatch at this checkpoint. Production UI waits for the prototype
+files, status, integration and final review. The prototype chat is running on
+`codex/components-help-panel-prototypes` from assignment checkpoint `b67e1f6`.
+Worker dispatch uses that same checkpoint; task identities are retained by the
+coordinating thread until their first handback. Production UI waits for the prototype
 chat's exact approved revision; independent core work can proceed. No costly
 SDK/package/native/CI operation has started. The primary checkout's unrelated audit,
 protected native recovery below and historical closed allowances remain intact.

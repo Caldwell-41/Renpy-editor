@@ -13,6 +13,11 @@ The coordinator branch is `codex/components-and-help-panel`, based on
 Worker branches and worktrees are allocated by T3 at dispatch and recorded below.
 The primary checkout's unrelated audit and protected recovery remain untouched.
 
+The prototype chat is bound to `codex/components-help-panel-prototypes` in the
+managed worktree of the same basename, from checkpoint
+`b67e1f64a0552410c12a038f4a651a800a87e061`. It owns the combined design alternatives
+and approval handback. Implementation workers start from the same checkpoint.
+
 | Owner | Exclusive files and interfaces |
 | --- | --- |
 | Coordinator | Shared `screens.rs`, `screens/ownership.rs`, `metadata.rs`, `source.rs`, `lib.rs`, `screen-ui.ts`, `screen-composition.ts`, `main.ts`, canvas/helper changes, shared contracts, status and this evidence record. |
