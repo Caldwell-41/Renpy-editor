@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import unittest
 import tempfile
+from contextlib import contextmanager
 from unittest.mock import patch
 from types import SimpleNamespace
 from PIL import Image, ImageDraw
@@ -27,6 +28,47 @@ def core_log(token):
     return ('running 1 test\ncomponent-inputs-sha256: ' + token + '\n'
             'test screens::components::tests::runtime_fixtures::frozen_two_panel_outputs_come_from_actual_component_transactions ... ok\n'
             'test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 607 filtered out; finished in 2.71s\n')
+
+
+@contextmanager
+def producer_machine(root):
+    """Controlled checkout/toolchain boundary; files and retention remain real."""
+    root = root.resolve()
+    actual_repo = proof.REPO
+    fixture = root / 'tests/fixtures/phase-3b-screens/components'
+    fixture.mkdir(parents=True)
+    for name in ('reference-shared.rpy', 'reference-independent.rpy'):
+        (fixture / name).write_bytes((actual_repo / 'tests/fixtures/phase-3b-screens/components' / name).read_bytes())
+    for name in ('archive_safety.py', 'sdk_adapter.py'):
+        target = root / 'spikes/renpy-sdk' / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((actual_repo / 'spikes/renpy-sdk' / name).read_bytes())
+    (root / 'app').mkdir()
+    inputs = {'app/src-core/src/lib.rs': 'a' * 64}
+    tools = dict(pin='1.90.0', rustc=dict(path='/pinned/rustc', version='rustc 1.90.0', sha256='b' * 64, bytes=100),
+                 cargo=dict(path='/pinned/cargo', version='cargo 1.90.0', sha256='c' * 64, bytes=100))
+    with patch.object(proof, 'REPO', root), patch.object(proof, 'material_inputs', return_value=inputs), \
+         patch.object(proof, 'committed_inputs', return_value=inputs), patch.object(proof, 'checkout_commit', return_value='d' * 40), \
+         patch.object(proof, 'capture_toolchain', return_value=tools):
+        yield inputs, tools
+
+
+def prepare_bundle(root, outcome=None):
+    prepared = root / 'prepared'
+    def cargo_export(argv, **limits):
+        export = Path(proof.os.environ['LOOMLIGHT_COMPONENT_INPUTS'])
+        export.mkdir()
+        accepted = json.dumps(manifest()).encode()
+        (export / 'accepted.json').write_bytes(accepted)
+        binary = Path(proof.os.environ['CARGO_TARGET_DIR']) / 'release/deps/loomlight_core-fixture'
+        binary.parent.mkdir(parents=True, exist_ok=True)
+        binary.write_bytes(b'retained exact test binary')
+        artifact = dict(reason='compiler-artifact', profile=dict(test=True), executable=str(binary), target=dict(name='loomlight_core'))
+        text = json.dumps(artifact) + '\n' + json.dumps(dict(reason='build-finished', success=True)) + '\n' + core_log(hashlib.sha256(accepted).hexdigest())
+        return SimpleNamespace(output=text, exit_code=0, timed_out=False, output_limited=False, duration_seconds=0.1) if outcome is None else outcome(text)
+    with patch.object(proof, 'run_bounded', side_effect=cargo_export):
+        proof.main(['--prepare', '--output', str(prepared)])
+    return prepared
 
 
 def manifest(independent_comment=''):
@@ -173,6 +215,122 @@ class InputAdmission(unittest.TestCase):
                 proof.validate_inputs(accepted)
 
 
+class ProducerAdmission(unittest.TestCase):
+    def test_both_modes_require_a_producer_before_any_output_or_process(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / 'must-not-stage'
+            with patch.object(proof, 'install_verified_tar') as install, patch.object(proof, 'run_bounded') as launch:
+                for mode in ['--validate-only', '--allow-fixture-execution']:
+                    with self.subTest(mode=mode), self.assertRaisesRegex(ValueError, 'producer bundle required'):
+                        proof.main([mode, '--output', str(output)])
+                self.assertFalse(output.exists())
+                install.assert_not_called()
+                launch.assert_not_called()
+
+    def test_failed_or_rejected_export_retains_binary_before_refusal(self):
+        for fault in ['command_failure', 'wrong_digest', 'duplicate_artifact', 'source_changed', 'toolchain_changed']:
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                with producer_machine(root) as (inputs, tools):
+                    def outcome(text):
+                        if fault == 'wrong_digest':
+                            text = text.replace('component-inputs-sha256: ', 'component-inputs-sha256: 0')
+                        elif fault == 'duplicate_artifact':
+                            text += text.splitlines()[0] + '\n'
+                        elif fault == 'source_changed':
+                            inputs['new source'] = 'e' * 64
+                        elif fault == 'toolchain_changed':
+                            tools['cargo']['sha256'] = 'e' * 64
+                        return SimpleNamespace(output=text, exit_code=101 if fault == 'command_failure' else 0,
+                                               timed_out=False, output_limited=False, duration_seconds=0.1)
+                    # Mutable machine returns must be captured by value, as real probes are.
+                    with patch.object(proof, 'material_inputs', side_effect=lambda: copy.deepcopy(inputs)), \
+                         patch.object(proof, 'committed_inputs', return_value=copy.deepcopy(inputs)), \
+                         patch.object(proof, 'capture_toolchain', side_effect=lambda: copy.deepcopy(tools)):
+                        with self.assertRaises(ValueError):
+                            prepare_bundle(root, outcome)
+                    prepared = root / 'prepared'
+                    receipt = json.loads((prepared / 'producer.json').read_text())
+                    self.assertFalse(receipt['passed'])
+                    binary = prepared / receipt['testBinary']['path']
+                    self.assertEqual(binary.read_bytes(), b'retained exact test binary')
+                    self.assertEqual(receipt['testBinary']['sha256'], hashlib.sha256(binary.read_bytes()).hexdigest())
+                    self.assertTrue((prepared / 'core-export.log').is_file())
+                    self.assertTrue((prepared / 'inputs-after.json').is_file())
+                    self.assertFalse((prepared / 'tmp').exists())
+
+    def test_missing_stale_mixed_or_changed_provenance_refuses_before_staging(self):
+        faults = ['missing_receipt', 'missing_binary', 'changed_binary', 'changed_accepted', 'changed_log', 'changed_after',
+                  'failed', 'wrong_toolchain', 'wrong_host', 'wrong_commit', 'stale_source', 'wrong_command', 'wrong_artifact', 'wrong_test', 'wrong_digest']
+        for fault in faults:
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                with producer_machine(root) as (inputs, tools):
+                    prepared = prepare_bundle(root)
+                    receipt = json.loads((prepared / 'producer.json').read_text())
+                    if fault == 'missing_receipt':
+                        (prepared / 'producer.json').unlink()
+                    elif fault in ('missing_binary', 'changed_binary'):
+                        binary = prepared / receipt['testBinary']['path']
+                        binary.unlink() if fault == 'missing_binary' else binary.write_bytes(b'changed')
+                    elif fault == 'changed_accepted':
+                        (prepared / 'accepted/accepted.json').write_text(json.dumps(manifest('# mixed run\n')))
+                    elif fault == 'changed_log':
+                        (prepared / 'core-export.log').write_text('mixed run')
+                    elif fault == 'changed_after':
+                        (prepared / 'inputs-after.json').write_text('{}')
+                    elif fault == 'stale_source':
+                        inputs['app/src-core/src/new.rs'] = 'e' * 64
+                    else:
+                        if fault == 'failed':
+                            receipt['command']['exitCode'] = 61
+                        elif fault == 'wrong_toolchain':
+                            receipt['toolchain']['cargo']['version'] = 'cargo 1.89.0'
+                        elif fault == 'wrong_host':
+                            receipt['architecture'] = 'wrong-host'
+                        elif fault == 'wrong_commit':
+                            receipt['candidate'] = 'not-a-commit'
+                        elif fault == 'wrong_command':
+                            receipt['command']['argv'].remove('--offline')
+                        elif fault == 'wrong_artifact':
+                            receipt['compilerArtifact'] = '/other/loomlight_core-fixture'
+                        else:
+                            log = (prepared / 'core-export.log').read_text()
+                            log = log.replace(proof.EXPORT_TEST, 'other::test') if fault == 'wrong_test' else log.replace('component-inputs-sha256: ', 'component-inputs-sha256: 0')
+                            (prepared / 'core-export.log').write_text(log)
+                            receipt['coreLogSHA256'] = digest(log)
+                        (prepared / 'producer.json').write_text(json.dumps(receipt))
+                    with patch.object(proof, 'install_verified_tar') as install, patch.object(proof, 'run_bounded') as launch:
+                        for mode in ['--validate-only', '--allow-fixture-execution']:
+                            with self.subTest(mode=mode), self.assertRaises(ValueError):
+                                proof.main([mode, '--prepared', str(prepared), '--output', str(root / 'must-not-stage')])
+                        self.assertFalse((root / 'must-not-stage').exists())
+                        install.assert_not_called()
+                        launch.assert_not_called()
+
+    def test_public_preparation_retains_exact_cargo_binary_and_separate_producer(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with producer_machine(root):
+                prepared = prepare_bundle(root)
+                receipt = json.loads((prepared / 'producer.json').read_text())
+                self.assertTrue(receipt['passed'])
+                self.assertEqual(receipt['candidate'], 'd' * 40)
+                self.assertEqual(receipt['testBinary']['bytes'], 26)
+                self.assertEqual((prepared / receipt['testBinary']['path']).read_bytes(), b'retained exact test binary')
+                self.assertIn('--locked', receipt['command']['argv'])
+                self.assertIn('--offline', receipt['command']['argv'])
+                self.assertIn('--message-format=json', receipt['command']['argv'])
+                self.assertEqual((prepared / 'inputs-before.json').read_bytes(), (prepared / 'inputs-after.json').read_bytes())
+                with patch.object(proof, 'checkout_commit', return_value='e' * 40), patch.object(proof, 'install_verified_tar') as install, patch.object(proof, 'run_bounded') as launch:
+                    result = proof.main(['--validate-only', '--prepared', str(prepared), '--output', str(root / 'validated')])
+                    self.assertEqual(result['producer']['candidate'], 'd' * 40)
+                    self.assertEqual(result['executionCandidate'], 'e' * 40)
+                    self.assertEqual(result['sdkProcesses'], 0)
+                    install.assert_not_called()
+                    launch.assert_not_called()
+
+
 class RuntimeAdmission(unittest.TestCase):
     def test_images_require_exact_literal_pixels_and_visible_output_at_both_positions(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -243,11 +401,9 @@ class RuntimeAdmission(unittest.TestCase):
 
 class CommandAdmission(unittest.TestCase):
     def test_missing_runtime_proof_stops_campaign_after_first_run(self):
-        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[2]) as temporary:
+        with tempfile.TemporaryDirectory() as temporary, producer_machine(Path(temporary)):
             root = Path(temporary)
-            accepted, log, output = root / 'accepted.json', root / 'core.log', root / 'attempt'
-            accepted.write_text(json.dumps(manifest()))
-            log.write_text(core_log(hashlib.sha256(accepted.read_bytes()).hexdigest()))
+            prepared, output = prepare_bundle(root), root / 'attempt'
             checksum = root / 'checksums.txt'
             checksum.write_text('# sha256\n' + proof.SDK_SHA + '  renpy-8.5.3-sdk.tar.bz2\n')
             def fake_install(archive, digest, destination):
@@ -258,8 +414,7 @@ class CommandAdmission(unittest.TestCase):
                                                     output_limited=False, duration_seconds=0.1)
             with patch.object(proof, 'install_verified_tar', side_effect=fake_install), patch.object(proof, 'run_bounded', return_value=success_without_proof) as launch:
                 with self.assertRaisesRegex(ValueError, 'missing or duplicate runtime proof'):
-                    proof.main(['--allow-fixture-execution', '--sdk-process-limit', '8', '--accepted', str(accepted),
-                                '--core-log', str(log), '--output', str(output),
+                    proof.main(['--allow-fixture-execution', '--sdk-process-limit', '8', '--prepared', str(prepared), '--output', str(output),
                                 '--archive', str(root / 'renpy-8.5.3-sdk.tar.bz2'), '--checksums', str(checksum)])
                 self.assertEqual(launch.call_count, 3)
             result = json.loads((output / 'result.json').read_text())
@@ -271,11 +426,9 @@ class CommandAdmission(unittest.TestCase):
     def test_failed_sdk_attempt_is_charged_once_stops_and_cleans_local_scratch(self):
         for failure in [SimpleNamespace(exit_code=61, output='fixture failed', timed_out=False,
                                         output_limited=False, duration_seconds=0.1), OSError('launch outcome unknown')]:
-            with self.subTest(failure=failure), tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[2]) as temporary:
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as temporary, producer_machine(Path(temporary)):
                 root = Path(temporary)
-                accepted, log, output = root / 'accepted.json', root / 'core.log', root / 'attempt'
-                accepted.write_text(json.dumps(manifest()))
-                log.write_text(core_log(hashlib.sha256(accepted.read_bytes()).hexdigest()))
+                prepared, output = prepare_bundle(root), root / 'attempt'
                 checksum = root / 'checksums.txt'
                 checksum.write_text('# sha256\n' + proof.SDK_SHA + '  renpy-8.5.3-sdk.tar.bz2\n')
                 def fake_install(archive, digest, destination):
@@ -288,8 +441,7 @@ class CommandAdmission(unittest.TestCase):
                     else:
                         launch.return_value = failure
                     with self.assertRaises((ValueError, OSError)):
-                        proof.main(['--allow-fixture-execution', '--sdk-process-limit', '8', '--accepted', str(accepted),
-                                    '--core-log', str(log), '--output', str(output),
+                        proof.main(['--allow-fixture-execution', '--sdk-process-limit', '8', '--prepared', str(prepared), '--output', str(output),
                                     '--archive', str(root / 'renpy-8.5.3-sdk.tar.bz2'), '--checksums', str(checksum)])
                     launch.assert_called_once()
                 result = json.loads((output / 'result.json').read_text())
@@ -321,13 +473,11 @@ class CommandAdmission(unittest.TestCase):
                 self.assertNotIn('Start()', (project / 'game/script.rpy').read_text())
 
     def test_validate_only_and_invalid_input_never_install_or_launch_sdk(self):
-        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[2]) as temporary:
+        with tempfile.TemporaryDirectory() as temporary, producer_machine(Path(temporary)):
             root = Path(temporary)
-            accepted, log, output = root / 'accepted.json', root / 'core.log', root / 'validated'
-            accepted.write_text(json.dumps(manifest()))
-            log.write_text(core_log(hashlib.sha256(accepted.read_bytes()).hexdigest()))
+            prepared, output = prepare_bundle(root), root / 'validated'
             with patch.object(proof, 'install_verified_tar') as install, patch.object(proof, 'run_bounded') as launch:
-                proof.main(['--validate-only', '--accepted', str(accepted), '--core-log', str(log), '--output', str(output)])
+                proof.main(['--validate-only', '--prepared', str(prepared), '--output', str(output)])
                 result = json.loads((output / 'result.json').read_text())
                 self.assertFalse(result['executedSdk'])
                 self.assertEqual(result['sdkProcesses'], 0)
@@ -340,10 +490,9 @@ class CommandAdmission(unittest.TestCase):
                         self.assertFalse((runnable / '.renpy-editor').exists())
                 self.assertFalse(result['passed'])
                 self.assertTrue(result['inputsValidated'])
-                log.write_text(core_log('b' * 64))
+                (prepared / 'core-export.log').write_text(core_log('b' * 64))
                 with self.assertRaises(ValueError):
-                    proof.main(['--allow-fixture-execution', '--sdk-process-limit', '8', '--accepted', str(accepted),
-                                '--core-log', str(log), '--output', str(root / 'invalid'),
+                    proof.main(['--allow-fixture-execution', '--sdk-process-limit', '8', '--prepared', str(prepared), '--output', str(root / 'invalid'),
                                 '--archive', str(root / 'missing-sdk.tar.bz2'), '--checksums', str(root / 'missing-checksums.txt')])
                 self.assertFalse((root / 'invalid').exists())
                 install.assert_not_called()

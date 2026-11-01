@@ -1,6 +1,7 @@
 """Qualify public-transaction component output against independent literal SDK output.
 
---validate-only checks frozen inputs without installing or launching an SDK.
+--prepare runs the exact public Cargo fixture and retains its producer receipt.
+--validate-only requires that verified --prepared bundle, without starting an SDK.
 Execution needs --allow-fixture-execution, --sdk-process-limit 8, and verified
 official archive/checksum inputs. It stops on the first failure without retries.
 """
@@ -18,6 +19,9 @@ import textwrap
 import tempfile
 import os
 import shutil
+import importlib.util
+import tomllib
+from io import BytesIO
 from pathlib import Path, PurePosixPath
 from PIL import Image, ImageChops, __version__ as PILLOW_VERSION
 
@@ -34,6 +38,11 @@ TEXTS = {'shared_output': 'Shared edited', 'independent_output': 'Independent co
 METADATA = {'.renpy-editor/project.json', '.renpy-editor/source-map.json', '.renpy-editor/authoring.json'}
 BASE_SOURCES = {'game/chapters/chapter_01/scene_001.rpy', 'game/definitions/characters.rpy',
                 'game/definitions/variables.rpy', 'game/gui.rpy', 'game/options.rpy', 'game/screens.rpy', 'game/script.rpy'}
+EXPORT_TEST = 'screens::components::tests::runtime_fixtures::frozen_two_panel_outputs_come_from_actual_component_transactions'
+MATERIAL_DIRS = ('app/src-core', 'tests/fixtures', '.cargo', 'app/.cargo')
+MATERIAL_FILES = ('app/Cargo.toml', 'app/Cargo.lock', 'app/rust-toolchain.toml', 'app/src-tauri/Cargo.toml',
+                  'app/scripts/qualify-owned-component.py', 'app/scripts/test_qualify_owned_component.py',
+                  'app/scripts/qualify-screens-source.py', 'spikes/renpy-sdk/sdk_adapter.py', 'spikes/renpy-sdk/archive_safety.py')
 
 
 def require(condition, message):
@@ -291,6 +300,195 @@ def read_bounded(path, limit):
     return data
 
 
+def write_json(path, value):
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+
+def checkout_commit():
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()
+
+
+def material_inputs():
+    paths = {REPO / name for name in MATERIAL_FILES}
+    for directory in MATERIAL_DIRS:
+        paths.update(p for p in (REPO / directory).rglob('*') if p.is_file() and not {'target', '__pycache__'} & set(p.parts))
+    return {p.relative_to(REPO).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}
+
+
+def committed_inputs(candidate):
+    require(re.fullmatch('[0-9a-f]{40}', candidate), 'invalid producing commit')
+    entries = subprocess.check_output(['git', 'ls-tree', '-rz', candidate, '--', *MATERIAL_DIRS, *MATERIAL_FILES], cwd=REPO).split(b'\0')
+    blobs = []
+    for entry in filter(None, entries):
+        header, path = entry.split(b'\t', 1)
+        mode, kind, oid = header.split()
+        require(kind == b'blob' and mode in (b'100644', b'100755'), 'unsupported material input')
+        blobs.append((path.decode('utf-8'), oid))
+    batch = subprocess.run(['git', 'cat-file', '--batch'], cwd=REPO, input=b''.join(oid + b'\n' for _, oid in blobs),
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True).stdout
+    stream, values = BytesIO(batch), {}
+    for path, oid in blobs:
+        actual, kind, size = stream.readline().split()
+        require(actual == oid and kind == b'blob', 'producing tree object mismatch')
+        values[path] = hashlib.sha256(stream.read(int(size))).hexdigest()
+        require(stream.read(1) == b'\n', 'incomplete producing tree')
+    return values
+
+
+def capture_toolchain():
+    pin = tomllib.loads((REPO / 'app/rust-toolchain.toml').read_text())['toolchain']['channel']
+    require(pin == '1.90.0' and shutil.which('rustup') is not None, 'existing pinned Rust toolchain required')
+    result = dict(pin=pin)
+    for tool in ('rustc', 'cargo'):
+        path = Path(subprocess.check_output(['rustup', 'which', '--toolchain', pin, tool], text=True, timeout=15).strip()).resolve()
+        version = subprocess.check_output([str(path), '-vV'], text=True, timeout=15).strip()
+        require(version.startswith(f'{tool} {pin} '), 'wrong pinned ' + tool)
+        result[tool] = dict(path=str(path), version=version, sha256=hashlib.sha256(path.read_bytes()).hexdigest(), bytes=path.stat().st_size)
+    cargo_home = Path(os.environ.get('CARGO_HOME', str(Path.home() / '.cargo')))
+    result['cargoConfig'] = {str(cargo_home / name): hashlib.sha256((cargo_home / name).read_bytes()).hexdigest()
+                             for name in ('config', 'config.toml') if (cargo_home / name).is_file()}
+    return result
+
+
+def export_argv(toolchain):
+    return [toolchain['cargo']['path'], 'test', '-p', 'loomlight-core', '--release', '--locked', '--offline',
+            '--lib', '--message-format=json', EXPORT_TEST, '--', '--exact', '--nocapture']
+
+
+def source_gate():
+    spec = importlib.util.spec_from_file_location('component_source_gate', Path(__file__).with_name('qualify-screens-source.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def compiler_artifact(text):
+    artifacts, finished = [], []
+    for line in text.splitlines():
+        if not line.startswith('{'):
+            continue
+        row = strict_json(line)
+        if row.get('reason') == 'compiler-artifact' and row.get('profile', {}).get('test') and row.get('executable') and row.get('target', {}).get('name') == 'loomlight_core':
+            artifacts.append(row['executable'])
+        if row.get('reason') == 'build-finished':
+            finished.append(row.get('success'))
+    require(len(artifacts) == 1 and finished == [True], 'missing or duplicate successful Cargo artifact')
+    return artifacts[0]
+
+
+def fresh_output(path):
+    output = path.resolve()
+    require(output.is_relative_to(REPO) and output != REPO and not output.exists(), 'output must be fresh and local to this worktree')
+    output.mkdir(parents=True)
+    return output
+
+
+def prepare_producer(path, expected_candidate=None):
+    output = fresh_output(path)
+    result = dict(schemaVersion=1, passed=False, executedSdk=False, exportTest=EXPORT_TEST, exportRunId=str(uuid.uuid4()),
+                  candidate=checkout_commit(), root=str(REPO), os=platform.system(), architecture=platform.machine(),
+                  testBinary=None, command=dict(outcome='not-started'), cleanupComplete=False)
+    temporary = output / 'tmp'
+    try:
+        require(expected_candidate in (None, result['candidate']), 'producer candidate does not match checkout')
+        before = material_inputs()
+        write_json(output / 'inputs-before.json', before)
+        require(before == committed_inputs(result['candidate']), 'producer material inputs are not committed')
+        result['toolchain'] = capture_toolchain()
+        temporary.mkdir()
+        env = {k: v for k, v in os.environ.items() if not (k.startswith(('CARGO_', 'RUSTFLAGS', 'RUSTDOC', 'RUSTC')) and k != 'CARGO_HOME')}
+        env.update(CARGO_TARGET_DIR=str(REPO / '.toolchains/target'), TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary),
+                   RUSTC=result['toolchain']['rustc']['path'], RUSTUP_TOOLCHAIN=result['toolchain']['pin'],
+                   RUSTC_WRAPPER='', RUSTC_WORKSPACE_WRAPPER='',
+                   PYTHONDONTWRITEBYTECODE='1', LOOMLIGHT_COMPONENT_INPUTS=str(output / 'accepted'))
+        result['targetDir'] = env['CARGO_TARGET_DIR']
+        result['command'] = dict(argv=export_argv(result['toolchain']), cwd=str(REPO / 'app'), outcome='unknown')
+        previous_env, previous_cwd = dict(os.environ), Path.cwd()
+        try:
+            os.chdir(REPO / 'app')
+            os.environ.clear()
+            os.environ.update(env)
+            observed = run_bounded(tuple(result['command']['argv']), timeout_seconds=180, output_limit=8_000_000)
+        finally:
+            os.environ.clear()
+            os.environ.update(previous_env)
+            os.chdir(previous_cwd)
+        (output / 'core-export.log').write_text(observed.output, encoding='utf-8')
+        # Retain before checking command success, source stability, digest or artifact validity.
+        result['testBinary'] = source_gate().retain_test_binary(observed.output, output)
+        result['command'].update(outcome='returned', exitCode=observed.exit_code, timedOut=observed.timed_out,
+                                 outputLimited=observed.output_limited, durationSeconds=observed.duration_seconds)
+        after = material_inputs()
+        write_json(output / 'inputs-after.json', after)
+        require(before == after and checkout_commit() == result['candidate'], 'producer inputs changed during export')
+        require(capture_toolchain() == result['toolchain'], 'producer toolchain changed during export')
+        require(observed.exit_code == 0 and not observed.timed_out and not observed.output_limited, 'fixture command failed; binary and log retained')
+        require(result['testBinary'] is not None, 'missing produced test binary')
+        accepted = read_bounded(output / 'accepted/accepted.json', 4_000_000)
+        result['acceptedSHA256'] = hashlib.sha256(accepted).hexdigest()
+        result['coreLogSHA256'] = hashlib.sha256((output / 'core-export.log').read_bytes()).hexdigest()
+        result['inputsSHA256'] = hashlib.sha256((output / 'inputs-before.json').read_bytes()).hexdigest()
+        result['compilerArtifact'] = compiler_artifact(observed.output)
+        validate_core_output(observed.output, result['acceptedSHA256'])
+        validate_inputs(strict_json(accepted.decode('utf-8')))
+        result['passed'] = True
+    except BaseException as error:
+        result['failure'] = dict(type=type(error).__name__, message=str(error))
+        raise
+    finally:
+        if (output / 'inputs-before.json').exists() and not (output / 'inputs-after.json').exists():
+            try:
+                write_json(output / 'inputs-after.json', material_inputs())
+            except Exception as error:
+                result['inputCaptureFailure'] = dict(type=type(error).__name__, message=str(error))
+        if temporary.exists():
+            shutil.rmtree(temporary)
+        result['cleanupComplete'] = not temporary.exists()
+        write_json(output / 'producer.json', result)
+    return result
+
+
+def prepared_file(root, relative):
+    path = PurePosixPath(relative)
+    require(not path.is_absolute() and path.as_posix() == relative and not {'.', '..'} & set(path.parts) and '\\' not in relative, 'unsafe producer evidence path')
+    result = root / relative
+    require(result.resolve().is_relative_to(root) and result.is_file(), 'missing producer evidence file')
+    return result
+
+
+def validate_prepared(path):
+    root = path.resolve()
+    try:
+        receipt = strict_json(read_bounded(prepared_file(root, 'producer.json'), 100_000).decode('utf-8'))
+        require(receipt['schemaVersion'] == 1 and receipt['passed'] is True and receipt['executedSdk'] is False and receipt['cleanupComplete'] is True, 'producer preparation did not complete')
+        require(receipt['exportTest'] == EXPORT_TEST, 'wrong producer fixture')
+        require(re.fullmatch('[0-9a-f]{40}', receipt['candidate']), 'invalid producing commit')
+        require(receipt['os'] == platform.system() and receipt['architecture'] == platform.machine() and Path(receipt['root']).is_absolute(), 'wrong producer host/root provenance')
+        canonical_id(receipt['exportRunId'])
+        before = read_bounded(prepared_file(root, 'inputs-before.json'), 2_000_000)
+        after = read_bounded(prepared_file(root, 'inputs-after.json'), 2_000_000)
+        require(before == after and hashlib.sha256(before).hexdigest() == receipt['inputsSHA256'], 'producer before/after inputs disagree')
+        inputs = strict_json(before.decode('utf-8'))
+        require(inputs == committed_inputs(receipt['candidate']) == material_inputs(), 'stale or uncommitted producer source inputs')
+        require(receipt['toolchain'] == capture_toolchain(), 'producer toolchain/provenance mismatch')
+        command = receipt['command']
+        require(command['argv'] == export_argv(receipt['toolchain']) and command['cwd'] == str(Path(receipt['root']) / 'app'), 'wrong producer command')
+        require(command['outcome'] == 'returned' and command['exitCode'] == 0 and command['timedOut'] is False and command['outputLimited'] is False, 'failed producer command')
+        binary = receipt['testBinary']
+        retained = prepared_file(root, binary['path'])
+        require(binary['path'] == 'test-binary/' + binary['name'] and retained.stat().st_size == binary['bytes'] > 0 and hashlib.sha256(retained.read_bytes()).hexdigest() == binary['sha256'], 'changed retained test binary')
+        accepted = read_bounded(prepared_file(root, 'accepted/accepted.json'), 4_000_000)
+        log = read_bounded(prepared_file(root, 'core-export.log'), 8_000_000)
+        require(hashlib.sha256(accepted).hexdigest() == receipt['acceptedSHA256'] and hashlib.sha256(log).hexdigest() == receipt['coreLogSHA256'], 'mixed producer accepted/log bytes')
+        artifact = compiler_artifact(log.decode('utf-8'))
+        require(artifact == receipt['compilerArtifact'] and Path(artifact).name == binary['name'] and Path(artifact).is_relative_to(Path(receipt['root']) / '.toolchains/target') and receipt['targetDir'] == str(Path(receipt['root']) / '.toolchains/target'), 'mixed producer compiler artifact')
+        validate_core_output(log.decode('utf-8'), receipt['acceptedSHA256'])
+        sources = validate_inputs(strict_json(accepted.decode('utf-8')))
+        return receipt, accepted, log, sources
+    except (KeyError, TypeError, AttributeError, OSError) as error:
+        raise ValueError('missing or malformed producer evidence') from error
+
+
 def prepare_runtime_project(project, sources, stage, width, height, output, receipt):
     """Write exact accepted UI files and separate trusted proof code, without execution."""
     require(stage in STAGES and (width, height) in ASPECTS, 'unsupported proof case')
@@ -447,34 +645,34 @@ def execute_qualification(args, output, result):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument('--prepare', action='store_true')
     mode.add_argument('--validate-only', action='store_true')
     mode.add_argument('--allow-fixture-execution', action='store_true')
-    for name in ('accepted', 'core-log', 'output'):
-        parser.add_argument('--' + name, required=True, type=Path)
+    parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--prepared', type=Path)
     for name in ('archive', 'checksums'):
         parser.add_argument('--' + name, type=Path)
     parser.add_argument('--candidate', help='Expected full checkout SHA; defaults to current HEAD')
     parser.add_argument('--sdk-process-limit', type=int)
     args = parser.parse_args(argv)
-    accepted_bytes = read_bounded(args.accepted, 4_000_000)
-    accepted_digest = hashlib.sha256(accepted_bytes).hexdigest()
-    sources = validate_inputs(strict_json(accepted_bytes.decode('utf-8')))
-    core_bytes = read_bounded(args.core_log, 2_000_000)
-    validate_core_output(core_bytes.decode('utf-8'), accepted_digest)
-    candidate = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()
+    if args.prepare:
+        require(args.prepared is None, '--prepare creates a new producer bundle')
+        return prepare_producer(args.output, args.candidate)
+    require(args.prepared is not None, 'verified --prepared producer bundle required')
+    producer, accepted_bytes, core_bytes, sources = validate_prepared(args.prepared)
+    accepted_digest = producer['acceptedSHA256']
+    candidate = checkout_commit()
     require(re.fullmatch('[0-9a-f]{40}', candidate) and args.candidate in (None, candidate), 'candidate does not match checkout')
     if args.allow_fixture_execution:
         require(args.sdk_process_limit == 8 and args.archive is not None and args.checksums is not None, 'execution requires an explicit eight-process allocation and verified archive inputs')
         require(expected_sha256(read_bounded(args.checksums, 100_000).decode('utf-8'), args.archive.name) == SDK_SHA, 'wrong official SDK checksum')
-    output = args.output.resolve()
-    require(output.is_relative_to(REPO) and output != REPO and not output.exists(), 'output must be fresh and local to this worktree')
-    output.mkdir(parents=True)
-    source_paths = sorted([*REPO.glob('app/src-core/src/screens*.rs'), *REPO.glob('app/src-core/src/screens/*.rs')])
+    output = fresh_output(args.output)
     result = dict(passed=False, inputsValidated=True, executedSdk=False, sdkProcesses=0, commands=[], records=[],
                   runId=str(uuid.uuid4()), runtimeProjectSHA256={},
-                  cleanupComplete=True, scratchCleanupComplete=True, candidate=candidate, acceptedSHA256=accepted_digest,
+                  cleanupComplete=True, scratchCleanupComplete=True, executionCandidate=candidate, producer=producer,
+                  producerReceiptSHA256=hashlib.sha256((args.prepared / 'producer.json').read_bytes()).hexdigest(), acceptedSHA256=accepted_digest,
                   coreLogSHA256=hashlib.sha256(core_bytes).hexdigest(), checkerSHA256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-                  sourceFilesSHA256={p.relative_to(REPO).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths},
+                  executionMaterialInputs=material_inputs(),
                   os=platform.system(), architecture=platform.machine(),
                   plannedCases=[dict(stage=stage, aspect=list(aspect)) for stage in STAGES for aspect in ASPECTS],
                   plannedSdkProcesses=8)
@@ -485,6 +683,12 @@ def main(argv=None):
     result['pillowVersion'] = PILLOW_VERSION
     (output / 'accepted.json').write_bytes(accepted_bytes)
     (output / 'core.log').write_bytes(core_bytes)
+    producer_copy = output / 'producer'
+    producer_copy.mkdir()
+    for name in ('producer.json', 'inputs-before.json', 'inputs-after.json', 'accepted/accepted.json', 'core-export.log', producer['testBinary']['path']):
+        target = producer_copy / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(prepared_file(args.prepared.resolve(), name).read_bytes())
     try:
         for stage in STAGES:
             for width, height in ASPECTS:
