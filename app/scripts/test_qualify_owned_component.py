@@ -325,6 +325,12 @@ class CommandAdmission(unittest.TestCase):
                 self.assertFalse(result['executedSdk'])
                 self.assertEqual(result['sdkProcesses'], 0)
                 self.assertEqual(len(result['plannedCases']), 4)
+                self.assertEqual(len(result['runtimeProjectSHA256']), 4)
+                for stage in ['shared', 'independent']:
+                    for aspect in ['1280x720', '1024x768']:
+                        runnable = output / 'runnable' / f'{stage}-{aspect}'
+                        self.assertTrue((runnable / 'game/ui/notes.rpy').is_file())
+                        self.assertFalse((runnable / '.renpy-editor').exists())
                 self.assertFalse(result['passed'])
                 self.assertTrue(result['inputsValidated'])
                 log.write_text(core_log('b' * 64))
