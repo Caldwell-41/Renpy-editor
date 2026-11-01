@@ -159,12 +159,21 @@ pub struct Node {
     pub numeric_layout: Option<layout::NumericLayout>,
     pub text_properties: Option<text::TextProperties>,
     pub style: Option<styles::StyleReference>,
+    pub component: Option<ComponentReference>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
     pub protected: Vec<Span>,
     #[serde(skip)]
     source_end: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ComponentReference {
+    pub component_id: String,
+    pub resolved: bool,
+    pub source_revision: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -257,6 +266,9 @@ fn kind(line: &Line<'_>) -> Option<&'static str> {
     if !line.single {
         return None;
     }
+    if line.element_id.is_some() && line.code.strip_prefix("use ").is_some_and(valid_name) {
+        return Some("use");
+    }
     match line.code {
         "fixed:" => return Some("fixed"),
         "frame:" => return Some("frame"),
@@ -340,15 +352,19 @@ fn parse_body(
             kind(line).unwrap()
         }
         .into(),
-        literal: line
-            .code
-            .split_once(' ')
-            .and_then(|(_, raw)| serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()),
+        literal: if kind(line) == Some("use") {
+            line.code.strip_prefix("use ").map(str::to_owned)
+        } else {
+            line.code.split_once(' ').and_then(|(_, raw)| {
+                serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()
+            })
+        },
         layout: Default::default(),
         position: None,
         numeric_layout: None,
         text_properties: None,
         style: None,
+        component: None,
         span: Span {
             start: line.start,
             end,

@@ -42,6 +42,7 @@ impl Fixture {
                 &project,
                 &project_id,
                 CreateRequest {
+                    starter: None,
                     name: "notes".into(),
                     expected_project_revision: catalog.project_revision,
                     expected_source_map_revision: catalog.source_map_revision,

@@ -103,3 +103,31 @@ rename assertion expected an invented error label; it was corrected to the exist
 public `INCOMING_REFERENCE` code after observing the established mapping. Five
 metadata tests pass after the schema bump. These are portable core results; normal
 runtime, UI and native proof remain pending.
+
+## Shared creation and component-use checkpoint
+
+The coordinator integrated the L08 preparation commits
+`518f4f51c6a54b0a587c550e2e34192047e8d468` and
+`891758f656ff5120a735536e05844520ed4a5dea`. Its one Rust request initializer was
+updated for the additive optional Help starter during integration; exclusive L08
+file ownership returns to the worker on the next implementation handoff.
+
+One noncommitting owned-screen creation preflight now serves both features. It
+retains collision, inventory, capacity, dirty-Source and bytecode policy. One
+finalizer accepts the new source/map and validated companion replacements through
+the existing shared history transaction. The existing create operation remains the
+committing wrapper and accepts an optional typed Help starter.
+
+Marked parameterless `use` leaves resolve only through typed use and component IDs.
+Unmarked/parameterized/custom inclusion stays opaque. Changed target tokens retain
+their old binding and become unresolved. Shared component composition requires
+captured review revisions and clean transitive user Source buffers. Returned
+documents resolve component revisions against the same proposed inventory, fixing
+an observed pre-commit/disk revision mismatch.
+
+Four actual IPC tests pass, including atomic Help create/one-step Undo/Redo/reopen,
+marked-use identity/refusal, effects propagation, shared-review admission and retained
+dependent Source drafts. The missing starter field, opaque use, unguarded shared
+edit and stale returned revision each produced a failing test before correction.
+Help action-span qualification, UI, complete write journeys and SDK proof remain
+pending. The prototype chat has draft alternatives; none is approved yet.

@@ -107,6 +107,13 @@ impl Effects<'_> {
             {
                 self.unknown = true;
             }
+            if node.kind == "use"
+                && !map.component_uses.iter().any(|usage| {
+                    usage.screen_id == owner.id && node.id.as_ref() == Some(&usage.node_id)
+                })
+            {
+                self.unknown = true;
+            }
             if matches!(node.kind.as_str(), "text" | "textbutton")
                 && node.literal.as_ref().is_some_and(|text| text.contains('['))
             {
@@ -167,7 +174,14 @@ impl Effects<'_> {
                 .find(|s| s.id == usage.component_id && s.kind == OwnedScreenKind::Component);
             match (node, component) {
                 (Some(node), Some(component))
-                    if node.kind == "use" && node.literal.as_deref() == Some(&component.name) =>
+                    if node.kind == "use"
+                        && node.literal.as_deref() == Some(&component.name)
+                        && screen
+                            .nodes
+                            .iter()
+                            .filter(|n| n.id.as_ref() == Some(&usage.node_id))
+                            .count()
+                            == 1 =>
                 {
                     self.dependencies.insert(
                         usage.node_id.clone(),
@@ -204,6 +218,35 @@ fn digest(bytes: &[u8]) -> String {
 }
 
 impl AuthoringService {
+    pub(super) fn ensure_component_users_clean(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        component_id: &str,
+    ) -> Result<(), SceneError> {
+        let (map, _, _, _) = self.screen_metadata(project, project_id)?;
+        let mut affected = HashSet::from([component_id]);
+        loop {
+            let previous = affected.len();
+            for usage in &map.component_uses {
+                if affected.contains(usage.component_id.as_str()) {
+                    affected.insert(usage.screen_id.as_str());
+                }
+            }
+            if affected.len() == previous {
+                break;
+            }
+        }
+        self.ensure_source_paths_clean(
+            project,
+            map.owned_screens
+                .iter()
+                .filter(|s| affected.contains(s.id.as_str()))
+                .map(|s| s.path.as_str()),
+        )
+        .map_err(|_| SceneError::DirtySource)
+    }
+
     pub fn screens_resolve_target(
         &self,
         project: &ProjectId,

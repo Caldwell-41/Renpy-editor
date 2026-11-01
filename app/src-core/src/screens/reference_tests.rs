@@ -79,3 +79,234 @@ fn dynamic_text_and_custom_actions_keep_screen_effects_unknown() {
     );
     assert_eq!(target["effects"]["unknown"], true);
 }
+
+#[test]
+fn help_starter_creation_is_one_source_and_metadata_history_transaction() {
+    let (temporary, mut service, root, _) = composition_project();
+    fs::create_dir_all(root.join("game/images")).unwrap();
+    let chosen = temporary.path().join("seal.png");
+    fs::write(
+        &chosen,
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/seal.png"),
+    )
+    .unwrap();
+    let choice = service.authoring_select_import(&chosen).unwrap();
+    let imported = ipc(
+        &mut service,
+        "asset.import",
+        json!({
+            "authorityId":choice.authority_id,"kind":"uiImage","technicalName":"seal",
+            "displayName":"Seal","characterId":null,"expression":null
+        }),
+    );
+    let image = &imported["assets"][0];
+    let before_map = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({
+            "name":"help_panel", "expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"],
+            "starter":{"title":"Help","explanation":"Continue reading.","assetId":image["id"],
+                "expectedAssetSha256":image["sha256"],"width":80,"height":40}
+        }),
+    );
+    let owner = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|o| o["name"] == "help_panel")
+        .unwrap();
+    assert_eq!(owner["kind"], "panel");
+    let path = root.join("game/ui/help_panel.rpy");
+    let source = fs::read(&path).unwrap();
+    assert!(String::from_utf8_lossy(&source).contains("action Hide(\"help_panel\")"));
+    let effects = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+            "screenId":owner["id"],"sourceName":"help_panel"
+        }}),
+    );
+    assert_eq!(effects["effects"]["unknown"], false);
+    assert_eq!(effects["effects"]["hiddenScreens"], json!([owner["id"]]));
+    composition_history(&mut service, "undo");
+    assert!(!path.exists());
+    assert_eq!(
+        fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
+        before_map
+    );
+    assert!(root.join("game/images/ui seal.png").exists());
+    composition_history(&mut service, "redo");
+    assert_eq!(fs::read(&path).unwrap(), source);
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(fs::read(&path).unwrap(), source);
+}
+
+#[test]
+fn marked_component_uses_resolve_by_identity_and_preserve_changed_name_intent() {
+    let (_temporary, mut service, root, panel) = composition_project();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({
+            "name":"details", "expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"], "expectedInventoryRevision":catalog["inventoryRevision"]
+        }),
+    );
+    let component = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|o| o["name"] == "details")
+        .unwrap();
+    let use_id = uuid::Uuid::new_v4().to_string();
+    let map_path = root.join(".renpy-editor/source-map.json");
+    let mut map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+    map["ownedScreens"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|o| o["id"] == component["id"])
+        .unwrap()["kind"] = json!("component");
+    map["componentUses"] =
+        json!([{"screenId":panel["id"],"nodeId":use_id,"componentId":component["id"]}]);
+    fs::write(&map_path, serde_json::to_vec_pretty(&map).unwrap()).unwrap();
+    let path = root.join(panel["path"].as_str().unwrap());
+    let original = fs::read_to_string(&path).unwrap();
+    let source = original.replace(
+        "    pass",
+        &format!("    use details # loomlight-element: {use_id}"),
+    );
+    fs::write(&path, &source).unwrap();
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":panel["path"]}),
+    );
+    let usage = &doc["screens"][0]["nodes"][1];
+    assert_eq!(usage["kind"], "use");
+    assert_eq!(usage["id"], use_id);
+    assert_eq!(usage["component"]["componentId"], component["id"]);
+    assert_eq!(usage["component"]["resolved"], true);
+    let before = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{"screenId":panel["id"],"sourceName":"notes"}}),
+    );
+    assert_eq!(before["effects"]["unknown"], false);
+    let component_source = fs::read(root.join("game/ui/details.rpy")).unwrap();
+    let component_doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":component["path"]}),
+    );
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({
+                "screenId":component["id"],"expectedRevision":component_doc["revision"],
+                "command":{"type":"add","parentId":component["rootId"],"kind":"text","text":"Shared"}
+            })
+        )["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
+    assert_eq!(
+        fs::read(root.join("game/ui/details.rpy")).unwrap(),
+        component_source
+    );
+    let review = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+            "screenId":component["id"],"sourceName":"details"
+        }}),
+    );
+    let applied = ipc(
+        &mut service,
+        "screens.compose",
+        json!({
+            "screenId":component["id"],"expectedRevision":component_doc["revision"],"componentRevisions":review["revisions"],
+            "command":{"type":"add","parentId":component["rootId"],"kind":"text","text":"Shared"}
+        }),
+    );
+    let returned_panel = applied["documents"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|doc| doc["path"] == panel["path"])
+        .unwrap();
+    assert_eq!(
+        returned_panel["screens"][0]["nodes"][1]["component"]["sourceRevision"],
+        applied["document"]["revision"]
+    );
+    let shared = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+            "screenId":panel["id"],"sourceName":"notes"
+        }}),
+    );
+    assert_ne!(shared["effects"]["revision"], before["effects"]["revision"]);
+    let opened = ipc(&mut service, "source.open", json!({"path":panel["path"]}));
+    let draft = ipc(
+        &mut service,
+        "source.updateDraft",
+        json!({
+            "path":panel["path"],"expectedBaseRevision":opened["baseRevision"],
+            "text":format!("{source}# retained draft\n"),"selectionStart":4,"selectionEnd":4
+        }),
+    );
+    let review = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+            "screenId":component["id"],"sourceName":"details"
+        }}),
+    );
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({
+                "screenId":component["id"],"expectedRevision":review["revisions"]["source"],
+                "componentRevisions":review["revisions"],
+                "command":{"type":"add","parentId":component["rootId"],"kind":"text","text":"Blocked"}
+            })
+        )["error"]["code"],
+        "DIRTY_SOURCE"
+    );
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":panel["path"]}))["text"],
+        draft["text"]
+    );
+    ipc(
+        &mut service,
+        "source.discard",
+        json!({"path":panel["path"]}),
+    );
+    fs::write(&path, source.replace("use details", "use different_name")).unwrap();
+    let changed = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":panel["path"]}),
+    );
+    assert_eq!(
+        changed["screens"][0]["nodes"][1]["component"]["componentId"],
+        component["id"]
+    );
+    assert_eq!(
+        changed["screens"][0]["nodes"][1]["component"]["resolved"],
+        false
+    );
+    let after = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{"screenId":panel["id"],"sourceName":"notes"}}),
+    );
+    assert_eq!(after["effects"]["unknown"], true);
+}
