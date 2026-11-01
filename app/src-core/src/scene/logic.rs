@@ -1646,3 +1646,6 @@ mod structural_review_tests {
 #[cfg(test)]
 #[path = "structure/tests.rs"]
 mod structural_tests;
+
+#[cfg(test)]
+mod panel_tests;
