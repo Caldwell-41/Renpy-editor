@@ -19,8 +19,10 @@ removal in one source/map history transaction. Its 17 panel tests and five share
 IPC journeys pass. L08 is replacing interim traversal with the canonical graph,
 completing its public affected-use review and checking its coherent write candidate.
 Both workers are preparing frozen public-transaction fixtures and rejecting runtime
-validators without SDK execution. L09 temporarily owns only its new module
-registration in `screens/tests.rs`; other shared ownership remains with the coordinator.
+validators without SDK execution. L09's normal-entry Help exporter `3ad43eef` is
+integrated as `3ccc584`; its exact IPC test passes. The temporary module-registration
+ownership has returned to the coordinator. All other file assignments remain in
+the linked evidence record.
 Source-map schema 7 owns recognition and preserves legacy-6 source bytes and IDs.
 Production UI waits for the prototype chat's exact approved revision. No costly
 SDK/package/native/CI operation has started. L09's earlier ordinary release-core

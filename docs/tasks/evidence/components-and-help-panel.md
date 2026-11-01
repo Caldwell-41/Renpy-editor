@@ -37,8 +37,8 @@ Runtime preparation extends L08 ownership to new
 `tests/fixtures/phase-3b-screens/components/` driver files. L09 owns new
 `screens/panel_fixture_tests.rs`, `app/scripts/qualify-help-panel.py`, its validator
 test and any new `tests/fixtures/phase-3b-screens/help-panel/` driver files.
-L09 temporarily owns only the corresponding module-registration lines in
-`screens/tests.rs`; the coordinator leaves that file untouched until handback.
+L09 temporarily owned only the corresponding module-registration lines in
+`screens/tests.rs`; ownership returned with exporter checkpoint `3ad43eef`.
 These assignments permit cheap fixture/export and harness checks, with no SDK
 installation/execution, native session, package or CI campaign yet.
 
@@ -256,3 +256,22 @@ The coordinator verified the linked Windows environment is reachable and has the
 Loomlight project registered. No target checkout was changed or execution assigned.
 The planned target qualification remains Windows x64 and macOS ARM64 under the
 host-routing policy; linked-host checks do not replace required milestone CI.
+
+## Normal-entry Help fixture export
+
+The coordinator reviewed and integrated L09 checkpoint `3ad43eef` as `3ccc584`.
+Its public IPC fixture imports a real typed UI-image, creates Help through the
+atomic screen owner, authors two Show Beats, one Hide Beat and narration markers
+through accepted Scene operations, and changes the existing entry ending to a Jump.
+The original normal-start bootstrap and opaque seed neighbors remain authoritative.
+The export preserves exact game bytes separately from project/source-map/authoring
+sidecars, with IDs, source ranges, revisions, effects and SHA-256 records. This is
+fixture preparation only; no Ren'Py command runs in the exporter.
+The exact exporter test passes on the coordinator branch (one passed, zero failed
+or ignored, 591 filtered). The test's synthetic output is removed on drop unless
+an explicit fresh export directory is selected.
+
+The existing isolated Python runtime reports 3.12.14. Both workers reuse it for
+cheap validator checks, with bytecode caches disabled or isolated locally. System
+Python 3.9.6 does not replace the documented harness requirement. No installation
+was needed. Actual six-case runtime validation remains pending.
