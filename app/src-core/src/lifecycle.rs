@@ -175,6 +175,8 @@ pub struct LifecycleService {
     runtime: runtime::RuntimeState,
     canvas: Option<crate::screens::canvas_session::Session>,
     last_canvas_shutdown: Option<CanvasShutdown>,
+    #[cfg(test)]
+    canvas_test_commands: Option<std::collections::VecDeque<Command>>,
 }
 
 struct InspectedProject {
@@ -234,6 +236,8 @@ impl LifecycleService {
             runtime: runtime::RuntimeState::default(),
             canvas: None,
             last_canvas_shutdown: None,
+            #[cfg(test)]
+            canvas_test_commands: None,
         })
     }
 
@@ -949,6 +953,26 @@ impl LifecycleService {
                 serde_json::json!({"phase":"unavailable","revision":plan.revision,"limits":plan.limits,
             "message":"This composition has unresolved source dependencies."}),
             );
+        }
+        if self
+            .canvas
+            .as_ref()
+            .is_some_and(crate::screens::canvas_session::Session::failed)
+            && !self.canvas_shutdown()
+        {
+            return Err(LifecycleError::Io);
+        }
+        #[cfg(test)]
+        if self.canvas.is_none() {
+            if let Some(commands) = &mut self.canvas_test_commands {
+                let command = commands
+                    .pop_front()
+                    .ok_or(LifecycleError::Scene(SceneError::InvariantBlocked))?;
+                self.canvas = Some(
+                    crate::screens::canvas_session::Session::new_for_test(&self.data_root, command)
+                        .map_err(LifecycleError::Scene)?,
+                );
+            }
         }
         if self.canvas.is_none() {
             let Some(sdk) = discover_managed_sdk(&self.data_root)
@@ -4801,5 +4825,7 @@ mod tests {
     }
 }
 
+#[cfg(test)]
+mod canvas_tests;
 #[cfg(test)]
 mod runtime_tests;

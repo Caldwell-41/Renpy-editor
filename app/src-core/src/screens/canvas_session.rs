@@ -28,10 +28,30 @@ pub(crate) struct Session {
 }
 impl Session {
     pub(crate) fn new(data: &Path, sdk: ValidatedSdk) -> Result<Self, SceneError> {
+        let mut session = Self::prepare(data)?;
+        session.worker = Some(
+            HelperProcess::start(sdk, session.anchor().clone())
+                .map_err(|_| SceneError::InvariantBlocked)?,
+        );
+        Ok(session)
+    }
+    #[cfg(test)]
+    pub(crate) fn new_for_test(
+        data: &Path,
+        command: std::process::Command,
+    ) -> Result<Self, SceneError> {
+        let mut session = Self::prepare(data)?;
+        session.worker = Some(
+            HelperProcess::start_for_test(command, session.anchor().clone())
+                .map_err(|_| SceneError::InvariantBlocked)?,
+        );
+        Ok(session)
+    }
+    fn prepare(data: &Path) -> Result<Self, SceneError> {
         let root = data.join(format!("canvas-helper-{}", uuid::Uuid::new_v4().simple()));
         fs::create_dir(&root).map_err(|_| SceneError::InvariantBlocked)?;
         let anchor = DirectoryAnchor::open_root(&root).map_err(|_| SceneError::InvariantBlocked)?;
-        let mut session = Self {
+        let session = Self {
             root,
             anchor: Some(anchor),
             worker: None,
@@ -60,14 +80,13 @@ impl Session {
                     .map_err(|_| crate::transaction::ErrorCode::IoFailure)
             })
             .map_err(|_| SceneError::InvariantBlocked)?;
-        session.worker = Some(
-            HelperProcess::start(sdk, session.anchor().clone())
-                .map_err(|_| SceneError::InvariantBlocked)?,
-        );
         Ok(session)
     }
     fn anchor(&self) -> &DirectoryAnchor {
         self.anchor.as_ref().expect("live canvas directory")
+    }
+    pub(crate) fn failed(&self) -> bool {
+        self.worker.as_ref().is_none_or(HelperProcess::failed)
     }
     pub(crate) fn submit(
         &mut self,
@@ -192,7 +211,7 @@ impl Session {
                 json!({"phase":"stale","frameId":frame,"message":"Canvas source or assets changed. Refresh Source; drafts are retained."}),
             );
         }
-        if self.worker.as_ref().is_none_or(HelperProcess::failed) {
+        if self.failed() {
             return Ok(
                 json!({"phase":"unavailable","frameId":frame,"message":"The canvas helper did not return a current frame. Drafts are retained."}),
             );

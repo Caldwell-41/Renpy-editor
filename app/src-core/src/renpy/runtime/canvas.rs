@@ -90,6 +90,21 @@ impl HelperProcess {
         {
             command.env("LOOMLIGHT_CANVAS_REFUSE", "1");
         }
+        Self::spawn(command, anchor, Some(sdk))
+    }
+    #[cfg(test)]
+    pub(crate) fn start_for_test(
+        mut command: Command,
+        anchor: DirectoryAnchor,
+    ) -> Result<Self, RenpyError> {
+        command.current_dir(anchor.path());
+        Self::spawn(command, anchor, None)
+    }
+    fn spawn(
+        mut command: Command,
+        anchor: DirectoryAnchor,
+        sdk: Option<ValidatedSdk>,
+    ) -> Result<Self, RenpyError> {
         let observation = Arc::new(Mutex::new(Observation {
             phase: "starting",
             exit: None,
@@ -110,7 +125,7 @@ impl HelperProcess {
             .name("loomlight-canvas".into())
             .spawn(move || {
                 if worker_stop.load(Ordering::Acquire)
-                    || sdk.revalidate(false).is_err()
+                    || sdk.is_some_and(|sdk| sdk.revalidate(false).is_err())
                     || anchor.validate_chain().is_err()
                 {
                     if let Ok(mut s) = state.lock() {
@@ -195,9 +210,10 @@ impl HelperProcess {
         })
     }
     pub(crate) fn failed(&self) -> bool {
-        self.observation.lock().map_or(true, |s| {
-            !matches!(s.phase, "starting" | "running") || s.truncated
-        })
+        self.stop.load(Ordering::Acquire)
+            || self.observation.lock().map_or(true, |s| {
+                !matches!(s.phase, "starting" | "running") || s.truncated
+            })
     }
     pub(crate) fn stop(&self) {
         self.stop.store(true, Ordering::Release);
