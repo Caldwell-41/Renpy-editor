@@ -1,22 +1,26 @@
 # Current status
 
-## Selected Phase 3B audit corrections
+## Phase 3B audit corrections merged
 
-PR #75's original twelve fixes passed at `af8c0bf`; its three review corrections
-passed both-target qualification ordinal 4 at `aee7475`. The
-[terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6552700639)
-owns those results and retained executable/source identities.
+[PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75) squash merged as
+`b7cb3a4` into `codex/phase3b-screen-designer`. Its tree exactly matches audited
+head `2701156`. The [terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6553735694)
+confirms Windows/macOS ordinal-5 qualification, automatic quality and retained
+source/executable/result artifacts. All twelve selected audit fixes and four
+review corrections are complete. Historical exclusions and broader acceptance
+limits remain unchanged; the five-dispatch allowance is closed.
 
-Kris then selected fixing the full-PR review's compiled-file matching finding,
-updating PR #75 and CI. Project scanning and screen creation now share the same
-bytecode/source matching rule. The focused public-API test reproduces `.rpyC`'s
-stale catalog before the fix and passes afterward, including a second creation
-using the returned revisions. The correction awaits exact-head both-target CI.
-The [maintenance task](../tasks/active/phase-3b-audit-fixes.md) owns scope;
-[evidence](../tasks/evidence/phase-3b-audit-fixes.md#compiled-file-matching-correction)
-owns checks and the selected ordinal-5 dispatch. The PR update receipt owns its
-candidate, run and terminal audit. No merge, extra SDK/package/native operation
-or wider acceptance is selected. Original exclusions remain unchanged.
+The [completed maintenance brief](../tasks/archive/2026-11-01-phase-3b-audit-fixes.md)
+and [merge/retirement evidence](../tasks/evidence/phase-3b-audit-fixes.md#merge-and-workspace-retirement)
+own closure. Seven completed worker worktrees, ten local branches and four merged
+remote branches are retired after equivalence and evidence verification. Their
+original commits and 131 unique evidence files remain hash-preserved in the
+ignored retirement archive. This primary checkout is on the integration branch;
+the unrelated audit, protected recovery and open Dependabot branch remain.
+
+Next recommended ticket is [L08 #41, reusable owned components](https://github.com/Caldwell-41/Renpy-editor/issues/41).
+Its L02 #37 prerequisite is accepted and closed. L08 remains unselected; no new
+implementation, SDK, package, native or CI operation is started.
 
 ## Connected native testing policy accepted
 
@@ -59,18 +63,15 @@ and evidence preservation. Original commits and 23 unique files are hash-preserv
 in the ignored retirement archive. Remote refs, unrelated task work, the untracked
 audit and protected native recovery remain intact. No L07 external wait is pending.
 
-## Reviewed text ownership cleanup
+## Text ownership cleanup merged
 
-`codex/single-text-draft-owner` is `review_ready`, based on `d990298`. Kris selected
-removing the duplicate renderer text flow while preserving current behavior and
-the core command. Typed fixtures exposed a hierarchy Enter submission defect;
-the corrected DOM cases and actual controller/core journey pass. All 277 frontend
-tests and the production build pass. [Maintenance evidence](../tasks/evidence/screen-text-ownership.md)
-owns the results and retained failures. Independent Standards and Spec reviews at
-`15477b5` each report zero findings. [PR #71](https://github.com/Caldwell-41/Renpy-editor/pull/71)
-is published. Both required automatic CI jobs pass at `216590d`; every executed
-step and its logs are audited. Nine unselected specialist jobs are skipped.
-The audit closeout is documentation only. Merge and wider acceptance remain separate.
+[PR #71](https://github.com/Caldwell-41/Renpy-editor/pull/71) merged as `e9e8661`;
+its tree matches final head `28e0675`. The [maintenance evidence](../tasks/evidence/screen-text-ownership.md)
+retains the 277 frontend passes, production build, actual controller/core journey,
+original Python environment failure and independent review at `15477b5`.
+Both required automatic jobs passed at `216590d`. Its completed local and remote
+branches are now retired with PR #75 cleanup after exact merge-tree verification.
+Wider acceptance is unchanged.
 
 ## L05 project fonts merged
 

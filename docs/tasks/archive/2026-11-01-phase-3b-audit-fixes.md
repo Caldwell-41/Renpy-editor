@@ -78,9 +78,12 @@ the coordinator selects costly qualification and records its limits before it
 starts. Historical closed allowances remain closed. Protected recovery and the
 unrelated untracked audit remain untouched.
 
-Current state: the original twelve fixes passed at `af8c0bf`; the three review
-corrections passed both-target qualification ordinal 4 at `aee7475`. Their PR
-receipts own terminal results. The compiled-file matching correction is selected
-for one additional both-target CI dispatch, ordinal 5. The evidence record owns
-cumulative consumption and verification. No additional SDK, package or native
-operation is selected. Merge and wider acceptance remain separate.
+Final state: accepted for the selected maintenance scope and squash merged through
+PR #75 as `b7cb3a4`. The merge tree exactly matches audited head `2701156`.
+Both-target ordinal-5 qualification, automatic quality and retained artifact audit
+pass; the [terminal receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6553735694)
+owns detailed results. Cumulative qualification consumption is 5/5 and closed.
+All completed worker worktrees and verified merged branches are retired with
+original commits and unique evidence preserved. The evidence record owns cleanup
+proof and the original failures. Excluded findings, original SDK scope, protected
+recovery and wider acceptance remain unchanged. No successor outcome is selected.

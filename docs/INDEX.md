@@ -80,6 +80,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |
 | Contribution and inbound licensing | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Complete PR CI status, selected qualification and monitoring | [Complete PR validation](testing/CI-VALIDATION.md), [delivery task](tasks/active/ci-validation.md) |
+| Completed Screens audit corrections and workspace retirement | [Maintenance brief](tasks/archive/2026-11-01-phase-3b-audit-fixes.md), [evidence](tasks/evidence/phase-3b-audit-fixes.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |
 | Current automated commands, host exclusions and production-probe consumers | [Automated checks](testing/AUTOMATED.md) |
 | Pinned SDK, source/runtime and performance gates | [SDK/runtime](testing/SDK-RUNTIME.md) |
