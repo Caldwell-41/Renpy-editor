@@ -2,17 +2,19 @@
 
 ## Selected Phase 3B audit corrections
 
-Kris selected twelve fixes on `codex/phase3b-audit-fixes`, based on fetched
-Screens head `c5f4ab1`. All five Sol 6.1 High groups are reviewed and integrated in
-[draft PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75). The
-[maintenance task](../tasks/active/phase-3b-audit-fixes.md) owns scope and confirmed
-test boundaries; [evidence](../tasks/evidence/phase-3b-audit-fixes.md) owns review,
-results and operation limits. Local frontend/core, lifecycle and five controller
-journeys pass, as does the two-start Mac SDK recovery proof. CI1 passes Mac and
-fails the Windows nested-layout fixture's refresh ordering. The corrected fixture
-passes locally; corrected CI and the connected Windows assignment remain pending.
-Findings #1, #3, #7, #10, #13 and #15 stay excluded. No merge or wider Phase 3B
-acceptance is selected. Final results and closure belong to the draft PR receipt.
+The original twelve fixes on `codex/phase3b-audit-fixes` passed exact-head CI at
+`af8c0bf` and both platforms' bounded SDK recovery. The
+[PR #75 closure receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6551921617)
+owns those results. Kris then selected three independent-review corrections:
+screen-root resize feedback, qualification executable retention and image-test
+setup duplication. Both Sol 6.1 High worker commits are integrated and coordinator
+review passes. All 305 frontend tests, 22 retention-helper tests and the affected
+numeric/nested controller/core journeys pass locally. The PR update and selected
+ordinal-4 Windows/macOS CI still require terminal evidence audit.
+The [maintenance task](../tasks/active/phase-3b-audit-fixes.md) owns scope and test
+boundaries; [evidence](../tasks/evidence/phase-3b-audit-fixes.md) owns results and
+cumulative limits. Findings #1, #3, #7, #10, #13 and #15 stay excluded. No merge,
+additional SDK/package/native operation or wider Phase 3B acceptance is selected.
 
 ## Connected native testing policy accepted
 

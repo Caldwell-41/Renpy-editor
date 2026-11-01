@@ -270,3 +270,81 @@ Windows SUNDOWN's bounded test-only assignment is pending; its actual helper-sta
 consumption will be recorded from its returned evidence. No package or native editor
 operation has run. Final terminal CI and host results will be recorded on PR #75;
 that receipt owns closure without another evidence-only candidate change.
+
+## Independent-review corrections
+
+The [original closure receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6551921617)
+supersedes the pending directions above. Qualification ordinal 3, run 41261014666
+attempt 1, and automatic quality 41262340085 pass at `af8c0bf`. Both artifacts were
+audited. Mac and Windows real-SDK recovery pass with two of four helper starts per
+host. The original three CI dispatches remain consumed, including failed CI1 and
+cancelled dispatch 2.
+
+Kris selected fixes after a separate Standards/Spec review of `c5f4ab1...af8c0bf`.
+The follow-up covers the screen-root provisional resize regression, missing tested
+executables in qualification artifacts and repeated image-test URL measurement.
+The frontend worker owns `screen-ui.ts` and the workspace/image DOM test files;
+the CI worker owns `audit-fixes.yml` and the existing retention helper/tests.
+Both use separate T3-managed worktrees from `af8c0bf`, with Sol 6.1 High. The
+coordinator owns review, integration, task/status records and PR publication.
+
+The request to update the PR and run CI selects one additional qualification
+dispatch, ordinal 4. The cumulative ceiling is four, with three consumed before
+this follow-up. A dispatch counts when it starts, including failure or cancellation;
+no retry beyond four is selected. Routine automatic PR checks remain separate.
+No new SDK/helper, package, native editor or connected-Windows operation is selected.
+
+The CI worker returned `fb696345628c1d7bd2da96e5ed0038a9c60b9fc2` on
+`t3/fix-ci-artifact-retention`, integrated as `2257b07` after coordinator inspection.
+It extends the existing retention helper with exact Cargo-artifact selection,
+binary hashes and availability states. Earlier available executables survive a
+later truncated record, which still fails retention. Upload requires source
+identity and privacy checks. The ordinal ceiling is four; exact ref, candidate
+and attempt-1 checks remain.
+
+All 22 retention-helper tests pass in the integration checkout. A real local
+three-case metadata run and controller build supplied Cargo messages; the helper
+retained both exact executables and the five-file privacy scan passes. Worker
+fixtures also cover failed pipelines, named-case compatibility, missing binaries,
+privacy rejection and ordinal/ref/SHA/attempt rejection.
+
+The frontend worker returned `6a1658be17eac29d0db7e004f691c40b9c40983a` on
+`t3/fix-screen-root-resize-preview`, integrated as `91e9ae8` after coordinator
+inspection. The guard had confused movement eligibility with resize support.
+Screen roots and fixed groups now supply provisional bounds without requiring
+two explicit alignment axes; canonical numeric position and anchor values retain
+their coordinate meaning. Ambiguous parents still use helper geometry. One
+test-local URL tracker replaces the four repeated image-test measurements.
+
+The worker's held-response red/green cases cover screen-root frames, missing
+alignment axes, explicit positioning and images, alongside the existing nested
+fixed and ambiguous-parent cases. They check immediate and settled guides, focus,
+revision-bound submission, refusal retention and cancellation. All 41 focused DOM
+tests, typechecking and the frontend build pass. Its ordinary build encountered a
+linked-dependency config-cache permission error; the supported runner loader
+passed without changing dependencies or production code. Original logs are retained.
+
+Coordinator inspection traced the coordinate values to the canonical numeric
+parser and the helper's fixed layout for screen roots. The first combined frontend
+run passed 304 of 305 cases; the Windows-probe validator failed because the command
+used system Python 3.9 without `tomllib`. The documented complete Python 3.12
+wrapper is selected for the corrected run. This is an environment failure, not a
+product correction; the original failure remains in ignored reports.
+
+With that wrapper, coordinator typechecking and all 305 frontend tests pass with
+zero skips; the ordinary production frontend build also passes with its existing
+chunk-size advisory. Numeric and nested real controller/core journeys both pass,
+including exact source and Undo/Redo checks. Their receipts distinguish
+`controllerAndRealCore: true` from `sdkGeometry: false`. The first numeric attempt
+was refused by the sandbox's loopback-listen policy before browser interaction;
+the normal authorized execution passes, with the refused evidence retained.
+
+Coordinator review finds no remaining issue in these three corrections. The existing
+core source tree remains `7ea249683da6e02479541c84131d475c4503874a`, identical to
+the original platform SDK proof. That proof retains its original helper-rendering
+scope; it does not qualify native pointer painting. Workflow lint, repository
+validation and whitespace checks pass. The existing validation plan still selects
+both exact job names in `screens-source.yml`; it does not inherit an old-head pass.
+Publish one coherent candidate and dispatch ordinal 4. Terminal job identities,
+retained executables, hashes, all required results and privacy/upload status must
+be audited before the new receipt closes the follow-up. No merge is selected.

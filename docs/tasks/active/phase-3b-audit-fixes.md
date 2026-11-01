@@ -27,6 +27,12 @@ Findings #1, #3, #7, #10, #13 and #15 are explicitly excluded. Preserve current
 source authority, shared transactions/history, conflict protection, inert helper,
 approved UI and signing/credential identities. No new design is selected.
 
+An independent review at `af8c0bf` found a screen-root resize feedback regression,
+missing qualification executable retention and repeated image-test measurement
+setup. Kris selected fixing all three, coordinator review, updating PR #75 and CI.
+This follow-up restores existing behavior and extends the existing evidence helper;
+the original exclusions remain unchanged.
+
 ## Acceptance
 
 - Each selected trigger has a focused failing test before its correction and a
@@ -57,7 +63,8 @@ Mac ARM64 coordinates development. Workers use separate T3-managed worktrees and
 disjoint files under the [assignment record](../evidence/phase-3b-audit-fixes.md).
 The coordinator owns shared contracts, status, CI selection, integration and review.
 The linked Windows host SUNDOWN has a bounded test-only assignment for the exact
-published candidate. Mac real-SDK recovery passes; Windows evidence is pending.
+published candidate. Both platforms' original real-SDK recovery passes are recorded
+in the [closure receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6551921617).
 The evidence record owns both-host limits and actual consumption.
 
 Routine checks need no numerical allowance. Workers run focused local checks;
@@ -65,8 +72,10 @@ the coordinator selects costly qualification and records its limits before it
 starts. Historical closed allowances remain closed. Protected recovery and the
 unrelated untracked audit remain untouched.
 
-Current state: all five groups are reviewed and integrated in draft PR #75.
-Combined local verification and Mac SDK recovery pass. CI1 exposed a browser-fixture
-ordering defect; its correction passes locally. Corrected CI and Windows proof remain. Detailed
-red/green results, integration findings, host operations and CI receipts belong in
-the linked evidence.
+Current state: the original twelve fixes passed exact-head qualification at
+`af8c0bf`; the PR receipt owns that closure. Both review-correction workers are
+integrated and coordinator review passes. All 305 frontend cases, the retention
+helper tests and the affected real controller/core journeys pass locally. The
+selected additional CI dispatch is ordinal 4; terminal jobs and artifacts still
+require audit. The evidence record owns cumulative consumption. No additional SDK,
+package or native operation is selected. Detailed results belong in the linked evidence.

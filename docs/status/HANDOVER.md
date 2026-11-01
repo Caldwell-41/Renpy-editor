@@ -4,28 +4,27 @@
 
 Continue on `codex/phase3b-audit-fixes` and
 [draft PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75), based on fetched
-Screens head `c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. All twelve selected fixes
-are reviewed and integrated. The [maintenance task](../tasks/active/phase-3b-audit-fixes.md)
+Screens head `c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. The original twelve fixes
+passed at `af8c0bf`; the [closure receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6551921617)
+owns exact-head CI and both-platform SDK results. The [maintenance task](../tasks/active/phase-3b-audit-fixes.md)
 owns scope and confirmed test boundaries; the [evidence record](../tasks/evidence/phase-3b-audit-fixes.md)
 owns worker identities, original failures and verification. Findings #1, #3, #7,
 #10, #13 and #15 remain excluded.
 
-Local combined frontend/core, three controlled lifecycle cases, five real
-controller/core journeys and desktop compilation pass. The real Mac SDK recovery
-proof passes at `039f22ce3c118f408145573ccedfeac0e93b7b70`, using two of four
-allowed Mac helper starts. The connected Windows SUNDOWN test-only assignment
-owns no source; its returned evidence and actual helper consumption are pending.
-No package or native editor operation is selected.
+Kris selected fixing three independent-review findings, coordinator review, a PR
+update and CI. Both disjoint Sol 6.1 High assignments are integrated: frontend
+resize/test cleanup as `91e9ae8`, workflow retention as `2257b07`. Coordinator
+review, 305 frontend cases, 22 retention-helper cases and numeric/nested real
+controller/core journeys pass. Publish the exact candidate and dispatch ordinal 4
+before registering the T3 watch; the PR receipt owns the run identity and result.
+The cumulative CI ceiling is four; the original three attempts remain consumed.
+Each platform used two of four SDK helper starts; no new SDK, package or native
+operation is selected. The evidence record owns current assignments and results.
 
-CI1 at that candidate fails after all Windows core/build checks, at a nested-layout
-fixture ordering assertion; Mac passes. A held response reproduces the stale
-hierarchy interaction. The fixture correction waits for refreshed columns and
-passes held/normal controller runs. Publish this correction and start dispatch 2 of
-the three-dispatch ceiling, then audit terminal jobs/artifacts/current-head status.
-The PR is linked and watched. Do not poll or register another watch. Completion
-resumes this thread; unwatch before final handback. Final terminal results, Windows
-operations and closure belong to a PR #75 receipt rather than another evidence-only
-candidate change. No merge is selected. Preserve the unrelated untracked audit and
+Next action: audit ordinal-4 terminal jobs, exact candidate and retained artifacts
+when the T3 watcher resumes this chat. Final closure belongs to a new PR #75 receipt. The earlier
+pending-CI/Windows instructions are superseded by the linked original closure.
+No merge is selected. Preserve the unrelated untracked audit and
 all protected recovery below. Existing size exceptions retain unique recovery
 records. A separate maintenance issue was not published after automatic approval
 review rejected that additional publication.

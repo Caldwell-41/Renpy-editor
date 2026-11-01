@@ -810,3 +810,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   original assertion timeout. The corrected real controller/core journey passes
   with the held response and normally, preserving the existing deadline.
 - **Evidence:** [Audit-fix CI1 diagnosis](../tasks/evidence/phase-3b-audit-fixes.md#ci1-failure-and-controller-ordering-correction).
+
+## H58. Resize feedback inherits the movement-eligibility guard
+
+- **Class/search:** product; screen-root frame, provisional resize guide, fixed
+  parent, missing alignment axis, held helper response.
+- **Cause/correction:** a nested-frame coordinate fix required two explicit
+  alignments before updating any provisional dimensions. That excluded ordinary
+  screen-root children and other literal resize targets. Use screen/fixed parent
+  bounds and canonical position/anchor values independently of movement eligibility;
+  retain the helper fallback for ambiguous parents.
+- **Regression:** held-response DOM cases check immediate and settled geometry,
+  focus, revision-bound submission, refusal retention and cancellation. Existing
+  nested-fixed and ambiguous-parent cases remain covered.
+- **Evidence:** [Independent-review corrections](../tasks/evidence/phase-3b-audit-fixes.md#independent-review-corrections).
