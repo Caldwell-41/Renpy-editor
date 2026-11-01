@@ -80,18 +80,23 @@ try {
   assert.equal(await horizontal.evaluate(input=>document.getElementById(input.getAttribute('aria-describedby')).hidden),true);
   assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
   const width=ui.getByRole('textbox',{name:'Width',exact:true});
-  await width.fill('invalid width');await width.press('Enter');
-  await ui.getByText('Width needs a finite number. Input retained.',{exact:true}).first().waitFor();
-  assert.equal(await width.inputValue(),'invalid width');
+  for(const spelling of ['0x280','invalid width']) {
+    await width.fill(spelling);await width.blur();assert.equal(await width.getAttribute('aria-invalid'),'true');await width.press('Enter');
+    await ui.getByText('Width needs a finite number. Input retained.',{exact:true}).first().waitFor();
+    assert.equal(await width.inputValue(),spelling);
+    assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
+    await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
+    await ui.getByRole('option',{name:'Free layout group',exact:true}).dblclick();
+    assert.equal(await ui.locator('.layout-feedback').isVisible(),false,'A saved element must not show another element\'s draft error');
+    await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
+    assert.equal(await width.inputValue(),spelling);assert.equal(await ui.locator('.layout-feedback').isVisible(),true);
+    await width.press('Escape');
+    await ui.getByText('Layout changes cancelled. No source was written.',{exact:true}).waitFor();
+    assert.equal(await width.inputValue(),'640');
+  }
+  await width.fill('6.4e2');await width.press('Enter');
+  await ui.getByText('No change. No undo entry added.',{exact:true}).waitFor();
   assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
-  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
-  await ui.getByRole('option',{name:'Free layout group',exact:true}).dblclick();
-  assert.equal(await ui.locator('.layout-feedback').isVisible(),false,'A saved element must not show another element\'s draft error');
-  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('option',{name:'Help frame',exact:true}).dblclick();
-  assert.equal(await width.inputValue(),'invalid width');assert.equal(await ui.locator('.layout-feedback').isVisible(),true);
-  await width.press('Escape');
-  await ui.getByText('Layout changes cancelled. No source was written.',{exact:true}).waitFor();
-  assert.equal(await width.inputValue(),'640');
   await width.fill('700');await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
   const frameRow=ui.getByRole('option',{name:'Help frame',exact:true});
   assert.equal(await frameRow.getAttribute('data-layout-draft'),'true','Choose marks the retained layout draft');
@@ -134,6 +139,7 @@ try {
   await ui.getByLabel('Screen',{exact:true}).selectOption(JSON.stringify(['owned',owner.id]));
   await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
   await ui.getByRole('treeitem',{name:'Text · Child',exact:true}).dblclick();
+  await ui.locator('.screen-text-layout > summary').click();
   const vertical=ui.getByRole('textbox',{name:'Vertical position',exact:true});
   await vertical.fill('12');await vertical.press('Enter');
   await ui.getByText(/The vertical group controls vertical placement.*Input retained/).first().waitFor();
@@ -145,7 +151,7 @@ try {
   await ui.getByRole('button',{name:'1  Choose',exact:true}).click();
   assert.equal(await ui.getByRole('treeitem',{name:'Text · Child',exact:true}).getAttribute('data-layout-draft'),'true');
   await ui.getByRole('treeitem',{name:'Text · Child',exact:true}).dblclick();assert.equal(await width.inputValue(),'120');
-  await width.press('Enter');await ui.getByText('Layout saved. Undo restores all layout fields together.',{exact:true}).waitFor();
+  await width.press('Enter');await page.waitForFunction(()=>document.querySelector('.layout-state')?.textContent==='Saved');
   assert.match((await request('source.open',{path:owner.path})).value.text,/spacing 12/);
   assert.match((await request('source.open',{path:owner.path})).value.text,/xsize 120/);
   await width.fill('130');
@@ -154,7 +160,7 @@ try {
   const changedDraft=(await request('source.updateDraft',{path:owner.path,expectedBaseRevision:beforeStale.baseRevision,text:changedSource,selectionStart:0,selectionEnd:0})).value;
   assert.equal((await request('source.save',{path:owner.path,expectedBaseRevision:changedDraft.baseRevision,expectedDraftVersion:changedDraft.draftVersion})).ok,true);
   await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();await ui.getByText('Source refreshed. Unfinished drafts retain their original revision.',{exact:true}).waitFor();await width.press('Enter');
-  await ui.getByText(/This layout draft uses an earlier Source revision/).first().waitFor();
+  await ui.getByText('Text and layout use different Source revisions. Your edits are kept.',{exact:true}).first().waitFor();
   assert.equal(await width.inputValue(),'130');assert.equal((await request('source.open',{path:owner.path})).value.text,changedSource);
   await width.press('Escape');assert.equal(await width.inputValue(),'125');
   assert.deepEqual(errors,[]);assert(plans.length>0);

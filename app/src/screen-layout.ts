@@ -27,6 +27,7 @@ const labels: Record<string, string> = {
   left_padding: "Left padding", right_padding: "Right padding", top_padding: "Top padding", bottom_padding: "Bottom padding", spacing: "Spacing",
 };
 const coordinate = (key: string) => ["xpos", "ypos", "xanchor", "yanchor"].includes(key);
+const numericSpelling = (key: string, text: string) => (["columns", "rows"].includes(key) ? /^\d+$/ : /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/).test(text.trim());
 const nodeKey = (node: ScreenNode) => node.id ?? JSON.stringify([node.kind, node.literal, node.span.start]);
 const draftKey = (document: ScreenDocument, screen: string, node: ScreenNode) => JSON.stringify([document.path, screen, nodeKey(node)]);
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = "") => {
@@ -109,7 +110,7 @@ export class ScreenLayoutEditor {
     for (const [key, field] of Object.entries(fields)) {
       const value = field.text.trim() === "" ? null : { unit: field.unit, value: Number(field.text) };
       const before = node.numericLayout?.values[key];
-      if (value === null ? before !== undefined : !before || value.unit !== before.unit || value.value !== before.value) result[key] = value;
+      if (value === null ? before !== undefined : !numericSpelling(key, field.text) || !before || value.unit !== before.unit || value.value !== before.value) result[key] = value;
     }
     return result;
   }
@@ -144,16 +145,19 @@ export class ScreenLayoutEditor {
       for (const key of ["columns", "rows"]) {
         if (completed && completed !== key) continue;
         const value = Number(fields[key]!.text);
-        if (!/^\d+$/.test(fields[key]!.text.trim()) || !Number.isInteger(value) || value < 1 || value > 64) return {key,text:`${labels[key]} needs a whole number from 1 to 64. Input retained.`};
+        if (!numericSpelling(key, fields[key]!.text) || !Number.isInteger(value) || value < 1 || value > 64) return {key,text:`${labels[key]} needs a whole number from 1 to 64. Input retained.`};
       }
-      const children = view.nodes.filter(node => node.parentStart === view.node.span.start).length;
-      if (Number(fields.columns!.text) * Number(fields.rows!.text) < children) return {key:completed === "rows" ? "rows" : "columns",text:`The grid needs room for ${children} children. Increase columns or rows. Input retained.`};
+      const counts = ["columns", "rows"].filter(key => key in edits && (!completed || completed === key));
+      if (counts.length && counts.every(key => !view.node.numericLayout?.blocked[key])) {
+        const children = view.nodes.filter(node => node.parentStart === view.node.span.start).length;
+        if (Number(fields.columns!.text) * Number(fields.rows!.text) < children) return {key:completed === "rows" ? "rows" : "columns",text:`The grid needs room for ${children} children. Increase columns or rows. Input retained.`};
+      }
     }
     for (const [key, field] of Object.entries(fields)) {
       if (completed && key !== completed) continue;
       if (field.text.trim() === "") continue;
       const value = Number(field.text);
-      if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(field.text.trim()) || !Number.isFinite(value)) return { key, text: `${labels[key]} needs a finite number. Input retained.` };
+      if (!numericSpelling(key, field.text) || !Number.isFinite(value)) return { key, text: `${labels[key]} needs a finite number. Input retained.` };
       if (Math.abs(value) > 16384 || field.unit === "pixels" && !Number.isInteger(value) || !coordinate(key) && value < (key.endsWith("size") ? 1 : 0)) return { key, text: `${labels[key]} needs ${coordinate(key) ? "a supported coordinate" : "a whole number of pixels"} within ${coordinate(key) ? "−16384 to 16384" : key.endsWith("size") ? "1 to 16384" : "0 to 16384"}. Input retained.` };
       if (key in edits && view.node.numericLayout?.blocked[key]) return { key, text: `${view.node.numericLayout.blocked[key]} Input retained.` };
     }

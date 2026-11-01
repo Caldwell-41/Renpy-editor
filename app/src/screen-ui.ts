@@ -855,9 +855,15 @@ export class ScreensWorkspace {
       const draft = this.draft()!, ax = node.kind === "frame" ? node.layout.xalign ?? 0 : 0, ay = node.kind === "frame" ? node.layout.yalign ?? 0 : 0;
       draft.width = String(Math.max(24, Math.min(16384, Math.round((gesture.width + (event.clientX - gesture.x) / this.scale / (1 - ax)) / 8) * 8)));
       draft.height = String(Math.max(24, Math.min(16384, Math.round((gesture.height + (event.clientY - gesture.y) / this.scale / (1 - ay)) / 8) * 8)));
-      target.style.width = `${Number(draft.width) * this.scale}px`; target.style.height = `${Number(draft.height) * this.scale}px`;
-      target.style.left = node.kind === "frame" ? `${(this.gameResolution.width - Number(draft.width)) * ax * this.scale}px` : target.style.left;
-      target.style.top = node.kind === "frame" ? `${(this.gameResolution.height - Number(draft.height)) * ay * this.scale}px` : target.style.top;
+      const parent = this.nodes().find(candidate => candidate.span.start === node.parentStart);
+      const bounds = parent?.kind === "fixed" && node.position ? this.frames.geometry?.find(geometry => geometry.start === parent.span.start) : undefined;
+      // Only the supported fixed-parent alignment gives unambiguous provisional bounds.
+      // Other containers can pad, distribute or clip children; keep their helper guide.
+      if (bounds) {
+        target.style.width = `${Number(draft.width) * this.scale}px`; target.style.height = `${Number(draft.height) * this.scale}px`;
+        target.style.left = `${(bounds.x + (bounds.width - Number(draft.width)) * ax) * this.scale}px`;
+        target.style.top = `${(bounds.y + (bounds.height - Number(draft.height)) * ay) * this.scale}px`;
+      }
       for (const property of ["left", "top", "width", "height"] as const) outline.style[property] = target.style[property];
       this.renderCanvas();
     };
