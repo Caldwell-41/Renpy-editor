@@ -410,6 +410,28 @@ fn derived_screen_effects_share_the_target_revision_and_keep_custom_effects_unkn
 }
 
 #[test]
+fn screen_beats_preserve_the_existing_unknown_flow_diagnostic() {
+    for operation in ["show", "hide"] {
+        let mut f = Fixture::new();
+        panel(&mut f, "help_panel");
+        let scene = f.model()["scenes"][0].clone();
+        f.save(
+            &scene,
+            &format!(
+                "label {}:\n    {operation} screen help_panel\n    return\n",
+                scene["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let flow = ipc(&mut f.service, "flow.list", json!({}));
+        assert!(flow["edges"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|edge| edge["sceneId"] == scene["id"] && edge["kind"] == "unknown"));
+    }
+}
+
+#[test]
 fn v6_panel_beats_migrate_on_open_without_source_or_identity_changes_and_reopen_is_noop() {
     let mut f = Fixture::new();
     let owner = panel(&mut f, "help_panel");
