@@ -435,3 +435,35 @@ retainer on partial Cargo output. All 13 adapter and 12 Help artifact checks pas
 Scratch cleanup and known process cleanup are now distinct in Help SDK results.
 L08's larger mandatory producer-receipt correction continues in its two assigned
 Python files; no component SDK allocation has been selected.
+
+## Third Help macOS campaign and component provenance review
+
+Help candidate `7e34c6a` passed version, compile, lint and all six separate normal-entry
+cases in `app/target/help-panel-sdk-macos-03`. The frozen manifest SHA-256 is
+`d79634e6f047b227dc10a0a0bb39c11d4daa23f1fff0f90027c4b9742993b470`;
+result SHA-256 is `598abb7ff3c2fed33838aff23af31fc860ebe664c23afd1fce7a283636199947`.
+Independent raw-log admission matches the aggregate observations and nine expected
+commands. Accepted source remained unchanged. Keyboard focus is observed on the
+actual Close widget immediately before Return; the pointer stays fixed. Outside
+click preserves the panel; Escape removes it; two dialogue advances preserve it.
+All commands exited zero and owned process/scratch cleanup completed. #44 owns the
+single cumulative accounting record. Earlier failed campaign results remain failed.
+This proves macOS pinned-engine behavior, not physical input, editor UI or Windows.
+
+The coordinator integrated component producer commits `dadcdf91` and `127924bf` as
+`37b8fb0` and `a137968`. Fresh read-only Standards/Spec reviews used the exclusive
+two-file diff from `c71c041` to `127924bf`. Standards found two P2 defects: final
+scratch cleanup could suppress an original failure, and missing/invalid duration
+could pass producer admission. Spec independently found final receipt writes could
+also suppress interruption, and original compiler bytes were not compared with the
+retained binary. Its CARGO_HOME removal finding is contradicted by the fixed code,
+which explicitly keeps CARGO_HOME; a focused execution-boundary test confirms it.
+
+Coordinator corrections preserve the same original exception even when scratch
+cleanup or receipt writing fails, record failed cleanup without a positive receipt,
+require finite nonnegative numeric durations, and hash original plus retained
+compiler artifacts at production and admission. Relevant fault checks first failed
+(12 assertion failures and two finalization errors), then all 17 cheap checks passed,
+including optimized Python. No SDK started during review or correction. Producer
+receipts from before this material change remain historical and cannot qualify the
+new candidate. A fresh committed producer is required before allocating execution.

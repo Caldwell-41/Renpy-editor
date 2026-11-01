@@ -243,6 +243,43 @@ class ProducerAdmission(unittest.TestCase):
                     self.assertTrue((prepared / 'inputs-after.json').is_file())
                     self.assertIn('compiler-artifact', (prepared / 'core-export.log').read_text())
 
+    def test_export_preserves_captured_cargo_home(self):
+        with tempfile.TemporaryDirectory() as temporary, producer_machine(Path(temporary)):
+            cargo_home = str(Path(temporary) / 'configured-cargo-home')
+            def observed(text):
+                self.assertEqual(proof.os.environ['CARGO_HOME'], cargo_home)
+                return SimpleNamespace(output=text, exit_code=0, timed_out=False, output_limited=False, duration_seconds=0.1)
+            with patch.dict(proof.os.environ, CARGO_HOME=cargo_home):
+                prepare_bundle(Path(temporary), observed)
+
+    def test_finalization_errors_preserve_original_interruption(self):
+        for fault in ('cleanup', 'receipt'):
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                with producer_machine(root):
+                    interruption = KeyboardInterrupt('original cancellation')
+                    def interrupted(text):
+                        interruption.command_output = text
+                        interruption.command_cleanup_complete = True
+                        raise interruption
+                    real_write = proof.write_json
+                    def write(path, value):
+                        if fault == 'receipt' and path.name == 'producer.json':
+                            raise OSError('receipt unavailable')
+                        return real_write(path, value)
+                    cleanup_patch = patch.object(proof.shutil, 'rmtree', side_effect=OSError('cleanup unavailable')) if fault == 'cleanup' else patch.object(proof, 'checkout_commit', return_value='d' * 40)
+                    with patch.object(proof, 'write_json', side_effect=write), cleanup_patch:
+                        with self.assertRaises(KeyboardInterrupt) as caught:
+                            prepare_bundle(root, interrupted)
+                    self.assertIs(caught.exception, interruption)
+                    if fault == 'cleanup':
+                        receipt = json.loads((root / 'prepared/producer.json').read_text())
+                        self.assertFalse(receipt['passed'])
+                        self.assertFalse(receipt['cleanupComplete'])
+                        self.assertEqual(receipt['scratchCleanupFailure']['type'], 'OSError')
+                    else:
+                        self.assertEqual(interruption.producer_receipt_failure['type'], 'OSError')
+
     def test_both_modes_require_a_producer_before_any_output_or_process(self):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / 'must-not-stage'
@@ -287,7 +324,7 @@ class ProducerAdmission(unittest.TestCase):
                     self.assertFalse((prepared / 'tmp').exists())
 
     def test_missing_stale_mixed_or_changed_provenance_refuses_before_staging(self):
-        faults = ['missing_receipt', 'missing_binary', 'changed_binary', 'changed_accepted', 'changed_log', 'changed_after',
+        faults = ['missing_duration', 'null_duration', 'negative_duration', 'infinite_duration', 'bool_duration', 'missing_original', 'changed_original', 'missing_receipt', 'missing_binary', 'changed_binary', 'changed_accepted', 'changed_log', 'changed_after',
                   'failed', 'wrong_toolchain', 'wrong_host', 'wrong_commit', 'stale_source', 'wrong_command', 'wrong_artifact', 'wrong_test', 'wrong_digest']
         for fault in faults:
             with self.subTest(fault=fault), tempfile.TemporaryDirectory() as temporary:
@@ -295,7 +332,10 @@ class ProducerAdmission(unittest.TestCase):
                 with producer_machine(root) as (inputs, tools):
                     prepared = prepare_bundle(root)
                     receipt = json.loads((prepared / 'producer.json').read_text())
-                    if fault == 'missing_receipt':
+                    if fault in ('missing_original', 'changed_original'):
+                        binary = Path(receipt['compilerArtifact'])
+                        binary.unlink() if fault == 'missing_original' else binary.write_bytes(b'changed original')
+                    elif fault == 'missing_receipt':
                         (prepared / 'producer.json').unlink()
                     elif fault in ('missing_binary', 'changed_binary'):
                         binary = prepared / receipt['testBinary']['path']
@@ -309,7 +349,12 @@ class ProducerAdmission(unittest.TestCase):
                     elif fault == 'stale_source':
                         inputs['app/src-core/src/new.rs'] = 'e' * 64
                     else:
-                        if fault == 'failed':
+                        if fault.endswith('_duration'):
+                            if fault == 'missing_duration':
+                                receipt['command'].pop('durationSeconds')
+                            else:
+                                receipt['command']['durationSeconds'] = {'null_duration': None, 'negative_duration': -1, 'infinite_duration': float('inf'), 'bool_duration': True}[fault]
+                        elif fault == 'failed':
                             receipt['command']['exitCode'] = 61
                         elif fault == 'wrong_toolchain':
                             receipt['toolchain']['cargo']['version'] = 'cargo 1.89.0'

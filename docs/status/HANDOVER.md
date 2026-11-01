@@ -25,24 +25,27 @@ and focus observed before a later pointer move. Twelve Python artifact checks,
 application typechecking and nine protocol tests pass. The first coordinator
 preparation's compiler-cache cleanup refusal remains a retained failure, with its
 accepted bytes and binary preserved; owned cleanup is corrected for the next freeze.
-Both workers are preparing frozen public-transaction fixtures and rejecting runtime
-validators without SDK execution. L09's normal-entry Help exporter `3ad43eef` is
-integrated as `3ccc584`; its exact IPC test passes. The temporary module-registration
-ownership has returned to the coordinator. All other file assignments remain in
-the linked evidence record.
-Source-map schema 7 owns recognition and preserves legacy-6 source bytes and IDs.
-Production UI waits for the prototype chat's exact approved revision. #44 owns the
-current SDK limit and consumption. The first Help macOS campaign passed version,
-compile and lint, then failed the first case with Start outside a menu context;
-five cases did not run, and owned cleanup completed. Its failed logs remain retained.
-The second campaign's runtime process exited zero but the gate rejected reporter
-trailing whitespace; it remains failed and #44 records eight confirmed starts.
-That parser correction admits the retained Show log without another launch. The
-next campaign tests keyboard focus first after fresh inputs. Shared cancellation
-cleanup now passes 13 actual-subprocess checks and exposes partial output on errors;
-the Help CLI retains interrupted exporter binaries and passes 12 artifact checks.
-L08 is implementing the required producer/source/toolchain/binary receipt in only
-its two Python harness files. Keep those files with that worker until handback.
+Both workers have handed back their core and runtime preparation; their temporary
+file ownership has returned to the coordinator. Source-map schema 7 owns recognition
+and preserves legacy-6 source bytes and IDs. Production UI waits for prototype
+candidate `405400c` to be explicitly approved. No production visual edits are made.
+
+The third macOS Help SDK campaign at `7e34c6a` passed all nine commands and all six
+normal-entry cases. Raw records independently verify Show across two advances,
+authored Hide, re-show/Close, outside click, default Escape and focused Return.
+Accepted source stayed byte-identical and owned cleanup completed. This is pinned
+macOS engine automation, not OS input or native editor evidence. #44 owns cumulative
+use; two earlier failed campaigns remain failed. Windows proof is pending.
+
+Shared cancellation cleanup passes 13 actual-subprocess checks and exposes bounded
+partial output on errors; Help artifact checks cover interrupted binary retention.
+Component provenance candidate `127924bf` is integrated. Fresh Standards/Spec reviews
+found finalization masking, incomplete duration admission and missing original
+artifact hashing. The coordinator reproduced and fixed them; 17 cheap checks pass,
+including preservation of the original interruption and both original/retained
+binary identity. One reported CARGO_HOME mismatch was contradicted by the existing
+filter, with a focused check confirming the configured home reaches Cargo. A fresh
+committed producer freeze is next before component SDK execution.
 No component SDK allowance is selected. No package/native editor/CI operation
 has started. L08's coherent worker release suite
 passed 549 cases; L09's earlier ordinary release-core

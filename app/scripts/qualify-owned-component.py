@@ -448,6 +448,11 @@ def prepare_producer(path, expected_candidate=None):
         result['coreLogSHA256'] = hashlib.sha256((output / 'core-export.log').read_bytes()).hexdigest()
         result['inputsSHA256'] = hashlib.sha256((output / 'inputs-before.json').read_bytes()).hexdigest()
         result['compilerArtifact'] = compiler_artifact(observed.output)
+        artifact = Path(result['compilerArtifact'])
+        result['originalArtifact'] = dict(path=str(artifact), bytes=artifact.stat().st_size,
+                                         sha256=hashlib.sha256(artifact.read_bytes()).hexdigest())
+        require(result['originalArtifact']['bytes'] == result['testBinary']['bytes'] and
+                result['originalArtifact']['sha256'] == result['testBinary']['sha256'], 'original and retained compiler artifacts differ')
         validate_core_output(observed.output, result['acceptedSHA256'])
         validate_inputs(strict_json(accepted.decode('utf-8')))
         result['passed'] = True
@@ -455,16 +460,28 @@ def prepare_producer(path, expected_candidate=None):
         result['failure'] = dict(type=type(error).__name__, message=str(error))
         raise
     finally:
+        original_error = sys.exception()
         if (output / 'inputs-before.json').exists() and not (output / 'inputs-after.json').exists():
             try:
                 write_json(output / 'inputs-after.json', material_inputs())
             except Exception as error:
                 result['inputCaptureFailure'] = dict(type=type(error).__name__, message=str(error))
         if temporary.exists():
-            shutil.rmtree(temporary)
+            try:
+                shutil.rmtree(temporary)
+            except Exception as error:
+                result['scratchCleanupFailure'] = dict(type=type(error).__name__, message=str(error))
         result['scratchCleanupComplete'] = not temporary.exists()
         result['cleanupComplete'] = result['scratchCleanupComplete'] and (result['command']['outcome'] == 'not-started' or result['command'].get('cleanupComplete') is True)
-        write_json(output / 'producer.json', result)
+        result['passed'] = result['passed'] and result['cleanupComplete']
+        try:
+            write_json(output / 'producer.json', result)
+        except Exception as error:
+            if original_error is None:
+                raise
+            original_error.producer_receipt_failure = dict(type=type(error).__name__, message=str(error))
+        if original_error is None:
+            require(result['cleanupComplete'], 'producer cleanup incomplete; failed receipt retained')
     return result
 
 
@@ -495,6 +512,8 @@ def validate_prepared(path):
         require(command['argv'] == export_argv(receipt['toolchain']) and command['cwd'] == str(Path(receipt['root']) / 'app'), 'wrong producer command')
         require(command['outcome'] == 'returned' and command['exitCode'] == 0 and command['timedOut'] is False and command['outputLimited'] is False, 'failed producer command')
         require(command['processReaped'] is True and command['cleanupComplete'] is True, 'producer process cleanup unknown')
+        duration = command.get('durationSeconds')
+        require(type(duration) in (int, float) and math.isfinite(duration) and duration >= 0, 'missing or invalid producer duration')
         binary = receipt['testBinary']
         retained = prepared_file(root, binary['path'])
         require(binary['path'] == 'test-binary/' + binary['name'] and retained.stat().st_size == binary['bytes'] > 0 and hashlib.sha256(retained.read_bytes()).hexdigest() == binary['sha256'], 'changed retained test binary')
@@ -503,6 +522,10 @@ def validate_prepared(path):
         require(hashlib.sha256(accepted).hexdigest() == receipt['acceptedSHA256'] and hashlib.sha256(log).hexdigest() == receipt['coreLogSHA256'], 'mixed producer accepted/log bytes')
         artifact = compiler_artifact(log.decode('utf-8'))
         require(artifact == receipt['compilerArtifact'] and Path(artifact).name == binary['name'] and Path(artifact).is_relative_to(Path(receipt['root']) / '.toolchains/target') and receipt['targetDir'] == str(Path(receipt['root']) / '.toolchains/target'), 'mixed producer compiler artifact')
+        original = receipt['originalArtifact']
+        require(original == dict(path=artifact, bytes=binary['bytes'], sha256=binary['sha256']) and
+                Path(artifact).stat().st_size == original['bytes'] and
+                hashlib.sha256(Path(artifact).read_bytes()).hexdigest() == original['sha256'], 'changed original compiler artifact')
         validate_core_output(log.decode('utf-8'), receipt['acceptedSHA256'])
         sources = validate_inputs(strict_json(accepted.decode('utf-8')))
         return receipt, accepted, log, sources

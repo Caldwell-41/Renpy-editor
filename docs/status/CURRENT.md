@@ -8,10 +8,11 @@ and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
 contracts, integration and final review; two isolated workers own the ticket modules.
 A separate prototype chat has draft alternatives awaiting approval before production
 UI changes. Both ticket cores and typed component IPC are integrated. Independent
-core/preparation reviews are complete, with coordinator fixes verified at their
-focused checks. Runtime fixtures and validators are prepared. The first Help SDK
-campaign passed compile/lint but failed its first runtime case in fixture entry.
-The diagnosed fixture correction is prepared for the next bounded campaign.
+core/preparation reviews have driven focused corrections. The macOS Help SDK
+campaign now passes all six normal-entry cases, including keyboard focus, Escape,
+outside click and dialogue persistence. Earlier failed campaigns remain retained;
+#44 owns cumulative SDK use. Component producer provenance is integrated and its
+review corrections pass 17 cheap checks before a fresh producer freeze.
 Final combined qualification remains pending.
 [Assignments and evidence](../tasks/evidence/components-and-help-panel.md) record
 file ownership and qualification scope. Neither ticket is accepted yet. The selected
