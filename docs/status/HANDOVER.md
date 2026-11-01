@@ -1,5 +1,23 @@
 # Current outcome handover
 
+## Selected Phase 3B audit corrections
+
+Continue on `codex/phase3b-audit-fixes`, prepared from fetched Screens head
+`c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. The local base matched origin after
+fetch. Kris selected twelve fixes, parallel Sol 6.1 High workers using the named
+root-cause and TDD skills, coordinator review, draft PR and complete selected CI.
+Read the [maintenance task](../tasks/active/phase-3b-audit-fixes.md) for exact scope
+and confirmed test boundaries, then the [assignment/evidence record](../tasks/evidence/phase-3b-audit-fixes.md)
+before integrating worker commits. Findings #1, #3, #7, #10, #13 and #15 are excluded.
+
+Mac ARM64 coordinates. Windows SUNDOWN is linked and reachable; no remote operation
+has run. Routine worker checks are selected; costly qualification requires its
+recorded selection before starting. No CI or native process is pending. The new
+task is local-only until the authorized publication. A separate GitHub maintenance
+issue was not published after automatic approval review rejected that additional
+publication. No merge is selected. Preserve the unrelated untracked audit and all
+protected recovery below. Existing size exceptions retain unique recovery evidence.
+
 ## Connected native testing policy closeout
 
 The [accepted documentation outcome](../tasks/archive/2026-11-01-connected-native-testing.md)
