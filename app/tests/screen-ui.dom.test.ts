@@ -8,10 +8,11 @@ const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 const documentFor = (path: string, name?: string): ScreenDocument => ({ path, revision: "before", partial: false,
   screens: name ? [{ name, nodes: [{ kind: "frame", literal: null, layout: {}, span: { start: 30, end: 90 }, parentStart: null,
     properties: [{ property: "xsize", value: 640 }, { property: "ysize", value: 360 }], protected: [] }] }] : [] });
-function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable", canvas = false, movable = false, sibling = false) {
+function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable", canvas = false, movable = false, sibling = false, suppliedDocument?: ScreenDocument) {
   const browser = new Window();
-  Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, ResizeObserver: browser.ResizeObserver });
+  Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLDetailsElement: browser.HTMLDetailsElement, ResizeObserver: browser.ResizeObserver });
   let documents = mixed ? [documentFor("game/ui/a_styles.rpy"), documentFor("game/ui/help.rpy", "help"), documentFor("game/ui/pause.rpy", "pause")] : [documentFor("game/ui/help.rpy", "help")];
+  if (suppliedDocument) documents = [suppliedDocument];
   if (movable) {
     const nodes=documents[0]!.screens[0]!.nodes;
     nodes[0]!.parentStart=10; nodes[0]!.position={xalign:0.5,yalign:0.5};
@@ -25,6 +26,8 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
   const payloads: {operation:CoreOperation;payload?:Record<string,unknown>}[]=[];
   let canvasAvailable = true;
   let canvasFrame: Record<string, unknown> = {};
+  let holdCanvas = false;
+  let deliverCanvas: ((frame: Record<string, unknown>) => void) | undefined;
   const workspace = new ScreensWorkspace({ resolution: { width: 1280, height: 720 }, current: () => true,
     coordinate: task => task(), source: target => { sources.push(target); }, preview: () => {}, saved: () => {},
     request: async <T>(operation: CoreOperation, payload?: Record<string, unknown>): Promise<T> => {
@@ -37,10 +40,18 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
         return ownedRace ? { ...documentFor("game/ui/help.rpy", ownedRace === "rename" ? "neighbor" : "help"), revision: "after" } as T : documents.find(d => d.path === payload?.path) as T;
       }
       if (operation === "screens.setSize" || operation === "screens.setPosition") return await new Promise<ScreenDocument>((resolve, reject) => { settle = { resolve, reject }; }) as T;
+      if (operation === "screens.setLayout") {
+        const accepted = structuredClone(documents[0]!); accepted.revision = "accepted";
+        Object.assign(accepted.screens[0]!.nodes.find(node => node.span.start === payload?.nodeStart)!.numericLayout!.values, payload?.values);
+        documents = [accepted]; return accepted as T;
+      }
       if (operation === "screens.canvasStatus" && canvas) return {phase:"ready"} as T;
-      if (operation === "screens.canvasRender" && canvas) return (canvasAvailable ? { phase:"ready", frameId:"fixture-frame", revision:"before", width:1280, height:720,
+      if (operation === "screens.canvasRender" && canvas) {
+        if (holdCanvas) return await new Promise(resolve => { deliverCanvas = frame => resolve({phase:"ready",revision:"before",image:"data:image/png;base64,settled",...frame} as T); });
+        return (canvasAvailable ? { phase:"ready", frameId:"fixture-frame", revision:"before", width:1280, height:720,
         image:"data:image/png;base64,fixture", geometry:[{start:10,x:0,y:0,width:1280,height:720},{start:30,x:320,y:180,width:640,height:360},
           ...(sibling ? [{start:100,x:10,y:10,width:100,height:30}] : [])], ...canvasFrame } : {phase:"unavailable",message:"Helper stopped. Drafts retained."}) as T;
+      }
       throw new Error(operation);
     } });
   workspace.mount(document.body);
@@ -48,9 +59,170 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
   const field = (name: string) => { const input = [...document.querySelectorAll("input")].find(i => i.ariaLabel === name); assert.ok(input, document.body.innerHTML); return input; };
   return { workspace, click, field, sources, calls, payloads, stopHelper: () => { canvasAvailable = false; }, removePause: () => { documents = documents.filter(d => !d.path.endsWith("pause.rpy")); },
     setCanvasFrame: (frame: Record<string, unknown>) => { canvasFrame = frame; },
+    holdCanvas: () => { holdCanvas = true; },
+    deliverCanvas: (frame: Record<string, unknown>) => { holdCanvas = false; assert.ok(deliverCanvas, "A helper request must be pending"); deliverCanvas(frame); },
+    removeSelectedElement: () => { documents = documents.map(doc => ({...doc,revision:"removed",screens:doc.screens.map(screen => ({...screen,nodes:screen.nodes.slice(1)}))})); },
     accept: () => { const accepted = structuredClone(documents.find(d => d.screens.length)!); accepted.revision = "accepted"; accepted.screens[0]!.nodes[0]!.properties[0]!.value = 750; settle!.resolve(accepted); },
     refuse: () => settle!.reject(new Error("Draft conflict")), dispose: () => workspace.dispose() };
 }
+
+for (const [kind, fieldName, spelling, invalid] of [
+    ["frame", "Width", "0x280", true],
+    ["grid", "Columns", "2.0", true],
+    ["frame", "Width", "6.4e2", false],
+  ] as const) test(`numeric spelling validates ${fieldName} ${spelling} before discarding an equivalent draft`, async () => {
+    const fixture = documentFor("game/ui/help.rpy", "help");
+    const node = fixture.screens[0]!.nodes[0]!;
+    node.kind = kind;
+    node.numericLayout = { values: kind === "grid" ? {columns:{unit:"count",value:2},rows:{unit:"count",value:1}} : {xsize:{unit:"pixels",value:640}}, blocked:{} };
+    const h = harness(false, undefined, false, false, false, fixture);
+    try {
+      await tick(); h.click("2  Design");
+      const input = h.field(fieldName); input.focus(); input.value = spelling; input.dispatchEvent(new window.Event("input"));
+      input.blur();
+      assert.equal(input.getAttribute("aria-invalid"), invalid ? "true" : null, `${fieldName} ${spelling} completion`);
+      input.dispatchEvent(new window.KeyboardEvent("keydown", {key:"Enter",bubbles:true}));
+      assert.equal(h.workspace.hasDraft(), invalid);
+      assert.equal(h.calls.includes("screens.setLayout"), false);
+      h.click("1  Choose"); h.click("2  Design");
+      assert.equal(h.field(fieldName).value, invalid ? spelling : "640", "Remount retains invalid spelling and normalizes valid no-ops");
+      if (invalid) {
+        h.removeSelectedElement(); await h.workspace.load();
+        const retained = [...document.querySelectorAll("textarea")].find(input => input.ariaLabel === "Retained layout draft")!;
+        assert.ok(retained, "Source removal retains the numeric draft");
+        assert.ok(retained.value.includes(`${fieldName}: ${spelling}`), retained.value);
+      }
+    } finally { h.dispose(); }
+});
+
+test("a grid with opaque branches saves spacing but refuses ambiguous count edits", async () => {
+  const fixture = documentFor("game/ui/help.rpy", "help");
+  const grid = fixture.screens[0]!.nodes[0]!;
+  grid.kind = "grid";
+  const reason = "Source-only grid children have an unknown cell count. Edit columns and rows in Source.";
+  grid.numericLayout = {values:{columns:{unit:"count",value:2},rows:{unit:"count",value:1},spacing:{unit:"pixels",value:8}},blocked:{columns:reason,rows:reason}};
+  for (const [index, kind] of ["text", "custom", "custom"].entries()) fixture.screens[0]!.nodes.push({kind,literal:null,layout:{},span:{start:100+index*20,end:120+index*20},parentStart:30,properties:[],protected:[]});
+  const h = harness(false, undefined, false, false, false, fixture);
+  try {
+    await tick(); h.click("2  Design");
+    const spacing = h.field("Spacing"); spacing.value = "9"; spacing.dispatchEvent(new window.Event("input"));
+    spacing.dispatchEvent(new window.KeyboardEvent("keydown", {key:"Enter",bubbles:true}));
+    await tick();
+    assert.doesNotMatch(document.querySelector(".screen-message")!.textContent!, /The grid needs room for 3 children/);
+    assert.deepEqual(h.payloads.filter(call => call.operation === "screens.setLayout").map(call => call.payload?.values), [{spacing:{unit:"pixels",value:9}}]);
+    assert.equal(h.workspace.hasDraft(), false);
+    const columns = h.field("Columns"); columns.value = "1"; columns.dispatchEvent(new window.Event("input"));
+    columns.dispatchEvent(new window.KeyboardEvent("keydown", {key:"Enter",bubbles:true}));
+    assert.match(document.querySelector(".screen-message")!.textContent!, /Source-only grid children have an unknown cell count/);
+    assert.equal(h.calls.filter(operation => operation === "screens.setLayout").length, 1);
+    assert.equal(h.workspace.hasDraft(), true);
+  } finally { h.dispose(); }
+});
+
+for (const parentKind of ["screen", "fixed", "frame"] as const) test(`nested frame resize ${parentKind === "frame" ? "waits for ambiguous parent bounds" : `guides use ${parentKind} bounds`} while the helper response is held`, async () => {
+  const fixture = documentFor("game/ui/help.rpy", "help");
+  const frame = fixture.screens[0]!.nodes[0]!;
+  frame.parentStart = 10; frame.layout = {xalign:0.5,yalign:0.5};
+  frame.numericLayout = {values:{xpos:{unit:"relative",value:0.5},xanchor:{unit:"relative",value:0.5},ypos:{unit:"relative",value:0.5},yanchor:{unit:"relative",value:0.5}},blocked:{},sourceBlocked:{}};
+  if (parentKind === "fixed") frame.position = {xalign:0.5,yalign:0.5};
+  fixture.screens[0]!.nodes.unshift({kind:parentKind,literal:null,layout:{},span:{start:10,end:100},parentStart:null,properties:[],protected:[]});
+  const h = harness(false, undefined, true, false, false, fixture);
+  try {
+    const initial = parentKind === "screen" ? ["320px","180px","640px","360px"] : ["180px","130px","640px","360px"];
+    const resized = parentKind === "screen" ? ["312px","172px","656px","376px"] : ["172px","122px","656px","376px"];
+    const parentBounds = parentKind === "screen" ? {start:10,x:0,y:0,width:1280,height:720} : {start:10,x:100,y:60,width:800,height:500};
+    h.setCanvasFrame({geometry:[parentBounds,{start:30,x:parseFloat(initial[0]!),y:parseFloat(initial[1]!),width:640,height:360}]});
+    await tick(); await tick();
+    const zoom = [...document.querySelectorAll("select")].find(input => input.ariaLabel === "Canvas zoom")!;
+    zoom.value = "100"; zoom.dispatchEvent(new window.Event("change"));
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    document.querySelector<HTMLButtonElement>('.screen-node[data-index="1"]')!.click();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    const handle = document.querySelector<HTMLButtonElement>(".screen-resize")!;
+    handle.setPointerCapture = () => {}; handle.hasPointerCapture = () => false; handle.focus();
+    const pointer = (type: string) => handle.dispatchEvent(new window.PointerEvent(type,{button:0,pointerId:1,clientX:type === "pointerdown" ? 100 : 108,clientY:type === "pointerdown" ? 100 : 108,bubbles:true}));
+    h.holdCanvas(); pointer("pointerdown"); pointer("pointermove");
+    const guide = document.querySelector<HTMLElement>(".screen-selection")!;
+    const target = document.querySelector<HTMLElement>('.screen-node[data-index="1"]')!;
+    const provisional = parentKind === "frame" ? initial : resized;
+    assert.deepEqual([target.style.left,target.style.top,target.style.width,target.style.height], provisional);
+    assert.deepEqual([guide.style.left,guide.style.top,guide.style.width,guide.style.height], provisional);
+    await tick(); await tick();
+    assert.deepEqual([guide.style.left,guide.style.top,guide.style.width,guide.style.height], provisional, "Pending helper delivery keeps only supported provisional geometry");
+    assert.equal(h.calls.includes("screens.setSize"), false);
+    h.deliverCanvas({geometry:[parentBounds,{start:30,x:parseFloat(resized[0]!),y:parseFloat(resized[1]!),width:656,height:376}]});
+    await tick(); await tick();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.deepEqual([target.style.left,target.style.top,target.style.width,target.style.height], resized);
+    assert.deepEqual([guide.style.left,guide.style.top,guide.style.width,guide.style.height], resized);
+    assert.equal(document.activeElement, handle);
+    pointer("pointerup");
+    const write = h.payloads.find(call => call.operation === "screens.setSize")!;
+    assert.deepEqual([write.payload?.width,write.payload?.height], [656,376]);
+    assert.equal(write.payload?.expectedRevision, "before");
+    assert.equal(document.activeElement, handle);
+    h.refuse(); await tick();
+    assert.equal(h.workspace.hasDraft(), true);
+    assert.match(document.querySelector(".screen-message")!.textContent!, /Draft conflict.*retained/);
+    h.workspace.panel.dispatchEvent(new window.KeyboardEvent("keydown", {key:"Escape",bubbles:true}));
+    await tick(); await tick();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.equal(h.workspace.hasDraft(), false, "Escape cancels the refused resize draft");
+    assert.equal(h.calls.filter(operation => operation === "screens.setSize").length, 1, "Cancellation does not submit another write");
+    const restored = document.querySelector<HTMLElement>('.screen-node[data-index="1"]')!;
+    assert.deepEqual([restored.style.left,restored.style.top,restored.style.width,restored.style.height], initial);
+  } finally { h.dispose(); }
+});
+
+for (const placement of ["one alignment axis", "no alignment axes", "literal position", "image"] as const) test(`fixed-parent resize previews ${placement} without movement eligibility`, async () => {
+  const fixture = documentFor("game/ui/help.rpy", "help");
+  const node = fixture.screens[0]!.nodes[0]!;
+  node.parentStart = 10;
+  node.layout = placement === "one alignment axis" ? {xalign:0.5} : {};
+  node.numericLayout = {values:{},blocked:{},sourceBlocked:{}};
+  if (placement === "one alignment axis") Object.assign(node.numericLayout.values, {xpos:{unit:"relative",value:0.5},xanchor:{unit:"relative",value:0.5}});
+  if (placement === "literal position") Object.assign(node.numericLayout.values, {xpos:{unit:"pixels",value:40},ypos:{unit:"relative",value:0.5},yanchor:{unit:"relative",value:0.5}});
+  if (placement === "image") node.kind = "image";
+  fixture.screens[0]!.nodes.unshift({kind:"fixed",literal:null,layout:{},span:{start:10,end:100},parentStart:null,properties:[],protected:[]});
+  const initial = placement === "one alignment axis" ? [180,60,640,360] : placement === "literal position" ? [140,130,640,360] : [100,60,640,360];
+  const resized = placement === "one alignment axis" ? [172,60,656,368] : placement === "literal position" ? [140,126,648,368] : [100,60,648,368];
+  const h = harness(false, undefined, true, false, false, fixture);
+  try {
+    const parentBounds = {start:10,x:100,y:60,width:800,height:500};
+    h.setCanvasFrame({geometry:[parentBounds,{start:30,x:initial[0],y:initial[1],width:640,height:360}]});
+    await tick(); await tick();
+    const zoom = [...document.querySelectorAll("select")].find(input => input.ariaLabel === "Canvas zoom")!;
+    zoom.value = "100"; zoom.dispatchEvent(new window.Event("change"));
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    document.querySelector<HTMLButtonElement>('.screen-node[data-index="1"]')!.click();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.equal(document.querySelector(".screen-move"), null);
+    const handle = document.querySelector<HTMLButtonElement>(".screen-resize")!;
+    handle.setPointerCapture = () => {}; handle.hasPointerCapture = () => false; handle.focus();
+    const pointer = (type: string) => handle.dispatchEvent(new window.PointerEvent(type,{button:0,pointerId:1,clientX:type === "pointerdown" ? 100 : 108,clientY:type === "pointerdown" ? 100 : 108,bubbles:true}));
+    const target = document.querySelector<HTMLElement>('.screen-node[data-index="1"]')!;
+    const guide = document.querySelector<HTMLElement>(".screen-selection")!;
+    const rectangle = (element: HTMLElement) => [element.style.left,element.style.top,element.style.width,element.style.height];
+    h.holdCanvas(); pointer("pointerdown"); pointer("pointermove");
+    assert.deepEqual(rectangle(target), resized.map(value => `${value}px`));
+    assert.deepEqual(rectangle(guide), resized.map(value => `${value}px`));
+    await tick(); await tick();
+    assert.deepEqual(rectangle(guide), resized.map(value => `${value}px`), "The guide stays provisional while the helper is held");
+    h.deliverCanvas({geometry:[parentBounds,{start:30,x:resized[0],y:resized[1],width:resized[2],height:resized[3]}]});
+    await tick(); await tick();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.deepEqual(rectangle(target), resized.map(value => `${value}px`));
+    assert.deepEqual(rectangle(guide), resized.map(value => `${value}px`));
+    assert.equal(document.activeElement, handle);
+    h.setCanvasFrame({geometry:[parentBounds,{start:30,x:initial[0],y:initial[1],width:640,height:360}]});
+    pointer("pointercancel");
+    await tick(); await tick();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.equal(h.workspace.hasDraft(), false);
+    assert.equal(h.calls.includes("screens.setSize"), false);
+    assert.deepEqual(rectangle(document.querySelector<HTMLElement>('.screen-node[data-index="1"]')!), initial.map(value => `${value}px`));
+  } finally { h.dispose(); }
+});
 
 test("move reference pixels depend on the installed helper image, including mid-gesture replacement", async () => {
   const h = harness(false, undefined, true, true);

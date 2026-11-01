@@ -234,6 +234,10 @@ Apply. Width/height drafts use whole pixels; aspect preservation derives from th
 natural ratio and rounds the derived dimension to the nearest whole pixel.
 Comments, neighboring source, node identity and no-op history remain protected.
 The image byte-limit diagnostic is `UI_IMAGE_TOO_LARGE` and names the 16 MiB bound.
+Passive previews share a 32 MiB cache budget. The mounted selected thumbnail and
+staged import retain their preview priority; picker previews remain evictable.
+Late picker responses cannot clear the selected thumbnail or revive a disposed
+workspace. Selection changes release the previous mounted preview's priority.
 
 [Ticket #40](https://github.com/Caldwell-41/Renpy-editor/issues/40) owns delivery and
 acceptance. [UI-image evidence](tasks/evidence/ui-image.md) distinguishes service
@@ -265,6 +269,11 @@ editable. An unchanged explicit font is revalidated before any typography write.
 Typography and layout share one history entry; no-op, source revisions, comments
 and neighboring custom source retain the existing protections. Canvas `textStyles`
 uses the same typed values and changes no project source.
+
+New or changed text literals are limited to 8,192 UTF-8 bytes. Existing-text and
+addition controls check that byte bound on field completion and submission, retain
+invalid input and focus the affected field. An unchanged source literal above the
+bound does not block typography-only edits, because its text is not submitted.
 
 [Ticket #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) owns acceptance.
 [Project font evidence](tasks/evidence/project-fonts.md) records the tested limits.
@@ -597,6 +606,12 @@ portable names exclude Ren'Py double-underscore private names, its internal `_m1
 namespace and Windows device names.
 An empty directory may remain after a rejected file transaction; source and metadata
 remain unchanged. Metadata size and relationship validation precede acceptance.
+Creation reserves inventory capacity for the new file and any missing parent
+directory before writing, including the aggregate script-byte limit. Its returned
+catalog is prepared from the captured inventory and proposed map before commit;
+a later inventory read failure cannot turn a committed creation into a refusal.
+The static-name scan skips recognized Python block bodies while retaining Ren'Py
+declarations nested in `init` blocks.
 
 Owned root resolution requires the original path/name, one adjacent matching marker,
 one supported declaration and an unambiguous static namespace. Source body edits and
@@ -626,6 +641,9 @@ It deletes the qualified subtree range, preserving surrounding source, and inser
 `pass` only when the remaining parent body would otherwise be empty. One accepted
 change uses one existing source transaction/history entry; no-op commands add none.
 Parsing, source ranges and returned revision all use the same captured byte buffer.
+An interleaved standalone comment outdented to the subtree header or beyond has
+ambiguous ownership and blocks removal and reorder. Comments within the subtree's
+body retain ordinary subtree behavior.
 
 Protected structural statements appear as read-only hierarchy rows with derived
 `source-<SHA-256>` identities. These identify the current inspected region; they do
@@ -680,6 +698,9 @@ The literal reader resolves `pos`, `anchor`, `align`, `xalign`/`yalign`, `xysize
 `minimum`/`maximum`, `padding`, `xpadding`/`ypadding` into canonical fields. It patches
 only changed numeric tokens when an alias can still represent the result. Otherwise
 it splits the affected alias into canonical statements while retaining its comment.
+Unchanged parent-controlled values in a fully literal alias can be retained during
+that split; source ambiguity still prevents splitting and controlled-field edits
+still refuse.
 Removing an entire property statement leaves `pass` so an empty block stays valid.
 Duplicate setters, expressions, malformed tuples, nested property blocks, unsupported
 body indentation, overlapping size rules and other placement transforms stay
@@ -689,6 +710,9 @@ source expressions or runs neighboring actions.
 
 One Apply uses the shared source transaction and history. No-op adds no entry.
 Numeric drafts retain their original source revision across refresh and conflicts.
+Invalid raw spelling remains a draft even when numeric conversion equals the saved
+value; valid equivalent spelling can remain a no-op. For grids with unknown cell
+count, unrelated layout changes do not inherit the count-edit capacity refusal.
 After an accepted numeric save, unchanged drafts for other durable element UUIDs can
 rebase onto that returned revision. Unmarked nodes use kind, literal and source offset
 as a temporary key, without claiming durable identity. Missing targets expose a
@@ -710,6 +734,8 @@ Opaque direct children make grid counts Source-only because their cell count is
 unknown. Grids without explicit `allow_underfull True` keep count changes and
 child Add/removal in Source. Safe unrelated layout edits remain available. The
 inspector's `allowsEmptyCells` metadata reports that policy without evaluating it.
+Equivalent whitespace in the scalar policy is accepted; duplicate or malformed
+policies remain protected.
 
 L04 viewports show stationary top-left clipping. Wheel/drag/key scrolling,
 scrollbars, adjustment bindings, initial offsets, child_size and alternate grid

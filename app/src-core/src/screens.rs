@@ -420,10 +420,14 @@ fn parse_body(
         if child.single && child.indent == line.indent + 4 {
             if nodes[slot].kind == "grid"
                 && after == next + 1
-                && matches!(child.code, "allow_underfull True" | "allow_underfull False")
-                && lines[index + 1..next]
-                    .iter()
-                    .all(|l| !l.code.starts_with("allow_underfull "))
+                && matches!(
+                    child.code.split_whitespace().collect::<Vec<_>>().as_slice(),
+                    ["allow_underfull", "True" | "False"]
+                )
+                && lines[index + 1..next].iter().all(|l| {
+                    l.indent != child.indent
+                        || l.code.split_whitespace().next() != Some("allow_underfull")
+                })
             {
                 recognized = true;
             }
@@ -652,6 +656,49 @@ fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, Sce
                 screen.nodes[index]
                     .protected
                     .retain(|span| !recognized.contains(&span.start));
+            }
+        }
+    }
+    // Standalone comments outdented from a subtree's body do not have a clear
+    // owner. Keep them protected when a contiguous subtree edit would take them.
+    let bom = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
+        3
+    } else {
+        0
+    };
+    for (start, end) in crate::authoring::lexical_ranges(&bytes[bom..], false, false)
+        .map_err(|_| SceneError::UnsupportedSource)?
+    {
+        let raw = &bytes[start + bom..end + bom];
+        let whitespace = raw
+            .iter()
+            .take_while(|b| matches!(**b, b' ' | b'\t'))
+            .count();
+        let indent = if raw[..whitespace].contains(&b'\t') {
+            0
+        } else {
+            whitespace
+        };
+        if raw.get(whitespace) != Some(&b'#') {
+            continue;
+        }
+        for node in result
+            .screens
+            .iter_mut()
+            .flat_map(|screen| &mut screen.nodes)
+        {
+            let header_indent = bytes[node.span.start..]
+                .iter()
+                .take_while(|b| **b == b' ')
+                .count();
+            if start + bom > node.span.start
+                && start + bom < node.source_end
+                && indent <= header_indent
+            {
+                node.protected.push(Span {
+                    start: start + bom,
+                    end: end + bom,
+                });
             }
         }
     }

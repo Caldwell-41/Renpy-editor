@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 import { readFileSync } from "node:fs";
+import { crc32, deflateSync, inflateSync } from "node:zlib";
 import { Window } from "happy-dom";
 import { ScreensWorkspace, type ScreenDocument, type ScreenNode } from "../src/screen-ui.js";
 import type { CoreOperation } from "../src/protocol.js";
@@ -8,7 +9,7 @@ import type { CoreOperation } from "../src/protocol.js";
 const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0));
 };
-function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, imageBytes?: Buffer, composeReady?: Promise<void>, nested = false) {
+function fixture(mediaReady?: Promise<void> | ((assetId: string) => Promise<void>), previewReady?: Promise<void>, imageBytes?: Buffer | { bytes: Record<string, Buffer>; width: number; height: number }, composeReady?: Promise<void>, nested = false) {
   const browser = new Window();
   Object.assign(globalThis, {
     window: browser,
@@ -102,7 +103,12 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, image
       naturalHeight: 40,
     },
   ];
-  const bytes = imageBytes ?? readFileSync(
+  if (imageBytes && !Buffer.isBuffer(imageBytes))
+    for (const asset of assets) {
+      asset.naturalWidth = imageBytes.width;
+      asset.naturalHeight = imageBytes.height;
+    }
+  const bytes = (assetId = "seal") => (Buffer.isBuffer(imageBytes) ? imageBytes : imageBytes?.bytes[assetId]) ?? readFileSync(
     new URL("../../../tests/fixtures/phase-3b-screens/ui-image/seal.png", import.meta.url),
   );
   let importSequence = 0;
@@ -136,16 +142,16 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, image
       if (operation === "screens.inspect") return structuredClone(doc) as T;
       if (operation === "authoring.list") return { assets: structuredClone(assets) } as T;
       if (operation === "media.present") {
-        await mediaReady;
         const a = assets.find((a) => a.id === payload?.assetId)!;
+        await (typeof mediaReady === "function" ? mediaReady(a.id) : mediaReady);
         return {
           assetId: a.id,
           purpose: "imagePreview",
           mimeType: "image/png",
-          dataBase64: bytes.toString("base64"),
+          dataBase64: bytes(a.id).toString("base64"),
           sha256: a.sha256,
           cacheKey: a.id + ":" + a.sha256,
-          byteCount: bytes.length,
+          byteCount: bytes(a.id).length,
           width: a.naturalWidth,
           height: a.naturalHeight,
         } as T;
@@ -162,12 +168,12 @@ function fixture(mediaReady?: Promise<void>, previewReady?: Promise<void>, image
           assetId: payload?.authorityId,
           purpose: "imagePreview",
           mimeType: "image/png",
-          dataBase64: bytes.toString("base64"),
+          dataBase64: bytes().toString("base64"),
           sha256: "preview-sha",
           cacheKey: "preview",
-          byteCount: bytes.length,
-          width: 80,
-          height: 40,
+          byteCount: bytes().length,
+          width: assets[0]!.naturalWidth,
+          height: assets[0]!.naturalHeight,
         } as T;
       }
       if (operation === "asset.import") {
@@ -480,16 +486,158 @@ test("Back discards late import previews without replacing the project picker", 
   }
 });
 
-test("picker image decodes stay within the media budget and keep visible URLs valid", async (t) => {
+function largePreviewAssets() {
+  const width = 2048, height = 1900;
+  const chunk = (type: string, data: Buffer) => {
+    const body = Buffer.concat([Buffer.from(type), data]);
+    const length = Buffer.alloc(4), checksum = Buffer.alloc(4);
+    length.writeUInt32BE(data.length);
+    checksum.writeUInt32BE(crc32(body));
+    return Buffer.concat([length, body, checksum]);
+  };
+  const bytes: Record<string, Buffer> = {};
+  for (const [index, id] of ["seal", "banner", "poster"].entries()) {
+    const pixels = Buffer.alloc((width * 3 + 1) * height);
+    let random = index + 1;
+    for (let row = 0; row < height; row++)
+      for (let column = 1; column <= width * 3; column++) {
+        random ^= random << 13; random ^= random >>> 17; random ^= random << 5;
+        pixels[row * (width * 3 + 1) + column] = random & 255;
+      }
+    const header = Buffer.alloc(13);
+    header.writeUInt32BE(width); header.writeUInt32BE(height, 4);
+    header[8] = 8; header[9] = 2;
+    const compressed = deflateSync(pixels);
+    assert.deepEqual(inflateSync(compressed), pixels, "The generated PNG pixels round-trip");
+    bytes[id] = Buffer.concat([
+      Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+      chunk("IHDR", header), chunk("IDAT", compressed), chunk("IEND", Buffer.alloc(0)),
+    ]);
+    assert.ok(bytes[id]!.length > 11 * 1024 * 1024 && bytes[id]!.length <= 16 * 1024 * 1024);
+  }
+  return { bytes, width, height };
+}
+
+function trackObjectUrls(t: TestContext) {
   const live = new Map<string, number>();
-  let peak = 0, sequence = 0;
+  let sequence = 0, peak = 0;
   t.mock.method(URL, "createObjectURL", (blob: Blob) => {
-    const url = `blob:picker-${++sequence}`;
+    const url = `blob:preview-${++sequence}`;
     live.set(url, blob.size);
     peak = Math.max(peak, [...live.values()].reduce((sum, size) => sum + size, 0));
     return url;
   });
   t.mock.method(URL, "revokeObjectURL", (url: string) => live.delete(url));
+  return { live, get created() { return sequence; }, get peakBytes() { return peak; } };
+}
+
+test("the selected thumbnail survives large distinct picker previews and picker close", async (t) => {
+  const urls = trackObjectUrls(t), { live } = urls;
+  const f = fixture(undefined, undefined, largePreviewAssets());
+  t.mock.method(f.browser.HTMLImageElement.prototype, "decode", async () => {});
+  const selected = () => document.querySelector<HTMLImageElement>(".screen-image-asset img");
+  try {
+    await flush(); f.edit("image-one"); await flush();
+    const src = selected()?.getAttribute("src");
+    assert.ok(src && live.has(src), "The selected thumbnail is displayed before opening the picker");
+    document.querySelector<HTMLButtonElement>(".screen-image-asset")!.click();
+    await flush();
+    assert.equal(selected()?.getAttribute("src"), src, "Picker admission keeps the selected thumbnail displayed");
+    assert.equal(f.calls.filter(c => c.operation === "media.present").length, 3);
+    assert.ok(urls.peakBytes <= 32 * 1024 * 1024, "Visible selection and pending decodes share the 32 MiB budget");
+    f.click("Close"); await flush();
+    assert.equal(selected()?.getAttribute("src"), src, "Closing the picker keeps the selected thumbnail displayed");
+    assert.ok(live.has(src));
+    for (const img of document.querySelectorAll<HTMLImageElement>("img[src]"))
+      assert.ok(live.has(img.src), "Mounted thumbnails never point to revoked URLs");
+
+    document.querySelector<HTMLButtonElement>(".screen-image-asset")!.click(); await flush();
+    [...document.querySelectorAll<HTMLButtonElement>("button")].find(b => b.ariaLabel === "Use Banner")!.click(); await flush();
+    const bannerSrc = selected()?.getAttribute("src");
+    assert.ok(bannerSrc && live.has(bannerSrc), "Choosing another asset transfers the selected thumbnail");
+    document.querySelector<HTMLButtonElement>(".screen-image-asset")!.click(); await flush();
+    assert.equal(selected()?.getAttribute("src"), bannerSrc);
+    assert.equal(live.has(src), false, "The previous selection becomes evictable after its inspector unmounts");
+    assert.ok(urls.peakBytes <= 32 * 1024 * 1024);
+    f.click("Close");
+  } finally {
+    f.workspace.dispose();
+  }
+  assert.equal(live.size, 0, "Disposal releases all preview URLs");
+});
+
+test("late large picker responses preserve the closed inspector and cannot revive a disposed workspace", async (t) => {
+  const urls = trackObjectUrls(t), { live } = urls;
+  let release!: () => void;
+  let ready = new Promise<void>(resolve => { release = resolve; });
+  const f = fixture(id => id === "seal" ? Promise.resolve() : ready, undefined, largePreviewAssets());
+  t.mock.method(f.browser.HTMLImageElement.prototype, "decode", async () => {});
+  try {
+    await flush(); f.edit("image-one"); await flush();
+    const selected = document.querySelector<HTMLImageElement>(".screen-image-asset img")!;
+    const src = selected.getAttribute("src");
+    assert.ok(src && live.has(src));
+    document.querySelector<HTMLButtonElement>(".screen-image-asset")!.click(); await flush();
+    assert.equal(f.calls.filter(c => c.operation === "media.present").length, 3, "Both other picker responses are pending");
+    f.click("Close");
+    release(); await flush();
+    assert.equal(document.querySelector(".screen-image-dialog"), null);
+    assert.equal(selected.getAttribute("src"), src, "Late picker responses keep the closed inspector thumbnail displayed");
+    assert.ok(live.has(src));
+    assert.ok(urls.peakBytes <= 32 * 1024 * 1024);
+
+    // The evicted picker asset must be requested again; hold that response across disposal.
+    ready = new Promise<void>(resolve => { release = resolve; });
+    document.querySelector<HTMLButtonElement>(".screen-image-asset")!.click(); await flush();
+    assert.equal(f.calls.filter(c => c.operation === "media.present").length, 4);
+    const admitted = urls.created;
+    f.workspace.dispose();
+    assert.equal(live.size, 0, "Disposal releases existing preview URLs immediately");
+    release(); await flush();
+    assert.equal(urls.created, admitted, "Late media responses never create URLs for a disposed workspace");
+    assert.equal(live.size, 0);
+    assert.equal(document.querySelector(".screen-image-dialog"), null);
+  } finally {
+    release();
+    f.workspace.dispose();
+  }
+});
+
+test("a large staged import and the selected thumbnail outlive late picker admission", async (t) => {
+  const urls = trackObjectUrls(t), { live } = urls;
+  let release!: () => void;
+  const pending = new Promise<void>(resolve => { release = resolve; });
+  const f = fixture(id => id === "poster" ? pending : Promise.resolve(), Promise.resolve(), largePreviewAssets());
+  t.mock.method(f.browser.HTMLImageElement.prototype, "decode", async () => {});
+  try {
+    await flush(); f.edit("image-one"); await flush();
+    const selected = document.querySelector<HTMLImageElement>(".screen-image-asset img")!;
+    const src = selected.getAttribute("src");
+    assert.ok(src && live.has(src));
+    document.querySelector<HTMLButtonElement>(".screen-image-asset")!.click(); await flush();
+    f.click("Import image…"); f.click("Browse files…"); await flush();
+    const staged = document.querySelector<HTMLImageElement>(".screen-image-staged img")!;
+    const stagedSrc = staged.getAttribute("src");
+    assert.ok(stagedSrc && live.has(stagedSrc), "The large import is decoded and staged");
+    release(); await flush();
+    assert.equal(selected.getAttribute("src"), src, "Late picker admission preserves the selected preview");
+    assert.equal(staged.getAttribute("src"), stagedSrc, "Late picker admission preserves the staged import");
+    assert.ok(live.has(src) && live.has(stagedSrc));
+    assert.ok(urls.peakBytes <= 32 * 1024 * 1024, "Both retained previews and pending decodes share the budget");
+    f.click("Close"); await flush();
+    assert.equal(live.has(stagedSrc), false, "Closing import releases its preview");
+    assert.equal(selected.getAttribute("src"), src);
+    assert.ok(live.has(src));
+    assert.equal(f.calls.some(c => c.operation === "asset.import"), false);
+  } finally {
+    release();
+    f.workspace.dispose();
+  }
+  assert.equal(live.size, 0);
+});
+
+test("picker image decodes stay within the media budget and keep visible URLs valid", async (t) => {
+  const urls = trackObjectUrls(t), { live } = urls;
   let release!: () => void;
   const decoding = new Promise<void>((resolve) => { release = resolve; });
   const f = fixture(undefined, undefined, Buffer.alloc(12 * 1024 * 1024));
@@ -501,10 +649,12 @@ test("picker image decodes stay within the media budget and keep visible URLs va
     [...document.querySelectorAll<HTMLButtonElement>("button")]
       .find((b) => b.ariaLabel === "Change image, Station seal")!.click();
     await flush();
-    assert.ok(peak <= 32 * 1024 * 1024, "Pending image decodes count toward the 32 MiB URL budget");
+    assert.ok(urls.peakBytes <= 32 * 1024 * 1024, "Pending image decodes count toward the 32 MiB URL budget");
     release();
     await flush();
-    assert.ok(peak <= 32 * 1024 * 1024, "Completed image decodes stay within the same budget");
+    assert.ok(urls.peakBytes <= 32 * 1024 * 1024, "Completed image decodes stay within the same budget");
+    const selected = document.querySelector<HTMLImageElement>(".screen-image-asset img");
+    assert.ok(selected?.getAttribute("src"), "The selected thumbnail appears when its pending decode settles");
     for (const img of document.querySelectorAll<HTMLImageElement>("img[src]"))
       assert.ok(live.has(img.src), "A live image never points to a revoked URL");
   } finally {

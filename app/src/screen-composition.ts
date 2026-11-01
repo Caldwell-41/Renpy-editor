@@ -1,5 +1,6 @@
 import { icon } from "./icons.ts";
 import { validateField } from "./authoring-input.ts";
+import { screenTextByteError } from "./screen-text-validation.ts";
 import type { LayoutEdits } from "./screen-layout.ts";
 import type { TextEdits, StyleEdit } from "./screen-text.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
@@ -319,7 +320,10 @@ export class ScreenComposer {
       const text = el("textarea"); text.ariaLabel = "New element text"; text.value = draft.text; text.maxLength = 8192; text.readOnly = this.saving;
       text.required = true;
       text.oninput = () => { draft.text = text.value; this.host.preview(); };
-      this.additionValidation = validateField(text, () => { if (!text.value.trim()) throw Error("Enter text before adding this element. Input retained."); });
+      this.additionValidation = validateField(text, () => {
+        if (!text.value.trim()) throw Error("Enter text before adding this element. Input retained.");
+        const error = screenTextByteError(text.value); if (error) throw Error(error);
+      });
       const label = el("label", "field", draft.kind === "textbutton" ? "Button label" : "Text"); label.append(text); form.append(label);
     }
     const cancel = () => { if (this.saving) return; this.addition = undefined; this.error = ""; this.render(); this.focusRow(); this.host.preview(); this.host.note("Addition cancelled. Nothing changed."); };

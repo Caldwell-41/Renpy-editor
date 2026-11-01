@@ -1,5 +1,32 @@
 # Current outcome handover
 
+## Selected Phase 3B audit corrections
+
+Continue on `codex/phase3b-audit-fixes` and
+[draft PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75), based on
+`c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. The original fixes passed at `af8c0bf`;
+the three review corrections passed both-target qualification ordinal 4 at
+`aee7475`. The [latest terminal receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6552700639)
+owns audited results. Prior pending ordinal-4 directions are superseded.
+
+Kris selected the full-PR review's compiled-file matching correction, a PR update
+and one further CI run. The public-API test fails for `.rpyC` before the fix and
+passes afterward. Project scanning and the creation response share the matching
+rule. The [task](../tasks/active/phase-3b-audit-fixes.md) owns acceptance and the
+[evidence section](../tasks/evidence/phase-3b-audit-fixes.md#compiled-file-matching-correction)
+owns verification and cumulative limits. Four qualification dispatches remain
+consumed; one ordinal-5 dispatch is selected. The PR update receipt owns the
+published candidate, run/attempt, confirmed watcher registration and later audit.
+On resume, audit both jobs, required named cases, retained executables, manifests,
+privacy and exact source identity before closure.
+
+No merge, additional SDK/helper start, package or native operation is selected.
+Prior SDK proof retains its original source and scope; each host used two of four
+helper starts. Findings #1, #3, #7, #10, #13 and #15 stay excluded. Preserve the
+unrelated untracked audit and protected recovery below. The existing status-file
+size exceptions retain unique recovery records. No separate maintenance issue
+was published after the original automatic approval rejection.
+
 ## Connected native testing policy closeout
 
 The [accepted documentation outcome](../tasks/archive/2026-11-01-connected-native-testing.md)

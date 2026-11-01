@@ -1,5 +1,23 @@
 # Current status
 
+## Selected Phase 3B audit corrections
+
+PR #75's original twelve fixes passed at `af8c0bf`; its three review corrections
+passed both-target qualification ordinal 4 at `aee7475`. The
+[terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6552700639)
+owns those results and retained executable/source identities.
+
+Kris then selected fixing the full-PR review's compiled-file matching finding,
+updating PR #75 and CI. Project scanning and screen creation now share the same
+bytecode/source matching rule. The focused public-API test reproduces `.rpyC`'s
+stale catalog before the fix and passes afterward, including a second creation
+using the returned revisions. The correction awaits exact-head both-target CI.
+The [maintenance task](../tasks/active/phase-3b-audit-fixes.md) owns scope;
+[evidence](../tasks/evidence/phase-3b-audit-fixes.md#compiled-file-matching-correction)
+owns checks and the selected ordinal-5 dispatch. The PR update receipt owns its
+candidate, run and terminal audit. No merge, extra SDK/package/native operation
+or wider acceptance is selected. Original exclusions remain unchanged.
+
 ## Connected native testing policy accepted
 
 Kris accepted the [routing policy and agent-guidance audit](../tasks/archive/2026-11-01-connected-native-testing.md)

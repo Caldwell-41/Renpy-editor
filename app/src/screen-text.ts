@@ -6,6 +6,7 @@ import type { SelectedAsset } from "./asset-import-ui.ts";
 import { technicalName, technicalNameInput, technicalNameHelp, validateField } from "./authoring-input.ts";
 import { ScreenFontMedia, type ProjectFont, type FontReference, type FontPresentation } from "./screen-font-media.ts";
 import type { ScreenLayoutEditor, LayoutReservation } from "./screen-layout.ts";
+import { screenTextByteError } from "./screen-text-validation.ts";
 
 export interface TextProperties {
   values: { font?: string; size?: number; color?: string; align?: number; bold?: boolean; italic?: boolean; [key:string]:unknown };
@@ -148,7 +149,7 @@ export class ScreenText {
       control.oninput = () => this.edit(field,control.value); label.append(control);
       if (control.readOnly) label.append(action("Edit in Source",this.host.source));
       if (field === "color") {const swatch = el("span","screen-text-swatch");swatch.ariaHidden = "true";label.append(swatch);}
-      this.registerField(view,field,control,() => control.readOnly ? undefined : this.fieldError(field,control.value));
+      this.registerField(view,field,control,() => control.readOnly ? undefined : this.fieldError(field,control.value,draft.node.literal));
       return label;
     };
     const content = el("section","screen-text-content");
@@ -405,8 +406,9 @@ export class ScreenText {
     }
     this.dismissStyle=close;dialog.append(action("Keep editing",close));dialog.oncancel=e=>{e.preventDefault();close();};dialog.onkeydown=e=>e.stopPropagation();this.styleDialog=dialog;this.card?.closest(".screens-editor")?.append(dialog);this.sync();dialog.showModal();dialog.querySelector<HTMLElement>("button,input")?.focus();
   }
-  private fieldError(field: TextField, value: string): string | undefined {
+  private fieldError(field: TextField, value: string, originalText?: string | null): string | undefined {
     if (field === "text" && !value.trim()) return "Enter text before applying. Your edits are kept.";
+    if (field === "text") return value === originalText ? undefined : screenTextByteError(value);
     if (field === "size" && value.trim() && (!/^\d+$/.test(value.trim()) || +value < 1 || +value > 512)) return "Use a whole size from 1 to 512 px, or clear it for the default. Your edits are kept.";
     if (field === "color" && value.trim() && !hex(value.trim())) return "Use a hex color such as #f1e9d6, or clear it for the default. Your edits are kept.";
   }
@@ -430,7 +432,7 @@ export class ScreenText {
     const problems=new Map<string,string>();
     for(const field of ["text","size","color"] as const) {
       if(draft.node.textProperties?.blocked[field]||["frame","window"].includes(draft.node.kind))continue;
-      const message=this.fieldError(field,draft.fields[field]);if(message)problems.set(field,message);
+      const message=this.fieldError(field,draft.fields[field],draft.node.literal);if(message)problems.set(field,message);
     }
     for(const key of Object.keys(draft.appearance)){if(this.appearanceBlocked(draft.node,key))continue;const message=this.appearanceError(key,draft.appearance);if(message)problems.set(`appearance:${key}`,message);}
     const errors=this.fieldErrors.get(draft.key)??new Set<string>();
