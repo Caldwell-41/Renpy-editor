@@ -225,6 +225,7 @@ fn frozen_two_panel_outputs_come_from_actual_component_transactions() {
         "screenNames":[fixture.owner.name,second.name],"componentIds":[component.id,copy.id],"useIds":[extracted.use_id,placed.use_id],
         "positions":[{"screenId":fixture.owner.id,"parentId":first_parent,"x":40,"y":40},{"screenId":second.id,"parentId":second_parent,"x":680,"y":40}]
     });
+    let bytes = serde_json::to_vec_pretty(&receipt).unwrap();
     if let Some(output) = std::env::var_os("LOOMLIGHT_COMPONENT_INPUTS") {
         let output = PathBuf::from(output);
         let worktree = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -240,10 +241,10 @@ fn frozen_two_panel_outputs_come_from_actual_component_transactions() {
             .unwrap()
             .starts_with(worktree));
         fs::create_dir(&output).unwrap();
-        fs::write(
-            output.join("accepted.json"),
-            serde_json::to_vec_pretty(&receipt).unwrap(),
-        )
-        .unwrap();
+        fs::write(output.join("accepted.json"), &bytes).unwrap();
     }
+    println!(
+        "component-inputs-sha256: {}",
+        hex::encode(Sha256::digest(&bytes))
+    );
 }
