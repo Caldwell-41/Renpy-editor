@@ -2713,7 +2713,22 @@ fn apply_beat_edit(
                     loaded,
                 )?
                 .unwrap_or(render_payload(&payload, loaded, newline)?)
+            } else if let Some(patched) = patch_screen_beat(
+                &source[beat.byte_start as usize..beat.byte_end as usize],
+                &beat.payload,
+                &payload,
+            )? {
+                patched
             } else {
+                if beat.payload.screen_target().is_some() {
+                    let original = std::str::from_utf8(
+                        &source[beat.byte_start as usize..beat.byte_end as usize],
+                    )
+                    .map_err(|_| SceneError::UnsupportedSource)?;
+                    if logic::without_comment(original).len() != original.len() {
+                        return Err(SceneError::OpaqueBoundary);
+                    }
+                }
                 render_payload(&payload, loaded, newline)?
             };
             let mut output = source.to_vec();
@@ -3579,11 +3594,44 @@ fn parse_line_version(
 }
 
 fn screen_statement(line: &str) -> Option<(bool, &str)> {
+    if line.contains(['\r', '\n']) {
+        return None;
+    }
+    let line = logic::without_comment(line).trim_end_matches([' ', '\t']);
     let (show, name) = line
         .strip_prefix("show screen ")
         .map(|name| (true, name))
         .or_else(|| line.strip_prefix("hide screen ").map(|name| (false, name)))?;
     crate::screens::valid_name(name).then_some((show, name))
+}
+
+fn patch_screen_beat(
+    bytes: &[u8],
+    previous: &BeatPayload,
+    next: &BeatPayload,
+) -> Result<Option<String>, SceneError> {
+    let (Some(old), Some(target)) = (previous.screen_target(), next.screen_target()) else {
+        return Ok(None);
+    };
+    let text = std::str::from_utf8(bytes).map_err(|_| SceneError::UnsupportedSource)?;
+    let indent = text.len() - text.trim_start_matches(' ').len();
+    let (show, name) = screen_statement(text[indent..].trim_end_matches(['\r', '\n']))
+        .ok_or(SceneError::OpaqueBoundary)?;
+    if name != old.source_name || show != matches!(previous, BeatPayload::ShowScreen { .. }) {
+        return Err(SceneError::OpaqueBoundary);
+    }
+    let start = indent + "show screen ".len();
+    let mut patched = text.to_owned();
+    patched.replace_range(start..start + name.len(), &target.source_name);
+    patched.replace_range(
+        indent..indent + 4,
+        if matches!(next, BeatPayload::ShowScreen { .. }) {
+            "show"
+        } else {
+            "hide"
+        },
+    );
+    Ok(Some(patched))
 }
 
 fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatPayload> {

@@ -600,6 +600,12 @@ fn apply(
                     logic::patch_menu(original, previous, options, loaded)?
                         .unwrap_or(generated_at_indent(&payload, loaded, newline, body.indent)?)
                 }
+                (previous, next)
+                    if previous.screen_target().is_some() && next.screen_target().is_some() =>
+                {
+                    patch_screen_beat(original, previous, next)?
+                        .ok_or(SceneError::OpaqueBoundary)?
+                }
                 (
                     BeatPayload::Dialogue {
                         character_id: old, ..

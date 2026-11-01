@@ -432,6 +432,160 @@ fn screen_beats_preserve_the_existing_unknown_flow_diagnostic() {
 }
 
 #[test]
+fn screen_comments_and_trailing_space_keep_source_bytes_identity_and_target_intent() {
+    let mut f = Fixture::new();
+    let owner = panel(&mut f, "help_panel");
+    panel(&mut f, "other_panel");
+    let scene = f.model()["scenes"][0].clone();
+    let source = format!(
+        "label {}:\r\n    show screen help_panel\r\n    hide screen help_panel\r\n    return\r\n",
+        scene["technicalLabel"].as_str().unwrap()
+    );
+    f.save(&scene, &source);
+    let before = f.model()["scenes"][0]["beats"].clone();
+    let commented = source
+        .replace(
+            "show screen help_panel\r\n",
+            "show screen help_panel \t# keep show\r\n",
+        )
+        .replace(
+            "hide screen help_panel\r\n",
+            "hide screen help_panel\t # keep hide  \r\n",
+        );
+    f.save(&scene, &commented);
+    let accepted = f.model()["scenes"][0]["beats"].clone();
+    for index in [0, 1] {
+        assert_eq!(accepted[index]["id"], before[index]["id"]);
+        assert_eq!(
+            accepted[index]["payload"]["target"]["screenId"],
+            owner["id"]
+        );
+        assert_eq!(accepted[index]["protected"], false);
+        assert!(accepted[index]["payload"]["revisions"].is_object());
+    }
+    assert_eq!(
+        ipc(
+            &mut f.service,
+            "source.open",
+            json!({"path":scene["sourcePath"]})
+        )["text"],
+        commented
+    );
+    let bytes = fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    assert_eq!(f.model()["scenes"][0]["beats"], accepted);
+    assert_eq!(
+        fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
+        bytes
+    );
+    let changed = commented.replace("screen help_panel", "screen other_panel");
+    f.save(&scene, &changed);
+    let unresolved = f.model()["scenes"][0]["beats"].clone();
+    for index in [0, 1] {
+        assert_eq!(unresolved[index]["id"], before[index]["id"]);
+        assert_eq!(
+            unresolved[index]["payload"]["target"]["screenId"],
+            owner["id"]
+        );
+        assert_eq!(unresolved[index]["protected"], true);
+        assert!(unresolved[index]["payload"]["revisions"].is_null());
+    }
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    assert_eq!(f.model()["scenes"][0]["beats"], unresolved);
+    assert_eq!(
+        ipc(
+            &mut f.service,
+            "source.open",
+            json!({"path":scene["sourcePath"]})
+        )["text"],
+        changed
+    );
+    for statement in [
+        "show screen help_panel() # parameters stay opaque",
+        "show screen expression target_name # dynamic name",
+        "hide screen \"help_panel\" # quoted name",
+    ] {
+        let opaque = format!(
+            "label {}:\n    {statement}\n    return\n",
+            scene["technicalLabel"].as_str().unwrap()
+        );
+        f.save(&scene, &opaque);
+        let beat = f.model()["scenes"][0]["beats"][0].clone();
+        assert_eq!(beat["payload"]["type"], "customCode");
+        assert_eq!(beat["protected"], true);
+        assert!(beat["payload"]["target"].is_null());
+        assert_eq!(
+            ipc(
+                &mut f.service,
+                "source.open",
+                json!({"path":scene["sourcePath"]})
+            )["text"],
+            opaque
+        );
+    }
+}
+
+#[test]
+fn picker_updates_patch_only_screen_name_tokens_and_keep_comments_spacing_and_noop_history() {
+    for legacy in [true, false] {
+        let mut f = Fixture::new();
+        panel(&mut f, "help_panel");
+        let other = panel(&mut f, "other_panel");
+        let scene = f.model()["scenes"][0].clone();
+        let mut expected = format!("label {}:\r\n    show screen help_panel \t# keep show\r\n    hide screen help_panel\t # keep hide  \r\n    return\r\n", scene["technicalLabel"].as_str().unwrap());
+        f.save(&scene, &expected);
+        for index in [0, 1] {
+            let current = f.model()["scenes"][0].clone();
+            let beat = &current["beats"][index];
+            let target = resolved(&mut f, &other);
+            let mut command = json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":current["sourceRevision"],
+                "beatId":beat["id"],"expectedBody":{"type":"root"},
+                "beat":{"type":beat["payload"]["type"],"target":target["binding"],"revisions":target["revisions"]}});
+            if legacy {
+                command["type"] = json!("updateBeat");
+                command.as_object_mut().unwrap().remove("expectedBody");
+            }
+            let updated = f.command(command.clone());
+            let changed = expected.replacen("screen help_panel", "screen other_panel", 1);
+            assert_eq!(
+                ipc(
+                    &mut f.service,
+                    "source.open",
+                    json!({"path":scene["sourcePath"]})
+                )["text"],
+                changed
+            );
+            assert_eq!(updated["scenes"][0]["beats"][index]["id"], beat["id"]);
+            let target = resolved(&mut f, &other);
+            command["expectedSourceRevision"] = updated["scenes"][0]["sourceRevision"].clone();
+            command["beat"]["revisions"] = target["revisions"].clone();
+            f.command(command);
+            f.command(json!({"type":"undo"}));
+            assert_eq!(
+                ipc(
+                    &mut f.service,
+                    "source.open",
+                    json!({"path":scene["sourcePath"]})
+                )["text"],
+                expected
+            );
+            f.command(json!({"type":"redo"}));
+            assert_eq!(
+                ipc(
+                    &mut f.service,
+                    "source.open",
+                    json!({"path":scene["sourcePath"]})
+                )["text"],
+                changed
+            );
+            expected = changed;
+        }
+    }
+}
+
+#[test]
 fn v6_panel_beats_migrate_on_open_without_source_or_identity_changes_and_reopen_is_noop() {
     let mut f = Fixture::new();
     let owner = panel(&mut f, "help_panel");
