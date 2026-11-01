@@ -119,15 +119,19 @@ test("a grid with opaque branches saves spacing but refuses ambiguous count edit
   } finally { h.dispose(); }
 });
 
-for (const parentKind of ["fixed", "frame"] as const) test(`nested frame resize ${parentKind === "fixed" ? "guides use parent bounds" : "waits for ambiguous parent bounds"} while the helper response is held`, async () => {
+for (const parentKind of ["screen", "fixed", "frame"] as const) test(`nested frame resize ${parentKind === "frame" ? "waits for ambiguous parent bounds" : `guides use ${parentKind} bounds`} while the helper response is held`, async () => {
   const fixture = documentFor("game/ui/help.rpy", "help");
   const frame = fixture.screens[0]!.nodes[0]!;
   frame.parentStart = 10; frame.layout = {xalign:0.5,yalign:0.5};
+  frame.numericLayout = {values:{xpos:{unit:"relative",value:0.5},xanchor:{unit:"relative",value:0.5},ypos:{unit:"relative",value:0.5},yanchor:{unit:"relative",value:0.5}},blocked:{},sourceBlocked:{}};
   if (parentKind === "fixed") frame.position = {xalign:0.5,yalign:0.5};
   fixture.screens[0]!.nodes.unshift({kind:parentKind,literal:null,layout:{},span:{start:10,end:100},parentStart:null,properties:[],protected:[]});
   const h = harness(false, undefined, true, false, false, fixture);
   try {
-    h.setCanvasFrame({geometry:[{start:10,x:100,y:60,width:800,height:500},{start:30,x:180,y:130,width:640,height:360}]});
+    const initial = parentKind === "screen" ? ["320px","180px","640px","360px"] : ["180px","130px","640px","360px"];
+    const resized = parentKind === "screen" ? ["312px","172px","656px","376px"] : ["172px","122px","656px","376px"];
+    const parentBounds = parentKind === "screen" ? {start:10,x:0,y:0,width:1280,height:720} : {start:10,x:100,y:60,width:800,height:500};
+    h.setCanvasFrame({geometry:[parentBounds,{start:30,x:parseFloat(initial[0]!),y:parseFloat(initial[1]!),width:640,height:360}]});
     await tick(); await tick();
     const zoom = [...document.querySelectorAll("select")].find(input => input.ariaLabel === "Canvas zoom")!;
     zoom.value = "100"; zoom.dispatchEvent(new window.Event("change"));
@@ -140,24 +144,83 @@ for (const parentKind of ["fixed", "frame"] as const) test(`nested frame resize 
     h.holdCanvas(); pointer("pointerdown"); pointer("pointermove");
     const guide = document.querySelector<HTMLElement>(".screen-selection")!;
     const target = document.querySelector<HTMLElement>('.screen-node[data-index="1"]')!;
-    const provisional = parentKind === "fixed" ? ["172px","122px","656px","376px"] : ["180px","130px","640px","360px"];
+    const provisional = parentKind === "frame" ? initial : resized;
     assert.deepEqual([target.style.left,target.style.top,target.style.width,target.style.height], provisional);
     assert.deepEqual([guide.style.left,guide.style.top,guide.style.width,guide.style.height], provisional);
     await tick(); await tick();
     assert.deepEqual([guide.style.left,guide.style.top,guide.style.width,guide.style.height], provisional, "Pending helper delivery keeps only supported provisional geometry");
     assert.equal(h.calls.includes("screens.setSize"), false);
-    h.deliverCanvas({geometry:[{start:10,x:100,y:60,width:800,height:500},{start:30,x:172,y:122,width:656,height:376}]});
+    h.deliverCanvas({geometry:[parentBounds,{start:30,x:parseFloat(resized[0]!),y:parseFloat(resized[1]!),width:656,height:376}]});
     await tick(); await tick();
     document.querySelector("img")!.dispatchEvent(new window.Event("load"));
-    assert.deepEqual([guide.style.left,guide.style.top,guide.style.width,guide.style.height], ["172px","122px","656px","376px"]);
+    assert.deepEqual([target.style.left,target.style.top,target.style.width,target.style.height], resized);
+    assert.deepEqual([guide.style.left,guide.style.top,guide.style.width,guide.style.height], resized);
     assert.equal(document.activeElement, handle);
     pointer("pointerup");
     const write = h.payloads.find(call => call.operation === "screens.setSize")!;
     assert.deepEqual([write.payload?.width,write.payload?.height], [656,376]);
+    assert.equal(write.payload?.expectedRevision, "before");
     assert.equal(document.activeElement, handle);
     h.refuse(); await tick();
     assert.equal(h.workspace.hasDraft(), true);
     assert.match(document.querySelector(".screen-message")!.textContent!, /Draft conflict.*retained/);
+    h.workspace.panel.dispatchEvent(new window.KeyboardEvent("keydown", {key:"Escape",bubbles:true}));
+    await tick(); await tick();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.equal(h.workspace.hasDraft(), false, "Escape cancels the refused resize draft");
+    assert.equal(h.calls.filter(operation => operation === "screens.setSize").length, 1, "Cancellation does not submit another write");
+    const restored = document.querySelector<HTMLElement>('.screen-node[data-index="1"]')!;
+    assert.deepEqual([restored.style.left,restored.style.top,restored.style.width,restored.style.height], initial);
+  } finally { h.dispose(); }
+});
+
+for (const placement of ["one alignment axis", "no alignment axes", "literal position", "image"] as const) test(`fixed-parent resize previews ${placement} without movement eligibility`, async () => {
+  const fixture = documentFor("game/ui/help.rpy", "help");
+  const node = fixture.screens[0]!.nodes[0]!;
+  node.parentStart = 10;
+  node.layout = placement === "one alignment axis" ? {xalign:0.5} : {};
+  node.numericLayout = {values:{},blocked:{},sourceBlocked:{}};
+  if (placement === "one alignment axis") Object.assign(node.numericLayout.values, {xpos:{unit:"relative",value:0.5},xanchor:{unit:"relative",value:0.5}});
+  if (placement === "literal position") Object.assign(node.numericLayout.values, {xpos:{unit:"pixels",value:40},ypos:{unit:"relative",value:0.5},yanchor:{unit:"relative",value:0.5}});
+  if (placement === "image") node.kind = "image";
+  fixture.screens[0]!.nodes.unshift({kind:"fixed",literal:null,layout:{},span:{start:10,end:100},parentStart:null,properties:[],protected:[]});
+  const initial = placement === "one alignment axis" ? [180,60,640,360] : placement === "literal position" ? [140,130,640,360] : [100,60,640,360];
+  const resized = placement === "one alignment axis" ? [172,60,656,368] : placement === "literal position" ? [140,126,648,368] : [100,60,648,368];
+  const h = harness(false, undefined, true, false, false, fixture);
+  try {
+    const parentBounds = {start:10,x:100,y:60,width:800,height:500};
+    h.setCanvasFrame({geometry:[parentBounds,{start:30,x:initial[0],y:initial[1],width:640,height:360}]});
+    await tick(); await tick();
+    const zoom = [...document.querySelectorAll("select")].find(input => input.ariaLabel === "Canvas zoom")!;
+    zoom.value = "100"; zoom.dispatchEvent(new window.Event("change"));
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    document.querySelector<HTMLButtonElement>('.screen-node[data-index="1"]')!.click();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.equal(document.querySelector(".screen-move"), null);
+    const handle = document.querySelector<HTMLButtonElement>(".screen-resize")!;
+    handle.setPointerCapture = () => {}; handle.hasPointerCapture = () => false; handle.focus();
+    const pointer = (type: string) => handle.dispatchEvent(new window.PointerEvent(type,{button:0,pointerId:1,clientX:type === "pointerdown" ? 100 : 108,clientY:type === "pointerdown" ? 100 : 108,bubbles:true}));
+    const target = document.querySelector<HTMLElement>('.screen-node[data-index="1"]')!;
+    const guide = document.querySelector<HTMLElement>(".screen-selection")!;
+    const rectangle = (element: HTMLElement) => [element.style.left,element.style.top,element.style.width,element.style.height];
+    h.holdCanvas(); pointer("pointerdown"); pointer("pointermove");
+    assert.deepEqual(rectangle(target), resized.map(value => `${value}px`));
+    assert.deepEqual(rectangle(guide), resized.map(value => `${value}px`));
+    await tick(); await tick();
+    assert.deepEqual(rectangle(guide), resized.map(value => `${value}px`), "The guide stays provisional while the helper is held");
+    h.deliverCanvas({geometry:[parentBounds,{start:30,x:resized[0],y:resized[1],width:resized[2],height:resized[3]}]});
+    await tick(); await tick();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.deepEqual(rectangle(target), resized.map(value => `${value}px`));
+    assert.deepEqual(rectangle(guide), resized.map(value => `${value}px`));
+    assert.equal(document.activeElement, handle);
+    h.setCanvasFrame({geometry:[parentBounds,{start:30,x:initial[0],y:initial[1],width:640,height:360}]});
+    pointer("pointercancel");
+    await tick(); await tick();
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.equal(h.workspace.hasDraft(), false);
+    assert.equal(h.calls.includes("screens.setSize"), false);
+    assert.deepEqual(rectangle(document.querySelector<HTMLElement>('.screen-node[data-index="1"]')!), initial.map(value => `${value}px`));
   } finally { h.dispose(); }
 });
 

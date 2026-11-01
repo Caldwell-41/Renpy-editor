@@ -856,13 +856,18 @@ export class ScreensWorkspace {
       draft.width = String(Math.max(24, Math.min(16384, Math.round((gesture.width + (event.clientX - gesture.x) / this.scale / (1 - ax)) / 8) * 8)));
       draft.height = String(Math.max(24, Math.min(16384, Math.round((gesture.height + (event.clientY - gesture.y) / this.scale / (1 - ay)) / 8) * 8)));
       const parent = this.nodes().find(candidate => candidate.span.start === node.parentStart);
-      const bounds = parent?.kind === "fixed" && node.position ? this.frames.geometry?.find(geometry => geometry.start === parent.span.start) : undefined;
-      // Only the supported fixed-parent alignment gives unambiguous provisional bounds.
+      const bounds = parent && ["screen", "fixed"].includes(parent.kind) ? this.frames.geometry?.find(geometry => geometry.start === parent.span.start) : undefined;
+      // Movement eligibility requires two explicit alignments; resize does not.
+      // Screen roots and fixed groups both place children in their own bounds.
       // Other containers can pad, distribute or clip children; keep their helper guide.
       if (bounds) {
+        const coordinate = (key: string, extent: number, fallback: number) => {
+          const value = node.numericLayout?.values[key];
+          return value ? value.value * (value.unit === "relative" ? extent : 1) : fallback;
+        };
         target.style.width = `${Number(draft.width) * this.scale}px`; target.style.height = `${Number(draft.height) * this.scale}px`;
-        target.style.left = `${(bounds.x + (bounds.width - Number(draft.width)) * ax) * this.scale}px`;
-        target.style.top = `${(bounds.y + (bounds.height - Number(draft.height)) * ay) * this.scale}px`;
+        target.style.left = `${(bounds.x + coordinate("xpos", bounds.width, bounds.width * ax) - coordinate("xanchor", Number(draft.width), Number(draft.width) * ax)) * this.scale}px`;
+        target.style.top = `${(bounds.y + coordinate("ypos", bounds.height, bounds.height * ay) - coordinate("yanchor", Number(draft.height), Number(draft.height) * ay)) * this.scale}px`;
       }
       for (const property of ["left", "top", "width", "height"] as const) outline.style[property] = target.style[property];
       this.renderCanvas();
