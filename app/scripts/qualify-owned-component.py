@@ -120,7 +120,8 @@ def validate_images(output, stage, width, height):
     require(ImageChops.difference(*images).getextrema() == ((0, 0),) * 4, 'literal reference pixels differ')
     for x in (40, 680):
         crop = images[0].crop((x, 40, min(x + 500, width), 220))
-        require(any(band.getbbox() for band in crop.split()[:3]) and crop.getchannel('A').getbbox(), 'missing visible output at panel position')
+        visible = Image.alpha_composite(Image.new('RGBA', crop.size, (0, 0, 0, 255)), crop).convert('RGB')
+        require(any(low < high for low, high in visible.getextrema()), 'missing visible foreground variation at panel position')
     return dict(stage=stage, aspect=[width, height], differingPixels=0, imageHashes=hashes)
 
 

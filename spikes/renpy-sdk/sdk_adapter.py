@@ -174,9 +174,14 @@ def run_bounded(argv: tuple[str, ...], *, timeout_seconds: float = 120, output_l
         creationflags=(subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0),
     )
     chunks: queue.Queue[bytes | None] = queue.Queue(maxsize=8)
+    stop_requested_at: float | None = None
 
     def kill_process_tree() -> None:
-        if process.poll() is not None:
+        nonlocal stop_requested_at
+        if stop_requested_at is not None:
+            return
+        if os.name == "nt" and process.poll() is not None:
+            stop_requested_at = time.monotonic()
             return
         try:
             if os.name == "nt":
@@ -194,6 +199,7 @@ def run_bounded(argv: tuple[str, ...], *, timeout_seconds: float = 120, output_l
                 os.killpg(process.pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
+        stop_requested_at = time.monotonic()
 
     def read_output() -> None:
         assert process.stdout is not None
@@ -207,34 +213,49 @@ def run_bounded(argv: tuple[str, ...], *, timeout_seconds: float = 120, output_l
     limited = False
     timed_out = False
     finished_reading = False
-    while not finished_reading:
-        remaining = timeout_seconds - (time.monotonic() - started)
-        if remaining <= 0:
-            timed_out = True
-            kill_process_tree()
-            remaining = 1
-        try:
-            chunk = chunks.get(timeout=min(max(remaining, 0.05), 0.25))
-        except queue.Empty:
-            continue
-        if chunk is None:
-            finished_reading = True
-        elif len(captured) < output_limit:
-            room = output_limit - len(captured)
-            captured.extend(chunk[:room])
-            if len(chunk) > room:
+    completed = False
+    try:
+        while not finished_reading:
+            if stop_requested_at is not None and time.monotonic() - stop_requested_at > 2:
+                raise AdapterError("Process output did not close after termination was requested")
+            remaining = timeout_seconds - (time.monotonic() - started)
+            if remaining <= 0:
+                timed_out = True
+                kill_process_tree()
+                remaining = 1
+            try:
+                chunk = chunks.get(timeout=min(max(remaining, 0.05), 0.25))
+            except queue.Empty:
+                continue
+            if chunk is None:
+                finished_reading = True
+            elif len(captured) < output_limit:
+                room = output_limit - len(captured)
+                captured.extend(chunk[:room])
+                if len(chunk) > room:
+                    limited = True
+                    kill_process_tree()
+            else:
                 limited = True
                 kill_process_tree()
-        else:
-            limited = True
+        exit_code = process.wait()
+        completed = True
+    finally:
+        if not completed:
             kill_process_tree()
-    exit_code = process.wait()
-    reader.join(timeout=1)
-    if process.stdout is not None:
-        process.stdout.close()
-    reader.join(timeout=1)
-    if process.stdout is not None:
-        process.stdout.close()
+        process.wait()
+        # Let a reader blocked on the bounded queue finish after cancellation.
+        deadline = time.monotonic() + 2
+        while reader.is_alive() and time.monotonic() < deadline:
+            try:
+                chunks.get(timeout=0.05)
+            except queue.Empty:
+                pass
+            reader.join(timeout=0.05)
+        if reader.is_alive():
+            raise AdapterError("Process ended but its output reader did not close")
+        if process.stdout is not None:
+            process.stdout.close()
     output = captured.decode("utf-8", errors="replace")
     return CommandResult(
         argv=argv,

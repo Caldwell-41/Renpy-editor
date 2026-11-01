@@ -43,6 +43,7 @@ class RuntimeEvidenceTests(unittest.TestCase):
     def test_runtime_requires_two_real_dialogue_advances_and_exact_accepted_identity(self):
         good = self.receipt()
         self.assertEqual(self.validate(self.log(good)), good)
+        self.assertEqual(self.validate(self.log(good).replace('Status: PASSED', 'Status: PASSED ')), good)
         for field, value in [('normalEntry', False), ('startedFromMenu', False), ('case', 'authored_hide'),
                              ('manifestSHA256', 'c' * 64), ('acceptedHashes', {}),
                              ('inputs', ['advance']), ('observations', good['observations'][:-1])]:
@@ -75,7 +76,7 @@ class RuntimeEvidenceTests(unittest.TestCase):
             row.update(case=case, inputs=inputs)
             row['observations'] = row['observations'][:2] + [
                 dict(step=step, line=line, panelVisible=visible, gameMenu=False,
-                     focusedClose=step == 'focused', mousePoint=[0, 0])
+                     focusedClose=step == 'focused', defaultClose=step == 'focused', mousePoint=[0, 0])
                 for step, line, visible in steps]
             row.update(defaultGameEscape=True, outsidePoint=[0, 0], frameRect=[200, 100, 600, 500])
             log = self.log(row).replace('global.help_panel::show_persists', 'global.help_panel::' + case)
@@ -91,7 +92,7 @@ class RuntimeEvidenceTests(unittest.TestCase):
                 elif case == 'escape':
                     bad['defaultGameEscape'] = False
                 else:
-                    bad['observations'][1]['focusedClose'] = False
+                    bad['observations'][2]['focusedClose'] = False
                 with self.assertRaises(ValueError):
                     gate.validate_runtime_output(self.log(bad).replace('global.help_panel::show_persists', 'global.help_panel::' + case), case, 'a' * 64, row['acceptedHashes'])
 
@@ -99,19 +100,22 @@ class RuntimeEvidenceTests(unittest.TestCase):
         row = self.receipt()
         row.update(case='keyboard_close', inputs=['moveOutside', 'K_DOWN', 'K_RETURN'],
                    outsidePoint=[0, 0], frameRect=[200, 100, 600, 500])
+        row['observations'][1]['focusedClose'] = False
         row['observations'] = row['observations'][:2] + [
             dict(step='focused', line='HP_SHOWN_0', panelVisible=True, gameMenu=False,
-                 focusedClose=True, mousePoint=[0, 0]),
+                 focusedClose=True, defaultClose=True, mousePoint=[0, 0]),
             dict(step='activated', line='HP_SHOWN_0', panelVisible=False, gameMenu=False,
                  focusedClose=False, mousePoint=[0, 0])]
         def validate(value):
             return gate.validate_runtime_output(self.log(value).replace('global.help_panel::show_persists',
                 'global.help_panel::keyboard_close'), 'keyboard_close', 'a' * 64, value['acceptedHashes'])
         self.assertEqual(validate(row), row)
-        for modify in ('lostFocus', 'movedPointer', 'oldObservation'):
+        for modify in ('lostFocus', 'wrongDefault', 'movedPointer', 'oldObservation'):
             bad = copy.deepcopy(row)
             if modify == 'lostFocus':
                 bad['observations'][2]['focusedClose'] = False
+            elif modify == 'wrongDefault':
+                bad['observations'][2]['defaultClose'] = False
             elif modify == 'movedPointer':
                 bad['observations'][2]['mousePoint'] = [300, 200]
             else:

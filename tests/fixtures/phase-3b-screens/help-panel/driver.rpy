@@ -52,11 +52,13 @@ init python:
         return close is not None and renpy.display.focus.get_focused() is close.widget
 
     def _hp_observe(step):
+        close = _hp_testfocus.find_focus("Close", False)
         _hp_observations.append(dict(
             step=step, line=_hp_line(),
             panelVisible=renpy.get_screen(_hp_manifest["panel"]["name"]) is not None,
             gameMenu=bool(renpy.context()._menu),
             focusedClose=_hp_close_focused(),
+            defaultClose=close is not None and bool(close.widget.default),
             mousePoint=list(renpy.test.testmouse.mouse_pos) if renpy.test.testmouse.mouse_pos is not None else None))
 
     def _hp_measure_outside():

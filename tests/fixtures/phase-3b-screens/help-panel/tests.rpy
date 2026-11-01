@@ -75,7 +75,6 @@ testsuite help_panel:
         $ _hp_emit("escape")
 
     testcase keyboard_close:
-        assert eval (_hp_observations[-1]["focusedClose"])
         $ _hp_frame_rect, _hp_outside = _hp_measure_outside()
         move pos _hp_outside
         $ _hp_inputs.append("moveOutside")

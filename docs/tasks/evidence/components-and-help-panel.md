@@ -376,3 +376,53 @@ The component fixture producer now serializes once, writes those bytes and emits
 one digest record. Its exact public test passes; independently parsed stdout matches
 the exported accepted.json SHA-256. L08 consumes checkpoint `0dd9618` for rejecting
 mixed-run, missing and duplicate digest records before its separate SDK allocation.
+
+## Second Help SDK campaign and reporter admission
+
+The `f9f4240` menu correction passed version, compile and lint. Its first selected
+runtime process exited zero and emitted exact normal-entry, menu-entry and two-advance
+Show observations. The outer campaign still failed because admission compared the
+completion line byte-for-byte and the pinned reporter appends a trailing space.
+The other five cases did not run. Four additional launches and successful owned
+cleanup are retained in `app/target/help-panel-sdk-macos-02`; #44 owns cumulative use.
+
+A new admission assertion reproduced that formatting refusal before the correction.
+Admission now removes trailing line whitespace only; exact status, uniqueness,
+case counts, duration and source/observation checks remain mandatory. The actual
+retained Show log passes that corrected admission against its exact manifest and
+all ten accepted file hashes. Its outer failed campaign remains failed.
+
+Read-only focus diagnosis also establishes that initial default focus depends on
+input modality. The keyboard case now requires the actual Close widget's default
+property and focus after real Down input, immediately before Return, rather than
+assuming focus on initial display. Missing/default-mismatched/currently-unfocused
+Close and a changed pointer still refuse. No production behavior changed. The next
+campaign selects keyboard focus first because that render/input path remains unproved.
+All twelve cheap admission/artifact checks pass before another launch.
+
+## Component harness review and shared cancellation
+
+The coordinator integrated L08 harness commits `80f1a70` and `9087d6d`. Two fresh
+read-only reviews examined `6f414e9...9087d6d`. Standards found one P2: accepted
+source and a successful core log did not verify their producing source/toolchain
+and retained binary, so current HEAD could relabel a stale pair. A mandatory producer
+preparation receipt remains required before component execution. Spec found one P2:
+independently nonzero RGB and alpha admitted identical solid-white or invisible
+colored images as positioned text. No other preparation defects or scope creep
+were reported.
+
+The coordinator added both rejected image profiles; each first passed incorrectly.
+The gate now checks foreground variation after alpha compositing in each panel's
+expected region. Both faults refuse, and all ten component harness tests pass.
+Literal equality, runtime text and run/input identity requirements remain unchanged.
+
+L08 also traced missing KeyboardInterrupt cleanup in the shared Python SDK adapter.
+A real subprocess cancellation test first left its child alive, then passed after
+unwind cleanup was added. That run also exposed stale noncanonical temporary-path
+expectations and repeated process-group termination. An actual syscall trace showed
+the first kill succeeding and repeated kills returning EPERM. Stop requests are now
+idempotent; cancellation reaps the parent, drains the bounded output reader and
+closes its pipe. A reader that fails to close reports an error instead of hanging.
+All thirteen adapter tests pass on macOS, including timeout and output limits.
+These use ordinary Python/shell subprocesses, with no SDK launches. Windows behavior
+still needs its target check; unknown process cleanup receives no positive claim.

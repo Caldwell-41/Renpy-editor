@@ -21,7 +21,7 @@ REPO = Path(__file__).resolve().parents[2]
 FIXTURE = REPO / 'tests/fixtures/phase-3b-screens/help-panel'
 EXPORT_TEST = 'screens::tests::panel_fixture::help_panel_runtime_fixture_exports_accepted_normal_entry_source'
 SDK_SHA256 = 'eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45'
-CASES = ('show_persists', 'authored_hide', 'reshow_close', 'outside_click', 'escape', 'keyboard_close')
+CASES = ('keyboard_close', 'outside_click', 'escape', 'reshow_close', 'authored_hide', 'show_persists')
 
 
 def require(value, message):
@@ -146,7 +146,7 @@ def validate_bundle(root):
 
 def validate_runtime_output(text, case, manifest_sha, accepted_hashes):
     require(case in CASES, 'unknown case')
-    lines = text.splitlines()
+    lines = [line.rstrip() for line in text.splitlines()]
     require(lines.count('[rpytest] Status: PASSED') == 1, 'missing/duplicate runtime completion')
     require(any(re.search(r'\bglobal\.help_panel::' + re.escape(case) + r'\b', line) for line in lines), 'missing named case')
     summary = [line for line in lines if line.startswith('[rpytest] Test cases :')]
@@ -181,8 +181,8 @@ def validate_runtime_output(text, case, manifest_sha, accepted_hashes):
                 'wrong engine observation: ' + step)
         require(type(observation.get('focusedClose')) is bool, 'missing focus observation')
     if case == 'keyboard_close':
-        require(observations[1]['focusedClose'] is True, 'Close did not receive default focus')
         require(observations[2]['focusedClose'] is True, 'Close was not keyboard focused immediately before activation')
+        require(observations[2].get('defaultClose') is True, 'Close is not the qualified default focus widget')
         require(observations[2].get('mousePoint') == row.get('outsidePoint')
                 and observations[3].get('mousePoint') == row.get('outsidePoint'),
                 'pointer moved between keyboard focus and activation')

@@ -186,7 +186,7 @@ class RuntimeAdmission(unittest.TestCase):
             record = proof.validate_images(root, 'shared', 1280, 720)
             self.assertEqual(record['differingPixels'], 0)
             self.assertEqual(set(record['imageHashes']), {'actual', 'literal'})
-            for fault in ['missing', 'wrong_size', 'pixel', 'blank', 'missing_second']:
+            for fault in ['missing', 'wrong_size', 'pixel', 'blank', 'missing_second', 'solid_white', 'hidden_rgb']:
                 for name in ['actual', 'literal']:
                     image.save(root / f'shared-1280x720-{name}.png')
                 path = root / 'shared-1280x720-actual.png'
@@ -196,6 +196,13 @@ class RuntimeAdmission(unittest.TestCase):
                     Image.new('RGBA', (640, 360)).save(path)
                 elif fault == 'pixel':
                     wrong = image.copy(); wrong.putpixel((50, 50), (255, 0, 0, 255)); wrong.save(path)
+                elif fault in ('solid_white', 'hidden_rgb'):
+                    wrong = Image.new('RGBA', image.size, (255, 255, 255, 255) if fault == 'solid_white' else (0, 0, 0, 255))
+                    if fault == 'hidden_rgb':
+                        for x in (40, 680):
+                            wrong.putpixel((x + 5, 45), (255, 255, 255, 0))
+                    for name in ('actual', 'literal'):
+                        wrong.save(root / f'shared-1280x720-{name}.png')
                 else:
                     wrong = Image.new('RGBA', image.size)
                     if fault == 'missing_second':

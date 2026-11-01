@@ -850,3 +850,28 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   the cause. Cheap admission checks require the new entry signal; corrected SDK
   execution remains pending at this record.
 - **Evidence:** [Entry diagnosis](../tasks/evidence/components-and-help-panel.md#first-help-sdk-campaign-and-entry-diagnosis).
+
+## H61. Exact completion-line comparison rejects reporter whitespace
+
+- **Class/search:** harness admission; Ren'Py rpytest Status PASSED, trailing space.
+- **Cause/correction:** the pinned reporter emits a trailing space on its completion
+  line; a byte-identical line-count check rejected an otherwise valid result.
+  Remove trailing line whitespace before exact status/uniqueness checks. Preserve
+  all case, duration, source-identity and observation requirements.
+- **Verification:** the new cheap assertion fails before correction and passes
+  afterward; the retained real Show log now admits without another SDK process.
+  Its original failed campaign remains failed and the other cases remain unrun.
+- **Evidence:** [Reporter admission](../tasks/evidence/components-and-help-panel.md#second-help-sdk-campaign-and-reporter-admission).
+
+## H62. Interrupted bounded command skips process cleanup
+
+- **Class/search:** harness adapter; KeyboardInterrupt, orphan process, repeated
+  killpg, EPERM, bounded output queue.
+- **Cause/correction:** the post-launch read loop had no unwind cleanup. A real
+  interruption left its process alive. Repeated group kills also signalled an
+  already-terminated group. Cleanup now reaps the process and drains/closes the
+  reader on unwind; stop requests are idempotent and incomplete pipe cleanup errors.
+- **Verification:** the new real-process cancellation case first fails, then all
+  thirteen adapter tests pass on macOS. A syscall trace separates repeated-kill
+  EPERM from a denied initial termination. Windows target evidence remains pending.
+- **Evidence:** [Cancellation correction](../tasks/evidence/components-and-help-panel.md#component-harness-review-and-shared-cancellation).
