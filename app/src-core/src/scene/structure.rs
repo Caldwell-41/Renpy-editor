@@ -229,6 +229,12 @@ impl AuthoringService {
                 transfer(payload)
             }
         };
+        let screen_update = match &edit {
+            BodyEdit::Update { id, payload, .. } => payload
+                .screen_target()
+                .map(|target| (id.clone(), target.clone())),
+            _ => None,
+        };
         let (proposed, forced) = apply(&source, &beats, edit, &loaded, &scene)?;
         logic::validate_conditional_completion(&proposed, &scene, &loaded)?;
         if transfer_edit {
@@ -238,7 +244,7 @@ impl AuthoringService {
                 &[(scene_id, proposed.as_slice())],
             )?;
         }
-        let (mapping, next_beats) = build_mapping(
+        let (mut mapping, next_beats) = build_mapping(
             &scene,
             &proposed,
             &sha256(&proposed),
@@ -250,6 +256,7 @@ impl AuthoringService {
                 &loaded.source_map.owned_screens,
             )),
         )?;
+        set_prepared_screen_target(&mut mapping, screen_update)?;
         if next_beats.len() > MAX_BEATS_PER_SCENE {
             return Err(SceneError::InvariantBlocked);
         }
