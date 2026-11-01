@@ -496,7 +496,7 @@ impl NumericLayout {
                     .atoms
                     .iter()
                     .flat_map(|atom| &atom.fields)
-                    .all(|key| !self.blocked.contains_key(key))
+                    .all(|key| !self.source_blocked.contains_key(key))
             })
             .map(|entry| entry.keyword.start - entry.indent)
             .collect()
@@ -617,7 +617,7 @@ impl NumericLayout {
                     .atoms
                     .iter()
                     .flat_map(|atom| &atom.fields)
-                    .any(|key| self.blocked.contains_key(key))
+                    .any(|key| self.source_blocked.contains_key(key))
                 {
                     return Err(SceneError::OpaqueBoundary);
                 }

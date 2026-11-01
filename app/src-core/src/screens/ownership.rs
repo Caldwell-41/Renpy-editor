@@ -7,6 +7,7 @@ use sha2::{Digest, Sha256};
 
 const MAP: &str = ".renpy-editor/source-map.json";
 const PROJECT: &str = ".renpy-editor/project.json";
+const MAX_SCRIPT_BYTES: usize = 64 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -72,12 +73,21 @@ fn declaration_names(bytes: &[u8]) -> Result<Vec<String>, SceneError> {
     let ranges = crate::authoring::lexical_ranges(bytes, false, false)
         .map_err(|_| SceneError::UnsupportedSource)?;
     let mut names = vec![];
+    let mut python_indent = None;
     for (start, end) in ranges {
         let logical = std::str::from_utf8(&bytes[start..end])
             .map_err(|_| SceneError::UnsupportedSource)?
             .replace("\\\r\n", " ")
             .replace("\\\n", " ");
-        let mut line = logical.trim_start();
+        let mut line = code(logical.trim_start());
+        if line.is_empty() {
+            continue;
+        }
+        let indent = logical.len() - logical.trim_start().len();
+        if python_indent.is_some_and(|parent| indent > parent) {
+            continue;
+        }
+        python_indent = None;
         // Ren'Py accepts init [priority] <statement> and screen [language-version].
         // Inspect the lexed header only; authoritative bytes are never normalized.
         let mut prefixes = 0;
@@ -87,6 +97,24 @@ fn declaration_names(bytes: &[u8]) -> Result<Vec<String>, SceneError> {
                 return Err(SceneError::UnsupportedSource);
             }
             line = skip_integer(tail);
+        }
+        if let Some(header) = line.strip_suffix(':') {
+            let tokens = header.split_whitespace().collect::<Vec<_>>();
+            let python = match tokens.as_slice() {
+                ["python"]
+                | ["python", "early"]
+                | ["python", "hide"]
+                | ["python", "early", "hide"] => true,
+                ["python", "in", store]
+                | ["python", "early", "in", store]
+                | ["python", "hide", "in", store]
+                | ["python", "early", "hide", "in", store] => store.split('.').all(identifier),
+                _ => false,
+            };
+            if python {
+                python_indent = Some(indent);
+                continue;
+            }
         }
         if let Some(tail) = keyword(line, "screen") {
             let name = skip_integer(tail)
@@ -266,10 +294,24 @@ impl AuthoringService {
     }
 
     pub(super) fn screen_inventory(&self, project: &ProjectId) -> Result<Inventory, SceneError> {
-        let mut paths = self
-            .transactions
-            .inventory_files_bounded(project, "game", 16384)
-            .map_err(|_| SceneError::SourceConflict)?;
+        self.screen_inventory_for_create(project, None)
+    }
+
+    fn screen_inventory_for_create(
+        &self,
+        project: &ProjectId,
+        destination: Option<&RelativePath>,
+    ) -> Result<Inventory, SceneError> {
+        let mut paths = match destination {
+            Some(destination) => {
+                self.transactions
+                    .inventory_files_for_create(project, "game", 16384, destination)
+            }
+            None => self
+                .transactions
+                .inventory_files_bounded(project, "game", 16384),
+        }
+        .map_err(|_| SceneError::SourceConflict)?;
         paths.retain(|path| {
             let lower = path.to_ascii_lowercase();
             lower.ends_with(".rpy") || lower.ends_with(".rpyc") || lower.ends_with(".rpa")
@@ -333,7 +375,7 @@ impl AuthoringService {
             total = total
                 .checked_add(bytes.len())
                 .ok_or(SceneError::InvariantBlocked)?;
-            if total > 64 * 1024 * 1024 {
+            if total > MAX_SCRIPT_BYTES {
                 return Err(SceneError::InvariantBlocked);
             }
             match declaration_names(&bytes) {
@@ -388,35 +430,7 @@ impl AuthoringService {
     ) -> Result<Catalog, SceneError> {
         let (map, _, revision, project_revision) = self.screen_metadata(project, project_id)?;
         let inventory = self.screen_inventory(project)?;
-        let styles = styles::Index::read(&inventory)?.catalog(&revision.sha256);
-        let owned = map
-            .owned_screens
-            .into_iter()
-            .map(|screen| {
-                let resolved = resolves(&screen, &inventory);
-                let source_revision = if resolved {
-                    inventory
-                        .files
-                        .iter()
-                        .find(|(path, _)| path == &screen.path)
-                        .map(|(_, bytes)| hex::encode(Sha256::digest(bytes)))
-                } else {
-                    None
-                };
-                OwnedReference {
-                    resolved,
-                    screen,
-                    source_revision,
-                }
-            })
-            .collect();
-        Ok(Catalog {
-            project_revision: project_revision.sha256,
-            source_map_revision: revision.sha256,
-            inventory_revision: inventory.revision,
-            owned,
-            styles,
-        })
+        catalog(map, inventory, revision.sha256, project_revision.sha256)
     }
 
     pub fn screens_create(
@@ -430,7 +444,9 @@ impl AuthoringService {
         }
         let (mut map, bytes, revision, project_revision) =
             self.screen_metadata(project, project_id)?;
-        let inventory = self.screen_inventory(project)?;
+        let destination = format!("game/ui/{}.rpy", request.name);
+        let mut inventory =
+            self.screen_inventory_for_create(project, Some(&path(&destination)?))?;
         if project_revision.sha256 != request.expected_project_revision
             || revision.sha256 != request.expected_source_map_revision
             || inventory.revision != request.expected_inventory_revision
@@ -440,7 +456,6 @@ impl AuthoringService {
         if !inventory.complete {
             return Err(SceneError::UnsupportedSource);
         }
-        let destination = format!("game/ui/{}.rpy", request.name);
         self.ensure_source_paths_clean(
             project,
             inventory
@@ -482,11 +497,41 @@ impl AuthoringService {
             screen.name
         )
         .into_bytes();
+        if inventory
+            .files
+            .iter()
+            .map(|(_, bytes)| bytes.len())
+            .sum::<usize>()
+            + source.len()
+            > MAX_SCRIPT_BYTES
+        {
+            return Err(SceneError::InvariantBlocked);
+        }
+        inventory.names.push(screen.name.clone());
+        inventory.files.push((destination.clone(), source.clone()));
+        inventory.files.sort_by(|a, b| a.0.cmp(&b.0));
+        inventory.script_files.push(destination.clone());
+        inventory.script_files.sort();
+        // This source now accounts for any previously orphaned bytecode at its path.
+        let bytecode = format!("{destination}c");
+        inventory
+            .unresolved_styles
+            .retain(|reason| reason != &format!("Unresolved bytecode styles in {bytecode}"));
+        inventory
+            .opaque_revisions
+            .retain(|(path, _)| path != &bytecode);
+        inventory.refresh_revision();
         map.sources.push(destination.clone());
         map.owned_screens.push(screen);
         map.validate(project_id)
             .map_err(|_| SceneError::InvalidMetadata)?;
         let proposed = crate::scene::source_map_bytes(&map)?;
+        let committed_catalog = catalog(
+            map,
+            inventory,
+            hex::encode(Sha256::digest(&proposed)),
+            project_revision.sha256,
+        )?;
         self.transactions
             .ensure_directory(project, "game/ui")
             .map_err(|error| {
@@ -518,6 +563,43 @@ impl AuthoringService {
                 intent: TransactionIntent::Edit,
             },
         )?;
-        self.screens_list(project, project_id)
+        Ok(committed_catalog)
     }
+}
+
+fn catalog(
+    map: SourceMapMetadata,
+    inventory: Inventory,
+    source_map_revision: String,
+    project_revision: String,
+) -> Result<Catalog, SceneError> {
+    let styles = styles::Index::read(&inventory)?.catalog(&source_map_revision);
+    let owned = map
+        .owned_screens
+        .into_iter()
+        .map(|screen| {
+            let resolved = resolves(&screen, &inventory);
+            let source_revision = if resolved {
+                inventory
+                    .files
+                    .iter()
+                    .find(|(path, _)| path == &screen.path)
+                    .map(|(_, bytes)| hex::encode(Sha256::digest(bytes)))
+            } else {
+                None
+            };
+            OwnedReference {
+                resolved,
+                screen,
+                source_revision,
+            }
+        })
+        .collect();
+    Ok(Catalog {
+        project_revision,
+        source_map_revision,
+        inventory_revision: inventory.revision,
+        owned,
+        styles,
+    })
 }

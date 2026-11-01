@@ -45,11 +45,36 @@ use std::{
 
 const MAX_MUTATIONS: usize = 128;
 const MAX_MUTATION_BYTES: usize = 16 * 1024 * 1024;
+const MAX_INVENTORY_FILES: usize = 4096;
+const MAX_INVENTORY_DEPTH: usize = 16;
 pub const MAX_IMPORT_BYTES: u64 = 512 * 1024 * 1024;
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 #[cfg(test)]
 thread_local! {
     static REVISION_BYTES_READ: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
+    static DURABLE_COMMIT_HOOK: std::cell::RefCell<Option<Box<dyn FnOnce(&Path)>>> = const { std::cell::RefCell::new(None) };
+}
+
+/// Arrange an ordinary external filesystem change after the durable commit.
+#[cfg(test)]
+pub(crate) fn with_durable_commit_hook<T>(
+    hook: impl FnOnce(&Path) + 'static,
+    task: impl FnOnce() -> T,
+) -> T {
+    struct Reset;
+    impl Drop for Reset {
+        fn drop(&mut self) {
+            DURABLE_COMMIT_HOOK.with(|hook| {
+                hook.borrow_mut().take();
+            });
+        }
+    }
+    DURABLE_COMMIT_HOOK.with(|slot| {
+        assert!(slot.borrow().is_none());
+        *slot.borrow_mut() = Some(Box::new(hook));
+    });
+    let _reset = Reset;
+    task()
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
@@ -914,7 +939,29 @@ impl TransactionService {
         &self,
         project: &ProjectId,
         directory: &str,
+        remaining_entries: usize,
+    ) -> Result<Vec<String>, PublicDiagnostic> {
+        self.inventory_files_projected(project, directory, remaining_entries, None)
+    }
+
+    /// Read the current inventory with capacity reserved for a proposed new file
+    /// and its missing parent directories. This operation never creates them.
+    pub(crate) fn inventory_files_for_create(
+        &self,
+        project: &ProjectId,
+        directory: &str,
+        remaining_entries: usize,
+        destination: &RelativePath,
+    ) -> Result<Vec<String>, PublicDiagnostic> {
+        self.inventory_files_projected(project, directory, remaining_entries, Some(destination))
+    }
+
+    fn inventory_files_projected(
+        &self,
+        project: &ProjectId,
+        directory: &str,
         mut remaining_entries: usize,
+        destination: Option<&RelativePath>,
     ) -> Result<Vec<String>, PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
@@ -925,8 +972,55 @@ impl TransactionService {
                 .map_err(|code| PublicDiagnostic::new(code, None))?;
         }
         let mut files = Vec::new();
+        if let Some(destination) = destination {
+            let relative = destination
+                .as_path()
+                .strip_prefix(directory)
+                .map_err(|_| PublicDiagnostic::new(ErrorCode::UnsafePath, None))?;
+            let parent = relative
+                .parent()
+                .ok_or_else(|| PublicDiagnostic::new(ErrorCode::UnsafePath, None))?;
+            if parent.components().count() > MAX_INVENTORY_DEPTH {
+                return Err(PublicDiagnostic::new(ErrorCode::UnsafePath, None));
+            }
+            let mut parent_anchor = anchor.clone();
+            let mut missing = false;
+            let mut reserved_entries = 1;
+            for component in parent.components() {
+                let std::path::Component::Normal(name) = component else {
+                    return Err(PublicDiagnostic::new(ErrorCode::UnsafePath, None));
+                };
+                if !missing {
+                    match fs::symlink_metadata(parent_anchor.path().join(name)) {
+                        Ok(_) => {
+                            parent_anchor = parent_anchor
+                                .open_child(name, false)
+                                .map_err(|code| PublicDiagnostic::new(code, None))?;
+                        }
+                        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                            missing = true
+                        }
+                        Err(_) => return Err(PublicDiagnostic::new(ErrorCode::IoFailure, None)),
+                    }
+                }
+                if missing {
+                    reserved_entries += 1;
+                }
+            }
+            parent_anchor
+                .validate_chain()
+                .map_err(|code| PublicDiagnostic::new(code, None))?;
+            remaining_entries = remaining_entries
+                .checked_sub(reserved_entries)
+                .ok_or_else(|| PublicDiagnostic::new(ErrorCode::InvalidProposal, None))?;
+            // The same walker enforces the file limit against the projected count.
+            files.push(destination.as_str().to_owned());
+        }
         inventory_directory(&anchor, directory, 0, &mut files, &mut remaining_entries)
             .map_err(|code| PublicDiagnostic::new(code, None))?;
+        if destination.is_some() {
+            files.remove(0);
+        }
         Ok(files)
     }
 
@@ -1345,6 +1439,10 @@ impl TransactionService {
         if injector.visit(FaultPoint::Durable, &approved.root).is_err() {
             return recovery(&txid);
         }
+        #[cfg(test)]
+        if let Some(hook) = DURABLE_COMMIT_HOOK.with(|hook| hook.borrow_mut().take()) {
+            hook(&approved.root);
+        }
         self.accepted_execution_edit(project);
         self.advance_execution_consent(project, &journal.mutations, &revisions);
         CommitOutcome::Committed {
@@ -1678,7 +1776,7 @@ fn inventory_directory(
     files: &mut Vec<String>,
     remaining_entries: &mut usize,
 ) -> Result<(), ErrorCode> {
-    if depth > 16 || files.len() > 4096 {
+    if depth > MAX_INVENTORY_DEPTH || files.len() > MAX_INVENTORY_FILES {
         return Err(ErrorCode::UnsafePath);
     }
     anchor.validate_chain()?;
@@ -1703,7 +1801,7 @@ fn inventory_directory(
             inventory_directory(&child, &relative, depth + 1, files, remaining_entries)?;
         } else if metadata.is_file() {
             files.push(relative);
-            if files.len() > 4096 {
+            if files.len() > MAX_INVENTORY_FILES {
                 return Err(ErrorCode::UnsafePath);
             }
         } else {

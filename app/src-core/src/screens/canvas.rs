@@ -185,6 +185,7 @@ impl AuthoringService {
             dependencies: vec![],
             script_files: vec![],
         };
+        let source = source_lines(&bytes)?;
         for node in &screen.nodes {
             let mut properties = Map::new();
             // Read only direct, single-line properties. The shared source parser owns
@@ -194,6 +195,20 @@ impl AuthoringService {
             let mut lines = text.lines();
             let header = lines.next().unwrap_or("");
             let indent = header.len() - header.trim_start().len() + 4;
+            for span in &node.protected {
+                if let Some(line) = source.iter().find(|line| line.start == span.start) {
+                    if line.indent != indent
+                        || kind(line).is_some()
+                            && !screen
+                                .nodes
+                                .iter()
+                                .any(|child| child.span.start == line.start)
+                    {
+                        plan.limits
+                            .push(format!("Source-only statement at {}", line.start));
+                    }
+                }
+            }
             for line in lines {
                 let depth = line.len() - line.trim_start_matches(' ').len();
                 if depth != indent {
@@ -214,7 +229,7 @@ impl AuthoringService {
                 {
                     continue;
                 }
-                let Some((key, raw)) = line.split_once(' ') else {
+                let Some((key, raw)) = line.split_once(char::is_whitespace) else {
                     plan.limits
                         .push(format!("Source-only statement at {}", node.span.start));
                     continue;
