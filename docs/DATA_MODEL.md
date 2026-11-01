@@ -308,8 +308,10 @@ Unrelated unsupported UI files do not block ordinary composition refresh.
 
 The bounded Style index reports its analysis limit without rejecting ordinary
 owned-screen operations. Archives and orphan bytecode make shared review
-unavailable and participate in its revision. Source-only `use` inclusion graphs
-also refuse shared edits until their affected parent screens can be accounted for.
+unavailable and participate in its revision. The shared bounded inclusion graph
+accounts for resolved owned components and projects their Style uses into affected
+parent screens. Unmarked, dynamic, unresolved, cyclic or over-limit inclusions
+refuse shared edits because their affected screens cannot be fully accounted for.
 These refusals retain drafts and explain the missing shared-review capability.
 Read-only inspection and canvas planning accept contained game `.rpy` paths for
 indexed affected-use previews; owned mutations retain their stricter path rules.
@@ -629,7 +631,45 @@ The marker belongs to the source and survives literal edits, sibling moves,
 transactional Undo/Redo and reopen. It is active only inside an explicitly owned,
 resolved screen. Unmarked Source-authored elements are not adopted on inspection;
 duplicate element UUIDs lose structural-edit authority rather than retargeting an edit.
-Source-map schema remains v6.
+This element-marker contract began in source-map v6.
+
+Source-map v7 extends each owned screen with `kind` (`panel` or `component`);
+an omitted kind reads as panel. Parameterless components use the same owned-screen
+registry, source markers and path rules. `componentUses` binds each use-node UUID
+to its containing owner UUID and component UUID. Only exact marked `use name`
+statements qualify. Parameters, expressions and transclusion stay opaque. Resolution
+requires the recorded IDs, original source name and qualified owner markers;
+renaming or deleting source never retargets a use by name.
+
+Transient `ScreenRevisions` capture source, source-map, inventory and effect hashes.
+Component writes require that capture, a complete bounded inclusion graph and clean
+Source buffers for transitive users. Composition and geometry share this admission
+owner. Style indexing uses the same graph rather than maintaining a second graph.
+Effect summaries hash relevant dependencies and report unknown for unsupported or
+custom behavior. A known inclusion alone does not make an unknown child passive.
+
+Schema v7 also recognizes bounded `show screen name` and `hide screen name` Story
+Beats. Their mapping stores `screenTarget` with stable screen UUID and source name;
+well-formed missing targets retain unresolved intent. Read-derived payload revisions
+and `screenEffects` are never persisted as permanent write authority. Explicit
+authoring requires a current resolved Panel target. Source edits preserve the old
+binding when a name changes, including to another known panel, and protect that
+Beat until the intent can be resolved. Bare names with inline comments and trailing
+whitespace retain their exact bytes; target edits patch only keyword/name tokens.
+Unsupported parameters and dynamic forms remain Custom Code.
+
+Older maps are validated with their own recognition rules before v7 refinement.
+Exact source ranges retain UUIDs and extension fields without rewriting `.rpy`.
+Existing opaque Beats are not adopted merely because the owned catalog changes.
+Show/Hide remain conservative boundaries for existing Continue and flow analysis;
+this recognition does not add AI operations or general screen-effect execution.
+
+Help starter creation uses the same single source/map transaction as blank creation.
+Its title, explanation, typed UI-image and Close button are ordinary marked nodes.
+Exact Panel self-Hide game-menu/Close actions, `modal False` and `default_focus True`
+are qualified for ordinary edits and subtree moves. Unsupported actions, duplicate
+properties and other target names stay protected. These contracts do not imply SDK,
+normal-play, UI or native acceptance; tickets #41/#44 own those remaining gates.
 
 Composition requests capture screen UUID and exact file revision. Add supports
 fixed/frame/vbox and literal text/textbutton nodes; a frame accepts one child.

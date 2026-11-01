@@ -511,6 +511,35 @@ impl AuthoringService {
                 if !movable(screen, node) {
                     return Err(SceneError::OpaqueBoundary);
                 }
+                let removed_ids = screen
+                    .nodes
+                    .iter()
+                    .filter(|child| {
+                        child.span.start >= node.span.start && child.span.start < node.source_end
+                    })
+                    .filter_map(|child| child.id.as_deref())
+                    .collect::<std::collections::HashSet<_>>();
+                let (mut map, map_bytes, map_revision, _) =
+                    self.screen_metadata(project, project_id)?;
+                if map_revision.sha256 != catalog.source_map_revision {
+                    return Err(SceneError::SourceConflict);
+                }
+                let old_count = map.component_uses.len();
+                map.component_uses.retain(|usage| {
+                    usage.screen_id != owner.screen.id
+                        || !removed_ids.contains(usage.node_id.as_str())
+                });
+                if map.component_uses.len() != old_count {
+                    map.validate(project_id)
+                        .map_err(|_| SceneError::InvalidMetadata)?;
+                    companions.push(FileMutation {
+                        path: RelativePath::new(".renpy-editor/source-map.json").unwrap(),
+                        kind: MutationKind::ReplaceExisting,
+                        base: map_revision,
+                        expected_bytes: map_bytes,
+                        proposed: crate::scene::source_map_bytes(&map)?,
+                    });
+                }
                 let siblings = screen
                     .nodes
                     .iter()
@@ -587,6 +616,19 @@ impl AuthoringService {
             });
         }
         let mut accepted_inventory = self.screen_inventory(project)?;
+        if let Some(mutation) = companions
+            .iter()
+            .find(|mutation| mutation.path.as_str() == ".renpy-editor/source-map.json")
+        {
+            if accepted_inventory.source_map_revision != mutation.base.sha256 {
+                return Err(SceneError::SourceConflict);
+            }
+            accepted_inventory.source_map =
+                crate::metadata::SourceMapMetadata::read_bytes(&mutation.proposed, project_id)
+                    .map_err(|_| SceneError::InvalidMetadata)?;
+            accepted_inventory.source_map_revision =
+                hex::encode(Sha256::digest(&mutation.proposed));
+        }
         for (p, b) in &mut accepted_inventory.files {
             if p == source_path {
                 *b = proposed.clone();
@@ -605,7 +647,7 @@ impl AuthoringService {
         )?;
         let index = styles::Index::read(&accepted_inventory)?;
         index.resolve(&mut accepted, &proposed)?;
-        let style_catalog = index.catalog(&catalog.source_map_revision);
+        let style_catalog = index.catalog(&accepted_inventory.source_map_revision);
         let mut documents = vec![];
         for (p, b) in &accepted_inventory.files {
             if path(p).is_err() {

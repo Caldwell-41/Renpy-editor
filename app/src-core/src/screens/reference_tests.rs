@@ -1,6 +1,84 @@
 use super::*;
 
 #[test]
+fn removing_a_component_subtree_prunes_only_its_use_bindings_in_one_history_entry() {
+    let (_temporary, mut service, root, panel) = composition_project();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({
+            "name":"details", "expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"],
+            "expectedInventoryRevision":catalog["inventoryRevision"]
+        }),
+    );
+    let component = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|owner| owner["name"] == "details")
+        .unwrap();
+    let map_path = root.join(".renpy-editor/source-map.json");
+    let mut map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+    map["ownedScreens"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|owner| owner["id"] == component["id"])
+        .unwrap()["kind"] = json!("component");
+    let group_id = uuid::Uuid::new_v4().to_string();
+    let removed_id = uuid::Uuid::new_v4().to_string();
+    let retained_id = uuid::Uuid::new_v4().to_string();
+    map["componentUses"] = json!([
+        {"screenId":panel["id"],"nodeId":removed_id,"componentId":component["id"]},
+        {"screenId":panel["id"],"nodeId":retained_id,"componentId":component["id"]}
+    ]);
+    fs::write(&map_path, serde_json::to_vec_pretty(&map).unwrap()).unwrap();
+    let path = root.join(panel["path"].as_str().unwrap());
+    let source = fs::read_to_string(&path).unwrap().replace("    pass", &format!(
+        "    vbox: # loomlight-element: {group_id}\n        use details # loomlight-element: {removed_id}\n    use details # loomlight-element: {retained_id}"
+    ));
+    fs::write(&path, &source).unwrap();
+    let before_map = fs::read(&map_path).unwrap();
+    let result = compose_command(
+        &mut service,
+        &panel,
+        json!({"type":"remove","nodeId":group_id}),
+    );
+    assert_eq!(result["changed"], true);
+    let after_source = fs::read(&path).unwrap();
+    assert!(!String::from_utf8_lossy(&after_source).contains(&removed_id));
+    assert!(String::from_utf8_lossy(&after_source).contains(&retained_id));
+    let after_map = fs::read(&map_path).unwrap();
+    let map: Value = serde_json::from_slice(&after_map).unwrap();
+    assert_eq!(
+        map["componentUses"],
+        json!([
+            {"screenId":panel["id"],"nodeId":retained_id,"componentId":component["id"]}
+        ])
+    );
+    assert_eq!(result["styles"]["error"], Value::Null);
+    assert_eq!(
+        ipc(&mut service, "screens.list", json!({}))["styles"]["error"],
+        Value::Null
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read(&path).unwrap(), source.as_bytes());
+    assert_eq!(fs::read(&map_path).unwrap(), before_map);
+    composition_history(&mut service, "redo");
+    assert_eq!(fs::read(&path).unwrap(), after_source);
+    assert_eq!(fs::read(&map_path).unwrap(), after_map);
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(fs::read(&map_path).unwrap(), after_map);
+    assert_eq!(
+        ipc(&mut service, "screens.list", json!({}))["styles"]["error"],
+        Value::Null
+    );
+}
+
+#[test]
 fn resolved_screen_targets_bind_identity_and_reject_stale_or_renamed_source() {
     let (_temporary, mut service, _root, owner) = composition_project();
     let binding = json!({"screenId":owner["id"], "sourceName":"notes"});

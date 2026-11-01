@@ -21,7 +21,7 @@ impl Fixture {
         let temporary = tempfile::tempdir().unwrap();
         let profile = temporary.path().join("profile");
         let mut seed = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
-        let root = profile.join("synthetic-project");
+        let root = fs::canonicalize(profile.join("synthetic-project")).unwrap();
         seed.open_path(&root).unwrap();
         seed.close().unwrap();
         let project: serde_json::Value =

@@ -197,3 +197,47 @@ dependent drafts, accepted revision consistency and generic canvas-use refusal.
 The new public gates failed before correction. Existing Style coverage passes
 27 cases; its one explicitly selected SDK/helper case remains ignored. These
 portable checks do not qualify component canvas rendering or normal play.
+
+## Help and Story core integration
+
+The coordinator reviewed and integrated L09's five exclusive commits from
+`d742ceb7` through `25eda974`, producing integration candidate `72972807`.
+Stable Show/Hide bindings, version-gated migration, captured revision admission,
+conservative read-derived effects, exact comment-bearing target edits and validated
+no-op history now use the existing Scene transactions. No production UI was added.
+
+L09's ordinary release-core candidate `7aa82d1` passed 531 tests, with zero failures,
+54 intentional default SDK/specialist/worker ignores and the three documented
+exclusions. The later comment correction passed 17 focused tests and was not part
+of that broad candidate. Its earlier sandboxed run remains failed (499 passes,
+31 transport setup failures, 54 ignores); its log and list remain in the worker's
+ignored `app/target`. These are candidate-specific results, not a combined pass.
+
+The coordinator's first integrated panel selection passed 14 and failed three
+starter tests during trusted-root fixture registration. Its worktree-local TMPDIR
+contained a lexical `..`; the new fixture had not canonicalized its root. Matching
+the existing component fixture fixes setup without changing production admission.
+The corrected selection passes all 17 tests, with zero ignored cases.
+
+## Component-use removal correction
+
+The L08 worker found that ordinary composition removal deleted a resolved use's
+source but left its typed binding behind. A new public IPC test first demonstrated
+that orphaned record after removing a containing group. Composition now prunes only
+bindings whose owned use nodes lie inside the verified removed subtree. Source and
+map replacements share the same history transaction, and the returned Style index
+uses the proposed map revision. The test passes exact one-step Undo/Redo, retention
+of a second use and no-op reopen. Deliberate Source deletion still retains unresolved
+intent; ordinary authoring removal explicitly removes that intent.
+
+## Draft design revision and type qualification
+
+A one-line type-only correction `282772a` narrows the existing Style mock's label
+keys to the actual label object. Application and full Design Lab TypeScript checks
+pass. Runtime code and approved historical records are unchanged. The prototype
+chat consumed the correction and now reports draft candidate `405400c`, fingerprint
+`cbed660d2ca119fb03eeb9451fd9e6038aacedf9487616be818e248976410149`.
+Its 84 offline cases include the no-UI-image state: Help creation is blocked with
+explicit Assets import guidance, entered name/choice retained, and Blank requires
+an explicit selection. Original draft captures remain preserved. Kris has not
+selected or approved a design; production UI and runtime proof remain pending.
