@@ -47,7 +47,11 @@ fn fixed_fixture() -> Fixture {
             &sha256(source.as_bytes()),
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )
         .unwrap();
         fs::write(fixture.root.join(&scene.source_path), source).unwrap();

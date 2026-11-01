@@ -34,6 +34,12 @@ const MAX_SCENES: usize = 4096;
 const MAX_TEXT_BYTES: usize = 10_000;
 type ForcedBeatId = (String, String, String, Option<usize>);
 
+pub(crate) type SceneParseContext<'a> = (
+    &'a ProjectMetadata,
+    &'a AuthoringMetadata,
+    &'a [crate::metadata::OwnedScreen],
+);
+
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum PlacementRef {
@@ -555,7 +561,7 @@ impl AuthoringService {
                 let (_, _, parsed) = parse_scene_mode(
                     scene,
                     &bytes,
-                    Some((&metadata, &authoring)),
+                    Some((&metadata, &authoring, &source_map.owned_screens)),
                     previous_schema,
                 )?;
                 if old.source_revision != revision.sha256 {
@@ -574,7 +580,11 @@ impl AuthoringService {
                 {
                     return Err(SceneError::InvalidMetadata);
                 }
-                let (_, _, parsed) = parse_scene(scene, &bytes, Some((&metadata, &authoring)))?;
+                let (_, _, parsed) = parse_scene(
+                    scene,
+                    &bytes,
+                    Some((&metadata, &authoring, &source_map.owned_screens)),
+                )?;
                 forced = logic::refine_legacy_ids(old, &parsed, &bytes)?;
                 old.source_revision.clear();
             }
@@ -584,7 +594,7 @@ impl AuthoringService {
                 &revision.sha256,
                 legacy.as_ref(),
                 &forced,
-                Some((&metadata, &authoring)),
+                Some((&metadata, &authoring, &source_map.owned_screens)),
             )?;
             source_map.scene_mappings.push(mapping);
         }
@@ -654,7 +664,11 @@ impl AuthoringService {
                     &revision.sha256,
                     Some(stored),
                     &[],
-                    Some((&loaded.project, &loaded.authoring)),
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
                 )?
                 .1
             };
@@ -796,7 +810,11 @@ impl AuthoringService {
                     &revision.sha256,
                     Some(mapping),
                     &[],
-                    Some((&loaded.project, &loaded.authoring)),
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
                 )?;
             }
             mutations = proposal.mutations;
@@ -838,7 +856,11 @@ impl AuthoringService {
                     &sha256(&bytes),
                     Some(&mapping),
                     &[],
-                    Some((&loaded.project, &loaded.authoring)),
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
                 )?;
                 let (next, mut forced) = apply_beat_edit(&bytes, &beats, edit, &loaded)?;
                 if let Some(ids) = assigned {
@@ -855,7 +877,11 @@ impl AuthoringService {
                     &sha256(&next),
                     Some(&mapping),
                     &forced,
-                    Some((&loaded.project, &loaded.authoring)),
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
                 )?;
                 bytes = next;
                 mapping = next_map;
@@ -935,7 +961,11 @@ impl AuthoringService {
             &sha256(&bytes),
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         if beats
             .last()
@@ -1437,7 +1467,11 @@ impl AuthoringService {
             &synthetic_revision,
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         loaded.project.scenes.push(scene);
         loaded.project.last_open = Selection {
@@ -1518,7 +1552,11 @@ impl AuthoringService {
             &source_revision.sha256,
             Some(&stored),
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         let choice = beats
             .iter()
@@ -1583,7 +1621,11 @@ impl AuthoringService {
             &proposed_source_revision,
             Some(&stored),
             &forced,
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         *loaded
             .source_map
@@ -1597,7 +1639,11 @@ impl AuthoringService {
             &destination_revision,
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         loaded.source_map.scene_mappings.push(destination_mapping);
 
@@ -1810,7 +1856,11 @@ impl AuthoringService {
                 &revision.sha256,
                 Some(stored),
                 &[],
-                Some((&loaded.project, &loaded.authoring)),
+                Some((
+                    &loaded.project,
+                    &loaded.authoring,
+                    &loaded.source_map.owned_screens,
+                )),
             )?;
             if beats.iter().any(|beat| {
                 beat.protected
@@ -1864,7 +1914,11 @@ impl AuthoringService {
             &source_revision.sha256,
             Some(&stored),
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         if beats.len() >= MAX_BEATS_PER_SCENE
             && matches!(
@@ -1892,7 +1946,11 @@ impl AuthoringService {
             &proposed_revision,
             Some(&stored),
             &forced,
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         *loaded
             .source_map
@@ -1950,7 +2008,7 @@ impl AuthoringService {
                 &revision.sha256,
                 Some(&stored),
                 &[],
-                Some((&loaded.project, &previous)),
+                Some((&loaded.project, &previous, &loaded.source_map.owned_screens)),
             )?;
             if beats.iter().any(|b| b.protected) {
                 return Err(SceneError::OpaqueBoundary);
@@ -2011,7 +2069,7 @@ impl AuthoringService {
                 &sha256(&proposed),
                 Some(&stored),
                 &forced,
-                Some((&loaded.project, next)),
+                Some((&loaded.project, next, &loaded.source_map.owned_screens)),
             )?;
             *loaded
                 .source_map
@@ -2097,7 +2155,7 @@ impl AuthoringService {
                 &revision.sha256,
                 Some(stored),
                 &[],
-                Some((metadata, &authoring)),
+                Some((metadata, &authoring, &source_map.owned_screens)),
             )?;
         }
         Ok(())
@@ -2962,10 +3020,7 @@ fn dialogue_quotes(line: &str) -> Option<(usize, usize)> {
     None
 }
 
-fn nested_dialogue(
-    line: &str,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-) -> Option<BeatPayload> {
+fn nested_dialogue(line: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatPayload> {
     let body = line.strip_prefix("        ")?;
     if body.starts_with(char::is_whitespace) {
         return None;
@@ -2984,7 +3039,7 @@ fn nested_dialogue(
 fn parse_bool_group(
     lines: &[(usize, usize, &str)],
     index: usize,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
 ) -> Option<(usize, Vec<ParsedBeat>)> {
     let (group_start, _, header) = lines[index];
     let name = header.strip_prefix("    if ")?.strip_suffix(':')?;
@@ -3073,7 +3128,7 @@ fn indentation(body: &str) -> usize {
 fn parse_condition_group(
     lines: &[(usize, usize, &str)],
     index: usize,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     indent: usize,
     parent: Option<(usize, usize)>,
     depth: usize,
@@ -3224,7 +3279,7 @@ fn parse_condition_group(
 fn parse_scene(
     scene: &SceneMetadata,
     bytes: &[u8],
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
 ) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
     parse_scene_mode(scene, bytes, loaded, SOURCE_MAP_SCHEMA_VERSION)
 }
@@ -3232,7 +3287,7 @@ fn parse_scene(
 fn parse_scene_mode(
     scene: &SceneMetadata,
     bytes: &[u8],
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     source_version: u32,
 ) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
     let legacy = source_version < 4;
@@ -3316,7 +3371,7 @@ fn parse_scene_mode(
                     break;
                 };
                 let destination = loaded
-                    .and_then(|(project, _)| {
+                    .and_then(|(project, _, _)| {
                         project
                             .scenes
                             .iter()
@@ -3378,7 +3433,7 @@ fn choice_option_text(line: &str) -> Option<String> {
 
 fn parse_line_version(
     body: &str,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     rich_logic: bool,
 ) -> Option<BeatPayload> {
     if !rich_logic && body.trim_start().starts_with("call ") {
@@ -3387,10 +3442,7 @@ fn parse_line_version(
     parse_line(body, loaded)
 }
 
-fn parse_line(
-    body: &str,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-) -> Option<BeatPayload> {
+fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatPayload> {
     let line = body.strip_prefix("    ")?;
     if line == "return" {
         return Some(BeatPayload::Return);
@@ -3414,7 +3466,7 @@ fn parse_line(
     }
     if let Some(label) = line.strip_prefix("jump ") {
         return loaded
-            .and_then(|(project, _)| {
+            .and_then(|(project, _, _)| {
                 project
                     .scenes
                     .iter()
@@ -3453,7 +3505,7 @@ fn parse_line(
     }
     if let Some(rest) = line.strip_prefix("$ ") {
         let (name, literal) = rest.split_once(" = ")?;
-        let (_, authoring) = loaded?;
+        let (_, authoring, _) = loaded?;
         let variable = authoring
             .variables
             .iter()
@@ -3511,10 +3563,7 @@ fn rename_appearance_token(
     Ok(output)
 }
 
-fn parse_show(
-    rest: &str,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-) -> Option<BeatPayload> {
+fn parse_show(rest: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatPayload> {
     let (without_transition, transition) = split_transition(rest)?;
     let (main, placement) = if let Some((main, at)) = without_transition.rsplit_once(" at ") {
         (main, Some(parse_placement(at)?))
@@ -3527,7 +3576,7 @@ fn parse_show(
     if parts.next().is_some() {
         return None;
     }
-    let (_, authoring) = loaded?;
+    let (_, authoring, _) = loaded?;
     let character = authoring
         .characters
         .iter()
@@ -3565,7 +3614,7 @@ pub(crate) fn build_mapping(
     revision: &str,
     previous: Option<&SceneSourceMapping>,
     forced: &[ForcedBeatId],
-    context: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    context: Option<SceneParseContext<'_>>,
 ) -> Result<(SceneSourceMapping, Vec<SceneBeat>), SceneError> {
     let (label_start, label_end, parsed) = parse_scene(scene, bytes, context)?;
     if let Some(previous) = previous.filter(|mapping| mapping.source_revision == revision) {
@@ -3998,10 +4047,7 @@ fn asset<'a>(
         .ok_or(SceneError::UnknownEntity)
 }
 
-fn find_character(
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-    technical: &str,
-) -> Option<String> {
+fn find_character(loaded: Option<SceneParseContext<'_>>, technical: &str) -> Option<String> {
     loaded?
         .1
         .characters
@@ -4011,7 +4057,7 @@ fn find_character(
 }
 
 fn find_asset(
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     discovery: &str,
     kind: AssetKind,
 ) -> Option<String> {
@@ -5165,8 +5211,16 @@ mod tests {
         for payload in &payloads {
             source.extend_from_slice(render_payload(payload, &loaded, "\n").unwrap().as_bytes());
         }
-        let (_, _, parsed) =
-            parse_scene(&scene, &source, Some((&project, &loaded.authoring))).unwrap();
+        let (_, _, parsed) = parse_scene(
+            &scene,
+            &source,
+            Some((
+                &project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
+        )
+        .unwrap();
         assert_eq!(
             parsed
                 .iter()
@@ -6644,7 +6698,11 @@ mod tests {
                 &sha256(source.as_bytes()),
                 None,
                 &[],
-                Some((&loaded.project, &loaded.authoring)),
+                Some((
+                    &loaded.project,
+                    &loaded.authoring,
+                    &loaded.source_map.owned_screens,
+                )),
             )
             .unwrap();
             fs::write(fixture.root.join(&scene.source_path), source).unwrap();
@@ -6778,7 +6836,11 @@ mod tests {
             &sha256(source),
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )
         .unwrap();
         fs::write(fixture.root.join(&excess.source_path), source).unwrap();

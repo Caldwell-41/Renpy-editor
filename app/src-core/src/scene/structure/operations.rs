@@ -332,7 +332,15 @@ fn patches(
     if output == source {
         return Err(SceneError::InvariantBlocked);
     }
-    let (_, _, parsed) = parse_scene(scene, &output, Some((&loaded.project, &loaded.authoring)))?;
+    let (_, _, parsed) = parse_scene(
+        scene,
+        &output,
+        Some((
+            &loaded.project,
+            &loaded.authoring,
+            &loaded.source_map.owned_screens,
+        )),
+    )?;
     let mut forced = Vec::new();
     for parsed in parsed {
         let original = kept.iter().find(|r| {

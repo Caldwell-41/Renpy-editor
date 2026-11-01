@@ -101,8 +101,15 @@ impl AuthoringService {
             if bytes_seen > 32 * 1024 * 1024 {
                 return Err(SceneError::UnsupportedCallRoute);
             }
-            let (_, _, parsed) =
-                parse_scene(scene, bytes, Some((&loaded.project, &loaded.authoring)))?;
+            let (_, _, parsed) = parse_scene(
+                scene,
+                bytes,
+                Some((
+                    &loaded.project,
+                    &loaded.authoring,
+                    &loaded.source_map.owned_screens,
+                )),
+            )?;
             adjacency.insert(
                 scene.id.clone(),
                 parsed
@@ -164,7 +171,11 @@ impl AuthoringService {
             &revision.sha256,
             Some(&stored),
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         let edit = match edit {
             edit @ BodyEdit::Structural(_) => edit,
@@ -233,7 +244,11 @@ impl AuthoringService {
             &sha256(&proposed),
             Some(&stored),
             &forced,
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         if next_beats.len() > MAX_BEATS_PER_SCENE {
             return Err(SceneError::InvariantBlocked);
