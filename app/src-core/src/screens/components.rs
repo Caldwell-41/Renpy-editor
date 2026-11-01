@@ -44,12 +44,13 @@ impl AuthoringService {
         if revision.sha256 != request.expected_revision {
             return Err(SceneError::SourceConflict);
         }
-        let document = self.owned_screen_document(
+        let mut document = self.owned_screen_document(
             project,
             &bytes,
             owner.screen.path.clone(),
             revision.sha256.clone(),
         )?;
+        self.resolve_screen_styles(project, &mut document, &bytes)?;
         let screen = document
             .screens
             .iter()
@@ -64,6 +65,7 @@ impl AuthoringService {
             node.kind.as_str(),
             "fixed" | "frame" | "window" | "vbox" | "hbox" | "grid" | "viewport"
         ) || bytes.get(node.source_end.saturating_sub(1)) != Some(&b'\n')
+            || !composition::movable(screen, node)
             || screen
                 .nodes
                 .iter()
@@ -71,10 +73,10 @@ impl AuthoringService {
                     child.span.start >= node.span.start && child.span.start < node.source_end
                 })
                 .any(|child| {
-                    child.id.is_none()
-                        || !child.protected.is_empty()
-                        || matches!(child.kind.as_str(), "text" | "textbutton")
-                            && child.literal.is_none()
+                    child
+                        .literal
+                        .as_ref()
+                        .is_some_and(|text| text.contains(['[', '{']))
                 })
         {
             return Err(SceneError::OpaqueBoundary);

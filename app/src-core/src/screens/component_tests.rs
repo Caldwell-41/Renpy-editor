@@ -3,7 +3,7 @@ use crate::{
     authoring::AuthoringService,
     lifecycle::LifecycleService,
     screens::{CreateRequest, InspectRequest},
-    source::{SourceDocument, SourceOpenRequest},
+    source::{SourceDocument, SourceDraftRequest, SourceOpenRequest},
     transaction::ProjectId,
 };
 use std::{fs, path::PathBuf};
@@ -164,6 +164,117 @@ fn prepare_extract_refuses_unterminated_group_without_changing_source_or_history
         crate::scene::SceneError::OpaqueBoundary
     );
     assert_eq!(fixture.source().text, Some(source));
+    assert!(
+        !fixture
+            .service
+            .scene_workspace(&fixture.project, &fixture.project_id)
+            .unwrap()
+            .can_undo
+    );
+}
+
+#[test]
+fn prepare_extract_refuses_text_that_can_capture_screen_local_values() {
+    let mut fixture = Fixture::new();
+    let source = format!(
+        "# loomlight-screen: {}\nscreen notes():\n    default screen_value = \"Local\"\n    vbox: # loomlight-element: {GROUP}\n        text \"Hello [screen_value]\" # loomlight-element: {TEXT}\n",
+        fixture.owner.id
+    );
+    fixture.reopen_with_source(&source);
+    assert_eq!(
+        fixture
+            .service
+            .prepare_extract_group(&fixture.project, &fixture.project_id, fixture.request())
+            .unwrap_err(),
+        crate::scene::SceneError::OpaqueBoundary
+    );
+    assert_eq!(fixture.source().text, Some(source));
+}
+
+#[test]
+fn prepare_extract_keeps_supported_style_references_in_the_selected_group() {
+    let mut fixture = Fixture::new();
+    let group = format!(
+        "    vbox: # loomlight-element: {GROUP}\n        text \"Styled\": # loomlight-element: {TEXT}\n            style \"ll_body\"\n"
+    );
+    let source = format!(
+        "# loomlight-screen: {}\nscreen notes():\n{group}\nstyle ll_body is text:\n    size 24\n",
+        fixture.owner.id
+    );
+    fixture.reopen_with_source(&source);
+    let prepared = fixture
+        .service
+        .prepare_extract_group(&fixture.project, &fixture.project_id, fixture.request())
+        .unwrap();
+    assert_eq!(prepared.source, group);
+    assert_eq!(fixture.source().text, Some(source));
+}
+
+#[test]
+fn prepare_extract_refuses_dirty_source_and_retains_the_draft() {
+    let mut fixture = Fixture::new();
+    let source = format!(
+        "# loomlight-screen: {}\nscreen notes():\n    vbox: # loomlight-element: {GROUP}\n        text \"Saved\" # loomlight-element: {TEXT}\n",
+        fixture.owner.id
+    );
+    fixture.reopen_with_source(&source);
+    let request = fixture.request();
+    let before = fixture.source();
+    let draft = source.replace("Saved", "Unfinished Source draft");
+    fixture
+        .service
+        .source_update_draft(
+            &fixture.project,
+            &fixture.project_id,
+            SourceDraftRequest {
+                path: fixture.owner.path.clone(),
+                expected_base_revision: before.base_revision.clone(),
+                text: draft.clone(),
+                selection_start: 12,
+                selection_end: 12,
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        fixture
+            .service
+            .prepare_extract_group(&fixture.project, &fixture.project_id, request)
+            .unwrap_err(),
+        crate::scene::SceneError::DirtySource
+    );
+    let retained = fixture.source();
+    assert!(retained.dirty);
+    assert_eq!(retained.text, Some(draft));
+    assert_eq!(retained.base_revision, before.base_revision);
+    assert_eq!(retained.selection_start, 12);
+    assert!(
+        !fixture
+            .service
+            .scene_workspace(&fixture.project, &fixture.project_id)
+            .unwrap()
+            .can_undo
+    );
+}
+
+#[test]
+fn prepare_extract_refuses_a_stale_selection_after_an_external_edit() {
+    let mut fixture = Fixture::new();
+    let source = format!(
+        "# loomlight-screen: {}\nscreen notes():\n    vbox: # loomlight-element: {GROUP}\n        text \"Saved\" # loomlight-element: {TEXT}\n",
+        fixture.owner.id
+    );
+    fixture.reopen_with_source(&source);
+    let request = fixture.request();
+    let external = source.replace("Saved", "External edit");
+    fs::write(fixture.root.join(&fixture.owner.path), &external).unwrap();
+    assert_eq!(
+        fixture
+            .service
+            .prepare_extract_group(&fixture.project, &fixture.project_id, request)
+            .unwrap_err(),
+        crate::scene::SceneError::SourceConflict
+    );
+    assert_eq!(fixture.source().text, Some(external));
     assert!(
         !fixture
             .service
