@@ -56,16 +56,17 @@ Kris confirmed these boundaries in the selecting conversation:
 Mac ARM64 coordinates development. Workers use separate T3-managed worktrees and
 disjoint files under the [assignment record](../evidence/phase-3b-audit-fixes.md).
 The coordinator owns shared contracts, status, CI selection, integration and review.
-The linked Windows host SUNDOWN is available. Its project metadata has been read;
-no remote build or test has run. The evidence record selects a narrow real-SDK
-recovery check on both hosts and records its limits.
+The linked Windows host SUNDOWN has a bounded test-only assignment for the exact
+published candidate. Mac real-SDK recovery passes; Windows evidence is pending.
+The evidence record owns both-host limits and actual consumption.
 
 Routine checks need no numerical allowance. Workers run focused local checks;
 the coordinator selects costly qualification and records its limits before it
 starts. Historical closed allowances remain closed. Protected recovery and the
 unrelated untracked audit remain untouched.
 
-Current state: all five groups are reviewed and integrated. Combined core and
-controller verification is running; platform qualification and draft publication follow. Detailed
+Current state: all five groups are reviewed and integrated in draft PR #75.
+Combined local verification and Mac SDK recovery pass. CI1 exposed a browser-fixture
+ordering defect; its correction passes locally. Corrected CI and Windows proof remain. Detailed
 red/green results, integration findings, host operations and CI receipts belong in
 the linked evidence.

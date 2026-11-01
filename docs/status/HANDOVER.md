@@ -2,29 +2,33 @@
 
 ## Selected Phase 3B audit corrections
 
-Continue on `codex/phase3b-audit-fixes`, prepared from fetched Screens head
-`c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. The local base matched origin after
-fetch. Kris selected twelve fixes, parallel Sol 6.1 High workers using the named
-root-cause and TDD skills, coordinator review, draft PR and complete selected CI.
-Read the [maintenance task](../tasks/active/phase-3b-audit-fixes.md) for exact scope
-and confirmed test boundaries, then the [assignment/evidence record](../tasks/evidence/phase-3b-audit-fixes.md)
-before integrating worker commits. Findings #1, #3, #7, #10, #13 and #15 are excluded.
+Continue on `codex/phase3b-audit-fixes` and
+[draft PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75), based on fetched
+Screens head `c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. All twelve selected fixes
+are reviewed and integrated. The [maintenance task](../tasks/active/phase-3b-audit-fixes.md)
+owns scope and confirmed test boundaries; the [evidence record](../tasks/evidence/phase-3b-audit-fixes.md)
+owns worker identities, original failures and verification. Findings #1, #3, #7,
+#10, #13 and #15 remain excluded.
 
-Mac ARM64 coordinates. Text validation (`644e26b`), image previews (`4076688`) and
-helper lifecycle (`11852a1`) are reviewed and integrated. Coordinator checks pass
-30 composition DOM cases, 14 image DOM cases and three controlled lifecycle cases.
-Workspace/numeric (`70f1f3a`) is reviewed and integrated; 22 DOM cases and both
-numeric/nested real controller/core journeys pass. Core Screens (`c8db7ef`) is
-reviewed and integrated, including its approved narrow inventory dependency in
-`transaction/mod.rs`. Combined core and authoring checks are running.
-Windows SUNDOWN metadata is inspected; no remote command has run. The evidence
-selects both-host real-SDK recovery with four helper starts per host, and three
-combined CI qualification dispatches; consumption is zero. No CI or native process
-is pending. The new
-task is local-only until the authorized publication. A separate GitHub maintenance
-issue was not published after automatic approval review rejected that additional
-publication. No merge is selected. Preserve the unrelated untracked audit and all
-protected recovery below. Existing size exceptions retain unique recovery evidence.
+Local combined frontend/core, three controlled lifecycle cases, five real
+controller/core journeys and desktop compilation pass. The real Mac SDK recovery
+proof passes at `039f22ce3c118f408145573ccedfeac0e93b7b70`, using two of four
+allowed Mac helper starts. The connected Windows SUNDOWN test-only assignment
+owns no source; its returned evidence and actual helper consumption are pending.
+No package or native editor operation is selected.
+
+CI1 at that candidate fails after all Windows core/build checks, at a nested-layout
+fixture ordering assertion; Mac passes. A held response reproduces the stale
+hierarchy interaction. The fixture correction waits for refreshed columns and
+passes held/normal controller runs. Publish this correction and start dispatch 2 of
+the three-dispatch ceiling, then audit terminal jobs/artifacts/current-head status.
+The PR is linked and watched. Do not poll or register another watch. Completion
+resumes this thread; unwatch before final handback. Final terminal results, Windows
+operations and closure belong to a PR #75 receipt rather than another evidence-only
+candidate change. No merge is selected. Preserve the unrelated untracked audit and
+all protected recovery below. Existing size exceptions retain unique recovery
+records. A separate maintenance issue was not published after automatic approval
+review rejected that additional publication.
 
 ## Connected native testing policy closeout
 

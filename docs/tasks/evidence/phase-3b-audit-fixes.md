@@ -214,3 +214,59 @@ The selected CI gate explicitly requires the nine new audit cases and the contro
 lifecycle cases to appear as passing in Cargo output. Existing gate checks reject
 missing, ignored and failed required markers. The real SDK recovery fixture remains
 separately selected and intentionally ignored during ordinary portable suites.
+
+## Integrated verification and Mac SDK recovery
+
+Candidate `039f22ce3c118f408145573ccedfeac0e93b7b70` contains all twelve selected
+fixes. Coordinator checks pass 107 Screens tests, 16 Source tests, three metadata
+tests, 39 transaction tests and three controlled lifecycle cases. The five Screens
+SDK qualifications, eighteen specialist transaction cases and two lifecycle fixture/
+SDK entries remain intentionally ignored in these ordinary runs. All five real
+controller/core journeys pass. Desktop compilation and formatting pass; existing
+dead-code warnings remain unchanged.
+
+The separately selected Mac ARM64 official-SDK recovery test passes at that exact
+candidate. It uses two helper starts of the four-start Mac ceiling. Startup refusal
+exits 72 and cleans up before replacement; the replacement supplies a current PNG
+and rectangle `(172, 122, 656, 376)`, retains the Source draft and disk bytes, then
+shuts down cooperatively with exit zero. Both fixture cleanup results are true.
+The coordinator inspected the retained PNG. This establishes helper rendering and
+geometry, not physical resize input or native editor painting. The JSON and PNG
+SHA-256 values are respectively
+`b4c93bc60a030ec523abe6196d8c3b5a6cf302ef1c5b7eaec6b865819dc028de` and
+`7ee9d9215c97625d499c75975a5bff6f0add5a0ef5c4faa1b1ce5c4f8c7b60a0`.
+Raw evidence remains in the ignored task report directory. A later harness-only
+correction does not change this tested application or SDK fixture.
+
+## CI1 failure and controller-ordering correction
+
+[Draft PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75) targets the
+Screens integration branch. Automatic Repository quality
+[run 41259596053](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41259596053)
+passes at `039f22c`. Selected qualification dispatch 1 of 3,
+[run 41259629110, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41259629110),
+is failed evidence. Its Mac job passes every selected stage. Windows passes frontend,
+public core audits, source/metadata/transactions, lifecycle, driver and desktop
+compilation, composition and numeric journeys. It fails in nested layout before the
+image and font journeys run. Those two Windows journeys remain unrun in CI1.
+Both uploaded artifacts were retrieved and their exact candidate files checked.
+
+The Windows assertion waited for the strict-grid removal refusal. The fixture
+started Refresh Source and immediately used the old hierarchy, before the async
+reload installed the strict policy. A controlled held `screens.list` response
+reproduces an open removal dialog (`dialog: 1`) and the same eight-second assertion
+failure. This is a harness ordering defect, not evidence of slow rendering or a
+source mutation. The production revision checks remain unchanged.
+
+The fixture now waits for the refreshed grid's visible column value before further
+interaction. Both Source replacements use this condition: opaque grid columns two,
+strict grid columns three. The corrected controller/core journey passes both with
+a held response and under normal scheduling, without changing its deadline. Red,
+green and original CI artifacts remain under the ignored `ci-1` reports. No SDK or
+helper starts are used by this correction.
+
+Prepare dispatch 2 of the three-dispatch ceiling on the corrected candidate.
+Windows SUNDOWN's bounded test-only assignment is pending; its actual helper-start
+consumption will be recorded from its returned evidence. No package or native editor
+operation has run. Final terminal CI and host results will be recorded on PR #75;
+that receipt owns closure without another evidence-only candidate change.

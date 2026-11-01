@@ -116,6 +116,7 @@ try {
   const save=async text=>{const current=await request('source.open',{path:owner.path});const draft=await request('source.updateDraft',{path:owner.path,expectedBaseRevision:current.baseRevision,text,selectionStart:0,selectionEnd:0});await request('source.save',{path:owner.path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});};
   await save(opaque);await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
   await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('treeitem',{name:'Grid',exact:true}).dblclick();
+  await page.waitForFunction(()=>document.querySelector('[data-layout-field=columns]')?.value==='2');
   const opaqueDocument=await request('screens.inspect',{path:owner.path}),opaqueGrid=opaqueDocument.screens[0].nodes.find(node=>node.kind==='grid');
   assert.equal(opaqueDocument.screens[0].nodes.filter(node=>node.parentStart===opaqueGrid.span.start).length,3,'The hierarchy includes both mutually exclusive branches');
   const refusedCount=await rpc({protocolVersion:1,requestId:randomUUID(),operation:'screens.setLayout',payload:{sessionId,path:owner.path,screenName:owner.name,expectedRevision:opaqueDocument.revision,nodeStart:opaqueGrid.span.start,values:{columns:{unit:'count',value:1}}}});
@@ -129,6 +130,8 @@ try {
   await ui.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=spacing]')?.value==='9');assert.equal(await read(),opaque.replace('spacing 8','spacing 9'));
   const strict=changed.replace('grid 4 1:','grid 3 1:').replace('allow_underfull True','allow_underfull False');
   await save(strict);await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
+  await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('treeitem',{name:'Grid',exact:true}).dblclick();
+  await page.waitForFunction(()=>document.querySelector('[data-layout-field=columns]')?.value==='3');
   await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('treeitem',{name:'Text · One',exact:true}).click();
   await ui.getByRole('button',{name:'Remove element',exact:true}).click();
   await ui.getByText(/This grid's empty-cell policy stays in Source/).first().waitFor();assert.equal(await page.locator('.screen-removal-dialog[open]').count(),0);assert.equal(await read(),strict);

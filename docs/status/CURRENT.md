@@ -2,18 +2,17 @@
 
 ## Selected Phase 3B audit corrections
 
-Kris selected twelve audited fixes on `codex/phase3b-audit-fixes`, based on the
-fetched Screens head `c5f4ab1`. The [maintenance task](../tasks/active/phase-3b-audit-fixes.md)
-owns scope and the confirmed public test boundaries; [evidence](../tasks/evidence/phase-3b-audit-fixes.md)
-owns parallel file assignments and validation. Five Sol 6.1 High workers use
-isolated worktrees, root-cause diagnosis and vertical TDD slices. All five groups
-are reviewed and integrated. Frontend, controlled lifecycle and numeric/nested
-controller checks pass; combined core and authoring journeys are running.
-The coordinator owns integration,
-review against each original trigger, a draft PR and selected CI.
-Findings #1, #3, #7, #10, #13 and #15 remain excluded. No merge or wider acceptance
-is selected. Windows SUNDOWN project metadata is inspected; remote execution and
-the selected both-host SDK recovery proof have not started. No CI is pending.
+Kris selected twelve fixes on `codex/phase3b-audit-fixes`, based on fetched
+Screens head `c5f4ab1`. All five Sol 6.1 High groups are reviewed and integrated in
+[draft PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75). The
+[maintenance task](../tasks/active/phase-3b-audit-fixes.md) owns scope and confirmed
+test boundaries; [evidence](../tasks/evidence/phase-3b-audit-fixes.md) owns review,
+results and operation limits. Local frontend/core, lifecycle and five controller
+journeys pass, as does the two-start Mac SDK recovery proof. CI1 passes Mac and
+fails the Windows nested-layout fixture's refresh ordering. The corrected fixture
+passes locally; corrected CI and the connected Windows assignment remain pending.
+Findings #1, #3, #7, #10, #13 and #15 stay excluded. No merge or wider Phase 3B
+acceptance is selected. Final results and closure belong to the draft PR receipt.
 
 ## Connected native testing policy accepted
 

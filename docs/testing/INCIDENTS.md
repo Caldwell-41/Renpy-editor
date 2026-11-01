@@ -797,3 +797,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   by another waiting request. The cancelled trial is failed evidence. Live overlap
   verification and terminal audit belong to the owning task and PR #73.
 - **Evidence:** [CI reporter queue diagnosis](../tasks/active/ci-validation.md#passing-trial-exposed-reporter-queue-cancellation).
+
+## H57. Nested layout journey uses the hierarchy before Source refresh completes
+
+- **Class/search:** browser fixture; Windows nested layout, strict-grid removal,
+  empty-cell policy, Refresh Source, missing refusal, open removal dialog.
+- **Cause/correction:** a Source save followed by Refresh Source does not synchronously
+  install the new document. The fixture selected the old child and opened removal
+  while reload was pending. Wait for the refreshed grid's visible columns before
+  proceeding after both Source replacements.
+- **Verification:** a held catalog response reproduces the old open dialog and
+  original assertion timeout. The corrected real controller/core journey passes
+  with the held response and normally, preserving the existing deadline.
+- **Evidence:** [Audit-fix CI1 diagnosis](../tasks/evidence/phase-3b-audit-fixes.md#ci1-failure-and-controller-ordering-correction).
