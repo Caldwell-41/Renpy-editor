@@ -467,3 +467,25 @@ compiler artifacts at production and admission. Relevant fault checks first fail
 including optimized Python. No SDK started during review or correction. Producer
 receipts from before this material change remain historical and cannot qualify the
 new candidate. A fresh committed producer is required before allocating execution.
+
+## First component macOS SDK campaign
+
+At `a97858c6ba0b16d1ab35d6cf058a93a657a1174d`, fresh public preparation retained
+producer receipt SHA-256 `7eadc52df0018d16d7a4f1681abf8630572e6614df5438df7e69bd33b31a495e`
+and accepted bytes `296d846956d9b881b77253a1ae83d11c6fe57ea8935c57286ac27571a1bf618b`.
+The exact release fixture passed, with 607 other tests filtered, in a 43.40-second
+bounded command. Original and retained binary bytes match. Read-only admission
+passed before any SDK start. An earlier producer attempt refused an incorrectly
+supplied expected SHA before Cargo; its failed receipt remains retained.
+
+After selecting and reserving the campaign in #41, all eight macOS commands passed
+using the checksum-pinned official 8.5.3 SDK. Four actual/literal screenshot pairs
+cover shared and independent-copy states at 1280x720 and 1024x768. All have zero
+differing pixels. Independent runtime text checks show two `Shared edited` uses
+before copy, and `Shared edited` plus `Independent copy` afterward. Raw logs, exact
+eight-command order, case identity and screenshot hashes were independently audited;
+the coordinator also inspected the independent-copy image. Owned cleanup completed.
+Runtime result SHA-256 is `259cb8674dbbadc273f7f10dbfb3e70762524c8da221601d1f82d7b15091ff55`.
+Ignored evidence remains under `.toolchains/component-sdk-macos-01`; #41 owns the
+single ceiling/accounting record. No extra Mac repetition is selected. This proves
+accepted core output in the macOS SDK, not UI/controller, Windows or physical input.

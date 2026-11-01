@@ -44,9 +44,14 @@ found finalization masking, incomplete duration admission and missing original
 artifact hashing. The coordinator reproduced and fixed them; 17 cheap checks pass,
 including preservation of the original interruption and both original/retained
 binary identity. One reported CARGO_HOME mismatch was contradicted by the existing
-filter, with a focused check confirming the configured home reaches Cargo. A fresh
-committed producer freeze is next before component SDK execution.
-No component SDK allowance is selected. No package/native editor/CI operation
+filter, with a focused check confirming the configured home reaches Cargo. The fresh public producer at `a97858c` passes exact fixture/admission and retains
+original/retained binary hashes. The first component macOS campaign passes all eight
+commands and four image pairs at two sizes, with zero pixel differences and correct
+shared/copy text. #41 owns its selected SDK ceiling and cumulative use. The first
+producer attempt refused before Cargo because the coordinator supplied an incorrect
+expected SHA; that failed receipt remains retained and consumed no SDK start.
+Component SDK evidence is under `.toolchains/component-sdk-macos-01`; no further
+Mac repeat is selected without changed or unresolved behavior. No package/native editor/CI operation
 has started. L08's coherent worker release suite
 passed 549 cases; L09's earlier ordinary release-core
 candidate `7aa82d1` passed 531 cases; the later comment correction and combined
