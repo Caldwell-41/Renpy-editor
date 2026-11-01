@@ -1,31 +1,32 @@
 # Current outcome handover
 
-## Selected Phase 3B audit corrections
+## Audit correction merge and workspace closeout
 
-Continue on `codex/phase3b-audit-fixes` and
-[draft PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75), based on
-`c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. The original fixes passed at `af8c0bf`;
-the three review corrections passed both-target qualification ordinal 4 at
-`aee7475`. The [latest terminal receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6552700639)
-owns audited results. Prior pending ordinal-4 directions are superseded.
+Kris selected squash merging [PR #75](https://github.com/Caldwell-41/Renpy-editor/pull/75)
+and cleaning completed workspaces/branches. Merge `b7cb3a40f95857168e2fd4db89e3f51072ac705f`
+is on `codex/phase3b-screen-designer`. Its tree exactly matches audited candidate
+`2701156cf7522fdfe27fc51b077054d9ef102254`. The primary checkout is current on the
+integration branch. The [final terminal receipt](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6553735694)
+owns Windows/macOS qualification ordinal 5, automatic quality and artifact audit.
+All twelve selected fixes and four review corrections are complete. CI consumption
+is 5/5 and closed; earlier failed/cancelled attempts and original SDK scope remain.
+No external wait or merge remains pending for this outcome.
 
-Kris selected the full-PR review's compiled-file matching correction, a PR update
-and one further CI run. The public-API test fails for `.rpyC` before the fix and
-passes afterward. Project scanning and the creation response share the matching
-rule. The [task](../tasks/active/phase-3b-audit-fixes.md) owns acceptance and the
-[evidence section](../tasks/evidence/phase-3b-audit-fixes.md#compiled-file-matching-correction)
-owns verification and cumulative limits. Four qualification dispatches remain
-consumed; one ordinal-5 dispatch is selected. The PR update receipt owns the
-published candidate, run/attempt, confirmed watcher registration and later audit.
-On resume, audit both jobs, required named cases, retained executables, manifests,
-privacy and exact source identity before closure.
+The [archived brief](../tasks/archive/2026-11-01-phase-3b-audit-fixes.md) owns bounded
+acceptance; [closeout evidence](../tasks/evidence/phase-3b-audit-fixes.md#merge-and-workspace-retirement)
+owns merge identity, branch equivalence and retirement. Seven clean worker
+worktrees, ten local branches and four merged remote branches were removed.
+Original commits and 131 unique evidence files are hash-preserved under ignored
+`.toolchains/retired-worktrees/pr75/`. Only local `main` and the Screens integration
+branch remain; the remote Dependabot branch remains with open PR #69. The
+unrelated untracked audit and protected recovery below are intact. Existing
+status-file size exceptions preserve unique historical recovery.
 
-No merge, additional SDK/helper start, package or native operation is selected.
-Prior SDK proof retains its original source and scope; each host used two of four
-helper starts. Findings #1, #3, #7, #10, #13 and #15 stay excluded. Preserve the
-unrelated untracked audit and protected recovery below. The existing status-file
-size exceptions retain unique recovery records. No separate maintenance issue
-was published after the original automatic approval rejection.
+Recommend [L08 #41: Reuse an owned component](https://github.com/Caldwell-41/Renpy-editor/issues/41)
+next. Its only work-ticket prerequisite, L02 #37, is accepted/closed; the
+parent and B03 group retain aggregate acceptance. No successor is selected.
+On selection, read #22, #25 and #41 plus applicable design/implementation contracts.
+Canvas remains deferred. No new SDK/helper, package, native or CI allowance is open.
 
 ## Connected native testing policy closeout
 
@@ -70,31 +71,20 @@ and evidence preservation. Original commits and 23 unique files are hash-preserv
 in the ignored retirement archive. Remote refs, unrelated task work, the untracked
 audit and protected native recovery remain intact. No L07 external wait is pending.
 
-## Text ownership cleanup review ready
+## Text ownership cleanup merged
 
-Kris selected architecture candidate 1 and a new branch on 2026-10-30.
-`codex/single-text-draft-owner`, based on `d990298`, is `review_ready` for
-integration into `codex/phase3b-screen-designer`. `ScreenText`
-owns existing-text drafts; the composer retains structural editing. The core
-`text` command and combined Apply ownership are unchanged.
+[PR #71](https://github.com/Caldwell-41/Renpy-editor/pull/71) merged as `e9e8661`;
+its tree exactly matches final head `28e0675`. Its completed local/remote branch
+was retired during PR #75 cleanup after integration verification. Original commits
+remain in the PR #75 retirement bundle.
 
-All 277 frontend tests, the production build and actual font controller/core journey
-pass. The journey reproduces and then verifies the hierarchy Enter correction;
-the first full-suite Python environment failure is retained separately.
-[The maintenance record](../tasks/evidence/screen-text-ownership.md) owns commands,
-evidence paths and qualification limits. Independent Standards and Spec reviews of
-`15477b5` each report zero findings. Kris selected push, PR creation and automatic
-`Repository quality` CI. [PR #71](https://github.com/Caldwell-41/Renpy-editor/pull/71)
-is published; [run 41020933759, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41020933759/attempts/1)
-passes at exact head `216590d`. Both required jobs, every executed step and its
-logs are audited, including 277 frontend passes and pinned Rust formatting.
-Nine unselected specialist jobs are skipped. No fix or retry is pending.
-The audit closeout changes documentation only; later automatic check identities
-and audits remain in the PR and ignored receipts without another receipt-only commit.
-The next action is user review. Merge and broader acceptance remain unselected.
-The unrelated audit and all
-protected recovery below are intact; historical closed allowances stay closed.
-The status files retain their existing size exception for unique recovery evidence.
+[Maintenance evidence](../tasks/evidence/screen-text-ownership.md) retains the
+hierarchy Enter correction, 277 frontend tests, production build, actual font
+controller/core journey and original Python environment failure. Independent
+Standards and Spec reviews at `15477b5` found no issues; [automatic run 41020933759](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41020933759/attempts/1)
+passed at `216590d` with both required jobs and every executed step audited.
+Later automatic identities remain in PR #71. No continuation or merge is pending;
+protected recovery and wider acceptance limits remain unchanged.
 
 ## L05 merge and workspace closeout
 

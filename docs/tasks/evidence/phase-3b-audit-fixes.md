@@ -1,6 +1,6 @@
 # Phase 3B audit-fix evidence
 
-The [maintenance task](../active/phase-3b-audit-fixes.md) owns scope and acceptance.
+The [maintenance task](../archive/2026-11-01-phase-3b-audit-fixes.md) owns scope and acceptance.
 Observation begins 2026-11-01 at fetched base
 `c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. The local integration branch is
 `codex/phase3b-audit-fixes`; the fast-forward check found no divergence.
@@ -407,3 +407,56 @@ cumulative consumption and watcher registration. Exact-head required jobs and
 retained evidence require terminal audit before closure. Prior SDK results remain
 bound to their original source and scope; they do not establish a new-head SDK
 qualification. No merge or wider acceptance is selected.
+
+## Merge and workspace retirement
+
+Kris selected squash merging PR #75, cleaning completed workspaces/branches and
+identifying the next ticket. PR #75 merged on 2026-11-01 as
+`b7cb3a40f95857168e2fd4db89e3f51072ac705f` into
+`codex/phase3b-screen-designer`. Its tree is
+`3285068cc41eb0a8a908402f4d146c528405e04e`, identical to audited head
+`2701156cf7522fdfe27fc51b077054d9ef102254`. The branch was mergeable with a green
+required status; the merge matched that exact head and bypassed no check.
+
+The [final terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/75#issuecomment-6553735694)
+confirms ordinal-5 qualification 41274553889, attempt 1, and automatic quality
+41274588222 at that candidate. Both artifacts pass archive hashes, all 46 manifest
+entries each, all 734 source inputs and retained executable hashes/architectures.
+Both targets pass 305 frontend cases, 108 Screens cases, all ten audit markers and
+all five controller/core journeys. Existing specialist/SDK ignores retain their
+scope. Cumulative dispatch consumption is 5/5 and closed. No new test campaign,
+SDK/helper start, package or native operation ran during merge/cleanup.
+
+All seven completed worker worktrees were source-clean and had only commits
+patch-equivalent to the audited branch. No other T3 task was running. Their 131
+unique evidence files were copied and SHA-256 verified before removal. The
+verified bundle and retirement manifest under ignored
+`.toolchains/retired-worktrees/pr75/` preserve original worker and completed
+branch commits, exact heads, equivalence results and every saved file hash.
+Regenerable dependency/build directories were discarded; evidence and shared
+primary-checkout toolchains were preserved.
+
+The seven worker branches and local `codex/phase3b-audit-fixes`,
+`codex/ci-validation` and `codex/single-text-draft-owner` were retired. The latter
+two match their merged PR #73/#71 trees exactly, and both merge commits are
+ancestors of the current integration branch. Remote branches for those three
+completed outcomes and `codex/l07-shared-looks` were deleted after head verification.
+L07's remote head `9be475b` exactly matches PR #72's merge tree at `58dfae4`;
+that merge is also in the integration branch. The recovery bundle contains all
+eleven retired branch references. Original history was not rewritten.
+
+Only the primary worktree and local `main`/Screens integration branches remain.
+The remote main/integration branches and open Dependabot PR #69 are retained.
+The unrelated untracked audit and all protected native recovery remain intact.
+The completed maintenance brief is archived; CURRENT/HANDOVER replace the old
+pending directions and retain their existing size exceptions for unique recovery.
+The documentation closeout is separate from the tested merge tree and changes
+no production code. It uses a temporary PR branch because the integration branch
+requires `Loomlight validation` for every commit. Its validation plan selects only
+ordinary automatic quality; no historical qualification is reopened. Repository
+validation and link/whitespace checks cover the records, and the closeout PR owns
+its automatic-check and temporary-branch retirement receipt.
+
+Recommend L08 #41 next. Its L02 #37 prerequisite is accepted/closed in the issue
+body and native dependency record. P3B #22 and B03 #25 retain broader acceptance.
+The recommendation does not select implementation or a new operation allowance.
