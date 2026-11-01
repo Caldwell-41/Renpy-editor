@@ -1,0 +1,20 @@
+import type { LabScreen } from "../../contracts.ts";
+
+export const definition: Omit<LabScreen, "approval"> = {
+  id: "components-and-help-panel", title: "Components and Help panel · #41 / #44", kind: "prototype",
+  description: "Three connected draft workflows. All source, history, reference changes and play stay in browser memory. No project or Ren'Py execution.",
+  states: [
+    { id: "group", title: "Start with a supported group" },
+    { id: "shared", title: "Component in two screens" },
+    { id: "starter", title: "Create a Help panel" },
+    { id: "story", title: "Show / Hide in Story" },
+    { id: "conflict", title: "Retained conflicting draft" },
+    { id: "missing", title: "Missing component reference" },
+  ],
+  variants: [
+    { id: "inspector", title: "A · Inspector and review dialog", load: () => import("./inspector.ts") },
+    { id: "library", title: "B · Component library", load: () => import("./library.ts") },
+    { id: "worksheet", title: "C · Review below the preview", load: () => import("./worksheet.ts") },
+  ],
+  check: "./screens/components-and-help-panel/check.mjs",
+};

@@ -1,0 +1,80 @@
+# Draft review notes
+
+No user design decision has been recorded. These are browser mock checks, not
+product acceptance or approval. Existing approved reference files are unchanged.
+
+## Current checks
+
+- The screen-local TypeScript check passes with the inherited strict lab options.
+- The approval-history/source/capture validator passes. All three candidates remain drafts.
+- Offline Chromium 153.0.8010.12 passes 72 layout cases: three variants, six states,
+  both themes, and 1100 by 720 / 560 by 640 CSS viewports.
+- Every focused interaction passes for A, B and C, including component extraction,
+  name collision refusal, component/parent picker, insertion, explicit shared-use
+  review, shared Apply, independent copy, sample Source, history, reopen, retained
+  conflict drafts, more typing while stale, editor Escape, unavailable component,
+  Help creation, image sizing, local Close editing, Show/Hide Beats, exact Beat Source,
+  continued dialogue, outside click, Close/Hide/game Escape and focus, and renamed
+  panel refusal. Compact review remains usable without horizontal overflow.
+- The final inline HTML preview at 728 pixels wide reports no browser console errors.
+- `git diff --check` passes.
+
+The complete lab TypeScript check fails in the unchanged approved-reference file
+`app/design-lab/screens/shared-look/editor.ts:251` with TS7053, a `string | number`
+index into the appearance-field labels. This screen's focused check excludes that
+unrelated module. The full `design:check` gate is not claimed as passing; promotion
+must run it and preserve or resolve that separate gap through its owner. No package,
+native, SDK, installation, CI dispatch or production implementation was performed.
+
+## Corrections during this draft
+
+Local ignored evidence is under `.toolchains/components-and-help-panel/`.
+The first sandboxed browser launch failed at macOS process registration. A disposable
+browser outside that sandbox subsequently ran the checks; no protected profile or
+native state was changed.
+
+`review-01.log` retains the first 72-case matrix and a check failure that tried to
+click Component Source inside a closed disclosure. `interactions-02.log` retains
+the same locator mistake for Reopen sample. The checks now open those disclosures.
+`interactions-03.log` caught a real mock defect: Connect refused playback after a
+target rename but did not display the error. Connect now shows that refusal.
+Disclosure open state also survives typing and draft rerenders.
+
+`review-04.log` and `review-05.log` pass all 72 cases and focused interactions.
+The latter checks a shorter compact shell with a visible Apply footer and a shorter
+worksheet preview. `interactions-06.log` passes after playback began using accepted
+sample content. `review-07.log` is the final 72-case and interaction pass after a
+canvas-fit correction. `report.json` and `interactions.json` retain current results.
+Earlier failures remain in their named logs; they are not passes.
+
+[Draft captures](draft-captures.json) identify 23 retained PNGs by hash and viewport.
+They include all three dark wide/compact baselines, affected-screen reviews,
+retained conflict drafts, playback with dialogue continuing, plus A's light
+baselines, New screen, Story and missing component. Their source identity belongs
+to the committed draft candidate. Approval will require Kris's explicit revision
+selection and the source/capture steps in Design Lab INTEGRATION.
+
+## Remaining simulations and deliberate limits
+
+All source generation, writes, revisions, history and reopen use a fictional model.
+There is no real source parser, ownership migration or durable storage. Source
+revision admission is deliberately coarse in this mock. References/effects identify
+the required concerns without defining new production request fields.
+
+The component sample supports one use per eligible frame and one shared definition
+plus independent copies. Insertion has an explicit parent control with one eligible
+parent in each fictional screen. The actual implementation must use its supported
+parent choices and keep opaque neighbors. The mock leaves existing surrounding
+screen content in place during insertion. Creating an independent copy requires
+applying or cancelling an existing draft first, with a visible refusal and no loss.
+
+The ordinary-node dialog exercises selected existing fields, not the entire
+production editor. Broader existing layout, Style, image import, add/remove,
+reordering and canvas interactions retain their earlier owners and approved designs.
+The screen picker separates owned panels from components. No blocking-screen or
+Call/Finish workflow is added.
+
+Playback uses browser controls to demonstrate the desired behavior. Its focus trap
+is an HTML dialog, not Ren'Py. Source-backed transaction/history/reopen and actual
+Ren'Py rendering, Escape and keyboard focus still require the ticket workers' and
+coordinator's evidence. This design-only chat supplies none of that qualification.

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "components-and-help-panel",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "inspector-v1", "variantId": "inspector", "approval": null },
+    { "id": "library-v1", "variantId": "library", "approval": null },
+    { "id": "worksheet-v1", "variantId": "worksheet", "approval": null }
+  ]
+}
