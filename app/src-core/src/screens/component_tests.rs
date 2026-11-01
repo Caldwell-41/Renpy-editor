@@ -1010,17 +1010,105 @@ fn shared_component_text_noop_has_no_history_and_changed_apply_updates_both_uses
 fn incomplete_inclusion_graph_refuses_placement_even_into_an_owned_panel() {
     let (fixture, component, _) = Fixture::with_component();
     let target = fixture.create_screen("other");
-    fs::write(fixture.root.join("game/ui/opaque.rpy"), "screen opaque():\n    use expression chosen_screen\n").unwrap();
-    let before = fixture.service.screens_list(&fixture.project, &fixture.project_id).unwrap();
+    fs::write(
+        fixture.root.join("game/ui/opaque.rpy"),
+        "screen opaque():\n    use expression chosen_screen\n",
+    )
+    .unwrap();
+    let before = fixture
+        .service
+        .screens_list(&fixture.project, &fixture.project_id)
+        .unwrap();
     let source = fixture.read(&target.path).text;
-    let result = fixture.service.screens_component_place(&fixture.project, &fixture.project_id, PlaceRequest {
-        component:binding(&component),expected_component:fixture.revisions(&component),target:binding(&target),expected_target:fixture.revisions(&target),parent_id:target.root_id.clone(),
-    });
-    assert!(result.is_err(), "unaccounted graph admitted placement: {result:?}");
-    let after = fixture.service.screens_list(&fixture.project, &fixture.project_id).unwrap();
+    let result = fixture.service.screens_component_place(
+        &fixture.project,
+        &fixture.project_id,
+        PlaceRequest {
+            component: binding(&component),
+            expected_component: fixture.revisions(&component),
+            target: binding(&target),
+            expected_target: fixture.revisions(&target),
+            parent_id: target.root_id.clone(),
+        },
+    );
+    assert!(
+        result.is_err(),
+        "unaccounted graph admitted placement: {result:?}"
+    );
+    let after = fixture
+        .service
+        .screens_list(&fixture.project, &fixture.project_id)
+        .unwrap();
     assert_eq!(after.inventory_revision, before.inventory_revision);
     assert_eq!(after.source_map_revision, before.source_map_revision);
     assert_eq!(fixture.read(&target.path).text, source);
+}
+
+#[test]
+fn component_review_lists_both_affected_screens_and_exact_use_source_locations() {
+    let (mut fixture, component, _) = Fixture::with_component();
+    let second = fixture.create_screen("other");
+    fixture
+        .service
+        .screens_component_place(
+            &fixture.project,
+            &fixture.project_id,
+            PlaceRequest {
+                component: binding(&component),
+                expected_component: fixture.revisions(&component),
+                target: binding(&second),
+                expected_target: fixture.revisions(&second),
+                parent_id: second.root_id.clone(),
+            },
+        )
+        .unwrap();
+    fixture.service.unregister_project(&fixture.project);
+    fixture.service = AuthoringService::default();
+    fixture.project = fixture.service.register_project(&fixture.root).unwrap();
+    let before = fixture
+        .service
+        .screens_list(&fixture.project, &fixture.project_id)
+        .unwrap();
+    let review = fixture
+        .service
+        .screens_component_review(&fixture.project, &fixture.project_id, &component.id)
+        .unwrap();
+    assert!(review.complete);
+    assert_eq!(review.component.revisions, fixture.revisions(&component));
+    assert_eq!(
+        review
+            .affected_screens
+            .iter()
+            .map(|owner| owner.screen.id.as_str())
+            .collect::<HashSet<_>>(),
+        HashSet::from([fixture.owner.id.as_str(), second.id.as_str()])
+    );
+    assert!(review.affected_screens.iter().all(|owner| owner.resolved));
+    assert_eq!(review.uses.len(), 2);
+    for usage in &review.uses {
+        assert!(usage.resolved);
+        assert_eq!(usage.component_id, component.id);
+        let source = fixture.read(&usage.path);
+        assert_eq!(usage.source_revision.as_ref(), Some(&source.base_revision));
+        let span = usage.span.as_ref().unwrap();
+        assert_eq!(
+            source.text.unwrap()[span.start..span.end].trim(),
+            format!("use shared_content # loomlight-element: {}", usage.node_id)
+        );
+    }
+    let after = fixture
+        .service
+        .screens_list(&fixture.project, &fixture.project_id)
+        .unwrap();
+    assert_eq!(after.source_map_revision, before.source_map_revision);
+    assert_eq!(after.inventory_revision, before.inventory_revision);
+    assert!(
+        !fixture
+            .service
+            .scene_workspace(&fixture.project, &fixture.project_id)
+            .unwrap()
+            .can_undo
+    );
 }
 
 #[test]

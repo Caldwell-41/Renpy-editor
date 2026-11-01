@@ -43,6 +43,28 @@ pub struct ComponentChange {
     pub use_id: String,
 }
 
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReviewedUse {
+    pub screen_id: String,
+    pub component_id: String,
+    pub node_id: String,
+    pub path: String,
+    pub screen_name: String,
+    pub span: Option<Span>,
+    pub source_revision: Option<String>,
+    pub resolved: bool,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ComponentReview {
+    pub component: references::ResolvedScreenTarget,
+    pub affected_screens: Vec<ownership::OwnedReference>,
+    pub uses: Vec<ReviewedUse>,
+    pub complete: bool,
+}
+
 fn reindent(source: &str, indentation: usize) -> Result<String, SceneError> {
     let original = source.bytes().take_while(|b| *b == b' ').count();
     let prefix = " ".repeat(original);
@@ -61,29 +83,25 @@ fn reindent(source: &str, indentation: usize) -> Result<String, SceneError> {
         .collect()
 }
 
-fn prevent_cycle(
-    map: &crate::metadata::SourceMapMetadata,
-    component: &str,
-    target: &str,
+/// Check the actual proposed graph without changing the captured companion base.
+fn check_created_graph(
+    prepared: &mut ownership::PreparedOwnedScreenCreate,
+    companion: &FileMutation,
 ) -> Result<(), SceneError> {
-    let mut pending = vec![(component, 0)];
-    let mut visited = HashSet::new();
-    while let Some((id, depth)) = pending.pop() {
-        if id == target {
-            return Err(SceneError::ReferenceBlocked);
-        }
-        if depth > MAX_DEPTH || visited.len() >= MAX_NODES {
-            return Err(SceneError::InvariantBlocked);
-        }
-        if !visited.insert(id) {
-            continue;
-        }
-        pending.extend(
-            map.component_uses
-                .iter()
-                .filter(|usage| usage.screen_id == id)
-                .map(|usage| (usage.component_id.as_str(), depth + 1)),
-        );
+    let index = prepared
+        .inventory
+        .files
+        .iter()
+        .position(|(path, _)| path == companion.path.as_str())
+        .ok_or(SceneError::InvalidPayload)?;
+    let captured = std::mem::replace(
+        &mut prepared.inventory.files[index].1,
+        companion.proposed.clone(),
+    );
+    let graph = references::component_graph(&prepared.map, &prepared.inventory);
+    prepared.inventory.files[index].1 = captured;
+    if !graph.complete {
+        return Err(SceneError::OpaqueBoundary);
     }
     Ok(())
 }
@@ -109,6 +127,103 @@ pub struct PreparedGroup {
 }
 
 impl AuthoringService {
+    pub fn screens_component_review(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        component_id: &str,
+    ) -> Result<ComponentReview, SceneError> {
+        let inventory = self.screen_inventory(project)?;
+        let owner = inventory
+            .source_map
+            .owned_screens
+            .iter()
+            .find(|owner| owner.id == component_id && owner.kind == OwnedScreenKind::Component)
+            .ok_or(SceneError::ReferenceBlocked)?;
+        let component = self.screens_resolve_target(
+            project,
+            project_id,
+            &ScreenTargetBinding {
+                screen_id: owner.id.clone(),
+                source_name: owner.name.clone(),
+            },
+            None,
+        )?;
+        if inventory.revision != component.revisions.inventory
+            || inventory.source_map_revision != component.revisions.source_map
+        {
+            return Err(SceneError::SourceConflict);
+        }
+        let graph = references::component_graph(&inventory.source_map, &inventory);
+        let mut affected = HashSet::from([component_id.to_owned()]);
+        loop {
+            let previous = affected.len();
+            for usage in &graph.uses {
+                if affected.contains(&usage.component_id) {
+                    affected.insert(usage.screen_id.clone());
+                }
+            }
+            if previous == affected.len() {
+                break;
+            }
+        }
+        let mut affected_screens = inventory
+            .source_map
+            .owned_screens
+            .iter()
+            .filter(|owner| owner.id != component_id && affected.contains(&owner.id))
+            .map(|owner| {
+                let resolved = ownership::resolves(owner, &inventory);
+                ownership::OwnedReference {
+                    screen: owner.clone(),
+                    resolved,
+                    source_revision: if resolved {
+                        graph
+                            .uses
+                            .iter()
+                            .find(|usage| usage.screen_id == owner.id)
+                            .and_then(|usage| usage.source_revision.clone())
+                    } else {
+                        None
+                    },
+                }
+            })
+            .collect::<Vec<_>>();
+        affected_screens.sort_by(|a, b| a.screen.name.cmp(&b.screen.name));
+        let mut uses = graph
+            .uses
+            .into_iter()
+            .filter(|usage| affected.contains(&usage.component_id))
+            .map(|usage| ReviewedUse {
+                screen_id: usage.screen_id,
+                component_id: usage.component_id,
+                node_id: usage.node_id,
+                path: usage.path,
+                screen_name: usage.screen_name,
+                span: usage.span,
+                source_revision: usage.source_revision,
+                resolved: usage.resolved,
+            })
+            .collect::<Vec<_>>();
+        uses.sort_by(|a, b| {
+            a.path
+                .cmp(&b.path)
+                .then_with(|| {
+                    a.span
+                        .as_ref()
+                        .map(|s| s.start)
+                        .cmp(&b.span.as_ref().map(|s| s.start))
+                })
+                .then_with(|| a.node_id.cmp(&b.node_id))
+        });
+        Ok(ComponentReview {
+            component,
+            affected_screens,
+            uses,
+            complete: graph.complete,
+        })
+    }
+
     pub fn screens_component_copy(
         &self,
         project: &ProjectId,
@@ -163,7 +278,22 @@ impl AuthoringService {
             return Err(SceneError::ReferenceBlocked);
         }
         if target.kind == OwnedScreenKind::Component {
-            self.ensure_component_users_clean(project, project_id, &target.binding.screen_id)?;
+            self.require_component_write_review(
+                project,
+                project_id,
+                &target.binding,
+                &request.expected_target,
+            )?;
+        }
+        let inventory = self.screen_inventory(project)?;
+        if inventory.revision != target.revisions.inventory
+            || inventory.revision != component.revisions.inventory
+        {
+            return Err(SceneError::SourceConflict);
+        }
+        let graph = references::component_graph(&inventory.source_map, &inventory);
+        if graph.would_cycle(&component.binding.screen_id, &target.binding.screen_id)? {
+            return Err(SceneError::ReferenceBlocked);
         }
         let (component_bytes, component_revision) = self
             .transactions
@@ -247,11 +377,6 @@ impl AuthoringService {
                 Ok(source)
             },
         )?;
-        prevent_cycle(
-            &prepared.map,
-            &component.binding.screen_id,
-            &target.binding.screen_id,
-        )?;
         let mut copied_uses = vec![];
         for usage in prepared
             .map
@@ -291,18 +416,15 @@ impl AuthoringService {
             prepared.owner.name.bytes(),
         );
         let component_id = prepared.owner.id.clone();
-        self.commit_owned_screen_create(
-            project,
-            project_id,
-            prepared,
-            vec![FileMutation {
-                path: path(&target.path)?,
-                kind: MutationKind::ReplaceExisting,
-                base: revision,
-                expected_bytes: bytes,
-                proposed,
-            }],
-        )?;
+        let companion = FileMutation {
+            path: path(&target.path)?,
+            kind: MutationKind::ReplaceExisting,
+            base: revision,
+            expected_bytes: bytes,
+            proposed,
+        };
+        check_created_graph(&mut prepared, &companion)?;
+        self.commit_owned_screen_create(project, project_id, prepared, vec![companion])?;
         Ok(ComponentChange {
             component_id,
             screen_id: request.target.screen_id,
@@ -334,7 +456,12 @@ impl AuthoringService {
         self.ensure_source_paths_clean(project, [component.path.as_str(), target.path.as_str()])
             .map_err(|_| SceneError::DirtySource)?;
         if target.kind == OwnedScreenKind::Component {
-            self.ensure_component_users_clean(project, project_id, &target.binding.screen_id)?;
+            self.require_component_write_review(
+                project,
+                project_id,
+                &target.binding,
+                &request.expected_target,
+            )?;
         }
         let (mut map, map_bytes, map_revision, _) = self.screen_metadata(project, project_id)?;
         if map_revision.sha256 != target.revisions.source_map
@@ -342,11 +469,16 @@ impl AuthoringService {
         {
             return Err(SceneError::SourceConflict);
         }
-        prevent_cycle(
-            &map,
-            &component.binding.screen_id,
-            &target.binding.screen_id,
-        )?;
+        let inventory = self.screen_inventory(project)?;
+        if inventory.revision != target.revisions.inventory
+            || inventory.revision != component.revisions.inventory
+        {
+            return Err(SceneError::SourceConflict);
+        }
+        let graph = references::component_graph(&map, &inventory);
+        if graph.would_cycle(&component.binding.screen_id, &target.binding.screen_id)? {
+            return Err(SceneError::ReferenceBlocked);
+        }
         let (bytes, revision) = self
             .transactions
             .snapshot(project, path(&target.path)?)
@@ -443,6 +575,22 @@ impl AuthoringService {
             &request.target,
             Some(&request.expected),
         )?;
+        if target.kind == OwnedScreenKind::Component {
+            self.require_component_write_review(
+                project,
+                project_id,
+                &target.binding,
+                &request.expected,
+            )?;
+        }
+        let inventory = self.screen_inventory(project)?;
+        if inventory.revision != target.revisions.inventory {
+            return Err(SceneError::SourceConflict);
+        }
+        let graph = references::component_graph(&inventory.source_map, &inventory);
+        if !graph.complete {
+            return Err(SceneError::OpaqueBoundary);
+        }
         let group = self.prepare_extract_group(
             project,
             project_id,
@@ -471,6 +619,9 @@ impl AuthoringService {
             OwnedScreenKind::Component,
             |owner| Ok(format!("screen {}():{newline}{body}", owner.name).into_bytes()),
         )?;
+        if graph.would_cycle(&prepared.owner.id, &group.screen_id)? {
+            return Err(SceneError::ReferenceBlocked);
+        }
         let moved_ids = source_lines(group.source.as_bytes())?
             .into_iter()
             .filter_map(|line| line.element_id)
@@ -502,18 +653,15 @@ impl AuthoringService {
         );
         proposed.splice(group.span.start..group.span.end, replacement.bytes());
         let component_id = prepared.owner.id.clone();
-        self.commit_owned_screen_create(
-            project,
-            project_id,
-            prepared,
-            vec![FileMutation {
-                path: path(&group.path)?,
-                kind: MutationKind::ReplaceExisting,
-                base: revision,
-                expected_bytes: bytes,
-                proposed,
-            }],
-        )?;
+        let companion = FileMutation {
+            path: path(&group.path)?,
+            kind: MutationKind::ReplaceExisting,
+            base: revision,
+            expected_bytes: bytes,
+            proposed,
+        };
+        check_created_graph(&mut prepared, &companion)?;
+        self.commit_owned_screen_create(project, project_id, prepared, vec![companion])?;
         Ok(ComponentChange {
             component_id,
             screen_id: group.screen_id,
