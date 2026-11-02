@@ -1228,6 +1228,7 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
 interface BeatEditor { readonly host: HTMLElement; readonly controls: readonly HTMLElement[]; readonly primary: HTMLElement; readonly read: () => BeatPayload; readonly focus: () => void }
 
 function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen" | "hideScreen" }>, existing: boolean, actions?: SceneActions): BeatEditor {
+  const intent = { ...payload.target }, originalRevisions = payload.revisions ? { ...payload.revisions } : undefined;
   const host = document.createElement("div"); host.className = "beat-fields story-screen-fields";
   const picker = document.createElement("select"); picker.setAttribute("aria-label", "Panel screen"); picker.disabled = true;
   const purpose = document.createElement("p"); purpose.textContent = payload.type === "showScreen"
@@ -1238,8 +1239,8 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
   let captured: { target: ScreenTargetBinding; revisions: ScreenRevisions } | undefined;
   let generation = 0;
   const panels = new Map<string, ScreenTargetBinding>();
-  const placeholder = (label: string) => { const option = document.createElement("option"); option.value = payload.target.screenId; option.textContent = label; option.dataset.unavailable = "true"; picker.replaceChildren(option); };
-  placeholder(payload.target.sourceName || "Loading panels…");
+  const placeholder = (label: string) => { const option = document.createElement("option"); option.value = intent.screenId; option.textContent = label; option.dataset.unavailable = "true"; picker.replaceChildren(option); };
+  placeholder(intent.sourceName || "Loading panels…");
   const fail = (error: unknown) => { captured = undefined; message.textContent = `${friendlyError(error, "Panel target unavailable.")} Choose an available panel explicitly. Input retained.`; };
   const resolve = async () => {
     const run = ++generation; captured = undefined;
@@ -1266,7 +1267,6 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
         const option = document.createElement("option"); option.value = screen.id; option.textContent = screen.name; picker.append(option);
         panels.set(screen.id, { screenId: screen.id, sourceName: screen.name });
       }
-      const intent = payload.target;
       const match = owned.find(screen => screen.id === intent.screenId && screen.name === intent.sourceName);
       if (intent.screenId && !match) {
         const option = document.createElement("option"); option.value = ""; option.textContent = `${intent.sourceName} · Unavailable`; option.dataset.unavailable = "true"; picker.prepend(option); picker.value = "";
@@ -1274,9 +1274,9 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
       } else if (!owned.length) { placeholder("No available Panel screens"); fail(Error("Create a Panel in Screens first.")); }
       else if (existing) {
         picker.value = intent.screenId;
-        if (!payload.revisions) fail(Error("The original target is unresolved."));
-        else if (match?.sourceRevision !== payload.revisions.source) fail(Error("The panel changed after this Beat was loaded."));
-        else { captured = { target: { ...intent }, revisions: { ...payload.revisions } }; message.textContent = "Panel ready."; }
+        if (!originalRevisions) fail(Error("The original target is unresolved."));
+        else if (match?.sourceRevision !== originalRevisions.source) fail(Error("The panel changed after this Beat was loaded."));
+        else { captured = { target: { ...intent }, revisions: originalRevisions }; message.textContent = "Panel ready."; }
       } else { if (match) picker.value = match.id; await resolve(); }
       picker.disabled = !owned.length;
     } catch (error) { fail(error); }
@@ -1361,7 +1361,7 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screen
     case "background": return { type, assetId: model.authoring.assets.find((item) => item.kind === "background")?.id ?? "", transition: "none" };
     case "showCharacter": return { type, characterId, appearanceId, placement: "centre", transition: "none" };
     case "hideCharacter": return { type, characterId, transition: "none" };
-    case "showScreen": case "hideScreen": return { type, target: screenHint ?? { screenId: "", sourceName: "" } };
+    case "showScreen": case "hideScreen": return { type, target: screenHint ? { ...screenHint } : { screenId: "", sourceName: "" } };
     case "changeAppearance": return { type, characterId, appearanceId, transition: "none" };
     case "placement": return { type, characterId, placement: "centre" };
     case "dialogue": return { type, characterId, text: "" };

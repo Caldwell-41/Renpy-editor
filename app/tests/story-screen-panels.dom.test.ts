@@ -95,3 +95,38 @@ test("unresolved typed Beat stays protected even when a different Panel has the 
   assert.match(s.host.querySelector('[data-beat-id="unresolved"]')!.textContent!, /Protected source/);
   await s.close();
 });
+
+test("late target resolution cannot replace the author's newer explicit Panel selection", async () => {
+  let finish!: (value: ResolvedScreenTarget) => void;
+  const nextBinding = { screenId: "about-panel", sourceName: "about" };
+  const nextTarget = { ...target, binding: nextBinding, revisions: { ...revisions, source: "about-source" } };
+  const s = setup({ screenCatalog: async () => ({ ...catalog, owned: [...catalog.owned, { ...catalog.owned[2]!, id: nextBinding.screenId, name: nextBinding.sourceName }] }),
+    resolveScreenTarget: async value => value.screenId === binding.screenId ? new Promise(resolve => { finish = resolve; }) : nextTarget });
+  const draft = openNew(s.host, "showScreen"); await tick();
+  const picker = draft.querySelector<HTMLSelectElement>('[aria-label="Panel screen"]')!;
+  picker.value = nextBinding.screenId; picker.dispatchEvent(new Event("change", { bubbles: true })); await tick();
+  finish(target); await tick(); button(draft, "Add Beat").click(); await tick();
+  assert.deepEqual(s.commands[0]!.beat, { type: "showScreen", target: nextBinding, revisions: nextTarget.revisions });
+  await s.close();
+});
+
+test("a new screen draft captures the navigation hint before the asynchronous catalog read", async () => {
+  const hint = { ...binding }; let finish!: (value: ScreenCatalog) => void;
+  const s = setup({ screenHint: hint, screenCatalog: async () => new Promise(resolve => { finish = resolve; }) });
+  const draft = openNew(s.host, "showScreen"); hint.sourceName = "different_name"; finish(catalog); await tick();
+  button(draft, "Add Beat").click(); await tick();
+  assert.deepEqual(s.commands[0]!.beat, { type: "showScreen", target: binding, revisions });
+  await s.close();
+});
+
+test("existing Show draft captures its workspace revisions before catalog refresh settles", async () => {
+  const supplied = { ...revisions }, base = fixture(); let finish!: (value: ScreenCatalog) => void;
+  const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [
+    { id: "show", byteStart: 20, byteEnd: 47, protected: false, payload: { type: "showScreen", target: binding, revisions: supplied } }, base.scenes[0]!.beats[1]!,
+  ] }] };
+  const s = setup({ screenCatalog: async () => new Promise(resolve => { finish = resolve; }) }, model);
+  s.host.querySelector<HTMLButtonElement>('[data-beat-id="show"] .beat-select')!.click(); supplied.source = "newer-revision"; finish(catalog); await tick();
+  button(s.host.querySelector('[data-beat-type="showScreen"]')!, "Commit Beat").click(); await tick();
+  assert.deepEqual(s.commands[0]!.beat, { type: "showScreen", target: binding, revisions });
+  await s.close();
+});

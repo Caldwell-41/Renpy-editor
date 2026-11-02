@@ -13,3 +13,4 @@
 .screen-panels-error:empty { display: none; }
 .screen-panels-error, .screen-panels-blocked { color: var(--status-error); }
 .screen-panels-form .screen-create-actions { border-top: 1px solid var(--border-normal); padding-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+.story-screen-fields pre { white-space: pre-wrap; overflow-wrap: anywhere; }
