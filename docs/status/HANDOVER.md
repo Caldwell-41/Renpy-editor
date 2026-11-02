@@ -80,13 +80,22 @@ Rust/Cargo 1.90.0, Node 24.19.0 and runtime Python 3.12.14 with Pillow 12.3.0.
 Private Taildrop delivered the bundle; Windows verified its exact hash and imported
 `31bd8441fdd099ea27ee6f9a66153655a2e90a11` to the new, noncheckedout
 `codex/components-help-windows-source` ref. Primary checkout is unchanged.
-T3 rejects direct remote `isolation:worktree`, so the assigned Windows test session
-must use the dedicated T3 worktree handoff from that exact candidate. The live
-assignment is recorded in `.toolchains/windows-preflight-assignment.json`.
-It owns only ignored outputs, cheap checks and fresh Windows producers. No tracked
-edits, installations or SDK/helper/native/package/CI starts are authorized in this
-stage. Stop if its actual worktree base differs. Do not poll the delegate; completion
-wakes the coordinator. Review returned proof before allocating either SDK campaign.
+T3 rejected direct remote `isolation:worktree`; its dedicated handoff instead created
+`codex/windows-components-help-qualification` at exact `31bd844`. The worktree is
+clean and the archive hash matches. Its first Python preflight ran 27 methods:
+24 passed, two methods produced three simulated-launcher errors and one retention
+method failed. Dependent checks stopped before core/frontend/producers; no SDK ran.
+A narrow Windows probe confirmed the fixture's PATH `cargo.cmd` does not intercept
+native bare-Cargo lookup. Exact Python emitter probes retain the binary correctly.
+The coordinator fixes only the two qualifier test files: supply both launcher
+layouts and directly route the synthetic emitter through the real bounded adapter.
+All 27 local checks pass normally and under `-O`. Preserve the original failed log
+and diagnostic under the Windows worktree's ignored `app/target`.
+Next, privately deliver the correction, fast-forward only the assigned Windows
+worktree after clean-state verification, then rerun the affected cheap preflight
+and create fresh Windows producers. The primary checkout/stash stays untouched.
+All tracked files remain coordinator-owned. No SDK/helper/native/package/CI starts
+are authorized in the preflight stage; review returned receipts before allocation.
 
 Matched-state visual inspection, typechecking and repository validation now pass
 within the detailed evidence's stated scope. The final browser receipts are
@@ -94,8 +103,8 @@ within the detailed evidence's stated scope. The final browser receipts are
 `.toolchains/help-ui/main-final/result.json`. Fourteen component captures cover
 matched wide/compact states with the actual scoped stylesheets. Existing production
 chrome and ordinary node editors remain; this is not a whole-screen pixel-match or
-native acceptance claim. Next, review the Windows worktree/preflight result and fresh producer receipts,
-then select the remaining target SDK checks within each leaf's existing ceiling. Required
+native acceptance claim. After the corrected Windows preflight and fresh producer receipts pass, select
+the remaining target SDK checks within each leaf's existing ceiling. Required
 Windows/CI/native proof remains a gap; do not close either ticket prematurely.
 Remove the coordinator's temporary `app/node_modules` dependency symlink after
 checks without touching primary dependencies. Keep ignored evidence/binaries and

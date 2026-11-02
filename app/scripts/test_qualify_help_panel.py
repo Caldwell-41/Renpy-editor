@@ -217,9 +217,19 @@ class CommandTests(unittest.TestCase):
                 + '    Path(os.environ["FIXTURE_READY"]).write_text("ready")\n'
                 + '    time.sleep(10)\n'
                 + 'sys.exit(int(os.environ["FIXTURE_CARGO_EXIT"]))\n')
-            wrapper = root / 'interrupt-preparation.py'
+            # A PATH cargo.cmd shim does not intercept Windows shell=False lookup.
+            # Keep the real bounded process/retainer and route only this test's emitter.
+            wrapper = root / 'fixture-preparation.py'
             wrapper.write_text('import _thread, os, runpy, sys, threading, time\n'
                 + 'from pathlib import Path\n'
+                + 'sys.path.insert(0, ' + repr(str(gate.REPO / 'spikes/renpy-sdk')) + ')\n'
+                + 'import sdk_adapter\n'
+                + 'bounded = sdk_adapter.run_bounded\n'
+                + 'def fixture_cargo(argv, **options):\n'
+                + '    if tuple(argv[:2]) != ("cargo", "test"):\n'
+                + '        raise AssertionError("unexpected fixture command")\n'
+                + '    return bounded((sys.executable, ' + repr(str(emitter)) + ', *argv[1:]), **options)\n'
+                + 'sdk_adapter.run_bounded = fixture_cargo\n'
                 + 'def interrupt():\n'
                 + '    deadline = time.monotonic() + 5\n'
                 + '    while time.monotonic() < deadline:\n'
@@ -227,26 +237,19 @@ class CommandTests(unittest.TestCase):
                 + '            _thread.interrupt_main()\n'
                 + '            return\n'
                 + '        time.sleep(0.01)\n'
-                + 'threading.Thread(target=interrupt, daemon=True).start()\n'
+                + 'if os.environ["FIXTURE_CARGO_SCENARIO"] == "interrupted":\n'
+                + '    threading.Thread(target=interrupt, daemon=True).start()\n'
                 + 'script = sys.argv.pop(1)\n'
                 + 'runpy.run_path(script, run_name="__main__")\n')
-            if os.name == 'nt':
-                (scripts / 'cargo.cmd').write_text('@"' + sys.executable + '" "' + str(emitter) + '" %*\n')
-            else:
-                shim = scripts / 'cargo'
-                shim.write_text('#!' + sys.executable + '\n' + emitter.read_text())
-                shim.chmod(0o755)
             for scenario, exit_code, expected_state in (
                 ('failed-command', 101, 'compiled'), ('invalid-bundle', 0, 'compiled'),
                 ('missing-binary', 101, 'unavailable'), ('no-compilation', 101, 'not-compiled'),
                 ('interrupted', 0, 'compiled')):
                 output = root / scenario
-                env = dict(os.environ, PATH=str(scripts) + os.pathsep + os.environ.get('PATH', ''),
-                           FIXTURE_CARGO_EXIT=str(exit_code), FIXTURE_BINARY_STATE=expected_state,
+                env = dict(os.environ, FIXTURE_CARGO_EXIT=str(exit_code), FIXTURE_BINARY_STATE=expected_state,
                            FIXTURE_CARGO_SCENARIO=scenario, FIXTURE_READY=str(root / 'ready'),
                            PYTHONDONTWRITEBYTECODE='1')
-                launcher = [sys.executable, str(wrapper)] if scenario == 'interrupted' else [sys.executable]
-                completed = subprocess.run([*launcher, str(gate.REPO / 'app/scripts/qualify-help-panel.py'),
+                completed = subprocess.run([sys.executable, str(wrapper), str(gate.REPO / 'app/scripts/qualify-help-panel.py'),
                     'prepare', '--output', str(output)], env=env, capture_output=True, text=True, timeout=30)
                 self.assertNotEqual(completed.returncode, 0, completed.stdout)
                 result = json.loads((output / 'result.json').read_text())

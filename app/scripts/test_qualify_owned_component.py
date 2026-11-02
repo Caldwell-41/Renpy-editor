@@ -472,19 +472,22 @@ class RuntimeAdmission(unittest.TestCase):
 
 
 class CommandAdmission(unittest.TestCase):
+    def install_mock_sdk(self, archive, digest, destination):
+        sdk = destination / 'renpy-8.5.3-sdk'
+        windows = sdk / 'lib/py3-windows-x86_64'
+        windows.mkdir(parents=True)
+        for path in (sdk / 'renpy.sh', sdk / 'renpy.py', windows / 'python.exe'):
+            path.write_text('mocked launcher boundary; never executed')
+
     def test_missing_runtime_proof_stops_campaign_after_first_run(self):
         with tempfile.TemporaryDirectory() as temporary, producer_machine(Path(temporary)):
             root = Path(temporary)
             prepared, output = prepare_bundle(root), root / 'attempt'
             checksum = root / 'checksums.txt'
             checksum.write_text('# sha256\n' + proof.SDK_SHA + '  renpy-8.5.3-sdk.tar.bz2\n')
-            def fake_install(archive, digest, destination):
-                sdk = destination / 'renpy-8.5.3-sdk'
-                sdk.mkdir(parents=True)
-                (sdk / 'renpy.sh').write_text('mocked launcher only')
             success_without_proof = SimpleNamespace(exit_code=0, output='no proof', timed_out=False,
                                                     output_limited=False, duration_seconds=0.1)
-            with patch.object(proof, 'install_verified_tar', side_effect=fake_install), patch.object(proof, 'run_bounded', return_value=success_without_proof) as launch:
+            with patch.object(proof, 'install_verified_tar', side_effect=self.install_mock_sdk), patch.object(proof, 'run_bounded', return_value=success_without_proof) as launch:
                 with self.assertRaisesRegex(ValueError, 'missing or duplicate runtime proof'):
                     proof.main(['--allow-fixture-execution', '--sdk-process-limit', '8', '--prepared', str(prepared), '--output', str(output),
                                 '--archive', str(root / 'renpy-8.5.3-sdk.tar.bz2'), '--checksums', str(checksum)])
@@ -503,11 +506,7 @@ class CommandAdmission(unittest.TestCase):
                 prepared, output = prepare_bundle(root), root / 'attempt'
                 checksum = root / 'checksums.txt'
                 checksum.write_text('# sha256\n' + proof.SDK_SHA + '  renpy-8.5.3-sdk.tar.bz2\n')
-                def fake_install(archive, digest, destination):
-                    sdk = destination / 'renpy-8.5.3-sdk'
-                    sdk.mkdir(parents=True)
-                    (sdk / 'renpy.sh').write_text('not executable; mocked test boundary only')
-                with patch.object(proof, 'install_verified_tar', side_effect=fake_install), patch.object(proof, 'run_bounded') as launch:
+                with patch.object(proof, 'install_verified_tar', side_effect=self.install_mock_sdk), patch.object(proof, 'run_bounded') as launch:
                     if isinstance(failure, Exception):
                         launch.side_effect = failure
                     else:

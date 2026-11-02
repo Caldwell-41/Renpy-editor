@@ -867,3 +867,43 @@ SDK/helper/native/package/CI start, download or tooling installation. Prior SDK
 consumption remains #41 8/24 and #44 17/27, zero reserved. Candidate-specific
 preflight results and target allocation will follow; neither private delivery nor
 worktree preparation constitutes Windows qualification.
+
+
+## Windows preflight fixture diagnosis, 2026-11-03
+
+T3's dedicated handoff created `codex/windows-components-help-qualification` from
+exact `31bd8441fdd099ea27ee6f9a66153655a2e90a11`; its tree matches the verified
+bundle and tracked state is clean. Windows rehashed the official archive against
+the pin and published checksum. The initial Python preflight ran 27 methods:
+24 passed, two methods produced three errors and one method failed. Dependent core,
+frontend and producer checks stopped. No SDK/helper/native/package/CI started.
+The failed log/receipt remains in the Windows worktree under
+`app/target/windows-preflight-31bd844`.
+
+The component errors come from mocked SDK installations containing only `renpy.sh`.
+The real adapter correctly requires `renpy.py` and its Windows Python executable.
+A coordinator-side loop selecting the Windows adapter path reproduces the same
+three errors in two methods. Supplying both mocked launcher layouts makes that loop
+green without changing the adapter or starting an SDK.
+
+The Help retention method expected compiled evidence but received `not-compiled`.
+A safety-intercepted Windows reproduction captured a bare `cargo test` call through
+`shell=False`. Fixture PATH lookup finds `cargo.cmd`, while native executable lookup
+finds real Cargo. The probe blocked that launch; its injected PermissionError is not
+the original unknown command failure. Explicit shim and exact-Python-emitter probes
+both emitted valid artifact JSON, exited 101 and retained the exact 43-byte synthetic
+binary. This identifies a fixture-resolution defect, not a retention-parser defect.
+Diagnostic manifest SHA-256 is
+`defc4aaa53075096a93900b80cd61168e29073ee09a2bfdee844b114d4839346`.
+Its ignored `retention-diagnostic` directory preserves boundary/argv, failed-result
+and emitter evidence. No real Cargo/compiler/SDK was started by that diagnosis.
+
+The narrow correction is test-only. A child bootstrap routes the expected Cargo
+fixture call directly to `[sys.executable, emitter, ...]` through the existing real
+bounded adapter; the CLI logging, retention, command refusal and interruption
+cleanup still execute. It refuses unexpected command names and never relies on a
+shell shim. All 27 qualifier methods pass locally normally and under `-O` after
+both corrections. Production source, commands, evidence admission and operation
+limits are unchanged. Fresh Windows checks and producer receipts are required after
+private delivery of the correction; the local pass does not relabel the failed
+Windows attempt. SDK totals remain #41 8/24 and #44 17/27, zero reserved.
