@@ -56,15 +56,33 @@ export function workingFingerprint(root) {
 export function committedFingerprint(root, commit) {
   if (!/^[a-f0-9]{40}$/.test(commit)) throw new Error("A full source commit is required.");
   const entries = git(root, ["ls-tree", "-rz", commit, "--", ...roots, ...fixed], "utf8").split("\0").filter(Boolean);
-  const files = [];
+  const objects = [];
   for (const entry of entries) {
     const separator = entry.indexOf("\t");
     const file = entry.slice(separator + 1);
     if (!isDesignSourceInput(file)) continue;
     const [mode, type, object] = entry.slice(0, separator).split(" ");
     if (!["100644", "100755"].includes(mode) || type !== "blob") throw new Error(`Design source must use regular files: ${file}`);
-    files.push([file, git(root, ["cat-file", "blob", object])]);
+    objects.push({ file, object });
   }
+  const batch = execFileSync("git", ["cat-file", "--batch"], {
+    cwd: root, input: objects.map(({ object }) => object + "\n").join(""),
+    stdio: ["pipe", "pipe", "pipe"], maxBuffer: 32 * 1024 * 1024,
+  });
+  const files = [];
+  let offset = 0;
+  for (const { file, object } of objects) {
+    const end = batch.indexOf(10, offset);
+    if (end < 0) throw new Error("Incomplete Design Lab source object header.");
+    const [actual, type, size] = batch.subarray(offset, end).toString("utf8").split(" ");
+    const length = Number(size);
+    if (actual !== object || type !== "blob" || !Number.isSafeInteger(length) || length < 0) throw new Error(`Invalid Design Lab source object: ${file}`);
+    offset = end + 1;
+    if (offset + length >= batch.length || batch[offset + length] !== 10) throw new Error(`Incomplete Design Lab source object: ${file}`);
+    files.push([file, batch.subarray(offset, offset + length)]);
+    offset += length + 1;
+  }
+  if (offset !== batch.length) throw new Error("Unexpected Design Lab source object output.");
   if (!files.length) throw new Error("Source commit contains no Design Lab/frontend inputs.");
   return digest(files);
 }

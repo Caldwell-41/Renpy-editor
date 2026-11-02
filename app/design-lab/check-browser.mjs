@@ -15,6 +15,7 @@ assert.equal(sourceUrl("C:\\sample\\app\\src\\preferences.ts"), "/@fs/C:/sample/
 const report = { basis: "Local browser samples only; no app persistence or native acceptance", cases: [], checks: [], errors: [] };
 const server = await createServer({
   configFile: fileURLToPath(new URL("vite.config.ts", lab)),
+  cacheDir: fileURLToPath(new URL("vite-cache/", output)),
   logLevel: "silent",
   server: { host: "127.0.0.1", port: 0, strictPort: false },
 });

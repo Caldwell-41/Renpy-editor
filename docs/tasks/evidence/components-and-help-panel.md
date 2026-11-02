@@ -564,3 +564,37 @@ source first with identity-only result; pending drafts move only after a verifie
 refresh and fresh-node match, with Apply as a separate history entry. No mock save
 or fabricated revision enters production. All costly-operation records remain in
 the owning GitHub leaves; UI authorization creates no fresh SDK/package/CI ceiling.
+
+## A2 approval integration and first production UI wiring
+
+The exact approval/evidence `eb1f8f61` is integrated with its preserved source and
+captures at `20c7fce8`. The full promotion command failed at initial navigation
+before rendering any cases. Scoped inspection is distinct and does not replace
+that failed gate. Diagnosis measured approval loading at 19,693.85 ms across 22
+records and nine approved source commits. `committedFingerprint` launched Git once
+per blob. A batch object read reduces the same loader plus explicit approved-source
+fingerprint verification to 348.47 ms, retaining the exact A2 fingerprint. Approval
+checks cover real Git/shared source and now include binary/newline and Unicode
+inputs. Browser-check cache output is explicitly worktree-local. The full corrected
+browser gate remains pending; no timeout was increased or approval guard bypassed.
+
+L09's first form/Story checkpoint `10d6dd8e` and `f3a86206` is integrated as
+`13267f1`/`54affa0`. The coordinator wires New screen to its Help/Blank form and real
+catalog-revision-bound creation; accepted creation closes before refresh, so a
+refresh error cannot invite a duplicate write. Use in Story validates the stable
+Panel and navigates to the existing Story Scene with a hint, without inserting a
+Beat. Main supplies real catalog/target callbacks; production bootstrap includes
+the scoped form CSS. Two workspace tests and six form/Story tests pass; the selected
+run including existing Screens tests passes 35 cases. Harness-only DOM selector
+assumptions were corrected without changing product behavior.
+
+The existing real-core owned-screen browser journey passes all eight groups after
+explicit Blank selection in the new form, covering Cancel/Escape/refusal, minimal
+creation, exact Source, Undo/Redo and reopen. Its cache override was added immediately
+after that run; the functional result applies to the unchanged app UI, not a claim
+that the override ran. New source and logs remain under the ignored controller
+output. L09's first form/core import attempt failed before form/Story writes because
+the default synthetic fixture lacked `game/images`. The default image-selection
+hook now prepares that empty fixture directory; no production fallback or guard
+change is added. Selection requires an open project, as existing service admission
+demonstrated in the coordinator's first refused harness invocation.

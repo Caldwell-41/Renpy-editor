@@ -44,6 +44,8 @@ try {
   put("app/src/styles.css", "body { color: teal; }\n");
   put("app/src/icons.ts", "export const icon = 'sample';\n");
   put("app/design-lab/preview.ts", "export const sample = true;\n");
+  put("app/public/route map.png", Buffer.from([0, 255, 10, 0, 13, 10, 42]));
+  put("app/design-lab/labels.json", '{"caption":"夜の案内"}\n');
   put("docs/design/example/approval.json", JSON.stringify(draft));
   const capture = Buffer.from("synthetic capture bytes for identity checks");
   put("docs/design/example/reference.png", capture);

@@ -875,3 +875,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   thirteen adapter tests pass on macOS. A syscall trace separates repeated-kill
   EPERM from a denied initial termination. Windows target evidence remains pending.
 - **Evidence:** [Cancellation correction](../tasks/evidence/components-and-help-panel.md#component-harness-review-and-shared-cancellation).
+
+## H63. Design Lab approval loading exceeds initial navigation deadline
+
+- **Class/search:** browser harness; initial page.goto, 8000 ms, zero cases,
+  approval source fingerprints, per-file Git subprocesses, shared Vite cache.
+- **Cause/correction:** generating virtual approval metadata reads each approved
+  source blob in a separate Git process. The real loader takes 19.7 seconds before
+  the page can load. One bounded batch object read preserves the exact blob bytes
+  and framing checks; the equivalent verification takes 0.35 seconds. The runner
+  also puts its cache under its worktree-local output rather than shared dependencies.
+- **Verification:** real Git/shared-source approval checks pass, including binary
+  newline and Unicode inputs; the exact approved A2 fingerprint remains identical.
+  The full browser gate remains pending. Its original zero-case timeout is failed.
+- **Evidence:** [A2 integration](../tasks/evidence/components-and-help-panel.md#a2-approval-integration-and-first-production-ui-wiring).

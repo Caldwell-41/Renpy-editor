@@ -14,8 +14,10 @@ resolved A versus A2 and Kris chose "A2 — Focused workflow (latest version, sh
 Selected screen `components-and-help-panel`, revision `refined-v1`, variant `refined`,
 source `c0ded415aba484633ac68981c48910afb82a959c`, fingerprint
 `1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08`.
-The prototype owner is recording exact promotion and running the required gate;
-keep its source/captures pinned. Screens owns appearance and Use in Story hands off
+Approval/evidence `eb1f8f61` is integrated at `20c7fce8`; keep source/captures pinned.
+The required full browser gate failed before any cases. Root measured 19.7-second
+per-blob approval Git loading and corrected it to a 0.35-second batch read with the
+identical approved fingerprint; full gate requalification remains pending. Screens owns appearance and Use in Story hands off
 to the existing Story workspace for Show/Hide. UI workers resume after promotion,
 with the shared contracts checkpoint and file boundaries in the evidence record.
 Workers dispatched from `9b7748a`: L08 on `t3/reuse-owned-component` and L09 on
