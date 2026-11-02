@@ -80,22 +80,27 @@ Rust/Cargo 1.90.0, Node 24.19.0 and runtime Python 3.12.14 with Pillow 12.3.0.
 Private Taildrop delivered the bundle; Windows verified its exact hash and imported
 `31bd8441fdd099ea27ee6f9a66153655a2e90a11` to the new, noncheckedout
 `codex/components-help-windows-source` ref. Primary checkout is unchanged.
-T3 rejected direct remote `isolation:worktree`; its dedicated handoff instead created
-`codex/windows-components-help-qualification` at exact `31bd844`. The worktree is
-clean and the archive hash matches. Its first Python preflight ran 27 methods:
-24 passed, two methods produced three simulated-launcher errors and one retention
-method failed. Dependent checks stopped before core/frontend/producers; no SDK ran.
-A narrow Windows probe confirmed the fixture's PATH `cargo.cmd` does not intercept
-native bare-Cargo lookup. Exact Python emitter probes retain the binary correctly.
-The coordinator fixes only the two qualifier test files: supply both launcher
-layouts and directly route the synthetic emitter through the real bounded adapter.
-All 27 local checks pass normally and under `-O`. Preserve the original failed log
-and diagnostic under the Windows worktree's ignored `app/target`.
-Next, privately deliver the correction, fast-forward only the assigned Windows
-worktree after clean-state verification, then rerun the affected cheap preflight
-and create fresh Windows producers. The primary checkout/stash stays untouched.
-All tracked files remain coordinator-owned. No SDK/helper/native/package/CI starts
-are authorized in the preflight stage; review returned receipts before allocation.
+T3's dedicated worktree handoff created `codex/windows-components-help-qualification`.
+It is now clean at corrected candidate `50188c2d15aee8f7838037c9057bf42101a6965e`.
+The initial Python mock-launcher/Cargo-shim failures were corrected in two test files
+only. Windows now passes 27 Python checks normally and under `-O`, typecheck and
+342 app tests. A separate cache-copy error stopped core before compilation. The
+actual existing registry is now copied/verified locally; offline resolution, 21
+release component tests, four debug panel tests and both fresh exporters/admission
+pass. Help's three actual-artifact tests pass. Original failures remain retained.
+Preflight receipt SHA-256 is
+`a99defd83c1cf48523951321d65ec3fa54b07df5300a886c9661915738919485`.
+
+The owning GitHub leaves now select one Windows component eight-launch campaign,
+then one Help nine-launch campaign only after component success/cleanup. SDK pin,
+case plan and time/output limits are unchanged; stop first failure, no retry.
+The single Windows SDK owner writes ignored outputs only. Active assignment is in
+`.toolchains/windows-sdk-assignment.json`; completion wakes this coordinator, so do
+not poll it. Actual start accounting/result audit is pending. Before execution,
+#41 was 8/24 and #44 was 17/27, zero reserved; do not infer current totals from the
+planned maximum. No helper/native editor/package/CI or tracked edit is selected.
+Review the terminal receipts and raw case/image evidence before acceptance or a
+correction selection. Primary checkout and stash must remain unchanged.
 
 Matched-state visual inspection, typechecking and repository validation now pass
 within the detailed evidence's stated scope. The final browser receipts are
@@ -103,8 +108,8 @@ within the detailed evidence's stated scope. The final browser receipts are
 `.toolchains/help-ui/main-final/result.json`. Fourteen component captures cover
 matched wide/compact states with the actual scoped stylesheets. Existing production
 chrome and ordinary node editors remain; this is not a whole-screen pixel-match or
-native acceptance claim. After the corrected Windows preflight and fresh producer receipts pass, select
-the remaining target SDK checks within each leaf's existing ceiling. Required
+native acceptance claim. Next, audit the running Windows campaigns' terminal results and actual starts,
+then resolve the remaining milestone native/CI/publication requirements. Required
 Windows/CI/native proof remains a gap; do not close either ticket prematurely.
 Remove the coordinator's temporary `app/node_modules` dependency symlink after
 checks without touching primary dependencies. Keep ignored evidence/binaries and

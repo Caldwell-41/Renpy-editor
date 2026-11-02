@@ -26,10 +26,11 @@ The existing macOS component SDK proof passes eight commands/four exact image pa
 Help passes six normal-entry runtime cases. No fresh SDK/helper/native/package/CI
 operation is selected by the UI checks. Kris corrected Windows' T3 project-root binding. Private Taildrop delivery and
 verified object import are complete; an existing supported Python includes Pillow.
-The isolated Windows worktree matches the exact imported candidate. Its first
-preflight found simulated-launcher and Cargo-shim portability defects in the Python
-tests. Narrow test-only corrections pass 27 local checks normally and under `-O`;
-Windows requalification and fresh producers are next. No Windows SDK run has started. Neither ticket
+The isolated Windows worktree is at corrected candidate `50188c2`. Its Python
+checks, typecheck, 342 app tests, 21 component tests, four panel tests and fresh
+producer admission pass. Earlier fixture/cache failures remain retained. The selected
+Windows SDK campaigns are running sequentially within the existing issue limits;
+their results and actual start counts are pending. Neither ticket
 is accepted or closed. Source remains local and unpushed.
 [Assignments, results and limits](../tasks/evidence/components-and-help-panel.md)
 retain exact candidates and failed attempts; #41/#44 own cumulative operation counts.

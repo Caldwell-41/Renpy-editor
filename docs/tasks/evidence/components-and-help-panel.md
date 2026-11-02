@@ -907,3 +907,47 @@ both corrections. Production source, commands, evidence admission and operation
 limits are unchanged. Fresh Windows checks and producer receipts are required after
 private delivery of the correction; the local pass does not relabel the failed
 Windows attempt. SDK totals remain #41 8/24 and #44 17/27, zero reserved.
+
+
+## Windows preflight passed and SDK selected, 2026-11-03
+
+Candidate `50188c2d15aee8f7838037c9057bf42101a6965e` is clean in the existing
+Windows qualification worktree. Both Python modes pass all 27 methods; typecheck
+and the ordinary frontend suite pass 342/342. The next core attempt stopped before
+compilation because the worker copied a placeholder cache; it ran zero tests.
+That failed receipt and incorrect cache remain retained.
+
+The corrected cache source contains 293 valid archives, 293 extracted packages and
+473 sparse-index files. `bzip2 0.6.1` archive, source and index match Cargo.lock.
+The copied registry's 12,963 files match the original, which remains unchanged.
+Locked offline resolution passes with Rust/Cargo 1.90.0 and existing MSVC. Public
+release component tests pass 21/21 in 109.72 seconds; debug panel tests pass 4/4 in
+31.58 seconds. Both fresh public-core exporters pass one exact test each, followed
+by prepared admission and three Help actual-artifact checks. No broad core or
+frontend suite was repeated after unchanged passing results. Producer scratch is
+removed; 27 ordinary core temporary entries remain local and recorded. A local
+`.toolchains/target` junction points to this worktree's `app/target` so both existing
+exporters reuse its warm build without source or timeout changes.
+
+Receipt `app/target/windows-cache-recovery-50188c2-20261103/receipt.json` has SHA-256
+`a99defd83c1cf48523951321d65ec3fa54b07df5300a886c9661915738919485`.
+Its artifact manifest binds exact commands, selected/terminal names and retained
+original/copied test executables. Component producer is
+`e47432aa6a825e973cfb5c296076468626b8d9de31e2dafa9bd0101e04aeddf3`, with accepted
+bytes `4c86317a97c2aa4d26d9ad56607b18f969bf93eb7b42a3852c41da1a4c428fe8`.
+Help producing result is
+`f9711381cbcd4925e39e112132585943709270755badf36755712287db9299b0`, with accepted
+manifest `c79cabe017f253eb140e8896b16998f2278e37112cafdc2cd2e79db9a3af0c5f`.
+The component validate-only result keeps SDK `passed:false` and records input
+admission separately; no runtime pass is inferred from preparation.
+
+The coordinator published and verified a Windows SDK selection in each owning leaf
+before delegation. One owner selects exactly eight component launcher commands,
+then nine Help commands only if component results and cleanup pass. Existing limits
+and original cases stay unchanged. Each campaign stops on first failure; no retry,
+extra version/help probe, driver/source change or diagnostic SDK start is allowed.
+Before execution #41 was 8/24 confirmed and #44 was 17/27, zero reserved. Actual
+starts and campaign results remain pending, so no planned maximum is recorded as
+consumed or passed. No helper/native editor/package/CI or source publication is
+selected. Primary checkout, stash, shared registry and previous evidence remain
+protected. `.toolchains/windows-sdk-assignment.json` owns the live delegate pointer.
