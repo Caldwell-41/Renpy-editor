@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { ScreenComponents, type ScreenComponentsHost } from "../src/screen-components.ts";
-import type { CompositionView } from "../src/screen-composition.ts";
-import type { ScreenCatalog, ScreenRevisions, ResolvedScreenTarget } from "../src/screen-contracts.ts";
+import type { CompositionView, CopyDraftParticipant } from "../src/screen-composition.ts";
+import type { ComponentReview, ScreenCatalog, ScreenRevisions, ResolvedScreenTarget } from "../src/screen-contracts.ts";
 import type { ScreenNode } from "../src/screen-ui.ts";
 import type { CoreOperation } from "../src/protocol.ts";
+import { Window } from "happy-dom";
 
 const revisions: ScreenRevisions = {source:"source",sourceMap:"map",inventory:"inventory",effects:"effects"};
 const node = (id:string,kind:string,start:number,parentStart:number|null):ScreenNode => ({id,kind,literal:null,span:{start,end:start+10},parentStart,layout:{},properties:[],protected:[]});
@@ -17,8 +18,8 @@ function fixture() {
   let saved = 0;
   const host:ScreenComponentsHost = {view:()=>view,catalog:()=>catalog,current:()=>true,
     request:async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T> => {calls.push({operation,payload});return (operation==="screens.resolveTarget"?resolved:operation==="screens.componentPrepareExtract"?{screenId:"panel",nodeId:"group",path:view.document.path,sourceRevision:"source",span:{start:20,end:30},source:"    vbox:\n"}:{componentId:"component",screenId:"panel",useId:"use"}) as T;},
-    coordinate:task=>task(),accepted:async()=>view,openDefinition:async()=>view,source:()=>{},redraw:()=>{},note:()=>{},saved:()=>{saved++;}};
-  return {controller:new ScreenComponents(host),host,view,catalog,calls,saved:()=>saved};
+    coordinate:task=>task(),accepted:async()=>{saved++;return view;},openDefinition:async()=>view,source:()=>{},redraw:()=>{},note:()=>{}};
+  return {controller:new ScreenComponents(host),host,view,catalog,calls,saved:()=>saved,markSaved:()=>{saved++;}};
 }
 
 test("extract preparation captures exact Source without writing; naming submits one typed transaction",async()=>{
@@ -45,4 +46,85 @@ test("placement requires an explicit current parent and preserves typed componen
   await h.controller.place("component","group");
   assert.deepEqual(h.calls.at(-1),{operation:"screens.componentPlace",payload:{component:{screenId:"component",sourceName:"route_guide"},expectedComponent:{...revisions,source:"component-source"},target:{screenId:"panel",sourceName:"help"},expectedTarget:revisions,parentId:"group"}});
   assert.equal(h.saved(),1);
+});
+
+function copyFixture() {
+  const h=fixture();
+  const panel=h.view;
+  panel.selected={...node("use","use",20,0),literal:"route_guide",component:{componentId:"component",resolved:true,sourceRevision:"component-source"}};
+  panel.nodes[1]=panel.selected;
+  const definition=(id:string,name:string,revision:string):CompositionView=>{
+    const nodes=[node(id+"-root","screen",0,null),node(id+"-group","vbox",40,0),{...node(id+"-text","text",90,40),literal:"Accepted",textProperties:{values:{size:20},blocked:{}}}];
+    return {document:{path:`game/ui/${name}.rpy`,revision,partial:false,screens:[{name,nodes}]},screenId:id,screenName:name,nodes,selected:nodes[2]!,step:"design",busy:false};
+  };
+  const original=definition("component","route_guide","component-source"), fresh=definition("copy","help_guide","copy-source");
+  h.catalog.owned.push({id:"component",rootId:"component-root",name:"route_guide",path:original.document.path,kind:"component",resolved:true,sourceRevision:"component-source"});
+  const review=(view:CompositionView):ComponentReview=>({component:{binding:{screenId:view.screenId,sourceName:view.screenName},kind:"component",path:view.document.path,rootId:view.nodes[0]!.id!,revisions:{...revisions,source:view.document.revision},effects:{revision:"effects",unknown:false,hiddenScreens:[],dependencies:[]}},affectedScreens:[h.catalog.owned[0]!],uses:[{screenId:"panel",componentId:view.screenId,nodeId:"use",path:panel.document.path,screenName:"help",span:{start:20,end:30},sourceRevision:"source",resolved:true}],complete:true});
+  let current=panel, failRefresh=true, accepted=0, transferred=0, draft="Pending";
+  const events:string[]=[];
+  const participant:CopyDraftParticipant={validate:()=>{events.push("validate");},prepare:(view,ids)=>{
+    assert.equal(view.document.revision,"copy-source");assert.equal(ids.get("component-text"),"copy-text");events.push("prepare");
+    return ()=>{events.push("commit:"+draft);transferred++;};},cancel:()=>{draft="";events.push("cancel");}};
+  h.host.captureDrafts=()=>[participant];h.host.view=()=>current;
+  h.host.request=async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>{
+    h.calls.push({operation,payload});
+    if(operation==="screens.componentReview")return review(payload?.componentId==="copy"?fresh:original) as T;
+    if(operation==="screens.resolveTarget")return ((payload?.binding as {screenId:string}).screenId==="panel"?{...review(original).component,binding:{screenId:"panel",sourceName:"help"},kind:"panel",path:panel.document.path,revisions}:review(fresh).component) as T;
+    if(operation==="screens.componentCopy")return {componentId:"copy",screenId:"panel",useId:"use"} as T;
+    throw Error(operation);
+  };
+  h.host.openDefinition=async(id)=>{current=id==="copy"?fresh:original;return current;};
+  h.host.accepted=async()=>{accepted++;h.markSaved();if(failRefresh)throw Error("refresh refused");
+    h.catalog.owned.push({id:"copy",rootId:"copy-root",name:"help_guide",path:fresh.document.path,kind:"component",resolved:true,sourceRevision:"copy-source"});
+    return {...panel,selected:{...panel.selected,component:{componentId:"copy",resolved:true,sourceRevision:"copy-source"}}};};
+  return {...h,panel,original,fresh,events,editDraft:(value:string)=>{draft=value;},refresh:()=>{failRefresh=false;},accepted:()=>accepted,transferred:()=>transferred};
+}
+
+test("accepted copy keeps the original draft through failed refresh; Reload verifies fresh IDs before transfer",async()=>{
+  const h=copyFixture();
+  await h.controller.editUse();
+  await assert.rejects(h.controller.makeCopy("help_guide"),/Copy created/);
+  assert.equal(h.saved(),1);assert.equal(h.transferred(),0);assert.equal(h.controller.hasPendingCopy(),true);
+  await assert.rejects(h.controller.place("component","component-group"),/copy/i);
+  h.editDraft("Latest pending values");h.refresh();await h.controller.reloadCopy();
+  assert.equal(h.accepted(),2);assert.equal(h.transferred(),1);assert.equal(h.controller.hasPendingCopy(),false);
+  assert.deepEqual(h.events,["validate","prepare","commit:Latest pending values"]);
+  assert.equal(h.calls.filter(c=>c.operation==="screens.componentCopy").length,1);
+});
+
+test("shared review lists all affected screens and only changed fields; Cancel keeps the draft and confirms exact revisions",async()=>{
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+  const h=copyFixture();
+  try {
+    await h.controller.editUse();
+    const changes=[{label:"Text",before:"Accepted",after:"Pending"},{label:"Size",before:"20 px",after:"20 px"}];
+    const first=h.controller.reviewChanges(changes);await new Promise(resolve=>setTimeout(resolve,0));
+    let dialog=document.querySelector("dialog")!;assert.ok(dialog);
+    assert.match(dialog.textContent??"",/Help/);assert.match(dialog.textContent??"",/Current/);assert.match(dialog.textContent??"",/After Apply/);
+    assert.match(dialog.textContent??"",/Pending/);assert.equal(dialog.textContent?.includes("Size"),false);
+    [...dialog.querySelectorAll("button")].find(button=>button.textContent==="Keep editing")!.click();
+    assert.equal(await first,undefined);assert.equal(h.saved(),0);
+    const second=h.controller.reviewChanges(changes);await new Promise(resolve=>setTimeout(resolve,0));
+    dialog=document.querySelector("dialog")!;
+    [...dialog.querySelectorAll("button")].find(button=>button.textContent==="Apply to 1 screen")!.click();
+    assert.deepEqual(await second,{...revisions,source:"component-source"});
+    assert.equal(h.calls.some(c=>c.operation==="screens.compose"),false,"Review never creates another save owner");
+  } finally {h.controller.dispose();await browser.happyDOM.abort();}
+});
+
+test("Make component keeps the entered name on refusal and Cancel writes nothing",async()=>{
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+  const h=fixture(),tools=document.createElement("div");document.body.append(tools);
+  try {
+    h.controller.renderGroupTools(tools);
+    [...tools.querySelectorAll("button")].find(button=>button.textContent==="Make component…")!.click();
+    await new Promise(resolve=>setTimeout(resolve,0));
+    const dialog=document.querySelector("dialog")!;assert.ok(dialog);
+    const field=dialog.querySelector("input")!;field.value="bad.name";
+    dialog.querySelector("form")!.dispatchEvent(new window.Event("submit",{bubbles:true,cancelable:true}));
+    await new Promise(resolve=>setTimeout(resolve,0));assert.equal(field.value,"bad.name");assert.equal(field.getAttribute("aria-invalid"),"true");
+    assert.equal(h.saved(),0);
+    [...dialog.querySelectorAll("button")].find(button=>button.textContent==="Cancel")!.click();
+    assert.equal(document.querySelector("dialog"),null);assert.equal(h.calls.some(call=>call.operation==="screens.componentExtract"),false);
+  } finally {h.controller.dispose();await browser.happyDOM.abort();}
 });

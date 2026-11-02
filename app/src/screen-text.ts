@@ -1,5 +1,5 @@
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
-import type { CompositionCommand, CompositionView } from "./screen-composition.ts";
+import type { CompositionCommand, CompositionView, CopyDraftParticipant } from "./screen-composition.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SelectedAsset } from "./asset-import-ui.ts";
@@ -30,6 +30,7 @@ interface Host {
   inspect: (path:string) => Promise<ScreenDocument>;
   resolution?: {width:number;height:number};
   reviewing?: (active:boolean) => void;
+  componentScope?: (host:HTMLElement,view:CompositionView) => boolean;
   current: () => boolean;
   request: <T>(operation: CoreOperation, payload?: Record<string, unknown>) => Promise<T>;
   coordinate: <T>(task: () => Promise<T>) => Promise<T>;
@@ -101,6 +102,46 @@ export class ScreenText {
   }
   hasDraft(): boolean { return this.drafts.size > 0; }
   hasNodeDraft(screenId: string, nodeId: string): boolean { return this.drafts.has(`${screenId}:${nodeId}`); }
+  captureComponentDrafts(view:CompositionView):readonly CopyDraftParticipant[] {
+    const keys=[...this.drafts.values()].filter(draft=>draft.screenId===view.screenId && draft.document.path===view.document.path).map(draft=>draft.key);
+    if(!keys.length)return [];
+    const catalog=this.host.styles?.();
+    const definitions=structuredClone(catalog?.definitions??[]);
+    const read=()=>keys.map(key=>{
+      const draft=this.drafts.get(key);
+      if(!draft || draft.document.revision!==view.document.revision || !view.nodes.some(node=>node.id===draft.node.id))throw Error("The text draft changed its Source target. Your input is kept.");
+      if(draft.style && draft.style.expectedRevision!==catalog?.revision)throw Error("The Style changed. Your input is kept.");
+      this.values(draft,true);return draft;
+    });
+    return [{
+      validate:()=>{read();},
+      prepare:(fresh,nodeIds)=>{
+        const drafts=read().map(draft=>{
+          const node=fresh.nodes.find(node=>node.id===nodeIds.get(draft.node.id!));
+          if(!node?.textProperties || node.kind!==draft.node.kind)throw Error("The copied text target is unavailable. Your input is kept.");
+          const key=`${fresh.screenId}:${node.id}`;
+          if(this.drafts.has(key))throw Error("The copied text target already has a draft. Your input is kept.");
+          const style=draft.style ? {...draft.style} : undefined;
+          if(style) {
+            const current=this.host.styles?.(), before=definitions.find(definition=>definition.name===style.name), after=current?.definitions.find(definition=>definition.name===style.name);
+            if(!current || before && (!after || !same({kind:before.kind,path:before.path,values:before.values,error:before.error},{kind:after.kind,path:after.path,values:after.values,error:after.error})) || !before && after)
+              throw Error("The copied Style could not be verified. Your input is kept.");
+            style.expectedRevision=current.revision;
+          }
+          return {original:draft.key,draft:{...draft,key,document:fresh.document,screenId:fresh.screenId,node,fields:{...draft.fields},appearance:{...draft.appearance},edited:new Set(draft.edited),style}};
+        });
+        return ()=>{
+          for(const {original,draft} of drafts) {
+            this.drafts.delete(original);this.errors.delete(original);this.fieldErrors.delete(original);
+            const appearance=this.appearanceStates.get(original);this.appearanceStates.delete(original);
+            if(appearance)this.appearanceStates.set(draft.key,appearance);
+            this.drafts.set(draft.key,draft);
+          }
+        };
+      },
+      cancel:()=>{for(const key of keys){this.drafts.delete(key);this.errors.delete(key);this.fieldErrors.delete(key);this.appearanceStates.delete(key);}},
+    }];
+  }
   isSaving(): boolean { return !!this.submitted || this.importing || this.preparing || !!this.styleDialog; }
   invalidate(): void { this.loaded = false; this.generation++; this.loading = undefined; }
   unmount(): void {
@@ -152,8 +193,10 @@ export class ScreenText {
       this.registerField(view,field,control,() => control.readOnly ? undefined : this.fieldError(field,control.value,draft.node.literal));
       return label;
     };
+    const componentScope=el("div"),component=this.host.componentScope?.(componentScope,view)??false;
+    if(component)body.append(componentScope);
     const content = el("section","screen-text-content");
-    const localLabel = el("div","screen-text-local-label");localLabel.append(el("strong","","Text content"),el("span","","This element only"));
+    const localLabel = el("div","screen-text-local-label");localLabel.append(el("strong","","Text content"),el("span","",component?"Within this component":"This element only"));
     content.append(localLabel,input("text","Text"));content.hidden=!["text","textbutton"].includes(view.selected.kind);
     const typography = el("section","screen-text-typography");
     if (view.selected.style || this.host.styles?.()) {typography.classList.add("screen-style-appearance");typography.append(this.renderScope());}
@@ -173,7 +216,7 @@ export class ScreenText {
     if(["frame","window"].includes(view.selected.kind)){trigger.hidden=true;warning.hidden=true;fields.hidden=true;row.hidden=true;}
     if(["frame","window","textbutton"].includes(view.selected.kind)) {const extra=el("div","screen-appearance-fields");this.renderAppearance(extra,view);typography.append(extra);}
     body.append(content,typography);
-    const disclosure = el("details","screen-text-layout");disclosure.open = this.expanded.get(this.cardKey) ?? false;const layoutSummary = el("summary","","Layout"), local = el("span","screen-text-local-scope","This element only");layoutSummary.append(local);disclosure.append(layoutSummary);
+    const disclosure = el("details","screen-text-layout");disclosure.open = this.expanded.get(this.cardKey) ?? false;const layoutSummary = el("summary","","Layout"), local = el("span","screen-text-local-scope",component?"Within this component":"This element only");layoutSummary.append(local);disclosure.append(layoutSummary);
     const layoutHost = el("div");disclosure.append(layoutHost);this.layout.render(layoutHost,{sharedCommit:true});this.host.layoutTools(disclosure);this.host.order(disclosure);body.append(disclosure);
     const commit = el("div","screen-text-commit"), error = el("p","screen-text-error");error.role = "alert";
     const review = action("Review Source",this.host.source);review.dataset.textReview = "";
