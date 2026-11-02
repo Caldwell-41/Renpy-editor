@@ -38,3 +38,15 @@ test("New screen mounts the real Help form and retains its fields after a refuse
 test("Use in Story passes a stable panel hint without creating a Beat",async()=>{
  const f=fixture();try{await flush();f.click("3  Use in Story");await flush();assert.deepEqual(f.story,[{screenId:"existing",sourceName:"existing"}]);assert.deepEqual(f.writes,[]);}finally{await f.close();}
 });
+
+test("creation Cancel and Escape restore focus to New screen without writing",async()=>{
+ const f=fixture();try{await flush();
+ for(const action of ["Cancel","Escape"]){
+  f.click("New screen");await flush();
+  const dialog=document.querySelector("dialog.screen-create")!,name=dialog.querySelector<HTMLInputElement>('[name="screen-name"]')!;name.focus();
+  if(action==="Cancel")(dialog.querySelector<HTMLButtonElement>('button[type="button"]'))!.click();
+  else name.dispatchEvent(new window.KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
+  assert.equal(dialog.isConnected,false);assert.equal(document.activeElement?.textContent,"New screen");assert.deepEqual(f.writes,[]);
+ }
+ }finally{await f.close();}
+});

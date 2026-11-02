@@ -540,7 +540,11 @@ export class ScreensWorkspace {
     const draft = this.creation;
     const dialog = el("dialog", "screen-create"); dialog.ariaLabel = "New screen";
     const status = el("p", "", "Loading project images…"); status.role = "status";
-    const cancel = () => { if (!this.busy) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.note("Creation cancelled. No source was written."); } };
+    const cancel = () => { if (!this.busy) {
+      this.creation = undefined; this.closeCreationDialog(); this.renderCard();
+      [...this.card.querySelectorAll<HTMLButtonElement>("button")].find(button=>button.textContent==="New screen")?.focus({preventScroll:true});
+      this.note("Creation cancelled. No source was written.");
+    } };
     dialog.append(el("h2", "", "New screen"),status,button("Cancel",cancel));
     dialog.oncancel = event => { event.preventDefault(); cancel(); };
     this.creationDialog = dialog; this.panel.append(dialog); dialog.showModal();

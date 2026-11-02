@@ -47,7 +47,16 @@ try{
   await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');startApplication((operation,payload)=>window.helpRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}));});
   await page.locator('.recent-open').click();await page.getByRole('button',{name:'Screens',exact:true}).click();
   const ui=page.locator('.screens-editor');await ui.getByRole('button',{name:'New screen',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'New screen',exact:true});await dialog.getByLabel('Screen name',{exact:true}).fill('travel_help');
+  const dialog=page.getByRole('dialog',{name:'New screen',exact:true});
+  for(const action of ['Cancel','Escape']){
+    const name=dialog.getByLabel('Screen name',{exact:true});await name.fill('cancelled_help');
+    if(action==='Cancel')await dialog.getByRole('button',{name:'Cancel',exact:true}).click();else await name.press('Escape');
+    await dialog.waitFor({state:'detached'});
+    assert.equal(await ui.getByRole('button',{name:'New screen',exact:true}).evaluate(button=>button===document.activeElement),true);
+    assert.equal(receipts.filter(r=>r.request.operation==='screens.create').length,0);
+    await ui.getByRole('button',{name:'New screen',exact:true}).click();
+  }
+  await dialog.getByLabel('Screen name',{exact:true}).fill('travel_help');
   await dialog.locator('.screen-panels-preview img').waitFor({state:'visible'});
   assert.equal(await dialog.locator('input:not([type=radio])').count(),1,'Only the approved name field precedes creation');
   for(const [width,height] of [[1100,720],[560,640]]){
@@ -61,7 +70,7 @@ try{
   const owner=(await call('screens.list')).owned.find(owner=>owner.name==='travel_help');assert(owner?.resolved);
   const accepted=await read(owner.path);assert.match(accepted,/text "Help"/);assert.match(accepted,/action Hide\("travel_help"\)/);
   assert.equal(receipts.filter(r=>r.request.operation==='screens.create').length,1);
-  checks.push('Main New screen creates the typed Help starter once, with real passive asset preview and ordinary nodes');
+  checks.push('Main New screen restores Cancel/Escape focus without writing, then creates typed Help once with real passive asset preview and ordinary nodes');
   await ui.getByRole('button',{name:/^1\s+Choose$/}).click();await ui.getByRole('treeitem',{name:'Text · Help',exact:true}).press('Enter');
   const text=ui.getByRole('textbox',{name:'Text',exact:true});await text.fill('Travel help');await ui.locator('[data-text-apply]').click();
   await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true);
