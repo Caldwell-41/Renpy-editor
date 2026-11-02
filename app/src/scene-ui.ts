@@ -872,6 +872,12 @@ export function renderSceneAuthoring(
     divider.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();adjust(allocation+(e.key==="ArrowUp"?-2:2),true);}});
     let dragging=false;divider.addEventListener("pointerdown",e=>{dragging=true;divider.setPointerCapture(e.pointerId);});divider.addEventListener("pointermove",e=>{if(dragging){const b=stack.getBoundingClientRect();adjust((e.clientY-b.top)/b.height*100);}});divider.addEventListener("pointerup",()=>{dragging=false;adjust(allocation,true);});divider.addEventListener("pointercancel",()=>{dragging=false;});stack.insertBefore(divider,beatsRegion);
     const tools = document.createElement("div"); tools.className = "beats-tools";tools.append(add);
+    if (actions.screenCatalog && actions.resolveScreenTarget) {
+      const screenBeat = button("Add screen Beat"); screenBeat.disabled = scene.sourceConflict;
+      screenBeat.addEventListener("click", () => openNewBeat(scene,"showScreen"));
+      if (actions.screenHint) screenBeat.title = `Use ${actions.screenHint.sourceName.replaceAll("_"," ")} in this Scene`;
+      tools.append(screenBeat);
+    }
     const addCondition = button("Add Condition"); addCondition.disabled = scene.sourceConflict;
     addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultInsertion(scene, { type: "root" }))); tools.append(addCondition);
     if (actions.assist) {

@@ -1,10 +1,13 @@
 import type { HelpStarter } from "./screen-contracts.ts";
+import { ScreenImageMedia } from "./screen-image-media.ts";
+import type { MediaPresentation } from "./scene-ui.ts";
 import type { UiImageAsset } from "./screen-images.ts";
 
 export interface PanelCreation { name: string; starter?: HelpStarter }
 interface PanelCreationOptions {
   assets: readonly UiImageAsset[];
   initialName?: string;
+  presentImage?: (assetId:string) => Promise<MediaPresentation>;
   create: (value: PanelCreation) => Promise<void>;
   cancel: () => void;
   current?: () => boolean;
@@ -33,15 +36,15 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
     const description = element("span"); description.append(element("strong", "", title), element("span", "", copy)); label.append(choice, description); starters.append(label);
   }
   const help = element("section", "screen-panels-help"); help.ariaLabel = "Help starter";
-  const title = input("starter-title", "Help");
-  const explanation = element("textarea"); explanation.name = "starter-explanation"; explanation.value = "Read this guide while the story continues."; explanation.rows = 2;
+  const defaults = {title:"Help",explanation:"Read this guide while the story continues.",width:320,height:180};
   const images = options.assets.filter(asset => asset.kind === "uiImage" && asset.status === "available" && /^[a-f0-9]{64}$/.test(asset.sha256)).map(asset => ({ ...asset }));
   const image = element("select"); image.name = "starter-image";
   for (const asset of images) { const option = element("option", "", asset.displayName); option.value = asset.id; image.append(option); }
-  const width = input("starter-width", "320", "number"), height = input("starter-height", "180", "number");
-  for (const control of [width, height]) { control.min = "1"; control.max = "16384"; control.step = "1"; }
-  const sizes = element("div", "screen-panels-size"); sizes.append(field("Width (px)", width), field("Height (px)", height));
-  help.append(field("Title", title), field("Explanation", explanation), field("Project image", image), sizes);
+  const preview = element("section","screen-panels-preview");
+  const thumbnail = element("img"); thumbnail.alt = ""; thumbnail.hidden = true;
+  const summary = element("div"); summary.append(element("strong","",defaults.title),element("p","",defaults.explanation),element("span","","Close"));
+  const previewStatus = element("p","screen-panels-preview-status"); previewStatus.role = "status";
+  preview.append(thumbnail,summary); help.append(field("Project image",image),preview,previewStatus);
   if (!images.length) {
     image.disabled = true;
     const blocked = element("p", "screen-panels-blocked", "Add a UI image first. Cancel, import an image in Assets with the UI image role, then return to create Help."); blocked.role = "status"; help.append(blocked);
@@ -54,8 +57,19 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   form.append(field("Screen name", name), starters, element("p", "screen-panels-purpose", "Panel · stays open while dialogue continues."), help, error, row);
   let disposed = false, busy = false, dirty = false, composing = false;
   const active = () => !disposed && options.current?.() !== false;
+  const media = options.presentImage ? new ScreenImageMedia(active,options.presentImage) : undefined;
+  let previewGeneration = 0;
+  const refreshPreview = () => {
+    const generation = ++previewGeneration, asset = images.find(asset => asset.id === image.value);
+    thumbnail.hidden = true; previewStatus.textContent = "";
+    if (!media || !asset || !isHelp()) return;
+    void media.load(asset).then(value => {
+      if (!active() || generation !== previewGeneration) return;
+      media.show(thumbnail,value); thumbnail.hidden = false;
+    }).catch(() => { if (active() && generation === previewGeneration) previewStatus.textContent = "Image preview unavailable."; });
+  };
   const isHelp = () => [...starters.querySelectorAll<HTMLInputElement>("input")].find(control => control.checked)?.value === "help";
-  const refresh = () => { help.hidden = !isHelp(); create.disabled = busy || (isHelp() && !images.length); };
+  const refresh = () => { help.hidden = !isHelp(); create.disabled = busy || (isHelp() && !images.length); refreshPreview(); };
   form.addEventListener("change", () => { dirty = true; refresh(); });
   form.addEventListener("input", () => { dirty = true; });
   form.addEventListener("compositionstart", () => { composing = true; });
@@ -75,11 +89,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
         invalid = image;
         const asset = images.find(asset => asset.id === image.value);
         if (!asset) throw Error("Help needs an available project UI image. Your name and starter choice are retained.");
-        for (const control of [width, height]) {
-          invalid = control;
-          if (!/^[1-9]\d*$/.test(control.value) || Number(control.value) > 16384) throw Error("Enter a whole size from 1 to 16384 pixels.");
-        }
-        value.starter = { title: title.value, explanation: explanation.value, assetId: asset.id, expectedAssetSha256: asset.sha256, width: Number(width.value), height: Number(height.value) };
+        value.starter = { ...defaults, assetId: asset.id, expectedAssetSha256: asset.sha256 };
       }
       busy = true;
       const controls = [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")].map(control => ({ control, disabled: control.disabled }));
@@ -91,5 +101,6 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
       dirty = true; error.textContent = `${failure instanceof Error ? failure.message : "Screen could not be created."} Input retained.`; invalid.focus();
     }
   });
-  return { element: form, focus: () => name.focus(), hasDraft: () => dirty, dispose: () => { disposed = true; } };
+  refreshPreview();
+  return { element: form, focus: () => name.focus(), hasDraft: () => dirty, dispose: () => { disposed = true; previewGeneration++; media?.dispose(); } };
 }

@@ -130,3 +130,14 @@ test("existing Show draft captures its workspace revisions before catalog refres
   assert.deepEqual(s.commands[0]!.beat, { type: "showScreen", target: binding, revisions });
   await s.close();
 });
+
+test("Use in Story offers an explicit screen Beat action with the selected panel hint", async () => {
+  const s = setup({screenHint:{...binding}});
+  try {
+    button(s.host,"Add screen Beat").click();await tick();
+    const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
+    assert.equal(draft.querySelector<HTMLSelectElement>("select")!.value,"showScreen");
+    assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Panel screen"]')!.value,binding.screenId);
+    assert.deepEqual(s.commands,[]);
+  } finally {await s.close();}
+});

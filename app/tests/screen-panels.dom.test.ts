@@ -14,18 +14,15 @@ function setup() {
 function control<T extends HTMLElement>(name: string): T { return document.querySelector<T>(`[name="${name}"]`)!; }
 function submit() { document.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); }
 
-test("Help creation defaults a valid typed image and sends one editable starter request", async () => {
+test("Help creation uses a typed project image and one ordinary editable starter request", async () => {
   const browser = setup(); const calls: PanelCreation[] = [];
   const view = buildPanelCreationForm({ assets: [{ ...image, id: "background", kind: "background" }, { ...image, id: "missing", status: "missing" }, image], create: async value => { calls.push(value); }, cancel: () => {} });
   document.body.append(view.element);
   assert.equal(control<HTMLSelectElement>("starter-image").value, "image");
+  assert.equal(view.element.querySelector(".screen-panels-preview strong")?.textContent,"Help");
   control<HTMLInputElement>("screen-name").value = "travel_help";
-  control<HTMLInputElement>("starter-title").value = "Travel help";
-  control<HTMLTextAreaElement>("starter-explanation").value = "Read while the tram moves.";
-  control<HTMLInputElement>("starter-width").value = "240";
-  control<HTMLInputElement>("starter-height").value = "120";
   submit(); await tick();
-  assert.deepEqual(calls, [{ name: "travel_help", starter: { title: "Travel help", explanation: "Read while the tram moves.", assetId: "image", expectedAssetSha256: image.sha256, width: 240, height: 120 } }]);
+  assert.deepEqual(calls, [{ name: "travel_help", starter: { title: "Help", explanation: "Read this guide while the story continues.", assetId: "image", expectedAssetSha256: image.sha256, width: 320, height: 180 } }]);
   view.dispose(); await browser.happyDOM.close();
 });
 
@@ -47,11 +44,10 @@ test("refused Help creation retains fields, serializes submission and Escape can
   const browser = setup(); let reject!: (error: Error) => void, writes = 0, cancels = 0;
   const view = buildPanelCreationForm({ assets: [image], create: async () => { writes++; await new Promise<void>((_, failure) => { reject = failure; }); }, cancel: () => { cancels++; } }); document.body.append(view.element);
   const name = control<HTMLInputElement>("screen-name"); name.value = "guide_help";
-  control<HTMLInputElement>("starter-title").value = "Retained title";
   submit(); submit(); assert.equal(writes, 1);
   view.element.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); assert.equal(cancels, 0);
   reject(Error("SCREEN_INVENTORY_CHANGED")); await tick();
-  assert.equal(name.value, "guide_help"); assert.equal(control<HTMLInputElement>("starter-title").value, "Retained title"); assert.equal(name.disabled, false);
+  assert.equal(name.value, "guide_help"); assert.equal(control<HTMLSelectElement>("starter-image").value, "image"); assert.equal(name.disabled, false);
   assert.match(view.element.textContent!, /SCREEN_INVENTORY_CHANGED.*Input retained/); assert.equal(view.hasDraft(), true);
   view.element.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); assert.equal(cancels, 1); assert.equal(writes, 1);
   view.dispose(); await browser.happyDOM.close();

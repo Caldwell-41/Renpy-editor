@@ -111,6 +111,7 @@ export class ScreensWorkspace {
     this.components = new ScreenComponents({view:()=>this.compositionView(),catalog:()=>this.catalog,current:()=>this.current(),request:actions.request,coordinate:task=>this.coordinateComponent(task),
       accepted:(change,selection)=>this.componentAccepted(change,selection),
       openDefinition:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"component"),openScreen:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"panel"),
+      structureBlocked:()=>this.busy || !!this.creation || !!this.resize || !!this.move || this.composer.hasAddition() || this.composer.hasRemoval() || this.images.hasAddition() || this.images.isSaving() || this.text.isSaving(),
       captureDrafts:view=>[...this.text.captureComponentDrafts(view),this.layout.captureCopyDraft(view),this.images.captureCopyDraft(view),this.captureGeometryDraft(view)].filter((value):value is CopyDraftParticipant=>!!value),
       source:actions.source,note:(text,error)=>this.note(text,error),redraw:()=>this.render(),
     });
@@ -162,6 +163,7 @@ export class ScreensWorkspace {
       layoutTools: host => { const tools = el("div","screen-image-order"); tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true))); host.append(tools); }, order: host => this.composer.renderOrder(host),
     }, this.layout);
     this.text = new ScreenText({
+      writeBlocked:()=>this.components.hasPendingCopy(),cancelComponentCopy:()=>this.components.cancelCopy(),
       componentScope:(host,view)=>this.components.renderScope(host,view),
       view: () => this.compositionView(),styles: () => this.catalog?.styles,documents:()=>this.documents,inspect:async path=>this.documents.find(d=>d.path===path)??await actions.request<ScreenDocument>("screens.inspect",{path}),resolution:this.gameResolution,reviewing:active=>{this.reviewingAppearance=active;this.frames.invalidate("Return from style review to update this canvas.");if(!active)this.renderCanvas();},buttonSample: state => {this.buttonState=state;const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;this.renderCanvas();},current: () => this.current(),request:actions.request,coordinate:actions.coordinate,
       commit:(command,base) => this.compose(command,base),redraw:() => this.renderCard(),preview:() => this.renderCanvas(),
@@ -543,7 +545,7 @@ export class ScreensWorkspace {
     this.creationDialog = dialog; this.panel.append(dialog); dialog.showModal();
     void this.actions.request<{assets:UiImageAsset[]}>("authoring.list").then(model => {
       if (!this.current() || this.creation !== draft || this.creationDialog !== dialog) return;
-      this.creationForm = buildPanelCreationForm({assets:model.assets,current:()=>this.current() && this.creation === draft,
+      this.creationForm = buildPanelCreationForm({assets:model.assets,presentImage:assetId=>this.actions.request("media.present",{assetId,purpose:"imagePreview"}),current:()=>this.current() && this.creation === draft,
         create:value=>this.create(value),cancel});
       dialog.replaceChildren(el("h2", "", "New screen"),this.creationForm.element); this.creationForm.focus();
     }).catch(error => {

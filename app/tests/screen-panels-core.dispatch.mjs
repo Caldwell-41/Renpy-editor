@@ -71,11 +71,10 @@ try {
     form.dispose(); form.element.remove();
   }, cancel: () => { form.dispose(); form.element.remove(); }});
   document.body.append(form.element); form.element.querySelector('[name="screen-name"]').value = 'travel_notes';
-  form.element.querySelector('[name="starter-title"]').value = 'Travel Help';
   form.element.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
   await wait(() => created || form.element.querySelector('[role="alert"]')?.textContent, 'Help create'); assert(created, form.element.textContent); assert.equal(creationCalls, 1);
   const panel = created.owned.find(screen => screen.name === 'travel_notes'); assert.equal(panel.kind, 'panel');
-  const acceptedPanel = await source(panel.path); assert.match(acceptedPanel, /text "Travel Help"/); assert.match(acceptedPanel, /action Hide\("travel_notes"\)/); assert.match(acceptedPanel, /default_focus True/);
+  const acceptedPanel = await source(panel.path); assert.match(acceptedPanel, /text "Help"/); assert.match(acceptedPanel, /action Hide\("travel_notes"\)/); assert.match(acceptedPanel, /default_focus True/);
   await history('undo'); assert(!(await call('screens.list')).owned.some(screen => screen.id === panel.id));
   await history('redo'); assert.equal(await source(panel.path), acceptedPanel);
   result.stages.push('Help form -> one accepted create -> one-step Undo/Redo');
