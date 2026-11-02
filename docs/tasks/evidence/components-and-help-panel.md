@@ -509,3 +509,30 @@ automatic approval-review rejection. Windows work remains pending on correcting
 that binding, private source delivery and Pillow availability. No alternate tool
 was used to bypass the denied change. The remote assignment is complete and stopped;
 its exact local continuation identity remains in the ignored assignment receipt.
+
+## A2 refinement handback, 2026-11-02
+
+The design owner handed back new, unapproved A2: screen `components-and-help-panel`,
+revision `refined-v1`, variant `refined`, source commit
+`c0ded415aba484633ac68981c48910afb82a959c`, reported fingerprint
+`1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08`.
+The coordinator verified the clean prototype checkout at that commit, read
+`REFINEMENT.md` and confirmed all approval entries and currentApproved remain null.
+Original A/B/C and historical captures are preserved. No draft source was promoted
+or cherry-picked into production.
+
+The refined workflow places affected scope beside fields, reviews changed shared
+fields, applies local edits directly and shortens dialogs. It retains typed-image
+selection and blocked Help creation without an image. Copy with a valid draft uses
+the agreed two-operation contract: accept a copy, verify fresh definition/revision
+and child identities, then attach the retained draft. Copy returns identities only.
+Failed post-copy inspection acknowledges the accepted copy, retains input and
+blocks Apply until Reload succeeds. Cancel leaves the accepted copy; Undo reverses
+Apply then Copy separately. These remain simulations pending user selection and
+actual UI-to-core implementation proof.
+
+The design owner reports full-lab strict TypeScript, source/approval validators,
+a 128-case alternative matrix, final focused interactions and a final 32-case A2
+matrix passing. Twenty-five hashed captures are in `refined-captures.json` on the
+prototype branch. The full promotion browser gate was not run or claimed. Those
+reports are prototype evidence only; exact Kris approval is still required.
