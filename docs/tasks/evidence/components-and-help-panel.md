@@ -536,3 +536,31 @@ a 128-case alternative matrix, final focused interactions and a final 32-case A2
 matrix passing. Twenty-five hashed captures are in `refined-captures.json` on the
 prototype branch. The full promotion browser gate was not run or claimed. Those
 reports are prototype evidence only; exact Kris approval is still required.
+
+## A2 approved and UI integration selected, 2026-11-02
+
+Kris said "okay, go ahead, i think i like A the best". The coordinator resolved
+original A versus A2, and Kris selected "A2 — Focused workflow (latest version,
+shown first)". This approves screen `components-and-help-panel`, revision
+`refined-v1`, variant `refined`, source `c0ded415aba484633ac68981c48910afb82a959c`,
+fingerprint `1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08`.
+The design owner is preserving that source/captures, recording approval and running
+the required promotion gate. Original alternatives remain. The preceding accepted
+workflow explanation clarifies integration: Screens edits appearance; Use in Story
+hands off to existing Story Show/Hide controls. No second Story editor is created.
+
+Shared protocol DTOs now live in `src/screen-contracts.ts`; `screen-ui.ts` consumes
+that owner and recognizes the core's typed component reference on inspected nodes.
+Application typechecking passes. This checkpoint changes no visible UI.
+
+UI ownership for the resumed work: L08 owns new `screen-components.ts` and scoped
+CSS/tests, plus component-specific extensions to existing `screen-text.ts` for
+shared review and retained draft transfer. L09 owns new `screen-panels.ts` and
+scoped CSS/tests, plus `scene-ui.ts` and its Show/Hide tests. The coordinator alone
+owns `screen-ui.ts`, `screen-composition.ts`, `screen-layout.ts`, `screen-images.ts`,
+`main.ts`, shared contracts/styles/core/IPC, status, integration and final review.
+Workers request hooks before editing any other owner. Core copy remains accepted
+source first with identity-only result; pending drafts move only after a verified
+refresh and fresh-node match, with Apply as a separate history entry. No mock save
+or fabricated revision enters production. All costly-operation records remain in
+the owning GitHub leaves; UI authorization creates no fresh SDK/package/CI ceiling.

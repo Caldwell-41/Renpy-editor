@@ -6,8 +6,9 @@ Kris approved implementation of [L08 #41](https://github.com/Caldwell-41/Renpy-e
 and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
 `codex/components-and-help-panel`, based on `8a1fc419`. The coordinator owns shared
 contracts, integration and final review; two isolated workers own the ticket modules.
-A separate prototype chat has unapproved A2 (`refined-v1`, source `c0ded415`)
-alongside the original A/B/C alternatives. Production UI waits for exact approval. Both ticket cores and typed component IPC are integrated. Independent
+Kris approved A2 (`refined-v1`, source `c0ded415`) explicitly on 2026-11-02 after
+distinguishing it from original A. The prototype owner is recording promotion
+without changing the approved reference. Production UI implementation is selected. Both ticket cores and typed component IPC are integrated. Independent
 core/preparation reviews have driven focused corrections. The macOS Help SDK
 campaign now passes all six normal-entry cases, including keyboard focus, Escape,
 outside click and dialogue persistence. Earlier failed campaigns remain retained;

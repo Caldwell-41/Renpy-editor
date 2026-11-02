@@ -8,11 +8,16 @@ Continue [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
 `8a1fc41959d363e600d739868bb0b37e270e9bdd`. Kris approved the two-worker plan and
 starting implementation. [The assignment checkpoint](../tasks/evidence/components-and-help-panel.md)
 owns file boundaries, integration order and test seams. The coordinator owns shared
-files, status, integration and final review. The prototype chat has unapproved
-alternatives on `codex/components-help-panel-prototypes`. Latest A2 is unapproved
-`refined-v1`, variant `refined`, at `c0ded415aba484633ac68981c48910afb82a959c`;
-original A/B/C remain. Its source fingerprint is
+files, status, integration and final review. Kris explicitly approved A2 on
+2026-11-02: after "okay, go ahead, i think i like A the best", the coordinator
+resolved A versus A2 and Kris chose "A2 — Focused workflow (latest version, shown first)".
+Selected screen `components-and-help-panel`, revision `refined-v1`, variant `refined`,
+source `c0ded415aba484633ac68981c48910afb82a959c`, fingerprint
 `1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08`.
+The prototype owner is recording exact promotion and running the required gate;
+keep its source/captures pinned. Screens owns appearance and Use in Story hands off
+to the existing Story workspace for Show/Hide. UI workers resume after promotion,
+with the shared contracts checkpoint and file boundaries in the evidence record.
 Workers dispatched from `9b7748a`: L08 on `t3/reuse-owned-component` and L09 on
 `t3/help-panel-show-hide`. Both preparation checkpoints are integrated. Shared
 identity, target/effects, creation, marked-use, complete graph/Style and geometry
@@ -30,8 +35,8 @@ preparation's compiler-cache cleanup refusal remains a retained failure, with it
 accepted bytes and binary preserved; owned cleanup is corrected for the next freeze.
 Both workers have handed back their core and runtime preparation; their temporary
 file ownership has returned to the coordinator. Source-map schema 7 owns recognition
-and preserves legacy-6 source bytes and IDs. Production UI waits for prototype
-A2 or another exact prototype revision to be explicitly approved. No production visual edits are made.
+and preserves legacy-6 source bytes and IDs. Production UI follows the approved A2 and written Screens/Story clarification;
+recorded promotion must finish before claiming an approved-layout match.
 
 The third macOS Help SDK campaign at `7e34c6a` passed all nine commands and all six
 normal-entry cases. Raw records independently verify Show across two advances,

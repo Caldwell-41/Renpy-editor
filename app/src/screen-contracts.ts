@@ -1,0 +1,28 @@
+import type { StyleCatalog } from "./screen-text.ts";
+
+export interface ScreenTargetBinding { screenId: string; sourceName: string }
+export interface ScreenRevisions { source: string; sourceMap: string; inventory: string; effects: string }
+export interface ScreenEffects {
+  revision: string; unknown: boolean; hiddenScreens: string[];
+  dependencies: { id: string; revision: string }[];
+}
+export interface OwnedScreen {
+  id: string; rootId: string; path: string; name: string; kind: "panel" | "component";
+  resolved: boolean; sourceRevision: string | null;
+}
+export interface ScreenCatalog {
+  projectRevision: string; sourceMapRevision: string; inventoryRevision: string;
+  owned: OwnedScreen[]; styles?: StyleCatalog;
+}
+export interface ResolvedScreenTarget {
+  binding: ScreenTargetBinding; kind: "panel" | "component"; path: string; rootId: string;
+  revisions: ScreenRevisions; effects: ScreenEffects;
+}
+export interface ComponentChange { componentId: string; screenId: string; useId: string }
+export interface ReviewedUse {
+  screenId: string; componentId: string; nodeId: string; path: string; screenName: string;
+  span: { start: number; end: number } | null; sourceRevision: string | null; resolved: boolean;
+}
+export interface ComponentReview {
+  component: ResolvedScreenTarget; affectedScreens: OwnedScreen[]; uses: ReviewedUse[]; complete: boolean;
+}

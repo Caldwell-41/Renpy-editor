@@ -8,6 +8,7 @@ import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SourceDocument, SourceInventory, SourceTarget } from "./source-ui.ts";
 import type { ScreenPreview } from "./runtime-preparation.ts";
+import type { OwnedScreen, ScreenCatalog } from "./screen-contracts.ts";
 
 export interface ScreenNode {
   id?: string | null;
@@ -18,15 +19,12 @@ export interface ScreenNode {
   numericLayout?: NumericLayout | null;
   textProperties?: TextProperties | null;
   style?: {name:string; error:string|null} | null;
+  component?: { componentId: string; resolved: boolean; sourceRevision: string | null } | null;
   protected: { start: number; end: number }[];
 }
 export interface ScreenDocument {
   path: string; revision: string; partial: boolean;
   screens: { name: string; nodes: ScreenNode[] }[];
-}
-interface OwnedScreen { id: string; rootId: string; path: string; name: string; resolved: boolean; sourceRevision: string | null }
-interface ScreenCatalog {
-  projectRevision: string; sourceMapRevision: string; inventoryRevision: string; owned: OwnedScreen[]; styles?: StyleCatalog;
 }
 interface Draft { document: ScreenDocument; screen: string; index: number; width: string; height: string; position?: { xalign: number; yalign: number } }
 interface CompositionResult { document: ScreenDocument; selectedId: string; changed?: boolean; styles?: StyleCatalog; documents?: ScreenDocument[] }
