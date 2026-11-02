@@ -258,7 +258,7 @@ export class ScreenComposer {
           tree.append(row);
         }
         card.append(tree); this.refreshSelection();
-        card.append(el("p", "screen-composition-help", "Arrows select · Enter edits · Alt + ↑ / ↓ reorders · Delete reviews removal"), action("New blank screen", this.host.newScreen));
+        card.append(el("p", "screen-composition-help", "Arrows select · Enter edits · Alt + ↑ / ↓ reorders · Delete reviews removal"), action("New screen", this.host.newScreen));
       }
     } else if (view.step === "design" && view.selected.numericLayout) {
       this.host.geometry(card);

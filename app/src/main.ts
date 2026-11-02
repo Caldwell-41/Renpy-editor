@@ -12,6 +12,7 @@ import { openSettings } from "./settings-ui.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
 import { applicationRequestLane as requestLane } from "./request-lane.ts";
 import { ScreensWorkspace } from "./screen-ui.ts";
+import type { ScreenCatalog, ResolvedScreenTarget } from "./screen-contracts.ts";
 import { RuntimeWorkspace } from "./runtime-ui.ts";
 import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
 import { completeApplicationClose, requestCore as desktopRequestCore } from "./bridge.ts";
@@ -502,6 +503,10 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
       source: target => { void requestProjectNavigation(project, "source", target); },
       preview: (target, validate) => runtimeWorkspace?.previewScreen(target, validate),
       saved: () => { void refreshPersistenceStatus(project, viewGeneration); },
+      useInStory: async screenHint => {
+        const scenes = await projectValue<SceneWorkspace>(project,"scene.list");
+        if (currentProject?.sessionId === project.sessionId) await requestProjectNavigation(project,"story",{sceneId:scenes.lastOpen.sceneId,screenHint});
+      },
     });
     screensWorkspace.mount(workspace);
     void refreshPersistenceStatus(project, generation);
@@ -626,6 +631,9 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
     disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
       current: () => generation === viewGeneration && currentProject?.sessionId === project.sessionId,
       caller: target?.caller,
+      screenHint: target?.screenHint,
+      screenCatalog: () => projectValue<ScreenCatalog>(project,"screens.list"),
+      resolveScreenTarget: binding => projectValue<ResolvedScreenTarget>(project,"screens.resolveTarget",{binding}),
       viewScene: next => { void requestProjectNavigation(project, "story", next); },
       viewContinuation: (sceneId, beatId, expectedSourceRevision) => {
         void (async () => {

@@ -266,6 +266,7 @@ fn main() {
         }
         if request["driver"] == "choosePanelImage" {
             assert!(mode.is_none());
+            fs::create_dir_all(game.join("game/images")).unwrap();
             let choice = host
                 .with_service(|service| service.authoring_select_import(&game.join("game/help.png")))
                 .unwrap()

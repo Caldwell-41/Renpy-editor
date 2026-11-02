@@ -1,6 +1,7 @@
 import "./styles.css";
 import "./ui-refresh.css";
 import "./screen-ui.css";
+import "./screen-panels.css";
 import { enableRichSourceEditor } from "./source-editor.ts";
 enableRichSourceEditor();
 import { loadPreferences } from "./preferences.ts";

@@ -1,4 +1,5 @@
-import { ScreenImages } from "./screen-images.ts";
+import { buildPanelCreationForm, type PanelCreation } from "./screen-panels.ts";
+import { ScreenImages, type UiImageAsset } from "./screen-images.ts";
 import { ScreenText, type TextProperties, type StyleCatalog } from "./screen-text.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
 import { ScreenLayoutEditor, type NumericLayout, type LayoutEdits } from "./screen-layout.ts";
@@ -8,7 +9,7 @@ import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SourceDocument, SourceInventory, SourceTarget } from "./source-ui.ts";
 import type { ScreenPreview } from "./runtime-preparation.ts";
-import type { OwnedScreen, ScreenCatalog } from "./screen-contracts.ts";
+import type { OwnedScreen, ScreenCatalog, ScreenTargetBinding } from "./screen-contracts.ts";
 
 export interface ScreenNode {
   id?: string | null;
@@ -42,6 +43,7 @@ interface Actions {
   source: (target: SourceTarget) => void;
   preview: (target: ScreenPreview, validate: boolean) => void;
   saved: () => void;
+  useInStory?: (binding: ScreenTargetBinding) => Promise<void>;
 }
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] => {
   const element = document.createElement(tag); element.className = className; element.textContent = text; return element;
@@ -78,7 +80,8 @@ export class ScreensWorkspace {
   private documents: ScreenDocument[] = [];
   private catalog?: ScreenCatalog;
   private owned?: OwnedScreen;
-  private creation?: { name: string; base: ScreenCatalog };
+  private creation?: { base: ScreenCatalog };
+  private creationForm?: ReturnType<typeof buildPanelCreationForm>;
   private creationDialog?: HTMLDialogElement;
   private doc?: ScreenDocument;
   private screen = "";
@@ -173,8 +176,8 @@ export class ScreensWorkspace {
     };
     const picker = el("label", "screen-picker", "Screen "); picker.append(this.selection);
     const limits = el("p", "muted screen-limits", "Supported numeric layout and literal text edits preserve source-only regions. Styles, assets, actions and Story connections retain their Source controls.");
-    for (const [id, label] of [["choose", "1  Choose"], ["design", "2  Design"], ["connect", "3  Connect"]]) {
-      this.rail.append(button(label!, () => { if (this.images.isSaving()) return; this.step = id!; this.renderCard(); }));
+    for (const [id, label] of [["choose", "1  Choose"], ["design", "2  Design"], ["connect", "3  Use in Story"]]) {
+      this.rail.append(button(label!, () => { if (this.images.isSaving()) return; if (id === "connect") { void this.useInStory(); return; } this.step = id!; this.renderCard(); }));
     }
     this.rail.ariaLabel = "Screen building steps";
     const caption = el("div", "screen-canvas-tools");
@@ -334,7 +337,7 @@ export class ScreensWorkspace {
     const node = this.nodes()[this.selected];
     this.card.append(el("h2", "", this.step === "choose" ? "Choose an element" : names[node?.kind ?? ""] ?? "Screen"));
     if (this.step === "choose") {
-      this.card.append(button("New blank screen", () => this.beginCreation()));
+      this.card.append(button("New screen", () => this.beginCreation()));
       if (this.creation) this.renderCreation();
       this.card.append(el("p", "muted", "Click a row to select it. Double-click or Enter opens Design."));
       const list = el("div", "screen-tree"); list.role = "listbox"; list.ariaLabel = "Elements";
@@ -402,38 +405,56 @@ export class ScreensWorkspace {
   }
   private beginCreation(): void {
     if (this.busy || this.hasDraft() || !this.catalog) { this.note("Finish or cancel unfinished changes before creating a screen. Input retained.", true); return; }
-    this.creation = { name: "", base: this.catalog }; this.renderCard(); this.creationDialog?.querySelector<HTMLInputElement>('[aria-label="Screen name"]')?.focus();
+    this.creation = { base: this.catalog }; this.renderCard(); this.creationDialog?.querySelector<HTMLInputElement>('[aria-label="Screen name"]')?.focus();
   }
   private renderCreation(): void {
-    if (this.creationDialog?.isConnected) return;
-    const input = el("input"); input.ariaLabel = "Screen name"; input.value = this.creation!.name; input.maxLength = 64;
-    input.readOnly = this.busy; input.oninput = () => { if (!this.busy && this.creation) this.creation.name = input.value; };
-    input.onkeydown = event => { if (event.key === "Enter") { event.preventDefault(); void this.create(); } };
-    const label = el("label", "", "Screen name"); label.append(input);
-    const form = el("dialog", "screen-create"); form.ariaLabel = "New blank screen";
-    const actions = el("div", "screen-create-actions");
-    actions.append(button("Cancel creation", () => { if (!this.busy) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.card.querySelector<HTMLButtonElement>("button")?.focus(); this.note("Creation cancelled. No source was written."); } }), button("Create blank screen", () => void this.create(), "button primary"));
-    const status = el("p"); status.role = "status"; status.ariaLive = "polite";
-    form.append(el("h2", "", "New blank screen"), label, el("p", "muted", "Use a source name such as travel_notes. Use letters, numbers and underscores, starting with a letter or a single underscore."), status, actions);
-    form.oncancel = event => { event.preventDefault(); this.cancel(); };
-    this.creationDialog = form; this.panel.append(form); form.showModal();
+    if (this.creationDialog?.isConnected || !this.creation) return;
+    const draft = this.creation;
+    const dialog = el("dialog", "screen-create"); dialog.ariaLabel = "New screen";
+    const status = el("p", "", "Loading project images…"); status.role = "status";
+    const cancel = () => { if (!this.busy) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.note("Creation cancelled. No source was written."); } };
+    dialog.append(el("h2", "", "New screen"),status,button("Cancel",cancel));
+    dialog.oncancel = event => { event.preventDefault(); cancel(); };
+    this.creationDialog = dialog; this.panel.append(dialog); dialog.showModal();
+    void this.actions.request<{assets:UiImageAsset[]}>("authoring.list").then(model => {
+      if (!this.current() || this.creation !== draft || this.creationDialog !== dialog) return;
+      this.creationForm = buildPanelCreationForm({assets:model.assets,current:()=>this.current() && this.creation === draft,
+        create:value=>this.create(value),cancel});
+      dialog.replaceChildren(el("h2", "", "New screen"),this.creationForm.element); this.creationForm.focus();
+    }).catch(error => {
+      if (this.creation === draft && dialog.isConnected) status.textContent = `${(error as Error).message} Cancel and reopen New screen to reload images.`;
+    });
   }
   private closeCreationDialog(): void {
+    this.creationForm?.dispose(); this.creationForm = undefined;
     this.creationDialog?.close(); this.creationDialog?.remove(); this.creationDialog = undefined;
   }
-  private async create(): Promise<void> {
-    const draft = this.creation; if (!draft || this.busy) return;
-    if (!/^[A-Za-z_][A-Za-z_0-9]{0,63}$/.test(draft.name)) { this.note("Enter a valid screen name. Input retained.", true); return; }
-    this.busy = true; this.loadSequence++; this.creationDialog!.querySelector<HTMLInputElement>('[aria-label="Screen name"]')!.readOnly = true;
+  private async create(value: PanelCreation): Promise<void> {
+    const draft = this.creation; if (!draft || this.busy) throw Error("Another operation is in progress");
+    this.busy = true; this.loadSequence++;
     try {
       const catalog = await this.actions.coordinate(() => this.actions.request<ScreenCatalog>("screens.create", {
-        name: draft.name, expectedProjectRevision: draft.base.projectRevision, expectedSourceMapRevision: draft.base.sourceMapRevision, expectedInventoryRevision: draft.base.inventoryRevision,
+        ...value, expectedProjectRevision:draft.base.projectRevision, expectedSourceMapRevision:draft.base.sourceMapRevision, expectedInventoryRevision:draft.base.inventoryRevision,
       }));
       if (!this.current()) return;
       this.owned = catalog.owned.find(s => !draft.base.owned.some(old => old.id === s.id));
       this.creation = undefined; this.closeCreationDialog(); this.selected = 0; this.saved(true);
-    } catch (error) { if (this.current()) this.note(`${(error as Error).message} Input retained. Cancel creation and refresh Source before trying again.`, true); }
-    finally { this.busy = false; if (this.current()) { const input = this.creationDialog?.querySelector<HTMLInputElement>('[aria-label="Screen name"]'); if (input) input.readOnly = false; if (!this.creation) { await this.load(); this.card.querySelector<HTMLElement>('[aria-selected="true"]')?.focus(); } } }
+    } finally {
+      this.busy = false;
+      if (this.current() && !this.creation) { await this.load(); this.card.querySelector<HTMLElement>('[aria-selected="true"]')?.focus(); }
+    }
+  }
+  private async useInStory(): Promise<void> {
+    if (this.busy || this.hasDraft()) { this.note("Apply or cancel unfinished changes before using this panel in Story. Input retained.",true); return; }
+    const owned = this.owned;
+    if (!owned?.resolved || owned.kind !== "panel" || !this.actions.useInStory) { this.note("Choose an available Panel screen to use in Story.",true); return; }
+    this.busy = true;
+    try {
+      const binding = {screenId:owned.id,sourceName:owned.name};
+      await this.actions.request("screens.resolveTarget",{binding});
+      if (this.current()) await this.actions.useInStory(binding);
+    } catch (error) { if (this.current()) this.note(`${(error as Error).message} Refresh Source before choosing this panel again.`,true); }
+    finally { this.busy = false; }
   }
   private updateSizeControls(): void {
     const node = this.nodes()[this.selected], draft = this.draft();
