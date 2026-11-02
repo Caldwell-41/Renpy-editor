@@ -74,15 +74,19 @@ Help source or supported rendering semantics. They are not new SDK executions or
 relabeled producers. #41/#44 own cumulative limits and use; no native editor,
 package or CI campaign has started. Browser/engine events are not OS/human input.
 
-Windows remains a concrete capability blocker. The linked SUNDOWN project still
-registers the parent folder; the Git root is its existing `repo` child. A fresh
-read-only settings check confirms the binding has not changed. T3 twice refused
-`project_update` with `capability_denied`; do not bypass it. Kris has been asked to
-correct the binding in the client. The preserved Windows checkout is clean at
-`039f22ce`, with its original stash/worktrees untouched. Rust/Cargo 1.90.0, Python
-3.13.15 and the official SDK/archive exist; that interpreter lacks Pillow metadata.
-Coordinator source is unpushed and absent there. Privately deliver the chosen
-candidate only after the corrected binding; inspect fresh remote state first.
+Kris corrected the Windows project binding on 2026-11-03. Fresh inventory confirms
+its Git root, clean primary `039f22ce`, preserved stash/worktrees and existing
+Rust/Cargo 1.90.0, Node 24.19.0 and runtime Python 3.12.14 with Pillow 12.3.0.
+Private Taildrop delivered the bundle; Windows verified its exact hash and imported
+`31bd8441fdd099ea27ee6f9a66153655a2e90a11` to the new, noncheckedout
+`codex/components-help-windows-source` ref. Primary checkout is unchanged.
+T3 rejects direct remote `isolation:worktree`, so the assigned Windows test session
+must use the dedicated T3 worktree handoff from that exact candidate. The live
+assignment is recorded in `.toolchains/windows-preflight-assignment.json`.
+It owns only ignored outputs, cheap checks and fresh Windows producers. No tracked
+edits, installations or SDK/helper/native/package/CI starts are authorized in this
+stage. Stop if its actual worktree base differs. Do not poll the delegate; completion
+wakes the coordinator. Review returned proof before allocating either SDK campaign.
 
 Matched-state visual inspection, typechecking and repository validation now pass
 within the detailed evidence's stated scope. The final browser receipts are
@@ -90,8 +94,8 @@ within the detailed evidence's stated scope. The final browser receipts are
 `.toolchains/help-ui/main-final/result.json`. Fourteen component captures cover
 matched wide/compact states with the actual scoped stylesheets. Existing production
 chrome and ordinary node editors remain; this is not a whole-screen pixel-match or
-native acceptance claim. Next, verify Kris's corrected Windows project binding,
-then privately deliver the branch and select remaining target checks. Required
+native acceptance claim. Next, review the Windows worktree/preflight result and fresh producer receipts,
+then select the remaining target SDK checks within each leaf's existing ceiling. Required
 Windows/CI/native proof remains a gap; do not close either ticket prematurely.
 Remove the coordinator's temporary `app/node_modules` dependency symlink after
 checks without touching primary dependencies. Keep ignored evidence/binaries and

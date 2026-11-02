@@ -24,9 +24,10 @@ and recurrence now preserves the public fixture.
 
 The existing macOS component SDK proof passes eight commands/four exact image pairs;
 Help passes six normal-entry runtime cases. No fresh SDK/helper/native/package/CI
-operation is selected by the UI checks. Windows remains blocked on T3's project-root
-binding, private source delivery and Pillow availability. T3 denied the setting
-change; the coordinator has asked Kris to correct the client binding. Neither ticket
+operation is selected by the UI checks. Kris corrected Windows' T3 project-root binding. Private Taildrop delivery and
+verified object import are complete; an existing supported Python includes Pillow.
+An isolated Windows preflight is preparing through T3's dedicated worktree handoff;
+remote delegation cannot allocate a worktree directly. No Windows SDK run has started. Neither ticket
 is accepted or closed. Source remains local and unpushed.
 [Assignments, results and limits](../tasks/evidence/components-and-help-panel.md)
 retain exact candidates and failed attempts; #41/#44 own cumulative operation counts.

@@ -829,3 +829,41 @@ the coordinator. Preserve the unrelated primary audit, existing stashes, protect
 recovery, ignored evidence and pinned prototype server. Status-file size exceptions
 retain unique historical accepted-baseline/recovery records, not another active
 execution brief.
+
+
+## Windows binding and private delivery, 2026-11-03
+
+Kris corrected the linked T3 project to its actual Git root. Read-only inventory
+confirms the clean primary checkout at `039f22ce`, its original stash, pinned
+Rust/Cargo 1.90.0 and Node 24.19.0. The existing agent-runtime Python 3.12.14 imports
+Pillow 12.3.0, resolving the earlier interpreter-capability gap without installation.
+The old worktree ownership checks were sandbox-refused; no global Git safety
+configuration was weakened. No test or native process was started by inventory.
+
+The coordinator identified existing authenticated Tailscale Taildrop and privately
+sent the prepared Git bundle. Windows verified 5,655,822 bytes and SHA-256
+`8cbe364538aaf6673d218b74b53313592ac327eda45e4c307261d9ee1859ec05`, then verified
+its required common base `c5f4ab18bc0fd9c1e73a5a97b5ce10d9534cd57c`. A local-file
+fetch imported source `31bd8441fdd099ea27ee6f9a66153655a2e90a11` to new,
+noncheckedout `codex/components-help-windows-source`, tree
+`fe7f5954644d29eb7e0cb1480099ab5245c9601e`. Implementation `0e5aff8` is present
+and an ancestor. Primary checkout/head/status and stash remain unchanged. No
+source was pushed or published. Sender receipt is
+`.toolchains/windows-private/receipt.json`; Windows retains its ignored
+`.toolchains/components-help-receive-20261103/receipt.json`.
+
+T3's remote delegate API rejected direct `isolation:worktree` before creating a
+child or running tests. The next assignment uses a shared remote test session only
+to invoke T3's dedicated worktree handoff with the exact imported commit, origin
+fetch disabled and setup skipped. No shell-created checkout or primary branch
+switch is permitted. The requested branch is
+`codex/windows-components-help-qualification`; its actual binding must be verified
+before tests. The assigned Windows owner may write ignored targets/logs/fixtures
+only; all tracked code, docs and tracker records remain coordinator-owned.
+
+This stage selects cheap qualifier checks, relevant public core tests, available
+ordinary app checks and fresh local core-export producer receipts. It grants no
+SDK/helper/native/package/CI start, download or tooling installation. Prior SDK
+consumption remains #41 8/24 and #44 17/27, zero reserved. Candidate-specific
+preflight results and target allocation will follow; neither private delivery nor
+worktree preparation constitutes Windows qualification.
