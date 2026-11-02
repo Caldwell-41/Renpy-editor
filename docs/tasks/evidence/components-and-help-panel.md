@@ -1063,3 +1063,32 @@ actual plan parses with the expected four job names and actionlint passes. These
 checks start no SDK/helper/native editor/package. Logs/results remain ignored under
 `.toolchains/pr-harness-local-01` and `.toolchains/pr-ci-validation-tests.log`.
 The owning leaves/PR will record the actual publication and exact-head CI receipts.
+
+
+## CI1 macOS dependency failure and isolated environment correction
+
+Draft [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77) is published at
+`376dd79bd72e6ea250bf53f8686d8411c7382923`. Automatic Repository quality
+[41547960219, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41547960219/attempts/1)
+passes both required jobs. Selected paired harness run
+[41548020288, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41548020288/attempts/1)
+fails on macOS before any harness group executes. Windows passes all four groups.
+The Mac dependency step returns pip's `externally-managed-environment`; the added
+install step incorrectly assumed the runner's system Python was writable.
+
+The narrow workflow correction creates a job-local virtual environment on either
+host, installs Pillow 12.3.0 there and exports that interpreter through GITHUB_ENV.
+It changes no tests, gate semantics, SDK source, timeout or system policy. Local
+interpreter isolation and actionlint pass. The actual corrected CI run is still
+required; the prior Mac failure is not a pass and its missing result is explicit.
+
+Both original CI1 archives are retained under `.toolchains/pr-77-ci1-artifacts`
+and match GitHub's artifact digests. Windows artifact 13189801191 is
+`f5531becc6c91bebc49fe8893e8becf0107834337a4abb97fda3b2d6a250a2c9`;
+Mac partial artifact 13189463079 is
+`26e886b24dc24c7354332445c1b85351ef3906c1f649db0888464a5838ea7802`.
+Windows retains identity, complete group logs/results and manifests. Mac retains
+only identity/candidate/tree/manifest, with no result or test groups. Full raw failed
+logs and exact job metadata are retained separately. No SDK/helper/native editor,
+package or additional costly selection occurred. SDK use remains #41 16/24 and
+#44 26/27, zero reserved.

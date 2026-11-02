@@ -80,18 +80,22 @@ extraction/profile cleanup passes; retained ordinary test scratch remains record
 No owned SDK/test process remains. Keep ignored artifacts and the pinned prototype
 server; the temporary coordinator dependency symlink is removed.
 
-Kris explicitly authorized source push and PR creation on 2026-11-03. Publish a
-DRAFT PR against `codex/phase3b-screen-designer`; do not merge or release. The local
+Kris explicitly authorized source push and PR creation on 2026-11-03. Draft [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77) is open against
+`codex/phase3b-screen-designer`; do not merge or release. The local
 body is `.toolchains/delivery/pr-body.md`. `.github/validation-plan.json` selects
 both automatic Repository quality jobs plus `quality.yml` workflow_dispatch jobs
 `Harness regressions — windows-2025` and `Harness regressions — macos-26`.
 The paired selector is `harness_regressions=true`, all other selectors false. It
-runs cheap harness checks only, no SDK/helper/native/package. CI installs the pinned
-Pillow dependency required by image evidence tests. Local prepublication proof passes
+runs cheap harness checks only, no SDK/helper/native/package. CI uses a job-local Python virtual environment for pinned Pillow. The initial
+paired run passed Windows but failed the Mac system-Python install before tests;
+its partial artifact is retained and the corrected run is required. Local prepublication proof passes
 all four groups, 300 Python methods with three named host skips, 18 reporter tests
 and actionlint. Do not substitute this for milestone package/native/human acceptance.
 
-The owning leaves and draft PR own the publication URL and live exact-head CI
+Automatic quality at `376dd79` passes both jobs. Paired CI1 `41548020288` fails
+only the Mac dependency setup; Windows groups pass. The original failed logs and
+both digest-verified artifacts remain under `.toolchains/pr-77-ci1-artifacts`.
+No SDK starts are added. The owning leaves and draft PR own the live exact-head CI
 run/attempt/state. After dispatch, audit both automatic and selected manual jobs and
 all executed steps/artifacts. Required failures/skips are not passes. Register the
 T3 PR watch and yield instead of polling; resolve old comments first. The watch wakes

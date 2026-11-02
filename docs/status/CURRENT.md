@@ -30,7 +30,9 @@ executable validation plan selects automatic Repository quality and the existing
 Windows/macOS harness jobs. Their live run/attempt/state and PR URL belong to the
 owning GitHub leaves and PR receipts. Local prepublication checks pass all four
 harness groups, including 300 Python methods with three named host skips, plus
-reporter tests and actionlint. This CI selection adds no SDK/native/package run
+reporter tests and actionlint. The initial paired CI passed Windows but failed the Mac system-Python install
+before tests; the corrected job uses a local virtual environment. This CI
+selection adds no SDK/native/package run
 and does not waive later milestone package/native/human acceptance. Neither ticket
 is accepted or closed; merging or releasing is not authorized.
 

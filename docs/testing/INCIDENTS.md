@@ -891,3 +891,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   nine actual approval/source guards. Its original zero-case timeout and later
   interaction failures remain failed, with their separate corrections retained.
 - **Evidence:** [A2 integration](../tasks/evidence/components-and-help-panel.md#a2-approval-integration-and-first-production-ui-wiring).
+
+
+## H64: Image evidence dependency install rejected by managed macOS Python
+
+- **Class/search:** CI environment; pip, externally-managed-environment, Homebrew,
+  Pillow, harness regressions, macos-26.
+- **Cause/correction:** the paired harness job installs Pillow directly into the
+  runner's externally managed Python. macOS refuses before any harness group runs.
+  Create a job-local virtual environment, install the pinned dependency there and
+  export its interpreter to later steps. Keep system package protections intact.
+- **Verification:** original CI1 has successful Windows groups but a failed Mac
+  dependency step; retained partial Mac evidence has no result. Actionlint and local
+  interpreter-isolation checks pass; the corrected paired CI run remains required.
+- **Evidence:** [CI1 diagnosis](../tasks/evidence/components-and-help-panel.md#ci1-macos-dependency-failure-and-isolated-environment-correction).
