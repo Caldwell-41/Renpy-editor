@@ -1,8 +1,10 @@
 # A2 refinement
 
 Kris requested unslop and principle-experience-first over the mock on 2026-11-02.
-This creates A2, variant `refined`, revision `refined-v1`. It is a draft, not Kris's
-selection or approval. A/B/C remain available and historical captures stay intact.
+This created A2, variant `refined`, revision `refined-v1`, initially as a draft.
+Kris explicitly selected and approved it later on 2026-11-02.
+[HANDOFF.md](HANDOFF.md) owns the approval, written navigation clarification and
+remaining full-gate failure. A/B/C remain available and historical captures stay intact.
 
 The original mock required a walkthrough to explain what to do. It put source
 ownership terms beside routine fields, reviewed unchanged values, and made the
@@ -80,5 +82,6 @@ The logs remain local under `.toolchains/components-and-help-panel/`.
 
 [A2 captures](refined-captures.json) retain its baseline states, shared review,
 pending-copy fields, failed-copy inspection, continued dialogue and compact states.
-Earlier draft-v1/v2 manifests and PNGs are unchanged. All approval entries remain
-null. No production code, SDK, package, native session, CI dispatch or agent was added.
+Earlier draft-v1/v2 manifests and PNGs are unchanged. A2's approval is now recorded;
+original A/B/C entries remain null. No production code, SDK, package, native session,
+CI dispatch or agent was added.

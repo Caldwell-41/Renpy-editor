@@ -1,10 +1,12 @@
 # Components and Help panel
 
-Draft alternatives for [#41, Reuse an owned component](https://github.com/Caldwell-41/Renpy-editor/issues/41)
+Design alternatives for [#41, Reuse an owned component](https://github.com/Caldwell-41/Renpy-editor/issues/41)
 and [#44, Create and show the Help panel](https://github.com/Caldwell-41/Renpy-editor/issues/44).
-Kris has not approved a revision. `approval.json` keeps every candidate a draft.
-This assignment changes no production files. [A2](REFINEMENT.md) applies Kris's
-requested unslop and Experience First pass. It remains unapproved.
+Kris approved A2 `refined-v1`, variant `refined`, on 2026-11-02. Original A/B/C remain
+drafts. [The approval handoff](HANDOFF.md) owns source identity, the written
+Screens/Use in Story clarification, the control map and the failed full promotion
+gate. This assignment changes no production files. [A2](REFINEMENT.md) applies Kris's
+requested unslop and Experience First pass.
 
 | Alternative | Component editing | Review |
 | --- | --- | --- |
@@ -63,7 +65,9 @@ creation only as an explicit separate choice. Switching back to Help restores th
 block. The coordinator confirmed this necessary core constraint; no user design
 approval is implied.
 
-Connect opens the Story example. Add a Show or Hide Beat through the owned-panel
+The preserved mock's Connect opens the Story example. The approved written
+clarification is Screens for appearance, then Use in Story to hand off to Story.
+Add a Show or Hide Beat through the owned-panel
 picker, then inspect that Beat's exact sample Source. Playback simulation shows the
 panel while dialogue advances. Close, Hide and game Escape dismiss it; outside
 click keeps it open. The native browser dialog gives the simulation bounded focus;
@@ -117,4 +121,5 @@ The prototype branch is `codex/components-help-panel-prototypes`, prepared at
 `b67e1f64a0552410c12a038f4a651a800a87e061`. Integration destination is
 `codex/components-and-help-panel`. This chat owns only the new screen directory,
 its registry entries and this design record. The coordinator owns production,
-status, integration and final review. Approval and handback remain pending.
+status, integration and final review. Approval is recorded in this directory; the
+full promotion browser gate remains failed as documented in the handoff.

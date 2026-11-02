@@ -1,7 +1,8 @@
 # Draft review notes
 
-No user design decision has been recorded. These are browser mock checks, not
-product acceptance or approval. Historical approved source commits, records and
+Kris subsequently approved A2 on 2026-11-02; [HANDOFF.md](HANDOFF.md) records that
+decision and the failed required promotion gate. The draft checks below retain
+their historical scope, not product acceptance. Historical approved source commits, records and
 captures are unchanged. The coordinator's type-only lab correction below is the
 sole shared-file change.
 
