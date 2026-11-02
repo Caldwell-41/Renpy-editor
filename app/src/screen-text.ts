@@ -31,6 +31,8 @@ interface Host {
   resolution?: {width:number;height:number};
   reviewing?: (active:boolean) => void;
   componentScope?: (host:HTMLElement,view:CompositionView) => boolean;
+  writeBlocked?: () => boolean;
+  cancelComponentCopy?: () => void;
   current: () => boolean;
   request: <T>(operation: CoreOperation, payload?: Record<string, unknown>) => Promise<T>;
   coordinate: <T>(task: () => Promise<T>) => Promise<T>;
@@ -194,7 +196,11 @@ export class ScreenText {
       return label;
     };
     const componentScope=el("div"),component=this.host.componentScope?.(componentScope,view)??false;
-    if(component)body.append(componentScope);
+    if(component) {
+      body.append(componentScope);
+      if(this.host.cancelComponentCopy)componentScope.querySelectorAll<HTMLElement>("[data-component-cancel]").forEach(control=>{control.hidden=true;});
+    }
+    card.dataset.componentScope=String(component);
     const content = el("section","screen-text-content");
     const localLabel = el("div","screen-text-local-label");localLabel.append(el("strong","","Text content"),el("span","",component?"Within this component":"This element only"));
     content.append(localLabel,input("text","Text"));content.hidden=!["text","textbutton"].includes(view.selected.kind);
@@ -252,9 +258,11 @@ export class ScreenText {
     const general = card.querySelector<HTMLElement>(".screen-text-error")!;general.textContent = error && !["text","size","color"].includes(error.field) ? error.text : "";general.hidden = !general.textContent;
     card.querySelector<HTMLElement>("[data-text-review]")!.hidden = error?.field !== "source";
     const style=this.styleAction(draft,this.values(draft,false)),uses=this.uses(draft),screens=new Set(uses.map(u=>JSON.stringify([u.path,u.screenName]))).size,shared=style?.scope==="shared"&&Object.keys(this.sharedValues(draft,this.values(draft,false))).length>0;
-    card.querySelector<HTMLElement>(".screen-text-state")!.textContent = busy ? "Applying changes…" : dirty ? shared ? `Shared appearance changes apply to ${screens} screens and ${uses.length} elements. Text content and Layout change this element only.` : "Changes apply to this element only." : "";
-    card.querySelector<HTMLButtonElement>("[data-text-apply]")!.textContent=style ? shared ? `Apply to ${screens} ${screens===1?"screen":"screens"}…` : "Apply to this element…" : "Apply";
-    card.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled = card.querySelector<HTMLButtonElement>("[data-text-cancel]")!.disabled = busy || !dirty;
+    const component=card.dataset.componentScope==="true",componentShared=card.querySelector<HTMLElement>(".screen-component-scope")?.dataset.shared!=="false",blockedWrite=!!this.host.writeBlocked?.();
+    card.querySelector<HTMLElement>(".screen-text-state")!.textContent = blockedWrite ? "Edits retained · reload needed" : busy ? "Applying changes…" : dirty ? component ? "Changes update this component wherever it is used." : shared ? `Shared appearance changes apply to ${screens} screens and ${uses.length} elements. Text content and Layout change this element only.` : "Changes apply to this element only." : "";
+    card.querySelector<HTMLButtonElement>("[data-text-apply]")!.textContent=component ? componentShared?"Review changes…":"Apply changes" : style ? shared ? `Apply to ${screens} ${screens===1?"screen":"screens"}…` : "Apply to this element…" : "Apply";
+    card.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled = busy || !dirty || !!this.host.writeBlocked?.();
+    card.querySelector<HTMLButtonElement>("[data-text-cancel]")!.disabled = busy || !dirty && !blockedWrite;
   }
   private styleAction(draft:Draft,values:TextEdits):StyleEdit|undefined {
     return draft.style&&(draft.style.scope!=="shared"||draft.style.name!==draft.node.style?.name||Object.keys(this.sharedValues(draft,values)).length)?{...draft.style}:undefined;
@@ -545,11 +553,17 @@ export class ScreenText {
   private focus(field:string):void {this.fieldControl(field)?.focus({preventScroll:true});}
   private cancel(): void {
     const view = this.host.view();if (!view || this.isSaving() || view.busy) return;
+    if(this.host.writeBlocked?.()) {
+      if(this.host.cancelComponentCopy)this.host.cancelComponentCopy();
+      else this.host.note("Cancel the retained copy operation in its component controls.",true);
+      return;
+    }
     const active = (document.activeElement as HTMLElement | null)?.dataset, field = active?.textField ?? (active?.layoutField ? `layout:${active.layoutField}` : undefined);
     this.drafts.delete(this.key(view));this.errors.delete(this.key(view));this.fieldErrors.delete(this.key(view));this.layout.cancelCurrent();this.host.redraw();if (field) this.focus(field);this.host.preview();this.host.note("Text changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
     const view = this.host.view();if (!view || this.isSaving() || view.busy) return;
+    if(this.host.writeBlocked?.()){this.host.note("Reload the copy or cancel its unsaved edits before applying.",true);return;}
     const draft = this.value(view);let values: TextEdits, layout: ReturnType<ScreenLayoutEditor["currentDraft"]>;
     try {values = this.values(draft,true);layout = this.layout.currentDraft(true);} catch {return;}
     if (!Object.keys(values).length && !layout && (!draft.style || draft.style.scope === "shared" && draft.style.name === view.selected.style?.name)) return;

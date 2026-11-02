@@ -101,10 +101,37 @@ test("copied numeric properties may move in Source but changed property values c
     if(changed) {
       await assert.rejects(h.controller.makeCopy("help_guide"),/accepted content changed/);
       assert.equal(h.transferred(),0);assert.equal(h.controller.hasPendingCopy(),true);
+      assert.equal(h.host.view()?.screenId,"component","Failed verification returns to the retained original fields");
     } else {
       await h.controller.makeCopy("help_guide");assert.equal(h.transferred(),1);assert.equal(h.controller.hasPendingCopy(),false);
     }
   }
+});
+
+test("copy prepares every draft before moving any; Cancel keeps the already accepted copy",async()=>{
+  const h=copyFixture();h.refresh();
+  const first=h.host.captureDrafts!(h.original)[0]!;let cancelled=0;
+  h.host.captureDrafts=()=>[first,{validate:()=>{},prepare:()=>{throw Error("Copied image cannot be verified");},cancel:()=>{cancelled++;}}];
+  await h.controller.editUse();await assert.rejects(h.controller.makeCopy("help_guide"),/Copied image cannot be verified/);
+  assert.equal(h.transferred(),0);assert.equal(h.controller.hasPendingCopy(),true);assert.deepEqual(h.events,["validate","prepare"]);
+  h.controller.cancelCopy();
+  assert.equal(h.controller.hasPendingCopy(),false);assert.equal(cancelled,1);assert.deepEqual(h.events,["validate","prepare","cancel"]);
+  assert.equal(h.calls.filter(call=>call.operation==="screens.componentCopy").length,1);
+  assert.equal(h.calls.some(call=>call.operation==="scene.apply"),false,"Cancel never reverses the accepted copy");
+});
+
+test("ambiguous copied identities retain the original draft and an incomplete review admits no shared write",async()=>{
+  const h=copyFixture();h.refresh();h.fresh.nodes[1]!.id=h.fresh.nodes[0]!.id;
+  await h.controller.editUse();await assert.rejects(h.controller.makeCopy("help_guide"),/identities.*ambiguous/);
+  assert.equal(h.transferred(),0);assert.equal(h.controller.hasPendingCopy(),true);
+  h.controller.cancelCopy();
+  const other=copyFixture();await other.controller.editUse();const request=other.host.request;
+  other.host.request=async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>{
+    const result=await request<T>(operation,payload);
+    return (operation==="screens.componentReview"?{...result,complete:false}:result) as T;
+  };
+  await assert.rejects(other.controller.reviewChanges([{label:"Text",before:"Accepted",after:"Pending"}]),/incomplete/);
+  assert.equal(other.saved(),0);
 });
 
 test("shared review lists all affected screens and only changed fields; Cancel keeps the draft and confirms exact revisions",async()=>{
@@ -112,6 +139,13 @@ test("shared review lists all affected screens and only changed fields; Cancel k
   const h=copyFixture();
   try {
     await h.controller.editUse();
+    const request=h.host.request;
+    h.host.request=async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>{
+      const result=await request<T>(operation,payload);
+      if(operation!=="screens.componentReview")return result;
+      const review=result as ComponentReview;
+      return {...review,affectedScreens:[...review.affectedScreens,{...h.catalog.owned[0]!,id:"about",name:"about"}],uses:[...review.uses,{...review.uses[0]!,screenId:"about",nodeId:"other-use"}]} as T;
+    };
     const changes=[{label:"Text",before:"Accepted",after:"Pending"},{label:"Size",before:"20 px",after:"20 px"}];
     const first=h.controller.reviewChanges(changes);await new Promise(resolve=>setTimeout(resolve,0));
     let dialog=document.querySelector("dialog")!;assert.ok(dialog);
@@ -121,7 +155,7 @@ test("shared review lists all affected screens and only changed fields; Cancel k
     assert.equal(await first,undefined);assert.equal(h.saved(),0);
     const second=h.controller.reviewChanges(changes);await new Promise(resolve=>setTimeout(resolve,0));
     dialog=document.querySelector("dialog")!;
-    [...dialog.querySelectorAll("button")].find(button=>button.textContent==="Apply to 1 screen")!.click();
+    [...dialog.querySelectorAll("button")].find(button=>button.textContent==="Apply to 2 screens")!.click();
     assert.deepEqual(await second,{...revisions,source:"component-source"});
     assert.equal(h.calls.some(c=>c.operation==="screens.compose"),false,"Review never creates another save owner");
   } finally {h.controller.dispose();await browser.happyDOM.abort();}
@@ -142,4 +176,10 @@ test("Make component keeps the entered name on refusal and Cancel writes nothing
     [...dialog.querySelectorAll("button")].find(button=>button.textContent==="Cancel")!.click();
     assert.equal(document.querySelector("dialog"),null);assert.equal(h.calls.some(call=>call.operation==="screens.componentExtract"),false);
   } finally {h.controller.dispose();await browser.happyDOM.abort();}
+});
+
+test("a component with one direct use captures admission without another shared confirmation",async()=>{
+  const h=copyFixture();await h.controller.editUse();
+  assert.deepEqual(await h.controller.reviewChanges([{label:"Text",before:"Accepted",after:"Pending"}]),{...revisions,source:"component-source"});
+  assert.equal(h.saved(),0);
 });

@@ -150,6 +150,7 @@ export class ScreenComponents {
       throw Error("Component references are unavailable or incomplete. Your edits are kept. Inspect Source.");
     if(base && (review.component.path!==base.document.path || review.component.revisions.source!==base.document.revision))
       throw Error("Source changed. Your draft is still here. Inspect Source before applying.");
+    this.scopes.set(JSON.stringify([componentId,review.component.revisions.source,review.component.revisions.sourceMap,review.component.revisions.inventory]),{review});
     return review;
   }
   async editUse(view=this.view()):Promise<CompositionView> {
@@ -216,7 +217,12 @@ export class ScreenComponents {
       this.pendingCopy=undefined;
       this.host.note(pending.participants.length ? `Copy created for ${ownerView.screenName}. Your edits are still unsaved. Apply them when ready.` : `Copy created for ${ownerView.screenName}. Other screens keep their original component.`);
     } catch(error) {
-      throw Error(`Copy created. Your edits are still unsaved. Reload copy to continue. ${(error as Error).message}`);
+      let restoreFailed=false;
+      if(this.active()) {
+        try {await this.host.openDefinition(pending.before.screenId,pending.before.selected.id??undefined);}
+        catch {restoreFailed=true;}
+      }
+      throw Error(`Copy created. Your edits are still unsaved. Reload copy to continue. ${(error as Error).message}${restoreFailed ? " The original fields could not be reopened; your input is still retained." : ""}`);
     }
   }
   async reloadCopy():Promise<void> {
@@ -259,7 +265,7 @@ export class ScreenComponents {
     try {
       const review=await this.componentReview(base.screenId,base);this.assertCurrent(base);
       const changes=changedFields.filter(change=>change.before!==change.after);
-      if(!changes.length)return review.component.revisions;
+      if(!changes.length || review.affectedScreens.length<=1 && review.uses.filter(use=>use.componentId===base.screenId).length<=1)return review.component.revisions;
       const dialog=el("dialog","screen-component-dialog");dialog.ariaLabel="Review component changes";
       dialog.append(el("h2","","Review changes"),el("p","",`Update ${displayName(base.screenName)} on ${review.affectedScreens.length} ${review.affectedScreens.length===1?"screen":"screens"}.`));
       this.affected(dialog,review);
@@ -350,7 +356,8 @@ export class ScreenComponents {
     const section=el("section","screen-component-scope");host.append(section);
     if(this.pendingCopy) {
       section.append(el("strong","","Copy created. Your edits are still unsaved."),el("p","","Reload the copy to continue. Other screens keep their saved content."));
-      const actions=el("div","screen-component-actions");actions.append(action("Reload copy",()=>this.run(()=>this.reloadCopy()),true),action("Cancel",()=>this.cancelCopy()));section.append(actions);return true;
+      const actions=el("div","screen-component-actions"),cancel=action("Cancel",()=>this.cancelCopy());cancel.dataset.componentCancel="";
+      actions.append(action("Reload copy",()=>this.run(()=>this.reloadCopy()),true),cancel);section.append(actions);return true;
     }
     const key=JSON.stringify([id,view.document.revision,this.host.catalog()?.sourceMapRevision,this.host.catalog()?.inventoryRevision]);
     let state=this.scopes.get(key);
@@ -363,6 +370,7 @@ export class ScreenComponents {
   private scopeContent(section:HTMLElement,view:CompositionView,id:string,state:{review?:ComponentReview;error?:string}):void {
     if(!state.review){section.append(el("p",state.error?"screen-component-error":"",state.error??"Loading affected screens…"));return;}
     const review=state.review,names=review.affectedScreens.map(owner=>displayName(owner.name));
+    section.dataset.shared=String(names.length>1 || review.uses.filter(use=>use.componentId===id).length>1);
     section.append(el("p","screen-component-scope-line",names.length>1?`Shared by ${names.join(" and ")}`:names.length?`Only ${names[0]}`:"This component is not used in a screen."));
     const tools=el("div","screen-component-actions");tools.append(action(`Used on ${names.length} ${names.length===1?"screen":"screens"}`,()=>this.run(()=>this.showUses(id))));
     if(this.origin?.componentId===id && names.length>1)tools.append(action(`Make a copy for ${displayName(this.origin.view.screenName)}`,()=>this.nameDialog(true)));
