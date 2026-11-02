@@ -8,8 +8,8 @@ const host = document.querySelector<HTMLElement>("#preview")!;
 const controls = document.createElement("nav"); controls.className = "cp-comparison"; controls.ariaLabel = "Compare draft designs";
 const root = document.createElement("div"); root.id = "study";
 const query = new URLSearchParams(location.search);
-let variant = (query.get("variant") ?? "inspector") as Variant;
-let state = query.get("state") ?? host.dataset.initialState ?? "shared";
+let variant = (query.get("variant") ?? "refined") as Variant;
+let state = query.get("state") ?? host.dataset.initialState ?? "group";
 let theme: "light" | "dark" = query.get("theme") === "light" ? "light" : "dark";
 let dispose: (() => void) | undefined;
 for (const item of definition.variants) {

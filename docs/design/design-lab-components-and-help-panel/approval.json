@@ -3,6 +3,7 @@
   "screenId": "components-and-help-panel",
   "currentApproved": null,
   "revisions": [
+    { "id": "refined-v1", "variantId": "refined", "approval": null },
     { "id": "inspector-v1", "variantId": "inspector", "approval": null },
     { "id": "library-v1", "variantId": "library", "approval": null },
     { "id": "worksheet-v1", "variantId": "worksheet", "approval": null }

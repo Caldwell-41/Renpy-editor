@@ -7,6 +7,10 @@ sole shared-file change.
 
 ## Current checks
 
+The current A2 results and control changes are in [REFINEMENT.md](REFINEMENT.md).
+It passes the 128-case matrix, final focused interactions, full lab TypeScript and
+approval checks. The earlier draft-v2 evidence below retains its original scope.
+
 - The screen-local TypeScript check passes with the inherited strict lab options.
 - The approval-history/source/capture validator passes. All three candidates remain drafts.
 - The full Design Lab TypeScript check also passes after the coordinator's type-only correction described below.
@@ -74,12 +78,16 @@ There is no real source parser, ownership migration or durable storage. Source
 revision admission is deliberately coarse in this mock. References/effects identify
 the required concerns without defining new production request fields.
 
-The component sample supports one use per eligible frame and one shared definition
+The original component sample supports one use per eligible frame and one shared definition
 plus independent copies. Insertion has an explicit parent control with one eligible
 parent in each fictional screen. The actual implementation must use its supported
 parent choices and keep opaque neighbors. The mock leaves existing surrounding
 screen content in place during insertion. Creating an independent copy requires
 applying or cancelling an existing draft first, with a visible refusal and no loss.
+A2 instead retains valid unsaved edits while it copies accepted source, verifies
+the refreshed target and fresh child IDs, then moves the draft. Failed verification
+keeps Apply disabled, acknowledges the saved copy and offers Reload copy. Cancel
+keeps the copy; Copy and the later Apply have separate Undo entries.
 
 The ordinary-node dialog exercises selected existing fields, not the entire
 production editor. Broader existing layout, Style, image import, add/remove,

@@ -5,11 +5,12 @@ import route from "../ui-image/route.svg?url";
 import { copy, fixture, source, componentUses, validName, defaultVisual, type Visual, type Sample, type Screen } from "./sample.ts";
 import "./style.css";
 
-export type Variant = "inspector" | "library" | "worksheet";
+export type Variant = "inspector" | "library" | "worksheet" | "refined";
 type Draft = Visual & { title: string; explanation: string; base: number };
 const escape = (value: unknown) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
 const button = (id: string, label: string, primary = false, disabled = false) => `<button type="button" class="cp-button${primary ? " cp-primary" : ""}" data-action="${id}" ${disabled ? "disabled" : ""}>${label}</button>`;
-const variants = { inspector: "A · Inspector", library: "B · Component library", worksheet: "C · Review below" };
+const variants = { inspector: "A · Inspector", library: "B · Component library", worksheet: "C · Review below", refined: "A2 · Focused workflow" };
+const displayName = (name: string) => name.replaceAll("_", " ").replace(/^./, first => first.toUpperCase());
 
 export function mountStudy(host: HTMLElement, context: LabContext, variant: Variant): () => void {
   document.documentElement.dataset.theme = context.theme;
@@ -17,12 +18,16 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const drafts = new Map<string, Draft>(), undo: Sample[] = [], redo: Sample[] = [];
   let notice = "Ready in sample", error = "", modal: HTMLDialogElement | null = null, reviewInline = false;
   let shown = true, line = 0, lastLauncher: HTMLElement | null = null;
+  const refined = variant === "refined";
+  let failCopyRefresh = context.state === "copy-refresh-failure";
+  let pendingCopy: { screenId: string; name: string; originalKey: string; draft: Draft; accepted: Draft } | null = null;
+  const copyNeedsReload = () => pendingCopy?.screenId === screenId;
   if (context.state === "story") step = "connect";
-  if (context.state === "conflict") { drafts.set("component-guide", { ...defaultVisual(), title: "A guide for night travellers", explanation: sample.component!.explanation, base: 1 }); sample.revision = 2; sample.component!.revision = 2; error = "Source changed after this draft began. Draft retained. Inspect Source before retrying."; }
+  if (context.state === "conflict") { drafts.set("component-guide", { ...defaultVisual(), title: "A guide for night travellers", explanation: sample.component!.explanation, base: 1 }); sample.revision = 2; sample.component!.revision = 2; error = refined ? "Source changed. Your draft is still here. Inspect Source before applying." : "Source changed after this draft began. Draft retained. Inspect Source before retrying."; }
   host.classList.add("cp-host"); host.dataset.variant = variant;
   const active = (): Screen => sample.screens.find(screen => screen.id === screenId)!;
   const shared = () => active().use && selection !== "close" ? sample.component : null;
-  const draftKey = () => selection === "close" ? `${screenId}/close` : shared() ? "component-guide" : screenId;
+  const draftKey = () => copyNeedsReload() ? pendingCopy!.originalKey : selection === "close" ? `${screenId}/close` : shared() ? "component-guide" : screenId;
   const values = (): Draft => {
     const c = shared(); const screen = active();
     return drafts.get(draftKey()) ?? { ...(c ?? screen), base: sample.revision };
@@ -32,16 +37,17 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const report = (message: string) => { notice = message; host.querySelector<HTMLElement>(".cp-status")!.textContent = message; };
   function accept(next: Sample, message: string) {
     undo.push(copy(sample)); redo.length = 0; next.revision = sample.revision + 1; sample = next;
-    error = ""; notice = `${message} One sample history entry.`; render();
+    error = ""; notice = refined ? message : `${message} One sample history entry.`; render();
   }
   function refuse(): boolean {
-    if (!available()) { error = "Component unavailable. The saved reference has not changed. Draft retained; inspect Source."; render(); return true; }
-    if (dirty() && values().base !== sample.revision) { error = "Source changed after this draft began. Draft retained. Inspect Source before retrying."; render(); return true; }
+    if (copyNeedsReload()) { error = "The copy exists. Your edits are still unsaved. Reload the copy before applying them."; render(); return true; }
+    if (!available()) { error = refined ? "Can't find this component. Your draft is still here. Inspect Source to resolve it." : "Component unavailable. The saved reference has not changed. Draft retained; inspect Source."; render(); return true; }
+    if (dirty() && values().base !== sample.revision) { error = refined ? "Source changed. Your draft is still here. Inspect Source before applying." : "Source changed after this draft began. Draft retained. Inspect Source before retrying."; render(); return true; }
     return false;
   }
   function content(screen: Screen, draft = true) {
     const c = screen.use ? sample.component : null;
-    const d = draft ? drafts.get(c ? "component-guide" : screen.id) : undefined;
+    const d = draft && !pendingCopy ? drafts.get(c ? "component-guide" : screen.id) : undefined;
     return { ...(d ?? c ?? screen) };
   }
   function preview(screen = active(), draft = true): string {
@@ -54,18 +60,19 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     </div></div>`;
   }
   function toolbar(): string {
-    return `<header class="cp-heading"><h1>${step === "connect" ? "Story" : "Screens"}</h1><div class="cp-tools">${button("new", "New screen", true)}${button("undo", "Undo", false, !undo.length)}${button("redo", "Redo", false, !redo.length)}${button("source", "Source")}</div></header>
+    return `<header class="cp-heading"><h1>${step === "connect" ? "Story" : "Screens"}</h1><div class="cp-tools">${button("new", "New screen", !refined || step === "choose")}${button("undo", "Undo", false, !undo.length)}${button("redo", "Redo", false, !redo.length)}${button("source", "Source")}</div></header>
     <nav class="cp-steps" aria-label="Screens steps">${["choose", "design", "connect"].map((id, i) => `<button data-action="step-${id}" aria-current="${step === id ? "step" : "false"}">${i + 1} ${id[0]!.toUpperCase() + id.slice(1)}</button>`).join("")}</nav>`;
   }
   function screenSelect(): string {
-    return `<label class="cp-screen-select">Screen <select name="screen" aria-label="Screen">${sample.screens.map(screen => `<option value="${screen.id}" ${screen.id === screenId ? "selected" : ""}>${escape(screen.name)} · Panel</option>`).join("")}</select></label>`;
+    return `<label class="cp-screen-select">Screen <select name="screen" aria-label="Screen">${sample.screens.map(screen => `<option value="${screen.id}" ${screen.id === screenId ? "selected" : ""}>${escape(refined ? displayName(screen.name) : screen.name)} · Panel</option>`).join("")}</select></label>`;
   }
   function tree(): string {
-    return `<section class="cp-tree"><h2>Elements</h2><div class="cp-row">${button("add-use", "+ Use component", false, !sample.component || sample.component.state !== "available")}</div>
+    return `<section class="cp-tree"><h2>Elements</h2><div class="cp-row">${button("add-use", refined ? "+ Add component" : "+ Use component", false, !sample.component || sample.component.state !== "available")}</div>
       ${[["group", active().use ? `Use ${sample.component?.name ?? "route_guide"}` : active().copyName ? `Use ${active().copyName}` : "Vertical group"], ["title", "Title"], ["image", "Tram emblem"], ["explanation", "Explanation"], ["close", "Close"]].filter(([id]) => active().starter || id === "group").map(([id, title]) => `<button data-select="${id}" class="cp-node ${selection === id ? "cp-selected" : ""}">${id === "group" ? "▾" : "　"} ${escape(title)}</button>`).join("")}
     </section>`;
   }
   function reviewBody(): string {
+    if (refined) return refinedReview();
     const screens = shared() ? componentUses(sample) : [active()];
     return `<h2>Review ${shared() ? "shared component" : "changes"}</h2><p>${shared() ? `Update ${screens.length} uses of <strong>${escape(sample.component!.name)}</strong>.` : `Update only ${escape(active().name)}.`}</p>
       <table class="cp-table"><thead><tr><th>Affected screen</th><th>Change</th></tr></thead><tbody>${screens.map(screen => `<tr><td>${escape(screen.name)}</td><td>${screen.use ? "Shared component content" : "Local content"}</td></tr>`).join("")}</tbody></table>
@@ -74,6 +81,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       <div class="cp-actions">${button("confirm-apply", shared() ? `Apply to ${screens.length} screens` : "Apply changes", true)}${button("back-review", "Keep editing")}</div>`;
   }
   function editor(): string {
+    if (refined) return refinedEditor();
     const c = shared(); const d = values();
     return `<section class="cp-editor" aria-label="Element editor"><div class="cp-editor-head"><h2>${selection === "close" ? "Editing Close button" : c ? "Editing shared component" : active().copyName ? "Editing independent component" : "Editing vertical group"}</h2>${button("focus-preview", "Show preview")}</div>
       <div class="cp-editor-body">
@@ -94,12 +102,38 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     return `<aside class="cp-library"><h2>Components</h2>${sample.component ? `<button data-action="uses" class="cp-library-item"><strong>${escape(sample.component.name)}</strong><span>${componentUses(sample).length} uses · ${sample.component.state}</span></button>` : `<p>No components yet.</p>`}${button("extract", "Make from selected group", false, !!sample.component)}${button("add-use", "Insert owned component", false, !sample.component || sample.component.state !== "available")}<div class="cp-library-bottom"><h2>Current screen</h2>${screenSelect()}${tree()}</div></aside>`;
   }
   function design(): string {
-    return `<div class="cp-design cp-${variant}">${variant === "library" ? library() : ""}<section class="cp-stage"><div class="cp-stage-head">${screenSelect()}<span>1280 × 720 · Fit</span>${button("play", "Test in Ren'Py")}</div>${preview()}<div class="cp-canvas-foot"><span>${dirty() ? "Draft canvas" : "Accepted sample canvas"}</span><span>Inert · click to select</span></div>${variant !== "library" ? tree() : ""}</section>${editor()}</div>`;
+    return `<div class="cp-design cp-${variant}">${variant === "library" ? library() : ""}<section class="cp-stage"><div class="cp-stage-head">${screenSelect()}<span>1280 × 720 · Fit</span>${button("play", refined ? "Try panel" : "Test in Ren'Py")}</div>${preview()}<div class="cp-canvas-foot"><span>${copyNeedsReload() ? "Saved copy · edits waiting for reload" : dirty() ? "Draft canvas" : "Accepted sample canvas"}</span><span>${refined ? "Click an element to edit" : "Inert · click to select"}</span></div>${variant !== "library" ? tree() : ""}</section>${editor()}</div>`;
+  }
+  function refinedReview(): string {
+    const c = shared(), d = values(), saved = c ?? active(), screens = c ? componentUses(sample) : [active()];
+    const rows: Array<[string, string, string]> = [];
+    for (const key of ["title", "explanation", "image", "width", "height", "fontSize", "closeLabel"] as const) {
+      if (d[key] === saved[key]) continue;
+      const label = { title: "Title", explanation: "Explanation", image: "Image", width: "Image width", height: "Image height", fontSize: "Title size", closeLabel: "Button label" }[key];
+      const show = (value: string | number) => key === "image" ? value === "tram" ? "Tram emblem" : "Route map" : typeof value === "number" ? `${value} px` : String(value);
+      rows.push([label, show(saved[key]), show(d[key])]);
+    }
+    return `<p>Update ${c ? displayName(c.name) : displayName(active().name)} on ${screens.length === 1 ? "this screen" : `${screens.length} screens`}.</p><table class="cp-table cp-affected"><thead><tr><th>Affected screen</th><th>Changes</th></tr></thead><tbody>${screens.map(s => `<tr><td>${escape(displayName(s.name))}</td><td>Component content</td></tr>`).join("")}</tbody></table><table class="cp-table cp-change-table"><thead><tr><th>Field</th><th>Current</th><th>After Apply</th></tr></thead><tbody>${rows.map(([label, before, after]) => `<tr><td>${label}</td><td>${escape(before)}</td><td>${escape(after)}</td></tr>`).join("")}</tbody></table><div class="cp-actions">${button("confirm-apply", `Apply to ${screens.length} ${screens.length === 1 ? "screen" : "screens"}`, true)}${button("back-review", "Keep editing")}</div>`;
+  }
+  function refinedEditor(): string {
+    const c = shared(), d = values(), closing = selection === "close";
+    const name = displayName(c?.name ?? active().copyName ?? active().name);
+    const uses = c ? componentUses(sample) : [active()];
+    return `<section class="cp-editor cp-refined-editor" aria-label="Element editor"><div class="cp-editor-head"><h2>${closing ? "Close button" : c || active().copyName ? name : `${displayName(active().name)} content`}</h2>${button("focus-preview", "Show preview")}</div>
+      <div class="cp-editor-body"><section class="cp-scope cp-refined-scope"><p class="cp-scope-line">${c ? `Shared by ${uses.map(s => escape(displayName(s.name))).join(" and ")}` : `Only ${escape(displayName(active().name))}`}</p>
+      ${closing ? `<p>Hides ${escape(displayName(active().name))}. Game Escape does the same.</p>` : c ? `<div class="cp-row">${button("uses", `Used on ${uses.length} ${uses.length === 1 ? "screen" : "screens"}`)}${uses.length > 1 ? button("copy", `Make a copy for ${escape(displayName(active().name))}`) : button("add-use", "Add to another screen…")}</div>` : active().copyName ? `<p>This copy has its own content.</p>` : `<p>Reuse this title, image and explanation in another screen.</p>${button("extract", "Make component…", false, !active().starter)}`}</section>
+      ${copyNeedsReload() ? `<div class="cp-error" role="alert"><strong>Copy created. Your edits are still unsaved.</strong><p>Reload the copy to continue. The other screens keep their saved content.</p>${button("reload-copy", "Reload copy")}</div>` : error ? `<div class="cp-error" role="alert">${escape(error)}${button("source-component", "Inspect Source")}</div>` : !available() ? `<div class="cp-error" role="alert">Can't find this component. Your draft is still here.${button("source-component", "Inspect Source")}</div>` : ""}
+      ${closing ? `<label class="cp-field">Button label<input name="close-label" value="${escape(d.closeLabel)}"></label>` : `<label class="cp-field">Title<input name="title" value="${escape(d.title)}" ${active().starter ? "" : "disabled"}></label><label class="cp-field">Explanation<textarea name="explanation" rows="3" ${active().starter ? "" : "disabled"}>${escape(d.explanation)}</textarea></label><button class="cp-refined-image" data-action="image"><img src="${d.image === "tram" ? tram : route}" alt="${d.image === "tram" ? "Tram emblem" : "Route map"}"><span><strong>${d.image === "tram" ? "Tram emblem" : "Route map"}</strong><br>${d.width} × ${d.height} px</span><span>Change…</span></button>`}
+      <details class="cp-disclosure"><summary>Layout and appearance</summary><p>Image size and title size use the existing element editor.</p>${button("existing", "Edit size and appearance")}</details>
+      <details class="cp-disclosure"><summary>Source and effects</summary><dl class="cp-meta"><dt>Source name</dt><dd>${escape(c?.name ?? active().copyName ?? active().name)}</dd><dt>Type</dt><dd>${closing || !c && !active().copyName ? "Panel" : "Component · no parameters"}</dd><dt>Stable reference</dt><dd>${active().copyName ? `${escape(active().copyName)}/component` : c?.id ?? screenId}</dd><dt>Revisions</dt><dd>Source ${sample.revision}; screen ${active().revision}${c ? `; component ${c.revision}; use 1` : ""}</dd><dt>Effects</dt><dd>${c?.unknown ? "Unknown. Custom child effects need Source inspection." : "Content presents information. Close hides this panel."}</dd></dl>${button("source-component", "Open Source")}</details></div>
+      <div class="cp-commit"><span>${copyNeedsReload() ? "Edits retained · reload needed" : dirty() ? c ? `Will update ${uses.map(s => escape(displayName(s.name))).join(" and ")}` : `Will update only ${escape(displayName(active().name))}` : "All changes applied"}</span><div class="cp-row">${button("apply", c ? "Review changes…" : "Apply changes", true, !dirty() || copyNeedsReload())}${button("cancel", "Cancel", false, !dirty())}</div></div></section>`;
   }
   function choose(): string {
+    if (refined) return `<div class="cp-choose"><section><h2>Screens</h2>${sample.screens.map(s => `<button class="cp-screen-row" data-open-screen="${s.id}"><strong>${escape(displayName(s.name))}</strong><span>Panel${s.use ? ` · uses ${escape(displayName(sample.component?.name ?? "route_guide"))}` : ""}</span><span>Edit</span></button>`).join("")}<h2>Components</h2>${sample.component ? `<div class="cp-screen-row"><strong>${escape(displayName(sample.component.name))}</strong>${button("uses", `Used on ${componentUses(sample).length} screens`)}</div>` : `<p>Select a screen and make a component from a group you want to reuse.</p>`}</section><section class="cp-stage">${preview()}</section></div>`;
     return `<div class="cp-choose"><section><h2>Owned screens</h2>${sample.screens.map(screen => `<button class="cp-screen-row" data-open-screen="${screen.id}"><strong>${escape(screen.name)}</strong><span>Panel · ${screen.use ? "uses route_guide" : screen.copyName ? `uses ${screen.copyName}` : "ordinary nodes"}</span><span>Open Design</span></button>`).join("")}<h2>Owned components</h2>${sample.component ? `<div class="cp-screen-row"><strong>${escape(sample.component.name)}</strong><span>Component · ${componentUses(sample).length} uses</span>${button("uses", "View uses")}</div>` : `<p>Make a supported group into a component from Design.</p>`}</section><section class="cp-stage">${preview()}<p>New screen offers Blank or Help panel starter. Both create ordinary editable source.</p></section></div>`;
   }
   function story(): string {
+    if (refined) return `<div class="cp-connect"><section><div class="cp-section-heading"><h2>Night route</h2>${button("add-beat", "+ Screen Beat", true)}</div><ol class="cp-beats"><li><span>Dialogue</span><p>The last tram waits by the station.</p></li>${sample.beats.map(beat => `<li><span>${beat.kind === "show" ? "Show screen" : "Hide screen"}</span><strong>${escape(displayName(beat.targetName))}</strong>${button(`beat-source-${beat.id}`, "Source")}${!sample.screens.some(s => s.id === beat.screenId && s.name === beat.targetName) ? `<p class="cp-error">Can't find this panel. Choose a current target before playing.</p>` : ""}</li>${beat.kind === "show" ? `<li><span>Dialogue</span><p>We can read the guide while the tram moves.</p></li>` : ""}`).join("")}<li><span>Dialogue</span><p>Next stop, the old observatory.</p></li></ol></section><section class="cp-connection"><h2>${escape(displayName(active().name))}</h2><p>Panel · dialogue continues while it's open.</p><dl class="cp-meta"><dt>Show</dt><dd>Opens the panel</dd><dt>Hide, Close, Escape</dt><dd>Dismiss the panel</dd><dt>Outside click</dt><dd>Keeps it open</dd></dl>${button("play", "Try playback", true)}${button("step-design", "Edit panel")}<details class="cp-disclosure"><summary>Source and effects</summary><p>Show adds this panel; Hide and Close remove it. Missing targets and unknown effects require Source inspection.</p><code>${escape(screenId)} · screen r${active().revision} · action r1 · binding r1</code></details></section></div>`;
     return `<div class="cp-connect"><section><div class="cp-section-heading"><h2>Night route</h2>${button("add-beat", "+ Screen Beat", true)}</div><ol class="cp-beats"><li><span>Dialogue</span><p>The last tram waits by the station.</p></li>${sample.beats.map(beat => `<li><span>${beat.kind === "show" ? "Show screen" : "Hide screen"}</span><strong>${escape(beat.targetName)}</strong>${button(`beat-source-${beat.id}`, "Source")}${!sample.screens.some(s => s.id === beat.screenId && s.name === beat.targetName) ? `<p class="cp-error">Target unavailable. Saved identity retained; this Beat cannot run.</p>` : ""}</li>${beat.kind === "show" ? `<li><span>Dialogue</span><p>We can read the guide while the tram moves.</p></li>` : ""}`).join("")}<li><span>Dialogue</span><p>Next stop, the old observatory.</p></li></ol></section>
       <section class="cp-connection"><h2>Help panel</h2><dl class="cp-meta"><dt>Type</dt><dd>Panel</dd><dt>Show</dt><dd>Stays visible through dialogue</dd><dt>Hide / Close</dt><dd>Removes the panel</dd><dt>Game Escape</dt><dd>Dismisses the panel</dd><dt>Outside click</dt><dd>Keeps the panel open</dd></dl>${button("play", "Try playback simulation", true)}${button("step-design", "Edit panel")}<p>Editor Escape cancels the current editor operation.</p><details class="cp-disclosure"><summary>Effects and revisions</summary><p>Show adds panel presence; Hide and Close remove it. Track the target screen, action and binding revisions. A missing target or unknown child remains unknown.</p><code>screen-help · revision ${sample.screens[0]!.revision}<br>sample action r1 · binding r1</code></details></section></div>`;
   }
@@ -125,11 +159,15 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function openDialog(title: string, html: string, focusName?: string) {
     lastLauncher = document.activeElement as HTMLElement; modal?.remove();
     modal = document.createElement("dialog"); modal.className = "cp-dialog"; modal.ariaLabel = title;
-    modal.innerHTML = `<div class="cp-dialog-heading"><h2>${title}</h2>${button("dialog-close", "Cancel")}</div><div class="cp-dialog-body">${html}</div>`;
+    modal.innerHTML = `<div class="cp-dialog-heading"><h2>${title}</h2>${refined ? "" : button("dialog-close", "Cancel")}</div><div class="cp-dialog-body">${html}</div>`;
     host.append(modal); modal.showModal();
     const current = modal, launcher = lastLauncher?.dataset.action;
     modal.addEventListener("close", () => { current.remove(); if (modal === current) modal = null; const returnTo = host.querySelector<HTMLElement>(`[data-action="${launcher ?? "new"}"]`) ?? host.querySelector<HTMLElement>("[name=title]"); returnTo?.focus({ preventScroll: true }); });
     if (focusName) modal.querySelector<HTMLInputElement>(`[name="${focusName}"]`)?.focus();
+    if (refined) modal.addEventListener("keydown", event => {
+      if (event.key !== "Enter" || event.isComposing || event.ctrlKey || event.metaKey || event.shiftKey || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement || event.target instanceof HTMLButtonElement) return;
+      const primary = current.querySelector<HTMLButtonElement>(".cp-primary:not(:disabled)"); if (primary) { event.preventDefault(); primary.click(); }
+    });
   }
   function closeDialog() { modal?.close(); }
   function nameProblem(name: string): string {
@@ -140,15 +178,27 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function namedOperation(kind: "extract" | "copy") {
     if (kind === "extract" && (!active().starter || sample.component || active().copyName)) { report("Select an ordinary supported group before making a component."); return; }
     if (kind === "copy" && refuse()) return;
+    if (refined && kind === "copy" && (!values().title.trim() || !values().explanation.trim())) { error = "Enter a title and explanation before copying. Your draft is still here."; render(); return; }
+    if (refined) {
+      const screenName = displayName(active().name), other = componentUses(sample).filter(s => s.id !== screenId).map(s => displayName(s.name)).join(" and ");
+      openDialog(kind === "copy" ? `Make a copy for ${screenName}` : "Make component", `<p>${kind === "copy" ? `${escape(screenName)} will use its own copy.${other ? ` ${escape(other)} keeps the saved original.` : ""}${dirty() ? " Your unsaved edits will follow after the copy is checked." : ""}` : "Share this title, image and explanation with other screens. Close stays with its panel."}</p><label class="cp-field">Component name<input name="component-name" value="${kind === "copy" ? `${escape(active().name)}_guide` : "route_guide"}"><span class="cp-field-help">Ren'Py name. Use letters, numbers and underscores.</span></label><p class="cp-form-error" role="alert"></p><div class="cp-actions">${button(`confirm-${kind}`, kind === "copy" ? "Create copy" : "Create component", true)}${button("dialog-close", "Cancel")}</div>`, "component-name"); return;
+    }
     openDialog(kind === "copy" ? "Make one use independent" : "Make component", `<p>${kind === "copy" ? `Copy only the use in ${escape(active().name)} into a new owned component. Other uses keep route_guide.` : `Move the selected supported group into an owned component. Replace this group in ${escape(active().name)} with one use.`}</p><label class="cp-field">Component name<input name="component-name" value="${kind === "copy" ? "help_guide" : "route_guide"}"></label><p class="cp-form-error" role="alert"></p><p>Parameterless component · Close stays in its owning panel.</p><div class="cp-actions">${button(`confirm-${kind}`, kind === "copy" ? "Create independent copy" : "Create component", true)}${button("dialog-close", "Cancel")}</div>`, "component-name");
   }
   function openNew() {
+    if (refined) {
+      openDialog("New screen", `<label class="cp-field">Screen name<input name="new-name" value="help_panel"></label><fieldset><legend>Start with</legend><label class="cp-option"><input type="radio" name="starter" value="help" checked><span><strong>Help panel</strong><br>Title, explanation, image and Close. Edit them after creation.</span></label><label class="cp-option"><input type="radio" name="starter" value="blank"><span><strong>Blank</strong><br>Start with an empty panel.</span></label></fieldset><p><strong>Panel</strong> · stays open while dialogue continues.</p>${sample.uiImages.length ? `<div class="cp-starter-assets"><label class="cp-field">Project image<select name="starter-image">${sample.uiImages.map(id => `<option value="${id}">${id === "tram" ? "Tram emblem" : "Route map"}</option>`).join("")}</select></label></div><div class="cp-starter-preview"><img src="${sample.uiImages[0] === "tram" ? tram : route}" alt="Selected project image"><span><strong>Help</strong><br>Choose a route. The last tram leaves at midnight.<br>Close</span></div>` : `<div class="cp-starter-blocked cp-error" role="status"><strong>Add a UI image first.</strong><p>Cancel, import an image in Assets with the UI image role, then return to create Help.</p></div>`}<p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("confirm-new", "Create screen", true, !sample.uiImages.length)}${button("dialog-close", "Cancel")}</div>`, "new-name"); return;
+    }
     openDialog("New screen", `<label class="cp-field">Screen name<input name="new-name" value="help_panel"></label><fieldset><legend>Start with</legend><label class="cp-option"><input type="radio" name="starter" value="help" checked><span><strong>Help panel</strong><br>Title, explanation, an existing UI image and Close. Edit every node later.</span></label><label class="cp-option"><input type="radio" name="starter" value="blank"><span><strong>Blank</strong><br>An empty screen for your own layout.</span></label></fieldset><p><strong>Type: Panel</strong> · Shown without stopping dialogue.</p><p>Close and game Escape dismiss it. Outside clicks keep it open.</p>
       ${sample.uiImages.length ? `<div class="cp-starter-assets"><label class="cp-field">Existing project UI image<select name="starter-image">${sample.uiImages.map(id => `<option value="${id}">${id === "tram" ? "Tram emblem" : "Route map"} · UI image</option>`).join("")}</select></label><p>Displayed size defaults to 320 × 180 px. Edit the ordinary image node after creation.</p></div><div class="cp-starter-preview"><img src="${sample.uiImages[0] === "tram" ? tram : route}" alt="Selected existing sample UI image"><span>Help<br>Choose a route. The last tram leaves at midnight.<br>Close</span></div>` : `<div class="cp-starter-blocked cp-error" role="status"><strong>No typed UI images available.</strong><p>Help panel needs an existing UI-image asset. Cancel, import an image in Assets with the UI image role, then reopen New screen.</p><p>No screen has been created. Blank is a separate choice.</p></div>`}
       <p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("confirm-new", "Create screen", true, !sample.uiImages.length)}${button("dialog-close", "Cancel")}</div>`, "new-name");
   }
   function openInsert() {
     if (!sample.component || sample.component.state !== "available") { report("No available owned component. Normal screens and panels are not components."); return; }
+    if (refined) {
+      const eligible = sample.screens.filter(s => !s.use && !s.copyName);
+      openDialog("Add component to a screen", `<label class="cp-field">Component<select name="component"><option value="component-guide">${escape(displayName(sample.component.name))}</option></select></label>${eligible.length ? `<label class="cp-field">Screen<select name="insert-screen">${eligible.map(s => `<option value="${s.id}">${escape(displayName(s.name))}</option>`).join("")}</select></label><label class="cp-field">Place inside<select name="insert-parent"><option value="panel-frame">Panel frame</option></select></label><p>The screen keeps its existing elements. The new content shares later edits with ${escape(displayName(active().name))}.</p>` : `<p>Every eligible frame in this sample already uses the component. Create another screen to try a new use.</p>`}<p class="cp-form-error" role="alert"></p><div class="cp-actions">${eligible.length ? button("confirm-insert", "Add component", true) : button("new", "New screen", true)}${button("dialog-close", "Cancel")}</div>`); return;
+    }
     openDialog("Use an owned component", `<label class="cp-field">Component<select name="component"><option value="component-guide">${escape(sample.component.name)} · Component</option></select></label><p>Only explicitly owned components appear here. Normal screens and panels are separate.</p><label class="cp-field">Screen<select name="insert-screen">${sample.screens.map(s => `<option value="${s.id}" ${!s.use ? "selected" : ""}>${escape(s.name)}</option>`).join("")}</select></label><label class="cp-field">Insertion parent<select name="insert-parent"><option value="panel-frame">Panel frame</option></select></label><p>Insert the component as a child of this frame. This sample has one eligible parent per screen.</p><p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("confirm-insert", "Insert use", true)}${button("dialog-close", "Cancel")}</div>`);
   }
   function showSource(target = "screen") {
@@ -162,6 +212,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function apply() {
     if (!dirty() || refuse()) return;
     if (!values().title.trim() || !values().explanation.trim()) { error = "Enter a title and explanation. Draft retained."; render(); host.querySelector<HTMLInputElement>("[name=title]")?.focus(); return; }
+    if (refined && !shared()) { finishApply(); return; }
     if (variant === "worksheet") { reviewInline = true; render(); host.querySelector(".cp-inline-review")?.scrollIntoView({ block: "nearest" }); }
     else openDialog("Review affected screens", reviewBody());
   }
@@ -171,9 +222,29 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const changed = { title: d.title, explanation: d.explanation, width: d.width, height: d.height, fontSize: d.fontSize, image: d.image };
     if (c) { Object.assign(next.component!, changed); next.component!.revision++; componentUses(next).forEach(s => s.revision++); }
     else { const screen = next.screens.find(s => s.id === screenId)!; if (selection !== "close") Object.assign(screen, changed); screen.closeLabel = d.closeLabel; screen.revision++; }
-    drafts.delete(draftKey()); reviewInline = false; closeDialog(); accept(next, "Changes applied.");
+    const appliedTo = c ? componentUses(sample).map(s => displayName(s.name)).join(" and ") : displayName(active().name);
+    drafts.delete(draftKey()); reviewInline = false; closeDialog(); accept(next, refined ? `Updated ${appliedTo}.` : "Changes applied.");
+  }
+  function verifyCopiedDraft() {
+    if (!pendingCopy) return;
+    const intent = pendingCopy;
+    // Simulated inspect/refresh, separate from the identity-only Copy result. The
+    // new definition and all corresponding child IDs must be verified first.
+    const refreshed = sample.screens.find(s => s.id === intent.screenId);
+    const nodeIds = refreshed?.copyNodeIds;
+    const supported = refreshed && refreshed.copyName === intent.name && !refreshed.use && nodeIds && new Set(Object.values(nodeIds)).size === 3 && Object.values(nodeIds).every(id => id.startsWith(`${intent.name}/`));
+    const contentMatches = refreshed && ["title", "explanation", "image", "width", "height", "fontSize"].every(key => refreshed[key as keyof Screen] === intent.accepted[key as keyof Draft]);
+    if (failCopyRefresh || !supported || !contentMatches) {
+      failCopyRefresh = false; notice = `Copy created for ${displayName(active().name)}. Your edits are retained. Reload the copy to continue.`; render(); return;
+    }
+    const retained = copy(drafts.get(intent.originalKey) ?? intent.draft);
+    drafts.delete(intent.originalKey); retained.base = sample.revision; drafts.set(intent.screenId, retained); pendingCopy = null;
+    notice = `Copy ready for ${displayName(active().name)}. Apply your edits when ready.`; error = ""; render();
   }
   function openBeat() {
+    if (refined) {
+      openDialog("Add screen Beat", `<label class="cp-field">Action<select name="beat-kind"><option value="show">Show screen</option><option value="hide">Hide screen</option></select></label><label class="cp-field">Panel<select name="beat-screen">${sample.screens.map(s => `<option value="${s.id}" ${s.id === screenId ? "selected" : ""}>${escape(displayName(s.name))}</option>`).join("")}</select></label><p class="cp-beat-purpose">Show keeps the panel open while dialogue continues.</p><p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("confirm-beat", "Add Beat", true, !sample.screens.length)}${button("dialog-close", "Cancel")}</div>`); return;
+    }
     openDialog("Add screen Beat", `<label class="cp-field">Operation<select name="beat-kind"><option value="show">Show screen</option><option value="hide">Hide screen</option></select></label><label class="cp-field">Owned panel<select name="beat-screen">${sample.screens.map(s => `<option value="${s.id}">${escape(s.name)} · Panel</option>`).join("")}</select></label><p>Uses a stable owned-screen identity. Components do not appear in this picker.</p><p>Show continues dialogue. Hide removes the shown panel.</p><p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("confirm-beat", "Insert Beat", true, !sample.screens.length)}${button("dialog-close", "Cancel")}</div>`);
   }
   function runSimulation() {
@@ -192,14 +263,18 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function ordinaryEditor() {
     const d = values();
+    if (refined) {
+      openDialog("Image and title size", `<label class="cp-field">Project image<select name="node-image">${sample.uiImages.map(id => `<option value="${id}" ${d.image === id ? "selected" : ""}>${id === "tram" ? "Tram emblem" : "Route map"}</option>`).join("")}</select></label><div class="cp-field-pair"><label class="cp-field">Width (px)<input name="node-width" type="number" min="1" value="${d.width}"></label><label class="cp-field">Height (px)<input name="node-height" type="number" min="1" value="${d.height}"></label></div><label class="cp-field">Title size (px)<input name="node-font" type="number" min="1" value="${d.fontSize}"></label><p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("node-draft", "Use these values", true, !sample.uiImages.length)}${button("dialog-close", "Cancel")}</div>`); return;
+    }
     openDialog("Edit ordinary nodes", `<p>Help starter nodes use the ordinary editing operations. This small sample shows image and title changes; existing layout, Style, add/remove and reordering retain their approved editor.</p><label class="cp-field">Typed UI-image asset<select name="node-image"><option value="tram" ${d.image === "tram" ? "selected" : ""}>Tram emblem · UI image</option><option value="route" ${d.image === "route" ? "selected" : ""}>Route map · UI image</option></select></label><div class="cp-field-pair"><label class="cp-field">Width (px)<input name="node-width" type="number" min="1" value="${d.width}"></label><label class="cp-field">Height (px)<input name="node-height" type="number" min="1" value="${d.height}"></label></div><label class="cp-field">Title font size<input name="node-font" type="number" min="1" value="${d.fontSize}"></label><p>These values join the pending draft. Apply still reviews the affected screens.</p><p class="cp-form-error" role="alert"></p><div class="cp-actions">${button("node-draft", "Keep in draft", true)}${button("dialog-close", "Cancel")}</div>`);
   }
   const events = new AbortController();
   host.addEventListener("click", event => {
     const target = (event.target as HTMLElement).closest<HTMLElement>("[data-action],[data-select],[data-open-screen]"); if (!target) return;
-    if (target.dataset.select) { selection = target.dataset.select; render(); host.querySelector<HTMLInputElement>(selection === "close" ? "[name=close-label]" : selection === "explanation" ? "[name=explanation]" : "[name=title]")?.focus({ preventScroll: true }); if (selection === "image") report("Tram emblem selected. Use Edit image for its existing editing route."); if (selection === "close") report("Close selected for editing. Canvas actions stay inert."); return; }
-    if (target.dataset.openScreen) { screenId = target.dataset.openScreen; step = "design"; error = ""; render(); return; }
+    if (target.dataset.select) { if (copyNeedsReload()) { report("Reload the copy or cancel its unsaved edits before changing selection."); return; } selection = target.dataset.select; render(); host.querySelector<HTMLInputElement>(selection === "close" ? "[name=close-label]" : selection === "explanation" ? "[name=explanation]" : "[name=title]")?.focus({ preventScroll: true }); if (selection === "image") report(refined ? "Image selected. Choose Change to edit it." : "Tram emblem selected. Use Edit image for its existing editing route."); if (selection === "close") report(refined ? "Close selected for editing." : "Close selected for editing. Canvas actions stay inert."); return; }
+    if (target.dataset.openScreen) { if (pendingCopy) { report("Reload the copy or cancel its unsaved edits before switching screens."); return; } screenId = target.dataset.openScreen; step = "design"; error = ""; render(); return; }
     const action = target.dataset.action!;
+    if (pendingCopy && ["new", "extract", "copy", "add-use", "add-beat", "existing", "image"].includes(action)) { report("Reload the copy or cancel its unsaved edits before starting another operation."); return; }
     if (action.startsWith("step-")) { step = action.slice(5); error = ""; render(); return; }
     if (action.startsWith("beat-source-")) { showSource(`beat:${action.slice(12)}`); return; }
     if (["undo", "redo"].includes(action)) {
@@ -217,24 +292,28 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       case "confirm-extract": case "confirm-copy": {
         const name = modal!.querySelector<HTMLInputElement>("[name=component-name]")!.value.trim(), problem = nameProblem(name);
         if (problem) { modal!.querySelector(".cp-form-error")!.textContent = problem; break; }
-        if (drafts.size) { modal!.querySelector(".cp-form-error")!.textContent = "Apply or cancel the retained draft first."; break; }
+        const carry = refined && action === "confirm-copy" && dirty() ? { screenId, name, originalKey: draftKey(), draft: copy(values()), accepted: { ...sample.component!, base: sample.revision } } : null;
+        if (drafts.size && !carry) { modal!.querySelector(".cp-form-error")!.textContent = "Apply or cancel the retained draft first."; break; }
+        if (carry && (values().base !== sample.revision || !available())) { closeDialog(); refuse(); break; }
         const next = copy(sample), screen = next.screens.find(s => s.id === screenId)!;
         if (action === "confirm-extract") { next.component = { width: screen.width, height: screen.height, fontSize: screen.fontSize, image: screen.image, closeLabel: screen.closeLabel, id: "component-guide", name, title: screen.title, explanation: screen.explanation, revision: 1, state: "available", unknown: false }; screen.use = true; }
-        else { const c = sample.component!; Object.assign(screen, { title: c.title, explanation: c.explanation, width: c.width, height: c.height, fontSize: c.fontSize, image: c.image }); screen.copyName = name; screen.use = false; screen.local = true; }
-        screen.revision++; closeDialog(); accept(next, action === "confirm-copy" ? "Only this use now refers to the new independent component." : "Owned component created; the selected group is now one use."); break;
+        else { const c = sample.component!; Object.assign(screen, { title: c.title, explanation: c.explanation, width: c.width, height: c.height, fontSize: c.fontSize, image: c.image }); screen.copyName = name; screen.copyNodeIds = { title: `${name}/title-${sample.revision}`, explanation: `${name}/explanation-${sample.revision}`, image: `${name}/image-${sample.revision}` }; screen.use = false; screen.local = true; }
+        screen.revision++; closeDialog(); accept(next, refined ? action === "confirm-copy" ? `Copy created for ${displayName(screen.name)}.` : "Component created. Add it to another screen when ready." : action === "confirm-copy" ? "Only this use now refers to the new independent component." : "Owned component created; the selected group is now one use.");
+        if (carry) { pendingCopy = carry; verifyCopiedDraft(); } break;
       }
       case "add-use": openInsert(); break;
       case "confirm-insert": {
         const id = modal!.querySelector<HTMLSelectElement>("[name=insert-screen]")!.value, next = copy(sample), screen = next.screens.find(s => s.id === id)!;
         if (screen.use) { modal!.querySelector(".cp-form-error")!.textContent = "This sample already has a use in that frame. Choose the other screen."; break; }
         if (screen.starter) screen.retainedGroup = { title: screen.title, explanation: screen.explanation };
-        screen.use = true; screen.starter = true; screen.revision++; screenId = screen.id; closeDialog(); accept(next, "Use inserted in the chosen panel frame. Existing content retained."); break;
+        screen.use = true; screen.starter = true; screen.revision++; screenId = screen.id; closeDialog(); accept(next, refined ? `Added ${displayName(sample.component!.name)} to ${displayName(screen.name)}. Both screens now share its content.` : "Use inserted in the chosen panel frame. Existing content retained."); break;
       }
       case "uses": openDialog("Component uses", `<p>${escape(sample.component?.name ?? "route_guide")} · explicitly owned component</p><table class="cp-table"><thead><tr><th>Screen</th><th>Reference</th></tr></thead><tbody>${componentUses(sample).map(s => `<tr><td>${escape(s.name)}</td><td><code>${s.id}/use-guide</code> · r1</td></tr>`).join("")}</tbody></table><p>Only these uses change on shared Apply.</p>${button("source-component", "Component Source")}${button("dialog-close", "Back to editor")}`); break;
       case "apply": apply(); break;
       case "confirm-apply": finishApply(); break;
       case "back-review": reviewInline = false; closeDialog(); render(); break;
-      case "cancel": drafts.delete(draftKey()); reviewInline = false; error = ""; notice = "Editor operation cancelled. Saved Source unchanged."; render(); break;
+      case "cancel": { const copied = !!active().copyName; drafts.delete(draftKey()); pendingCopy = null; reviewInline = false; error = ""; notice = refined ? copied ? "Unsaved edits discarded. The copy is still here." : "Unsaved edits discarded." : "Editor operation cancelled. Saved Source unchanged."; render(); break; }
+      case "reload-copy": verifyCopiedDraft(); break;
       case "confirm-new": {
         const name = modal!.querySelector<HTMLInputElement>("[name=new-name]")!.value.trim(), problem = nameProblem(name);
         if (problem) { modal!.querySelector(".cp-form-error")!.textContent = problem; break; }
@@ -242,13 +321,13 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
         const image = modal!.querySelector<HTMLSelectElement>("[name=starter-image]")?.value as "tram" | "route" | undefined;
         if (starter && (!image || !sample.uiImages.includes(image))) { modal!.querySelector(".cp-form-error")!.textContent = "Help panel needs an existing typed UI image. No screen created; your name and starter choice are retained."; break; }
         const next = copy(sample), id = `screen-created-${next.revision}`; next.screens.push({ ...defaultVisual(), ...(starter && image ? { image } : {}), id, name, title: "Help", explanation: "Choose a route. The last tram leaves at midnight.", starter, use: false, local: false, revision: 1 });
-        screenId = id; step = "design"; closeDialog(); accept(next, `${starter ? "Editable Help starter" : "Blank panel"} created.`); break;
+        screenId = id; selection = "group"; step = "design"; closeDialog(); accept(next, refined ? `${displayName(name)} created. Edit its elements or connect it to Story.` : `${starter ? "Editable Help starter" : "Blank panel"} created.`); break;
       }
       case "add-beat": openBeat(); break;
       case "confirm-beat": {
         const id = modal!.querySelector<HTMLSelectElement>("[name=beat-screen]")!.value, kind = modal!.querySelector<HTMLSelectElement>("[name=beat-kind]")!.value as "show" | "hide";
         const screen = sample.screens.find(s => s.id === id); if (!screen) { modal!.querySelector(".cp-form-error")!.textContent = "Target unavailable. Choose a current owned panel explicitly."; break; }
-        const next = copy(sample); next.beats.push({ id: `beat-${kind}-${sample.revision}`, kind, screenId: id, targetName: screen.name, revision: 1 }); closeDialog(); accept(next, `${kind === "show" ? "Show" : "Hide"} Beat inserted with a stable screen reference.`); break;
+        const next = copy(sample); next.beats.push({ id: `beat-${kind}-${sample.revision}`, kind, screenId: id, targetName: screen.name, revision: 1 }); closeDialog(); accept(next, refined ? `${kind === "show" ? "Show" : "Hide"} ${displayName(screen.name)} added to Story.` : `${kind === "show" ? "Show" : "Hide"} Beat inserted with a stable screen reference.`); break;
       }
       case "play": runSimulation(); break;
       case "play-close": setShown(false, "Close hid the panel. Dialogue continues."); break;
@@ -265,7 +344,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       }
       case "focus-preview": host.querySelector(".cp-canvas")?.scrollIntoView({ block: "start" }); break;
       case "reopen": notice = "Reopened accepted sample Source. Stable identities, history and retained draft stay in this browser session."; render(); break;
-      case "reset": sample = fixture(context.state); screenId = "screen-help"; drafts.clear(); undo.length = redo.length = 0; error = ""; reviewInline = false; notice = "Fresh fictional sample."; render(); break;
+      case "reset": sample = fixture(context.state); screenId = "screen-help"; drafts.clear(); pendingCopy = null; failCopyRefresh = context.state === "copy-refresh-failure"; undo.length = redo.length = 0; error = ""; reviewInline = false; notice = "Fresh fictional sample."; render(); break;
     }
   }, { signal: events.signal });
   host.addEventListener("input", event => {
@@ -277,7 +356,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }, { signal: events.signal });
   host.addEventListener("change", event => {
     const input = event.target as HTMLSelectElement;
-    if (input.name === "screen") { screenId = input.value; error = ""; selection = "group"; render(); }
+    if (input.name === "screen") { if (pendingCopy) { input.value = screenId; report("Reload the copy or cancel its unsaved edits before switching screens."); return; } screenId = input.value; error = ""; selection = "group"; render(); }
     if (input.name === "external" && input.value) {
       sample.revision++;
       if (sample.component) {
@@ -298,11 +377,18 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       modal!.querySelector(".cp-form-error")!.textContent = "";
     }
     if (input.name === "starter-image") modal!.querySelector<HTMLImageElement>(".cp-starter-preview img")!.src = input.value === "tram" ? tram : route;
+    if (refined && input.name === "beat-kind") modal!.querySelector(".cp-beat-purpose")!.textContent = input.value === "show" ? "Show keeps the panel open while dialogue continues." : "Hide removes the panel at this point in the story.";
   }, { signal: events.signal });
   host.addEventListener("keydown", event => {
     if (event.key !== "Escape" || modal || event.isComposing) return;
-    if (dirty()) { event.preventDefault(); drafts.delete(draftKey()); error = ""; reviewInline = false; notice = "Editor Escape cancelled the pending editor operation. Saved Source unchanged."; render(); }
+    if (dirty()) { event.preventDefault(); drafts.delete(draftKey()); pendingCopy = null; error = ""; reviewInline = false; notice = refined ? active().copyName ? "Unsaved edits discarded. The copy is still here." : "Unsaved edits discarded." : "Editor Escape cancelled the pending editor operation. Saved Source unchanged."; render(); }
   }, { signal: events.signal });
   render(); if (["starter", "no-images"].includes(context.state)) openNew();
+  if (refined && context.state === "copy-refresh-failure") {
+    drafts.set("component-guide", { ...values(), title: "Help for night travellers" });
+    namedOperation("copy");
+    modal!.querySelector<HTMLInputElement>("[name=component-name]")!.value = "help_guide";
+    modal!.querySelector<HTMLButtonElement>('[data-action="confirm-copy"]')!.click();
+  }
   return () => { events.abort(); modal?.remove(); host.replaceChildren(); host.classList.remove("cp-host"); };
 }

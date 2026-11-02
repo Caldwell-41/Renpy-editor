@@ -3,10 +3,12 @@
 Draft alternatives for [#41, Reuse an owned component](https://github.com/Caldwell-41/Renpy-editor/issues/41)
 and [#44, Create and show the Help panel](https://github.com/Caldwell-41/Renpy-editor/issues/44).
 Kris has not approved a revision. `approval.json` keeps every candidate a draft.
-This assignment changes no production files.
+This assignment changes no production files. [A2](REFINEMENT.md) applies Kris's
+requested unslop and Experience First pass. It remains unapproved.
 
 | Alternative | Component editing | Review |
 | --- | --- | --- |
+| A2, focused workflow | The inspector states which screens will change and offers a copy for the current screen. Valid pending edits follow only after the copy is verified. | Shared review compares changed fields; local edits use one Apply. |
 | A, inspector | Scope and component actions sit above ordinary content fields beside the canvas. Compact view puts the editor first. | A dialog lists every affected screen. |
 | B, library | A persistent component column adds discovery, use counts and insertion beside the same editor. | The same affected-screen dialog. |
 | C, worksheet | The canvas and element tree sit above full-width editing fields. | Affected-screen review expands below the fields. |
@@ -38,7 +40,7 @@ It is a self-contained export of the registered Design Lab mounts. It requires n
 server. The comparison controls switch alternatives, fresh scenarios and themes.
 `empty-images.html` in the same output directory opens the blocked starter directly.
 The existing lab registry also exposes screen `components-and-help-panel`, variants
-`inspector`, `library` and `worksheet`, with the seven registered scenarios.
+`refined`, `inspector`, `library` and `worksheet`, with the eight registered scenarios.
 
 Start with **Start with a supported group**. Make component, name it, then use
 **Use component** to insert it in About's panel frame. Change the title and review
@@ -85,7 +87,7 @@ their presence is not design approval.
 | Use component | Pick an owned component and insertion parent. Insert a new use without replacing neighboring content. Normal screens/panels are ineligible in this picker. |
 | View uses | Read current source-backed references, grouped by screen. |
 | Shared Apply | Review the explicit affected-screen list, then accept the pending content through the shared transaction owner. |
-| Make independent copy | Require a fresh component name. Copy only the selected use; retain every other reference. The sample requires applying or cancelling a pending draft first. |
+| Make independent copy | Require a fresh component name. Copy only the selected use; retain every other reference. A2 carries valid pending edits only after a separate verified refresh of the new target. Original alternatives require applying or cancelling the draft first. |
 | Source | Resolve the selected definition/use/Beat to its exact current source span. Missing or renamed targets refuse silent rebinding. |
 | New screen | Create Blank or ordinary editable Help starter with explicit panel kind. Prefill title/explanation/size and select an existing typed UI image. With no eligible image, block Help creation without a silent Blank fallback or bundled asset. |
 | Ordinary node editing | Existing qualified text, image, layout, Style, structure and Close operations remain with their current owners. |
@@ -98,7 +100,7 @@ their presence is not design approval.
 ## Evidence and limits
 
 Focused TypeScript checking uses the screen-local `tsconfig.json`. The offline runner
-checks all three layouts, seven scenarios, both lab themes and both sizes, 1100 by 720
+checks all four layouts, eight scenarios, both lab themes and both sizes, 1100 by 720
 and 560 by 640. Its focused interaction check covers names/collisions, parent choice,
 shared review, copying, exact sample Source, draft conflict/Escape, starter/image/Close
 editing, Show/Hide, missing-target refusal and simulated playback focus/dismissal.

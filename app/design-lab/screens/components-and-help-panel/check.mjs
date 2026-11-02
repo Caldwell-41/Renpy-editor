@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import refinedCheck from "./refined-check.mjs";
 
 // Shared by the normal Design Lab page runner and the offline review runner.
 export default async function check({ page, open, capture = async () => {} }) {
@@ -95,4 +96,5 @@ export default async function check({ page, open, capture = async () => {} }) {
     await capture(`${variant}-shared-review-dark-compact`);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   }
+  await refinedCheck({ page, open, capture });
 }

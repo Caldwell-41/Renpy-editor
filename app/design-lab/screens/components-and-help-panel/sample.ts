@@ -1,7 +1,7 @@
 // Fictional data and illustrative source. This is not a source parser or transaction service.
 export type Visual = { width: number; height: number; fontSize: number; image: "tram" | "route"; closeLabel: string };
 export const defaultVisual = (): Visual => ({ width: 320, height: 180, fontSize: 32, image: "tram", closeLabel: "Close" });
-export type Screen = Visual & { id: string; name: string; title: string; explanation: string; starter: boolean; use: boolean; local: boolean; revision: number; copyName?: string; retainedGroup?: { title: string; explanation: string } };
+export type Screen = Visual & { id: string; name: string; title: string; explanation: string; starter: boolean; use: boolean; local: boolean; revision: number; copyName?: string; copyNodeIds?: { title: string; explanation: string; image: string }; retainedGroup?: { title: string; explanation: string } };
 export type Beat = { id: string; kind: "show" | "hide"; screenId: string; targetName: string; revision: number };
 export type Sample = {
   revision: number;
