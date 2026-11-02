@@ -22,6 +22,8 @@ const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const capture=async state=>{
   if(process.env.COMPONENT_VISUAL_CAPTURE!=='1')return;
   const previous=page.viewportSize();
+  const scrolls=await page.locator('.screen-card,.screen-text-body').evaluateAll(elements=>elements.map(element=>element.scrollTop));
+  await page.locator('.screen-card,.screen-text-body').evaluateAll(elements=>elements.forEach(element=>{element.scrollTop=0;}));
   for(const [width,height] of [[1100,720],[560,640]]){
     await page.setViewportSize({width,height});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${state}/${width} overflow`);
@@ -29,6 +31,7 @@ const capture=async state=>{
     captures.push({state,theme:'dark',width,height,scale:1,path:name,sha256:digest(bytes)});
   }
   await page.setViewportSize(previous);
+  await page.locator('.screen-card,.screen-text-body').evaluateAll((elements,scrolls)=>elements.forEach((element,index)=>{element.scrollTop=scrolls[index]??0;}),scrolls);
 };
 const signal=async(promise,name)=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(`${name} did not complete`)),10000);})]);}finally{clearTimeout(timer);}};
 const candidate=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
@@ -138,6 +141,7 @@ try {
     await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),component.id);
     await choose();await ui.locator(`[data-node-id="${title}"]`).press('Enter');
     await ui.getByText('Shared by Component about and Component help',{exact:true}).waitFor();
+    await capture('shared-before-edit');
     const accepted=await read(component.path);await field().fill('Shared through UI');
     await ui.locator('.screen-text-layout').evaluate(details=>{details.open=true;});await ui.getByLabel('Width',{exact:true}).fill('420');
     await ui.locator('[data-text-apply]').click();
