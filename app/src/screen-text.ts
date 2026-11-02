@@ -73,6 +73,8 @@ export class ScreenText {
   private styleDialog?: HTMLDialogElement;
   private dismissStyle?: () => void;
   private lastField?: string;
+  private readonly carets=new Map<string,{field:string;start:number|null;end:number|null}>();
+  private copyFocus?:{key:string;field:string;start:number|null;end:number|null};
   private readonly appearanceStates = new Map<string,string>();
   private pickerKey?: string;
   private search = "";
@@ -118,6 +120,8 @@ export class ScreenText {
     return [{
       validate:()=>{read();},
       prepare:(fresh,nodeIds)=>{
+        const selectedKey=`${view.screenId}:${view.selected.id}`;
+        const focus=this.cardKey===selectedKey ? this.caret() : this.carets.get(selectedKey);
         const drafts=read().map(draft=>{
           const node=fresh.nodes.find(node=>node.id===nodeIds.get(draft.node.id!));
           if(!node?.textProperties || node.kind!==draft.node.kind)throw Error("The copied text target is unavailable. Your input is kept.");
@@ -137,6 +141,10 @@ export class ScreenText {
             this.drafts.delete(original);this.errors.delete(original);this.fieldErrors.delete(original);
             const appearance=this.appearanceStates.get(original);this.appearanceStates.delete(original);
             if(appearance)this.appearanceStates.set(draft.key,appearance);
+            const scroll=this.scrolls.get(original),expanded=this.expanded.get(original);
+            if(scroll!==undefined)this.scrolls.set(draft.key,scroll);
+            if(expanded!==undefined)this.expanded.set(draft.key,expanded);
+            if(original===selectedKey && focus)this.copyFocus={...focus,key:draft.key};
             this.drafts.set(draft.key,draft);
           }
         };
@@ -148,11 +156,16 @@ export class ScreenText {
   invalidate(): void { this.loaded = false; this.generation++; this.loading = undefined; }
   unmount(): void {
     if (this.card && this.cardKey) {
+      this.carets.set(this.cardKey,this.caret());
       this.scrolls.set(this.cardKey,this.card.querySelector(".screen-text-body")?.scrollTop ?? 0);
       const layout = this.card.querySelector<HTMLDetailsElement>(".screen-text-layout");
       if (layout) this.expanded.set(this.cardKey,layout.open);
     }
     this.keys?.abort(); this.fieldValidators.clear(); this.card = undefined; this.cardKey = undefined;
+  }
+  private caret():{field:string;start:number|null;end:number|null} {
+    const field=this.lastField??"text",control=this.fieldControl(field);
+    return {field,start:control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement?control.selectionStart:null,end:control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement?control.selectionEnd:null};
   }
   dispose(): void { this.disposed = true; this.generation++; this.closePicker(false); this.dismissStyle?.(); this.styleDialog?.remove(); this.styleDialog = undefined; this.unmount(); this.media.dispose(); }
   private async refreshAssets(): Promise<void> {
@@ -236,6 +249,11 @@ export class ScreenText {
     },{signal:this.keys.signal});
     void this.refreshAssets().catch(error => {if (this.active()) this.host.note((error as Error).message,true);});this.sync();
     for (const field of this.fieldErrors.get(this.key(view)) ?? []) {try {this.fieldValidators.get(field)?.();} catch { /* Restore this element's field error after navigation. */ }}
+    if(this.copyFocus?.key===this.cardKey && !view.busy && !this.isSaving()) {
+      const focus=this.copyFocus;this.copyFocus=undefined;this.focus(focus.field);
+      const field=this.fieldControl(focus.field);
+      if(focus.start!==null && focus.end!==null && (field instanceof HTMLTextAreaElement || field instanceof HTMLInputElement && ["text","search","tel","url","password"].includes(field.type)))field.setSelectionRange(focus.start,focus.end);
+    }
     return true;
   }
   sync(): void {

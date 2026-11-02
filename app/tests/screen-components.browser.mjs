@@ -23,7 +23,7 @@ await writeFile(join(output,'harness.mjs'),harness);
 const rpc=async request=>{
   if(['screens.canvasRender','screens.canvasStatus'].includes(request.operation))return {ok:true,value:{phase:'unavailable',message:'Component canvas/helper qualification is separate.'}};
   if(failCopyInspect && request.operation==='screens.inspect' && request.payload.path==='game/ui/component_about_copy.rpy') {
-    failCopyInspect=false;const result={ok:false,error:{code:'SOURCE_CONFLICT',message:'Deliberate post-copy inspection refusal'}};
+    const result={ok:false,error:{code:'SOURCE_CONFLICT',message:'Deliberate post-copy inspection refusal'}};
     receipts.push({request,result,injectedReadFailure:true});return result;
   }
   const result=await child.request(request);receipts.push({request,result});for(const observe of listeners)observe({request,result});if(result.value?.sessionId)sessionId=result.value.sessionId;return result;
@@ -131,7 +131,7 @@ try {
     await dialog.getByRole('button',{name:'Create copy',exact:true}).click();await dialog.waitFor({state:'detached'});
     await ui.getByText('Copy created. Your edits are still unsaved.',{exact:true}).waitFor();
     assert.equal(await field().inputValue(),'About only pending');assert.equal(await ui.locator('[data-text-apply]').isDisabled(),true);
-    await field().fill('About only latest pending');await ui.locator('.screen-text-layout').evaluate(details=>{details.open=true;});await ui.getByLabel('Width',{exact:true}).fill('490');await ui.getByRole('button',{name:'Reload copy',exact:true}).click();
+    await field().fill('About only latest pending');await ui.locator('.screen-text-layout').evaluate(details=>{details.open=true;});await ui.getByLabel('Width',{exact:true}).fill('490');failCopyInspect=false;await ui.getByRole('button',{name:'Reload copy',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===false);
     assert.equal(await field().inputValue(),'About only latest pending');
     await ui.locator('.screen-text-layout').evaluate(details=>{details.open=true;});assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'490');

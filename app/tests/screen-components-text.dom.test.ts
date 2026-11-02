@@ -28,10 +28,12 @@ test("component text draft keeps its original target until verified transfer and
     assert.throws(()=>participant.prepare(fresh,new Map()),/copied/);
     assert.equal(text.hasNodeDraft("original","original"),true);
     fill("Latest pending input");
+    card.querySelector("textarea")!.focus();card.querySelector("textarea")!.setSelectionRange(2,7);
     const attach=participant.prepare(fresh,new Map([["original","copy"]]));
     assert.equal(text.hasNodeDraft("original","original"),true);assert.equal(text.hasNodeDraft("copy","copy"),false);
     attach();view=fresh;render();
     assert.equal(text.hasNodeDraft("original","original"),false);assert.equal(card.querySelector("textarea")!.value,"Latest pending input");
+    assert.equal(document.activeElement===card.querySelector("textarea"),true);assert.deepEqual([card.querySelector("textarea")!.selectionStart,card.querySelector("textarea")!.selectionEnd],[2,7]);
     blocked=false;text.sync();
     card.querySelector<HTMLButtonElement>("[data-text-apply]")!.click();await new Promise(resolve=>setTimeout(resolve,0));
     assert.equal(commits[0]?.revision,"inspected-copy-source");

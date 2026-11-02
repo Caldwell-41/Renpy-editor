@@ -309,7 +309,7 @@ export class ScreenComponents {
   private mountDialog(title:string):{dialog:HTMLDialogElement;close:()=>void} {
     if(this.dialog)throw Error("Finish the current dialog first.");
     const focused=document.activeElement as HTMLElement|null, dialog=el("dialog","screen-component-dialog");dialog.ariaLabel=title;dialog.append(el("h2","",title));
-    const close=()=>{if(this.working)return;dialog.close();dialog.remove();if(this.dialog===dialog){this.dialog=undefined;this.dismissDialog=undefined;}if(focused?.isConnected)focused.focus({preventScroll:true});};
+    const close=()=>{if(this.working)return;dialog.close();dialog.remove();if(this.dialog===dialog){this.dialog=undefined;this.dismissDialog=undefined;}if(this.active())this.host.redraw();if(focused?.isConnected)focused.focus({preventScroll:true});};
     this.dialog=dialog;this.dismissDialog=()=>{dialog.remove();this.dialog=undefined;};
     dialog.oncancel=event=>{event.preventDefault();close();};dialog.onkeydown=event=>event.stopPropagation();document.body.append(dialog);
     return {dialog,close};
