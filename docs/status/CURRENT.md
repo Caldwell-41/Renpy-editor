@@ -28,10 +28,12 @@ operation is selected by the UI checks. Kris corrected Windows' T3 project-root 
 verified object import are complete; an existing supported Python includes Pillow.
 The isolated Windows worktree is at corrected candidate `50188c2`. Its Python
 checks, typecheck, 342 app tests, 21 component tests, four panel tests and fresh
-producer admission pass. Earlier fixture/cache failures remain retained. The selected
-Windows SDK campaigns are running sequentially within the existing issue limits;
-their results and actual start counts are pending. Neither ticket
-is accepted or closed. Source remains local and unpushed.
+producer admission pass. Earlier fixture/cache failures remain retained. Windows SDK qualification passes all eight component commands/four exact image
+pairs and nine Help commands/six normal-entry cases. Cumulative use is #41 16/24
+and #44 26/27, zero reserved. No further SDK run is selected. Coordinator artifact audit passes; the verified Windows evidence ZIP is retained
+locally. Required publication/CI and broader milestone native/human acceptance
+remain pending. Neither ticket is accepted or
+closed. Source remains local and unpushed.
 [Assignments, results and limits](../tasks/evidence/components-and-help-panel.md)
 retain exact candidates and failed attempts; #41/#44 own cumulative operation counts.
 

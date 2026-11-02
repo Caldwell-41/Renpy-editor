@@ -951,3 +951,90 @@ starts and campaign results remain pending, so no planned maximum is recorded as
 consumed or passed. No helper/native editor/package/CI or source publication is
 selected. Primary checkout, stash, shared registry and previous evidence remain
 protected. `.toolchains/windows-sdk-assignment.json` owns the live delegate pointer.
+
+
+## Windows SDK campaigns passed, 2026-11-03
+
+The first assigned SDK owner's disposable reader rejected a BOM in PowerShell's
+`environment.json` before either qualifier ran. It started zero SDK processes;
+receipt `1a658fdd763478e6844d37ce48fde17950db773f7a85e4d5403e670b794d5688` remains
+separate failed preflight evidence. The replacement reads the unchanged snapshot
+as `utf-8-sig`, compares its values to the producing receipt and uses fresh output.
+No tracked source, qualifier, admission rule, timeout or output limit changed.
+
+Both campaigns pass on clean Windows candidate
+`50188c2d15aee8f7838037c9057bf42101a6965e`. Component launched exactly eight commands
+in 49.594 seconds. Four actual/literal image pairs match with zero differing RGBA
+pixels at both 1280x720 and 1024x768. Visible texts are shared/shared before Copy
+and shared/independent afterward; observed renderer is angle2. Help launched exactly
+nine commands in 48.079 seconds. Its six distinct normal-entry cases pass persistence
+through two dialogue advances, authored Hide, re-show/Close, outside click, default
+Escape and observed-focus keyboard Close. All six raw logs re-admit against the
+same frozen manifest without another engine launch.
+
+Every one of the 17 commands is PID-observed and exits 0 within its original bounds,
+with no timeout, output overflow, retry or uncertain start. Actual cumulative SDK
+consumption is now **#41 16/24 and #44 26/27, zero reserved**. The owning leaves have
+been updated; planned commands are not counted twice. No further SDK selection,
+helper/native-editor/package/CI operation or source publication follows from this
+passing result. Engine events are not OS/physical input or human acceptance.
+
+Accepted source, frozen producers, preflight/BOM evidence, primary checkout and stash
+remain unchanged. Owned process trees, SDK extraction scratch and fresh profiles/temp
+are cleaned up. The environment snapshot hash remains
+`aa9e43f4d80fdb777c4b1c740e6e54b96dc417349c3832ad9caf3148ad27a926`.
+Combined receipt is
+`fcbf3a3744182fbc38dff89ca834564407770dcc9ffb4ea61837af943babc442`; its verified
+120-file inventory is
+`4e8951919fe9c47112fa2d4b57f2657e46815971c0ce418528fdf6dd9f7ba750`.
+The Windows worktree retains both and the full command/image/case handoff under
+`app/target/windows-sdk-50188c2-20261103-owner2`. A read-only data audit/private
+artifact return is selected for coordinator preservation, with no new test or
+engine execution. Local receipt/ZIP verification will bind that returned copy.
+
+The coordinator prepared a local PR description using the PR skill. Source remains
+unpublished, both issues remain open, and required PR CI plus broader milestone
+native/human acceptance retain their explicit limits. No historical allowance or
+unselected release/package gate is silently reopened.
+
+
+## Coordinator artifact audit and local delivery readiness, 2026-11-03
+
+The independent Windows data audit confirms all 120 inventoried files, actual
+launcher PID/order/counts, unchanged accepted source and cleanup with no mismatch.
+It starts zero test/SDK processes. Private Taildrop returns a 121-entry ZIP of the
+synthetic retained evidence, 26,858,829 bytes, SHA-256
+`f4e1f965e59f8f6dfbb1d74d9f0a1ccbecef1a13c93df42708cbf0c76e035707`.
+The coordinator verifies that exact received archive, receipt and inventory hashes
+and every inventory size/hash. ZIP paths are relative and contained, with no links,
+encrypted entries or duplicate names. The verified copy remains ignored under
+`.toolchains/windows-return`; the original returned download is preserved.
+
+The coordinator independently re-runs the existing static evidence validators on
+the returned data. All four component runtime records and exact RGBA image pairs
+pass, including both-position visible output. The Help accepted bundle validates,
+and all six raw logs re-admit against its exact manifest and accepted hashes.
+Every component and Help command has a positive duration within its original bound,
+exit 0, no timeout/overflow and required cleanup. Exactly 17 started PIDs agree
+with eight component and nine Help rows; no uncertain start exists. Inspection of
+actual screenshots confirms the shared texts at both sites and the independent
+copy only at its chosen site, without clipping in the sampled sizes. The local
+`.toolchains/windows-return/coordinator-audit.json` records this audit. It starts
+zero SDK processes and changes no source.
+
+The coordinator's final review is complete for the local implementation. Full-base
+independent Standards/Spec reviews through `ebcd374` have zero remaining actionable
+findings; the coordinator reviews subsequent scoped fidelity, test-portability and
+evidence changes. Portable/connected checks retain their exact candidates, and
+production core/UI is unchanged between `0e5aff8` and Windows candidate `50188c2`.
+All delegates are finished. No owned SDK/test process remains, no recovery/signing
+identity changed and no source is published. The primary checkout, stashes,
+prototype/reference worktree and pinned server remain preserved.
+
+Both tickets stay open. Local code is ready for publication review; the prepared PR
+body is ignored under `.toolchains/delivery/pr-body.md`. Publication has not been
+authorized, so neither source push nor PR creation occurred. The branch still needs
+its required PR validation selection and subsequent CI before integration; broader
+milestone native/human acceptance is separate. This local handoff is not a merge,
+release or whole-3B acceptance. No further SDK/helper/native/package/CI campaign is
+selected. Final SDK use remains #41 16/24 and #44 26/27, zero reserved.

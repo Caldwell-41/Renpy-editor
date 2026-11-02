@@ -91,16 +91,33 @@ pass. Help's three actual-artifact tests pass. Original failures remain retained
 Preflight receipt SHA-256 is
 `a99defd83c1cf48523951321d65ec3fa54b07df5300a886c9661915738919485`.
 
-The owning GitHub leaves now select one Windows component eight-launch campaign,
-then one Help nine-launch campaign only after component success/cleanup. SDK pin,
-case plan and time/output limits are unchanged; stop first failure, no retry.
-The single Windows SDK owner writes ignored outputs only. Active assignment is in
-`.toolchains/windows-sdk-assignment.json`; completion wakes this coordinator, so do
-not poll it. Actual start accounting/result audit is pending. Before execution,
-#41 was 8/24 and #44 was 17/27, zero reserved; do not infer current totals from the
-planned maximum. No helper/native editor/package/CI or tracked edit is selected.
-Review the terminal receipts and raw case/image evidence before acceptance or a
-correction selection. Primary checkout and stash must remain unchanged.
+Windows SDK qualification now passes at `50188c2`: exactly eight component commands
+in 49.594 seconds and nine Help commands in 48.079 seconds. All 17 actual starts
+were PID-observed, exited 0 within unchanged limits and have no uncertain outcome.
+All four component actual/literal pairs match exactly under angle2 at both sizes;
+all six Help normal-entry cases pass and raw logs re-admit without extra execution.
+Actual cumulative use is #41 16/24 and #44 26/27, zero reserved. No further campaign
+is selected. The earlier SDK owner's BOM-reader refusal started zero commands;
+BOM-aware decoding preserves the original snapshot and values without changing the
+tracked qualifiers or admission rules. Owned SDK process/scratch/profile cleanup
+passes; primary/stash and earlier evidence stay unchanged.
+
+Combined receipt SHA-256 is
+`fcbf3a3744182fbc38dff89ca834564407770dcc9ffb4ea61837af943babc442`;
+the verified 120-file inventory is
+`4e8951919fe9c47112fa2d4b57f2657e46815971c0ce418528fdf6dd9f7ba750`.
+Both remain in the Windows worktree's ignored
+`app/target/windows-sdk-50188c2-20261103-owner2`. The independent data audit and private return are complete. The coordinator has
+verified all 120 inventory hashes locally, safely preserved all 121 ZIP entries,
+re-admitted four image pairs and six raw Help logs with the existing validators,
+and inspected output screenshots. This adds zero SDK starts. The returned ZIP is
+`.toolchains/windows-return/windows-components-help-50188c2-evidence.zip`,
+26,858,829 bytes, SHA-256
+`f4e1f965e59f8f6dfbb1d74d9f0a1ccbecef1a13c93df42708cbf0c76e035707`.
+`.toolchains/windows-return/coordinator-audit.json` records the local audit. All
+Windows delegates are finished; no wait, running SDK or owned test process remains.
+All tracked ownership remains with the coordinator. No helper/native editor/package
+or CI proof is established by these browser/engine results.
 
 Matched-state visual inspection, typechecking and repository validation now pass
 within the detailed evidence's stated scope. The final browser receipts are
@@ -108,8 +125,10 @@ within the detailed evidence's stated scope. The final browser receipts are
 `.toolchains/help-ui/main-final/result.json`. Fourteen component captures cover
 matched wide/compact states with the actual scoped stylesheets. Existing production
 chrome and ordinary node editors remain; this is not a whole-screen pixel-match or
-native acceptance claim. Next, audit the running Windows campaigns' terminal results and actual starts,
-then resolve the remaining milestone native/CI/publication requirements. Required
+native acceptance claim. Local implementation, connected-target proof and final evidence review are ready.
+Next, obtain source-publication authorization before PR/required CI. The local PR
+description is prepared under `.toolchains/delivery/pr-body.md`; do not push or
+open a PR until authorized. Broader milestone native/human requirements remain separate. Required
 Windows/CI/native proof remains a gap; do not close either ticket prematurely.
 Remove the coordinator's temporary `app/node_modules` dependency symlink after
 checks without touching primary dependencies. Keep ignored evidence/binaries and
