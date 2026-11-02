@@ -1092,3 +1092,40 @@ only identity/candidate/tree/manifest, with no result or test groups. Full raw f
 logs and exact job metadata are retained separately. No SDK/helper/native editor,
 package or additional costly selection occurred. SDK use remains #41 16/24 and
 #44 26/27, zero reserved.
+
+
+## PR CI2 terminal audit, 2026-11-03
+
+At exact head `ee17b94fc598627c132e067f39c163ec82bafd91`, automatic Repository
+quality [41548708772, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41548708772/attempts/1)
+and paired harness [41548765954, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41548765954/attempts/1)
+are terminal successful. Both required job sets are present exactly once; every
+executed job and step, including start/finish reporters, succeeds. Unselected jobs
+are skipped. Current PR remains draft, clean and without outstanding reviews.
+
+The paired Windows and Mac artifacts match GitHub ZIP digests
+`944f5216d5970222e2d734f88ad10d7e48a96493a9ab9fa01e95b0f7a00b944f` and
+`de2a08a13b15aabdb55f29b53dd46652bbbd2a4035648189cd2c49bf95c006d5`.
+Each ten-file manifest verifies after safe extraction. Candidate, tree, run ID,
+attempt and outcome agree. All 783 recorded input hashes agree with the committed
+checkout representation. The first audit's raw-blob comparison correctly differed
+for four PowerShell files; the repository declares CRLF checkout filters. The
+completed audit verifies Git's exact filtered bytes for those files without
+normalizing, ignoring or accepting edited input.
+
+Windows Python runs 304 methods with only four named Mac-only exclusions. Mac runs
+300 methods with only three named Windows-only exclusions. Existing rejection gates
+admit both logs. Each host passes Python, Q1 rejection, Q1 source audit and retention;
+retention has ten cases and only its named Windows symlink exclusion. Artifact
+privacy/identity gates pass. Full logs and downloaded results remain under ignored
+`.toolchains/pr-77-ci2-*`; `.toolchains/pr-77-ci2-terminal-audit.json` binds the audit.
+The original CI1 failed Mac setup and successful Windows slice stay separately
+retained. This correction adds zero SDK/helper/native editor/package starts.
+
+The final handover documentation records this tested CI source. A later docs-only
+head does not inherit these exact-head statuses: the unchanged executable plan
+still requires its own automatic and paired runs, with their live receipts owned
+by PR #77 and the selected leaves. No further source/runtime qualification is
+selected. SDK totals remain #41 16/24 and #44 26/27, zero reserved. Both issues stay
+open; the PR stays draft and no merge, release, or broader native/human acceptance
+is authorized by the CI result.

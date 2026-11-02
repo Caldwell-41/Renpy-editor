@@ -92,11 +92,19 @@ its partial artifact is retained and the corrected run is required. Local prepub
 all four groups, 300 Python methods with three named host skips, 18 reporter tests
 and actionlint. Do not substitute this for milestone package/native/human acceptance.
 
-Automatic quality at `376dd79` passes both jobs. Paired CI1 `41548020288` fails
-only the Mac dependency setup; Windows groups pass. The original failed logs and
+Original automatic quality at `376dd79` passes both jobs. Paired CI1 `41548020288`
+fails only the Mac dependency setup; Windows groups pass. The original failed logs and
 both digest-verified artifacts remain under `.toolchains/pr-77-ci1-artifacts`.
-No SDK starts are added. The owning leaves and draft PR own the live exact-head CI
-run/attempt/state. After dispatch, audit both automatic and selected manual jobs and
+No SDK starts are added. Corrected automatic run `41548708772` and paired run
+`41548765954`, both attempt 1 at `ee17b94`, pass all executed steps. Required job
+sets are complete. Both paired ZIP digests, ten-file manifests, run/attempt identity
+and all 783 tracked checkout input hashes verify. Four PowerShell inputs use the
+repository-declared CRLF checkout filters, not raw blob bytes; the audit verifies
+Git's exact filtered representation. Windows Python runs 304 methods with four
+named host exclusions; Mac runs 300 with three. All four independent groups pass.
+Terminal audit is `.toolchains/pr-77-ci2-terminal-audit.json`; CI1 remains retained.
+The final documentation head needs its own automatic/paired status. The owning
+leaves and draft PR own the live exact-head CI run/attempt/state. After dispatch, audit both automatic and selected manual jobs and
 all executed steps/artifacts. Required failures/skips are not passes. Register the
 T3 PR watch and yield instead of polling; resolve old comments first. The watch wakes
 this coordinator. On completion, audit the final head and update issue/PR receipts;

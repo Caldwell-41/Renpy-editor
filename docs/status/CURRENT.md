@@ -1,6 +1,6 @@
 # Current status
 
-## Components and Help panel ready for draft PR validation
+## Components and Help panel in draft PR review
 
 Kris selected [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
 [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
@@ -25,13 +25,15 @@ exporters and artifact admission. Earlier fixture/cache/BOM setup failures remai
 separate. All 120 returned evidence files verify locally. SDK consumption is #41
 16/24 and #44 26/27, zero reserved; no further campaign is selected.
 
-Kris authorized pushing the branch and opening a PR on 2026-11-03. The draft PR's
-executable validation plan selects automatic Repository quality and the existing
-Windows/macOS harness jobs. Their live run/attempt/state and PR URL belong to the
-owning GitHub leaves and PR receipts. Local prepublication checks pass all four
+Kris authorized publication on 2026-11-03. Draft
+[PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77) targets
+`codex/phase3b-screen-designer`. Its automatic quality and selected paired
+Windows/macOS harness jobs pass at `ee17b94`; every executed step and both
+digest-verified artifacts are audited. The final documentation head still requires
+its own exact-head status, owned by the PR and selected GitHub leaves. Local prepublication checks pass all four
 harness groups, including 300 Python methods with three named host skips, plus
 reporter tests and actionlint. The initial paired CI passed Windows but failed the Mac system-Python install
-before tests; the corrected job uses a local virtual environment. This CI
+before tests; the isolated-environment correction now passes on both targets. This CI
 selection adds no SDK/native/package run
 and does not waive later milestone package/native/human acceptance. Neither ticket
 is accepted or closed; merging or releasing is not authorized.

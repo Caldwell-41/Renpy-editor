@@ -903,5 +903,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   export its interpreter to later steps. Keep system package protections intact.
 - **Verification:** original CI1 has successful Windows groups but a failed Mac
   dependency step; retained partial Mac evidence has no result. Actionlint and local
-  interpreter-isolation checks pass; the corrected paired CI run remains required.
+  interpreter-isolation checks pass. Corrected paired run 41548765954 at `ee17b94`
+  passes all four harness groups on both hosts; exact-head artifacts and declared
+  checkout filters verify. Original failed Mac preflight remains failed.
 - **Evidence:** [CI1 diagnosis](../tasks/evidence/components-and-help-panel.md#ci1-macos-dependency-failure-and-isolated-environment-correction).
