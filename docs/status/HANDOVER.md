@@ -18,8 +18,14 @@ Approval/evidence `eb1f8f61` is integrated at `20c7fce8`; keep source/captures p
 The required full browser gate failed before any cases. Root measured 19.7-second
 per-blob approval Git loading and corrected it to a 0.35-second batch read with the
 identical approved fingerprint; full gate requalification remains pending. Screens owns appearance and Use in Story hands off
-to the existing Story workspace for Show/Hide. UI workers resume after promotion,
-with the shared contracts checkpoint and file boundaries in the evidence record.
+to the existing Story workspace for Show/Hide. UI workers resumed on the shared contracts and disjoint file boundaries. L09
+completed at `71938d4e`; all exclusive fixes and its real controller/core driver
+are integrated through `f8b0fe6`. Its 322 ordinary app tests, 12 focused and 36
+existing Scene cases pass; real creation/Show/Hide/history/stale/rename-reopen pass.
+Earlier failures were fixture/adapter/recent-record-ID mistakes, not core defects.
+L08 module checkpoints through `559e4d0` are integrated; it still owns its component
+module, component-specific text extensions and tests while completing actual
+controller/core qualification. Root component host wiring is in progress.
 Workers dispatched from `9b7748a`: L08 on `t3/reuse-owned-component` and L09 on
 `t3/help-panel-show-hide`. Both preparation checkpoints are integrated. Shared
 identity, target/effects, creation, marked-use, complete graph/Style and geometry

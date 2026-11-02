@@ -49,7 +49,8 @@ test("image copy transfer keeps pending size and verifies the copied node and pa
     view.selected.kind="image";view.selected.literal="images/seal.png";
     view.selected.numericLayout={values:{xsize:{unit:"pixels",value:160},ysize:{unit:"pixels",value:80}},blocked:{}};
   }
-  const images=new ScreenImages({view:f.getView,current:()=>true,request:async<T>(operation:string):Promise<T>=>{
+  let blocked=false,cancellations=0;
+  const images=new ScreenImages({writeBlocked:()=>blocked,cancelComponentCopy:()=>{cancellations++;images.captureCopyDraft(f.getView())!.cancel();blocked=false;},view:f.getView,current:()=>true,request:async<T>(operation:string):Promise<T>=>{
     if(operation==="authoring.list")return {assets:[{id:"seal",kind:"uiImage",displayName:"Seal",relativePath:"game/images/seal.png",sha256:"asset",status:"available",naturalWidth:160,naturalHeight:80}]} as T;
     throw Error("No passive media needed for draft transfer");
   },coordinate:task=>task(),commit:async()=>{throw Error("Copy must not apply image");},redraw:()=>{},preview:()=>{},note:()=>{},select:()=>{},source:()=>{},saved:()=>{},layoutTools:()=>{},order:()=>{}},f.editor);
@@ -63,6 +64,9 @@ test("image copy transfer keeps pending size and verifies the copied node and pa
     f.setView(f.fresh);commit();images.render(host,f.fresh);
     assert.equal(host.querySelector<HTMLInputElement>('[data-image-field="width"]')!.value,"320");
     assert.equal(host.querySelector<HTMLInputElement>('[data-image-field="height"]')!.value,"160");
-    images.captureCopyDraft(f.fresh)!.cancel();assert.equal(images.hasDraft(),false);
+    blocked=true;images.sync();assert.equal(host.querySelector<HTMLButtonElement>("[data-image-apply]")!.disabled,true);
+    const retained=host.querySelector<HTMLInputElement>('[data-image-field="width"]')!;assert.equal(retained.readOnly,false);
+    retained.value="400";retained.dispatchEvent(new window.Event("input",{bubbles:true}));assert.equal(retained.value,"400");
+    host.querySelector<HTMLButtonElement>("[data-image-cancel]")!.click();assert.equal(cancellations,1);assert.equal(images.hasDraft(),false);
   } finally {images.dispose();await f.close();}
 });

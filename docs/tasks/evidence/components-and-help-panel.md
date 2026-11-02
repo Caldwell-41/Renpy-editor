@@ -598,3 +598,35 @@ the default synthetic fixture lacked `game/images`. The default image-selection
 hook now prepares that empty fixture directory; no production fallback or guard
 change is added. Selection requires an open project, as existing service admission
 demonstrated in the coordinator's first refused harness invocation.
+
+## Component host wiring and Help module qualification
+
+L08 module `f11a6067`/`768574c5` and semantic property-span correction `559e4d0`
+are integrated. The coordinator supplies real refresh/selection, accepted-change
+acknowledgement, draft participants and common component write admission. Shared
+review returns captured exact revisions to compose/layout/size/position; ordinary
+panels keep their existing synchronous input reservation. An initial selected run
+exposed lost immediate locks when panel Apply awaited the component-only helper.
+The focused red is retained; the corrected panel fast path passes all 27 existing
+Screens tests, and the selected component/text/transfer/workspace run passes 39.
+Image recovery separately proves editable retained fields, disabled Apply and
+Cancel delegation. Component real-controller qualification remains in progress.
+
+L09 final UI candidate `71938d4e` is integrated through `ed7dea8`, `c936a88` and
+`f8b0fe6`. Its four-group real production module/controller-to-core journey passes
+Help creation with a real imported UI image, exact Show/Hide Source, no-op/one-step
+history, editor cancellation, stale refusal and protected rename/reopen intent.
+Final result SHA-256 is `09dfaaf0623bef606f915c7257f662bd3f10ecc3d6f31103be357864d1fe19ca`;
+raw final log is `990fb83005572d4989bcc1769f35ded8df5e5501c0705d90fd68486192771fb7`.
+The ordinary app suite passes 322/322 with supported Python, after an initial
+321/322 environment failure from system Python lacking tomllib. Twelve module and
+36 existing Scene/Story cases pass. Whole-app navigation, visual comparison and
+combined review remain coordinator proof.
+
+A read-only diagnosis independently found the apparent reopen failure occurred
+before project validation: opening a recent project refreshes its recent-record
+UUID, while the harness reused its original UUID. The corrected journey reloads
+recent records by stable project ID before reopening. It then passes the unchanged
+header-rename assertions with old stable target intent protected. No Rust admission
+or source protection was changed for that failure. All failed attempts/captures
+remain in the worker's ignored handback artifacts.

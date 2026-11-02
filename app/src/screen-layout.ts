@@ -17,6 +17,8 @@ interface View { document: ScreenDocument; screen: string; node: ScreenNode; nod
 interface Host {
   view: () => View | undefined;
   commit: (draft: Draft, edits: LayoutEdits) => Promise<void>;
+  writeBlocked?: () => boolean;
+  cancelComponentCopy?: () => void;
   preview: () => void;
   note: (text: string, error?: boolean) => void;
   select: (node: ScreenNode) => void;
@@ -209,6 +211,7 @@ export class ScreenLayoutEditor {
   }
   private async apply(): Promise<void> {
     const view = this.host.view(); if (!view || view.busy || this.saving || this.composing) return;
+    if (this.host.writeBlocked?.()) { this.host.note("Reload or cancel the copy before applying. Input retained.",true); return; }
     const draft = this.drafts.get(this.key(view));
     if (!draft) { this.host.note("No change. No undo entry added."); return; }
     const invalid = this.validate(view, draft.fields); if (invalid) { this.fail(invalid.text, invalid.key); return; }
@@ -220,6 +223,7 @@ export class ScreenLayoutEditor {
     finally { this.saving = false; this.sync(); }
   }
   private cancel(): void {
+    if (this.host.writeBlocked?.()) { this.host.cancelComponentCopy?.(); return; }
     const view = this.host.view(); if (!view || view.busy || this.saving || this.composing) return;
     const key = (document.activeElement as HTMLElement | null)?.dataset.layoutField;
     this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.errors.delete(this.key(view)); const host = this.hostElement; if (host) this.render(host,this.presentation);
@@ -315,7 +319,7 @@ export class ScreenLayoutEditor {
     const commit = el("div", "layout-commit"), feedback = el("p", "layout-feedback"); feedback.role = "alert";
     const state = el("p", "layout-commit-state"), actions = el("div", "layout-actions");
     const apply = el("button", "button primary", "Apply layout"); apply.type = "submit"; apply.setAttribute("form", this.formId);
-    const cancel = action("Cancel layout", () => this.cancel()); actions.append(apply, cancel); commit.append(feedback, state, actions);
+    const cancel = action("Cancel layout", () => this.cancel()); cancel.dataset.layoutCancel = ""; actions.append(apply, cancel); commit.append(feedback, state, actions);
     heading.hidden = commit.hidden = sharedCommit; host.append(heading, form, commit); this.sync();
     const error = this.errors.get(this.key(view));
     if (error?.field) { try { this.fieldValidators.get(error.field)?.(); } catch { /* Retain the field's explanation after remounting. */ } }
@@ -331,8 +335,8 @@ export class ScreenLayoutEditor {
     host.querySelectorAll<HTMLInputElement>("input").forEach(input => { input.readOnly = view.busy || this.saving; });
     host.querySelectorAll<HTMLSelectElement>("select").forEach(select => select.disabled = view.busy || this.saving);
     host.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
-      const disabled = view.busy || this.saving || button.textContent === "Cancel layout" && !dirty;
-      if (button.type === "submit") { button.ariaDisabled = String(disabled); button.disabled = false; }
+      const disabled = view.busy || this.saving || button.textContent === "Cancel layout" && !dirty && !this.host.writeBlocked?.();
+      if (button.type === "submit") { button.ariaDisabled = String(disabled || this.host.writeBlocked?.()); button.disabled = !!this.host.writeBlocked?.(); }
       else button.disabled = disabled;
     });
     host.querySelectorAll<HTMLButtonElement>("[data-align-x]").forEach(button => button.ariaPressed = String(["xpos", "xanchor", "ypos", "yanchor"].every(key => fields[key]!.text !== "" && fields[key]!.unit === "relative" && Number(fields[key]!.text) === Number(key.startsWith("x") ? button.dataset.alignX : button.dataset.alignY))));

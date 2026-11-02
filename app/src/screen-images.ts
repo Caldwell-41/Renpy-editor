@@ -35,6 +35,8 @@ interface SubmittedImage {
 }
 interface Host {
   view: () => CompositionView | undefined;
+  writeBlocked?: () => boolean;
+  cancelComponentCopy?: () => void;
   current: () => boolean;
   request: <T>(operation: CoreOperation, payload?: Record<string, unknown>) => Promise<T>;
   coordinate: <T>(task: () => Promise<T>) => Promise<T>;
@@ -178,6 +180,8 @@ export class ScreenImages {
   private asset(id?: string): UiImageAsset | undefined {
     return this.assets.find((a) => a.id === id);
   }
+  assetName(id: string): string { return this.asset(id)?.displayName ?? "Unavailable image"; }
+  assetIdForLiteral(literal: string | null | undefined): string | undefined { return this.assets.find(asset => asset.relativePath === `game/${literal}`)?.id; }
   private accepted(view: CompositionView): Draft {
     const asset = this.assets.find(
       (a) => a.kind === "uiImage" && a.relativePath === `game/${view.selected.literal}`,
@@ -595,8 +599,8 @@ export class ScreenImages {
     const dirty = this.hasCurrentDraft() || layout;
     const apply = this.card.querySelector<HTMLButtonElement>("[data-image-apply]"),
       cancel = this.card.querySelector<HTMLButtonElement>("[data-image-cancel]");
-    if (apply) apply.disabled = this.saving || !dirty;
-    if (cancel) cancel.disabled = this.saving || !dirty;
+    if (apply) apply.disabled = this.saving || !dirty || !!this.host.writeBlocked?.();
+    if (cancel) cancel.disabled = this.saving || !dirty && !this.host.writeBlocked?.();
     const state = this.card.querySelector<HTMLElement>(".screen-image-state");
     if (state)
       state.textContent = this.saving ? "Applying image…" : dirty ? "Pending changes" : "No pending changes";
@@ -629,6 +633,7 @@ export class ScreenImages {
     this.host.note(text, true);
   }
   private cancel(): void {
+    if (this.host.writeBlocked?.()) { this.host.cancelComponentCopy?.(); return; }
     if (this.saving) return;
     const draft = this.value();
     if (!draft) return;
@@ -658,6 +663,7 @@ export class ScreenImages {
       : "This image is missing or unreadable. Choose another image. Your draft is retained."};
   }
   private async apply(): Promise<void> {
+    if (this.host.writeBlocked?.()) { this.host.note("Reload or cancel the copy before applying. Input retained.",true); return; }
     const view = this.host.view(),
       draft = this.value(view);
     if (!view || !draft || this.saving) return;
