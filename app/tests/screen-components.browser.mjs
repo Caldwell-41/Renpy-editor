@@ -96,8 +96,11 @@ try {
     const choose=()=>ui.getByRole('button',{name:/^1\s+Choose$/}).click();
     const field=()=>ui.getByRole('textbox',{name:'Text',exact:true});
     await select(help);await choose();await ui.locator(`[data-node-id="${group}"]`).press('Enter');
+    const extractLaunch=await ui.getByRole('button',{name:'Make component…',exact:true}).elementHandle();
     await ui.getByRole('button',{name:'Make component…',exact:true}).click();
     let dialog=page.getByRole('dialog',{name:'Make component',exact:true});
+    await dialog.getByRole('button',{name:'Cancel',exact:true}).click();assert.equal(await extractLaunch.evaluate(element=>element.isConnected && document.activeElement===element),true);
+    await ui.getByRole('button',{name:'Make component…',exact:true}).click();
     await dialog.getByLabel('Component name',{exact:true}).fill('component_route_guide');await dialog.getByRole('button',{name:'Make component',exact:true}).click();await dialog.waitFor({state:'detached'});
     const component=(await request('screens.list')).owned.find(owner=>owner.name==='component_route_guide');assert.ok(component);
     const firstUse=(await request('screens.inspect',{path:help.path})).screens[0].nodes.find(node=>node.kind==='use');assert.equal(firstUse.component.componentId,component.id);
@@ -105,7 +108,10 @@ try {
     assert.equal((await request('screens.inspect',{path:component.path})).screens[0].nodes.some(node=>node.id===title),true);
     checks.push('UI extraction preserves moved IDs and exact opaque neighbor');
     await select(about);await choose();await ui.locator(`[data-node-id="${about.rootId}"]`).press('Enter');
+    const insertLaunch=await ui.getByRole('button',{name:'Add component…',exact:true}).elementHandle();
     await ui.getByRole('button',{name:'Add component…',exact:true}).click();dialog=page.getByRole('dialog',{name:'Add component',exact:true});
+    await dialog.getByRole('button',{name:'Cancel',exact:true}).click();assert.equal(await insertLaunch.evaluate(element=>element.isConnected && document.activeElement===element),true);
+    await ui.getByRole('button',{name:'Add component…',exact:true}).click();
     await dialog.getByLabel('Component',{exact:true}).selectOption(component.id);await dialog.getByLabel('Parent group',{exact:true}).selectOption(about.rootId);
     await dialog.getByRole('button',{name:'Insert component',exact:true}).click();await dialog.waitFor({state:'detached'});
     const secondUse=(await request('screens.inspect',{path:about.path})).screens[0].nodes.find(node=>node.kind==='use');assert.notEqual(firstUse.id,secondUse.id);assert.equal(secondUse.component.componentId,component.id);
@@ -156,6 +162,12 @@ try {
     await page.getByRole('button',{name:'Close Project',exact:true}).click();await page.locator('.recent-open').click();await page.getByRole('button',{name:'Screens',exact:true}).click();
     assert.equal(await read(independent.path),copied);assert.equal(await read(component.path),shared);
     await select(help);await choose();await ui.locator(`[data-node-id="${firstUse.id}"]`).press('Enter');
+    const source=await read(help.path),use=(await request('screens.inspect',{path:help.path})).screens[0].nodes.find(node=>node.id===firstUse.id);
+    await ui.getByRole('button',{name:'Use Source',exact:true}).click();const editor=page.locator('textarea.source-editor');await editor.waitFor();
+    const location=await editor.evaluate(element=>({text:element.value,start:element.selectionStart,end:element.selectionEnd}));
+    assert.equal(location.text,source);assert.equal(location.start,Buffer.from(source).subarray(0,use.span.start).toString('utf8').length);assert.equal(location.end,Buffer.from(source).subarray(0,use.span.end).toString('utf8').length);
+    checks.push('actual Source navigation selects the exact accepted UTF-8 use span');
+    await page.getByRole('button',{name:'Screens',exact:true}).click();
     const renamed=shared.replace('screen component_route_guide():','screen component_route_guide_renamed():');assert.notEqual(renamed,shared);await save(component.path,renamed);
     await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();await ui.getByText(/Can't find this component/).waitFor();
     assert.equal((await request('screens.inspect',{path:help.path})).screens[0].nodes.find(node=>node.id===firstUse.id).component.componentId,component.id);

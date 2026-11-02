@@ -197,3 +197,45 @@ test("Choose keeps the ordinary element tree available when a component use is s
   try {assert.equal(h.controller.renderUse(card,h.panel),false);assert.equal(card.childElementCount,0);}
   finally {h.controller.dispose();void browser.happyDOM.abort();}
 });
+
+test("untouched naming and insertion Cancel preserve the original launch control and focus",async()=>{
+  for(const label of ["Make component…","Add component…"]) {
+    const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+    const h=fixture(),tools=document.createElement("div");document.body.append(tools);
+    h.catalog.owned.push({id:"component",rootId:"component-root",path:"game/ui/guide.rpy",name:"guide",kind:"component",resolved:true,sourceRevision:"component-source"});
+    h.host.redraw=()=>{tools.replaceChildren();h.controller.renderGroupTools(tools);};
+    try {
+      h.host.redraw();const launch=[...tools.querySelectorAll("button")].find(button=>button.textContent===label)!;
+      launch.focus();launch.click();await new Promise(resolve=>setTimeout(resolve,0));
+      const dialog=document.querySelector("dialog")!;assert.ok(dialog);
+      [...dialog.querySelectorAll("button")].find(button=>button.textContent==="Cancel")!.click();
+      assert.equal(launch.isConnected,true);assert.equal(document.activeElement===launch,true);
+      assert.equal(h.saved(),0);
+    } finally {h.controller.dispose();await browser.happyDOM.abort();}
+  }
+});
+
+test("a replacement scope receives the shared affected-screen request after the previous render unmounts",async()=>{
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+  const h=copyFixture(),host=document.createElement("section");document.body.append(host);
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});const request=h.host.request;
+  h.host.request=async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>{if(operation==="screens.componentReview")await gate;return request<T>(operation,payload);};
+  try {
+    h.controller.renderScope(host,h.original);host.replaceChildren();h.controller.renderScope(host,h.original);
+    release();await new Promise(resolve=>setTimeout(resolve,0));
+    assert.equal(host.textContent?.includes("Loading affected screens"),false);
+    assert.equal(host.querySelector<HTMLElement>(".screen-component-scope")?.dataset.componentRevision,"component-source");
+  } finally {h.controller.dispose();await browser.happyDOM.abort();}
+});
+
+test("an affected use opens its exact Source span after dismissing the reference dialog",async()=>{
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+  const h=copyFixture(),host=document.createElement("section");document.body.append(host);let target:unknown;
+  h.host.source=value=>{assert.equal(document.querySelector("dialog")===null,true);target=value;};
+  try {
+    h.controller.renderScope(host,h.original);await new Promise(resolve=>setTimeout(resolve,0));
+    [...host.querySelectorAll("button")].find(button=>button.textContent==="Used on 1 screen")!.click();await new Promise(resolve=>setTimeout(resolve,0));
+    document.querySelector<HTMLButtonElement>("dialog .screen-component-references button")!.click();
+    assert.deepEqual(target,{path:"game/ui/help.rpy",expectedRevision:"source",byteStart:20,byteEnd:30});
+  } finally {h.controller.dispose();await browser.happyDOM.abort();}
+});

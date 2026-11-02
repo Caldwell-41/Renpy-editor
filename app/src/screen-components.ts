@@ -29,6 +29,7 @@ export interface PreparedComponentGroup {
 interface Extraction { view:CompositionView; target:ResolvedScreenTarget; projectRevision:string; group:PreparedComponentGroup }
 interface UseOrigin { view:CompositionView; target:ResolvedScreenTarget; componentId:string; useId:string }
 interface PendingCopy { change:ComponentChange; name:string; before:CompositionView; participants:readonly CopyDraftParticipant[]; origin:UseOrigin }
+interface ScopeState { review?:ComponentReview; error?:string; loading?:Promise<void> }
 
 function copiedNodes(before:CompositionView,after:CompositionView):ReadonlyMap<string,string> {
   if(before.document.partial || after.document.partial || before.nodes.length!==after.nodes.length || before.nodes.length>1024)
@@ -71,7 +72,7 @@ export class ScreenComponents {
   private pendingCopy?:PendingCopy;
   private dialog?:HTMLDialogElement;
   private dismissDialog?:()=>void;
-  private readonly scopes=new Map<string,{review?:ComponentReview;error?:string}>();
+  private readonly scopes=new Map<string,ScopeState>();
   constructor(private readonly host: ScreenComponentsHost) {}
   isSaving(): boolean { return this.working || !!this.dialog; }
   hasPendingCopy(): boolean { return !!this.pendingCopy; }
@@ -157,7 +158,8 @@ export class ScreenComponents {
       throw Error("Component references are unavailable or incomplete. Your edits are kept. Inspect Source.");
     if(base && (review.component.path!==base.document.path || review.component.revisions.source!==base.document.revision))
       throw Error("Source changed. Your draft is still here. Inspect Source before applying.");
-    this.scopes.set(JSON.stringify([componentId,review.component.revisions.source,review.component.revisions.sourceMap,review.component.revisions.inventory]),{review});
+    const key=JSON.stringify([componentId,review.component.revisions.source,review.component.revisions.sourceMap,review.component.revisions.inventory]);
+    const state=this.scopes.get(key)??{};state.review=review;this.scopes.set(key,state);
     return review;
   }
   async editUse(view=this.view()):Promise<CompositionView> {
@@ -243,6 +245,7 @@ export class ScreenComponents {
   }
   private sourceUse(use:ComponentReview["uses"][number]):void {
     if(!use.resolved || !use.span || !use.sourceRevision)throw Error("This reference no longer has an exact Source location. Reload Source.");
+    this.dismissDialog?.();
     this.host.source({path:use.path,expectedRevision:use.sourceRevision,byteStart:use.span.start,byteEnd:use.span.end});
   }
   private affected(dialog:HTMLElement,review:ComponentReview):void {
@@ -306,10 +309,10 @@ export class ScreenComponents {
     if(!root || doc.revision!==review.component.revisions.source)throw Error("The exact component Source location changed. Reload Source.");
     this.host.source({path:doc.path,expectedRevision:doc.revision,byteStart:root.span.start,byteEnd:root.span.end});
   }
-  private mountDialog(title:string):{dialog:HTMLDialogElement;close:()=>void} {
+  private mountDialog(title:string):{dialog:HTMLDialogElement;close:(refresh?:boolean)=>void} {
     if(this.dialog)throw Error("Finish the current dialog first.");
     const focused=document.activeElement as HTMLElement|null, dialog=el("dialog","screen-component-dialog");dialog.ariaLabel=title;dialog.append(el("h2","",title));
-    const close=()=>{if(this.working)return;dialog.close();dialog.remove();if(this.dialog===dialog){this.dialog=undefined;this.dismissDialog=undefined;}if(this.active())this.host.redraw();if(focused?.isConnected)focused.focus({preventScroll:true});};
+    const close=(refresh=false)=>{if(this.working)return;dialog.close();dialog.remove();if(this.dialog===dialog){this.dialog=undefined;this.dismissDialog=undefined;}if(refresh && this.active())this.host.redraw();if(focused?.isConnected)focused.focus({preventScroll:true});};
     this.dialog=dialog;this.dismissDialog=()=>{dialog.remove();this.dialog=undefined;};
     dialog.oncancel=event=>{event.preventDefault();close();};dialog.onkeydown=event=>event.stopPropagation();document.body.append(dialog);
     return {dialog,close};
@@ -329,8 +332,8 @@ export class ScreenComponents {
       event.preventDefault();if(this.working)return;
       try{validate();}catch{input.focus();return;}
       submit.disabled=true;
-      void (copy?this.makeCopy(input.value):this.extract(input.value)).then(()=>close()).catch(failure=>{
-        if(this.pendingCopy){close();this.host.note((failure as Error).message,true);this.host.redraw();}
+      void (copy?this.makeCopy(input.value):this.extract(input.value)).then(()=>close(true)).catch(failure=>{
+        if(this.pendingCopy){close(true);this.host.note((failure as Error).message,true);}
         else {error.textContent=(failure as Error).message;input.focus();}
       }).finally(()=>{submit.disabled=false;});
     };
@@ -370,8 +373,10 @@ export class ScreenComponents {
     let state=this.scopes.get(key);
     if(!state) {
       state={};this.scopes.set(key,state);const capture=state;
-      void this.componentReview(id,owner?.kind==="component" && owner.id===id?view:undefined).then(review=>{capture.review=review;}).catch(error=>{capture.error=(error as Error).message;}).finally(()=>{if(this.active() && section.isConnected){section.replaceChildren();this.scopeContent(section,view,id,capture);}});
+      capture.loading=this.componentReview(id,owner?.kind==="component" && owner.id===id?view:undefined).then(review=>{capture.review=review;}).catch(error=>{capture.error=(error as Error).message;});
     }
+    const capture=state;
+    void capture.loading?.then(()=>{if(this.active() && section.isConnected && this.scopes.get(key)===capture){section.replaceChildren();this.scopeContent(section,view,id,capture);}});
     this.scopeContent(section,view,id,state);return true;
   }
   private scopeContent(section:HTMLElement,view:CompositionView,id:string,state:{review?:ComponentReview;error?:string}):void {
@@ -388,7 +393,7 @@ export class ScreenComponents {
   }
   private async showUses(componentId:string):Promise<void> {
     const review=await this.componentReview(componentId),{dialog,close}=this.mountDialog("Component uses");
-    this.affected(dialog,review);dialog.append(action("Back to editor",close));dialog.showModal();dialog.querySelector("button")?.focus();
+    this.affected(dialog,review);dialog.append(action("Back to editor",()=>close()));dialog.showModal();dialog.querySelector("button")?.focus();
   }
   private async insertDialog(preselected?:string):Promise<void> {
     const base=this.view(),catalog=this.host.catalog();if(!catalog)return;
@@ -402,13 +407,15 @@ export class ScreenComponents {
     const component=select("Component",components);if(preselected)component.value=preselected;
     const screen=select("Screen",panels),parent=select("Parent group",[]);
     if(panels.some(panel=>panel.id===base.screenId))screen.value=base.screenId;
-    let target:CompositionView|undefined;
+    let target:CompositionView|undefined,navigated=false;
     const submit=action("Insert component",()=>{},true);submit.type="submit";submit.onclick=null;submit.disabled=true;
     let sequence=0;
     const load=async()=>{
       const capture=++sequence;submit.disabled=true;target=undefined;parent.replaceChildren();
       try {
-        const view=screen.value===base.screenId?base:await this.host.openScreen?.(screen.value);
+        let view:CompositionView|undefined;
+        if(screen.value===base.screenId && !navigated)view=base;
+        else {navigated=true;view=await this.host.openScreen?.(screen.value);}
         if(capture!==sequence || this.dialog!==dialog)return;
         if(!view || view.screenId!==screen.value)throw Error("The selected screen could not be refreshed.");target=view;
         for(const node of view.nodes.filter(node=>node.id && ["screen","fixed","frame","window","vbox","hbox","grid","viewport"].includes(node.kind))){const option=el("option","",node.kind==="screen"?"Screen root":`${displayName(node.kind)} · byte ${node.span.start}`);option.value=node.id!;parent.append(option);}
@@ -417,9 +424,10 @@ export class ScreenComponents {
       }catch(failure){error.textContent=(failure as Error).message;}
     };
     screen.onchange=()=>{void load();};
-    const actions=el("div","screen-component-actions");actions.append(submit,action("Cancel",close));form.append(error,actions);dialog.append(form);
+    const actions=el("div","screen-component-actions");actions.append(submit,action("Cancel",()=>close(navigated)));form.append(error,actions);dialog.append(form);
+    dialog.oncancel=event=>{event.preventDefault();close(navigated);};
     form.onsubmit=event=>{event.preventDefault();if(this.working || !target || !parent.value)return;submit.disabled=true;
-      void this.place(component.value,parent.value).then(()=>close()).catch(failure=>{error.textContent=(failure as Error).message;}).finally(()=>{submit.disabled=false;});};
+      void this.place(component.value,parent.value).then(()=>close(true)).catch(failure=>{error.textContent=(failure as Error).message;}).finally(()=>{submit.disabled=false;});};
     dialog.showModal();component.focus();await load();
   }
 }
