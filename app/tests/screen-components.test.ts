@@ -33,6 +33,13 @@ test("extract preparation captures exact Source without writing; naming submits 
   assert.equal(h.saved(),1);
 });
 
+test("structural extraction and placement keep current-owner pending fields on their original target",async()=>{
+  const h=fixture();h.host.captureDrafts=()=>[{validate:()=>{},prepare:()=>()=>{},cancel:()=>{throw Error("Must retain input");}}];
+  await assert.rejects(h.controller.prepareExtract(),/Apply or cancel/);
+  await assert.rejects(h.controller.place("component","group"),/Apply or cancel/);
+  assert.equal(h.calls.length,0);assert.equal(h.saved(),0);
+});
+
 test("placement requires an explicit current parent and preserves typed component intent",async()=>{
   const h=fixture();
   h.catalog.owned.push({id:"component",rootId:"component-root",name:"route_guide",path:"game/ui/route_guide.rpy",kind:"component",resolved:true,sourceRevision:"component-source"});

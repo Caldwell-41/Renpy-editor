@@ -17,6 +17,7 @@ export interface ScreenComponentsHost {
   openDefinition(componentId: string, nodeId?: string): Promise<CompositionView>;
   openScreen?(screenId: string, nodeId?: string): Promise<CompositionView>;
   captureDrafts?(view: CompositionView): readonly CopyDraftParticipant[];
+  structureBlocked?(): boolean;
   source(target: SourceTarget): void;
   note(message: string, error?: boolean): void;
   redraw(): void;
@@ -95,9 +96,14 @@ export class ScreenComponents {
     if(target.revisions.source!==view.document.revision)throw Error("Source changed. Your input is kept. Inspect Source before continuing.");
     return target;
   }
+  private structuralView():CompositionView {
+    const view=this.view();
+    if(this.host.structureBlocked?.() || this.host.captureDrafts?.(view).length)throw Error("Apply or cancel unfinished edits before changing component structure. Your input is kept.");
+    return view;
+  }
   async prepareExtract():Promise<PreparedComponentGroup> {
     if(this.working)throw Error("Finish the current operation first.");
-    const view=this.view(), projectRevision=this.host.catalog()?.projectRevision;
+    const view=this.structuralView(), projectRevision=this.host.catalog()?.projectRevision;
     if(!view.selected.id || !projectRevision)throw Error("Choose a supported owned group first.");
     this.working=true;
     try {
@@ -112,6 +118,7 @@ export class ScreenComponents {
   async extract(name:string):Promise<ComponentChange> {
     if(this.working || !this.extraction)throw Error("Review the selected group first.");
     const capture=this.extraction;
+    this.structuralView();
     this.assertCurrent(capture.view);
     const normalized=technicalName(name,"Component name");
     this.working=true;
@@ -127,7 +134,7 @@ export class ScreenComponents {
   cancelExtraction():void { if(!this.working)this.extraction=undefined; }
   async place(componentId:string,parentId:string):Promise<ComponentChange> {
     if(this.working)throw Error("Finish the current operation first.");
-    const view=this.view(), owner=this.host.catalog()?.owned.find(owner=>owner.id===componentId && owner.kind==="component" && owner.resolved);
+    const view=this.structuralView(), owner=this.host.catalog()?.owned.find(owner=>owner.id===componentId && owner.kind==="component" && owner.resolved);
     if(!view.nodes.some(node=>node.id===parentId && ["screen","fixed","frame","window","vbox","hbox","grid","viewport"].includes(node.kind)))
       throw Error("Choose the parent group for this component.");
     if(!owner)throw Error("This component is unavailable. Its saved identity is kept.");
@@ -370,6 +377,7 @@ export class ScreenComponents {
   private scopeContent(section:HTMLElement,view:CompositionView,id:string,state:{review?:ComponentReview;error?:string}):void {
     if(!state.review){section.append(el("p",state.error?"screen-component-error":"",state.error??"Loading affected screens…"));return;}
     const review=state.review,names=review.affectedScreens.map(owner=>displayName(owner.name));
+    section.dataset.componentId=id;section.dataset.componentRevision=review.component.revisions.source;
     section.dataset.shared=String(names.length>1 || review.uses.filter(use=>use.componentId===id).length>1);
     section.append(el("p","screen-component-scope-line",names.length>1?`Shared by ${names.join(" and ")}`:names.length?`Only ${names[0]}`:"This component is not used in a screen."));
     const tools=el("div","screen-component-actions");tools.append(action(`Used on ${names.length} ${names.length===1?"screen":"screens"}`,()=>this.run(()=>this.showUses(id))));
