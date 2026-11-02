@@ -1,5 +1,6 @@
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import { validateField } from "./authoring-input.ts";
+import type { CompositionView, CopyDraftParticipant } from "./screen-composition.ts";
 
 export type LayoutUnit = "pixels" | "relative" | "count";
 export interface LayoutValue { unit: LayoutUnit; value: number }
@@ -50,6 +51,38 @@ export class ScreenLayoutEditor {
   private presentation: LayoutPresentation = {};
   constructor(private readonly host: Host) {}
   hasDraft(): boolean { return this.drafts.size > 0; }
+  captureCopyDraft(view: CompositionView): CopyDraftParticipant | undefined {
+    const keys = [...this.drafts].filter(([, draft]) => draft.document.path === view.document.path && draft.screen === view.screenName).map(([key]) => key);
+    if (!keys.length) return;
+    const read = () => keys.map(key => {
+      const draft = this.drafts.get(key), node = view.nodes.find(node => node.id === draft?.node.id);
+      if (!draft || !node || draft.document.revision !== view.document.revision) throw Error("The layout draft changed its Source target. Input retained.");
+      const invalid = this.validate({document:view.document,screen:view.screenName,node,nodes:view.nodes,busy:false,otherDraft:false}, draft.fields);
+      if (invalid) throw Error(invalid.text);
+      return draft;
+    });
+    return {
+      validate: () => { read(); },
+      prepare: (fresh, nodeIds) => {
+        const drafts = read().map(draft => {
+          const node = fresh.nodes.find(node => node.id === nodeIds.get(draft.node.id!));
+          if (!node?.numericLayout) throw Error("The copied layout target is unavailable. Input retained.");
+          const key = draftKey(fresh.document, fresh.screenName, node);
+          if (this.drafts.has(key)) throw Error("The copied layout target already has a draft. Input retained.");
+          return { original: draft.key, draft: {...draft,key,document:fresh.document,screen:fresh.screenName,node,fields:structuredClone(draft.fields)} };
+        });
+        return () => {
+          for (const {original,draft} of drafts) {
+            this.drafts.delete(original); this.errors.delete(original);
+            const units = this.emptyUnits.get(original); this.emptyUnits.delete(original);
+            if (units) this.emptyUnits.set(draft.key, units);
+            this.drafts.set(draft.key, draft);
+          }
+        };
+      },
+      cancel: () => { for (const key of keys) { this.drafts.delete(key); this.errors.delete(key); this.emptyUnits.delete(key); } },
+    };
+  }
   hasNodeDraft(document: ScreenDocument, screen: string, node: ScreenNode): boolean { return this.drafts.has(draftKey(document, screen, node)); }
   renderRetained(host: HTMLElement, documents: ScreenDocument[]): void {
     for (const [key, draft] of this.drafts) {
