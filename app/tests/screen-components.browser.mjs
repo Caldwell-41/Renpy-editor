@@ -14,10 +14,22 @@ await mkdir(output,{recursive:false});
 const fixtureRoot=join(tmpdir(),`loomlight-help-controller-${randomUUID()}`);
 const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'../.toolchains/target','debug/examples/help-controller-driver'+(process.platform==='win32'?'.exe':'')),[fixtureRoot],{startupTimeout:60000});
 const game=join(fixtureRoot,'synthetic-project'),receipts=[],errors=[],checks=[];
+const captures=[];
 let sessionId,browser,page,server,failCopyInspect=false;
 let failedCopyPath='game/ui/component_about_copy.rpy',heldSourcePath,releaseSource,sourceStarted,sourceFinished;
 const listeners=new Set();
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
+const capture=async state=>{
+  if(process.env.COMPONENT_VISUAL_CAPTURE!=='1')return;
+  const previous=page.viewportSize();
+  for(const [width,height] of [[1100,720],[560,640]]){
+    await page.setViewportSize({width,height});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${state}/${width} overflow`);
+    const name=`${state}-dark-${width}.png`,bytes=await page.screenshot({path:join(output,name)});
+    captures.push({state,theme:'dark',width,height,scale:1,path:name,sha256:digest(bytes)});
+  }
+  await page.setViewportSize(previous);
+};
 const signal=async(promise,name)=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(`${name} did not complete`)),10000);})]);}finally{clearTimeout(timer);}};
 const candidate=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 const harness=await readFile(new URL(import.meta.url)),harnessSHA256=digest(harness);
@@ -118,6 +130,7 @@ try {
     await dialog.getByRole('button',{name:'Cancel',exact:true}).click();assert.equal(await insertLaunch.evaluate(element=>element.isConnected && document.activeElement===element),true);
     await ui.getByRole('button',{name:'Add component…',exact:true}).click();
     await dialog.getByLabel('Component',{exact:true}).selectOption(component.id);await dialog.getByLabel('Parent group',{exact:true}).selectOption(about.rootId);
+    await capture('insert-component');
     await dialog.getByRole('button',{name:'Insert component',exact:true}).click();await dialog.waitFor({state:'detached'});
     const secondUse=(await request('screens.inspect',{path:about.path})).screens[0].nodes.find(node=>node.kind==='use');assert.notEqual(firstUse.id,secondUse.id);assert.equal(secondUse.component.componentId,component.id);
     await ui.getByRole('button',{name:'Edit component',exact:true}).click();
@@ -130,6 +143,7 @@ try {
     dialog=page.getByRole('dialog',{name:'Review component changes',exact:true});await dialog.waitFor();
     assert.match(await dialog.innerText(),/Component about/);assert.match(await dialog.innerText(),/Component help/);assert.equal(await dialog.locator('.screen-component-changes tbody tr').count(),2);
     assert.match(await dialog.innerText(),/420/);assert.equal((await dialog.innerText()).includes('Color'),false,'Untouched fields stay out of shared review');
+    await capture('shared-review');
     await dialog.getByRole('button',{name:'Keep editing',exact:true}).click();assert.equal(await field().inputValue(),'Shared through UI');assert.equal(await read(component.path),accepted);
     await ui.locator('[data-text-apply]').click();dialog=page.getByRole('dialog',{name:'Review component changes',exact:true});await dialog.getByRole('button',{name:'Apply to 2 screens',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true && !document.querySelector('.screen-text-state')?.textContent.includes('Applying'));
@@ -137,6 +151,7 @@ try {
     for(const owner of [help,about])assert.equal((await request('screens.inspect',{path:owner.path})).screens[0].nodes.find(node=>node.kind==='use').component.sourceRevision,digest(shared));
     await field().fill('Cancelled');await ui.locator('[data-text-cancel]').click();assert.equal(await read(component.path),shared);
     checks.push('shared changed-only review, Cancel and Apply reach actual core and both uses');
+    await capture('shared-fields');
     const openShared=async()=>{
       await select(about);await choose();await ui.locator(`[data-node-id="${secondUse.id}"]`).press('Enter');
       await ui.getByRole('button',{name:'Edit component',exact:true}).click();
@@ -152,6 +167,7 @@ try {
       await dialog.getByRole('button',{name:'Create copy',exact:true}).click();await dialog.waitFor({state:'detached'});
       await ui.getByText('Copy created. Your edits are still unsaved.',{exact:true}).waitFor();
       await field().fill('First text entered during recovery');assert.equal(await ui.locator('[data-text-apply]').isDisabled(),true);
+      if(initial==='clean')await capture('copy-refresh-failure');
       if(initial==='layout'){
         failCopyInspect=false;await ui.getByRole('button',{name:'Reload copy',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===false);
         assert.equal(await field().inputValue(),'First text entered during recovery');
@@ -188,6 +204,7 @@ try {
     await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true && !document.querySelector('.screen-text-state')?.textContent.includes('Applying'));
     assert.equal(await page.getByRole('dialog').count(),0,'A single-use independent edit applies directly');
     const copied=await read(independent.path);assert.ok(copied.includes('Independent through UI'));assert.equal(await read(component.path),shared);
+    await capture('independent-fields');
     assert.equal((await request('screens.inspect',{path:help.path})).screens[0].nodes.find(node=>node.id===firstUse.id).component.componentId,component.id);
     checks.push('accepted Copy, failed refresh, latest draft Reload, Cancel keeping copy and separate local Apply');
     await history('undo');await page.waitForFunction(()=>document.querySelector('.screen-card textarea')?.value==='Shared through UI');
@@ -224,6 +241,7 @@ try {
     assert.equal((await request('screens.inspect',{path:help.path})).screens[0].nodes.find(node=>node.id===firstUse.id).component.componentId,component.id);
     assert.equal(await ui.getByRole('button',{name:'Edit component',exact:true}).count(),0);await save(component.path,shared);
     checks.push('reopen exact source and Source rename preserves stable missing intent without retargeting');
+    await capture('missing-component');
     for(const [width,height] of [[1100,800],[560,720]]){await page.setViewportSize({width,height});await page.screenshot({path:join(output,`production-dark-${width}.png`),fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
     assert.deepEqual(errors,[]);
     await writeFile(join(output,'accepted-component.rpy'),shared);await writeFile(join(output,'accepted-independent.rpy'),copied);
@@ -239,5 +257,5 @@ try {
   for(const close of [()=>browser?.close(),()=>server?.close(),()=>child.stop()])try{await close();}catch(error){cleanupErrors.push(String(error));}
   cleanupComplete=cleanupErrors.length===0;if(!cleanupComplete)passed=false;
   await writeFile(join(output,'receipts.json'),JSON.stringify(receipts,null,2));
-  await writeFile(join(output,'result.json'),JSON.stringify({passed,candidate,harnessSHA256,checks,errors,realCore:true,sdk:false,helper:false,nativeEditor:false,cleanupComplete,cleanupErrors},null,2));
+  await writeFile(join(output,'result.json'),JSON.stringify({passed,candidate,harnessSHA256,checks,captures,errors,realCore:true,sdk:false,helper:false,nativeEditor:false,cleanupComplete,cleanupErrors},null,2));
 }
