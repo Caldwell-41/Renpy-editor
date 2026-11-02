@@ -106,12 +106,13 @@ export class ScreenImages {
   hasAddition(): boolean {
     return !!this.addition;
   }
-  captureCopyDraft(view: CompositionView): CopyDraftParticipant | undefined {
-    const captured = [...this.drafts.values(), ...(this.addition ? [this.addition] : [])]
+  captureCopyDraft(view: CompositionView, trackNewDrafts=false): CopyDraftParticipant | undefined {
+    const currentKeys = () => [...this.drafts.values(), ...(this.addition ? [this.addition] : [])]
       .filter(draft => draft.document.path === view.document.path && draft.screenId === view.screenId)
       .map(draft => ({key:draft.key,addition:!draft.nodeId}));
-    if (!captured.length) return;
-    const read = () => captured.map(({key,addition}) => {
+    const captured=currentKeys(),keys=()=>trackNewDrafts?currentKeys():captured;
+    if (!captured.length && !trackNewDrafts) return;
+    const read = () => keys().map(({key,addition}) => {
       const draft = addition ? this.addition : this.drafts.get(key);
       if (!draft || draft.key !== key || draft.document.revision !== view.document.revision) throw Error("The image draft changed its Source target. Input retained.");
       const invalid = this.invalidDraft(draft);
@@ -138,7 +139,7 @@ export class ScreenImages {
           }
         };
       },
-      cancel: () => { for (const {key,addition} of captured) { if (addition && this.addition?.key === key) this.addition = undefined; else this.drafts.delete(key); this.errors.delete(key); this.locks.delete(key); } },
+      cancel: () => { for (const {key,addition} of keys()) { if (addition && this.addition?.key === key) this.addition = undefined; else this.drafts.delete(key); this.errors.delete(key); this.locks.delete(key); } },
     };
   }
   renderRetained(host: HTMLElement, documents: ScreenDocument[]): void {

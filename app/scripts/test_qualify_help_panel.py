@@ -14,6 +14,7 @@ import sys
 import os
 import subprocess
 import hashlib
+import re
 
 spec = importlib.util.spec_from_file_location('help_panel_gate', Path(__file__).with_name('qualify-help-panel.py'))
 gate = importlib.util.module_from_spec(spec)
@@ -21,6 +22,15 @@ spec.loader.exec_module(gate)
 
 
 class RuntimeEvidenceTests(unittest.TestCase):
+    def test_preparation_fingerprint_binds_literal_compile_time_inputs(self):
+        library = gate.REPO / 'app/src-core/src/lib.rs'
+        material = gate.inputs()
+        for relative in re.findall(r'include_(?:str|bytes)!\("([^\"]+)"\)', library.read_text()):
+            source = (library.parent / relative).resolve()
+            key = source.relative_to(gate.REPO).as_posix()
+            self.assertIn(key, material)
+            self.assertEqual(material[key], gate.digest(source))
+
     def receipt(self):
         return dict(schemaVersion=1, sdkVersion='8.5.3', case='show_persists',
                     manifestSHA256='a' * 64, normalEntry=True, startedFromMenu=True,

@@ -15,18 +15,23 @@ const fixtureRoot=join(tmpdir(),`loomlight-help-controller-${randomUUID()}`);
 const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'../.toolchains/target','debug/examples/help-controller-driver'+(process.platform==='win32'?'.exe':'')),[fixtureRoot],{startupTimeout:60000});
 const game=join(fixtureRoot,'synthetic-project'),receipts=[],errors=[],checks=[];
 let sessionId,browser,page,server,failCopyInspect=false;
+let failedCopyPath='game/ui/component_about_copy.rpy',heldSourcePath,releaseSource,sourceStarted,sourceFinished;
 const listeners=new Set();
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
+const signal=async(promise,name)=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(`${name} did not complete`)),10000);})]);}finally{clearTimeout(timer);}};
 const candidate=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 const harness=await readFile(new URL(import.meta.url)),harnessSHA256=digest(harness);
 await writeFile(join(output,'harness.mjs'),harness);
 const rpc=async request=>{
   if(['screens.canvasRender','screens.canvasStatus'].includes(request.operation))return {ok:true,value:{phase:'unavailable',message:'Component canvas/helper qualification is separate.'}};
-  if(failCopyInspect && request.operation==='screens.inspect' && request.payload.path==='game/ui/component_about_copy.rpy') {
+  if(failCopyInspect && request.operation==='screens.inspect' && request.payload.path===failedCopyPath) {
     const result={ok:false,error:{code:'SOURCE_CONFLICT',message:'Deliberate post-copy inspection refusal'}};
     receipts.push({request,result,injectedReadFailure:true});return result;
   }
-  const result=await child.request(request);receipts.push({request,result});for(const observe of listeners)observe({request,result});if(result.value?.sessionId)sessionId=result.value.sessionId;return result;
+  if(request.operation==='screens.inspect'&&request.payload.path===heldSourcePath){sourceStarted();await new Promise(resolve=>{releaseSource=resolve;});}
+  const result=await child.request(request);receipts.push({request,result});for(const observe of listeners)observe({request,result});if(result.value?.sessionId)sessionId=result.value.sessionId;
+  if(request.operation==='screens.inspect'&&request.payload.path===heldSourcePath)sourceFinished();
+  return result;
 };
 const request=async(operation,payload={})=>{
   const result=await rpc({protocolVersion:1,requestId:randomUUID(),operation,payload:{sessionId,...payload}});
@@ -132,6 +137,38 @@ try {
     for(const owner of [help,about])assert.equal((await request('screens.inspect',{path:owner.path})).screens[0].nodes.find(node=>node.kind==='use').component.sourceRevision,digest(shared));
     await field().fill('Cancelled');await ui.locator('[data-text-cancel]').click();assert.equal(await read(component.path),shared);
     checks.push('shared changed-only review, Cancel and Apply reach actual core and both uses');
+    const openShared=async()=>{
+      await select(about);await choose();await ui.locator(`[data-node-id="${secondUse.id}"]`).press('Enter');
+      await ui.getByRole('button',{name:'Edit component',exact:true}).click();
+      await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),component.id);
+      await choose();await ui.locator(`[data-node-id="${title}"]`).press('Enter');
+    };
+    for(const initial of ['clean','layout']){
+      await openShared();const mapBefore=await mapBytes();
+      if(initial==='layout'){await ui.locator('.screen-text-layout').evaluate(details=>{details.open=true;});await ui.getByLabel('Width',{exact:true}).fill('480');}
+      const name=`component_${initial}_recovery`;failedCopyPath=`game/ui/${name}.rpy`;
+      await ui.getByRole('button',{name:'Make a copy for Component about',exact:true}).click();dialog=page.getByRole('dialog',{name:'Make a copy for Component about',exact:true});
+      await dialog.getByLabel('Component name',{exact:true}).fill(name);failCopyInspect=true;
+      await dialog.getByRole('button',{name:'Create copy',exact:true}).click();await dialog.waitFor({state:'detached'});
+      await ui.getByText('Copy created. Your edits are still unsaved.',{exact:true}).waitFor();
+      await field().fill('First text entered during recovery');assert.equal(await ui.locator('[data-text-apply]').isDisabled(),true);
+      if(initial==='layout'){
+        failCopyInspect=false;await ui.getByRole('button',{name:'Reload copy',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===false);
+        assert.equal(await field().inputValue(),'First text entered during recovery');
+        await ui.locator('.screen-text-layout').evaluate(details=>{details.open=true;});assert.equal(await ui.getByLabel('Width',{exact:true}).inputValue(),'480');
+      }
+      await ui.locator('[data-text-cancel]').click();failCopyInspect=false;
+      assert.equal(await field().inputValue(),'Shared through UI');
+      const acceptedRecovery=(await request('screens.list')).owned.find(owner=>owner.name===name);assert.ok(acceptedRecovery,'Cancel keeps the accepted Copy');
+      assert.equal((await read(acceptedRecovery.path)).includes('First text entered during recovery'),false);
+      assert.equal(await read(component.path),shared);
+      await select(about);await choose();await ui.locator(`[data-node-id="${secondUse.id}"]`).press('Enter');await ui.getByRole('button',{name:'Edit component',exact:true}).click();
+      await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),acceptedRecovery.id);
+      await history('undo');await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),component.id);
+      await assert.rejects(readFile(join(game,acceptedRecovery.path)),error=>error.code==='ENOENT');assert.deepEqual(await mapBytes(),mapBefore);
+    }
+    checks.push('clean Copy and layout-only Copy track newly typed recovery text; Cancel/Reload never leave it on the original shared definition');
+    await openShared();failedCopyPath='game/ui/component_about_copy.rpy';
     const copyMap=await mapBytes();await field().fill('About only pending');await ui.getByLabel('Width',{exact:true}).fill('480');await ui.getByRole('button',{name:'Make a copy for Component about',exact:true}).click();
     dialog=page.getByRole('dialog',{name:'Make a copy for Component about',exact:true});await dialog.getByLabel('Component name',{exact:true}).fill('component_about_copy');failCopyInspect=true;
     await dialog.getByRole('button',{name:'Create copy',exact:true}).click();await dialog.waitFor({state:'detached'});
@@ -168,6 +205,14 @@ try {
     assert.equal(location.text,source);assert.equal(location.start,Buffer.from(source).subarray(0,use.span.start).toString('utf8').length);assert.equal(location.end,Buffer.from(source).subarray(0,use.span.end).toString('utf8').length);
     checks.push('actual Source navigation selects the exact accepted UTF-8 use span');
     await page.getByRole('button',{name:'Screens',exact:true}).click();
+    const began=new Promise(resolve=>{sourceStarted=resolve;}),finished=new Promise(resolve=>{sourceFinished=resolve;});heldSourcePath=component.path;
+    await ui.getByRole('button',{name:'Open Source',exact:true}).click();await signal(began,'Source inspection start');
+    await page.getByRole('button',{name:'Story',exact:true}).click();await page.locator('.scene-header').waitFor();
+    releaseSource();await signal(finished,'Source inspection completion');heldSourcePath=undefined;
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    assert.equal(await page.locator('textarea.source-editor').count(),0);assert.equal(await page.locator('.scene-header').isVisible(),true);
+    checks.push('late component Source inspection cannot navigate away from the later Story view');
+    await page.getByRole('button',{name:'Screens',exact:true}).click();
     const renamed=shared.replace('screen component_route_guide():','screen component_route_guide_renamed():');assert.notEqual(renamed,shared);await save(component.path,renamed);
     await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();await ui.getByText(/Can't find this component/).waitFor();
     assert.equal((await request('screens.inspect',{path:help.path})).screens[0].nodes.find(node=>node.id===firstUse.id).component.componentId,component.id);
@@ -183,6 +228,7 @@ try {
   if(page){await writeFile(join(output,'failure-dom.txt'),await page.locator('body').innerText());await page.screenshot({path:join(output,'failure.png'),fullPage:true});}
   throw error;
 } finally {
+  releaseSource?.();
   const cleanupErrors=[];
   for(const close of [()=>browser?.close(),()=>server?.close(),()=>child.stop()])try{await close();}catch(error){cleanupErrors.push(String(error));}
   cleanupComplete=cleanupErrors.length===0;if(!cleanupComplete)passed=false;

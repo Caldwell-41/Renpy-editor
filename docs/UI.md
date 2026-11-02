@@ -890,6 +890,9 @@ Apply is a second history entry. A failed refresh acknowledges the copy, retains
 input and blocks Apply until Reload copy succeeds. Cancel discards pending edits
 while preserving the accepted copy. These controls follow approved A2 `refined-v1`;
 the linked evidence owns remaining visual, target and acceptance limits.
+Recovery includes fields first edited after Copy. Their existing draft owners track
+the original target until verification; Reload transfers those latest drafts and
+Cancel discards them without leaving edits attached to the shared definition.
 
 | Component hierarchy | Constraint canvas | Properties/source |
 | --- | --- | --- |

@@ -16,7 +16,7 @@ export interface ScreenComponentsHost {
   accepted(change: ComponentChange, selection: {screenId:string;nodeId:string}): Promise<CompositionView>;
   openDefinition(componentId: string, nodeId?: string): Promise<CompositionView>;
   openScreen?(screenId: string, nodeId?: string): Promise<CompositionView>;
-  captureDrafts?(view: CompositionView): readonly CopyDraftParticipant[];
+  captureDrafts?(view: CompositionView, trackNewDrafts?: boolean): readonly CopyDraftParticipant[];
   structureBlocked?(): boolean;
   source(target: SourceTarget): void;
   note(message: string, error?: boolean): void;
@@ -68,6 +68,7 @@ export class ScreenComponents {
   private extraction?: Extraction;
   private working = false;
   private disposed = false;
+  private generation = 0;
   private origin?:UseOrigin;
   private pendingCopy?:PendingCopy;
   private dialog?:HTMLDialogElement;
@@ -153,8 +154,9 @@ export class ScreenComponents {
     } finally {this.working=false;}
   }
   private async componentReview(componentId:string,base?:CompositionView):Promise<ComponentReview> {
+    const generation=this.generation;
     const review=await this.host.request<ComponentReview>("screens.componentReview",{componentId});
-    if(!this.active() || review.component.kind!=="component" || review.component.binding.screenId!==componentId || !review.complete)
+    if(!this.active() || generation!==this.generation || review.component.kind!=="component" || review.component.binding.screenId!==componentId || !review.complete)
       throw Error("Component references are unavailable or incomplete. Your edits are kept. Inspect Source.");
     if(base && (review.component.path!==base.document.path || review.component.revisions.source!==base.document.revision))
       throw Error("Source changed. Your draft is still here. Inspect Source before applying.");
@@ -180,7 +182,7 @@ export class ScreenComponents {
     if(this.working)throw Error("Finish the current operation first.");
     const before=this.view(), origin=this.origin, normalized=technicalName(name,"Component name");
     if(!origin || before.screenId!==origin.componentId)throw Error("Open a component from its current screen use before copying.");
-    const participants=this.host.captureDrafts?.(before)??[];
+    const participants=this.host.captureDrafts?.(before,true)??[];
     for(const participant of participants)participant.validate();
     this.working=true;
     try {
@@ -200,6 +202,7 @@ export class ScreenComponents {
   private async verifyCopy():Promise<void> {
     const pending=this.pendingCopy;
     if(!pending || !this.active())throw Error("The copy refresh is unavailable. Your edits are kept.");
+    const hasDrafts=(this.host.captureDrafts?.(pending.before).length??pending.participants.length)>0;
     try {
       const {change,before}=pending;
       const ownerView=await this.host.accepted(change,{screenId:change.screenId,nodeId:change.useId});
@@ -224,7 +227,7 @@ export class ScreenComponents {
       for(const commit of commits)commit();
       this.origin={view:ownerView,target:ownerTarget,componentId:change.componentId,useId:change.useId};
       this.pendingCopy=undefined;
-      this.host.note(pending.participants.length ? `Copy created for ${ownerView.screenName}. Your edits are still unsaved. Apply them when ready.` : `Copy created for ${ownerView.screenName}. Other screens keep their original component.`);
+      this.host.note(hasDrafts ? `Copy created for ${ownerView.screenName}. Your edits are still unsaved. Apply them when ready.` : `Copy created for ${ownerView.screenName}. Other screens keep their original component.`);
     } catch(error) {
       let restoreFailed=false;
       if(this.active()) {
@@ -295,16 +298,19 @@ export class ScreenComponents {
       this.assertCurrent(base);return review.component.revisions;
     } finally {this.working=false;}
   }
-  invalidate():void {this.scopes.clear();this.extraction=undefined;if(!this.pendingCopy)this.origin=undefined;}
+  invalidate():void {this.generation++;this.scopes.clear();this.extraction=undefined;if(!this.pendingCopy)this.origin=undefined;}
   private run(task:()=>Promise<unknown>):void {
-    void task().catch(error=>{if(this.active()){this.host.note((error as Error).message,true);this.host.redraw();}});
+    const generation=this.generation;
+    void task().catch(error=>{if(this.active() && generation===this.generation){this.host.note((error as Error).message,true);this.host.redraw();}});
   }
   private currentSource(view:CompositionView):void {
     this.host.source({path:view.document.path,expectedRevision:view.document.revision,byteStart:view.selected.span.start,byteEnd:view.selected.span.end});
   }
   private async componentSource(componentId:string):Promise<void> {
+    const generation=this.generation;
     const review=await this.componentReview(componentId);
     const doc=await this.host.request<ScreenDocument>("screens.inspect",{path:review.component.path});
+    if(!this.active() || generation!==this.generation)return;
     const root=doc.screens.find(screen=>screen.name===review.component.binding.sourceName)?.nodes.find(node=>node.id===review.component.rootId);
     if(!root || doc.revision!==review.component.revisions.source)throw Error("The exact component Source location changed. Reload Source.");
     this.host.source({path:doc.path,expectedRevision:doc.revision,byteStart:root.span.start,byteEnd:root.span.end});

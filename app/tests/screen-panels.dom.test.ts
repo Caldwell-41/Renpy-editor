@@ -60,3 +60,13 @@ test("Help keeps the chosen asset hash from form admission instead of refreshing
   assert.equal(calls[0]!.starter!.expectedAssetSha256, image.sha256);
   view.dispose(); await browser.happyDOM.close();
 });
+
+test("screen name validates on completion, associates its error and allows incomplete typing",async()=>{
+  const browser=setup(),view=buildPanelCreationForm({assets:[image],create:async()=>{},cancel:()=>{}});document.body.append(view.element);
+  const name=control<HTMLInputElement>("screen-name");assert.equal(name.hasAttribute("aria-invalid"),false);
+  name.value="bad name";name.dispatchEvent(new Event("input",{bubbles:true}));assert.equal(name.hasAttribute("aria-invalid"),false);
+  name.dispatchEvent(new Event("blur"));assert.equal(name.getAttribute("aria-invalid"),"true");
+  const error=document.getElementById(name.getAttribute("aria-describedby")!);assert.ok(error);assert.match(error.textContent!,/letters|underscore/);
+  name.value="valid_name";name.dispatchEvent(new Event("input",{bubbles:true}));assert.equal(name.hasAttribute("aria-invalid"),false);assert.equal(error.hidden,true);
+  view.dispose();await browser.happyDOM.close();
+});

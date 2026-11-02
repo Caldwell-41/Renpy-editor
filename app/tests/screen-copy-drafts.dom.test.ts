@@ -22,7 +22,7 @@ function fixture() {
 
 test("layout copy transfer retains latest input until all fresh targets are verified",async()=>{
   const f=fixture();try {
-    f.edit("12");const transfer=f.editor.captureCopyDraft(f.original)!;transfer.validate();
+    const transfer=f.editor.captureCopyDraft(f.original,true)!;assert.ok(transfer);f.edit("12");transfer.validate();
     assert.throws(()=>transfer.prepare(f.fresh,new Map()),/copied|target/i);
     assert.equal(f.editor.hasNodeDraft(f.original.document,"shared",f.original.selected),true);
     f.edit("14");const commit=transfer.prepare(f.fresh,new Map([["group","new-group"]]));
@@ -56,8 +56,9 @@ test("image copy transfer keeps pending size and verifies the copied node and pa
   },coordinate:task=>task(),commit:async()=>{throw Error("Copy must not apply image");},redraw:()=>{},preview:()=>{},note:()=>{},select:()=>{},source:()=>{},saved:()=>{},layoutTools:()=>{},order:()=>{}},f.editor);
   try {
     await images.refreshAssets();images.render(host,f.original);
+    const transfer=images.captureCopyDraft(f.original,true)!;assert.ok(transfer);
     const width=host.querySelector<HTMLInputElement>('[data-image-field="width"]')!;assert.ok(width);width.value="320";width.dispatchEvent(new window.Event("input",{bubbles:true}));
-    const transfer=images.captureCopyDraft(f.original)!;transfer.validate();
+    transfer.validate();
     assert.throws(()=>transfer.prepare(f.fresh,new Map([["group","new-group"]])),/parent|target/i);
     assert.equal(images.hasDraft(),true);
     const commit=transfer.prepare(f.fresh,new Map([["root","new-root"],["group","new-group"]]));

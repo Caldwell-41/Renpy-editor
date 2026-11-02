@@ -217,6 +217,8 @@ def inputs():
         files.update(path for path in (REPO / directory).rglob('*') if path.is_file())
     files.update(REPO / name for name in (
         'app/Cargo.toml', 'app/Cargo.lock', 'app/rust-toolchain.toml',
+        'app/src-tauri/tauri.conf.json', 'app/src-tauri/capabilities/main.json',
+        'app/src-tauri/permissions/core-request.toml', 'app/src-tauri/build.rs',
         'app/scripts/qualify-help-panel.py', 'app/scripts/test_qualify_help_panel.py',
         'app/scripts/qualify-screens-source.py', 'spikes/renpy-sdk/sdk_adapter.py', 'spikes/renpy-sdk/archive_safety.py'))
     return {path.relative_to(REPO).as_posix(): digest(path) for path in sorted(files)}

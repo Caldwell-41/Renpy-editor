@@ -108,11 +108,11 @@ export class ScreensWorkspace {
   private readonly compositionHistory: { path: string; before: string; after: string; beforeId?: string | null; afterId: string; removal: boolean }[] = [];
   constructor(private readonly actions: Actions) {
     this.gameResolution = {...actions.resolution};
-    this.components = new ScreenComponents({view:()=>this.compositionView(),catalog:()=>this.catalog,current:()=>this.current(),request:actions.request,coordinate:task=>this.coordinateComponent(task),
+    this.components = new ScreenComponents({view:()=>this.compositionView(),catalog:()=>this.catalog,current:()=>this.current() && this.panel.isConnected,request:actions.request,coordinate:task=>this.coordinateComponent(task),
       accepted:(change,selection)=>this.componentAccepted(change,selection),
       openDefinition:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"component"),openScreen:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"panel"),
       structureBlocked:()=>this.busy || !!this.creation || !!this.resize || !!this.move || this.composer.hasAddition() || this.composer.hasRemoval() || this.images.hasAddition() || this.images.isSaving() || this.text.isSaving(),
-      captureDrafts:view=>[...this.text.captureComponentDrafts(view),this.layout.captureCopyDraft(view),this.images.captureCopyDraft(view),this.captureGeometryDraft(view)].filter((value):value is CopyDraftParticipant=>!!value),
+      captureDrafts:(view,trackNewDrafts=false)=>[...this.text.captureComponentDrafts(view,trackNewDrafts),this.layout.captureCopyDraft(view,trackNewDrafts),this.images.captureCopyDraft(view,trackNewDrafts),this.captureGeometryDraft(view,trackNewDrafts)].filter((value):value is CopyDraftParticipant=>!!value),
       source:actions.source,note:(text,error)=>this.note(text,error),redraw:()=>this.render(),
     });
     this.layout = new ScreenLayoutEditor({
@@ -286,10 +286,11 @@ export class ScreensWorkspace {
       return result;
     });
   }
-  private captureGeometryDraft(view: CompositionView): CopyDraftParticipant | undefined {
-    const keys = [...this.drafts].filter(([,draft]) => draft.document.path === view.document.path && draft.screen === view.screenName).map(([key]) => key);
-    if (!keys.length) return;
-    const read = () => keys.map(key => {
+  private captureGeometryDraft(view: CompositionView, trackNewDrafts=false): CopyDraftParticipant | undefined {
+    const currentKeys = () => [...this.drafts].filter(([,draft]) => draft.document.path === view.document.path && draft.screen === view.screenName).map(([key]) => key);
+    const captured=currentKeys(), keys=()=>trackNewDrafts?currentKeys():captured;
+    if (!captured.length && !trackNewDrafts) return;
+    const read = () => keys().map(key => {
       const draft = this.drafts.get(key), node = draft?.document.screens.find(screen => screen.name === draft.screen)?.nodes[draft.index];
       if (!draft || !node?.id || draft.document.revision !== view.document.revision) throw Error("The size or position draft changed its Source target. Input retained.");
       const valid = draft.position ? Object.values(draft.position).every(value => Number.isFinite(value) && value >= 0 && value <= 1)
@@ -306,7 +307,7 @@ export class ScreensWorkspace {
         return {key,next,draft:{...draft,document:fresh.document,screen:fresh.screenName,index,...(draft.position?{position:{...draft.position}}:{})}};
       });
       return ()=>{for(const transfer of transfers){this.drafts.delete(transfer.key);this.drafts.set(transfer.next,transfer.draft);}};
-    },cancel:()=>{for(const key of keys)this.drafts.delete(key);}};
+    },cancel:()=>{for(const key of keys())this.drafts.delete(key);}};
   }
   private async componentWrite(base: ScreenDocument, fields: readonly ComponentFieldChange[]): Promise<ScreenRevisions | undefined> {
     if (this.components.hasPendingCopy()) throw Error("Reload or cancel the copy's unsaved edits before applying. Input retained.");
@@ -328,7 +329,11 @@ export class ScreensWorkspace {
     const text = (value: unknown): string => value == null ? "Inherited" : typeof value === "object" ? JSON.stringify(value) : String(value);
     if (command.type === "formatText") {
       const fields = Object.entries(command.values).flatMap(([key,value]) => key === "appearance" ? Object.entries(value ?? {}) : [[key,value]]);
-      return [...fields.map(([key,value])=>({label:String(key).replaceAll("_"," "),before:text(key === "text" ? node?.literal : node?.textProperties?.values[String(key)]),after:text(value)})),...this.layoutChanges(node!,command.layout ?? {})];
+      return [
+        ...fields.map(([key,value])=>({label:String(key).replaceAll("_"," "),before:text(key === "text" ? node?.literal : node?.textProperties?.values[String(key)]),after:text(value)})),
+        ...(command.style ? [{label:"Style",before:node?.style?.name ?? "Inherited",after:command.style.scope==="local" ? `Independent copy of ${command.style.name}` : command.style.name}] : []),
+        ...this.layoutChanges(node!,command.layout ?? {}),
+      ];
     }
     if (command.type === "image" || command.type === "addImage") {
       const image = this.images.assetName(command.assetId);

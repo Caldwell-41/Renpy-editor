@@ -702,6 +702,22 @@ impl AuthoringService {
             .iter()
             .find(|node| node.id.as_ref() == Some(&request.node_id))
             .ok_or(SceneError::UnknownEntity)?;
+        if owner.screen.kind == OwnedScreenKind::Panel {
+            // Same-Panel moves qualify these statements, but extraction changes
+            // their owner. A reusable component must not capture that dismissal.
+            let raw = inspect(&bytes, owner.screen.path.clone(), revision.sha256.clone())?;
+            let raw_screen = raw
+                .screens
+                .iter()
+                .find(|screen| screen.name == owner.screen.name)
+                .ok_or(SceneError::ReferenceBlocked)?;
+            if references::qualified_panel_spans(&owner.screen, raw_screen, &bytes)
+                .keys()
+                .any(|start| *start >= node.span.start && *start < node.source_end)
+            {
+                return Err(SceneError::OpaqueBoundary);
+            }
+        }
         if !matches!(
             node.kind.as_str(),
             "fixed" | "frame" | "window" | "vbox" | "hbox" | "grid" | "viewport"

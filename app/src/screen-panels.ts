@@ -2,6 +2,7 @@ import type { HelpStarter } from "./screen-contracts.ts";
 import { ScreenImageMedia } from "./screen-image-media.ts";
 import type { MediaPresentation } from "./scene-ui.ts";
 import type { UiImageAsset } from "./screen-images.ts";
+import { validateField } from "./authoring-input.ts";
 
 export interface PanelCreation { name: string; starter?: HelpStarter }
 interface PanelCreationOptions {
@@ -55,6 +56,9 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   const cancel = element("button", "button secondary", "Cancel"); cancel.type = "button";
   row.append(create, cancel);
   form.append(field("Screen name", name), starters, element("p", "screen-panels-purpose", "Panel · stays open while dialogue continues."), help, error, row);
+  const validateName=validateField(name,()=>{
+    if (!/^[A-Za-z_][A-Za-z_0-9]{0,63}$/.test(name.value)) throw Error("Use letters, numbers and underscores. Start with a letter or underscore.");
+  });
   let disposed = false, busy = false, dirty = false, composing = false;
   const active = () => !disposed && options.current?.() !== false;
   const media = options.presentImage ? new ScreenImageMedia(active,options.presentImage) : undefined;
@@ -83,7 +87,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
     error.textContent = "";
     let invalid: HTMLElement = name;
     try {
-      if (!/^[A-Za-z_][A-Za-z_0-9]{0,63}$/.test(name.value)) throw Error("Use letters, numbers and underscores. Start with a letter or underscore.");
+      validateName();
       const value: PanelCreation = { name: name.value };
       if (isHelp()) {
         invalid = image;

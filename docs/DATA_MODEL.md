@@ -640,6 +640,9 @@ to its containing owner UUID and component UUID. Only exact marked `use name`
 statements qualify. Parameters, expressions and transclusion stay opaque. Resolution
 requires the recorded IDs, original source name and qualified owner markers;
 renaming or deleting source never retargets a use by name.
+Panel self-Hide and focus qualifications are local to that Panel. Extraction refuses
+a subtree containing those contextual statements; ordinary edits and reorders inside
+the original Panel remain qualified. Keep Close outside reusable content groups.
 
 Transient `ScreenRevisions` capture source, source-map, inventory and effect hashes.
 Component writes require that capture, a complete bounded inclusion graph and clean

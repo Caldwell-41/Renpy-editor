@@ -106,15 +106,16 @@ export class ScreenText {
   }
   hasDraft(): boolean { return this.drafts.size > 0; }
   hasNodeDraft(screenId: string, nodeId: string): boolean { return this.drafts.has(`${screenId}:${nodeId}`); }
-  captureComponentDrafts(view:CompositionView):readonly CopyDraftParticipant[] {
-    const keys=[...this.drafts.values()].filter(draft=>draft.screenId===view.screenId && draft.document.path===view.document.path).map(draft=>draft.key);
-    if(!keys.length)return [];
+  captureComponentDrafts(view:CompositionView,trackNewDrafts=false):readonly CopyDraftParticipant[] {
+    const currentKeys=()=>[...this.drafts.values()].filter(draft=>draft.screenId===view.screenId && draft.document.path===view.document.path).map(draft=>draft.key);
+    const captured=currentKeys(),keys=()=>trackNewDrafts?currentKeys():captured;
+    if(!captured.length && !trackNewDrafts)return [];
     const catalog=this.host.styles?.();
     const definitions=structuredClone(catalog?.definitions??[]);
-    const read=()=>keys.map(key=>{
+    const read=()=>keys().map(key=>{
       const draft=this.drafts.get(key);
       if(!draft || draft.document.revision!==view.document.revision || !view.nodes.some(node=>node.id===draft.node.id))throw Error("The text draft changed its Source target. Your input is kept.");
-      if(draft.style && draft.style.expectedRevision!==catalog?.revision)throw Error("The Style changed. Your input is kept.");
+      if(draft.style && draft.style.expectedRevision!==catalog?.revision && draft.style.expectedRevision!==this.host.styles?.()?.revision)throw Error("The Style changed. Your input is kept.");
       this.values(draft,true);return draft;
     });
     return [{
@@ -149,7 +150,7 @@ export class ScreenText {
           }
         };
       },
-      cancel:()=>{for(const key of keys){this.drafts.delete(key);this.errors.delete(key);this.fieldErrors.delete(key);this.appearanceStates.delete(key);}},
+      cancel:()=>{for(const key of keys()){this.drafts.delete(key);this.errors.delete(key);this.fieldErrors.delete(key);this.appearanceStates.delete(key);}},
     }];
   }
   isSaving(): boolean { return !!this.submitted || this.importing || this.preparing || !!this.styleDialog; }

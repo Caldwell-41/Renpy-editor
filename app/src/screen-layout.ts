@@ -53,10 +53,11 @@ export class ScreenLayoutEditor {
   private presentation: LayoutPresentation = {};
   constructor(private readonly host: Host) {}
   hasDraft(): boolean { return this.drafts.size > 0; }
-  captureCopyDraft(view: CompositionView): CopyDraftParticipant | undefined {
-    const keys = [...this.drafts].filter(([, draft]) => draft.document.path === view.document.path && draft.screen === view.screenName).map(([key]) => key);
-    if (!keys.length) return;
-    const read = () => keys.map(key => {
+  captureCopyDraft(view: CompositionView, trackNewDrafts=false): CopyDraftParticipant | undefined {
+    const currentKeys = () => [...this.drafts].filter(([, draft]) => draft.document.path === view.document.path && draft.screen === view.screenName).map(([key]) => key);
+    const captured=currentKeys(),keys=()=>trackNewDrafts?currentKeys():captured;
+    if (!captured.length && !trackNewDrafts) return;
+    const read = () => keys().map(key => {
       const draft = this.drafts.get(key), node = view.nodes.find(node => node.id === draft?.node.id);
       if (!draft || !node || draft.document.revision !== view.document.revision) throw Error("The layout draft changed its Source target. Input retained.");
       const invalid = this.validate({document:view.document,screen:view.screenName,node,nodes:view.nodes,busy:false,otherDraft:false}, draft.fields);
@@ -82,7 +83,7 @@ export class ScreenLayoutEditor {
           }
         };
       },
-      cancel: () => { for (const key of keys) { this.drafts.delete(key); this.errors.delete(key); this.emptyUnits.delete(key); } },
+      cancel: () => { for (const key of keys()) { this.drafts.delete(key); this.errors.delete(key); this.emptyUnits.delete(key); } },
     };
   }
   hasNodeDraft(document: ScreenDocument, screen: string, node: ScreenNode): boolean { return this.drafts.has(draftKey(document, screen, node)); }

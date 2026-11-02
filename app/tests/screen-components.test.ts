@@ -89,6 +89,7 @@ function copyFixture() {
 
 test("accepted copy keeps the original draft through failed refresh; Reload verifies fresh IDs before transfer",async()=>{
   const h=copyFixture();
+  const capture=h.host.captureDrafts!;h.host.captureDrafts=(view,trackNewDrafts)=>{if(trackNewDrafts!==true)return [];return capture(view);};
   await h.controller.editUse();
   await assert.rejects(h.controller.makeCopy("help_guide"),/Copy created/);
   assert.equal(h.saved(),1);assert.equal(h.transferred(),0);assert.equal(h.controller.hasPendingCopy(),true);
@@ -97,6 +98,21 @@ test("accepted copy keeps the original draft through failed refresh; Reload veri
   assert.equal(h.accepted(),2);assert.equal(h.transferred(),1);assert.equal(h.controller.hasPendingCopy(),false);
   assert.deepEqual(h.events,["validate","prepare","commit:Latest pending values"]);
   assert.equal(h.calls.filter(c=>c.operation==="screens.componentCopy").length,1);
+});
+
+test("component Source completion cannot navigate after leaving or remounting Screens",async()=>{
+ for(const boundary of ["dispose","remount"]){
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+  const h=copyFixture(),host=document.createElement("section");document.body.append(host);let release!:(value:unknown)=>void,navigations=0;
+  const request=h.host.request,waiting=new Promise(resolve=>{release=resolve;});
+  h.host.source=()=>{navigations++;};h.host.request=async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>operation==="screens.inspect"?await waiting as T:request<T>(operation,payload);
+  try{
+   h.controller.renderScope(host,h.original);await new Promise(resolve=>setTimeout(resolve,0));
+   [...host.querySelectorAll("button")].find(button=>button.textContent==="Open Source")!.click();await new Promise(resolve=>setTimeout(resolve,0));
+   if(boundary==="dispose")h.controller.dispose();else h.controller.invalidate();
+   release(h.original.document);await new Promise(resolve=>setTimeout(resolve,0));assert.equal(navigations,0);
+  }finally{h.controller.dispose();await browser.happyDOM.abort();}
+ }
 });
 
 test("copied numeric properties may move in Source but changed property values cannot receive a draft",async()=>{

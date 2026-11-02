@@ -194,6 +194,96 @@ fn history(f: &Fixture, command: crate::scene::SceneCommand) {
 }
 
 #[test]
+fn help_dismissal_cannot_be_extracted_into_a_component_with_another_panel_target() {
+    let f = Fixture::new();
+    let catalog = f.service.screens_list(&f.project, &f.project_id).unwrap();
+    let created = f
+        .service
+        .screens_create(
+            &f.project,
+            &f.project_id,
+            super::CreateRequest {
+                name: "help_panel".into(),
+                expected_project_revision: catalog.project_revision,
+                expected_source_map_revision: catalog.source_map_revision,
+                expected_inventory_revision: catalog.inventory_revision,
+                starter: Some(f.starter()),
+            },
+        )
+        .unwrap();
+    let owner = &created.owned[0].screen;
+    let before = fs::read(f.root.join(&owner.path)).unwrap();
+    let map = fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap();
+    let document = f
+        .service
+        .screens_inspect(
+            &f.project,
+            InspectRequest {
+                path: owner.path.clone(),
+            },
+        )
+        .unwrap();
+    let binding = crate::metadata::ScreenTargetBinding {
+        screen_id: owner.id.clone(),
+        source_name: owner.name.clone(),
+    };
+    let target = f
+        .service
+        .screens_resolve_target(&f.project, &f.project_id, &binding, None)
+        .unwrap();
+    for group in document.screens[0]
+        .nodes
+        .iter()
+        .filter(|node| matches!(node.kind.as_str(), "frame" | "vbox"))
+    {
+        assert_eq!(
+            f.service
+                .prepare_extract_group(
+                    &f.project,
+                    &f.project_id,
+                    super::components::PrepareExtractRequest {
+                        screen_id: owner.id.clone(),
+                        node_id: group.id.clone().unwrap(),
+                        expected_revision: document.revision.clone(),
+                    }
+                )
+                .unwrap_err(),
+            SceneError::OpaqueBoundary
+        );
+        assert_eq!(
+            f.service
+                .screens_component_extract(
+                    &f.project,
+                    &f.project_id,
+                    super::components::ExtractRequest {
+                        target: binding.clone(),
+                        expected: target.revisions.clone(),
+                        expected_project_revision: created.project_revision.clone(),
+                        node_id: group.id.clone().unwrap(),
+                        name: "must_not_move_close".into(),
+                    }
+                )
+                .unwrap_err(),
+            SceneError::OpaqueBoundary
+        );
+        assert_eq!(fs::read(f.root.join(&owner.path)).unwrap(), before);
+        assert_eq!(
+            fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap(),
+            map
+        );
+    }
+    history(&f, crate::scene::SceneCommand::Undo);
+    assert!(
+        f.service
+            .screens_list(&f.project, &f.project_id)
+            .unwrap()
+            .owned
+            .is_empty(),
+        "Refusals add no history after the one Help create"
+    );
+}
+
+#[test]
 fn help_starter_nodes_edit_reorder_remove_and_reopen_with_qualified_dismissal_source() {
     use serde_json::json;
     let mut f = Fixture::new();

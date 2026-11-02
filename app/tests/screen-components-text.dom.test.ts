@@ -13,22 +13,29 @@ test("component text draft keeps its original target until verified transfer and
     return {document:{path:`game/ui/${id}.rpy`,revision,partial:false,screens:[{name:id,nodes:[node]}]},screenId:id,screenName:id,nodes:[node],selected:node,step:"design",busy:false};
   };
   const original=make("original","original-source"),fresh=make("copy","inspected-copy-source");let view=original;
+  for(const target of [original,fresh])target.selected.style={name:"body",error:null};
+  let styleRevision="before-copy",changedStyle=false;
   const commits:{command:CompositionCommand;revision:string}[]=[];let blocked=true,cancelled=0;
   const layout=new ScreenLayoutEditor({view:()=>undefined,commit:async()=>{},preview:()=>{},note:()=>{},select:()=>{}});
-  const text=new ScreenText({view:()=>view,current:()=>true,writeBlocked:()=>blocked,cancelComponentCopy:()=>{cancelled++;},request:async<T>()=>({assets:[]} as T),coordinate:task=>task(),inspect:async()=>view.document,
+  const text=new ScreenText({view:()=>view,styles:()=>({revision:styleRevision,definitions:[{name:"body",path:"game/ui/styles.rpy",kind:"text",values:{size:changedStyle?21:20},uses:[],error:null}]}),current:()=>true,writeBlocked:()=>blocked,cancelComponentCopy:()=>{cancelled++;},request:async<T>()=>({assets:[]} as T),coordinate:task=>task(),inspect:async()=>view.document,
     commit:async(command,base)=>{commits.push({command,revision:base.revision});},redraw:()=>render(),preview:()=>{},source:()=>{},saved:()=>{},layoutTools:()=>{},order:()=>{},note:()=>{}},layout);
   const card=document.createElement("section");document.body.append(card);
   function render(){text.unmount();card.replaceChildren();text.render(card,view);}
   const fill=(value:string)=>{const input=card.querySelector("textarea")!;input.value=value;input.dispatchEvent(new window.Event("input"));};
   try {
+    render();assert.equal(text.captureComponentDrafts(original).length,0);
+    const [participant]=text.captureComponentDrafts(original,true);assert.ok(participant);
+    styleRevision="after-copy";
+    fill("First typed after Copy failed");participant.cancel();assert.equal(text.hasNodeDraft("original","original"),false);
     render();fill("Pending");
     assert.equal(card.querySelector("textarea")!.readOnly,false,"Recovery still permits typing");
     assert.equal(card.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled,true);
-    const [participant]=text.captureComponentDrafts(original);assert.ok(participant);participant.validate();
+    participant.validate();
     assert.throws(()=>participant.prepare(fresh,new Map()),/copied/);
     assert.equal(text.hasNodeDraft("original","original"),true);
     fill("Latest pending input");
     card.querySelector("textarea")!.focus();card.querySelector("textarea")!.setSelectionRange(2,7);
+    changedStyle=true;assert.throws(()=>participant.prepare(fresh,new Map([["original","copy"]])),/Style/);changedStyle=false;
     const attach=participant.prepare(fresh,new Map([["original","copy"]]));
     assert.equal(text.hasNodeDraft("original","original"),true);assert.equal(text.hasNodeDraft("copy","copy"),false);
     attach();view=fresh;render();
