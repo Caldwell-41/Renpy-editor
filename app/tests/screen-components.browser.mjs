@@ -162,6 +162,8 @@ try {
       const acceptedRecovery=(await request('screens.list')).owned.find(owner=>owner.name===name);assert.ok(acceptedRecovery,'Cancel keeps the accepted Copy');
       assert.equal((await read(acceptedRecovery.path)).includes('First text entered during recovery'),false);
       assert.equal(await read(component.path),shared);
+      await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
+      await page.waitForFunction(id=>{const option=[...document.querySelectorAll('.screen-picker select option')].find(option=>option.value===JSON.stringify(['owned',id]));return option && !option.textContent.includes('unavailable');},acceptedRecovery.id);
       await select(about);await choose();await ui.locator(`[data-node-id="${secondUse.id}"]`).press('Enter');await ui.getByRole('button',{name:'Edit component',exact:true}).click();
       await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),acceptedRecovery.id);
       await history('undo');await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),component.id);
