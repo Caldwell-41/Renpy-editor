@@ -9,6 +9,11 @@ export interface CompositionView {
   document: ScreenDocument; screenId: string; screenName: string; nodes: ScreenNode[];
   selected: ScreenNode; step: string; busy: boolean;
 }
+export interface CopyDraftParticipant {
+  validate(): void;
+  prepare(freshView: CompositionView, nodeIds: ReadonlyMap<string, string>): () => void;
+  cancel(): void;
+}
 interface ImageSelection { assetId: string; expectedAssetSha256: string; replacementSha256?: string; width: number; height: number; layout?: LayoutEdits }
 export type CompositionCommand =
   | ({ type: "addImage"; parentId: string } & ImageSelection)

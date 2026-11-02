@@ -19,6 +19,10 @@ export interface ResolvedScreenTarget {
   revisions: ScreenRevisions; effects: ScreenEffects;
 }
 export interface ComponentChange { componentId: string; screenId: string; useId: string }
+export interface HelpStarter {
+  title: string; explanation: string; assetId: string; expectedAssetSha256: string;
+  width: number; height: number;
+}
 export interface ReviewedUse {
   screenId: string; componentId: string; nodeId: string; path: string; screenName: string;
   span: { start: number; end: number } | null; sourceRevision: string | null; resolved: boolean;
