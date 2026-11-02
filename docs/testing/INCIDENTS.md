@@ -887,5 +887,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   also puts its cache under its worktree-local output rather than shared dependencies.
 - **Verification:** real Git/shared-source approval checks pass, including binary
   newline and Unicode inputs; the exact approved A2 fingerprint remains identical.
-  The full browser gate remains pending. Its original zero-case timeout is failed.
+  The corrected current-source gate passes 1,216 rendering cases, 29 groups and
+  nine actual approval/source guards. Its original zero-case timeout and later
+  interaction failures remain failed, with their separate corrections retained.
 - **Evidence:** [A2 integration](../tasks/evidence/components-and-help-panel.md#a2-approval-integration-and-first-production-ui-wiring).

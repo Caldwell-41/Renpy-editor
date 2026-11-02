@@ -1,27 +1,35 @@
 # Current status
 
-## Owned components and Help panel selected
+## Owned components and Help panel implemented locally
 
-Kris approved implementation of [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41)
-and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
-`codex/components-and-help-panel`, based on `8a1fc419`. The coordinator owns shared
-contracts, integration and final review; two isolated workers own the ticket modules.
-Kris approved A2 (`refined-v1`, source `c0ded415`) explicitly on 2026-11-02 after
-distinguishing it from original A. The prototype owner is recording promotion
-without changing the approved reference. Production UI implementation is selected. Both ticket cores and typed component IPC are integrated. Independent
-core/preparation reviews have driven focused corrections. The macOS Help SDK
-campaign now passes all six normal-entry cases, including keyboard focus, Escape,
-outside click and dialogue persistence. Earlier failed campaigns remain retained;
-#44 owns cumulative SDK use. Component provenance corrections pass 17 cheap checks. Its fresh public producer
-and macOS SDK campaign pass all eight commands and four actual/literal image pairs
-at two sizes. Windows and approved UI/controller proof remain pending.
-The linked Windows inventory is complete; target work is blocked on the T3
-project-root binding and source delivery. The settings correction was denied by
-T3 capability enforcement. Final combined qualification remains pending.
-[Assignments and evidence](../tasks/evidence/components-and-help-panel.md) record
-file ownership and qualification scope. Neither ticket is accepted yet. The selected
-SDK limits and use are recorded separately in #41 and #44. No package, native editor or CI operation has
-started. Historical limits remain closed.
+Kris selected [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
+[L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
+`codex/components-and-help-panel`, from `8a1fc419`. Both isolated workers have handed
+back; the coordinator owns all files, integration and final review. Exact approved
+A2 `refined-v1` remains pinned to `c0ded415`, with approval evidence `eb1f8f61`.
+Screens owns appearance; Use in Story navigates to the existing Story editor without
+inserting a Beat.
+
+Both cores and the production controls are integrated. Full Standards/Spec reviews
+from the original base report zero remaining actionable findings after `ebcd374`.
+Corrections protect panel-local Close actions, review Style rebinding, retain fields
+first edited during Copy recovery, and reject late Source navigation. The actual
+main/component browser journey passes all ten groups; main Help/Story passes four.
+All 342 ordinary app tests pass. The corrected Design Lab gate passes 1,216 render
+cases, 29 groups and nine actual approval/source guards. Earlier failures remain
+retained. Final core qualification passes 552 cases, with 54 intentional ignores
+and three documented exclusions. One earlier migration-open failure remains unexplained; its
+focused/peer checks and the later full run pass. The failed binary remains retained,
+and recurrence now preserves the public fixture.
+
+The existing macOS component SDK proof passes eight commands/four exact image pairs;
+Help passes six normal-entry runtime cases. No fresh SDK/helper/native/package/CI
+operation is selected by the UI checks. Windows remains blocked on T3's project-root
+binding, private source delivery and Pillow availability. T3 denied the setting
+change; the coordinator has asked Kris to correct the client binding. Neither ticket
+is accepted or closed. Source remains local and unpushed.
+[Assignments, results and limits](../tasks/evidence/components-and-help-panel.md)
+retain exact candidates and failed attempts; #41/#44 own cumulative operation counts.
 
 ## Phase 3B audit corrections merged
 

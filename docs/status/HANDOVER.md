@@ -2,92 +2,102 @@
 
 ## Active components and Help panel implementation
 
-Continue [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
-[L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on coordinator branch
-`codex/components-and-help-panel`, initially based on
-`8a1fc41959d363e600d739868bb0b37e270e9bdd`. Kris approved the two-worker plan and
-starting implementation. [The assignment checkpoint](../tasks/evidence/components-and-help-panel.md)
-owns file boundaries, integration order and test seams. The coordinator owns shared
-files, status, integration and final review. Kris explicitly approved A2 on
-2026-11-02: after "okay, go ahead, i think i like A the best", the coordinator
-resolved A versus A2 and Kris chose "A2 — Focused workflow (latest version, shown first)".
-Selected screen `components-and-help-panel`, revision `refined-v1`, variant `refined`,
-source `c0ded415aba484633ac68981c48910afb82a959c`, fingerprint
+Continue selected [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41)
+and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
+`codex/components-and-help-panel`, original fixed review base
+`8a1fc41959d363e600d739868bb0b37e270e9bdd`. Both isolated workers are finished and
+clean; ownership of all files has returned to the coordinator. Do not start another
+worker or reset to a historical candidate. The primary checkout's unrelated audit,
+existing stashes and protected recovery below remain intact.
+
+Kris explicitly selected A2, Focused workflow, `components-and-help-panel` /
+`refined-v1` / `refined`, after disambiguating it from original A. Source is
+`c0ded415aba484633ac68981c48910afb82a959c`, fingerprint
 `1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08`.
-Approval/evidence `eb1f8f61` is integrated at `20c7fce8`; keep source/captures pinned.
-The required full browser gate failed before any cases. Root measured 19.7-second
-per-blob approval Git loading and corrected it to a 0.35-second batch read with the
-identical approved fingerprint; full gate requalification remains pending. Screens owns appearance and Use in Story hands off
-to the existing Story workspace for Show/Hide. UI workers resumed on the shared contracts and disjoint file boundaries. L09
-completed at `71938d4e`; all exclusive fixes and its real controller/core driver
-are integrated through `f8b0fe6`. Its 322 ordinary app tests, 12 focused and 36
-existing Scene cases pass; real creation/Show/Hide/history/stale/rename-reopen pass.
-Earlier failures were fixture/adapter/recent-record-ID mistakes, not core defects.
-L08 module checkpoints through `559e4d0` are integrated; it still owns its component
-module, component-specific text extensions and tests while completing actual
-controller/core qualification. Root component host wiring is in progress.
-Workers dispatched from `9b7748a`: L08 on `t3/reuse-owned-component` and L09 on
-`t3/help-panel-show-hide`. Both preparation checkpoints are integrated. Shared
-identity, target/effects, creation, marked-use, complete graph/Style and geometry
-admission hooks are integrated. Help/Story core through worker `25eda974` is
-integrated; coordinator candidate `fb2bed50` also fixes ordinary component-use
-removal in one source/map history transaction. Its 17 panel tests and five shared
-IPC journeys pass. L08's coherent `e5d01ca` core is now integrated through `560b3f2`.
-Its independent reviews found no Spec or hard Standards defects; the coordinator
-removed duplicated user traversal and added typed component IPC. All 21 component
-tests and the new actual IPC journey pass after those changes. Help preparation
-review found two P2 issues, now fixed with rejecting tests: failed binary retention
-and focus observed before a later pointer move. Twelve Python artifact checks,
-application typechecking and nine protocol tests pass. The first coordinator
-preparation's compiler-cache cleanup refusal remains a retained failure, with its
-accepted bytes and binary preserved; owned cleanup is corrected for the next freeze.
-Both workers have handed back their core and runtime preparation; their temporary
-file ownership has returned to the coordinator. Source-map schema 7 owns recognition
-and preserves legacy-6 source bytes and IDs. Production UI follows the approved A2 and written Screens/Story clarification;
-recorded promotion must finish before claiming an approved-layout match.
+Approval/evidence `eb1f8f61` is integrated; all 25 retained capture hashes still agree.
+The [handoff](../design/design-lab-components-and-help-panel/HANDOFF.md) preserves
+its written clarification: Screens edits appearance; Use in Story hands the selected
+Panel to existing Story Show/Hide controls without writing automatically. Copy
+accepts saved source first, then separately verifies the new owner/revision/child IDs
+before transferring drafts. Apply is the next ordinary history entry.
 
-The third macOS Help SDK campaign at `7e34c6a` passed all nine commands and all six
-normal-entry cases. Raw records independently verify Show across two advances,
-authored Hide, re-show/Close, outside click, default Escape and focused Return.
-Accepted source stayed byte-identical and owned cleanup completed. This is pinned
-macOS engine automation, not OS input or native editor evidence. #44 owns cumulative
-use; two earlier failed campaigns remain failed. Windows proof is pending.
+[Detailed evidence](../tasks/evidence/components-and-help-panel.md) owns assignments,
+implementation/review history, raw-result locations and failures. Source-map v7,
+canonical bounded component graph, shared revision/effect admission, typed IPC and
+Help/Story are integrated. Final worker UI `dd06cf8` is integrated as `1ea5231`.
+Coordinator correction `ebcd374` resolves full-review findings: extraction cannot
+move Panel-local Close/focus statements into components; component review includes
+Style binding changes; New screen validates associated name errors on completion;
+Copy tracks fields first edited during failed refresh in the existing draft owners;
+late Source reads cannot navigate after leaving/remounting Screens. Ordinary
+same-Panel editing/reorder remains qualified. A Help group containing Close is not
+extractable as-is; use a content-only group and keep Close local.
 
-Shared cancellation cleanup passes 13 actual-subprocess checks and exposes bounded
-partial output on errors; Help artifact checks cover interrupted binary retention.
-Component provenance candidate `127924bf` is integrated. Fresh Standards/Spec reviews
-found finalization masking, incomplete duration admission and missing original
-artifact hashing. The coordinator reproduced and fixed them; 17 cheap checks pass,
-including preservation of the original interruption and both original/retained
-binary identity. One reported CARGO_HOME mismatch was contradicted by the existing
-filter, with a focused check confirming the configured home reaches Cargo. The fresh public producer at `a97858c` passes exact fixture/admission and retains
-original/retained binary hashes. The first component macOS campaign passes all eight
-commands and four image pairs at two sizes, with zero pixel differences and correct
-shared/copy text. #41 owns its selected SDK ceiling and cumulative use. The first
-producer attempt refused before Cargo because the coordinator supplied an incorrect
-expected SHA; that failed receipt remains retained and consumed no SDK start.
-Component SDK evidence is under `.toolchains/component-sdk-macos-01`; no further
-Mac repeat is selected without changed or unresolved behavior. No package/native editor/CI operation
-has started. L08's coherent worker release suite
-passed 549 cases; L09's earlier ordinary release-core
-candidate `7aa82d1` passed 531 cases; the later comment correction and combined
-candidate still need final qualification. Initial sandbox failures and L08's cancelled
-old-base ordinary run remain failures/cancelled in linked evidence. The linked
-Windows host is reachable. The SUNDOWN read-only inventory completed: its actual
-Git root is the registered folder's `repo` child, at clean `039f22ce` with one
-preserved stash and clean existing worktrees. Rust/Cargo 1.90.0, Python 3.13.15
-and the official SDK/archive exist; that Python has no Pillow metadata. None of
-the coordinator candidate/base objects are present. No build, SDK or app ran.
-The attempted T3 project-root correction returned `capability_denied`: changing
-project settings requires a live full-access/default calling thread or full-access
-client. No setting or checkout changed. Windows qualification is blocked on that
-binding, private delivery of the unpushed source and resolving Pillow. Do not bypass
-the denied setting through another tool or alter the preserved checkout/stash.
-The inventory identity is retained locally in `.toolchains/windows-inventory-assignment.json`.
-No remote work is active or target execution assigned.
-Source commits remain local with no push or PR; #44 publishes current execution and
-SDK accounting. The primary checkout's unrelated audit,
-protected native recovery below and historical closed allowances remain intact.
+Full Standards/Spec reviews cover `8a1fc419...ebcd374` and report zero remaining
+violations/actionable findings. Subsequent production changes align scoped modal dimensions/colour, owner names,
+recovery warnings and the layout owner's field labels. The browser fixtures now load
+the actual bootstrap stylesheet list. Core test-only instrumentation preserves the
+public fixture when its initial open fails. The last production-source checkpoint
+is `0e5aff8c04d997c804051053f346c57b49808681`. Nothing is pushed, published or merged
+upstream.
+
+Portable results: all 342 ordinary app tests pass with the supported existing
+Python. The ten-group production main/component-to-core journey passes, including
+clean and layout-only Copy followed by new recovery text, Cancel/Reload, separate
+Apply/history/reopen, exact UTF-8 Source and delayed navigation refusal. The main
+Help journey passes four groups, including Cancel/Escape focus, a real typed image,
+honest empty-image blocking, one creation, an ordinary title edit and explicit Show/Hide. Scoped field/transfer
+checks and Python evidence checks pass. The full corrected Design Lab command
+passes 1,216 cases, 29 groups and nine actual approval/source guards. Its matrix
+renders current drafts; historical references remain guarded and pinned. Original
+zero-case timeout, later 488/1,088/1,216-case failures and focused diagnoses remain
+failed evidence, not replacement passes. Current production captures use all five
+bootstrap stylesheets and matched wide/compact viewports; earlier component captures
+omitted the scoped stylesheet and are not fidelity evidence.
+
+The combined ordinary release-core run before the review guard passed 551 cases.
+The corrected run then returned 551 pass/one failure/54 default ignores/three
+documented exclusions: an existing Apply-both fixture initially opened with
+`Scene(RecoveryRequired)`. Its cause is unproven; the identical focused test and all
+22 ordinary Lifecycle peers pass unchanged. The failed executable/logs are retained
+under `.toolchains/core-open-recovery-failure`. The subsequent full run at `1a6690c` passes 552 cases, with 54 default ignores,
+three documented exclusions and zero doctests in 514.05 seconds. All 606 listed names
+have one terminal result. `.toolchains/components-help-core-final-receipt.json` binds
+its logs and core tree. No recovery guard or exclusion was relaxed; the earlier
+failed run remains failed, with no proven cause. No core process remains active.
+
+Existing macOS SDK proof remains scoped: component campaign at `a97858c` passes eight
+commands and four actual/literal image pairs at two sizes, with zero pixel differences;
+Help campaign at `7e34c6a` passes all six normal-entry persistence/Hide/Close/outside/
+Escape/focus cases. The later extraction refusal and UI fixes change no generated
+Help source or supported rendering semantics. They are not new SDK executions or
+relabeled producers. #41/#44 own cumulative limits and use; no native editor,
+package or CI campaign has started. Browser/engine events are not OS/human input.
+
+Windows remains a concrete capability blocker. The linked SUNDOWN project still
+registers the parent folder; the Git root is its existing `repo` child. A fresh
+read-only settings check confirms the binding has not changed. T3 twice refused
+`project_update` with `capability_denied`; do not bypass it. Kris has been asked to
+correct the binding in the client. The preserved Windows checkout is clean at
+`039f22ce`, with its original stash/worktrees untouched. Rust/Cargo 1.90.0, Python
+3.13.15 and the official SDK/archive exist; that interpreter lacks Pillow metadata.
+Coordinator source is unpushed and absent there. Privately deliver the chosen
+candidate only after the corrected binding; inspect fresh remote state first.
+
+Matched-state visual inspection, typechecking and repository validation now pass
+within the detailed evidence's stated scope. The final browser receipts are
+`.toolchains/component-ui/final/result.json` and
+`.toolchains/help-ui/main-final/result.json`. Fourteen component captures cover
+matched wide/compact states with the actual scoped stylesheets. Existing production
+chrome and ordinary node editors remain; this is not a whole-screen pixel-match or
+native acceptance claim. Next, verify Kris's corrected Windows project binding,
+then privately deliver the branch and select remaining target checks. Required
+Windows/CI/native proof remains a gap; do not close either ticket prematurely.
+Remove the coordinator's temporary `app/node_modules` dependency symlink after
+checks without touching primary dependencies. Keep ignored evidence/binaries and
+the user-requested pinned prototype server intact. Historical closed allowances
+below stay closed. The retained historical sections exceed the size targets because
+they contain unique accepted-baseline and protected-recovery records.
 
 ## Audit correction merge and workspace closeout
 

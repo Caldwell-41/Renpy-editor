@@ -695,3 +695,137 @@ audit rejected that framing and was corrected without changing test output.
 The tested core tree is `283ed8cab74f9b59af09eb2d966d9209e46d25a8`, unchanged between
 `4f8c0cf` and subsequent UI-only checkpoints. Local log identities and the audit are
 in `.toolchains/components-help-core-receipt.json`; no SDK/native case was selected.
+
+
+## Final local integration, review and qualification, 2026-11-02
+
+Both isolated ticket workers are finished and clean. All ownership has returned to
+this coordinator. The implementation checkpoint is
+`0e5aff8c04d997c804051053f346c57b49808681` on
+`codex/components-and-help-panel`; the original full-review base remains
+`8a1fc41959d363e600d739868bb0b37e270e9bdd`. Later delivery documentation does not
+become the tested implementation candidate. Source and evidence remain local;
+there is no push, PR, upstream merge or ticket acceptance.
+
+### Review corrections
+
+Independent Standards and Spec reviews of the full base identified a Panel-local
+Close qualification leaking into component extraction, omitted Style binding in
+the affected-screen review, and inaccessible New screen name validation. Independent
+L08 UI review also reproduced fields first edited during an accepted Copy's failed
+refresh remaining attached to the original definition, and late Source inspection
+navigating after the author left Screens. Correction `ebcd374` addresses all five.
+Both full-review axes rechecked `8a1fc419...ebcd374` with zero remaining actionable
+findings. The coordinator reviewed the subsequent scoped fidelity/test changes.
+
+Extraction now refuses subtrees containing qualified Panel-local Hide/focus spans;
+ordinary same-Panel editing and reorder still work. Keep Close local and extract a
+content-only group. Components and the Help starter remain independent features.
+Existing draft owners track fields first edited during Copy recovery as well as
+previous drafts; no second draft store is added. Every participant prepares against
+verified copied identities before any transfer commits. Style binding uses the same
+changed-field review. Source navigation checks activity after asynchronous reads.
+
+### Terminal portable checks
+
+| Check | Candidate and terminal result |
+| --- | --- |
+| Ordinary app | `0e5aff8`: 342 passed, zero failed/skipped/cancelled, 36.656 seconds. Existing supported Python 3.12.14 is explicit. |
+| Ordinary release core | `1a6690c`: 552 passed, zero failed, 54 default SDK/specialist ignores, three documented exclusions, zero doctests, 514.05 seconds. All 606 listed selected names have exactly one terminal result. The core tree is unchanged through `0e5aff8`. |
+| Main component browser | `0e5aff8`: ten groups, zero page errors, owned cleanup complete. Real production main/Screens calls the ordinary real-core driver. |
+| Main Help/Story browser | `0e5aff8`: four groups, owned cleanup complete. Real typed image import, actual empty-image blocking, Cancel/Escape focus, atomic creation, ordinary title edit, explicit Show/Hide and reopen pass. |
+| Corrected full Design Lab | `c77d176`: 1,216 rendering cases, 29 groups, nine actual approval/source guards, zero errors, Chrome 156.0.8078.74. Later production fidelity changes do not change the Lab matrix. |
+| Final static checks | Typecheck and whitespace check pass; repository validation passes for 1,460 files. |
+
+The ordinary core command remains the documented release/locked/offline suite with
+only the three exclusions in AUTOMATED.md. It uses controlled loopback access and
+worktree-local outputs. Receipt `.toolchains/components-help-core-final-receipt.json`
+binds core tree `7a3ded6d5b14c2d067809283d44bc6b1a05ccf7d`, exact-name audit and logs.
+No SDK/helper/native test is silently selected by these ordinary checks.
+
+Component browser coverage includes exact-byte incomplete-graph refusal, actual
+extraction/placement, affected-screen Text/layout review and Cancel/Apply, clean and
+layout-only Copy followed by newly typed recovery text, verified Reload/Cancel,
+separate local Apply, both history entries, Redo/reopen, exact UTF-8 Source spans and
+late-navigation refusal. Source rename preserves missing stable intent rather than
+retargeting a same-name owner. Style/image/geometry reuse their existing owners and
+common admission/transfer adapters with focused tests; this browser run does not
+claim a full mutation campaign for every field type.
+
+The Lab matrix renders current-source samples explicitly as drafts, then restores
+actual approval records and checks matching-source rendering or changed-source
+refusal. All nine historical source guards refuse this changed checkout as expected.
+The exact approved A2 committed fingerprint and all 25 reference captures still
+match. This passing current-source gate does not replace the original failed
+promotion run or claim historical pixel fidelity, persistence or native acceptance.
+
+### Visual and functional findings
+
+Fourteen current component captures use matched 1,100/560-pixel viewports and all
+five actual bootstrap stylesheets. Inspection covers insertion, shared fields,
+changed-field review, Copy naming, refresh recovery and independent edits. Help
+captures cover wide/compact New screen, the passive asset preview and empty-image
+blocking. The new controls follow approved A2's hierarchy, scoped dialog dimensions,
+affected scope beside fields and recovery warning. Required Source/effect details
+remain available. Existing production chrome, ordinary Text/Style/layout/image
+editors and the honestly unavailable component canvas remain. This is a scoped
+visual finding, not a whole-screen pixel-match, OS-input or subjective acceptance
+claim. Earlier component captures missing the scoped stylesheet are not fidelity
+proof. The explicit Use in Story clarification still controls navigation wording.
+
+Functional proof comes from real authoring transactions and exact Source/history
+assertions above. Browser events are not physical/native input. Existing macOS SDK
+component output at `a97858c` and normal-entry Help behavior at `7e34c6a` retain their
+original frozen producers and scope. The later extraction refusal and UI fixes
+change neither generated Help bytes nor supported runtime rendering semantics.
+They introduce no fresh SDK execution or relabeled producer.
+
+### Retained failures and artifact identities
+
+One corrected broad core run returned 551 passes and one initial public-fixture open
+failure, `Scene(RecoveryRequired)`. Its cause remains unproven. The same focused test
+and all 22 ordinary Lifecycle peers passed unchanged. Before rebuilding, the failed
+executable was retained under `.toolchains/core-open-recovery-failure`, SHA-256
+`211fc1f1d4609568c25869bf5b03ba9a63b873a2386546af319dc3499a42cf6b`.
+A test-only correction now retains the public fixture if this open fails again.
+No production recovery protection or exclusion changed. The subsequent 552-pass
+full run is a separate result; it does not turn the failed run into a pass.
+
+Original zero-case Lab timeout and later 488/1,088/1,216-case failures remain
+separate failed reports. Their diagnosed fixes batch Git object reads, separate
+current drafts from historical approval guards, update the old Connect expectation,
+and wait for actual prototype focus restoration after Enter. No timeout or approved
+reference source changed. Worker/browser harness failures and Python environment
+failures remain in their original output directories; corrected runs do not erase
+them.
+
+| Local artifact | SHA-256 |
+| --- | --- |
+| `.toolchains/component-ui/final/result.json` | `b038e5e33effecc84d6e79592218454e6f04f0b5e1d2c810c01b2e59fe828163` |
+| `.toolchains/component-ui/final/receipts.json` | `17b2d1be35a0311316e78fbe1335f04b569c7b1ef2930eea05860970802ac6d7` |
+| `.toolchains/help-ui/main-final/result.json` | `6aaddf2d930501a3d533f4c4e5de1c8729bec411a05e7161ad91345ce3445e11` |
+| `.toolchains/help-ui/main-final/receipts.json` | `08bd6795f4b09cecf0416a08374ce4536919c7621343abdd96334c496f423535` |
+| `.toolchains/integrated-app-terminal.log` | `dbecb034f8a9d5b5bedc3699d54c4e783b25c156806dc1460d992e43d713cf77` |
+| `.toolchains/design-lab/report.json` | `6363b204c16f3e10cb1bfd7ea031ec5aeec93bb08176ba720edaade183a3cd10` |
+| `app/target/components-help-core-final-results.log` | `50fd99770541a26ee3eb9697b18acf6e1d797c6b396f99b22729050178871e52` |
+
+These ignored local artifacts contain only synthetic qualification content. They
+remain uncommitted; hashes permit checking the retained evidence at handoff.
+
+### Remaining target blocker and publication state
+
+Windows qualification is unexecuted. The linked SUNDOWN T3 project still binds the
+parent directory instead of its Git `repo` child. T3 refused coordinator setting
+updates with `capability_denied`; no other route bypasses that denial. Kris has been
+asked to correct the folder in the client. Private delivery of this unpushed branch
+and availability of Pillow in the existing supported Windows interpreter remain
+prerequisites. No Windows SDK launcher start is charged or reserved.
+
+Cumulative SDK use remains #41 8/24 confirmed and #44 17/27 confirmed, zero reserved.
+The leaves own those counts and limits. Windows target proof and the required
+milestone native/CI gates remain open; there is no additional campaign selected by
+this delivery record. Both tickets stay open. All worker ownership has returned to
+the coordinator. Preserve the unrelated primary audit, existing stashes, protected
+recovery, ignored evidence and pinned prototype server. Status-file size exceptions
+retain unique historical accepted-baseline/recovery records, not another active
+execution brief.
