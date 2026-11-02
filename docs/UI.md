@@ -874,6 +874,23 @@ owned selection names its original file and does not select a neighboring screen
 The dialog follows the approved modal pattern; the existing limited editor layout
 still has the previously recorded flow-v1 differences.
 
+The selected [L08/L09 implementation](tasks/evidence/components-and-help-panel.md)
+extends New screen with explicit Blank and Help starters. Help requires an available
+project UI image; no image keeps the draft and blocks Help creation. Its title,
+explanation, image and Close remain ordinary editable nodes after creation.
+Use in Story hands the selected owned Panel to the existing Story workspace without
+writing a Beat. The author explicitly adds Show screen or Hide screen there.
+Unavailable stable targets remain unresolved rather than following a reused name.
+
+Supported groups can become owned parameterless components and be inserted under
+an explicit parent in another screen. Shared Apply reviews only changed fields and
+lists affected screens. Make a copy accepts the saved definition first; pending
+edits move only after the new definition, revision and child IDs are verified.
+Apply is a second history entry. A failed refresh acknowledges the copy, retains
+input and blocks Apply until Reload copy succeeds. Cancel discards pending edits
+while preserving the accepted copy. These controls follow approved A2 `refined-v1`;
+the linked evidence owns remaining visual, target and acceptance limits.
+
 | Component hierarchy | Constraint canvas | Properties/source |
 | --- | --- | --- |
 | Frames, containers, text, images, buttons, bars, grids, viewports, components | Selected resolution/aspect preview with layout guides and interaction state | Layout/style/action fields; synchronized screen language; protected custom regions |
@@ -888,7 +905,8 @@ visible while Story continues; Hide dismisses it. Call waits for **Finish intera
 before continuing at the following Beat. Keep screen calls distinct from Scene calls;
 show the selected target and preserve draft/history behavior. Dynamic arguments and
 captured return values are deferred. [3B.2a](tasks/reference/phase-3b-screens.md#4-3b--supported-screen-designer)
-owns source, action-context and normal-play proof. This is planned, not implemented.
+owns source, action-context and normal-play proof. Show/Hide are implemented in the
+selected L09 branch and await its acceptance; Call/Finish remains later work.
 
 ### Animation/audio timeline
 

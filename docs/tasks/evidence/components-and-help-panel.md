@@ -630,3 +630,68 @@ recent records by stable project ID before reopening. It then passes the unchang
 header-rename assertions with old stable target intent protected. No Rust admission
 or source protection was changed for that failure. All failed attempts/captures
 remain in the worker's ignored handback artifacts.
+
+## Main integration and current-source Design Lab checks
+
+The coordinator integrated L08 through `af39a6d` at `b86a6b3`. Its Choose step
+retains the ordinary element tree; definition navigation redraws after unlocking.
+The real browser then exposed a host selector mismatch: the verified component
+document opened, but the Screen picker still selected its prior Panel. Root
+`69baa48` synchronizes both selections after refresh and guards step navigation
+during active operations. The focused workspace test first reproduced the mismatch
+and then passed. L08 retains its failed browser attempts and owns subsequent
+copy-recovery fixes until handback.
+
+The approved A2 starter capture has name, starter choice, project image and a
+passive summary. Root `63c037b` removes the extra precreation appearance fields
+from its earlier worker brief and uses the existing media service for the thumbnail.
+Title, explanation and dimensions remain ordinary editable nodes after creation.
+Existing text/layout/image/geometry owners provide pending-copy write blocking and
+Cancel delegation. No second transaction or draft owner is introduced.
+
+The new main Help/Story browser journey passes four groups against root `4f8c0cf`
+and its recorded harness bytes: actual typed image and passive preview, one accepted
+Help creation, a minimal ordinary title edit, Use in Story navigation without any
+Beat write, explicit stable-target Show/Hide, one-step history and project reopen.
+Its result is `.toolchains/help-ui/main-03/result.json`; captures cover dark wide
+and compact creation plus Story. The initial two runs failed harness expectations
+for lowercase picker text and the mixed-line-ending fixture's CRLF insertion,
+respectively. Their failed receipts remain separate; no production source was
+changed to satisfy them. Both cleanup paths exited the driver successfully.
+This is production main/controller/core evidence, not SDK or native input evidence.
+
+The first corrected full Lab run reached 488 cases before the actual historical
+Screens guard refused changed source. The gate had assumed every historical
+approval could render from one current checkout. Root `4f8c0cf` keeps the complete
+current-source matrix explicitly Draft using disposable browser-only metadata,
+then restores actual records and checks every current pointer and its matching-source
+rendering or changed-source refusal. Repository records and reference captures stay
+unchanged. Independent scoped Standards and Spec reviews each reported zero
+actionable findings. Historical visual comparison remains a separate requirement.
+
+The second full run reached 1,088 render cases and 20 check groups, then failed the
+inherited production-editor check's old `3 Connect` label. Its full terminal report
+is preserved as `.toolchains/design-lab-corrected-02-report.json`. Root `f24d001`
+updates that one current-source expectation to the approved Use in Story behavior:
+the callback-less legacy preview refuses navigation, retains its editor and writes
+no history. That focused A5 interaction check passes. The third full gate is running;
+neither prior full run is recorded as passing.
+
+The third full Lab run reached 1,216 render cases and 21 check groups before the
+compact prototype Copy/Escape assertion failed. A two-case keyboard/focus trace
+reproduces the cause: Enter closes the naming dialog, but its asynchronous close
+handler has not restored editor focus before the next Escape. Offline screenshots
+had supplied that delay implicitly. Waiting for the actual title-focus restoration
+makes the same Escape discard the draft and preserve the accepted copy. The full
+refined interaction check now passes without screenshot waits. Only its test helper
+changes; approved mock rendering/behavior source and all reference captures stay
+pinned. The failed full report and both diagnostic event traces are retained.
+
+The combined ordinary release-core suite passes 551 cases, with no failures,
+54 intentional default ignores, three documented exclusions and zero doctests in
+524.13 seconds. Its exact-name audit matches all 605 listed cases once. One transport
+diagnostic shares a line with the next terminal test token; the initial line-anchored
+audit rejected that framing and was corrected without changing test output.
+The tested core tree is `283ed8cab74f9b59af09eb2d966d9209e46d25a8`, unchanged between
+`4f8c0cf` and subsequent UI-only checkpoints. Local log identities and the audit are
+in `.toolchains/components-help-core-receipt.json`; no SDK/native case was selected.

@@ -5,7 +5,12 @@ export default async function refinedCheck({ page, open, capture = async () => {
   const dialog = () => page.locator("dialog[open]");
   const start = async (state = "shared", size = { width: 1100, height: 720 }) => { await page.setViewportSize(size); await open({ variant: "refined", state, theme: "dark" }); };
   async function source() { await click("source"); const text = await dialog().innerText(); await click("dialog-close"); return text; }
-  async function copyForHelp(name = "help_guide") { await click("copy"); await dialog().locator('[name="component-name"]').fill(name); await dialog().locator('[name="component-name"]').press("Enter"); }
+  async function copyForHelp(name = "help_guide") {
+    await click("copy"); await dialog().locator('[name="component-name"]').fill(name); await dialog().locator('[name="component-name"]').press("Enter");
+    // HTMLDialogElement.close restores focus asynchronously. A screenshot used
+    // to hide this boundary in offline review; the full gate has no capture wait.
+    await page.waitForFunction(() => !document.querySelector("dialog[open]") && document.activeElement?.getAttribute("name") === "title");
+  }
 
   await start("group"); await click("extract"); await dialog().locator('[name="component-name"]').press("Enter");
   await page.getByRole("heading", { name: "Route guide", exact: true }).waitFor();
