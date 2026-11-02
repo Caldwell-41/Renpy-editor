@@ -24,7 +24,7 @@ function input(name: string, value: string, type = "text") {
 /** Fields only. ScreensWorkspace owns the catalog snapshot and the accepted create. */
 export function buildPanelCreationForm(options: PanelCreationOptions) {
   const form = element("form", "screen-panels-form"); form.noValidate = true;
-  const name = input("screen-name", options.initialName ?? "help_panel"); name.ariaLabel = "Screen name"; name.maxLength = 64;
+  const name = input("screen-name", options.initialName ?? "help_panel"); name.setAttribute("aria-label", "Screen name"); name.maxLength = 64;
   name.autocomplete = "off"; name.spellcheck = false;
   const starters = element("fieldset", "screen-panels-starters"); starters.append(element("legend", "", "Start with"));
   for (const [value, title, copy] of [["help", "Help panel", "Title, explanation, image and Close. Edit them after creation."], ["blank", "Blank", "Start with an empty panel."]]) {
@@ -35,7 +35,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   const help = element("section", "screen-panels-help"); help.ariaLabel = "Help starter";
   const title = input("starter-title", "Help");
   const explanation = element("textarea"); explanation.name = "starter-explanation"; explanation.value = "Read this guide while the story continues."; explanation.rows = 2;
-  const images = options.assets.filter(asset => asset.kind === "uiImage" && asset.status === "available" && /^[a-f0-9]{64}$/.test(asset.sha256));
+  const images = options.assets.filter(asset => asset.kind === "uiImage" && asset.status === "available" && /^[a-f0-9]{64}$/.test(asset.sha256)).map(asset => ({ ...asset }));
   const image = element("select"); image.name = "starter-image";
   for (const asset of images) { const option = element("option", "", asset.displayName); option.value = asset.id; image.append(option); }
   const width = input("starter-width", "320", "number"), height = input("starter-height", "180", "number");

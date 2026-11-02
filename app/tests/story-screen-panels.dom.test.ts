@@ -85,3 +85,13 @@ test("existing screen Beats keep exact Source navigation, conservative effects a
   assert.equal(editor.isConnected, false); assert.equal(s.commands.length, 0);
   await s.close();
 });
+
+test("unresolved typed Beat stays protected even when a different Panel has the same source name", async () => {
+  const base = fixture(); const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [
+    { id: "unresolved", byteStart: 20, byteEnd: 47, protected: true, payload: { type: "showScreen", target: { screenId: "deleted-panel", sourceName: "help_panel" } } }, base.scenes[0]!.beats[1]!,
+  ] }] };
+  const s = setup({}, model); s.host.querySelector<HTMLButtonElement>('[data-beat-id="unresolved"] .beat-select')!.click(); await tick();
+  assert.equal(s.host.querySelector('[aria-label="Panel screen"]'), null); assert.equal(s.resolutions.length, 0); assert.equal(s.commands.length, 0);
+  assert.match(s.host.querySelector('[data-beat-id="unresolved"]')!.textContent!, /Protected source/);
+  await s.close();
+});

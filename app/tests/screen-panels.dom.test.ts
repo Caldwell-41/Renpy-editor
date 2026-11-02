@@ -42,3 +42,25 @@ test("empty image inventory keeps Help and its name blocked until the author exp
   assert.equal(create.disabled, false); submit(); await tick(); assert.deepEqual(calls, [{ name: "help_without_image" }]);
   view.dispose(); await browser.happyDOM.close();
 });
+
+test("refused Help creation retains fields, serializes submission and Escape cancels only the editor", async () => {
+  const browser = setup(); let reject!: (error: Error) => void, writes = 0, cancels = 0;
+  const view = buildPanelCreationForm({ assets: [image], create: async () => { writes++; await new Promise<void>((_, failure) => { reject = failure; }); }, cancel: () => { cancels++; } }); document.body.append(view.element);
+  const name = control<HTMLInputElement>("screen-name"); name.value = "guide_help";
+  control<HTMLInputElement>("starter-title").value = "Retained title";
+  submit(); submit(); assert.equal(writes, 1);
+  view.element.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); assert.equal(cancels, 0);
+  reject(Error("SCREEN_INVENTORY_CHANGED")); await tick();
+  assert.equal(name.value, "guide_help"); assert.equal(control<HTMLInputElement>("starter-title").value, "Retained title"); assert.equal(name.disabled, false);
+  assert.match(view.element.textContent!, /SCREEN_INVENTORY_CHANGED.*Input retained/); assert.equal(view.hasDraft(), true);
+  view.element.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); assert.equal(cancels, 1); assert.equal(writes, 1);
+  view.dispose(); await browser.happyDOM.close();
+});
+
+test("Help keeps the chosen asset hash from form admission instead of refreshing it during Apply", async () => {
+  const browser = setup(), supplied = { ...image }; const calls: PanelCreation[] = [];
+  const view = buildPanelCreationForm({ assets: [supplied], create: async value => { calls.push(value); }, cancel: () => {} }); document.body.append(view.element);
+  supplied.sha256 = "b".repeat(64); submit(); await tick();
+  assert.equal(calls[0]!.starter!.expectedAssetSha256, image.sha256);
+  view.dispose(); await browser.happyDOM.close();
+});
