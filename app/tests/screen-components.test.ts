@@ -190,3 +190,10 @@ test("a component with one direct use captures admission without another shared 
   assert.deepEqual(await h.controller.reviewChanges([{label:"Text",before:"Accepted",after:"Pending"}]),{...revisions,source:"component-source"});
   assert.equal(h.saved(),0);
 });
+
+test("Choose keeps the ordinary element tree available when a component use is selected",()=>{
+  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
+  const h=copyFixture();h.panel.step="choose";const card=document.createElement("section");
+  try {assert.equal(h.controller.renderUse(card,h.panel),false);assert.equal(card.childElementCount,0);}
+  finally {h.controller.dispose();void browser.happyDOM.abort();}
+});

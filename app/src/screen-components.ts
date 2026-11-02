@@ -172,7 +172,7 @@ export class ScreenComponents {
       if(fresh.screenId!==use.component.componentId || fresh.document.revision!==review.component.revisions.source || fresh.document.path!==review.component.path)
         throw Error("The component refresh changed. Your input is kept. Reload Source.");
       this.origin={view,target,componentId:use.component.componentId,useId:use.id};return fresh;
-    } finally {this.working=false;}
+    } finally {this.working=false;if(this.active())this.host.redraw();}
   }
   async makeCopy(name:string):Promise<ComponentChange> {
     if(this.working)throw Error("Finish the current operation first.");
@@ -347,7 +347,7 @@ export class ScreenComponents {
     tools.append(insert);host.append(tools);
   }
   renderUse(card:HTMLElement,view:CompositionView):boolean {
-    if(view.selected.kind!=="use")return false;
+    if(view.selected.kind!=="use" || view.step!=="design")return false;
     const id=view.selected.component?.componentId,owner=this.host.catalog()?.owned.find(owner=>owner.id===id);
     card.classList.add("screen-component-use");card.append(el("h2","",displayName(owner?.name??view.selected.literal??"Component")));
     if(!view.selected.component?.resolved || !owner?.resolved)card.append(el("p","screen-component-error","Can't find this component. Its saved reference is kept. Inspect Source to resolve it."));
