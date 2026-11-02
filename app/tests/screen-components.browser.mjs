@@ -140,7 +140,7 @@ try {
     await ui.locator('[data-text-cancel]').click();assert.equal((await read(independent.path)).includes('About only latest pending'),false);
     assert.equal((await request('screens.inspect',{path:about.path})).screens[0].nodes.find(node=>node.id===secondUse.id).component.componentId,independent.id);
     await field().fill('Independent through UI');await ui.locator('.screen-text-layout').evaluate(details=>{details.open=true;});await ui.getByLabel('Width',{exact:true}).fill('460');await ui.locator('[data-text-apply]').click();
-    await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true);
+    await page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true && !document.querySelector('.screen-text-state')?.textContent.includes('Applying'));
     assert.equal(await page.getByRole('dialog').count(),0,'A single-use independent edit applies directly');
     const copied=await read(independent.path);assert.ok(copied.includes('Independent through UI'));assert.equal(await read(component.path),shared);
     assert.equal((await request('screens.inspect',{path:help.path})).screens[0].nodes.find(node=>node.id===firstUse.id).component.componentId,component.id);
