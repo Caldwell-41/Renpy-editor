@@ -195,7 +195,7 @@ export class ScreensWorkspace {
     const picker = el("label", "screen-picker", "Screen "); picker.append(this.selection);
     const limits = el("p", "muted screen-limits", "Supported numeric layout and literal text edits preserve source-only regions. Styles, assets, actions and Story connections retain their Source controls.");
     for (const [id, label] of [["choose", "1  Choose"], ["design", "2  Design"], ["connect", "3  Use in Story"]]) {
-      this.rail.append(button(label!, () => { if (this.images.isSaving()) return; if (id === "connect") { void this.useInStory(); return; } this.step = id!; this.renderCard(); }));
+      this.rail.append(button(label!, () => { if (this.busy || this.components.isSaving() || this.components.hasPendingCopy() || this.images.isSaving() || this.text.isSaving()) { this.note("Finish the current operation before changing steps. Input retained.",true); return; } if (id === "connect") { void this.useInStory(); return; } this.step = id!; this.renderCard(); }));
     }
     this.rail.ariaLabel = "Screen building steps";
     const caption = el("div", "screen-canvas-tools");
@@ -255,6 +255,7 @@ export class ScreensWorkspace {
     const index = nodes.findIndex(node => node.id === (nodeId ?? owner.rootId));
     if (index < 0) throw Error("The selected element is unavailable after refresh. Input retained.");
     this.owned = owner; this.doc = document; this.screen = owner.name; this.selected = index; this.step = "design";
+    this.selection.value = JSON.stringify(["owned",owner.id]);
     const receipt = this.lastComponentReceipt && this.componentReceipts.get(this.lastComponentReceipt);
     if (receipt && receipt.afterMap === this.catalog?.sourceMapRevision && receipt.componentId === id) receipt.after = {screenId:id,nodeId:nodes[index]!.id!};
     this.rememberSelection(); this.render();
