@@ -165,6 +165,9 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24.19.0
+      - name: Install pinned image evidence dependency
+        shell: bash
+        run: '"$HARNESS_PYTHON" -m pip install Pillow==12.3.0'
       - name: Run all independent harness groups and print failed assertions
         shell: bash
         run: '"$HARNESS_PYTHON" app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/harness-regressions"'

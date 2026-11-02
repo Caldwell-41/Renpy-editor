@@ -1,41 +1,42 @@
 # Current status
 
-## Owned components and Help panel implemented locally
+## Components and Help panel ready for draft PR validation
 
 Kris selected [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
 [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
-`codex/components-and-help-panel`, from `8a1fc419`. Both isolated workers have handed
-back; the coordinator owns all files, integration and final review. Exact approved
-A2 `refined-v1` remains pinned to `c0ded415`, with approval evidence `eb1f8f61`.
-Screens owns appearance; Use in Story navigates to the existing Story editor without
-inserting a Beat.
+`codex/components-and-help-panel`, from `8a1fc419`. Both isolated workers are done;
+the coordinator owns integration and final review. Exact approved A2 `refined-v1`
+remains pinned to `c0ded415`, with approval evidence `eb1f8f61`. Screens edits
+appearance; Use in Story opens the existing Story editor without inserting a Beat.
 
-Both cores and the production controls are integrated. Full Standards/Spec reviews
-from the original base report zero remaining actionable findings after `ebcd374`.
-Corrections protect panel-local Close actions, review Style rebinding, retain fields
-first edited during Copy recovery, and reject late Source navigation. The actual
-main/component browser journey passes all ten groups; main Help/Story passes four.
-All 342 ordinary app tests pass. The corrected Design Lab gate passes 1,216 render
-cases, 29 groups and nine actual approval/source guards. Earlier failures remain
-retained. Final core qualification passes 552 cases, with 54 intentional ignores
-and three documented exclusions. One earlier migration-open failure remains unexplained; its
-focused/peer checks and the later full run pass. The failed binary remains retained,
-and recurrence now preserves the public fixture.
+Both features are implemented. Full Standards/Spec reviews through `ebcd374` have
+zero remaining actionable findings; later scoped fidelity/test changes are
+coordinator-reviewed. Real main/component-to-core and Help/Story journeys pass ten
+and four groups. All 342 app tests pass. The corrected Design Lab passes 1,216
+cases, 29 groups and nine approval/source guards. macOS ordinary core passes 552,
+with 54 intentional ignores and three documented exclusions. One earlier initial
+open failure remains unexplained and retained; its focused/peer checks and later
+full run pass without weakening recovery protections.
 
-The existing macOS component SDK proof passes eight commands/four exact image pairs;
-Help passes six normal-entry runtime cases. No fresh SDK/helper/native/package/CI
-operation is selected by the UI checks. Kris corrected Windows' T3 project-root binding. Private Taildrop delivery and
-verified object import are complete; an existing supported Python includes Pillow.
-The isolated Windows worktree is at corrected candidate `50188c2`. Its Python
-checks, typecheck, 342 app tests, 21 component tests, four panel tests and fresh
-producer admission pass. Earlier fixture/cache failures remain retained. Windows SDK qualification passes all eight component commands/four exact image
-pairs and nine Help commands/six normal-entry cases. Cumulative use is #41 16/24
-and #44 26/27, zero reserved. No further SDK run is selected. Coordinator artifact audit passes; the verified Windows evidence ZIP is retained
-locally. Required publication/CI and broader milestone native/human acceptance
-remain pending. Neither ticket is accepted or
-closed. Source remains local and unpushed.
-[Assignments, results and limits](../tasks/evidence/components-and-help-panel.md)
-retain exact candidates and failed attempts; #41/#44 own cumulative operation counts.
+Both targets have pinned-SDK proof. Each component campaign passes four exact image
+pairs at two sizes; Help passes six normal-entry persistence/dismissal/focus cases.
+Windows candidate `50188c2` also passes 21 component tests, four panel tests, fresh
+exporters and artifact admission. Earlier fixture/cache/BOM setup failures remain
+separate. All 120 returned evidence files verify locally. SDK consumption is #41
+16/24 and #44 26/27, zero reserved; no further campaign is selected.
+
+Kris authorized pushing the branch and opening a PR on 2026-11-03. The draft PR's
+executable validation plan selects automatic Repository quality and the existing
+Windows/macOS harness jobs. Their live run/attempt/state and PR URL belong to the
+owning GitHub leaves and PR receipts. Local prepublication checks pass all four
+harness groups, including 300 Python methods with three named host skips, plus
+reporter tests and actionlint. This CI selection adds no SDK/native/package run
+and does not waive later milestone package/native/human acceptance. Neither ticket
+is accepted or closed; merging or releasing is not authorized.
+
+[Assignments, evidence and limits](../tasks/evidence/components-and-help-panel.md)
+retain exact candidates, review corrections and failed attempts. Historical sections
+below preserve unique accepted-baseline and protected-recovery records.
 
 ## Phase 3B audit corrections merged
 

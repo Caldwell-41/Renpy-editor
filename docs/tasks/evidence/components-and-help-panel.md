@@ -1038,3 +1038,28 @@ its required PR validation selection and subsequent CI before integration; broad
 milestone native/human acceptance is separate. This local handoff is not a merge,
 release or whole-3B acceptance. No further SDK/helper/native/package/CI campaign is
 selected. Final SDK use remains #41 16/24 and #44 26/27, zero reserved.
+
+
+## Publication authorized and PR validation selected, 2026-11-03
+
+Kris answered Yes to pushing this branch and opening a PR for required CI. The
+coordinator will publish a draft against `codex/phase3b-screen-designer`, whose
+remote head still matches the original fixed base `8a1fc419`. No merge, release,
+issue acceptance or additional SDK/native/package campaign is selected.
+
+The branch validation plan now names `codex/components-and-help-panel` and requires
+both automatic Repository quality jobs plus the existing paired harness jobs
+`Harness regressions — windows-2025` and `Harness regressions — macos-26` from a
+`quality.yml` workflow_dispatch with `harness_regressions=true`. This inexpensive
+selection exercises all independent Python/rejection/retention groups on actual
+hosts. It reuses recorded SDK proof with its exact scope and does not waive later
+milestone package/native/human acceptance. Pinned Pillow 12.3.0 is installed in
+that CI job because image admission tests require it; no local tooling is installed.
+
+Before publication the existing Mac harness command passes all four groups. Python
+discovery runs 300 methods with only three named host exclusions; Q1 rejection,
+source audit and all ten retention cases pass. All 18 reporter tests pass, the
+actual plan parses with the expected four job names and actionlint passes. These
+checks start no SDK/helper/native editor/package. Logs/results remain ignored under
+`.toolchains/pr-harness-local-01` and `.toolchains/pr-ci-validation-tests.log`.
+The owning leaves/PR will record the actual publication and exact-head CI receipts.

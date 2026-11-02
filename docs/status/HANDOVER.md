@@ -1,140 +1,104 @@
 # Current outcome handover
 
-## Active components and Help panel implementation
+## Components and Help panel publication and CI
 
 Continue selected [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41)
 and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
-`codex/components-and-help-panel`, original fixed review base
-`8a1fc41959d363e600d739868bb0b37e270e9bdd`. Both isolated workers are finished and
-clean; ownership of all files has returned to the coordinator. Do not start another
-worker or reset to a historical candidate. The primary checkout's unrelated audit,
-existing stashes and protected recovery below remain intact.
+`codex/components-and-help-panel`. Original full-review base is
+`8a1fc41959d363e600d739868bb0b37e270e9bdd`; product core/UI is last changed at
+`0e5aff8c04d997c804051053f346c57b49808681`. Windows proof uses corrected candidate
+`50188c2d15aee8f7838037c9057bf42101a6965e`, whose two later Python test fixes do
+not change production. All implementation/Windows workers are finished. The
+coordinator owns every tracked file, integration, issues and final audit. Preserve
+the primary checkout's unrelated audit, stashes and protected recovery below.
 
-Kris explicitly selected A2, Focused workflow, `components-and-help-panel` /
-`refined-v1` / `refined`, after disambiguating it from original A. Source is
+Kris approved exact A2 `components-and-help-panel` / `refined-v1` / `refined`, source
 `c0ded415aba484633ac68981c48910afb82a959c`, fingerprint
 `1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08`.
-Approval/evidence `eb1f8f61` is integrated; all 25 retained capture hashes still agree.
-The [handoff](../design/design-lab-components-and-help-panel/HANDOFF.md) preserves
-its written clarification: Screens edits appearance; Use in Story hands the selected
-Panel to existing Story Show/Hide controls without writing automatically. Copy
-accepts saved source first, then separately verifies the new owner/revision/child IDs
-before transferring drafts. Apply is the next ordinary history entry.
+Approval/evidence `eb1f8f61` and all 25 reference captures remain intact. The
+[handoff](../design/design-lab-components-and-help-panel/HANDOFF.md) controls copy
+recovery and the written Use in Story clarification. Appearance stays in Screens;
+Story handoff writes no Beat. Copy accepts saved source first, verifies new owner,
+revision, topology and fresh child IDs, then transfers retained fields. Apply is a
+separate ordinary history entry. Cancel keeps the accepted copy and drops edits.
 
-[Detailed evidence](../tasks/evidence/components-and-help-panel.md) owns assignments,
-implementation/review history, raw-result locations and failures. Source-map v7,
-canonical bounded component graph, shared revision/effect admission, typed IPC and
-Help/Story are integrated. Final worker UI `dd06cf8` is integrated as `1ea5231`.
-Coordinator correction `ebcd374` resolves full-review findings: extraction cannot
-move Panel-local Close/focus statements into components; component review includes
-Style binding changes; New screen validates associated name errors on completion;
-Copy tracks fields first edited during failed refresh in the existing draft owners;
-late Source reads cannot navigate after leaving/remounting Screens. Ordinary
-same-Panel editing/reorder remains qualified. A Help group containing Close is not
-extractable as-is; use a content-only group and keep Close local.
+Source-map v7, the canonical bounded inclusion graph, conservative effects/revisions,
+typed component operations and Help/Story are integrated. Full independent Standards
+and Spec reviews cover `8a1fc419...ebcd374` with zero remaining actionable findings.
+That correction keeps Panel-local Close/focus spans out of extraction, reviews Style
+binding, validates associated New screen name errors, captures fields first edited
+during failed Copy refresh, and refuses late Source navigation after leaving Screens.
+Ordinary same-Panel edits/reorder remain qualified. Keep Close local and extract a
+content-only group. Subsequent scoped fidelity and test-portability changes are
+coordinator-reviewed. Components canvas expansion, Call/Finish and wider 3B remain
+outside these leaves.
 
-Full Standards/Spec reviews cover `8a1fc419...ebcd374` and report zero remaining
-violations/actionable findings. Subsequent production changes align scoped modal dimensions/colour, owner names,
-recovery warnings and the layout owner's field labels. The browser fixtures now load
-the actual bootstrap stylesheet list. Core test-only instrumentation preserves the
-public fixture when its initial open fails. The last production-source checkpoint
-is `0e5aff8c04d997c804051053f346c57b49808681`. Nothing is pushed, published or merged
-upstream.
+Portable proof: 342 app tests; ten real main/component-to-core groups and four main
+Help/Story groups; corrected Design Lab 1,216 cases/29 groups/nine actual source
+protection guards. The Lab matrix renders current drafts and refuses mismatched
+historical sources; it is not a historical pixel-match or native acceptance claim.
+Current component captures load all five production stylesheets at matched sizes.
+The scoped visual finding follows A2 while preserving ordinary production editors
+and honest canvas unavailability. All original Lab/browser/environment failures stay
+in [detailed evidence](../tasks/evidence/components-and-help-panel.md).
 
-Portable results: all 342 ordinary app tests pass with the supported existing
-Python. The ten-group production main/component-to-core journey passes, including
-clean and layout-only Copy followed by new recovery text, Cancel/Reload, separate
-Apply/history/reopen, exact UTF-8 Source and delayed navigation refusal. The main
-Help journey passes four groups, including Cancel/Escape focus, a real typed image,
-honest empty-image blocking, one creation, an ordinary title edit and explicit Show/Hide. Scoped field/transfer
-checks and Python evidence checks pass. The full corrected Design Lab command
-passes 1,216 cases, 29 groups and nine actual approval/source guards. Its matrix
-renders current drafts; historical references remain guarded and pinned. Original
-zero-case timeout, later 488/1,088/1,216-case failures and focused diagnoses remain
-failed evidence, not replacement passes. Current production captures use all five
-bootstrap stylesheets and matched wide/compact viewports; earlier component captures
-omitted the scoped stylesheet and are not fidelity evidence.
+macOS ordinary release core passes 552, with 54 default ignores, three documented
+exclusions and zero doctests, at `1a6690c`; that core tree is unchanged. Receipt
+`.toolchains/components-help-core-final-receipt.json` binds all 606 selected terminal
+names. One prior broad run returned 551 pass/one initial `Scene(RecoveryRequired)`
+open failure. Cause remains unproven; identical focused/22 peer checks and the later
+full run pass. Failed binary/logs remain in `.toolchains/core-open-recovery-failure`.
+Only test failure retention changed; no recovery protection or exclusion was relaxed.
 
-The combined ordinary release-core run before the review guard passed 551 cases.
-The corrected run then returned 551 pass/one failure/54 default ignores/three
-documented exclusions: an existing Apply-both fixture initially opened with
-`Scene(RecoveryRequired)`. Its cause is unproven; the identical focused test and all
-22 ordinary Lifecycle peers pass unchanged. The failed executable/logs are retained
-under `.toolchains/core-open-recovery-failure`. The subsequent full run at `1a6690c` passes 552 cases, with 54 default ignores,
-three documented exclusions and zero doctests in 514.05 seconds. All 606 listed names
-have one terminal result. `.toolchains/components-help-core-final-receipt.json` binds
-its logs and core tree. No recovery guard or exclusion was relaxed; the earlier
-failed run remains failed, with no proven cause. No core process remains active.
+Windows T3 binding is corrected. Private Taildrop delivery/import preserved its
+primary `039f22ce` and stash `5dfd4b9a`. The T3-managed isolated branch
+`codex/windows-components-help-qualification` stays clean at `50188c2`. Existing
+Python 3.12.14/Pillow 12.3.0, Node 24.19.0 and Rust/Cargo 1.90.0/MSVC are used.
+Its corrected preflight passes 27 Python checks normally and under `-O`, app 342,
+component 21, panel four, both exporters and Help's three actual-artifact checks.
+Earlier mocked launcher/Cargo-shim failures, wrong-cache refusal and BOM-reader
+zero-start refusal are retained separately. No runtime pass is inferred from input
+admission.
 
-Existing macOS SDK proof remains scoped: component campaign at `a97858c` passes eight
-commands and four actual/literal image pairs at two sizes, with zero pixel differences;
-Help campaign at `7e34c6a` passes all six normal-entry persistence/Hide/Close/outside/
-Escape/focus cases. The later extraction refusal and UI fixes change no generated
-Help source or supported rendering semantics. They are not new SDK executions or
-relabeled producers. #41/#44 own cumulative limits and use; no native editor,
-package or CI campaign has started. Browser/engine events are not OS/human input.
+Both targets' SDK slices pass at their recorded producers. Windows at `50188c2`
+uses eight component commands and nine Help commands, all PID-observed, exit 0,
+within unchanged bounds, no retry/uncertainty. Four actual/literal image pairs match
+exactly at both sizes under angle2. All six Help normal-entry cases and raw-log
+readmission pass. Cumulative SDK use is #41 16/24 and #44 26/27, zero reserved;
+no further SDK campaign is selected. Browser/engine events are not physical input.
 
-Kris corrected the Windows project binding on 2026-11-03. Fresh inventory confirms
-its Git root, clean primary `039f22ce`, preserved stash/worktrees and existing
-Rust/Cargo 1.90.0, Node 24.19.0 and runtime Python 3.12.14 with Pillow 12.3.0.
-Private Taildrop delivered the bundle; Windows verified its exact hash and imported
-`31bd8441fdd099ea27ee6f9a66153655a2e90a11` to the new, noncheckedout
-`codex/components-help-windows-source` ref. Primary checkout is unchanged.
-T3's dedicated worktree handoff created `codex/windows-components-help-qualification`.
-It is now clean at corrected candidate `50188c2d15aee8f7838037c9057bf42101a6965e`.
-The initial Python mock-launcher/Cargo-shim failures were corrected in two test files
-only. Windows now passes 27 Python checks normally and under `-O`, typecheck and
-342 app tests. A separate cache-copy error stopped core before compilation. The
-actual existing registry is now copied/verified locally; offline resolution, 21
-release component tests, four debug panel tests and both fresh exporters/admission
-pass. Help's three actual-artifact tests pass. Original failures remain retained.
-Preflight receipt SHA-256 is
-`a99defd83c1cf48523951321d65ec3fa54b07df5300a886c9661915738919485`.
-
-Windows SDK qualification now passes at `50188c2`: exactly eight component commands
-in 49.594 seconds and nine Help commands in 48.079 seconds. All 17 actual starts
-were PID-observed, exited 0 within unchanged limits and have no uncertain outcome.
-All four component actual/literal pairs match exactly under angle2 at both sizes;
-all six Help normal-entry cases pass and raw logs re-admit without extra execution.
-Actual cumulative use is #41 16/24 and #44 26/27, zero reserved. No further campaign
-is selected. The earlier SDK owner's BOM-reader refusal started zero commands;
-BOM-aware decoding preserves the original snapshot and values without changing the
-tracked qualifiers or admission rules. Owned SDK process/scratch/profile cleanup
-passes; primary/stash and earlier evidence stay unchanged.
-
-Combined receipt SHA-256 is
-`fcbf3a3744182fbc38dff89ca834564407770dcc9ffb4ea61837af943babc442`;
-the verified 120-file inventory is
-`4e8951919fe9c47112fa2d4b57f2657e46815971c0ce418528fdf6dd9f7ba750`.
-Both remain in the Windows worktree's ignored
-`app/target/windows-sdk-50188c2-20261103-owner2`. The independent data audit and private return are complete. The coordinator has
-verified all 120 inventory hashes locally, safely preserved all 121 ZIP entries,
-re-admitted four image pairs and six raw Help logs with the existing validators,
-and inspected output screenshots. This adds zero SDK starts. The returned ZIP is
+The Windows receipt is
+`fcbf3a3744182fbc38dff89ca834564407770dcc9ffb4ea61837af943babc442`; its 120-file
+inventory is `4e8951919fe9c47112fa2d4b57f2657e46815971c0ce418528fdf6dd9f7ba750`.
+The coordinator verifies all hashes, safe archive entries, four image pairs and six
+Help raw logs locally, with zero new SDK starts. Returned ZIP is
 `.toolchains/windows-return/windows-components-help-50188c2-evidence.zip`,
 26,858,829 bytes, SHA-256
 `f4e1f965e59f8f6dfbb1d74d9f0a1ccbecef1a13c93df42708cbf0c76e035707`.
-`.toolchains/windows-return/coordinator-audit.json` records the local audit. All
-Windows delegates are finished; no wait, running SDK or owned test process remains.
-All tracked ownership remains with the coordinator. No helper/native editor/package
-or CI proof is established by these browser/engine results.
+Audit receipt is `.toolchains/windows-return/coordinator-audit.json`. SDK process,
+extraction/profile cleanup passes; retained ordinary test scratch remains recorded.
+No owned SDK/test process remains. Keep ignored artifacts and the pinned prototype
+server; the temporary coordinator dependency symlink is removed.
 
-Matched-state visual inspection, typechecking and repository validation now pass
-within the detailed evidence's stated scope. The final browser receipts are
-`.toolchains/component-ui/final/result.json` and
-`.toolchains/help-ui/main-final/result.json`. Fourteen component captures cover
-matched wide/compact states with the actual scoped stylesheets. Existing production
-chrome and ordinary node editors remain; this is not a whole-screen pixel-match or
-native acceptance claim. Local implementation, connected-target proof and final evidence review are ready.
-Next, obtain source-publication authorization before PR/required CI. The local PR
-description is prepared under `.toolchains/delivery/pr-body.md`; do not push or
-open a PR until authorized. Broader milestone native/human requirements remain separate. Required
-Windows/CI/native proof remains a gap; do not close either ticket prematurely.
-Remove the coordinator's temporary `app/node_modules` dependency symlink after
-checks without touching primary dependencies. Keep ignored evidence/binaries and
-the user-requested pinned prototype server intact. Historical closed allowances
-below stay closed. The retained historical sections exceed the size targets because
-they contain unique accepted-baseline and protected-recovery records.
+Kris explicitly authorized source push and PR creation on 2026-11-03. Publish a
+DRAFT PR against `codex/phase3b-screen-designer`; do not merge or release. The local
+body is `.toolchains/delivery/pr-body.md`. `.github/validation-plan.json` selects
+both automatic Repository quality jobs plus `quality.yml` workflow_dispatch jobs
+`Harness regressions — windows-2025` and `Harness regressions — macos-26`.
+The paired selector is `harness_regressions=true`, all other selectors false. It
+runs cheap harness checks only, no SDK/helper/native/package. CI installs the pinned
+Pillow dependency required by image evidence tests. Local prepublication proof passes
+all four groups, 300 Python methods with three named host skips, 18 reporter tests
+and actionlint. Do not substitute this for milestone package/native/human acceptance.
+
+The owning leaves and draft PR own the publication URL and live exact-head CI
+run/attempt/state. After dispatch, audit both automatic and selected manual jobs and
+all executed steps/artifacts. Required failures/skips are not passes. Register the
+T3 PR watch and yield instead of polling; resolve old comments first. The watch wakes
+this coordinator. On completion, audit the final head and update issue/PR receipts;
+keep both leaves open pending acceptance. No additional costly operation or broader
+milestone scope is selected. Historical sections below exceed size targets to
+preserve unique accepted-baseline/protected-recovery state.
 
 ## Audit correction merge and workspace closeout
 
