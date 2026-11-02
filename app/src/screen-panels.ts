@@ -54,7 +54,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   form.append(field("Screen name", name), starters, element("p", "screen-panels-purpose", "Panel · stays open while dialogue continues."), help, error, row);
   let disposed = false, busy = false, dirty = false, composing = false;
   const active = () => !disposed && options.current?.() !== false;
-  const isHelp = () => form.querySelector<HTMLInputElement>('[name="starter"]:checked')?.value === "help";
+  const isHelp = () => [...starters.querySelectorAll<HTMLInputElement>("input")].find(control => control.checked)?.value === "help";
   const refresh = () => { help.hidden = !isHelp(); create.disabled = busy || (isHelp() && !images.length); };
   form.addEventListener("change", () => { dirty = true; refresh(); });
   form.addEventListener("input", () => { dirty = true; });
