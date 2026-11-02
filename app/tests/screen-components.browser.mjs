@@ -96,7 +96,8 @@ try {
     await server.listen();browser=await chromium.launch({channel:'chrome',headless:true});
     page=await browser.newPage({viewport:{width:1100,height:800},colorScheme:'dark'});page.setDefaultTimeout(10000);
     page.on('pageerror',error=>errors.push(error.message));await page.exposeBinding('componentRpc',(_,message)=>rpc(message));
-    await page.route('**/component-controller',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));
+    const styles=['styles','ui-refresh','screen-ui','screen-panels','screen-components'];
+    await page.route('**/component-controller',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8">'+styles.map(name=>`<link rel="stylesheet" href="/src/${name}.css">`).join('')+'<div id="app"></div>'}));
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/component-controller`,{waitUntil:'domcontentloaded'});
     await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');startApplication((operation,payload)=>window.componentRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}));});
     await page.locator('.recent-open').click();await page.getByRole('button',{name:'Screens',exact:true}).click();

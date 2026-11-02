@@ -8,7 +8,7 @@
 .screen-component-error { color:var(--status-error);font-size:12px;line-height:1.6;white-space:pre-wrap; }
 .screen-component-error:empty { display:none; }
 .screen-component-scope [hidden] { display:none!important; }
-.screen-component-dialog { width:min(680px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;padding:22px;border:1px solid var(--border-normal);border-radius:0;background:var(--surface-panel);color:var(--text-primary);font:12px var(--font-ui); }
+.screen-component-dialog { width:min(570px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;box-sizing:border-box;padding:20px;border:1px solid var(--border-strong);border-radius:0;background:var(--surface-panel);color:var(--text-primary);box-shadow:var(--shadow-preview);font:12px var(--font-ui); }
 .screen-component-dialog::backdrop { background:#0009; }
 .screen-component-dialog h2 { margin:0 0 14px;font-size:18px;line-height:1.4; }
 .screen-component-dialog p { line-height:1.6; }

@@ -3,7 +3,7 @@ import { buildPanelCreationForm, type PanelCreation } from "./screen-panels.ts";
 import { ScreenImages, type UiImageAsset } from "./screen-images.ts";
 import { ScreenText, type TextProperties, type StyleCatalog } from "./screen-text.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
-import { ScreenLayoutEditor, type NumericLayout, type LayoutEdits } from "./screen-layout.ts";
+import { ScreenLayoutEditor, layoutFieldLabels, type NumericLayout, type LayoutEdits } from "./screen-layout.ts";
 import { icon } from "./icons.ts";
 import { ScreenComposer, screenNodeKey, type CompositionCommand, type CompositionView, type CopyDraftParticipant } from "./screen-composition.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
@@ -322,7 +322,7 @@ export class ScreensWorkspace {
     } finally { this.busy = false; }
   }
   private layoutChanges(node: ScreenNode, edits: LayoutEdits): ComponentFieldChange[] {
-    return Object.entries(edits).map(([key,value]) => ({label:key.replaceAll("_"," "),before:node.numericLayout?.values[key] ? `${node.numericLayout.values[key]!.value} ${node.numericLayout.values[key]!.unit}` : "Inherited",after:value ? `${value.value} ${value.unit}` : "Inherited"}));
+    return Object.entries(edits).map(([key,value]) => ({label:layoutFieldLabels[key] ?? key.replaceAll("_"," "),before:node.numericLayout?.values[key] ? `${node.numericLayout.values[key]!.value} ${node.numericLayout.values[key]!.unit}` : "Inherited",after:value ? `${value.value} ${value.unit}` : "Inherited"}));
   }
   private compositionChanges(command: CompositionCommand): ComponentFieldChange[] {
     const node = "nodeId" in command ? this.nodes().find(node => node.id === command.nodeId) : undefined;

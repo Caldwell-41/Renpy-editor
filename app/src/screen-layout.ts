@@ -29,6 +29,7 @@ const labels: Record<string, string> = {
   xsize: "Width", ysize: "Height", xminimum: "Minimum width", xmaximum: "Maximum width", yminimum: "Minimum height", ymaximum: "Maximum height",
   left_padding: "Left padding", right_padding: "Right padding", top_padding: "Top padding", bottom_padding: "Bottom padding", spacing: "Spacing",
 };
+export { labels as layoutFieldLabels };
 const coordinate = (key: string) => ["xpos", "ypos", "xanchor", "yanchor"].includes(key);
 const numericSpelling = (key: string, text: string) => (["columns", "rows"].includes(key) ? /^\d+$/ : /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/).test(text.trim());
 const nodeKey = (node: ScreenNode) => node.id ?? JSON.stringify([node.kind, node.literal, node.span.start]);

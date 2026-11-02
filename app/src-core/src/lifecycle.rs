@@ -2650,13 +2650,21 @@ mod tests {
         for change in [
             "draft", "external", "combined", "base", "missing", "session", "success",
         ] {
-            let temp = tempfile::tempdir().unwrap();
+            let mut temp = tempfile::tempdir().unwrap();
             let root = temp.path().join("review-project");
             make_openable_project(&root, "Review binding");
             let path = "game/custom.rpy";
             fs::write(root.join(path), b"alpha beta gamma\n").unwrap();
             let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
-            let project = service.open_path(&root).unwrap();
+            let project = service.open_path(&root).unwrap_or_else(|error| {
+                // Keep this public fixture's migration journal if opening fails;
+                // deleting it would lose the only filesystem evidence of recovery.
+                temp.disable_cleanup(true);
+                panic!(
+                    "initial open for {change} failed: {error:?}; fixture retained at {}",
+                    temp.path().display()
+                );
+            });
             let mut session = project.session_id.clone();
             let opened = closeout_ipc(
                 &mut service,
