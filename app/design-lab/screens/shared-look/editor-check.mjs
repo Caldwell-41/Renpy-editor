@@ -48,7 +48,11 @@ export default async function check({ page, open }) {
   result = await state(); assert.notEqual(result.accepted.uses["Help/body"], result.accepted.uses["About/body"]); assert.equal(result.accepted.looks.body.values.color, "#f1e9d6"); assert.equal(result.accepted.looks[result.accepted.uses["Help/body"]].values.color, "#e8a87c");
   await field("size").fill("40"); await cancel().click(); assert.equal(await field("size").inputValue(), "32"); assert.equal((await state()).history, 2);
   await page.getByRole("button", { name: "1 Choose", exact: true }).click(); await body().dblclick(); assert.match(await page.locator(".sle-look").innerText(), /Editing this element only/);
-  await page.getByRole("button", { name: "3 Connect", exact: true }).click(); assert.equal(await page.locator(".sle-look").count(), 0);
+  // This legacy component preview supplies no Panel/Story callback. The current
+  // app must keep its appearance editor and refuse the handoff without writing.
+  await page.getByRole("button", { name: "3 Use in Story", exact: true }).click();
+  await page.getByText("Choose an available Panel screen to use in Story.", { exact: true }).waitFor();
+  assert.equal(await page.locator(".sle-look").count(), 1); assert.equal((await state()).history, 2);
   await page.getByRole("button", { name: "2 Design", exact: true }).click(); await page.locator(".sle-look").waitFor();
   await design(); await field("text").fill("Only the Help content changes."); await apply().click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1);
   assert.equal(await page.locator(".sle-review").count(), 0); result = await state(); assert.match(result.accepted.documents[1].screens[0].nodes.find(n => n.id === "body").literal, /long way home/);
@@ -111,5 +115,5 @@ export default async function check({ page, open }) {
   await page.locator(".screen-tools").getByRole("button", { name: "Undo", exact: true }).click();
   await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1);
   assert.match(await page.locator(".sle-look").innerText(), /14 elements across 8 screens/);
-  console.log("A5 existing-editor journey passes: sidebar, Choose/Design/Connect, existing fields, shared Apply, independent copy, review retention, history and refusal.");
+  console.log("A5 existing-editor journey passes: sidebar, Choose/Design, unavailable Story handoff, existing fields, shared Apply, independent copy, review retention, history and refusal.");
 }
