@@ -7,6 +7,7 @@ import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {driverProcess} from './phase2-driver-process.mjs';
+import {productionStylesheetLinks} from './production-stylesheets.mjs';
 
 const output=resolve(process.env.OWNED_SCREEN_OUTPUT??'../.toolchains/owned-screen/browser-01');
 await mkdir(output,{recursive:true});
@@ -24,7 +25,8 @@ try {
   assert.equal((await child.next()).ready,true);await server.listen();
   browser=await chromium.launch({channel:'chrome',headless:true});page=await browser.newPage({viewport:{width:1100,height:720}});
   page.on('pageerror',error=>errors.push(error.message));await page.exposeBinding('ownedRpc',(_,request)=>rpc(request));
-  await page.route('**/owned-driver',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><link rel="stylesheet" href="/src/screen-ui.css"><div id="app"></div>'}));
+  const styles=await productionStylesheetLinks();
+  await page.route('**/owned-driver',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8">'+styles+'<div id="app"></div>'}));
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/owned-driver`);
   await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');startApplication(async(operation,payload)=>window.ownedRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}));});
   await page.locator('.recent-open').click();await page.getByRole('button',{name:'Screens',exact:true}).click();

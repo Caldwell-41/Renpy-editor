@@ -8,6 +8,7 @@ import {join,resolve} from 'node:path';
 import {mkdir,writeFile,access,readFile} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {driverProcess} from './phase2-driver-process.mjs';
+import {productionStylesheetLinks} from './production-stylesheets.mjs';
 
 const output=resolve(process.env.PANEL_MAIN_OUTPUT??'../.toolchains/help-ui/main-01');
 await mkdir(output,{recursive:false});
@@ -33,21 +34,27 @@ const sourceApplyCount=()=>receipts.filter(r=>r.request.operation==='scene.apply
 try{
   assert.equal((await child.next()).ready,true);
   const recent=(await call('project.listRecent'))[0];await call('project.openRecent',{recentId:recent.id});
-  const choice=await child.request({driver:'choosePanelImage'});
-  const assets=await call('asset.import',{authorityId:choice.authorityId,kind:'uiImage',technicalName:'panel_emblem',displayName:'Panel emblem'});
-  assert(assets.assets.some(asset=>asset.kind==='uiImage'&&asset.status==='available'));
   const original=await call('scene.list'),entry=original.scenes.find(scene=>scene.id===original.lastOpen.sceneId);
   const storyBefore=await read(entry.sourcePath);await call('project.close');session=undefined;
   server=await createServer({root:resolve('.'),cacheDir:join(output,'vite-cache'),logLevel:'error',server:{host:'127.0.0.1',port:0}});await server.listen();
   browser=await chromium.launch({channel:'chrome',headless:true});page=await browser.newPage({viewport:{width:1100,height:720},colorScheme:'dark'});
   page.on('pageerror',error=>errors.push(error.message));await page.exposeBinding('helpRpc',(_,request)=>rpc(request));
-  const styles=['styles','ui-refresh','screen-ui','screen-panels','screen-components'];
-  await page.route('**/help-controller',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8">'+styles.map(name=>`<link rel="stylesheet" href="/src/${name}.css">`).join('')+'<div id="app"></div>'}));
+  const styles=await productionStylesheetLinks();
+  await page.route('**/help-controller',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8">'+styles+'<div id="app"></div>'}));
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/help-controller`);
   await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');startApplication((operation,payload)=>window.helpRpc({protocolVersion:1,requestId:crypto.randomUUID(),operation,payload}));});
   await page.locator('.recent-open').click();await page.getByRole('button',{name:'Screens',exact:true}).click();
   const ui=page.locator('.screens-editor');await ui.getByRole('button',{name:'New screen',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'New screen',exact:true});
+  await dialog.getByText(/Add a UI image first/).waitFor();assert.equal(await dialog.getByRole('button',{name:'Create screen',exact:true}).isDisabled(),true);
+  for(const [width,height] of [[1100,720],[560,640]]){await page.setViewportSize({width,height});await page.screenshot({path:join(output,`no-images-dark-${width}.png`)});}
+  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();await page.setViewportSize({width:1100,height:720});
+  const choice=await child.request({driver:'choosePanelImage'});
+  const assets=await call('asset.import',{authorityId:choice.authorityId,kind:'uiImage',technicalName:'panel_emblem',displayName:'Panel emblem'});
+  assert(assets.assets.some(asset=>asset.kind==='uiImage'&&asset.status==='available'));
+  const previous=await ui.locator('.screen-card > *').first().elementHandle();await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
+  await page.waitForFunction(element=>!element.isConnected,previous);
+  await ui.getByRole('button',{name:'New screen',exact:true}).click();
   for(const action of ['Cancel','Escape']){
     const name=dialog.getByLabel('Screen name',{exact:true});await name.fill('cancelled_help');
     if(action==='Cancel')await dialog.getByRole('button',{name:'Cancel',exact:true}).click();else await name.press('Escape');

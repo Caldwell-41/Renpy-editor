@@ -211,6 +211,7 @@ export class ScreenText {
     };
     const componentScope=el("div"),component=this.host.componentScope?.(componentScope,view)??false;
     if(component) {
+      heading.querySelector("h2")!.textContent=view.screenName.replaceAll("_"," ").replace(/^./,letter=>letter.toUpperCase());
       body.append(componentScope);
       if(this.host.cancelComponentCopy)componentScope.querySelectorAll<HTMLElement>("[data-component-cancel]").forEach(control=>{control.hidden=true;});
     }

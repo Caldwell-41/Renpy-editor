@@ -280,7 +280,7 @@ export class ScreenComponents {
       const changes=changedFields.filter(change=>change.before!==change.after);
       if(!changes.length || review.affectedScreens.length<=1 && review.uses.filter(use=>use.componentId===base.screenId).length<=1)return review.component.revisions;
       const dialog=el("dialog","screen-component-dialog");dialog.ariaLabel="Review component changes";
-      dialog.append(el("h2","","Review changes"),el("p","",`Update ${displayName(base.screenName)} on ${review.affectedScreens.length} ${review.affectedScreens.length===1?"screen":"screens"}.`));
+      dialog.append(el("h2","","Review affected screens"),el("p","",`Update ${displayName(base.screenName)} on ${review.affectedScreens.length} ${review.affectedScreens.length===1?"screen":"screens"}.`));
       this.affected(dialog,review);
       const table=el("table","screen-component-changes"),head=el("thead"),heading=el("tr");
       for(const label of ["Field","Current","After Apply"])heading.append(el("th","",label));head.append(heading);table.append(head);
@@ -371,6 +371,7 @@ export class ScreenComponents {
     if(!id)return false;
     const section=el("section","screen-component-scope");host.append(section);
     if(this.pendingCopy) {
+      section.classList.add("screen-component-recovery");section.role="alert";
       section.append(el("strong","","Copy created. Your edits are still unsaved."),el("p","","Reload the copy to continue. Other screens keep their saved content."));
       const actions=el("div","screen-component-actions"),cancel=action("Cancel",()=>this.cancelCopy());cancel.dataset.componentCancel="";
       actions.append(action("Reload copy",()=>this.run(()=>this.reloadCopy()),true),cancel);section.append(actions);return true;

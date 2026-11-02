@@ -7,6 +7,9 @@
 .screen-component-use>.button { margin-bottom:12px; }
 .screen-component-error { color:var(--status-error);font-size:12px;line-height:1.6;white-space:pre-wrap; }
 .screen-component-error:empty { display:none; }
+.screen-component-recovery { border-left:2px solid var(--status-warning);border-bottom:0;padding:8px 10px;color:var(--status-warning); }
+.screen-component-recovery .button { border:0;background:transparent;color:inherit;padding:2px 0;text-decoration:underline; }
+[data-component-scope=true] .screen-text-heading h2 { min-width:0;overflow-wrap:anywhere; }
 .screen-component-scope [hidden] { display:none!important; }
 .screen-component-dialog { width:min(570px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;box-sizing:border-box;padding:20px;border:1px solid var(--border-strong);border-radius:0;background:var(--surface-panel);color:var(--text-primary);box-shadow:var(--shadow-preview);font:12px var(--font-ui); }
 .screen-component-dialog::backdrop { background:#0009; }
