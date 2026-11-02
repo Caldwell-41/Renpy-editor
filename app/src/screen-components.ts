@@ -37,10 +37,13 @@ function copiedNodes(before:CompositionView,after:CompositionView):ReadonlyMap<s
     throw Error("The copied child identities are unavailable or ambiguous. Your edits are kept.");
   const shape=(view:CompositionView,node:ScreenNode)=>{
     const {id:_id,span:_span,parentStart,...values}=node;
+    const properties=node.properties.map(property=>{
+      const {span:_sourceSpan,...semantic}=property as typeof property & {span?:unknown};return semantic;
+    });
     if(node.protected.length)throw Error("The copied definition contains Source-only content. Your edits are kept.");
     const parent=parentStart===null ? null : view.nodes.findIndex(node=>node.span.start===parentStart);
     if(parent===-1)throw Error("The copied parent is unavailable. Your edits are kept.");
-    return JSON.stringify({parent,...values});
+    return JSON.stringify({parent,...values,properties});
   };
   const ids=new Map<string,string>();
   for(const [index,node] of before.nodes.entries()) {

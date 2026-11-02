@@ -92,6 +92,21 @@ test("accepted copy keeps the original draft through failed refresh; Reload veri
   assert.equal(h.calls.filter(c=>c.operation==="screens.componentCopy").length,1);
 });
 
+test("copied numeric properties may move in Source but changed property values cannot receive a draft",async()=>{
+  for(const changed of [false,true]) {
+    const h=copyFixture();h.refresh();
+    Object.assign(h.original.nodes[1]!,{properties:[{property:"xsize",value:500,span:{start:55,end:65}}]});
+    Object.assign(h.fresh.nodes[1]!,{properties:[{property:"xsize",value:changed?501:500,span:{start:85,end:95}}]});
+    await h.controller.editUse();
+    if(changed) {
+      await assert.rejects(h.controller.makeCopy("help_guide"),/accepted content changed/);
+      assert.equal(h.transferred(),0);assert.equal(h.controller.hasPendingCopy(),true);
+    } else {
+      await h.controller.makeCopy("help_guide");assert.equal(h.transferred(),1);assert.equal(h.controller.hasPendingCopy(),false);
+    }
+  }
+});
+
 test("shared review lists all affected screens and only changed fields; Cancel keeps the draft and confirms exact revisions",async()=>{
   const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement});
   const h=copyFixture();
