@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "screenId": "components-and-help-panel",
+  "currentApproved": "refined-v1",
+  "revisions": [
+    {
+      "id": "refined-v1",
+      "variantId": "refined",
+      "approval": {
+        "date": "2026-11-02",
+        "decision": "In the coordinator thread, after the workflow explanation, Kris said \"okay, go ahead, i think i like A the best\". The coordinator clarified original A versus A2. Kris selected \"A2 — Focused workflow (latest version, shown first)\". This approves only components-and-help-panel / refined-v1 / refined at the recorded source. The accepted preceding explanation clarifies that Screens edits appearance and Use in Story hands off to Story for Show/Hide Beats; the preserved mock still labels that route Connect. Original A/B/C remain drafts and earlier Screens/image/Style approvals retain their scope.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "c0ded415aba484633ac68981c48910afb82a959c",
+          "fingerprint": "1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-group-dark-wide.png",
+            "sha256": "791f0a59e6b0ad5604a164a3ec41d855543c3ef6cca048c73e31057663c80efa",
+            "state": "group",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-group-dark-compact.png",
+            "sha256": "1e881c4c3a69d1c9c82c927f8e66f1f7f738e5bad537cc817ad7812deffe57b0",
+            "state": "group",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-group-light-wide.png",
+            "sha256": "b61981e6b2e6619ed04e957ef325e76643a4325f9dcd5e6e71ec8dc1208dda27",
+            "state": "group",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-group-light-compact.png",
+            "sha256": "3ebccf411b0058e707df8ff510060f373d2a87d92d70cc4e412c4a92d0d9d22f",
+            "state": "group",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-shared-dark-wide.png",
+            "sha256": "587467c2a280e810f81bae406f76b6828dd5c2e2fdaecf949286cf3a9b209b1c",
+            "state": "shared",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-shared-dark-compact.png",
+            "sha256": "54437cdc54c6ce3968c3b9aef644ebfdb37894375b4a3aa1f567a2d73b996e60",
+            "state": "shared",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-shared-light-wide.png",
+            "sha256": "65116b56e4e1133b5799a3330c59c174d16b1c7eb2463e9459a0cc06762db4ac",
+            "state": "shared",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-shared-light-compact.png",
+            "sha256": "62ea029d1b4b915e92c5b7c6690cac7941a50a7adddc224894cdc29920ae7c01",
+            "state": "shared",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-no-images-dark-wide.png",
+            "sha256": "56b414caf5dee2290490a994a181bfc9e40ced54fb62613eb2466a0b33299662",
+            "state": "no-images",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-no-images-dark-compact.png",
+            "sha256": "718965371fa5d6e33544730cf3799ee913272017d9004889b3b02d78a9ef7f99",
+            "state": "no-images",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-no-images-light-wide.png",
+            "sha256": "36bd344f0a21c1c23573aabb7f51eaa49dd92c10f6b2a9952fbc97fe9c19b5e2",
+            "state": "no-images",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-no-images-light-compact.png",
+            "sha256": "f8fcfacb18ad18cb59f3ec9f82f4e352a140b080be4dd3759ba41431d9421828",
+            "state": "no-images",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-copy-refresh-failure-dark-wide.png",
+            "sha256": "02523aff2f2d99d6671e6136d167930b76d89654a5fcb6327f245fb75b6e7d2e",
+            "state": "copy-refresh-failure",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-copy-refresh-failure-dark-compact.png",
+            "sha256": "337772f022dc0f68d2dd73cc307a93d69e920212413f8d3583de74c15e9b1718",
+            "state": "copy-refresh-failure",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-copy-refresh-failure-light-wide.png",
+            "sha256": "b9c7d65e7d5cc6756b46d77104329569b1dee00f0021694e993b4b47f2bfa2ee",
+            "state": "copy-refresh-failure",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-copy-refresh-failure-light-compact.png",
+            "sha256": "ec8563fd6cd9a4b84b6b4ba0a3086df0cc1d8a6e7bd063ea86b5c9487f2c3a0d",
+            "state": "copy-refresh-failure",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-shared-review-dark-wide.png",
+            "sha256": "3c7bb61426b3804b7f1dcaf8642b63f1f54721948790e8441cd1ee9fb1fc94a9",
+            "state": "shared-review",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-copy-with-draft-dark-wide.png",
+            "sha256": "98aa5f4a53a048bd2c526bce865879f2f240d5a68711bf4babd7ee85c3d7cbb8",
+            "state": "copy-with-draft",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-copy-with-draft-dark-compact.png",
+            "sha256": "3d519db2551ab5dc20a54211cc140f41aa10ebb7a9bc90d9eead4a1d8c97e9e5",
+            "state": "copy-with-draft",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-copy-reload-dark-wide.png",
+            "sha256": "d23f64d192df6a0912880c344f4644afa8694238d3c47564eb6966b2f82575ef",
+            "state": "copy-reload",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-dialogue-continues-dark-wide.png",
+            "sha256": "1500233557876a9f74044c77f3374123d272745e3abfcc877507344bee6908b0",
+            "state": "dialogue-continues",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-story-dark-wide.png",
+            "sha256": "80abc83437f929988562a5b3740b458e5dbe3f1f8ef605aa221e7d911026fd86",
+            "state": "story",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-starter-dark-wide.png",
+            "sha256": "825ec718bb9fcc57df0b9eee7949a5db3cf1618b958dcc2c538ae2dc808ecf5f",
+            "state": "starter",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-missing-dark-wide.png",
+            "sha256": "6b39ca354a656a045dea4d888fbcad97af94db5b7a0acf19da4997b56f64688b",
+            "state": "missing",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-components-and-help-panel/captures/refined-v1/refined-conflict-dark-wide.png",
+            "sha256": "b449a8f978e2c559f1d02adbf4c349b0129d632fa7a015e9c0959bb929b23aaa",
+            "state": "conflict",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Screens edits a panel's appearance. Use in Story hands off to Story, where the author places Show screen and Hide screen Beats. This written integration clarification takes precedence over the preserved mock's confusing Connect route; it is not a replacement reference design.",
+          "Keep A2's inspector workflow, canvas/tree selection, explicit editing scope beside content fields, Source access, history controls and compact Apply visibility. Existing approved layout, font, Style, image, structure and canvas controls retain their owners and capabilities.",
+          "Make a supported group into an explicitly owned parameterless component with a required fresh component name. Keep Close local to the owning panel. No parameter expressions, transclusion or arbitrary import are added.",
+          "Insert a use through an owned-component picker and chosen insertion parent without replacing neighboring content. Normal screens and panels remain distinct from explicitly owned components.",
+          "State the affected screens before editing. Shared review lists every affected screen and only changed fields, comparing Current with After Apply. A shared Apply updates all uses. Ordinary local edits use one Apply.",
+          "Make a copy for the named current screen. Copy accepts saved component content first, changes only that use, and creates its own transaction/history entry. The other uses retain the accepted original content.",
+          "With valid pending edits, retain their original target, base revision and input until a separate refresh verifies the copied definition, current revision and corresponding fresh child IDs. Only then may the draft move to that independent target. Copy returns identity only; it does not return a revision or child-ID map.",
+          "Apply the verified carried draft as a second ordinary transaction/history entry. Copy refusal for stale or unavailable intent keeps the original draft. Cancel after Copy discards only unsaved edits and leaves the accepted copy. Undo reverses Apply, then Copy, separately; Redo preserves that order.",
+          "If Copy succeeds but refresh or rebinding fails, acknowledge the existing copy, retain unsaved input, disable Apply and offer Reload copy. Do not claim rollback or auto-apply. Successful verification is required before draft Apply.",
+          "New screen offers Blank and Help panel, with explicit panel kind. Help uses prefilled title, explanation and displayed image size plus selection of a real existing typed project UI image. Its title, explanation, image and Close remain ordinary editable nodes.",
+          "If no eligible typed UI image exists, keep Help selected, retain the entered screen name, disable creation and direct the author to import an image in Assets with the UI image role, then return. Do not invent a bundled asset or silently create Blank. Blank requires explicit selection.",
+          "Story Show/Hide uses an owned-panel picker and exact Source navigation. Persist target identity {screenId, sourceName}; refresh source/sourceMap/inventory/effects revisions for admission without user-entered revision fields. Components are ineligible in the panel picker.",
+          "Show keeps the panel visible while dialogue continues. Hide, Close and default game Escape dismiss it. Outside clicks keep it open. Qualify focus in actual Ren'Py. Editor Escape continues to cancel an editor operation.",
+          "Keep stable source references, exact Source spans and visible missing/rename/deletion refusal. Retain invalid, conflicted and stale drafts. Preserve source-backed minimal transactions, one history entry per accepted operation, no-op behavior, cancellation, Undo/Redo, reconciliation and reopen through existing product owners.",
+          "Record relevant screen/component/use/action/binding revisions and combine known child effects conservatively. Custom or unsupported effects stay unknown. A2's browser model does not establish production persistence or runtime correctness.",
+          "Use the existing dark palette, typography and icons, dense controls and ordinary keyboard focus. Add no decorative card/pill chrome, light-gray subtitle lines above sections or continuous repainting animation."
+        ],
+        "deviations": [
+          "All project writes, Source generation, transactions, history/reopen, target revisions, fresh child-ID verification, external-edit simulation and playback in this reference are fictional browser-memory operations. They are not UI-to-core, migration, lossless source, durable recovery or pinned-SDK proof.",
+          "The preserved reference and captures still say Connect. The approved written clarification is Screens for appearance and Use in Story for the handoff to Story Show/Hide authoring. Preserve the original reference while implementing that clarified route; do not add Call/Finish or a general action builder.",
+          "The component sample has one shared definition plus independent copies and one eligible frame/use per sample screen. Production must use its supported insertion parents and preserve opaque neighbors; the mock limits are not new product restrictions.",
+          "The ordinary-node dialog demonstrates selected image and title-size fields. The broader existing layout, Style, font, image import, add/remove, reordering and canvas operations remain with their approved production owners.",
+          "SVG artwork and browser sizing are illustrative. The playback focus trap is an HTML dialog, not Ren'Py. Actual component output, continued dialogue, dismissal and keyboard focus still require ticket qualification.",
+          "The mock's static Draft captions are part of the preserved reviewed source. The Design Lab approval record and chrome own approval status; do not change approved code merely to relabel the standalone sample.",
+          "Retained captures cover both themes/sizes for group, shared, empty-image and failed-copy-refresh states. Other retained interaction and Story/starter/conflict/missing captures cover the specific conditions in the record; uncaptured combinations remain outside the retained visual comparison set."
+        ]
+      }
+    },
+    { "id": "inspector-v1", "variantId": "inspector", "approval": null },
+    { "id": "library-v1", "variantId": "library", "approval": null },
+    { "id": "worksheet-v1", "variantId": "worksheet", "approval": null }
+  ]
+}
