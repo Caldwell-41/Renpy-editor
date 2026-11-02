@@ -264,6 +264,15 @@ fn main() {
             emit(json!({"changed":true}));
             continue;
         }
+        if request["driver"] == "choosePanelImage" {
+            assert!(mode.is_none());
+            let choice = host
+                .with_service(|service| service.authoring_select_import(&game.join("game/help.png")))
+                .unwrap()
+                .unwrap();
+            emit(serde_json::to_value(choice).unwrap());
+            continue;
+        }
         if request["driver"] == "chooseImage" {
             assert_eq!(mode.as_deref(), Some("ui-image"));
             let choice = host
