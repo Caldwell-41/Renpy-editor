@@ -13,9 +13,9 @@
 .screen-panels-preview p { margin: 4px 0; }
 .screen-panels-preview-status { margin: 0; }
 .screen-panels-preview-status:empty { display: none; }
-.screen-create { min-width:0;padding:18px;border-radius:0;font-size:12px; }
+.screen-create { box-sizing:border-box;width:100%;max-width:none;min-width:0;padding:18px;border:0;border-radius:0;font-size:12px; }
 .screen-create > h2 { font-size:17px;margin:0 0 18px; }
-.screen-panels-form .field>span { display:block;font-size:11px;font-weight:600; }
+.screen-panels-form .field>span { display:block;margin-bottom:8px;font-size:11px;font-weight:600; }
 .screen-panels-form .field input,.screen-panels-form .field select { box-sizing:border-box;width:100%;min-height:32px;font-size:12px;border-radius:0; }
 .screen-panels-form .screen-create-actions { justify-content:flex-start;margin-top:0; }
 .screen-panels-form .button { border-radius:0;font-size:11px;min-height:28px; }

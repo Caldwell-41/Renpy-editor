@@ -61,8 +61,8 @@ try{
  const choice=await child.request({driver:'choosePanelImage'});const imported=await call('asset.import',{authorityId:choice.authorityId,kind:'uiImage',technicalName:'a4_seal',displayName:'A4 seal'});const asset=imported.assets.find(item=>item.kind==='uiImage');assert(asset);
  await ui.getByRole('button',{name:'New screen',exact:true}).click();await form.getByLabel('Screen name').fill('a4_dialog');await form.getByLabel('Screen kind',{exact:true}).selectOption('dialog');
  await ui.locator('.screen-starter-canvas img').waitFor({state:'visible'});
- const geometry=await page.evaluate(()=>{const card=document.querySelector('.screen-card').getBoundingClientRect(),preview=document.querySelector('.screen-starter-canvas .screen-panels-preview').getBoundingClientRect();return {cardLeft:card.left,previewRight:preview.right,previewWidth:preview.width,previewHeight:preview.height};});
- assert(geometry.previewWidth>200&&geometry.previewRight<=geometry.cardLeft);result.previewGeometry=geometry;
+ const geometry=await page.evaluate(()=>{const card=document.querySelector('.screen-card').getBoundingClientRect(),preview=document.querySelector('.screen-starter-canvas .screen-panels-preview').getBoundingClientRect(),form=document.querySelector('section.screen-create');return {cardLeft:card.left,previewRight:preview.right,previewWidth:preview.width,previewHeight:preview.height,formScrollWidth:form.scrollWidth,formWidth:form.clientWidth};});
+ assert(geometry.previewWidth>200&&geometry.previewRight<=geometry.cardLeft);assert(geometry.formScrollWidth<=geometry.formWidth);result.previewGeometry=geometry;
  await capture('typed-starter-inspector');await page.setViewportSize({width:560,height:640});assert(await ui.locator('.screen-stage').isHidden());await page.setViewportSize({width:1100,height:720});
  const assetPath=join(scratch,'synthetic-project',asset.relativePath),withheld=`${assetPath}.withheld`;await rename(assetPath,withheld);
  try{
@@ -95,7 +95,15 @@ try{
  const cancelStyle=await draft.getByRole('button',{name:'Cancel',exact:true}).evaluate(element=>getComputedStyle(element).borderTopStyle);assert.equal(cancelStyle,'solid');await capture('recovered-pending-anchor');
  await draft.getByRole('button',{name:'Add Beat',exact:true}).click();await draft.waitFor({state:'detached'});assert.equal(await page.locator('.story-screen-pending').count(),0);
  model=await call('scene.list');const beats=model.scenes.find(item=>item.id===current.id).beats,callIndex=beats.findIndex(item=>item.payload.type==='callScreen');assert(callIndex>=0&&beats[callIndex+1]?.id===anchor.id);result.checks.push('deleted remembered Scene recovers through production main and accepts only explicitly selected placement');result.checks.push('pending marker matches the accepted anchor, Cancel is outlined and successful acceptance removes the marker');
- assert.equal(result.checks.length,4);assert.deepEqual(result.pageErrors,[]);result.passed=true;
+ const document=await call('screens.inspect',{path:owner.path});
+ await call('screens.compose',{screenId:owner.id,expectedRevision:document.revision,command:{type:'add',parentId:owner.rootId,kind:'textbutton',text:'Pending close'}});
+ await page.getByRole('button',{name:'Screens',exact:true}).click();await ui.getByRole('treeitem',{name:'Text button · Pending close',exact:true}).press('Enter');await ui.locator('.screen-dismissal select').selectOption('finishInteraction');
+ const base=await call('source.open',{path:owner.path}),renamed=await call('source.updateDraft',{path:owner.path,expectedBaseRevision:base.baseRevision,text:base.text.replace('screen a4_dialog():','screen renamed_a4_dialog():'),selectionStart:0,selectionEnd:0});
+ await call('source.save',{path:owner.path,expectedBaseRevision:renamed.baseRevision,expectedDraftVersion:renamed.draftVersion});
+ await ui.getByRole('button',{name:/^1\s+Choose$/}).click();await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
+ const retained=ui.locator('.screen-dismissal-retained');await retained.getByText(/Pending close/).waitFor();await capture('unresolved-action-draft');await retained.getByRole('button',{name:'Cancel action draft'}).click();await retained.waitFor({state:'detached'});
+ await page.getByRole('button',{name:'Close Project',exact:true}).click();await page.locator('.recent-open').waitFor();result.checks.push('an unresolved screen keeps its original Finish draft cancellable and does not trap project close');
+ assert.equal(result.checks.length,5);assert.deepEqual(result.pageErrors,[]);result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};if(page){await writeFile(join(output,'failure.txt'),await page.locator('body').innerText());await page.screenshot({path:join(output,'failure.png'),fullPage:true});}throw error;}
 finally{
  await browser?.close();await server?.close();
