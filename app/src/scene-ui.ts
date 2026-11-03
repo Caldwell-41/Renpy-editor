@@ -1157,6 +1157,8 @@ export function renderSceneAuthoring(
   const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), insertion?: ScreenInsertion): void => {
     if (host.querySelector(".new-beat")) return;
     const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
+    const openingInsertion = structuredClone(insertion ?? actions.screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
+    let rememberedInsertion = false;
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
@@ -1189,7 +1191,7 @@ export function renderSceneAuthoring(
       pendingMarker.textContent=`Pending ${beatLabels[type.value as BeatPayload["type"]]}`;
       if(before)before.before(pendingMarker);else bodyHost.append(pendingMarker);
     };
-    const remember=()=>{if(screenType())try{actions.rememberScreenInsertion?.({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});}catch{/* Retain the unavailable original position until an explicit choice. */}};
+    const remember=()=>{if(screenType())try{actions.rememberScreenInsertion?.({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;}catch{/* Retain the unavailable original position until an explicit choice. */}};
     placement.host.addEventListener("change",()=>{locationConfirmed=true;placementError.textContent="";remember();updatePendingMarker();});
     const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions);
@@ -1198,7 +1200,7 @@ export function renderSceneAuthoring(
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", screenType()?"button secondary":"text-button");
-    const cancelDraft=()=>{pendingMarker.remove();panel.remove();};cancel.addEventListener("click",cancelDraft);
+    const cancelDraft=()=>{if(rememberedInsertion)actions.rememberScreenInsertion?.(structuredClone(openingInsertion));pendingMarker.remove();panel.remove();};cancel.addEventListener("click",cancelDraft);
     type.addEventListener("change",()=>{cancel.className=screenType()?"button secondary":"text-button";updatePendingMarker();});
     let pending=false;
     panel.addEventListener("keydown", event => {

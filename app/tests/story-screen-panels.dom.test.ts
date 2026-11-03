@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { renderSceneAuthoring, type SceneActions, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
+import { renderSceneAuthoring, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
 import { storyFixture } from "./story-controls-fixture.js";
 
@@ -190,6 +190,48 @@ test("screen insertion keeps existing nested body ownership",async()=>{
  const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));
  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();
  assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(s.host.querySelector(".story-screen-pending")!.parentElement?.getAttribute("data-branch-id"),"branch");button(draft,"Cancel").click();assert.equal(s.host.querySelector(".story-screen-pending"),null);await s.close();
+});
+
+test("Cancel and Escape restore the captured insertion context after a refused screen draft",async()=>{
+ for(const cancel of ["button","escape"])for(const context of ["current","default","unavailable nested"]){
+  const model=fixture(),scene=model.scenes[0]!;
+  const original:ScreenInsertion=context!=="unavailable nested"
+   ?{sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:"end"}},expectedSourceRevision:scene.sourceRevision}
+   :{sceneId:scene.id,body:{type:"branch",groupId:"removed-group",branchId:"removed-branch"},position:{type:"before",anchor:{type:"beat",beatId:"removed-beat"}},expectedSourceRevision:"old-source"};
+  let remembered=structuredClone(original);
+  const s=setup({screenInsertion:context==="default"?undefined:original,rememberScreenInsertion:value=>{remembered=structuredClone(value);}},model);
+  try{
+   button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
+   if(context==="unavailable nested"){
+    const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="root";body.dispatchEvent(new Event("change",{bubbles:true}));
+   }
+   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+   button(draft,"Add Beat").click();await tick();
+   assert.deepEqual(remembered.position,{type:"before",anchor:{type:"beat",beatId:"line"}},"Refusal must retain the pending position");
+   assert.ok(draft.isConnected);
+   if(cancel==="button")button(draft,"Cancel").click();else position.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
+   assert.deepEqual(remembered,original,"Cancellation must restore the location captured before this draft");
+   assert.equal(s.host.querySelector(".story-screen-pending"),null);
+  }finally{await s.close();}
+ }
+});
+
+test("accepted screen insertion remembers its nested location at the accepted revision",async()=>{
+ const base=fixture(),scene=base.scenes[0]!;
+ const model:SceneWorkspace={...base,scenes:[{...scene,beats:[
+  {id:"branch",byteStart:10,byteEnd:20,protected:false,conditionalBranch:{groupId:"group",otherwise:false,condition:{status:"supported",expression:{type:"bool",value:true}}},payload:{type:"customCode",source:"if True:",reason:"Condition"}},
+  {...scene.beats[0]!,owner:{groupId:"group",branchId:"branch"}},scene.beats[1]!
+ ]}]};
+ let remembered:ScreenInsertion|undefined;
+ const s=setup({rememberScreenInsertion:value=>{remembered=structuredClone(value);},apply:async()=>({...model,scenes:[{...model.scenes[0]!,sourceRevision:"accepted-source"}]})},model);
+ try{
+  const draft=openNew(s.host,"showScreen");await tick();
+  const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));
+  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+  button(draft,"Add Beat").click();await tick();
+  assert.equal(draft.isConnected,false);
+  assert.deepEqual(remembered,{sceneId:scene.id,body:{type:"branch",groupId:"group",branchId:"branch"},position:{type:"before",anchor:{type:"beat",beatId:"line"}},expectedSourceRevision:"accepted-source"});
+ }finally{await s.close();}
 });
 
 test("a deleted insertion Scene retains intent and allows an explicit replacement position",async()=>{
