@@ -292,6 +292,8 @@ fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
             );
             helper_requested = true;
             let starting = ipc(service, "screens.canvasRender", request.clone());
+            assert_eq!(super::super::canvas_session::helper_start_attempts_for_test() - helpers_before, 1,
+                "This proof reuses one owner; an unexpected replacement stays charged and stops the campaign");
             assert_eq!(starting["phase"], "starting", "{starting}");
             let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
             let frame = loop {
