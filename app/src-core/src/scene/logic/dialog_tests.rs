@@ -303,6 +303,37 @@ fn reject_compose(
 }
 
 #[test]
+fn dismissal_refuses_duplicate_element_ids_without_retargeting_or_writes() {
+    let mut f = Fixture::new();
+    let owner = dialog(&mut f, "help_dialog");
+    let first = compose(
+        &mut f,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"First"}),
+    );
+    let second = compose(
+        &mut f,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Second"}),
+    );
+    let path = json!({"sourcePath":owner["path"]});
+    let before = source(&mut f, &path);
+    f.save(
+        &path,
+        &before.replace(
+            second["selectedId"].as_str().unwrap(),
+            first["selectedId"].as_str().unwrap(),
+        ),
+    );
+    reject_compose(
+        &mut f,
+        &owner,
+        json!({"type":"dismissal","nodeId":first["selectedId"],"action":"finishInteraction"}),
+        None,
+    );
+}
+
+#[test]
 fn dismissal_changes_only_expression_preserving_crlf_comments_and_opaque_neighbors() {
     let mut f = Fixture::new();
     let owner = dialog(&mut f, "help_dialog");

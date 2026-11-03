@@ -12,7 +12,7 @@ pub enum Action {
 pub(super) fn prepare(
     owner: &OwnedScreen,
     screen: &Screen,
-    node_id: &str,
+    node_start: usize,
     bytes: &[u8],
     action: Action,
     blocking: bool,
@@ -25,7 +25,7 @@ pub(super) fn prepare(
     let node = screen
         .nodes
         .iter()
-        .find(|n| n.id.as_deref() == Some(node_id))
+        .find(|n| n.span.start == node_start)
         .ok_or(SceneError::UnknownEntity)?;
     let span = references::editable_dismissal_action(owner, screen, node, bytes)
         .ok_or(SceneError::OpaqueBoundary)?;

@@ -254,6 +254,12 @@ impl AuthoringService {
                 id
             }
             Command::Dismissal { node_id, action } => {
+                // Only the qualified document grants element identity authority.
+                let node = screen
+                    .nodes
+                    .iter()
+                    .find(|node| node.id.as_ref() == Some(&node_id))
+                    .ok_or(SceneError::UnknownEntity)?;
                 let resolved = self.screens_resolve_target(
                     project,
                     project_id,
@@ -277,7 +283,7 @@ impl AuthoringService {
                 proposed = dismissal::prepare(
                     &owner.screen,
                     raw_screen,
-                    &node_id,
+                    node.span.start,
                     &bytes,
                     action,
                     resolved.blocking,
