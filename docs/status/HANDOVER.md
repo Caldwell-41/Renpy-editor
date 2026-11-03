@@ -2,39 +2,51 @@
 
 ## Help dialog and base Help canvas implementation
 
-Kris approved the plan for #45/#46 and allowed Sol High fast mode for subagents.
-Continue on local integration branch `codex/help-dialog-canvas`, based on
-`e32ded49f2c4212cd78efc748cdf9b59cdcc0c48`. The coordinator owns shared files,
-integration, verification and final review. The source-map v8 dialog/Finish and
-creation/blocking checkpoints have focused passing evidence. The Dialog builder is
-integrated, and blank/Help dialog creation uses the existing transaction. Call
-runtime proof, affected UI and full base-canvas qualification remain pending. The
-Call/Finish backend is integrated as `3a7664c`; its eight public-core cases pass.
-The shared Null editability correction preserves component extraction and context
-refusal. Transfer its checkpoint to the lanes before their final portable handoff.
+Continue approved #45/#46 on local integration branch `codex/help-dialog-canvas`,
+from `e32ded4`. Current backend code checkpoint is `d9107a5`. Both portable lanes
+are integrated. The coordinator owns shared contracts, findings, integration and
+final review. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
+records assignments, exact candidates, tests, failures and cumulative operation use.
 
-[The coordination/evidence record](../tasks/evidence/help-dialog-and-canvas.md)
-owns file boundaries, test results and next actions. Dialog/Story and Canvas work on
-`t3/help-dialog-story-call` and `t3/help-canvas-rendering-fidelity`. The sole prototype
-chat uses `t3/help-dialog-design-prototype`, with unapproved A1/B1/C1 choices.
-Both lanes consumed the shared creation/resolver checkpoint. Canvas is correcting
-four offline gate/proof findings and checking actual draft/saved button parity;
-Dialog/Story is finishing its frozen normal-entry exporter and qualifier.
-The Dialog/Story agent must receive the approved source/design/evidence directly
-from that prototype before changing affected production UI. Browser and
-desktop work goes to Terra Max. Workers follow the implement skill and commit.
+Blocking Dialog creation/resolution, Call/Finish, conservative source/history and
+inert Null editing are implemented. Production UI still waits for exact approval.
+Current prototype A4/B4/C4 source is `8851689b62eda03127c199ca0276a776b0d623ab`.
+Kris requested only insertion placement and Add/Cancel/secondary-action spacing.
+Help still requires a typed UI image. Placement uses existing Story body/Position
+ownership, with no new IPC/persistence or general action builder. These requests
+are not approval. Preserve earlier revisions, failures and proof limits. The
+prototype must deliver the exact approved source/control map/evidence directly to
+the Dialog implementation owner and copy the coordinator before production edits.
 
-Mac is the development host. SUNDOWN's read-only preflight confirms pinned tools,
-verified SDK archive and prior ANGLE2/helper capability. The new candidate is absent
-there; transfer only the fixed candidate into a fresh assigned checkout. Preserve
-its clean primary checkout, protected stash and reserved worktrees. No
-SDK/helper/package/native/CI campaign has started.
-The evidence owner records #45/#46 SDK matrices and ceilings; frozen producers and
-offline gates need audit before starts. Prior allowances
-remain closed. No push/PR/merge/issue closure/release is selected, and required
-published qualification must remain an explicit gap. Keep the unrelated audit,
-ignored archives, protected native state and earlier unique recovery evidence.
-This is local-only continuation; no external wait is pending at this checkpoint.
+Mac Dialog passes all eight normal-entry cases at `dff0c64`; Windows passes all
+eight at `4c084a4`. Both targets pass eight exact Canvas pixel/geometry comparisons
+at `4c084a4`. Accepted sources remain unchanged, with complete process/scratch
+cleanup, one persistent Canvas owner per campaign and Windows private-desktop
+closure. This is backend/synthetic-input evidence, not production UI or physical
+acceptance. Use is 20/24 Dialog and 16/20 Canvas on Mac, and 11/16 Dialog and 8/12 Canvas on Windows.
+There are no uncertain or reserved starts.
+
+The `4c084a4` routine core run passes 575 cases with zero failures, 55 declared
+ignores and three selected exclusions. Staged independent backend review reports
+two P2 Standards findings and no actionable Spec findings, with known UI gaps. Both findings are fixed:
+`218f116` restores qualified duplicate-ID authority for dismissal; `d9107a5` retains
+Canvas reference scratch until process cleanup is proven. Their red/green checks,
+12 Dialog cases, six Canvas gates, production compilation and formatting pass.
+No SDK rerun was selected for these failure-path corrections. Preserve successful
+proof scope and all original failures; final combined UI review is still pending.
+
+SUNDOWN's assigned qualification worktree is clean at `4c084a4`; primary checkout,
+protected stash and unrelated processes remain intact. Prior path/PowerShell
+failures are retained. Use Python-captured native exit codes, the recorded Downloads
+route and literal `-File` PowerShell setup. Kris permits later reviewed task bundles
+to the same linked PC through Taildrop, recording payload/hash and excluding private
+game content/build output. Synchronize only the assigned test checkout.
+
+Stop SDK failures for coordinator review; reviewed corrections may proceed within
+the approved ceilings. No native editor/package/CI launch, push/PR/merge/issue closure
+or release is selected. Preserve the unrelated untracked audit, ignored evidence,
+SDK archives and protected recovery state. Next, finish any focused correction
+verification, then integrate the approved UI and verify actual UI-to-core journeys.
 
 ## PR 77 merge and workspace closeout
 

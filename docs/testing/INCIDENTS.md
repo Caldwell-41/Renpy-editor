@@ -919,3 +919,15 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   `submit` bypassed the browser gate. Assert associated error, retained input/focus
   and no write. The case fails before the fix and passes afterward.
 - **Evidence:** [Naming correction](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).
+
+## P06. Canvas JSON decoding changes fractional geometry
+
+- **Class/search:** product; fractional geometry, exact comparison, one ULP,
+  `448.20000000000005`, `float_roundtrip`, Canvas status.
+- **Cause/correction:** the pinned JSON decoder's default floating-point path changes
+  this helper coordinate to `448.2000000000001`. Enable its lossless round-trip
+  feature. Keep the renderer and exact pixel/geometry comparison unchanged.
+- **Regression:** the production Canvas status path with the existing controlled
+  child reproduces the changed coordinate before the fix and preserves its exact
+  floating-point bits afterward. The child exits and its scratch is removed.
+- **Evidence:** [Matched captures and geometry diagnosis](../tasks/evidence/help-dialog-and-canvas.md#mac-matrix-and-exact-geometry-diagnosis).

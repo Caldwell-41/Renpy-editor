@@ -2,16 +2,24 @@
 
 ## Help dialog and base Help canvas selected
 
-Kris approved implementation of [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45)
-and [#46](https://github.com/Caldwell-41/Renpy-editor/issues/46) on the new local
-`codex/help-dialog-canvas` integration branch from `e32ded4`. The coordinator owns
-shared contracts, integration, combined checks and final review. Two isolated Sol
-High implementation lanes are planned, with fast mode permitted. Dialog/Story UI
-waits for a separately approved prototype; Canvas work can continue independently.
-[Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns assignments,
-contract-checkpoint results, test seams and operation accounting. Implementation
-and both tickets' acceptance remain pending. No publication, merge or release is
-selected; historical closed allowances and protected recovery remain intact.
+Kris approved [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45) and
+[#46](https://github.com/Caldwell-41/Renpy-editor/issues/46) on local integration
+branch `codex/help-dialog-canvas` from `e32ded4`. Both portable lanes are integrated;
+the coordinator owns shared contracts, review findings, integration and final review.
+
+| Capability | Implemented and automated proof | Remaining acceptance |
+| --- | --- | --- |
+| Blocking Help dialog and Story Call/Finish backend | Eight normal-entry cases pass on both targets; source/history/refusal checks pass | Approved production UI and actual UI-to-core journeys |
+| Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Final combined integration review; wider canvas acceptance stays separate |
+| Combined backend | 575 routine core passes at `4c084a4`; two backend Standards findings fixed with focused red/green checks | UI integration and final combined review |
+
+The prototype's A4/B4/C4 revision is under review, not approved. Help still requires
+a typed UI image; placement uses existing Story body/Position ownership. No
+production UI is promoted before the direct approved handoff.
+[Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
+checks, earlier failures, operation counts and exact scope. Physical/human and
+published package/CI acceptance remain separate. Neither ticket is closed; this
+work remains local, with no publication, merge or release selected.
 
 ## Components and Help panel merged and accepted
 

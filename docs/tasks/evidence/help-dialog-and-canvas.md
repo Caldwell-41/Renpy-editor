@@ -106,8 +106,8 @@ checks, review and commits need no numerical allowance.
 
 | Outcome | Planned SDK starts per target | Ceiling per target | Current use |
 | --- | --- | --- | --- |
-| #45 dialog normal entry | 11: version, compile, lint, eight normal-entry cases | 16 | Mac 0; Windows 0 |
-| #46 base Help fidelity | 8: compile, lint, two normal-entry runs, two adapter validations, discovery, persistent helper | 12 | Mac 0; Windows 0 |
+| #45 dialog normal entry | 11: version, compile, lint, eight normal-entry cases | Mac 24; Windows 16 | Mac 20; Windows 11 |
+| #46 base Help fidelity | 8: compile, lint, two normal-entry runs, two adapter validations, discovery, persistent helper | Mac 20; Windows 12 | Mac 16; Windows 8 |
 
 Targets are Mac ARM64 and Windows x64. The #45 matrix runs pointer Close,
 default-focus keyboard Close, Escape and outside-click/underlying-blocking cases
@@ -117,8 +117,11 @@ both aspects and normal/hover for eight matched frames per target. Its helper is
 one persistent SDK process for all frames. New namespaces are `base_help_fidelity`
 and `base_help_anchors`, separate from #45 and historical proof fixtures.
 
-The ceilings include five focused correction starts for #45 and four for #46 per
-target. Every actual SDK process start counts, including version/validation,
+The original #45 ceiling was 16 per target. Kris raised the Mac ceiling to 24
+after nine charged starts and the confirmed focus diagnosis, authorizing the
+11-start corrected campaign and reviewed corrections within that ceiling. Windows
+remains 16. The #46 ceiling includes four correction starts per target. Every
+actual SDK process start counts, including version/validation,
 failed/cancelled attempts and helpers. Uncertain starts reserve capacity until
 resolved. Shared setup starts are charged once to their producing outcome and
 linked when reused. No native-editor/package/CI starts are selected by these limits.
@@ -130,7 +133,7 @@ No publication is selected. Required published CI/package qualification remains
 an acceptance gap until authorized; connected-host evidence retains its exact
 candidate and scope. Agents must not independently start an expensive campaign.
 
-Both implementation lanes and the user-iterable prototype chat are active. The
+At initial selection, both implementation lanes and the prototype chat were active. The
 Dialog/Story owner proceeds with backend work while the prototype seeks approval.
 Canvas confirms the current mappings already cover native base displayables,
 numeric coordinates, typography/Styles and verified assets, with no demonstrated
@@ -224,10 +227,15 @@ shared checkpoint and owns its held direct Add/remove case. Canvas receives the
 actual backend producer for a focused saved/draft plan parity check; no renderer
 change is yet justified by its data-only projection.
 
-The prototype displays unapproved inspector/steps/Story-split choices in its sole
-user-iterable chat. Its current candidate is `8dfd15f`, with source and final browser/
-Design Lab checks still underway; no approval is inferred from display or earlier
-checks. The direct approved source/control-map handoff remains mandatory.
+The prototype's A1/B1/C1 at `8dfd15f` were withdrawn before approval after panel
+picker/Source and no-image preview defects were found. Replacement A2/B2/C2 use
+`inspector-v2`, `steps-v2` and `story-split-v2` at `ffe5cad`, fingerprint
+`b1bddfeee798504f1fbf66c526e2f6efa9da8e9bff1690d3cd4024a47dacb891`.
+They remain unapproved, with final verification underway. A full Design Lab check
+at the old candidate failed after 448 renders in an existing Studio interaction
+wait before Help; it remains failed evidence, not a passing promotion gate. No
+production UI was implemented from either draft. The direct approved source/control
+map handoff remains mandatory.
 
 Canvas's initial independent reviews found four unique proof/gate issues: explicit
 UTF8, retained helper failure/count/shutdown receipts, opaque uniform-frame refusal,
@@ -235,3 +243,352 @@ and binding to expected reviewed candidate and designated binary. The lane is
 correcting them with offline rejection checks. These were not production-renderer
 findings. Both lanes' runtime exporters/gates and all new SDK proof remain pending;
 no SDK/helper/native/package/CI process has started.
+
+## Portable qualifier integration and outstanding accounting fixes
+
+Dialog/Story qualifier `8dc0007` is integrated as `091ec43`, with 11 public-core
+dialog tests passing on the coordinator's integrated candidate. Its default
+offline invocation passes seven tests and skips three artifact-selected cases;
+that is not a complete ten-case artifact audit. The worker's independent Spec
+review reports no actionable finding within its backend scope and retains UI/SDK
+gaps. Standards identifies the three default skips as a routine harness admission
+defect under H34. The worker is correcting registration without changing the
+closed #44 harness.
+
+The coordinator found that #45's launch counter advanced before process-start
+evidence. The lane is separating attempted, confirmed, refused and uncertain
+reserved starts, retaining process receipts before log/retention I/O, and preserving
+both original and retention failures. SDK execution remains unselected until the
+committed correction and frozen material are audited.
+
+Canvas producer `9e8ffc1`, geometry-observer correction `556e3c7` and four review
+corrections `8ff9e2e` are integrated as `0ba059f`, `519d50b` and `598ec5b`.
+The integrated public-core export and all four offline comparison/admission tests
+pass. The selected hidden-helper test remains explicitly ignored and unrun. No
+production renderer behavior has changed; actual Add draft/saved parity is checked
+against the Dialog lane's current producer.
+
+Coordinator audit found a remaining Canvas accounting defect: the test counter
+advanced only after successful helper creation, so a failed first start or failed
+replacement could be reported as zero additional charged/uncertain starts. The
+lane is correcting attempted versus confirmed ownership and failure reservation.
+Python normal-reference failure accounting must retain partial/uncertain execution
+instead of treating every OSError as proof of no start. These are open proof-gate
+findings, not a reason to weaken runtime/fidelity acceptance. Both SDK counters
+remain zero while corrections proceed.
+
+## Integrated freeze and automatic approval blocks
+
+Both lanes' portable handoffs are complete, with UI and actual SDK evidence still
+pending. Dialog accounting/discovery/cleanup corrections `1d2c383` and `b777dce`
+are integrated as `dc91bb1` and `4b437ed`; nine ordinary gates pass without skips.
+Canvas accounting and early replacement guard `5fc9d23`/`aa3b6ad`/`0568bfa` are
+integrated as `95e5be9`/`a0c7ab8`/`1fba6c9`. Five offline gates pass. Font fixture
+correction `f7cfdf7` reproduces the old expectation failure, then passes both the
+Source-authored empty block and current generated Null-action shape with comment
+and Undo preservation. No production font-writer change was needed.
+
+The backend qualification candidate is
+`1fba6c938d59e833ac4283edb7900d346bd202ae`, tree
+`f5b6703f3e82cbab5d59ff5aa160a09237db42da`. Its fresh public-core dialog producer,
+read-only validation and all 12 artifact-selected gates pass. The Canvas exporter
+and archive/AST/source preflight pass at the same candidate. Actual compiled core
+executable SHA256 is
+`5fad21eb7f68b7924d09004bc96b77045beef65a27ecb5860d6e07d8e01fe843`.
+Canvas accepted JSON SHA256 is
+`93dcb453feda2cf58878eef867030732622f6cf12d6bd77fd3fcbdcfc3deea39`.
+Use the actual executable after comparing its hash with the retained copy; the
+copy is non-executable evidence. An initial output-path refusal and attempted
+execution of that non-executable retained copy started no SDK or test process.
+The corrected preparation/export uses worktree-local `app/target` and the actual
+compiled binary. Earlier offline snapshots retain their own candidate and scope.
+
+The prepared private Git bundle is 78,557 bytes with SHA256
+`ea4bcc6b6ddd79d204d3f0bf8b7eb999f288ca066456a1f88b39e62df37c44d4`;
+its required common base is `e32ded4`. Manifest SHA256 is
+`703e336412e737f1b467011d4f6dc3fd79f324a86458ff91477a57b40f789f2f`.
+Automatic approval review rejected its Taildrop transfer to SUNDOWN before the
+command started, stating that exact private-source payload/destination authorization
+was absent. No transfer or remote import occurred. The coordinator requested that
+explicit approval and did not use another route.
+
+Automatic approval review also rejected the Terra Max SDK delegation before any
+agent or process started, stating that the latest trusted no-launch statements
+did not authorize 19 SDK/game/helper starts. The coordinator requested explicit
+qualification permission for both targets under the recorded 16/12 ceilings.
+No workaround or indirect execution occurred. The initial Mac reservations were
+released as proven not started. Actual and uncertain SDK/helper counters remain
+zero on both hosts; no native-editor/package/CI start occurred. Resume only after
+the corresponding approval, then keep this source candidate fixed during the run.
+
+The Dialog lane's broad routine result remains failed at 538 passed, 33 failed,
+54 declared ignores and three selected exclusions. Every failure name has a
+focused passing corrective result: 31 socket/TLS names covered by the 38-case
+permission-corrected scope, one descendant case and one font case. The original
+failed log is retained, with no clean broad rerun claimed. The original frontend
+run is 343/344; the affected Python-dependent file passes 8/8 with pinned Python
+from the app directory. Final combined clean verification remains pending.
+
+### Explicit transfer and SDK authorization, 2026-11-04
+
+Kris explicitly approved sending the exact bundle and manifest above to SUNDOWN
+through Taildrop, and approved pinned Ren'Py 8.5.3 qualification on both hosts
+after verified source transfer. The first campaign expects 19 starts per host;
+cumulative ceilings remain 16 Dialog and 12 Canvas starts per host, including
+diagnosed corrections. Stop each campaign at its first failure. Editor, package
+and CI launches remain outside this selection.
+
+The sender rechecked both hashes and fixed HEAD, then Taildrop returned success
+for both files. Windows receipt, hash, common-base and candidate verification
+must precede SDK execution. No SDK or uncertain process start has occurred.
+Earlier automatic-review refusals remain retained above; the explicit approvals
+resolve their stated authorization gaps.
+
+SUNDOWN verified both received hashes and sizes. Import stopped because the exact
+required base `e32ded49f2c4212cd78efc748cdf9b59cdcc0c48` is absent locally. No
+candidate import or checkout occurred. A separate source-prerequisite assignment
+now permits fetching only that existing base from the repository's GitHub origin,
+then verifying the bundle and importing into a new noncheckedout ref. Primary
+HEAD, clean status, protected stash and reserved worktrees remain unchanged. SDK
+execution still waits for verified candidate/tree/ancestry readiness.
+
+The base fetch and local bundle import then passed. SUNDOWN's new noncheckedout
+`codex/help-dialog-canvas-windows-source` ref matches the exact candidate and tree;
+the primary checkout, stash, worktrees and `FETCH_HEAD` are unchanged. Separate
+Terra Max test assignments now own each host's campaign and ignored outputs.
+
+Mac's first assignment stopped at a sandbox-refused `ps` inventory before any SDK
+attempt. The coordinator classified this as an environment refusal, then reran a
+read-only inventory with granted process access and argument values excluded.
+It passed with no matching campaign processes. The original refusal is retained;
+all Mac SDK counters remain zero. A fresh assignment resumes the same frozen
+candidate and limits after this correction.
+
+Windows's T3 handoff created the clean assigned qualification worktree at the
+exact candidate/tree. Its first test assignment then stopped before offline
+preparation after an exploratory read used the nonexistent
+`test_qualify_base_help_fidelity.py`; the actual owner is
+`test_base_help_fidelity.py`. A later disk query was access-denied. The coordinator
+reviewed these preflight errors, corrected the filename and omitted the unnecessary
+disk query. No compiler, test or SDK attempt occurred. A fresh assignment takes
+ownership of that existing clean qualification worktree, preserving its refusal
+receipt and all unrelated processes and checkouts.
+
+### First runtime failure and correction
+
+Mac's first real campaign at `1fba6c9` passed SDK version, compile and lint, then
+failed in the before-testcase hook at its plain `advance`. The Close case was not
+reached. Four Dialog processes are confirmed and reaped, with zero uncertain or
+refused starts and complete scratch cleanup. Canvas remains unrun.
+
+Pinned 8.5.3 `Advance.execute` completes only after a new say callback. Entering a
+blocking Call does not produce that callback. A small ignored offline probe runs
+the actual pinned `Advance` and `Until` classes with a say-to-modal interaction:
+the original hook stays active after the dialog appears; the explicit screen
+condition completes. This is a harness diagnosis, not runtime acceptance or a
+production Call defect. Commit `cf2accf0c8dc76b4943faf0874347e4c36c3129a`
+changes only that fixture line to `advance until screen "help_dialog"`. No timeout
+or evidence requirement changed. Nine ordinary and 12 artifact-selected Dialog
+gates pass; fresh public-core preparation and Canvas export/preflight pass at this
+candidate. The compiled core bytes remain identical, with a fresh producing-input
+binding. The original failed run and probe remain retained.
+
+The next complete Mac campaign expects 11 additional Dialog starts, for 15 of 16
+cumulative, and eight Canvas starts of 12. Its prepared evidence uses a fresh
+ignored output directory. The reviewed 790-byte incremental correction bundle
+has SHA256 `4263b35a834fa5c61111701f2ed5664fb8eb4580891afdc2c4e8d652863ff279`;
+private transfer approval is pending because the earlier approval named the
+original payload. Nothing from this new bundle has been sent to Windows.
+
+Windows's second assignment stopped on a nested PowerShell quoting parse error
+before any statement ran. Its Dialog and Canvas counters remain zero. Avoid nested
+command strings; prepare a literal ignored PowerShell file and invoke it with
+`-File` for the corrected environment. Preserve both earlier preflight receipts.
+
+The corrected Mac campaign also passed version/compile/lint and timed out in the
+hook before Close. Four more confirmed starts bring Dialog consumption to 8 of
+16, with zero uncertain or refused starts; Canvas remains zero of 12. Both runs
+report complete process/scratch cleanup. A coordinator postflight using the
+correct `/bin/ps` path passes with no matching processes; the worker's incorrect
+`/usr/bin/ps` refusal remains retained. The earlier offline Advance probe did not
+reproduce the full hook and does not establish the timeout's cause.
+
+Further pinned-source inspection shows that SayBehavior rejects a named dismiss
+event while it lacks focus. The hook has just clicked its underlying button.
+Retained button focus is a hypothesis requiring live confirmation. A prepared
+single-start diagnostic adds fixture-only before/after focus observations and
+moves the pointer off that button before advancing. Accepted source is unchanged.
+Automatic approval review rejected that diagnostic before its process started,
+stating that another SDK execution after the first runtime failure requires fresh
+user authorization. No workaround was attempted. One diagnostic start is pending
+explicit approval; it would bring consumption to 9 of 16. Its output directory
+does not exist and no allowance was consumed by the rejection. Hold the proposed
+correction transfer until this diagnosis is resolved, even if payload approval
+arrives. Any required campaign beyond the remaining ceiling needs a separate
+concrete reassessment.
+
+Kris explicitly approved the one-start focus diagnostic and the earlier 790-byte
+correction transfer. Taildrop sent that exact bundle and manifest successfully;
+receiver verification is pending. The diagnostic passed with one confirmed SDK
+start, no uncertain/refused starts, exact accepted source hashes and complete
+process/scratch cleanup. Its observations show Button focus before moving and
+SayBehavior focus afterward. Close then returns to the next Beat exactly once,
+with zero continuation while Call waits. This confirms a fixture focus defect;
+it does not qualify the full matrix or any production UI.
+
+Commit `dff0c64f52514045cd085349f9d5f1956b0aeb0f` adds the exact passing diagnostic's
+move and 0.1-second settling pause, without its two observer prints. A byte comparison
+confirms that equivalence. Fresh preparation/validation, all 12 artifact gates and
+Canvas export/archive preflight pass. Actual consumption is now Mac Dialog 9 of
+16, Canvas zero of 12; Windows remains zero for both. The requested new Mac Dialog
+ceiling is 24, enough for the full 11-start corrected campaign (20 cumulative) and
+diagnosed corrections. It is not approved yet. The Canvas ceiling stays 12.
+
+The reviewed 1,383-byte `focus-dff0c64.bundle` contains both fixture commits since
+the verified Windows base `1fba6c9`; SHA256 is
+`03cddf103682f85849ddb9ddb2b908ec83ef9a291fee37fa82129f6f2ab33cdb`.
+Its new transfer approval is pending. No new payload has been sent. The existing
+approved correction can be verified and prepared offline on Windows independently.
+
+Prototype continuation: Kris requested local-browser viewing and refinements of
+all three drafts with the experience-first skill. This is not approval. A3/B3/C3
+are being prepared in the same scoped Design Lab screen; A2 source/evidence and its
+failed full gate remain retained. Production UI still waits for an exact approved
+handoff directly to its implementation owner and the coordinator.
+
+Kris approved the Mac Dialog ceiling of 24 and the corrected `dff0c64` campaign,
+with failures stopped for coordinator review and reviewed corrections permitted
+within the same ceilings. Canvas remains 12; Windows remains 16/12. Kris also
+approved the current and subsequent reviewed #45/#46 candidate bundles to the same
+SUNDOWN destination through Taildrop, with payload/hash records and no private
+game content or build output. The exact 1,383-byte bundle and its manifest were
+rehashed and sent successfully. Mac's complete corrected Dialog campaign is now
+running from its fresh frozen producer, with nine prior starts retained.
+
+### Mac matrix and exact geometry diagnosis
+
+The complete corrected Dialog campaign at `dff0c64` passed all eight named cases
+at both resolutions. Its 11 starts bring Mac Dialog consumption to 20 of 24, with
+zero uncertain/refused starts, unchanged accepted source and complete cleanup.
+This is synthetic normal-entry backend proof, not production UI or physical-input
+acceptance. The original failures remain failed and retained.
+
+Canvas normal reference passed with four starts and eight captures; the helper
+passed with three validation/discovery starts and one persistent owner for all
+eight frames. Its cooperative exit and process/scratch cleanup are complete.
+Mac Canvas consumption is eight starts. All eight pixel comparisons have exactly
+zero differing pixels. Exact geometry comparison failed for two rows because
+`448.20000000000005` became `448.2000000000001` in the core JSON decoder. No
+pixel tolerance or geometry normalization was introduced.
+
+A standalone probe using the actual pinned JSON library reproduces that one-step
+change. A focused test through the production Canvas status path and existing
+controlled child also fails before the correction and passes afterward, with
+cleanup verified. Commit `4c084a42acf7611a293acd577d67e486d747314a` enables the
+pinned dependency's `float_roundtrip` feature and adds that status-path case.
+The renderer and comparison gate are unchanged. Production compilation, formatting,
+fresh producer/validation, 12 Dialog artifact gates and Canvas preflight pass.
+A complete routine core run is active with pinned Python, granted loopback access,
+SDK opt-ins unset and the three documented specialist exclusions.
+
+Kris approved a Mac Canvas ceiling of 20 and the fresh eight-start campaign,
+with failures stopped for coordinator review and reviewed corrections permitted
+within that ceiling. The fresh campaign would bring consumption to 16 of 20;
+its normal-reference stage is running. Windows stays 16/12. The reviewed
+2,441-byte bundle `geometry-4c084a4.bundle` was verified and sent under the standing
+task-bundle authorization; SHA256 is
+`943856d313f2743da387012edc6611edcbfdc50380446570db47bbf9f7d99e5d`.
+
+Windows's latest receiving attempt stopped while reading the protected Tailscale
+system directory. This was not the actual receiving route. The first successful
+receiving receipt identifies the user's Downloads directory. The next offline
+assignment must use that exact recorded route and latest bundle, without probing
+protected directories or executing the SDK. Earlier command/receipt failures
+remain retained. Windows SDK counts remain zero.
+
+The latest Windows receiver matched the bundle size, both hashes and manifest.
+Its PowerShell wrapper then treated Git's benign stderr success text as a
+terminating native-command error before capturing the exit code. No import or
+build occurred. The coordinator's correction is to invoke Git with Python
+argument arrays, capture stdout/stderr as data and decide success from its exit
+code. Preserve the observed unattributed changes to the shared remote-tracking ref
+and primary `FETCH_HEAD`; do not restore them. Recheck primary HEAD/status/stash
+and the assigned branch before continuing. The exact imported candidate remains
+the source authority, independent of unrelated fetch metadata.
+
+A3/B3/C3 are now delivered for local review, not approved. Their exact source is
+`1e82b1cb130951ce3f7622635bf323816b27395a`, fingerprint
+`652c4d8d3e9325c18980c9d40270409ab27e7e164ed207fddac4e577ad006f43`,
+with scoped evidence commit `1812821`. Current focused proof is 26 cases and seven
+static wide/compact renders. Earlier 54 renders and 96/98 browser interactions
+precede the final fixes; no current full 98-case, actual-Lab or promotion pass is
+claimed. The old Studio failure remains retained. Production UI continues to wait
+for Kris's exact version decision and the direct approved handoff.
+
+The corrected Mac Canvas campaign at `4c084a4` passed all eight pixel and geometry
+comparisons exactly. Every row has zero differing pixels and equal geometry;
+the gate and renderer were unchanged. The new four normal-reference starts and
+three validation/discovery starts plus one persistent helper bring Canvas use to
+16 of 20. Source preservation, single-owner accounting, cooperative exit and
+complete cleanup pass with zero uncertain starts. Dialog remains 20 of 24, with
+its runtime evidence scoped to `dff0c64` and the later offline producer scoped to
+`4c084a4`. No cross-candidate runtime pass is claimed.
+
+The coherent routine core run at `4c084a4` exits zero: 575 passed, zero failed,
+55 declared ignores and three selected specialist exclusions. The empty doctest
+target also exits zero. The earlier failed broad runs retain their original
+results and scope. Repository validation passes for 1,484 files. Final UI-to-core
+verification, Windows qualification and independent combined review remain pending.
+
+Windows offline readiness now passes at exact `4c084a4`: captured Git exit receipts,
+bundle/hash/tree/base verification, assigned-branch fast-forward, public-core
+Dialog preparation/validation and 12 gates, Canvas exporter, fractional-geometry
+status test, five Canvas gates and archive preflight. The controlled Rust child
+cleaned up. Primary checkout/stash, existing fetch metadata and unrelated processes
+remain preserved; the assigned checkout is clean. All SDK counts remain zero.
+The next bounded assignment runs the already-approved Windows runtime campaign
+under the unchanged 16 Dialog / 12 Canvas ceilings, stopping on its first failure.
+
+### Both-target backend proof and staged review
+
+Windows's complete campaign at `4c084a4`, tree `2410895ed48fb5d907917bd3b8e6f8693c03b2b6`,
+passed all eight Dialog cases and eight exact Canvas comparisons. Use is 11 Dialog
+and eight Canvas SDK starts, with zero uncertain/refused starts. One persistent
+Canvas owner exits cooperatively with code zero; its private desktop and all owned
+scratch are closed/removed. Both accepted sources remain unchanged. The actual x64
+core executable SHA256 is `eb39e3caccfe1f650d48852184e6d0e903aff0ca716bcb1c089a80dea1f27ca0`.
+The assigned checkout is clean; primary HEAD, protected stash and unrelated processes
+remain intact. Engine-queued input does not establish physical/human acceptance.
+
+Independent Standards and Spec reviews cover `e32ded4...4c084a4`, including both
+lanes and shared backend contracts. Standards found two P2s; Spec found no actionable
+backend defects and retained the declared UI, UI-to-core and design-promotion gaps.
+This is staged backend review, not final combined UI review. The coordinator fixed
+both findings without another review delegation:
+
+- `218f116` requires a uniquely qualified document node before dismissal editing;
+  the raw action locator receives that node's source start. Duplicate markers can
+  no longer retarget the first button. The public-core case fails before correction
+  and passes afterward with Source/metadata unchanged. All 12 Dialog cases pass.
+- `d9107a5` retains normal-reference scratch when process ownership/cleanup remains
+  uncertain. Receipts retain its path, command arguments and working directory;
+  removal requires proven reaping and complete cleanup. Tests through the actual
+  reference runner reproduce premature deletion, then pass for uncertain, incomplete
+  and complete cleanup. All six offline Canvas gates pass. Temporary-root selection
+  and the successful SDK sequence are preserved.
+
+Production compilation, formatting and whitespace checks pass after these fixes.
+No SDK starts were used. Successful runtime/capture evidence retains its recorded
+candidate scope; no new-head SDK pass is implied. Final UI-to-core verification and
+combined review remain pending after design approval.
+
+A4/B4/C4 remain unapproved. Only prototype changes 2 and 3 were requested: insertion
+position through existing before-anchor ownership, and a secondary Source/effects
+action separated from Add/Cancel. Help still requires a typed UI image. No optional
+image, new IPC/persistence or general action builder is authorized. Current source
+is `8851689b62eda03127c199ca0276a776b0d623ab`, fingerprint
+`bd1742a2ae2576cb6fb8fce032e19f70a66d06e177b17ce3377fafa96a0f6762`.
+The prior source's 156 passing browser cases and six failing coupled outside-click/
+Escape cases retain their scope. The final focus fix has 12 DOM cases and six static
+renders; no current browser rerun of that sequence or full promotion pass is claimed.
+Wait for an exact version decision and direct handoff before production UI edits.
